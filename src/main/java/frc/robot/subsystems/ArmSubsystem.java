@@ -32,6 +32,11 @@ public class ArmSubsystem extends SubsystemBase
 {
 
   private final TalonFXS                   armMotor    = new TalonFXS(1);//, MotorType.kBrushless);
+//  private final SmartMotorControllerTelemetryConfig motorTelemetryConfig = new SmartMotorControllerTelemetryConfig()
+//          .withMechanismPosition()
+//          .withRotorPosition()
+//          .withMechanismLowerLimit()
+//          .withMechanismUpperLimit();
   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withClosedLoopController(4, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
       .withSoftLimit(Degrees.of(-30), Degrees.of(100))
@@ -39,6 +44,7 @@ public class ArmSubsystem extends SubsystemBase
 //      .withExternalEncoder(armMotor.getAbsoluteEncoder())
       .withIdleMode(MotorMode.BRAKE)
       .withTelemetry("ArmMotor", TelemetryVerbosity.HIGH)
+//      .withSpecificTelemetry("ArmMotor", motorTelemetryConfig)
       .withStatorCurrentLimit(Amps.of(40))
 //      .withVoltageCompensation(Volts.of(12))
       .withMotorInverted(false)

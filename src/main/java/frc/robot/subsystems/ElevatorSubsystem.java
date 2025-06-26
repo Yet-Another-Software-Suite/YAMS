@@ -28,11 +28,17 @@ import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.SparkWrapper;
+import yams.telemetry.SmartMotorControllerTelemetryConfig;
 
 public class ElevatorSubsystem extends SubsystemBase
 {
 
   private final SparkMax                   elevatorMotor = new SparkMax(2, MotorType.kBrushless);
+//  private final SmartMotorControllerTelemetryConfig motorTelemetryConfig = new SmartMotorControllerTelemetryConfig()
+//          .withMechanismPosition()
+//          .withRotorPosition()
+//          .withMechanismLowerLimit()
+//          .withMechanismUpperLimit();
   private final SmartMotorControllerConfig motorConfig   = new SmartMotorControllerConfig(this)
       .withMechanismCircumference(Meters.of(Inches.of(0.25).in(Meters) * 22))
       .withClosedLoopController(4, 0, 0, MetersPerSecond.of(0.5), MetersPerSecondPerSecond.of(0.5))
@@ -41,6 +47,7 @@ public class ElevatorSubsystem extends SubsystemBase
 //      .withExternalEncoder(armMotor.getAbsoluteEncoder())
       .withIdleMode(MotorMode.BRAKE)
       .withTelemetry("ElevatorMotor", TelemetryVerbosity.HIGH)
+//      .withSpecificTelemetry("ElevatorMotor", motorTelemetryConfig)
       .withStatorCurrentLimit(Amps.of(40))
       .withVoltageCompensation(Volts.of(12))
       .withMotorInverted(false)

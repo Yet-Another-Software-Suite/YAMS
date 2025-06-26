@@ -25,18 +25,25 @@ import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.remote.TalonFXSWrapper;
+import yams.telemetry.SmartMotorControllerTelemetryConfig;
 
 public class TurretSubsystem extends SubsystemBase
 {
 
   private final TalonFXS                   turretMotor = new TalonFXS(1);//, MotorType.kBrushless);
+//  private final SmartMotorControllerTelemetryConfig motorTelemetryConfig = new SmartMotorControllerTelemetryConfig()
+//          .withMechanismPosition()
+//          .withRotorPosition()
+//          .withMechanismLowerLimit()
+//          .withMechanismUpperLimit();
   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withClosedLoopController(4, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
       .withSoftLimit(Degrees.of(-30), Degrees.of(100))
       .withGearing(gearing(gearbox(3, 4)))
 //      .withExternalEncoder(armMotor.getAbsoluteEncoder())
       .withIdleMode(MotorMode.BRAKE)
-      .withTelemetry("ArmMotor", TelemetryVerbosity.HIGH)
+      .withTelemetry("TurretMotor", TelemetryVerbosity.HIGH)
+//      .withSpecificTelemetry("TurretMotor", motorTelemetryConfig)
       .withStatorCurrentLimit(Amps.of(40))
 //      .withVoltageCompensation(Volts.of(12))
       .withMotorInverted(false)
