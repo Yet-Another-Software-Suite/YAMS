@@ -478,20 +478,6 @@ public class SmartMotorControllerConfig
     return this;
   }
 
-  /**
-   * Set the telemetry for the {@link SmartMotorController} with a {@link SmartMotorControllerTelemetryConfig}
-   * {@link TelemetryVerbosity} defaults to HIGH.
-   *
-   * @param telemetryConfig Config that specifies what to log.
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   */
-  public SmartMotorControllerConfig withSpecificTelemetry(SmartMotorControllerTelemetryConfig telemetryConfig) {
-    this.telemetryName = Optional.of("motor");
-    this.verbosity = Optional.of(TelemetryVerbosity.HIGH);
-    this.specifiedTelemetryConfig = telemetryConfig == null ? Optional.empty() : Optional.of(telemetryConfig);
-    return this;
-  }
-
   public Optional<Object> getSmartControllerTelemetryConfig() {
     return specifiedTelemetryConfig;
   }
