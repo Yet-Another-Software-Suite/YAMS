@@ -1,5 +1,6 @@
 package yams.mechanisms;
 
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
@@ -156,4 +157,26 @@ public abstract class SmartMechanism
    * Update the mechanism's telemetry.
    */
   public abstract void updateTelemetry();
+
+  /**
+   * Get the {@link Mechanism2d} for the mechanism.
+   *
+   * @return {@link Mechanism2d} for the mechanism.
+   */
+  public Mechanism2d getMechanismWindow()
+  {
+    return mechanismWindow;
+  }
+
+  /**
+   * Update the mechanism's visualization state.
+   */
+  public abstract void visualizationUpdate();
+
+  /**
+   * Get the {@link Translation3d} of the mechanism using {@link Mechanism2d} coordinates.
+   *
+   * @return {@link Translation3d} of the mechanism.
+   */
+  public abstract Translation3d getRelativeMechanismPosition();
 }

@@ -9,13 +9,13 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import yams.mechanisms.SmartMechanism;
+import yams.motorcontrollers.SmartMotorController;
 
 /**
  * Generic for positional mechanisms.
  */
 public abstract class SmartPositionalMechanism extends SmartMechanism
 {
-
   /**
    * The root point of the Mechanism.
    */
@@ -53,4 +53,35 @@ public abstract class SmartPositionalMechanism extends SmartMechanism
    * @return {@link edu.wpi.first.wpilibj2.command.SequentialCommandGroup} running the SysId commands.
    */
   public abstract Command sysId(Voltage maximumVoltage, Velocity<VoltageUnit> step, Time duration);
+
+  /**
+   * Get the ligament of the 2D mechanism model. Used to change the position of the mechanism model
+   * in the SmartDashboard.
+   *
+   * @return Ligament of the 2D mechanism model.
+   */
+  public MechanismLigament2d getMechanismLigament() 
+  {
+    return mechanismLigament;
+  }
+
+  /**
+   * The root of the 2D mechanism model.
+   *
+   * @return Root of the 2D mechanism model.
+   */
+  public MechanismRoot2d getMechanismRoot() 
+  {
+    return mechanismRoot;
+  }
+
+  /**
+   * Get the motor controller which is moving the mechanism.
+   *
+   * @return Motor controller which is moving the mechanism.
+   */
+  public SmartMotorController getMotor() 
+  {
+    return m_motor;
+  }
 }

@@ -9,6 +9,8 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.VoltageUnit;
@@ -34,6 +36,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import java.util.Optional;
 import yams.exceptions.ElevatorConfigurationException;
 import yams.mechanisms.config.ElevatorConfig;
+import yams.mechanisms.config.MechanismPositionConfig;
+import yams.mechanisms.config.MechanismPositionConfig.Plane;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 
@@ -61,7 +65,7 @@ public class Elevator extends SmartPositionalMechanism
     m_subsystem = config.getMotor().getConfig().getSubsystem();
     if (config.getTelemetryName().isPresent())
     {
-      NetworkTable table = NetworkTableInstance.getDefault().getTable("Tuning")
+      NetworkTable table = NetworkTableInstance.getDefault().getTable(config.getNetworkRoot().orElse("Tuning"))
                                                .getSubTable(config.getTelemetryName().get());
       m_telemetry.setupTelemetry(table);
       m_telemetry.units.set("Meters");
@@ -200,10 +204,41 @@ public class Elevator extends SmartPositionalMechanism
       {
         RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_sim.get().getCurrentDrawAmps()));
       }
-      mechanismLigament.setLength(getHeight().in(Meters));
+      visualizationUpdate();
     }
   }
 
+  /**
+   * Updates the length of the mechanism ligament to match the current height
+   * of the elevator in meters.
+   */
+  @Override
+  public void visualizationUpdate() 
+  {
+    mechanismLigament.setLength(getHeight().in(Meters));
+  }
+  
+  /**
+   * Get the relative position of the mechanism, taking into account the relative position defined
+   * in the {@link MechanismPositionConfig}.
+   *
+   * @return The relative position of the mechanism as a {@link Translation3d}.
+   */
+  @Override
+  public Translation3d getRelativeMechanismPosition()
+  { 
+    Plane movementPlane = m_config.getMechanismPositionConfig().getMovementPlane();
+    Translation3d mechanismTranslation = new Translation3d(mechanismLigament.getLength(), 
+      new Rotation3d(Plane.YZ == movementPlane ? mechanismLigament.getAngle() : 0, 
+                    Plane.XZ == movementPlane ? mechanismLigament.getAngle() : 0, 0));
+    if (m_config.getMechanismPositionConfig().getRelativePosition().isPresent())
+    {
+      return m_config.getMechanismPositionConfig().getRelativePosition().get()
+                     .plus(mechanismTranslation);
+    }
+    return mechanismTranslation;
+  }
+    
   /**
    * Set the height of the elevator.
    *

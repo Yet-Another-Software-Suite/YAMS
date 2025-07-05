@@ -7,6 +7,8 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.VoltageUnit;
@@ -31,6 +33,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import java.util.Optional;
 import yams.exceptions.ArmConfigurationException;
 import yams.mechanisms.config.ArmConfig;
+import yams.mechanisms.config.MechanismPositionConfig;
+import yams.mechanisms.config.MechanismPositionConfig.Plane;
 import yams.motorcontrollers.SmartMotorController;
 
 public class Arm extends SmartPositionalMechanism
@@ -62,7 +66,7 @@ public class Arm extends SmartPositionalMechanism
     }
     if (config.getTelemetryName().isPresent())
     {
-      NetworkTable table = NetworkTableInstance.getDefault().getTable("Tuning")
+      NetworkTable table = NetworkTableInstance.getDefault().getTable(config.getNetworkRoot().orElse("Tuning"))
                                                .getSubTable(config.getTelemetryName().get());
       m_telemetry.setupTelemetry(table);
       m_telemetry.units.set("Degrees");
@@ -106,11 +110,12 @@ public class Arm extends SmartPositionalMechanism
                                                   0.002 / 4096.0,
                                                   0.0));// Add noise with a std-dev of 1 tick
 
-      mechanismWindow = new Mechanism2d(config.getLength().get().in(Meters) * 2,
-                                        config.getLength().get().in(Meters) * 2);
+      mechanismWindow = new Mechanism2d(config.getMechanismPositionConfig().getWindowXDimension(config.getLength().get()).in(Meters),
+                                        config.getMechanismPositionConfig().getWindowYDimension(config.getLength().get()).in(Meters));
       mechanismRoot = mechanismWindow.getRoot(
           config.getTelemetryName().isPresent() ? config.getTelemetryName().get() + "Root" : "ArmRoot",
-          config.getLength().get().in(Meters), config.getLength().get().in(Meters));
+          config.getMechanismPositionConfig().getMechanismX(config.getLength().get()).in(Meters),
+          config.getMechanismPositionConfig().getMechanismY(config.getLength().get()).in(Meters));
       mechanismLigament = mechanismRoot.append(new MechanismLigament2d(
           config.getTelemetryName().isPresent() ? config.getTelemetryName().get() : "Arm",
           config.getLength().get().in(Meters),
@@ -174,8 +179,40 @@ public class Arm extends SmartPositionalMechanism
         m_motor.setEncoderPosition(m_config.getUpperHardLimit().get());
       }
       RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_sim.get().getCurrentDrawAmps()));
-      mechanismLigament.setAngle(getAngle().in(Degrees));
+      visualizationUpdate();
     }
+  }
+
+  /**
+   * Updates the mechanism ligament with the current angle of the arm.
+   * 
+   * @see SmartPositionalMechanism#visualizationUpdate()
+   */
+  @Override
+  public void visualizationUpdate() 
+  {
+    mechanismLigament.setAngle(getAngle().in(Degrees));
+  }
+
+  /**
+   * Get the relative position of the mechanism, taking into account the relative position defined
+   * in the {@link MechanismPositionConfig}.
+   *
+   * @return The relative position of the mechanism as a {@link Translation3d}.
+   */
+  @Override
+  public Translation3d getRelativeMechanismPosition()
+  { 
+    Plane movementPlane = m_config.getMechanismPositionConfig().getMovementPlane();
+    Translation3d mechanismTranslation = new Translation3d(mechanismLigament.getLength(), 
+      new Rotation3d(Plane.YZ == movementPlane ? mechanismLigament.getAngle() : 0, 
+                    Plane.XZ == movementPlane ? mechanismLigament.getAngle() : 0, 0));
+    if (m_config.getMechanismPositionConfig().getRelativePosition().isPresent())
+    {
+      return m_config.getMechanismPositionConfig().getRelativePosition().get()
+                     .plus(mechanismTranslation);
+    }
+    return mechanismTranslation;
   }
 
   /**
@@ -319,5 +356,15 @@ public class Arm extends SmartPositionalMechanism
   public Trigger gte(Angle angle)
   {
     return new Trigger(() -> getAngle().gte(angle));
+  }
+
+  /**
+   * Get the {@link ArmConfig} for this {@link Arm}.
+   *
+   * @return The {@link ArmConfig} used to configure this {@link Arm}.
+   */
+  public ArmConfig getArmConfig()
+  {
+    return m_config;
   }
 }

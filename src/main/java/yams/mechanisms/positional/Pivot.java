@@ -6,6 +6,10 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Seconds;
 
+import java.util.Optional;
+
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -29,7 +33,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import java.util.Optional;
 import yams.exceptions.ArmConfigurationException;
 import yams.exceptions.PivotConfigurationException;
 import yams.mechanisms.config.PivotConfig;
@@ -64,7 +67,7 @@ public class Pivot extends SmartPositionalMechanism
     }
     if (config.getTelemetryName().isPresent())
     {
-      NetworkTable table = NetworkTableInstance.getDefault().getTable("Tuning")
+      NetworkTable table = NetworkTableInstance.getDefault().getTable(config.getNetworkRoot().orElse("Tuning"))
                                                .getSubTable(config.getTelemetryName().get());
       m_telemetry.setupTelemetry(table);
       m_telemetry.units.set("Degrees");
@@ -295,7 +298,7 @@ public class Pivot extends SmartPositionalMechanism
       m_motor.simIterate(m_sim.get().getAngularVelocity());
 
       RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_sim.get().getCurrentDrawAmps()));
-      mechanismLigament.setAngle(getAngle().in(Degrees));
+      visualizationUpdate();
     }
   }
 
@@ -306,5 +309,43 @@ public class Pivot extends SmartPositionalMechanism
     m_motor.getMechanismPositionSetpoint().ifPresent(m_setpoint -> m_telemetry.setpointPublisher.set(m_setpoint.in(
         Degrees)));
     m_motor.updateTelemetry();
+  }
+
+  /**
+   * Updates the angle of the mechanism ligament to match the current
+   * angle of the pivot.
+   */
+  @Override
+  public void visualizationUpdate()
+  {
+    mechanismLigament.setAngle(getAngle().in(Degrees));
+  }
+
+  /**
+   * Get the relative position of the mechanism, taking into account the relative position defined
+   * in the {@link MechanismPositionConfig}.
+   *
+   * @return The relative position of the mechanism as a {@link Translation3d}.
+   */
+  @Override
+  public Translation3d getRelativeMechanismPosition()
+  {
+    Translation3d mechanismTranslation = new Translation3d(mechanismLigament.getLength(), new Rotation3d(0, 0, mechanismLigament.getAngle()));
+    if (m_config.getMechanismPositionConfig().getRelativePosition().isPresent())
+    {
+      return m_config.getMechanismPositionConfig().getRelativePosition().get()
+                     .plus(mechanismTranslation);
+    }
+    return mechanismTranslation;
+  }
+
+  /**
+   * Get the {@link PivotConfig} object for this {@link Pivot}
+   *
+   * @return The {@link PivotConfig} object for this {@link Pivot}
+   */
+  public PivotConfig getPivotConfig()
+  {
+    return m_config;
   }
 }

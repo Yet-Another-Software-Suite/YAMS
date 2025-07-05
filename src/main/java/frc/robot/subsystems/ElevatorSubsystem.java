@@ -16,11 +16,13 @@ import static yams.mechanisms.SmartMechanism.gearing;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import yams.mechanisms.config.ElevatorConfig;
+import yams.mechanisms.config.MechanismPositionConfig;
 import yams.mechanisms.positional.Elevator;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
@@ -51,10 +53,16 @@ public class ElevatorSubsystem extends SubsystemBase
   private final SmartMotorController       motor         = new SparkWrapper(elevatorMotor,
                                                                             DCMotor.getNEO(1),
                                                                             motorConfig);
+  private final MechanismPositionConfig    robotToMechanism = new MechanismPositionConfig()
+    .withMaxRobotHeight(Meters.of(1.5))
+    .withMaxRobotLength(Meters.of(0.75))
+    .withRelativePosition(new Translation3d(Meters.of(-0.25), Meters.of(0), Meters.of(0.5)));
+
   private final ElevatorConfig             m_config      = new ElevatorConfig(motor)
       .withStartingHeight(Meters.of(0.5))
       .withHardLimits(Meters.of(0), Meters.of(3))
       .withTelemetry("Elevator", TelemetryVerbosity.HIGH)
+      .withMechanismPositionConfig(robotToMechanism)
       .withMass(Pounds.of(16));
   private final Elevator                   elevator      = new Elevator(m_config);
 

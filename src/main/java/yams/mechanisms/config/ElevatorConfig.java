@@ -2,12 +2,13 @@ package yams.mechanisms.config;
 
 import static edu.wpi.first.units.Units.Degrees;
 
+import java.util.Optional;
+
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
-import java.util.Optional;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
@@ -24,6 +25,10 @@ public class ElevatorConfig
    * Telemetry name.
    */
   private       Optional<String>     telemetryName = Optional.empty();
+  /**
+   * The network root of the mechanism (Optional).
+   */
+  protected Optional<String> networkRoot;
   /**
    * Telemetry verbosity
    */
@@ -48,6 +53,10 @@ public class ElevatorConfig
    * Sim color value
    */
   private Color8Bit                    simColor           = new Color8Bit(Color.kOrange);
+  /**
+   * Mechanism position configuration for the {@link yams.mechanisms.positional.Pivot} (Optional).
+   */
+  private MechanismPositionConfig mechanismPositionConfig = new MechanismPositionConfig();
 
 
   /**
@@ -119,6 +128,33 @@ public class ElevatorConfig
   {
     this.telemetryName = telemetryName == null ? Optional.empty() : Optional.of(telemetryName);
     this.telemetryVerbosity = telemetryVerbosity == null ? Optional.empty() : Optional.of(telemetryVerbosity);
+    return this;
+  }
+
+  /**
+   * Configure telemetry for the {@link yams.mechanisms.positional.Arm} mechanism.
+   *
+   * @param telemetryName      Telemetry NetworkTable name to appear under "SmartDashboard/"
+   * @param telemetryVerbosity Telemetry verbosity to apply.
+   * @return {@link ArmConfig} for chaining.
+   */
+  public ElevatorConfig withTelemetry(String networkRoot, String telemetryName, TelemetryVerbosity telemetryVerbosity)
+  {
+    this.networkRoot = Optional.ofNullable(networkRoot);
+    this.telemetryName = telemetryName == null ? Optional.empty() : Optional.of(telemetryName);
+    this.telemetryVerbosity = telemetryVerbosity == null ? Optional.empty() : Optional.of(telemetryVerbosity);
+    return this;
+  }
+
+  /**
+   * Set the elevator mechnism position configuration.
+   * 
+   * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link yams.mechanisms.positional.Elevator}
+   * @return {@link ElevatorConfig} for chaining
+   */
+  public ElevatorConfig withMechanismPositionConfig(MechanismPositionConfig mechanismPositionConfig)
+  {
+    this.mechanismPositionConfig = mechanismPositionConfig;
     return this;
   }
 
@@ -274,5 +310,25 @@ public class ElevatorConfig
   public Optional<Mass> getCarriageMass()
   {
     return carriageWeight;
+  }
+
+
+  /**
+   * Get the mechanism position configuration of the elevator.
+   *
+   * @return Optional containing the mechanism position configuration if set, otherwise an empty Optional.
+   */
+  public MechanismPositionConfig getMechanismPositionConfig()
+  {
+    return mechanismPositionConfig;
+  }
+
+  /**
+   * Get the network root of the mechanism.
+   * @return Optional containing the network root if set, otherwise an empty Optional.
+   */
+  public Optional<String> getNetworkRoot()
+  {
+    return networkRoot;
   }
 }

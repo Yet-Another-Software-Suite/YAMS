@@ -15,11 +15,13 @@ import static yams.mechanisms.SmartMechanism.gearing;
 
 import com.ctre.phoenix6.hardware.TalonFXS;
 import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import yams.mechanisms.config.ArmConfig;
+import yams.mechanisms.config.MechanismPositionConfig;
 import yams.mechanisms.positional.Arm;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
@@ -47,13 +49,18 @@ public class ArmSubsystem extends SubsystemBase
       .withFeedforward(new ArmFeedforward(0, 0, 0, 0))
       .withControlMode(ControlMode.CLOSED_LOOP);
   private final SmartMotorController       motor       = new TalonFXSWrapper(armMotor, DCMotor.getNEO(1), motorConfig);
+  private final MechanismPositionConfig    robotToMechanism = new MechanismPositionConfig()
+    .withMaxRobotHeight(Meters.of(1.5))
+    .withMaxRobotLength(Meters.of(0.75))
+    .withRelativePosition(new Translation3d(Meters.of(0.25), Meters.of(0), Meters.of(0.5)));
   private final ArmConfig                  m_config    = new ArmConfig(motor)
       .withLength(Meters.of(0.135))
       .withHardLimit(Degrees.of(-100), Degrees.of(200))
-      .withTelemetry("ArmExample", TelemetryVerbosity.HIGH)
+      .withTelemetry("Arm","ArmExample", TelemetryVerbosity.HIGH)
       .withMass(Pounds.of(1))
       .withStartingPosition(Degrees.of(0))
-      .withHorizontalZero(Degrees.of(0));
+      .withHorizontalZero(Degrees.of(0))
+      .withMechanismPositionConfig(robotToMechanism);
   private final Arm                        arm         = new Arm(m_config);
 
   public ArmSubsystem()
