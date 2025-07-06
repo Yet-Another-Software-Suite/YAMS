@@ -31,6 +31,7 @@ import java.util.Optional;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.gearing.MechanismGearing;
 import yams.telemetry.SmartMotorControllerTelemetry;
+import yams.telemetry.SmartMotorControllerTelemetryConfig;
 
 public abstract class SmartMotorController
 {
@@ -38,39 +39,43 @@ public abstract class SmartMotorController
   /**
    * Telemetry.
    */
-  protected SmartMotorControllerTelemetry   telemetry                  = new SmartMotorControllerTelemetry();
+  protected SmartMotorControllerTelemetry                 telemetry                  = new SmartMotorControllerTelemetry();
   /**
    * {@link SmartMotorControllerConfig} for the motor.
    */
-  protected SmartMotorControllerConfig      config;
+  protected SmartMotorControllerConfig                    config;
   /**
    * Profiled PID controller for the motor controller.
    */
-  protected Optional<ProfiledPIDController> pidController              = Optional.empty();
+  protected Optional<ProfiledPIDController>               pidController              = Optional.empty();
   /**
    * Simple PID controller for the motor controller.
    */
-  protected Optional<PIDController>         simplePidController        = Optional.empty();
+  protected Optional<PIDController>                       simplePidController        = Optional.empty();
   /**
    * Setpoint position
    */
-  protected Optional<Angle>                 setpointPosition           = Optional.empty();
+  protected Optional<Angle>                               setpointPosition           = Optional.empty();
   /**
    * Setpoint velocity.
    */
-  protected Optional<AngularVelocity>       setpointVelocity           = Optional.empty();
+  protected Optional<AngularVelocity>                     setpointVelocity           = Optional.empty();
   /**
    * Thread of the closed loop controller.
    */
-  protected Notifier                        closedLoopControllerThread = null;
+  protected Notifier                                      closedLoopControllerThread = null;
   /**
    * Parent table for telemetry.
    */
-  protected Optional<NetworkTable>          parentTable                = Optional.empty();
+  protected Optional<NetworkTable>                        parentTable                = Optional.empty();
   /**
    * {@link SmartMotorController} telemetry table.
    */
-  protected Optional<NetworkTable>          telemetryTable             = Optional.empty();
+  protected Optional<NetworkTable>                        telemetryTable             = Optional.empty();
+  /**
+   * Config for publishing specific telemetry.
+   */
+  protected Optional<SmartMotorControllerTelemetryConfig> telemetryConfig            = Optional.empty();
 
 
   /**
@@ -561,7 +566,10 @@ public abstract class SmartMotorController
         telemetry.distance = getMeasurementPosition();
         telemetry.linearVelocity = getMeasurementVelocity();
       }
-      telemetry.publish(telemetryTable.get(), config.getVerbosity().get());
+      config.getSmartControllerTelemetryConfig().ifPresentOrElse(
+              telemetryConfig ->
+                      telemetry.publishFromConfig(telemetryTable.get(), ((SmartMotorControllerTelemetryConfig) telemetryConfig)),
+              () -> telemetry.publish(telemetryTable.get(), config.getVerbosity().get()));
     }
   }
 

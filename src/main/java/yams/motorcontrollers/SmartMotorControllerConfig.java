@@ -33,6 +33,7 @@ import java.util.OptionalInt;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
+import yams.telemetry.SmartMotorControllerTelemetryConfig;
 
 /**
  * Smart motor controller config.
@@ -133,6 +134,10 @@ public class SmartMotorControllerConfig
    * Telemetry verbosity setting.
    */
   private Optional<TelemetryVerbosity>      verbosity                          = Optional.empty();
+  /**
+   * Optional config for custom telemetry setup.
+   */
+  private Optional<Object>                  specifiedTelemetryConfig           = Optional.empty();
   /**
    * Zero offset of the {@link SmartMotorController}
    */
@@ -457,6 +462,24 @@ public class SmartMotorControllerConfig
     this.telemetryName = Optional.of("motor");
     this.verbosity = Optional.of(verbosity);
     return this;
+  }
+
+  /**
+   * Set the telemetry for the {@link SmartMotorController} with a {@link SmartMotorControllerTelemetryConfig}
+   *
+   * @param telemetryName Name for the {@link SmartMotorController}
+   * @param telemetryConfig Config that specifies what to log.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public SmartMotorControllerConfig withSpecificTelemetry(String telemetryName, SmartMotorControllerTelemetryConfig telemetryConfig) {
+    this.telemetryName = telemetryName == null ? Optional.empty() : Optional.of(telemetryName);
+    this.verbosity = Optional.of(TelemetryVerbosity.HIGH);
+    this.specifiedTelemetryConfig = telemetryConfig == null ? Optional.empty() : Optional.of(telemetryConfig);
+    return this;
+  }
+
+  public Optional<Object> getSmartControllerTelemetryConfig() {
+    return specifiedTelemetryConfig;
   }
 
   /**
