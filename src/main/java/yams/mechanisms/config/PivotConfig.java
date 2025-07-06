@@ -26,7 +26,7 @@ public class PivotConfig
   /**
    * The network root of the mechanism (Optional).
    */
-  protected Optional<String> networkRoot;
+  protected Optional<String> networkRoot = Optional.empty();
   /**
    * Telemetry verbosity
    */
