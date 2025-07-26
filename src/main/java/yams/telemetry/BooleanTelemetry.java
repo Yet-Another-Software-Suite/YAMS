@@ -20,7 +20,7 @@ public class BooleanTelemetry
   private final String                      key;
   private final boolean                     defaultValue;
   private final boolean               tunable;
-  private       boolean                     enabled    = false;
+  protected     boolean                     enabled    = false;
   private       BooleanPublisher            publisher  = null;
   private       Optional<BooleanSubscriber> subscriber = Optional.empty();
 

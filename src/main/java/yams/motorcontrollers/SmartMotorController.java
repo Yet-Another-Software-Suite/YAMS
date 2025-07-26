@@ -521,10 +521,10 @@ public abstract class SmartMotorController
         tuningTable = Optional.of(tuning.getSubTable(config.getTelemetryName().get()));
         if (config.getSmartControllerTelemetryConfig().isPresent())
         {
-          this.telemetry.setupTelemetry(telemetry, tuning, config.getSmartControllerTelemetryConfig().get());
+          this.telemetry.setupTelemetry(this, telemetry, tuning, config.getSmartControllerTelemetryConfig().get());
         } else
         {
-          this.telemetry.setupTelemetry(telemetry,
+          this.telemetry.setupTelemetry(this, telemetry,
                                         tuning,
                                         new SmartMotorControllerTelemetryConfig().withTelemetryVerbosity(config.getVerbosity()
                                                                                                                .orElse(

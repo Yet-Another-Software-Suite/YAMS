@@ -389,7 +389,8 @@ public class TalonFXWrapper extends SmartMotorController
   public void setVelocity(AngularVelocity angle)
   {
     setpointVelocity = Optional.ofNullable(angle);
-    m_talonfx.setControl(m_velocityReq.withVelocity(angle));
+    if(angle != null)
+        m_talonfx.setControl(m_velocityReq.withVelocity(angle));
   }
 
   @Override

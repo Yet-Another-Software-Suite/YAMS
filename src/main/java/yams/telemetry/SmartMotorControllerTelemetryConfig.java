@@ -3,6 +3,8 @@ package yams.telemetry;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
 import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
@@ -65,20 +67,33 @@ public class SmartMotorControllerTelemetryConfig
   /**
    * Get the configured double fields.
    *
+   * @param smc {@link SmartMotorController} used to disable unavailable telemetry for certain motor controllers.
    * @return Configured {@link DoubleTelemetry} for each {@link DoubleTelemetryField}
    */
-  public Map<DoubleTelemetryField, DoubleTelemetry> getDoubleFields()
+  public Map<DoubleTelemetryField, DoubleTelemetry> getDoubleFields(SmartMotorController smc)
   {
+    if(smc.getSupplyCurrent().isEmpty())
+    {
+      doubleFields.get(DoubleTelemetryField.SupplyCurrent).disable();
+    }
     return doubleFields;
   }
 
   /**
    * Get the configured bool fields.
    *
+   * @param smc {@link SmartMotorController} used to disable unavailable telemetry for certain motor controllers.
    * @return Configured {@link BooleanTelemetry} for each {@link BooleanTelemetryField}.
    */
-  public Map<BooleanTelemetryField, BooleanTelemetry> getBoolFields()
+  public Map<BooleanTelemetryField, BooleanTelemetry> getBoolFields(SmartMotorController smc)
   {
+    var config = smc.getConfig();
+    if(config.getArmFeedforward().isEmpty())
+      boolFields.get(BooleanTelemetryField.ArmFeedForward).disable();
+    if(config.getElevatorFeedforward().isEmpty())
+      boolFields.get(BooleanTelemetryField.ElevatorFeedForward).disable();
+    if(config.getSimpleFeedforward().isEmpty())
+      boolFields.get(BooleanTelemetryField.SimpleMotorFeedForward).disable();
     return boolFields;
   }
 

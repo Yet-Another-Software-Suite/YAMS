@@ -19,8 +19,8 @@ public class DoubleTelemetry
   private final DoubleTelemetryField field;
   private final String                     key;
   private final double                     defaultValue;
-  private final boolean              tunable;
-  private       boolean                    enabled    = false;
+  private final boolean                    tunable;
+  protected     boolean                    enabled    = false;
   private       DoublePublisher            publisher  = null;
   private       Optional<DoubleSubscriber> subscriber = Optional.empty();
 
@@ -85,7 +85,7 @@ public class DoubleTelemetry
 
   public boolean tunable()
   {
-    return subscriber.isPresent() && tunable;
+    return subscriber.isPresent() && tunable && enabled;
   }
 
   public void enable()

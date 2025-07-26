@@ -1,18 +1,12 @@
 package yams.telemetry;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Fahrenheit;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Volts;
-
 import edu.wpi.first.networktables.NetworkTable;
 import java.util.Map;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+
+import static edu.wpi.first.units.Units.*;
 
 public class SmartMotorControllerTelemetry
 {
@@ -41,19 +35,20 @@ public class SmartMotorControllerTelemetry
   /**
    * Setup Telemetry Pub/Sub fields.
    *
+   * @param smartMotorController {@link SmartMotorController} used to determine what telemetry features can and should be disabled bc they are not available.
    * @param publishTable {@link NetworkTable} that holds all of the output fields.
    * @param tuningTable  {@link NetworkTable} that holds all of the tuning fields.
    * @param config       {@link SmartMotorControllerTelemetryConfig} to apply.
    */
-  public void setupTelemetry(NetworkTable publishTable, NetworkTable tuningTable,
+  public void setupTelemetry(SmartMotorController smartMotorController, NetworkTable publishTable, NetworkTable tuningTable,
                              SmartMotorControllerTelemetryConfig config)
   {
     if (!publishTable.equals(this.dataNetworkTable))
     {
       dataNetworkTable = publishTable;
       this.config = config;
-      doubleFields = config.getDoubleFields();
-      boolFields = config.getBoolFields();
+      doubleFields = config.getDoubleFields(smartMotorController);
+      boolFields = config.getBoolFields(smartMotorController);
       for (Map.Entry<DoubleTelemetryField, DoubleTelemetry> entry : doubleFields.entrySet())
       {
         entry.getValue().setupNetworkTables(dataNetworkTable, tuningNetworkTable);
@@ -76,6 +71,8 @@ public class SmartMotorControllerTelemetry
     for (Map.Entry<BooleanTelemetryField, BooleanTelemetry> entry : boolFields.entrySet())
     {
       BooleanTelemetry bt = entry.getValue();
+      if(!bt.enabled)
+        continue;
       switch (bt.getField())
       {
         case MechanismUpperLimit ->
@@ -116,13 +113,15 @@ public class SmartMotorControllerTelemetry
     for (Map.Entry<DoubleTelemetryField, DoubleTelemetry> entry : doubleFields.entrySet())
     {
       DoubleTelemetry dt = entry.getValue();
+      if(!dt.enabled)
+        continue;
       switch (dt.getField())
       {
         case SetpointPosition ->
         {
           smc.getMechanismPositionSetpoint().ifPresent(mechSetpoint -> dt.set(
               cfg.getMechanismCircumference().isPresent() ? cfg.convertFromMechanism(mechSetpoint).in(Meters)
-                                                          : mechSetpoint.in(Radians)));
+                                                          : mechSetpoint.in(Rotations)));
         }
         case SetpointVelocity ->
         {
@@ -130,7 +129,7 @@ public class SmartMotorControllerTelemetry
                                                            dt.set(cfg.getMechanismCircumference().isPresent() ?
                                                                   cfg.convertFromMechanism(mechSetpoint)
                                                                      .in(MetersPerSecond) :
-                                                                  mechSetpoint.in(RadiansPerSecond)));
+                                                                  mechSetpoint.in(RotationsPerSecond)));
         }
         case FeedforwardVoltage ->
         {
@@ -169,25 +168,29 @@ public class SmartMotorControllerTelemetry
         }
         case MechanismPosition ->
         {
-          dt.set(smc.getMechanismPosition().in(Radians));
+          dt.set(smc.getMechanismPosition().in(Rotations));
         }
         case MechanismVelocity ->
         {
-          dt.set(smc.getMechanismVelocity().in(RadiansPerSecond));
+          dt.set(smc.getMechanismVelocity().in(RotationsPerSecond));
         }
         case RotorPosition ->
         {
-          dt.set(smc.getRotorPosition().in(Radians));
+          dt.set(smc.getRotorPosition().in(Rotations));
         }
         case RotorVelocity ->
         {
-          dt.set(smc.getRotorVelocity().in(RadiansPerSecond));
+          dt.set(smc.getRotorVelocity().in(RotationsPerSecond));
         }
       }
     }
   }
 
 
+  /**
+   * Apply the tuning values from {@link NetworkTable} to the {@link SmartMotorController}
+   * @param smartMotorController {@link SmartMotorController} to control.
+   */
   public void applyTuningValues(SmartMotorController smartMotorController)
   {
 
@@ -206,31 +209,74 @@ public class SmartMotorControllerTelemetry
           }
           case SetpointVelocity ->
           {
+            if(dt.get() == 0 && smartMotorController.getMechanismSetpointVelocity().isEmpty())
+              return;
             cfg.getMechanismCircumference().ifPresentOrElse(circumference -> smartMotorController.setVelocity(
                 MetersPerSecond.of(
-                    dt.get())), () -> smartMotorController.setVelocity(RadiansPerSecond.of(dt.get())));
+                    dt.get())), () -> smartMotorController.setVelocity(dt.get() == 0 ? null : RadiansPerSecond.of(dt.get())));
           }
         }
       }
     }
   }
 
-  // TODO: Add docs.
+  /**
+   * Boolean telemetry for {@link SmartMotorController}s
+   */
   public enum BooleanTelemetryField
   {
+    /**
+     * Mechanism upper limit
+     */
     MechanismUpperLimit("limits/Mechanism Upper Limit", false, false),
+    /**
+     * Mechanism lower limit.
+     */
     MechanismLowerLimit("limits/Mechanism Lower Limit", false, false),
+    /**
+     * Temperature limit if available.
+     */
     TemperatureLimit("limits/Temperature Limit", false, false),
+    /**
+     * Velocity control currently getting used.
+     */
     VelocityControl("control/Velocity Control", false, false),
+    /**
+     * Elevator feedforward currently getting used.
+     */
     ElevatorFeedForward("control/Elevator Feedforward", false, false),
+    /**
+     * Arm feedforward currently getting used.
+     */
     ArmFeedForward("control/Arm Feedforward", false, false),
+    /**
+     * Simple motor feedforward currently getting used.
+     */
     SimpleMotorFeedForward("control/Simple Motor Feedforward", false, false),
+    /**
+     * Motion profile currently getting used.
+     */
     MotionProfile("control/Motion Profile", false, false);
 
+    /**
+     * Default value of the boolean telemetry field.
+     */
     private final boolean currentValue;
+    /**
+     * Key that the telemetry is stored at.
+     */
     private final String  key;
+    /**
+     * Tunable field?
+     */
     private final boolean tunable;
 
+    /**
+     * Create a boolean telemetry field.
+     * @param fieldName Field for {@link NetworkTable}
+     * @param defaultValue Default value in NT.
+     * @param tunable Tunable field.
+     */
     BooleanTelemetryField(String fieldName, boolean defaultValue, boolean tunable)
     {
       key = fieldName;
@@ -238,6 +284,10 @@ public class SmartMotorControllerTelemetry
       this.tunable = tunable;
     }
 
+    /**
+     * Create a {@link BooleanTelemetry} object for non-static usage.
+     * @return {@link BooleanTelemetry}
+     */
     public BooleanTelemetry create()
     {
       return new BooleanTelemetry(key, currentValue, this, tunable);
@@ -246,22 +296,53 @@ public class SmartMotorControllerTelemetry
 
   }
 
+  /**
+   * Double telemetry field.
+   */
   public enum DoubleTelemetryField
   {
-    SetpointPosition("Setpoint Position", 0, true),
-    SetpointVelocity("Setpoint Velocity", 0, false),
-    FeedforwardVoltage("Feedforward voltage", 0, false),
-    PIDOutputVoltage("PID Output voltage", 0, false),
-    OutputVoltage("Output Voltage", 0, false),
-    StatorCurrent("Stator Current", 0, false),
-    SupplyCurrent("Supply Current", 0, false),
+    /**
+     * Setpoint position
+     */
+    SetpointPosition("closedloop/setpoint/position", 0, true),
+    /**
+     * Setpoint velocity
+     */
+    SetpointVelocity("closedloop/setpoint/velocity", 0, true),
+    /**
+     * Feedforward voltage.
+     */
+    FeedforwardVoltage("closedloop/voltage/feedforward", 0, false),
+    /**
+     * PID output voltage
+     */
+    PIDOutputVoltage("closedloop/voltage/feedback", 0, false),
+    /**
+     * Voltage supplied to the motor.
+     */
+    OutputVoltage("Motor Voltage", 0, false),
+    /**
+     * Stator current.
+     */
+    StatorCurrent("current/stator", 0, false),
+    /**
+     * Supply current.
+     */
+    SupplyCurrent("current/supply", 0, false),
+    /**
+     * Motor temperature
+     */
     MotorTemperature("Motor Temperature", 0, false),
-    MeasurementPosition("Measurement Position", 0, false),
-    MeasurementVelocity("Measurement Velocity", 0, false),
-    MechanismPosition("Mechanism Position", 0, false),
-    MechanismVelocity("Mechanism Velocity", 0, false),
-    RotorPosition("Rotor Position", 0, false),
-    RotorVelocity("Rotor Velocity", 0, false);
+    /**
+     * Measurement position
+     */
+    MeasurementPosition("measurement/position (meters)", 0, false),
+
+    MeasurementVelocity("measurement/velocity (meters per second)", 0, false),
+    MechanismPosition("mechanism/position (rotations)", 0, false),
+    MechanismVelocity("mechanism/velocity (rotations per second)", 0, false),
+    RotorPosition("rotor/position (rotations)", 0, false),
+    RotorVelocity("rotor/velocity (rotations per second)", 0, false);
 
     private final double  defaultVal;
     private final String  key;
