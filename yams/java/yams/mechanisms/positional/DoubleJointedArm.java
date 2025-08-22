@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -335,6 +336,31 @@ public class DoubleJointedArm extends SmartPositionalMechanism
   public Trigger max()
   {
     return null;
+  }
+
+  // TODO Probably getting replaced with joint requests. 
+  public Angle getLowerAngle() {
+    return m_lowerSMC.getMechanismPosition();
+  }
+
+  public Command setAngle(Angle lowerAngle,  Angle upperAngle) {
+    return Commands.run(() -> {
+      if (lowerAngle != null) {m_lowerSMC.setPosition(lowerAngle);}
+      if (upperAngle != null) {m_upperSMC.setPosition(upperAngle);}
+    }, m_subsystem).withName(m_subsystem.getName() + " SetAngle");
+  }
+
+  public Command set(Double lowerDutycycle, Double upperDutycycle) {
+    return Commands.startRun(() -> {
+      if (lowerDutycycle != null) {m_lowerSMC.stopClosedLoopController();}
+      if (upperDutycycle != null) {m_upperSMC.stopClosedLoopController();}
+      }, () -> {
+      if (lowerDutycycle != null) {m_lowerSMC.setDutyCycle(lowerDutycycle);}
+      if (upperDutycycle != null) {m_upperSMC.setDutyCycle(upperDutycycle);}
+      }, m_subsystem).finallyDo(() -> {
+        if (lowerDutycycle != null) {m_lowerSMC.startClosedLoopController();}
+        if (upperDutycycle != null) {m_upperSMC.startClosedLoopController();}
+      }).withName(m_subsystem.getName() + " SetDutyCycle");
   }
 
   @Override

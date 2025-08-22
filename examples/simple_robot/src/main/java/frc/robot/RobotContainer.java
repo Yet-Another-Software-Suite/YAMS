@@ -42,6 +42,12 @@ public class RobotContainer
 //    xboxController.button(4).whileTrue(elevator.elevCmd(-0.5));
 //    xboxController.button(5).whileTrue(elevator.elevCmd(0.5));
 
+    xboxController.button(1).whileTrue(dja.setAngle(Degrees.of(90), null));
+    xboxController.button(2).whileTrue(dja.set(null, 1.0));
+    xboxController.button(3).whileTrue(dja.setAngle(Degrees.of(15), Degrees.of(45)));
+    xboxController.button(4).whileTrue(dja.setAngle(Degrees.of(180), Degrees.of(90)));
+    xboxController.button(5).whileTrue(dja.setAngle(Degrees.of(135), Degrees.of(135)));
+
 //    xboxController.button(1).whileTrue(arm.armCmd(0.5));
 //    xboxController.button(2).whileTrue(arm.armCmd(-0.5));
 //    xboxController.button(3).whileTrue(arm.setAngle(Degrees.of(30)));

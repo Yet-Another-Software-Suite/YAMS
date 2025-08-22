@@ -27,8 +27,8 @@ import yams.motorcontrollers.local.SparkWrapper;
 public class JointedArmSubsystem extends SubsystemBase
 {
 
-  private final SparkMax                   lowerMotor  = new SparkMax(4, SparkLowLevel.MotorType.kBrushless);
-  private final SparkMax                   upperMotor  = new SparkMax(5, SparkLowLevel.MotorType.kBrushless);
+  private final SparkMax                   lowerMotor  = new SparkMax(1, SparkLowLevel.MotorType.kBrushless);
+  private final SparkMax                   upperMotor  = new SparkMax(2, SparkLowLevel.MotorType.kBrushless);
   private final SmartMotorControllerConfig lowerConfig = new SmartMotorControllerConfig(this)
       .withClosedLoopController(28, 0.1, 0.01, DegreesPerSecond.of(1480), DegreesPerSecondPerSecond.of(720))
       //.withSoftLimit(Degrees.of(-30), Degrees.of(100))
@@ -86,8 +86,12 @@ public class JointedArmSubsystem extends SubsystemBase
     testPose.set(new Pose2d(new Translation2d(1, 4), Rotation2d.kZero));
   }
 
-  public Command runArm(Angle lowerAngle, Angle upperAngle, int type, Double dutycycle) {
-    return jointedArm.runArm(lowerAngle, upperAngle, type, dutycycle);
+  public Command setAngle(Angle lowerAngle, Angle upperAngle) {
+    return jointedArm.setAngle(lowerAngle, upperAngle);
+  }
+
+  public Command set(Double lowerDutycycle, Double upperDutycycle) {
+    return jointedArm.set(lowerDutycycle, upperDutycycle);
   }
 
   public void periodic()
