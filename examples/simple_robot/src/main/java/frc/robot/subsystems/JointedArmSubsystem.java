@@ -1,14 +1,6 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Pounds;
-import static edu.wpi.first.units.Units.Second;
-import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.*;
 import static yams.mechanisms.SmartMechanism.gearbox;
 import static yams.mechanisms.SmartMechanism.gearing;
 
@@ -21,6 +13,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -37,9 +30,9 @@ public class JointedArmSubsystem extends SubsystemBase
   private final SparkMax                   lowerMotor  = new SparkMax(4, SparkLowLevel.MotorType.kBrushless);
   private final SparkMax                   upperMotor  = new SparkMax(5, SparkLowLevel.MotorType.kBrushless);
   private final SmartMotorControllerConfig lowerConfig = new SmartMotorControllerConfig(this)
-      .withClosedLoopController(4, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
+      .withClosedLoopController(28, 0.1, 0.01, DegreesPerSecond.of(1480), DegreesPerSecondPerSecond.of(720))
       //.withSoftLimit(Degrees.of(-30), Degrees.of(100))
-      .withGearing(gearing(gearbox(3, 4)))
+      .withGearing(gearing(gearbox(3, 4, 5)))
 //      .withExternalEncoder(armMotor.getAbsoluteEncoder())
       .withIdleMode(SmartMotorControllerConfig.MotorMode.BRAKE)
       .withTelemetry("LowerMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
@@ -50,42 +43,51 @@ public class JointedArmSubsystem extends SubsystemBase
       .withFeedforward(new ArmFeedforward(0, 0, 0, 0))
       .withControlMode(SmartMotorControllerConfig.ControlMode.CLOSED_LOOP);
 
-  private final SmartMotorControllerConfig upperConfig = lowerConfig
-      .withClosedLoopController(4, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
-      //.withSoftLimit(Degrees.of(0), Degrees.of(100))
-      .withTelemetry("UpperMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
-      .withMotorInverted(false)
-      .withFeedforward(new ArmFeedforward(0, 0, 0, 0));
+  private final SmartMotorControllerConfig upperConfig = new SmartMotorControllerConfig(this)
+          .withClosedLoopController(28, 0.1, 0.01, DegreesPerSecond.of(1480), DegreesPerSecondPerSecond.of(720))
+          //.withSoftLimit(Degrees.of(-30), Degrees.of(100))
+          .withGearing(gearing(gearbox(3, 4, 5)))
+//      .withExternalEncoder(armMotor.getAbsoluteEncoder())
+          .withIdleMode(SmartMotorControllerConfig.MotorMode.BRAKE)
+          .withTelemetry("LowerMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
+          .withStatorCurrentLimit(Amps.of(40))
+          .withMotorInverted(false)
+          .withClosedLoopRampRate(Seconds.of(0.25))
+          .withOpenLoopRampRate(Seconds.of(0.25))
+          .withFeedforward(new ArmFeedforward(0, 0, 0, 0))
+          .withControlMode(SmartMotorControllerConfig.ControlMode.CLOSED_LOOP);
   private final SmartMotorController       upperSMC    = new SparkWrapper(upperMotor,
                                                                           DCMotor.getNEO(1),
                                                                           upperConfig);
   private final SmartMotorController       lowerSMC    = new SparkWrapper(lowerMotor,
                                                                           DCMotor.getNEO(1),
                                                                           lowerConfig);
-
   private final ArmConfig        lowerArmConfig = new ArmConfig(lowerSMC)
-      .withLength(Meters.of(0.135))
-      .withHardLimit(Degrees.of(-100), Degrees.of(200))
+      .withLength(Feet.of(2))
+      .withHardLimit(Degrees.of(-360), Degrees.of(360))
       .withTelemetry("LowerArm", SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
-      .withMass(Pounds.of(1))
-      .withStartingPosition(Degrees.of(90.5));
+      .withMass(Pounds.of(5))
+      .withStartingPosition(Degrees.of(90));
   private final ArmConfig        upperArmConfig = new ArmConfig(upperSMC)
-      .withLength(Meters.of(0.135))
-      .withHardLimit(Degrees.of(-100), Degrees.of(200))
+      .withLength(Feet.of(2))
+      .withHardLimit(Degrees.of(-360), Degrees.of(360))
       .withTelemetry("UpperArm", SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
-      .withMass(Pounds.of(1))
+      .withMass(Pounds.of(2))
       .withSimColor(new Color8Bit(Color.kDarkRed))
-      .withStartingPosition(Degrees.of(90.5));
+      .withStartingPosition(Degrees.of(0));
   private final DoubleJointedArm jointedArm     = new DoubleJointedArm(lowerArmConfig, upperArmConfig);
 
   public static StructPublisher<Pose2d> testPose = NetworkTableInstance.getDefault()
                                                                        .getTable("SmartDashboard")
                                                                        .getStructTopic("Test Pose", Pose2d.struct)
                                                                        .publish();
-
   public JointedArmSubsystem()
   {
     testPose.set(new Pose2d(new Translation2d(1, 4), Rotation2d.kZero));
+  }
+
+  public Command runArm(Angle lowerAngle, Angle upperAngle, int type, Double dutycycle) {
+    return jointedArm.runArm(lowerAngle, upperAngle, type, dutycycle);
   }
 
   public void periodic()

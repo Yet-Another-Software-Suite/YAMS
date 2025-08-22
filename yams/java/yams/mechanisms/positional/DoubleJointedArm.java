@@ -1,9 +1,5 @@
 package yams.mechanisms.positional;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Radians;
-
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.VoltageUnit;
@@ -29,6 +25,8 @@ import yams.mechanisms.config.ArmConfig;
 import yams.mechanisms.config.MechanismPositionConfig;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.simulation.ArmSimSupplier;
+
+import static edu.wpi.first.units.Units.*;
 
 /**
  * Arm mechanism.
@@ -102,6 +100,8 @@ public class DoubleJointedArm extends SmartPositionalMechanism
                                                        "Cannot create commands for single subsystem.",
                                                        "withSubsystem(this)");
     }
+
+    m_subsystem = lowerConfig.getMotor().getConfig().getSubsystem();
 
     // Check that the starting angle is defined
     if (lowerConfig.getStartingAngle().isEmpty() || upperConfig.getStartingAngle().isEmpty())
