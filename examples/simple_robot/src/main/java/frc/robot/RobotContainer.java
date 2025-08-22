@@ -9,20 +9,17 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.subsystems.DoubleJointedArmSubsystem;
-import frc.robot.subsystems.ElevatorSubsystem;
-
-import static edu.wpi.first.units.Units.Meters;
-
+import frc.robot.subsystems.JointedArmSubsystem;
 
 public class RobotContainer
 {
 
   //  TurretSubsystem       turret         = new TurretSubsystem();
 //  ArmSubsystem arm = new ArmSubsystem();
+  JointedArmSubsystem dja = new  JointedArmSubsystem();
 //  public ElevatorSubsystem elevator = new ElevatorSubsystem();
-  private DoubleJointedArmSubsystem dja = new DoubleJointedArmSubsystem();
   public CommandXboxController xboxController = new CommandXboxController(0);
+
 
   public RobotContainer()
   {

@@ -1,13 +1,7 @@
 package yams.mechanisms.positional;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Radians;
-
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Time;
@@ -34,6 +28,8 @@ import yams.mechanisms.config.MechanismPositionConfig;
 import yams.mechanisms.config.MechanismPositionConfig.Plane;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.simulation.ArmSimSupplier;
+
+import static edu.wpi.first.units.Units.*;
 
 /**
  * Arm mechanism.
@@ -181,18 +177,18 @@ public class DoubleJointedArm extends SmartPositionalMechanism
                                            .plus(lowerLen.times(Math.sin(lowerConfig.getStartingAngle().get()
                                                                                     .in(Radians)))).in(Meters);
       m_mechanismWindow = new Mechanism2d(lowerWindowX + upperWindowX, lowerWindowY + upperWindowY);
-      m_mechanismRoot = m_mechanismWindow.getRoot(getName() + "Root", lowerMechanismX, lowerMechanismY);
-      m_lowerLigament = m_mechanismLigament = m_mechanismRoot.append(new MechanismLigament2d(getName() + " lower",
+      m_mechanismRoot = m_mechanismWindow.getRoot("Lower Root", lowerMechanismX, lowerMechanismY);
+      m_lowerLigament = m_mechanismLigament = m_mechanismRoot.append(new MechanismLigament2d(" lower",
                                                                                              lowerLen.in(Meters),
                                                                                              lowerConfig.getStartingAngle()
                                                                                                         .get()
                                                                                                         .in(Degrees),
                                                                                              6,
                                                                                              lowerConfig.getSimColor()));
-      m_upperRoot = m_mechanismRoot.append(m_mechanismWindow.getRoot(getName() + " upper Root",
+      m_upperRoot = m_mechanismWindow.getRoot("Upper Root",
                                                                      upperMechanismX,
-                                                                     upperMechanismY));
-      m_upperLigament = m_upperRoot.append(new MechanismLigament2d(getName() + " upper",
+                                                                     upperMechanismY);
+      m_upperLigament = m_upperRoot.append(new MechanismLigament2d("upper",
                                                                    upperLen.in(Meters),
                                                                    upperConfig.getStartingAngle().get()
                                                                               .in(Degrees),
@@ -222,7 +218,7 @@ public class DoubleJointedArm extends SmartPositionalMechanism
 //                                                          .in(Degrees),
 //                                                       4, new Color8Bit(Color.kYellow)));
 //      }
-      SmartDashboard.putData(getName() + "/mechanism", m_mechanismWindow);
+      SmartDashboard.putData("DJA" + "/mechanism", m_mechanismWindow);
     }
   }
 
@@ -310,10 +306,18 @@ public class DoubleJointedArm extends SmartPositionalMechanism
   @Override
   public void visualizationUpdate()
   {
-    var upperTrans = getJointPose();
+    var lowerMechPosCfg = m_lowerArmConfig.getMechanismPositionConfig();
+    var lowerLength = m_lowerArmConfig.getLength().get();
+    var lowerAngle = getLowerAngle().in(Radians);
+    var lowerMechanismX = lowerMechPosCfg.getMechanismX(lowerLength).in(Meters);
+    var lowerMechanismY = lowerMechPosCfg.getMechanismY(lowerLength).in(Meters);
+    var jointPos = new Translation2d(
+            lowerMechanismX + (lowerLength.in(Meters) * Math.cos(lowerAngle)),
+            lowerMechanismY + (lowerLength.in(Meters) * Math.sin(lowerAngle))
+    );
     m_lowerLigament.setAngle(getLowerAngle().in(Degrees));
     m_upperLigament.setAngle(getUpperAngle().in(Degrees));
-    m_upperRoot.setPosition(upperTrans.getX(),upperTrans.getY());
+    m_upperRoot.setPosition(jointPos.getX(),jointPos.getY());
 //    m_mechanismLigament.setAngle(getAngle().in(Degrees));
   }
 
