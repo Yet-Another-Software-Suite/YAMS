@@ -101,7 +101,6 @@ public class DoubleJointedArm extends SmartPositionalMechanism
                                                        "Cannot create commands for single subsystem.",
                                                        "withSubsystem(this)");
     }
-
     m_subsystem = lowerConfig.getMotor().getConfig().getSubsystem();
 
     // Check that the starting angle is defined
@@ -217,7 +216,6 @@ public class DoubleJointedArm extends SmartPositionalMechanism
       m_upperSMC.setupSimulation();
       m_lowerSMC.setupSimulation();
     }
-
     // Apply configs
     lowerConfig.applyConfig();
     upperConfig.applyConfig();
@@ -338,7 +336,7 @@ public class DoubleJointedArm extends SmartPositionalMechanism
     return null;
   }
 
-  // TODO Probably getting replaced with joint requests. 
+  // TODO Probably getting replaced with joint requests.
   public Angle getLowerAngle() {
     return m_lowerSMC.getMechanismPosition();
   }
@@ -386,7 +384,6 @@ public class DoubleJointedArm extends SmartPositionalMechanism
   {
     return null;
   }
-
 
   @Override
   public Trigger min()

@@ -9,30 +9,30 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.subsystems.JointedArmSubsystem;
+import frc.robot.subsystems.DoubleJointedArmSubsystem;
 
 import static edu.wpi.first.units.Units.Degrees;
 
 public class RobotContainer
 {
+//  private final ArmSubsystem              arm = new ArmSubsystem();
+//  private final DoubleJointedArmSubsystem jointedArm = new DoubleJointedArmSubsystem();
+//  private final ElevatorSubsystem         elevator = new ElevatorSubsystem();
+//  private final ShooterSubsystem          shooter = new ShooterSubsystem();
+//  private final TurretSubsystem           turret         = new TurretSubsystem();
 
-  //  TurretSubsystem       turret         = new TurretSubsystem();
-//  ArmSubsystem arm = new ArmSubsystem();
-  JointedArmSubsystem dja = new  JointedArmSubsystem();
-//  public ElevatorSubsystem elevator = new ElevatorSubsystem();
-  public CommandXboxController xboxController = new CommandXboxController(0);
-
+  private final CommandXboxController     xboxController = new CommandXboxController(0);
 
   public RobotContainer()
   {
     DriverStation.silenceJoystickConnectionWarning(true);
-//    turret.setDefaultCommand(turret.turretCmd(0.0));
 //    arm.setDefaultCommand(arm.armCmd(0));
 //    arm.setDefaultCommand(arm.setAngle(Degrees.of(0)));
+//    jointedArm.setDefaultCommand(jointedArm.setAngle(Degrees.of(90), Degrees.of(0)));
 //    elevator.setDefaultCommand(elevator.elevCmd(0));
+//    turret.setDefaultCommand(turret.turretCmd(0.0));
     configureBindings();
   }
-
 
   private void configureBindings()
   {
@@ -42,11 +42,11 @@ public class RobotContainer
 //    xboxController.button(4).whileTrue(elevator.elevCmd(-0.5));
 //    xboxController.button(5).whileTrue(elevator.elevCmd(0.5));
 
-    xboxController.button(1).whileTrue(dja.setAngle(Degrees.of(90), null));
-    xboxController.button(2).whileTrue(dja.set(null, 1.0));
-    xboxController.button(3).whileTrue(dja.setAngle(Degrees.of(15), Degrees.of(45)));
-    xboxController.button(4).whileTrue(dja.setAngle(Degrees.of(180), Degrees.of(90)));
-    xboxController.button(5).whileTrue(dja.setAngle(Degrees.of(135), Degrees.of(135)));
+//    xboxController.button(1).whileTrue(jointedArm.setAngle(Degrees.of(90), null));
+//    xboxController.button(2).whileTrue(jointedArm.set(null, 1.0));
+//    xboxController.button(3).whileTrue(jointedArm.setAngle(Degrees.of(15), Degrees.of(45)));
+//    xboxController.button(4).whileTrue(jointedArm.setAngle(Degrees.of(180), Degrees.of(90)));
+//    xboxController.button(5).whileTrue(jointedArm.setAngle(Degrees.of(135), Degrees.of(135)));
 
 //    xboxController.button(1).whileTrue(arm.armCmd(0.5));
 //    xboxController.button(2).whileTrue(arm.armCmd(-0.5));
@@ -61,7 +61,6 @@ public class RobotContainer
 //    xboxController.button(2).whileTrue(turret.turretCmd(-0.2));
 //    xboxController.button(3).whileTrue(turret.sysId());
   }
-
 
   public Command getAutonomousCommand()
   {

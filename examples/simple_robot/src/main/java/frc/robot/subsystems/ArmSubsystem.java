@@ -33,7 +33,6 @@ import yams.motorcontrollers.local.SparkWrapper;
 
 public class ArmSubsystem extends SubsystemBase
 {
-
   private final SparkMax                   armMotor         = new SparkMax(1, MotorType.kBrushless);
   //  private final SmartMotorControllerTelemetryConfig motorTelemetryConfig = new SmartMotorControllerTelemetryConfig()
 //          .withMechanismPosition()
@@ -62,7 +61,6 @@ public class ArmSubsystem extends SubsystemBase
       .withMaxRobotHeight(Meters.of(1.5))
       .withMaxRobotLength(Meters.of(0.75))
       .withRelativePosition(new Translation3d(Meters.of(0.25), Meters.of(0), Meters.of(0.5)));
-
 
   private       ArmConfig m_config = new ArmConfig(motor)
       .withLength(Meters.of(0.135))
@@ -103,4 +101,3 @@ public class ArmSubsystem extends SubsystemBase
     return arm.setAngle(angle);
   }
 }
-

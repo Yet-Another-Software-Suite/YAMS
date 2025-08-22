@@ -30,7 +30,6 @@ import yams.motorcontrollers.local.SparkWrapper;
 
 public class ShooterSubsystem extends SubsystemBase
 {
-
   private final SparkMax                   armMotor    = new SparkMax(1, MotorType.kBrushless);
   //  private final SmartMotorControllerTelemetryConfig motorTelemetryConfig = new SmartMotorControllerTelemetryConfig()
 //          .withMechanismPosition()
@@ -53,7 +52,6 @@ public class ShooterSubsystem extends SubsystemBase
       .withFeedforward(new ArmFeedforward(0, 0, 0, 0))
       .withControlMode(ControlMode.CLOSED_LOOP);
   private final SmartMotorController       motor       = new SparkWrapper(armMotor, DCMotor.getNEO(1), motorConfig);
-
   private final ShooterConfig shooterConfig = new ShooterConfig(motor)
       .withDiameter(Inches.of(4))
       .withMass(Pounds.of(1))

@@ -32,7 +32,6 @@ import yams.motorcontrollers.local.SparkWrapper;
 
 public class ElevatorSubsystem extends SubsystemBase
 {
-
   private final SparkMax                   elevatorMotor = new SparkMax(2, SparkLowLevel.MotorType.kBrushless);
   //  private final SmartMotorControllerTelemetryConfig motorTelemetryConfig = new SmartMotorControllerTelemetryConfig()
 //          .withMechanismPosition()
@@ -58,7 +57,6 @@ public class ElevatorSubsystem extends SubsystemBase
   private final SmartMotorController       motor         = new SparkWrapper(elevatorMotor,
                                                                             DCMotor.getNEO(1),
                                                                             motorConfig);
-
   private final MechanismPositionConfig m_robotToMechanism = new MechanismPositionConfig()
       .withMaxRobotHeight(Meters.of(1.5))
       .withMaxRobotLength(Meters.of(0.75))
@@ -101,4 +99,3 @@ public class ElevatorSubsystem extends SubsystemBase
     return m_elevator.sysId(Volts.of(12), Volts.of(12).per(Second), Second.of(30));
   }
 }
-

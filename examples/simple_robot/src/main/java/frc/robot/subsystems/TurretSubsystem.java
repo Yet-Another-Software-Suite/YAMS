@@ -31,7 +31,6 @@ import yams.motorcontrollers.remote.TalonFXSWrapper;
 
 public class TurretSubsystem extends SubsystemBase
 {
-
   private final TalonFXS                   turretMotor = new TalonFXS(1);//, MotorType.kBrushless);
   //  private final SmartMotorControllerTelemetryConfig motorTelemetryConfig = new SmartMotorControllerTelemetryConfig()
 //          .withMechanismPosition()
@@ -56,7 +55,6 @@ public class TurretSubsystem extends SubsystemBase
   private final SmartMotorController       motor       = new TalonFXSWrapper(turretMotor,
                                                                              DCMotor.getNEO(1),
                                                                              motorConfig);
-
   private final MechanismPositionConfig    robotToMechanism = new MechanismPositionConfig()
       .withMaxRobotHeight(Meters.of(1.5))
       .withMaxRobotLength(Meters.of(0.75))
@@ -76,7 +74,6 @@ public class TurretSubsystem extends SubsystemBase
     //       Also, you can call addChild(name, sendableChild) to associate sendables with the subsystem
     //       such as SpeedControllers, Encoders, DigitalInputs, etc.
   }
-
 
   public void periodic()
   {
@@ -103,4 +100,3 @@ public class TurretSubsystem extends SubsystemBase
     return turret.setAngle(angle);
   }
 }
-
