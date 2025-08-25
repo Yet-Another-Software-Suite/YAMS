@@ -254,14 +254,15 @@ public class Elevator extends SmartPositionalMechanism
                                         config.getMaximumHeight().get().in(Meters) * 2);
 
       m_mechanismRoot = m_mechanismWindow.getRoot(getName() + "Root",
-        config.getMaximumHeight().get().in(Meters) - config.getMechanismPositionConfig().getRelativePosition().get().getX(),
-        config.getMechanismPositionConfig().getRelativePosition().get().getZ());
+        config.getMaximumHeight().get().in(Meters) - config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d()).getX(),
+        config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d()).getZ());
+
       if (m_smc.getConfig().getMechanismLowerLimit().isPresent())
         {
         m_mechanismWindow.getRoot(
                   "MinSoft",
-                  config.getMaximumHeight().get().in(Meters) + config.getMechanismPositionConfig().getRelativePosition().get().getX()-Inches.of(6).in(Meters),
-                  config.getMechanismPositionConfig().getRelativePosition().get().getZ())
+                  config.getMaximumHeight().get().in(Meters) + config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d()).getX()-Inches.of(6).in(Meters),
+                  config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d()).getZ())
                 .append(new MechanismLigament2d(
                     "Limit",
                     m_smc.getConfig().convertFromMechanism(m_smc.getConfig().getMechanismLowerLimit().get())
@@ -275,8 +276,8 @@ public class Elevator extends SmartPositionalMechanism
         {
           m_mechanismWindow.getRoot(
                     "MaxSoft",
-                    config.getMaximumHeight().get().in(Meters) + config.getMechanismPositionConfig().getRelativePosition().get().getX()-Inches.of(6).in(Meters),
-                    config.getMechanismPositionConfig().getRelativePosition().get().getZ())
+                    config.getMaximumHeight().get().in(Meters) + config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d()).getX()-Inches.of(6).in(Meters),
+                    config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d()).getZ())
                   .append(new MechanismLigament2d(
                       "Limit",
                       m_smc.getConfig().convertFromMechanism(m_smc.getConfig().getMechanismUpperLimit().get())
@@ -288,8 +289,8 @@ public class Elevator extends SmartPositionalMechanism
         }
         m_mechanismWindow.getRoot(
                 "MinHard",
-                config.getMaximumHeight().get().in(Meters) + config.getMechanismPositionConfig().getRelativePosition().get().getX()-Inches.of(8).in(Meters),
-                config.getMechanismPositionConfig().getRelativePosition().get().getZ())
+                config.getMaximumHeight().get().in(Meters) + config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d()).getX()-Inches.of(8).in(Meters),
+                config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d()).getZ())
               .append(new MechanismLigament2d(
                 "Limit",
                 config.getMinimumHeight().get().in(Meters),
@@ -299,8 +300,8 @@ public class Elevator extends SmartPositionalMechanism
             ));
         m_mechanismWindow.getRoot(
                 "MaxHard",
-                config.getMaximumHeight().get().in(Meters) + config.getMechanismPositionConfig().getRelativePosition().get().getX()-Inches.of(8).in(Meters),
-                config.getMechanismPositionConfig().getRelativePosition().get().getZ())
+                config.getMaximumHeight().get().in(Meters) + config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d()).getX()-Inches.of(8).in(Meters),
+                config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d()).getZ())
               .append(new MechanismLigament2d(
                 "Limit",
                 config.getMaximumHeight().get().in(Meters),
