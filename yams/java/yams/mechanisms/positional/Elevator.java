@@ -260,7 +260,7 @@ public class Elevator extends SmartPositionalMechanism
         {
         m_mechanismWindow.getRoot(
                   "MinSoft",
-                  config.getMaximumHeight().get().in(Meters) - config.getMechanismPositionConfig().getRelativePosition().get().getX()+Inches.of(6).in(Meters),
+                  config.getMaximumHeight().get().in(Meters) + config.getMechanismPositionConfig().getRelativePosition().get().getX()-Inches.of(6).in(Meters),
                   config.getMechanismPositionConfig().getRelativePosition().get().getZ())
                 .append(new MechanismLigament2d(
                     "Limit",
@@ -275,7 +275,7 @@ public class Elevator extends SmartPositionalMechanism
         {
           m_mechanismWindow.getRoot(
                     "MaxSoft",
-                    config.getMaximumHeight().get().in(Meters) - config.getMechanismPositionConfig().getRelativePosition().get().getX()+Inches.of(6).in(Meters),
+                    config.getMaximumHeight().get().in(Meters) + config.getMechanismPositionConfig().getRelativePosition().get().getX()-Inches.of(6).in(Meters),
                     config.getMechanismPositionConfig().getRelativePosition().get().getZ())
                   .append(new MechanismLigament2d(
                       "Limit",
@@ -288,7 +288,7 @@ public class Elevator extends SmartPositionalMechanism
         }
         m_mechanismWindow.getRoot(
                 "MinHard",
-                config.getMaximumHeight().get().in(Meters) - config.getMechanismPositionConfig().getRelativePosition().get().getX()+Inches.of(8).in(Meters),
+                config.getMaximumHeight().get().in(Meters) + config.getMechanismPositionConfig().getRelativePosition().get().getX()-Inches.of(8).in(Meters),
                 config.getMechanismPositionConfig().getRelativePosition().get().getZ())
               .append(new MechanismLigament2d(
                 "Limit",
@@ -299,7 +299,7 @@ public class Elevator extends SmartPositionalMechanism
             ));
         m_mechanismWindow.getRoot(
                 "MaxHard",
-                config.getMaximumHeight().get().in(Meters) - config.getMechanismPositionConfig().getRelativePosition().get().getX()+Inches.of(8).in(Meters),
+                config.getMaximumHeight().get().in(Meters) + config.getMechanismPositionConfig().getRelativePosition().get().getX()-Inches.of(8).in(Meters),
                 config.getMechanismPositionConfig().getRelativePosition().get().getZ())
               .append(new MechanismLigament2d(
                 "Limit",
