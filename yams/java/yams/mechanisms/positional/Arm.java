@@ -118,10 +118,11 @@ public class Arm extends SmartPositionalMechanism
                                           config.getMechanismPositionConfig()
                                               .getWindowYDimension(config.getLength().get()).in(Meters));
       m_mechanismRoot = m_mechanismWindow.getRoot(getName() + "Root",
-                                                  config.getMechanismPositionConfig()
-                                                    .getMechanismX(config.getLength().get()).in(Meters),
-                                                  config.getMechanismPositionConfig()
-                                                    .getMechanismY(config.getLength().get()).in(Meters));
+                                                  config.getMechanismPositionConfig().getMechanismX(config.getLength().get()).in(Meters)
+                                                  + config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d()).getX(),
+                                                  config.getMechanismPositionConfig().getMechanismY(config.getLength().get()).in(Meters)
+                                                  + config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d()).getZ()
+                                                  );
       m_mechanismLigament = m_mechanismRoot.append(new MechanismLigament2d(getName(),
                                                                            config.getLength().get().in(Meters),
                                                                            config.getStartingAngle().get().in(Degrees),
