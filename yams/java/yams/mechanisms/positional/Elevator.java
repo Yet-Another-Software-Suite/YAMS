@@ -253,56 +253,62 @@ public class Elevator extends SmartPositionalMechanism
       m_mechanismWindow = new Mechanism2d(config.getMaximumHeight().get().in(Meters) * 2,
                                         config.getMaximumHeight().get().in(Meters) * 2);
 
-      if (m_smc.getConfig().getMechanismLowerLimit().isPresent())
-      {
-        m_mechanismWindow.getRoot(
-                           "MinSoft",
-                           config.getMaximumHeight().get().minus(Inches.of(6)).in(Meters), 0)
-                         .append(new MechanismLigament2d(
-                             "Limit",
-                             m_smc.getConfig().convertFromMechanism(m_smc.getConfig().getMechanismLowerLimit().get())
-                                  .in(Meters),
-                             config.getAngle().in(Degrees),
-                             3,
-                             new Color8Bit(Color.kYellow)
-                       ));
-      }
-      if (m_smc.getConfig().getMechanismUpperLimit().isPresent())
-      {
-        m_mechanismWindow.getRoot(
-                           "MaxSoft",
-                           config.getMaximumHeight().get().plus(Inches.of(6)).in(Meters), 0)
-                         .append(new MechanismLigament2d(
-                             "Limit",
-                             m_smc.getConfig().convertFromMechanism(m_smc.getConfig().getMechanismUpperLimit().get())
-                                  .in(Meters),
-                             config.getAngle().in(Degrees),
-                             3,
-                             new Color8Bit(Color.kHotPink)
-                       ));
-      }
-      m_mechanismWindow.getRoot(
-                         "MinHard",
-                         config.getMaximumHeight().get().minus(Inches.of(8)).in(Meters), 0)
-                       .append(new MechanismLigament2d(
-                         "Limit",
-                         config.getMinimumHeight().get().in(Meters),
-                         config.getAngle().in(Degrees),
-                         3,
-                         new Color8Bit(Color.kRed)
-                     ));
-      m_mechanismWindow.getRoot(
-                         "MaxHard",
-                         config.getMaximumHeight().get().plus(Inches.of(8)).in(Meters), 0)
-                       .append(new MechanismLigament2d(
-                         "Limit",
-                         config.getMaximumHeight().get().in(Meters),
-                         config.getAngle().in(Degrees),
-                         3,
-                         new Color8Bit(Color.kLimeGreen)
-                     ));
       m_mechanismRoot = m_mechanismWindow.getRoot(getName() + "Root",
-                                                  config.getMaximumHeight().get().in(Meters), 0);
+        config.getMaximumHeight().get().in(Meters) - config.getMechanismPositionConfig().getRelativePosition().get().getX(),
+        config.getMechanismPositionConfig().getRelativePosition().get().getZ());
+      if (m_smc.getConfig().getMechanismLowerLimit().isPresent())
+        {
+        m_mechanismWindow.getRoot(
+                  "MinSoft",
+                  config.getMaximumHeight().get().in(Meters) - config.getMechanismPositionConfig().getRelativePosition().get().getX()+Inches.of(6).in(Meters),
+                  config.getMechanismPositionConfig().getRelativePosition().get().getZ())
+                .append(new MechanismLigament2d(
+                    "Limit",
+                    m_smc.getConfig().convertFromMechanism(m_smc.getConfig().getMechanismLowerLimit().get())
+                        .in(Meters),
+                    config.getAngle().in(Degrees),
+                    3,
+                    new Color8Bit(Color.kYellow)
+              ));
+        }
+        if (m_smc.getConfig().getMechanismUpperLimit().isPresent())
+        {
+          m_mechanismWindow.getRoot(
+                    "MaxSoft",
+                    config.getMaximumHeight().get().in(Meters) - config.getMechanismPositionConfig().getRelativePosition().get().getX()+Inches.of(6).in(Meters),
+                    config.getMechanismPositionConfig().getRelativePosition().get().getZ())
+                  .append(new MechanismLigament2d(
+                      "Limit",
+                      m_smc.getConfig().convertFromMechanism(m_smc.getConfig().getMechanismUpperLimit().get())
+                          .in(Meters),
+                      config.getAngle().in(Degrees),
+                      3,
+                      new Color8Bit(Color.kHotPink)
+                ));
+        }
+        m_mechanismWindow.getRoot(
+                "MinHard",
+                config.getMaximumHeight().get().in(Meters) - config.getMechanismPositionConfig().getRelativePosition().get().getX()+Inches.of(8).in(Meters),
+                config.getMechanismPositionConfig().getRelativePosition().get().getZ())
+              .append(new MechanismLigament2d(
+                "Limit",
+                config.getMinimumHeight().get().in(Meters),
+                config.getAngle().in(Degrees),
+                3,
+                new Color8Bit(Color.kRed)
+            ));
+        m_mechanismWindow.getRoot(
+                "MaxHard",
+                config.getMaximumHeight().get().in(Meters) - config.getMechanismPositionConfig().getRelativePosition().get().getX()+Inches.of(8).in(Meters),
+                config.getMechanismPositionConfig().getRelativePosition().get().getZ())
+              .append(new MechanismLigament2d(
+                "Limit",
+                config.getMaximumHeight().get().in(Meters),
+                config.getAngle().in(Degrees),
+                3,
+                new Color8Bit(Color.kLimeGreen)
+            ));
+            
       m_mechanismLigament = m_mechanismRoot.append(new MechanismLigament2d(getName(),
                                                                            config.getStartingHeight().get().in(Meters),
                                                                            config.getAngle().in(Degrees),
@@ -311,6 +317,7 @@ public class Elevator extends SmartPositionalMechanism
       SmartDashboard.putData(getName() + "/mechanism", m_mechanismWindow);
     }
   }
+  
 
   @Override
   public void updateTelemetry()

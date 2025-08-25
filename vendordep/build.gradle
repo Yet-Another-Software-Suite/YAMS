@@ -10,6 +10,7 @@ plugins {
   id "edu.wpi.first.GradleRIO" version "2025.3.2"
   id 'edu.wpi.first.GradleJni' version '1.1.0'
   id 'edu.wpi.first.GradleVsCode' version '2.1.0'
+    id 'maven-publish'
 }
 
 // WPILib Version
@@ -26,6 +27,7 @@ if (project.hasProperty('releaseMode')) {
 } else {
   wpilibRepositories.addAllDevelopmentRepositories(project)
 }
+
 
 java {
   sourceCompatibility = JavaVersion.VERSION_17
