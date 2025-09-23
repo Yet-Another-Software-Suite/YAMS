@@ -1,5 +1,7 @@
 package yams.gearing;
 
+import static yams.mechanisms.SmartMechanism.gearbox;
+
 import java.util.Optional;
 
 /**
@@ -25,6 +27,22 @@ public class MechanismGearing
   public MechanismGearing(GearBox gearBox)
   {
     this.gearBox = gearBox;
+  }
+
+  /**
+   *
+   * @param divisor The value to divide the gear ratio by.
+   * @return
+   * @throws IllegalArgumentException if divisor is zero.
+   */
+  public MechanismGearing div(double divisor) {
+  if (divisor == 0) {
+      throw new IllegalArgumentException("Divisor cannot be zero");
+  }
+  double originalRatio = gearBox.getInputToOutputConversionFactor();
+  double newRatio = originalRatio / divisor;
+  GearBox newGearbox = new GearBox(new double[]{newRatio});
+  return sprockets.isPresent() ? new MechanismGearing(newGearbox, sprockets.get()) : new MechanismGearing(newGearbox);
   }
 
   /**
