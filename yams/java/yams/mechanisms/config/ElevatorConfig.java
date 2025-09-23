@@ -60,7 +60,31 @@ public class ElevatorConfig
    * Mechanism position configuration for the {@link yams.mechanisms.positional.Pivot} (Optional).
    */
   private       MechanismPositionConfig      mechanismPositionConfig = new MechanismPositionConfig();
+  /**
+   * Number of cascading stages.
+   */
+  private       int                          cascadingStages         = 1;
 
+  /**
+   * @param stages Number of cascading stages.
+   * @return {@link ElevatorConfig}
+   */
+  public ElevatorConfig withCascadingStages(int stages) {
+    if (stages < 1) {
+      throw new IllegalArgumentException("Stages must be at least 1");
+    }
+    this.cascadingStages = stages;
+    return this;
+  }
+
+  /**
+   * Get the number of cascading stages.
+   *  
+   * @return Number of stages.
+   */
+  public int getCascadingStages() {
+    return cascadingStages;
+  }
 
   /**
    * Elevator Configuration class
