@@ -1,0 +1,150 @@
+import edu.wpi.first.toolchain.*
+
+plugins {
+  id 'cpp'
+  id 'java'
+  id 'google-test'
+  id 'idea'
+  id 'edu.wpi.first.wpilib.repositories.WPILibRepositoriesPlugin' version '2025.0'
+  id 'edu.wpi.first.NativeUtils' version '2025.9.0'
+  id "edu.wpi.first.GradleRIO" version "2025.3.2"
+  id 'edu.wpi.first.GradleJni' version '1.1.0'
+  id 'edu.wpi.first.GradleVsCode' version '2.1.0'
+}
+
+// WPILib Version
+ext.wpilibVersion = "2025.3.2"
+ext.releasePath = "$buildDir/maven"
+ext.pubVersion = System.getenv("releaseVersion") ?: System.getenv("releaseName") ?: "test"
+
+
+repositories {
+  mavenCentral()
+}
+if (project.hasProperty('releaseMode')) {
+  wpilibRepositories.addAllReleaseRepositories(project)
+} else {
+  wpilibRepositories.addAllDevelopmentRepositories(project)
+}
+
+java {
+  sourceCompatibility = JavaVersion.VERSION_17
+  targetCompatibility = JavaVersion.VERSION_17
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "$rootDir/../yams/java/"
+        }
+    }
+//    test {
+//        java {
+//            srcDir "src/test/java"
+//        }
+//    }
+}
+
+var javaVersion = "17"
+
+// Apply C++ configuration
+apply from: 'config.gradle'
+
+// Apply Java configuration
+dependencies {
+    annotationProcessor wpi.java.deps.wpilibAnnotations()
+    implementation wpi.java.deps.wpilib()
+    implementation wpi.java.vendor.java()
+
+    implementation "edu.wpi.first.cscore:cscore-java:$wpilibVersion"
+    implementation "edu.wpi.first.cameraserver:cameraserver-java:$wpilibVersion"
+    implementation "edu.wpi.first.ntcore:ntcore-java:$wpilibVersion"
+    implementation "edu.wpi.first.wpilibj:wpilibj-java:$wpilibVersion"
+    implementation "edu.wpi.first.wpiutil:wpiutil-java:$wpilibVersion"
+    implementation "edu.wpi.first.wpimath:wpimath-java:$wpilibVersion"
+    implementation "edu.wpi.first.wpiunits:wpiunits-java:$wpilibVersion"
+    implementation "edu.wpi.first.hal:hal-java:$wpilibVersion"
+    implementation "org.ejml:ejml-simple:0.43.1"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:2.15.2"
+    implementation "com.fasterxml.jackson.core:jackson-core:2.15.2"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.15.2"
+    implementation 'edu.wpi.first.thirdparty.frc2025.opencv:opencv-java:4.10.0-2'
+
+//    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
+//    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    nativeDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.desktop)
+    nativeDebug wpi.java.vendor.jniDebug(wpi.platforms.desktop)
+    simulationDebug wpi.sim.enableDebug()
+
+    nativeRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.desktop)
+    nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
+    simulationRelease wpi.sim.enableRelease()
+
+    testImplementation platform("org.junit:junit-bom:5.11.4")
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testImplementation "org.junit.jupiter:junit-jupiter-params"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+    testImplementation "org.mockito:mockito-core:5.3.1"
+    testImplementation "org.mockito:mockito-junit-jupiter:5.3.1"
+    testImplementation wpi.java.vendor.java()
+
+}
+
+// Set up java tests
+test {
+    useJUnitPlatform()
+    systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+    testLogging {
+        events "failed"
+        exceptionFormat "full"
+    }
+}
+
+wpi.sim.addGui().defaultEnabled = true
+wpi.sim.addDriverstation()
+wpi.java.configureTestTasks(test)
+
+tasks.test {
+    // Disable test when running 'build' task, but enable when running 'test' task directly
+    enabled = !gradle.startParameter.taskNames.contains('build')
+}
+
+if (project.hasProperty('onlylinuxathena') || project.hasProperty('onlylinuxarm32') || project.hasProperty('onlylinuxarm64') || project.hasProperty('onlywindowsarm64') || project.hasProperty('onlylinuxsystemcore')) {
+    test.enabled = false
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs.add '-XDstringConcat=inline'
+    options.encoding = 'UTF-8'
+}
+
+javadoc {
+    title = "Yet Another Mechanism System API"
+    destinationDir = file("$releasePath/javadocs")
+    options {
+        links "https://docs.oracle.com/en/java/javase/$javaVersion/docs/api/",
+                'https://github.wpilib.org/allwpilib/docs/release/java/',
+                'https://codedocs.revrobotics.com/java/',
+                'https://api.ctr-electronics.com/phoenix6/release/java/',
+                'https://api.ctr-electronics.com/phoenix/release/java/',
+                "https://www.kauailabs.com/public_files/navx-mxp/apidocs/java/"
+    }
+}
+ext.getCurrentArch = {
+    return NativePlatforms.desktop
+}
+
+def systemArch = getCurrentArch()
+
+model {
+  components {
+  }
+}
+
+build.dependsOn javadoc
+apply from: 'publish.gradle'
+
+wrapper {
+  gradleVersion '8.11'
+}

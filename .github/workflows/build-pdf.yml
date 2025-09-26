@@ -1,0 +1,34 @@
+# .github/workflows/convert-to-pdf.yml
+
+name: Docs to PDF
+# This workflow is triggered on pushes to the repository.
+on:
+  push:
+    branches:
+      - master
+    # Paths can be used to only trigger actions when you have edited certain files, such as a file within the /docs directory
+    paths:
+      - 'docs/**.md'
+      - 'docs/.gitbook/**'
+
+jobs:
+  converttopdf:
+    name: Build PDF
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: baileyjm02/markdown-to-pdf@v1
+        with:
+          input_dir: docs
+          output_dir: pdfs
+          images_dir: docs/.gitbook
+          # for example <img src="./images/file-name.png">
+          image_import: ./gitbook
+          # Default is true, can set to false to only get PDF files
+          build_html: true
+          table_of_contents: true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docs
+          path: pdfs
+

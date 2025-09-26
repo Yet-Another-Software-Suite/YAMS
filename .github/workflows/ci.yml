@@ -1,0 +1,35 @@
+name: YAMS CI
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      releaseVersion: ${{ inputs.releaseVersion }}
+      releaseName: ${{ github.event.release.name }}
+      workingDirectory: ${{github.workspace}}/vendordep
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+      - run: chmod +x gradlew
+        working-directory: ${{ env.workingDirectory }}
+      - name: Install roboRio toolchain
+        run: ./gradlew installRoboRioToolchain
+        working-directory: ${{ env.workingDirectory }}
+      - name: Build vendordep
+        run: ./gradlew build
+        working-directory: ${{ env.workingDirectory }}
+      - name: Unit tests
+        run: ./gradlew test
+        working-directory: ${{ env.workingDirectory }}
+      - name: Publish vendordep
+        run: ./gradlew publish
+        working-directory: ${{ env.workingDirectory }}
+      - name: Upload vendordep json, maven repository, and javadocs
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ env.workingDirectory }}/build/maven/
