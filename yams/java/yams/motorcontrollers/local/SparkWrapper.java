@@ -706,10 +706,10 @@ public class SparkWrapper extends SmartMotorController
   public void setKd(double kD)
   {
     m_simplePidController.ifPresent(simplePidController -> {
-      simplePidController.setP(kD);
+      simplePidController.setD(kD);
     });
     m_pidController.ifPresent(pidController -> {
-      pidController.setP(kD);
+      pidController.setD(kD);
     });
   }
 
@@ -756,7 +756,7 @@ public class SparkWrapper extends SmartMotorController
       simpleMotorFeedforward.setKa(kA);
     });
     m_config.getArmFeedforward().ifPresent(armFeedforward -> {
-      armFeedforward.setKs(kA);
+      armFeedforward.setKa(kA);
     });
     m_config.getElevatorFeedforward().ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKa(kA);
