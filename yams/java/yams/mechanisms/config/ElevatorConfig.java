@@ -166,7 +166,7 @@ public class ElevatorConfig
   }
 
   /**
-   * Set the elevator mechnism position configuration.
+   * Set the elevator mechanism position configuration.
    *
    * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link yams.mechanisms.positional.Elevator}
    * @return {@link ElevatorConfig} for chaining

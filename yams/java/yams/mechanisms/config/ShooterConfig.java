@@ -2,6 +2,7 @@ package yams.mechanisms.config;
 
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -67,6 +68,14 @@ public class ShooterConfig
    * Mechanism position configuration for the {@link yams.mechanisms.positional.Pivot} (Optional).
    */
   private       MechanismPositionConfig      mechanismPositionConfig = new MechanismPositionConfig();
+  /*
+   * Use speedometer simulation for the shooter.
+   */
+  private       boolean                      useSpeedometer           = false;
+  /*
+   * Max velocity of the speedometer simulation (Optional).
+   */
+  private       Optional<AngularVelocity>    speedometerMaxVelocity   = Optional.empty();
 
   /**
    * Arm Configuration class
@@ -80,6 +89,7 @@ public class ShooterConfig
 
   /**
    * Set the minimum velocity of the shooter.
+   * Also updates the speedometer simulation max velocity
    *
    * @param speed Minimum velocity of the shooter.
    * @return {@link ShooterConfig} for chaining
@@ -87,11 +97,17 @@ public class ShooterConfig
   public ShooterConfig withLowerSoftLimit(AngularVelocity speed)
   {
     minVelocity = Optional.ofNullable(speed);
+    // Set the speedometer max to the highest absolute value of the max and min Velocity
+    // If the max is less than the min, set the speedometer max to the min
+    speedometerMaxVelocity = Optional.ofNullable(maxVelocity.orElse(RPM.of(0)).abs(RPM) > (minVelocity.orElse(RPM.of(0))).abs(RPM) 
+      ? RPM.of(maxVelocity.orElse(RPM.of(0)).abs(RPM)) // The orElse here is just to deal with the Optional, it will likely never be 0
+      : RPM.of(minVelocity.orElse(RPM.of(0)).abs(RPM))); // The orElse here is just to deal with the Optional, it will likely never be 0
     return this;
   }
 
   /**
    * Set the maximum velocity of the shooter.
+   * Also updates the speedometer simulation max velocity
    *
    * @param speed Maximum velocity of the shooter.
    * @return {@link ShooterConfig} for chaining.
@@ -99,6 +115,11 @@ public class ShooterConfig
   public ShooterConfig withUpperSoftLimit(AngularVelocity speed)
   {
     maxVelocity = Optional.ofNullable(speed);
+    // Set the speedometer max to the highest absolute value of the max and min Velocity
+    // If the max is less than the min, set the speedometer max to the min
+    speedometerMaxVelocity = Optional.ofNullable(maxVelocity.orElse(RPM.of(0)).abs(RPM) > (minVelocity.orElse(RPM.of(0))).abs(RPM) 
+      ? RPM.of(maxVelocity.orElse(RPM.of(0)).abs(RPM)) // The orElse here is just to deal with the Optional, it will likely never be 0
+      : RPM.of(minVelocity.orElse(RPM.of(0)).abs(RPM))); // The orElse here is just to deal with the Optional, it will likely never be 0
     return this;
   }
 
@@ -113,9 +134,90 @@ public class ShooterConfig
   {
     minVelocity = Optional.ofNullable(low);
     maxVelocity = Optional.ofNullable(high);
+    // Set the speedometer max to the highest absolute value of the two
+    speedometerMaxVelocity = Optional.ofNullable(high.abs(RPM) > low.abs(RPM) ? RPM.of(high.abs(RPM)) : RPM.of(low.abs(RPM)));
     return this;
   }
 
+  /**
+   * Enables the use of the speedometer simulation for the shooter.
+   *
+   * The speedometer simulation is a simulation of a speedometer that is used
+   * to simulate the behavior of the shooter. This is useful for testing and
+   * debugging the shooter without having to physically move it.
+   *
+   * @param maxVelocity The maximum velocity of the shooter.
+   * @return {@link ShooterConfig} for chaining.
+   */
+  public ShooterConfig withSpeedometerSimulation(AngularVelocity maxVelocity)
+  {
+    this.useSpeedometer = true;
+    this.speedometerMaxVelocity = Optional.ofNullable(maxVelocity);
+    return this;
+  }
+
+  /**
+   * Enables the use of the speedometer simulation for the shooter.
+   *
+   * The speedometer simulation is a simulation of a speedometer that is used
+   * to simulate the behavior of the shooter. This is useful for testing and
+   * debugging the shooter without having to physically move it.
+   *
+   * @return {@link ShooterConfig} for chaining.
+   */
+  public ShooterConfig withSpeedometerSimulation()
+  {
+    if (!speedometerMaxVelocity.isPresent()) {
+      throw new ShooterConfigurationException("Speedometer max velocity is not set." ,
+        "Cannot use speedometer simulation!",
+        "Set it with useSpeedometerSimulation(AngularVelocity) or withSoftLimit(AngularVelocity, AngularVelocity)");
+    }
+    this.useSpeedometer = true;
+    return this;
+  }
+  
+  /**
+   * Disable the use of the speedometer simulation for the shooter.
+   *
+   * The speedometer simulation is a simulation of a speedometer that is used
+   * to simulate the behavior of the shooter. This is useful for testing and
+   * debugging the shooter without having to physically move it.
+   *
+   * @return {@link ShooterConfig} for chaining.
+   */
+  public ShooterConfig disableSpeedometerSimulation()
+  {
+    this.useSpeedometer = false;
+    return this;
+  }
+
+  /**
+   * Check if the shooter is using the speedometer simulation.
+   *
+   * The speedometer simulation is a simulation of the speedometer that is used
+   * to simulate the behavior of the shooter. This is useful for testing and
+   * debugging the shooter without having to physically move it.
+   *
+   * @return True if the shooter is using the speedometer simulation.
+   */
+  public boolean isUsingSpeedometerSimulation()
+  {
+    return useSpeedometer;
+  }
+
+
+  /**
+   * Get the maximum velocity of the speedometer simulation.
+   *
+   * If the speedometer simulation is not enabled, this will return an empty Optional.
+   *
+   * @return The maximum velocity of the speedometer simulation, or an empty Optional if the speedometer simulation is not enabled.
+   */
+  public Optional<AngularVelocity> getSpeedometerMaxVelocity()
+  {
+    return speedometerMaxVelocity;
+  }
+  
   /**
    * Publish the color in sim as this.
    *
@@ -181,6 +283,18 @@ public class ShooterConfig
     return this;
   }
 
+  /**
+   * Set the shooter mechanism position configuration.
+   *
+   * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link yams.mechanisms.velocity.Shooter}
+   * @return {@link ShooterConfig} for chaining
+   */
+  public ShooterConfig withMechanismPositionConfig(MechanismPositionConfig mechanismPositionConfig)
+  {
+    this.mechanismPositionConfig = mechanismPositionConfig;
+    return this;
+  }
+  
   /**
    * Configure telemetry for the {@link yams.mechanisms.velocity.Shooter} mechanism.
    *

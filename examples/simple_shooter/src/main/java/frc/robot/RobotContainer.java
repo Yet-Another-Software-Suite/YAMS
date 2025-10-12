@@ -5,13 +5,12 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.RPM;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.ShooterSubsystem;
-
-import static edu.wpi.first.units.Units.Meters;
 
 
 public class RobotContainer
@@ -29,7 +28,7 @@ public class RobotContainer
 
   private void configureBindings()
   {
-    xboxController.button(1).whileTrue(shooter.setVelocity(RPM.of(60)));
+    xboxController.button(1).whileTrue(shooter.setVelocity(RPM.of(300)));
     xboxController.button(2).whileTrue(shooter.setVelocity(RPM.of(0)));
     xboxController.button(3).whileTrue(shooter.sysId());
     xboxController.button(4).whileTrue(shooter.setDutyCycle(-0.5));

@@ -377,6 +377,11 @@ public abstract class SmartMotorController
           pidOutputVoltage.set(pid.calculate(getMechanismVelocity().in(RotationsPerSecond),
                                              setpointVelocity.get().in(RotationsPerSecond)));
         });
+        if (simpleMotorFeedforward.isPresent())
+        {
+          feedforward = simpleMotorFeedforward.get().calculateWithVelocities(getMechanismVelocity().in(
+            RotationsPerSecond), setpointVelocity.get().in(RotationsPerSecond));
+        }
       }
     }
     if (mechUpperLimit.isPresent())
