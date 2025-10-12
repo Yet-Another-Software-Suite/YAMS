@@ -454,7 +454,7 @@ public class Elevator extends SmartPositionalMechanism
       return new Trigger(gte(m_smc.getConfig()
                                   .convertFromMechanism(m_smc.getConfig().getMechanismUpperLimit().get())));
     }
-    if (m_config.getMaximumHeight().isEmpty())
+    if (m_config.getMaximumHeight().isPresent())
     {
       return gte(m_config.getMaximumHeight().get());
     }
@@ -471,7 +471,7 @@ public class Elevator extends SmartPositionalMechanism
       return new Trigger(gte(m_smc.getConfig()
                                   .convertFromMechanism(m_smc.getConfig().getMechanismLowerLimit().get())));
     }
-    if (m_config.getMinimumHeight().isEmpty())
+    if (m_config.getMinimumHeight().isPresent())
     {
       return gte(m_config.getMinimumHeight().get());
     }

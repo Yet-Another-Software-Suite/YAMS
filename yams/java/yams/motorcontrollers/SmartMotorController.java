@@ -41,7 +41,9 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.gearing.MechanismGearing;
+import yams.math.ExponentialProfilePIDController;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
+import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.telemetry.SmartMotorControllerTelemetry;
 import yams.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
@@ -66,6 +68,10 @@ public abstract class SmartMotorController
    * Profiled PID controller for the motor controller.
    */
   protected Optional<ProfiledPIDController>               m_pidController               = Optional.empty();
+  /**
+   * Exponential profile PID controller for the motor controller.
+   */
+  protected Optional<ExponentialProfilePIDController>     m_expoPidController           = Optional.empty();
   /**
    * Simple PID controller for the motor controller.
    */
@@ -220,9 +226,13 @@ public abstract class SmartMotorController
       m_simplePidController.ifPresent(PIDController::reset);
       m_pidController.ifPresent(pid -> pid.reset(getMechanismPosition().in(Rotations),
                                                  getMechanismVelocity().in(RotationsPerSecond)));
+      m_expoPidController.ifPresent(pid -> pid.reset(getMechanismPosition().in(Rotations),
+                                                     getMechanismVelocity().in(RotationsPerSecond)));
       m_config.getMechanismCircumference().ifPresent(circumference -> {
         m_pidController.ifPresent(pid -> pid.reset(getMeasurementPosition().in(Meters),
                                                    getMeasurementVelocity().in(MetersPerSecond)));
+        m_expoPidController.ifPresent(pid -> pid.reset(getMeasurementPosition().in(Meters),
+                                                       getMeasurementVelocity().in(MetersPerSecond)));
       });
       m_closedLoopControllerThread.stop();
       m_closedLoopControllerThread.startPeriodic(m_config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20))
@@ -281,7 +291,44 @@ public abstract class SmartMotorController
       }
     }
 
-    if (m_pidController.isPresent() && setpointPosition.isPresent())
+    if (m_expoPidController.isPresent() && setpointPosition.isPresent())
+    {
+      if (armFeedforward.isPresent())
+      {
+        pidOutputVoltage.set(m_expoPidController.get().calculate(getMechanismPosition().in(Rotations),
+                                                                 setpointPosition.get().in(Rotations)));
+        feedforward = armFeedforward.get().calculateWithVelocities(getMechanismPosition().in(Rotations),
+                                                                   m_expoPidController.get()
+                                                                                      .getCurrentVelocitySetpoint()
+                                                                                      .in(RotationsPerSecond),
+                                                                   m_expoPidController.get().getNextVelocitySetpoint()
+                                                                                      .in(RotationsPerSecond));
+      } else if (elevatorFeedforward.isPresent())
+      {
+        pidOutputVoltage.set(m_expoPidController.get().calculate(getMeasurementPosition().in(Meters),
+                                                                 m_config.convertFromMechanism(setpointPosition.get())
+                                                                         .in(Meters)));
+        feedforward = elevatorFeedforward.get().calculateWithVelocities(m_config.convertFromMechanism(
+                                                                            m_expoPidController.get()
+                                                                                               .getCurrentVelocitySetpoint()).in(MetersPerSecond),
+                                                                        m_config.convertFromMechanism(
+                                                                                    m_expoPidController.get()
+                                                                                                       .getNextVelocitySetpoint())
+                                                                                .in(MetersPerSecond));
+
+      } else if (simpleMotorFeedforward.isPresent())
+      {
+        pidOutputVoltage.set(m_expoPidController.get().calculate(getMechanismPosition().in(Rotations),
+                                                                 setpointPosition.get().in(Rotations)));
+        feedforward = simpleMotorFeedforward.get().calculateWithVelocities(m_expoPidController.get()
+                                                                                              .getCurrentVelocitySetpoint()
+                                                                                              .in(RotationsPerSecond),
+                                                                           m_expoPidController.get()
+                                                                                              .getNextVelocitySetpoint()
+                                                                                              .in(RotationsPerSecond));
+
+      }
+    } else if (m_pidController.isPresent() && setpointPosition.isPresent())
     {
       if (armFeedforward.isPresent())
       {
@@ -387,6 +434,13 @@ public abstract class SmartMotorController
    * Simulation iteration.
    */
   public abstract void simIterate();
+
+  /**
+   * Set the motor idle mode from COAST or BRAKE.
+   *
+   * @param mode {@link MotorMode} selected.
+   */
+  public abstract void setIdleMode(MotorMode mode);
 
   /**
    * Set the encoder velocity

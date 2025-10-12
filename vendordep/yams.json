@@ -7,7 +7,7 @@
     "mavenUrls": [
         "https://yet-another-software-suite.github.io/YAMS/releases/"
     ],
-    "jsonUrl": "https://yet-another-software-suite.github.io/YAMS/YAMS.json",
+    "jsonUrl": "https://yet-another-software-suite.github.io/YAMS/yams.json",
     "javaDependencies": [
         {
             "groupId": "${groupId}",

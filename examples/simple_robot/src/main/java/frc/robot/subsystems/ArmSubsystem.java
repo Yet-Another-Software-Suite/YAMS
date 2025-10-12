@@ -68,7 +68,7 @@ public class ArmSubsystem extends SubsystemBase
       .withTelemetry("ArmExample", TelemetryVerbosity.HIGH)
       .withMass(Pounds.of(1))
       .withStartingPosition(Degrees.of(0))
-      .withHorizontalZero(Degrees.of(0))
+//      .withHorizontalZero(Degrees.of(0))
       .withMechanismPositionConfig(robotToMechanism);
   private final Arm       arm      = new Arm(m_config);
 

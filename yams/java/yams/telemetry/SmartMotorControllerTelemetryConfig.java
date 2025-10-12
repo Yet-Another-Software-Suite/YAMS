@@ -173,6 +173,12 @@ public class SmartMotorControllerTelemetryConfig
                   .setDefaultValue(e.getConstraints().maxAcceleration);
       doubleFields.get(DoubleTelemetryField.MotionProfileMaxVelocity).setDefaultValue(e.getConstraints().maxVelocity);
     });
+    config.getExponentiallyProfiledClosedLoopController().ifPresent(e -> {
+      doubleFields.get(DoubleTelemetryField.kP).setDefaultValue(e.getP());
+      doubleFields.get(DoubleTelemetryField.kI).setDefaultValue(e.getI());
+      doubleFields.get(DoubleTelemetryField.kD).setDefaultValue(e.getD());
+      // TODO: Add kV and kA
+    });
     config.getArmFeedforward().ifPresent(e -> {
       doubleFields.get(DoubleTelemetryField.kG).enable();
       doubleFields.get(DoubleTelemetryField.kS).setDefaultValue(e.getKs());

@@ -146,6 +146,12 @@ public class NovaWrapper extends SmartMotorController
   }
 
   @Override
+  public void setIdleMode(MotorMode mode)
+  {
+    m_nova.setBrakeMode(mode == MotorMode.BRAKE);
+  }
+
+  @Override
   public void setEncoderVelocity(AngularVelocity velocity)
   {
 //    m_sim.ifPresent(dcMotorSim -> dcMotorSim.setAngularVelocity(velocity.in(RadiansPerSecond)));
@@ -202,21 +208,25 @@ public class NovaWrapper extends SmartMotorController
     this.m_config = config;
     m_config.resetValidationCheck();
     m_gearing = config.getGearing();
+    m_expoPidController = config.getExponentiallyProfiledClosedLoopController();
     m_pidController = config.getClosedLoopController();
+    m_simplePidController = config.getSimpleClosedLoopController();
 
     // Handle simple pid vs profile pid controller.
-    if (m_pidController.isEmpty())
+    if (m_expoPidController.isEmpty())
     {
-      m_simplePidController = config.getSimpleClosedLoopController();
-      if (m_simplePidController.isEmpty())
+      if (m_pidController.isEmpty())
       {
-        throw new IllegalArgumentException("[ERROR] closed loop controller must not be empty");
+        if (m_simplePidController.isEmpty())
+        {
+          throw new IllegalArgumentException("[ERROR] closed loop controller must not be empty");
+        }
+      } else if (config.getSimpleClosedLoopController().isPresent())
+      {
+        throw new SmartMotorControllerConfigurationException("ProfiledPIDController and PIDController defined",
+                                                             "Cannot have both PID Controllers.",
+                                                             ".withClosedLoopController");
       }
-    } else if (config.getSimpleClosedLoopController().isPresent())
-    {
-      throw new SmartMotorControllerConfigurationException("ProfiledPIDController and PIDController defined",
-                                                           "Cannot have both PID Controllers.",
-                                                           ".withClosedLoopController");
     }
 
     config.getClosedLoopTolerance().ifPresent(tolerance -> {
@@ -226,10 +236,13 @@ public class NovaWrapper extends SmartMotorController
                                                                                     .in(Meters)));
         m_simplePidController.ifPresent(pidController -> pidController.setTolerance(config.convertFromMechanism(
             tolerance).in(Meters)));
+        m_expoPidController.ifPresent(pidController -> pidController.setTolerance(config.convertFromMechanism(tolerance)
+                                                                                        .in(Meters)));
       } else
       {
         m_pidController.ifPresent(pidController -> pidController.setTolerance(tolerance.in(Rotations)));
         m_simplePidController.ifPresent(pidController -> pidController.setTolerance(tolerance.in(Rotations)));
+        m_expoPidController.ifPresent(pidController -> pidController.setTolerance(tolerance.in(Rotations)));
       }
     });
 
@@ -342,35 +355,43 @@ public class NovaWrapper extends SmartMotorController
             ".\n\tPlease use an `EncoderType` instead.");
       }
 
-      if(config.getZeroOffset().isPresent())
+      if (config.getZeroOffset().isPresent())
       {
-        throw new SmartMotorControllerConfigurationException("Zero offset is unavailable for ThriftyNova", "Zero offset could not be applied", ".withZeroOffset");
+        throw new SmartMotorControllerConfigurationException("Zero offset is unavailable for ThriftyNova",
+                                                             "Zero offset could not be applied",
+                                                             ".withZeroOffset");
 //        m_nova.setAbsOffset(config.getZeroOffset().get().in(Rotations));
       }
-      if(config.getExternalEncoderGearing().getRotorToMechanismRatio() != 1.0)
+      if (config.getExternalEncoderGearing().getRotorToMechanismRatio() != 1.0)
       {
         // Do nothing, applied later.
       }
 
-    }
-    else {
+    } else
+    {
       if (config.getZeroOffset().isPresent())
       {
-        throw new SmartMotorControllerConfigurationException("Zero offset is only available for external encoders", "Zero offset could not be applied", ".withZeroOffset");
+        throw new SmartMotorControllerConfigurationException("Zero offset is only available for external encoders",
+                                                             "Zero offset could not be applied",
+                                                             ".withZeroOffset");
       }
 
-      if(config.getExternalEncoderGearing().getRotorToMechanismRatio() != 1.0)
+      if (config.getExternalEncoderGearing().getRotorToMechanismRatio() != 1.0)
       {
-        throw new SmartMotorControllerConfigurationException("External encoder gearing is not supported when there is no external encoder", "External encoder gearing could not be set", ".withExternalEncoderGearing");
+        throw new SmartMotorControllerConfigurationException(
+            "External encoder gearing is not supported when there is no external encoder",
+            "External encoder gearing could not be set",
+            ".withExternalEncoderGearing");
       }
     }
 
-    if(config.getExternalEncoderInverted())
+    if (config.getExternalEncoderInverted())
     {
-      throw new SmartMotorControllerConfigurationException("External encoder cannot be inverted because no external encoder exists", "External encoder could not be inverted", ".withExternalEncoderInverted");
+      throw new SmartMotorControllerConfigurationException(
+          "External encoder cannot be inverted because no external encoder exists",
+          "External encoder could not be inverted",
+          ".withExternalEncoderInverted");
     }
-
-
 
     if (config.getFollowers().isPresent())
     {
@@ -598,6 +619,9 @@ public class NovaWrapper extends SmartMotorController
     m_pidController.ifPresent(pidController -> {
       pidController.setP(kP);
     });
+    m_expoPidController.ifPresent(expoPidController -> {
+      expoPidController.setP(kP);
+    });
   }
 
   @Override
@@ -608,6 +632,9 @@ public class NovaWrapper extends SmartMotorController
     });
     m_pidController.ifPresent(pidController -> {
       pidController.setI(kI);
+    });
+    m_expoPidController.ifPresent(expoPidController -> {
+      expoPidController.setI(kI);
     });
 
   }
@@ -620,6 +647,9 @@ public class NovaWrapper extends SmartMotorController
     });
     m_pidController.ifPresent(pidController -> {
       pidController.setD(kD);
+    });
+    m_expoPidController.ifPresent(expoPidController -> {
+      expoPidController.setD(kD);
     });
   }
 
