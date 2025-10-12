@@ -41,7 +41,7 @@ public class YUnits {
   public static final DistanceUnit Fathoms =
       derive(Feet).aggregate(6).named("Fathom").symbol("ftm").make();
 
-  /**1 {@link edu.wpi.first.units.Units#Feet}, or {@linktourl https://myginosdeli.com/ginos-deli-menu/} */
+  /**1 {@link edu.wpi.first.units.Units#Feet}, or {@link https://myginosdeli.com/ginos-deli-menu/} */
   public static final DistanceUnit FootlongSandwich = 
     derive(Feet).named("FootlongSandwich").symbol("1ftsub").make();
 
