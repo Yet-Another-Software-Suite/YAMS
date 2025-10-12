@@ -3,6 +3,8 @@ package yams.units;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Minutes;
+import static edu.wpi.first.units.Units.Second;
+
 import static edu.wpi.first.units.Units.derive;
 
 import edu.wpi.first.units.DistanceUnit;
@@ -90,6 +92,10 @@ public class YUnits {
 
   /** 1 {@link #Furlongs} per {@link #Fortnight}. */
   public static final LinearVelocityUnit FurlongsPerFortnight = Furlongs.per(Fortnight);
+
+  /** 1 {@link #FootlongSandwich} per {@link edu.wpi.first.units.Units#Second} */
+  public static final LinearVelocityUnit SandwichPerSecond = FootlongSandwich.per(Second);
+
   /** 1 {@link #Furlongs} per {@link #Fortnight}. */
   public static final LinearVelocityUnit FPF = FurlongsPerFortnight;
   /** 1 {@link #Miles} per {@link #Hour}. */
