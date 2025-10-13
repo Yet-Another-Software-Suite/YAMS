@@ -3,14 +3,15 @@ package yams.units;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Minutes;
+import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Second;
 
 import static edu.wpi.first.units.Units.derive;
 
+import edu.wpi.first.units.AngularVelocityUnit;
 import edu.wpi.first.units.DistanceUnit;
 import edu.wpi.first.units.LinearVelocityUnit;
 import edu.wpi.first.units.TimeUnit;
-import edu.wpi.first.units.measure.LinearVelocity;
 
 /**
  * YUnits that are fun and useful!
@@ -80,8 +81,15 @@ public class YUnits {
   public static final TimeUnit Hours =
       derive(Minutes).aggregate(60).named("Hour").symbol("hr").make();
 
+/** 525600 {@link edu.wpi.first.units.Units#Minutes}. */
+  public static final TimeUnit Years = 
+      derive(Minutes).aggregate(525600).named("Year").symbol("yr").make();
+
   /** Alias for {@link #Hours} to make combined unit definitions read more smoothly. */
   public static final TimeUnit Hour = Hours; // singularized alias
+
+  /** Alias for {@link #Years} to make combined unit definitions read more smoothly. */
+  public static final TimeUnit Year = Years; // singularized alias
 
   /** 24 {@link #Hours}. */
   public static final TimeUnit Days = derive(Hours).aggregate(24).named("Days").symbol("days").make();
@@ -102,6 +110,11 @@ public class YUnits {
   public static final LinearVelocityUnit MilesPerHour = Miles.per(Hour);
   /** 1 {@link #Miles} per {@link #Hour}. */
   public static final LinearVelocityUnit MPH = MilesPerHour;
+
+  /** 1 {@link #Rotations} per {@link #Year}. */
+  public static final AngularVelocityUnit RotationsPerYear = Rotations.per(Year);
+  /** 1 {@link #Rotations} per {@link #Year}. */
+  public static final AngularVelocityUnit RPY = RotationsPerYear;
 
   // TODO: Add InchesPerSecondPerSecond, RPMPerSecond
 }
