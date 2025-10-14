@@ -111,9 +111,9 @@ public class YUnits {
   /** 1 {@link #Miles} per {@link #Hour}. */
   public static final LinearVelocityUnit MPH = MilesPerHour;
 
-  /** 1 {@link #Rotations} per {@link #Year}. */
+  /** 1 {@link edu.wpi.first.units.Units#Rotations} per {@link #Year}. */
   public static final AngularVelocityUnit RotationsPerYear = Rotations.per(Year);
-  /** 1 {@link #Rotations} per {@link #Year}. */
+  /** 1 {@link edu.wpi.first.units.Units#Rotations} per {@link #Year}. */
   public static final AngularVelocityUnit RPY = RotationsPerYear;
 
   // TODO: Add InchesPerSecondPerSecond, RPMPerSecond
