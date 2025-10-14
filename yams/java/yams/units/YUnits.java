@@ -4,12 +4,16 @@ import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Minutes;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Second;
 
 import static edu.wpi.first.units.Units.derive;
 
+
 import edu.wpi.first.units.AngularVelocityUnit;
+import edu.wpi.first.units.AngularAccelerationUnit;
 import edu.wpi.first.units.DistanceUnit;
+import edu.wpi.first.units.LinearAccelerationUnit;
 import edu.wpi.first.units.LinearVelocityUnit;
 import edu.wpi.first.units.TimeUnit;
 
@@ -43,7 +47,7 @@ public class YUnits {
       derive(Feet).aggregate(6).named("Fathom").symbol("ftm").make();
 
   /**1 {@link edu.wpi.first.units.Units#Feet}, or <a href="https://myginosdeli.com/ginos-deli-menu/">Sandwich</a> */
-  public static final DistanceUnit FootlongSandwich = 
+  public static final DistanceUnit FootlongSandwich =
     derive(Feet).named("FootlongSandwich").symbol("1ftsub").make();
 
   /** 1.8288 {@link edu.wpi.first.units.Units#Meters}s, or 6 {@link edu.wpi.first.units.Units#Feet}. */
@@ -111,10 +115,15 @@ public class YUnits {
   /** 1 {@link #Miles} per {@link #Hour}. */
   public static final LinearVelocityUnit MPH = MilesPerHour;
 
+
   /** 1 {@link edu.wpi.first.units.Units#Rotations} per {@link #Year}. */
   public static final AngularVelocityUnit RotationsPerYear = Rotations.per(Year);
   /** 1 {@link edu.wpi.first.units.Units#Rotations} per {@link #Year}. */
   public static final AngularVelocityUnit RPY = RotationsPerYear;
 
-  // TODO: Add InchesPerSecondPerSecond, RPMPerSecond
+  /** 1 {@link edu.wpi.first.units.Units#RPM} per {@link edu.wpi.first.units.Units#Second} */
+  public static final AngularAccelerationUnit RotationsPerMinutePerSecond = RPM.per(Second);
+  /** 1 {@link edu.wpi.first.units.Units#RPM} per {@link edu.wpi.first.units.Units#Second} */
+  public static final AngularAccelerationUnit RPMPerSecond               = RotationsPerMinutePerSecond;
+
 }
