@@ -29,6 +29,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import yams.gearing.GearBox;
+import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.ShooterConfig;
 import yams.mechanisms.velocity.Shooter;
 import yams.motorcontrollers.SmartMotorController;
@@ -49,7 +51,7 @@ public class ShooterSubsystem extends SubsystemBase
 //          .withMechanismUpperLimit();
   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withClosedLoopController(0.00016541, 0, 0, RPM.of(5000), RotationsPerSecondPerSecond.of(2500))
-      .withGearing(gearing(gearbox(3, 4)))
+      .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
 //      .withExternalEncoder(armMotor.getAbsoluteEncoder())
       .withIdleMode(MotorMode.COAST)
       .withTelemetry("ShooterMotor", TelemetryVerbosity.HIGH)

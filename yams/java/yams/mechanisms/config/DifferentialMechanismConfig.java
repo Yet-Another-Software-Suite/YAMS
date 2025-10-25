@@ -1,11 +1,17 @@
 package yams.mechanisms.config;
 
+import static edu.wpi.first.units.Units.Kilograms;
+import static edu.wpi.first.units.Units.Meters;
+
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.function.Supplier;
 import yams.exceptions.DifferentialMechanismConfigurationException;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
@@ -15,440 +21,475 @@ import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
-import java.util.Optional;
-import java.util.OptionalDouble;
-import java.util.function.Supplier;
-
-import static edu.wpi.first.units.Units.Kilograms;
-import static edu.wpi.first.units.Units.Meters;
-
 /**
  * Differential Mechanism config.
  */
-public class DifferentialMechanismConfig {
+public class DifferentialMechanismConfig
+{
 
-    /**
-     * {@link SmartMotorController} for the {@link DifferentialMechanism}
-     */
-    private final SmartMotorController leftMotorController;
-    /**
-     * {@link SmartMotorController} for the {@link DifferentialMechanism}
-     */
-    private final SmartMotorController rightMotorController;
-    /**
-     * The network root of the mechanism (Optional).
-     */
-    @Deprecated
-    protected Optional<String> networkRoot = Optional.empty();
-    /**
-     * Telemetry name.
-     */
-    private Optional<String> telemetryName = Optional.empty();
-    /**
-     * Telemetry verbosity
-     */
-    private Optional<TelemetryVerbosity> telemetryVerbosity = Optional.empty();
-    /**
-     * Twist gearing between the twist bevel gear and the motor sprocket. Separate from Tilt gearing implemented in the {@link SmartMotorControllerConfig}.
-     */
-    private MechanismGearing twistGearing = new MechanismGearing(new GearBox(new double[]{1}));
-    /**
-     * Supplier of the twist angle using an absolute encoder for the {@link DifferentialMechanism}.
-     */
-    private Optional<Supplier<Angle>> twistAngle = Optional.empty();
-    /**
-     * Supplier of the tilt angle using an absolute encoder for the {@link DifferentialMechanism}.
-     */
-    private Optional<Supplier<Angle>> tiltAngle = Optional.empty();
-    /**
-     * Starting twist angle for the {@link DifferentialMechanism}.
-     */
-    private Optional<Angle> startingTwistAngle = Optional.empty();
-    /**
-     * Starting tilt angle for the {@link DifferentialMechanism}.
-     */
-    private Optional<Angle> startingTiltAngle = Optional.empty();
-    /**
-     * {@link DifferentialMechanism} MOI from CAD software. If not given estimated with length and weight.
-     */
-    private OptionalDouble MOI = OptionalDouble.empty();
-    /**
-     * {@link DifferentialMechanism} length.
-     */
-    private Optional<Distance> length = Optional.empty();
-    /**
-     * Sim color value
-     */
-    private Color8Bit simColor = new Color8Bit(Color.kOrange);
-    /**
-     * Mechanism position configuration for the {@link DifferentialMechanism}
-     */
-    private MechanismPositionConfig mechanismPositionConfig = new MechanismPositionConfig();
+  /**
+   * {@link SmartMotorController} for the {@link DifferentialMechanism}
+   */
+  private final SmartMotorController         leftMotorController;
+  /**
+   * {@link SmartMotorController} for the {@link DifferentialMechanism}
+   */
+  private final SmartMotorController         rightMotorController;
+  /**
+   * The network root of the mechanism (Optional).
+   */
+  @Deprecated
+  protected     Optional<String>             networkRoot             = Optional.empty();
+  /**
+   * Telemetry name.
+   */
+  private       Optional<String>             telemetryName           = Optional.empty();
+  /**
+   * Telemetry verbosity
+   */
+  private       Optional<TelemetryVerbosity> telemetryVerbosity      = Optional.empty();
+  /**
+   * Twist gearing between the twist bevel gear and the motor sprocket. Separate from Tilt gearing implemented in the
+   * {@link SmartMotorControllerConfig}.
+   */
+  private       MechanismGearing             twistGearing            = new MechanismGearing(new GearBox(new double[]{
+      1}));
+  /**
+   * Supplier of the twist angle using an absolute encoder for the {@link DifferentialMechanism}.
+   */
+  private       Optional<Supplier<Angle>>    twistAngle              = Optional.empty();
+  /**
+   * Supplier of the tilt angle using an absolute encoder for the {@link DifferentialMechanism}.
+   */
+  private       Optional<Supplier<Angle>>    tiltAngle               = Optional.empty();
+  /**
+   * Starting twist angle for the {@link DifferentialMechanism}.
+   */
+  private       Optional<Angle>              startingTwistAngle      = Optional.empty();
+  /**
+   * Starting tilt angle for the {@link DifferentialMechanism}.
+   */
+  private       Optional<Angle>              startingTiltAngle       = Optional.empty();
+  /**
+   * {@link DifferentialMechanism} MOI from CAD software. If not given estimated with length and weight.
+   */
+  private       OptionalDouble               MOI                     = OptionalDouble.empty();
+  /**
+   * {@link DifferentialMechanism} length.
+   */
+  private       Optional<Distance>           length                  = Optional.empty();
+  /**
+   * Sim color value
+   */
+  private       Color8Bit                    simColor                = new Color8Bit(Color.kOrange);
+  /**
+   * Mechanism position configuration for the {@link DifferentialMechanism}
+   */
+  private       MechanismPositionConfig      mechanismPositionConfig = new MechanismPositionConfig();
 
-    /**
-     * Get the twist angle of the {@link DifferentialMechanism} with any additional twist gearing.
-     *
-     * @param leftMechPos  Left {@link SmartMotorController} Mechanism Position
-     * @param rightMechPos Right {@link SmartMotorController} Mechanism Position
-     * @return Twist {@link Angle}
-     */
-    public Angle getTwistAngle(Angle leftMechPos, Angle rightMechPos) {
-        return leftMechPos.minus(rightMechPos).times(twistGearing.getRotorToMechanismRatio()).div(2);
+  /**
+   * Differential Mechanism configuration class.
+   *
+   * @param left  Left {@link SmartMotorController} configured with the gearing up to the tilt movement if
+   *              synchronized.
+   * @param right Right {@link SmartMotorController} configured with the gearing up to the tilt movement if
+   *              syncrhonized.
+   */
+  public DifferentialMechanismConfig(SmartMotorController left, SmartMotorController right)
+  {
+    leftMotorController = left;
+    rightMotorController = right;
+    mechanismPositionConfig.withMovementPlane(Plane.XY);
+  }
+
+  /**
+   * Get the twist angle of the {@link DifferentialMechanism} with any additional twist gearing.
+   *
+   * @param leftMechPos  Left {@link SmartMotorController} Mechanism Position
+   * @param rightMechPos Right {@link SmartMotorController} Mechanism Position
+   * @return Twist {@link Angle}
+   */
+  public Angle getTwistAngle(Angle leftMechPos, Angle rightMechPos)
+  {
+    return leftMechPos.minus(rightMechPos).times(twistGearing.getRotorToMechanismRatio()).div(2);
+  }
+
+  /**
+   * Get the tilt angle of the {@link DifferentialMechanism}.
+   *
+   * @param leftMechPos  Left {@link SmartMotorController} Mechanism Position
+   * @param rightMechPos Right {@link SmartMotorController} Mechanism Position
+   * @return Tilt {@link Angle}
+   */
+  public Angle getTiltAngle(Angle leftMechPos, Angle rightMechPos)
+  {
+    return leftMechPos.plus(rightMechPos).div(2);
+  }
+
+  /**
+   * The left {@link SmartMotorController} mechanism position.
+   *
+   * @param tilt  {@link Angle} of the Tilt.
+   * @param twist {@link Angle} of the twist.
+   * @return Left mechanism position {@link Angle}
+   */
+  public Angle getLeftMechanismPosition(Angle tilt, Angle twist)
+  {
+    return tilt.plus(twist.times(twistGearing.getMechanismToRotorRatio()));
+  }
+
+  /**
+   * The right {@link SmartMotorController} mechanism position.
+   *
+   * @param tilt  {@link Angle} of the Tilt.
+   * @param twist {@link Angle} of the Twist.
+   * @return Right mechanism position {@link Angle}
+   */
+  public Angle getRightMechanismPosition(Angle tilt, Angle twist)
+  {
+    return tilt.minus(twist.times(twistGearing.getMechanismToRotorRatio()));
+  }
+
+  /**
+   * Set the starting encoder positions for the {@link DifferentialMechanism}.
+   */
+  private void setStartingEncoderPositions()
+  {
+    if (startingTiltAngle.isPresent() && startingTwistAngle.isPresent())
+    {
+      var twist = startingTwistAngle.get();
+      var tilt  = startingTiltAngle.get();
+      var left  = getLeftMechanismPosition(tilt, twist);
+      var right = getRightMechanismPosition(tilt, twist);
+      leftMotorController.getConfig().withStartingPosition(left);
+      rightMotorController.getConfig().withStartingPosition(right);
     }
+  }
 
-    /**
-     * Get the tilt angle of the {@link DifferentialMechanism}.
-     *
-     * @param leftMechPos  Left {@link SmartMotorController} Mechanism Position
-     * @param rightMechPos Right {@link SmartMotorController} Mechanism Position
-     * @return Tilt {@link Angle}
-     */
-    public Angle getTiltAngle(Angle leftMechPos, Angle rightMechPos) {
-        return leftMechPos.plus(rightMechPos).div(2);
+  /**
+   * Publish the color in sim as this.
+   *
+   * @param simColor {@link Color8Bit} to show.
+   * @return {@link DifferentialMechanismConfig} for chaining.
+   */
+  public DifferentialMechanismConfig withSimColor(final Color8Bit simColor)
+  {
+    this.simColor = simColor;
+    return this;
+  }
+
+  /**
+   * Configure the MOI directly instead of estimating it with the length and mass of the {@link DifferentialMechanism}
+   * for simulation.
+   *
+   * @param MOI Moment of Inertia of the {@link DifferentialMechanism}
+   * @return {@link DifferentialMechanismConfig} for chaining.
+   */
+  public DifferentialMechanismConfig withMOI(double MOI)
+  {
+    this.MOI = OptionalDouble.of(MOI);
+    return this;
+  }
+
+  /**
+   * Set the length of the {@link DifferentialMechanism}.
+   *
+   * @param length Length of the {@link DifferentialMechanism}
+   * @return {@link DifferentialMechanismConfig} for chaining.
+   */
+  public DifferentialMechanismConfig withLength(Distance length)
+  {
+    this.length = Optional.ofNullable(length);
+    return this;
+  }
+
+  /**
+   * Configure the MOI directly instead of estimating it with the length and mass of the {@link DifferentialMechanism}
+   * for simulation.
+   *
+   * @param length Length of the {@link DifferentialMechanism}.
+   * @param weight Weight of the {@link DifferentialMechanism}
+   * @return {@link DifferentialMechanismConfig} for chaining.
+   */
+  public DifferentialMechanismConfig withMOI(Distance length, Mass weight)
+  {
+    this.length = Optional.ofNullable(length);
+    this.MOI = OptionalDouble.of(SingleJointedArmSim.estimateMOI(length.in(Meters), weight.in(Kilograms)));
+    return this;
+  }
+
+  /**
+   * Configure telemetry for the {@link yams.mechanisms.positional.Pivot} mechanism.
+   *
+   * @param telemetryName      Telemetry NetworkTable name to appear under "SmartDashboard/"
+   * @param telemetryVerbosity Telemetry verbosity to apply.
+   * @return {@link DifferentialMechanismConfig} for chaining.
+   */
+  public DifferentialMechanismConfig withTelemetry(String telemetryName, TelemetryVerbosity telemetryVerbosity)
+  {
+    this.telemetryName = Optional.ofNullable(telemetryName);
+    this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
+    return this;
+  }
+
+  /**
+   * Set the differential mechanism position configuration.
+   *
+   * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link DifferentialMechanism}
+   * @return {@link DifferentialMechanismConfig} for chaining
+   */
+  public DifferentialMechanismConfig withMechanismPositionConfig(MechanismPositionConfig mechanismPositionConfig)
+  {
+    this.mechanismPositionConfig = mechanismPositionConfig;
+    return this;
+  }
+
+  /**
+   * Aet the gearing for the differential mechanism if it isnt 1:1. Separate from gearing to the bevel gears.
+   *
+   * @param gearing Gearing for the bevel gears.
+   * @return {@link DifferentialMechanismConfig} for chaining
+   */
+  public DifferentialMechanismConfig withGearing(MechanismGearing gearing)
+  {
+    twistGearing = gearing;
+    return this;
+  }
+
+
+  /**
+   * Set the {@link DifferentialMechanism} twist starting position.
+   *
+   * @param startingPosition Starting position of the {@link DifferentialMechanism} twist.
+   * @return {@link DifferentialMechanismConfig} for chaining
+   */
+  public DifferentialMechanismConfig withTwistStartingPosition(Angle startingPosition)
+  {
+    startingTwistAngle = Optional.ofNullable(startingPosition);
+    setStartingEncoderPositions();
+    return this;
+  }
+
+  /**
+   * Setup suppliers for absolute encoders on the {@link DifferentialMechanism}
+   *
+   * @param twistSupplier {@link Supplier<Angle>} for the twist.
+   * @param tiltSupplier  {@link Supplier<Angle>} for the tilt.
+   * @return {@link DifferentialMechanismConfig} for chaining.
+   */
+  public DifferentialMechanismConfig withAngleSuppliers(Supplier<Angle> twistSupplier, Supplier<Angle> tiltSupplier)
+  {
+    this.twistAngle = Optional.ofNullable(twistSupplier);
+    this.tiltAngle = Optional.ofNullable(tiltSupplier);
+    return this;
+  }
+
+  /**
+   * Set the {@link DifferentialMechanism} starting positions.
+   *
+   * @param tilt  {@link Angle} of the tilt.
+   * @param twist {@link Angle} of the twist.
+   * @return {@link DifferentialMechanismConfig} for chaining.
+   */
+  public DifferentialMechanismConfig withStartingPosition(Angle tilt, Angle twist)
+  {
+    startingTiltAngle = Optional.ofNullable(tilt);
+    startingTwistAngle = Optional.ofNullable(twist);
+    setStartingEncoderPositions();
+    return this;
+  }
+
+  /**
+   * Set the {@link DifferentialMechanism} tilt starting position.
+   *
+   * @param startingPosition Starting position of the {@link DifferentialMechanism} tilt.
+   * @return {@link DifferentialMechanismConfig} for chaining
+   */
+  public DifferentialMechanismConfig withTiltStartingPosition(Angle startingPosition)
+  {
+    startingTiltAngle = Optional.ofNullable(startingPosition);
+    setStartingEncoderPositions();
+    return this;
+  }
+
+  /**
+   * Apply config changes from this class to the {@link SmartMotorController}
+   *
+   * @return {@link SmartMotorController#applyConfig(SmartMotorControllerConfig)} result.
+   */
+  public boolean applyConfig()
+  {
+    return leftMotorController.applyConfig(leftMotorController.getConfig()) && rightMotorController.applyConfig(
+        rightMotorController.getConfig());
+  }
+
+
+  /**
+   * Get the moment of inertia for the {@link DifferentialMechanism} simulation.
+   *
+   * @return Moment of Inertia.
+   */
+  public double getMOI()
+  {
+    if (MOI.isPresent())
+    {
+      return MOI.getAsDouble();
     }
-
-    /**
-     * The left {@link SmartMotorController} mechanism position.
-     *
-     * @param tilt  {@link Angle} of the Tilt.
-     * @param twist {@link Angle} of the twist.
-     * @return Left mechanism position {@link Angle}
-     */
-    public Angle getLeftMechanismPosition(Angle tilt, Angle twist) {
-        return tilt.plus(twist.times(twistGearing.getMechanismToRotorRatio()));
-    }
-
-    /**
-     * The right {@link SmartMotorController} mechanism position.
-     *
-     * @param tilt  {@link Angle} of the Tilt.
-     * @param twist {@link Angle} of the Twist.
-     * @return Right mechanism position {@link Angle}
-     */
-    public Angle getRightMechanismPosition(Angle tilt, Angle twist) {
-        return tilt.minus(twist.times(twistGearing.getMechanismToRotorRatio()));
-    }
+    throw new DifferentialMechanismConfigurationException("Differential Mechanism Twist MOI must be set!",
+                                                          "Cannot get the MOI!",
+                                                          ".withMOI()");
+  }
 
 
-    /**
-     * Set the starting encoder positions for the {@link DifferentialMechanism}.
-     */
-    private void setStartingEncoderPositions() {
-        if (startingTiltAngle.isPresent() && startingTwistAngle.isPresent()) {
-            var twist = startingTwistAngle.get();
-            var tilt = startingTiltAngle.get();
-            var left = getLeftMechanismPosition(tilt, twist);
-            var right = getRightMechanismPosition(tilt, twist);
-            leftMotorController.getConfig().withStartingPosition(left);
-            rightMotorController.getConfig().withStartingPosition(right);
-        }
-    }
+  /**
+   * Get the telemetry verbosity of the {@link yams.mechanisms.positional.Pivot}
+   *
+   * @return {@link TelemetryVerbosity} of the {@link yams.mechanisms.positional.Pivot}
+   */
+  public Optional<TelemetryVerbosity> getTelemetryVerbosity()
+  {
+    return telemetryVerbosity;
+  }
 
-    /**
-     * Differential Mechanism configuration class.
-     *
-     * @param left  Left {@link SmartMotorController} configured with the gearing up to the tilt movement if synchronized.
-     * @param right Right {@link SmartMotorController} configured with the gearing up to the tilt movement if syncrhonized.
-     */
-    public DifferentialMechanismConfig(SmartMotorController left, SmartMotorController right) {
-        leftMotorController = left;
-        rightMotorController = right;
-        mechanismPositionConfig.withMovementPlane(Plane.XY);
-    }
+  /**
+   * Network Tables name for the {@link yams.mechanisms.positional.Pivot}
+   *
+   * @return Network Tables name.
+   */
+  public Optional<String> getTelemetryName()
+  {
+    return telemetryName;
+  }
 
-    /**
-     * Publish the color in sim as this.
-     *
-     * @param simColor {@link Color8Bit} to show.
-     * @return {@link DifferentialMechanismConfig} for chaining.
-     */
-    public DifferentialMechanismConfig withSimColor(final Color8Bit simColor) {
-        this.simColor = simColor;
-        return this;
-    }
+  /**
+   * Get the starting angle of the {@link DifferentialMechanism} tilt.
+   *
+   * @return {@link Angle} of the {@link DifferentialMechanism} tilt.
+   */
+  public Optional<Angle> getTiltStartingAngle()
+  {
+    return startingTiltAngle;
+  }
 
-    /**
-     * Configure the MOI directly instead of estimating it with the length and mass of the
-     * {@link DifferentialMechanism} for simulation.
-     *
-     * @param MOI Moment of Inertia of the {@link DifferentialMechanism}
-     * @return {@link DifferentialMechanismConfig} for chaining.
-     */
-    public DifferentialMechanismConfig withMOI(double MOI) {
-        this.MOI = OptionalDouble.of(MOI);
-        return this;
-    }
+  /**
+   * Get starting tilt {@link Angle}.
+   *
+   * @return Tilt {@link Angle}.
+   */
+  public Optional<Angle> getStartingTiltAngle()
+  {
+    return startingTiltAngle;
+  }
 
-    /**
-     * Set the length of the {@link DifferentialMechanism}.
-     *
-     * @param length Length of the {@link DifferentialMechanism}
-     * @return {@link DifferentialMechanismConfig} for chaining.
-     */
-    public DifferentialMechanismConfig withLength(Distance length) {
-        this.length = Optional.ofNullable(length);
-        return this;
-    }
+  /**
+   * Get starting twist {@link Angle}.
+   *
+   * @return Twist {@link Angle}.
+   */
+  public Optional<Angle> getStartingTwistAngle()
+  {
+    return startingTwistAngle;
+  }
 
-    /**
-     * Configure the MOI directly instead of estimating it with the length and mass of the
-     * {@link DifferentialMechanism} for simulation.
-     *
-     * @param length Length of the {@link DifferentialMechanism}.
-     * @param weight Weight of the {@link DifferentialMechanism}
-     * @return {@link DifferentialMechanismConfig} for chaining.
-     */
-    public DifferentialMechanismConfig withMOI(Distance length, Mass weight) {
-        this.length = Optional.ofNullable(length);
-        this.MOI = OptionalDouble.of(SingleJointedArmSim.estimateMOI(length.in(Meters), weight.in(Kilograms)));
-        return this;
-    }
+  /**
+   * Get the starting angle of the {@link DifferentialMechanism} twist.
+   *
+   * @return {@link Angle} of the {@link DifferentialMechanism} twist.
+   */
+  public Optional<Angle> getTwistStartingAngle()
+  {
+    return startingTwistAngle;
+  }
 
-    /**
-     * Configure telemetry for the {@link yams.mechanisms.positional.Pivot} mechanism.
-     *
-     * @param telemetryName      Telemetry NetworkTable name to appear under "SmartDashboard/"
-     * @param telemetryVerbosity Telemetry verbosity to apply.
-     * @return {@link DifferentialMechanismConfig} for chaining.
-     */
-    public DifferentialMechanismConfig withTelemetry(String telemetryName, TelemetryVerbosity telemetryVerbosity) {
-        this.telemetryName = Optional.ofNullable(telemetryName);
-        this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
-        return this;
-    }
+  /**
+   * Get the angle supplier for the attached absolute encoder, if it exists.
+   *
+   * @return {@link Angle} supplier for the given absolute encoder attached to the twist.
+   */
+  public Optional<Supplier<Angle>> getTwistAngleSupplier()
+  {
+    return twistAngle;
+  }
 
-    /**
-     * Set the differential mechanism position configuration.
-     *
-     * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link DifferentialMechanism}
-     * @return {@link DifferentialMechanismConfig} for chaining
-     */
-    public DifferentialMechanismConfig withMechanismPositionConfig(MechanismPositionConfig mechanismPositionConfig) {
-        this.mechanismPositionConfig = mechanismPositionConfig;
-        return this;
-    }
+  /**
+   * Get the length of the {@link DifferentialMechanism}
+   *
+   * @return {@link Distance} of {@link DifferentialMechanism}
+   */
+  public Optional<Distance> getLength()
+  {
+    return length;
+  }
 
-    /**
-     * Aet the gearing for the differential mechanism if it isnt 1:1. Separate from gearing to the bevel gears.
-     *
-     * @param gearing Gearing for the bevel gears.
-     * @return {@link DifferentialMechanismConfig} for chaining
-     */
-    public DifferentialMechanismConfig withGearing(MechanismGearing gearing) {
-        twistGearing = gearing;
-        return this;
-    }
+  /**
+   * The gearing for the twist in the {@link DifferentialMechanism}
+   *
+   * @return {@link MechanismGearing} of the twist.
+   */
+  public MechanismGearing getTwistGearing()
+  {
+    return twistGearing;
+  }
 
+  /**
+   * Get the angle supplier for the attached absolute encoder, if it exists.
+   *
+   * @return {@link Angle} supplier for the given absolute encoder attached to the tilt.
+   */
+  public Optional<Supplier<Angle>> getTiltAngleSupplier()
+  {
+    return tiltAngle;
+  }
 
-    /**
-     * Set the {@link DifferentialMechanism} twist starting position.
-     *
-     * @param startingPosition Starting position of the {@link DifferentialMechanism} twist.
-     * @return {@link DifferentialMechanismConfig} for chaining
-     */
-    public DifferentialMechanismConfig withTwistStartingPosition(Angle startingPosition) {
-        startingTwistAngle = Optional.ofNullable(startingPosition);
-        setStartingEncoderPositions();
-        return this;
-    }
+  /**
+   * Get the left {@link SmartMotorController} of the {@link DifferentialMechanism}
+   *
+   * @return left {@link SmartMotorController}
+   */
+  public SmartMotorController getLeftMotorController()
+  {
+    return leftMotorController;
+  }
 
-    /**
-     * Setup suppliers for absolute encoders on the {@link DifferentialMechanism}
-     *
-     * @param twistSupplier {@link Supplier<Angle>} for the twist.
-     * @param tiltSupplier  {@link Supplier<Angle>} for the tilt.
-     * @return {@link DifferentialMechanismConfig} for chaining.
-     */
-    public DifferentialMechanismConfig withAngleSuppliers(Supplier<Angle> twistSupplier, Supplier<Angle> tiltSupplier) {
-        this.twistAngle = Optional.ofNullable(twistSupplier);
-        this.tiltAngle = Optional.ofNullable(tiltSupplier);
-        return this;
-    }
+  /**
+   * Get the right {@link SmartMotorController} of the {@link DifferentialMechanism}
+   *
+   * @return right {@link SmartMotorController}
+   */
+  public SmartMotorController getRightMotorController()
+  {
+    return rightMotorController;
+  }
 
-    /**
-     * Set the {@link DifferentialMechanism} starting positions.
-     *
-     * @param tilt  {@link Angle} of the tilt.
-     * @param twist {@link Angle} of the twist.
-     * @return {@link DifferentialMechanismConfig} for chaining.
-     */
-    public DifferentialMechanismConfig withStartingPosition(Angle tilt, Angle twist) {
-        startingTiltAngle = Optional.ofNullable(tilt);
-        startingTwistAngle = Optional.ofNullable(twist);
-        setStartingEncoderPositions();
-        return this;
-    }
+  /**
+   * Sim color value
+   *
+   * @return Sim color value
+   */
+  public Color8Bit getSimColor()
+  {
+    return simColor;
+  }
 
-    /**
-     * Set the {@link DifferentialMechanism} tilt starting position.
-     *
-     * @param startingPosition Starting position of the {@link DifferentialMechanism} tilt.
-     * @return {@link DifferentialMechanismConfig} for chaining
-     */
-    public DifferentialMechanismConfig withTiltStartingPosition(Angle startingPosition) {
-        startingTiltAngle = Optional.ofNullable(startingPosition);
-        setStartingEncoderPositions();
-        return this;
-    }
+  /**
+   * Get the {@link MechanismPositionConfig} associated with this {@link DifferentialMechanismConfig}.
+   *
+   * @return An {@link Optional} containing the {@link MechanismPositionConfig} if present, otherwise an empty
+   * {@link Optional}.
+   */
+  public MechanismPositionConfig getMechanismPositionConfig()
+  {
+    return mechanismPositionConfig;
+  }
 
-    /**
-     * Apply config changes from this class to the {@link SmartMotorController}
-     *
-     * @return {@link SmartMotorController#applyConfig(SmartMotorControllerConfig)} result.
-     */
-    public boolean applyConfig() {
-        return leftMotorController.applyConfig(leftMotorController.getConfig()) && rightMotorController.applyConfig(rightMotorController.getConfig());
-    }
-
-
-    /**
-     * Get the moment of inertia for the {@link DifferentialMechanism} simulation.
-     *
-     * @return Moment of Inertia.
-     */
-    public double getMOI() {
-        if (MOI.isPresent()) {
-            return MOI.getAsDouble();
-        }
-        throw new DifferentialMechanismConfigurationException("Differential Mechanism Twist MOI must be set!",
-                "Cannot get the MOI!",
-                ".withMOI()");
-    }
-
-
-    /**
-     * Get the telemetry verbosity of the {@link yams.mechanisms.positional.Pivot}
-     *
-     * @return {@link TelemetryVerbosity} of the {@link yams.mechanisms.positional.Pivot}
-     */
-    public Optional<TelemetryVerbosity> getTelemetryVerbosity() {
-        return telemetryVerbosity;
-    }
-
-    /**
-     * Network Tables name for the {@link yams.mechanisms.positional.Pivot}
-     *
-     * @return Network Tables name.
-     */
-    public Optional<String> getTelemetryName() {
-        return telemetryName;
-    }
-
-    /**
-     * Get the starting angle of the {@link DifferentialMechanism} tilt.
-     *
-     * @return {@link Angle} of the {@link DifferentialMechanism} tilt.
-     */
-    public Optional<Angle> getTiltStartingAngle() {
-        return startingTiltAngle;
-    }
-
-    /**
-     * Get starting tilt {@link Angle}.
-     *
-     * @return Tilt {@link Angle}.
-     */
-    public Optional<Angle> getStartingTiltAngle() {
-        return startingTiltAngle;
-    }
-
-    /**
-     * Get starting twist {@link Angle}.
-     *
-     * @return Twist {@link Angle}.
-     */
-    public Optional<Angle> getStartingTwistAngle() {
-        return startingTwistAngle;
-    }
-
-    /**
-     * Get the starting angle of the {@link DifferentialMechanism} twist.
-     *
-     * @return {@link Angle} of the {@link DifferentialMechanism} twist.
-     */
-    public Optional<Angle> getTwistStartingAngle() {
-        return startingTwistAngle;
-    }
-
-    /**
-     * Get the angle supplier for the attached absolute encoder, if it exists.
-     *
-     * @return {@link Angle} supplier for the given absolute encoder attached to the twist.
-     */
-    public Optional<Supplier<Angle>> getTwistAngleSupplier() {
-        return twistAngle;
-    }
-
-    /**
-     * Get the length of the {@link DifferentialMechanism}
-     * @return {@link Distance} of {@link DifferentialMechanism}
-     */
-    public Optional<Distance> getLength() {
-        return length;
-    }
-
-    /**
-     * The gearing for the twist in the {@link DifferentialMechanism}
-     *
-     * @return {@link MechanismGearing} of the twist.
-     */
-    public MechanismGearing getTwistGearing() {
-        return twistGearing;
-    }
-
-    /**
-     * Get the angle supplier for the attached absolute encoder, if it exists.
-     *
-     * @return {@link Angle} supplier for the given absolute encoder attached to the tilt.
-     */
-    public Optional<Supplier<Angle>> getTiltAngleSupplier() {
-        return tiltAngle;
-    }
-
-    /**
-     * Get the left {@link SmartMotorController} of the {@link DifferentialMechanism}
-     *
-     * @return left {@link SmartMotorController}
-     */
-    public SmartMotorController getLeftMotorController() {
-        return leftMotorController;
-    }
-
-    /**
-     * Get the right {@link SmartMotorController} of the {@link DifferentialMechanism}
-     *
-     * @return right {@link SmartMotorController}
-     */
-    public SmartMotorController getRightMotorController() {
-        return rightMotorController;
-    }
-
-    /**
-     * Sim color value
-     *
-     * @return Sim color value
-     */
-    public Color8Bit getSimColor() {
-        return simColor;
-    }
-
-    /**
-     * Get the {@link MechanismPositionConfig} associated with this {@link DifferentialMechanismConfig}.
-     *
-     * @return An {@link Optional} containing the {@link MechanismPositionConfig} if present, otherwise an empty
-     * {@link Optional}.
-     */
-    public MechanismPositionConfig getMechanismPositionConfig() {
-        return mechanismPositionConfig;
-    }
-
-    /**
-     * Get the network root of the mechanism.
-     *
-     * @return Optional containing the network root if set, otherwise an empty Optional.
-     */
-    @Deprecated
-    public Optional<String> getNetworkRoot() {
-        return networkRoot;
-    }
+  /**
+   * Get the network root of the mechanism.
+   *
+   * @return Optional containing the network root if set, otherwise an empty Optional.
+   */
+  @Deprecated
+  public Optional<String> getNetworkRoot()
+  {
+    return networkRoot;
+  }
 }

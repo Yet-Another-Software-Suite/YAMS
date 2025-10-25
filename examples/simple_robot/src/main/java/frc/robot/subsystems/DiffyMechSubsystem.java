@@ -7,6 +7,8 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import yams.gearing.GearBox;
+import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.DifferentialMechanismConfig;
 import yams.mechanisms.positional.DifferentialMechanism;
 import yams.motorcontrollers.SmartMotorController;
@@ -23,7 +25,7 @@ public class DiffyMechSubsystem extends SubsystemBase
   private final SmartMotorControllerConfig leftConfig = new SmartMotorControllerConfig(this)
           .withClosedLoopController(16, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
           //.withSoftLimit(Degrees.of(-30), Degrees.of(100))
-          .withGearing(gearing(gearbox(3, 4, 5)))
+          .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4, 5)))
 //      .withExternalEncoder(armMotor.getAbsoluteEncoder())
           .withIdleMode(SmartMotorControllerConfig.MotorMode.BRAKE)
           .withTelemetry("LeftMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
@@ -40,7 +42,7 @@ public class DiffyMechSubsystem extends SubsystemBase
   private final SmartMotorControllerConfig rightConfig = new SmartMotorControllerConfig(this)
           .withClosedLoopController(16, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
           //.withSoftLimit(Degrees.of(-30), Degrees.of(100))
-          .withGearing(gearing(gearbox(3, 4, 5)))
+          .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4, 5)))
 //      .withExternalEncoder(armMotor.getAbsoluteEncoder())
           .withIdleMode(SmartMotorControllerConfig.MotorMode.BRAKE)
           .withTelemetry("RightMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH)

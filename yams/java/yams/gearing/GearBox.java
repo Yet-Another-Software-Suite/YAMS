@@ -19,28 +19,6 @@ public class GearBox
   private double   gearReductionRatio;
 
   /**
-   * Create the gearbox given the reduction stages of the gearbox.
-   *
-   * @param reductionStages Reduction stages where the number is > 0 to indicate a reduction.
-   * @return {@link GearBox}.
-   */
-  public static GearBox fromReductionStages(double... reductionStages)
-  {
-    return new GearBox(reductionStages);
-  }
-
-  /**
-   * Create the gearbox given the reduction stages of the gearbox.
-   *
-   * @param stages Stages in the format of "IN:OUT". For example "3:1"
-   * @return {@link GearBox}
-   */
-  public static GearBox fromStages(String... stages)
-  {
-    return new GearBox(stages);
-  }
-
-  /**
    * Construct the {@link GearBox} with the reduction stages given.
    *
    * @param reductionStage Reduction stages where the number is > 0 to indicate a reduction.
@@ -49,7 +27,6 @@ public class GearBox
   {
     setupGearBox(reductionStage);
   }
-
 
   /**
    * Construct the {@link GearBox} with the reduction stages given.
@@ -74,6 +51,27 @@ public class GearBox
     setupGearBox(stages);
   }
 
+  /**
+   * Create the gearbox given the reduction stages of the gearbox.
+   *
+   * @param reductionStages Reduction stages where the number is > 0 to indicate a reduction.
+   * @return {@link GearBox}.
+   */
+  public static GearBox fromReductionStages(double... reductionStages)
+  {
+    return new GearBox(reductionStages);
+  }
+
+  /**
+   * Create the gearbox given the reduction stages of the gearbox.
+   *
+   * @param stages Stages in the format of "IN:OUT". For example, "3:1"
+   * @return {@link GearBox}
+   */
+  public static GearBox fromStages(String... stages)
+  {
+    return new GearBox(stages);
+  }
 
   /**
    * Sets the stages and calculates the reduction for the {@link GearBox}

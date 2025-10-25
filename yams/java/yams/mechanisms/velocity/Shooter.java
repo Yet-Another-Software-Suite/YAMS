@@ -1,20 +1,15 @@
 package yams.mechanisms.velocity;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
-
-import java.util.Optional;
-import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.VoltageUnit;
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
@@ -35,6 +30,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import java.util.Optional;
+import java.util.function.Supplier;
 import yams.exceptions.ShooterConfigurationException;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.MechanismPositionConfig;
@@ -96,21 +93,26 @@ public class Shooter extends SmartVelocityMechanism
       m_smc.setSimSupplier(new DCMotorSimSupplier(m_dcmotorSim.get(), m_smc));
       Distance ShooterLength = config.getLength().orElse(Inches.of(36));
       m_mechanismWindow = new Mechanism2d(ShooterLength.in(Meters) * 2,
-                                        ShooterLength.in(Meters) * 2);
+                                          ShooterLength.in(Meters) * 2);
       mechanismRoot = m_mechanismWindow.getRoot(getName() + "Root",
                                                 ShooterLength.in(Meters), ShooterLength.in(Meters));
       mechanismLigament = mechanismRoot.append(new MechanismLigament2d(getName(),
                                                                        ShooterLength.in(Meters),
                                                                        0, 6, config.getSimColor()));
-      if (config.isUsingSpeedometerSimulation() && config.getSpeedometerMaxVelocity().isPresent()) {
+      if (config.isUsingSpeedometerSimulation() && config.getSpeedometerMaxVelocity().isPresent())
+      {
         mechanismRoot.append(new MechanismLigament2d(getName() + " Upper Limit",
-                                ShooterLength.in(Meters),
-                                270 - config.getUpperSoftLimit().orElse(RPM.of(0)).in(RPM) / config.getSpeedometerMaxVelocity().orElse(RPM.of(20000)).in(RPM) * 180,
-                                6, new Color8Bit(Color.kHotPink)));      
+                                                     ShooterLength.in(Meters),
+                                                     270 - config.getUpperSoftLimit().orElse(RPM.of(0)).in(RPM) /
+                                                           config.getSpeedometerMaxVelocity().orElse(RPM.of(20000))
+                                                                 .in(RPM) * 180,
+                                                     6, new Color8Bit(Color.kHotPink)));
         mechanismRoot.append(new MechanismLigament2d(getName() + " Lower Limit",
-                                  ShooterLength.in(Meters),
-                                  270 - config.getLowerSoftLimit().orElse(RPM.of(0)).in(RPM) / config.getSpeedometerMaxVelocity().orElse(RPM.of(20000)).in(RPM) * 180,
-                                  6, new Color8Bit(Color.kYellow)));      
+                                                     ShooterLength.in(Meters),
+                                                     270 - config.getLowerSoftLimit().orElse(RPM.of(0)).in(RPM) /
+                                                           config.getSpeedometerMaxVelocity().orElse(RPM.of(20000))
+                                                                 .in(RPM) * 180,
+                                                     6, new Color8Bit(Color.kYellow)));
       }
       SmartDashboard.putData(getName() + "/mechanism", m_mechanismWindow);
     }
@@ -239,38 +241,47 @@ public class Shooter extends SmartVelocityMechanism
   @Override
   public Command sysId(Voltage maximumVoltage, Velocity<VoltageUnit> step, Time duration)
   {
-       SysIdRoutine routine = m_smc.sysId(maximumVoltage, step, duration);
-       AngularVelocity max = RPM.of(1000);
-       AngularVelocity min = RPM.of(-1000);
-      if (m_config.getUpperSoftLimit().isPresent()) {
-           max = m_config.getUpperSoftLimit().get().minus(RPM.of(1));
-       } else {
-           throw new ShooterConfigurationException("Shooter upper hard and motor controller soft limit is empty",
-                   "Cannot create SysIdRoutine.",
-                   "withSoftLimit(Angle,Angle)");
-       }
-      if (m_config.getLowerSoftLimit().isPresent()) {
-           min = m_config.getLowerSoftLimit().get().plus(RPM.of(1));
-       } else {
-           throw new ShooterConfigurationException("Shooter lower hard and motor controller soft limit is empty",
-                   "Cannot create SysIdRoutine.",
-                   "withSoftLimit(Angle,Angle)");
-       }
-       Trigger maxTrigger = gte(max);
-       Trigger minTrigger = lte(min);
+    SysIdRoutine    routine = m_smc.sysId(maximumVoltage, step, duration);
+    AngularVelocity max     = RPM.of(1000);
+    AngularVelocity min     = RPM.of(-1000);
+    if (m_config.getUpperSoftLimit().isPresent())
+    {
+      max = m_config.getUpperSoftLimit().get().minus(RPM.of(1));
+    } else
+    {
+      throw new ShooterConfigurationException("Shooter upper hard and motor controller soft limit is empty",
+                                              "Cannot create SysIdRoutine.",
+                                              "withSoftLimit(Angle,Angle)");
+    }
+    if (m_config.getLowerSoftLimit().isPresent())
+    {
+      min = m_config.getLowerSoftLimit().get().plus(RPM.of(1));
+    } else
+    {
+      throw new ShooterConfigurationException("Shooter lower hard and motor controller soft limit is empty",
+                                              "Cannot create SysIdRoutine.",
+                                              "withSoftLimit(Angle,Angle)");
+    }
+    Trigger maxTrigger = gte(max);
+    Trigger minTrigger = lte(min);
 
-       Command group = Commands.print("Starting SysId")
-               .andThen(Commands.runOnce(m_smc::stopClosedLoopController))
-               .andThen(routine.dynamic(Direction.kForward).until(maxTrigger).finallyDo(() -> System.err.println("Forward done")))
-               .andThen(routine.dynamic(Direction.kReverse).until(minTrigger).finallyDo(() -> System.err.println("Reverse done")))
-               .andThen(routine.quasistatic(Direction.kForward).until(maxTrigger).finallyDo(() -> System.err.println("Quasistatic forward done")))
-               .andThen(routine.quasistatic(Direction.kReverse).until(minTrigger).finallyDo(() -> System.err.println("Quasistatic reverse done")));
-               
-       if (m_config.getTelemetryName().isPresent()) {
-           group = group.andThen(Commands.print(getName() + " SysId test done."));
-       }
-       return group.withName(m_subsystem.getName() + " SysId")
-              .finallyDo(m_smc::startClosedLoopController);
+    Command group = Commands.print("Starting SysId")
+                            .andThen(Commands.runOnce(m_smc::stopClosedLoopController))
+                            .andThen(routine.dynamic(Direction.kForward).until(maxTrigger)
+                                            .finallyDo(() -> System.err.println("Forward done")))
+                            .andThen(routine.dynamic(Direction.kReverse).until(minTrigger)
+                                            .finallyDo(() -> System.err.println("Reverse done")))
+                            .andThen(routine.quasistatic(Direction.kForward).until(maxTrigger)
+                                            .finallyDo(() -> System.err.println("Quasistatic forward done")))
+                            .andThen(routine.quasistatic(Direction.kReverse).until(minTrigger)
+                                            .finallyDo(() -> System.err.println("Quasistatic reverse done")));
+
+    if (m_config.getTelemetryName().isPresent())
+    {
+      group = group.andThen(Commands.print(getName() + " SysId test done."));
+    }
+    return group.withName(m_subsystem.getName() + " SysId")
+                .finallyDo(m_smc::startClosedLoopController);
   }
 
   @Override
@@ -302,9 +313,12 @@ public class Shooter extends SmartVelocityMechanism
   @Override
   public void visualizationUpdate()
   {
-    if (m_config.isUsingSpeedometerSimulation() && m_config.getSpeedometerMaxVelocity().isPresent()) {
-      mechanismLigament.setAngle(270 - m_smc.getMechanismVelocity().in(RPM) / m_config.getSpeedometerMaxVelocity().get().in(RPM) * 180);
-    } else {
+    if (m_config.isUsingSpeedometerSimulation() && m_config.getSpeedometerMaxVelocity().isPresent())
+    {
+      mechanismLigament.setAngle(
+          270 - m_smc.getMechanismVelocity().in(RPM) / m_config.getSpeedometerMaxVelocity().get().in(RPM) * 180);
+    } else
+    {
       mechanismLigament.setAngle(m_smc.getMechanismPosition().in(Degrees));
     }
   }

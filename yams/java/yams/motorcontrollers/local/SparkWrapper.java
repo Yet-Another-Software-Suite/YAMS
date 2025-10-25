@@ -525,10 +525,19 @@ public class SparkWrapper extends SmartMotorController
       config.clearFollowers();
     }
 
-    if (config.getDiscontinuityPoint().isPresent())
+    if (config.getMaxDiscontinuityPoint().isPresent() &&
+        !(m_pidController.isPresent() || m_expoPidController.isPresent() || m_simplePidController.isPresent()))
     {
       throw new IllegalArgumentException(
           "[ERROR] Discontinuity point is not supported on Sparks, or we have not implemented this!");
+    } else if (config.getMaxDiscontinuityPoint().isPresent() && config.getMinDiscontinuityPoint().isPresent())
+    {
+      var max = config.getMaxDiscontinuityPoint().get().in(Rotations);
+      var min = config.getMinDiscontinuityPoint().get().in(Rotations);
+
+      m_pidController.ifPresent(pidController -> {pidController.enableContinuousInput(min, max);});
+      m_expoPidController.ifPresent(pidController -> {pidController.enableContinuousInput(min, max);});
+      m_simplePidController.ifPresent(pidController -> {pidController.enableContinuousInput(min, max);});
     }
 
     config.validateBasicOptions();

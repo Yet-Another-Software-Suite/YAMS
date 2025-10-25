@@ -11,6 +11,8 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import yams.gearing.GearBox;
+import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.ArmConfig;
 import yams.mechanisms.positional.DoubleJointedArm;
 import yams.motorcontrollers.SmartMotorController;
@@ -27,7 +29,7 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
   private final SmartMotorControllerConfig lowerConfig = new SmartMotorControllerConfig(this)
           .withClosedLoopController(16, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
           //.withSoftLimit(Degrees.of(-30), Degrees.of(100))
-          .withGearing(gearing(gearbox(3, 4, 5)))
+          .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4, 5)))
 //      .withExternalEncoder(armMotor.getAbsoluteEncoder())
           .withIdleMode(SmartMotorControllerConfig.MotorMode.BRAKE)
           .withTelemetry("LowerMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
@@ -50,7 +52,7 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
   private final SmartMotorControllerConfig upperConfig = new SmartMotorControllerConfig(this)
           .withClosedLoopController(16, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
           //.withSoftLimit(Degrees.of(-30), Degrees.of(100))
-          .withGearing(gearing(gearbox(3, 4, 5)))
+          .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4, 5)))
 //      .withExternalEncoder(armMotor.getAbsoluteEncoder())
           .withIdleMode(SmartMotorControllerConfig.MotorMode.BRAKE)
           .withTelemetry("UpperMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH)

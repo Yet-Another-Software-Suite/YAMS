@@ -19,6 +19,9 @@ import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
+/**
+ * Swerve Module
+ **/
 public class SwerveModuleConfig
 {
 
@@ -54,15 +57,19 @@ public class SwerveModuleConfig
    * Swerve module state optimization using
    * {@link edu.wpi.first.math.kinematics.SwerveModuleState#optimize(Rotation2d)}.
    */
-  private       boolean                      swerveModuleStateOptimization = true;
+  private boolean                  swerveModuleStateOptimization = true;
   /**
    * Swerve module cosine compensation.
    */
-  private       boolean                      cosineCompensation            = false;
+  private boolean                  cosineCompensation            = false;
+  /**
+   * Coupling ratio for the {@link yams.mechanisms.swerve.SwerveModule}.
+   */
+  private GearBox                  couplingRatio;
   /**
    * Swerve module minimum velocity.
    */
-  private       Optional<LinearVelocity>     minimumVelocity               = Optional.empty();
+  private Optional<LinearVelocity> minimumVelocity               = Optional.empty();
   /**
    * Distance from the center of rotation for the {@link yams.mechanisms.swerve.SwerveModule}.
    */
@@ -79,6 +86,20 @@ public class SwerveModuleConfig
     this.driveMotor = drive;
     this.azimuthMotor = azimuth;
   }
+
+  /**
+   * Cosine compensation for the {@link yams.mechanisms.swerve.SwerveModule}, adjusting the velocity by the cosine of
+   * the (current_angle-desired_angle).
+   *
+   * @param compensate Enable or disable cosine compensation.
+   * @return {@link SwerveModuleConfig} for chaining.
+   */
+  public SwerveModuleConfig withCosineCompensation(boolean compensate)
+  {
+    this.cosineCompensation = compensate;
+    return this;
+  }
+  // TODO: Add coupling ratio
 
   /**
    * Set the absolute encoder for the azimuth {@link SmartMotorController} if it's the SAME VENDOR, only.
@@ -312,7 +333,7 @@ public class SwerveModuleConfig
   }
 
   /**
-   * Get the cosine compensated velocity to set the swerve module to.
+   * Get the cosine-compensated velocity to set the swerve module to.
    *
    * @param desiredState Desired {@link SwerveModuleState} to use.
    * @return Cosine compensated velocity in meters/second.

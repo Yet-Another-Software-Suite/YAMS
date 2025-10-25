@@ -89,10 +89,6 @@ public abstract class SmartMotorController
    */
   protected Notifier                                      m_closedLoopControllerThread  = null;
   /**
-   * Running status of the closed loop controller.
-   */
-  private   boolean                                       m_closedLoopControllerRunning = false;
-  /**
    * Parent table for telemetry.
    */
   protected Optional<NetworkTable>                        parentTable                   = Optional.empty();
@@ -112,7 +108,10 @@ public abstract class SmartMotorController
    * {@link SimSupplier} for the mechanism.
    */
   protected Optional<SimSupplier>                         m_simSupplier                 = Optional.empty();
-
+  /**
+   * Running status of the closed loop controller.
+   */
+  private boolean m_closedLoopControllerRunning = false;
 
   /**
    * Create a {@link SmartMotorController} wrapper from the provided motor controller object.
@@ -380,7 +379,7 @@ public abstract class SmartMotorController
         if (simpleMotorFeedforward.isPresent())
         {
           feedforward = simpleMotorFeedforward.get().calculateWithVelocities(getMechanismVelocity().in(
-            RotationsPerSecond), setpointVelocity.get().in(RotationsPerSecond));
+              RotationsPerSecond), setpointVelocity.get().in(RotationsPerSecond));
         }
       }
     }

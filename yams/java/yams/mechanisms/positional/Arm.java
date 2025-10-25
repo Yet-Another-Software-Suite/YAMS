@@ -116,13 +116,17 @@ public class Arm extends SmartPositionalMechanism
       m_mechanismWindow = new Mechanism2d(config.getMechanismPositionConfig()
                                                 .getWindowXDimension(config.getLength().get()).in(Meters),
                                           config.getMechanismPositionConfig()
-                                              .getWindowYDimension(config.getLength().get()).in(Meters));
+                                                .getWindowYDimension(config.getLength().get()).in(Meters));
       m_mechanismRoot = m_mechanismWindow.getRoot(getName() + "Root",
-                                                  config.getMechanismPositionConfig().getMechanismX(config.getLength().get()).in(Meters)
-                                                  + config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d()).getX(),
-                                                  config.getMechanismPositionConfig().getMechanismY(config.getLength().get()).in(Meters)
-                                                  + config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d()).getZ()
-                                                  );
+                                                  config.getMechanismPositionConfig()
+                                                        .getMechanismX(config.getLength().get()).in(Meters)
+                                                  + config.getMechanismPositionConfig().getRelativePosition()
+                                                          .orElse(new Translation3d()).getX(),
+                                                  config.getMechanismPositionConfig()
+                                                        .getMechanismY(config.getLength().get()).in(Meters)
+                                                  + config.getMechanismPositionConfig().getRelativePosition()
+                                                          .orElse(new Translation3d()).getZ()
+                                                 );
       m_mechanismLigament = m_mechanismRoot.append(new MechanismLigament2d(getName(),
                                                                            config.getLength().get().in(Meters),
                                                                            config.getStartingAngle().get().in(Degrees),
@@ -131,12 +135,12 @@ public class Arm extends SmartPositionalMechanism
       m_mechanismRoot.append(new MechanismLigament2d("MaxHard",
                                                      Inch.of(3).in(Meters),
                                                      config.getUpperHardLimit().get()
-                                                         .in(Degrees),
+                                                           .in(Degrees),
                                                      4,
                                                      new Color8Bit(Color.kLimeGreen)));
       m_mechanismRoot.append(new MechanismLigament2d("MinHard", Inch.of(3).in(Meters),
                                                      config.getLowerHardLimit().get()
-                                                         .in(Degrees),
+                                                           .in(Degrees),
                                                      4, new Color8Bit(Color.kRed)));
       if (motor.getConfig().getMechanismLowerLimit().isPresent() &&
           motor.getConfig().getMechanismUpperLimit().isPresent())
@@ -144,12 +148,12 @@ public class Arm extends SmartPositionalMechanism
         m_mechanismRoot.append(new MechanismLigament2d("MaxSoft",
                                                        Inch.of(3).in(Meters),
                                                        motor.getConfig().getMechanismUpperLimit().get()
-                                                          .in(Degrees),
+                                                            .in(Degrees),
                                                        4,
                                                        new Color8Bit(Color.kHotPink)));
         m_mechanismRoot.append(new MechanismLigament2d("MinSoft", Inch.of(3).in(Meters),
                                                        motor.getConfig().getMechanismLowerLimit().get()
-                                                          .in(Degrees),
+                                                            .in(Degrees),
                                                        4, new Color8Bit(Color.kYellow)));
       }
       SmartDashboard.putData(getName() + "/mechanism", m_mechanismWindow);
@@ -211,10 +215,12 @@ public class Arm extends SmartPositionalMechanism
     Plane movementPlane = m_config.getMechanismPositionConfig().getMovementPlane();
     Translation3d mechanismTranslation = new Translation3d(m_mechanismLigament.getLength(),
                                                            new Rotation3d(
-                                                               Plane.YZ == movementPlane ? m_mechanismLigament.getAngle()
-                                                                                         : 0,
-                                                               Plane.XZ == movementPlane ? m_mechanismLigament.getAngle()
-                                                                                         : 0, 0));
+                                                               Plane.YZ == movementPlane
+                                                               ? m_mechanismLigament.getAngle()
+                                                               : 0,
+                                                               Plane.XZ == movementPlane
+                                                               ? m_mechanismLigament.getAngle()
+                                                               : 0, 0));
     if (m_config.getMechanismPositionConfig().getRelativePosition().isPresent())
     {
       return m_config.getMechanismPositionConfig().getRelativePosition().get()

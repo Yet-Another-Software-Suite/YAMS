@@ -20,19 +20,19 @@ public class SwerveModule
   /**
    * Drive motor controller.
    */
-  private SmartMotorController m_dirveMotorController;
+  private final SmartMotorController m_dirveMotorController;
   /**
    * Azimuth motor controller.
    */
-  private SmartMotorController m_azimuthMotorController;
+  private final SmartMotorController m_azimuthMotorController;
   /**
    * Swerve module configuration.
    */
-  private SwerveModuleConfig   m_config;
+  private final SwerveModuleConfig   m_config;
   /**
    * Mechanism Telemetry
    */
-  private MechanismTelemetry   m_telemetry = new MechanismTelemetry();
+  private final MechanismTelemetry   m_telemetry = new MechanismTelemetry();
 
   /**
    * Create a SwerveModule.

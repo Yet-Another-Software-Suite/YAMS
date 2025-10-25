@@ -13,6 +13,16 @@
         </processorPath>
         <module name="simple_robot.main" />
       </profile>
+      <profile name="Gradle Imported" enabled="true">
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/edu.wpi.first.epilogue/epilogue-processor-java/2025.3.2/1afff56c1e460907df3cc06e20ba7d3ea291d58e/epilogue-processor-java-2025.3.2.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/edu.wpi.first.epilogue/epilogue-runtime-java/2025.3.2/11f91500d1f4abcd6931ff0c2cd39cf57e392b86/epilogue-runtime-java-2025.3.2.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.littletonrobotics.akit/akit-autolog/4.1.2/2e632674c8b3df1b22e93fa7f6010cdbaf959529/akit-autolog-4.1.2.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.squareup/javapoet/1.13.0/d6562d385049f35eb50403fa86bb11cce76b866a/javapoet-1.13.0.jar" />
+        </processorPath>
+        <module name="simple_elevator.main" />
+      </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="17" />
   </component>

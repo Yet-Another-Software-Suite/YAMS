@@ -19,10 +19,14 @@ import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import yams.gearing.GearBox;
+import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.ArmConfig;
 import yams.mechanisms.config.MechanismPositionConfig;
+import yams.mechanisms.config.SensorConfig;
 import yams.mechanisms.positional.Arm;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
@@ -30,6 +34,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.SparkWrapper;
+import yams.motorcontrollers.simulation.Sensor;
 
 public class ArmSubsystem extends SubsystemBase
 {
@@ -42,7 +47,7 @@ public class ArmSubsystem extends SubsystemBase
   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withClosedLoopController(4, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
       .withSoftLimit(Degrees.of(-30), Degrees.of(100))
-      .withGearing(gearing(gearbox(3, 4)))
+      .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
 //      .withExternalEncoder(armMotor.getAbsoluteEncoder())
       .withIdleMode(MotorMode.BRAKE)
       .withTelemetry("ArmMotor", TelemetryVerbosity.HIGH)
@@ -72,12 +77,25 @@ public class ArmSubsystem extends SubsystemBase
       .withMechanismPositionConfig(robotToMechanism);
   private final Arm       arm      = new Arm(m_config);
 
+  private DigitalInput dio = new DigitalInput(0);
+  private final Sensor coralSensor = new SensorConfig("CoralDetectorBeamBreak")
+      .withField("Beam", dio::get, false)
+      .withSimulatedValue("Beam", Seconds.of(3), Seconds.of(4), true)
+      .withSimulatedValue("Beam",arm.isNear(Degrees.of(40), Degrees.of(2)), true)
+      .getSensor();
+
   public ArmSubsystem()
   {
   }
 
+  public boolean getBeamBreak()
+  {
+    return coralSensor.getAsBoolean("Beam");
+  }
+
   public void periodic()
   {
+    getBeamBreak();
     arm.updateTelemetry();
   }
 

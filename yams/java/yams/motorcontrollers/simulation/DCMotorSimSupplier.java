@@ -27,12 +27,12 @@ public class DCMotorSimSupplier implements SimSupplier
 {
 
   private boolean          inputFed   = false;
-  private boolean          simUpdated = false;
-  private Supplier<Double> motorDutyCycleSupplier;
-  private DCMotorSim       sim;
-  private MechanismGearing mechGearing;
-  private Time             period;
-  private DCMotor          motor;
+  private       boolean          simUpdated = false;
+  private final Supplier<Double> motorDutyCycleSupplier;
+  private final DCMotorSim       sim;
+  private final MechanismGearing mechGearing;
+  private final Time             period;
+  private final DCMotor          motor;
 
 
   /**

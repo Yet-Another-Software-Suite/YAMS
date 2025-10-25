@@ -4,10 +4,13 @@
 
 package yams.telemetry;
 
-import edu.wpi.first.networktables.*;
-import yams.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
-
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.BooleanSubscriber;
+import edu.wpi.first.networktables.BooleanTopic;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.PubSub;
 import java.util.Optional;
+import yams.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
 
 /**
  * Boolean Telemetry for SmartMotorControllers.

@@ -23,135 +23,160 @@ import yams.motorcontrollers.SmartMotorController;
 /**
  * ArmSim Supplier
  */
-public class ArmSimSupplier implements SimSupplier {
+public class ArmSimSupplier implements SimSupplier
+{
 
-    private boolean inputFed = false;
-    private boolean simUpdated = false;
-    private Supplier<Double> motorDutyCycleSupplier;
-    private SingleJointedArmSim sim;
-    private MechanismGearing mechGearing;
-    private Time period;
-    private DCMotor motor;
+  private       boolean             inputFed   = false;
+  private       boolean             simUpdated = false;
+  private final Supplier<Double>    motorDutyCycleSupplier;
+  private final SingleJointedArmSim sim;
+  private final MechanismGearing    mechGearing;
+  private final Time                period;
+  private final DCMotor             motor;
 
 
-    /**
-     * Construct the ArmSim supplier
-     *
-     * @param simulation           Simulatoin instance
-     * @param smartMotorController SMC for the ArmSim..
-     */
-    public ArmSimSupplier(SingleJointedArmSim simulation, SmartMotorController smartMotorController) {
-        var config = smartMotorController.getConfig();
-        sim = simulation;
-        motorDutyCycleSupplier = smartMotorController::getDutyCycle;
-        mechGearing = config.getGearing();
-        period = config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20));
-        motor = smartMotorController.getDCMotor();
+  /**
+   * Construct the ArmSim supplier
+   *
+   * @param simulation           Simulatoin instance
+   * @param smartMotorController SMC for the ArmSim..
+   */
+  public ArmSimSupplier(SingleJointedArmSim simulation, SmartMotorController smartMotorController)
+  {
+    var config = smartMotorController.getConfig();
+    sim = simulation;
+    motorDutyCycleSupplier = smartMotorController::getDutyCycle;
+    mechGearing = config.getGearing();
+    period = config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20));
+    motor = smartMotorController.getDCMotor();
+  }
+
+  @Override
+  public void updateSimState()
+  {
+    if (!isInputFed())
+    {
+      sim.setInputVoltage(motorDutyCycleSupplier.get() * RoboRioSim.getVInVoltage());
+    }
+    if (!simUpdated)
+    {
+      starveInput();
+      sim.update(period.in(Seconds));
+      try
+      {
+        Thread.sleep(1);
+      } catch (Exception e)
+      {
+
+      }
+      feedUpdateSim();
     }
 
-    @Override
-    public void updateSimState() {
-        if (!isInputFed()) {
-            sim.setInputVoltage(motorDutyCycleSupplier.get() * RoboRioSim.getVInVoltage());
-        }
-        if (!simUpdated) {
-            starveInput();
-            sim.update(period.in(Seconds));
-            try {
-                Thread.sleep(1);
-            } catch (Exception e) {
+  }
 
-            }
-            feedUpdateSim();
-        }
+  @Override
+  public boolean getUpdatedSim()
+  {
+    return simUpdated;
+  }
 
-    }
+  @Override
+  public void feedUpdateSim()
+  {
+    simUpdated = true;
+  }
 
-    @Override
-    public boolean getUpdatedSim() {
-        return simUpdated;
-    }
+  @Override
+  public void starveUpdateSim()
+  {
+    simUpdated = false;
+  }
 
-    @Override
-    public void feedUpdateSim() {
-        simUpdated = true;
-    }
+  @Override
+  public boolean isInputFed()
+  {
+    return inputFed;
+  }
 
-    @Override
-    public void starveUpdateSim() {
-        simUpdated = false;
-    }
+  @Override
+  public void feedInput()
+  {
+    inputFed = true;
+  }
 
-    @Override
-    public boolean isInputFed() {
-        return inputFed;
-    }
+  @Override
+  public void starveInput()
+  {
+    inputFed = false;
+  }
 
-    @Override
-    public void feedInput() {
-        inputFed = true;
-    }
+  @Override
+  public void setMechanismStatorDutyCycle(double dutyCycle)
+  {
+    feedInput();
+    sim.setInputVoltage(dutyCycle * getMechanismSupplyVoltage().in(Volts));
+  }
 
-    @Override
-    public void starveInput() {
-        inputFed = false;
-    }
+  @Override
+  public Voltage getMechanismSupplyVoltage()
+  {
+    return Volts.of(RoboRioSim.getVInVoltage());
+  }
 
-    @Override
-    public void setMechanismStatorDutyCycle(double dutyCycle) {
-        feedInput();
-        sim.setInputVoltage(dutyCycle * getMechanismSupplyVoltage().in(Volts));
-    }
+  @Override
+  public Voltage getMechanismStatorVoltage()
+  {
+    return Volts.of(motor.getVoltage(motor.getTorque(sim.getCurrentDrawAmps()),
+                                     sim.getVelocityRadPerSec()));
+  }
 
-    @Override
-    public Voltage getMechanismSupplyVoltage() {
-        return Volts.of(RoboRioSim.getVInVoltage());
-    }
+  @Override
+  public void setMechanismStatorVoltage(Voltage volts)
+  {
+    feedInput();
+    sim.setInputVoltage(volts.in(Volts));
+  }
 
-    @Override
-    public Voltage getMechanismStatorVoltage() {
-        return Volts.of(motor.getVoltage(motor.getTorque(sim.getCurrentDrawAmps()),
-                sim.getVelocityRadPerSec()));
-    }
+  @Override
+  public Angle getMechanismPosition()
+  {
+    return Radians.of(sim.getAngleRads());
+  }
 
-    @Override
-    public void setMechanismStatorVoltage(Voltage volts) {
-        feedInput();
-        sim.setInputVoltage(volts.in(Volts));
-    }
+  @Override
+  public void setMechanismPosition(Angle position)
+  {
+    sim.setState(position.in(Radians),
+                 sim.getVelocityRadPerSec());//.times(config.getGearing().getMechanismToRotorRatio()).in(Radians));
+  }
 
-    @Override
-    public Angle getMechanismPosition() {
-        return Radians.of(sim.getAngleRads());
-    }
+  @Override
+  public Angle getRotorPosition()
+  {
+    return getMechanismPosition().times(mechGearing.getMechanismToRotorRatio());
+  }
 
-    @Override
-    public void setMechanismPosition(Angle position) {
-        sim.setState(position.in(Radians), sim.getVelocityRadPerSec());//.times(config.getGearing().getMechanismToRotorRatio()).in(Radians));
-    }
+  @Override
+  public AngularVelocity getMechanismVelocity()
+  {
+    return RadiansPerSecond.of(sim.getVelocityRadPerSec());
+  }
 
-    @Override
-    public Angle getRotorPosition() {
-        return getMechanismPosition().times(mechGearing.getMechanismToRotorRatio());
-    }
+  @Override
+  public void setMechanismVelocity(AngularVelocity velocity)
+  {
+    sim.setState(sim.getAngleRads(), velocity.in(RadiansPerSecond));
+  }
 
-    @Override
-    public AngularVelocity getMechanismVelocity() {
-        return RadiansPerSecond.of(sim.getVelocityRadPerSec());
-    }
+  @Override
+  public AngularVelocity getRotorVelocity()
+  {
+    return getMechanismVelocity().times(mechGearing.getMechanismToRotorRatio());
+  }
 
-    @Override
-    public void setMechanismVelocity(AngularVelocity velocity) {
-        sim.setState(sim.getAngleRads(), velocity.in(RadiansPerSecond));;
-    }
-
-    @Override
-    public AngularVelocity getRotorVelocity() {
-        return getMechanismVelocity().times(mechGearing.getMechanismToRotorRatio());
-    }
-
-    @Override
-    public Current getCurrentDraw() {
-        return Amps.of(sim.getCurrentDrawAmps());
-    }
+  @Override
+  public Current getCurrentDraw()
+  {
+    return Amps.of(sim.getCurrentDrawAmps());
+  }
 }

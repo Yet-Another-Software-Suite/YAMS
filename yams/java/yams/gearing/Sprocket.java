@@ -52,6 +52,16 @@ public class Sprocket
   }
 
   /**
+   * Construct the {@link Sprocket} with the reduction stages given.
+   *
+   * @param stages List of stages in the format of "IN:OUT".
+   */
+  public static Sprocket fromStages(String... stages)
+  {
+    return new Sprocket(stages);
+  }
+
+  /**
    * Set up the reduction stages for the {@link Sprocket}
    *
    * @param sprocketReductionStage Reductions in the form of "IN:OUT" => IN/OUT
@@ -73,6 +83,7 @@ public class Sprocket
 
   /**
    * Multiply the sprocket reduction ratio by X.
+   *
    * @param x X to multiply by.
    * @return {@link Sprocket} for chaining.
    */
@@ -84,6 +95,7 @@ public class Sprocket
 
   /**
    * Divide the sprocket reduction ratio by X.
+   *
    * @param x X to divide by.
    * @return {@link Sprocket}
    */

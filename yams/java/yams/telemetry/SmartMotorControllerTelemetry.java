@@ -309,6 +309,27 @@ public class SmartMotorControllerTelemetry
   }
 
   /**
+   * Close and unpublish telemetry.
+   */
+  public void close()
+  {
+    if (doubleFields != null)
+    {
+      for (Map.Entry<DoubleTelemetryField, DoubleTelemetry> entry : doubleFields.entrySet())
+      {
+        entry.getValue().close();
+      }
+    }
+    if (boolFields != null)
+    {
+      for (Map.Entry<BooleanTelemetryField, BooleanTelemetry> entry : boolFields.entrySet())
+      {
+        entry.getValue().close();
+      }
+    }
+  }
+
+  /**
    * Boolean telemetry for {@link SmartMotorController}s
    */
   public enum BooleanTelemetryField
@@ -555,22 +576,5 @@ public class SmartMotorControllerTelemetry
       return new DoubleTelemetry(key, defaultVal, this, tunable, unit);
     }
 
-  }
-
-  /**
-   * Close and unpublish telemetry.
-   */
-  public void close()
-  {
-    if(doubleFields != null)
-        for (Map.Entry<DoubleTelemetryField, DoubleTelemetry> entry : doubleFields.entrySet())
-        {
-          entry.getValue().close();
-        }
-    if(boolFields != null)
-        for (Map.Entry<BooleanTelemetryField, BooleanTelemetry> entry : boolFields.entrySet())
-        {
-          entry.getValue().close();
-        }
   }
 }

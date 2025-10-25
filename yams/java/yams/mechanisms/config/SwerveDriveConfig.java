@@ -29,13 +29,13 @@ public class SwerveDriveConfig
 {
 
   /**
-   * Telemetry verbosity
-   */
-  private       Optional<TelemetryVerbosity>        telemetryVerbosity            = Optional.empty();
-  /**
    * {@link SwerveModule}s for the {@link yams.mechanisms.swerve.SwerveDrive}.
    */
   private final SwerveModule[]                      modules;
+  /**
+   * Telemetry verbosity
+   */
+  private       Optional<TelemetryVerbosity>        telemetryVerbosity            = Optional.empty();
   /**
    * Gyro supplier.
    */
@@ -107,7 +107,7 @@ public class SwerveDriveConfig
   /**
    * Swerve drive subsystem.
    */
-  private       Subsystem                           subsystem;
+  private final Subsystem                           subsystem;
 
   /**
    * Create the {@link SwerveDriveConfig} for the {@link yams.mechanisms.swerve.SwerveDrive}
@@ -164,6 +164,10 @@ public class SwerveDriveConfig
    */
   public SwerveDriveConfig withRotationController(PIDController controller)
   {
+    if (controller != null)
+    {
+      controller.enableContinuousInput(-Math.PI, Math.PI);
+    }
     rotationController = Optional.ofNullable(controller);
     return this;
   }
@@ -434,7 +438,8 @@ public class SwerveDriveConfig
   {
     var angularVelocity = new Rotation2d(gyroAngularVelocitySupplier.orElseThrow().get().in(RadiansPerSecond) *
                                          (RobotBase.isSimulation() ?
-                                          simAngularVelocityScaleFactor.orElse(angularVelocityScaleFactor.orElseThrow()) :
+                                          simAngularVelocityScaleFactor.orElse(angularVelocityScaleFactor.orElseThrow())
+                                                                   :
                                           angularVelocityScaleFactor.orElseThrow()));
     if (angularVelocity.getRadians() != 0.0)
     {
@@ -497,6 +502,37 @@ public class SwerveDriveConfig
   {
     return (RobotBase.isSimulation() ? simRotationController.orElse(rotationController.orElseThrow())
                                      : rotationController.orElseThrow());
+  }
+
+  /**
+   * Cube the {@link Translation2d} magnitude given in Polar coordinates.
+   *
+   * @param translation {@link Translation2d} to manipulate.
+   * @return Cubed magnitude from {@link Translation2d}.
+   */
+  public static Translation2d cubeTranslation(Translation2d translation)
+  {
+    if (Math.hypot(translation.getX(), translation.getY()) <= 1.0E-6)
+    {
+      return translation;
+    }
+    return new Translation2d(Math.pow(translation.getNorm(), 3), translation.getAngle());
+  }
+
+  /**
+   * Scale the {@link Translation2d} Polar coordinate magnitude.
+   *
+   * @param translation {@link Translation2d} to use.
+   * @param scalar      Multiplier for the Polar coordinate magnitude to use.
+   * @return {@link Translation2d} scaled by given magnitude scalar.
+   */
+  public static Translation2d scaleTranslation(Translation2d translation, double scalar)
+  {
+    if (Math.hypot(translation.getX(), translation.getY()) <= 1.0E-6)
+    {
+      return translation;
+    }
+    return new Translation2d(translation.getNorm() * scalar, translation.getAngle());
   }
 
   /**

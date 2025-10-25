@@ -3,8 +3,11 @@ package yams.mechanisms.swerve;
 import static edu.wpi.first.hal.FRCNetComm.tInstances.kRobotDriveSwerve_YAGSL;
 import static edu.wpi.first.hal.FRCNetComm.tResourceType.kResourceType_RobotDrive;
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.Second;
 
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
@@ -22,6 +25,7 @@ import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -40,10 +44,6 @@ public class SwerveDrive
    */
   private final SwerveModule[]                          m_modules;
   /**
-   * The config for the drive.
-   */
-  private       SwerveDriveConfig                       m_config;
-  /**
    * The pose estimator for the drive.
    */
   private final SwerveDrivePoseEstimator                m_poseEstimator;
@@ -51,10 +51,6 @@ public class SwerveDrive
    * The kinematics for the drive.
    */
   private final SwerveDriveKinematics                   m_kinematics;
-  /**
-   * Mechanism telemetry.
-   */
-  private       MechanismTelemetry                      m_telemetry    = new MechanismTelemetry();
   /**
    * Desired swerve module states.
    */
@@ -84,44 +80,21 @@ public class SwerveDrive
    */
   private final DoublePublisher                         m_gyroPublisher;
   /**
-   * Simulated Gyro Angle. Used for simulation purposes only. Not used in real robot code.
-   */
-  private       Angle                                   m_simGyroAngle = Rotations.of(0);
-  /**
    * Timer for simulation purposes only. Not used in real robot code.
    */
-  private final Timer                                   m_simTimer     = new Timer();
-
+  private final Timer              m_simTimer     = new Timer();
   /**
-   * Cube the {@link Translation2d} magnitude given in Polar coordinates.
-   *
-   * @param translation {@link Translation2d} to manipulate.
-   * @return Cubed magnitude from {@link Translation2d}.
+   * The config for the drive.
    */
-  public static Translation2d cubeTranslation(Translation2d translation)
-  {
-    if (Math.hypot(translation.getX(), translation.getY()) <= 1.0E-6)
-    {
-      return translation;
-    }
-    return new Translation2d(Math.pow(translation.getNorm(), 3), translation.getAngle());
-  }
-
+  private final SwerveDriveConfig  m_config;
   /**
-   * Scale the {@link Translation2d} Polar coordinate magnitude.
-   *
-   * @param translation {@link Translation2d} to use.
-   * @param scalar      Multiplier for the Polar coordinate magnitude to use.
-   * @return {@link Translation2d} scaled by given magnitude scalar.
+   * Mechanism telemetry.
    */
-  public static Translation2d scaleTranslation(Translation2d translation, double scalar)
-  {
-    if (Math.hypot(translation.getX(), translation.getY()) <= 1.0E-6)
-    {
-      return translation;
-    }
-    return new Translation2d(translation.getNorm() * scalar, translation.getAngle());
-  }
+  private final MechanismTelemetry m_telemetry    = new MechanismTelemetry();
+  /**
+   * Simulated Gyro Angle. Used for simulation purposes only. Not used in real robot code.
+   */
+  private       Angle              m_simGyroAngle = Rotations.of(0);
 
   /**
    * Create a SwerveDrive.
@@ -164,7 +137,6 @@ public class SwerveDrive
     // Report as YAGSL bc this will become apart of YAGSL in 2027...
     HAL.report(kResourceType_RobotDrive, kRobotDriveSwerve_YAGSL);
   }
-
 
   /**
    * Create a {@link RunCommand} to drive the swerve drive with robot relative chassis speeds.
@@ -296,6 +268,57 @@ public class SwerveDrive
   public void resetTranslationPID()
   {
     m_config.getTranslationPID().reset();
+  }
+
+  /**
+   * Get the {@link Distance} from the given pose to the robot.
+   *
+   * @param pose {@link Pose2d} to get the distance from.
+   * @return {@link Distance} from the given pose to the robot.
+   */
+  public Distance getDistanceFromPose(Pose2d pose)
+  {
+    return Meters.of(getPose().getTranslation().getDistance(pose.getTranslation()));
+  }
+
+  /**
+   * Get the angle difference between the robot's current pose and the given pose.
+   *
+   * @param pose {@link Pose2d} to get the angle difference from.
+   * @return {@link Angle} difference between the robot's current pose and the given pose.
+   */
+  public Angle getAngleDifferenceFromPose(Pose2d pose)
+  {
+    return getPose().minus(pose).getRotation().getMeasure();
+  }
+
+  /**
+   * Drive the robot to the given pose.
+   *
+   * @param pose {@link Pose2d} to drive the robot to. Field relative, blue-origin where 0deg is facing towards RED
+   * @return {@link Command} to drive the robot to the given pose.
+   */
+  public Command driveToPose(Pose2d pose)
+  {
+    return Commands.runOnce(() -> {
+      resetTranslationPID();
+      resetAzimuthPID();
+    }).andThen(drive(() -> {
+      var azimuthPID        = m_config.getRotationPID();
+      var translationPID    = m_config.getTranslationPID();
+      var distance          = getDistanceFromPose(pose);
+      var angleDifference   = getAngleDifferenceFromPose(pose);
+      var translationScalar = translationPID.calculate(distance.in(Meters), 0);
+      var currentPose       = getPose();
+      var poseDifference    = currentPose.minus(pose);
+      return ChassisSpeeds.fromFieldRelativeSpeeds(poseDifference.getMeasureX().per(Second).times(translationScalar),
+                                                   poseDifference.getMeasureY().per(Second).times(translationScalar),
+                                                   RadiansPerSecond.of(azimuthPID.calculate(currentPose.getRotation()
+                                                                                                       .getRadians(),
+                                                                                            pose.getRotation()
+                                                                                                .getRadians())),
+                                                   new Rotation2d(getGyroAngle()));
+    })).withName("Drive to Pose");
   }
 
   /**

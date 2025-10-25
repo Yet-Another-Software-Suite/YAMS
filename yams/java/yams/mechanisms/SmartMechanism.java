@@ -36,14 +36,16 @@ public abstract class SmartMechanism
   /**
    * Mechanism Window.
    */
-  protected Mechanism2d        m_mechanismWindow;
+  protected Mechanism2d m_mechanismWindow;
 
   /**
    * Create the {@link Sprocket} class easily for use within the mechanism.
    *
    * @param sprocketReductionStages Teeth of each sprocket in the chain, in the format of "IN:OUT" => IN/OUT.
    * @return {@link Sprocket} representing the sprocketReductionStages given.
+   * @deprecated Use {@link Sprocket#fromStages(String...)} instead.
    */
+  @Deprecated(forRemoval = true)
   public static Sprocket sprocket(double... sprocketReductionStages)
   {
     return new Sprocket(sprocketReductionStages);
@@ -54,7 +56,9 @@ public abstract class SmartMechanism
    *
    * @param sprocketReductionStages Teeth of each sprocket in the chain in the format of "IN:OUT".
    * @return {@link Sprocket} representing the sprocketReductionStages given.
+   * @deprecated Use {@link Sprocket#fromStages(String...)} instead.
    */
+  @Deprecated(forRemoval = true)
   public static Sprocket sprocket(String... sprocketReductionStages)
   {
     return new Sprocket(sprocketReductionStages);
@@ -66,7 +70,9 @@ public abstract class SmartMechanism
    *
    * @param reductionStages Reduction stages in the gear box in the format of "IN:OUT"
    * @return {@link GearBox} for use in {@link MechanismGearing};
+   * @deprecated Use {@link GearBox#fromStages(String...)} instead.
    */
+  @Deprecated(forRemoval = true)
   public static GearBox gearbox(String... reductionStages)
   {
     return new GearBox(reductionStages);
@@ -74,11 +80,13 @@ public abstract class SmartMechanism
 
 
   /**
-   * Create the {@link GearBox} for {@link MechanismGearing}
+   * Create the {@link GearBox} for {@link MechanismGearing}.
    *
    * @param reductionStages Reduction stages in the gear box, where "IN:OUT" => IN/OUT.
    * @return {@link GearBox} for use in {@link MechanismGearing};
+   * @deprecated Use {@link GearBox#fromReductionStages(double...)} instead.
    */
+  @Deprecated(forRemoval = true)
   public static GearBox gearbox(double... reductionStages)
   {
     return new GearBox(reductionStages);
@@ -90,7 +98,9 @@ public abstract class SmartMechanism
    * @param gearBox  {@link GearBox} created using {@link SmartMechanism#gearbox(double...)}.
    * @param sprocket {@link Sprocket} created using {@link SmartMechanism#sprocket(double...)}.
    * @return {@link MechanismGearing} with the {@link GearBox} and {@link Sprocket}.
+   * @deprecated Use {@link MechanismGearing#MechanismGearing(GearBox, Sprocket)} instead.
    */
+  @Deprecated(forRemoval = true)
   public static MechanismGearing gearing(GearBox gearBox, Sprocket sprocket)
   {
     return new MechanismGearing(gearBox, sprocket);
@@ -101,7 +111,9 @@ public abstract class SmartMechanism
    *
    * @param gearBox {@link GearBox} created using {@link SmartMechanism#gearbox(double...)}.
    * @return {@link MechanismGearing} with the {@link GearBox}.
+   * @deprecated Use {@link MechanismGearing} instead.
    */
+  @Deprecated(forRemoval = true)
   public static MechanismGearing gearing(GearBox gearBox)
   {
     return new MechanismGearing(gearBox);

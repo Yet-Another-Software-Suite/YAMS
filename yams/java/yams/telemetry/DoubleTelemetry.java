@@ -32,13 +32,13 @@ public class DoubleTelemetry
    */
   private final boolean                    tunable;
   /**
-   * Unit to display.
-   */
-  private       String                     unit;
-  /**
    * Enabled?
    */
   protected     boolean                    enabled      = false;
+  /**
+   * Unit to display.
+   */
+  private       String                     unit;
   /**
    * Default value.
    */

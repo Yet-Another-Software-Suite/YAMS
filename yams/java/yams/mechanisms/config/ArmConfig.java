@@ -109,7 +109,7 @@ public class ArmConfig
    */
   public ArmConfig withLength(Distance distance)
   {
-    if(weight.isPresent() && distance != null)
+    if (weight.isPresent() && distance != null)
     {
       motor.getConfig().withMomentOfInertia(distance, weight.get());
     }
@@ -125,7 +125,7 @@ public class ArmConfig
    */
   public ArmConfig withMass(Mass mass)
   {
-    if(length.isPresent() && mass != null)
+    if (length.isPresent() && mass != null)
     {
       motor.getConfig().withMomentOfInertia(length.get(), mass);
     }

@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 import static yams.mechanisms.SmartMechanism.gearbox;
@@ -20,6 +21,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.math.ExponentialProfilePIDController;
@@ -88,7 +90,9 @@ public class ElevatorSubsystem extends SubsystemBase
 
   public ElevatorSubsystem()
   {
-
+    new Trigger(()->m_elevator.getHeight().lte(Meters.of(0.1)))
+        .and(()->motor.getMechanismPositionSetpoint().orElse(Rotations.of(1)).isEquivalent(Rotations.of(0)))
+        .whileTrue(m_elevator.set(0));
   }
 
   public void periodic()

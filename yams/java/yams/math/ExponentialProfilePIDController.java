@@ -39,13 +39,17 @@ public class ExponentialProfilePIDController
 {
 
   /**
+   * Iteration timer.
+   */
+  private final Timer              timer   = new Timer();
+  /**
    * The wrapped PID controller.
    */
-  private       PIDController                      controller;
+  private final PIDController      controller;
   /**
    * The wrapped profile.
    */
-  private       ExponentialProfile                 profile      = null;
+  private       ExponentialProfile profile = null;
   /**
    * The current state from {@link ExponentialProfile}
    */
@@ -54,10 +58,6 @@ public class ExponentialProfilePIDController
    * The next state from {@link ExponentialProfile}
    */
   private       Optional<ExponentialProfile.State> nextState    = Optional.empty();
-  /**
-   * Iteration timer.
-   */
-  private final Timer                              timer        = new Timer();
   /**
    * Loop time.
    */
@@ -68,35 +68,29 @@ public class ExponentialProfilePIDController
   private       Constraints                        constraints  = null;
 
   /**
-   * Get the velocity gain as constant.
+   * Constructor.
    *
-   * @return kV with (-A/B)
+   * @param controller  The wrapped PID controller.
+   * @param constraints The wrapped profile constraints.
    */
-  public AngularVelocity getKv()
+  public ExponentialProfilePIDController(PIDController controller, Constraints constraints)
   {
-    if (constraints == null)
-    {
-      throw new IllegalStateException("constraints must be set before getting Kv");
-    }
-    var A = constraints.A;
-    var B = constraints.B;
-    return RotationsPerSecond.of(-A / B);
+    this.controller = controller;
+    this.constraints = constraints;
+    this.profile = new ExponentialProfile(constraints);
   }
 
   /**
-   * Get the acceleration gain kA
+   * Constructor.
    *
-   * @return kA interpreted as (1.0/B)
+   * @param kP          kP value for the {@link PIDController}
+   * @param kI          kI value for the {@link PIDController}
+   * @param kD          kD value for the {@link PIDController}
+   * @param constraints {@link Constraints} for the {@link ExponentialProfile}
    */
-  public AngularAcceleration getKa()
+  public ExponentialProfilePIDController(double kP, double kI, double kD, Constraints constraints)
   {
-    if (constraints == null)
-    {
-      throw new IllegalStateException("constraints must be set before getting Kv");
-    }
-    var A = constraints.A;
-    var B = constraints.B;
-    return RotationsPerSecondPerSecond.of(1.0 / B);
+    this(new PIDController(kP, kI, kD), constraints);
   }
 
   /**
@@ -199,31 +193,36 @@ public class ExponentialProfilePIDController
   }
 
   /**
-   * Constructor.
+   * Get the velocity gain as constant.
    *
-   * @param controller  The wrapped PID controller.
-   * @param constraints The wrapped profile constraints.
+   * @return kV with (-A/B)
    */
-  public ExponentialProfilePIDController(PIDController controller, Constraints constraints)
+  public AngularVelocity getKv()
   {
-    this.controller = controller;
-    this.constraints = constraints;
-    this.profile = new ExponentialProfile(constraints);
+    if (constraints == null)
+    {
+      throw new IllegalStateException("constraints must be set before getting Kv");
+    }
+    var A = constraints.A;
+    var B = constraints.B;
+    return RotationsPerSecond.of(-A / B);
   }
 
   /**
-   * Constructor.
+   * Get the acceleration gain kA
    *
-   * @param kP          kP value for the {@link PIDController}
-   * @param kI          kI value for the {@link PIDController}
-   * @param kD          kD value for the {@link PIDController}
-   * @param constraints {@link Constraints} for the {@link ExponentialProfile}
+   * @return kA interpreted as (1.0/B)
    */
-  public ExponentialProfilePIDController(double kP, double kI, double kD, Constraints constraints)
+  public AngularAcceleration getKa()
   {
-    this(new PIDController(kP, kI, kD), constraints);
+    if (constraints == null)
+    {
+      throw new IllegalStateException("constraints must be set before getting Kv");
+    }
+    var A = constraints.A;
+    var B = constraints.B;
+    return RotationsPerSecondPerSecond.of(1.0 / B);
   }
-
 
   /**
    * Reset the controller, set the next setpoint to empty.
@@ -256,36 +255,6 @@ public class ExponentialProfilePIDController
   public Optional<Constraints> getConstraints()
   {
     return Optional.ofNullable(constraints);
-  }
-
-  /**
-   * Sets the Proportional coefficient of the PID controller gain.
-   *
-   * @param kP The proportional coefficient. Must be &gt;= 0.
-   */
-  public void setP(double kP)
-  {
-    controller.setP(kP);
-  }
-
-  /**
-   * Sets the Integral coefficient of the PID controller gain.
-   *
-   * @param kI The integral coefficient. Must be >= 0.
-   */
-  public void setI(double kI)
-  {
-    controller.setI(kI);
-  }
-
-  /**
-   * Sets the Differential coefficient of the PID controller gain.
-   *
-   * @param kD The differential coefficient. Must be >= 0.
-   */
-  public void setD(double kD)
-  {
-    controller.setD(kD);
   }
 
   /**
@@ -447,6 +416,16 @@ public class ExponentialProfilePIDController
   }
 
   /**
+   * Sets the Proportional coefficient of the PID controller gain.
+   *
+   * @param kP The proportional coefficient. Must be &gt;= 0.
+   */
+  public void setP(double kP)
+  {
+    controller.setP(kP);
+  }
+
+  /**
    * Get the Integral coefficient.
    *
    * @return integral coefficient
@@ -457,6 +436,16 @@ public class ExponentialProfilePIDController
   }
 
   /**
+   * Sets the Integral coefficient of the PID controller gain.
+   *
+   * @param kI The integral coefficient. Must be >= 0.
+   */
+  public void setI(double kI)
+  {
+    controller.setI(kI);
+  }
+
+  /**
    * Get the Differential coefficient.
    *
    * @return differential coefficient
@@ -464,5 +453,29 @@ public class ExponentialProfilePIDController
   public double getD()
   {
     return controller.getD();
+  }
+
+  /**
+   * Sets the Differential coefficient of the PID controller gain.
+   *
+   * @param kD The differential coefficient. Must be >= 0.
+   */
+  public void setD(double kD)
+  {
+    controller.setD(kD);
+  }
+
+  /**
+   * Enables continuous input.
+   *
+   * <p>Rather then using the max and min input range as constraints, it considers them to be the
+   * same point and automatically calculates the shortest route to the setpoint.
+   *
+   * @param minimumInput The minimum value expected from the input.
+   * @param maximumInput The maximum value expected from the input.
+   */
+  public void enableContinuousInput(double minimumInput, double maximumInput)
+  {
+    controller.enableContinuousInput(minimumInput, maximumInput);
   }
 }
