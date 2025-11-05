@@ -45,12 +45,24 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.dyn4j.exception.NullElementException;
+
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.hardware.TalonFXS;
+import com.revrobotics.spark.SparkBase;
+import com.thethriftybot.ThriftyNova;
+
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.gearing.MechanismGearing;
 import yams.math.ExponentialProfilePIDController;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.motorcontrollers.local.NovaWrapper;
+import yams.motorcontrollers.local.SparkWrapper;
+import yams.motorcontrollers.remote.TalonFXSWrapper;
+import yams.motorcontrollers.remote.TalonFXWrapper;
 import yams.telemetry.SmartMotorControllerTelemetry;
 import yams.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
 import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
@@ -129,7 +141,19 @@ public abstract class SmartMotorController
    */
   public static SmartMotorController create(Object motorController, DCMotor motorSim, SmartMotorControllerConfig cfg)
   {
-    return null;
+    if(motorController == null) {
+      throw new IllegalArgumentException("motorController cannot be null.");
+    } if(motorController instanceof TalonFX) {
+      return new TalonFXWrapper((TalonFX) motorController, motorSim, cfg);
+    } else if(motorController instanceof TalonFXS) {
+      return new TalonFXSWrapper((TalonFXS) motorController, motorSim, cfg);
+    } else if(motorController instanceof SparkBase) {
+      return new SparkWrapper((SparkBase) motorController, motorSim, cfg);
+    } else if(motorController instanceof ThriftyNova) {
+      return new NovaWrapper((ThriftyNova) motorController, motorSim, cfg);
+    } else {
+      throw new IllegalArgumentException("Unsupported motor controller type: " + motorController.getClass().getCanonicalName() + ". Expected TalonFX, TalonFXS, SparkBase, or ThriftyNova.");
+    }
   }
 
   /**
