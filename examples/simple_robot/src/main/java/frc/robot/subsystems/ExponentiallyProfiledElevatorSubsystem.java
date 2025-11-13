@@ -139,8 +139,8 @@ public class ExponentiallyProfiledElevatorSubsystem extends SubsystemBase
   public Command homing(Current threshhold)
   {
       Debouncer       currentDebouncer  = new Debouncer(0.4); // Current threshold is only detected if exceeded for 0.4 seconds.
-      Voltage runVolts          = Volts.of(-2); // Volts required to run the mechanism down. Could be negative if the mechanism is inverted.
-      Distance limitHit          = hardUpperLimit;  // Limit which gets hit. Could be the lower limit if the volts makes the arm go down.
+      Voltage runVolts          = Volts.of(-2); // Volts required to run the mechanism down. Could be positive if the mechanism is inverted.
+      Distance limitHit          = hardLowerLimit;  // Limit which gets hit. Could be the lower limit if the volts makes the arm go down.
       AngularVelocity velocityThreshold = DegreesPerSecond.of(2); // The maximum amount of movement for the arm to be considered "hitting the hard limit".
       return Commands.startRun(motor::stopClosedLoopController, // Stop the closed loop controller
                       () -> motor.setVoltage(runVolts)) // Set the voltage of the motor
