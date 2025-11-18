@@ -6,6 +6,7 @@ import edu.wpi.first.hal.SimDevice.Direction;
 import edu.wpi.first.hal.SimValue;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj.RobotBase;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
@@ -88,6 +89,7 @@ public class SensorData
   {
     this(name, convert(supplier), convert(defaultVal), HALValueType.kInt);
   }
+
   /**
    * Sensor data constructor.
    *
@@ -99,6 +101,7 @@ public class SensorData
   {
     this(name, convert(supplier), convert(defaultVal), HALValueType.kBoolean);
   }
+
   /**
    * Sensor data constructor.
    *
@@ -318,11 +321,10 @@ public class SensorData
     var item = new Pair<>(trigger, value);
     if (m_triggerValues.isEmpty())
     {
-      m_triggerValues = Optional.of(List.of(item));
-    } else
-    {
-      m_triggerValues.get().add(item);
+      m_triggerValues = Optional.of(new ArrayList<>());
     }
+    m_triggerValues.get().add(item);
+
   }
 
   /**

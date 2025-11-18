@@ -53,6 +53,7 @@ public class ElevatorSubsystem extends SubsystemBase
 //          .withMechanismUpperLimit(); // Specific telemetry verbosity
   private final SmartMotorControllerConfig motorConfig        = new SmartMotorControllerConfig(this)
       .withMechanismCircumference(circumference)
+//      .withFollowers(Pair.of(new SparkMax(3, SparkLowLevel.MotorType.kBrushless), true))
       .withClosedLoopController(new ExponentialProfilePIDController(30, 0, 0, ExponentialProfilePIDController
           .createElevatorConstraints(Volts.of(12),
                                      motors,

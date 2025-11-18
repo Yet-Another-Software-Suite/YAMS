@@ -35,6 +35,7 @@ import yams.motorcontrollers.local.SparkWrapper;
 
 public class ArmSubsystem extends SubsystemBase
 {
+  // TODO: Add detailed comments explaining the example, similar to the ExponentiallyProfiledArmSubsystem
 
   private final SparkMax                   armMotor         = new SparkMax(1, MotorType.kBrushless);
   //  private final SmartMotorControllerTelemetryConfig motorTelemetryConfig = new SmartMotorControllerTelemetryConfig()

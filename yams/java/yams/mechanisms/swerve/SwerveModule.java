@@ -137,6 +137,7 @@ public class SwerveModule
   {
     m_dirveMotorController.updateTelemetry();
     m_azimuthMotorController.updateTelemetry();
+    m_telemetry.updateLoopTime();
   }
 
   /**

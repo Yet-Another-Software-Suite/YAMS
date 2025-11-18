@@ -51,6 +51,10 @@ public class Arm extends SmartPositionalMechanism
    * Simulation for the arm.
    */
   private       Optional<SingleJointedArmSim> m_sim = Optional.empty();
+  /**
+   * Mechanism ligament for the setpoint.
+   */
+  private       MechanismLigament2d m_setpointLigament = null;
 
   /**
    * Constructor for the Arm mechanism.
@@ -127,11 +131,19 @@ public class Arm extends SmartPositionalMechanism
                                                   + config.getMechanismPositionConfig().getRelativePosition()
                                                           .orElse(new Translation3d()).getZ()
                                                  );
+
       m_mechanismLigament = m_mechanismRoot.append(new MechanismLigament2d(getName(),
                                                                            config.getLength().get().in(Meters),
                                                                            config.getStartingAngle().get().in(Degrees),
                                                                            6,
                                                                            config.getSimColor()));
+      m_setpointLigament = m_mechanismRoot.append(new MechanismLigament2d("Setpoint",
+                                                                          config.getLength().get()
+                                                                                .in(Meters),
+                                                                          config.getStartingAngle().get()
+                                                                                .in(Degrees),
+                                                                          3,
+                                                                          new Color8Bit(Color.kWhite)));
       m_mechanismRoot.append(new MechanismLigament2d("MaxHard",
                                                      Inch.of(3).in(Meters),
                                                      config.getUpperHardLimit().get()
@@ -167,6 +179,7 @@ public class Arm extends SmartPositionalMechanism
 //    m_telemetry.updatePosition(getAngle());
 //    m_motor.getMechanismPositionSetpoint().ifPresent(m_setpoint -> m_telemetry.updateSetpoint(m_setpoint));
     m_smc.updateTelemetry();
+    m_telemetry.updateLoopTime();
   }
 
   @Override
@@ -201,6 +214,7 @@ public class Arm extends SmartPositionalMechanism
   public void visualizationUpdate()
   {
     m_mechanismLigament.setAngle(getAngle().in(Degrees));
+    m_setpointLigament.setAngle(m_smc.getMechanismPositionSetpoint().orElse(getAngle()).in(Degrees));
   }
 
   /**

@@ -113,18 +113,22 @@ public class DoubleTelemetry
     if (tuningTable != null && tunable)
     {
       topic = tuningTable.getDoubleTopic(key);
+      subPublisher = !unit.equals("none") ?
+                     topic.publishEx("double", "{\"units\": \"" + unit + "\"}") :
+                     topic.publish();
       subscriber = Optional.of(topic.subscribe(defaultValue));
-      subPublisher = topic.publish();
-      if (!unit.equals("none"))
-      {topic.setProperties("{\"unit\":\"" + unit + "\"}");}
+//      if (!unit.equals("none"))
+//      {topic.setProperties("{\"units\":\"" + unit + "\"}");}
       subPublisher.setDefault(defaultValue);
     } else
     {
       assert dataTable != null;
       topic = dataTable.getDoubleTopic(key);
-      publisher = Optional.of(topic.publish());
-      if (!unit.equals("none"))
-      {topic.setProperties("{\"unit\": \"" + unit + "\"}");}
+      publisher = Optional.of(!unit.equals("none") ?
+                              topic.publishEx("double", "{\"units\": \"" + unit + "\"}") :
+                              topic.publish());
+//      if (!unit.equals("none"))
+//      {topic.setProperties("{\"units\": \"" + unit + "\"}");}
       publisher.get().setDefault(defaultValue);
     }
   }
@@ -138,15 +142,27 @@ public class DoubleTelemetry
   {
     switch (unit)
     {
+      case "tunable_position":
+        unit = cfg.getMechanismCircumference().isPresent() ? "meter" : "degrees";
+        break;
       case "position":
-        unit = cfg.getMechanismCircumference().isPresent() ? "meters" : "rotations";
+        unit = cfg.getMechanismCircumference().isPresent() ? "meter" : "rotations";
+        break;
+      case "tunable_velocity":
+        unit = cfg.getMechanismCircumference().isPresent() ? "meter_per_second"
+                                                           : "degrees_per_second";
         break;
       case "velocity":
-        unit = cfg.getMechanismCircumference().isPresent() ? "meters_per_second" : "rotations_per_second";
+        unit = cfg.getMechanismCircumference().isPresent() ? "meter_per_second"
+                                                           : "rotation_per_second";
+        break;
+      case "tunable_acceleration":
+        unit = cfg.getMechanismCircumference().isPresent() ? "meter_per_second_per_second"
+                                                           : "degrees_per_second_per_second";
         break;
       case "acceleration":
-        unit = cfg.getMechanismCircumference().isPresent() ? "meters_per_second_per_second"
-                                                           : "rotations_per_second_per_second";
+        unit = cfg.getMechanismCircumference().isPresent() ? "meter_per_second_per_second"
+                                                           : "rotation_per_second_per_second";
         break;
     }
     return this;
@@ -229,8 +245,8 @@ public class DoubleTelemetry
   public void enable()
   {
     enabled = true;
-    if ((publisher.isEmpty() || subscriber.isEmpty()) && (tuningTable.isPresent() || dataTable.isPresent()))
-    {setupNetworkTables(dataTable.get(), tuningTable.get());}
+//    if ((publisher.isEmpty() || subscriber.isEmpty()) && (tuningTable.isPresent() || dataTable.isPresent()))
+//    {setupNetworkTables(dataTable.get(), tuningTable.get());}
   }
 
   /**

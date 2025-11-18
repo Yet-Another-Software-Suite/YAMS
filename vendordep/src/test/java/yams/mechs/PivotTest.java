@@ -32,6 +32,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import yams.gearing.GearBox;
+import yams.gearing.MechanismGearing;
 import yams.helpers.MockHardwareExtension;
 import yams.helpers.SmartMotorControllerTestSubsystem;
 import yams.helpers.TestWithScheduler;
@@ -56,7 +58,7 @@ public class PivotTest
     return new SmartMotorControllerConfig(subsystem)
         .withClosedLoopController(4, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
         .withSoftLimit(Degrees.of(-100), Degrees.of(100))
-        .withGearing(gearing(gearbox(3, 4,5)))
+        .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4, 5)))
         .withIdleMode(MotorMode.BRAKE)
         .withStatorCurrentLimit(Amps.of(40))
         .withMotorInverted(false)

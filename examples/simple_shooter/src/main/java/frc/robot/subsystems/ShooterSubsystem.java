@@ -31,8 +31,8 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
-import yams.mechanisms.config.ShooterConfig;
-import yams.mechanisms.velocity.Shooter;
+import yams.mechanisms.config.FlyWheelConfig;
+import yams.mechanisms.velocity.FlyWheel;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
@@ -42,6 +42,7 @@ import yams.motorcontrollers.local.SparkWrapper;
 
 public class ShooterSubsystem extends SubsystemBase
 {
+  // TODO: Add detailed comments explaining the example, similar to the ExponentiallyProfiledArmSubsystem
 
   private final SparkMax                   armMotor    = new SparkMax(1, MotorType.kBrushless);
   //  private final SmartMotorControllerTelemetryConfig motorTelemetryConfig = new SmartMotorControllerTelemetryConfig()
@@ -66,13 +67,13 @@ public class ShooterSubsystem extends SubsystemBase
       .withControlMode(ControlMode.CLOSED_LOOP);
   private final SmartMotorController       motor       = new SparkWrapper(armMotor, DCMotor.getNEO(1), motorConfig);
 
-  private final ShooterConfig shooterConfig = new ShooterConfig(motor)
+  private final FlyWheelConfig shooterConfig = new FlyWheelConfig(motor)
       .withDiameter(Inches.of(4))
       .withMass(Pounds.of(1))
       .withTelemetry("ShooterMech", TelemetryVerbosity.HIGH)
       .withSoftLimit(RPM.of(-500), RPM.of(500))
       .withSpeedometerSimulation(RPM.of(750));
-  private final Shooter       shooter       = new Shooter(shooterConfig);
+  private final FlyWheel       shooter       = new FlyWheel(shooterConfig);
 
   public ShooterSubsystem() {}
 

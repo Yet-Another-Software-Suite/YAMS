@@ -307,6 +307,7 @@ public class DoubleJointedArm extends SmartPositionalMechanism
   {
     m_lowerSMC.updateTelemetry();
     m_upperSMC.updateTelemetry();
+    m_telemetry.updateLoopTime();
   }
 
   @Override

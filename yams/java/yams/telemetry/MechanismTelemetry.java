@@ -1,7 +1,10 @@
 package yams.telemetry;
 
+import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Timer;
+import java.util.Optional;
 import yams.motorcontrollers.SmartMotorController;
 
 /**
@@ -18,6 +21,24 @@ public class MechanismTelemetry
    * Tuning NetworkTable.
    */
   private NetworkTable tuningNetworkTable;
+  /**
+   * Loop time publisher.
+   */
+  private Optional<DoublePublisher> loopTimePublisher = Optional.empty();
+  /**
+   * Loop time timer.
+   */
+  private double prevTimestamp = 0;
+
+  /**
+   * Setup loop time publisher.
+   */
+  public void setupLoopTime()
+  {
+    var loopTimePublisherTopic = networkTable.getDoubleTopic("loopTime");
+    loopTimePublisherTopic.setProperties("{\"unit\":\"second\"}");
+    loopTimePublisher = Optional.of(loopTimePublisherTopic.publish());
+  }
 
   /**
    * Setup telemetry for the Mechanism and motor controller.
@@ -32,6 +53,7 @@ public class MechanismTelemetry
     networkTable = NetworkTableInstance.getDefault().getTable("Mechanisms")
                                        .getSubTable(mechanismTelemetryName);
     motorController.setupTelemetry(networkTable, tuningNetworkTable);
+    setupLoopTime();
   }
 
   /**
@@ -45,6 +67,7 @@ public class MechanismTelemetry
                                              .getSubTable(mechanismTelemetryName);
     networkTable = NetworkTableInstance.getDefault().getTable("Mechanisms")
                                        .getSubTable(mechanismTelemetryName);
+    setupLoopTime();
   }
 
   /**
@@ -65,5 +88,19 @@ public class MechanismTelemetry
   public NetworkTable getTuningTable()
   {
     return tuningNetworkTable;
+  }
+
+  /**
+   * Update the loop time.
+   */
+  public void updateLoopTime()
+  {
+    loopTimePublisher.ifPresent(publisher -> {
+      if (prevTimestamp != 0)
+      {
+        publisher.set(Timer.getFPGATimestamp() - prevTimestamp);
+      }
+      prevTimestamp = Timer.getFPGATimestamp();
+    });
   }
 }

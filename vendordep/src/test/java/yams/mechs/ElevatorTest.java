@@ -34,6 +34,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import yams.gearing.GearBox;
+import yams.gearing.MechanismGearing;
 import yams.helpers.MockHardwareExtension;
 import yams.helpers.SmartMotorControllerTestSubsystem;
 import yams.helpers.TestWithScheduler;
@@ -59,7 +61,7 @@ public class ElevatorTest
         .withMechanismCircumference(Meters.of(Inches.of(0.25).in(Meters) * 22))
         .withClosedLoopController(4, 0, 0, MetersPerSecond.of(0.1), MetersPerSecondPerSecond.of(0.5))
         .withSoftLimit(Meters.of(0), Meters.of(5))
-        .withGearing(gearing(gearbox(3, 4)))
+        .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
         .withIdleMode(MotorMode.BRAKE)
 //        .withTelemetry("ElevatorMotor", TelemetryVerbosity.HIGH)
         .withStatorCurrentLimit(Amps.of(40))

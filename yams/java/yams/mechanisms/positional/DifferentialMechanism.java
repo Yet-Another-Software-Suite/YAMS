@@ -271,6 +271,7 @@ public class DifferentialMechanism extends SmartPositionalMechanism
   {
     m_leftSMC.updateTelemetry();
     m_rightSMC.updateTelemetry();
+    m_telemetry.updateLoopTime();
   }
 
   @Override

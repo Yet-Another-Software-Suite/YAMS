@@ -30,6 +30,7 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -40,7 +41,6 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import yams.exceptions.SmartMotorControllerConfigurationException;
-import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.math.ExponentialProfilePIDController;
 import yams.telemetry.SmartMotorControllerTelemetryConfig;
@@ -58,7 +58,7 @@ public class SmartMotorControllerConfig
   /**
    * Missing options that would be decremented for each motor application.
    */
-  private final List<SmartMotorControllerOptions>         missingOptions   = Arrays.asList(
+  private final List<SmartMotorControllerOptions>         missingOptions                   = Arrays.asList(
       SmartMotorControllerOptions.values());
   /**
    * Validation set to confirm all options have been applied to the Smart Motor Controller.
@@ -109,15 +109,15 @@ public class SmartMotorControllerConfig
   /**
    * Controller for the {@link SmartMotorController}.
    */
-  private       Optional<ProfiledPIDController>           controller       = Optional.empty();
+  private       Optional<ProfiledPIDController>           controller                       = Optional.empty();
   /**
    * Controller for the {@link SmartMotorController}.
    */
-  private       Optional<ExponentialProfilePIDController> expoController   = Optional.empty();
+  private       Optional<ExponentialProfilePIDController> expoController                   = Optional.empty();
   /**
    * Controller for the {@link SmartMotorController}.
    */
-  private       Optional<PIDController>                   simpleController = Optional.empty();
+  private       Optional<PIDController>                   simpleController                 = Optional.empty();
   /**
    * Controller for the {@link SmartMotorController}.
    */
@@ -137,9 +137,8 @@ public class SmartMotorControllerConfig
   /**
    * External encoder gearing, defaults to 1:1.
    */
-  private       MechanismGearing                              externalEncoderGearing             = new MechanismGearing(
-      new GearBox(
-          new double[]{1.0}));
+  private       MechanismGearing                          externalEncoderGearing           = new MechanismGearing(
+      1);
   /**
    * Mechanism Circumference for distance calculations.
    */
@@ -223,7 +222,7 @@ public class SmartMotorControllerConfig
   /**
    * Feedback synchronization threshhold.
    */
-  private       Optional<Angle>                               feedbackSynchronizationThreshold   = Optional.empty();
+  private       Optional<Angle>                           feedbackSynchronizationThreshold = Optional.empty();
   /**
    * The motor controller mode.
    */
@@ -246,6 +245,7 @@ public class SmartMotorControllerConfig
   private       Double                                        moi                                = SingleJointedArmSim
       .estimateMOI(Inches.of(4).in(Meters),
                    Pounds.of(1).in(Kilograms));
+
   /**
    * Construct the {@link SmartMotorControllerConfig} for the {@link Subsystem}
    *
@@ -384,12 +384,12 @@ public class SmartMotorControllerConfig
   }
 
   /**
-   * Set the zero offset of the {@link SmartMotorController}
+   * Set the zero offset of the {@link SmartMotorController}'s external Encoder.
    *
    * @param distance Zero offset in distance.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
-  public SmartMotorControllerConfig withZeroOffset(Distance distance)
+  public SmartMotorControllerConfig withExternalEncoderZeroOffset(Distance distance)
   {
     if (mechanismCircumference.isEmpty())
     {
@@ -402,12 +402,12 @@ public class SmartMotorControllerConfig
   }
 
   /**
-   * Set the zero offset of the {@link SmartMotorController}
+   * Set the zero offset of the {@link SmartMotorController}'s external Encoder.
    *
    * @param angle {@link Angle} to 0.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
-  public SmartMotorControllerConfig withZeroOffset(Angle angle)
+  public SmartMotorControllerConfig withExternalEncoderZeroOffset(Angle angle)
   {
     zeroOffset = Optional.ofNullable(angle);
     return this;
@@ -856,6 +856,19 @@ public class SmartMotorControllerConfig
     gearing = gear;
     return this;
   }
+
+  /**
+   * Set the {@link MechanismGearing} for the {@link SmartMotorController}.
+   *
+   * @param reductionRatio Reduction ratio, for example, a ratio of "3:1" is 3; a ratio of "1:2" is 0.5.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public SmartMotorControllerConfig withGearing(double reductionRatio)
+  {
+    gearing = new MechanismGearing(reductionRatio);
+    return this;
+  }
+
 
   /**
    * Set the mechanism circumference to allow distance calculations on the {@link SmartMotorController}.
@@ -1677,14 +1690,44 @@ public class SmartMotorControllerConfig
   }
 
   /**
-   * Set the external encoder gearing. Default is a 1:1 with MAX Planetary.
+   * Set the external encoder gearing.
    *
    * @param externalEncoderGearing External encoder gearing.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
-  public SmartMotorControllerConfig withExternalGearing(MechanismGearing externalEncoderGearing)
+  public SmartMotorControllerConfig withExternalEncoderGearing(MechanismGearing externalEncoderGearing)
   {
+    if (externalEncoderGearing.getRotorToMechanismRatio() > 1)
+    {
+      DriverStation.reportWarning(
+          "[IMPORTANT] Your gearing is set in a way that the external encoder will exceed the maximum reading, " +
+          "this WILL result in multiple angle's being read as the same 'angle.\n\t" +
+          "Ignore this warning IF your mechanism will never travel outside of the slice you are reading, adjust the offset accordingly.\n\t" +
+          "You have been warned! (^.^) - Rivet",
+          true);
+    }
     this.externalEncoderGearing = externalEncoderGearing;
+    return this;
+  }
+
+  /**
+   * Set the external encoder gearing.
+   *
+   * @param reductionRatio External encoder gearing. For example, a ratio of "3:1" is 3; "1:2" is 0.5
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public SmartMotorControllerConfig withExternalEncoderGearing(double reductionRatio)
+  {
+    if (reductionRatio > 1)
+    {
+      DriverStation.reportWarning(
+          "[IMPORTANT] Your gearing is set in a way that the external encoder will exceed the maximum reading, " +
+          "this WILL result in multiple angle's being read as the same 'angle.\n\t" +
+          "Ignore this warning IF your mechanism will never travel outside of the slice you are reading, adjust the offset accordingly.\n\t" +
+          "You have been warned! (^.^) - Rivet",
+          true);
+    }
+    this.externalEncoderGearing = new MechanismGearing(reductionRatio);
     return this;
   }
 

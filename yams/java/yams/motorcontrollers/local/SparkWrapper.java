@@ -267,6 +267,7 @@ public class SparkWrapper extends SmartMotorController
       m_sparkBaseConfig.absoluteEncoder.zeroOffset(getMechanismPosition().minus(angle).in(Rotations));
       m_sparkAbsoluteEncoderSim.ifPresent(absoluteEncoderSim -> absoluteEncoderSim.setPosition(angle.in(Rotations)));
     }
+    sparkSim.ifPresent(sim -> sim.setPosition(angle.in(Rotations)));
     m_sparkRelativeEncoder.setPosition(angle.in(Rotations));
     sparkRelativeEncoderSim.ifPresent(relativeEncoderSim -> relativeEncoderSim.setPosition(angle.in(Rotations)));
     m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismPosition(angle));
@@ -332,7 +333,8 @@ public class SparkWrapper extends SmartMotorController
       {
         if (m_simplePidController.isEmpty())
         {
-          throw new IllegalArgumentException("[ERROR] closed loop controller must not be empty");
+          if (config.getMotorControllerMode() == ControlMode.CLOSED_LOOP)
+          {throw new IllegalArgumentException("[ERROR] closed loop controller must not be empty");}
         }
       } else if (config.getSimpleClosedLoopController().isPresent())
       {
@@ -460,6 +462,8 @@ public class SparkWrapper extends SmartMotorController
             m_sparkAbsoluteEncoderSim.ifPresent(enc -> enc.setZeroOffset(config.getZeroOffset().get().in(Rotations)));
           }
         }
+
+//        seedRelativeEncoder();
       } else
       {
         throw new IllegalArgumentException(
@@ -479,7 +483,7 @@ public class SparkWrapper extends SmartMotorController
       {
         throw new SmartMotorControllerConfigurationException("Zero offset is only available for external encoders",
                                                              "Zero offset could not be applied",
-                                                             ".withZeroOffset");
+                                                             ".withExternalEncoderZeroOffset");
       }
 
       if (config.getExternalEncoderInverted())

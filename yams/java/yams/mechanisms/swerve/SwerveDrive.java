@@ -379,6 +379,7 @@ public class SwerveDrive
     m_currentRobotRelativeChassisSpeedsPublisher.accept(getRobotRelativeSpeed());
     m_fieldRelativeChassisSpeedsPublisher.accept(getFieldRelativeSpeed());
     Arrays.stream(m_modules).forEach(SwerveModule::updateTelemetry);
+    m_telemetry.updateLoopTime();
   }
 
   /**

@@ -184,7 +184,7 @@ public class ArmConfig
    */
   public ArmConfig withHorizontalZero(Angle horizontalZero)
   {
-    motor.getConfig().withZeroOffset(horizontalZero);
+    motor.getConfig().withExternalEncoderZeroOffset(horizontalZero);
     return this;
   }
 

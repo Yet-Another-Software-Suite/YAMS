@@ -3,13 +3,13 @@ package yams.telemetry;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Fahrenheit;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -278,8 +278,8 @@ public class SmartMotorControllerTelemetry
           case StatorCurrentLimit -> smartMotorController.setStatorCurrentLimit(Amps.of(dt.get()));
           case MeasurementUpperLimit -> smartMotorController.setMeasurementUpperLimit(Meters.of(dt.get()));
           case MeasurementLowerLimit -> smartMotorController.setMeasurementLowerLimit(Meters.of(dt.get()));
-          case MechanismUpperLimit -> smartMotorController.setMechanismUpperLimit(Rotations.of(dt.get()));
-          case MechanismLowerLimit -> smartMotorController.setMechanismLowerLimit(Rotations.of(dt.get()));
+          case MechanismUpperLimit -> smartMotorController.setMechanismUpperLimit(Degrees.of(dt.get()));
+          case MechanismLowerLimit -> smartMotorController.setMechanismLowerLimit(Degrees.of(dt.get()));
           case MotionProfileMaxAcceleration ->
           {
             cfg.getMechanismCircumference().ifPresentOrElse(distance -> {
@@ -287,7 +287,7 @@ public class SmartMotorControllerTelemetry
                                                             },
                                                             () -> {
                                                               smartMotorController.setMotionProfileMaxAcceleration(
-                                                                  RotationsPerSecondPerSecond.of(dt.get()));
+                                                                  DegreesPerSecondPerSecond.of(dt.get()));
                                                             });
             break;
           }
@@ -298,7 +298,7 @@ public class SmartMotorControllerTelemetry
                                                             },
                                                             () -> {
                                                               smartMotorController.setMotionProfileMaxVelocity(
-                                                                  RotationsPerSecond.of(dt.get()));
+                                                                  DegreesPerSecond.of(dt.get()));
                                                             });
 
             break;
@@ -423,11 +423,11 @@ public class SmartMotorControllerTelemetry
     /**
      * Motion profile maximum velocity, could be in MPS or RPS
      */
-    MotionProfileMaxVelocity("closedloop/motionprofile/maxVelocity", 0, true, "velocity"),
+    MotionProfileMaxVelocity("closedloop/motionprofile/maxVelocity", 0, true, "tunable_velocity"),
     /**
      * Motion profile maximum accelerartion, could be in MPS^2 or RPS^2
      */
-    MotionProfileMaxAcceleration("closedloop/motionprofile/maxAcceleration", 0, true, "acceleration"),
+    MotionProfileMaxAcceleration("closedloop/motionprofile/maxAcceleration", 0, true, "tunable_acceleration"),
     /**
      * kS
      */
@@ -459,7 +459,7 @@ public class SmartMotorControllerTelemetry
     /**
      * Setpoint position
      */
-    TunableSetpointPosition("closedloop/setpoint/position", 0, true, "position"),
+    TunableSetpointPosition("closedloop/setpoint/position", 0, true, "tunable_position"),
     /**
      * Setpoint position
      */
@@ -467,7 +467,7 @@ public class SmartMotorControllerTelemetry
     /**
      * Setpoint velocity
      */
-    TunableSetpointVelocity("closedloop/setpoint/velocity", 0, true, "velocity"),
+    TunableSetpointVelocity("closedloop/setpoint/velocity", 0, true, "tunable_velocity"),
     /**
      * Setpoint velocity
      */
@@ -523,11 +523,11 @@ public class SmartMotorControllerTelemetry
     /**
      * Mechanism lower limit in rotations.
      */
-    MechanismLowerLimit("mechanism/limit/lower", 0, true, "rotations"),
+    MechanismLowerLimit("mechanism/limit/lower", 0, true, "degrees"),
     /**
      * Mechanism upper limit in rotations.
      */
-    MechanismUpperLimit("mechanism/limit/upper", 0, true, "rotations"),
+    MechanismUpperLimit("mechanism/limit/upper", 0, true, "degrees"),
     /**
      * Rotor position in rotations.
      */
@@ -539,11 +539,11 @@ public class SmartMotorControllerTelemetry
     /**
      * Closed loop dutycyle ramp rate.
      */
-    ClosedloopRampRate("ramprate/dutycycle/closedloop", 0, true, "none"),
+    ClosedloopRampRate("ramprate/dutycycle/closedloop", 0, true, "seconds"),
     /**
      * Open loop dutycycle ramp rate.
      */
-    OpenloopRampRate("ramprate/dutycycle/openloop", 0, true, "none");
+    OpenloopRampRate("ramprate/dutycycle/openloop", 0, true, "seconds");
 
     private final double  defaultVal;
     private final String  key;

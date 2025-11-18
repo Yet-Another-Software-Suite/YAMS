@@ -7,6 +7,14 @@
 
 ---
 
+## 📖 Documentation
+
+[YAMS Gitbook](https://yagsl.gitbook.io/yams/documentation)
+
+[YASS Website](https://yetanothersoftwaresuite.com)
+
+---
+
 ## 🔧 Key Features
 
 - 🧠 Unified interfaces for `Arm`, `Elevator`, and `Pivot` mechanisms  

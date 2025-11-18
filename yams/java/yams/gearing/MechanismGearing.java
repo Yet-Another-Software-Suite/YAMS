@@ -18,6 +18,16 @@ public class MechanismGearing
   private       Optional<Sprocket> sprockets = Optional.empty();
 
   /**
+   * Construct a {@link MechanismGearing} with a reduction ratio.
+   *
+   * @param reductionRatio Reduction ratio. For example, a reduction of "3:1" is 3.0; a reduction of "1:2" is 0.5.
+   */
+  public MechanismGearing(double reductionRatio)
+  {
+    gearBox = GearBox.fromReductionStages(reductionRatio);
+  }
+
+  /**
    * Initialize the {@link MechanismGearing} with only a {@link GearBox} attached to the mechanism motor.
    *
    * @param gearBox {@link GearBox} of the Mechanism.

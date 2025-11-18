@@ -33,12 +33,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import yams.gearing.GearBox;
+import yams.gearing.MechanismGearing;
 import yams.helpers.MockHardwareExtension;
 import yams.helpers.SmartMotorControllerTestSubsystem;
 import yams.helpers.TestWithScheduler;
-import yams.mechanisms.config.ShooterConfig;
+import yams.mechanisms.config.FlyWheelConfig;
 import yams.mechanisms.positional.Pivot;
-import yams.mechanisms.velocity.Shooter;
+import yams.mechanisms.velocity.FlyWheel;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
@@ -58,7 +60,7 @@ public class ShooterTest
     return new SmartMotorControllerConfig(subsystem)
         .withClosedLoopController(1, 0, 0)
 //        .withSoftLimit(Degrees.of(-100), Degrees.of(100))
-        .withGearing(gearing(gearbox(3, 4)))
+        .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
         .withIdleMode(MotorMode.BRAKE)
 //      .withSpecificTelemetry("ArmMotor", motorTelemetryConfig)
         .withStatorCurrentLimit(Amps.of(40))
@@ -67,14 +69,14 @@ public class ShooterTest
         .withControlMode(ControlMode.CLOSED_LOOP);
   }
 
-  private static Shooter createShooter(SmartMotorController smc)
+  private static FlyWheel createShooter(SmartMotorController smc)
   {
-    ShooterConfig cfg = new ShooterConfig(smc)
+    FlyWheelConfig cfg = new FlyWheelConfig(smc)
         .withDiameter(Inches.of(4))
         .withMass(Pounds.of(1))
 //        .withTelemetry("ShooterMech", TelemetryVerbosity.HIGH)
         .withUpperSoftLimit(RPM.of(1000));
-    Shooter                           shooter = new Shooter(cfg);
+    FlyWheel                           shooter = new FlyWheel(cfg);
     SmartMotorControllerTestSubsystem subsys  = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.smc = smc;
     subsys.mechSimPeriodic = shooter::simIterate;
@@ -276,7 +278,7 @@ public class ShooterTest
   void testShooterDutyCycle(SmartMotorController smc) throws InterruptedException
   {
     startTest(smc);
-    Shooter   shooter       = createShooter(smc);
+    FlyWheel   shooter       = createShooter(smc);
     Command dutyCycleUp = shooter.set(0.5);
     Command dutyCycleDown = shooter.set(-0.5);
 
@@ -296,7 +298,7 @@ public class ShooterTest
   void testShooterVelocityPID(SmartMotorController smc) throws InterruptedException
   {
     startTest(smc);
-    Shooter   shooter   = createShooter(smc);
+    FlyWheel   shooter   = createShooter(smc);
     Command highPid = shooter.setSpeed(RPM.of(80));
     Command lowPid  = shooter.setSpeed(RPM.of(-80));
 

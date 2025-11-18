@@ -215,22 +215,10 @@ public class TalonFXWrapper extends SmartMotorController
   }
 
   @Override
+  @Deprecated
   public void synchronizeRelativeEncoder()
   {
-    if (m_config.getFeedbackSynchronizationThreshold().isPresent())
-    {
-      // if (sparkAbsoluteEncoder.isPresent())
-      // {
-      // if
-      // (!Rotations.of(sparkRelativeEncoder.getPosition()).isNear(Rotations.of(sparkAbsoluteEncoder.get()
-      // .getPosition()),
-      // config.getFeedbackSynchronizationThreshold()
-      // .get()))
-      // {
-      // seedRelativeEncoder();
-      // }
-      // }
-    }
+    // Unused
   }
 
   @Override
@@ -554,7 +542,7 @@ public class TalonFXWrapper extends SmartMotorController
                                                                                   : "TalonFX(" +
                                                                                     m_talonfx.getDeviceID() + ")"));
       }
-    } else
+    } else if (config.getMotorControllerMode() == ControlMode.CLOSED_LOOP)
     {
       throw new IllegalArgumentException("[ERROR] No closed loop configuration available!");
     }
@@ -566,12 +554,8 @@ public class TalonFXWrapper extends SmartMotorController
                                                            ".withClosedLoopTolerance");
     }
 
-    if (m_config.getMotorControllerMode() == ControlMode.OPEN_LOOP)
-    {
-      throw new SmartMotorControllerConfigurationException("Open loop mode is the same as Closed Loop Mode",
-                                                           "Cannot set motor controller mode to Open Loop on TalonFX",
-                                                           ".withOpenLoopMode");
-    }
+    // Fetch the controller mode to satisfy the requirement of knowing the control mode.
+    config.getMotorControllerMode();
 
     // Feedforwards
     Optional<ArmFeedforward>         armFeedforward         = m_config.getArmFeedforward();
