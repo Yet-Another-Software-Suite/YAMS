@@ -59,8 +59,8 @@ jobs:
           name: 'github-pages'
           retention-days: '90'
           path: ${{ env.workingDirectory }}/build/maven/
-      - name: Deploy to GitHub Pages
-        id: deployment
+      # - name: Deploy to GitHub Pages
+      #   id: deployment
       #   uses: actions/deploy-pages@v4
       # - name: Output Pages Tree
       #   run: find ${{ env.workingDirectory }}/build/maven/ -type f
