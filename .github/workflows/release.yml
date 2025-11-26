@@ -18,9 +18,10 @@ jobs:
     env:
       releaseVersion: ${{ inputs.releaseVersion }}
       workingDirectory: ${{github.workspace}}/vendordep
+      url: ${{steps.deployment.outputs.page_url}}
+
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-      #url: ${{steps.deployment.outputs.page_url}}
+      
     
     steps:
       - run: git config --global user.name "thenetworkgrinch" && git config --global user.email "thenetworkgrinch@noreply.users.github.com"
