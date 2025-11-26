@@ -63,8 +63,6 @@ jobs:
         uses: actions/deploy-pages@v4
       - name: Output Pages Tree
         run: find ${{ env.workingDirectory }}/build/maven/ -type f
-      - name: Create Vendor JSON Repo PR
-        uses: wpilibsuite/vendor-json-repo/.github/actions/add_vendordep@main
 
         continue-on-error: true
   #deploy:
