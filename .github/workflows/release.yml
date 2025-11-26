@@ -18,7 +18,6 @@ jobs:
     env:
       releaseVersion: ${{ inputs.releaseVersion }}
       workingDirectory: ${{github.workspace}}/vendordep
-      url: ${{steps.deployment.outputs.page_url}}
 
       name: github-pages
       
@@ -62,25 +61,26 @@ jobs:
           path: ${{ env.workingDirectory }}/build/maven/
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
-      - name: Output Pages Tree
-        run: find ${{ env.workingDirectory }}/build/maven/ -type f
+      #   uses: actions/deploy-pages@v4
+      # - name: Output Pages Tree
+      #   run: find ${{ env.workingDirectory }}/build/maven/ -type f
 
         continue-on-error: true
-  #deploy:
-    #permissions:
-      #contents: write
-      #pages: write
-      #id-token: write
-    #environment:
-      #name: github-pages
-      #url: ${{steps.deployment.outputs.page_url}}
-    #runs-on: ubuntu-latest
-    #needs: build
-    #steps:
-  ##    - name: Deploy to GitHub Pages
-   ##     id: deployment
-   #     uses: actions/deploy-pages@v4
+  
+  deploy:
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{steps.deployment.outputs.page_url}}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+  #    - name: Deploy to GitHub Pages
+   #     id: deployment
+       uses: actions/deploy-pages@v4
 
 
 
