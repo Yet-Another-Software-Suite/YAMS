@@ -14,9 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      actions: read
+      actions: write
       pages: write
-      deployments: read
+      deployments: write
       id-token: write
     env:
       releaseVersion: ${{ inputs.releaseVersion }}
