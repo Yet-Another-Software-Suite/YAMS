@@ -65,12 +65,7 @@ jobs:
         run: find ${{ env.workingDirectory }}/build/maven/ -type f
       - name: Create Vendor JSON Repo PR
         uses: wpilibsuite/vendor-json-repo/.github/actions/add_vendordep@main
-        with:
-          repo: Yet-Another-Software-Suite/vendor-json-repo
-          token: ${{ secrets.PUBLISH_VENDOR_JSON_TOKEN }}
-          vendordep_file: ${{ env.workingDirectory }}/build/maven/yams-${{inputs.releaseVersion}}.json
-          pr_title: "Automatically add YAMS version ${{inputs.releaseVersion}}"
-          pr_branch: "publish_yams_${{inputs.releaseVersion}}"
+
         continue-on-error: true
   #deploy:
     #permissions:
