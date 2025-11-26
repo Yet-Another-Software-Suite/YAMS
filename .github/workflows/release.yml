@@ -10,6 +10,7 @@ jobs:
   build:
     environment: 
       url: ${{steps.deployment.outputs.page_url}}
+      name: github-pages
     runs-on: ubuntu-latest
     permissions:
       contents: write
