@@ -23,6 +23,9 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 public class PivotConfig
 {
 
+  private Boolean forceSim = false;
+
+
   /**
    * {@link SmartMotorController} for the {@link yams.mechanisms.positional.Pivot}
    */
@@ -124,6 +127,12 @@ public class PivotConfig
   {
     this.telemetryName = Optional.ofNullable(telemetryName);
     this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
+    return this;
+  }
+
+
+  public PivotConfig withForceSim(boolean forceSim){
+    this.forceSim=forceSim;
     return this;
   }
 

@@ -25,6 +25,9 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 public class FlyWheelConfig
 {
 
+  private Boolean forceSim = false;
+
+
   /**
    * {@link SmartMotorController} for the {@link FlyWheel}
    */
@@ -158,6 +161,12 @@ public class FlyWheelConfig
   {
     this.useSpeedometer = true;
     this.speedometerMaxVelocity = Optional.ofNullable(maxVelocity);
+    return this;
+  }
+
+
+  public FlyWheelConfig withForceSim(boolean forceSim){
+    this.forceSim=forceSim;
     return this;
   }
 

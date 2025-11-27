@@ -27,6 +27,10 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 public class DifferentialMechanismConfig
 {
 
+
+  private Boolean forceSim = false;
+
+
   /**
    * {@link SmartMotorController} for the {@link DifferentialMechanism}
    */
@@ -66,6 +70,7 @@ public class DifferentialMechanismConfig
    * Starting twist angle for the {@link DifferentialMechanism}.
    */
   private       Optional<Angle>              startingTwistAngle      = Optional.empty();
+
   /**
    * Starting tilt angle for the {@link DifferentialMechanism}.
    */
@@ -124,6 +129,12 @@ public class DifferentialMechanismConfig
   public Angle getTiltAngle(Angle leftMechPos, Angle rightMechPos)
   {
     return leftMechPos.plus(rightMechPos).div(2);
+  }
+
+
+  public DifferentialMechanismConfig withForceSim(boolean forceSim){
+    this.forceSim=forceSim;
+    return this;
   }
 
   /**
