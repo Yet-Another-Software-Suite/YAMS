@@ -26,7 +26,7 @@ jobs:
       
     
     steps:
-      - run: git config --global user.name "thenetworkgrinch" && git config --global user.email "thenetworkgrinch@noreply.users.github.com"
+      - run: git config --global user.name "1799Printer" && git config --global user.email "FRC1799Printer@gmail.com"
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v3
         with:
