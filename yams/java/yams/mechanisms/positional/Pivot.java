@@ -79,7 +79,7 @@ public class Pivot extends SmartPositionalMechanism
     }
     config.applyConfig();
 
-    if (RobotBase.isSimulation())
+    if (RobotBase.isSimulation()||config.getForceSim())
     {
       SmartMotorController smc = config.getMotor();
       if (config.getLowerHardLimit().isEmpty())

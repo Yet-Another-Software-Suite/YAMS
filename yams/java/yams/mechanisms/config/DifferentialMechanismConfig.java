@@ -137,6 +137,10 @@ public class DifferentialMechanismConfig
     return this;
   }
 
+  public boolean getForceSim(){
+    return forceSim;
+  }
+
   /**
    * The left {@link SmartMotorController} mechanism position.
    *

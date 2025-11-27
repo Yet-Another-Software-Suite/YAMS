@@ -134,7 +134,7 @@ public class DifferentialMechanism extends SmartPositionalMechanism
       m_telemetry.setupTelemetry(getName() + "/right", m_rightSMC);
     });
 
-    if (RobotBase.isSimulation())
+    if (RobotBase.isSimulation()||m_config.getForceSim())
     {
       var startingtilt  = m_config.getStartingTiltAngle().get();
       var startingtwist = m_config.getStartingTwistAngle().get();

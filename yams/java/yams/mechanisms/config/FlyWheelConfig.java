@@ -170,6 +170,10 @@ public class FlyWheelConfig
     return this;
   }
 
+  public boolean getForceSim(){
+    return forceSim;
+  }
+
   /**
    * Enables the use of the speedometer simulation for the shooter.
    * <p>

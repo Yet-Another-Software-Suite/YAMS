@@ -270,6 +270,10 @@ public class ArmConfig
     return length;
   }
 
+  public boolean getForceSim(){
+    return forceSim;
+  }
+
   /**
    * Get the moment of inertia for the {@link yams.mechanisms.positional.Arm} simulation.
    *

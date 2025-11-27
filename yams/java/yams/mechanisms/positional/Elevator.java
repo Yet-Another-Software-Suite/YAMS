@@ -85,7 +85,7 @@ public class Elevator extends SmartPositionalMechanism
     }
     config.applyConfig();
 
-    if (RobotBase.isSimulation())
+    if (RobotBase.isSimulation()||config.getForceSim())
     {
       SmartMotorController motor = config.getMotor();
       motor.setupSimulation();

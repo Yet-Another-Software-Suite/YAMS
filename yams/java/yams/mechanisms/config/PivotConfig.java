@@ -136,6 +136,10 @@ public class PivotConfig
     return this;
   }
 
+  public boolean getForceSim(){
+    return forceSim;
+  }
+
   /**
    * Configure telemetry for the {@link yams.mechanisms.positional.Pivot} mechanism.
    *

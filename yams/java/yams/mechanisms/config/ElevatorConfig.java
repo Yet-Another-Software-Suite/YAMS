@@ -143,6 +143,10 @@ public class ElevatorConfig
     return this;
   }
 
+  public boolean getForceSim(){
+    return forceSim;
+  }
+
   /**
    * Configure telemetry for the {@link yams.mechanisms.positional.Arm} mechanism.
    *
