@@ -19,6 +19,9 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 public class ElevatorConfig
 {
 
+  private Boolean forceSim = false;
+
+
   /**
    * {@link SmartMotorController} for the {@link yams.mechanisms.positional.Elevator}
    */
@@ -132,6 +135,16 @@ public class ElevatorConfig
     this.telemetryName = Optional.ofNullable(telemetryName);
     this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
     return this;
+  }
+
+
+  public ElevatorConfig withForceSim(boolean forceSim){
+    this.forceSim=forceSim;
+    return this;
+  }
+
+  public boolean getForceSim(){
+    return forceSim;
   }
 
   /**

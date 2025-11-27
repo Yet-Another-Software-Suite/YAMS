@@ -146,7 +146,7 @@ public class DoubleJointedArm extends SmartPositionalMechanism
       m_telemetry.setupTelemetry(getName() + "/upper", m_upperSMC);
     });
 
-    if (RobotBase.isSimulation())
+    if (RobotBase.isSimulation()||m_lowerArmConfig.getForceSim()||m_upperArmConfig.getForceSim())
     {
 
       if (lowerConfig.getLowerHardLimit().isEmpty() || upperConfig.getLowerHardLimit().isEmpty())

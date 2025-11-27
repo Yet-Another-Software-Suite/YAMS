@@ -36,6 +36,10 @@ public class ArmConfig
    * Telemetry verbosity
    */
   private       Optional<TelemetryVerbosity> telemetryVerbosity      = Optional.empty();
+
+
+  private Boolean forceSim = false;
+
   /**
    * Lower Hard Limit for the {@link yams.mechanisms.positional.Arm} to be representing in simulation.
    */
@@ -98,6 +102,11 @@ public class ArmConfig
   {
     motor.getConfig().withMomentOfInertia(MOI);
     this.moi = OptionalDouble.of(MOI);
+    return this;
+  }
+
+  public ArmConfig withForceSim(boolean forceSim){
+    this.forceSim=forceSim;
     return this;
   }
 
@@ -259,6 +268,10 @@ public class ArmConfig
   public Optional<Distance> getLength()
   {
     return length;
+  }
+
+  public boolean getForceSim(){
+    return forceSim;
   }
 
   /**
