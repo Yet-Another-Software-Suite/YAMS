@@ -5,9 +5,9 @@
     "frcYear": "2025",
     "uuid": "a1051e86-a979-4880-a28b-a0d5362d1d96",
     "mavenUrls": [
-        "https://yet-another-software-suite.github.io/YAMS/releases/"
+        "https://FRC-1799.github.io/YAMS/releases/"
     ],
-    "jsonUrl": "https://yet-another-software-suite.github.io/YAMS/yams.json",
+    "jsonUrl": "https://FRC-1799.github.io/YAMS/yams.json",
     "javaDependencies": [
         {
             "groupId": "${groupId}",
