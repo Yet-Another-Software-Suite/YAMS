@@ -24,6 +24,7 @@ import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
@@ -925,6 +926,18 @@ public class SmartMotorControllerConfig
   public SmartMotorControllerConfig withClosedLoopControlPeriod(Time time)
   {
     controlPeriod = Optional.of(time);
+    return this;
+  }
+
+  /**
+   * Modify the period of the PID controller for the motor controller.
+   *
+   * @param time Period of the motor controller PID.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public SmartMotorControllerConfig withClosedLoopControlPeriod(Frequency time)
+  {
+    controlPeriod = Optional.of(time.asPeriod());
     return this;
   }
 

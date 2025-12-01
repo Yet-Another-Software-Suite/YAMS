@@ -156,7 +156,13 @@ public class SwerveDrive
    */
   public Angle getGyroAngle()
   {
-    return RobotBase.isReal() ? m_config.getGyroAngle() : m_simGyroAngle;
+      if (RobotBase.isSimulation()) {
+          if (m_config.getMapleDriveSim().isPresent()) {
+              return m_config.getMapleDriveSim().get().getOdometryEstimatedPose().getRotation().getMeasure();
+          }
+          return m_simGyroAngle;
+      }
+      return m_config.getGyroAngle();
   }
 
   /**
@@ -191,6 +197,10 @@ public class SwerveDrive
                  m_kinematics.toSwerveModuleStates(robotRelativeChassisSpeeds);
     for (int i = 0; i < states.length; i++)
     {
+      // if MapleSim is configured, run the swerve states through it.
+      if (RobotBase.isSimulation() && m_config.getMapleDriveSim().isPresent()) {
+          m_config.getMapleDriveSim().get().runSwerveStates(states);
+      }
       m_modules[i].setSwerveModuleState(states[i]);
     }
     m_desiredModuleStatesPublisher.accept(states);
@@ -215,7 +225,23 @@ public class SwerveDrive
    */
   public Pose2d getPose()
   {
+    if (RobotBase.isSimulation() && m_config.getMapleDriveSim().isPresent()) {
+        return m_config.getMapleDriveSim().get().getOdometryEstimatedPose();
+    }
     return m_poseEstimator.getEstimatedPosition();
+  }
+
+  /**
+   * Gets the actual pose in the {@link org.ironmaple.simulation.SimulatedArena} from MapleSim.
+   *
+   * @return the robot's real pose.
+   */
+  public Pose2d getMapleSimPose()
+  {
+      if (RobotBase.isSimulation()) {
+          return m_config.getMapleDriveSim().get().getActualPoseInSimulationWorld();
+      }
+      throw new IllegalStateException("getMapleSimPose() is only available in simulation.");
   }
 
   /**
@@ -225,7 +251,8 @@ public class SwerveDrive
   public void zeroGyro()
   {
     m_config.withGyroOffset(getGyroAngle().plus(m_config.getGyroOffset()));
-    resetOdometry(new Pose2d(getPose().getTranslation(), new Rotation2d()));
+    // If in sim reset to the simulated drive.
+    resetOdometry(RobotBase.isSimulation() ? getMapleSimPose() : new Pose2d(getPose().getTranslation(), Rotation2d.kZero));
   }
 
   /**
@@ -248,6 +275,10 @@ public class SwerveDrive
    */
   public void resetOdometry(Pose2d pose)
   {
+    if (RobotBase.isSimulation() && m_config.getMapleDriveSim().isPresent()) {
+        m_config.getMapleDriveSim().get().resetOdometry(pose);
+        m_config.getMapleDriveSim().get().setSimulationWorldPose(pose);
+    }
     m_poseEstimator.resetPosition(new Rotation2d(getGyroAngle()), getModulePositions(), pose);
     ChassisSpeeds robotRelativeSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(new ChassisSpeeds(0, 0, 0),
                                                                               new Rotation2d(getGyroAngle()));
@@ -387,6 +418,10 @@ public class SwerveDrive
    */
   public void simIterate()
   {
+    // If MapleSim is configured, update it.
+    if (m_config.getMapleDriveSim().isPresent()) {
+        m_config.getMapleDriveSim().get().periodic();
+    }
     if (!m_simTimer.isRunning())
     {m_simTimer.start();}
     Arrays.stream(m_modules).forEach(SwerveModule::simIterate);
@@ -422,6 +457,10 @@ public class SwerveDrive
    */
   public SwerveModulePosition[] getModulePositions()
   {
+    // If MapleSim is configured, return the simulated positions.
+    if (RobotBase.isSimulation() && m_config.getMapleDriveSim().isPresent()) {
+        return m_config.getMapleDriveSim().get().getLatestModulePositions();
+    }
     return Arrays.stream(m_modules)
                  .map(SwerveModule::getPosition)
                  .toArray(SwerveModulePosition[]::new);
@@ -434,6 +473,10 @@ public class SwerveDrive
    */
   public SwerveModuleState[] getModuleStates()
   {
+    // If MapleSim is configured, return the simulated states.
+    if (RobotBase.isSimulation() && m_config.getMapleDriveSim().isPresent()) {
+        return m_config.getMapleDriveSim().get().getMeasuredStates();
+    }
     return Arrays.stream(m_modules)
                  .map(SwerveModule::getState)
                  .toArray(SwerveModuleState[]::new);

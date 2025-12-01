@@ -144,19 +144,19 @@ public class TalonFXSWrapper extends SmartMotorController
   /**
    * Temperature status
    */
-  private final StatusSignal<Temperature>     m_deviceTemperature;
+  private final StatusSignal<Temperature> m_deviceTemperature;
   /**
    * {@link CANcoder} to use as external feedback sensor.
    */
-  private final Optional<CANcoder>            m_cancoder        = Optional.empty();
+  private       Optional<CANcoder>        m_cancoder = Optional.empty();
   /**
    * {@link CANdi} to use as external feedback sensor.
    */
-  private final Optional<CANdi>               m_candi           = Optional.empty();
+  private       Optional<CANdi>           m_candi    = Optional.empty();
   /**
    * Exponent profile enabled.
    */
-  private       boolean                       expEnabled        = false;
+  private       boolean                   expEnabled = false;
   /**
    * {@link DCMotorSim} for the {@link TalonFXS}.
    */
@@ -700,13 +700,15 @@ public class TalonFXSWrapper extends SmartMotorController
                                     " because an external encoder is used!", false);
       }
       // Set the gear ratio for external encoders.
-      m_talonConfig.ExternalFeedback.RotorToSensorRatio = 1.0;
-//          config.getExternalEncoderGearing().getMechanismToRotorRatio() *
-//          config.getGearing().getMechanismToRotorRatio();
+      m_talonConfig.ExternalFeedback.RotorToSensorRatio = config.getGearing().getRotorToMechanismRatio() *
+                                                          config.getExternalEncoderGearing()
+                                                                .getMechanismToRotorRatio();
+      // config.getExternalEncoderGearing().getMechanismToRotorRatio() *
       m_talonConfig.ExternalFeedback.SensorToMechanismRatio = config.getExternalEncoderGearing()
                                                                     .getMechanismToRotorRatio();
       if (config.getExternalEncoder().get() instanceof CANcoder encoder)
       {
+        m_cancoder = Optional.of((CANcoder) config.getExternalEncoder().get());
         var configurator = encoder.getConfigurator();
         var cfg          = new CANcoderConfiguration();
         configurator.refresh(cfg);
@@ -716,13 +718,7 @@ public class TalonFXSWrapper extends SmartMotorController
                                                 : SensorDirectionValue.CounterClockwise_Positive);
 
         // Configure feedback source for CANCoder
-        if (encoder.getIsProLicensed().getValue())
-        {
-          m_talonConfig.ExternalFeedback.ExternalFeedbackSensorSource = ExternalFeedbackSensorSourceValue.SyncCANcoder;
-        } else
-        {
-          m_talonConfig.ExternalFeedback.ExternalFeedbackSensorSource = ExternalFeedbackSensorSourceValue.RemoteCANcoder;
-        }
+        m_talonConfig.ExternalFeedback.ExternalFeedbackSensorSource = ExternalFeedbackSensorSourceValue.FusedCANcoder;
         // Zero offset
         if (config.getZeroOffset().isPresent())
         {
@@ -739,31 +735,19 @@ public class TalonFXSWrapper extends SmartMotorController
         configurator.apply(cfg);
       } else if (config.getExternalEncoder().get() instanceof CANdi encoder)
       {
+        m_candi = Optional.of((CANdi) config.getExternalEncoder().get());
         var configurator = encoder.getConfigurator();
         var cfg          = new CANdiConfiguration();
         configurator.refresh(cfg);
         m_talonConfig.ExternalFeedback.FeedbackRemoteSensorID = encoder.getDeviceID();
         // Ensure pro uses best option.
-        if (encoder.getIsProLicensed().getValue())
+        if (useCANdiPWM2())
         {
-          if (useCANdiPWM2())
-          {
-            m_talonConfig.ExternalFeedback.ExternalFeedbackSensorSource = ExternalFeedbackSensorSourceValue.SyncCANdiPWM2;
-          }
-          if (useCANdiPWM1())
-          {
-            m_talonConfig.ExternalFeedback.ExternalFeedbackSensorSource = ExternalFeedbackSensorSourceValue.SyncCANdiPWM1;
-          }
-        } else
+          m_talonConfig.ExternalFeedback.ExternalFeedbackSensorSource = ExternalFeedbackSensorSourceValue.FusedCANdiPWM2;
+        }
+        if (useCANdiPWM1())
         {
-          if (useCANdiPWM2())
-          {
-            m_talonConfig.ExternalFeedback.ExternalFeedbackSensorSource = ExternalFeedbackSensorSourceValue.RemoteCANdiPWM2;
-          }
-          if (useCANdiPWM1())
-          {
-            m_talonConfig.ExternalFeedback.ExternalFeedbackSensorSource = ExternalFeedbackSensorSourceValue.RemoteCANdiPWM1;
-          }
+          m_talonConfig.ExternalFeedback.ExternalFeedbackSensorSource = ExternalFeedbackSensorSourceValue.FusedCANdiPWM1;
         }
         if (useCANdiPWM1())
         {
@@ -818,6 +802,7 @@ public class TalonFXSWrapper extends SmartMotorController
                                                              "withExternalEncoderGearing(Rotations.of(1.0))");
       }
 
+      m_talonConfig.ExternalFeedback.ExternalFeedbackSensorSource = ExternalFeedbackSensorSourceValue.Commutation;
       m_talonConfig.ExternalFeedback.RotorToSensorRatio = 1.0;//config.getGearing().getRotorToMechanismRatio();
       m_talonConfig.ExternalFeedback.SensorToMechanismRatio = config.getGearing().getMechanismToRotorRatio();
       // Zero offset.
@@ -889,6 +874,7 @@ public class TalonFXSWrapper extends SmartMotorController
     }
 
     // Unsupported options.
+    // TODO: This isn't really unsupported but needs to be adjusted to 1microsecond since the control loop runs at that speed
     if (config.getClosedLoopControlPeriod().isPresent())
     {
       throw new IllegalArgumentException("[ERROR] ClosedLoopControlPeriod is not supported");
