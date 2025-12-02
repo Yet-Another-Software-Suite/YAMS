@@ -139,16 +139,16 @@ public class ExponentialProfilePIDController
                                                                     MechanismGearing gearing)
   {
     var sysid = LinearSystemId.createSingleJointedArmSystem(motor,
-            moi.in(KilogramSquareMeters),
-            gearing.getMechanismToRotorRatio());
+                                                            moi.in(KilogramSquareMeters),
+                                                            gearing.getMechanismToRotorRatio());
     var A  = sysid.getA(0, 0); // radians
     var B  = sysid.getB(0, 0); // radians
     var kV = RadiansPerSecond.of(-A / B);
     var kA = RadiansPerSecondPerSecond.of(1.0 / B);
 //    return ExponentialProfile.Constraints.fromStateSpace(maxVolts.in(Volts), A, B);
     return ExponentialProfile.Constraints.fromCharacteristics(maxVolts.in(Volts),
-            kV.in(RotationsPerSecond),
-            kA.in(RotationsPerSecondPerSecond));
+                                                              kV.in(RotationsPerSecond),
+                                                              kA.in(RotationsPerSecondPerSecond));
   }
 
   /**
