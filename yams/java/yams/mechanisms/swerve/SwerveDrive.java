@@ -172,16 +172,50 @@ public class SwerveDrive
   public void lockPose()
   {
     // Sets states
-    for (SwerveModule swerveModule : m_modules)
+    SwerveModuleState[] desiredStates = new SwerveModuleState[m_modules.length];
+    for (int i = 0; i < m_modules.length; i++)
     {
-      SwerveModuleState desiredState =
-          new SwerveModuleState(0, swerveModule.getConfig().getLocation().orElseThrow().getAngle());
-      swerveModule.setSwerveModuleState(desiredState);
+      desiredStates[i] =
+          new SwerveModuleState(0, m_modules[i].getConfig().getLocation().orElseThrow().getAngle());
     }
+    setSwerveModuleStates(desiredStates);
 
     // Update kinematics because we are not using setModuleStates
     m_desiredRobotRelativeChassisSpeedsPublisher.accept(new ChassisSpeeds());
-    m_desiredModuleStatesPublisher.accept(m_kinematics.toSwerveModuleStates(new ChassisSpeeds()));
+  }
+
+  /**
+   * Set the {@link SwerveModuleState}s of the swerve drive directly.
+   *
+   * @param states {@link SwerveModuleState}s to use, must be the same count as the swerve drive is configured order is
+   *               Clockwise from FL.
+   */
+  public void setSwerveModuleStates(SwerveModuleState[] states)
+  {
+    for (int i = 0; i < states.length; i++)
+    {
+      // if MapleSim is configured, run the swerve states through it.
+      if (RobotBase.isSimulation() && m_config.getMapleDriveSim().isPresent())
+      {
+        m_config.getMapleDriveSim().get().runSwerveStates(states);
+      }
+      m_modules[i].setSwerveModuleState(states[i]);
+    }
+    m_desiredModuleStatesPublisher.accept(states);
+  }
+
+  /**
+   * Get the {@link SwerveModuleState}s of the swerve drive given a robot relative chassis speed..
+   *
+   * @param robotRelativeChassisSpeeds Robot relative {@link ChassisSpeeds}.
+   * @return {@link SwerveModuleState}s of the swerve drive.
+   */
+  public SwerveModuleState[] getStateFromRobotRelativeChassisSpeeds(ChassisSpeeds robotRelativeChassisSpeeds)
+  {
+    robotRelativeChassisSpeeds = m_config.optimizeRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds);
+    return m_config.getCenterOfRotation().isPresent() ?
+           m_kinematics.toSwerveModuleStates(robotRelativeChassisSpeeds, m_config.getCenterOfRotation().get()) :
+           m_kinematics.toSwerveModuleStates(robotRelativeChassisSpeeds);
   }
 
   /**
@@ -191,19 +225,7 @@ public class SwerveDrive
    */
   public void setRobotRelativeChassisSpeeds(ChassisSpeeds robotRelativeChassisSpeeds)
   {
-    robotRelativeChassisSpeeds = m_config.optimizeRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds);
-    var states = m_config.getCenterOfRotation().isPresent() ?
-                 m_kinematics.toSwerveModuleStates(robotRelativeChassisSpeeds, m_config.getCenterOfRotation().get()) :
-                 m_kinematics.toSwerveModuleStates(robotRelativeChassisSpeeds);
-    for (int i = 0; i < states.length; i++)
-    {
-      // if MapleSim is configured, run the swerve states through it.
-      if (RobotBase.isSimulation() && m_config.getMapleDriveSim().isPresent()) {
-          m_config.getMapleDriveSim().get().runSwerveStates(states);
-      }
-      m_modules[i].setSwerveModuleState(states[i]);
-    }
-    m_desiredModuleStatesPublisher.accept(states);
+    setSwerveModuleStates(getStateFromRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds));
     m_desiredRobotRelativeChassisSpeedsPublisher.accept(robotRelativeChassisSpeeds);
   }
 
