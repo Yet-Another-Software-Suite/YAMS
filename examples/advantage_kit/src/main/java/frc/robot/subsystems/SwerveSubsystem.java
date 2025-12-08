@@ -213,7 +213,7 @@ public class SwerveSubsystem extends SubsystemBase
   public void periodic()
   {
     updateInputs();
-    Logger.processInputs("SwerveInputs", swerveInputs);
+    Logger.processInputs("Swerve", swerveInputs);
     drive.updateTelemetry();
     field.setRobotPose(getPose());
   }

@@ -69,8 +69,8 @@ public class ElevatorSubsystem extends SubsystemBase
   private final Mass             weight         = Pounds.of(16);
   private final DCMotor          motors         = DCMotor.getNEO(1);
   private final MechanismGearing gearing        = new MechanismGearing(GearBox.fromReductionStages(3, 4));
-  private final SparkMax         elevatorMotor  = new SparkMax(2, SparkLowLevel.MotorType.kBrushless);
-  private final SparkMax         elevatorMotor2 = new SparkMax(3, SparkLowLevel.MotorType.kBrushless);
+  private final SparkMax         elevatorMotor  = new SparkMax(30, SparkLowLevel.MotorType.kBrushless);
+  private final SparkMax         elevatorMotor2 = new SparkMax(31, SparkLowLevel.MotorType.kBrushless);
 
   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
@@ -132,13 +132,13 @@ public class ElevatorSubsystem extends SubsystemBase
 
   public Command elevCmd(double dutycycle)
   {
-    Logger.recordOutput("ElevatorDutyCycle", dutycycle);
+    Logger.recordOutput("Elevator/DutyCycle", dutycycle);
     return m_elevator.set(dutycycle);
   }
 
   public Command setHeight(Distance height)
   {
-    Logger.recordOutput("ElevatorSetpoint", height);
+    Logger.recordOutput("Elevator/Setpoint", height);
     return m_elevator.setHeight(height);
   }
 
