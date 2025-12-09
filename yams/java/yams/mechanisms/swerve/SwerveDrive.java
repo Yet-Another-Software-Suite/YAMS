@@ -105,9 +105,7 @@ public class SwerveDrive
   {
     m_config = config;
     m_modules = config.getModules();
-    m_kinematics = new SwerveDriveKinematics(Arrays.stream(m_modules)
-                                                   .map(module -> module.getConfig().getLocation().orElseThrow())
-                                                   .toArray(Translation2d[]::new));
+    m_kinematics = getKinematics();
     m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics,
                                                    new Rotation2d(getGyroAngle()),
                                                    getModulePositions(),
@@ -144,6 +142,7 @@ public class SwerveDrive
    * @param robotRelativeChassisSpeeds {@link Supplier<ChassisSpeeds>} for the robot relative chassis speeds. Could also
    *                                   use {@link yams.mechanisms.swerve.utility.SwerveInputStream}
    * @return {@link RunCommand} to drive the swerve drive.
+   * @implNote Not compatible with AdvantageKit
    */
   public Command drive(Supplier<ChassisSpeeds> robotRelativeChassisSpeeds)
   {
@@ -156,18 +155,21 @@ public class SwerveDrive
    */
   public Angle getGyroAngle()
   {
-      if (RobotBase.isSimulation()) {
-          if (m_config.getMapleDriveSim().isPresent()) {
-              return m_config.getMapleDriveSim().get().getOdometryEstimatedPose().getRotation().getMeasure();
-          }
-          return m_simGyroAngle;
+    if (RobotBase.isSimulation())
+    {
+      if (m_config.getMapleDriveSim().isPresent())
+      {
+        return m_config.getMapleDriveSim().get().getOdometryEstimatedPose().getRotation().getMeasure();
       }
-      return m_config.getGyroAngle();
+      return m_simGyroAngle;
+    }
+    return m_config.getGyroAngle();
   }
 
   /**
    * Point all modules toward the robot center, thus making the robot very difficult to move. Forcing the robot to keep
    * the current pose.
+   * @implNote Not compatible with AdvantageKit
    */
   public void lockPose()
   {
@@ -189,6 +191,7 @@ public class SwerveDrive
    *
    * @param states {@link SwerveModuleState}s to use, must be the same count as the swerve drive is configured order is
    *               Clockwise from FL.
+   * @implNote Not compatible with AdvantageKit if MapleSim is defined.
    */
   public void setSwerveModuleStates(SwerveModuleState[] states)
   {
@@ -247,34 +250,51 @@ public class SwerveDrive
    */
   public Pose2d getPose()
   {
-    if (RobotBase.isSimulation() && m_config.getMapleDriveSim().isPresent()) {
-        return m_config.getMapleDriveSim().get().getOdometryEstimatedPose();
+    if (RobotBase.isSimulation() && m_config.getMapleDriveSim().isPresent())
+    {
+      return m_config.getMapleDriveSim().get().getOdometryEstimatedPose();
     }
     return m_poseEstimator.getEstimatedPosition();
+  }
+
+  /**
+   * Create the {@link SwerveDriveKinematics} so you can recreate a new {@link SwerveDrivePoseEstimator}.
+   *
+   * @return {@link SwerveDriveKinematics}
+   */
+  public SwerveDriveKinematics getKinematics()
+  {
+    return new SwerveDriveKinematics(Arrays.stream(m_modules)
+                                           .map(module -> module.getConfig().getLocation().orElseThrow())
+                                           .toArray(Translation2d[]::new));
   }
 
   /**
    * Gets the actual pose in the {@link org.ironmaple.simulation.SimulatedArena} from MapleSim.
    *
    * @return the robot's real pose.
+   * @implNote Not compatible with AdvantageKit
    */
   public Pose2d getMapleSimPose()
   {
-      if (RobotBase.isSimulation()) {
-          return m_config.getMapleDriveSim().get().getActualPoseInSimulationWorld();
-      }
-      throw new IllegalStateException("getMapleSimPose() is only available in simulation.");
+    if (RobotBase.isSimulation())
+    {
+      return m_config.getMapleDriveSim().get().getActualPoseInSimulationWorld();
+    }
+    throw new IllegalStateException("getMapleSimPose() is only available in simulation.");
   }
 
   /**
    * Resets the gyro angle to zero and resets odometry to the same position, but facing toward 0 (red alliance
    * station).
+   * @implNote Not compatible with AdvantageKit
    */
   public void zeroGyro()
   {
     m_config.withGyroOffset(getGyroAngle().plus(m_config.getGyroOffset()));
     // If in sim reset to the simulated drive.
-    resetOdometry(RobotBase.isSimulation() ? getMapleSimPose() : new Pose2d(getPose().getTranslation(), Rotation2d.kZero));
+    resetOdometry(
+        RobotBase.isSimulation() ? getMapleSimPose() : new Pose2d(getPose().getTranslation(), Rotation2d.kZero));
   }
 
   /**
@@ -297,9 +317,10 @@ public class SwerveDrive
    */
   public void resetOdometry(Pose2d pose)
   {
-    if (RobotBase.isSimulation() && m_config.getMapleDriveSim().isPresent()) {
-        m_config.getMapleDriveSim().get().resetOdometry(pose);
-        m_config.getMapleDriveSim().get().setSimulationWorldPose(pose);
+    if (RobotBase.isSimulation() && m_config.getMapleDriveSim().isPresent())
+    {
+      m_config.getMapleDriveSim().get().resetOdometry(pose);
+      m_config.getMapleDriveSim().get().setSimulationWorldPose(pose);
     }
     m_poseEstimator.resetPosition(new Rotation2d(getGyroAngle()), getModulePositions(), pose);
     ChassisSpeeds robotRelativeSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(new ChassisSpeeds(0, 0, 0),
@@ -350,6 +371,7 @@ public class SwerveDrive
    *
    * @param pose {@link Pose2d} to drive the robot to. Field relative, blue-origin where 0deg is facing towards RED
    * @return {@link Command} to drive the robot to the given pose.
+   * @implNote Not compatible with AdvantageKit
    */
   public Command driveToPose(Pose2d pose)
   {
@@ -441,8 +463,9 @@ public class SwerveDrive
   public void simIterate()
   {
     // If MapleSim is configured, update it.
-    if (m_config.getMapleDriveSim().isPresent()) {
-        m_config.getMapleDriveSim().get().periodic();
+    if (m_config.getMapleDriveSim().isPresent())
+    {
+      m_config.getMapleDriveSim().get().periodic();
     }
     if (!m_simTimer.isRunning())
     {m_simTimer.start();}
@@ -480,8 +503,9 @@ public class SwerveDrive
   public SwerveModulePosition[] getModulePositions()
   {
     // If MapleSim is configured, return the simulated positions.
-    if (RobotBase.isSimulation() && m_config.getMapleDriveSim().isPresent()) {
-        return m_config.getMapleDriveSim().get().getLatestModulePositions();
+    if (RobotBase.isSimulation() && m_config.getMapleDriveSim().isPresent())
+    {
+      return m_config.getMapleDriveSim().get().getLatestModulePositions();
     }
     return Arrays.stream(m_modules)
                  .map(SwerveModule::getPosition)
@@ -496,8 +520,9 @@ public class SwerveDrive
   public SwerveModuleState[] getModuleStates()
   {
     // If MapleSim is configured, return the simulated states.
-    if (RobotBase.isSimulation() && m_config.getMapleDriveSim().isPresent()) {
-        return m_config.getMapleDriveSim().get().getMeasuredStates();
+    if (RobotBase.isSimulation() && m_config.getMapleDriveSim().isPresent())
+    {
+      return m_config.getMapleDriveSim().get().getMeasuredStates();
     }
     return Arrays.stream(m_modules)
                  .map(SwerveModule::getState)
