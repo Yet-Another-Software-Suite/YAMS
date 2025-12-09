@@ -443,11 +443,19 @@ public class SwerveDrive
   }
 
   /**
-   * Update the telemetry of the drive.
+   * Update the {@link SwerveDrivePoseEstimator} with the current gyro angle and {@link SwerveModulePosition}
+   */
+  private void updatePoseEstimator()
+  {
+    m_poseEstimator.update(new Rotation2d(getGyroAngle()), getModulePositions());
+  }
+
+  /**
+   * Update the telemetry and {@link SwerveDrivePoseEstimator} of the drive.
    */
   public void updateTelemetry()
   {
-    m_poseEstimator.update(new Rotation2d(getGyroAngle()), getModulePositions());
+    updatePoseEstimator();
     m_gyroPublisher.accept(getGyroAngle().in(Degrees));
     m_currentModuleStatesPublisher.accept(getModuleStates());
     m_posePublisher.accept(getPose());

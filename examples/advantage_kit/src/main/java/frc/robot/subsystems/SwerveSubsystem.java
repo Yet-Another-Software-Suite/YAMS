@@ -203,6 +203,8 @@ public class SwerveSubsystem extends SubsystemBase
   public Command setRobotRelativeChassisSpeeds(ChassisSpeeds speeds)
   {
     return run(() -> {
+      Logger.recordOutput("Swerve/DesiredChassisSpeeds", speeds);
+      Logger.recordOutput("Swerve/DesiredOptimizedChassisSpeeds", config.optimizeRobotRelativeChassisSpeeds(speeds));
       SwerveModuleState[] states = drive.getStateFromRobotRelativeChassisSpeeds(speeds);
       Logger.recordOutput("Swerve/DesiredStates", states);
       drive.setSwerveModuleStates(states);
@@ -238,6 +240,9 @@ public class SwerveSubsystem extends SubsystemBase
   public Command setRobotRelativeChassisSpeeds(Supplier<ChassisSpeeds> speedsSupplier)
   {
     return run(() -> {
+      Logger.recordOutput("Swerve/DesiredChassisSpeeds", speedsSupplier.get());
+      Logger.recordOutput("Swerve/DesiredOptimizedChassisSpeeds",
+                          config.optimizeRobotRelativeChassisSpeeds(speedsSupplier.get()));
       SwerveModuleState[] states = drive.getStateFromRobotRelativeChassisSpeeds(speedsSupplier.get());
       Logger.recordOutput("Swerve/DesiredStates", states);
       drive.setSwerveModuleStates(states);
@@ -246,7 +251,27 @@ public class SwerveSubsystem extends SubsystemBase
 
   public Command lock()
   {
-    return run(drive::lockPose);
+    return run(() -> {
+      ChassisSpeeds speeds = new ChassisSpeeds();
+      Logger.recordOutput("Swerve/DesiredChassisSpeeds", speeds);
+      Logger.recordOutput("Swerve/DesiredOptimizedChassisSpeeds", speeds);
+      // Sets states
+      SwerveModule[]      modules       = config.getModules();
+      SwerveModuleState[] desiredStates = new SwerveModuleState[modules.length];
+      for (int i = 0; i < modules.length; i++)
+      {
+        desiredStates[i] =
+            new SwerveModuleState(0, modules[i].getConfig().getLocation().orElseThrow().getAngle());
+      }
+      Logger.recordOutput("Swerve/DesiredStates", desiredStates);
+      drive.setSwerveModuleStates(desiredStates);
+    });
+  }
+
+  public void resetOdometry(Pose2d pose)
+  {
+    drive.resetOdometry(pose);
+    visionPoseEstimator.resetPose(pose);
   }
 
   public Pose2d getPose()
@@ -262,12 +287,13 @@ public class SwerveSubsystem extends SubsystemBase
   @Override
   public void periodic()
   {
+    drive.updateTelemetry(); // Updates the pose estimator, must be called before processInputs
     updateInputs();
     Logger.processInputs("Swerve", swerveInputs);
-    drive.updateTelemetry();
     field.setRobotPose(getPose());
     visionPoseEstimator.update(getGyroAngle(), swerveInputs.positions);
     field.getObject("VisionPose").setPose(visionPoseEstimator.getEstimatedPosition());
+    Logger.recordOutput("Swerve/VisionPose", visionPoseEstimator.getEstimatedPosition());
     // TODO: Add vision stuff here
   }
 
