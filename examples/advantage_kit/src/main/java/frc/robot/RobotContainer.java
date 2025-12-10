@@ -5,11 +5,12 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -34,20 +35,22 @@ public class RobotContainer
     drive.setDefaultCommand(drive.setRobotRelativeChassisSpeeds(drive.getChassisSpeedsSupplier(xboxController::getLeftY,
                                                                                                xboxController::getLeftX,
                                                                                                xboxController::getRightX)));
+    arm.setDefaultCommand(arm.setAngle(Degrees.of(0)));
+    elevator.setDefaultCommand(elevator.setHeight(Meters.of(0)));
+    shooter.setDefaultCommand(shooter.set(0));
     configureBindings();
   }
 
   private void configureBindings()
   {
 
-    xboxController.button(1).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisSpeeds(0.5, 0, 0)));
-    xboxController.button(2).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisSpeeds(-0.5, 0, 0)));
-    xboxController.button(3).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisSpeeds(0, 0.5, 0)));
-    xboxController.button(4).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisSpeeds(0, -0.5, 0)));
-    xboxController.button(5).whileTrue(drive.driveToPose(new Pose2d(Meters.of(3),
+    xboxController.a().whileTrue(arm.setAngle(Degrees.of(20)));
+    xboxController.b().whileTrue(elevator.setHeight(Meters.of(1)));
+    xboxController.x().whileTrue(shooter.setVelocity(RPM.of(3000)));
+    xboxController.leftBumper().whileTrue(drive.driveToPose(new Pose2d(Meters.of(3),
                                                                     Meters.of(3),
                                                                     Rotation2d.fromDegrees(30))));
-    xboxController.button(6).whileTrue(drive.driveToPose(new Pose2d(Meters.of(5),
+    xboxController.rightBumper().whileTrue(drive.driveToPose(new Pose2d(Meters.of(5),
                                                                     Meters.of(6),
                                                                     Rotation2d.fromDegrees(70))));
 
