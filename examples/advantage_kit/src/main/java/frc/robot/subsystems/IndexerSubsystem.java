@@ -92,7 +92,7 @@ public class IndexerSubsystem extends SubsystemBase
     return run(() -> {
       Logger.recordOutput("Indexer/Voltage", volts);
       motor.setVoltage(volts);
-    });
+    }).withName("IndexerSetVoltage");
   }
 
   /**
@@ -106,7 +106,7 @@ public class IndexerSubsystem extends SubsystemBase
     return run(() -> {
       Logger.recordOutput("Indexer/DutyCycle", dutyCycle);
       motor.setDutyCycle(dutyCycle);
-    });
+    }).withName("IndexerSetDutyCycle");
   }
 
   /**
@@ -120,7 +120,7 @@ public class IndexerSubsystem extends SubsystemBase
     return run(() -> {
       Logger.recordOutput("Indexer/DutyCycle", dutyCycle.get());
       motor.setDutyCycle(dutyCycle.get());
-    });
+    }).withName("IndexerSetDutyCycleSupplier");
   }
 
   @Override

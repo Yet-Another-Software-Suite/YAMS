@@ -30,7 +30,6 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -208,15 +207,15 @@ public class SwerveSubsystem extends SubsystemBase
       SwerveModuleState[] states = drive.getStateFromRobotRelativeChassisSpeeds(speeds);
       Logger.recordOutput("Swerve/DesiredStates", states);
       drive.setSwerveModuleStates(states);
-    });
+    }).withName("Set Robot Relative Chassis Speeds");
   }
 
   public Command driveToPose(Pose2d pose)
   {
-    return Commands.runOnce(() -> {
+    return startRun(() -> {
       drive.resetTranslationPID();
       drive.resetAzimuthPID();
-    }).andThen(run(() -> {
+    }, () -> {
       var azimuthPID        = config.getRotationPID();
       var translationPID    = config.getTranslationPID();
       var distance          = drive.getDistanceFromPose(pose);
@@ -234,7 +233,7 @@ public class SwerveSubsystem extends SubsystemBase
                                                                               pose.getRotation()
                                                                                   .getRadians())),
                                                                           getGyroAngle()));
-    })).withName("Drive to Pose");
+    }).withName("Drive to Pose");
   }
 
   public Command setRobotRelativeChassisSpeeds(Supplier<ChassisSpeeds> speedsSupplier)
@@ -246,7 +245,7 @@ public class SwerveSubsystem extends SubsystemBase
       SwerveModuleState[] states = drive.getStateFromRobotRelativeChassisSpeeds(speedsSupplier.get());
       Logger.recordOutput("Swerve/DesiredStates", states);
       drive.setSwerveModuleStates(states);
-    });
+    }).withName("Set Robot Relative Chassis Speeds Supplier");
   }
 
   public Command lock()
@@ -265,7 +264,7 @@ public class SwerveSubsystem extends SubsystemBase
       }
       Logger.recordOutput("Swerve/DesiredStates", desiredStates);
       drive.setSwerveModuleStates(desiredStates);
-    });
+    }).withName("Lock");
   }
 
   public void resetOdometry(Pose2d pose)
