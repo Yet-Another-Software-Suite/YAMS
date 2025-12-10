@@ -142,7 +142,7 @@ public class SwerveDrive
    * @param robotRelativeChassisSpeeds {@link Supplier<ChassisSpeeds>} for the robot relative chassis speeds. Could also
    *                                   use {@link yams.mechanisms.swerve.utility.SwerveInputStream}
    * @return {@link RunCommand} to drive the swerve drive.
-   * @apiNote Not compatible with AdvantageKit
+   * @implNote Not compatible with AdvantageKit
    */
   public Command drive(Supplier<ChassisSpeeds> robotRelativeChassisSpeeds)
   {
@@ -169,7 +169,7 @@ public class SwerveDrive
   /**
    * Point all modules toward the robot center, thus making the robot very difficult to move. Forcing the robot to keep
    * the current pose.
-   * @apiNote Not compatible with AdvantageKit
+   * @implNote Not compatible with AdvantageKit
    */
   public void lockPose()
   {
@@ -191,7 +191,7 @@ public class SwerveDrive
    *
    * @param states {@link SwerveModuleState}s to use, must be the same count as the swerve drive is configured order is
    *               Clockwise from FL.
-   * @apiNote Not compatible with AdvantageKit if MapleSim is defined.
+   * @implNote Not compatible with AdvantageKit if MapleSim is defined.
    */
   public void setSwerveModuleStates(SwerveModuleState[] states)
   {
@@ -273,7 +273,7 @@ public class SwerveDrive
    * Gets the actual pose in the {@link org.ironmaple.simulation.SimulatedArena} from MapleSim.
    *
    * @return the robot's real pose.
-   * @apiNote Not compatible with AdvantageKit
+   * @implNote Not compatible with AdvantageKit
    */
   public Pose2d getMapleSimPose()
   {
@@ -287,7 +287,7 @@ public class SwerveDrive
   /**
    * Resets the gyro angle to zero and resets odometry to the same position, but facing toward 0 (red alliance
    * station).
-   * @apiNote Not compatible with AdvantageKit
+   * @implNote Not compatible with AdvantageKit
    */
   public void zeroGyro()
   {
@@ -371,7 +371,7 @@ public class SwerveDrive
    *
    * @param pose {@link Pose2d} to drive the robot to. Field relative, blue-origin where 0deg is facing towards RED
    * @return {@link Command} to drive the robot to the given pose.
-   * @apiNote Not compatible with AdvantageKit
+   * @implNote Not compatible with AdvantageKit
    */
   public Command driveToPose(Pose2d pose)
   {
