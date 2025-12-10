@@ -129,6 +129,11 @@ javadoc {
                 'https://api.ctr-electronics.com/phoenix6/release/java/',
                 'https://api.ctr-electronics.com/phoenix/release/java/',
                 "https://www.kauailabs.com/public_files/navx-mxp/apidocs/java/"
+        tags 'todo:X"',
+            'apiNote:a:"API Note:"',
+            'implSpec:a:"Implementation Requirements:"',
+            'implNote:a:"Implementation Note:"'
+
     }
 }
 ext.getCurrentArch = {
