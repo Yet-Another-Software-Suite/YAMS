@@ -72,7 +72,7 @@ public class IndexerSubsystem extends SubsystemBase
   }
 
   /**
-   * Gets the current velocity of the shooter.
+   * Gets the current velocity of the indexer.
    *
    * @return FlyWheel velocity.
    */
@@ -81,9 +81,22 @@ public class IndexerSubsystem extends SubsystemBase
     return indexerInputs.velocity;
   }
 
+  /**
+   * Set the voltage of the indexer.
+   *
+   * @param volts Voltage to set.
+   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
+   */
+  public Command setVoltage(Voltage volts)
+  {
+    return run(() -> {
+      Logger.recordOutput("Indexer/Voltage", volts);
+      motor.setVoltage(volts);
+    });
+  }
 
   /**
-   * Set the dutycycle of the shooter.
+   * Set the dutycycle of the indexer.
    *
    * @param dutyCycle DutyCycle to set.
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
@@ -96,7 +109,12 @@ public class IndexerSubsystem extends SubsystemBase
     });
   }
 
-
+  /**
+   * DutyCycle supplier controlling the indexer
+   *
+   * @param dutyCycle Dutycyle supplier
+   * @return Command
+   */
   public Command setDutyCycle(Supplier<Double> dutyCycle)
   {
     return run(() -> {
