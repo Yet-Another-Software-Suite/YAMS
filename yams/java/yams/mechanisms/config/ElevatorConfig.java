@@ -45,7 +45,7 @@ public class ElevatorConfig
    */
   private       Optional<Distance>           upperHardLimit          = Optional.empty();
   /**
-   * {@link yams.mechanisms.positional.Elevator} length for simulation.
+   * {@link yams.mechanisms.positional.Elevator} angle for simulation.
    */
   private       Angle                        angle                   = Degrees.of(90);
   /**
@@ -97,9 +97,9 @@ public class ElevatorConfig
   }
 
   /**
-   * Configure the {@link yams.mechanisms.positional.Elevator}s length for simulation.
+   * Configure the {@link yams.mechanisms.positional.Elevator}s angle for simulation.
    *
-   * @param angle Length of the {@link yams.mechanisms.positional.Elevator}.
+   * @param angle Angle of the {@link yams.mechanisms.positional.Elevator}.
    * @return {@link ElevatorConfig} for chaining.
    */
   public ElevatorConfig withAngle(Angle angle)
@@ -227,7 +227,7 @@ public class ElevatorConfig
   }
 
   /**
-   * Get the Length of the {@link yams.mechanisms.positional.Elevator}
+   * Get the Angle of the {@link yams.mechanisms.positional.Elevator}
    *
    * @return {@link Angle} of the Elevator.
    */
