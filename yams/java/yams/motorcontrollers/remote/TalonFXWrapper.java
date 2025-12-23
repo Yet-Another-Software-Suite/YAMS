@@ -92,7 +92,7 @@ public class TalonFXWrapper extends SmartMotorController
    */
   private final VelocityVoltage               m_velocityReq     = new VelocityVoltage(0).withSlot(0);
   /**
-   * Position with trapazoidal profiling request.
+   * Position with trapezoidal profiling request.
    */
   private final MotionMagicVoltage            m_trapPositionReq = new MotionMagicVoltage(0).withSlot(0);
   /**

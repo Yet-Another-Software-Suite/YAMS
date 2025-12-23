@@ -827,28 +827,28 @@ public abstract class SmartMotorController
   public abstract void setEncoderInverted(boolean inverted);
 
   /**
-   * Set the maximum velocity of the trapazoidal profile for the feedback controller.
+   * Set the maximum velocity of the trapezoidal profile for the feedback controller.
    *
    * @param maxVelocity Maximum velocity, will be translated to MetersPerSecond.
    */
   public abstract void setMotionProfileMaxVelocity(LinearVelocity maxVelocity);
 
   /**
-   * Set the maximum acceleration of the trapazoidal profile for the feedback controller.
+   * Set the maximum acceleration of the trapezoidal profile for the feedback controller.
    *
    * @param maxAcceleration Maximum acceleration, will be translated to MetersPerSecondPerSecond.
    */
   public abstract void setMotionProfileMaxAcceleration(LinearAcceleration maxAcceleration);
 
   /**
-   * Set the maximum velocity for the trapazoidal profile for the feedback controller.
+   * Set the maximum velocity for the trapezoidal profile for the feedback controller.
    *
    * @param maxVelocity Maximum velocity, will be translated to RotationsPerSecond.
    */
   public abstract void setMotionProfileMaxVelocity(AngularVelocity maxVelocity);
 
   /**
-   * Set the maximum acceleration for the trapazoidal profile for the feedback controller.
+   * Set the maximum acceleration for the trapezoidal profile for the feedback controller.
    *
    * @param maxAcceleration Maximum acceleration, will be translated to RotationsPerSecondPerSecond.
    */

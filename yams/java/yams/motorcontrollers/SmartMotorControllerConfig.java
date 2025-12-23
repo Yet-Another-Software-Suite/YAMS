@@ -1130,8 +1130,8 @@ public class SmartMotorControllerConfig
    * @param kP              KP scalar for the PID Controller.
    * @param kI              KI scalar for the PID Controller.
    * @param kD              KD scalar for the PID Controller.
-   * @param maxVelocity     Maximum linear velocity for the Trapazoidal profile.
-   * @param maxAcceleration Maximum linear acceleration for the Trapazoidal profile.
+   * @param maxVelocity     Maximum linear velocity for the Trapezoidal profile.
+   * @param maxAcceleration Maximum linear acceleration for the Trapezoidal profile.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withSimClosedLoopController(double kP, double kI, double kD,
@@ -1256,8 +1256,8 @@ public class SmartMotorControllerConfig
    * @param kP              KP scalar for the PID Controller, the units passed in are in Meters and output is Voltage.
    * @param kI              KI scalar for the PID Controller, the units passed in are in Meters and output is Voltage.
    * @param kD              KD scalar for the PID Controller, the units passed in are in Meters and output is Voltage.
-   * @param maxVelocity     Maximum linear velocity for the Trapazoidal profile.
-   * @param maxAcceleration Maximum linear acceleration for the Trapazoidal profile.
+   * @param maxVelocity     Maximum linear velocity for the Trapezoidal profile.
+   * @param maxAcceleration Maximum linear acceleration for the Trapezoidal profile.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withClosedLoopController(double kP, double kI, double kD,
@@ -1289,8 +1289,8 @@ public class SmartMotorControllerConfig
    *                        Voltage.
    * @param kD              KD scalar for the PID Controller, the units passed in are in Rotations and output is
    *                        Voltage.
-   * @param maxVelocity     Maximum angular velocity for the Trapazoidal profile.
-   * @param maxAcceleration Maximum angular acceleration for the Trapazoidal profile.
+   * @param maxVelocity     Maximum angular velocity for the Trapezoidal profile.
+   * @param maxAcceleration Maximum angular acceleration for the Trapezoidal profile.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withClosedLoopController(double kP, double kI, double kD,
