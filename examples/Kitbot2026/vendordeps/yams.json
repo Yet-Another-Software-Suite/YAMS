@@ -1,0 +1,28 @@
+{
+    "fileName": "yams.json",
+    "name": "Yet Another Mechanism System",
+    "version": "2025.12.29",
+    "frcYear": "2025",
+    "uuid": "a1051e86-a979-4880-a28b-a0d5362d1d96",
+    "mavenUrls": [
+        "https://yet-another-software-suite.github.io/YAMS/releases/"
+    ],
+    "jsonUrl": "https://yet-another-software-suite.github.io/YAMS/yams.json",
+    "javaDependencies": [
+        {
+            "groupId": "yams",
+            "artifactId": "YAMS-java",
+            "version": "2025.12.29"
+        }
+    ],
+    "cppDependencies": [],
+    "jniDependencies": [],
+    "requires": [
+        {
+            "uuid": "c39481e8-4a63-4a4c-9df6-48d91e4da37b",
+            "errorMessage": "maple-sim is required for simulation",
+            "offlineFileName": "maple-sim.json",
+            "onlineUrl": "https://shenzhen-robotics-alliance.github.io/maple-sim/vendordep/maple-sim.json"
+        }
+    ]
+}
