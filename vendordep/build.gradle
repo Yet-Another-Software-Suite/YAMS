@@ -133,7 +133,7 @@ javadoc {
             'apiNote:a:API Note:',
             'implSpec:a:Implementation Requirements:',
             'implNote:a:Implementation Note:'
-
+        isFailOnWarning = false
     }
 }
 ext.getCurrentArch = {
