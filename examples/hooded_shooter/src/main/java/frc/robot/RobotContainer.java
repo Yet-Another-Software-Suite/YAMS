@@ -10,9 +10,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 
 public class RobotContainer {
-  public ShooterSubsystem shooter = new ShooterSubsystem(); // holds hood, flywheel and turret
+  public VisionSubsystem vision = new VisionSubsystem();
+  public ShooterSubsystem shooter = new ShooterSubsystem(vision); // holds hood, flywheel and turret
   public CommandXboxController xboxController = new CommandXboxController(0);
 
   public RobotContainer() {
@@ -21,6 +23,8 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
+
+    xboxController.rightBumper().whileTrue(shooter.runShooter()).whileFalse(shooter.stopShooter());
   }
 
   public Command getAutonomousCommand() {
