@@ -126,14 +126,13 @@ javadoc {
         links "https://docs.oracle.com/en/java/javase/$javaVersion/docs/api/",
                 'https://github.wpilib.org/allwpilib/docs/release/java/',
                 'https://codedocs.revrobotics.com/java/',
-                'https://api.ctr-electronics.com/phoenix6/release/java/',
-                'https://api.ctr-electronics.com/phoenix/release/java/',
+                'https://api.ctr-electronics.com/phoenix6/stable/java/',
+                'https://api.ctr-electronics.com/phoenix/stable/java/',
                 "https://www.kauailabs.com/public_files/navx-mxp/apidocs/java/"
         tags 'todo:X"',
             'apiNote:a:API Note:',
             'implSpec:a:Implementation Requirements:',
             'implNote:a:Implementation Note:'
-        isFailOnWarning = false
     }
 }
 ext.getCurrentArch = {

@@ -28,13 +28,31 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 public class YUnits
 {
   // Angular Momentum Units
+  /**
+   * Pounds * Feet/Second
+   */
   public static final LinearMomentumUnit PoundFeetPerSecond = Pound.mult(FeetPerSecond);
+  /**
+   * Pounds * Inches/Second
+   */
   public static final LinearMomentumUnit PoundInchesPerSecond = Pound.mult(InchesPerSecond);
   // Linear Momentum Units
+  /**
+   * Pounds * Feet^2/Second
+   */
   public static final AngularMomentumUnit PoundFeetSquaredPerSecond = PoundFeetPerSecond.mult(Feet);
+  /**
+   * Pounds * Inches^2/Second
+   */
   public static final AngularMomentumUnit PoundInchesSquaredPerSecond = PoundInchesPerSecond.mult(Inches);
   // Moment of Inertia Units
+  /**
+   * Pounds^2 * Inches * Radians/Second
+   */
   public static final MomentOfInertiaUnit PoundSquareFeet = MomentOfInertiaUnit.combine(PoundFeetSquaredPerSecond,RadiansPerSecond);
+  /**
+   * Pounds^2 * Inches *Radians/Second
+   */
   public static final MomentOfInertiaUnit PoundSquareInches = MomentOfInertiaUnit.combine(PoundInchesSquaredPerSecond,RadiansPerSecond);
 
   /**
