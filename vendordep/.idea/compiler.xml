@@ -5,8 +5,8 @@
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/edu.wpi.first.epilogue/epilogue-processor-java/2026.1.1-beta-1/fb15dfaa643caedf2c63e9be5e16b9c5266ac504/epilogue-processor-java-2026.1.1-beta-1.jar" />
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/edu.wpi.first.epilogue/epilogue-runtime-java/2026.1.1-beta-1/6ff33d686582597a947e3e4b4ae94981ced0930/epilogue-runtime-java-2026.1.1-beta-1.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/edu.wpi.first.epilogue/epilogue-processor-java/2026.1.1/42cc93c9a74622d8a8c4f6f1722c4ab4779df9fb/epilogue-processor-java-2026.1.1.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/edu.wpi.first.epilogue/epilogue-runtime-java/2026.1.1/862de5ab03b6cf0bffaa85ffc290656178f55d86/epilogue-runtime-java-2026.1.1.jar" />
         </processorPath>
         <module name="vendordep.main" />
       </profile>
