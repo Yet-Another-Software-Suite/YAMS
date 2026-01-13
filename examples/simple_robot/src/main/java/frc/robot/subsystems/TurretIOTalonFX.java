@@ -42,7 +42,6 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.remote.TalonFXWrapper;
 import yams.telemetry.SmartMotorControllerTelemetryConfig;
 
-/** Hardware-backed turret IO that works for both real and sim (YAMS handles the mode). */
 public class TurretIOTalonFX implements TurretIO {
   private final TalonFX turretMotor;
   private final SmartMotorControllerTelemetryConfig motorTelemetryConfig;
@@ -202,6 +201,7 @@ public class TurretIOTalonFX implements TurretIO {
   }
 
   private void attemptRotorSeedFromCANCoders() {
+    // CANcoder rotations per turret rotation; derived from stage2 ratio and 50T->(27/31T) gear ratio.
     double ratioA = cancoderRatio(SubsystemConstants.TURRET_ABS_GEAR_A_TEETH);
     double ratioB = cancoderRatio(SubsystemConstants.TURRET_ABS_GEAR_B_TEETH);
 
@@ -319,6 +319,8 @@ public class TurretIOTalonFX implements TurretIO {
     cancoderSimB.setVelocity(ratioB * turretVelocityRps);
   }
 
+  // try all feasible wrap counts for encoder A, then pick the turret rotation whose
+  // predicted encoder B value best matches the wrapped value
   private CrtSolution resolveTurretFromSensors(
       double absA,
       double absB,
@@ -330,14 +332,22 @@ public class TurretIOTalonFX implements TurretIO {
     double secondErr = Double.MAX_VALUE;
     double bestRot = Double.NaN;
 
+    // absA is modulo-1; n is the integer wrap count, bound so turretRot stays in [0, max]
+    // Expected loop count is ~= (ratioA * maxTurretRotations + 3). The lower this is, the 
+    // more reasonable the search time will be. For example, if your turret gearbox is 12:50, 10:110,
+    // then you can drive the encoders off the 50t spur with a 27t and 31t gear, which gives you ~ 1.52 rotations
+    // (450 degrees) of absolute coverage, and a maximum of 29 loop iterations.
     int minNA = (int) Math.floor(-absA);
     int maxNA = (int) Math.ceil(ratioA * maxTurretRotations - absA + 1.0);
 
     for (int n = minNA; n <= maxNA; n++) {
+      //"candidate" turret rotation derived from encoder A
       double turretRot = (absA + n) / ratioA;
+      // avoid rejecting edge values due to rounding
       if (turretRot < -1e-6 || turretRot > maxTurretRotations + 1e-6) {
         continue;
       }
+      // predict encoder B for this candiate and score by best modular error
       double predictedB = wrap01(ratioB * turretRot);
       double err = modularError(predictedB, absB);
       if (err < bestErr) {
@@ -349,10 +359,12 @@ public class TurretIOTalonFX implements TurretIO {
       }
     }
 
+    // matchTolerance is in fractional rotations of the encoder gear
     if (!Double.isFinite(bestRot) || bestErr > matchTolerance) {
       return null;
     }
 
+    // if two candidates match nearly equally, treat them as ambiguous
     if (secondErr <= matchTolerance && Math.abs(secondErr - bestErr) < 1e-3) {
       return null;
     }
@@ -374,11 +386,13 @@ public class TurretIOTalonFX implements TurretIO {
   }
 
   private double cancoderRatio(int drivenTeeth) {
+    // ratio = (turret gear/50t gear) * ( 50t gear/encoder gear)
     return SubsystemConstants.TURRET_STAGE2_RATIO
         * (SubsystemConstants.TURRET_STAGE1_GEAR_TEETH / drivenTeeth);
   }
 
   private void logCrtCoverage() {
+    // LCM of the encoder gear teeth give the repeat period of the combined pattern
     double coverageRot =
         lcm(SubsystemConstants.TURRET_ABS_GEAR_A_TEETH, SubsystemConstants.TURRET_ABS_GEAR_B_TEETH)
             / (SubsystemConstants.TURRET_STAGE2_RATIO
@@ -387,6 +401,12 @@ public class TurretIOTalonFX implements TurretIO {
     Logger.recordOutput(
         "Turret/CRT/CoverageSatisfiesRange",
         coverageRot >= SubsystemConstants.TURRET_MAX_ROTATIONS);
+
+    // max amount of loop iterations in resolveTurretFromSensors
+    double ratioA = cancoderRatio(SubsystemConstants.TURRET_ABS_GEAR_A_TEETH);
+    double theoreticalMaxIterations =
+        Math.ceil(ratioA * SubsystemConstants.Turret_MAX_ROTATIONS) + 3.0;
+    Logger.recordOutput("Turret/CRT/TheoreticalMaxIterations", theoreticalMaxIterations);
   }
 
   private static int gcd(int a, int b) {
