@@ -7,13 +7,13 @@ plugins {
   id 'idea'
   id 'edu.wpi.first.wpilib.repositories.WPILibRepositoriesPlugin' version '2025.0'
   id 'edu.wpi.first.NativeUtils' version '2026.0.1'
-  id "edu.wpi.first.GradleRIO" version "2026.1.1-beta-1"
+  id "edu.wpi.first.GradleRIO" version "2026.1.1"
   id 'edu.wpi.first.GradleJni' version '1.1.0'
   id 'edu.wpi.first.GradleVsCode' version '2.1.0'
 }
 
 // WPILib Version
-ext.wpilibVersion = "2026.1.1-beta-1"
+ext.wpilibVersion = "2026.1.1"
 ext.releasePath = "$buildDir/maven"
 ext.pubVersion = System.getenv("releaseVersion") ?: System.getenv("releaseName") ?: "test"
 
@@ -126,14 +126,13 @@ javadoc {
         links "https://docs.oracle.com/en/java/javase/$javaVersion/docs/api/",
                 'https://github.wpilib.org/allwpilib/docs/release/java/',
                 'https://codedocs.revrobotics.com/java/',
-                'https://api.ctr-electronics.com/phoenix6/release/java/',
-                'https://api.ctr-electronics.com/phoenix/release/java/',
+                'https://api.ctr-electronics.com/phoenix6/stable/java/',
+                'https://api.ctr-electronics.com/phoenix/stable/java/',
                 "https://www.kauailabs.com/public_files/navx-mxp/apidocs/java/"
         tags 'todo:X"',
             'apiNote:a:API Note:',
             'implSpec:a:Implementation Requirements:',
             'implNote:a:Implementation Note:'
-
     }
 }
 ext.getCurrentArch = {
