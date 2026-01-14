@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
@@ -28,7 +29,8 @@ public class ShootOnTheMoveCommand extends Command
   /**
    * The velocity scalar is used to compensate for the robot's velocity. This must be tuned and found empircially.
    */
-  private final double velocityScalar = 0.1;
+  private final double velocityScalar    = 0.1;
+  private final Angle  setpointTolerance = Degrees.of(1);
   private final SwerveSubsystem        swerveSubsystem;
   private final SwerveInputStream      inputStream;
   private final Pose2d                 targetPose;
@@ -78,6 +80,7 @@ public class ShootOnTheMoveCommand extends Command
     this.swerveSubsystem = swerveSubsystem;
     this.inputStream = inputStream;
     this.targetPose = targetPose;
+    pidController.setTolerance(setpointTolerance.in(Radians));
     // each subsystem used by the command must be passed into the
     // addRequirements() method (which takes a vararg of Subsystem)
     addRequirements(this.swerveSubsystem);
@@ -96,7 +99,8 @@ public class ShootOnTheMoveCommand extends Command
     var compensatedPose = estimatePose(swerveSubsystem.getPose(),
                                        swerveSubsystem.getFieldOrientedChassisSpeed(),
                                        velocityScalar);
-    var setpoint = getAngleTowardsPose(compensatedPose, targetPose).in(Radians);
+    var setpointAngle = getAngleTowardsPose(compensatedPose, targetPose);
+    var setpoint      = setpointAngle.in(Radians);
     var output = pidController.calculate(compensatedPose.getRotation().getRadians(),
                                          new State(setpoint, 0));
     var feedforwardOutput = feedforward.calculate(pidController.getSetpoint().velocity);
@@ -104,6 +108,10 @@ public class ShootOnTheMoveCommand extends Command
     originalSpeed.omegaRadiansPerSecond = output + feedforwardOutput;
     swerveSubsystem.driveRobotRelative(() -> ChassisSpeeds.fromFieldRelativeSpeeds(originalSpeed,
                                                                                    new Rotation2d(swerveSubsystem.getGyroAngle())));
+    if (pidController.atGoal())
+    {
+      // TODO: Allow firing
+    }
   }
 
   @Override
