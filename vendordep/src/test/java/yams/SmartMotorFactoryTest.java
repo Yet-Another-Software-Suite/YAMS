@@ -93,7 +93,7 @@ public class SmartMotorFactoryTest {
 
     // TODO: Implement the reverse CRT here
 
-    assertEquals(encoder.getAngle(), Degrees.of(258.75));
+    assertEquals(encoder.getAngle(), Rotations.of(.71875));
 
   }
 
