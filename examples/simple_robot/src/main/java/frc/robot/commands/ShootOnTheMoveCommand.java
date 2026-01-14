@@ -25,6 +25,10 @@ import yams.mechanisms.swerve.utility.SwerveInputStream;
 public class ShootOnTheMoveCommand extends Command
 {
 
+  /**
+   * The velocity scalar is used to compensate for the robot's velocity. This must be tuned and found empircially.
+   */
+  private final double velocityScalar = 0.1;
   private final SwerveSubsystem        swerveSubsystem;
   private final SwerveInputStream      inputStream;
   private final Pose2d                 targetPose;
@@ -91,7 +95,7 @@ public class ShootOnTheMoveCommand extends Command
   {
     var compensatedPose = estimatePose(swerveSubsystem.getPose(),
                                        swerveSubsystem.getFieldOrientedChassisSpeed(),
-                                       0.9);
+                                       velocityScalar);
     var setpoint = getAngleTowardsPose(compensatedPose, targetPose).in(Radians);
     var output = pidController.calculate(compensatedPose.getRotation().getRadians(),
                                          new State(setpoint, 0));
