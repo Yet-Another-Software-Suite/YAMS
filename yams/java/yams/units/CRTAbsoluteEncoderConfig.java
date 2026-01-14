@@ -163,7 +163,7 @@ public class CRTAbsoluteEncoderConfig
     var teeth2      = absoluteEncoder2Teeth.orElseThrow();
     var commonGears = Arrays.stream(teeth1).filter(t -> Arrays.stream(teeth2).anyMatch(t2 -> t == t2)).toArray();
     var gearings    = getAbsoluteEncoderStages(commonGears);
-    System.out.println("Common Gearing:");
+    System.out.println("CRT Common Gearing:");
     System.out.println(Arrays.toString(gearings));
     return new MechanismGearing(GearBox.fromStages(gearings));
   }

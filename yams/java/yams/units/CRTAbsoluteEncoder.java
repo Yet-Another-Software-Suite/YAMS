@@ -11,16 +11,40 @@ public class CRTAbsoluteEncoder
 
   private final MechanismGearing commonGearing;
 
-  private final int absoluteEncoder1PrimeGear;
-  private final int absoluteEncoder2PrimeGear;
+  /**
+   * Absolute encoder 1 prime gear teeth.
+   */
+  private final int m1;
+  /**
+   * Absolute encoder 2 prime gear teeth.
+   */
+  private final int m2;
 
+  /**
+   * CRT Config
+   */
   private final CRTAbsoluteEncoderConfig config;
 
   // Precomputed CRT constants
-  private final int M;  // Combined modulus = primeGearTeeth1 * primeGearTeeth2
+  /**
+   * Combined modulus = primeGearTeeth1 * primeGearTeeth2
+   */
+  private final int M;
+  /**
+   * Combined modulus / absolute encoder 1 prime gear teeth
+   */
   private final int M1;
+  /**
+   * Combined modulus / absolute encoder 2 prime gear teeth
+   */
   private final int M2;
+  /**
+   * Inverse modulus of (combined modules / absolute encoder 1 prime gear teeth).
+   */
   private final int invM1;
+  /**
+   * Inverse modulus of (combined modules / absolute encoder 2 prime gear teeth).
+   */
   private final int invM2;
 
   /**
@@ -46,17 +70,22 @@ public class CRTAbsoluteEncoder
   {
     config = cfg;
     var primeGears = cfg.getAbsoluteEncoderPrimeGears();
-    absoluteEncoder1PrimeGear = primeGears.getFirst();
-    absoluteEncoder2PrimeGear = primeGears.getSecond();
+    m1 = primeGears.getFirst();
+    m2 = primeGears.getSecond();
     commonGearing = cfg.getCommonGearing();
 
-    this.M = absoluteEncoder1PrimeGear * absoluteEncoder1PrimeGear;
+    this.M = m1 * m2;
 
-    this.M1 = M / absoluteEncoder1PrimeGear;
-    this.M2 = M / absoluteEncoder2PrimeGear;
+    this.M1 = M / m1;
+    this.M2 = M / m2;
 
-    this.invM1 = modInverse(M1, absoluteEncoder1PrimeGear);
-    this.invM2 = modInverse(M2, absoluteEncoder2PrimeGear);
+//    System.out.println("prime gear1: " + m1);
+//    System.out.println("prime gear2: " + m2);
+//
+//    System.out.println("M1: " + M1);
+//    System.out.println("M2: " + M2);
+    this.invM1 = modInverse(M1, m1);
+    this.invM2 = modInverse(M2, m2);
   }
 
   /**
@@ -68,16 +97,24 @@ public class CRTAbsoluteEncoder
    */
   public Angle getAngle()
   {
-    int r1 = Math.floorMod((int) Math.round(
-        config.getAbsoluteEncoder1Angle().in(Rotations) * absoluteEncoder1PrimeGear), absoluteEncoder1PrimeGear);
-    int r2 = Math.floorMod((int) Math.round(
-        config.getAbsoluteEncoder2Angle().in(Rotations) * absoluteEncoder2PrimeGear), absoluteEncoder2PrimeGear);
+    // Integer tooth indices (CRT domain)
+    int r1 = Math.floorMod((int) Math.floor(config.getAbsoluteEncoder1Angle().in(Rotations) * m1), m1);
+    int r2 = Math.floorMod((int) Math.floor(config.getAbsoluteEncoder2Angle().in(Rotations) * m2), m2);
 
-    int x =
-        (r1 * M1 * invM1 +
-         r2 * M2 * invM2) % M;
+    // Chinese Remainder Theorem
+    int primeGearIndex = Math.floorMod(r1 * M1 * invM1 +
+                                       r2 * M2 * invM2,
+                                       M);
 
-    return Rotations.of(Math.floorMod(x, M)).times(commonGearing.getRotorToMechanismRatio());
+    // Fractional position from one encoder (high resolution)
+    double fractionalPrimeGear = config.getAbsoluteEncoder1Angle().in(Rotations);
+
+    // Combine integer + fractional
+    double primeGearRotations =
+        primeGearIndex + fractionalPrimeGear;
+
+    // Convert to turret rotations
+    return Rotations.of(primeGearRotations * commonGearing.getRotorToMechanismRatio());
   }
 
 }
