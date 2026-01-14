@@ -97,24 +97,26 @@ public class CRTAbsoluteEncoder
    */
   public Angle getAngle()
   {
-    // Integer tooth indices (CRT domain)
-    int r1 = Math.floorMod((int) Math.floor(config.getAbsoluteEncoder1Angle().in(Rotations) * m1), m1);
+    double enc1 = config.getAbsoluteEncoder1Angle().in(Rotations);
+
+// Integer tooth indices
+    int r1 = Math.floorMod((int) Math.floor(enc1 * m1), m1);
     int r2 = Math.floorMod((int) Math.floor(config.getAbsoluteEncoder2Angle().in(Rotations) * m2), m2);
 
-    // Chinese Remainder Theorem
-    int primeGearIndex = Math.floorMod(r1 * M1 * invM1 +
-                                       r2 * M2 * invM2,
-                                       M);
+// CRT
+    int primeGearIndex = Math.floorMod(
+        r1 * M1 * invM1 +
+        r2 * M2 * invM2,
+        M);
 
-    // Fractional position from one encoder (high resolution)
-    double fractionalPrimeGear = config.getAbsoluteEncoder1Angle().in(Rotations);
+// Fractional part *in prime-gear domain*
+    double fractionalPrimeGear = (enc1 * m1 - Math.floor(enc1 * m1)) / m1;
 
-    // Combine integer + fractional
-    double primeGearRotations =
-        primeGearIndex + fractionalPrimeGear;
+// Combine
+    double primeGearRotations = primeGearIndex + fractionalPrimeGear;
 
-    // Convert to turret rotations
     return Rotations.of(primeGearRotations * commonGearing.getRotorToMechanismRatio());
+
   }
 
 }

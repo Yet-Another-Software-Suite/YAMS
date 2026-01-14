@@ -25,12 +25,12 @@ public class ChineseRemainderTheoremTest
 
   private Angle getAbs1()
   {
-    return absoluteEncoder1Reading;
+    return Degrees.of(absoluteEncoder1Reading.in(Degrees) % 360.0);
   }
 
   private Angle getAbs2()
   {
-    return absoluteEncoder2Reading;
+    return Degrees.of(absoluteEncoder2Reading.in(Degrees) % 360.0);
   }
 
   @Test
@@ -74,12 +74,13 @@ public class ChineseRemainderTheoremTest
       var turretAngle = Degrees.of(i / precision);
       absoluteEncoder1Reading = turretAngle.times(absoluteEncoder1Gearing.getMechanismToRotorRatio());
       absoluteEncoder2Reading = turretAngle.times(absoluteEncoder2Gearing.getMechanismToRotorRatio());
-      var testing = turretAngle.isNear(encoder.getAngle(), readingTolerance);
+      var estimatedAngle = encoder.getAngle();
+      var testing = turretAngle.isNear(estimatedAngle, readingTolerance);
       if (!testing)
       {
-        System.out.println("Absolute Encoder Reading: " + absoluteEncoder1Reading + " " + absoluteEncoder2Reading);
+        System.out.println("Absolute Encoder Reading: " + getAbs1() + " " + getAbs2());
         System.out.println("Turret Angle(degrees): " + turretAngle.in(Degrees));
-        System.out.println("CRT Angle(degrees): " + encoder.getAngle().in(Degrees));
+        System.out.println("CRT Angle(degrees): " + estimatedAngle.in(Degrees));
         break;
       }
 //      assertTrue(testing);
