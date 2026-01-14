@@ -107,23 +107,34 @@ public class CRTAbsoluteEncoderConfig
   }
 
   /**
-   * Get the absolute encoder 1 gearing from the turret to the absolute encoder.
+   * Get the absolute encoder gearing from the turret to the absolute encoder.
    *
-   * @return Absolute encoder 1 {@link MechanismGearing}.
+   * @param teeth Teeth, starting from the mechanism to the absolute encoder.
+   * @return Array of stages.
    */
-  public MechanismGearing getAbsoluteEncoder1Gearing()
+  private String[] getAbsoluteEncoderStages(int[] teeth)
   {
-    var teeth = absoluteEncoder1Teeth.get();
-
     // TODO: Have someone check if this is right.
     ArrayList<String> gearings = new ArrayList<>();
     for (int i = 1; i < teeth.length; i++)
     {
       gearings.add(teeth[i] + ":" + teeth[i - 1]);
     }
+    return gearings.toArray(String[]::new);
+  }
+
+  /**
+   * Get the absolute encoder 1 gearing from the turret to the absolute encoder.
+   *
+   * @return Absolute encoder 1 {@link MechanismGearing}.
+   */
+  public MechanismGearing getAbsoluteEncoder1Gearing()
+  {
+    var teeth    = absoluteEncoder1Teeth.orElseThrow();
+    var gearings = getAbsoluteEncoderStages(teeth);
     System.out.println("Absolute Encoder 1 Gearing:");
-    System.out.println(gearings);
-    return new MechanismGearing(GearBox.fromStages(gearings.toArray(String[]::new)));
+    System.out.println(Arrays.toString(gearings));
+    return new MechanismGearing(GearBox.fromStages(gearings));
   }
 
   /**
@@ -133,16 +144,28 @@ public class CRTAbsoluteEncoderConfig
    */
   public MechanismGearing getAbsoluteEncoder2Gearing()
   {
-    var teeth = absoluteEncoder2Teeth.get();
-    // TODO: Have someone check if this is right.
-    ArrayList<String> gearings = new ArrayList<>();
-    for (int i = 1; i < teeth.length; i++)
-    {
-      gearings.add(teeth[i] + ":" + teeth[i - 1]);
-    }
+
+    var teeth    = absoluteEncoder2Teeth.orElseThrow();
+    var gearings = getAbsoluteEncoderStages(teeth);
     System.out.println("Absolute Encoder 2 Gearing:");
-    System.out.println(gearings);
-    return new MechanismGearing(GearBox.fromStages(gearings.toArray(String[]::new)));
+    System.out.println(Arrays.toString(gearings));
+    return new MechanismGearing(GearBox.fromStages(gearings));
+  }
+
+  /**
+   * Get the common gearing between the two absolute encoders.
+   *
+   * @return Common {@link MechanismGearing}.
+   */
+  public MechanismGearing getCommonGearing()
+  {
+    var teeth1      = absoluteEncoder1Teeth.orElseThrow();
+    var teeth2      = absoluteEncoder2Teeth.orElseThrow();
+    var commonGears = Arrays.stream(teeth1).filter(t -> Arrays.stream(teeth2).anyMatch(t2 -> t == t2)).toArray();
+    var gearings    = getAbsoluteEncoderStages(commonGears);
+    System.out.println("Common Gearing:");
+    System.out.println(Arrays.toString(gearings));
+    return new MechanismGearing(GearBox.fromStages(gearings));
   }
 
   /**

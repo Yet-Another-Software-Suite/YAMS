@@ -9,8 +9,7 @@ import yams.gearing.MechanismGearing;
 public class CRTAbsoluteEncoder
 {
 
-  private final MechanismGearing absoluteEncoder1Gearing;
-  private final MechanismGearing absoluteEncoder2Gearing;
+  private final MechanismGearing commonGearing;
 
   private final int absoluteEncoder1PrimeGear;
   private final int absoluteEncoder2PrimeGear;
@@ -24,6 +23,13 @@ public class CRTAbsoluteEncoder
   private final int invM1;
   private final int invM2;
 
+  /**
+   * Invert the modulus operation mathematically.
+   *
+   * @param a   a
+   * @param mod modulus
+   * @return Inverse of a mod modulus.
+   */
   private static int modInverse(int a, int mod)
   {
     return BigInteger.valueOf(a)
@@ -31,14 +37,18 @@ public class CRTAbsoluteEncoder
                      .intValue();
   }
 
+  /**
+   * Construct the Chinese Remainder Theorem Absolute Encoder.
+   *
+   * @param cfg {@link CRTAbsoluteEncoderConfig} with the absolute encoders setup.
+   */
   public CRTAbsoluteEncoder(CRTAbsoluteEncoderConfig cfg)
   {
     config = cfg;
     var primeGears = cfg.getAbsoluteEncoderPrimeGears();
     absoluteEncoder1PrimeGear = primeGears.getFirst();
     absoluteEncoder2PrimeGear = primeGears.getSecond();
-    absoluteEncoder1Gearing = cfg.getAbsoluteEncoder1Gearing();
-    absoluteEncoder2Gearing = cfg.getAbsoluteEncoder2Gearing();
+    commonGearing = cfg.getCommonGearing();
 
     this.M = absoluteEncoder1PrimeGear * absoluteEncoder1PrimeGear;
 
@@ -53,7 +63,8 @@ public class CRTAbsoluteEncoder
    * Get the current angle of the mechanism with the Chinese Remainder Theorem.
    *
    * @return Current angle of the mechanism.
-   * @implNote In the range of (0, absoluteEncoder1PrimeGearTeeth * absoluteEncoder2PrimeGearTeeth)
+   * @implNote Returns the mechanism rotation in the range of (0, absoluteEncoder1PrimeGearTeeth *
+   * absoluteEncoder2PrimeGearTeeth) * rotorToMechanismRatio.
    */
   public Angle getAngle()
   {
@@ -66,7 +77,7 @@ public class CRTAbsoluteEncoder
         (r1 * M1 * invM1 +
          r2 * M2 * invM2) % M;
 
-    return Rotations.of(Math.floorMod(x, M));
+    return Rotations.of(Math.floorMod(x, M)).times(commonGearing.getRotorToMechanismRatio());
   }
 
 }
