@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -128,6 +129,21 @@ public class SwerveSubsystem extends SubsystemBase
   public void simulationPeriodic()
   {
     drive.simIterate();
+  }
+
+  public Pose2d getPose()
+  {
+    return drive.getPose();
+  }
+
+  public ChassisSpeeds getFieldOrientedChassisSpeed()
+  {
+    return drive.getFieldRelativeSpeed();
+  }
+
+  public Angle getGyroAngle()
+  {
+    return drive.getGyroAngle();
   }
 }
 
