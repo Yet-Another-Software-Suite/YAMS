@@ -23,7 +23,7 @@ public class Sprocket
    *
    * @param sprocketReductionStage Sprocket teeth, in the form of "IN:OUT" => IN/OUT
    */
-  public Sprocket(double[] sprocketReductionStage)
+  public Sprocket(double... sprocketReductionStage)
   {
     setupStages(sprocketReductionStage);
   }

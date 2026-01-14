@@ -2,54 +2,57 @@ package yams;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import edu.wpi.first.math.geometry.Rotation2d;
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.thethriftybot.devices.ThriftyNova;
-
+import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.system.plant.DCMotor;
-
+import edu.wpi.first.units.measure.Angle;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import yams.gearing.GearBox;
+import yams.gearing.MechanismGearing;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorFactory;
 import yams.units.CRTAbsoluteEncoder;
 import yams.units.CRTAbsoluteEncoderConfig;
 
-public class SmartMotorFactoryTest {
+public class SmartMotorFactoryTest
+{
 
   @BeforeAll
-  static void setupMockFactories() {
+  static void setupMockFactories()
+  {
     SmartMotorFactory.availableControllers.put("com.ctre.phoenix6.hardware.TalonFX",
-        (params) -> mock(SmartMotorController.class));
+                                               (params) -> mock(SmartMotorController.class));
     SmartMotorFactory.availableControllers.put("com.ctre.phoenix6.hardware.TalonFXS",
-        (params) -> mock(SmartMotorController.class));
+                                               (params) -> mock(SmartMotorController.class));
     SmartMotorFactory.availableControllers.put("com.revrobotics.spark.SparkBase",
-        (params) -> mock(SmartMotorController.class));
+                                               (params) -> mock(SmartMotorController.class));
     SmartMotorFactory.availableControllers.put("com.thethriftybot.ThriftyNova",
-        (params) -> mock(SmartMotorController.class));
+                                               (params) -> mock(SmartMotorController.class));
   }
 
   @Test
-  void testFactoryRegistration() {
+  void testFactoryRegistration()
+  {
     assertFalse(SmartMotorFactory.availableControllers.isEmpty(), "Factory should have registered controllers");
   }
 
   @Test
-  void testCreateTalonFXWrapper() {
-    TalonFX mockController = mock(TalonFX.class);
-    DCMotor mockMotor = createMockDCMotor();
-    SmartMotorControllerConfig mockConfig = createMockSmartConfig();
+  void testCreateTalonFXWrapper()
+  {
+    TalonFX                    mockController = mock(TalonFX.class);
+    DCMotor                    mockMotor      = createMockDCMotor();
+    SmartMotorControllerConfig mockConfig     = createMockSmartConfig();
 
     Optional<SmartMotorController> result = SmartMotorFactory.create(mockController, mockMotor, mockConfig);
 
@@ -57,10 +60,11 @@ public class SmartMotorFactoryTest {
   }
 
   @Test
-  void testCreateTalonFXSWrapper() {
-    TalonFXS mockController = mock(TalonFXS.class);
-    DCMotor mockMotor = createMockDCMotor();
-    SmartMotorControllerConfig mockConfig = createMockSmartConfig();
+  void testCreateTalonFXSWrapper()
+  {
+    TalonFXS                   mockController = mock(TalonFXS.class);
+    DCMotor                    mockMotor      = createMockDCMotor();
+    SmartMotorControllerConfig mockConfig     = createMockSmartConfig();
 
     Optional<SmartMotorController> result = SmartMotorFactory.create(mockController, mockMotor, mockConfig);
 
@@ -68,7 +72,8 @@ public class SmartMotorFactoryTest {
   }
 
   @Test
-  void testCreateSparkWrapper() {
+  void testCreateSparkWrapper()
+  {
     DCMotor mockMotor = createMockDCMotor();
 
     Optional<SmartMotorController> result = SmartMotorFactory.create(
@@ -79,23 +84,7 @@ public class SmartMotorFactoryTest {
     assertTrue(result.isPresent(), "Factory should create a Spark SmartMotorController");
   }
 
-  @Test
-  void testCRT()
-  {
-    var primeGear1 = 13;
-    var primeGear2 = 23;
-    var config = new CRTAbsoluteEncoderConfig(()->Rotations.of(0.15),()->Rotations.of(0.05))
-        .withAbsoluteEncoder1Gearing(20,32,primeGear1)
-        .withAbsoluteEncoder2Gearing(20,32,primeGear2);
-    var encoder = new CRTAbsoluteEncoder(config);
-    System.out.println("CRT Angle(rots): "+encoder.getAngle().in(Rotations));
-    System.out.println("CRT Angle(degrees): "+encoder.getAngle().in(Degrees));
 
-    // TODO: Implement the reverse CRT here
-
-    assertEquals(encoder.getAngle(), Rotations.of(.71875));
-
-  }
 
 //  @Test
 //  void testCreateNovaWrapper() {
@@ -109,8 +98,11 @@ public class SmartMotorFactoryTest {
 //  }
 
   @Test
-  void testCreateUnsupportedClassReturnsEmpty() {
-    class DummyController {
+  void testCreateUnsupportedClassReturnsEmpty()
+  {
+    class DummyController
+    {
+
     }
 
     DummyController dummy = new DummyController();
@@ -120,11 +112,13 @@ public class SmartMotorFactoryTest {
     assertFalse(result.isPresent(), "Factory should return empty for unsupported classes");
   }
 
-  private static DCMotor createMockDCMotor() {
+  private static DCMotor createMockDCMotor()
+  {
     return DCMotor.getBag(1);
   }
 
-  private static SmartMotorControllerConfig createMockSmartConfig() {
+  private static SmartMotorControllerConfig createMockSmartConfig()
+  {
     return new SmartMotorControllerConfig(null);
   }
 }

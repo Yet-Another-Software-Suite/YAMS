@@ -118,7 +118,7 @@ public class CRTAbsoluteEncoderConfig
     ArrayList<String> gearings = new ArrayList<>();
     for (int i = 1; i < teeth.length; i++)
     {
-      gearings.add(teeth[i] + ":" + teeth[i - 1]);
+      gearings.add(teeth[i-1] + ":" + teeth[i]);
     }
     return gearings.toArray(String[]::new);
   }
