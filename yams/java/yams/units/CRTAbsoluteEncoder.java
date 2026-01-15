@@ -1,10 +1,12 @@
 package yams.units;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
+
 import java.math.BigInteger;
+
 import yams.gearing.MechanismGearing;
 
 public class CRTAbsoluteEncoder
@@ -25,33 +27,6 @@ public class CRTAbsoluteEncoder
    * CRT Config
    */
   private final CRTAbsoluteEncoderConfig config;
-
-  static class Bezout {
-    final double u, v;
-    final int gcd;
-    Bezout(double u, double v, int gcd) {
-      this.u = u;
-      this.v = v;
-      this.gcd = gcd;
-    }
-  }
-
-  static Bezout bezout(int a, int b) {
-    int old_r = a, r = b;
-    int old_s = 1, s = 0;
-    int old_t = 0, t = 1;
-
-    while (r != 0) {
-      int q = old_r / r;
-      int tmp;
-
-      tmp = old_r; old_r = r; r = tmp - q * r;
-      tmp = old_s; old_s = s; s = tmp - q * s;
-      tmp = old_t; old_t = t; t = tmp - q * t;
-    }
-
-    return new Bezout(old_s, old_t, old_r);
-  }
 
   /**
    * Invert the modulus operation mathematically.
@@ -81,29 +56,30 @@ public class CRTAbsoluteEncoder
     commonGearing = cfg.getCommonGearing();
   }
 
-  /**
-   * Get the current angle of the mechanism with the Chinese Remainder Theorem.
-   *
-   * @return Current angle of the mechanism.
-   */
-  public Angle getAngle()
-  {
-    // This is still wrong, i have no idea why....
-    double posA = config.getAbsoluteEncoder1Angle().in(Rotations);
-    double posB = config.getAbsoluteEncoder2Angle().in(Rotations);
-
-    double a = posA * m1;
-    double b = posB * m2;
-
-    Bezout bz = bezout(m1, m2);
-
-    double m = (double) m1 * m2 / bz.gcd;
-
-    double x =
-        (a * bz.v * m2 +
-         b * bz.u * m1) / bz.gcd;
-    var turretRotations = Rotations.of(x * commonGearing.getRotorToMechanismRatio());
-    return turretRotations;
-  }
-
+    /**
+     * Get the current angle of the mechanism with the Chinese Remainder Theorem.
+     *
+     * @return Current angle of the mechanism.
+     * @implNote Returns the mechanism rotation in the range of (0, absoluteEncoder1PrimeGearTeeth *
+     * absoluteEncoder2PrimeGearTeeth) * rotorToMechanismRatio.
+     */
+    public Angle getAngle() {
+        double enc1 = config.getAbsoluteEncoder1Angle().in(Rotations) * m1 / 32;
+        double enc2 = config.getAbsoluteEncoder2Angle().in(Rotations) * m2 / 32;
+        System.out.println(enc1 + " " + enc2);
+        System.out.println(Math.abs(enc1 - enc2));
+        double closest1 = enc1, closest2 = enc2;
+        for (int i = 0; i < 10000; i++) {
+            if (MathUtil.isNear(enc1, enc2, 0.0000000000001)) break;
+            if (enc1 < enc2) enc1 += m1 / 32.0;
+            else if (enc2 < enc1) enc2 += m2 / 32.0;
+            if (Math.abs(enc1 - enc2) < Math.abs(closest1 - closest2)) {
+                closest1 = enc1;
+                closest2 = enc2;
+            }
+        }
+        System.out.println(closest1 + " " + closest2);
+        System.out.println(Math.abs(closest1 - closest2));
+        return Rotations.of((closest1 + closest2) / 2 / commonGearing.getMechanismToRotorRatio());
+    }
 }

@@ -17,20 +17,20 @@ public class ChineseRemainderTheoremTest
 
   private Angle  readingTolerance        = Degrees.of(1);
   private int    primeGear1              = 13;
-  private int    primeGear2              = 12;
-  private double precision               = 10;
+  private int    primeGear2              = 23;
+  private double precision               = 10.0;
   private int    maximumTestDegrees      = (int) Rotations.of(520).in(Degrees);
   private Angle  absoluteEncoder1Reading = Degrees.of(0);
   private Angle  absoluteEncoder2Reading = Degrees.of(0);
 
   private Angle getAbs1()
   {
-    return absoluteEncoder1Reading;// Degrees.of(absoluteEncoder1Reading.in(Degrees) % 360.0);
+    return Degrees.of(absoluteEncoder1Reading.in(Degrees) % 360.0);
   }
 
   private Angle getAbs2()
   {
-    return absoluteEncoder2Reading;//Degrees.of(absoluteEncoder2Reading.in(Degrees) % 360.0);
+    return Degrees.of(absoluteEncoder2Reading.in(Degrees) % 360.0);
   }
 
   @Test
@@ -62,12 +62,12 @@ public class ChineseRemainderTheoremTest
   void testCRT()
   {
 
-    var absoluteEncoder1Gearing = new MechanismGearing(GearBox.fromTeeth(primeGear1, 76));
-    var absoluteEncoder2Gearing = new MechanismGearing(GearBox.fromTeeth(primeGear2, 76));
+    var absoluteEncoder1Gearing = new MechanismGearing(GearBox.fromTeeth(primeGear1, 32, 20, 200));
+    var absoluteEncoder2Gearing = new MechanismGearing(GearBox.fromTeeth(primeGear2, 32, 20, 200));
 
     var config = new CRTAbsoluteEncoderConfig(this::getAbs1, this::getAbs2)
-        .withAbsoluteEncoder1Gearing(76, primeGear1)
-        .withAbsoluteEncoder2Gearing(76, primeGear2);
+        .withAbsoluteEncoder1Gearing(200, 20, 32, primeGear1)
+        .withAbsoluteEncoder2Gearing(200, 20, 32, primeGear2);
     var encoder = new CRTAbsoluteEncoder(config);
     for (int i = 0; i < maximumTestDegrees * precision; i++)
     {
