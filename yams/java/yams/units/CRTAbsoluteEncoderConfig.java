@@ -165,7 +165,7 @@ public class CRTAbsoluteEncoderConfig
     var gearings    = getAbsoluteEncoderStages(commonGears);
     System.out.println("CRT Common Gearing:");
     System.out.println(Arrays.toString(gearings));
-    return new MechanismGearing(GearBox.fromStages(gearings));
+    return gearings.length > 2 ? new MechanismGearing(GearBox.fromStages(gearings)) : new MechanismGearing(1.0);
   }
 
   /**

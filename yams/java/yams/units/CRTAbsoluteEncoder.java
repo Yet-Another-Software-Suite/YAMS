@@ -1,5 +1,6 @@
 package yams.units;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;
 
 import edu.wpi.first.units.measure.Angle;
@@ -25,27 +26,32 @@ public class CRTAbsoluteEncoder
    */
   private final CRTAbsoluteEncoderConfig config;
 
-  // Precomputed CRT constants
-  /**
-   * Combined modulus = primeGearTeeth1 * primeGearTeeth2
-   */
-  private final int M;
-  /**
-   * Combined modulus / absolute encoder 1 prime gear teeth
-   */
-  private final int M1;
-  /**
-   * Combined modulus / absolute encoder 2 prime gear teeth
-   */
-  private final int M2;
-  /**
-   * Inverse modulus of (combined modules / absolute encoder 1 prime gear teeth).
-   */
-  private final int invM1;
-  /**
-   * Inverse modulus of (combined modules / absolute encoder 2 prime gear teeth).
-   */
-  private final int invM2;
+  static class Bezout {
+    final double u, v;
+    final int gcd;
+    Bezout(double u, double v, int gcd) {
+      this.u = u;
+      this.v = v;
+      this.gcd = gcd;
+    }
+  }
+
+  static Bezout bezout(int a, int b) {
+    int old_r = a, r = b;
+    int old_s = 1, s = 0;
+    int old_t = 0, t = 1;
+
+    while (r != 0) {
+      int q = old_r / r;
+      int tmp;
+
+      tmp = old_r; old_r = r; r = tmp - q * r;
+      tmp = old_s; old_s = s; s = tmp - q * s;
+      tmp = old_t; old_t = t; t = tmp - q * t;
+    }
+
+    return new Bezout(old_s, old_t, old_r);
+  }
 
   /**
    * Invert the modulus operation mathematically.
@@ -73,50 +79,31 @@ public class CRTAbsoluteEncoder
     m1 = primeGears.getFirst();
     m2 = primeGears.getSecond();
     commonGearing = cfg.getCommonGearing();
-
-    this.M = m1 * m2;
-
-    this.M1 = M / m1;
-    this.M2 = M / m2;
-
-//    System.out.println("prime gear1: " + m1);
-//    System.out.println("prime gear2: " + m2);
-//
-//    System.out.println("M1: " + M1);
-//    System.out.println("M2: " + M2);
-    this.invM1 = modInverse(M1, m1);
-    this.invM2 = modInverse(M2, m2);
   }
 
   /**
    * Get the current angle of the mechanism with the Chinese Remainder Theorem.
    *
    * @return Current angle of the mechanism.
-   * @implNote Returns the mechanism rotation in the range of (0, absoluteEncoder1PrimeGearTeeth *
-   * absoluteEncoder2PrimeGearTeeth) * rotorToMechanismRatio.
    */
   public Angle getAngle()
   {
-    double enc1 = config.getAbsoluteEncoder1Angle().in(Rotations);
+    // This is still wrong, i have no idea why....
+    double posA = config.getAbsoluteEncoder1Angle().in(Rotations);
+    double posB = config.getAbsoluteEncoder2Angle().in(Rotations);
 
-// Integer tooth indices
-    int r1 = Math.floorMod((int) Math.floor(enc1 * m1), m1);
-    int r2 = Math.floorMod((int) Math.floor(config.getAbsoluteEncoder2Angle().in(Rotations) * m2), m2);
+    double a = posA * m1;
+    double b = posB * m2;
 
-// CRT
-    int primeGearIndex = Math.floorMod(
-        r1 * M1 * invM1 +
-        r2 * M2 * invM2,
-        M);
+    Bezout bz = bezout(m1, m2);
 
-// Fractional part *in prime-gear domain*
-    double fractionalPrimeGear = (enc1 * m1 - Math.floor(enc1 * m1)) / m1;
+    double m = (double) m1 * m2 / bz.gcd;
 
-// Combine
-    double primeGearRotations = primeGearIndex + fractionalPrimeGear;
-
-    return Rotations.of(primeGearRotations * commonGearing.getRotorToMechanismRatio());
-
+    double x =
+        (a * bz.v * m2 +
+         b * bz.u * m1) / bz.gcd;
+    var turretRotations = Rotations.of(x * commonGearing.getRotorToMechanismRatio());
+    return turretRotations;
   }
 
 }
