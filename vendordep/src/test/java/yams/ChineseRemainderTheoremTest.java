@@ -12,16 +12,15 @@ import yams.gearing.MechanismGearing;
 import yams.units.CRTAbsoluteEncoder;
 import yams.units.CRTAbsoluteEncoderConfig;
 
-public class ChineseRemainderTheoremTest
-{
+public class ChineseRemainderTheoremTest {
 
-  private Angle  readingTolerance        = Degrees.of(1);
-  private int    primeGear1              = 13;
-  private int    primeGear2              = 23;
-  private double precision               = 10.0;
-  private int    maximumTestDegrees      = (int) Rotations.of(520).in(Degrees);
-  private Angle  absoluteEncoder1Reading = Degrees.of(0);
-  private Angle  absoluteEncoder2Reading = Degrees.of(0);
+    private Angle readingTolerance = Degrees.of(1);
+    private int primeGear1 = 4000;
+    private int primeGear2 = 4001;
+    private double precision = 10.0;
+    private int maximumTestDegrees = (int) Rotations.of(520).in(Degrees);
+    private Angle absoluteEncoder1Reading = Degrees.of(0);
+    private Angle absoluteEncoder2Reading = Degrees.of(0);
 
   private Angle getAbs1()
   {
