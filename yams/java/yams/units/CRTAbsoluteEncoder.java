@@ -96,22 +96,19 @@ public class CRTAbsoluteEncoder {
      * absoluteEncoder2PrimeGearTeeth) * rotorToMechanismRatio.
      */
     public Angle getAngle() {
-        double enc1 = config.getAbsoluteEncoder1Angle().in(Rotations) * m1 / 32;
-        double enc2 = config.getAbsoluteEncoder2Angle().in(Rotations) * m2 / 32;
-        System.out.println(enc1 + " " + enc2);
-        System.out.println(Math.abs(enc1 - enc2));
+        double commonGear = Math.round(config.getAbsoluteEncoder1Gearing().getMechanismToRotorRatio() * m1 / config.getCommonGearing().getMechanismToRotorRatio());
+        double enc1 = config.getAbsoluteEncoder1Angle().in(Rotations) * m1 / commonGear;
+        double enc2 = config.getAbsoluteEncoder2Angle().in(Rotations) * m2 / commonGear;
         double closest1 = enc1, closest2 = enc2;
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 1000; i++) {
             if (MathUtil.isNear(enc1, enc2, 0.0000000000001)) break;
-            if (enc1 < enc2) enc1 += m1 / 32.0;
-            else if (enc2 < enc1) enc2 += m2 / 32.0;
+            if (enc1 < enc2) enc1 += m1 / commonGear;
+            else if (enc2 < enc1) enc2 += m2 / commonGear;
             if (Math.abs(enc1 - enc2) < Math.abs(closest1 - closest2)) {
                 closest1 = enc1;
                 closest2 = enc2;
             }
         }
-        System.out.println(closest1 + " " + closest2);
-        System.out.println(Math.abs(closest1 - closest2));
         return Rotations.of((closest1 + closest2) / 2 / commonGearing.getMechanismToRotorRatio());
     }
 

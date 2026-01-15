@@ -15,9 +15,9 @@ import yams.units.CRTAbsoluteEncoderConfig;
 public class ChineseRemainderTheoremTest {
 
     private Angle readingTolerance = Degrees.of(1);
-    private int primeGear1 = 13;
-    private int primeGear2 = 23;
-    private double precision = 10.0;
+    private int primeGear1 = 4000;
+    private int primeGear2 = 4001;
+    private double precision = 1.0;
     private int maximumTestDegrees = (int) Rotations.of(520).in(Degrees);
     private Angle absoluteEncoder1Reading = Degrees.of(0);
     private Angle absoluteEncoder2Reading = Degrees.of(0);
@@ -64,7 +64,7 @@ public class ChineseRemainderTheoremTest {
                 .withAbsoluteEncoder1Gearing(200, 20, 32, primeGear1)
                 .withAbsoluteEncoder2Gearing(200, 20, 32, primeGear2);
         var encoder = new CRTAbsoluteEncoder(config);
-        for (int i = 3600; i < 10000; i++) {
+        for (int i = 0; i < maximumTestDegrees * precision; i++) {
             var turretAngle = Degrees.of(i / precision);
             absoluteEncoder1Reading = turretAngle.times(absoluteEncoder1Gearing.getMechanismToRotorRatio());
             absoluteEncoder2Reading = turretAngle.times(absoluteEncoder2Gearing.getMechanismToRotorRatio());

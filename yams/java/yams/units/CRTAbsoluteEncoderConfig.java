@@ -132,8 +132,8 @@ public class CRTAbsoluteEncoderConfig
   {
     var teeth    = absoluteEncoder1Teeth.orElseThrow();
     var gearings = getAbsoluteEncoderStages(teeth);
-    System.out.println("Absolute Encoder 1 Gearing:");
-    System.out.println(Arrays.toString(gearings));
+//    System.out.println("Absolute Encoder 1 Gearing:");
+//    System.out.println(Arrays.toString(gearings));
     return new MechanismGearing(GearBox.fromStages(gearings));
   }
 
@@ -147,8 +147,8 @@ public class CRTAbsoluteEncoderConfig
 
     var teeth    = absoluteEncoder2Teeth.orElseThrow();
     var gearings = getAbsoluteEncoderStages(teeth);
-    System.out.println("Absolute Encoder 2 Gearing:");
-    System.out.println(Arrays.toString(gearings));
+//    System.out.println("Absolute Encoder 2 Gearing:");
+//    System.out.println(Arrays.toString(gearings));
     return new MechanismGearing(GearBox.fromStages(gearings));
   }
 
