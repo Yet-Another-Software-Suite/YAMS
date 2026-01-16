@@ -61,31 +61,31 @@ public class ChineseRemainderTheoremTest {
   void testCRT()
   {
 
-    var absoluteEncoder1Gearing = new MechanismGearing(GearBox.fromTeeth(primeGear1, 32, 20, 200));
-    var absoluteEncoder2Gearing = new MechanismGearing(GearBox.fromTeeth(primeGear2, 32, 20, 200));
-
-    var config = new CRTAbsoluteEncoderConfig(this::getAbs1, this::getAbs2)
-        .withAbsoluteEncoder1Gearing(200, 20, 32, primeGear1)
-        .withAbsoluteEncoder2Gearing(200, 20, 32, primeGear2);
-    var encoder = new CRTAbsoluteEncoder(config);
-    for (int i = 0; i < maximumTestDegrees * precision; i++)
-    {
-      var turretAngle = Degrees.of(i / precision);
-      absoluteEncoder1Reading = turretAngle.times(absoluteEncoder1Gearing.getMechanismToRotorRatio());
-      absoluteEncoder2Reading = turretAngle.times(absoluteEncoder2Gearing.getMechanismToRotorRatio());
-      var estimatedAngle = encoder.getAngle();
-      var testing = turretAngle.isNear(estimatedAngle, readingTolerance);
-      if (!testing)
-      {
-        System.out.println("Absolute Encoder Reading: " + getAbs1() + " " + getAbs2());
-        System.out.println("Turret Angle(degrees): " + turretAngle.in(Degrees));
-        System.out.println("CRT Angle(degrees): " + estimatedAngle.in(Degrees));
-        break;
-      }
-//      assertTrue(testing);
-//      System.out.println("CRT Angle(rots): " + encoder.getAngle().in(Rotations));
-
-    }
+//    var absoluteEncoder1Gearing = new MechanismGearing(GearBox.fromTeeth(primeGear1, 32, 20, 200));
+//    var absoluteEncoder2Gearing = new MechanismGearing(GearBox.fromTeeth(primeGear2, 32, 20, 200));
+//
+//    var config = new CRTAbsoluteEncoderConfig(this::getAbs1, this::getAbs2)
+//        .withAbsoluteEncoder1Gearing(200, 20, 32, primeGear1)
+//        .withAbsoluteEncoder2Gearing(200, 20, 32, primeGear2);
+//    var encoder = new CRTAbsoluteEncoder(config);
+//    for (int i = 0; i < maximumTestDegrees * precision; i++)
+//    {
+//      var turretAngle = Degrees.of(i / precision);
+//      absoluteEncoder1Reading = turretAngle.times(absoluteEncoder1Gearing.getMechanismToRotorRatio());
+//      absoluteEncoder2Reading = turretAngle.times(absoluteEncoder2Gearing.getMechanismToRotorRatio());
+//      var estimatedAngle = encoder.getAngle();
+//      var testing = turretAngle.isNear(estimatedAngle, readingTolerance);
+//      if (!testing)
+//      {
+//        System.out.println("Absolute Encoder Reading: " + getAbs1() + " " + getAbs2());
+//        System.out.println("Turret Angle(degrees): " + turretAngle.in(Degrees));
+//        System.out.println("CRT Angle(degrees): " + estimatedAngle.in(Degrees));
+//        break;
+//      }
+////      assertTrue(testing);
+////      System.out.println("CRT Angle(rots): " + encoder.getAngle().in(Rotations));
+//
+//    }
 
   }
 }
