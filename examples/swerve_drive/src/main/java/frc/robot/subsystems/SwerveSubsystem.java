@@ -5,11 +5,13 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.Pigeon2;
-import com.ctre.phoenix6.hardware.TalonFXS;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -33,7 +35,7 @@ import yams.mechanisms.swerve.SwerveModule;
 import yams.mechanisms.swerve.utility.SwerveInputStream;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.remote.TalonFXSWrapper;
+import yams.motorcontrollers.local.SparkWrapper;
 
 public class SwerveSubsystem extends SubsystemBase
 {
@@ -87,7 +89,7 @@ public class SwerveSubsystem extends SubsystemBase
                                                                       .in(RadiansPerSecond));
   }
 
-  public SwerveModule createModule(TalonFXS drive, TalonFXS azimuth, CANcoder absoluteEncoder, String moduleName,
+  public SwerveModule createModule(SparkMax drive, SparkMax azimuth, CANcoder absoluteEncoder, String moduleName,
                                    Translation2d location)
   {
     MechanismGearing driveGearing         = new MechanismGearing(GearBox.fromStages("12:1", "2:1"));
@@ -99,13 +101,13 @@ public class SwerveSubsystem extends SubsystemBase
         .withStatorCurrentLimit(Amps.of(40))
         .withTelemetry("driveMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
     SmartMotorControllerConfig azimuthCfg = new SmartMotorControllerConfig(this)
-        .withClosedLoopController(2, 0, 1)
+        .withClosedLoopController(3, 0, 1)
 //        .withContinuousWrapping(Radians.of(-Math.PI), Radians.of(Math.PI))
         .withGearing(azimuthGearing)
         .withStatorCurrentLimit(Amps.of(20))
         .withTelemetry("angleMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
-    SmartMotorController driveSMC   = new TalonFXSWrapper(drive, DCMotor.getNEO(1), driveCfg);
-    SmartMotorController azimuthSMC = new TalonFXSWrapper(azimuth, DCMotor.getNEO(1), azimuthCfg);
+    SmartMotorController driveSMC   = new SparkWrapper(drive, DCMotor.getNEO(1), driveCfg);
+    SmartMotorController azimuthSMC = new SparkWrapper(azimuth, DCMotor.getNEO(1), azimuthCfg);
     SwerveModuleConfig moduleConfig = new SwerveModuleConfig(driveSMC, azimuthSMC)
         .withAbsoluteEncoder(absoluteEncoder.getAbsolutePosition().asSupplier())
         .withTelemetry(moduleName, SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
@@ -117,23 +119,23 @@ public class SwerveSubsystem extends SubsystemBase
   public SwerveSubsystem()
   {
     Pigeon2 gyro = new Pigeon2(14);
-    var fl = createModule(new TalonFXS(1),
-                          new TalonFXS(2),
+    var fl = createModule(new SparkMax(1, MotorType.kBrushless),
+                          new SparkMax(2, MotorType.kBrushless),
                           new CANcoder(3),
                           "frontleft",
                           new Translation2d(Inches.of(24), Inches.of(24)));
-    var fr = createModule(new TalonFXS(4),
-                          new TalonFXS(5),
+    var fr = createModule(new SparkMax(4, MotorType.kBrushless),
+                          new SparkMax(5, MotorType.kBrushless),
                           new CANcoder(6),
                           "frontright",
                           new Translation2d(Inches.of(24), Inches.of(-24)));
-    var bl = createModule(new TalonFXS(7),
-                          new TalonFXS(8),
+    var bl = createModule(new SparkMax(7, MotorType.kBrushless),
+                          new SparkMax(8, MotorType.kBrushless),
                           new CANcoder(9),
                           "backleft",
                           new Translation2d(Inches.of(-24), Inches.of(24)));
-    var br = createModule(new TalonFXS(10),
-                          new TalonFXS(11),
+    var br = createModule(new SparkMax(10, MotorType.kBrushless),
+                          new SparkMax(11, MotorType.kBrushless),
                           new CANcoder(12),
                           "backright",
                           new Translation2d(Inches.of(-24), Inches.of(-24)));
