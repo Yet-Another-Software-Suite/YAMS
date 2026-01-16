@@ -68,7 +68,7 @@ public class CRTAbsoluteEncoder
         double enc1 = config.getAbsoluteEncoder1Angle().in(Rotations) * m1 / commonGear;
         double enc2 = config.getAbsoluteEncoder2Angle().in(Rotations) * m2 / commonGear;
         double closest1 = enc1, closest2 = enc2;
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 100; i++) {
             if (MathUtil.isNear(enc1, enc2, 0.0000000000001)) break;
             if (enc1 < enc2) enc1 += m1 / commonGear;
             else if (enc2 < enc1) enc2 += m2 / commonGear;
