@@ -1,9 +1,13 @@
 package yams.mechanisms.config;
 
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
@@ -23,51 +27,67 @@ public class ArmConfig
   /**
    * {@link SmartMotorController} for the {@link yams.mechanisms.positional.Arm}
    */
-  private final SmartMotorController         motor;
+  private   Optional<SmartMotorController> motor;
   /**
    * The network root of the mechanism (Optional).
    */
-  protected     Optional<String>             networkTableName        = Optional.empty();
+  protected Optional<String>               networkTableName        = Optional.empty();
   /**
    * Telemetry name.
    */
-  private       Optional<String>             telemetryName           = Optional.empty();
+  private   Optional<String>               telemetryName           = Optional.empty();
   /**
    * Telemetry verbosity
    */
-  private       Optional<TelemetryVerbosity> telemetryVerbosity      = Optional.empty();
 
 
   private Boolean forceSim = false;
 
+  private   Optional<TelemetryVerbosity>   telemetryVerbosity      = Optional.empty();
   /**
    * Lower Hard Limit for the {@link yams.mechanisms.positional.Arm} to be representing in simulation.
    */
-  private       Optional<Angle>              lowerHardLimit          = Optional.empty();
+  private   Optional<Angle>                lowerHardLimit          = Optional.empty();
   /**
    * Upper hard limit for the {@link yams.mechanisms.positional.Arm} representing in simulation.
    */
-  private       Optional<Angle>              upperHardLimit          = Optional.empty();
+  private   Optional<Angle>                upperHardLimit          = Optional.empty();
   /**
    * {@link yams.mechanisms.positional.Arm} length for simulation.
    */
-  private       Optional<Distance>           length                  = Optional.empty();
+  private   Optional<Distance>             length                  = Optional.empty();
   /**
    * {@link yams.mechanisms.positional.Arm} mass for simulation.
    */
-  private       Optional<Mass>               weight                  = Optional.empty();
+  private   Optional<Mass>                 weight                  = Optional.empty();
   /**
    * {@link yams.mechanisms.positional.Arm} MOI from CAD software. If not given estimated with length and weight.
    */
-  private       OptionalDouble               moi                     = OptionalDouble.empty();
+  private   OptionalDouble                 moi                     = OptionalDouble.empty();
   /**
    * Sim color value
    */
-  private       Color8Bit                    simColor                = new Color8Bit(Color.kOrange);
+  private   Color8Bit                      simColor                = new Color8Bit(Color.kOrange);
   /**
    * Mechanism position configuration for the {@link yams.mechanisms.positional.Pivot} (Optional).
    */
-  private       MechanismPositionConfig      mechanismPositionConfig = new MechanismPositionConfig();
+  private   MechanismPositionConfig        mechanismPositionConfig = new MechanismPositionConfig();
+  /**
+   * Horizontal zero of the arm's absolute encoder.
+   */
+  private   Optional<Angle>                horizantalZero          = Optional.empty();
+  /**
+   * Starting position of the arms motor controller encoder.
+   */
+  private   Optional<Angle>                startingPosition        = Optional.empty();
+  /**
+   * Lower and upper soft limits of the arms closed loop controller. (LowerLimit, UpperLimit)
+   */
+  private   Optional<Pair<Angle, Angle>>   softLimits              = Optional.empty();
+  /**
+   * Wrapping angles for the Arm applied to the motor controllers closed loop controller. (Min, Max)
+   */
+  private   Optional<Pair<Angle, Angle>>   continuousWrapping      = Optional.empty();
 
   /**
    * Arm Configuration class
@@ -76,8 +96,72 @@ public class ArmConfig
    */
   public ArmConfig(SmartMotorController motorController)
   {
-    motor = motorController;
+    motor = Optional.of(motorController);
   }
+
+  /**
+   * Arm configuration class. Required
+   */
+  public ArmConfig()
+  {}
+
+  /**
+   * Copy constructor.
+   *
+   * @param cfg Configuration to copy from.
+   */
+  private ArmConfig(ArmConfig cfg)
+  {
+    motor = cfg.motor;
+    networkTableName = cfg.networkTableName;
+    telemetryName = cfg.telemetryName;
+    telemetryVerbosity = cfg.telemetryVerbosity;
+    lowerHardLimit = cfg.lowerHardLimit;
+    upperHardLimit = cfg.upperHardLimit;
+    length = cfg.length;
+    weight = cfg.weight;
+    moi = cfg.moi;
+    simColor = cfg.simColor;
+    mechanismPositionConfig = cfg.mechanismPositionConfig;
+    startingPosition = cfg.startingPosition;
+    softLimits = cfg.softLimits;
+    continuousWrapping = cfg.continuousWrapping;
+    horizantalZero = cfg.horizantalZero;
+  }
+
+  @Override
+  public ArmConfig clone()
+  {
+    return new ArmConfig(this);
+  }
+
+  /**
+   * Configure the {@link SmartMotorController} for the {@link yams.mechanisms.positional.Arm}
+   *
+   * @param motorController Primary {@link SmartMotorController} for the {@link yams.mechanisms.positional.Arm}
+   * @return {@link ArmConfig} for chaining.
+   */
+  public ArmConfig withSmartMotorController(SmartMotorController motorController)
+  {
+    if (motor.isPresent())
+    {
+      throw new ArmConfigurationException("Arm already has a SmartMotorController!",
+                                          "Cannot set a new one!",
+                                          ".withSmartMotorController(SmartMotorController)");
+    }
+    motor = Optional.of(motorController);
+    moi.ifPresent(moi -> motorController.getConfig().withMomentOfInertia(moi));
+    if (length.isPresent() && weight.isPresent() && moi.isEmpty())
+    {
+      motorController.getConfig().withMomentOfInertia(length.get(), weight.get());
+    }
+    horizantalZero.ifPresent(this::withHorizontalZero);
+    startingPosition.ifPresent(this::withStartingPosition);
+    softLimits.ifPresent(limits -> withSoftLimits(limits.getFirst(), limits.getSecond()));
+    continuousWrapping.ifPresent(wrapping -> withWrapping(wrapping.getFirst(), wrapping.getSecond()));
+    return this;
+  }
+
 
   /**
    * Publish the color in sim as this.
@@ -95,13 +179,29 @@ public class ArmConfig
    * Configure the MOI directly instead of estimating it with the length and mass of the
    * {@link yams.mechanisms.positional.Arm} for simulation.
    *
+   * @param MOI Moment of Inertia of the {@link yams.mechanisms.positional.Arm}. in {@link Units#KilogramSquareMeters}
+   * @return {@link ArmConfig} for chaining.
+   * @implNote Please use {@link #withMOI(MomentOfInertia)} instead. Default unit is KilogramSquareMeters
+   */
+  @Deprecated(since = "2026", forRemoval = true)
+  public ArmConfig withMOI(double MOI)
+  {
+    motor.ifPresent(motor -> motor.getConfig().withMomentOfInertia(KilogramSquareMeters.of(MOI)));
+    this.moi = OptionalDouble.of(MOI);
+    return this;
+  }
+
+  /**
+   * Configure the MOI directly instead of estimating it with the length and mass of the
+   * {@link yams.mechanisms.positional.Arm} for simulation.
+   *
    * @param MOI Moment of Inertia of the {@link yams.mechanisms.positional.Arm}
    * @return {@link ArmConfig} for chaining.
    */
-  public ArmConfig withMOI(double MOI)
+  public ArmConfig withMOI(MomentOfInertia MOI)
   {
-    motor.getConfig().withMomentOfInertia(MOI);
-    this.moi = OptionalDouble.of(MOI);
+    motor.ifPresent(motor -> motor.getConfig().withMomentOfInertia(MOI));
+    this.moi = OptionalDouble.of(MOI.in(KilogramSquareMeters));
     return this;
   }
 
@@ -120,7 +220,7 @@ public class ArmConfig
   {
     if (weight.isPresent() && distance != null)
     {
-      motor.getConfig().withMomentOfInertia(distance, weight.get());
+      motor.ifPresent(motor -> motor.getConfig().withMomentOfInertia(distance, weight.get()));
     }
     this.length = Optional.ofNullable(distance);
     return this;
@@ -136,7 +236,7 @@ public class ArmConfig
   {
     if (length.isPresent() && mass != null)
     {
-      motor.getConfig().withMomentOfInertia(length.get(), mass);
+      motor.ifPresent(motor -> motor.getConfig().withMomentOfInertia(length.get(), mass));
     }
     this.weight = Optional.ofNullable(mass);
     return this;
@@ -174,7 +274,7 @@ public class ArmConfig
   }
 
   /**
-   * Set the elevator mechnism position configuration.
+   * Set the elevator mechanism position configuration.
    *
    * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link yams.mechanisms.positional.Elevator}
    * @return {@link PivotConfig} for chaining
@@ -185,27 +285,30 @@ public class ArmConfig
     return this;
   }
 
+
   /**
-   * Set the horizontal zero of the arm.
+   * Set the horizontal zero of the arms absolute encoder.
    *
    * @param horizontalZero Offset of the arm that will make the arm read 0 when horizontal.
    * @return {@link ArmConfig} for chaining.
    */
   public ArmConfig withHorizontalZero(Angle horizontalZero)
   {
-    motor.getConfig().withExternalEncoderZeroOffset(horizontalZero);
+    this.horizantalZero = Optional.ofNullable(horizontalZero);
+    motor.ifPresent(motor -> motor.getConfig().withExternalEncoderZeroOffset(horizontalZero));
     return this;
   }
 
   /**
-   * Set the arm starting position.
+   * Set the arm starting angle of the motor controller encoder.
    *
    * @param startingPosition Starting position of the arm.
    * @return {@link ArmConfig} for chaining
    */
   public ArmConfig withStartingPosition(Angle startingPosition)
   {
-    motor.getConfig().withStartingPosition(startingPosition);
+    this.startingPosition = Optional.ofNullable(startingPosition);
+    motor.ifPresent(motor -> motor.getConfig().withStartingPosition(startingPosition));
     return this;
   }
 
@@ -218,7 +321,8 @@ public class ArmConfig
    */
   public ArmConfig withSoftLimits(Angle lowerLimit, Angle upperLimit)
   {
-    motor.getConfig().withSoftLimit(lowerLimit, upperLimit);
+    softLimits = Optional.of(Pair.of(lowerLimit, upperLimit));
+    motor.ifPresent(motor -> motor.getConfig().withSoftLimit(lowerLimit, upperLimit));
     return this;
   }
 
@@ -232,7 +336,8 @@ public class ArmConfig
    */
   public ArmConfig withWrapping(Angle min, Angle max)
   {
-    motor.getConfig().withContinuousWrapping(min, max);
+    continuousWrapping = Optional.of(Pair.of(min, max));
+    motor.ifPresent(motor -> motor.getConfig().withContinuousWrapping(min, max));
     return this;
   }
 
@@ -257,7 +362,7 @@ public class ArmConfig
    */
   public boolean applyConfig()
   {
-    return motor.applyConfig(motor.getConfig());
+    return motor.orElseThrow().applyConfig(motor.orElseThrow().getConfig());
   }
 
   /**
@@ -341,7 +446,7 @@ public class ArmConfig
    */
   public Optional<Angle> getStartingAngle()
   {
-    return motor.getConfig().getStartingPosition();
+    return startingPosition;
   }
 
   /**
@@ -351,7 +456,7 @@ public class ArmConfig
    */
   public SmartMotorController getMotor()
   {
-    return motor;
+    return motor.orElseThrow();
   }
 
   /**

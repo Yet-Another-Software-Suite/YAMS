@@ -31,94 +31,134 @@ public class SwerveDriveConfig
   /**
    * {@link SwerveModule}s for the {@link yams.mechanisms.swerve.SwerveDrive}.
    */
-  private final SwerveModule[]                      modules;
+  private SwerveModule[]                      modules;
   /**
    * Telemetry verbosity
    */
-  private       Optional<TelemetryVerbosity>        telemetryVerbosity            = Optional.empty();
+  private Optional<TelemetryVerbosity>        telemetryVerbosity            = Optional.empty();
   /**
    * Gyro supplier.
    */
-  private       Optional<Supplier<Angle>>           gyroSupplier                  = Optional.empty();
+  private Optional<Supplier<Angle>>           gyroSupplier                  = Optional.empty();
   /**
    * Gyro angular velocity supplier.
    */
-  private       Optional<Supplier<AngularVelocity>> gyroAngularVelocitySupplier   = Optional.empty();
+  private Optional<Supplier<AngularVelocity>> gyroAngularVelocitySupplier   = Optional.empty();
   /**
    * Gyro offset.
    */
-  private       Optional<Angle>                     gyroOffset                    = Optional.empty();
+  private Optional<Angle>                     gyroOffset                    = Optional.empty();
   /**
    * Gyro inverted.
    */
-  private       boolean                             gyroInverted                  = false;
+  private boolean                             gyroInverted                  = false;
   /**
    * Starting pose on the field.
    */
-  private       Pose2d                              initialPose                   = new Pose2d();
+  private Pose2d                              initialPose                   = new Pose2d();
   /**
    * Maximum speed of the chassis.
    */
-  private       Optional<LinearVelocity>            maximumChassisLinearVelocity  = Optional.empty();
+  private Optional<LinearVelocity>            maximumChassisLinearVelocity  = Optional.empty();
   /**
    * Maximum angular speed of the chassis.
    */
-  private       Optional<AngularVelocity>           maximumChassisAngularVelocity = Optional.empty();
+  private Optional<AngularVelocity>           maximumChassisAngularVelocity = Optional.empty();
   /**
    * Maximum speed of the modules.
    */
-  private       Optional<LinearVelocity>            maximumModuleLinearVelocity   = Optional.empty();
+  private Optional<LinearVelocity>            maximumModuleLinearVelocity   = Optional.empty();
   /**
    * Discretization time for the pose estimation.
    */
-  private       Optional<Time>                      discretizationSeconds         = Optional.empty();
+  private Optional<Time>                      discretizationSeconds         = Optional.empty();
   /**
    * Angular velocity scale factor.
    */
-  private       OptionalDouble                      angularVelocityScaleFactor    = OptionalDouble.empty();
+  private OptionalDouble                      angularVelocityScaleFactor    = OptionalDouble.empty();
   /**
    * Center of Rotation
    */
-  private       Optional<Translation2d>             centerOfRotation              = Optional.empty();
+  private Optional<Translation2d>             centerOfRotation              = Optional.empty();
   /**
    * Translation PID controller.
    */
-  private       Optional<PIDController>             translationController         = Optional.empty();
+  private Optional<PIDController>             translationController         = Optional.empty();
   /**
    * Rotation PID controller.
    */
-  private       Optional<PIDController>             rotationController            = Optional.empty();
+  private Optional<PIDController>             rotationController            = Optional.empty();
   /**
    * Simulated translation PID controller.
    */
-  private       Optional<PIDController>             simTranslationController      = Optional.empty();
+  private Optional<PIDController>             simTranslationController      = Optional.empty();
   /**
    * Simulated rotation PID controller.
    */
-  private       Optional<PIDController>             simRotationController         = Optional.empty();
+  private Optional<PIDController>             simRotationController         = Optional.empty();
   /**
    * Discretization time for the pose estimation.
    */
-  private       Optional<Time>                      simDiscretizationSeconds      = Optional.empty();
+  private Optional<Time>                      simDiscretizationSeconds      = Optional.empty();
   /**
    * Angular velocity scale factor.
    */
-  private       OptionalDouble                      simAngularVelocityScaleFactor = OptionalDouble.empty();
+  private OptionalDouble                      simAngularVelocityScaleFactor = OptionalDouble.empty();
+  /**
+   *  MapleSim Drive Simulation.
+   */
+//  private       Optional<SelfControlledSwerveDriveSimulation>   mapleDriveSim                   = Optional.empty();
   /**
    * Swerve drive subsystem.
    */
-  private final Subsystem                           subsystem;
+  private Subsystem                           subsystem;
 
   /**
    * Create the {@link SwerveDriveConfig} for the {@link yams.mechanisms.swerve.SwerveDrive}
    *
-   * @param modules {@link SwerveModule}s for the {@link yams.mechanisms.swerve.SwerveDrive}
+   * @param modules         {@link SwerveModule}s for the {@link yams.mechanisms.swerve.SwerveDrive}
+   * @param swerveSubsystem SwerveDrive subsystem.
    */
   public SwerveDriveConfig(Subsystem swerveSubsystem, SwerveModule... modules)
   {
     subsystem = swerveSubsystem;
     this.modules = modules;
   }
+
+  /**
+   * Create the {@link SwerveDriveConfig} for the {@link yams.mechanisms.swerve.SwerveDrive}
+   *
+   * @implNote Must define a Subsystem with {@link #withSubsystem(Subsystem)} and modules with
+   * {@link #withModules(SwerveModule...)}
+   */
+  public SwerveDriveConfig()
+  {
+  }
+
+  /**
+   * Define a {@link Subsystem} for the {@link yams.mechanisms.swerve.SwerveDrive}
+   *
+   * @param subsystem {@link Subsystem} for the {@link yams.mechanisms.swerve.SwerveDrive}
+   * @return {@link SwerveDriveConfig} for chaining.
+   */
+  public SwerveDriveConfig withSubsystem(Subsystem subsystem)
+  {
+    this.subsystem = subsystem;
+    return this;
+  }
+
+  /**
+   * Set the {@link SwerveModule}s for the {@link yams.mechanisms.swerve.SwerveDrive}.
+   *
+   * @param modules {@link SwerveModule}s for the {@link yams.mechanisms.swerve.SwerveDrive}.
+   * @return {@link SwerveDriveConfig} for chaining.
+   */
+  public SwerveDriveConfig withModules(SwerveModule... modules)
+  {
+    this.modules = modules;
+    return this;
+  }
+
 
   /**
    * Set the translation PID controller.
@@ -331,6 +371,27 @@ public class SwerveDriveConfig
     return this;
   }
 
+//  /**
+//   * Sets up MapleSim Physics Collision support on the simulated {@link yams.mechanisms.swerve.SwerveDrive}.
+//   * This integration is simplified and may result in slight differences compared to the real robot.
+//   * For more information read these
+//   * <a href="https://shenzhen-robotics-alliance.github.io/maple-sim/swerve-simulation-overview">MapleSim Docs</a>
+//   *
+//   * @param mapleConfig {@link DriveTrainSimulationConfig} for the simulated {@link yams.mechanisms.swerve.SwerveDrive}.
+//   * @param startingPose initial pose of the simulated {@link yams.mechanisms.swerve.SwerveDrive}.
+//   * @return {@link SwerveDriveConfig} for chaining.
+//   */
+//  public SwerveDriveConfig withMapleSim(DriveTrainSimulationConfig mapleConfig, Pose2d startingPose)
+//  {
+//      if (RobotBase.isSimulation()) {
+//          this.mapleDriveSim = Optional.of(new SelfControlledSwerveDriveSimulation(new SwerveDriveSimulation(mapleConfig, startingPose)));
+//          this.initialPose = startingPose;
+//          // Register the drivetrain sim with the SimulatedArena
+//          SimulatedArena.getInstance().addDriveTrainSimulation(mapleDriveSim.get().getDriveTrainSimulation());
+//      }
+//      return this;
+//  }
+
   /**
    * Configure telemetry for the {@link yams.mechanisms.swerve.SwerveModule} mechanism.
    *
@@ -534,6 +595,18 @@ public class SwerveDriveConfig
     }
     return new Translation2d(translation.getNorm() * scalar, translation.getAngle());
   }
+
+//  /**
+//   * Get the {@link SelfControlledSwerveDriveSimulation} if it is configured.
+//   *
+//   * @return the {@link SelfControlledSwerveDriveSimulation} if it is configured, otherwise throws an exception.
+//   */
+//  public Optional<SelfControlledSwerveDriveSimulation> getMapleDriveSim() {
+//      if (RobotBase.isSimulation()) {
+//          return mapleDriveSim;
+//      }
+//      throw new IllegalStateException("RobotBase is not in Simulation, MapleDriveSim is empty!");
+//  }
 
   /**
    * Get the swerve drive subsystem.

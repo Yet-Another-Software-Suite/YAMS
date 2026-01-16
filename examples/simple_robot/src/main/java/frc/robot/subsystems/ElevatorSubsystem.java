@@ -60,7 +60,7 @@ public class ElevatorSubsystem extends SubsystemBase
                                      weight,
                                      radius,
                                      gearing)))
-//      .withClosedLoopController(4, 0, 0, MetersPerSecond.of(0.5), MetersPerSecondPerSecond.of(0.5)) // Trapazoidal Profile PID Controller
+//      .withClosedLoopController(4, 0, 0, MetersPerSecond.of(0.5), MetersPerSecondPerSecond.of(0.5)) // Trapezoidal Profile PID Controller
       .withSoftLimit(Meters.of(0), Meters.of(2))
       .withGearing(gearing)
 //      .withExternalEncoder(armMotor.getAbsoluteEncoder()) // External Encoder if you need one, really shouldnt be used for Elevators

@@ -23,6 +23,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -114,6 +115,10 @@ public abstract class SmartMotorController
    * {@link SimSupplier} for the mechanism.
    */
   protected Optional<SimSupplier>                         m_simSupplier                 = Optional.empty();
+  /**
+   * Loosely coupled followers.
+   */
+  protected Optional<SmartMotorController[]> m_looseFollowers = Optional.empty();
   /**
    * Running status of the closed loop controller.
    */
@@ -712,64 +717,36 @@ public abstract class SmartMotorController
                                                                                                                      TelemetryVerbosity.HIGH)));
         }
         updateTelemetry();
-        Command liveTuningCommand = Commands.run(() -> this.telemetry.applyTuningValues(this),
-                                                 m_config.getSubsystem())
-                                            .finallyDo(() -> System.err.println(
-                                                "=====================================================\nLIVE TUNING MODE STOP\n====================================================="));
-        liveTuningCommand.setName("LiveTuning");
-        liveTuningCommand.setSubsystem(m_config.getSubsystem().getName());
-        SmartDashboard.putData(telemetryTable.get().getPath().substring(1) + "/Commands/LiveTuning", liveTuningCommand);
-        Command setEncoderToZero = Commands.runOnce(() -> {
-          System.out.println(
-              "=====================================================\nSET ENCODER TO ZERO\n=====================================================");
-          System.out.println(
-              "Current Mechanism Position: " + getMechanismPosition().in(Degrees) + "° Current Velocity: " +
-              getRotorVelocity());
-          setEncoderPosition(Rotations.zero());
-        }, m_config.getSubsystem());
-        setEncoderToZero.setName("ZeroEncoder");
-        setEncoderToZero.setSubsystem(m_config.getSubsystem().getName());
-        SmartDashboard.putData(telemetryTable.get().getPath().substring(1) + "/Commands/ZeroEncoder", setEncoderToZero);
-        Debouncer              currentDebouncer  = new Debouncer(0.1);
-        Debouncer              velocityDebouncer = new Debouncer(0.25);
-        AtomicReference<Angle> startingAngle     = new AtomicReference<>(Rotations.zero());
-        Command testUpCommand = Commands.startRun(() -> {
+        if(this.telemetry.tuningEnabled())
+        {
+          var telemetryPath    = telemetryTable.get().getPath().substring(1).split("/");
+          var telemetryPathStr = telemetryPath[0] + "/Commands/" + telemetryPath[telemetryPath.length - 1];
+          Command setEncoderToZero = Commands.runOnce(() -> {
+            System.out.println(
+                "=====================================================\nSET ENCODER TO ZERO\n=====================================================");
+            System.out.println(
+                "Current Mechanism Position: " + getMechanismPosition().in(Degrees) + "° Current Velocity: " +
+                getRotorVelocity());
+            setEncoderPosition(Rotations.zero());
+          }, m_config.getSubsystem());
+          setEncoderToZero.setName("ZeroEncoder");
+          setEncoderToZero.setSubsystem(m_config.getSubsystem().getName());
 
-                                          System.out.println(
-                                              "=====================================================\nTEST UP\n=====================================================");
-                                          System.out.println(
-                                              "Test will end whe Mechanism Velocity exceeds or equals 3°/s OR the Stator current exceeds 40A OR after 0.5 seconds");
-                                          stopClosedLoopController();
-                                          setDutyCycle(0);
-                                          startingAngle.set(getMechanismPosition());
-                                        }, () -> {
+          Debouncer              currentDebouncer  = new Debouncer(0.1);
+          Debouncer              velocityDebouncer = new Debouncer(0.25);
+          AtomicReference<Angle> startingAngle     = new AtomicReference<>(Rotations.zero());
+          Command testUpCommand = Commands.startRun(() -> {
 
-                                          setDutyCycle(getDutyCycle() + 0.001);
-                                        }, m_config.getSubsystem()).until(() -> velocityDebouncer.calculate(
-                                            getMechanismVelocity().abs(DegreesPerSecond) >= 3) ||
-                                                                                currentDebouncer.calculate(
-                                                                                    getStatorCurrent().gte(Amps.of(40))))
-                                        .withTimeout(Seconds.of(0.5))
-                                        .finallyDo(() -> {
-                                          setDutyCycle(0);
-                                          if (getMechanismPosition().lte(startingAngle.get()))
-                                          {System.out.println(getName() + " needs to be inverted");}
-                                          startClosedLoopController();
-                                        });
-        testUpCommand.setName("Up");
-        testUpCommand.setSubsystem(m_config.getSubsystem().getName());
-        SmartDashboard.putData(telemetryTable.get().getPath().substring(1) + "/Commands/Up", testUpCommand);
-        Command testDownCommand = Commands.startRun(() -> {
                                             System.out.println(
-                                                "=====================================================\nTEST DOWN\n=====================================================");
+                                                "=====================================================\nTEST UP\n=====================================================");
                                             System.out.println(
-                                                "Test will end whe Mechanism Velocity exceeds or equals 3°/s OR the Stator current exceeds 40A after 0.5seconds");
+                                                "Test will end whe Mechanism Velocity exceeds or equals 3°/s OR the Stator current exceeds 40A OR after 0.5 seconds");
                                             stopClosedLoopController();
                                             setDutyCycle(0);
                                             startingAngle.set(getMechanismPosition());
                                           }, () -> {
 
-                                            setDutyCycle(getDutyCycle() - 0.001);
+                                            setDutyCycle(getDutyCycle() + 0.001);
                                           }, m_config.getSubsystem()).until(() -> velocityDebouncer.calculate(
                                               getMechanismVelocity().abs(DegreesPerSecond) >= 3) ||
                                                                                   currentDebouncer.calculate(
@@ -777,16 +754,55 @@ public abstract class SmartMotorController
                                           .withTimeout(Seconds.of(0.5))
                                           .finallyDo(() -> {
                                             setDutyCycle(0);
-                                            if (getMechanismPosition().gte(startingAngle.get()))
+                                            if (getMechanismPosition().lte(startingAngle.get()))
                                             {System.out.println(getName() + " needs to be inverted");}
                                             startClosedLoopController();
                                           });
-        testDownCommand.setName("Down");
-        testDownCommand.setSubsystem(m_config.getSubsystem().getName());
-        SmartDashboard.putData(telemetryTable.get().getPath().substring(1) + "/Commands/Down", testDownCommand);
+          testUpCommand.setName("Up");
+          testUpCommand.setSubsystem(m_config.getSubsystem().getName());
+          Command testDownCommand = Commands.startRun(() -> {
+                                              System.out.println(
+                                                  "=====================================================\nTEST DOWN\n=====================================================");
+                                              System.out.println(
+                                                  "Test will end whe Mechanism Velocity exceeds or equals 3°/s OR the Stator current exceeds 40A after 0.5seconds");
+                                              stopClosedLoopController();
+                                              setDutyCycle(0);
+                                              startingAngle.set(getMechanismPosition());
+                                            }, () -> {
 
+                                              setDutyCycle(getDutyCycle() - 0.001);
+                                            }, m_config.getSubsystem()).until(() -> velocityDebouncer.calculate(
+                                                getMechanismVelocity().abs(DegreesPerSecond) >= 3) ||
+                                                                                    currentDebouncer.calculate(
+                                                                                        getStatorCurrent().gte(Amps.of(40))))
+                                            .withTimeout(Seconds.of(0.5))
+                                            .finallyDo(() -> {
+                                              setDutyCycle(0);
+                                              if (getMechanismPosition().gte(startingAngle.get()))
+                                              {System.out.println(getName() + " needs to be inverted");}
+                                              startClosedLoopController();
+                                            });
+          testDownCommand.setName("Down");
+          testDownCommand.setSubsystem(m_config.getSubsystem().getName());
+          SmartMotorControllerCommandRegistry.addCommand("Live Tuning",
+                                                         m_config.getSubsystem(),
+                                                         () -> this.telemetry.applyTuningValues(this));
+          SmartDashboard.putData(telemetryPathStr + "/ZeroEncoder", setEncoderToZero);
+          SmartDashboard.putData(telemetryPathStr + "/Up", testUpCommand);
+          SmartDashboard.putData(telemetryPathStr + "/Down", testDownCommand);
+        }
       }
     }
+  }
+
+  /**
+   * Setup Telemetry with default NT path
+   */
+  public void setupTelemetry()
+  {
+    var tuningNetworkTable = NetworkTableInstance.getDefault().getTable("Tuning");
+    var networkTable       = NetworkTableInstance.getDefault().getTable("Mechanisms");
+    setupTelemetry(networkTable, tuningNetworkTable);
   }
 
   /**
@@ -796,13 +812,11 @@ public abstract class SmartMotorController
   {
     if (telemetryTable.isPresent() && m_config.getVerbosity().isPresent())
     {
-//      telemetry.refresh(this);
       telemetry.publish(this);
-      // if(tuningTable.isPresent())
-      //   telemetry.applyChanges(this);
-
+    } else if (m_config.getVerbosity().isPresent())
+    {
+      setupTelemetry();
     }
-    // TODO: Update PID, Feedforward, current limits, soft limits, ramp rate, motor inversion, encoder inversion
   }
 
   /**
@@ -820,28 +834,28 @@ public abstract class SmartMotorController
   public abstract void setEncoderInverted(boolean inverted);
 
   /**
-   * Set the maximum velocity of the trapazoidal profile for the feedback controller.
+   * Set the maximum velocity of the trapezoidal profile for the feedback controller.
    *
    * @param maxVelocity Maximum velocity, will be translated to MetersPerSecond.
    */
   public abstract void setMotionProfileMaxVelocity(LinearVelocity maxVelocity);
 
   /**
-   * Set the maximum acceleration of the trapazoidal profile for the feedback controller.
+   * Set the maximum acceleration of the trapezoidal profile for the feedback controller.
    *
    * @param maxAcceleration Maximum acceleration, will be translated to MetersPerSecondPerSecond.
    */
   public abstract void setMotionProfileMaxAcceleration(LinearAcceleration maxAcceleration);
 
   /**
-   * Set the maximum velocity for the trapazoidal profile for the feedback controller.
+   * Set the maximum velocity for the trapezoidal profile for the feedback controller.
    *
    * @param maxVelocity Maximum velocity, will be translated to RotationsPerSecond.
    */
   public abstract void setMotionProfileMaxVelocity(AngularVelocity maxVelocity);
 
   /**
-   * Set the maximum acceleration for the trapazoidal profile for the feedback controller.
+   * Set the maximum acceleration for the trapezoidal profile for the feedback controller.
    *
    * @param maxAcceleration Maximum acceleration, will be translated to RotationsPerSecondPerSecond.
    */

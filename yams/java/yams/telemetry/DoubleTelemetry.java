@@ -135,6 +135,7 @@ public class DoubleTelemetry
 
   /**
    * Set the unit.
+   * @param cfg {@link SmartMotorControllerConfig} used to determine the unit. If the MechanismCircumference is set it will be in meters, else it will be in degrees.
    *
    * @return {@link DoubleTelemetry} for chaining.
    */
@@ -150,7 +151,7 @@ public class DoubleTelemetry
         break;
       case "tunable_velocity":
         unit = cfg.getMechanismCircumference().isPresent() ? "meter_per_second"
-                                                           : "degrees_per_second";
+                                                           : "rotation_per_second";
         break;
       case "velocity":
         unit = cfg.getMechanismCircumference().isPresent() ? "meter_per_second"
@@ -158,7 +159,7 @@ public class DoubleTelemetry
         break;
       case "tunable_acceleration":
         unit = cfg.getMechanismCircumference().isPresent() ? "meter_per_second_per_second"
-                                                           : "degrees_per_second_per_second";
+                                                           : "rotations_per_second_per_second";
         break;
       case "acceleration":
         unit = cfg.getMechanismCircumference().isPresent() ? "meter_per_second_per_second"

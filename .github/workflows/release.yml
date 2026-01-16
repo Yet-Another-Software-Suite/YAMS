@@ -6,6 +6,10 @@ on:
         description: "Release version number"
         type: string
         required: true
+      publish:
+        type: boolean
+        description: "Publish to WPILib"
+        default: false
 jobs:
   build:
     environment: 
@@ -67,7 +71,6 @@ jobs:
         uses: actions/deploy-pages@v4
       - name: Output Pages Tree
         run: find ${{ env.workingDirectory }}/build/maven/ -type f
-
         continue-on-error: true
   
   # deploy:

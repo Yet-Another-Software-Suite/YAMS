@@ -10,11 +10,9 @@ import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
-import static yams.mechanisms.SmartMechanism.gearbox;
-import static yams.mechanisms.SmartMechanism.gearing;
 
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -33,12 +31,14 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.local.SparkWrapper;
+import yams.motorcontrollers.remote.TalonFXWrapper;
 import yams.motorcontrollers.simulation.Sensor;
 
 public class ArmSubsystem extends SubsystemBase
 {
-  private final SparkMax                   armMotor         = new SparkMax(1, MotorType.kBrushless);
+
+  private final CANcoder                   cancoder    = new CANcoder(2);
+  private final TalonFX                    armMotor    = new TalonFX(1);
   //  private final SmartMotorControllerTelemetryConfig motorTelemetryConfig = new SmartMotorControllerTelemetryConfig()
 //          .withMechanismPosition()
 //          .withRotorPosition()
@@ -58,11 +58,15 @@ public class ArmSubsystem extends SubsystemBase
       .withClosedLoopRampRate(Seconds.of(0.25))
       .withOpenLoopRampRate(Seconds.of(0.25))
       .withFeedforward(new ArmFeedforward(0, 0, 0, 0))
-      .withControlMode(ControlMode.CLOSED_LOOP);
-  private final SmartMotorController       motor            = new SparkWrapper(armMotor,
-                                                                               DCMotor.getNEO(1),
-                                                                               motorConfig);
-  private final MechanismPositionConfig    robotToMechanism = new MechanismPositionConfig()
+      .withControlMode(ControlMode.CLOSED_LOOP)
+      .withExternalEncoder(cancoder)
+      .withExternalEncoderGearing(0.5)
+      .withUseExternalFeedbackEncoder(true);
+
+  private final SmartMotorController    motor            = new TalonFXWrapper(armMotor,
+                                                                              DCMotor.getKrakenX60(1),
+                                                                              motorConfig);
+  private final MechanismPositionConfig robotToMechanism = new MechanismPositionConfig()
       .withMaxRobotHeight(Meters.of(1.5))
       .withMaxRobotLength(Meters.of(0.75))
       .withRelativePosition(new Translation3d(Meters.of(0.25), Meters.of(0), Meters.of(0.5)));
@@ -77,11 +81,11 @@ public class ArmSubsystem extends SubsystemBase
       .withMechanismPositionConfig(robotToMechanism);
   private final Arm       arm      = new Arm(m_config);
 
-  private DigitalInput dio = new DigitalInput(0);
-  private final Sensor coralSensor = new SensorConfig("CoralDetectorBeamBreak")
+  private       DigitalInput dio         = new DigitalInput(0);
+  private final Sensor       coralSensor = new SensorConfig("CoralDetectorBeamBreak")
       .withField("Beam", dio::get, false)
       .withSimulatedValue("Beam", Seconds.of(3), Seconds.of(4), true)
-      .withSimulatedValue("Beam",arm.isNear(Degrees.of(40), Degrees.of(2)), true)
+      .withSimulatedValue("Beam", arm.isNear(Degrees.of(40), Degrees.of(2)), true)
       .getSensor();
 
   public ArmSubsystem()

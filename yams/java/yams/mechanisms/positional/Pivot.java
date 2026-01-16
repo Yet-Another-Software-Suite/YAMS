@@ -54,6 +54,10 @@ public class Pivot extends SmartPositionalMechanism
    * Simulation for the Pivot.
    */
   private       Optional<DCMotorSim> m_dcmotorSim = Optional.empty();
+  /**
+   * Mechanism ligament for the setpoint.
+   */
+  private MechanismLigament2d m_setpointLigament = null;
 
   /**
    * Construct the Pivot class
@@ -117,6 +121,12 @@ public class Pivot extends SmartPositionalMechanism
                                                                            config.getStartingAngle().get().in(Degrees),
                                                                            6,
                                                                            config.getSimColor()));
+      m_setpointLigament = m_mechanismRoot.append(new MechanismLigament2d("Setpoint",
+                                                                          pivotLength.in(Meters),
+                                                                          config.getStartingAngle().get()
+                                                                                .in(Degrees),
+                                                                          3,
+                                                                          new Color8Bit(Color.kWhite)));
       m_mechanismRoot.append(new MechanismLigament2d("MaxHard",
                                                      Inch.of(3).in(Meters),
                                                      config.getUpperHardLimit().get()
@@ -343,7 +353,9 @@ public class Pivot extends SmartPositionalMechanism
   @Override
   public void visualizationUpdate()
   {
+// TODO: Add setpoint ligament
     m_mechanismLigament.setAngle(getAngle().in(Degrees));
+    m_setpointLigament.setAngle(m_smc.getMechanismPositionSetpoint().orElse(getAngle()).in(Degrees));
   }
 
   /**

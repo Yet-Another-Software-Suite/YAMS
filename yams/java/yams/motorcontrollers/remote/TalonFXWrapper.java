@@ -16,9 +16,12 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CANdiConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicExpoVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.CANdi;
@@ -28,6 +31,7 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MagnetHealthValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.Pair;
@@ -88,21 +92,43 @@ public class TalonFXWrapper extends SmartMotorController
    */
   private final TalonFXConfigurator           m_configurator;
   /**
+   * Control request slot.
+   */
+  private final int                        m_controlReqSlot    = 0;
+  /**
    * Velocity control request
    */
-  private final VelocityVoltage               m_velocityReq     = new VelocityVoltage(0).withSlot(0);
+  private final VelocityVoltage            m_simpleVelocityReq = new VelocityVoltage(0).withSlot(m_controlReqSlot);
   /**
-   * Position with trapazoidal profiling request.
+   * Position control request.
    */
-  private final MotionMagicVoltage            m_trapPositionReq = new MotionMagicVoltage(0).withSlot(0);
+  private final PositionVoltage            m_simplePositionReq = new PositionVoltage(0).withSlot(m_controlReqSlot);
+  /**
+   * Position with trapezoidal profiling request.
+   */
+  private final MotionMagicVoltage         m_trapPositionReq   = new MotionMagicVoltage(0).withSlot(m_controlReqSlot);
+  /**
+   * Velocity with trapezoidal profiling request.
+   */
+  private final MotionMagicVelocityVoltage m_trapVelocityReq   = new MotionMagicVelocityVoltage(0).withSlot(
+      m_controlReqSlot);
   /**
    * Position with exponential profiling request.
    */
-  private final MotionMagicExpoVoltage        m_expoPositionReq = new MotionMagicExpoVoltage(0).withSlot(0);
+  private final MotionMagicExpoVoltage     m_expoPositionReq   = new MotionMagicExpoVoltage(0).withSlot(
+      m_controlReqSlot);
+  /**
+   * Position control request to use.
+   */
+  private       ControlRequest             m_positionReq       = m_simplePositionReq;
+  /**
+   * Velocity control request to use.
+   */
+  private       ControlRequest             m_velocityReq       = m_simpleVelocityReq;
   /**
    * Configuration of the motor
    */
-  private final TalonFXConfiguration          m_talonConfig;
+  private final TalonFXConfiguration       m_talonConfig;
   /**
    * Mechanism position in rotations.
    */
@@ -138,19 +164,19 @@ public class TalonFXWrapper extends SmartMotorController
   /**
    * Temperature status
    */
-  private final StatusSignal<Temperature>     m_deviceTemperature;
+  private final StatusSignal<Temperature> m_deviceTemperature;
   /**
    * {@link CANcoder} to use as external feedback sensor.
    */
-  private final Optional<CANcoder>            m_cancoder        = Optional.empty();
+  private       Optional<CANcoder>        m_cancoder = Optional.empty();
   /**
    * {@link CANdi} to use as external feedback sensor.
    */
-  private final Optional<CANdi>               m_candi           = Optional.empty();
+  private       Optional<CANdi>           m_candi    = Optional.empty();
   /**
    * Exponential profiled velocity control request enabled.
    */
-  private       boolean                       expEnabled        = false;
+  private       boolean                   expEnabled = false;
   /**
    * {@link DCMotorSim} for the {@link TalonFX}.
    */
@@ -416,7 +442,20 @@ public class TalonFXWrapper extends SmartMotorController
     setpointPosition = Optional.ofNullable(angle);
     if (angle != null)
     {
-      m_talonfx.setControl(expEnabled ? m_expoPositionReq.withPosition(angle) : m_trapPositionReq.withPosition(angle));
+      switch (m_positionReq.getName())
+      {
+        case "MotionMagicExpoVoltage":
+          m_talonfx.setControl(m_expoPositionReq.withPosition(angle));
+          break;
+        case "MotionMagicVoltage":
+          m_talonfx.setControl(m_trapPositionReq.withPosition(angle));
+          break;
+        case "PositionVoltage":
+        default:
+          m_talonfx.setControl(m_simplePositionReq.withPosition(angle));
+          break;
+      }
+      m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setPosition(angle);}});
     }
   }
 
@@ -433,12 +472,24 @@ public class TalonFXWrapper extends SmartMotorController
   }
 
   @Override
-  public void setVelocity(AngularVelocity angle)
+  public void setVelocity(AngularVelocity angularVelocity)
   {
-    setpointVelocity = Optional.ofNullable(angle);
-    if (angle != null)
+    setpointVelocity = Optional.ofNullable(angularVelocity);
+    // TODO: Cannot actually simulate velocity closed loop controllers yet.
+    if (angularVelocity != null)
     {
-      m_talonfx.setControl(m_velocityReq.withVelocity(angle));
+      switch (m_velocityReq.getName())
+      {
+        case "MotionMagicVelocityVoltage":
+          m_talonfx.setControl(m_trapVelocityReq.withVelocity(angularVelocity));
+          break;
+        case "VelocityVoltage":
+        default:
+          m_talonfx.setControl(m_simpleVelocityReq.withVelocity(angularVelocity));
+          break;
+      }
+      m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setVelocity(angularVelocity);}});
+      m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismVelocity(angularVelocity));
     }
   }
 
@@ -461,6 +512,7 @@ public class TalonFXWrapper extends SmartMotorController
     config.resetValidationCheck();
     m_configurator.refresh(m_talonConfig);
     this.m_config = config;
+    this.m_looseFollowers = config.getLooselyCoupledFollowers();
     // Closed loop controllers.
     if (config.getClosedLoopController().isPresent() && config.getSimpleClosedLoopController().isPresent())
     {
@@ -499,6 +551,8 @@ public class TalonFXWrapper extends SmartMotorController
 //        m_talonConfig.MotionMagic.withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(controller.getConstraints().maxAcceleration));
 //
 //      }
+      m_positionReq = m_expoPositionReq;
+      m_velocityReq = m_trapVelocityReq;
     } else if (config.getClosedLoopController().isPresent())
     {
       ProfiledPIDController controller = config.getClosedLoopController().get();
@@ -529,6 +583,8 @@ public class TalonFXWrapper extends SmartMotorController
         m_talonConfig.MotionMagic
             .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(controller.getConstraints().maxAcceleration));
       }
+      m_positionReq = m_trapPositionReq;
+      m_velocityReq = m_trapVelocityReq;
     } else if (config.getSimpleClosedLoopController().isPresent())
     {
       PIDController controller = config.getSimpleClosedLoopController().get();
@@ -542,6 +598,8 @@ public class TalonFXWrapper extends SmartMotorController
                                                                                   : "TalonFX(" +
                                                                                     m_talonfx.getDeviceID() + ")"));
       }
+      m_positionReq = m_simplePositionReq;
+      m_velocityReq = m_simpleVelocityReq;
     } else if (config.getMotorControllerMode() == ControlMode.CLOSED_LOOP)
     {
       throw new IllegalArgumentException("[ERROR] No closed loop configuration available!");
@@ -653,13 +711,15 @@ public class TalonFXWrapper extends SmartMotorController
                                     " because an external encoder is used!", false);
       }
       // Set the gear ratio for external encoders.
-      m_talonConfig.Feedback.RotorToSensorRatio = 1.0;
+      m_talonConfig.Feedback.RotorToSensorRatio = config.getGearing().getMechanismToRotorRatio() *
+                                                  config.getExternalEncoderGearing()
+                                                        .getRotorToMechanismRatio();
       // config.getExternalEncoderGearing().getMechanismToRotorRatio() *
-      // config.getGearing().getMechanismToRotorRatio();
       m_talonConfig.Feedback.SensorToMechanismRatio = config.getExternalEncoderGearing()
                                                             .getMechanismToRotorRatio();
       if (config.getExternalEncoder().get() instanceof CANcoder encoder)
       {
+        m_cancoder = Optional.of((CANcoder) config.getExternalEncoder().get());
         var configurator = encoder.getConfigurator();
         var cfg          = new CANcoderConfiguration();
         configurator.refresh(cfg);
@@ -669,13 +729,7 @@ public class TalonFXWrapper extends SmartMotorController
                                                 : SensorDirectionValue.CounterClockwise_Positive);
 
         // Configure feedback source for CANCoder
-        if (encoder.getIsProLicensed().getValue())
-        {
-          m_talonConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.SyncCANcoder;
-        } else
-        {
-          m_talonConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
-        }
+        m_talonConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
         // Zero offset
         if (config.getZeroOffset().isPresent())
         {
@@ -692,31 +746,19 @@ public class TalonFXWrapper extends SmartMotorController
         configurator.apply(cfg);
       } else if (config.getExternalEncoder().get() instanceof CANdi encoder)
       {
+        m_candi = Optional.of((CANdi) config.getExternalEncoder().get());
         var configurator = encoder.getConfigurator();
         var cfg          = new CANdiConfiguration();
         configurator.refresh(cfg);
         m_talonConfig.Feedback.FeedbackRemoteSensorID = encoder.getDeviceID();
         // Ensure pro uses best option.
-        if (encoder.getIsProLicensed().getValue())
+        if (useCANdiPWM2())
         {
-          if (useCANdiPWM2())
-          {
-            m_talonConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.SyncCANdiPWM2;
-          }
-          if (useCANdiPWM1())
-          {
-            m_talonConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.SyncCANdiPWM1;
-          }
-        } else
+          m_talonConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANdiPWM2;
+        }
+        if (useCANdiPWM1())
         {
-          if (useCANdiPWM2())
-          {
-            m_talonConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANdiPWM2;
-          }
-          if (useCANdiPWM1())
-          {
-            m_talonConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANdiPWM1;
-          }
+          m_talonConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANdiPWM1;
         }
         if (useCANdiPWM1())
         {
@@ -772,6 +814,7 @@ public class TalonFXWrapper extends SmartMotorController
                                                              "withExternalEncoderGearing(Rotations.of(1.0))");
       }
 
+      m_talonConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
       m_talonConfig.Feedback.RotorToSensorRatio = 1.0;
       m_talonConfig.Feedback.SensorToMechanismRatio = config.getGearing().getMechanismToRotorRatio();
 
@@ -829,13 +872,13 @@ public class TalonFXWrapper extends SmartMotorController
           if (follower.getFirst() instanceof TalonFXS)
           {
             applied = ((TalonFXS) follower.getFirst()).setControl(new Follower(m_talonfx.getDeviceID(),
-                                                                               follower.getSecond()));
+                                                                               follower.getSecond() ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned));
 
 
           } else if (follower.getFirst() instanceof TalonFX)
           {
             applied = ((TalonFX) follower.getFirst()).setControl(new Follower(m_talonfx.getDeviceID(),
-                                                                              follower.getSecond()));
+                    follower.getSecond() ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned));
           } else
           {
             throw new IllegalArgumentException(
@@ -848,6 +891,7 @@ public class TalonFXWrapper extends SmartMotorController
     }
 
     // Unsupported options.
+    // TODO: This isn't really unsupported but needs to be adjusted to 1microsecond since the control loop runs at that speed
     if (config.getClosedLoopControlPeriod().isPresent())
     {
       throw new IllegalArgumentException("[ERROR] ClosedLoopControlPeriod is not supported");
@@ -916,7 +960,7 @@ public class TalonFXWrapper extends SmartMotorController
   @Override
   public AngularVelocity getMechanismVelocity()
   {
-    if (m_cancoder.isPresent())
+    /*if (m_cancoder.isPresent())
     {
       return m_cancoder.get().getVelocity().getValue();
     }
@@ -930,14 +974,14 @@ public class TalonFXWrapper extends SmartMotorController
       {
         return m_candi.get().getPWM2Velocity().getValue();
       }
-    }
+    }*/
     return m_mechanismVelocity.refresh().getValue();
   }
 
   @Override
   public Angle getMechanismPosition()
   {
-    if (m_cancoder.isPresent())
+    /*if (m_cancoder.isPresent())
     {
       return m_cancoder.get().getPosition().getValue();
     }
@@ -951,7 +995,7 @@ public class TalonFXWrapper extends SmartMotorController
       {
         return m_candi.get().getPWM2Position().getValue();
       }
-    }
+    }*/
     return m_mechanismPosition.refresh().getValue();
   }
 
@@ -1040,7 +1084,8 @@ public class TalonFXWrapper extends SmartMotorController
   }
 
   /**
-   * Ensure setting is applied.
+   * Ensure setting is applied, retries every 10ms.
+   * @return {@link StatusCode} from the device.
    */
   public StatusCode forceConfigApply()
   {

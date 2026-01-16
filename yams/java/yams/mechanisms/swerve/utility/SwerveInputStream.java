@@ -228,38 +228,50 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds>
   }
 
   /**
+   * Clone the {@link SwerveInputStream} object.
+   *
+   * @param cfg {@link SwerveInputStream} to clone.
+   */
+  private SwerveInputStream(SwerveInputStream cfg)
+  {
+    swerveDrive = cfg.swerveDrive;
+    controllerTranslationX = cfg.controllerTranslationX;
+    controllerTranslationY = cfg.controllerTranslationY;
+    controllerOmega = cfg.controllerOmega;
+    controllerHeadingX = cfg.controllerHeadingX;
+    controllerHeadingY = cfg.controllerHeadingY;
+    axisDeadband = cfg.axisDeadband;
+    translationAxisScale = cfg.translationAxisScale;
+    omegaAxisScale = cfg.omegaAxisScale;
+    driveToPose = cfg.driveToPose;
+    driveToPoseTranslationPIDController = cfg.driveToPoseTranslationPIDController;
+    driveToPoseOmegaPIDController = cfg.driveToPoseOmegaPIDController;
+    aimTarget = cfg.aimTarget;
+    headingEnabled = cfg.headingEnabled;
+    aimEnabled = cfg.aimEnabled;
+    driveToPoseEnabled = cfg.driveToPoseEnabled;
+    currentMode = cfg.currentMode;
+    translationOnlyEnabled = cfg.translationOnlyEnabled;
+    lockedHeading = cfg.lockedHeading;
+    omegaCube = cfg.omegaCube;
+    translationCube = cfg.translationCube;
+    robotRelative = cfg.robotRelative;
+    allianceRelative = cfg.allianceRelative;
+    translationHeadingOffsetEnabled = cfg.translationHeadingOffsetEnabled;
+    translationHeadingOffset = cfg.translationHeadingOffset;
+    maximumChassisLinearVelocity = cfg.maximumChassisLinearVelocity;
+    maximumChassisAngularVelocity = cfg.maximumChassisAngularVelocity;
+  }
+
+  /**
    * Copy the {@link SwerveInputStream} object.
    *
    * @return Clone of current {@link SwerveInputStream}
    */
-  public SwerveInputStream copy()
+  @Override
+  public SwerveInputStream clone()
   {
-    SwerveInputStream newStream = new SwerveInputStream(swerveDrive, controllerTranslationX, controllerTranslationY);
-    newStream.controllerOmega = controllerOmega;
-    newStream.controllerHeadingX = controllerHeadingX;
-    newStream.controllerHeadingY = controllerHeadingY;
-    newStream.axisDeadband = axisDeadband;
-    newStream.translationAxisScale = translationAxisScale;
-    newStream.omegaAxisScale = omegaAxisScale;
-    newStream.driveToPose = driveToPose;
-    newStream.driveToPoseTranslationPIDController = driveToPoseTranslationPIDController;
-    newStream.driveToPoseOmegaPIDController = driveToPoseOmegaPIDController;
-    newStream.aimTarget = aimTarget;
-    newStream.headingEnabled = headingEnabled;
-    newStream.aimEnabled = aimEnabled;
-    newStream.driveToPoseEnabled = driveToPoseEnabled;
-    newStream.currentMode = currentMode;
-    newStream.translationOnlyEnabled = translationOnlyEnabled;
-    newStream.lockedHeading = lockedHeading;
-    newStream.omegaCube = omegaCube;
-    newStream.translationCube = translationCube;
-    newStream.robotRelative = robotRelative;
-    newStream.allianceRelative = allianceRelative;
-    newStream.translationHeadingOffsetEnabled = translationHeadingOffsetEnabled;
-    newStream.translationHeadingOffset = translationHeadingOffset;
-    newStream.maximumChassisLinearVelocity = maximumChassisLinearVelocity;
-    newStream.maximumChassisAngularVelocity = maximumChassisAngularVelocity;
-    return newStream;
+    return new SwerveInputStream(this);
   }
 
   /**

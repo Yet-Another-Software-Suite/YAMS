@@ -74,6 +74,38 @@ public class GearBox
   }
 
   /**
+   * Create the gearbox given the teeth of each gear.
+   *
+   * @param teeth Gear teeth from driven gear to drive gear.
+   * @return {@link GearBox}
+   */
+  public static GearBox fromTeeth(int... teeth)
+  {
+    if (teeth == null || teeth.length < 2)
+    {
+      throw new IllegalArgumentException(
+          "At least two gears (drive and driven) are required"
+      );
+    }
+
+    double reductionRatio = 1.0;
+
+    for (int i = 0; i < teeth.length - 1; i++)
+    {
+      if (teeth[i] <= 0 || teeth[i + 1] <= 0)
+      {
+        throw new IllegalArgumentException(
+            "Gear teeth counts must be positive integers"
+        );
+      }
+
+      reductionRatio *= (double) teeth[i + 1] / teeth[i];
+    }
+
+    return new GearBox(new double[]{reductionRatio});
+  }
+
+  /**
    * Sets the stages and calculates the reduction for the {@link GearBox}
    *
    * @param reductionStage Reduction stages where the number is > 0 to indicate a reduction.

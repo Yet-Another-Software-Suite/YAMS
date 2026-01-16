@@ -6,14 +6,14 @@ plugins {
   id 'google-test'
   id 'idea'
   id 'edu.wpi.first.wpilib.repositories.WPILibRepositoriesPlugin' version '2025.0'
-  id 'edu.wpi.first.NativeUtils' version '2025.9.0'
-  id "edu.wpi.first.GradleRIO" version "2025.3.2"
+  id 'edu.wpi.first.NativeUtils' version '2026.0.1'
+  id "edu.wpi.first.GradleRIO" version "2026.2.1"
   id 'edu.wpi.first.GradleJni' version '1.1.0'
   id 'edu.wpi.first.GradleVsCode' version '2.1.0'
 }
 
 // WPILib Version
-ext.wpilibVersion = "2025.3.2"
+ext.wpilibVersion = "2026.1.1"
 ext.releasePath = "$buildDir/maven"
 ext.pubVersion = System.getenv("releaseVersion") ?: System.getenv("releaseName") ?: "test"
 
@@ -64,10 +64,10 @@ dependencies {
     implementation "edu.wpi.first.wpimath:wpimath-java:$wpilibVersion"
     implementation "edu.wpi.first.wpiunits:wpiunits-java:$wpilibVersion"
     implementation "edu.wpi.first.hal:hal-java:$wpilibVersion"
-    implementation "org.ejml:ejml-simple:0.43.1"
-    implementation "com.fasterxml.jackson.core:jackson-annotations:2.15.2"
-    implementation "com.fasterxml.jackson.core:jackson-core:2.15.2"
-    implementation "com.fasterxml.jackson.core:jackson-databind:2.15.2"
+    implementation "org.ejml:ejml-simple:0.44.0"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:2.19.2"
+    implementation "com.fasterxml.jackson.core:jackson-core:2.19.2"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.19.2"
     implementation 'edu.wpi.first.thirdparty.frc2025.opencv:opencv-java:4.10.0-2'
 
 //    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
@@ -97,7 +97,7 @@ test {
     systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
     testLogging {
         events "failed"
-        exceptionFormat "full"
+        exceptionFormat = "full"
     }
 }
 
@@ -126,9 +126,13 @@ javadoc {
         links "https://docs.oracle.com/en/java/javase/$javaVersion/docs/api/",
                 'https://github.wpilib.org/allwpilib/docs/release/java/',
                 'https://codedocs.revrobotics.com/java/',
-                'https://api.ctr-electronics.com/phoenix6/release/java/',
-                'https://api.ctr-electronics.com/phoenix/release/java/',
+                'https://api.ctr-electronics.com/phoenix6/stable/java/',
+                'https://api.ctr-electronics.com/phoenix/stable/java/',
                 "https://www.kauailabs.com/public_files/navx-mxp/apidocs/java/"
+        tags 'todo:X"',
+            'apiNote:a:API Note:',
+            'implSpec:a:Implementation Requirements:',
+            'implNote:a:Implementation Note:'
     }
 }
 ext.getCurrentArch = {
@@ -146,5 +150,5 @@ build.dependsOn javadoc
 apply from: 'publish.gradle'
 
 wrapper {
-  gradleVersion '8.11'
+  gradleVersion = '8.14.3'
 }

@@ -91,6 +91,7 @@ public class DoubleJointedArm extends SmartPositionalMechanism
    * Constructor for the Arm mechanism.
    *
    * @param lowerConfig Lower {@link ArmConfig} to use.
+   * @param upperConfig Upper {@link ArmConfig} to use.
    */
   public DoubleJointedArm(ArmConfig lowerConfig, ArmConfig upperConfig)
   {

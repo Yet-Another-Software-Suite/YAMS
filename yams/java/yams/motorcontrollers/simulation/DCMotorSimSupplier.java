@@ -64,7 +64,7 @@ public class DCMotorSimSupplier implements SimSupplier
       sim.update(period.in(Seconds));
       try
       {
-        Thread.sleep(1);
+        //Thread.sleep(1);
       } catch (Exception e)
       {
 

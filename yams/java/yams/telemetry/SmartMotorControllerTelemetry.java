@@ -2,14 +2,13 @@ package yams.telemetry;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Fahrenheit;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -262,7 +261,8 @@ public class SmartMotorControllerTelemetry
                                                                 MetersPerSecond.of(
                                                                     dt.get())),
                                                             () -> smartMotorController.setVelocity(
-                                                                dt.get() == 0 ? null : DegreesPerSecond.of(dt.get())));
+                                                                dt.get() == 0 ? null
+                                                                              : RotationsPerSecond.of(dt.get())));
             break;
           }
           case kP -> smartMotorController.setKp(dt.get());
@@ -287,7 +287,7 @@ public class SmartMotorControllerTelemetry
                                                             },
                                                             () -> {
                                                               smartMotorController.setMotionProfileMaxAcceleration(
-                                                                  DegreesPerSecondPerSecond.of(dt.get()));
+                                                                  RotationsPerSecondPerSecond.of(dt.get()));
                                                             });
             break;
           }
@@ -298,7 +298,7 @@ public class SmartMotorControllerTelemetry
                                                             },
                                                             () -> {
                                                               smartMotorController.setMotionProfileMaxVelocity(
-                                                                  DegreesPerSecond.of(dt.get()));
+                                                                  RotationsPerSecond.of(dt.get()));
                                                             });
 
             break;
@@ -327,6 +327,18 @@ public class SmartMotorControllerTelemetry
         entry.getValue().close();
       }
     }
+  }
+
+  /**
+   * Whether or not tuning is enabled.
+   *
+   * @return Checks if {@link DoubleTelemetryField#TunableSetpointPosition} or
+   * {@link DoubleTelemetryField#TunableSetpointVelocity} are enabled.
+   */
+  public boolean tuningEnabled()
+  {
+    return doubleFields.get(DoubleTelemetryField.TunableSetpointPosition).enabled || doubleFields.get(
+        DoubleTelemetryField.TunableSetpointVelocity).enabled;
   }
 
   /**

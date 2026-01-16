@@ -2,7 +2,7 @@
     "fileName": "yams.json",
     "name": "Yet Another Mechanism System",
     "version": "${version}",
-    "frcYear": "2025",
+    "frcYear": "2026",
     "uuid": "a1051e86-a979-4880-a28b-a0d5362d1d96",
     "mavenUrls": [
         "https://FRC-1799.github.io/YAMS/releases/"
@@ -16,5 +16,6 @@
         }
     ],
     "cppDependencies": [],
-    "jniDependencies": []
+    "jniDependencies": [],
+    "requires": []
 }

@@ -2,12 +2,14 @@ package yams.mechanisms.config;
 
 import static edu.wpi.first.units.Units.Degrees;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import java.util.Optional;
+import java.util.OptionalInt;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
@@ -25,7 +27,7 @@ public class ElevatorConfig
   /**
    * {@link SmartMotorController} for the {@link yams.mechanisms.positional.Elevator}
    */
-  private final SmartMotorController         motor;
+  private Optional<SmartMotorController>         motor = Optional.empty();
   /**
    * The network root of the mechanism (Optional).
    */
@@ -48,7 +50,7 @@ public class ElevatorConfig
    */
   private       Optional<Distance>           upperHardLimit          = Optional.empty();
   /**
-   * {@link yams.mechanisms.positional.Elevator} length for simulation.
+   * {@link yams.mechanisms.positional.Elevator} angle for simulation.
    */
   private       Angle                        angle                   = Degrees.of(90);
   /**
@@ -62,8 +64,23 @@ public class ElevatorConfig
   /**
    * Mechanism position configuration for the {@link yams.mechanisms.positional.Pivot} (Optional).
    */
-  private       MechanismPositionConfig      mechanismPositionConfig = new MechanismPositionConfig();
-
+  private       MechanismPositionConfig mechanismPositionConfig = new MechanismPositionConfig();
+  /**
+   * Drum radius of the elevator spool, or the sprocket pitch * teeth.
+   */
+  private Optional<Distance>            drumCircumference       = Optional.empty();
+  /**
+   * Elevator stages, applied to the motor controller config gearing by dividing it by the number of stages given.
+   */
+  private OptionalInt                   stages                  = OptionalInt.empty();
+  /**
+   * Starting height to set the motor's encoder to.
+   */
+  private Optional<Distance> startingHeight = Optional.empty();
+  /**
+   * Soft limits of the {@link SmartMotorController} closed loop controller. Can be exceeded. (LowerLimit, UpperLimit)
+   */
+  private Optional<Pair<Distance, Distance>> softLimits = Optional.empty();
 
   /**
    * Elevator Configuration class
@@ -72,7 +89,60 @@ public class ElevatorConfig
    */
   public ElevatorConfig(SmartMotorController motorController)
   {
-    motor = motorController;
+    motor = Optional.ofNullable(motorController);
+  }
+
+  /**
+   * Elevator Configuration class
+   *
+   * @implNote You are REQUIRED to call {@link #withSmartMotorController(SmartMotorController)} before this is used with
+   * an {@link yams.mechanisms.positional.Elevator}
+   */
+  public ElevatorConfig() {}
+
+  /**
+   * Copy constructor.
+   *
+   * @param cfg Configuration to copy from.
+   */
+  private ElevatorConfig(ElevatorConfig cfg)
+  {
+    this.motor = cfg.motor;
+    this.drumCircumference = cfg.drumCircumference;
+    this.stages = cfg.stages;
+    this.startingHeight = cfg.startingHeight;
+    this.softLimits = cfg.softLimits;
+    this.simColor = cfg.simColor;
+    this.angle = cfg.angle;
+    this.carriageWeight = cfg.carriageWeight;
+    this.telemetryName = cfg.telemetryName;
+    this.telemetryVerbosity = cfg.telemetryVerbosity;
+    this.networkRoot = cfg.networkRoot;
+    this.mechanismPositionConfig = cfg.mechanismPositionConfig;
+    this.lowerHardLimit = cfg.lowerHardLimit;
+    this.upperHardLimit = cfg.upperHardLimit;
+  }
+
+  @Override
+  public ElevatorConfig clone()
+  {
+    return new ElevatorConfig(this);
+  }
+
+  /**
+   * Set the {@link SmartMotorController} for the {@link yams.mechanisms.positional.Elevator}
+   *
+   * @param motorController Primary {@link SmartMotorController} for the {@link yams.mechanisms.positional.Elevator}
+   * @return {@link ElevatorConfig} for chaining.
+   */
+  public ElevatorConfig withSmartMotorController(SmartMotorController motorController)
+  {
+    motor = Optional.of(motorController);
+    drumCircumference.ifPresent(drumRadius->motor.get().getConfig().withMechanismCircumference(drumRadius));
+    stages.ifPresent(this::withCascadingElevatorStages);
+    startingHeight.ifPresent(this::withStartingHeight);
+    softLimits.ifPresent(softLimits->withSoftLimits(softLimits.getFirst(), softLimits.getSecond()));
+    return this;
   }
 
   /**
@@ -83,7 +153,23 @@ public class ElevatorConfig
    */
   public ElevatorConfig withDrumRadius(Distance drumRadius)
   {
-    motor.getConfig().withMechanismCircumference(drumRadius.times(2 * Math.PI));
+    this.drumCircumference = Optional.ofNullable(drumRadius.times(2 * Math.PI));
+    motor.ifPresent(motor -> motor.getConfig().withMechanismCircumference(drumRadius.times(2 * Math.PI)));
+    return this;
+  }
+
+  /**
+   * Set the {@link yams.mechanisms.positional.Elevator} drum radius via the chain pitch (.25in or .35in) and teeth
+   * count.
+   *
+   * @param chainPitch Chain pitch.
+   * @param teeth      Sprocket teeth count.
+   * @return {@link ElevatorConfig} for chaining.
+   */
+  public ElevatorConfig withDrumRadius(Distance chainPitch, int teeth)
+  {
+    this.drumCircumference = Optional.ofNullable(chainPitch.times(teeth));
+    motor.ifPresent(motor -> motor.getConfig().withMechanismCircumference(chainPitch.times(teeth)));
     return this;
   }
 
@@ -100,9 +186,9 @@ public class ElevatorConfig
   }
 
   /**
-   * Configure the {@link yams.mechanisms.positional.Elevator}s length for simulation.
+   * Configure the {@link yams.mechanisms.positional.Elevator}s angle for simulation.
    *
-   * @param angle Length of the {@link yams.mechanisms.positional.Elevator}.
+   * @param angle Angle of the {@link yams.mechanisms.positional.Elevator}.
    * @return {@link ElevatorConfig} for chaining.
    */
   public ElevatorConfig withAngle(Angle angle)
@@ -173,8 +259,8 @@ public class ElevatorConfig
    */
   public ElevatorConfig withCascadingElevatorStages(int stages)
   {
-    var smcConfig = motor.getConfig();
-    smcConfig.withGearing(smcConfig.getGearing().div(2));
+    this.stages = OptionalInt.of(stages);
+    motor.ifPresent(motor -> motor.getConfig().withGearing(motor.getConfig().getGearing().div(stages)));
     return this;
   }
 
@@ -198,9 +284,12 @@ public class ElevatorConfig
    */
   public ElevatorConfig withStartingHeight(Distance startingPosition)
   {
-    motor.getConfig().withStartingPosition(startingPosition);
+    startingHeight = Optional.ofNullable(startingPosition);
+    motor.ifPresent(motor->motor.getConfig().withStartingPosition(startingPosition));
     return this;
   }
+
+
 
   /**
    * Set the elevator soft limits. When exceeded the power will be set to 0.
@@ -211,7 +300,8 @@ public class ElevatorConfig
    */
   public ElevatorConfig withSoftLimits(Distance lowerLimit, Distance upperLimit)
   {
-    motor.getConfig().withSoftLimit(lowerLimit, upperLimit);
+    softLimits = Optional.of(Pair.of(lowerLimit,upperLimit));
+    motor.ifPresent(motor->motor.getConfig().withSoftLimit(lowerLimit, upperLimit));
     return this;
   }
 
@@ -236,11 +326,11 @@ public class ElevatorConfig
    */
   public boolean applyConfig()
   {
-    return motor.applyConfig(motor.getConfig());
+    return motor.orElseThrow().applyConfig(motor.orElseThrow().getConfig());
   }
 
   /**
-   * Get the Length of the {@link yams.mechanisms.positional.Elevator}
+   * Get the Angle of the {@link yams.mechanisms.positional.Elevator}
    *
    * @return {@link Angle} of the Elevator.
    */
@@ -296,8 +386,8 @@ public class ElevatorConfig
    */
   public Optional<Distance> getStartingHeight()
   {
-    return motor.getConfig().getStartingPosition().isPresent() ? Optional.of(motor.getConfig()
-                                                                                  .convertFromMechanism(motor.getConfig()
+    return motor.orElseThrow().getConfig().getStartingPosition().isPresent() ? Optional.of(motor.orElseThrow().getConfig()
+                                                                                  .convertFromMechanism(motor.orElseThrow().getConfig()
                                                                                                              .getStartingPosition()
                                                                                                              .get()))
                                                                : Optional.empty();
@@ -310,7 +400,7 @@ public class ElevatorConfig
    */
   public SmartMotorController getMotor()
   {
-    return motor;
+    return motor.orElseThrow();
   }
 
   /**
@@ -330,13 +420,13 @@ public class ElevatorConfig
    */
   public Distance getDrumRadius()
   {
-    if (motor.getConfig().getMechanismCircumference().isEmpty())
+    if (motor.orElseThrow().getConfig().getMechanismCircumference().isEmpty())
     {
       throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
                                                            "Drum radius cannot be fetched.",
                                                            "withMechanismCircumference(Distance)");
     }
-    return motor.getConfig().getMechanismCircumference().get().div(2 * Math.PI);
+    return motor.orElseThrow().getConfig().getMechanismCircumference().get().div(2 * Math.PI);
   }
 
   /**
