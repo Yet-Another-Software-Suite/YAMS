@@ -10,9 +10,13 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.thethriftybot.devices.ThriftyNova;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -35,7 +39,10 @@ import yams.mechanisms.swerve.SwerveModule;
 import yams.mechanisms.swerve.utility.SwerveInputStream;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
+import yams.motorcontrollers.local.NovaWrapper;
 import yams.motorcontrollers.local.SparkWrapper;
+import yams.motorcontrollers.remote.TalonFXSWrapper;
+import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class SwerveSubsystem extends SubsystemBase
 {
@@ -92,16 +99,18 @@ public class SwerveSubsystem extends SubsystemBase
   public SwerveModule createModule(SparkMax drive, SparkMax azimuth, CANcoder absoluteEncoder, String moduleName,
                                    Translation2d location)
   {
-    MechanismGearing driveGearing         = new MechanismGearing(GearBox.fromStages("12:1", "2:1"));
-    MechanismGearing azimuthGearing       = new MechanismGearing(GearBox.fromStages("21:1"));
+    MechanismGearing driveGearing   = new MechanismGearing(12.75);
+    MechanismGearing azimuthGearing = new MechanismGearing(6.75);
     SmartMotorControllerConfig driveCfg = new SmartMotorControllerConfig(this)
         .withWheelDiameter(Inches.of(4))
-        .withClosedLoopController(50, 0, 4)
+        .withClosedLoopController(1, 0, 0)
         .withGearing(driveGearing)
+//        .withFeedforward(new SimpleMotorFeedforward(0,1,0))
         .withStatorCurrentLimit(Amps.of(40))
         .withTelemetry("driveMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
     SmartMotorControllerConfig azimuthCfg = new SmartMotorControllerConfig(this)
-        .withClosedLoopController(3, 0, 1)
+        .withClosedLoopController(20, 0, 8)
+        .withFeedforward(new SimpleMotorFeedforward(0, 0))
 //        .withContinuousWrapping(Radians.of(-Math.PI), Radians.of(Math.PI))
         .withGearing(azimuthGearing)
         .withStatorCurrentLimit(Amps.of(20))
@@ -112,6 +121,7 @@ public class SwerveSubsystem extends SubsystemBase
         .withAbsoluteEncoder(absoluteEncoder.getAbsolutePosition().asSupplier())
         .withTelemetry(moduleName, SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
         .withLocation(location)
+        .withMinimumVelocity(MetersPerSecond.of(0.1))
         .withOptimization(true);
     return new SwerveModule(moduleConfig);
   }

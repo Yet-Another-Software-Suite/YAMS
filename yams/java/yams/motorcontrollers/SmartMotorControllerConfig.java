@@ -246,9 +246,7 @@ public class SmartMotorControllerConfig
   /**
    * Moment of inertia for DCSim
    */
-  private       Double                                        moi                                = SingleJointedArmSim
-      .estimateMOI(Inches.of(4).in(Meters),
-                   Pounds.of(1).in(Kilograms));
+  private Double moi = 1.0;
   /**
    * Loosely coupled followers.
    */

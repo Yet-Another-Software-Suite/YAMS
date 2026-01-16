@@ -200,11 +200,10 @@ public class SparkWrapper extends SmartMotorController
         sparkSim = Optional.of(new SparkSim(m_spark, m_motor));
         sparkRelativeEncoderSim = Optional.of(sparkSim.get().getRelativeEncoderSim());
         m_dcMotorSim = Optional.of(new DCMotorSim(LinearSystemId.createDCMotorSystem(m_motor,
-                                                                                     0.001,
+                                                                                     m_config.getMOI(),
                                                                                      m_config.getGearing()
-                                                                                             .getRotorToMechanismRatio()),
-                                                  m_motor,
-                                                  1.0 / 1024.0, 0));
+                                                                                             .getMechanismToRotorRatio()),
+                                                  m_motor));
         setSimSupplier(new DCMotorSimSupplier(m_dcMotorSim.get(), this));
       }
       m_config.getStartingPosition().ifPresent(startingPos -> {
