@@ -43,8 +43,8 @@ public class SwerveSubsystem extends SubsystemBase
   private final SwerveDrive drive;
   private final Field2d     field = new Field2d();
 
-  private AngularVelocity maximumChassisSpeedsAngularVelocity = DegreesPerSecond.of(720);
-  private LinearVelocity  maximumChassisSpeedsLinearVelocity  = MetersPerSecond.of(4);
+  private AngularVelocity maximumChassisSpeedsAngularVelocity = DegreesPerSecond.of(360);
+  private LinearVelocity  maximumChassisSpeedsLinearVelocity  = MetersPerSecond.of(1);
 
   /**
    * Get a {@link Supplier<ChassisSpeeds>} for the robot relative chassis speeds based on "standard" swerve drive
@@ -94,7 +94,6 @@ public class SwerveSubsystem extends SubsystemBase
   {
     MechanismGearing driveGearing         = new MechanismGearing(GearBox.fromStages("12:1", "2:1"));
     MechanismGearing azimuthGearing       = new MechanismGearing(GearBox.fromStages("21:1"));
-    PIDController    azimuthPIDController = new PIDController(1, 0, 0);
     SmartMotorControllerConfig driveCfg = new SmartMotorControllerConfig(this)
         .withWheelDiameter(Inches.of(4))
         .withClosedLoopController(50, 0, 4)
@@ -102,8 +101,8 @@ public class SwerveSubsystem extends SubsystemBase
         .withStatorCurrentLimit(Amps.of(40))
         .withTelemetry("driveMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
     SmartMotorControllerConfig azimuthCfg = new SmartMotorControllerConfig(this)
-        .withClosedLoopController(50, 0, 4)
-        .withContinuousWrapping(Radians.of(-Math.PI), Radians.of(Math.PI))
+        .withClosedLoopController(3, 0, 1)
+//        .withContinuousWrapping(Radians.of(-Math.PI), Radians.of(Math.PI))
         .withGearing(azimuthGearing)
         .withStatorCurrentLimit(Amps.of(20))
         .withTelemetry("angleMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
