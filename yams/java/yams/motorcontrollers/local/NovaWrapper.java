@@ -17,6 +17,9 @@ import com.thethriftybot.devices.ThriftyNova.CurrentType;
 import com.thethriftybot.devices.ThriftyNova.EncoderType;
 import com.thethriftybot.devices.ThriftyNova.ExternalEncoder;
 import com.thethriftybot.devices.ThriftyNova.ThriftyNovaConfig;
+import com.thethriftybot.util.Conversion;
+import com.thethriftybot.util.Conversion.PositionUnit;
+import com.thethriftybot.util.Conversion.VelocityUnit;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -75,6 +78,14 @@ public class NovaWrapper extends SmartMotorController
    * Gearing for the {@link ThriftyNova}.
    */
   private       MechanismGearing     m_gearing;
+  /**
+   * Nova Conversion.
+   */
+  private Conversion m_positionConversion = new Conversion(PositionUnit.ROTATIONS, EncoderType.INTERNAL);
+  /**
+   * Nova Conversion.
+   */
+  private Conversion m_velocityConversion = new Conversion(VelocityUnit.RADIANS_PER_SEC, EncoderType.INTERNAL);
 
   /**
    * Construct the Nova Wrapper for the generic {@link SmartMotorController}.
@@ -349,6 +360,8 @@ public class NovaWrapper extends SmartMotorController
       if (externalEncoder instanceof ExternalEncoder)
       {
         m_nova.useEncoderType(EncoderType.ABS);
+        m_positionConversion = new Conversion(PositionUnit.ROTATIONS, EncoderType.ABS);
+        m_velocityConversion = new Conversion(VelocityUnit.ROTATIONS_PER_MIN, EncoderType.ABS);
         m_nova.setExternalEncoder((ExternalEncoder) externalEncoder);
       } else
       {
@@ -510,7 +523,7 @@ public class NovaWrapper extends SmartMotorController
       {
         // There should be an alert thrown here; but Alerts are not thread-safe.
         return RotationsPerSecond.of(
-            m_nova.getVelocityQuad() * m_config.getExternalEncoderGearing().getRotorToMechanismRatio());
+            m_velocityConversion.fromMotor(m_nova.getVelocityQuad()) * m_config.getExternalEncoderGearing().getRotorToMechanismRatio());
       }
     }
     return getRotorVelocity().times(m_gearing.getRotorToMechanismRatio());
@@ -528,10 +541,10 @@ public class NovaWrapper extends SmartMotorController
       Object externalEncoder = m_config.getExternalEncoder().get();
       if (externalEncoder == EncoderType.ABS)
       {
-        return Rotations.of(m_nova.getPositionAbs() * m_config.getExternalEncoderGearing().getRotorToMechanismRatio());
+        return Rotations.of(m_positionConversion.fromMotor(m_nova.getPositionAbs()) * m_config.getExternalEncoderGearing().getRotorToMechanismRatio());
       } else if (externalEncoder == EncoderType.QUAD)
       {
-        return Rotations.of(m_nova.getPositionQuad() * m_config.getExternalEncoderGearing().getRotorToMechanismRatio());
+        return Rotations.of(m_positionConversion.fromMotor(m_nova.getPositionQuad()) * m_config.getExternalEncoderGearing().getRotorToMechanismRatio());
       }
     }
     return getRotorPosition().times(m_gearing.getRotorToMechanismRatio());
@@ -544,7 +557,7 @@ public class NovaWrapper extends SmartMotorController
     {
       return m_simSupplier.get().getRotorVelocity();
     }
-    return RotationsPerSecond.of(m_nova.getVelocity());
+    return RotationsPerSecond.of(m_velocityConversion.fromMotor(m_nova.getVelocity()));
   }
 
   @Override
@@ -554,7 +567,7 @@ public class NovaWrapper extends SmartMotorController
     {
       return m_simSupplier.get().getRotorPosition();
     }
-    return Rotations.of(m_nova.getPosition());
+    return Rotations.of(m_positionConversion.fromMotor(m_nova.getPosition()));
   }
 
   @Override
