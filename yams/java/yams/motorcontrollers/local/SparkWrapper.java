@@ -124,6 +124,18 @@ public class SparkWrapper extends SmartMotorController
    * DC Motor Sim.
    */
   private       Optional<DCMotorSim>              m_dcMotorSim              = Optional.empty();
+  /**
+   * REV Control type to use for position control.
+   */
+  private       ControlType    m_positionControlType = ControlType.kPosition;
+  /**
+   * REV Control type to use for velocity control.
+   */
+  private       ControlType    m_velocityControlType = ControlType.kVelocity;
+  /**
+   * REV Closed loop slot.
+   */
+  private final ClosedLoopSlot m_closedLoopSlot      = ClosedLoopSlot.kSlot0;
 
   /**
    * Create a {@link SmartMotorController} from {@link SparkMax} or {@link SparkFlex}
@@ -308,8 +320,8 @@ public class SparkWrapper extends SmartMotorController
     if (m_expoPidController.isEmpty() && angle != null)
     {
       m_sparkPidController.setSetpoint(angle.in(Rotations),
-                                       ControlType.kMAXMotionPositionControl,
-                                       ClosedLoopSlot.kSlot0);
+                                       m_positionControlType,
+                                       m_closedLoopSlot);
     }
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setPosition(angle);}});
   }
@@ -330,11 +342,13 @@ public class SparkWrapper extends SmartMotorController
   public void setVelocity(AngularVelocity angularVelocity)
   {
     setpointVelocity = Optional.ofNullable(angularVelocity);
+    // TODO: Cannot actually simulate velocity closed loop controllers yet.
+    m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismVelocity(angularVelocity));
     if (m_expoPidController.isEmpty() && angularVelocity != null)
     {
       m_sparkPidController.setSetpoint(angularVelocity.in(RotationsPerSecond),
-                                       ControlType.kVelocity,
-                                       ClosedLoopSlot.kSlot0);
+                                       m_velocityControlType,
+                                       m_closedLoopSlot);
     }
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setVelocity(angularVelocity);}});
   }
@@ -455,10 +469,12 @@ public class SparkWrapper extends SmartMotorController
           .pid(pidController.getP(),
                pidController.getI(),
                pidController.getD(),
-               ClosedLoopSlot.kSlot0)
+               m_closedLoopSlot)
           .maxMotion.positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal)
                     .cruiseVelocity(maxVel)
                     .maxAcceleration(maxAccel);
+      m_positionControlType = ControlType.kMAXMotionPositionControl;
+      m_velocityControlType = ControlType.kMAXMotionVelocityControl;
     });
     // Set simple closed loop controller values
     config.getSimpleClosedLoopController().ifPresent(pidController -> {
@@ -467,7 +483,9 @@ public class SparkWrapper extends SmartMotorController
           .pid(pidController.getP(),
                pidController.getI(),
                pidController.getD(),
-               ClosedLoopSlot.kSlot0);
+               m_closedLoopSlot);
+      m_positionControlType = ControlType.kPosition;
+      m_velocityControlType = ControlType.kVelocity;
     });
 
     // Set feedforward values
@@ -494,10 +512,10 @@ public class SparkWrapper extends SmartMotorController
 
     // Set closed loop tolerance and profile tolerance to the same thing.
     config.getClosedLoopTolerance().ifPresent(tolerance -> {
-      m_sparkBaseConfig.closedLoop.allowedClosedLoopError(tolerance.in(Rotations), ClosedLoopSlot.kSlot0);
+      m_sparkBaseConfig.closedLoop.allowedClosedLoopError(tolerance.in(Rotations), m_closedLoopSlot);
       if (m_pidController.isPresent())
       {
-        m_sparkBaseConfig.closedLoop.maxMotion.allowedProfileError(tolerance.in(Rotations), ClosedLoopSlot.kSlot0);
+        m_sparkBaseConfig.closedLoop.maxMotion.allowedProfileError(tolerance.in(Rotations), m_closedLoopSlot);
       }
     });
 
