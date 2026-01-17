@@ -246,7 +246,7 @@ public class SmartMotorControllerConfig
   /**
    * Moment of inertia for DCSim
    */
-  private Double moi = 1.0;
+  private Double moi = 0.02;
   /**
    * Loosely coupled followers.
    */

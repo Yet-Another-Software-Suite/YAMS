@@ -4,6 +4,7 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
@@ -23,6 +24,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -101,16 +103,20 @@ public class SwerveSubsystem extends SubsystemBase
   {
     MechanismGearing driveGearing   = new MechanismGearing(12.75);
     MechanismGearing azimuthGearing = new MechanismGearing(6.75);
+    Distance wheelDiameter = Inches.of(4);
     SmartMotorControllerConfig driveCfg = new SmartMotorControllerConfig(this)
-        .withWheelDiameter(Inches.of(4))
-        .withClosedLoopController(1, 0, 0)
+        .withWheelDiameter(wheelDiameter)
+        .withClosedLoopController(0.3, 0, 0)
         .withGearing(driveGearing)
-//        .withFeedforward(new SimpleMotorFeedforward(0,1,0))
+        .withFeedforward(new SimpleMotorFeedforward(0,
+                                                    12.0 / (maximumChassisSpeedsLinearVelocity.in(MetersPerSecond) /
+                                                            wheelDiameter.in(Meters)),
+                                                    0.01))
         .withStatorCurrentLimit(Amps.of(40))
         .withTelemetry("driveMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
     SmartMotorControllerConfig azimuthCfg = new SmartMotorControllerConfig(this)
-        .withClosedLoopController(20, 0, 8)
-        .withFeedforward(new SimpleMotorFeedforward(0, 0))
+        .withClosedLoopController(1, 0, 0)
+        .withFeedforward(new SimpleMotorFeedforward(0, 1))
 //        .withContinuousWrapping(Radians.of(-Math.PI), Radians.of(Math.PI))
         .withGearing(azimuthGearing)
         .withStatorCurrentLimit(Amps.of(20))
@@ -121,7 +127,7 @@ public class SwerveSubsystem extends SubsystemBase
         .withAbsoluteEncoder(absoluteEncoder.getAbsolutePosition().asSupplier())
         .withTelemetry(moduleName, SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
         .withLocation(location)
-        .withMinimumVelocity(MetersPerSecond.of(0.1))
+//        .withMinimumVelocity(MetersPerSecond.of(0.1))
         .withOptimization(true);
     return new SwerveModule(moduleConfig);
   }
@@ -167,7 +173,7 @@ public class SwerveSubsystem extends SubsystemBase
    */
   public Command drive(Supplier<ChassisSpeeds> speedsSupplier)
   {
-    return drive.drive(speedsSupplier);
+    return run(() -> drive.setFieldRelativeChassisSpeeds(speedsSupplier.get())).withName("Field Oriented Drive");
   }
 
   public Command setRobotRelativeChassisSpeeds(ChassisSpeeds speeds)
