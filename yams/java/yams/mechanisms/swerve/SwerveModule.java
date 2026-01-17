@@ -20,11 +20,11 @@ public class SwerveModule
   /**
    * Drive motor controller.
    */
-  private final SmartMotorController m_dirveMotorController;
+  protected final SmartMotorController m_dirveMotorController;
   /**
    * Azimuth motor controller.
    */
-  private final SmartMotorController m_azimuthMotorController;
+  protected final SmartMotorController m_azimuthMotorController;
   /**
    * Swerve module configuration.
    */
@@ -147,5 +147,25 @@ public class SwerveModule
   {
     m_dirveMotorController.simIterate();
     m_azimuthMotorController.simIterate();
+  }
+
+  /**
+   * Get the azimuth {@link SmartMotorController}.
+   *
+   * @return Azimuth {@link SmartMotorController}.
+   */
+  public SmartMotorController getAzimuthMotorController()
+  {
+    return m_azimuthMotorController;
+  }
+
+  /**
+   * Get the drive {@link SmartMotorController}.
+   *
+   * @return Drive {@link SmartMotorController}.
+   */
+  public SmartMotorController getDriveMotorController()
+  {
+    return m_dirveMotorController;
   }
 }

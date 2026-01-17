@@ -24,16 +24,26 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.Supplier;
 import yams.mechanisms.config.SwerveDriveConfig;
+import yams.motorcontrollers.SmartMotorController;
 import yams.telemetry.MechanismTelemetry;
 
 /**
@@ -155,6 +165,7 @@ public class SwerveDrive
 
   /**
    * Get the Gyro Angle.
+   *
    * @return Gyro angle, or maple sim odometry gyro angle.
    */
   public Angle getGyroAngle()
@@ -173,6 +184,7 @@ public class SwerveDrive
   /**
    * Point all modules toward the robot center, thus making the robot very difficult to move. Forcing the robot to keep
    * the current pose.
+   *
    * @implNote Not compatible with AdvantageKit
    */
   public void lockPose()
@@ -291,6 +303,7 @@ public class SwerveDrive
   /**
    * Resets the gyro angle to zero and resets odometry to the same position, but facing toward 0 (red alliance
    * station).
+   *
    * @implNote Not compatible with AdvantageKit
    */
   public void zeroGyro()
@@ -299,7 +312,7 @@ public class SwerveDrive
     // If in sim reset to the simulated drive.
 //    resetOdometry(
 //        RobotBase.isSimulation() ? getMapleSimPose() : new Pose2d(getPose().getTranslation(), Rotation2d.kZero));
-      resetOdometry(new Pose2d(getPose().getTranslation(), Rotation2d.kZero));
+    resetOdometry(new Pose2d(getPose().getTranslation(), Rotation2d.kZero));
   }
 
   /**
@@ -550,5 +563,109 @@ public class SwerveDrive
   public SwerveDriveConfig getConfig()
   {
     return m_config;
+  }
+
+  /**
+   * Run SysId on an Azimuth (Steering/Angle) motor.
+   *
+   * @param module       {@link SwerveModule} to run SysId on.
+   * @param maxVoltage   Maximum voltage of the {@link SysIdRoutine}.
+   * @param stepVoltage  Step voltage for the dynamic test in {@link SysIdRoutine}.
+   * @param testDuration Duration of each {@link SysIdRoutine} run.
+   * @return {@link Command} to run SysId on the module.
+   */
+  public Command sysIdAzimuth(SwerveModule module, Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage,
+                              Time testDuration)
+  {
+    SmartMotorController smc       = module.m_azimuthMotorController;
+    SysIdRoutine         routine   = module.m_azimuthMotorController.sysId(maxVoltage, stepVoltage, testDuration);
+    var                  timeSlice = testDuration.div(4);
+    return Commands.print("Starting azimuth sysId on module " + module.getName() + "!")
+                   .andThen(Commands.runOnce(smc::stopClosedLoopController))
+                   .andThen(routine.dynamic(Direction.kForward).withTimeout(timeSlice))
+                   .andThen(routine.dynamic(Direction.kReverse).withTimeout(timeSlice))
+                   .andThen(routine.quasistatic(Direction.kForward).withTimeout(timeSlice))
+                   .andThen(routine.quasistatic(Direction.kReverse).withTimeout(timeSlice))
+                   .finallyDo(smc::startClosedLoopController)
+                   .andThen(Commands.print("Finished azimuth sysId on module " + module.getName() + "!"));
+  }
+
+
+  /**
+   * Run SysId on the drive motors. Spins the robot in place to get the drive sysid.
+   *
+   * @param maxVoltage   Maximum voltage of the {@link SysIdRoutine}.
+   * @param stepVoltage  Step voltage for the dynamic test in {@link SysIdRoutine}.
+   * @param testDuration Duration of each {@link SysIdRoutine} run.
+   * @return {@link Command} to run SysId on the drive.
+   */
+  public Command sysIdDrive(Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage, Time testDuration)
+  {
+    Config sysIdConfig = new Config(stepVoltage, maxVoltage, testDuration);
+    var    testSlice   = testDuration.div(4);
+    var routine = new SysIdRoutine(sysIdConfig,
+                                   new SysIdRoutine.Mechanism(
+                                       (voltage) -> {
+                                         for (var mod : m_modules)
+                                         {
+                                           mod.m_dirveMotorController.setVoltage(voltage);
+                                         }
+                                       },
+                                       log -> {
+                                         for (var mod : m_modules)
+                                         {
+                                           log.motor(mod.m_dirveMotorController.getName())
+                                              .voltage(
+                                                  mod.m_dirveMotorController.getVoltage())
+                                              .angularPosition(mod.m_dirveMotorController.getMechanismPosition())
+                                              .angularVelocity(mod.m_dirveMotorController.getMechanismVelocity());
+                                         }
+                                       },
+                                       m_config.getSubsystem()));
+    return Commands.print("Starting drive sysId!")
+                   .andThen(
+                       Commands.runOnce(() -> {
+                         SwerveModuleState[] rotaryStates = m_kinematics.toSwerveModuleStates(new ChassisSpeeds(0,
+                                                                                                                0,
+                                                                                                                1));
+                         for (int i = 0; i < m_modules.length; i++)
+                         {
+                           m_modules[i].m_azimuthMotorController.setPosition(Radians.of(rotaryStates[i].angle.getRadians()));
+                         }
+                       }))
+                   .andThen(Commands.runOnce(() -> {
+                     for (var mod : m_modules)
+                     {
+                       mod.m_dirveMotorController.stopClosedLoopController();
+                     }
+                   }))
+                   .andThen(routine.dynamic(Direction.kForward).withTimeout(testSlice))
+                   .andThen(routine.dynamic(Direction.kReverse).withTimeout(testSlice))
+                   .andThen(routine.quasistatic(Direction.kForward).withTimeout(testSlice))
+                   .andThen(routine.quasistatic(Direction.kReverse).withTimeout(testSlice))
+                   .finallyDo(() -> {
+                     for (var mod : m_modules) {mod.m_dirveMotorController.startClosedLoopController();}
+                   })
+                   .andThen(Commands.print("Done with drive sysId!"));
+  }
+
+  /**
+   * Get a module by its name.
+   *
+   * @param moduleName Name of the module.
+   * @return {@link SwerveModule} with the given name if it exists.
+   */
+  public Optional<SwerveModule> getModule(String moduleName)
+  {
+    Optional<SwerveModule> module = Optional.empty();
+    for (var mod : m_modules)
+    {
+      if (mod.getName().equals(moduleName))
+      {
+        module = Optional.of(mod);
+        break;
+      }
+    }
+    return module;
   }
 }
