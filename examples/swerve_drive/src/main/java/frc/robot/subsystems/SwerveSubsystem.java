@@ -104,6 +104,7 @@ public class SwerveSubsystem extends SubsystemBase
     MechanismGearing driveGearing   = new MechanismGearing(12.75);
     MechanismGearing azimuthGearing = new MechanismGearing(6.75);
     Distance wheelDiameter = Inches.of(4);
+    // To get the best accuracy in simulation set the MOI of your motors.
     SmartMotorControllerConfig driveCfg = new SmartMotorControllerConfig(this)
         .withWheelDiameter(wheelDiameter)
         .withClosedLoopController(0.3, 0, 0)
