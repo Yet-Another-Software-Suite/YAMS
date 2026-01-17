@@ -601,7 +601,8 @@ public class SwerveDrive
    */
   public Command sysIdDrive(Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage, Time testDuration)
   {
-    Config sysIdConfig = new Config(stepVoltage, maxVoltage, testDuration);
+    // Get the config from the drive motor to support custom logging by CTRE and REV.
+    Config sysIdConfig = m_modules[0].m_dirveMotorController.getSysIdConfig(maxVoltage, stepVoltage, testDuration);
     var    testSlice   = testDuration.div(4);
     var routine = new SysIdRoutine(sysIdConfig,
                                    new SysIdRoutine.Mechanism(
