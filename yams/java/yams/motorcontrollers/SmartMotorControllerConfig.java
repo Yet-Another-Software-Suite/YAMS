@@ -1767,6 +1767,8 @@ public class SmartMotorControllerConfig
   public boolean getMotorInverted()
   {
     basicOptions.remove(BasicOptions.MotorInverted);
+    if(RobotBase.isSimulation())
+      return false;
     return motorInverted;
   }
 
@@ -1987,6 +1989,8 @@ public class SmartMotorControllerConfig
   public boolean getExternalEncoderInverted()
   {
     externalEncoderOptions.remove(ExternalEncoderOptions.ExternalEncoderInverted);
+    if(RobotBase.isSimulation())
+      return false;
     return externalEncoderInverted;
   }
 
