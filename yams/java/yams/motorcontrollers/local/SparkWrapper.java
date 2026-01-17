@@ -1174,7 +1174,7 @@ public class SparkWrapper extends SmartMotorController
   }
 
   @Override
-  protected Config getSysIdConfig(Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage, Time testDuration)
+  public Config getSysIdConfig(Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage, Time testDuration)
   {
     StatusLogger.start();
     return new Config(stepVoltage, maxVoltage, testDuration);

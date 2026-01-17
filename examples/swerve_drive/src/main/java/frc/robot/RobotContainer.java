@@ -35,10 +35,12 @@ public class RobotContainer
   private void configureBindings()
   {
 
-    xboxController.button(1).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisSpeeds(0.5, 0, 0)));
-    xboxController.button(2).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisSpeeds(-0.5, 0, 0)));
-    xboxController.button(3).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisSpeeds(0, 0.5, 0)));
-    xboxController.button(4).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisSpeeds(0, -0.5, 0)));
+//    xboxController.button(1).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisSpeeds(0.5, 0, 0)));
+    xboxController.button(1).whileTrue(drive.azimuthSysId());
+    xboxController.button(2).whileTrue(drive.driveSysId());
+//    xboxController.button(2).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisSpeeds(-0.5, 0, 0)));
+//    xboxController.button(3).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisSpeeds(0, 0.5, 0)));
+//    xboxController.button(4).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisSpeeds(0, -0.5, 0)));
     xboxController.button(5).whileTrue(drive.driveToPose(new Pose2d(Meters.of(3),
                                                                     Meters.of(3),
                                                                     Rotation2d.fromDegrees(30))));

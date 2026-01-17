@@ -1407,7 +1407,7 @@ public class TalonFXSWrapper extends SmartMotorController
   }
 
   @Override
-  protected Config getSysIdConfig(Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage, Time testDuration)
+  public Config getSysIdConfig(Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage, Time testDuration)
   {
     return new Config(stepVoltage,
                       maxVoltage,

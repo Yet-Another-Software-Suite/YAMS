@@ -523,7 +523,7 @@ public abstract class SmartMotorController
    * @param testDuration Duration of each {@link SysIdRoutine} run.
    * @return {@link Config} of the {@link SysIdRoutine} to run.
    */
-  protected Config getSysIdConfig(Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage, Time testDuration)
+  public Config getSysIdConfig(Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage, Time testDuration)
   {
     return new Config(stepVoltage, maxVoltage, testDuration);
   }

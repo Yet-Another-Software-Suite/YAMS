@@ -6,16 +6,14 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.Pigeon2;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.thethriftybot.devices.ThriftyNova;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -32,19 +30,16 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.SwerveDriveConfig;
 import yams.mechanisms.config.SwerveModuleConfig;
 import yams.mechanisms.swerve.SwerveDrive;
+import yams.mechanisms.swerve.SwerveDrive.DriveSysIdTestType;
 import yams.mechanisms.swerve.SwerveModule;
 import yams.mechanisms.swerve.utility.SwerveInputStream;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.local.NovaWrapper;
 import yams.motorcontrollers.local.SparkWrapper;
-import yams.motorcontrollers.remote.TalonFXSWrapper;
-import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class SwerveSubsystem extends SubsystemBase
 {
@@ -118,7 +113,6 @@ public class SwerveSubsystem extends SubsystemBase
     SmartMotorControllerConfig azimuthCfg = new SmartMotorControllerConfig(this)
         .withClosedLoopController(1, 0, 0)
         .withFeedforward(new SimpleMotorFeedforward(0, 1))
-//        .withContinuousWrapping(Radians.of(-Math.PI), Radians.of(Math.PI))
         .withGearing(azimuthGearing)
         .withStatorCurrentLimit(Amps.of(20))
         .withTelemetry("angleMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
@@ -128,7 +122,6 @@ public class SwerveSubsystem extends SubsystemBase
         .withAbsoluteEncoder(absoluteEncoder.getAbsolutePosition().asSupplier())
         .withTelemetry(moduleName, SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
         .withLocation(location)
-//        .withMinimumVelocity(MetersPerSecond.of(0.1))
         .withOptimization(true);
     return new SwerveModule(moduleConfig);
   }
@@ -167,9 +160,9 @@ public class SwerveSubsystem extends SubsystemBase
   }
 
   /**
-   * Drive the {@link SwerveDrive} object with robot relative chassis speeds.
+   * Drive the {@link SwerveDrive} object with field relative chassis speeds.
    *
-   * @param speedsSupplier Robot relative {@link ChassisSpeeds}.
+   * @param speedsSupplier Field relative {@link ChassisSpeeds}.
    * @return {@link Command} to run the drive.
    */
   public Command drive(Supplier<ChassisSpeeds> speedsSupplier)
@@ -195,6 +188,19 @@ public class SwerveSubsystem extends SubsystemBase
   public Command lock()
   {
     return run(drive::lockPose);
+  }
+
+  public Command azimuthSysId()
+  {
+    return drive.sysIdAzimuth(drive.getModule("frontleft").orElseThrow(),
+                              Volts.of(3),
+                              Volts.of(1).per(Second),
+                              Second.of(10));
+  }
+
+  public Command driveSysId()
+  {
+    return drive.sysIdDrive(Volts.of(12), Volts.of(3).per(Second), Second.of(15), DriveSysIdTestType.DRIVE);
   }
 
   @Override
