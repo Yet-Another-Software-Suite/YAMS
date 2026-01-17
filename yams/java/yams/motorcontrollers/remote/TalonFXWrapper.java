@@ -224,7 +224,7 @@ public class TalonFXWrapper extends SmartMotorController
         m_dcmotorSim = Optional.of(new DCMotorSim(LinearSystemId.createDCMotorSystem(m_dcmotor,
                                                                                      m_config.getMOI(),
                                                                                      m_config.getGearing()
-                                                                                             .getRotorToMechanismRatio()),
+                                                                                             .getMechanismToRotorRatio()),
                                                   m_dcmotor));
         setSimSupplier(new DCMotorSimSupplier(m_dcmotorSim.get(), this));
       }
@@ -252,11 +252,6 @@ public class TalonFXWrapper extends SmartMotorController
   {
     if (RobotBase.isSimulation() && m_simSupplier.isPresent())
     {
-      if (!m_simSupplier.get().getUpdatedSim())
-      {
-        m_simSupplier.get().updateSimState();
-        m_simSupplier.get().starveUpdateSim();
-      }
       var talonFXSim = m_talonfx.getSimState();
 
       // set the supply voltage of the TalonFX
@@ -265,13 +260,11 @@ public class TalonFXWrapper extends SmartMotorController
       // get the motor voltage of the TalonFX
       var motorVoltage = talonFXSim.getMotorVoltageMeasure();
 
-      // use the motor voltage to calculate new position and velocity
-      // using WPILib's DCMotorSim class for physics simulation
-      // m_dcmotorSim.get().setInputVoltage(motorVoltage.in(Volts));
-      /*m_dcmotorSim.ifPresent(sim -> {
-        sim.setAngularVelocity(m_simSupplier.get().getMechanismVelocity().in(RadiansPerSecond));
-        sim.update(config.getClosedLoopControlPeriod().in(Seconds));
-      });*/
+      m_simSupplier.ifPresent(simSupplier -> {
+        simSupplier.setMechanismStatorVoltage(motorVoltage); // dcmotorSim.setInputVoltage(motorVoltage)
+        simSupplier.updateSimState(); // dcmotorSim.update(0.020)
+        simSupplier.starveUpdateSim(); // clear update once atomic
+      });
 
       // apply the new rotor position and velocity to the TalonFX;
       // note that this is rotor position/velocity (before gear ratio), but

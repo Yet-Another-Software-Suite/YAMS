@@ -267,7 +267,7 @@ public class TalonFXSWrapper extends SmartMotorController
         m_dcmotorSim = Optional.of(new DCMotorSim(LinearSystemId.createDCMotorSystem(m_dcmotor,
                                                                                      m_config.getMOI(),
                                                                                      m_config.getGearing()
-                                                                                             .getRotorToMechanismRatio()),
+                                                                                             .getMechanismToRotorRatio()),
                                                   m_dcmotor));
         setSimSupplier(new DCMotorSimSupplier(m_dcmotorSim.get(), this));
       }
@@ -295,26 +295,19 @@ public class TalonFXSWrapper extends SmartMotorController
   {
     if (RobotBase.isSimulation() && m_simSupplier.isPresent())
     {
-      if (!m_simSupplier.get().getUpdatedSim())
-      {
-        m_simSupplier.get().updateSimState();
-        m_simSupplier.get().starveUpdateSim();
-      }
       var talonFXSim = m_talonfxs.getSimState();
 
       // set the supply voltage of the TalonFX
-      talonFXSim.setSupplyVoltage(m_simSupplier.get().getMechanismSupplyVoltage());
+      talonFXSim.setSupplyVoltage(m_simSupplier.get().getMechanismSupplyVoltage()); // RoboRioSim.getVInVoltage()
 
       // get the motor voltage of the TalonFX
       var motorVoltage = talonFXSim.getMotorVoltageMeasure();
 
-      // use the motor voltage to calculate new position and velocity
-      // using WPILib's DCMotorSim class for physics simulation
-      // m_dcmotorSim.get().setInputVoltage(motorVoltage.in(Volts));
-//      m_dcmotorSim.ifPresent(sim -> {
-//        sim.setAngularVelocity(m_simSupplier.get().getMechanismVelocity().in(RadiansPerSecond));
-//        sim.update(config.getClosedLoopControlPeriod().in(Seconds));
-//      });
+      m_simSupplier.ifPresent(simSupplier -> {
+        simSupplier.setMechanismStatorVoltage(motorVoltage); // dcmotorSim.setInputVoltage(motorVoltage)
+        simSupplier.updateSimState(); // dcmotorSim.update(0.020)
+        simSupplier.starveUpdateSim(); // clear update once atomic
+      });
 
       // apply the new rotor position and velocity to the TalonFX;
       // note that this is rotor position/velocity (before gear ratio), but
@@ -524,7 +517,7 @@ public class TalonFXSWrapper extends SmartMotorController
           break;
       }
       m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setVelocity(angularVelocity);}});
-      m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismVelocity(angularVelocity));
+//      m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismVelocity(angularVelocity));
     }
   }
 
@@ -630,17 +623,17 @@ public class TalonFXSWrapper extends SmartMotorController
     } else if (config.getSimpleClosedLoopController().isPresent())
     {
       PIDController controller = config.getSimpleClosedLoopController().get();
-      if (config.getMechanismCircumference().isPresent())
-      {
-        m_talonConfig.Slot0.kP = config.convertToMechanism(Meters.of(controller.getP())).in(Rotations);
-        m_talonConfig.Slot0.kI = config.convertToMechanism(Meters.of(controller.getI())).in(Rotations);
-        m_talonConfig.Slot0.kD = config.convertToMechanism(Meters.of(controller.getD())).in(Rotations);
-      } else
-      {
+//      if (config.getMechanismCircumference().isPresent())
+//      {
+//        m_talonConfig.Slot0.kP = config.convertToMechanism(Meters.of(controller.getP())).in(Rotations);
+//        m_talonConfig.Slot0.kI = config.convertToMechanism(Meters.of(controller.getI())).in(Rotations);
+//        m_talonConfig.Slot0.kD = config.convertToMechanism(Meters.of(controller.getD())).in(Rotations);
+//      } else
+//      {
         m_talonConfig.Slot0.kP = controller.getP();
         m_talonConfig.Slot0.kI = controller.getI();
         m_talonConfig.Slot0.kD = controller.getD();
-      }
+//      }
       if (controller.getErrorTolerance() != new PIDController(0, 0, 0).getErrorTolerance())
       {
         throw new IllegalArgumentException("[ERROR] Cannot set closed-loop controller error tolerance on " +

@@ -115,9 +115,8 @@ public class NovaWrapper extends SmartMotorController
         m_dcMotorSim = Optional.of(new DCMotorSim(LinearSystemId.createDCMotorSystem(m_motor,
                                                                                      m_config.getMOI(),
                                                                                      m_config.getGearing()
-                                                                                             .getRotorToMechanismRatio()),
-                                                  m_motor,
-                                                  1.0 / 1024.0, 0));
+                                                                                             .getMechanismToRotorRatio()),
+                                                  m_motor));
 
         setSimSupplier(new DCMotorSimSupplier(m_dcMotorSim.get(), this));
       }
