@@ -16,10 +16,8 @@
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
-          <entry name="$PROJECT_DIR$/../../../../../../../Public/wpilib/2026/maven/edu/wpi/first/epilogue/epilogue-processor-java/2026.1.1-beta-1/epilogue-processor-java-2026.1.1-beta-1.jar" />
-          <entry name="$PROJECT_DIR$/../../../../../../../Public/wpilib/2026/maven/edu/wpi/first/epilogue/epilogue-runtime-java/2026.1.1-beta-1/epilogue-runtime-java-2026.1.1-beta-1.jar" />
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.littletonrobotics.akit/akit-autolog/26.0.0-beta-1/dc14a9c17482b2b27d5aa69d50423f52458f2fb6/akit-autolog-26.0.0-beta-1.jar" />
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.squareup/javapoet/1.13.0/d6562d385049f35eb50403fa86bb11cce76b866a/javapoet-1.13.0.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/edu.wpi.first.epilogue/epilogue-processor-java/2026.2.1/e3220063a16c88fed75463db169024df7a0a449e/epilogue-processor-java-2026.2.1.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/edu.wpi.first.epilogue/epilogue-runtime-java/2026.2.1/a1c0143fae961fbf7ee737afe29747d869492b57/epilogue-runtime-java-2026.2.1.jar" />
         </processorPath>
         <module name="simple_arm.main" />
       </profile>
