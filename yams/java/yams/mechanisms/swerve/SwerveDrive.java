@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
@@ -35,7 +36,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -590,6 +590,21 @@ public class SwerveDrive
                    .andThen(Commands.print("Finished azimuth sysId on module " + module.getName() + "!"));
   }
 
+  /**
+   * SysId test type for the drive motors.
+   */
+  public enum DriveSysIdTestType
+  {
+    /**
+     * Spin the robot in place to get the drive sysid.
+     */
+    SPIN,
+    /**
+     * Drive forward and backward to get the drive sysid.
+     */
+    DRIVE
+  }
+
 
   /**
    * Run SysId on the drive motors. Spins the robot in place to get the drive sysid.
@@ -597,9 +612,11 @@ public class SwerveDrive
    * @param maxVoltage   Maximum voltage of the {@link SysIdRoutine}.
    * @param stepVoltage  Step voltage for the dynamic test in {@link SysIdRoutine}.
    * @param testDuration Duration of each {@link SysIdRoutine} run.
+   * @param driveType    SysId test type for the drive motors.
    * @return {@link Command} to run SysId on the drive.
    */
-  public Command sysIdDrive(Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage, Time testDuration)
+  public Command sysIdDrive(Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage, Time testDuration,
+                            DriveSysIdTestType driveType)
   {
     // Get the config from the drive motor to support custom logging by CTRE and REV.
     Config sysIdConfig = m_modules[0].m_dirveMotorController.getSysIdConfig(maxVoltage, stepVoltage, testDuration);
@@ -631,9 +648,13 @@ public class SwerveDrive
                                                                                                                 1));
                          for (int i = 0; i < m_modules.length; i++)
                          {
-                           m_modules[i].m_azimuthMotorController.setPosition(Radians.of(rotaryStates[i].angle.getRadians()));
+                           m_modules[i].m_azimuthMotorController.setPosition(
+                               driveType == DriveSysIdTestType.SPIN ? Radians.of(rotaryStates[i].angle.getRadians())
+                                                                    : Rotations.of(0));
                          }
                        }))
+                   .andThen(Commands.print("Waiting for wheels to align")
+                                    .andThen(Commands.waitSeconds(Seconds.of(1.5).in(Seconds))))
                    .andThen(Commands.runOnce(() -> {
                      for (var mod : m_modules)
                      {

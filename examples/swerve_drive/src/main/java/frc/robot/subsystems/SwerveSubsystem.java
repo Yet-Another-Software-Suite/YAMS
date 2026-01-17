@@ -34,6 +34,7 @@ import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.SwerveDriveConfig;
 import yams.mechanisms.config.SwerveModuleConfig;
 import yams.mechanisms.swerve.SwerveDrive;
+import yams.mechanisms.swerve.SwerveDrive.DriveSysIdTestType;
 import yams.mechanisms.swerve.SwerveModule;
 import yams.mechanisms.swerve.utility.SwerveInputStream;
 import yams.motorcontrollers.SmartMotorController;
@@ -199,7 +200,7 @@ public class SwerveSubsystem extends SubsystemBase
 
   public Command driveSysId()
   {
-    return drive.sysIdDrive(Volts.of(12), Volts.of(3).per(Second), Second.of(30));
+    return drive.sysIdDrive(Volts.of(12), Volts.of(3).per(Second), Second.of(15), DriveSysIdTestType.DRIVE);
   }
 
   @Override
