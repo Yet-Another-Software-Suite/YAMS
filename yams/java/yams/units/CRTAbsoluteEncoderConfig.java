@@ -12,6 +12,9 @@ import java.util.function.Supplier;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 
+/**
+ * Configuration for the CRT solver. Made by team 6911
+ */
 public class CRTAbsoluteEncoderConfig {
 
   private final Supplier<Angle> absoluteEncoder1AngleSupplier;
@@ -187,6 +190,9 @@ public class CRTAbsoluteEncoderConfig {
    *
    * <p>Call {@link #withCrtGearRecommendationConstraints(double, int, int, int)} to configure
    * coverage and search bounds.
+   *
+   * <p>{@code stage1GearTeeth} is the gear that drives both encoder pinions, and {@code stage2Ratio}
+   * is the shared "common ratio" between the mechanism and that drive gear.
    */
   public CRTAbsoluteEncoderConfig withCrtGearRecommendationInputs(
       int stage1GearTeeth, double stage2Ratio) {
@@ -233,7 +239,8 @@ public class CRTAbsoluteEncoderConfig {
    * Defines a meshed gear chain for encoder 1, ordered from mechanism drive gear to encoder.
    *
    * <p>Example: {@code withAbsoluteEncoder1Gearing(50, 20, 40)} means 50T drives 20T, which drives
-   * 40T on encoder 1, for a ratio of (50/20) * (20/40) = 50/40.
+   * 40T on encoder 1, for a ratio of (50/20) * (20/40) = 50/40. A simpler one-stage chain would be
+   * {@code withAbsoluteEncoder1Gearing(72, 24)} for a 3:1 reduction.
    *
    * <p>Not valid for compound same-shaft trains; use {@link
    * #withAbsoluteEncoder1GearingStages(int...)} instead.
@@ -248,7 +255,8 @@ public class CRTAbsoluteEncoderConfig {
    * Defines a meshed gear chain for encoder 2, ordered from mechanism drive gear to encoder.
    *
    * <p>Example: {@code withAbsoluteEncoder2Gearing(50, 20, 40)} means 50T drives 20T, which drives
-   * 40T on encoder 2, for a ratio of (50/20) * (20/40) = 50/40.
+   * 40T on encoder 2, for a ratio of (50/20) * (20/40) = 50/40. A single mesh could be
+   * {@code withAbsoluteEncoder2Gearing(60, 20)} for a 3:1 reduction.
    *
    * <p>Not valid for compound same-shaft trains; use {@link
    * #withAbsoluteEncoder2GearingStages(int...)} instead.
@@ -264,7 +272,8 @@ public class CRTAbsoluteEncoderConfig {
    *
    * <p>Use this for compound trains or when you need same-shaft gears represented by separate
    * stages. Example: {@code withAbsoluteEncoder1GearingStages(12, 36, 18, 60)} means 12T drives
-   * 36T, then 18T drives 60T.
+   * 36T, then 18T drives 60T. A single stage would be {@code withAbsoluteEncoder1GearingStages(12,
+   * 60)}.
    */
   public CRTAbsoluteEncoderConfig withAbsoluteEncoder1GearingStages(int... driverDrivenPairs) {
     this.absoluteEncoder1TeethStages =
@@ -287,17 +296,15 @@ public class CRTAbsoluteEncoderConfig {
 
   /** Builds a MechanismGearing for encoder 1 from the configured chain/stages. */
   public MechanismGearing getAbsoluteEncoder1Gearing() {
-    String[] stages = buildStagesForEncoder(1);
-    return new MechanismGearing(GearBox.fromStages(stages));
+    return buildMechanismGearingForEncoder(1);
   }
 
   /** Builds a MechanismGearing for encoder 2 from the configured chain/stages. */
   public MechanismGearing getAbsoluteEncoder2Gearing() {
-    String[] stages = buildStagesForEncoder(2);
-    return new MechanismGearing(GearBox.fromStages(stages));
+    return buildMechanismGearingForEncoder(2);
   }
 
-  private String[] buildStagesForEncoder(int encoderIndex) {
+  private MechanismGearing buildMechanismGearingForEncoder(int encoderIndex) {
     Optional<int[]> chain =
         (encoderIndex == 1) ? absoluteEncoder1TeethChain : absoluteEncoder2TeethChain;
     Optional<int[]> pairs =
@@ -312,14 +319,7 @@ public class CRTAbsoluteEncoderConfig {
                 + " gear stages must be (driver,driven) pairs (even length >= 2).");
       }
       validatePositiveTeeth(p, "encoder " + encoderIndex + " gear stages");
-      String[] stages = new String[p.length / 2];
-      int idx = 0;
-      for (int i = 0; i < p.length; i += 2) {
-        int driver = p[i];
-        int driven = p[i + 1];
-        stages[idx++] = driven + ":" + driver; // keep prior convention
-      }
-      return stages;
+      return new MechanismGearing(GearBox.fromStages(buildStagesFromDriverDrivenPairs(p)));
     }
 
     if (chain.isPresent()) {
@@ -329,11 +329,7 @@ public class CRTAbsoluteEncoderConfig {
             "Encoder " + encoderIndex + " gear chain must have >= 2 tooth counts.");
       }
       validatePositiveTeeth(t, "encoder " + encoderIndex + " gear chain");
-      String[] stages = new String[t.length - 1];
-      for (int i = 1; i < t.length; i++) {
-        stages[i - 1] = t[i] + ":" + t[i - 1];
-      }
-      return stages;
+      return new MechanismGearing(GearBox.fromStages(buildStagesFromChain(t)));
     }
 
     throw new IllegalStateException("Absolute encoder " + encoderIndex + " gearing not set.");
@@ -412,18 +408,8 @@ public class CRTAbsoluteEncoderConfig {
    * <p>Returns encoder rotations per mechanism rotation.
    */
   public static double ratioFromChain(int... teethChain) {
-    if (teethChain == null) {
-      throw new IllegalArgumentException("Gear chain must not be null");
-    }
-    if (teethChain.length < 2) {
-      throw new IllegalArgumentException("Gear chain must have >= 2 tooth counts");
-    }
-    validatePositiveTeeth(teethChain, "gear chain");
-    double ratio = 1.0;
-    for (int i = 1; i < teethChain.length; i++) {
-      ratio *= ((double) teethChain[i - 1]) / teethChain[i];
-    }
-    return ratio;
+    String[] stages = buildStagesFromChain(teethChain);
+    return new MechanismGearing(GearBox.fromStages(stages)).getMechanismToRotorRatio();
   }
 
   /**
@@ -432,20 +418,8 @@ public class CRTAbsoluteEncoderConfig {
    * <p>Returns encoder rotations per mechanism rotation.
    */
   public static double ratioFromDriverDrivenPairs(int... driverDrivenPairs) {
-    if (driverDrivenPairs == null) {
-      throw new IllegalArgumentException("Stages must not be null");
-    }
-    if (driverDrivenPairs.length < 2 || (driverDrivenPairs.length % 2) != 0) {
-      throw new IllegalArgumentException("Stages must be (driver,driven) pairs (even length >= 2)");
-    }
-    validatePositiveTeeth(driverDrivenPairs, "driver/driven stages");
-    double ratio = 1.0;
-    for (int i = 0; i < driverDrivenPairs.length; i += 2) {
-      int driver = driverDrivenPairs[i];
-      int driven = driverDrivenPairs[i + 1];
-      ratio *= ((double) driver) / driven;
-    }
-    return ratio;
+    String[] stages = buildStagesFromDriverDrivenPairs(driverDrivenPairs);
+    return new MechanismGearing(GearBox.fromStages(stages)).getMechanismToRotorRatio();
   }
 
   /**
@@ -604,6 +578,45 @@ public class CRTAbsoluteEncoderConfig {
         throw new IllegalArgumentException(label + " must be > 0");
       }
     }
+  }
+
+  /**
+   * Converts a driver-to-driven tooth chain into GearBox stage strings ("driver:driven").
+   *
+   * <p>Example: {@code [50, 20, 40]} becomes {@code ["50:20", "20:40"]}.
+   */
+  private static String[] buildStagesFromChain(int[] teethChain) {
+    Objects.requireNonNull(teethChain, "teethChain");
+    if (teethChain.length < 2) {
+      throw new IllegalArgumentException("Gear chain must have >= 2 tooth counts");
+    }
+    validatePositiveTeeth(teethChain, "gear chain");
+    String[] stages = new String[teethChain.length - 1];
+    for (int i = 1; i < teethChain.length; i++) {
+      stages[i - 1] = teethChain[i - 1] + ":" + teethChain[i];
+    }
+    return stages;
+  }
+
+  /**
+   * Converts (driver, driven) stage pairs into GearBox stage strings ("driver:driven").
+   *
+   * <p>Example: {@code [12, 36, 18, 60]} becomes {@code ["12:36", "18:60"]}.
+   */
+  private static String[] buildStagesFromDriverDrivenPairs(int[] driverDrivenPairs) {
+    Objects.requireNonNull(driverDrivenPairs, "driverDrivenPairs");
+    if (driverDrivenPairs.length < 2 || (driverDrivenPairs.length % 2) != 0) {
+      throw new IllegalArgumentException("Stages must be (driver,driven) pairs (even length >= 2)");
+    }
+    validatePositiveTeeth(driverDrivenPairs, "driver/driven stages");
+    String[] stages = new String[driverDrivenPairs.length / 2];
+    int idx = 0;
+    for (int i = 0; i < driverDrivenPairs.length; i += 2) {
+      int driver = driverDrivenPairs[i];
+      int driven = driverDrivenPairs[i + 1];
+      stages[idx++] = driver + ":" + driven;
+    }
+    return stages;
   }
 
   private static int[] copyTeeth(int[] teeth, String label) {
