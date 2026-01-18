@@ -16,7 +16,7 @@ import java.util.Optional;
  *
  * <p>This is <b>not</b> a textbook Chinese Remainder Theorem solve; it is a
  * "CRT-inspired" unwrapping method that is easier to keep stable with backlash and sensor
- * noise.
+ * noise. Created by team 6911.
  */
 public class CRTAbsoluteEncoder {
 
