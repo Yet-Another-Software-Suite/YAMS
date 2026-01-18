@@ -1,117 +1,106 @@
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.RPM;
 
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.SwerveSubsystem;
-import yams.mechanisms.swerve.utility.SwerveInputStream;
+import java.util.List;
+import java.util.function.Supplier;
 
 
+/**
+ * Largely written by Eeshwar based off their blog at https://blog.eeshwark.com/robotblog/shooting-on-the-fly
+ */
 public class ShootOnTheMoveCommand extends Command
 {
 
-  /**
-   * The velocity scalar is used to compensate for the robot's velocity. This must be tuned and found empircially.
-   */
-  private final double velocityScalar    = 0.1;
-  private final Angle  setpointTolerance = Degrees.of(1);
-  private final SwerveSubsystem        swerveSubsystem;
-  private final SwerveInputStream      inputStream;
-  private final Pose2d                 targetPose;
-  private final AngularVelocity        maxProfiledVelocity     = RotationsPerSecond.of(3);
-  private final AngularAcceleration    maxProfiledAcceleration = RotationsPerSecondPerSecond.of(3);
-  private final ProfiledPIDController  pidController           = new ProfiledPIDController(1,
-                                                                                           0,
-                                                                                           0,
-                                                                                           new Constraints(
-                                                                                               maxProfiledVelocity.in(
-                                                                                                   RadiansPerSecond),
-                                                                                               maxProfiledAcceleration.in(
-                                                                                                   RadiansPerSecondPerSecond)));
-  private final SimpleMotorFeedforward feedforward             = new SimpleMotorFeedforward(0, 0, 0);
+  private final Supplier<Pose2d>        robotPose;
+  private final Supplier<ChassisSpeeds> fieldOrientedChassisSpeeds;
+  private final Pose2d                  goalPose;
 
+  // Tuned Constants
   /**
-   * Estimate the pose in which you will be shooting from, taking into account the current robot velocity.
-   *
-   * @param currentPose                {@link Pose2d} of the robot.
-   * @param fieldOrientedChassisSpeed  Field oriented {@link ChassisSpeeds} of the robot.
-   * @param velocityCompensationScalar Scalar applied to the chassis speeds to compensate for robot velocity.
-   * @return Estimated {@link Pose2d} of the robot, based off the {@link ChassisSpeeds} multiplied by the scalar.
+   * Time in seconds between when the robot is told to move and when the shooter actually shoots.
    */
-  public static Pose2d estimatePose(Pose2d currentPose, ChassisSpeeds fieldOrientedChassisSpeed,
-                                    double velocityCompensationScalar)
-  {
-    var deltaSpeed       = fieldOrientedChassisSpeed.times(velocityCompensationScalar);
-    var deltaTranslation = new Translation2d(deltaSpeed.vxMetersPerSecond, deltaSpeed.vyMetersPerSecond);
-    return new Pose2d(currentPose.getTranslation().plus(deltaTranslation),
-                      currentPose.getRotation());
-  }
-
+  private final double                     latency      = 0.15;
   /**
-   * Get the angle between two poses, useful to know where to point.
-   *
-   * @param currentPose Velocity compensated current pose.
-   * @param targetPose  Target pose to point towards.
-   * @return {@link Angle} between the two poses, to point to.
+   * Maps Distance to RPM
    */
-  public static Angle getAngleTowardsPose(Pose2d currentPose, Pose2d targetPose)
-  {
-    return targetPose.getTranslation().minus(currentPose.getTranslation()).getAngle().getMeasure();
-  }
+  private final InterpolatingDoubleTreeMap shooterTable = new InterpolatingDoubleTreeMap();
 
-  public ShootOnTheMoveCommand(SwerveSubsystem swerveSubsystem, SwerveInputStream inputStream, Pose2d targetPose)
+
+  public ShootOnTheMoveCommand(Supplier<Pose2d> currentPose, Supplier<ChassisSpeeds> fieldOrientedChassisSpeeds,
+                               Pose2d goal)
   {
-    this.swerveSubsystem = swerveSubsystem;
-    this.inputStream = inputStream;
-    this.targetPose = targetPose;
-    pidController.setTolerance(setpointTolerance.in(Radians));
-    // each subsystem used by the command must be passed into the
-    // addRequirements() method (which takes a vararg of Subsystem)
-    addRequirements(this.swerveSubsystem);
+    robotPose = currentPose;
+    this.fieldOrientedChassisSpeeds = fieldOrientedChassisSpeeds;
+    this.goalPose = goal;
+
+    // Test Results
+    for (var entry : List.of(Pair.of(Meters.of(1), RPM.of((1000))),
+                             Pair.of(Meters.of(2), RPM.of(2000)),
+                             Pair.of(Meters.of(3), RPM.of(3000)))
+    )
+    {shooterTable.put(entry.getFirst().in(Meters), entry.getSecond().in(RPM));}
+
+    addRequirements();
   }
 
   @Override
   public void initialize()
   {
-    pidController.reset(swerveSubsystem.getPose().getRotation().getRadians(),
-                        swerveSubsystem.getFieldOrientedChassisSpeed().omegaRadiansPerSecond);
+
   }
 
   @Override
   public void execute()
   {
-    var compensatedPose = estimatePose(swerveSubsystem.getPose(),
-                                       swerveSubsystem.getFieldOrientedChassisSpeed(),
-                                       velocityScalar);
-    var setpointAngle = getAngleTowardsPose(compensatedPose, targetPose);
-    var setpoint      = setpointAngle.in(Radians);
-    var output = pidController.calculate(compensatedPose.getRotation().getRadians(),
-                                         new State(setpoint, 0));
-    var feedforwardOutput = feedforward.calculate(pidController.getSetpoint().velocity);
-    var originalSpeed     = this.inputStream.get();
-    originalSpeed.omegaRadiansPerSecond = output + feedforwardOutput;
-    swerveSubsystem.driveRobotRelative(() -> ChassisSpeeds.fromFieldRelativeSpeeds(originalSpeed,
-                                                                                   new Rotation2d(swerveSubsystem.getGyroAngle())));
-    if (pidController.atGoal())
-    {
-      // TODO: Allow firing
-    }
+    // Please look here for the original authors work!
+    // https://blog.eeshwark.com/robotblog/shooting-on-the-fly
+    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    // YASS did not come up with this
+    // -------------------------------------------------------
+
+    var robotSpeed = fieldOrientedChassisSpeeds.get();
+    // 1. LATENCY COMP
+    Translation2d futurePos = robotPose.get().getTranslation().plus(
+        new Translation2d(robotSpeed.vxMetersPerSecond, robotSpeed.vyMetersPerSecond).times(latency)
+                                                                   );
+
+    // 2. GET TARGET VECTOR
+    Translation2d goalLocation = goalPose.getTranslation();
+    Translation2d targetVec    = goalLocation.minus(futurePos);
+    double        dist         = targetVec.getNorm();
+
+    // 3. CALCULATE IDEAL SHOT (Stationary)
+    // Note: This returns HORIZONTAL velocity component
+    double idealHorizontalSpeed = shooterTable.get(dist);
+
+    // 4. VECTOR SUBTRACTION
+    Translation2d robotVelVec = new Translation2d(robotSpeed.vxMetersPerSecond, robotSpeed.vyMetersPerSecond);
+    Translation2d shotVec     = targetVec.div(dist).times(idealHorizontalSpeed).minus(robotVelVec);
+
+    // 5. CONVERT TO CONTROLS
+    double turretAngle        = shotVec.getAngle().getDegrees();
+    double newHorizontalSpeed = shotVec.getNorm();
+
+    // 6. SOLVE FOR NEW PITCH/RPM
+    // Assuming constant total exit velocity, variable hood:
+    double totalExitVelocity = 15.0; // m/s
+    // Clamp to avoid domain errors if we need more speed than possible
+    double ratio    = Math.min(newHorizontalSpeed / totalExitVelocity, 1.0);
+    double newPitch = Math.acos(ratio);
+
+    // 7. SET OUTPUTS
+    //turret.setAngle(turretAngle); // Could also just set the swerveDrive to point towards this angle like AlignToGoal
+    //hood.setAngle(Math.toDegrees(newPitch));
+    //shooter.setRPM(MetersPerSecond.of(totalExitVelocity));
+
   }
 
   @Override
