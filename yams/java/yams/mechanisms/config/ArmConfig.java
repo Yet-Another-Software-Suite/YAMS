@@ -146,7 +146,7 @@ public class ArmConfig
                                           ".withSmartMotorController(SmartMotorController)");
     }
     motor = Optional.of(motorController);
-    moi.ifPresent(moi -> motorController.getConfig().withMomentOfInertia(moi));
+    moi.ifPresent(moi -> motorController.getConfig().withMomentOfInertia(KilogramSquareMeters.of(moi)));
     if (length.isPresent() && weight.isPresent() && moi.isEmpty())
     {
       motorController.getConfig().withMomentOfInertia(length.get(), weight.get());

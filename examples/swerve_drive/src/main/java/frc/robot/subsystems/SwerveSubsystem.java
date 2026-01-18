@@ -4,21 +4,25 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -26,11 +30,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.SwerveDriveConfig;
 import yams.mechanisms.config.SwerveModuleConfig;
 import yams.mechanisms.swerve.SwerveDrive;
+import yams.mechanisms.swerve.SwerveDrive.DriveSysIdTestType;
 import yams.mechanisms.swerve.SwerveModule;
 import yams.mechanisms.swerve.utility.SwerveInputStream;
 import yams.motorcontrollers.SmartMotorController;
@@ -43,8 +47,8 @@ public class SwerveSubsystem extends SubsystemBase
   private final SwerveDrive drive;
   private final Field2d     field = new Field2d();
 
-  private AngularVelocity maximumChassisSpeedsAngularVelocity = DegreesPerSecond.of(720);
-  private LinearVelocity  maximumChassisSpeedsLinearVelocity  = MetersPerSecond.of(4);
+  private AngularVelocity maximumChassisSpeedsAngularVelocity = DegreesPerSecond.of(360);
+  private LinearVelocity  maximumChassisSpeedsLinearVelocity  = MetersPerSecond.of(1);
 
   /**
    * Get a {@link Supplier<ChassisSpeeds>} for the robot relative chassis speeds based on "standard" swerve drive
@@ -92,18 +96,23 @@ public class SwerveSubsystem extends SubsystemBase
   public SwerveModule createModule(SparkMax drive, SparkMax azimuth, CANcoder absoluteEncoder, String moduleName,
                                    Translation2d location)
   {
-    MechanismGearing driveGearing         = new MechanismGearing(GearBox.fromStages("12:1", "2:1"));
-    MechanismGearing azimuthGearing       = new MechanismGearing(GearBox.fromStages("21:1"));
-    PIDController    azimuthPIDController = new PIDController(1, 0, 0);
+    MechanismGearing driveGearing   = new MechanismGearing(12.75);
+    MechanismGearing azimuthGearing = new MechanismGearing(6.75);
+    Distance wheelDiameter = Inches.of(4);
+    // To get the best accuracy in simulation set the MOI of your motors.
     SmartMotorControllerConfig driveCfg = new SmartMotorControllerConfig(this)
-        .withWheelDiameter(Inches.of(4))
-        .withClosedLoopController(50, 0, 4)
+        .withWheelDiameter(wheelDiameter)
+        .withClosedLoopController(0.3, 0, 0)
         .withGearing(driveGearing)
+        .withFeedforward(new SimpleMotorFeedforward(0,
+                                                    12.0 / (maximumChassisSpeedsLinearVelocity.in(MetersPerSecond) /
+                                                            wheelDiameter.in(Meters)),
+                                                    0.01))
         .withStatorCurrentLimit(Amps.of(40))
         .withTelemetry("driveMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
     SmartMotorControllerConfig azimuthCfg = new SmartMotorControllerConfig(this)
-        .withClosedLoopController(50, 0, 4)
-        .withContinuousWrapping(Radians.of(-Math.PI), Radians.of(Math.PI))
+        .withClosedLoopController(1, 0, 0)
+        .withFeedforward(new SimpleMotorFeedforward(0, 1))
         .withGearing(azimuthGearing)
         .withStatorCurrentLimit(Amps.of(20))
         .withTelemetry("angleMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
@@ -151,14 +160,14 @@ public class SwerveSubsystem extends SubsystemBase
   }
 
   /**
-   * Drive the {@link SwerveDrive} object with robot relative chassis speeds.
+   * Drive the {@link SwerveDrive} object with field relative chassis speeds.
    *
-   * @param speedsSupplier Robot relative {@link ChassisSpeeds}.
+   * @param speedsSupplier Field relative {@link ChassisSpeeds}.
    * @return {@link Command} to run the drive.
    */
   public Command drive(Supplier<ChassisSpeeds> speedsSupplier)
   {
-    return drive.drive(speedsSupplier);
+    return run(() -> drive.setFieldRelativeChassisSpeeds(speedsSupplier.get())).withName("Field Oriented Drive");
   }
 
   public Command setRobotRelativeChassisSpeeds(ChassisSpeeds speeds)
@@ -179,6 +188,19 @@ public class SwerveSubsystem extends SubsystemBase
   public Command lock()
   {
     return run(drive::lockPose);
+  }
+
+  public Command azimuthSysId()
+  {
+    return drive.sysIdAzimuth(drive.getModule("frontleft").orElseThrow(),
+                              Volts.of(3),
+                              Volts.of(1).per(Second),
+                              Second.of(10));
+  }
+
+  public Command driveSysId()
+  {
+    return drive.sysIdDrive(Volts.of(12), Volts.of(3).per(Second), Second.of(15), DriveSysIdTestType.DRIVE);
   }
 
   @Override

@@ -246,9 +246,7 @@ public class SmartMotorControllerConfig
   /**
    * Moment of inertia for DCSim
    */
-  private       Double                                        moi                                = SingleJointedArmSim
-      .estimateMOI(Inches.of(4).in(Meters),
-                   Pounds.of(1).in(Kilograms));
+  private Double moi = 0.02;
   /**
    * Loosely coupled followers.
    */
@@ -1769,6 +1767,8 @@ public class SmartMotorControllerConfig
   public boolean getMotorInverted()
   {
     basicOptions.remove(BasicOptions.MotorInverted);
+    if(RobotBase.isSimulation())
+      return false;
     return motorInverted;
   }
 
@@ -1989,6 +1989,8 @@ public class SmartMotorControllerConfig
   public boolean getExternalEncoderInverted()
   {
     externalEncoderOptions.remove(ExternalEncoderOptions.ExternalEncoderInverted);
+    if(RobotBase.isSimulation())
+      return false;
     return externalEncoderInverted;
   }
 
