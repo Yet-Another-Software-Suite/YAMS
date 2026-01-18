@@ -127,19 +127,24 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Create the gearbox given the reduction stages of the gearbox.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getInputToOutputConversionFactor()" class="member-name-link">getInputToOutputConversionFactor</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the conversion factor to transform the gearbox input into the gear box output rotations.</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="GearBox.html" title="class in yams.gearing">GearBox</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#fromTeeth(int...)" class="member-name-link">fromTeeth</a><wbr>(int...&nbsp;teeth)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Create the gearbox given the teeth of each gear.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getOutputToInputConversionFactor()" class="member-name-link">getOutputToInputConversionFactor</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getInputToOutputConversionFactor()" class="member-name-link">getInputToOutputConversionFactor</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get the conversion factor to transform the gearbox input into the gear box output rotations.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getOutputToInputConversionFactor()" class="member-name-link">getOutputToInputConversionFactor</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the conversion factor to transform the gearbox output value into the gear box input value.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="GearBox.html" title="class in yams.gearing">GearBox</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#times(double)" class="member-name-link">times</a><wbr>(double&nbsp;x)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="GearBox.html" title="class in yams.gearing">GearBox</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#times(double)" class="member-name-link">times</a><wbr>(double&nbsp;x)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Multiply the gear reduction ratio by X.</div>
 </div>
 </div>
@@ -210,6 +215,19 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>stages</code> - Stages in the format of "IN:OUT". For example, "3:1"</dd>
+<dt>Returns:</dt>
+<dd><a href="GearBox.html" title="class in yams.gearing"><code>GearBox</code></a></dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="fromTeeth(int...)">
+<h3>fromTeeth</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="GearBox.html" title="class in yams.gearing">GearBox</a></span>&nbsp;<span class="element-name">fromTeeth</span><wbr><span class="parameters">(int...&nbsp;teeth)</span></div>
+<div class="block">Create the gearbox given the teeth of each gear.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>teeth</code> - Gear teeth from driven gear to drive gear.</dd>
 <dt>Returns:</dt>
 <dd><a href="GearBox.html" title="class in yams.gearing"><code>GearBox</code></a></dd>
 </dl>

@@ -333,6 +333,10 @@ loadScripts(document, 'script');</script>
 <div class="block">Convert <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>LinearVelocity</code></a> to <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> using the
  <code>SmartMotorControllerConfig.mechanismCircumference</code></div>
 </dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html#coverageRot()" class="member-name-link">coverageRot()</a> - Method in record class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html" title="class in yams.units">CRTAbsoluteEncoderConfig.CrtGearPair</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>coverageRot</code> record component.</div>
+</dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetry.BooleanTelemetryField.html#create()" class="member-name-link">create()</a> - Method in enum class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetry.BooleanTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.BooleanTelemetryField</a></dt>
 <dd>
 <div class="block">Create a <a href="yams/telemetry/BooleanTelemetry.html" title="class in yams.telemetry"><code>BooleanTelemetry</code></a> object for non-static usage.</div>
@@ -380,6 +384,24 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/simulation/SensorData.html#createValue(edu.wpi.first.hal.SimDevice,edu.wpi.first.hal.SimDevice.Direction)" class="member-name-link">createValue(SimDevice, SimDevice.Direction)</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/SensorData.html" title="class in yams.motorcontrollers.simulation">SensorData</a></dt>
 <dd>
 <div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/hal/SimValue.html" title="class or interface in edu.wpi.first.hal" class="external-link"><code>SimValue</code></a> for the sensor.</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoder.html" class="type-name-link" title="class in yams.units">CRTAbsoluteEncoder</a> - Class in <a href="yams/units/package-summary.html">yams.units</a></dt>
+<dd>
+<div class="block">A CRT style absolute mechanism angle estimator using two absolute encoders.</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoder.html#%3Cinit%3E(yams.units.CRTAbsoluteEncoderConfig)" class="member-name-link">CRTAbsoluteEncoder(CRTAbsoluteEncoderConfig)</a> - Constructor for class yams.units.<a href="yams/units/CRTAbsoluteEncoder.html" title="class in yams.units">CRTAbsoluteEncoder</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html" class="type-name-link" title="class in yams.units">CRTAbsoluteEncoderConfig</a> - Class in <a href="yams/units/package-summary.html">yams.units</a></dt>
+<dd>
+<div class="block">Configuration for the CRT solver.</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#%3Cinit%3E(java.util.function.Supplier,java.util.function.Supplier)" class="member-name-link">CRTAbsoluteEncoderConfig(Supplier&lt;Angle&gt;, Supplier&lt;Angle&gt;)</a> - Constructor for class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html" class="type-name-link" title="class in yams.units">CRTAbsoluteEncoderConfig.CrtGearPair</a> - Record Class in <a href="yams/units/package-summary.html">yams.units</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html#%3Cinit%3E(int,int,int,double,int,int)" class="member-name-link">CrtGearPair(int, int, int, double, int, int)</a> - Constructor for record class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html" title="class in yams.units">CRTAbsoluteEncoderConfig.CrtGearPair</a></dt>
+<dd>
+<div class="block">Creates an instance of a <code>CrtGearPair</code> record class.</div>
 </dd>
 <dt><a href="yams/mechanisms/config/SwerveDriveConfig.html#cubeTranslation(edu.wpi.first.math.geometry.Translation2d)" class="member-name-link">cubeTranslation(Translation2d)</a> - Static method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
@@ -500,6 +522,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Create a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/RunCommand.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>RunCommand</code></a> to drive the swerve drive with robot relative chassis speeds.</div>
 </dd>
+<dt><a href="yams/mechanisms/swerve/SwerveDrive.DriveSysIdTestType.html#DRIVE" class="member-name-link">DRIVE</a> - Enum constant in enum class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.DriveSysIdTestType.html" title="enum class in yams.mechanisms.swerve">SwerveDrive.DriveSysIdTestType</a></dt>
+<dd>
+<div class="block">Drive forward and backward to get the drive sysid.</div>
+</dd>
 <dt><a href="yams/mechanisms/swerve/SwerveDrive.html#driveToPose(edu.wpi.first.math.geometry.Pose2d)" class="member-name-link">driveToPose(Pose2d)</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
 <div class="block">Drive the robot to the given pose.</div>
@@ -575,6 +601,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Encoder inversion.</div>
 </dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html" title="class in yams.units">CRTAbsoluteEncoderConfig.CrtGearPair</a></dt>
+<dd>
+<div class="block">Indicates whether some other object is "equal to" this one.</div>
+</dd>
 <dt><a href="yams/math/ExponentialProfilePIDController.html" class="type-name-link" title="class in yams.math">ExponentialProfilePIDController</a> - Class in <a href="yams/math/package-summary.html">yams.math</a></dt>
 <dd>
 <div class="block">Exponential profile PID controller.</div>
@@ -614,6 +644,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html#feedUpdateSim()" class="member-name-link">feedUpdateSim()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#findSmallestCrtGearPair(int,double,double,double,int,int,int)" class="member-name-link">findSmallestCrtGearPair(int, double, double, double, int, int, int)</a> - Static method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">Finds the smallest gear pair that satisfies coverage and iteration limits.</div>
+</dd>
 <dt><a href="yams/mechanisms/velocity/FlyWheel.html" class="type-name-link" title="class in yams.mechanisms.velocity">FlyWheel</a> - Class in <a href="yams/mechanisms/velocity/package-summary.html">yams.mechanisms.velocity</a></dt>
 <dd>
 <div class="block">FlyWheel mechanism.</div>
@@ -674,6 +708,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Construct the <a href="yams/gearing/Sprocket.html" title="class in yams.gearing"><code>Sprocket</code></a> with the reduction stages given.</div>
 </dd>
+<dt><a href="yams/gearing/GearBox.html#fromTeeth(int...)" class="member-name-link">fromTeeth(int...)</a> - Static method in class yams.gearing.<a href="yams/gearing/GearBox.html" title="class in yams.gearing">GearBox</a></dt>
+<dd>
+<div class="block">Create the gearbox given the teeth of each gear.</div>
+</dd>
 <dt><a href="yams/units/YUnits.html#Furlong" class="member-name-link">Furlong</a> - Static variable in class yams.units.<a href="yams/units/YUnits.html" title="class in yams.units">YUnits</a></dt>
 <dd>
 <div class="block">201.168 <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/Units.html#Meters" title="class or interface in edu.wpi.first.units" class="external-link"><code>Units.Meters</code></a>s, or 10 <a href="yams/units/YUnits.html#Chains"><code>Chains</code></a>.</div>
@@ -689,6 +727,18 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:G">G</h2>
 <dl class="index">
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html#gcd()" class="member-name-link">gcd()</a> - Method in record class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html" title="class in yams.units">CRTAbsoluteEncoderConfig.CrtGearPair</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>gcd</code> record component.</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html#gearA()" class="member-name-link">gearA()</a> - Method in record class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html" title="class in yams.units">CRTAbsoluteEncoderConfig.CrtGearPair</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>gearA</code> record component.</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html#gearB()" class="member-name-link">gearB()</a> - Method in record class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html" title="class in yams.units">CRTAbsoluteEncoderConfig.CrtGearPair</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>gearB</code> record component.</div>
+</dd>
 <dt><a href="yams/mechanisms/SmartMechanism.html#gearbox(double...)" class="member-name-link">gearbox(double...)</a> - Static method in class yams.mechanisms.<a href="yams/mechanisms/SmartMechanism.html" title="class in yams.mechanisms">SmartMechanism</a></dt>
 <dd>
 <div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
@@ -741,6 +791,22 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the value.</div>
 </dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getAbsoluteEncoder1Angle()" class="member-name-link">getAbsoluteEncoder1Angle()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getAbsoluteEncoder1Gearing()" class="member-name-link">getAbsoluteEncoder1Gearing()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">Builds a MechanismGearing for encoder 1 from the configured chain/stages.</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getAbsoluteEncoder1OffsetRotations()" class="member-name-link">getAbsoluteEncoder1OffsetRotations()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getAbsoluteEncoder2Angle()" class="member-name-link">getAbsoluteEncoder2Angle()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getAbsoluteEncoder2Gearing()" class="member-name-link">getAbsoluteEncoder2Gearing()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">Builds a MechanismGearing for encoder 2 from the configured chain/stages.</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getAbsoluteEncoder2OffsetRotations()" class="member-name-link">getAbsoluteEncoder2OffsetRotations()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/mechanisms/config/SwerveModuleConfig.html#getAbsoluteEncoderAngle()" class="member-name-link">getAbsoluteEncoderAngle()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></dt>
 <dd>
 <div class="block">Get the absolute encoder angle for the azimuth <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
@@ -760,6 +826,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/swerve/SwerveDrive.html#getAngleDifferenceFromPose(edu.wpi.first.math.geometry.Pose2d)" class="member-name-link">getAngleDifferenceFromPose(Pose2d)</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
 <div class="block">Get the angle difference between the robot's current pose and the given pose.</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoder.html#getAngleOptional()" class="member-name-link">getAngleOptional()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoder.html" title="class in yams.units">CRTAbsoluteEncoder</a></dt>
+<dd>
+<div class="block">Returns the mechanism angle if a unique solution is found.</div>
 </dd>
 <dt><a href="yams/mechanisms/positional/DoubleJointedArm.html#getAnglesForPosition(edu.wpi.first.math.geometry.Translation2d,boolean)" class="member-name-link">getAnglesForPosition(Translation2d, boolean)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/DoubleJointedArm.html" title="class in yams.mechanisms.positional">DoubleJointedArm</a></dt>
 <dd>
@@ -808,6 +878,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/config/SwerveModuleConfig.html#getAzimuthMotor()" class="member-name-link">getAzimuthMotor()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></dt>
 <dd>
 <div class="block">Get the azimuth <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a>.</div>
+</dd>
+<dt><a href="yams/mechanisms/swerve/SwerveModule.html#getAzimuthMotorController()" class="member-name-link">getAzimuthMotorController()</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve">SwerveModule</a></dt>
+<dd>
+<div class="block">Get the azimuth <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#getBoolFields(yams.motorcontrollers.SmartMotorController)" class="member-name-link">getBoolFields(SmartMotorController)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
 <dd>
@@ -930,6 +1004,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the drive <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a>.</div>
 </dd>
+<dt><a href="yams/mechanisms/swerve/SwerveModule.html#getDriveMotorController()" class="member-name-link">getDriveMotorController()</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve">SwerveModule</a></dt>
+<dd>
+<div class="block">Get the drive <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
+</dd>
 <dt><a href="yams/mechanisms/config/ElevatorConfig.html#getDrumRadius()" class="member-name-link">getDrumRadius()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></dt>
 <dd>
 <div class="block">Get the <a href="yams/mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> drum radius.</div>
@@ -949,6 +1027,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getElevatorFeedforward()" class="member-name-link">getElevatorFeedforward()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/ElevatorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>ElevatorFeedforward</code></a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link"><code>Optional</code></a></div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getEncoder1RotationsPerMechanismRotation()" class="member-name-link">getEncoder1RotationsPerMechanismRotation()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">Returns encoder 1 rotations per mechanism rotation (includes inversion if enabled).</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getEncoder2RotationsPerMechanismRotation()" class="member-name-link">getEncoder2RotationsPerMechanismRotation()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">Returns encoder 2 rotations per mechanism rotation (includes inversion if enabled).</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getEncoderInverted()" class="member-name-link">getEncoderInverted()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -1051,6 +1137,18 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the velocity gain as constant.</div>
 </dd>
+<dt><a href="yams/units/CRTAbsoluteEncoder.html#getLastErrorRotations()" class="member-name-link">getLastErrorRotations()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoder.html" title="class in yams.units">CRTAbsoluteEncoder</a></dt>
+<dd>
+<div class="block">Last best-match modular error in rotations.</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoder.html#getLastIterations()" class="member-name-link">getLastIterations()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoder.html" title="class in yams.units">CRTAbsoluteEncoder</a></dt>
+<dd>
+<div class="block">Number of candidates evaluated in the last solve attempt.</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoder.html#getLastStatus()" class="member-name-link">getLastStatus()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoder.html" title="class in yams.units">CRTAbsoluteEncoder</a></dt>
+<dd>
+<div class="block">Last solver status string (e.g., OK / NO_SOLUTION / AMBIGUOUS / INVALID_CONFIG).</div>
+</dd>
 <dt><a href="yams/mechanisms/config/DifferentialMechanismConfig.html#getLeftMechanismPosition(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)" class="member-name-link">getLeftMechanismPosition(Angle, Angle)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/DifferentialMechanismConfig.html" title="class in yams.mechanisms.config">DifferentialMechanismConfig</a></dt>
 <dd>
 <div class="block">The left <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> mechanism position.</div>
@@ -1095,6 +1193,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the lower soft limit of the shooter.</div>
 </dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getMatchToleranceRotations()" class="member-name-link">getMatchToleranceRotations()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getMaxDiscontinuityPoint()" class="member-name-link">getMaxDiscontinuityPoint()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the discontinuity point for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> encoder.</div>
@@ -1115,6 +1215,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the maximum speed of the modules.</div>
 </dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getMaxMechanismRotations()" class="member-name-link">getMaxMechanismRotations()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/local/NovaWrapper.html#getMeasurementPosition()" class="member-name-link">getMeasurementPosition()</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/NovaWrapper.html" title="class in yams.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/local/SparkWrapper.html#getMeasurementPosition()" class="member-name-link">getMeasurementPosition()</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/SparkWrapper.html" title="class in yams.motorcontrollers.local">SparkWrapper</a></dt>
@@ -1282,6 +1384,12 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/config/ElevatorConfig.html#getMinimumHeight()" class="member-name-link">getMinimumHeight()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></dt>
 <dd>
 <div class="block">Get the lower hard limit of the <a href="yams/mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a></div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getMinMechanismRotations()" class="member-name-link">getMinMechanismRotations()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/mechanisms/swerve/SwerveDrive.html#getModule(java.lang.String)" class="member-name-link">getModule(String)</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
+<dd>
+<div class="block">Get a module by its name.</div>
 </dd>
 <dt><a href="yams/mechanisms/swerve/SwerveDrive.html#getModulePositions()" class="member-name-link">getModulePositions()</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
@@ -1480,6 +1588,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/math/ExponentialProfilePIDController.html#getPositionTolerance()" class="member-name-link">getPositionTolerance()</a> - Method in class yams.math.<a href="yams/math/ExponentialProfilePIDController.html" title="class in yams.math">ExponentialProfilePIDController</a></dt>
 <dd>
 <div class="block">Returns the error tolerance of this controller.</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getRecommendedCrtGearPair()" class="member-name-link">getRecommendedCrtGearPair()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">Returns a recommended CRT gear pair if gear-search inputs are configured.</div>
 </dd>
 <dt><a href="yams/mechanisms/positional/Arm.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional">Arm</a></dt>
 <dd>
@@ -1857,6 +1969,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the HALValue type.</div>
 </dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getUniqueCoverageRotations()" class="member-name-link">getUniqueCoverageRotations()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">Returns unique coverage in mechanism rotations, if prime teeth + common scale are set.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/local/NovaWrapper.html#getUnsupportedTelemetryFields()" class="member-name-link">getUnsupportedTelemetryFields()</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/NovaWrapper.html" title="class in yams.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/local/SparkWrapper.html#getUnsupportedTelemetryFields()" class="member-name-link">getUnsupportedTelemetryFields()</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/SparkWrapper.html" title="class in yams.motorcontrollers.local">SparkWrapper</a></dt>
@@ -1966,6 +2082,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">101.6/1000 of a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/Units.html#Meters" title="class or interface in edu.wpi.first.units" class="external-link"><code>Units.Meters</code></a>, or 4 <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/Units.html#Inches" title="class or interface in edu.wpi.first.units" class="external-link"><code>Units.Inches</code></a>.</div>
 </dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html" title="class in yams.units">CRTAbsoluteEncoderConfig.CrtGearPair</a></dt>
+<dd>
+<div class="block">Returns a hash code value for this object.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.TelemetryVerbosity.html#HIGH" class="member-name-link">HIGH</a> - Enum constant in enum class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.TelemetryVerbosity.html" title="enum class in yams.motorcontrollers">SmartMotorControllerConfig.TelemetryVerbosity</a></dt>
 <dd>
 <div class="block">High telemetry</div>
@@ -1989,6 +2109,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Constructs exception for failure to provide stages.</div>
 </dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#isCoprime(int,int)" class="member-name-link">isCoprime(int, int)</a> - Static method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/SimSupplier.html#isInputFed()" class="member-name-link">isInputFed()</a> - Method in interface yams.motorcontrollers.<a href="yams/motorcontrollers/SimSupplier.html" title="interface in yams.motorcontrollers">SimSupplier</a></dt>
 <dd>
 <div class="block">Check if the input was fed.</div>
@@ -2079,6 +2201,10 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:L">L</h2>
 <dl class="index">
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html#lcm()" class="member-name-link">lcm()</a> - Method in record class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html" title="class in yams.units">CRTAbsoluteEncoderConfig.CrtGearPair</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>lcm</code> record component.</div>
+</dd>
 <dt><a href="yams/units/YUnits.html#League" class="member-name-link">League</a> - Static variable in class yams.units.<a href="yams/units/YUnits.html" title="class in yams.units">YUnits</a></dt>
 <dd>
 <div class="block">4828.032 <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/Units.html#Meters" title="class or interface in edu.wpi.first.units" class="external-link"><code>Units.Meters</code></a>s, or 3 <a href="yams/units/YUnits.html#Miles"><code>Miles</code></a>.</div>
@@ -2114,6 +2240,10 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:M">M</h2>
 <dl class="index">
+<dt><a href="yams/mechanisms/swerve/SwerveModule.html#m_azimuthMotorController" class="member-name-link">m_azimuthMotorController</a> - Variable in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve">SwerveModule</a></dt>
+<dd>
+<div class="block">Azimuth motor controller.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorController.html#m_closedLoopControllerThread" class="member-name-link">m_closedLoopControllerThread</a> - Variable in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Thread of the closed loop controller.</div>
@@ -2121,6 +2251,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/SmartMotorController.html#m_config" class="member-name-link">m_config</a> - Variable in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block"><a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for the motor.</div>
+</dd>
+<dt><a href="yams/mechanisms/swerve/SwerveModule.html#m_dirveMotorController" class="member-name-link">m_dirveMotorController</a> - Variable in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve">SwerveModule</a></dt>
+<dd>
+<div class="block">Drive motor controller.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorController.html#m_expoPidController" class="member-name-link">m_expoPidController</a> - Variable in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>
@@ -2499,6 +2633,18 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:R">R</h2>
 <dl class="index">
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#ratioFromChain(int...)" class="member-name-link">ratioFromChain(int...)</a> - Static method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">Computes ratio from a simple meshed gear chain (driver/gear/.../encoder).</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#ratioFromCommonDrive(double,int,int)" class="member-name-link">ratioFromCommonDrive(double, int, int)</a> - Static method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">Computes ratio from a shared drive stage: commonRatio * (driveGear / encoderGear).</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#ratioFromDriverDrivenPairs(int...)" class="member-name-link">ratioFromDriverDrivenPairs(int...)</a> - Static method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">Computes ratio from explicit (driver, driven) stage pairs.</div>
+</dd>
 <dt><a href="yams/math/ExponentialProfilePIDController.html#reset(double,double)" class="member-name-link">reset(double, double)</a> - Method in class yams.math.<a href="yams/math/ExponentialProfilePIDController.html" title="class in yams.math">ExponentialProfilePIDController</a></dt>
 <dd>
 <div class="block">Reset the PID and profile with the given postion and velocity as the measured position and velocity.</div>
@@ -3492,6 +3638,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Create a <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> from <a href="https://codedocs.revrobotics.com/java/com/revrobotics/spark/SparkMax.html" title="class or interface in com.revrobotics.spark" class="external-link"><code>SparkMax</code></a> or <a href="https://codedocs.revrobotics.com/java/com/revrobotics/spark/SparkFlex.html" title="class or interface in com.revrobotics.spark" class="external-link"><code>SparkFlex</code></a></div>
 </dd>
+<dt><a href="yams/mechanisms/swerve/SwerveDrive.DriveSysIdTestType.html#SPIN" class="member-name-link">SPIN</a> - Enum constant in enum class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.DriveSysIdTestType.html" title="enum class in yams.mechanisms.swerve">SwerveDrive.DriveSysIdTestType</a></dt>
+<dd>
+<div class="block">Spin the robot in place to get the drive sysid.</div>
+</dd>
 <dt><a href="yams/mechanisms/SmartMechanism.html#sprocket(double...)" class="member-name-link">sprocket(double...)</a> - Static method in class yams.mechanisms.<a href="yams/mechanisms/SmartMechanism.html" title="class in yams.mechanisms">SmartMechanism</a></dt>
 <dd>
 <div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
@@ -3508,7 +3658,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Sprocket class to handle calculating the conversion factor of a sprocket in your mechanism.</div>
 </dd>
-<dt><a href="yams/gearing/Sprocket.html#%3Cinit%3E(double%5B%5D)" class="member-name-link">Sprocket(double[])</a> - Constructor for class yams.gearing.<a href="yams/gearing/Sprocket.html" title="class in yams.gearing">Sprocket</a></dt>
+<dt><a href="yams/gearing/Sprocket.html#%3Cinit%3E(double...)" class="member-name-link">Sprocket(double...)</a> - Constructor for class yams.gearing.<a href="yams/gearing/Sprocket.html" title="class in yams.gearing">Sprocket</a></dt>
 <dd>
 <div class="block">Create the sprocket given the teeth of each sprocket in the chain.</div>
 </dd>
@@ -3571,6 +3721,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/swerve/SwerveDrive.html#%3Cinit%3E(yams.mechanisms.config.SwerveDriveConfig)" class="member-name-link">SwerveDrive(SwerveDriveConfig)</a> - Constructor for class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
 <div class="block">Create a SwerveDrive.</div>
+</dd>
+<dt><a href="yams/mechanisms/swerve/SwerveDrive.DriveSysIdTestType.html" class="type-name-link" title="enum class in yams.mechanisms.swerve">SwerveDrive.DriveSysIdTestType</a> - Enum Class in <a href="yams/mechanisms/swerve/package-summary.html">yams.mechanisms.swerve</a></dt>
+<dd>
+<div class="block">SysId test type for the drive motors.</div>
 </dd>
 <dt><a href="yams/mechanisms/config/SwerveDriveConfig.html" class="type-name-link" title="class in yams.mechanisms.config">SwerveDriveConfig</a> - Class in <a href="yams/mechanisms/config/package-summary.html">yams.mechanisms.config</a></dt>
 <dd>
@@ -3670,6 +3824,14 @@ loadScripts(document, 'script');</script>
  MEASUREMENT with the step voltage then up to the maximum MEASUREMENT increasing each second by the step voltage
  generated via the <a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </dd>
+<dt><a href="yams/mechanisms/swerve/SwerveDrive.html#sysIdAzimuth(yams.mechanisms.swerve.SwerveModule,edu.wpi.first.units.measure.Voltage,edu.wpi.first.units.measure.Velocity,edu.wpi.first.units.measure.Time)" class="member-name-link">sysIdAzimuth(SwerveModule, Voltage, Velocity&lt;VoltageUnit&gt;, Time)</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
+<dd>
+<div class="block">Run SysId on an Azimuth (Steering/Angle) motor.</div>
+</dd>
+<dt><a href="yams/mechanisms/swerve/SwerveDrive.html#sysIdDrive(edu.wpi.first.units.measure.Voltage,edu.wpi.first.units.measure.Velocity,edu.wpi.first.units.measure.Time,yams.mechanisms.swerve.SwerveDrive.DriveSysIdTestType)" class="member-name-link">sysIdDrive(Voltage, Velocity&lt;VoltageUnit&gt;, Time, SwerveDrive.DriveSysIdTestType)</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
+<dd>
+<div class="block">Run SysId on the drive motors.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:T">T</h2>
 <dl class="index">
@@ -3705,6 +3867,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Temperature limit if available.</div>
 </dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html#theoreticalIterations()" class="member-name-link">theoreticalIterations()</a> - Method in record class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html" title="class in yams.units">CRTAbsoluteEncoderConfig.CrtGearPair</a></dt>
+<dd>
+<div class="block">Returns the value of the <code>theoreticalIterations</code> record component.</div>
+</dd>
 <dt><a href="yams/gearing/GearBox.html#times(double)" class="member-name-link">times(double)</a> - Method in class yams.gearing.<a href="yams/gearing/GearBox.html" title="class in yams.gearing">GearBox</a></dt>
 <dd>
 <div class="block">Multiply the gear reduction ratio by X.</div>
@@ -3712,6 +3878,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/gearing/Sprocket.html#times(double)" class="member-name-link">times(double)</a> - Method in class yams.gearing.<a href="yams/gearing/Sprocket.html" title="class in yams.gearing">Sprocket</a></dt>
 <dd>
 <div class="block">Multiply the sprocket reduction ratio by X.</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html#toString()" class="member-name-link">toString()</a> - Method in record class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html" title="class in yams.units">CRTAbsoluteEncoderConfig.CrtGearPair</a></dt>
+<dd>
+<div class="block">Returns a string representation of this record class.</div>
 </dd>
 <dt><a href="yams/telemetry/DoubleTelemetry.html#transformUnit(yams.motorcontrollers.SmartMotorControllerConfig)" class="member-name-link">transformUnit(SmartMotorControllerConfig)</a> - Method in class yams.telemetry.<a href="yams/telemetry/DoubleTelemetry.html" title="class in yams.telemetry">DoubleTelemetry</a></dt>
 <dd>
@@ -3823,6 +3993,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
 </dd>
+<dt><a href="yams/mechanisms/swerve/SwerveDrive.DriveSysIdTestType.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.DriveSysIdTestType.html" title="enum class in yams.mechanisms.swerve">SwerveDrive.DriveSysIdTestType</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this class with the specified name.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/simulation/SensorData.HALValueType.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/SensorData.HALValueType.html" title="enum class in yams.motorcontrollers.simulation">SensorData.HALValueType</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
@@ -3852,6 +4026,11 @@ loadScripts(document, 'script');</script>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
 </dd>
 <dt><a href="yams/mechanisms/config/MechanismPositionConfig.Plane.html#values()" class="member-name-link">values()</a> - Static method in enum class yams.mechanisms.config.<a href="yams/mechanisms/config/MechanismPositionConfig.Plane.html" title="enum class in yams.mechanisms.config">MechanismPositionConfig.Plane</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum class, in
+the order they are declared.</div>
+</dd>
+<dt><a href="yams/mechanisms/swerve/SwerveDrive.DriveSysIdTestType.html#values()" class="member-name-link">values()</a> - Static method in enum class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.DriveSysIdTestType.html" title="enum class in yams.mechanisms.swerve">SwerveDrive.DriveSysIdTestType</a></dt>
 <dd>
 <div class="block">Returns an array containing the constants of this enum class, in
 the order they are declared.</div>
@@ -3942,6 +4121,30 @@ the order they are declared.</div>
 <dd>
 <div class="block">Supply a non-alike vendor absolute encoder for the azimuth <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withAbsoluteEncoder1Gearing(int...)" class="member-name-link">withAbsoluteEncoder1Gearing(int...)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">Defines a meshed gear chain for encoder 1, ordered from mechanism drive gear to encoder.</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withAbsoluteEncoder1GearingStages(int...)" class="member-name-link">withAbsoluteEncoder1GearingStages(int...)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">Defines explicit mesh stages for encoder 1 as (driverTeeth, drivenTeeth) pairs.</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withAbsoluteEncoder1Inverted(boolean)" class="member-name-link">withAbsoluteEncoder1Inverted(boolean)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">If true, flips encoder 1 ratio sign (use when the sensor is mounted reversed).</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withAbsoluteEncoder2Gearing(int...)" class="member-name-link">withAbsoluteEncoder2Gearing(int...)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">Defines a meshed gear chain for encoder 2, ordered from mechanism drive gear to encoder.</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withAbsoluteEncoder2GearingStages(int...)" class="member-name-link">withAbsoluteEncoder2GearingStages(int...)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">Defines explicit mesh stages for encoder 2 as (driverTeeth, drivenTeeth) pairs.</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withAbsoluteEncoder2Inverted(boolean)" class="member-name-link">withAbsoluteEncoder2Inverted(boolean)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">If true, flips encoder 2 ratio sign (use when the sensor is mounted reversed).</div>
+</dd>
 <dt><a href="yams/mechanisms/config/SwerveModuleConfig.html#withAbsoluteEncoderGearing(yams.gearing.GearBox)" class="member-name-link">withAbsoluteEncoderGearing(GearBox)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></dt>
 <dd>
 <div class="block">Set the gearing of the absolute encoder if it's not 1:1.</div>
@@ -3950,6 +4153,10 @@ the order they are declared.</div>
 <dd>
 <div class="block">Set the absolute encoder offset for the azimuth <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> so that the absolute encoder reads 0
  while the wheel is facing forwards and bevel to the left.</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withAbsoluteEncoderOffsets(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)" class="member-name-link">withAbsoluteEncoderOffsets(Angle, Angle)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">Sets encoder offsets added to raw absolute readings before wrap (in rotations).</div>
 </dd>
 <dt><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html#withAim(edu.wpi.first.math.geometry.Pose2d,java.util.function.BooleanSupplier)" class="member-name-link">withAim(Pose2d, BooleanSupplier)</a> - Method in class yams.mechanisms.swerve.utility.<a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></dt>
 <dd>
@@ -4040,6 +4247,10 @@ the order they are declared.</div>
 <dd>
 <div class="block">Set the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> closed loop controller tolerance via distance.</div>
 </dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withCommonDriveGear(double,int,int,int)" class="member-name-link">withCommonDriveGear(double, int, int, int)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">Sets ratios using a shared drive gear stage.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withContinuousWrapping(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)" class="member-name-link">withContinuousWrapping(Angle, Angle)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set continuous wrapping for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
@@ -4060,6 +4271,14 @@ the order they are declared.</div>
 <dd>
 <div class="block">Cosine compensation for the <a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a>, adjusting the velocity by the cosine of
  the (current_angle-desired_angle).</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withCrtGearRecommendationConstraints(double,int,int,int)" class="member-name-link">withCrtGearRecommendationConstraints(double, int, int, int)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">Sets CRT gear recommendation constraints (coverage margin + search bounds).</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withCrtGearRecommendationInputs(int,double)" class="member-name-link">withCrtGearRecommendationInputs(int, double)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">Sets the stage1 gear teeth and stage2 ratio inputs used for gear recommendations.</div>
 </dd>
 <dt><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html#withCubeRotationControllerAxis()" class="member-name-link">withCubeRotationControllerAxis()</a> - Method in class yams.mechanisms.swerve.utility.<a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></dt>
 <dd>
@@ -4109,6 +4328,10 @@ the order they are declared.</div>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withEncoderInverted(boolean)" class="member-name-link">withEncoderInverted(boolean)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the encoder inversion state.</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withEncoderRatios(double,double)" class="member-name-link">withEncoderRatios(double, double)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">Sets encoder rotations per mechanism rotation directly for encoder 1 and encoder 2.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withExternalEncoder(java.lang.Object)" class="member-name-link">withExternalEncoder(Object)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -4267,6 +4490,10 @@ the order they are declared.</div>
 <dd>
 <div class="block">Configure the <a href="yams/mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a>s <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Mass</code></a> for simulation.</div>
 </dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withMatchTolerance(edu.wpi.first.units.measure.Angle)" class="member-name-link">withMatchTolerance(Angle)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">Sets the match tolerance for encoder 2 modular error (in rotations).</div>
+</dd>
 <dt><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html#withMaximumAngularVelocity(edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">withMaximumAngularVelocity(AngularVelocity)</a> - Method in class yams.mechanisms.swerve.utility.<a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></dt>
 <dd>
 <div class="block">Maximum angular velocity to use for the <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> object, will be translated to Rotations per Second.</div>
@@ -4330,6 +4557,10 @@ the order they are declared.</div>
 <dt><a href="yams/mechanisms/config/PivotConfig.html#withMechanismPositionConfig(yams.mechanisms.config.MechanismPositionConfig)" class="member-name-link">withMechanismPositionConfig(MechanismPositionConfig)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config">PivotConfig</a></dt>
 <dd>
 <div class="block">Set the elevator mechanism position configuration.</div>
+</dd>
+<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withMechanismRange(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)" class="member-name-link">withMechanismRange(Angle, Angle)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dd>
+<div class="block">Sets the allowed mechanism angle range (in rotations).</div>
 </dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#withMechanismUpperLimit()" class="member-name-link">withMechanismUpperLimit()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
 <dd>
