@@ -363,6 +363,11 @@ public class CRTAbsoluteEncoderConfig {
     return maxMechanismRotations;
   }
 
+  /** Allowed mechanism travel in rotations (max - min). */
+  public double getMechanismRange() {
+    return maxMechanismRotations - minMechanismRotations;
+  }
+
   public double getMatchToleranceRotations() {
     return matchToleranceRotations;
   }
