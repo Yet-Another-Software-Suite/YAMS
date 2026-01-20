@@ -361,9 +361,9 @@ public class Arm extends SmartPositionalMechanism
 
     Command group = Commands.print("Starting SysId!")
                             .andThen(Commands.runOnce(m_smc::stopClosedLoopController))
-                            .andThen(routine.dynamic(Direction.kForward).until(maxTrigger))
+                            .andThen(routine.dynamic(Direction.kForward).until(maxTrigger).withTimeout(3))
                             .andThen(routine.dynamic(Direction.kReverse).until(minTrigger))
-                            .andThen(routine.quasistatic(Direction.kForward).until(maxTrigger))
+                            .andThen(routine.quasistatic(Direction.kForward).until(maxTrigger).withTimeout(3))
                             .andThen(routine.quasistatic(Direction.kReverse).until(minTrigger))
                             .finallyDo(m_smc::startClosedLoopController);
     if (m_config.getTelemetryName().isPresent())

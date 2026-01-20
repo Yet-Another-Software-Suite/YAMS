@@ -475,14 +475,14 @@ public abstract class SmartMotorController
   /**
    * Set the encoder position
    *
-   * @param angle Mechanism {@link Angle} to reach.
+   * @param angle Current Mechanism {@link Angle}.
    */
   public abstract void setEncoderPosition(Angle angle);
 
   /**
    * Set the encoder position.
    *
-   * @param distance Measurement {@link Distance} to reach.
+   * @param distance Current Measurement {@link Distance}.
    */
   public abstract void setEncoderPosition(Distance distance);
 

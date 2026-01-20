@@ -183,7 +183,8 @@ public class NovaWrapper extends SmartMotorController
   @Override
   public void setEncoderPosition(Angle angle)
   {
-    m_nova.setEncoderPosition(angle.in(Rotations));
+    m_nova.setEncoderPosition(m_positionConversion.toMotor(angle.times(m_gearing.getMechanismToRotorRatio())
+                                                                .in(Rotations)));
     m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismPosition(angle));
   }
 
