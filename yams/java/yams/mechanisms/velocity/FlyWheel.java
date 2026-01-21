@@ -196,8 +196,7 @@ public class FlyWheel extends SmartVelocityMechanism
                                     " which is greater than maximum velocity " + high + "!", false);
       }
     });
-    m_smc.startClosedLoopController();
-    return Commands.run(() -> m_smc.setVelocity(speed), m_subsystem).withName(
+    return Commands.startRun(m_smc::startClosedLoopController, () -> m_smc.setVelocity(speed), m_subsystem).withName(
         m_subsystem.getName() + " " + getName() + " SetSpeed");
   }
 
@@ -209,9 +208,9 @@ public class FlyWheel extends SmartVelocityMechanism
    */
   public Command setSpeed(Supplier<AngularVelocity> speed)
   {
-    m_smc.startClosedLoopController();
-    return Commands.run(() -> m_smc.setVelocity(speed.get()), m_subsystem).withName(
-        m_subsystem.getName() + " SetSpeed Supplier");
+    return Commands.startRun(m_smc::startClosedLoopController, () -> m_smc.setVelocity(speed.get()), m_subsystem)
+                   .withName(
+                       m_subsystem.getName() + " SetSpeed Supplier");
   }
 
   @Override
