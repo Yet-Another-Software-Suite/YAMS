@@ -22,8 +22,8 @@ import yams.gearing.MechanismGearing;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorFactory;
-import yams.units.CRTAbsoluteEncoder;
-import yams.units.CRTAbsoluteEncoderConfig;
+import yams.units.EasyCRT;
+import yams.units.EasyCRTConfig;
 
 public class SmartMotorFactoryTest
 {

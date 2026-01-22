@@ -2,6 +2,7 @@ package yams.units;
 
 import static edu.wpi.first.units.Units.Rotations;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import java.util.Optional;
 
@@ -16,14 +17,16 @@ import java.util.Optional;
  *
  * <p>This is <b>not</b> a textbook Chinese Remainder Theorem solve; it is a
  * "CRT-inspired" unwrapping method that is easier to keep stable with backlash and sensor
- * noise. Created by team 6911.
+ * noise.
+ * 
+ * <p>Created by team 6911.
  */
-public class CRTAbsoluteEncoder {
+public class EasyCRT {
 
   /**
    * Configuration containing ratios, limits, and encoder suppliers.
    */
-  private final CRTAbsoluteEncoderConfig config;
+  private final EasyCRTConfig easyCrtConfig;
 
   /**
    * Last solve status string (e.g., OK / NO_SOLUTION / AMBIGUOUS / INVALID_CONFIG).
@@ -41,12 +44,12 @@ public class CRTAbsoluteEncoder {
   private int lastIterations = 0;
 
   /**
-   * Creates a CRT absolute encoder solver.
+   * Creates an EasyCRT solver.
    *
-   * @param cfg configuration describing encoder ratios, offsets, and limits
+   * @param easyCrtConfig configuration describing encoder ratios, offsets, and limits
    */
-  public CRTAbsoluteEncoder(CRTAbsoluteEncoderConfig cfg) {
-    this.config = cfg;
+  public EasyCRT(EasyCRTConfig easyCrtConfig) {
+    this.easyCrtConfig = easyCrtConfig;
   }
 
   /**
@@ -58,23 +61,27 @@ public class CRTAbsoluteEncoder {
    * @return optional containing mechanism angle when uniquely resolved
    */
   public Optional<Angle> getAngleOptional() {
-    final double ratio1 = config.getEncoder1RotationsPerMechanismRotation();
-    final double ratio2 = config.getEncoder2RotationsPerMechanismRotation();
-    final double minMechRot = config.getMinMechanismAngle().in(Rotations);
-    final double maxMechRot = config.getMaxMechanismAngle().in(Rotations);
-    final double tolRot = config.getMatchTolerance().in(Rotations);
+    final double ratio1 = easyCrtConfig.getEncoder1RotationsPerMechanismRotation();
+    final double ratio2 = easyCrtConfig.getEncoder2RotationsPerMechanismRotation();
+    final double minMechRot = easyCrtConfig.getMinMechanismAngle().in(Rotations);
+    final double maxMechRot = easyCrtConfig.getMaxMechanismAngle().in(Rotations);
+    final double tolRot = easyCrtConfig.getMatchTolerance().in(Rotations);
 
     // Read + wrap into [0, 1).
     final double abs1 =
-        wrap01(
-            config.getAbsoluteEncoder1Angle()
-                .plus(config.getAbsoluteEncoder1Offset())
-                .in(Rotations));
+        MathUtil.inputModulus(
+            easyCrtConfig.getAbsoluteEncoder1Angle()
+                .plus(easyCrtConfig.getAbsoluteEncoder1Offset())
+                .in(Rotations),
+            0.0,
+            1.0);
     final double abs2 =
-        wrap01(
-            config.getAbsoluteEncoder2Angle()
-                .plus(config.getAbsoluteEncoder2Offset())
-                .in(Rotations));
+        MathUtil.inputModulus(
+            easyCrtConfig.getAbsoluteEncoder2Angle()
+                .plus(easyCrtConfig.getAbsoluteEncoder2Offset())
+                .in(Rotations),
+            0.0,
+            1.0);
 
     CrtSolution sol =
         resolveFromSensors(abs1, abs2, ratio1, ratio2, minMechRot, maxMechRot, tolRot);
@@ -175,7 +182,7 @@ public class CRTAbsoluteEncoder {
         continue;
       }
 
-      double predicted2 = wrap01(ratio2 * mechRot);
+      double predicted2 = MathUtil.inputModulus(ratio2 * mechRot, 0.0, 1.0);
       double err = modularError(predicted2, abs2);
 
       if (err < bestErr) {
@@ -203,20 +210,6 @@ public class CRTAbsoluteEncoder {
     lastStatus = "OK";
     lastErrorRot = bestErr;
     return new CrtSolution(bestRot, bestErr);
-  }
-
-  /**
-   * Wraps a rotation value into the range [0, 1).
-   *
-   * @param rotations rotations to wrap
-   * @return wrapped rotations in [0, 1)
-   */
-  private static double wrap01(double rotations) {
-    double wrapped = rotations % 1.0;
-    if (wrapped < 0.0) {
-      wrapped += 1.0;
-    }
-    return wrapped;
   }
 
   /**

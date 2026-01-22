@@ -13,9 +13,9 @@ import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 
 /**
- * Configuration for the CRT solver made by team 6911.
+ * Configuration for the EasyCRT solver. Made by team 6911.
  */
-public class CRTAbsoluteEncoderConfig {
+public class EasyCRTConfig {
 
   /**
    * Supplies the absolute angle measurement for encoder 1.
@@ -143,7 +143,7 @@ public class CRTAbsoluteEncoderConfig {
    * @param absoluteEncoder1AngleSupplier supplier that returns the angle for encoder 1
    * @param absoluteEncoder2AngleSupplier supplier that returns the angle for encoder 2
    */
-  public CRTAbsoluteEncoderConfig(
+  public EasyCRTConfig(
       Supplier<Angle> absoluteEncoder1AngleSupplier,
       Supplier<Angle> absoluteEncoder2AngleSupplier) {
     this.absoluteEncoder1AngleSupplier =
@@ -165,7 +165,7 @@ public class CRTAbsoluteEncoderConfig {
    * @param encoder2RotPerMechanismRot rotations per mechanism rotation for encoder 2
    * @return this configuration for chaining
    */
-  public CRTAbsoluteEncoderConfig withEncoderRatios(
+  public EasyCRTConfig withEncoderRatios(
       double encoder1RotPerMechanismRot, double encoder2RotPerMechanismRot) {
     this.encoder1RotPerMechanismRot = Optional.of(encoder1RotPerMechanismRot);
     this.encoder2RotPerMechanismRot = Optional.of(encoder2RotPerMechanismRot);
@@ -193,7 +193,7 @@ public class CRTAbsoluteEncoderConfig {
    * @param absoluteEncoder2PinionTeeth tooth count on encoder 2 pinion
    * @return this configuration for chaining
    */
-  public CRTAbsoluteEncoderConfig withCommonDriveGear(
+  public EasyCRTConfig withCommonDriveGear(
       double commonRatio,
       int driveGearTeeth,
       int absoluteEncoder1PinionTeeth,
@@ -226,7 +226,7 @@ public class CRTAbsoluteEncoderConfig {
    * @param encoder2Offset offset to apply to encoder 2 reading
    * @return this configuration for chaining
    */
-  public CRTAbsoluteEncoderConfig withAbsoluteEncoderOffsets(
+  public EasyCRTConfig withAbsoluteEncoderOffsets(
       Angle encoder1Offset, Angle encoder2Offset) {
     this.absoluteEncoder1Offset = Objects.requireNonNull(encoder1Offset, "encoder1Offset");
     this.absoluteEncoder2Offset = Objects.requireNonNull(encoder2Offset, "encoder2Offset");
@@ -240,7 +240,7 @@ public class CRTAbsoluteEncoderConfig {
    * @param maxAngle maximum allowed mechanism angle
    * @return this configuration for chaining
    */
-  public CRTAbsoluteEncoderConfig withMechanismRange(Angle minAngle, Angle maxAngle) {
+  public EasyCRTConfig withMechanismRange(Angle minAngle, Angle maxAngle) {
     this.minMechanismAngle = Objects.requireNonNull(minAngle, "minAngle");
     this.maxMechanismAngle = Objects.requireNonNull(maxAngle, "maxAngle");
     return this;
@@ -266,7 +266,7 @@ public class CRTAbsoluteEncoderConfig {
    * @param tolerance allowable modular error for encoder 2
    * @return this configuration for chaining
    */
-  public CRTAbsoluteEncoderConfig withMatchTolerance(Angle tolerance) {
+  public EasyCRTConfig withMatchTolerance(Angle tolerance) {
     this.matchTolerance = Objects.requireNonNull(tolerance, "tolerance");
     return this;
   }
@@ -280,7 +280,7 @@ public class CRTAbsoluteEncoderConfig {
    * @param inverted whether encoder 1 should be inverted
    * @return this configuration for chaining
    */
-  public CRTAbsoluteEncoderConfig withAbsoluteEncoder1Inverted(boolean inverted) {
+  public EasyCRTConfig withAbsoluteEncoder1Inverted(boolean inverted) {
     this.encoder1Inverted = inverted;
     return this;
   }
@@ -294,7 +294,7 @@ public class CRTAbsoluteEncoderConfig {
    * @param inverted whether encoder 2 should be inverted
    * @return this configuration for chaining
    */
-  public CRTAbsoluteEncoderConfig withAbsoluteEncoder2Inverted(boolean inverted) {
+  public EasyCRTConfig withAbsoluteEncoder2Inverted(boolean inverted) {
     this.encoder2Inverted = inverted;
     return this;
   }
@@ -306,7 +306,7 @@ public class CRTAbsoluteEncoderConfig {
    * @param encoder2Inverted whether encoder 2 should be inverted
    * @return this configuration for chaining
    */
-  public CRTAbsoluteEncoderConfig withAbsoluteEncoderInversions(
+  public EasyCRTConfig withAbsoluteEncoderInversions(
       boolean encoder1Inverted, boolean encoder2Inverted) {
     this.encoder1Inverted = encoder1Inverted;
     this.encoder2Inverted = encoder2Inverted;
@@ -326,7 +326,7 @@ public class CRTAbsoluteEncoderConfig {
    * @param stage2Ratio common ratio between mechanism and drive gear
    * @return this configuration for chaining
    */
-  public CRTAbsoluteEncoderConfig withCrtGearRecommendationInputs(
+  public EasyCRTConfig withCrtGearRecommendationInputs(
       int stage1GearTeeth, double stage2Ratio) {
     requirePositiveTeeth(stage1GearTeeth, "stage1GearTeeth");
     requireNonZeroFinite(stage2Ratio, "stage2Ratio");
@@ -349,7 +349,7 @@ public class CRTAbsoluteEncoderConfig {
    * @param maxIterationsLimit maximum iterations per gear to consider valid
    * @return this configuration for chaining
    */
-  public CRTAbsoluteEncoderConfig withCrtGearRecommendationConstraints(
+  public EasyCRTConfig withCrtGearRecommendationConstraints(
       double coverageMargin, int minTeeth, int maxTeeth, int maxIterationsLimit) {
     if (!RobotBase.isSimulation()) {
       return this;
@@ -386,7 +386,7 @@ public class CRTAbsoluteEncoderConfig {
    * @param teethChain ordered teeth counts from mechanism gear to encoder 1 pinion
    * @return this configuration for chaining
    */
-  public CRTAbsoluteEncoderConfig withAbsoluteEncoder1Gearing(int... teethChain) {
+  public EasyCRTConfig withAbsoluteEncoder1Gearing(int... teethChain) {
     this.absoluteEncoder1TeethChain =
         Optional.of(copyTeeth(teethChain, "absoluteEncoder1TeethChain"));
     return this;
@@ -405,7 +405,7 @@ public class CRTAbsoluteEncoderConfig {
    * @param teethChain ordered teeth counts from mechanism gear to encoder 2 pinion
    * @return this configuration for chaining
    */
-  public CRTAbsoluteEncoderConfig withAbsoluteEncoder2Gearing(int... teethChain) {
+  public EasyCRTConfig withAbsoluteEncoder2Gearing(int... teethChain) {
     this.absoluteEncoder2TeethChain =
         Optional.of(copyTeeth(teethChain, "absoluteEncoder2TeethChain"));
     return this;
@@ -422,7 +422,7 @@ public class CRTAbsoluteEncoderConfig {
    * @param driverDrivenPairs alternating driver and driven teeth counts for each stage
    * @return this configuration for chaining
    */
-  public CRTAbsoluteEncoderConfig withAbsoluteEncoder1GearingStages(int... driverDrivenPairs) {
+  public EasyCRTConfig withAbsoluteEncoder1GearingStages(int... driverDrivenPairs) {
     this.absoluteEncoder1TeethStages =
         Optional.of(copyTeeth(driverDrivenPairs, "absoluteEncoder1TeethStages"));
     return this;
@@ -438,7 +438,7 @@ public class CRTAbsoluteEncoderConfig {
    * @param driverDrivenPairs alternating driver and driven teeth counts for each stage
    * @return this configuration for chaining
    */
-  public CRTAbsoluteEncoderConfig withAbsoluteEncoder2GearingStages(int... driverDrivenPairs) {
+  public EasyCRTConfig withAbsoluteEncoder2GearingStages(int... driverDrivenPairs) {
     this.absoluteEncoder2TeethStages =
         Optional.of(copyTeeth(driverDrivenPairs, "absoluteEncoder2TeethStages"));
     return this;
@@ -499,7 +499,7 @@ public class CRTAbsoluteEncoderConfig {
     throw new IllegalStateException("Absolute encoder " + encoderIndex + " gearing not set.");
   }
 
-  // --- Getters used by CRTAbsoluteEncoder ---
+  // --- Getters used by EasyCRT ---
 
   /**
    * Returns the current angle for absolute encoder 1.
