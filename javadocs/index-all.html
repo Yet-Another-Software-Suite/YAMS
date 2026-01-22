@@ -333,9 +333,13 @@ loadScripts(document, 'script');</script>
 <div class="block">Convert <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>LinearVelocity</code></a> to <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> using the
  <code>SmartMotorControllerConfig.mechanismCircumference</code></div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html#coverageRot()" class="member-name-link">coverageRot()</a> - Method in record class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html" title="class in yams.units">CRTAbsoluteEncoderConfig.CrtGearPair</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.CrtGearPair.html#coverage()" class="member-name-link">coverage()</a> - Method in record class yams.units.<a href="yams/units/EasyCRTConfig.CrtGearPair.html" title="class in yams.units">EasyCRTConfig.CrtGearPair</a></dt>
 <dd>
-<div class="block">Returns the value of the <code>coverageRot</code> record component.</div>
+<div class="block">Returns the value of the <a href="./yams/units/EasyCRTConfig.CrtGearPair.html#param-coverage"><code>coverage</code></a> record component.</div>
+</dd>
+<dt><a href="yams/units/EasyCRTConfig.html#coverageSatisfiesRange()" class="member-name-link">coverageSatisfiesRange()</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
+<dd>
+<div class="block">Returns true when the unique coverage meets or exceeds the configured maximum mechanism range.</div>
 </dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetry.BooleanTelemetryField.html#create()" class="member-name-link">create()</a> - Method in enum class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetry.BooleanTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.BooleanTelemetryField</a></dt>
 <dd>
@@ -385,21 +389,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/hal/SimValue.html" title="class or interface in edu.wpi.first.hal" class="external-link"><code>SimValue</code></a> for the sensor.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoder.html" class="type-name-link" title="class in yams.units">CRTAbsoluteEncoder</a> - Class in <a href="yams/units/package-summary.html">yams.units</a></dt>
-<dd>
-<div class="block">A CRT style absolute mechanism angle estimator using two absolute encoders.</div>
-</dd>
-<dt><a href="yams/units/CRTAbsoluteEncoder.html#%3Cinit%3E(yams.units.CRTAbsoluteEncoderConfig)" class="member-name-link">CRTAbsoluteEncoder(CRTAbsoluteEncoderConfig)</a> - Constructor for class yams.units.<a href="yams/units/CRTAbsoluteEncoder.html" title="class in yams.units">CRTAbsoluteEncoder</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html" class="type-name-link" title="class in yams.units">CRTAbsoluteEncoderConfig</a> - Class in <a href="yams/units/package-summary.html">yams.units</a></dt>
-<dd>
-<div class="block">Configuration for the CRT solver.</div>
-</dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#%3Cinit%3E(java.util.function.Supplier,java.util.function.Supplier)" class="member-name-link">CRTAbsoluteEncoderConfig(Supplier&lt;Angle&gt;, Supplier&lt;Angle&gt;)</a> - Constructor for class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html" class="type-name-link" title="class in yams.units">CRTAbsoluteEncoderConfig.CrtGearPair</a> - Record Class in <a href="yams/units/package-summary.html">yams.units</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html#%3Cinit%3E(int,int,int,double,int,int)" class="member-name-link">CrtGearPair(int, int, int, double, int, int)</a> - Constructor for record class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html" title="class in yams.units">CRTAbsoluteEncoderConfig.CrtGearPair</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.CrtGearPair.html#%3Cinit%3E(int,int,int,edu.wpi.first.units.measure.Angle,int,int)" class="member-name-link">CrtGearPair(int, int, int, Angle, int, int)</a> - Constructor for record class yams.units.<a href="yams/units/EasyCRTConfig.CrtGearPair.html" title="class in yams.units">EasyCRTConfig.CrtGearPair</a></dt>
 <dd>
 <div class="block">Creates an instance of a <code>CrtGearPair</code> record class.</div>
 </dd>
@@ -545,6 +535,26 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:E">E</h2>
 <dl class="index">
+<dt><a href="yams/units/EasyCRT.html" class="type-name-link" title="class in yams.units">EasyCRT</a> - Class in <a href="yams/units/package-summary.html">yams.units</a></dt>
+<dd>
+<div class="block">A CRT style absolute mechanism angle estimator using two absolute encoders.</div>
+</dd>
+<dt><a href="yams/units/EasyCRT.html#%3Cinit%3E(yams.units.EasyCRTConfig)" class="member-name-link">EasyCRT(EasyCRTConfig)</a> - Constructor for class yams.units.<a href="yams/units/EasyCRT.html" title="class in yams.units">EasyCRT</a></dt>
+<dd>
+<div class="block">Creates an EasyCRT solver.</div>
+</dd>
+<dt><a href="yams/units/EasyCRTConfig.html" class="type-name-link" title="class in yams.units">EasyCRTConfig</a> - Class in <a href="yams/units/package-summary.html">yams.units</a></dt>
+<dd>
+<div class="block">Configuration for the EasyCRT solver.</div>
+</dd>
+<dt><a href="yams/units/EasyCRTConfig.html#%3Cinit%3E(java.util.function.Supplier,java.util.function.Supplier)" class="member-name-link">EasyCRTConfig(Supplier&lt;Angle&gt;, Supplier&lt;Angle&gt;)</a> - Constructor for class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
+<dd>
+<div class="block">Creates a configuration with suppliers for both absolute encoders.</div>
+</dd>
+<dt><a href="yams/units/EasyCRTConfig.CrtGearPair.html" class="type-name-link" title="class in yams.units">EasyCRTConfig.CrtGearPair</a> - Record Class in <a href="yams/units/package-summary.html">yams.units</a></dt>
+<dd>
+<div class="block">Represents a candidate CRT gear pair.</div>
+</dd>
 <dt><a href="yams/mechanisms/positional/Elevator.html" class="type-name-link" title="class in yams.mechanisms.positional">Elevator</a> - Class in <a href="yams/mechanisms/positional/package-summary.html">yams.mechanisms.positional</a></dt>
 <dd>
 <div class="block">Elevator mechanism.</div>
@@ -601,7 +611,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Encoder inversion.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html" title="class in yams.units">CRTAbsoluteEncoderConfig.CrtGearPair</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.CrtGearPair.html#equals(java.lang.Object)" class="member-name-link">equals(Object)</a> - Method in record class yams.units.<a href="yams/units/EasyCRTConfig.CrtGearPair.html" title="class in yams.units">EasyCRTConfig.CrtGearPair</a></dt>
 <dd>
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
 </dd>
@@ -644,7 +654,7 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html#feedUpdateSim()" class="member-name-link">feedUpdateSim()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#findSmallestCrtGearPair(int,double,double,double,int,int,int)" class="member-name-link">findSmallestCrtGearPair(int, double, double, double, int, int, int)</a> - Static method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#findSmallestCrtGearPair(int,double,edu.wpi.first.units.measure.Angle,double,int,int,int)" class="member-name-link">findSmallestCrtGearPair(int, double, Angle, double, int, int, int)</a> - Static method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Finds the smallest gear pair that satisfies coverage and iteration limits.</div>
 </dd>
@@ -727,17 +737,17 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:G">G</h2>
 <dl class="index">
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html#gcd()" class="member-name-link">gcd()</a> - Method in record class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html" title="class in yams.units">CRTAbsoluteEncoderConfig.CrtGearPair</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.CrtGearPair.html#gcd()" class="member-name-link">gcd()</a> - Method in record class yams.units.<a href="yams/units/EasyCRTConfig.CrtGearPair.html" title="class in yams.units">EasyCRTConfig.CrtGearPair</a></dt>
 <dd>
-<div class="block">Returns the value of the <code>gcd</code> record component.</div>
+<div class="block">Returns the value of the <a href="./yams/units/EasyCRTConfig.CrtGearPair.html#param-gcd"><code>gcd</code></a> record component.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html#gearA()" class="member-name-link">gearA()</a> - Method in record class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html" title="class in yams.units">CRTAbsoluteEncoderConfig.CrtGearPair</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.CrtGearPair.html#gearA()" class="member-name-link">gearA()</a> - Method in record class yams.units.<a href="yams/units/EasyCRTConfig.CrtGearPair.html" title="class in yams.units">EasyCRTConfig.CrtGearPair</a></dt>
 <dd>
-<div class="block">Returns the value of the <code>gearA</code> record component.</div>
+<div class="block">Returns the value of the <a href="./yams/units/EasyCRTConfig.CrtGearPair.html#param-gearA"><code>gearA</code></a> record component.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html#gearB()" class="member-name-link">gearB()</a> - Method in record class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html" title="class in yams.units">CRTAbsoluteEncoderConfig.CrtGearPair</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.CrtGearPair.html#gearB()" class="member-name-link">gearB()</a> - Method in record class yams.units.<a href="yams/units/EasyCRTConfig.CrtGearPair.html" title="class in yams.units">EasyCRTConfig.CrtGearPair</a></dt>
 <dd>
-<div class="block">Returns the value of the <code>gearB</code> record component.</div>
+<div class="block">Returns the value of the <a href="./yams/units/EasyCRTConfig.CrtGearPair.html#param-gearB"><code>gearB</code></a> record component.</div>
 </dd>
 <dt><a href="yams/mechanisms/SmartMechanism.html#gearbox(double...)" class="member-name-link">gearbox(double...)</a> - Static method in class yams.mechanisms.<a href="yams/mechanisms/SmartMechanism.html" title="class in yams.mechanisms">SmartMechanism</a></dt>
 <dd>
@@ -791,22 +801,30 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the value.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getAbsoluteEncoder1Angle()" class="member-name-link">getAbsoluteEncoder1Angle()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getAbsoluteEncoder1Gearing()" class="member-name-link">getAbsoluteEncoder1Gearing()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#getAbsoluteEncoder1Angle()" class="member-name-link">getAbsoluteEncoder1Angle()</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
-<div class="block">Builds a MechanismGearing for encoder 1 from the configured chain/stages.</div>
+<div class="block">Returns the current angle for absolute encoder 1.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getAbsoluteEncoder1OffsetRotations()" class="member-name-link">getAbsoluteEncoder1OffsetRotations()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getAbsoluteEncoder2Angle()" class="member-name-link">getAbsoluteEncoder2Angle()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getAbsoluteEncoder2Gearing()" class="member-name-link">getAbsoluteEncoder2Gearing()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#getAbsoluteEncoder1Gearing()" class="member-name-link">getAbsoluteEncoder1Gearing()</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
-<div class="block">Builds a MechanismGearing for encoder 2 from the configured chain/stages.</div>
+<div class="block">Builds a MechanismGearing for encoder 1 from the configured chain or stages.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getAbsoluteEncoder2OffsetRotations()" class="member-name-link">getAbsoluteEncoder2OffsetRotations()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
-<dd>&nbsp;</dd>
+<dt><a href="yams/units/EasyCRTConfig.html#getAbsoluteEncoder1Offset()" class="member-name-link">getAbsoluteEncoder1Offset()</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
+<dd>
+<div class="block">Returns the configured offset for encoder 1 in rotations.</div>
+</dd>
+<dt><a href="yams/units/EasyCRTConfig.html#getAbsoluteEncoder2Angle()" class="member-name-link">getAbsoluteEncoder2Angle()</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
+<dd>
+<div class="block">Returns the current angle for absolute encoder 2.</div>
+</dd>
+<dt><a href="yams/units/EasyCRTConfig.html#getAbsoluteEncoder2Gearing()" class="member-name-link">getAbsoluteEncoder2Gearing()</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
+<dd>
+<div class="block">Builds a MechanismGearing for encoder 2 from the configured chain or stages.</div>
+</dd>
+<dt><a href="yams/units/EasyCRTConfig.html#getAbsoluteEncoder2Offset()" class="member-name-link">getAbsoluteEncoder2Offset()</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
+<dd>
+<div class="block">Returns the configured offset for encoder 2 in rotations.</div>
+</dd>
 <dt><a href="yams/mechanisms/config/SwerveModuleConfig.html#getAbsoluteEncoderAngle()" class="member-name-link">getAbsoluteEncoderAngle()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></dt>
 <dd>
 <div class="block">Get the absolute encoder angle for the azimuth <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
@@ -827,7 +845,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the angle difference between the robot's current pose and the given pose.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoder.html#getAngleOptional()" class="member-name-link">getAngleOptional()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoder.html" title="class in yams.units">CRTAbsoluteEncoder</a></dt>
+<dt><a href="yams/units/EasyCRT.html#getAngleOptional()" class="member-name-link">getAngleOptional()</a> - Method in class yams.units.<a href="yams/units/EasyCRT.html" title="class in yams.units">EasyCRT</a></dt>
 <dd>
 <div class="block">Returns the mechanism angle if a unique solution is found.</div>
 </dd>
@@ -1028,11 +1046,11 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/ElevatorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>ElevatorFeedforward</code></a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link"><code>Optional</code></a></div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getEncoder1RotationsPerMechanismRotation()" class="member-name-link">getEncoder1RotationsPerMechanismRotation()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#getEncoder1RotationsPerMechanismRotation()" class="member-name-link">getEncoder1RotationsPerMechanismRotation()</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Returns encoder 1 rotations per mechanism rotation (includes inversion if enabled).</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getEncoder2RotationsPerMechanismRotation()" class="member-name-link">getEncoder2RotationsPerMechanismRotation()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#getEncoder2RotationsPerMechanismRotation()" class="member-name-link">getEncoder2RotationsPerMechanismRotation()</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Returns encoder 2 rotations per mechanism rotation (includes inversion if enabled).</div>
 </dd>
@@ -1137,17 +1155,17 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the velocity gain as constant.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoder.html#getLastErrorRotations()" class="member-name-link">getLastErrorRotations()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoder.html" title="class in yams.units">CRTAbsoluteEncoder</a></dt>
+<dt><a href="yams/units/EasyCRT.html#getLastErrorRotations()" class="member-name-link">getLastErrorRotations()</a> - Method in class yams.units.<a href="yams/units/EasyCRT.html" title="class in yams.units">EasyCRT</a></dt>
 <dd>
-<div class="block">Last best-match modular error in rotations.</div>
+<div class="block">Returns the last best-match modular error in rotations.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoder.html#getLastIterations()" class="member-name-link">getLastIterations()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoder.html" title="class in yams.units">CRTAbsoluteEncoder</a></dt>
+<dt><a href="yams/units/EasyCRT.html#getLastIterations()" class="member-name-link">getLastIterations()</a> - Method in class yams.units.<a href="yams/units/EasyCRT.html" title="class in yams.units">EasyCRT</a></dt>
 <dd>
-<div class="block">Number of candidates evaluated in the last solve attempt.</div>
+<div class="block">Returns the number of candidates evaluated in the last solve attempt.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoder.html#getLastStatus()" class="member-name-link">getLastStatus()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoder.html" title="class in yams.units">CRTAbsoluteEncoder</a></dt>
+<dt><a href="yams/units/EasyCRT.html#getLastStatus()" class="member-name-link">getLastStatus()</a> - Method in class yams.units.<a href="yams/units/EasyCRT.html" title="class in yams.units">EasyCRT</a></dt>
 <dd>
-<div class="block">Last solver status string (e.g., OK / NO_SOLUTION / AMBIGUOUS / INVALID_CONFIG).</div>
+<div class="block">Returns the last solver status string.</div>
 </dd>
 <dt><a href="yams/mechanisms/config/DifferentialMechanismConfig.html#getLeftMechanismPosition(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)" class="member-name-link">getLeftMechanismPosition(Angle, Angle)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/DifferentialMechanismConfig.html" title="class in yams.mechanisms.config">DifferentialMechanismConfig</a></dt>
 <dd>
@@ -1193,8 +1211,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the lower soft limit of the shooter.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getMatchToleranceRotations()" class="member-name-link">getMatchToleranceRotations()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
-<dd>&nbsp;</dd>
+<dt><a href="yams/units/EasyCRTConfig.html#getMatchTolerance()" class="member-name-link">getMatchTolerance()</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
+<dd>
+<div class="block">Returns the maximum allowed modular error between predicted and measured encoder 2.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getMaxDiscontinuityPoint()" class="member-name-link">getMaxDiscontinuityPoint()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the discontinuity point for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> encoder.</div>
@@ -1215,8 +1235,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the maximum speed of the modules.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getMaxMechanismRotations()" class="member-name-link">getMaxMechanismRotations()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
-<dd>&nbsp;</dd>
+<dt><a href="yams/units/EasyCRTConfig.html#getMaxMechanismAngle()" class="member-name-link">getMaxMechanismAngle()</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
+<dd>
+<div class="block">Returns the maximum allowed mechanism rotations.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/local/NovaWrapper.html#getMeasurementPosition()" class="member-name-link">getMeasurementPosition()</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/NovaWrapper.html" title="class in yams.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/local/SparkWrapper.html#getMeasurementPosition()" class="member-name-link">getMeasurementPosition()</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/SparkWrapper.html" title="class in yams.motorcontrollers.local">SparkWrapper</a></dt>
@@ -1304,6 +1326,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the Mechanism setpoint position.</div>
 </dd>
+<dt><a href="yams/units/EasyCRTConfig.html#getMechanismRange()" class="member-name-link">getMechanismRange()</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
+<dd>
+<div class="block">Allowed mechanism travel in rotations (max - min).</div>
+</dd>
 <dt><a href="yams/mechanisms/positional/SmartPositionalMechanism.html#getMechanismRoot()" class="member-name-link">getMechanismRoot()</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/SmartPositionalMechanism.html" title="class in yams.mechanisms.positional">SmartPositionalMechanism</a></dt>
 <dd>
 <div class="block">The root of the 2D mechanism model.</div>
@@ -1385,8 +1411,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the lower hard limit of the <a href="yams/mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a></div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getMinMechanismRotations()" class="member-name-link">getMinMechanismRotations()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
-<dd>&nbsp;</dd>
+<dt><a href="yams/units/EasyCRTConfig.html#getMinMechanismAngle()" class="member-name-link">getMinMechanismAngle()</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
+<dd>
+<div class="block">Returns the minimum allowed mechanism rotations.</div>
+</dd>
 <dt><a href="yams/mechanisms/swerve/SwerveDrive.html#getModule(java.lang.String)" class="member-name-link">getModule(String)</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
 <div class="block">Get a module by its name.</div>
@@ -1589,7 +1617,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the error tolerance of this controller.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getRecommendedCrtGearPair()" class="member-name-link">getRecommendedCrtGearPair()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#getRecommendedCrtGearPair()" class="member-name-link">getRecommendedCrtGearPair()</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Returns a recommended CRT gear pair if gear-search inputs are configured.</div>
 </dd>
@@ -1969,9 +1997,9 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the HALValue type.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#getUniqueCoverageRotations()" class="member-name-link">getUniqueCoverageRotations()</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#getUniqueCoverage()" class="member-name-link">getUniqueCoverage()</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
-<div class="block">Returns unique coverage in mechanism rotations, if prime teeth + common scale are set.</div>
+<div class="block">Returns unique coverage in mechanism angle, if prime teeth + common scale are set.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/local/NovaWrapper.html#getUnsupportedTelemetryFields()" class="member-name-link">getUnsupportedTelemetryFields()</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/NovaWrapper.html" title="class in yams.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
@@ -2082,7 +2110,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">101.6/1000 of a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/Units.html#Meters" title="class or interface in edu.wpi.first.units" class="external-link"><code>Units.Meters</code></a>, or 4 <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/Units.html#Inches" title="class or interface in edu.wpi.first.units" class="external-link"><code>Units.Inches</code></a>.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html" title="class in yams.units">CRTAbsoluteEncoderConfig.CrtGearPair</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.CrtGearPair.html#hashCode()" class="member-name-link">hashCode()</a> - Method in record class yams.units.<a href="yams/units/EasyCRTConfig.CrtGearPair.html" title="class in yams.units">EasyCRTConfig.CrtGearPair</a></dt>
 <dd>
 <div class="block">Returns a hash code value for this object.</div>
 </dd>
@@ -2109,8 +2137,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Constructs exception for failure to provide stages.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#isCoprime(int,int)" class="member-name-link">isCoprime(int, int)</a> - Static method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
-<dd>&nbsp;</dd>
+<dt><a href="yams/units/EasyCRTConfig.html#isCoprime(int,int)" class="member-name-link">isCoprime(int, int)</a> - Static method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
+<dd>
+<div class="block">Checks whether two integers are coprime.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SimSupplier.html#isInputFed()" class="member-name-link">isInputFed()</a> - Method in interface yams.motorcontrollers.<a href="yams/motorcontrollers/SimSupplier.html" title="interface in yams.motorcontrollers">SimSupplier</a></dt>
 <dd>
 <div class="block">Check if the input was fed.</div>
@@ -2201,9 +2231,9 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:L">L</h2>
 <dl class="index">
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html#lcm()" class="member-name-link">lcm()</a> - Method in record class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html" title="class in yams.units">CRTAbsoluteEncoderConfig.CrtGearPair</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.CrtGearPair.html#lcm()" class="member-name-link">lcm()</a> - Method in record class yams.units.<a href="yams/units/EasyCRTConfig.CrtGearPair.html" title="class in yams.units">EasyCRTConfig.CrtGearPair</a></dt>
 <dd>
-<div class="block">Returns the value of the <code>lcm</code> record component.</div>
+<div class="block">Returns the value of the <a href="./yams/units/EasyCRTConfig.CrtGearPair.html#param-lcm"><code>lcm</code></a> record component.</div>
 </dd>
 <dt><a href="yams/units/YUnits.html#League" class="member-name-link">League</a> - Static variable in class yams.units.<a href="yams/units/YUnits.html" title="class in yams.units">YUnits</a></dt>
 <dd>
@@ -2633,15 +2663,15 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:R">R</h2>
 <dl class="index">
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#ratioFromChain(int...)" class="member-name-link">ratioFromChain(int...)</a> - Static method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#ratioFromChain(int...)" class="member-name-link">ratioFromChain(int...)</a> - Static method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Computes ratio from a simple meshed gear chain (driver/gear/.../encoder).</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#ratioFromCommonDrive(double,int,int)" class="member-name-link">ratioFromCommonDrive(double, int, int)</a> - Static method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#ratioFromCommonDrive(double,int,int)" class="member-name-link">ratioFromCommonDrive(double, int, int)</a> - Static method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Computes ratio from a shared drive stage: commonRatio * (driveGear / encoderGear).</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#ratioFromDriverDrivenPairs(int...)" class="member-name-link">ratioFromDriverDrivenPairs(int...)</a> - Static method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#ratioFromDriverDrivenPairs(int...)" class="member-name-link">ratioFromDriverDrivenPairs(int...)</a> - Static method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Computes ratio from explicit (driver, driven) stage pairs.</div>
 </dd>
@@ -3867,9 +3897,9 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Temperature limit if available.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html#theoreticalIterations()" class="member-name-link">theoreticalIterations()</a> - Method in record class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html" title="class in yams.units">CRTAbsoluteEncoderConfig.CrtGearPair</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.CrtGearPair.html#theoreticalIterations()" class="member-name-link">theoreticalIterations()</a> - Method in record class yams.units.<a href="yams/units/EasyCRTConfig.CrtGearPair.html" title="class in yams.units">EasyCRTConfig.CrtGearPair</a></dt>
 <dd>
-<div class="block">Returns the value of the <code>theoreticalIterations</code> record component.</div>
+<div class="block">Returns the value of the <a href="./yams/units/EasyCRTConfig.CrtGearPair.html#param-theoreticalIterations"><code>theoreticalIterations</code></a> record component.</div>
 </dd>
 <dt><a href="yams/gearing/GearBox.html#times(double)" class="member-name-link">times(double)</a> - Method in class yams.gearing.<a href="yams/gearing/GearBox.html" title="class in yams.gearing">GearBox</a></dt>
 <dd>
@@ -3879,7 +3909,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Multiply the sprocket reduction ratio by X.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html#toString()" class="member-name-link">toString()</a> - Method in record class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.CrtGearPair.html" title="class in yams.units">CRTAbsoluteEncoderConfig.CrtGearPair</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.CrtGearPair.html#toString()" class="member-name-link">toString()</a> - Method in record class yams.units.<a href="yams/units/EasyCRTConfig.CrtGearPair.html" title="class in yams.units">EasyCRTConfig.CrtGearPair</a></dt>
 <dd>
 <div class="block">Returns a string representation of this record class.</div>
 </dd>
@@ -4121,27 +4151,27 @@ the order they are declared.</div>
 <dd>
 <div class="block">Supply a non-alike vendor absolute encoder for the azimuth <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withAbsoluteEncoder1Gearing(int...)" class="member-name-link">withAbsoluteEncoder1Gearing(int...)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#withAbsoluteEncoder1Gearing(int...)" class="member-name-link">withAbsoluteEncoder1Gearing(int...)</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Defines a meshed gear chain for encoder 1, ordered from mechanism drive gear to encoder.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withAbsoluteEncoder1GearingStages(int...)" class="member-name-link">withAbsoluteEncoder1GearingStages(int...)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#withAbsoluteEncoder1GearingStages(int...)" class="member-name-link">withAbsoluteEncoder1GearingStages(int...)</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Defines explicit mesh stages for encoder 1 as (driverTeeth, drivenTeeth) pairs.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withAbsoluteEncoder1Inverted(boolean)" class="member-name-link">withAbsoluteEncoder1Inverted(boolean)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#withAbsoluteEncoder1Inverted(boolean)" class="member-name-link">withAbsoluteEncoder1Inverted(boolean)</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">If true, flips encoder 1 ratio sign (use when the sensor is mounted reversed).</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withAbsoluteEncoder2Gearing(int...)" class="member-name-link">withAbsoluteEncoder2Gearing(int...)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#withAbsoluteEncoder2Gearing(int...)" class="member-name-link">withAbsoluteEncoder2Gearing(int...)</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Defines a meshed gear chain for encoder 2, ordered from mechanism drive gear to encoder.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withAbsoluteEncoder2GearingStages(int...)" class="member-name-link">withAbsoluteEncoder2GearingStages(int...)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#withAbsoluteEncoder2GearingStages(int...)" class="member-name-link">withAbsoluteEncoder2GearingStages(int...)</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Defines explicit mesh stages for encoder 2 as (driverTeeth, drivenTeeth) pairs.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withAbsoluteEncoder2Inverted(boolean)" class="member-name-link">withAbsoluteEncoder2Inverted(boolean)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#withAbsoluteEncoder2Inverted(boolean)" class="member-name-link">withAbsoluteEncoder2Inverted(boolean)</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">If true, flips encoder 2 ratio sign (use when the sensor is mounted reversed).</div>
 </dd>
@@ -4149,12 +4179,16 @@ the order they are declared.</div>
 <dd>
 <div class="block">Set the gearing of the absolute encoder if it's not 1:1.</div>
 </dd>
+<dt><a href="yams/units/EasyCRTConfig.html#withAbsoluteEncoderInversions(boolean,boolean)" class="member-name-link">withAbsoluteEncoderInversions(boolean, boolean)</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
+<dd>
+<div class="block">Sets inversion for both encoders in one call.</div>
+</dd>
 <dt><a href="yams/mechanisms/config/SwerveModuleConfig.html#withAbsoluteEncoderOffset(edu.wpi.first.units.measure.Angle)" class="member-name-link">withAbsoluteEncoderOffset(Angle)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></dt>
 <dd>
 <div class="block">Set the absolute encoder offset for the azimuth <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> so that the absolute encoder reads 0
  while the wheel is facing forwards and bevel to the left.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withAbsoluteEncoderOffsets(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)" class="member-name-link">withAbsoluteEncoderOffsets(Angle, Angle)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#withAbsoluteEncoderOffsets(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)" class="member-name-link">withAbsoluteEncoderOffsets(Angle, Angle)</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Sets encoder offsets added to raw absolute readings before wrap (in rotations).</div>
 </dd>
@@ -4247,7 +4281,7 @@ the order they are declared.</div>
 <dd>
 <div class="block">Set the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> closed loop controller tolerance via distance.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withCommonDriveGear(double,int,int,int)" class="member-name-link">withCommonDriveGear(double, int, int, int)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#withCommonDriveGear(double,int,int,int)" class="member-name-link">withCommonDriveGear(double, int, int, int)</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Sets ratios using a shared drive gear stage.</div>
 </dd>
@@ -4272,11 +4306,11 @@ the order they are declared.</div>
 <div class="block">Cosine compensation for the <a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a>, adjusting the velocity by the cosine of
  the (current_angle-desired_angle).</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withCrtGearRecommendationConstraints(double,int,int,int)" class="member-name-link">withCrtGearRecommendationConstraints(double, int, int, int)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#withCrtGearRecommendationConstraints(double,int,int,int)" class="member-name-link">withCrtGearRecommendationConstraints(double, int, int, int)</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Sets CRT gear recommendation constraints (coverage margin + search bounds).</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withCrtGearRecommendationInputs(int,double)" class="member-name-link">withCrtGearRecommendationInputs(int, double)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#withCrtGearRecommendationInputs(int,double)" class="member-name-link">withCrtGearRecommendationInputs(int, double)</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Sets the stage1 gear teeth and stage2 ratio inputs used for gear recommendations.</div>
 </dd>
@@ -4329,7 +4363,7 @@ the order they are declared.</div>
 <dd>
 <div class="block">Set the encoder inversion state.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withEncoderRatios(double,double)" class="member-name-link">withEncoderRatios(double, double)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#withEncoderRatios(double,double)" class="member-name-link">withEncoderRatios(double, double)</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Sets encoder rotations per mechanism rotation directly for encoder 1 and encoder 2.</div>
 </dd>
@@ -4490,7 +4524,7 @@ the order they are declared.</div>
 <dd>
 <div class="block">Configure the <a href="yams/mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a>s <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Mass</code></a> for simulation.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withMatchTolerance(edu.wpi.first.units.measure.Angle)" class="member-name-link">withMatchTolerance(Angle)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#withMatchTolerance(edu.wpi.first.units.measure.Angle)" class="member-name-link">withMatchTolerance(Angle)</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Sets the match tolerance for encoder 2 modular error (in rotations).</div>
 </dd>
@@ -4558,7 +4592,7 @@ the order they are declared.</div>
 <dd>
 <div class="block">Set the elevator mechanism position configuration.</div>
 </dd>
-<dt><a href="yams/units/CRTAbsoluteEncoderConfig.html#withMechanismRange(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)" class="member-name-link">withMechanismRange(Angle, Angle)</a> - Method in class yams.units.<a href="yams/units/CRTAbsoluteEncoderConfig.html" title="class in yams.units">CRTAbsoluteEncoderConfig</a></dt>
+<dt><a href="yams/units/EasyCRTConfig.html#withMechanismRange(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)" class="member-name-link">withMechanismRange(Angle, Angle)</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Sets the allowed mechanism angle range (in rotations).</div>
 </dd>
