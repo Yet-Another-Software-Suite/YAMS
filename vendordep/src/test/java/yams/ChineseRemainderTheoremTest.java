@@ -8,8 +8,8 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import org.junit.jupiter.api.Test;
 import yams.gearing.MechanismGearing;
-import yams.units.CRTAbsoluteEncoder;
-import yams.units.CRTAbsoluteEncoderConfig;
+import yams.units.EasyCRT;
+import yams.units.EasyCRTConfig;
 
 public class ChineseRemainderTheoremTest {
 
@@ -48,7 +48,7 @@ public class ChineseRemainderTheoremTest {
     var absoluteEncoder2Gearing =
         new MechanismGearing(commonRatio * ((double) driveGearTeeth / encoder2Pinion));
 
-    var config = new CRTAbsoluteEncoderConfig(this::getAbs1, this::getAbs2)
+    var config = new EasyCRTConfig(this::getAbs1, this::getAbs2)
         .withCommonDriveGear(commonRatio, driveGearTeeth, encoder1Pinion, encoder2Pinion);
 
     assertTrue(
@@ -82,15 +82,15 @@ public class ChineseRemainderTheoremTest {
     var absoluteEncoder2Gearing =
         new MechanismGearing(commonRatio * ((double) driveGearTeeth / encoder2Pinion));
 
-    var config = new CRTAbsoluteEncoderConfig(this::getAbs1, this::getAbs2)
+    var config = new EasyCRTConfig(this::getAbs1, this::getAbs2)
         .withCommonDriveGear(commonRatio, driveGearTeeth, encoder1Pinion, encoder2Pinion);
 
     // Limit the sweep to the unique coverage
-    double coverageRotations = config.getUniqueCoverageRotations().orElse(2.0);
+    double coverageRotations = config.getUniqueCoverage().map(angle -> angle.in(Rotations)).orElse(2.0);
     double sweepRotations = Math.max(0.5, Math.min(coverageRotations - 0.05, coverageRotations));
     config.withMechanismRange(Rotations.of(0), Rotations.of(sweepRotations));
     int maxIterations = (int) Math.round(sweepRotations * 360 * precision);
-    var encoder = new CRTAbsoluteEncoder(config);
+    var encoder = new EasyCRT(config);
     for (int i = 0; i < maxIterations; i++)
     {
       var turretAngle = Degrees.of(i / precision);

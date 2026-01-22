@@ -2,6 +2,7 @@ package yams.units;
 
 import static edu.wpi.first.units.Units.Rotations;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import java.util.Optional;
 
@@ -16,18 +17,39 @@ import java.util.Optional;
  *
  * <p>This is <b>not</b> a textbook Chinese Remainder Theorem solve; it is a
  * "CRT-inspired" unwrapping method that is easier to keep stable with backlash and sensor
- * noise. Created by team 6911.
+ * noise.
+ * 
+ * <p>Created by team 6911.
  */
-public class CRTAbsoluteEncoder {
+public class EasyCRT {
 
-  private final CRTAbsoluteEncoderConfig config;
+  /**
+   * Configuration containing ratios, limits, and encoder suppliers.
+   */
+  private final EasyCRTConfig easyCrtConfig;
 
+  /**
+   * Last solve status string (e.g., OK / NO_SOLUTION / AMBIGUOUS / INVALID_CONFIG).
+   */
   private String lastStatus = "NOT_ATTEMPTED";
+
+  /**
+   * Last best-match modular error in rotations.
+   */
   private double lastErrorRot = Double.NaN;
+
+  /**
+   * Number of candidates evaluated in the most recent solve attempt.
+   */
   private int lastIterations = 0;
 
-  public CRTAbsoluteEncoder(CRTAbsoluteEncoderConfig cfg) {
-    this.config = cfg;
+  /**
+   * Creates an EasyCRT solver.
+   *
+   * @param easyCrtConfig configuration describing encoder ratios, offsets, and limits
+   */
+  public EasyCRT(EasyCRTConfig easyCrtConfig) {
+    this.easyCrtConfig = easyCrtConfig;
   }
 
   /**
@@ -35,23 +57,31 @@ public class CRTAbsoluteEncoder {
    *
    * <p>If no unique solution is found (outside tolerance or ambiguous), returns {@link
    * Optional#empty()}.
+   *
+   * @return optional containing mechanism angle when uniquely resolved
    */
   public Optional<Angle> getAngleOptional() {
-    final double ratio1 = config.getEncoder1RotationsPerMechanismRotation();
-    final double ratio2 = config.getEncoder2RotationsPerMechanismRotation();
-    final double minMechRot = config.getMinMechanismRotations();
-    final double maxMechRot = config.getMaxMechanismRotations();
-    final double tolRot = config.getMatchToleranceRotations();
+    final double ratio1 = easyCrtConfig.getEncoder1RotationsPerMechanismRotation();
+    final double ratio2 = easyCrtConfig.getEncoder2RotationsPerMechanismRotation();
+    final double minMechRot = easyCrtConfig.getMinMechanismAngle().in(Rotations);
+    final double maxMechRot = easyCrtConfig.getMaxMechanismAngle().in(Rotations);
+    final double tolRot = easyCrtConfig.getMatchTolerance().in(Rotations);
 
     // Read + wrap into [0, 1).
     final double abs1 =
-        wrap01(
-            config.getAbsoluteEncoder1Angle().in(Rotations)
-                + config.getAbsoluteEncoder1OffsetRotations());
+        MathUtil.inputModulus(
+            easyCrtConfig.getAbsoluteEncoder1Angle()
+                .plus(easyCrtConfig.getAbsoluteEncoder1Offset())
+                .in(Rotations),
+            0.0,
+            1.0);
     final double abs2 =
-        wrap01(
-            config.getAbsoluteEncoder2Angle().in(Rotations)
-                + config.getAbsoluteEncoder2OffsetRotations());
+        MathUtil.inputModulus(
+            easyCrtConfig.getAbsoluteEncoder2Angle()
+                .plus(easyCrtConfig.getAbsoluteEncoder2Offset())
+                .in(Rotations),
+            0.0,
+            1.0);
 
     CrtSolution sol =
         resolveFromSensors(abs1, abs2, ratio1, ratio2, minMechRot, maxMechRot, tolRot);
@@ -62,21 +92,45 @@ public class CRTAbsoluteEncoder {
     return Optional.of(Rotations.of(sol.mechanismRotations()));
   }
 
-  /** Last solver status string (e.g., OK / NO_SOLUTION / AMBIGUOUS / INVALID_CONFIG). */
+  /**
+   * Returns the last solver status string.
+   *
+   * @return status from the previous solve attempt
+   */
   public String getLastStatus() {
     return lastStatus;
   }
 
-  /** Last best-match modular error in rotations. */
+  /**
+   * Returns the last best-match modular error in rotations.
+   *
+   * @return last modular error, or NaN if not solved
+   */
   public double getLastErrorRotations() {
     return lastErrorRot;
   }
 
-  /** Number of candidates evaluated in the last solve attempt. */
+  /**
+   * Returns the number of candidates evaluated in the last solve attempt.
+   *
+   * @return iteration count from the previous solve attempt
+   */
   public int getLastIterations() {
     return lastIterations;
   }
 
+  /**
+   * Solves for mechanism rotations using wrapped encoder readings and configured ratios.
+   *
+   * @param abs1 wrapped absolute encoder 1 reading in rotations
+   * @param abs2 wrapped absolute encoder 2 reading in rotations
+   * @param ratio1 encoder 1 rotations per mechanism rotation
+   * @param ratio2 encoder 2 rotations per mechanism rotation
+   * @param minMechanismRotations minimum allowed mechanism rotations
+   * @param maxMechanismRotations maximum allowed mechanism rotations
+   * @param matchTolerance maximum allowed modular error to accept a solution
+   * @return solution containing mechanism rotations and error, or null when not found or ambiguous
+   */
   private CrtSolution resolveFromSensors(
       double abs1,
       double abs2,
@@ -128,7 +182,7 @@ public class CRTAbsoluteEncoder {
         continue;
       }
 
-      double predicted2 = wrap01(ratio2 * mechRot);
+      double predicted2 = MathUtil.inputModulus(ratio2 * mechRot, 0.0, 1.0);
       double err = modularError(predicted2, abs2);
 
       if (err < bestErr) {
@@ -158,18 +212,23 @@ public class CRTAbsoluteEncoder {
     return new CrtSolution(bestRot, bestErr);
   }
 
-  private static double wrap01(double rotations) {
-    double wrapped = rotations % 1.0;
-    if (wrapped < 0.0) {
-      wrapped += 1.0;
-    }
-    return wrapped;
-  }
-
+  /**
+   * Computes the minimal modular difference between two wrapped values.
+   *
+   * @param a first wrapped value
+   * @param b second wrapped value
+   * @return minimal modular error in rotations
+   */
   private static double modularError(double a, double b) {
     double diff = Math.abs(a - b);
     return diff > 0.5 ? 1.0 - diff : diff;
   }
 
+  /**
+   * Container for a CRT solve result.
+   *
+   * @param mechanismRotations solved mechanism rotations
+   * @param errorRotations modular error associated with the solution
+   */
   private static record CrtSolution(double mechanismRotations, double errorRotations) {}
 }
