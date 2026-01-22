@@ -86,7 +86,7 @@ public class ChineseRemainderTheoremTest {
         .withCommonDriveGear(commonRatio, driveGearTeeth, encoder1Pinion, encoder2Pinion);
 
     // Limit the sweep to the unique coverage
-    double coverageRotations = config.getUniqueCoverageRotations().orElse(2.0);
+    double coverageRotations = config.getUniqueCoverage().map(angle -> angle.in(Rotations)).orElse(2.0);
     double sweepRotations = Math.max(0.5, Math.min(coverageRotations - 0.05, coverageRotations));
     config.withMechanismRange(Rotations.of(0), Rotations.of(sweepRotations));
     int maxIterations = (int) Math.round(sweepRotations * 360 * precision);

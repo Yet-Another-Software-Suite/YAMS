@@ -20,12 +20,31 @@ import java.util.Optional;
  */
 public class CRTAbsoluteEncoder {
 
+  /**
+   * Configuration containing ratios, limits, and encoder suppliers.
+   */
   private final CRTAbsoluteEncoderConfig config;
 
+  /**
+   * Last solve status string (e.g., OK / NO_SOLUTION / AMBIGUOUS / INVALID_CONFIG).
+   */
   private String lastStatus = "NOT_ATTEMPTED";
+
+  /**
+   * Last best-match modular error in rotations.
+   */
   private double lastErrorRot = Double.NaN;
+
+  /**
+   * Number of candidates evaluated in the most recent solve attempt.
+   */
   private int lastIterations = 0;
 
+  /**
+   * Creates a CRT absolute encoder solver.
+   *
+   * @param cfg configuration describing encoder ratios, offsets, and limits
+   */
   public CRTAbsoluteEncoder(CRTAbsoluteEncoderConfig cfg) {
     this.config = cfg;
   }
@@ -35,23 +54,27 @@ public class CRTAbsoluteEncoder {
    *
    * <p>If no unique solution is found (outside tolerance or ambiguous), returns {@link
    * Optional#empty()}.
+   *
+   * @return optional containing mechanism angle when uniquely resolved
    */
   public Optional<Angle> getAngleOptional() {
     final double ratio1 = config.getEncoder1RotationsPerMechanismRotation();
     final double ratio2 = config.getEncoder2RotationsPerMechanismRotation();
-    final double minMechRot = config.getMinMechanismRotations();
-    final double maxMechRot = config.getMaxMechanismRotations();
-    final double tolRot = config.getMatchToleranceRotations();
+    final double minMechRot = config.getMinMechanismAngle().in(Rotations);
+    final double maxMechRot = config.getMaxMechanismAngle().in(Rotations);
+    final double tolRot = config.getMatchTolerance().in(Rotations);
 
     // Read + wrap into [0, 1).
     final double abs1 =
         wrap01(
-            config.getAbsoluteEncoder1Angle().in(Rotations)
-                + config.getAbsoluteEncoder1OffsetRotations());
+            config.getAbsoluteEncoder1Angle()
+                .plus(config.getAbsoluteEncoder1Offset())
+                .in(Rotations));
     final double abs2 =
         wrap01(
-            config.getAbsoluteEncoder2Angle().in(Rotations)
-                + config.getAbsoluteEncoder2OffsetRotations());
+            config.getAbsoluteEncoder2Angle()
+                .plus(config.getAbsoluteEncoder2Offset())
+                .in(Rotations));
 
     CrtSolution sol =
         resolveFromSensors(abs1, abs2, ratio1, ratio2, minMechRot, maxMechRot, tolRot);
@@ -62,21 +85,45 @@ public class CRTAbsoluteEncoder {
     return Optional.of(Rotations.of(sol.mechanismRotations()));
   }
 
-  /** Last solver status string (e.g., OK / NO_SOLUTION / AMBIGUOUS / INVALID_CONFIG). */
+  /**
+   * Returns the last solver status string.
+   *
+   * @return status from the previous solve attempt
+   */
   public String getLastStatus() {
     return lastStatus;
   }
 
-  /** Last best-match modular error in rotations. */
+  /**
+   * Returns the last best-match modular error in rotations.
+   *
+   * @return last modular error, or NaN if not solved
+   */
   public double getLastErrorRotations() {
     return lastErrorRot;
   }
 
-  /** Number of candidates evaluated in the last solve attempt. */
+  /**
+   * Returns the number of candidates evaluated in the last solve attempt.
+   *
+   * @return iteration count from the previous solve attempt
+   */
   public int getLastIterations() {
     return lastIterations;
   }
 
+  /**
+   * Solves for mechanism rotations using wrapped encoder readings and configured ratios.
+   *
+   * @param abs1 wrapped absolute encoder 1 reading in rotations
+   * @param abs2 wrapped absolute encoder 2 reading in rotations
+   * @param ratio1 encoder 1 rotations per mechanism rotation
+   * @param ratio2 encoder 2 rotations per mechanism rotation
+   * @param minMechanismRotations minimum allowed mechanism rotations
+   * @param maxMechanismRotations maximum allowed mechanism rotations
+   * @param matchTolerance maximum allowed modular error to accept a solution
+   * @return solution containing mechanism rotations and error, or null when not found or ambiguous
+   */
   private CrtSolution resolveFromSensors(
       double abs1,
       double abs2,
@@ -158,6 +205,12 @@ public class CRTAbsoluteEncoder {
     return new CrtSolution(bestRot, bestErr);
   }
 
+  /**
+   * Wraps a rotation value into the range [0, 1).
+   *
+   * @param rotations rotations to wrap
+   * @return wrapped rotations in [0, 1)
+   */
   private static double wrap01(double rotations) {
     double wrapped = rotations % 1.0;
     if (wrapped < 0.0) {
@@ -166,10 +219,23 @@ public class CRTAbsoluteEncoder {
     return wrapped;
   }
 
+  /**
+   * Computes the minimal modular difference between two wrapped values.
+   *
+   * @param a first wrapped value
+   * @param b second wrapped value
+   * @return minimal modular error in rotations
+   */
   private static double modularError(double a, double b) {
     double diff = Math.abs(a - b);
     return diff > 0.5 ? 1.0 - diff : diff;
   }
 
+  /**
+   * Container for a CRT solve result.
+   *
+   * @param mechanismRotations solved mechanism rotations
+   * @param errorRotations modular error associated with the solution
+   */
   private static record CrtSolution(double mechanismRotations, double errorRotations) {}
 }
