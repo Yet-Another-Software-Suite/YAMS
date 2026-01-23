@@ -1368,7 +1368,7 @@ public class TalonFXSWrapper extends SmartMotorController
   public StatusCode forceConfigApply()
   {
     StatusCode status = m_configurator.apply(m_talonConfig);
-    while (!status.isOK())
+    for (int i=0; i < 10 && !status.isOK(); i++)
     {
       Timer.delay(Milliseconds.of(10).in(Seconds));
       status = m_configurator.apply(m_talonConfig);
