@@ -3,7 +3,7 @@
 This guide shows how to configure the EasyCRT solver (`EasyCRT` + `EasyCRTConfig`)
 
 ## How the solver works
-- You supply two wrapped absolute angles (0-1 rotations each) plus their rotations-per-mechanism-rotation ratios.
+- You supply two absolute enocder angles (wrapping to [0,1) is taken care of by the config) plus their rotations-per-mechanism-rotation ratios.
 - The solver enumerates every mechanism angle that fits encoder 1 within the allowed mechanism range, predicts what encoder 2 should read, and measures modular error.
 - The best match inside your tolerance becomes the mechanism angle; near ties become `AMBIGUOUS`; no in-range match becomes `NO_SOLUTION`.
 - The iteration count stays reasonable. Typical solves are tens of iterations. Log `getLastIterations()` to view this. The gear recommender also filters gear pairs whose theoretical iterations exceed your limit.
@@ -50,7 +50,7 @@ Pick ONE path per encoder to define rotations per mechanism rotation.
 
 Sanity checks:
 - Ratios must be finite and non-zero; tooth counts must be positive.
-- If neither direct ratios nor gearing are provided, the configuration throws when solving.
+- If neither direct ratios nor gearing are provided, the configuration throws an error.
 - When using chains or stages, verify the order (mechanism -> ... -> encoder). Reversed order yields the wrong ratio.
 
 ## Offsets and limits
