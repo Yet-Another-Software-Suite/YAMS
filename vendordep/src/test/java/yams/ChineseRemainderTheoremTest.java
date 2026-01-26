@@ -71,11 +71,11 @@ public class ChineseRemainderTheoremTest {
   @Test
   void testCRT()
   {
-
-    double commonRatio = 11.0; // 10 -> 110
-    int driveGearTeeth = 50;   // shared gear driving both encoders
-    int encoder1Pinion = 30;
-    int encoder2Pinion = 31;
+    System.out.println("Starting CRT Test");
+    double commonRatio = 180.0/60.0; // 60 -> 180
+    int driveGearTeeth = 60; // shared gear driving both encoders (60 in this case)
+    int encoder1Pinion = 19; // 19t attached to 60t drive gear
+    int encoder2Pinion = 21; // 21t attached to 60t drive gear
 
     var absoluteEncoder1Gearing =
         new MechanismGearing(commonRatio * ((double) driveGearTeeth / encoder1Pinion));
@@ -84,6 +84,8 @@ public class ChineseRemainderTheoremTest {
 
     var config = new EasyCRTConfig(this::getAbs1, this::getAbs2)
         .withCommonDriveGear(commonRatio, driveGearTeeth, encoder1Pinion, encoder2Pinion);
+
+    config.getUniqueCoverage().ifPresent(angle -> System.out.println("Unique Coverage(rots): " + angle.in(Rotations)));
 
     // Limit the sweep to the unique coverage
     double coverageRotations = config.getUniqueCoverage().map(angle -> angle.in(Rotations)).orElse(2.0);
@@ -112,7 +114,7 @@ public class ChineseRemainderTheoremTest {
         break;
       }
       assertTrue(testing);
-      //System.out.println("CRT Angle(rots): " + encoder.getAngleOptional());
+//      System.out.println("CRT Angle(rots): " + encoder.getAngleOptional());
 
     }
   }
