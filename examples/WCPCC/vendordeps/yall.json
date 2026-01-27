@@ -1,0 +1,20 @@
+{
+    "fileName": "yall.json",
+    "name": "YALL",
+    "version": "2026.1.26",
+    "frcYear": "2026",
+    "uuid": "29aa8c8f-05ae-40aa-96f9-552a5c8a0347",
+    "mavenUrls": [
+        "https://Yet-Another-Software-Suite.github.io/YALL/releases"
+    ],
+    "jsonUrl": "https://Yet-Another-Software-Suite.github.io/YALL/yall.json",
+    "javaDependencies": [
+        {
+            "groupId": "yall",
+            "artifactId": "YALL-java",
+            "version": "2026.1.26"
+        }
+    ],
+    "jniDependencies": [],
+    "cppDependencies": []
+}
