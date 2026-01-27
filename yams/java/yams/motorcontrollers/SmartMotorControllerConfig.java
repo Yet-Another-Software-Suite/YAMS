@@ -1,13 +1,11 @@
 package yams.motorcontrollers;
 
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
@@ -20,7 +18,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.units.MomentOfInertiaUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -55,6 +52,10 @@ import yams.telemetry.SmartMotorControllerTelemetryConfig;
 public class SmartMotorControllerConfig
 {
 
+  /**
+   * Vendor specific configuration for the {@link SmartMotorController}.
+   */
+  private       Optional<Object>                              vendorConfig                       = Optional.empty();
   /**
    * Subsystem that the {@link SmartMotorController} controls.
    */
@@ -246,7 +247,8 @@ public class SmartMotorControllerConfig
   /**
    * Moment of inertia for DCSim
    */
-  private Double moi = 0.02;
+  private       MomentOfInertia                               moi                                = KilogramSquareMeters.of(
+      0.02);
   /**
    * Loosely coupled followers.
    */
@@ -278,6 +280,7 @@ public class SmartMotorControllerConfig
    */
   private SmartMotorControllerConfig(SmartMotorControllerConfig cfg)
   {
+    this.vendorConfig = cfg.vendorConfig;
     this.subsystem = cfg.subsystem;
     this.missingOptions.clear();
     this.missingOptions.addAll(cfg.missingOptions);
@@ -335,6 +338,21 @@ public class SmartMotorControllerConfig
     return new SmartMotorControllerConfig(this);
   }
 
+  /**
+   * Set the vendor specific config for the {@link SmartMotorController} which will be used as a base. Vendor configs
+   * will be overridden by the {@link SmartMotorControllerConfig} options.
+   *
+   * @param vendorConfig Vendor specific config object. Must be of the correct type for the
+   *                     {@link SmartMotorController}. Only the root configuration class is accepted.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   * @implSpec {@link SmartMotorControllerConfig} options will always take precedence and overwrite the vendor config.
+   * Apply any changes after the {@link SmartMotorController} is created to ensure accuracy.
+   */
+  public SmartMotorControllerConfig withVendorConfig(Object vendorConfig)
+  {
+    this.vendorConfig = Optional.ofNullable(vendorConfig);
+    return this;
+  }
 
   /**
    * Sets the {@link Subsystem} for the {@link SmartMotorControllerConfig} to pass along to {@link SmartMotorController}
@@ -724,7 +742,7 @@ public class SmartMotorControllerConfig
                                                            "withMOI(Inches.of(4),Pounds.of(1))");
     } else
     {
-      moi = SingleJointedArmSim.estimateMOI(length.in(Meters), weight.in(Kilograms));
+      moi = KilogramSquareMeters.of(SingleJointedArmSim.estimateMOI(length.in(Meters), weight.in(Kilograms)));
     }
     return this;
   }
@@ -740,7 +758,7 @@ public class SmartMotorControllerConfig
   @Deprecated(since = "2026", forRemoval = true)
   public SmartMotorControllerConfig withMomentOfInertia(double MOI)
   {
-    moi = MOI;
+    moi = KilogramSquareMeters.of(MOI);
     return this;
   }
 
@@ -753,7 +771,7 @@ public class SmartMotorControllerConfig
    */
   public SmartMotorControllerConfig withMomentOfInertia(MomentOfInertia MOI)
   {
-    moi = MOI.in(KilogramSquareMeters);
+    moi = MOI;
     return this;
   }
 
@@ -813,7 +831,7 @@ public class SmartMotorControllerConfig
   public double getMOI()
   {
 //    basicOptions.remove(BasicOptions.MomentOfInertia);
-    return moi;
+    return moi.in(KilogramSquareMeters);
   }
 
   /**
@@ -1767,8 +1785,8 @@ public class SmartMotorControllerConfig
   public boolean getMotorInverted()
   {
     basicOptions.remove(BasicOptions.MotorInverted);
-    if(RobotBase.isSimulation())
-      return false;
+    if (RobotBase.isSimulation())
+    {return false;}
     return motorInverted;
   }
 
@@ -1936,6 +1954,16 @@ public class SmartMotorControllerConfig
   }
 
   /**
+   * Get the vendor specific configuration object to mutate with {@link SmartMotorControllerConfig} options.
+   *
+   * @return {@link SmartMotorController} vendor-specific configuration object.
+   */
+  public Optional<Object> getVendorConfig()
+  {
+    return vendorConfig;
+  }
+
+  /**
    * Reset the validation checks for all required options to be applied to {@link SmartMotorController} from
    * {@link SmartMotorController#applyConfig(SmartMotorControllerConfig)}.
    */
@@ -1989,8 +2017,8 @@ public class SmartMotorControllerConfig
   public boolean getExternalEncoderInverted()
   {
     externalEncoderOptions.remove(ExternalEncoderOptions.ExternalEncoderInverted);
-    if(RobotBase.isSimulation())
-      return false;
+    if (RobotBase.isSimulation())
+    {return false;}
     return externalEncoderInverted;
   }
 
