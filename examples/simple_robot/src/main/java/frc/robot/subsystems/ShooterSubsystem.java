@@ -41,8 +41,6 @@ public class ShooterSubsystem extends SubsystemBase
       .withTelemetry("ShooterMotor", TelemetryVerbosity.HIGH)
       .withStatorCurrentLimit(Amps.of(40))
       .withMotorInverted(false)
-      .withClosedLoopRampRate(Seconds.of(0.25))
-      .withOpenLoopRampRate(Seconds.of(0.25))
       .withFeedforward(new SimpleMotorFeedforward(0, 0, 0))
       .withControlMode(ControlMode.CLOSED_LOOP);
   private final SmartMotorController       motor         = new SparkWrapper(armMotor, DCMotor.getNEO(1), motorConfig);
