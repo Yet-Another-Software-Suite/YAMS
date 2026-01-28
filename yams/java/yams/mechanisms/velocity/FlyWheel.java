@@ -16,7 +16,6 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
@@ -256,21 +255,6 @@ public class FlyWheel extends SmartVelocityMechanism
    */
   public Command run(AngularVelocity velocity)
   {
-    // TODO: Deprecate this
-    m_config.getLowerSoftLimit().ifPresent(low -> {
-      if (low.gt(velocity))
-      {
-        DriverStation.reportWarning("[WARNING] You have requested to set " + getName() + " to " + velocity +
-                                    " which is lower than minimum velocity " + low + "!", false);
-      }
-    });
-    m_config.getUpperSoftLimit().ifPresent(high -> {
-      if (high.lt(velocity))
-      {
-        DriverStation.reportWarning("[WARNING] You have requested to set " + getName() + " to " + velocity +
-                                    " which is greater than maximum velocity " + high + "!", false);
-      }
-    });
     return setSpeed(() -> velocity).withName(m_subsystem.getName() + " " + getName() + " SetSpeed");
   }
 
