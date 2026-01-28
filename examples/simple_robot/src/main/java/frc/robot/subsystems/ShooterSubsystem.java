@@ -81,9 +81,10 @@ public class ShooterSubsystem extends SubsystemBase
    */
   public Command set(double dutyCycle) {return shooter.set(dutyCycle);}
 
-  public Command setVelocity(Supplier<AngularVelocity> speed) {return shooter.setSpeed(speed);}
 
   public Command setDutyCycle(Supplier<Double> dutyCycle) {return shooter.set(dutyCycle);}
+
+  public Command setVelocity(Supplier<AngularVelocity> speed) {return shooter.run(speed);}
 
   @Override
   public void simulationPeriodic()
