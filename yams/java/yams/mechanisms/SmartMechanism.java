@@ -2,6 +2,9 @@ package yams.mechanisms;
 
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -171,6 +174,72 @@ public abstract class SmartMechanism
     return Commands.startRun(m_smc::stopClosedLoopController, () -> m_smc.setVoltage(volts.get()), m_subsystem)
                    .finallyDo(m_smc::startClosedLoopController)
                    .withName(m_subsystem.getName() + " SetVoltage Supplier");
+  }
+
+  /**
+   * Set the {@link SmartMotorController} to the given speed.
+   *
+   * @param velocity {@link LinearVelocity} to go to.
+   */
+  public void setMeasurementVelocitySetpoint(LinearVelocity velocity)
+  {
+    m_smc.startClosedLoopController();
+    m_smc.setVelocity(velocity);
+  }
+
+  /**
+   * Set the {@link SmartMotorController} to the given speed.
+   *
+   * @param velocity {@link AngularVelocity} to go to.
+   */
+  public void setMechanismVelocitySetpoint(AngularVelocity velocity)
+  {
+    m_smc.startClosedLoopController();
+    m_smc.setVelocity(velocity);
+  }
+
+  /**
+   * Sets the {@link SmartMotorController} to the given distance.
+   *
+   * @param distance {@link Distance} to go to.
+   */
+  public void setMeasurementPositionSetpoint(Distance distance)
+  {
+    m_smc.startClosedLoopController();
+    m_smc.setPosition(distance);
+  }
+
+  /**
+   * Sets the {@link SmartMotorController} to the given angle.
+   *
+   * @param angle {@link Angle} to go to.
+   */
+  public void setMechanismPositionSetpoint(Angle angle)
+  {
+    m_smc.startClosedLoopController();
+    m_smc.setPosition(angle);
+  }
+
+  /**
+   * Set the voltage of the {@link SmartMotorController}.
+   *
+   * @param voltage {@link Voltage} to go to.
+   */
+  public void setVoltageSetpoint(Voltage voltage)
+  {
+    m_smc.stopClosedLoopController();
+    m_smc.setVoltage(voltage);
+  }
+
+  /**
+   * Set the dutycycle of the {@link SmartMotorController}.
+   *
+   * @param dutycycle [-1,1] to set.
+   */
+  public void setDutyCycleSetpoint(double dutycycle)
+  {
+    m_smc.stopClosedLoopController();
+    m_smc.setDutyCycle(dutycycle);
   }
 
   /**

@@ -3,11 +3,15 @@ package yams.mechanisms.config;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Second;
 
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
@@ -50,15 +54,15 @@ public class FlyWheelConfig
   /**
    * Telemetry verbosity
    */
-  private   Optional<TelemetryVerbosity>   telemetryVerbosity      = Optional.empty();
+  private Optional<TelemetryVerbosity> telemetryVerbosity = Optional.empty();
   /**
    * {@link FlyWheel} length for simulation.
    */
-  private   Optional<Distance>             length                  = Optional.empty();
+  private Optional<Distance>           diameter           = Optional.empty();
   /**
    * {@link FlyWheel} mass for simulation.
    */
-  private   Optional<Mass>                 weight                  = Optional.empty();
+  private Optional<Mass>               weight             = Optional.empty();
   /**
    * {@link FlyWheel} MOI from CAD software. If not given estimated with length and weight.
    */
@@ -106,7 +110,7 @@ public class FlyWheelConfig
     this.maxVelocity = cfg.maxVelocity;
     this.telemetryName = cfg.telemetryName;
     this.telemetryVerbosity = cfg.telemetryVerbosity;
-    this.length = cfg.length;
+    this.diameter = cfg.diameter;
     this.weight = cfg.weight;
     this.moi = cfg.moi;
     this.simColor = cfg.simColor;
@@ -339,7 +343,7 @@ public class FlyWheelConfig
    */
   public FlyWheelConfig withDiameter(Distance distance)
   {
-    this.length = Optional.ofNullable(distance);
+    this.diameter = Optional.ofNullable(distance);
     return this;
   }
 
@@ -412,11 +416,11 @@ public class FlyWheelConfig
   /**
    * Get the Length of the {@link FlyWheel}
    *
-   * @return {@link Distance} of the Arm.
+   * @return {@link Distance} of the {@link FlyWheel} or an empty {@link Optional} if not set..
    */
-  public Optional<Distance> getLength()
+  public Optional<Distance> getDiameter()
   {
-    return length;
+    return diameter;
   }
 
   /**
@@ -430,9 +434,9 @@ public class FlyWheelConfig
     {
       return moi.getAsDouble();
     }
-    if (length.isPresent() && weight.isPresent())
+    if (diameter.isPresent() && weight.isPresent())
     {
-      return SingleJointedArmSim.estimateMOI(length.get().in(Units.Meters), weight.get().in(Units.Kilograms));
+      return SingleJointedArmSim.estimateMOI(diameter.get().in(Units.Meters), weight.get().in(Units.Kilograms));
     }
     throw new FlyWheelConfigurationException("FlyWheel diameter and weight or MOI must be set!",
                                              "Cannot get the MOI!",
@@ -520,5 +524,43 @@ public class FlyWheelConfig
   public Optional<String> getTelemetryNetworkTableName()
   {
     return networkTableName;
+  }
+
+  /**
+   * Get the circumference of the {@link FlyWheel}.
+   *
+   * @return {@link Distance} representing the circumference of the FlyWheel.
+   */
+  public Distance getCircumference()
+  {
+    if (diameter.isEmpty())
+    {
+      throw new FlyWheelConfigurationException("FlyWheel diameter is empty",
+                                               "Cannot run speed without diameter.",
+                                               "withDiameter(Distance)");
+    }
+    return diameter.orElseThrow().times(Math.PI);
+  }
+
+  /**
+   * Get the {@link LinearVelocity} of the {@link FlyWheel} given an {@link AngularVelocity}
+   *
+   * @param velocity {@link AngularVelocity} to convert to {@link LinearVelocity}
+   * @return {@link LinearVelocity} of the {@link FlyWheel}
+   */
+  public LinearVelocity getLinearVelocity(AngularVelocity velocity)
+  {
+    return getCircumference().per(Second).times(velocity.in(RotationsPerSecond));
+  }
+
+  /**
+   * Get the {@link AngularVelocity} of the {@link FlyWheel} given a {@link LinearVelocity}
+   *
+   * @param velocity {@link LinearVelocity} to convert to {@link AngularVelocity}
+   * @return {@link AngularVelocity} of the {@link FlyWheel}
+   */
+  public AngularVelocity getAngularVelocity(LinearVelocity velocity)
+  {
+    return RotationsPerSecond.of(velocity.in(MetersPerSecond) / getCircumference().in(Meters));
   }
 }

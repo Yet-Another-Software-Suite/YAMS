@@ -12,6 +12,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
@@ -91,7 +92,7 @@ public class FlyWheel extends SmartVelocityMechanism
                                                 dcMotor));
 
       m_smc.setSimSupplier(new DCMotorSimSupplier(m_dcmotorSim.get(), m_smc));
-      Distance ShooterLength = config.getLength().orElse(Inches.of(36));
+      Distance ShooterLength = config.getDiameter().orElse(Inches.of(36));
       m_mechanismWindow = new Mechanism2d(ShooterLength.in(Meters) * 2,
                                           ShooterLength.in(Meters) * 2);
       mechanismRoot = m_mechanismWindow.getRoot(getName() + "Root",
@@ -163,6 +164,13 @@ public class FlyWheel extends SmartVelocityMechanism
   }
 
   /**
+   * Get the {@link LinearVelocity} of the FlyWheel.
+   *
+   * @return FlyWheel {@link LinearVelocity}
+   */
+  public LinearVelocity getLinearVelocity() {return m_config.getLinearVelocity(m_smc.getMechanismVelocity());}
+
+  /**
    * FlyWheel is near a speed.
    *
    * @param speed  {@link AngularVelocity} to be near.
@@ -174,30 +182,105 @@ public class FlyWheel extends SmartVelocityMechanism
     return new Trigger(() -> getSpeed().isNear(speed, within));
   }
 
+
   /**
    * Set the FlyWheel to the given speed.
    *
-   * @param speed FlyWheel speed to go to.
+   * @param velocity FlyWheel speed to go to.
    * @return {@link Command} that sets the FlyWheel to the desired speed.
    */
-  public Command setSpeed(AngularVelocity speed)
+  public Command setSpeed(Supplier<AngularVelocity> velocity)
   {
+    return Commands.startRun(m_smc::startClosedLoopController, () -> m_smc.setVelocity(velocity.get()), m_subsystem)
+                   .withName(
+                       m_subsystem.getName() + " SetSpeed Supplier");
+  }
+
+  /**
+   * Set the FlyWheel to the given speed.
+   *
+   * @param velocity FlyWheel speed to go to.
+   * @return {@link Command} that sets the FlyWheel to the desired speed.
+   */
+  public Command setSpeed(AngularVelocity velocity)
+  {
+    // TODO: Deprecate this
     m_config.getLowerSoftLimit().ifPresent(low -> {
-      if (low.gt(speed))
+      if (low.gt(velocity))
       {
-        DriverStation.reportWarning("[WARNING] You have requested to set " + getName() + " to " + speed +
+        DriverStation.reportWarning("[WARNING] You have requested to set " + getName() + " to " + velocity +
                                     " which is lower than minimum velocity " + low + "!", false);
       }
     });
     m_config.getUpperSoftLimit().ifPresent(high -> {
-      if (high.lt(speed))
+      if (high.lt(velocity))
       {
-        DriverStation.reportWarning("[WARNING] You have requested to set " + getName() + " to " + speed +
+        DriverStation.reportWarning("[WARNING] You have requested to set " + getName() + " to " + velocity +
                                     " which is greater than maximum velocity " + high + "!", false);
       }
     });
-    return Commands.startRun(m_smc::startClosedLoopController, () -> m_smc.setVelocity(speed), m_subsystem).withName(
-        m_subsystem.getName() + " " + getName() + " SetSpeed");
+    return setSpeed(() -> velocity).withName(m_subsystem.getName() + " " + getName() + " SetSpeed");
+  }
+
+  /**
+   * Run the FlyWheel to a velocity within a tolerance, then end the command.
+   *
+   * @param velocity  {@link Supplier} of {@link AngularVelocity}
+   * @param tolerance {@link AngularVelocity} tolerance
+   * @return {@link Command} that runs the FlyWheel to the desired velocity then moves on.
+   * @implNote If you are using this function, try not to have a default command or else the default command will
+   * override the setting after this command ends.
+   */
+  public Command runToVelocity(Supplier<AngularVelocity> velocity, AngularVelocity tolerance)
+  {
+    return Commands.runOnce(m_smc::startClosedLoopController, m_subsystem)
+                   .andThen(Commands.runOnce(() -> m_smc.setVelocity(velocity.get()), m_subsystem))
+                   .andThen(Commands.waitUntil(() -> isNear(velocity.get(), tolerance).getAsBoolean()))
+                   .withName(m_subsystem.getName() + " RunToVelocity Supplier");
+  }
+
+  /**
+   * Run the FlyWheel to a velocity within a tolerance, then end the command.
+   *
+   * @param velocity  {@link AngularVelocity} to go to.
+   * @param tolerance {@link AngularVelocity} tolerance
+   * @return {@link Command} that runs the FlyWheel to the desired velocity then moves on.
+   * @implNote If you are using this function, try not to have a default command or else the default command will
+   * override the setting after this command ends.
+   */
+  public Command runToVelocity(AngularVelocity velocity, AngularVelocity tolerance)
+  {
+    return runToVelocity(() -> velocity, tolerance).withName(m_subsystem.getName() + " RunToVelocity");
+  }
+
+  /**
+   * Run the FlyWheel to a velocity within a tolerance then end the command.
+   *
+   * @param velocity  {@link LinearVelocity} to go to.
+   * @param tolerance {@link LinearVelocity} tolerance
+   * @return {@link Command} that runs the FlyWheel to the desired velocity then moves on.
+   * @implNote If you are using this function, try not to have a default command or else the default command will
+   * override the setting after this command ends.
+   */
+  public Command runToVelocity(LinearVelocity velocity, LinearVelocity tolerance)
+  {
+    m_config.getCircumference(); // Circumference check
+    return runToVelocity(() -> m_config.getAngularVelocity(velocity), m_config.getAngularVelocity(tolerance));
+  }
+
+  /**
+   * Run the FlyWheel to a velocity within a tolerance then end the command.
+   *
+   * @param velocity  {@link LinearVelocity} to go to.
+   * @param tolerance {@link LinearVelocity} tolerance
+   * @return {@link Command} that runs the FlyWheel to the desired velocity then moves on.
+   * @implNote If you are using this function, try not to have a default command or else the default command will
+   * override the setting after this command ends.
+   */
+  public Command runToVelocity(Supplier<LinearVelocity> velocity, LinearVelocity tolerance)
+  {
+    m_config.getCircumference(); // Circumference check
+    return runToVelocity(() -> m_config.getAngularVelocity(velocity.get()), m_config.getAngularVelocity(tolerance));
   }
 
   /**
@@ -206,11 +289,34 @@ public class FlyWheel extends SmartVelocityMechanism
    * @param speed FlyWheel speed to go to.
    * @return {@link Command} that sets the FlyWheel to the desired speed.
    */
-  public Command setSpeed(Supplier<AngularVelocity> speed)
+  public Command runVelocity(Supplier<LinearVelocity> speed)
   {
-    return Commands.startRun(m_smc::startClosedLoopController, () -> m_smc.setVelocity(speed.get()), m_subsystem)
-                   .withName(
-                       m_subsystem.getName() + " SetSpeed Supplier");
+    m_config.getCircumference(); // Circumference check
+    return setSpeed(() -> m_config.getAngularVelocity(speed.get()))
+        .withName(m_subsystem.getName() + " RunSpeed Supplier");
+  }
+
+  /**
+   * Set the FlyWheel to the given speed.
+   *
+   * @param speed FlyWheel speed to go to.
+   * @return {@link Command} that sets the FlyWheel to the desired speed.
+   */
+  public Command runVelocity(LinearVelocity speed)
+  {
+    return setSpeed(m_config.getAngularVelocity(speed)).withName(m_subsystem.getName() + " RunSpeed");
+  }
+
+  /**
+   * Set the FlyWheel to the given speed.
+   *
+   * @param speed {@link LinearVelocity} to go to.
+   */
+  @Override
+  public void setMeasurementVelocitySetpoint(LinearVelocity speed)
+  {
+    m_smc.startClosedLoopController();
+    m_smc.setVelocity(m_config.getAngularVelocity(speed));
   }
 
   @Override

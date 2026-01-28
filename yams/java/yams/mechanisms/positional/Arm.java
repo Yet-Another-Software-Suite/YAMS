@@ -10,6 +10,8 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
@@ -415,5 +417,19 @@ public class Arm extends SmartPositionalMechanism
   public ArmConfig getArmConfig()
   {
     return m_config;
+  }
+
+  @Override
+  @Deprecated
+  public void setMeasurementVelocitySetpoint(LinearVelocity velocity)
+  {
+    throw new RuntimeException("Unimplemented");
+  }
+
+  @Override
+  @Deprecated
+  public void setMeasurementPositionSetpoint(Distance distance)
+  {
+    throw new RuntimeException("Unimplemented");
   }
 }
