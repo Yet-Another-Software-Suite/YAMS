@@ -35,7 +35,7 @@ public class ShooterSubsystem extends SubsystemBase
 
   private final SparkMax                   armMotor      = new SparkMax(1, MotorType.kBrushless);
   private final SmartMotorControllerConfig motorConfig   = new SmartMotorControllerConfig(this)
-      .withClosedLoopController(1, 0, 0)
+      .withClosedLoopController(1, 0, 0, RPM.of(30000), RPM.per(Second).of(100000))
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
       .withIdleMode(MotorMode.COAST)
       .withTelemetry("ShooterMotor", TelemetryVerbosity.HIGH)
