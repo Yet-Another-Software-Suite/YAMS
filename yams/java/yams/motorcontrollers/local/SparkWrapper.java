@@ -127,15 +127,15 @@ public class SparkWrapper extends SmartMotorController
   /**
    * REV Control type to use for position control.
    */
-  private       ControlType    m_positionControlType = ControlType.kPosition;
+  private       ControlType                       m_positionControlType     = ControlType.kPosition;
   /**
    * REV Control type to use for velocity control.
    */
-  private       ControlType    m_velocityControlType = ControlType.kVelocity;
+  private       ControlType                       m_velocityControlType     = ControlType.kVelocity;
   /**
    * REV Closed loop slot.
    */
-  private final ClosedLoopSlot m_closedLoopSlot      = ClosedLoopSlot.kSlot0;
+  private final ClosedLoopSlot                    m_closedLoopSlot          = ClosedLoopSlot.kSlot0;
 
   /**
    * Create a {@link SmartMotorController} from {@link SparkMax} or {@link SparkFlex}
@@ -149,10 +149,34 @@ public class SparkWrapper extends SmartMotorController
   {
     if (controller instanceof SparkMax)
     {
-      m_sparkBaseConfig = new SparkMaxConfig();
+      if (config.getVendorConfig().isPresent())
+      {
+        var genCfg = config.getVendorConfig().get();
+        if (!(genCfg instanceof SparkMaxConfig))
+        {
+          throw new SmartMotorControllerConfigurationException(
+              "SparkMaxConfig is the only acceptable vendor config for SparkMax controllers.",
+              "SparkMaxConfig not found.",
+              ".withVendorConfig(new SparkMaxConfig())");
+        }
+        m_sparkBaseConfig = (SparkMaxConfig) genCfg;
+      } else
+      {m_sparkBaseConfig = new SparkMaxConfig();}
     } else if (controller instanceof SparkFlex)
     {
-      m_sparkBaseConfig = new SparkFlexConfig();
+      if (config.getVendorConfig().isPresent())
+      {
+        var genCfg = config.getVendorConfig().get();
+        if (!(genCfg instanceof SparkFlexConfig))
+        {
+          throw new SmartMotorControllerConfigurationException(
+              "SparkFlexConfig is the only acceptable vendor config for SparkFlex controllers.",
+              "SparkFlexConfig not found.",
+              ".withVendorConfig(new SparkFlexConfig())");
+        }
+        m_sparkBaseConfig = (SparkFlexConfig) genCfg;
+      } else
+      {m_sparkBaseConfig = new SparkFlexConfig();}
     } else
     {
       throw new IllegalArgumentException(

@@ -358,3 +358,5 @@ compile_commands.json
 /examples/swerve_drive_maplesim/.idea
 /examples/swerve_drive/.idea
 /examples/swerve_drive/.idea
+
+*.revlog
