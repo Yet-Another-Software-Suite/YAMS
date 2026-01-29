@@ -475,7 +475,7 @@ public class Elevator extends SmartPositionalMechanism
   public Command runTo(Distance height, Distance tolerance)
   {
     return Commands.runOnce(() -> m_smc.setPosition(height), m_subsystem)
-                   .andThen(Commands.waitUntil(isNear(height, tolerance, Seconds.of(0.1))))
+                   .andThen(Commands.waitUntil(isNear(height, tolerance).debounce(0.1, DebounceType.kRising)))
                    .withName(m_subsystem.getName() + " Run To Height");
   }
 
@@ -491,7 +491,7 @@ public class Elevator extends SmartPositionalMechanism
   public Command runTo(Supplier<Distance> height, Distance tolerance)
   {
     return Commands.runOnce(() -> m_smc.setPosition(height.get()), m_subsystem)
-                   .andThen(Commands.waitUntil(isNear(height.get(), tolerance, Seconds.of(0.1))))
+                   .andThen(Commands.waitUntil(isNear(height.get(), tolerance).debounce(0.1, DebounceType.kRising)))
                    .withName(m_subsystem.getName() + " Run To Height Supplier");
   }
 
@@ -527,19 +527,6 @@ public class Elevator extends SmartPositionalMechanism
   public Trigger isNear(Distance height, Distance within)
   {
     return new Trigger(() -> getHeight().isNear(height, within));
-  }
-
-  /**
-   * Elevator is near a height.
-   *
-   * @param height   {@link Distance} to be near.
-   * @param within   {@link Distance} within.
-   * @param debounce {@link Time} to debounce the trigger.
-   * @return Trigger on when the elevator is near another height.
-   */
-  public Trigger isNear(Distance height, Distance within, Time debounce)
-  {
-    return new Trigger(() -> getHeight().isNear(height, within)).debounce(debounce.in(Seconds), DebounceType.kRising);
   }
 
   @Override

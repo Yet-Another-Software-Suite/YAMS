@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -319,7 +318,7 @@ public class Arm extends SmartPositionalMechanism
   public Command runTo(Angle angle, Angle tolerance)
   {
     return Commands.runOnce(() -> m_smc.setPosition(angle), m_subsystem)
-                   .andThen(Commands.waitUntil(isNear(angle, tolerance, Seconds.of(0.1))))
+                   .andThen(Commands.waitUntil(isNear(angle, tolerance).debounce(0.1, DebounceType.kRising)))
                    .withName(m_subsystem.getName() + " RunTo Angle");
   }
 
@@ -334,7 +333,7 @@ public class Arm extends SmartPositionalMechanism
   public Command runTo(Supplier<Angle> angle, Angle tolerance)
   {
     return Commands.runOnce(() -> m_smc.setPosition(angle.get()), m_subsystem)
-                   .andThen(Commands.waitUntil(isNear(angle.get(), tolerance, Seconds.of(0.1))))
+                   .andThen(Commands.waitUntil(isNear(angle.get(), tolerance).debounce(0.1, DebounceType.kRising)))
                    .withName(m_subsystem.getName() + " RunTo Angle Supplier");
   }
 
@@ -348,19 +347,6 @@ public class Arm extends SmartPositionalMechanism
   public Trigger isNear(Angle angle, Angle within)
   {
     return new Trigger(() -> getAngle().isNear(angle, within));
-  }
-
-  /**
-   * Arm is near an angle.
-   *
-   * @param angle    {@link Angle} to be near.
-   * @param within   {@link Angle} within.
-   * @param debounce {@link edu.wpi.first.math.filter.Debouncer} time.
-   * @return {@link Trigger} on when the arm is near another angle.
-   */
-  public Trigger isNear(Angle angle, Angle within, Time debounce)
-  {
-    return new Trigger(() -> getAngle().isNear(angle, within)).debounce(debounce.in(Seconds), DebounceType.kRising);
   }
 
   @Override

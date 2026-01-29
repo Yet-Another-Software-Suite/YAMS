@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -184,20 +183,6 @@ public class FlyWheel extends SmartVelocityMechanism
   }
 
   /**
-   * FlyWheel is near a speed. Same as {@link Trigger#debounce(double)}
-   *
-   * @param speed    {@link AngularVelocity} to be near.
-   * @param within   {@link AngularVelocity} within.
-   * @param debounce {@link Time} to debounce the trigger.
-   * @return Trigger on when the FlyWheel is near another speed.
-   */
-  public Trigger isNear(AngularVelocity speed, AngularVelocity within, Time debounce)
-  {
-    return new Trigger(() -> getSpeed().isNear(speed, within)).debounce(debounce.in(Seconds), DebounceType.kRising);
-  }
-
-
-  /**
    * Set the FlyWheel to the given speed.
    *
    * @param velocity FlyWheel speed to go to.
@@ -301,7 +286,10 @@ public class FlyWheel extends SmartVelocityMechanism
    */
   public Command runTo(AngularVelocity velocity, AngularVelocity tolerance)
   {
-    return runTo(() -> velocity, tolerance).withName(m_subsystem.getName() + " RunToVelocity");
+    return Commands.runOnce(m_smc::startClosedLoopController, m_subsystem)
+                   .andThen(Commands.runOnce(() -> m_smc.setVelocity(velocity), m_subsystem))
+                   .andThen(Commands.waitUntil(isNear(velocity, tolerance).debounce(0.1, DebounceType.kRising)))
+                   .withName(m_subsystem.getName() + " RunToVelocity");
   }
 
   /**
@@ -316,7 +304,7 @@ public class FlyWheel extends SmartVelocityMechanism
   public Command runTo(LinearVelocity velocity, LinearVelocity tolerance)
   {
     m_config.getCircumference(); // Circumference check
-    return runTo(() -> m_config.getAngularVelocity(velocity), m_config.getAngularVelocity(tolerance));
+    return runTo(m_config.getAngularVelocity(velocity), m_config.getAngularVelocity(tolerance));
   }
 
   /**
