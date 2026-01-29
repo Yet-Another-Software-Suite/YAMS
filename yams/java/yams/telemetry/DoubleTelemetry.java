@@ -135,8 +135,9 @@ public class DoubleTelemetry
 
   /**
    * Set the unit.
-   * @param cfg {@link SmartMotorControllerConfig} used to determine the unit. If the MechanismCircumference is set it will be in meters, else it will be in degrees.
    *
+   * @param cfg {@link SmartMotorControllerConfig} used to determine the unit. If the MechanismCircumference is set it
+   *            will be in meters, else it will be in degrees.
    * @return {@link DoubleTelemetry} for chaining.
    */
   public DoubleTelemetry transformUnit(SmartMotorControllerConfig cfg)
@@ -144,26 +145,26 @@ public class DoubleTelemetry
     switch (unit)
     {
       case "tunable_position":
-        unit = cfg.getMechanismCircumference().isPresent() ? "meter" : "degrees";
+        unit = cfg.getLinearClosedLoopControllerUse() ? "meter" : "degrees";
         break;
       case "position":
-        unit = cfg.getMechanismCircumference().isPresent() ? "meter" : "rotations";
+        unit = cfg.getLinearClosedLoopControllerUse() ? "meter" : "rotations";
         break;
       case "tunable_velocity":
-        unit = cfg.getMechanismCircumference().isPresent() ? "meter_per_second"
-                                                           : "rotation_per_second";
+        unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second"
+                                                      : "rotation_per_second";
         break;
       case "velocity":
-        unit = cfg.getMechanismCircumference().isPresent() ? "meter_per_second"
-                                                           : "rotation_per_second";
+        unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second"
+                                                      : "rotation_per_second";
         break;
       case "tunable_acceleration":
-        unit = cfg.getMechanismCircumference().isPresent() ? "meter_per_second_per_second"
-                                                           : "rotations_per_second_per_second";
+        unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second_per_second"
+                                                      : "rotations_per_second_per_second";
         break;
       case "acceleration":
-        unit = cfg.getMechanismCircumference().isPresent() ? "meter_per_second_per_second"
-                                                           : "rotation_per_second_per_second";
+        unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second_per_second"
+                                                      : "rotation_per_second_per_second";
         break;
     }
     return this;

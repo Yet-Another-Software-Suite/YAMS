@@ -150,14 +150,14 @@ public class SmartMotorControllerTelemetry
         case SetpointPosition ->
         {
           smc.getMechanismPositionSetpoint().ifPresent(mechSetpoint -> dt.set(
-              cfg.getMechanismCircumference().isPresent() ? cfg.convertFromMechanism(mechSetpoint).in(Meters)
-                                                          : mechSetpoint.in(Rotations)));
+              cfg.getLinearClosedLoopControllerUse() ? cfg.convertFromMechanism(mechSetpoint).in(Meters)
+                                                     : mechSetpoint.in(Rotations)));
           break;
         }
         case SetpointVelocity ->
         {
           smc.getMechanismSetpointVelocity().ifPresent(mechSetpoint ->
-                                                           dt.set(cfg.getMechanismCircumference().isPresent() ?
+                                                           dt.set(cfg.getLinearClosedLoopControllerUse() ?
                                                                   cfg.convertFromMechanism(mechSetpoint)
                                                                      .in(MetersPerSecond) :
                                                                   mechSetpoint.in(RotationsPerSecond)));
@@ -243,12 +243,13 @@ public class SmartMotorControllerTelemetry
         {
           case TunableSetpointPosition ->
           {
-            cfg.getMechanismCircumference().ifPresentOrElse(
-                circumference -> {
-                  smartMotorController.setPosition(Meters.of(dt.get()));
-                }, () -> {
-                  smartMotorController.setPosition(Degrees.of(dt.get()));
-                });
+            if (cfg.getLinearClosedLoopControllerUse())
+            {
+              smartMotorController.setPosition(Meters.of(dt.get()));
+            } else
+            {
+              smartMotorController.setPosition(Degrees.of(dt.get()));
+            }
             break;
           }
           case TunableSetpointVelocity ->
@@ -257,12 +258,13 @@ public class SmartMotorControllerTelemetry
             {
               continue;
             }
-            cfg.getMechanismCircumference().ifPresentOrElse(circumference -> smartMotorController.setVelocity(
-                                                                MetersPerSecond.of(
-                                                                    dt.get())),
-                                                            () -> smartMotorController.setVelocity(
-                                                                dt.get() == 0 ? null
-                                                                              : RotationsPerSecond.of(dt.get())));
+            if (cfg.getLinearClosedLoopControllerUse())
+            {
+              smartMotorController.setVelocity(MetersPerSecond.of(dt.get()));
+            } else
+            {
+              smartMotorController.setVelocity(dt.get() == 0 ? null : RotationsPerSecond.of(dt.get()));
+            }
             break;
           }
           case kP -> smartMotorController.setKp(dt.get());
@@ -282,25 +284,26 @@ public class SmartMotorControllerTelemetry
           case MechanismLowerLimit -> smartMotorController.setMechanismLowerLimit(Degrees.of(dt.get()));
           case MotionProfileMaxAcceleration ->
           {
-            cfg.getMechanismCircumference().ifPresentOrElse(distance -> {
-                                                              smartMotorController.setMotionProfileMaxAcceleration(MetersPerSecondPerSecond.of(dt.get()));
-                                                            },
-                                                            () -> {
-                                                              smartMotorController.setMotionProfileMaxAcceleration(
-                                                                  RotationsPerSecondPerSecond.of(dt.get()));
-                                                            });
+            if (cfg.getLinearClosedLoopControllerUse())
+            {
+              smartMotorController.setMotionProfileMaxAcceleration(MetersPerSecondPerSecond.of(dt.get()));
+
+            } else
+            {
+              smartMotorController.setMotionProfileMaxAcceleration(
+                  RotationsPerSecondPerSecond.of(dt.get()));
+            }
             break;
           }
           case MotionProfileMaxVelocity ->
           {
-            cfg.getMechanismCircumference().ifPresentOrElse(distance -> {
-                                                              smartMotorController.setMotionProfileMaxVelocity(MetersPerSecond.of(dt.get()));
-                                                            },
-                                                            () -> {
-                                                              smartMotorController.setMotionProfileMaxVelocity(
-                                                                  RotationsPerSecond.of(dt.get()));
-                                                            });
-
+            if (cfg.getLinearClosedLoopControllerUse())
+            {
+              smartMotorController.setMotionProfileMaxVelocity(MetersPerSecond.of(dt.get()));
+            } else
+            {
+              smartMotorController.setMotionProfileMaxVelocity(RotationsPerSecond.of(dt.get()));
+            }
             break;
           }
         }

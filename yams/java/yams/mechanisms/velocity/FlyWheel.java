@@ -4,7 +4,9 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Seconds;
 
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -181,6 +183,19 @@ public class FlyWheel extends SmartVelocityMechanism
     return new Trigger(() -> getSpeed().isNear(speed, within));
   }
 
+  /**
+   * FlyWheel is near a speed. Same as {@link Trigger#debounce(double)}
+   *
+   * @param speed    {@link AngularVelocity} to be near.
+   * @param within   {@link AngularVelocity} within.
+   * @param debounce {@link Time} to debounce the trigger.
+   * @return Trigger on when the FlyWheel is near another speed.
+   */
+  public Trigger isNear(AngularVelocity speed, AngularVelocity within, Time debounce)
+  {
+    return new Trigger(() -> getSpeed().isNear(speed, within)).debounce(debounce.in(Seconds), DebounceType.kRising);
+  }
+
 
   /**
    * Set the FlyWheel to the given speed.
@@ -271,7 +286,7 @@ public class FlyWheel extends SmartVelocityMechanism
   {
     return Commands.runOnce(m_smc::startClosedLoopController, m_subsystem)
                    .andThen(Commands.runOnce(() -> m_smc.setVelocity(velocity.get()), m_subsystem))
-                   .andThen(Commands.waitUntil(() -> isNear(velocity.get(), tolerance).getAsBoolean()))
+                   .andThen(Commands.waitUntil(isNear(velocity.get(), tolerance).debounce(0.1, DebounceType.kRising)))
                    .withName(m_subsystem.getName() + " RunToVelocity Supplier");
   }
 

@@ -415,19 +415,13 @@ public class SparkWrapper extends SmartMotorController
 
       config.getClosedLoopTolerance().ifPresent(tolerance -> {
         // Set closed loop tolerance and profile tolerance to the same thing.
-        if (config.getMechanismCircumference().isPresent())
+        if (config.getLinearClosedLoopControllerUse())
         {
-//          m_pidController.ifPresent(pidController -> pidController.setTolerance(config.convertFromMechanism(tolerance)
-//                                                                                      .in(Meters)));
-//          m_simplePidController.ifPresent(pidController -> pidController.setTolerance(config.convertFromMechanism(
-//              tolerance).in(Meters)));
           m_expoPidController.ifPresent(pidController -> pidController.setTolerance(config.convertFromMechanism(
                                                                                               tolerance)
                                                                                           .in(Meters)));
         } else
         {
-//          m_pidController.ifPresent(pidController -> pidController.setTolerance(tolerance.in(Rotations)));
-//          m_simplePidController.ifPresent(pidController -> pidController.setTolerance(tolerance.in(Rotations)));
           m_expoPidController.ifPresent(pidController -> pidController.setTolerance(tolerance.in(Rotations)));
         }
       });
@@ -481,7 +475,7 @@ public class SparkWrapper extends SmartMotorController
       var maxAccel = pidController.getConstraints().maxAcceleration;
       var maxVel   = pidController.getConstraints().maxVelocity;
       // Distance based mechanism, converting from meters to rotations.
-      if (config.getMechanismCircumference().isPresent())
+      if (config.getLinearClosedLoopControllerUse())
       {
         maxVel = config.convertToMechanism(MetersPerSecond.of(maxVel)).in(RotationsPerSecond);
         maxAccel = config.convertToMechanism(MetersPerSecondPerSecond.of(maxAccel)).in(RotationsPerSecondPerSecond);

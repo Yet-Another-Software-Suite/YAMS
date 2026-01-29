@@ -264,7 +264,7 @@ public class NovaWrapper extends SmartMotorController
     }
 
     config.getClosedLoopTolerance().ifPresent(tolerance -> {
-      if (config.getMechanismCircumference().isPresent())
+      if (config.getLinearClosedLoopControllerUse())
       {
         m_pidController.ifPresent(pidController -> pidController.setTolerance(config.convertFromMechanism(tolerance)
                                                                                     .in(Meters)));

@@ -268,6 +268,26 @@ public class DifferentialMechanism extends SmartPositionalMechanism
     }, m_subsystem).withName(getName() + " set position");
   }
 
+  public Command run(Angle tilt, Angle twist)
+  {
+    return null;
+  }
+
+  public Command run(Supplier<Angle> tilt, Supplier<Angle> twist)
+  {
+    return null;
+  }
+
+  public Command runTo(Angle tilt, Angle twist)
+  {
+    return null;
+  }
+
+  public Command runTo(Supplier<Angle> tilt, Supplier<Angle> twist)
+  {
+    return null;
+  }
+
   @Override
   public void updateTelemetry()
   {

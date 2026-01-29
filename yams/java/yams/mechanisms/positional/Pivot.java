@@ -4,7 +4,9 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Seconds;
 
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -32,7 +34,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import java.util.Optional;
 import java.util.function.Supplier;
-import yams.exceptions.ArmConfigurationException;
 import yams.exceptions.PivotConfigurationException;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.MechanismPositionConfig;
@@ -202,18 +203,6 @@ public class Pivot extends SmartPositionalMechanism
   }
 
   /**
-   * Pivot is near an angle.
-   *
-   * @param angle  {@link Angle} to be near.
-   * @param within {@link Angle} within.
-   * @return Trigger on when the pivot is near another angle.
-   */
-  public Trigger isNear(Angle angle, Angle within)
-  {
-    return new Trigger(() -> getAngle().isNear(angle, within));
-  }
-
-  /**
    * Set the pivot to the given angle.
    *
    * @param angle Pivot angle to go to.
@@ -221,7 +210,7 @@ public class Pivot extends SmartPositionalMechanism
    */
   public Command setAngle(Angle angle)
   {
-    return Commands.run(() -> m_smc.setPosition(angle), m_subsystem).withName(m_subsystem.getName() + " SetAngle");
+    return run(angle).withName(m_subsystem.getName() + " SetAngle");
   }
 
   /**
@@ -232,8 +221,85 @@ public class Pivot extends SmartPositionalMechanism
    */
   public Command setAngle(Supplier<Angle> angle)
   {
+    return run(angle).withName(m_subsystem.getName() + " SetAngle Supplier");
+  }
+
+  /**
+   * Set the pivot to the given angle.
+   *
+   * @param angle Pivot angle to go to.
+   * @return {@link Command} that sets the pivot to the desired angle.
+   */
+  public Command run(Angle angle)
+  {
+    return Commands.run(() -> m_smc.setPosition(angle), m_subsystem).withName(m_subsystem.getName() + " SetAngle");
+  }
+
+  /**
+   * Set the pivot to the given angle via a supplier.
+   *
+   * @param angle Supplier for the pivot angle to go to.
+   * @return {@link Command} that sets the pivot to the desired angle.
+   */
+  public Command run(Supplier<Angle> angle)
+  {
     return Commands.run(() -> m_smc.setPosition(angle.get()), m_subsystem).withName(
-        m_subsystem.getName() + " SetAngle Supplier");
+        m_subsystem.getName() + " RunAngle Supplier");
+  }
+
+  /**
+   * Set the pivot to the given angle then end the command.
+   *
+   * @param angle     {@link Angle} to go to.
+   * @param tolerance Tolerance {@link Angle}
+   * @return {@link Command} that sets the pivot to the desired angle.
+   * @implNote This command will not stop. It should NOT be used when there is a default command on the Subsystem.
+   */
+  public Command runTo(Angle angle, Angle tolerance)
+  {
+    return Commands.runOnce(() -> m_smc.setPosition(angle), m_subsystem)
+                   .andThen(Commands.waitUntil(isNear(angle, tolerance, Seconds.of(0.1))))
+                   .withName(m_subsystem.getName() + " RunTo Angle");
+  }
+
+  /**
+   * Set the pivot to the given angle then end the command.
+   *
+   * @param angle     {@link Angle} to go to.
+   * @param tolerance Tolerance {@link Angle}
+   * @return {@link Command} that sets the pivot to the desired angle.
+   * @implNote This command will not stop. It should NOT be used when there is a default command on the Subsystem.
+   */
+  public Command runTo(Supplier<Angle> angle, Angle tolerance)
+  {
+    return Commands.runOnce(() -> m_smc.setPosition(angle.get()), m_subsystem)
+                   .andThen(Commands.waitUntil(isNear(angle.get(), tolerance, Seconds.of(0.1))))
+                   .withName(m_subsystem.getName() + " RunTo Angle Supplier");
+  }
+
+  /**
+   * Pivot is near an angle.
+   *
+   * @param angle  {@link Angle} to be near.
+   * @param within {@link Angle} within.
+   * @return {@link Trigger} on when the pivot is near another angle.
+   */
+  public Trigger isNear(Angle angle, Angle within)
+  {
+    return new Trigger(() -> getAngle().isNear(angle, within));
+  }
+
+  /**
+   * Pivot is near an angle.
+   *
+   * @param angle    {@link Angle} to be near.
+   * @param within   {@link Angle} within.
+   * @param debounce {@link edu.wpi.first.math.filter.Debouncer} time.
+   * @return {@link Trigger} on when the pivot is near another angle.
+   */
+  public Trigger isNear(Angle angle, Angle within, Time debounce)
+  {
+    return new Trigger(() -> getAngle().isNear(angle, within)).debounce(debounce.in(Seconds), DebounceType.kRising);
   }
 
   @Override
@@ -247,7 +313,7 @@ public class Pivot extends SmartPositionalMechanism
     {
       return gte(m_config.getUpperHardLimit().get());
     }
-    throw new ArmConfigurationException("Pivot upper hard and motor controller soft limit is empty",
+    throw new PivotConfigurationException("Pivot upper hard and motor controller soft limit is empty",
                                         "Cannot create max trigger.",
                                         "withHardLimit(Angle,Angle)");
   }
@@ -263,7 +329,7 @@ public class Pivot extends SmartPositionalMechanism
     {
       return gte(m_config.getLowerHardLimit().get());
     }
-    throw new ArmConfigurationException("Pivot lower hard and motor controller soft limit is empty",
+    throw new PivotConfigurationException("Pivot lower hard and motor controller soft limit is empty",
                                         "Cannot create min trigger.",
                                         "withHardLimit(Angle,Angle)");
   }

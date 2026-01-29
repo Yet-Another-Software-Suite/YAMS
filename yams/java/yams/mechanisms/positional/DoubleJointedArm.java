@@ -293,6 +293,26 @@ public class DoubleJointedArm extends SmartPositionalMechanism
     });
   }
 
+  public Command run(Translation2d translation2d, boolean invert)
+  {
+    return null;
+  }
+
+  public Command run(Supplier<Translation2d> translation, Supplier<Boolean> invert)
+  {
+    return null;
+  }
+
+  public Command runTo(Translation2d translation2d, boolean invert)
+  {
+    return null;
+  }
+
+  public Command runTo(Supplier<Translation2d> translation, Supplier<Boolean> invert)
+  {
+    return null;
+  }
+
   //    def inv_kinematics(self, pos, invert = False):
   //        """Inverse kinematics for a target position pos (x,y). Invert controls elbow direction."""
   //        [x,y] = pos.flat
