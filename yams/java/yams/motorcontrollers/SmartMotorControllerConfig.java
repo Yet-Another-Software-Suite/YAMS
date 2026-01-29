@@ -253,6 +253,10 @@ public class SmartMotorControllerConfig
    * Loosely coupled followers.
    */
   private       Optional<SmartMotorController[]>              looselyCoupledFollowers            = Optional.empty();
+  /**
+   * Linear or {@link Distance} based closed loop controller.
+   */
+  public boolean linearClosedLoopController = false;
 
   /**
    * Construct the {@link SmartMotorControllerConfig} for the {@link Subsystem}
@@ -330,6 +334,7 @@ public class SmartMotorControllerConfig
     this.closedLoopTolerance = cfg.closedLoopTolerance;
     this.moi = cfg.moi;
     this.looselyCoupledFollowers = cfg.looselyCoupledFollowers;
+    this.linearClosedLoopController = cfg.linearClosedLoopController;
   }
 
   @Override
@@ -1064,6 +1069,16 @@ public class SmartMotorControllerConfig
   }
 
   /**
+   * If the closed loop controller is linear or {@link Distance} based.
+   *
+   * @return Linear closed loop controller.
+   */
+  public boolean getLinearClosedLoopControllerUse()
+  {
+    return linearClosedLoopController && mechanismCircumference.isPresent();
+  }
+
+  /**
    * Modify the period of the PID controller for the motor controller.
    *
    * @param time Period of the motor controller PID.
@@ -1166,6 +1181,7 @@ public class SmartMotorControllerConfig
       this.sim_elevatorFeedforward = Optional.empty();
     } else
     {
+      linearClosedLoopController = true;
       this.sim_armFeedforward = Optional.empty();
       this.sim_simpleFeedforward = Optional.empty();
       this.sim_elevatorFeedforward = Optional.of(elevatorFeedforward);
@@ -1186,6 +1202,7 @@ public class SmartMotorControllerConfig
       this.elevatorFeedforward = Optional.empty();
     } else
     {
+      linearClosedLoopController = true;
       this.armFeedforward = Optional.empty();
       this.simpleFeedforward = Optional.empty();
       this.elevatorFeedforward = Optional.of(elevatorFeedforward);
@@ -1290,6 +1307,7 @@ public class SmartMotorControllerConfig
                                                            "Closed loop controller cannot be created.",
                                                            "withMechanismCircumference(Distance)");
     }
+    linearClosedLoopController = true;
     this.sim_simpleController = Optional.empty();
     this.sim_expoController = Optional.empty();
     this.sim_controller = Optional.of(new ProfiledPIDController(kP,
@@ -1518,6 +1536,18 @@ public class SmartMotorControllerConfig
       this.sim_elevatorFeedforward = Optional.empty();
       this.sim_simpleFeedforward = Optional.of(simpleFeedforward);
     }
+    return this;
+  }
+
+  /**
+   * Set the closed loop controller to be Linear or {@link Distance} based.
+   *
+   * @param linearClosedLoopController Closed loop controller is distance based when true, angle based when false.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public SmartMotorControllerConfig withLinearClosedLoopController(boolean linearClosedLoopController)
+  {
+    this.linearClosedLoopController = linearClosedLoopController;
     return this;
   }
 

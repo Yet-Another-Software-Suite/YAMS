@@ -12,6 +12,7 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -425,7 +426,7 @@ public class Elevator extends SmartPositionalMechanism
    */
   public Command setHeight(Distance height)
   {
-    return Commands.run(() -> m_smc.setPosition(height), m_subsystem).withName(m_subsystem.getName() + " SetHeight");
+    return run(height).withName(m_subsystem.getName() + " SetHeight");
   }
 
   /**
@@ -436,8 +437,62 @@ public class Elevator extends SmartPositionalMechanism
    */
   public Command setHeight(Supplier<Distance> height)
   {
-    return Commands.run(() -> m_smc.setPosition(height.get()), m_subsystem).withName(
-        m_subsystem.getName() + " SetHeight Supplier");
+    return run(height).withName(m_subsystem.getName() + " SetHeight Supplier");
+  }
+
+  /**
+   * Set the height of the elevator.
+   *
+   * @param height Height of the elevator to reach.
+   * @return {@link Command} that  sets the elevator height, stops immediately.
+   */
+  public Command run(Distance height)
+  {
+    return Commands.run(() -> m_smc.setPosition(height), m_subsystem).withName(m_subsystem.getName() + " Run Height");
+  }
+
+  /**
+   * Set the height of the elevator.
+   *
+   * @param height Height of the elevator to reach.
+   * @return {@link Command} that  sets the elevator height, stops immediately.
+   */
+  public Command run(Supplier<Distance> height)
+  {
+    return Commands.run(() -> m_smc.setPosition(height.get()), m_subsystem)
+                   .withName(m_subsystem.getName() + " Run Height Supplier");
+  }
+
+  /**
+   * Run the elevator to the desired height with a tolerance, then move on.
+   *
+   * @param height    Height to reach.
+   * @param tolerance The acceptable tolerance
+   * @return {@link Command} which will run the elevator to the desired height with a tolerance, then move on.
+   * @implNote This should NOT be used with a default command, the mechanism will not stop running after this to allow
+   * for easy chaining.
+   */
+  public Command runTo(Distance height, Distance tolerance)
+  {
+    return Commands.runOnce(() -> m_smc.setPosition(height), m_subsystem)
+                   .andThen(Commands.waitUntil(isNear(height, tolerance, Seconds.of(0.1))))
+                   .withName(m_subsystem.getName() + " Run To Height");
+  }
+
+  /**
+   * Run the elevator to the desired height with a tolerance, then move on.
+   *
+   * @param height    Height to reach.
+   * @param tolerance The acceptable tolerance
+   * @return {@link Command} which will run the elevator to the desired height with a tolerance, then move on.
+   * @implNote This should NOT be used with a default command, the mechanism will not stop running after this to allow
+   * for easy chaining.
+   */
+  public Command runTo(Supplier<Distance> height, Distance tolerance)
+  {
+    return Commands.runOnce(() -> m_smc.setPosition(height.get()), m_subsystem)
+                   .andThen(Commands.waitUntil(isNear(height.get(), tolerance, Seconds.of(0.1))))
+                   .withName(m_subsystem.getName() + " Run To Height Supplier");
   }
 
 
@@ -472,6 +527,19 @@ public class Elevator extends SmartPositionalMechanism
   public Trigger isNear(Distance height, Distance within)
   {
     return new Trigger(() -> getHeight().isNear(height, within));
+  }
+
+  /**
+   * Elevator is near a height.
+   *
+   * @param height   {@link Distance} to be near.
+   * @param within   {@link Distance} within.
+   * @param debounce {@link Time} to debounce the trigger.
+   * @return Trigger on when the elevator is near another height.
+   */
+  public Trigger isNear(Distance height, Distance within, Time debounce)
+  {
+    return new Trigger(() -> getHeight().isNear(height, within)).debounce(debounce.in(Seconds), DebounceType.kRising);
   }
 
   @Override

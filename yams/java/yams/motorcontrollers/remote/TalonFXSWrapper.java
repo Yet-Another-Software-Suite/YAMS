@@ -615,7 +615,7 @@ public class TalonFXSWrapper extends SmartMotorController
       m_talonConfig.Slot0.kI = controller.getI();
       m_talonConfig.Slot0.kD = controller.getD();
 
-      if (config.getMechanismCircumference().isPresent())
+      if (config.getLinearClosedLoopControllerUse())
       {
 //        m_talonConfig.Slot0.kP = config.convertToMechanism(Meters.of(controller.getP())).in(Rotations);
 //        m_talonConfig.Slot0.kI = config.convertToMechanism(Meters.of(controller.getI())).in(Rotations);

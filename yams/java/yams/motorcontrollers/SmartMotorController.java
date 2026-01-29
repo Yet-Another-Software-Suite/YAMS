@@ -118,11 +118,11 @@ public abstract class SmartMotorController
   /**
    * Loosely coupled followers.
    */
-  protected Optional<SmartMotorController[]> m_looseFollowers = Optional.empty();
+  protected Optional<SmartMotorController[]> m_looseFollowers              = Optional.empty();
   /**
    * Running status of the closed loop controller.
    */
-  private boolean m_closedLoopControllerRunning = false;
+  private   boolean                          m_closedLoopControllerRunning = false;
 
   /**
    * Create a {@link SmartMotorController} wrapper from the provided motor controller object.
@@ -238,12 +238,13 @@ public abstract class SmartMotorController
                                                  getMechanismVelocity().in(RotationsPerSecond)));
       m_expoPidController.ifPresent(pid -> pid.reset(getMechanismPosition().in(Rotations),
                                                      getMechanismVelocity().in(RotationsPerSecond)));
-      m_config.getMechanismCircumference().ifPresent(circumference -> {
+      if (m_config.getLinearClosedLoopControllerUse())
+      {
         m_pidController.ifPresent(pid -> pid.reset(getMeasurementPosition().in(Meters),
                                                    getMeasurementVelocity().in(MetersPerSecond)));
         m_expoPidController.ifPresent(pid -> pid.reset(getMeasurementPosition().in(Meters),
                                                        getMeasurementVelocity().in(MetersPerSecond)));
-      });
+      }
       m_closedLoopControllerThread.stop();
       m_closedLoopControllerThread.startPeriodic(m_config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20))
                                                          .in(Seconds));
@@ -549,7 +550,7 @@ public abstract class SmartMotorController
                                                            "withTelemetry(String,TelemetryVerbosity)");
     }
     Config sysIdConfig = getSysIdConfig(maxVoltage, stepVoltage, testDuration);
-    if (m_config.getMechanismCircumference().isPresent())
+    if (m_config.getLinearClosedLoopControllerUse())
     {
       sysIdRoutine = new SysIdRoutine(sysIdConfig,
                                       new SysIdRoutine.Mechanism(
@@ -717,7 +718,7 @@ public abstract class SmartMotorController
                                                                                                                      TelemetryVerbosity.HIGH)));
         }
         updateTelemetry();
-        if(this.telemetry.tuningEnabled())
+        if (this.telemetry.tuningEnabled())
         {
           var telemetryPath    = telemetryTable.get().getPath().substring(1).split("/");
           var telemetryPathStr = telemetryPath[0] + "/Commands/" + telemetryPath[telemetryPath.length - 1];

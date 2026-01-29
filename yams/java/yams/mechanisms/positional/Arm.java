@@ -4,12 +4,16 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Seconds;
 
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
@@ -50,11 +54,11 @@ public class Arm extends SmartPositionalMechanism
   /**
    * Simulation for the arm.
    */
-  private       Optional<SingleJointedArmSim> m_sim = Optional.empty();
+  private Optional<SingleJointedArmSim> m_sim              = Optional.empty();
   /**
    * Mechanism ligament for the setpoint.
    */
-  private       MechanismLigament2d m_setpointLigament = null;
+  private MechanismLigament2d           m_setpointLigament = null;
 
   /**
    * Constructor for the Arm mechanism.
@@ -267,7 +271,7 @@ public class Arm extends SmartPositionalMechanism
    */
   public Command setAngle(Angle angle)
   {
-    return Commands.run(() -> m_smc.setPosition(angle), m_subsystem).withName(m_subsystem.getName() + " SetAngle");
+    return run(angle).withName(m_subsystem.getName() + " SetAngle");
   }
 
   /**
@@ -278,8 +282,60 @@ public class Arm extends SmartPositionalMechanism
    */
   public Command setAngle(Supplier<Angle> angle)
   {
+    return run(angle).withName(m_subsystem.getName() + " SetAngle Supplier");
+  }
+
+  /**
+   * Set the arm to the given angle.
+   *
+   * @param angle Arm angle to go to.
+   * @return {@link Command} that sets the arm to the desired angle.
+   */
+  public Command run(Angle angle)
+  {
+    return Commands.run(() -> m_smc.setPosition(angle), m_subsystem).withName(m_subsystem.getName() + " SetAngle");
+  }
+
+  /**
+   * Set the arm to the given angle via a supplier.
+   *
+   * @param angle Supplier for the arm angle to go to.
+   * @return {@link Command} that sets the arm to the desired angle.
+   */
+  public Command run(Supplier<Angle> angle)
+  {
     return Commands.run(() -> m_smc.setPosition(angle.get()), m_subsystem).withName(
-        m_subsystem.getName() + " SetAngle Supplier");
+        m_subsystem.getName() + " RunAngle Supplier");
+  }
+
+  /**
+   * Set the arm to the given angle then end the command.
+   *
+   * @param angle     {@link Angle} to go to.
+   * @param tolerance Tolerance {@link Angle}
+   * @return {@link Command} that sets the arm to the desired angle.
+   * @implNote This command will not stop. It should NOT be used when there is a default command on the Subsystem.
+   */
+  public Command runTo(Angle angle, Angle tolerance)
+  {
+    return Commands.runOnce(() -> m_smc.setPosition(angle), m_subsystem)
+                   .andThen(Commands.waitUntil(isNear(angle, tolerance, Seconds.of(0.1))))
+                   .withName(m_subsystem.getName() + " RunTo Angle");
+  }
+
+  /**
+   * Set the arm to the given angle then end the command.
+   *
+   * @param angle     {@link Angle} to go to.
+   * @param tolerance Tolerance {@link Angle}
+   * @return {@link Command} that sets the arm to the desired angle.
+   * @implNote This command will not stop. It should NOT be used when there is a default command on the Subsystem.
+   */
+  public Command runTo(Supplier<Angle> angle, Angle tolerance)
+  {
+    return Commands.runOnce(() -> m_smc.setPosition(angle.get()), m_subsystem)
+                   .andThen(Commands.waitUntil(isNear(angle.get(), tolerance, Seconds.of(0.1))))
+                   .withName(m_subsystem.getName() + " RunTo Angle Supplier");
   }
 
   /**
@@ -287,11 +343,24 @@ public class Arm extends SmartPositionalMechanism
    *
    * @param angle  {@link Angle} to be near.
    * @param within {@link Angle} within.
-   * @return Trigger on when the arm is near another angle.
+   * @return {@link Trigger} on when the arm is near another angle.
    */
   public Trigger isNear(Angle angle, Angle within)
   {
     return new Trigger(() -> getAngle().isNear(angle, within));
+  }
+
+  /**
+   * Arm is near an angle.
+   *
+   * @param angle    {@link Angle} to be near.
+   * @param within   {@link Angle} within.
+   * @param debounce {@link edu.wpi.first.math.filter.Debouncer} time.
+   * @return {@link Trigger} on when the arm is near another angle.
+   */
+  public Trigger isNear(Angle angle, Angle within, Time debounce)
+  {
+    return new Trigger(() -> getAngle().isNear(angle, within)).debounce(debounce.in(Seconds), DebounceType.kRising);
   }
 
   @Override
@@ -415,5 +484,19 @@ public class Arm extends SmartPositionalMechanism
   public ArmConfig getArmConfig()
   {
     return m_config;
+  }
+
+  @Override
+  @Deprecated
+  public void setMeasurementVelocitySetpoint(LinearVelocity velocity)
+  {
+    throw new RuntimeException("Unimplemented");
+  }
+
+  @Override
+  @Deprecated
+  public void setMeasurementPositionSetpoint(Distance distance)
+  {
+    throw new RuntimeException("Unimplemented");
   }
 }

@@ -9,7 +9,9 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
@@ -291,6 +293,26 @@ public class DoubleJointedArm extends SmartPositionalMechanism
     });
   }
 
+  public Command run(Translation2d translation2d, boolean invert)
+  {
+    return null;
+  }
+
+  public Command run(Supplier<Translation2d> translation, Supplier<Boolean> invert)
+  {
+    return null;
+  }
+
+  public Command runTo(Translation2d translation2d, boolean invert)
+  {
+    return null;
+  }
+
+  public Command runTo(Supplier<Translation2d> translation, Supplier<Boolean> invert)
+  {
+    return null;
+  }
+
   //    def inv_kinematics(self, pos, invert = False):
   //        """Inverse kinematics for a target position pos (x,y). Invert controls elbow direction."""
   //        [x,y] = pos.flat
@@ -493,6 +515,48 @@ public class DoubleJointedArm extends SmartPositionalMechanism
   @Override
   @Deprecated
   public Command sysId(Voltage maximumVoltage, Velocity<VoltageUnit> step, Time duration)
+  {
+    throw new RuntimeException("Unimplemented");
+  }
+
+  @Override
+  @Deprecated
+  public void setMeasurementVelocitySetpoint(LinearVelocity velocity)
+  {
+    throw new RuntimeException("Unimplemented");
+  }
+
+  @Override
+  @Deprecated
+  public void setMechanismVelocitySetpoint(AngularVelocity velocity)
+  {
+    throw new RuntimeException("Unimplemented");
+  }
+
+  @Override
+  @Deprecated
+  public void setMeasurementPositionSetpoint(Distance distance)
+  {
+    throw new RuntimeException("Unimplemented");
+  }
+
+  @Override
+  @Deprecated
+  public void setMechanismPositionSetpoint(Angle angle)
+  {
+    throw new RuntimeException("Unimplemented");
+  }
+
+  @Override
+  @Deprecated
+  public void setVoltageSetpoint(Voltage voltage)
+  {
+    throw new RuntimeException("Unimplemented");
+  }
+
+  @Override
+  @Deprecated
+  public void setDutyCycleSetpoint(double dutycycle)
   {
     throw new RuntimeException("Unimplemented");
   }

@@ -2,11 +2,8 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Second;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -84,9 +81,10 @@ public class ShooterSubsystem extends SubsystemBase
    */
   public Command set(double dutyCycle) {return shooter.set(dutyCycle);}
 
-  public Command setVelocity(Supplier<AngularVelocity> speed) {return shooter.setSpeed(speed);}
 
   public Command setDutyCycle(Supplier<Double> dutyCycle) {return shooter.set(dutyCycle);}
+
+  public Command setVelocity(Supplier<AngularVelocity> speed) {return shooter.run(speed);}
 
   @Override
   public void simulationPeriodic()
@@ -102,8 +100,7 @@ public class ShooterSubsystem extends SubsystemBase
 
   public void setRPM(LinearVelocity newHorizontalSpeed)
   {
-    motor.setVelocity(RotationsPerSecond.of(
-        newHorizontalSpeed.in(MetersPerSecond) / shooterConfig.getLength().orElseThrow().times(Math.PI).in(Meters)));
+    shooter.setMeasurementVelocitySetpoint(newHorizontalSpeed);
   }
 
   public boolean readyToShoot(AngularVelocity tolerance)
