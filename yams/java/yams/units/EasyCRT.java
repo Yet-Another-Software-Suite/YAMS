@@ -22,6 +22,31 @@ import java.util.Optional;
  * <p>Created by team 6911.
  */
 public class EasyCRT {
+  /**
+   * The list of possible statuses from the previous solve attempt.
+   */
+  public enum CRTStatus {
+    /**
+     * The previous solve succeeded.
+     */
+    OK,
+    /**
+     * The previous solve attempt could not find a solution.
+     */
+    NO_SOLUTION,
+    /**
+     * The previous solve attempt resulted in two nearly-equal matches within tolerance.
+     */
+    AMBIGUOUS,
+    /**
+     * No solve attempts have occured.
+     */
+    NOT_ATTEMPTED,
+    /**
+     * A solve was not attempted, as the solver was not configured correctly.
+     */
+    INVALID_CONFIG
+  }
 
   /**
    * Configuration containing ratios, limits, and encoder suppliers.
@@ -31,7 +56,7 @@ public class EasyCRT {
   /**
    * Last solve status string (e.g., OK / NO_SOLUTION / AMBIGUOUS / INVALID_CONFIG).
    */
-  private String lastStatus = "NOT_ATTEMPTED";
+  private CRTStatus lastStatus = CRTStatus.NOT_ATTEMPTED;
 
   /**
    * Last best-match modular error in rotations.
@@ -97,7 +122,7 @@ public class EasyCRT {
    *
    * @return status from the previous solve attempt
    */
-  public String getLastStatus() {
+  public CRTStatus getLastStatus() {
     return lastStatus;
   }
 
@@ -153,7 +178,7 @@ public class EasyCRT {
         || minMechanismRotations > maxMechanismRotations
         || !Double.isFinite(matchTolerance)
         || matchTolerance < 0.0) {
-      lastStatus = "INVALID_CONFIG";
+      lastStatus = CRTStatus.INVALID_CONFIG;
       return null;
     }
 
@@ -195,19 +220,19 @@ public class EasyCRT {
     }
 
     if (!Double.isFinite(bestRot) || bestErr > matchTolerance) {
-      lastStatus = "NO_SOLUTION";
+      lastStatus = CRTStatus.NO_SOLUTION;
       lastErrorRot = bestErr;
       return null;
     }
 
     // If there are two nearly-equal matches within tolerance, the solution is ambiguous.
     if (secondErr <= matchTolerance && Math.abs(secondErr - bestErr) < 1e-3) {
-      lastStatus = "AMBIGUOUS";
+      lastStatus = CRTStatus.AMBIGUOUS;
       lastErrorRot = bestErr;
       return null;
     }
 
-    lastStatus = "OK";
+    lastStatus = CRTStatus.OK;
     lastErrorRot = bestErr;
     return new CrtSolution(bestRot, bestErr);
   }
