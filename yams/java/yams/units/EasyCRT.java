@@ -22,11 +22,29 @@ import java.util.Optional;
  * <p>Created by team 6911.
  */
 public class EasyCRT {
+  /**
+   * The list of possible statuses from the previous solve attempt.
+   */
   public enum CRTStatus {
+    /**
+     * The previous solve succeeded.
+     */
     OK,
+    /**
+     * The previous solve attempt could not find a solution.
+     */
     NO_SOLUTION,
+    /**
+     * The previous solve attempt resulted in two nearly-equal matches within tolerance.
+     */
     AMBIGUOUS,
+    /**
+     * No solve attempts have occured.
+     */
     NOT_ATTEMPTED,
+    /**
+     * A solve was not attempted, as the solver was not configured correctly.
+     */
     INVALID_CONFIG
   }
 
