@@ -502,7 +502,8 @@ public class NovaWrapper extends SmartMotorController
   @Override
   public Voltage getVoltage()
   {
-    return m_simSupplier.isPresent() ? m_simSupplier.get().getMechanismStatorVoltage() : Volts.of(m_nova.getVoltage());
+    return m_simSupplier.isPresent() ? m_simSupplier.get().getMechanismStatorVoltage() : Volts.of(
+        m_nova.getVoltage() * m_nova.get());
   }
 
   @Override
