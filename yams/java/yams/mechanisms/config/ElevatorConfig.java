@@ -79,6 +79,9 @@ public class ElevatorConfig
    */
   private Optional<Pair<Distance, Distance>> softLimits = Optional.empty();
 
+  /**
+   * Disable gravity on the elevator simulation.
+   */
   private boolean       isElevatorHorizontal          = false;
 
   /**
