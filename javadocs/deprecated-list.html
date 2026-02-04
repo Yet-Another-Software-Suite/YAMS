@@ -159,6 +159,10 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color"></div>
 <div class="col-summary-item-name even-row-color"><a href="yams/mechanisms/config/PivotConfig.html#withTelemetry(java.lang.String,java.lang.String,yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)">yams.mechanisms.config.PivotConfig.withTelemetry<wbr>(String, String, SmartMotorControllerConfig.TelemetryVerbosity)</a></div>
 <div class="col-last even-row-color"></div>
+<div class="col-summary-item-name odd-row-color"><a href="yams/mechanisms/positional/Arm.html#setMeasurementPositionSetpoint(edu.wpi.first.units.measure.Distance)">yams.mechanisms.positional.Arm.setMeasurementPositionSetpoint<wbr>(Distance)</a></div>
+<div class="col-last odd-row-color"></div>
+<div class="col-summary-item-name even-row-color"><a href="yams/mechanisms/positional/Arm.html#setMeasurementVelocitySetpoint(edu.wpi.first.units.measure.LinearVelocity)">yams.mechanisms.positional.Arm.setMeasurementVelocitySetpoint<wbr>(LinearVelocity)</a></div>
+<div class="col-last even-row-color"></div>
 <div class="col-summary-item-name odd-row-color"><a href="yams/mechanisms/positional/DifferentialMechanism.html#max()">yams.mechanisms.positional.DifferentialMechanism.max()</a></div>
 <div class="col-last odd-row-color"></div>
 <div class="col-summary-item-name even-row-color"><a href="yams/mechanisms/positional/DifferentialMechanism.html#min()">yams.mechanisms.positional.DifferentialMechanism.min()</a></div>
@@ -167,9 +171,21 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color"></div>
 <div class="col-summary-item-name even-row-color"><a href="yams/mechanisms/positional/DifferentialMechanism.html#set(java.util.function.Supplier)">yams.mechanisms.positional.DifferentialMechanism.set<wbr>(Supplier&lt;Double&gt;)</a></div>
 <div class="col-last even-row-color"></div>
-<div class="col-summary-item-name odd-row-color"><a href="yams/mechanisms/positional/DifferentialMechanism.html#setVoltage(edu.wpi.first.units.measure.Voltage)">yams.mechanisms.positional.DifferentialMechanism.setVoltage<wbr>(Voltage)</a></div>
+<div class="col-summary-item-name odd-row-color"><a href="yams/mechanisms/positional/DifferentialMechanism.html#setDutyCycleSetpoint(double)">yams.mechanisms.positional.DifferentialMechanism.setDutyCycleSetpoint<wbr>(double)</a></div>
 <div class="col-last odd-row-color"></div>
-<div class="col-summary-item-name even-row-color"><a href="yams/mechanisms/positional/DifferentialMechanism.html#setVoltage(java.util.function.Supplier)">yams.mechanisms.positional.DifferentialMechanism.setVoltage<wbr>(Supplier&lt;Voltage&gt;)</a></div>
+<div class="col-summary-item-name even-row-color"><a href="yams/mechanisms/positional/DifferentialMechanism.html#setMeasurementPositionSetpoint(edu.wpi.first.units.measure.Distance)">yams.mechanisms.positional.DifferentialMechanism.setMeasurementPositionSetpoint<wbr>(Distance)</a></div>
+<div class="col-last even-row-color"></div>
+<div class="col-summary-item-name odd-row-color"><a href="yams/mechanisms/positional/DifferentialMechanism.html#setMeasurementVelocitySetpoint(edu.wpi.first.units.measure.LinearVelocity)">yams.mechanisms.positional.DifferentialMechanism.setMeasurementVelocitySetpoint<wbr>(LinearVelocity)</a></div>
+<div class="col-last odd-row-color"></div>
+<div class="col-summary-item-name even-row-color"><a href="yams/mechanisms/positional/DifferentialMechanism.html#setMechanismPositionSetpoint(edu.wpi.first.units.measure.Angle)">yams.mechanisms.positional.DifferentialMechanism.setMechanismPositionSetpoint<wbr>(Angle)</a></div>
+<div class="col-last even-row-color"></div>
+<div class="col-summary-item-name odd-row-color"><a href="yams/mechanisms/positional/DifferentialMechanism.html#setMechanismVelocitySetpoint(edu.wpi.first.units.measure.AngularVelocity)">yams.mechanisms.positional.DifferentialMechanism.setMechanismVelocitySetpoint<wbr>(AngularVelocity)</a></div>
+<div class="col-last odd-row-color"></div>
+<div class="col-summary-item-name even-row-color"><a href="yams/mechanisms/positional/DifferentialMechanism.html#setVoltage(edu.wpi.first.units.measure.Voltage)">yams.mechanisms.positional.DifferentialMechanism.setVoltage<wbr>(Voltage)</a></div>
+<div class="col-last even-row-color"></div>
+<div class="col-summary-item-name odd-row-color"><a href="yams/mechanisms/positional/DifferentialMechanism.html#setVoltage(java.util.function.Supplier)">yams.mechanisms.positional.DifferentialMechanism.setVoltage<wbr>(Supplier&lt;Voltage&gt;)</a></div>
+<div class="col-last odd-row-color"></div>
+<div class="col-summary-item-name even-row-color"><a href="yams/mechanisms/positional/DifferentialMechanism.html#setVoltageSetpoint(edu.wpi.first.units.measure.Voltage)">yams.mechanisms.positional.DifferentialMechanism.setVoltageSetpoint<wbr>(Voltage)</a></div>
 <div class="col-last even-row-color"></div>
 <div class="col-summary-item-name odd-row-color"><a href="yams/mechanisms/positional/DifferentialMechanism.html#sysId(edu.wpi.first.units.measure.Voltage,edu.wpi.first.units.measure.Velocity,edu.wpi.first.units.measure.Time)">yams.mechanisms.positional.DifferentialMechanism.sysId<wbr>(Voltage, Velocity&lt;VoltageUnit&gt;, Time)</a></div>
 <div class="col-last odd-row-color"></div>
@@ -181,11 +197,27 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color"></div>
 <div class="col-summary-item-name odd-row-color"><a href="yams/mechanisms/positional/DoubleJointedArm.html#set(java.util.function.Supplier)">yams.mechanisms.positional.DoubleJointedArm.set<wbr>(Supplier&lt;Double&gt;)</a></div>
 <div class="col-last odd-row-color"></div>
-<div class="col-summary-item-name even-row-color"><a href="yams/mechanisms/positional/DoubleJointedArm.html#setVoltage(edu.wpi.first.units.measure.Voltage)">yams.mechanisms.positional.DoubleJointedArm.setVoltage<wbr>(Voltage)</a></div>
+<div class="col-summary-item-name even-row-color"><a href="yams/mechanisms/positional/DoubleJointedArm.html#setDutyCycleSetpoint(double)">yams.mechanisms.positional.DoubleJointedArm.setDutyCycleSetpoint<wbr>(double)</a></div>
 <div class="col-last even-row-color"></div>
-<div class="col-summary-item-name odd-row-color"><a href="yams/mechanisms/positional/DoubleJointedArm.html#setVoltage(java.util.function.Supplier)">yams.mechanisms.positional.DoubleJointedArm.setVoltage<wbr>(Supplier&lt;Voltage&gt;)</a></div>
+<div class="col-summary-item-name odd-row-color"><a href="yams/mechanisms/positional/DoubleJointedArm.html#setMeasurementPositionSetpoint(edu.wpi.first.units.measure.Distance)">yams.mechanisms.positional.DoubleJointedArm.setMeasurementPositionSetpoint<wbr>(Distance)</a></div>
+<div class="col-last odd-row-color"></div>
+<div class="col-summary-item-name even-row-color"><a href="yams/mechanisms/positional/DoubleJointedArm.html#setMeasurementVelocitySetpoint(edu.wpi.first.units.measure.LinearVelocity)">yams.mechanisms.positional.DoubleJointedArm.setMeasurementVelocitySetpoint<wbr>(LinearVelocity)</a></div>
+<div class="col-last even-row-color"></div>
+<div class="col-summary-item-name odd-row-color"><a href="yams/mechanisms/positional/DoubleJointedArm.html#setMechanismPositionSetpoint(edu.wpi.first.units.measure.Angle)">yams.mechanisms.positional.DoubleJointedArm.setMechanismPositionSetpoint<wbr>(Angle)</a></div>
+<div class="col-last odd-row-color"></div>
+<div class="col-summary-item-name even-row-color"><a href="yams/mechanisms/positional/DoubleJointedArm.html#setMechanismVelocitySetpoint(edu.wpi.first.units.measure.AngularVelocity)">yams.mechanisms.positional.DoubleJointedArm.setMechanismVelocitySetpoint<wbr>(AngularVelocity)</a></div>
+<div class="col-last even-row-color"></div>
+<div class="col-summary-item-name odd-row-color"><a href="yams/mechanisms/positional/DoubleJointedArm.html#setVoltage(edu.wpi.first.units.measure.Voltage)">yams.mechanisms.positional.DoubleJointedArm.setVoltage<wbr>(Voltage)</a></div>
+<div class="col-last odd-row-color"></div>
+<div class="col-summary-item-name even-row-color"><a href="yams/mechanisms/positional/DoubleJointedArm.html#setVoltage(java.util.function.Supplier)">yams.mechanisms.positional.DoubleJointedArm.setVoltage<wbr>(Supplier&lt;Voltage&gt;)</a></div>
+<div class="col-last even-row-color"></div>
+<div class="col-summary-item-name odd-row-color"><a href="yams/mechanisms/positional/DoubleJointedArm.html#setVoltageSetpoint(edu.wpi.first.units.measure.Voltage)">yams.mechanisms.positional.DoubleJointedArm.setVoltageSetpoint<wbr>(Voltage)</a></div>
 <div class="col-last odd-row-color"></div>
 <div class="col-summary-item-name even-row-color"><a href="yams/mechanisms/positional/DoubleJointedArm.html#sysId(edu.wpi.first.units.measure.Voltage,edu.wpi.first.units.measure.Velocity,edu.wpi.first.units.measure.Time)">yams.mechanisms.positional.DoubleJointedArm.sysId<wbr>(Voltage, Velocity&lt;VoltageUnit&gt;, Time)</a></div>
+<div class="col-last even-row-color"></div>
+<div class="col-summary-item-name odd-row-color"><a href="yams/mechanisms/positional/Pivot.html#setMeasurementPositionSetpoint(edu.wpi.first.units.measure.Distance)">yams.mechanisms.positional.Pivot.setMeasurementPositionSetpoint<wbr>(Distance)</a></div>
+<div class="col-last odd-row-color"></div>
+<div class="col-summary-item-name even-row-color"><a href="yams/mechanisms/positional/Pivot.html#setMeasurementVelocitySetpoint(edu.wpi.first.units.measure.LinearVelocity)">yams.mechanisms.positional.Pivot.setMeasurementVelocitySetpoint<wbr>(LinearVelocity)</a></div>
 <div class="col-last even-row-color"></div>
 <div class="col-summary-item-name odd-row-color"><a href="yams/mechanisms/SmartMechanism.html#gearbox(double...)">yams.mechanisms.SmartMechanism.gearbox<wbr>(double...)</a></div>
 <div class="col-last odd-row-color">
@@ -219,26 +251,28 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color"></div>
 <div class="col-summary-item-name even-row-color"><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html#resetDriveToPosePIDControllers()">yams.mechanisms.swerve.utility.SwerveInputStream.resetDriveToPosePIDControllers()</a></div>
 <div class="col-last even-row-color"></div>
-<div class="col-summary-item-name odd-row-color"><a href="yams/motorcontrollers/local/NovaWrapper.html#setOpenLoopRampRate(edu.wpi.first.units.measure.Time)">yams.motorcontrollers.local.NovaWrapper.setOpenLoopRampRate<wbr>(Time)</a></div>
+<div class="col-summary-item-name odd-row-color"><a href="yams/mechanisms/velocity/FlyWheel.html#setMeasurementPositionSetpoint(edu.wpi.first.units.measure.Distance)">yams.mechanisms.velocity.FlyWheel.setMeasurementPositionSetpoint<wbr>(Distance)</a></div>
 <div class="col-last odd-row-color"></div>
-<div class="col-summary-item-name even-row-color"><a href="yams/motorcontrollers/local/SparkWrapper.html#getSupplyCurrent()">yams.motorcontrollers.local.SparkWrapper.getSupplyCurrent()</a></div>
+<div class="col-summary-item-name even-row-color"><a href="yams/motorcontrollers/local/NovaWrapper.html#setOpenLoopRampRate(edu.wpi.first.units.measure.Time)">yams.motorcontrollers.local.NovaWrapper.setOpenLoopRampRate<wbr>(Time)</a></div>
 <div class="col-last even-row-color"></div>
-<div class="col-summary-item-name odd-row-color"><a href="yams/motorcontrollers/local/SparkWrapper.html#setSupplyCurrentLimit(edu.wpi.first.units.measure.Current)">yams.motorcontrollers.local.SparkWrapper.setSupplyCurrentLimit<wbr>(Current)</a></div>
+<div class="col-summary-item-name odd-row-color"><a href="yams/motorcontrollers/local/SparkWrapper.html#getSupplyCurrent()">yams.motorcontrollers.local.SparkWrapper.getSupplyCurrent()</a></div>
 <div class="col-last odd-row-color"></div>
-<div class="col-summary-item-name even-row-color"><a href="yams/motorcontrollers/remote/TalonFXSWrapper.html#setEncoderVelocity(edu.wpi.first.units.measure.AngularVelocity)">yams.motorcontrollers.remote.TalonFXSWrapper.setEncoderVelocity<wbr>(AngularVelocity)</a></div>
+<div class="col-summary-item-name even-row-color"><a href="yams/motorcontrollers/local/SparkWrapper.html#setSupplyCurrentLimit(edu.wpi.first.units.measure.Current)">yams.motorcontrollers.local.SparkWrapper.setSupplyCurrentLimit<wbr>(Current)</a></div>
 <div class="col-last even-row-color"></div>
-<div class="col-summary-item-name odd-row-color"><a href="yams/motorcontrollers/remote/TalonFXSWrapper.html#setSupplyCurrentLimit(edu.wpi.first.units.measure.Current)">yams.motorcontrollers.remote.TalonFXSWrapper.setSupplyCurrentLimit<wbr>(Current)</a></div>
+<div class="col-summary-item-name odd-row-color"><a href="yams/motorcontrollers/remote/TalonFXSWrapper.html#setEncoderVelocity(edu.wpi.first.units.measure.AngularVelocity)">yams.motorcontrollers.remote.TalonFXSWrapper.setEncoderVelocity<wbr>(AngularVelocity)</a></div>
 <div class="col-last odd-row-color"></div>
-<div class="col-summary-item-name even-row-color"><a href="yams/motorcontrollers/remote/TalonFXSWrapper.html#synchronizeRelativeEncoder()">yams.motorcontrollers.remote.TalonFXSWrapper.synchronizeRelativeEncoder()</a></div>
+<div class="col-summary-item-name even-row-color"><a href="yams/motorcontrollers/remote/TalonFXSWrapper.html#setSupplyCurrentLimit(edu.wpi.first.units.measure.Current)">yams.motorcontrollers.remote.TalonFXSWrapper.setSupplyCurrentLimit<wbr>(Current)</a></div>
 <div class="col-last even-row-color"></div>
-<div class="col-summary-item-name odd-row-color"><a href="yams/motorcontrollers/remote/TalonFXWrapper.html#setEncoderVelocity(edu.wpi.first.units.measure.AngularVelocity)">yams.motorcontrollers.remote.TalonFXWrapper.setEncoderVelocity<wbr>(AngularVelocity)</a></div>
+<div class="col-summary-item-name odd-row-color"><a href="yams/motorcontrollers/remote/TalonFXSWrapper.html#synchronizeRelativeEncoder()">yams.motorcontrollers.remote.TalonFXSWrapper.synchronizeRelativeEncoder()</a></div>
 <div class="col-last odd-row-color"></div>
-<div class="col-summary-item-name even-row-color"><a href="yams/motorcontrollers/remote/TalonFXWrapper.html#setSupplyCurrentLimit(edu.wpi.first.units.measure.Current)">yams.motorcontrollers.remote.TalonFXWrapper.setSupplyCurrentLimit<wbr>(Current)</a></div>
+<div class="col-summary-item-name even-row-color"><a href="yams/motorcontrollers/remote/TalonFXWrapper.html#setEncoderVelocity(edu.wpi.first.units.measure.AngularVelocity)">yams.motorcontrollers.remote.TalonFXWrapper.setEncoderVelocity<wbr>(AngularVelocity)</a></div>
 <div class="col-last even-row-color"></div>
-<div class="col-summary-item-name odd-row-color"><a href="yams/motorcontrollers/remote/TalonFXWrapper.html#synchronizeRelativeEncoder()">yams.motorcontrollers.remote.TalonFXWrapper.synchronizeRelativeEncoder()</a></div>
+<div class="col-summary-item-name odd-row-color"><a href="yams/motorcontrollers/remote/TalonFXWrapper.html#setSupplyCurrentLimit(edu.wpi.first.units.measure.Current)">yams.motorcontrollers.remote.TalonFXWrapper.setSupplyCurrentLimit<wbr>(Current)</a></div>
 <div class="col-last odd-row-color"></div>
-<div class="col-summary-item-name even-row-color"><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withMomentOfInertia(double)">yams.motorcontrollers.SmartMotorControllerConfig.withMomentOfInertia<wbr>(double)</a></div>
+<div class="col-summary-item-name even-row-color"><a href="yams/motorcontrollers/remote/TalonFXWrapper.html#synchronizeRelativeEncoder()">yams.motorcontrollers.remote.TalonFXWrapper.synchronizeRelativeEncoder()</a></div>
 <div class="col-last even-row-color"></div>
+<div class="col-summary-item-name odd-row-color"><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withMomentOfInertia(double)">yams.motorcontrollers.SmartMotorControllerConfig.withMomentOfInertia<wbr>(double)</a></div>
+<div class="col-last odd-row-color"></div>
 </div>
 </div>
 </li>
