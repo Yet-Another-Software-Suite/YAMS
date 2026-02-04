@@ -78,7 +78,6 @@ public class ElevatorConfig
    * Soft limits of the {@link SmartMotorController} closed loop controller. Can be exceeded. (LowerLimit, UpperLimit)
    */
   private Optional<Pair<Distance, Distance>> softLimits = Optional.empty();
-
   /**
    * Disable gravity on the elevator simulation.
    */
