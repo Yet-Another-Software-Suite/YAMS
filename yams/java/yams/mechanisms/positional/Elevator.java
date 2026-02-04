@@ -118,13 +118,16 @@ public class Elevator extends SmartPositionalMechanism
                                                  "Cannot create simulator",
                                                  "withStartingHeight(Distance)");
       }
+
+      boolean simulateGravity = !config.getIsElevatorHorizontal();
+
       m_sim = Optional.of(new ElevatorSim(motor.getDCMotor(),
                                           motor.getConfig().getGearing().getMechanismToRotorRatio(),
                                           config.getCarriageMass().get().in(Kilograms),
                                           config.getDrumRadius().in(Meters),
                                           config.getMinimumHeight().get().in(Meters),
                                           config.getMaximumHeight().get().in(Meters),
-                                          true,
+                                          simulateGravity,
                                           config.getStartingHeight().get().in(Meters),
                                           0.01 / 4096, 0.01 / 4096));
       m_smc.setSimSupplier(new SimSupplier()
