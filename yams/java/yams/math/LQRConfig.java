@@ -5,8 +5,8 @@ import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -176,9 +176,9 @@ public class LQRConfig
   public LQRConfig withFlyWheel(AngularVelocity qelms, AngularVelocity modelTrust, AngularVelocity encoderTrust)
   {
     m_type = Optional.of(LQRType.FLYWHEEL);
-    m_qelms = Optional.of(VecBuilder.fill(qelms.in(RotationsPerSecond)));
-    m_modelStdDevs = Optional.of(VecBuilder.fill(modelTrust.in(RotationsPerSecond)));
-    m_encoderStdDevs = Optional.of(VecBuilder.fill(encoderTrust.in(RotationsPerSecond)));
+    m_qelms = Optional.of(VecBuilder.fill(qelms.in(RadiansPerSecond)));
+    m_modelStdDevs = Optional.of(VecBuilder.fill(modelTrust.in(RadiansPerSecond)));
+    m_encoderStdDevs = Optional.of(VecBuilder.fill(encoderTrust.in(RadiansPerSecond)));
     return this;
   }
 
@@ -230,10 +230,10 @@ public class LQRConfig
                            AngularVelocity modelVelocityTrust, Angle encoderPositionTrust)
   {
     m_type = Optional.of(LQRType.ARM);
-    m_qelms = Optional.of(VecBuilder.fill(qelmsPosition.in(Rotations), qelmsVelocity.in(RotationsPerSecond)));
-    m_modelStdDevs = Optional.of(VecBuilder.fill(modelPositionTrust.in(Rotations),
-                                                 modelVelocityTrust.in(RotationsPerSecond)));
-    m_encoderStdDevs = Optional.of(VecBuilder.fill(encoderPositionTrust.in(Rotations)));
+    m_qelms = Optional.of(VecBuilder.fill(qelmsPosition.in(Radians), qelmsVelocity.in(RadiansPerSecond)));
+    m_modelStdDevs = Optional.of(VecBuilder.fill(modelPositionTrust.in(Radians),
+                                                 modelVelocityTrust.in(RadiansPerSecond)));
+    m_encoderStdDevs = Optional.of(VecBuilder.fill(encoderPositionTrust.in(Radians)));
     return this;
   }
 
