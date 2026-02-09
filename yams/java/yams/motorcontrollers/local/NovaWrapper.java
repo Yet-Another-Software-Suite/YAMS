@@ -328,6 +328,12 @@ public class NovaWrapper extends SmartMotorController
           "[Error] ThriftyNova does not support separate closed loop and open loop ramp rates, using the SmartMotorControllerConfig.withClosedLoopRampRate() as both.");
     }
 
+    if (config.getVendorPositionControlRequest().isPresent() || config.getVendorVelocityControlRequest().isPresent())
+    {
+      throw new IllegalArgumentException("[ERROR] ThriftyNova does not support vendor control requests");
+    }
+
+
     // Gearing
     // Do nothing since not supported yet.
 

@@ -670,6 +670,34 @@ public class TalonFXSWrapper extends SmartMotorController
                                                            ".withClosedLoopTolerance");
     }
 
+    if(config.getVendorPositionControlRequest().isPresent()){
+      var genControlRequest = config.getVendorPositionControlRequest().get();
+      if (genControlRequest instanceof ControlRequest)
+      {
+        m_positionReq = (ControlRequest) genControlRequest;
+      } else
+      {
+        throw new SmartMotorControllerConfigurationException(
+            "ControlRequest is the only acceptable vendor config type for TalonFXWrapper",
+            "Vendor control request is unable to be applied",
+            ".withVendorPositionControlRequest(new PositionVoltage(0))");
+      }
+    }
+
+    if(config.getVendorVelocityControlRequest().isPresent()){
+      var genControlRequest = config.getVendorVelocityControlRequest().get();
+      if (genControlRequest instanceof ControlRequest)
+      {
+        m_velocityReq = (ControlRequest) genControlRequest;
+      } else
+      {
+        throw new SmartMotorControllerConfigurationException(
+            "ControlRequest is the only acceptable vendor config type for TalonFXWrapper",
+            "Vendor control request is unable to be applied",
+            ".withVendorVelocityControlRequest(new VelocityVoltage(0))");
+      }
+    }
+
     // Fetch the controller mode to satisfy the requirement of knowing the control mode.
     config.getMotorControllerMode();
 
