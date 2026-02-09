@@ -745,6 +745,11 @@ public class SparkWrapper extends SmartMotorController
       throw new IllegalArgumentException("[ERROR] Spark relative encoder cannot be inverted!");
     }
 
+    if (config.getUseVelocityTorqueCurrentControl())
+    {
+      throw new IllegalArgumentException("[ERROR] Spark doesn't support velocity torque current control");
+    }
+
     config.validateBasicOptions();
     config.validateExternalEncoderOptions();
     return configureSpark(() -> m_spark.configure(m_sparkBaseConfig,

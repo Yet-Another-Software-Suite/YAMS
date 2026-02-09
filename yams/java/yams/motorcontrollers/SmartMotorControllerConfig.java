@@ -219,6 +219,10 @@ public class SmartMotorControllerConfig
    */
   private       boolean                                       useExternalEncoder                 = true;
   /**
+   * Use Velocity Torque Current control if set.
+   */
+  private       boolean                                       useVelocityTorqueCurrentControl               = false;
+  /**
    * {@link SmartMotorController} starting angle.
    */
   private       Optional<Angle>                               startingPosition                   = Optional.empty();
@@ -339,6 +343,7 @@ public class SmartMotorControllerConfig
     this.moi = cfg.moi;
     this.looselyCoupledFollowers = cfg.looselyCoupledFollowers;
     this.linearClosedLoopController = cfg.linearClosedLoopController;
+    this.useVelocityTorqueCurrentControl = cfg.useVelocityTorqueCurrentControl;
   }
 
   @Override
@@ -1477,6 +1482,17 @@ public class SmartMotorControllerConfig
   }
 
   /**
+   * Use torque current control for velocity.
+   * 
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public SmartMotorControllerConfig withVelocityTorqueCurrentControl()
+  {
+    this.useVelocityTorqueCurrentControl = true;
+    return this;
+  }
+
+  /**
    * Get the controller for the {@link SmartMotorController}, the units passed in are in Rotations (or Meters if
    * Mechanism Circumference is configured), the outputs are in Volts.
    *
@@ -1521,6 +1537,18 @@ public class SmartMotorControllerConfig
       return sim_simpleController;
     }
     return simpleController;
+  }
+
+  /**
+   * Get whether or not the motor uses torque current control for velocity
+   *
+   * @return use of torque current for velocity control
+   */
+  public boolean getUseVelocityTorqueCurrentControl()
+  {
+    if (RobotBase.isSimulation())
+    {return false;}
+    return this.useVelocityTorqueCurrentControl;
   }
 
   /**

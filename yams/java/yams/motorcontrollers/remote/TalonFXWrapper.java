@@ -22,6 +22,7 @@ import com.ctre.phoenix6.controls.MotionMagicExpoVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.CANdi;
@@ -112,6 +113,10 @@ public class TalonFXWrapper extends SmartMotorController
    */
   private final MotionMagicVelocityVoltage    m_trapVelocityReq   = new MotionMagicVelocityVoltage(0).withSlot(
       m_controlReqSlot);
+  /**
+   * Velocity torque current FOC request.
+   */
+  private final VelocityTorqueCurrentFOC      m_velocityTorqueCurrentReq   = new VelocityTorqueCurrentFOC(0).withSlot(m_controlReqSlot);
   /**
    * Position with exponential profiling request.
    */
@@ -492,6 +497,9 @@ public class TalonFXWrapper extends SmartMotorController
         case "MotionMagicVelocityVoltage":
           m_talonfx.setControl(m_trapVelocityReq.withVelocity(angularVelocity));
           break;
+        case "VelocityTorqueCurrentFOC":
+          m_talonfx.setControl(m_velocityTorqueCurrentReq.withVelocity(angularVelocity));
+          break;
         case "VelocityVoltage":
         default:
           m_talonfx.setControl(m_simpleVelocityReq.withVelocity(angularVelocity));
@@ -619,6 +627,10 @@ public class TalonFXWrapper extends SmartMotorController
       throw new SmartMotorControllerConfigurationException("Closed loop tolerance is not available on TalonFX",
                                                            "Cannot set closed loop tolerance on TalonFX",
                                                            ".withClosedLoopTolerance");
+    }
+
+    if(config.getUseVelocityTorqueCurrentControl()){
+      m_velocityReq = m_velocityTorqueCurrentReq;
     }
 
     // Fetch the controller mode to satisfy the requirement of knowing the control mode.

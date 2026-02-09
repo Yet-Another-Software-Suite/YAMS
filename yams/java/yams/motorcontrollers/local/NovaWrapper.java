@@ -431,6 +431,11 @@ public class NovaWrapper extends SmartMotorController
           ".withExternalEncoderInverted");
     }
 
+    if (config.getUseVelocityTorqueCurrentControl())
+    {
+      throw new IllegalArgumentException("[ERROR] Spark doesn't support velocity torque current control");
+    }
+
     if (config.getFollowers().isPresent())
     {
       for (Pair<Object, Boolean> follower : config.getFollowers().get())
