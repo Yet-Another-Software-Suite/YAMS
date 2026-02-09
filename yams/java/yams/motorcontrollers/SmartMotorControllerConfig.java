@@ -1,5 +1,6 @@
 package yams.motorcontrollers;
 
+import static edu.wpi.first.hal.FRCNetComm.tResourceType.kResourceType_YAMS;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Kilograms;
@@ -11,6 +12,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
+import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
@@ -265,6 +267,7 @@ public class SmartMotorControllerConfig
    */
   public SmartMotorControllerConfig(Subsystem subsystem)
   {
+    HAL.report(kResourceType_YAMS, 1);
     this.subsystem = Optional.ofNullable(subsystem);
   }
 
@@ -275,6 +278,7 @@ public class SmartMotorControllerConfig
    */
   public SmartMotorControllerConfig()
   {
+    HAL.report(kResourceType_YAMS, 1);
   }
 
   /**

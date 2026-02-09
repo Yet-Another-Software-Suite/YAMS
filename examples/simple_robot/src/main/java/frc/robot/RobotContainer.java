@@ -5,25 +5,22 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.RPM;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.subsystems.ArmSubsystem;
-import frc.robot.subsystems.doubleflywheel.DoubleFlyWheelSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 
 public class RobotContainer
 {
 
-  private final ArmSubsystem arm = new ArmSubsystem();
-  private final DoubleFlyWheelSubsystem flyWheelSubsystem = new DoubleFlyWheelSubsystem();
+  //  private final ArmSubsystem arm = new ArmSubsystem();
+//  private final DoubleFlyWheelSubsystem flyWheelSubsystem = new DoubleFlyWheelSubsystem();
 //  private final DiffyMechSubsystem m_diffyMechSubsystem = new DiffyMechSubsystem();
 //  private final DoubleJointedArmSubsystem jointedArm = new DoubleJointedArmSubsystem();
 //  private final ElevatorSubsystem elevator = new ElevatorSubsystem();
 //private final SwerveSubsystem drive = new SwerveSubsystem();
-//  private final ShooterSubsystem shooter = new ShooterSubsystem();
+  private final ShooterSubsystem shooter = new ShooterSubsystem();
 //  private final TurretSubsystem           turret         = new TurretSubsystem();
 
   private final CommandXboxController     xboxController = new CommandXboxController(0);
@@ -31,7 +28,7 @@ public class RobotContainer
   public RobotContainer()
   {
     DriverStation.silenceJoystickConnectionWarning(true);
-    flyWheelSubsystem.setDefaultCommand(flyWheelSubsystem.setDutyCycle(0, 0));
+//    flyWheelSubsystem.setDefaultCommand(flyWheelSubsystem.setDutyCycle(0, 0));
 //    arm.setDefaultCommand(arm.armCmd(0));
 //    arm.setDefaultCommand(arm.setAngle(Degrees.of(0)));
 //    jointedArm.setDefaultCommand(jointedArm.setAngle(Degrees.of(90), Degrees.of(0)));
@@ -85,9 +82,9 @@ public class RobotContainer
 //    xboxController.button(3).whileTrue(arm.setAngle(Degrees.of(30)));
 //    xboxController.button(4).whileTrue(arm.setAngle(Degrees.of(80)));
 
-    xboxController.button(1).whileTrue(flyWheelSubsystem.setDutyCycle(0, 0.5));
-    xboxController.button(2).whileTrue(flyWheelSubsystem.setDutyCycle(0.5, 0));
-    xboxController.button(3).whileTrue(flyWheelSubsystem.setVelocity(RPM.of(3000), RPM.of(6000)));
+//    xboxController.button(1).whileTrue(flyWheelSubsystem.setDutyCycle(0, 0.5));
+//    xboxController.button(2).whileTrue(flyWheelSubsystem.setDutyCycle(0.5, 0));
+//    xboxController.button(3).whileTrue(flyWheelSubsystem.setVelocity(RPM.of(3000), RPM.of(6000)));
 //    xboxController.button(1).whileTrue(arm.setAngle(Degrees.of(-30)));
 //    xboxController.button(2).whileTrue(arm.setAngle(Degrees.of(30)));
 //    xboxController.button(3).whileTrue(arm.sysId());
