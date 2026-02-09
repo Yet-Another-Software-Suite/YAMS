@@ -14,7 +14,6 @@ import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
-import com.ctre.phoenix6.controls.ControlRequest;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.PersistMode;
 import com.revrobotics.REVLibError;
@@ -506,34 +505,6 @@ public class SparkWrapper extends SmartMotorController
       m_positionControlType = ControlType.kPosition;
       m_velocityControlType = ControlType.kVelocity;
     });
-
-    if(config.getVendorPositionControlRequest().isPresent()){
-      var genControlRequest = config.getVendorPositionControlRequest().get();
-      if (genControlRequest instanceof ControlType)
-      {
-        m_positionControlType = (ControlType) genControlRequest;
-      } else
-      {
-        throw new SmartMotorControllerConfigurationException(
-            "ControlType is the only acceptable vendor config type for SparkWapper",
-            "Vendor control request is unable to be applied",
-            ".withVendorPositionControlRequest(ControlType.kPosition)");
-      }
-    }
-
-    if(config.getVendorVelocityControlRequest().isPresent()){
-      var genControlRequest = config.getVendorVelocityControlRequest().get();
-      if (genControlRequest instanceof ControlType)
-      {
-        m_velocityControlType = (ControlType) genControlRequest;
-      } else
-      {
-        throw new SmartMotorControllerConfigurationException(
-            "ControlType is the only acceptable vendor config type for SparkWapper",
-            "Vendor control request is unable to be applied",
-            ".withVendorVelocityControlRequest(ControlType.kVelocity)");
-      }
-    }
 
     // Set feedforward values
     config.getArmFeedforward().ifPresent(ff -> {
