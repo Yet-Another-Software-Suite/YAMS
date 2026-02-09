@@ -23,7 +23,9 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicExpoVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.CANdi;
@@ -122,6 +124,16 @@ public class TalonFXSWrapper extends SmartMotorController
    */
   private final MotionMagicExpoVoltage        m_expoPositionReq   = new MotionMagicExpoVoltage(0).withSlot(
       m_controlReqSlot);
+  /**
+   * Torque current velocity control request
+   */
+  private final VelocityTorqueCurrentFOC      m_torqueCurrentVelocityReq = new VelocityTorqueCurrentFOC(0).withSlot(
+    m_controlReqSlot);
+  /**
+   * Torque current position control request
+   */
+  private final PositionTorqueCurrentFOC      m_torqueCurrentPositionReq = new PositionTorqueCurrentFOC(0).withSlot(
+    m_controlReqSlot);
   /**
    * Position control request to use.
    */
@@ -489,6 +501,9 @@ public class TalonFXSWrapper extends SmartMotorController
         case "MotionMagicExpoVoltage":
           m_talonfxs.setControl(m_expoPositionReq.withPosition(angle));
           break;
+        case "PositionTorqueCurrentFOC":
+          m_talonfxs.setControl(m_torqueCurrentPositionReq.withPosition(angle));
+          break;
         case "MotionMagicVoltage":
           m_talonfxs.setControl(m_trapPositionReq.withPosition(angle));
           break;
@@ -525,6 +540,9 @@ public class TalonFXSWrapper extends SmartMotorController
       {
         case "MotionMagicVelocityVoltage":
           m_talonfxs.setControl(m_trapVelocityReq.withVelocity(angularVelocity));
+          break;
+        case "VelocityTorqueCurrentFOC":
+          m_talonfxs.setControl(m_torqueCurrentVelocityReq.withVelocity(angularVelocity));
           break;
         case "VelocityVoltage":
         default:
