@@ -17,6 +17,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
+import yams.math.LQRConfig.LQRType;
 
 /**
  * Linear Quadratic Regulator (Regulator is a type of controller)
@@ -24,6 +25,7 @@ import edu.wpi.first.units.measure.Voltage;
 public class LQRController
 {
 
+  private final LQRType m_type;
   private final LinearSystemLoop<?, ?, ?> m_loop;
   private final Time                      m_period;
 
@@ -32,8 +34,9 @@ public class LQRController
    *
    * @param loop {@link LinearSystemLoop} which can be derived from {@link LQRConfig}
    */
-  public LQRController(LinearSystemLoop<?, ?, ?> loop, Time period)
+  public LQRController(LQRType type, LinearSystemLoop<?, ?, ?> loop, Time period)
   {
+    m_type = type;
     m_loop = loop;
     m_period = period;
   }
@@ -45,6 +48,7 @@ public class LQRController
    */
   public LQRController(LQRConfig config)
   {
+    m_type = config.getType();
     m_loop = config.getLoop();
     m_period = config.getPeriod();
   }
@@ -97,6 +101,16 @@ public class LQRController
     loop.correct((VecBuilder.fill(measured.in(RadiansPerSecond))));
     loop.predict(m_period.in(Seconds));
     return Volts.of(loop.getU(0));
+  }
+
+  /**
+   * Get the type of LQR.
+   *
+   * @return {@link LQRType}
+   */
+  public LQRType getType()
+  {
+    return m_type;
   }
 
 

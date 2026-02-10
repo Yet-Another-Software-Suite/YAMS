@@ -30,6 +30,7 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import yams.gearing.MechanismGearing;
 
 /**
@@ -128,6 +129,14 @@ public class LQRConfig
    * Elevator radius for {@link LinearSystemId#createElevatorSystem(DCMotor, double, double, double)}
    */
   private       Optional<Distance>  m_elevatorDrumRadius = Optional.empty();
+  /**
+   * Measurement delay.
+   */
+  private Optional<Time> m_measurementDelay = Optional.empty();
+  /**
+   * Agressiveness.
+   */
+  private OptionalDouble m_aggressiveness   = OptionalDouble.empty();
 
   /**
    * Create a new LQR Configuration.
@@ -182,6 +191,31 @@ public class LQRConfig
     m_maxVoltage = voltage;
     return this;
   }
+
+  /**
+   * Set the measurement delay of the LQR.
+   *
+   * @param delay Measurement delay.
+   * @return {@link LQRConfig} for chaining.
+   */
+  public LQRConfig withMeasurementDelay(Time delay)
+  {
+    m_measurementDelay = Optional.of(delay);
+    return this;
+  }
+
+  /**
+   * Agressiveness of the LQR, howfast it will attempt to achieve the desired state.
+   *
+   * @param agressiveness Usually 10, arbitrary scale.
+   * @return {@link LQRConfig} for chaining.
+   */
+  public LQRConfig withAgressiveness(double agressiveness)
+  {
+    m_aggressiveness = OptionalDouble.of(agressiveness);
+    return this;
+  }
+
 
   /**
    * Construct a Flywheel LQR Configuration.
