@@ -261,6 +261,26 @@ public class LQRController
   }
 
   /**
+   * Get the current exponential profile state.
+   *
+   * @return {@link ExponentialProfile.State} if it exists, otherwise {@link Optional#empty()}
+   */
+  public Optional<ExponentialProfile.State> getExponentialProfileState()
+  {
+    return m_expoProfile.isPresent() && m_type != LQRType.FLYWHEEL ? Optional.of(m_currentExpoState) : Optional.empty();
+  }
+
+  /**
+   * Get the current trapezoidal profile state.
+   *
+   * @return {@link TrapezoidProfile.State} if it exists, otherwise {@link Optional#empty()}
+   */
+  public Optional<TrapezoidProfile.State> getTrapezoidalProfileState()
+  {
+    return m_trapProfile.isPresent() && m_type != LQRType.FLYWHEEL ? Optional.of(m_currentTrapState) : Optional.empty();
+  }
+
+  /**
    * Get the type of LQR.
    *
    * @return {@link LQRType}
