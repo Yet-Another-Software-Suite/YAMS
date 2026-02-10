@@ -340,7 +340,7 @@ public class SparkWrapper extends SmartMotorController
   public void setPosition(Angle angle)
   {
     setpointPosition = Optional.ofNullable(angle);
-    if (m_expoPidController.isEmpty() && angle != null)
+    if (m_expoPidController.isEmpty() && m_lqrController.isEmpty() && angle != null)
     {
       m_sparkPidController.setSetpoint(angle.in(Rotations),
                                        m_positionControlType,
@@ -367,7 +367,7 @@ public class SparkWrapper extends SmartMotorController
     setpointVelocity = Optional.ofNullable(angularVelocity);
     // TODO: Cannot actually simulate velocity closed loop controllers yet.
     m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismVelocity(angularVelocity));
-    if (m_expoPidController.isEmpty() && angularVelocity != null)
+    if (m_expoPidController.isEmpty() && m_lqrController.isEmpty() && angularVelocity != null)
     {
       m_sparkPidController.setSetpoint(angularVelocity.in(RotationsPerSecond),
                                        m_velocityControlType,
@@ -393,7 +393,7 @@ public class SparkWrapper extends SmartMotorController
     m_looseFollowers = config.getLooselyCoupledFollowers();
 
     // Handle simple pid vs profile pid controller.
-    if (m_expoPidController.isEmpty())
+    if (m_expoPidController.isEmpty() && m_lqrController.isEmpty())
     {
       if (m_pidController.isEmpty())
       {
@@ -411,7 +411,7 @@ public class SparkWrapper extends SmartMotorController
     }
 
     // Handle closed loop controller thread
-    if (m_expoPidController.isPresent())
+    if (m_expoPidController.isPresent() || m_lqrController.isPresent())
     {
 
       config.getClosedLoopTolerance().ifPresent(tolerance -> {

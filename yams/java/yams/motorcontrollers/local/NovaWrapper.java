@@ -247,7 +247,7 @@ public class NovaWrapper extends SmartMotorController
     m_looseFollowers = config.getLooselyCoupledFollowers();
 
     // Handle simple pid vs profile pid controller.
-    if (m_expoPidController.isEmpty())
+    if (m_expoPidController.isEmpty() && m_lqrController.isEmpty())
     {
       if (m_pidController.isEmpty())
       {

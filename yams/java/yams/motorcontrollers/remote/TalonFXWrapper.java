@@ -524,6 +524,7 @@ public class TalonFXWrapper extends SmartMotorController
     this.m_looseFollowers = config.getLooselyCoupledFollowers();
     m_lqrController = config.getLQRClosedLoopController();
     // Closed loop controllers.
+    // TODO: Add support for LQR
     if (config.getClosedLoopController().isPresent() && config.getSimpleClosedLoopController().isPresent())
     {
       throw new SmartMotorControllerConfigurationException("ProfiledPIDController and PIDController defined",
