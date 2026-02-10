@@ -240,6 +240,7 @@ public class NovaWrapper extends SmartMotorController
     this.m_config = config;
     m_config.resetValidationCheck();
     m_gearing = config.getGearing();
+    m_lqrController = config.getLQRClosedLoopController();
     m_expoPidController = config.getExponentiallyProfiledClosedLoopController();
     m_pidController = config.getClosedLoopController();
     m_simplePidController = config.getSimpleClosedLoopController();

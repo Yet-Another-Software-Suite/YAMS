@@ -386,6 +386,7 @@ public class SparkWrapper extends SmartMotorController
       m_spark.pauseFollowerMode();
       m_sparkBaseConfig.disableFollowerMode();
     }
+    m_lqrController = config.getLQRClosedLoopController();
     m_expoPidController = config.getExponentiallyProfiledClosedLoopController();
     m_pidController = config.getClosedLoopController();
     m_simplePidController = config.getSimpleClosedLoopController();

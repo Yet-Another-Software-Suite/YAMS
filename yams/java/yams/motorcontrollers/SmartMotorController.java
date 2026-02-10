@@ -49,6 +49,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.gearing.MechanismGearing;
 import yams.math.ExponentialProfilePIDController;
+import yams.math.LQRController;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
@@ -83,6 +84,10 @@ public abstract class SmartMotorController
    * Simple PID controller for the motor controller.
    */
   protected Optional<PIDController>                       m_simplePidController         = Optional.empty();
+  /**
+   * LQR controller for the motor controller.
+   */
+  protected Optional<LQRController>          m_lqrController               = Optional.empty();
   /**
    * Setpoint position
    */
@@ -238,12 +243,14 @@ public abstract class SmartMotorController
                                                  getMechanismVelocity().in(RotationsPerSecond)));
       m_expoPidController.ifPresent(pid -> pid.reset(getMechanismPosition().in(Rotations),
                                                      getMechanismVelocity().in(RotationsPerSecond)));
+      m_lqrController.ifPresent(lqr -> lqr.reset(getMechanismPosition(), getMechanismVelocity()));
       if (m_config.getLinearClosedLoopControllerUse())
       {
         m_pidController.ifPresent(pid -> pid.reset(getMeasurementPosition().in(Meters),
                                                    getMeasurementVelocity().in(MetersPerSecond)));
         m_expoPidController.ifPresent(pid -> pid.reset(getMeasurementPosition().in(Meters),
                                                        getMeasurementVelocity().in(MetersPerSecond)));
+        m_lqrController.ifPresent(lqr -> lqr.reset(getMeasurementPosition(), getMeasurementVelocity()));
       }
       m_closedLoopControllerThread.stop();
       m_closedLoopControllerThread.startPeriodic(m_config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20))
@@ -257,12 +264,103 @@ public abstract class SmartMotorController
   }
 
   /**
+   * Get the closed loop controller setpoint from the motion profile, or the current position and velocity.
+   *
+   * @return Closed loop controller setpoint. Pair({@link Angle}, {@link AngularVelocity})
+   */
+  private Pair<Angle, AngularVelocity> getAngularClosedLoopControllerSetpoint()
+  {
+    AtomicReference<Angle>           positionSetpoint = new AtomicReference<>(getMechanismPosition());
+    AtomicReference<AngularVelocity> velocitySetpoint = new AtomicReference<>(getMechanismVelocity());
+    m_simplePidController.ifPresent(pid -> {
+      var setpoint = pid.getSetpoint();
+      if (setpointPosition.isPresent())
+      {
+        positionSetpoint.set(Rotations.of(setpoint));
+      } else if (setpointVelocity.isPresent())
+      {
+        velocitySetpoint.set(RotationsPerSecond.of(setpoint));
+      }
+    });
+    m_pidController.ifPresent(pid -> {
+      var state = pid.getSetpoint();
+      positionSetpoint.set(Rotations.of(state.position));
+      velocitySetpoint.set(RotationsPerSecond.of(state.velocity));
+    });
+    m_expoPidController.ifPresent(pid -> {
+      var state = pid.getNextState().orElse(pid.getCurrentState());
+      positionSetpoint.set(Rotations.of(state.position));
+      velocitySetpoint.set(RotationsPerSecond.of(state.velocity));
+    });
+    m_lqrController.ifPresent(lqrController -> {
+      if (lqrController.getExponentialProfileState().isPresent())
+      {
+        var state = lqrController.getExponentialProfileState().get();
+        positionSetpoint.set(Rotations.of(state.position));
+        velocitySetpoint.set(RotationsPerSecond.of(state.velocity));
+      } else if (lqrController.getTrapezoidalProfileState().isPresent())
+      {
+        var state = lqrController.getTrapezoidalProfileState().get();
+        positionSetpoint.set(Rotations.of(state.position));
+        velocitySetpoint.set(RotationsPerSecond.of(state.velocity));
+      }
+    });
+    return Pair.of(positionSetpoint.get(), velocitySetpoint.get());
+  }
+
+
+  /**
+   * Get the closed loop controller setpoint from the motion profile, or the current position and velocity.
+   *
+   * @return Closed loop controller setpoint. Pair({@link Distance}, {@link LinearVelocity})
+   */
+  private Pair<Distance, LinearVelocity> getLinearClosedLoopControllerSetpoint()
+  {
+    AtomicReference<Distance>       positionSetpoint = new AtomicReference<>(getMeasurementPosition());
+    AtomicReference<LinearVelocity> velocitySetpoint = new AtomicReference<>(getMeasurementVelocity());
+    m_simplePidController.ifPresent(pid -> {
+      var setpoint = pid.getSetpoint();
+      if (setpointPosition.isPresent())
+      {
+        positionSetpoint.set(Meters.of(setpoint));
+      } else if (setpointVelocity.isPresent())
+      {
+        velocitySetpoint.set(MetersPerSecond.of(setpoint));
+      }
+    });
+    m_pidController.ifPresent(pid -> {
+      var state = pid.getSetpoint();
+      positionSetpoint.set(Meters.of(state.position));
+      velocitySetpoint.set(MetersPerSecond.of(state.velocity));
+    });
+    m_expoPidController.ifPresent(pid -> {
+      var state = pid.getNextState().orElse(pid.getCurrentState());
+      positionSetpoint.set(Meters.of(state.position));
+      velocitySetpoint.set(MetersPerSecond.of(state.velocity));
+    });
+    m_lqrController.ifPresent(lqrController -> {
+      if (lqrController.getExponentialProfileState().isPresent())
+      {
+        var state = lqrController.getExponentialProfileState().get();
+        positionSetpoint.set(Meters.of(state.position));
+        velocitySetpoint.set(MetersPerSecond.of(state.velocity));
+      } else if (lqrController.getTrapezoidalProfileState().isPresent())
+      {
+        var state = lqrController.getTrapezoidalProfileState().get();
+        positionSetpoint.set(Meters.of(state.position));
+        velocitySetpoint.set(MetersPerSecond.of(state.velocity));
+      }
+    });
+    return Pair.of(positionSetpoint.get(), velocitySetpoint.get());
+  }
+
+  /**
    * Iterate the closed loop controller. Feedforward are only applied with profiled pid controllers.
    */
   public void iterateClosedLoopController()
   {
     AtomicReference<Double>          pidOutputVoltage       = new AtomicReference<>((double) 0);
-    double                           feedforward            = 0.0;
+    AtomicReference<Double> feedforward = new AtomicReference<>(0.0);
     Optional<Angle>                  mechLowerLimit         = m_config.getMechanismLowerLimit();
     Optional<Angle>                  mechUpperLimit         = m_config.getMechanismUpperLimit();
     Optional<ArmFeedforward>         armFeedforward         = m_config.getArmFeedforward();
@@ -270,11 +368,17 @@ public abstract class SmartMotorController
     Optional<SimpleMotorFeedforward> simpleMotorFeedforward = m_config.getSimpleFeedforward();
     Optional<Temperature>            temperatureCutoff      = m_config.getTemperatureCutoff();
     Optional<Voltage>                maximumVoltage         = m_config.getClosedLoopControllerMaximumVoltage();
-
     synchronizeRelativeEncoder();
 
     if (!m_closedLoopControllerRunning)
     {return;}
+    // Get the current setpoints
+    Pair<Angle, AngularVelocity>   currentMechanismSetpoint   = getAngularClosedLoopControllerSetpoint();
+    Pair<Distance, LinearVelocity> currentMeasurementSetpoint = getLinearClosedLoopControllerSetpoint();
+    Pair<Angle, AngularVelocity>   nextMechanismSetpoint;
+    Pair<Distance, LinearVelocity> nextMeasurementSetpoint;
+    boolean profiled = !(m_pidController.isEmpty() && m_expoPidController.isEmpty() &&
+                         (m_lqrController.isEmpty() || !m_lqrController.get().isProfiled()));
 
     if (setpointPosition.isPresent())
     {
@@ -302,127 +406,154 @@ public abstract class SmartMotorController
       }
     }
 
-    if (m_expoPidController.isPresent() && setpointPosition.isPresent())
+    if (m_config.getLinearClosedLoopControllerUse())
     {
-      if (armFeedforward.isPresent())
-      {
-        pidOutputVoltage.set(m_expoPidController.get().calculate(getMechanismPosition().in(Rotations),
-                                                                 setpointPosition.get().in(Rotations)));
-        feedforward = armFeedforward.get().calculateWithVelocities(getMechanismPosition().in(Radians),
-                                                                   m_expoPidController.get()
-                                                                                      .getCurrentVelocitySetpoint()
-                                                                                      .in(RadiansPerSecond),
-                                                                   m_expoPidController.get().getNextVelocitySetpoint()
-                                                                                      .in(RadiansPerSecond));
-      } else if (elevatorFeedforward.isPresent())
-      {
-        pidOutputVoltage.set(m_expoPidController.get().calculate(getMeasurementPosition().in(Meters),
-                                                                 m_config.convertFromMechanism(setpointPosition.get())
-                                                                         .in(Meters)));
-        feedforward = elevatorFeedforward.get().calculateWithVelocities(m_config.convertFromMechanism(
-                                                                            m_expoPidController.get()
-                                                                                               .getCurrentVelocitySetpoint()).in(MetersPerSecond),
-                                                                        m_config.convertFromMechanism(
-                                                                                    m_expoPidController.get()
-                                                                                                       .getNextVelocitySetpoint())
-                                                                                .in(MetersPerSecond));
-
-      } else if (simpleMotorFeedforward.isPresent())
-      {
-        pidOutputVoltage.set(m_expoPidController.get().calculate(getMechanismPosition().in(Rotations),
-                                                                 setpointPosition.get().in(Rotations)));
-        feedforward = simpleMotorFeedforward.get().calculateWithVelocities(m_expoPidController.get()
-                                                                                              .getCurrentVelocitySetpoint()
-                                                                                              .in(RotationsPerSecond),
-                                                                           m_expoPidController.get()
-                                                                                              .getNextVelocitySetpoint()
-                                                                                              .in(RotationsPerSecond));
-
-      }
-    } else if (m_pidController.isPresent() && setpointPosition.isPresent())
-    {
-      if (armFeedforward.isPresent())
-      {
-        pidOutputVoltage.set(m_pidController.get().calculate(getMechanismPosition().in(Rotations),
-                                                             setpointPosition.get().in(Rotations)));
-        feedforward = armFeedforward.get().calculateWithVelocities(getMechanismPosition().in(Radians),
-                                                                   getMechanismVelocity().in(
-                                                                       RadiansPerSecond),
-                                                                   RotationsPerSecond.of(m_pidController.get()
-                                                                                                        .getSetpoint().velocity)
-                                                                                     .in(RadiansPerSecond));
-      } else if (elevatorFeedforward.isPresent())
-      {
-        pidOutputVoltage.set(m_pidController.get().calculate(getMeasurementPosition().in(Meters),
-                                                             m_config.convertFromMechanism(setpointPosition.get())
-                                                                     .in(Meters)));
-        feedforward = elevatorFeedforward.get().calculateWithVelocities(getMeasurementVelocity().in(
-            MetersPerSecond), m_pidController.get().getSetpoint().velocity);
-
-      } else if (simpleMotorFeedforward.isPresent())
-      {
-        pidOutputVoltage.set(m_pidController.get().calculate(getMechanismPosition().in(Rotations),
-                                                             setpointPosition.get().in(Rotations)));
-        feedforward = simpleMotorFeedforward.get().calculateWithVelocities(getMechanismVelocity().in(
-            RotationsPerSecond), m_pidController.get().getSetpoint().velocity);
-
-      }
+      setpointPosition.ifPresent(position -> {
+        var distanceSetpoint = m_config.convertFromMechanism(position);
+        m_simplePidController.ifPresent(pid -> {
+          pidOutputVoltage.set(pid.calculate(getMeasurementPosition().in(Meters),
+                                             distanceSetpoint.in(Meters)));
+        });
+        m_pidController.ifPresent(pid -> {
+          pidOutputVoltage.set(pid.calculate(getMeasurementPosition().in(Meters), distanceSetpoint.in(Meters)));
+        });
+        m_expoPidController.ifPresent(pid -> {
+          pidOutputVoltage.set(pid.calculate(getMeasurementPosition().in(Meters),
+                                             distanceSetpoint.in(Meters)));
+        });
+        m_lqrController.ifPresent(lqr -> {
+          pidOutputVoltage.set(lqr.calculate(getMeasurementPosition(), distanceSetpoint).in(Volts));
+        });
+      });
+      setpointVelocity.ifPresent(velocity -> {
+        var velocitySetpoint = m_config.convertFromMechanism(setpointVelocity.get());
+        m_simplePidController.ifPresent(pid -> {
+          pidOutputVoltage.set(pid.calculate(getMeasurementVelocity().in(MetersPerSecond),
+                                             velocitySetpoint.in(MetersPerSecond)));
+        });
+        m_pidController.ifPresent(pid -> {
+          pidOutputVoltage.set(pid.calculate(getMeasurementVelocity().in(MetersPerSecond),
+                                             velocitySetpoint.in(MetersPerSecond)));
+        });
+        m_expoPidController.ifPresent(pid -> {
+          pidOutputVoltage.set(pid.calculate(getMeasurementVelocity().in(MetersPerSecond),
+                                             velocitySetpoint.in(MetersPerSecond)));
+        });
+        m_lqrController.ifPresent(lqr -> {
+          pidOutputVoltage.set(lqr.calculate(getMeasurementVelocity(), velocitySetpoint).in(Volts));
+        });
+      });
     } else
     {
-      if (setpointPosition.isPresent())
-      {
+      setpointPosition.ifPresent(position -> {
         m_simplePidController.ifPresent(pid -> {
           pidOutputVoltage.set(pid.calculate(getMechanismPosition().in(Rotations),
-                                             setpointPosition.get().in(Rotations)));
+                                             position.in(Rotations)));
         });
         m_pidController.ifPresent(pid -> {
           pidOutputVoltage.set(pid.calculate(getMechanismPosition().in(Rotations),
-                                             setpointPosition.get().in(Rotations)));
+                                             position.in(Rotations)));
         });
-      } else if (setpointVelocity.isPresent())
-      {
+        m_expoPidController.ifPresent(pid -> {
+          pidOutputVoltage.set(pid.calculate(getMechanismPosition().in(Rotations),
+                                             position.in(Rotations)));
+        });
+        m_lqrController.ifPresent(lqr -> {
+          pidOutputVoltage.set(lqr.calculate(getMechanismPosition(), position).in(Volts));
+        });
+      });
+      setpointVelocity.ifPresent(velocity -> {
         m_simplePidController.ifPresent(pid -> {
           pidOutputVoltage.set(pid.calculate(getMechanismVelocity().in(RotationsPerSecond),
-                                             setpointVelocity.get().in(RotationsPerSecond)));
+                                             velocity.in(RotationsPerSecond)));
         });
         m_pidController.ifPresent(pid -> {
           pidOutputVoltage.set(pid.calculate(getMechanismVelocity().in(RotationsPerSecond),
-                                             setpointVelocity.get().in(RotationsPerSecond)));
+                                             velocity.in(RotationsPerSecond)));
         });
-        if (simpleMotorFeedforward.isPresent())
-        {
-          feedforward = simpleMotorFeedforward.get().calculateWithVelocities(getMechanismVelocity().in(
-              RotationsPerSecond), setpointVelocity.get().in(RotationsPerSecond));
-        }
-      }
+        m_expoPidController.ifPresent(pid -> pid.calculate(getMechanismVelocity().in(RotationsPerSecond),
+                                                           velocity.in(RotationsPerSecond)));
+        m_lqrController.ifPresent(lqr -> {
+          pidOutputVoltage.set(lqr.calculate(getMechanismVelocity(), velocity).in(Volts));
+        });
+      });
     }
+
+    // Get the new setpoints
+    nextMechanismSetpoint = getAngularClosedLoopControllerSetpoint();
+    nextMeasurementSetpoint = getLinearClosedLoopControllerSetpoint();
+
+    armFeedforward.ifPresent(ff -> {
+      if (profiled)
+      {
+
+        feedforward.set(ff.calculateWithVelocities(getMechanismPosition().in(Radians),
+                                                   currentMechanismSetpoint.getSecond().in(RadiansPerSecond),
+                                                   nextMechanismSetpoint.getSecond().in(RadiansPerSecond)));
+      } else
+      {
+        // TODO: Not profiled, so using current velocity or setpoint velocity.
+        ff.calculate(nextMechanismSetpoint.getFirst().in(Radians),
+                     nextMechanismSetpoint.getSecond().in(RadiansPerSecond));
+      }
+    });
+
+    elevatorFeedforward.ifPresent(ff -> {
+      if (profiled)
+      {
+
+        feedforward.set(ff.calculateWithVelocities(currentMeasurementSetpoint.getSecond().in(MetersPerSecond),
+                                                   nextMeasurementSetpoint.getSecond().in(MetersPerSecond)));
+      } else
+      {
+        // TODO: Not profiled, so using current velocity or setpoint velocity.
+        ff.calculate(nextMeasurementSetpoint.getSecond().in(MetersPerSecond));
+      }
+    });
+
+    simpleMotorFeedforward.ifPresent(ff -> {
+      if (profiled)
+      {
+        feedforward.set(ff.calculateWithVelocities(currentMechanismSetpoint.getSecond().in(RadiansPerSecond),
+                                                   nextMechanismSetpoint.getSecond().in(RadiansPerSecond)));
+
+      } else
+      {
+        // TODO: Not profiled, so using current velocity, or setpoint velocity.
+        ff.calculate(nextMechanismSetpoint.getSecond().in(RotationsPerSecond));
+      }
+    });
+
     if (mechUpperLimit.isPresent())
     {
       if (getMechanismPosition().gt(mechUpperLimit.get()) &&
-          (pidOutputVoltage.get() + feedforward) > 0)
+          (pidOutputVoltage.get() + feedforward.get()) > 0)
       {
-        pidOutputVoltage.set(feedforward = 0);
+        feedforward.set(0.0);
+        pidOutputVoltage.set(0.0);
       }
     }
     if (mechLowerLimit.isPresent())
     {
       if (getMechanismPosition().lt(mechLowerLimit.get()) &&
-          (pidOutputVoltage.get() + feedforward) < 0)
+          (pidOutputVoltage.get() + feedforward.get()) < 0)
       {
-        pidOutputVoltage.set(feedforward = 0);
+        feedforward.set(0.0);
+        pidOutputVoltage.set(0.0);
       }
     }
     if (temperatureCutoff.isPresent())
     {
       if (getTemperature().gte(temperatureCutoff.get()))
       {
-        pidOutputVoltage.set(feedforward = 0);
+        feedforward.set(0.0);
+        pidOutputVoltage.set(0.0);
       }
     }
 //    telemetry.pidOutputVoltage = pidOutputVoltage;
 //    telemetry.feedforwardVoltage = feedforward;
 //    telemetry.outputVoltage = pidOutputVoltage + feedforward;
-    double outputVoltage = pidOutputVoltage.get() + feedforward;
+    double outputVoltage = pidOutputVoltage.get() + feedforward.get();
     if (maximumVoltage.isPresent())
     {
       double maxVolts = maximumVoltage.get().in(Volts);

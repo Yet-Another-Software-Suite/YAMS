@@ -557,6 +557,7 @@ public class TalonFXSWrapper extends SmartMotorController
 
     m_configurator.refresh(m_talonConfig);
     this.m_config = config;
+    m_lqrController = config.getLQRClosedLoopController();
     this.m_looseFollowers = config.getLooselyCoupledFollowers();
     // Closed loop controllers.
     if (config.getClosedLoopController().isPresent() && config.getSimpleClosedLoopController().isPresent())

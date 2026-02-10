@@ -522,6 +522,7 @@ public class TalonFXWrapper extends SmartMotorController
     m_configurator.refresh(m_talonConfig);
     this.m_config = config;
     this.m_looseFollowers = config.getLooselyCoupledFollowers();
+    m_lqrController = config.getLQRClosedLoopController();
     // Closed loop controllers.
     if (config.getClosedLoopController().isPresent() && config.getSimpleClosedLoopController().isPresent())
     {
@@ -548,18 +549,6 @@ public class TalonFXWrapper extends SmartMotorController
           .withMotionMagicExpo_kV(controller.getKv().in(RotationsPerSecond))
           .withMotionMagicExpo_kA(controller.getKa().in(RotationsPerSecondPerSecond));
       expEnabled = true;
-//      if (config.getMechanismCircumference().isPresent())
-//      {
-//        //m_talonConfig.Slot0.kP = config.convertToMechanism(Meters.of(controller.getP())).in(Rotations);
-//        //m_talonConfig.Slot0.kI = config.convertToMechanism(Meters.of(controller.getI())).in(Rotations);
-//        //m_talonConfig.Slot0.kD = config.convertToMechanism(Meters.of(controller.getD())).in(Rotations);
-//
-//      } else
-//      {
-//        m_talonConfig.MotionMagic.withMotionMagicCruiseVelocity(RotationsPerSecond.of(controller.getConstraints().maxAcceleration));
-//        m_talonConfig.MotionMagic.withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(controller.getConstraints().maxAcceleration));
-//
-//      }
       m_positionReq = m_expoPositionReq;
       m_velocityReq = m_trapVelocityReq;
     } else if (config.getClosedLoopController().isPresent())
@@ -577,9 +566,6 @@ public class TalonFXWrapper extends SmartMotorController
       m_talonConfig.Slot0.kD = controller.getD();
       if (config.getLinearClosedLoopControllerUse())
       {
-//        m_talonConfig.Slot0.kP = config.convertToMechanism(Meters.of(controller.getP())).in(Rotations);
-//        m_talonConfig.Slot0.kI = config.convertToMechanism(Meters.of(controller.getI())).in(Rotations);
-//        m_talonConfig.Slot0.kD = config.convertToMechanism(Meters.of(controller.getD())).in(Rotations);
         m_talonConfig.MotionMagic
             .withMotionMagicCruiseVelocity(
                 config.convertToMechanism(MetersPerSecond.of(controller.getConstraints().maxVelocity)));

@@ -210,7 +210,7 @@ public class LQRController
                        Meters.of(m_currentTrapState.position),
                        MetersPerSecond.of(m_currentTrapState.velocity));
     }
-    throw new IllegalStateException("No profile set for elevator");
+    return calculate(measured, position, MetersPerSecond.zero());
   }
 
   /**
@@ -240,7 +240,7 @@ public class LQRController
                        Radians.of(m_currentTrapState.position),
                        RadiansPerSecond.of(m_currentTrapState.velocity));
     }
-    throw new IllegalStateException("No profile set for arm");
+    return calculate(measured, position, RadiansPerSecond.zero());
   }
 
   /**
@@ -256,6 +256,23 @@ public class LQRController
     LinearSystemLoop<N1, N1, N1> loop = (LinearSystemLoop<N1, N1, N1>) m_loop;
     loop.setNextR(velocity.in(RadiansPerSecond));
     loop.correct((VecBuilder.fill(measured.in(RadiansPerSecond))));
+    loop.predict(m_period.in(Seconds));
+    return Volts.of(loop.getU(0));
+  }
+
+  /**
+   * Calculate the voltage for a Flywheel LQR
+   *
+   * @param measured Measured velocity of the flywheel.
+   * @param velocity Setpoint velocity of the flywheel.
+   * @return {@link Voltage} to apply to the flywheel.
+   */
+  public Voltage calculate(LinearVelocity measured, LinearVelocity velocity)
+  {
+    // Motion profiles are ignored for flywheels.
+    LinearSystemLoop<N1, N1, N1> loop = (LinearSystemLoop<N1, N1, N1>) m_loop;
+    loop.setNextR(velocity.in(MetersPerSecond));
+    loop.correct((VecBuilder.fill(measured.in(MetersPerSecond))));
     loop.predict(m_period.in(Seconds));
     return Volts.of(loop.getU(0));
   }
@@ -300,4 +317,13 @@ public class LQRController
     return m_config;
   }
 
+  /**
+   * Has motion profile
+   *
+   * @return If motion profile exists
+   */
+  public boolean isProfiled()
+  {
+    return m_expoProfile.isPresent() || m_trapProfile.isPresent();
+  }
 }
