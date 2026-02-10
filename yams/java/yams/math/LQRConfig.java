@@ -39,6 +39,26 @@ public class LQRConfig
 {
 
   /**
+   * Get the {@link LQRType} of the LQR.
+   *
+   * @return {@link LQRType} of the LQR.
+   */
+  public LQRType getType()
+  {
+    return m_type.orElseThrow();
+  }
+
+  /**
+   * Get the loop time for the LQR.
+   *
+   * @return {@link Time} for the loop time.
+   */
+  public Time getPeriod()
+  {
+    return m_period;
+  }
+
+  /**
    * LQR Type
    */
   public enum LQRType
