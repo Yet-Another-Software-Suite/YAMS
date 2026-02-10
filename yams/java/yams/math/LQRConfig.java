@@ -4,9 +4,11 @@ import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Milliseconds;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -21,7 +23,11 @@ import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.LinearSystemLoop;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.math.trajectory.ExponentialProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -29,6 +35,7 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import yams.gearing.MechanismGearing;
@@ -81,62 +88,70 @@ public class LQRConfig
   /**
    * LQR Type
    */
-  private       Optional<LQRType>   m_type               = Optional.empty();
+  private       Optional<LQRType>            m_type               = Optional.empty();
   /**
    * {@link DCMotor} for the {@link edu.wpi.first.math.controller.LinearQuadraticRegulator}.
    */
-  private final DCMotor             m_motor;
+  private final DCMotor                      m_motor;
   /**
    * {@link MechanismGearing} for the {@link edu.wpi.first.math.controller.LinearQuadraticRegulator}.
    */
-  private final MechanismGearing    m_gearing;
+  private final MechanismGearing             m_gearing;
   /**
    * {@link MomentOfInertia} for the {@link edu.wpi.first.math.controller.LinearQuadraticRegulator}.
    */
-  private final MomentOfInertia     m_moi;
+  private final MomentOfInertia              m_moi;
   /**
    * Loop time for the {@link edu.wpi.first.math.controller.LinearQuadraticRegulator}. Could be faster if using
    * {@link edu.wpi.first.wpilibj.Notifier}s.
    */
-  private       Time                m_period             = Milliseconds.of(20);
+  private       Time                         m_period             = Milliseconds.of(20);
   /**
    * Maximum voltage for the {@link edu.wpi.first.math.system.LinearSystemLoop}. Default is 12v.
    */
-  private       Voltage             m_maxVoltage         = Volts.of(12);
+  private       Voltage                      m_maxVoltage         = Volts.of(12);
   /**
    * Control effort (voltage) tolerance. Decrease this to more heavily penalize control effort, or make the controller
    * less aggressive. 12 is a good starting point because that is the (approximate) maximum voltage of a battery.
    */
-  private       Voltage             m_relms              = Volts.of(12);
+  private       Voltage                      m_relms              = Volts.of(12);
   /**
    * Tolerance. Decrease this to more heavily penalize state excursion, or make the controller behave more
    * aggressively.
    */
-  private       Optional<Vector<?>> m_qelms              = Optional.empty();
+  private       Optional<Vector<?>>          m_qelms              = Optional.empty();
   /**
    * Standard deviation of the model, size of the vector depends on the model type.
    */
-  private       Optional<Vector<?>> m_modelStdDevs       = Optional.empty();
+  private       Optional<Vector<?>>          m_modelStdDevs       = Optional.empty();
   /**
    * Standard deviation of the encoder, size of the vector depends on the model type.
    */
-  private       Optional<Vector<?>> m_encoderStdDevs     = Optional.empty();
+  private       Optional<Vector<?>>          m_encoderStdDevs     = Optional.empty();
   /**
    * Elevator mass for {@link LinearSystemId#createElevatorSystem(DCMotor, double, double, double)}
    */
-  private       Optional<Mass>      m_elevatorMass       = Optional.empty();
+  private       Optional<Mass>               m_elevatorMass       = Optional.empty();
   /**
    * Elevator radius for {@link LinearSystemId#createElevatorSystem(DCMotor, double, double, double)}
    */
-  private       Optional<Distance>  m_elevatorDrumRadius = Optional.empty();
+  private       Optional<Distance>           m_elevatorDrumRadius = Optional.empty();
   /**
    * Measurement delay.
    */
-  private Optional<Time> m_measurementDelay = Optional.empty();
+  private       Optional<Time>               m_measurementDelay   = Optional.empty();
   /**
    * Agressiveness.
    */
-  private OptionalDouble m_aggressiveness   = OptionalDouble.empty();
+  private       OptionalDouble               m_aggressiveness     = OptionalDouble.empty();
+  /**
+   * Exponential profile
+   */
+  private       Optional<ExponentialProfile> m_expoProfile        = Optional.empty();
+  /**
+   * Trapezoid profile
+   */
+  private       Optional<TrapezoidProfile>   m_trapProfile        = Optional.empty();
 
   /**
    * Create a new LQR Configuration.
@@ -150,6 +165,173 @@ public class LQRConfig
     m_motor = motor;
     m_gearing = gearing;
     m_moi = moi;
+  }
+
+  /**
+   * Set the exponential profile for the LQR.
+   *
+   * @param exp Exponential profile, in meters/s or radians/s.
+   * @return {@link LQRConfig} for chaining.
+   */
+  public LQRConfig withProfile(ExponentialProfile exp)
+  {
+    m_expoProfile = Optional.of(exp);
+    m_trapProfile = Optional.empty();
+    return this;
+  }
+
+  /**
+   * Set the exponential profile for the LQR.
+   *
+   * @param exp Trapezoidal profile, in meters/s or radians/s.
+   * @return {@link LQRConfig} for chaining.
+   */
+  public LQRConfig withProfile(TrapezoidProfile exp)
+  {
+    m_trapProfile = Optional.of(exp);
+    m_expoProfile = Optional.empty();
+    return this;
+  }
+
+  /**
+   * Set the trapezoid profile for the LQR.
+   *
+   * @param maxVelocity Maximum angular velocity.
+   * @param maxAccel    Maximum angular acceleration.
+   * @return {@link LQRConfig} for chaining.
+   */
+  public LQRConfig withProfile(AngularVelocity maxVelocity, AngularAcceleration maxAccel)
+  {
+    return withProfile(new TrapezoidProfile(new Constraints(maxVelocity.in(RadiansPerSecond),
+                                                            maxAccel.in(RadiansPerSecondPerSecond))));
+  }
+
+  /**
+   * Set the {@link ExponentialProfile.Constraints} for an elevator.
+   *
+   * @param maxVolts   Maximum input voltage for profile generation.
+   * @param motor      {@link DCMotor} of the elevator.
+   * @param mass       {@link Mass} of the elevator carriage.
+   * @param drumRadius {@link Distance} of the elevator drum radius.
+   * @param gearing    {@link MechanismGearing} of the elevator from the drum to the rotor.
+   * @return {@link LQRConfig} for chaining.
+   */
+  public LQRConfig withExponentialElevatorProfile(Voltage maxVolts, DCMotor motor, Mass mass,
+                                                  Distance drumRadius,
+                                                  MechanismGearing gearing)
+  {
+    var sysid = LinearSystemId.createElevatorSystem(motor,
+                                                    mass.in(Kilograms),
+                                                    drumRadius.in(Meters),
+                                                    gearing.getMechanismToRotorRatio());
+    var circumference = (2.0 * Math.PI * drumRadius.in(Meters));
+
+    var A  = sysid.getA(0, 0);
+    var B  = sysid.getB(0, 0);
+    var kV = MetersPerSecond.of(-A / B);
+    var kA = MetersPerSecondPerSecond.of(1.0 / B);
+    return withProfile(new ExponentialProfile(ExponentialProfile.Constraints.fromCharacteristics(maxVolts.in(Volts),
+                                                                                                 kV.in(MetersPerSecond) /
+                                                                                                 circumference,
+                                                                                                 kA.in(
+                                                                                                     MetersPerSecondPerSecond) /
+                                                                                                 circumference)));
+  }
+
+  /**
+   * Set the {@link ExponentialProfile.Constraints} for an arm.
+   *
+   * @param maxVolts Maximum input voltage for profile generation.
+   * @param motor    {@link DCMotor} of the arm.
+   * @param moi      {@link MomentOfInertia} of the arm.
+   * @param gearing  {@link MechanismGearing} of the arm from the rotor to the drum.
+   *                 {@code gearing.getMechanismToRotorRatio()}
+   * @return {@link LQRConfig} for chaining
+   */
+  public LQRConfig withExponentialArmProfile(Voltage maxVolts, DCMotor motor, MomentOfInertia moi,
+                                             MechanismGearing gearing)
+  {
+    var sysid = LinearSystemId.createSingleJointedArmSystem(motor,
+                                                            moi.in(KilogramSquareMeters),
+                                                            gearing.getMechanismToRotorRatio());
+    var A  = sysid.getA(0, 0); // radians
+    var B  = sysid.getB(0, 0); // radians
+    var kV = RadiansPerSecond.of(-A / B);
+    var kA = RadiansPerSecondPerSecond.of(1.0 / B);
+    return withProfile(new ExponentialProfile(ExponentialProfile.Constraints.fromCharacteristics(maxVolts.in(Volts),
+                                                                                                 kV.in(RadiansPerSecond),
+                                                                                                 kA.in(
+                                                                                                     RadiansPerSecondPerSecond))));
+  }
+
+  /**
+   * Set the {@link ExponentialProfile.Constraints} for an arm.
+   *
+   * @param maxVolts Maximum input voltage for profile generation.
+   * @param motor    {@link DCMotor} of the arm.
+   * @param mass     {@link Mass} of the arm.
+   * @param length   {@link Distance} of the arm length.
+   * @param gearing  {@link MechanismGearing} of the arm from the rotor to the drum.
+   *                 {@code gearing.getMechanismToRotorRatio()}
+   * @return {@link ExponentialProfile.Constraints}
+   */
+  public LQRConfig withExponentialArmProfile(Voltage maxVolts, DCMotor motor, Mass mass,
+                                             Distance length, MechanismGearing gearing)
+  {
+    return withExponentialArmProfile(maxVolts, motor,
+                                     KilogramSquareMeters.of(SingleJointedArmSim.estimateMOI(length.in(Meters),
+                                                                                             mass.in(Kilograms))),
+                                     gearing);
+  }
+
+  /**
+   * Get the {@link ExponentialProfile.Constraints} for a flywheel.
+   *
+   * @param maxVolts Maximum input voltage for profile generation.
+   * @param motor    {@link DCMotor} of the flywheel.
+   * @param moi      {@link MomentOfInertia} of the flywheel.
+   * @param gearing  {@link MechanismGearing} of the flywheel from the rotor to the drum.
+   * @return {@link ExponentialProfile.Constraints}
+   */
+  public LQRConfig withExponentialFlyWheelProfile(Voltage maxVolts, DCMotor motor, MomentOfInertia moi,
+                                                  MechanismGearing gearing)
+  {
+    return withExponentialArmProfile(maxVolts, motor, moi, gearing);
+  }
+
+  /**
+   * Get the {@link ExponentialProfile.Constraints} for a flywheel.
+   *
+   * @param maxVolts Maximum input voltage for profile generation.
+   * @param motor    {@link DCMotor} of the flywheel.
+   * @param mass     {@link Mass} of the flywheel.
+   * @param radius   {@link Distance} of the flywheel radius.
+   * @param gearing  {@link MechanismGearing} of the flywheel from the rotor to the drum.
+   * @return {@link ExponentialProfile.Constraints}
+   */
+  public LQRConfig withExponentialFlyWheelProfile(Voltage maxVolts, DCMotor motor, Mass mass,
+                                                  Distance radius, MechanismGearing gearing)
+  {
+    return withExponentialArmProfile(maxVolts, motor, mass, radius, gearing);
+  }
+
+  /**
+   * Create a generic constraints object.
+   *
+   * @param maxVolts        Maximum input voltage for profile generation.
+   * @param maxVelocity     Maximum velocity.
+   * @param maxAcceleration Maximum acceleration.
+   * @return {@link LQRConfig} for chaining.
+   */
+  public LQRConfig withExponentialProfile(Voltage maxVolts, AngularVelocity maxVelocity,
+                                          AngularAcceleration maxAcceleration)
+  {
+    var maxV = maxVolts.in(Volts);
+    return withProfile(new ExponentialProfile(ExponentialProfile.Constraints.fromStateSpace(maxVolts.in(Volts),
+                                                                                            maxV / maxVelocity.in(
+                                                                                                RadiansPerSecond),
+                                                                                            maxV / maxAcceleration.in(
+                                                                                                RadiansPerSecondPerSecond))));
   }
 
   /**
@@ -447,5 +629,25 @@ public class LQRConfig
     throw new IllegalStateException("Invalid LQR Type");
   }
 
+
+  /**
+   * Get the {@link TrapezoidProfile} for the LQR.
+   *
+   * @return {@link TrapezoidProfile} for the LQR.
+   */
+  public Optional<TrapezoidProfile> getTrapezoidalProfile()
+  {
+    return m_trapProfile;
+  }
+
+  /**
+   * Get the {@link ExponentialProfile} for the LQR.
+   *
+   * @return {@link ExponentialProfile} for the LQR.
+   */
+  public Optional<ExponentialProfile> getExponentialProfile()
+  {
+    return m_expoProfile;
+  }
 
 }
