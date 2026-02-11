@@ -377,6 +377,9 @@ public class Pivot extends SmartPositionalMechanism
       m_smc.getSimSupplier().get().starveUpdateSim();
       if (m_config.getLowerHardLimit().isPresent() && m_dcmotorSim.get().getAngularVelocityRadPerSec() < 0 &&
           m_smc.getMechanismPosition().lt(m_config.getLowerHardLimit().get()))
+          // Stop the motor from moving further in the direction of the hard limit
+          m_dcmotorSim.get().setAngularVelocity(0);
+          m_smc.setDutyCycle(0);
       {
         m_smc.setEncoderPosition(m_config.getLowerHardLimit().get());
       }
@@ -384,6 +387,9 @@ public class Pivot extends SmartPositionalMechanism
           m_smc.getMechanismPosition().gt(m_config.getUpperHardLimit().get()))
       {
         m_smc.setEncoderPosition(m_config.getUpperHardLimit().get());
+        // Stop the motor from moving further in the direction of the hard limit
+        m_dcmotorSim.get().setAngularVelocity(0);
+        m_smc.setDutyCycle(0);
       }
       RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_dcmotorSim.get()
                                                                                            .getCurrentDrawAmps()));
