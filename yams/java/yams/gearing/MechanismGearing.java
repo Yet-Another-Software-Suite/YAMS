@@ -28,6 +28,16 @@ public class MechanismGearing
   }
 
   /**
+   * Construct a {@link MechanismGearing} with a reduction ratios.
+   *
+   * @param reductionRatios Reduction ratio. For example, a reduction of "3:1" is 3.0; a reduction of "1:2" is 0.5.
+   */
+  public MechanismGearing(double... reductionRatios)
+  {
+    gearBox = GearBox.fromReductionStages(reductionRatios);
+  }
+
+  /**
    * Initialize the {@link MechanismGearing} with only a {@link GearBox} attached to the mechanism motor.
    *
    * @param gearBox {@link GearBox} of the Mechanism.

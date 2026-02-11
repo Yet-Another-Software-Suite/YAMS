@@ -1,17 +1,18 @@
 package yams.motorcontrollers;
 
+import static edu.wpi.first.hal.FRCNetComm.tResourceType.kResourceType_YAMS;
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
+import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
@@ -28,6 +29,7 @@ import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
@@ -53,13 +55,17 @@ public class SmartMotorControllerConfig
 {
 
   /**
+   * Vendor specific configuration for the {@link SmartMotorController}.
+   */
+  private       Optional<Object>                              vendorConfig                       = Optional.empty();
+  /**
    * Subsystem that the {@link SmartMotorController} controls.
    */
-  private final Subsystem                                 subsystem;
+  private       Optional<Subsystem>                           subsystem                          = Optional.empty();
   /**
    * Missing options that would be decremented for each motor application.
    */
-  private final List<SmartMotorControllerOptions>         missingOptions                   = Arrays.asList(
+  private final List<SmartMotorControllerOptions>             missingOptions                     = Arrays.asList(
       SmartMotorControllerOptions.values());
   /**
    * Validation set to confirm all options have been applied to the Smart Motor Controller.
@@ -110,15 +116,15 @@ public class SmartMotorControllerConfig
   /**
    * Controller for the {@link SmartMotorController}.
    */
-  private       Optional<ProfiledPIDController>           controller                       = Optional.empty();
+  private       Optional<ProfiledPIDController>               controller                         = Optional.empty();
   /**
    * Controller for the {@link SmartMotorController}.
    */
-  private       Optional<ExponentialProfilePIDController> expoController                   = Optional.empty();
+  private       Optional<ExponentialProfilePIDController>     expoController                     = Optional.empty();
   /**
    * Controller for the {@link SmartMotorController}.
    */
-  private       Optional<PIDController>                   simpleController                 = Optional.empty();
+  private       Optional<PIDController>                       simpleController                   = Optional.empty();
   /**
    * Controller for the {@link SmartMotorController}.
    */
@@ -138,7 +144,7 @@ public class SmartMotorControllerConfig
   /**
    * External encoder gearing, defaults to 1:1.
    */
-  private       MechanismGearing                          externalEncoderGearing           = new MechanismGearing(
+  private       MechanismGearing                              externalEncoderGearing             = new MechanismGearing(
       1);
   /**
    * Mechanism Circumference for distance calculations.
@@ -223,7 +229,7 @@ public class SmartMotorControllerConfig
   /**
    * Feedback synchronization threshhold.
    */
-  private       Optional<Angle>                           feedbackSynchronizationThreshold = Optional.empty();
+  private       Optional<Angle>                               feedbackSynchronizationThreshold   = Optional.empty();
   /**
    * The motor controller mode.
    */
@@ -243,9 +249,16 @@ public class SmartMotorControllerConfig
   /**
    * Moment of inertia for DCSim
    */
-  private       Double                                        moi                                = SingleJointedArmSim
-      .estimateMOI(Inches.of(4).in(Meters),
-                   Pounds.of(1).in(Kilograms));
+  private       MomentOfInertia                               moi                                = KilogramSquareMeters.of(
+      0.02);
+  /**
+   * Loosely coupled followers.
+   */
+  private       Optional<SmartMotorController[]>              looselyCoupledFollowers            = Optional.empty();
+  /**
+   * Linear or {@link Distance} based closed loop controller.
+   */
+  public boolean linearClosedLoopController = false;
 
   /**
    * Construct the {@link SmartMotorControllerConfig} for the {@link Subsystem}
@@ -254,7 +267,120 @@ public class SmartMotorControllerConfig
    */
   public SmartMotorControllerConfig(Subsystem subsystem)
   {
-    this.subsystem = subsystem;
+    HAL.report(kResourceType_YAMS, 1);
+    this.subsystem = Optional.ofNullable(subsystem);
+  }
+
+  /**
+   * Construct the {@link SmartMotorControllerConfig} with a {@link Subsystem} added later.
+   *
+   * @implNote You must use {@link #withSubsystem(Subsystem)} before passing off to {@link SmartMotorController}
+   */
+  public SmartMotorControllerConfig()
+  {
+    HAL.report(kResourceType_YAMS, 1);
+  }
+
+  /**
+   * Duplicate the SmartMotorControllerConfig.
+   *
+   * @param cfg Config to duplicate.
+   */
+  private SmartMotorControllerConfig(SmartMotorControllerConfig cfg)
+  {
+    this.vendorConfig = cfg.vendorConfig;
+    this.subsystem = cfg.subsystem;
+    this.missingOptions.clear();
+    this.missingOptions.addAll(cfg.missingOptions);
+    this.basicOptions = EnumSet.copyOf(cfg.basicOptions);
+    this.externalEncoderOptions = EnumSet.copyOf(cfg.externalEncoderOptions);
+    this.externalEncoder = cfg.externalEncoder;
+    this.externalEncoderInverted = cfg.externalEncoderInverted;
+    this.followers = cfg.followers;
+    this.simpleFeedforward = cfg.simpleFeedforward;
+    this.elevatorFeedforward = cfg.elevatorFeedforward;
+    this.armFeedforward = cfg.armFeedforward;
+    this.sim_simpleFeedforward = cfg.sim_simpleFeedforward;
+    this.sim_elevatorFeedforward = cfg.sim_elevatorFeedforward;
+    this.sim_armFeedforward = cfg.sim_armFeedforward;
+    this.controller = cfg.controller;
+    this.expoController = cfg.expoController;
+    this.simpleController = cfg.simpleController;
+    this.sim_expoController = cfg.sim_expoController;
+    this.sim_controller = cfg.sim_controller;
+    this.sim_simpleController = cfg.sim_simpleController;
+    this.gearing = cfg.gearing;
+    this.externalEncoderGearing = cfg.externalEncoderGearing;
+    this.mechanismCircumference = cfg.mechanismCircumference;
+    this.controlPeriod = cfg.controlPeriod;
+    this.openLoopRampRate = cfg.openLoopRampRate;
+    this.closeLoopRampRate = cfg.closeLoopRampRate;
+    this.statorStallCurrentLimit = cfg.statorStallCurrentLimit;
+    this.supplyStallCurrentLimit = cfg.supplyStallCurrentLimit;
+    this.voltageCompensation = cfg.voltageCompensation;
+    this.idleMode = cfg.idleMode;
+    this.mechanismLowerLimit = cfg.mechanismLowerLimit;
+    this.mechanismUpperLimit = cfg.mechanismUpperLimit;
+    this.telemetryName = cfg.telemetryName;
+    this.verbosity = cfg.verbosity;
+    this.specifiedTelemetryConfig = cfg.specifiedTelemetryConfig;
+    this.zeroOffset = cfg.zeroOffset;
+    this.temperatureCutoff = cfg.temperatureCutoff;
+    this.encoderInverted = cfg.encoderInverted;
+    this.motorInverted = cfg.motorInverted;
+    this.useExternalEncoder = cfg.useExternalEncoder;
+    this.startingPosition = cfg.startingPosition;
+    this.closedLoopControllerMaximumVoltage = cfg.closedLoopControllerMaximumVoltage;
+    this.feedbackSynchronizationThreshold = cfg.feedbackSynchronizationThreshold;
+    this.motorControllerMode = cfg.motorControllerMode;
+    this.maxDiscontinuityPoint = cfg.maxDiscontinuityPoint;
+    this.minDiscontinuityPoint = cfg.minDiscontinuityPoint;
+    this.closedLoopTolerance = cfg.closedLoopTolerance;
+    this.moi = cfg.moi;
+    this.looselyCoupledFollowers = cfg.looselyCoupledFollowers;
+    this.linearClosedLoopController = cfg.linearClosedLoopController;
+  }
+
+  @Override
+  public SmartMotorControllerConfig clone()
+  {
+    return new SmartMotorControllerConfig(this);
+  }
+
+  /**
+   * Set the vendor specific config for the {@link SmartMotorController} which will be used as a base. Vendor configs
+   * will be overridden by the {@link SmartMotorControllerConfig} options.
+   *
+   * @param vendorConfig Vendor specific config object. Must be of the correct type for the
+   *                     {@link SmartMotorController}. Only the root configuration class is accepted.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   * @implSpec {@link SmartMotorControllerConfig} options will always take precedence and overwrite the vendor config.
+   * Apply any changes after the {@link SmartMotorController} is created to ensure accuracy.
+   */
+  public SmartMotorControllerConfig withVendorConfig(Object vendorConfig)
+  {
+    this.vendorConfig = Optional.ofNullable(vendorConfig);
+    return this;
+  }
+
+  /**
+   * Sets the {@link Subsystem} for the {@link SmartMotorControllerConfig} to pass along to {@link SmartMotorController}
+   * and {@link yams.mechanisms.SmartMechanism}s. Must be set if a {@link Subsystem} was not defined previously.
+   *
+   * @param subsystem {@link Subsystem} to use.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   * @implNote Does not copy the entire config, should NEVER be reused.
+   */
+  public SmartMotorControllerConfig withSubsystem(Subsystem subsystem)
+  {
+    if (this.subsystem.isPresent())
+    {
+      throw new SmartMotorControllerConfigurationException("Subsystem has already been set",
+                                                           "Cannot set subsystem",
+                                                           "withSubsystem(Subsystem subsystem) should only be called once");
+    }
+    this.subsystem = Optional.of(subsystem);
+    return this;
   }
 
   /**
@@ -625,8 +751,23 @@ public class SmartMotorControllerConfig
                                                            "withMOI(Inches.of(4),Pounds.of(1))");
     } else
     {
-      moi = SingleJointedArmSim.estimateMOI(length.in(Meters), weight.in(Kilograms));
+      moi = KilogramSquareMeters.of(SingleJointedArmSim.estimateMOI(length.in(Meters), weight.in(Kilograms)));
     }
+    return this;
+  }
+
+  /**
+   * Add the mechanism moment of inertia to the {@link SmartMotorController}s simulation when not run under a formal
+   * mechanism.
+   *
+   * @param MOI Known moment of inertia. In {@link edu.wpi.first.units.Units#KilogramSquareMeters}
+   * @return {@link SmartMotorControllerConfig} for chaining
+   * @implNote Please use {@link #withMomentOfInertia(MomentOfInertia)} instead. Default unit is KilogramSquareMeters
+   */
+  @Deprecated(since = "2026", forRemoval = true)
+  public SmartMotorControllerConfig withMomentOfInertia(double MOI)
+  {
+    moi = KilogramSquareMeters.of(MOI);
     return this;
   }
 
@@ -637,7 +778,7 @@ public class SmartMotorControllerConfig
    * @param MOI Known moment of inertia.
    * @return {@link SmartMotorControllerConfig} for chaining
    */
-  public SmartMotorControllerConfig withMomentOfInertia(double MOI)
+  public SmartMotorControllerConfig withMomentOfInertia(MomentOfInertia MOI)
   {
     moi = MOI;
     return this;
@@ -699,7 +840,7 @@ public class SmartMotorControllerConfig
   public double getMOI()
   {
 //    basicOptions.remove(BasicOptions.MomentOfInertia);
-    return moi;
+    return moi.in(KilogramSquareMeters);
   }
 
   /**
@@ -753,13 +894,27 @@ public class SmartMotorControllerConfig
    * Set the follower motors of the {@link SmartMotorController}
    *
    * @param followers Base motor types (NOT {@link SmartMotorController}!) to configure as followers, must be same brand
-   *                  as the {@link SmartMotorController} with inversion..
+   *                  as the {@link SmartMotorController} with inversion from the base motor.
    * @return {@link SmartMotorControllerConfig} for chaining
    */
   @SafeVarargs
   public final SmartMotorControllerConfig withFollowers(Pair<Object, Boolean>... followers)
   {
     this.followers = Optional.ofNullable(followers);
+    return this;
+  }
+
+  /**
+   * Applies loosely coupled follower motors to the {@link SmartMotorController}.
+   *
+   * @param followers {@link SmartMotorController}s to configure as followers.
+   * @return {@link SmartMotorControllerConfig} for chaining
+   * @implNote ONLY the position and velocity requests will be forwarded.
+   * @implSpec Configurations are not transferred!
+   */
+  public final SmartMotorControllerConfig withLooselyCoupledFollowers(SmartMotorController... followers)
+  {
+    this.looselyCoupledFollowers = Optional.ofNullable(followers);
     return this;
   }
 
@@ -918,6 +1073,16 @@ public class SmartMotorControllerConfig
   }
 
   /**
+   * If the closed loop controller is linear or {@link Distance} based.
+   *
+   * @return Linear closed loop controller.
+   */
+  public boolean getLinearClosedLoopControllerUse()
+  {
+    return linearClosedLoopController && mechanismCircumference.isPresent();
+  }
+
+  /**
    * Modify the period of the PID controller for the motor controller.
    *
    * @param time Period of the motor controller PID.
@@ -1020,6 +1185,7 @@ public class SmartMotorControllerConfig
       this.sim_elevatorFeedforward = Optional.empty();
     } else
     {
+      linearClosedLoopController = true;
       this.sim_armFeedforward = Optional.empty();
       this.sim_simpleFeedforward = Optional.empty();
       this.sim_elevatorFeedforward = Optional.of(elevatorFeedforward);
@@ -1040,6 +1206,7 @@ public class SmartMotorControllerConfig
       this.elevatorFeedforward = Optional.empty();
     } else
     {
+      linearClosedLoopController = true;
       this.armFeedforward = Optional.empty();
       this.simpleFeedforward = Optional.empty();
       this.elevatorFeedforward = Optional.of(elevatorFeedforward);
@@ -1130,8 +1297,8 @@ public class SmartMotorControllerConfig
    * @param kP              KP scalar for the PID Controller.
    * @param kI              KI scalar for the PID Controller.
    * @param kD              KD scalar for the PID Controller.
-   * @param maxVelocity     Maximum linear velocity for the Trapazoidal profile.
-   * @param maxAcceleration Maximum linear acceleration for the Trapazoidal profile.
+   * @param maxVelocity     Maximum linear velocity for the Trapezoidal profile.
+   * @param maxAcceleration Maximum linear acceleration for the Trapezoidal profile.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withSimClosedLoopController(double kP, double kI, double kD,
@@ -1144,6 +1311,7 @@ public class SmartMotorControllerConfig
                                                            "Closed loop controller cannot be created.",
                                                            "withMechanismCircumference(Distance)");
     }
+    linearClosedLoopController = true;
     this.sim_simpleController = Optional.empty();
     this.sim_expoController = Optional.empty();
     this.sim_controller = Optional.of(new ProfiledPIDController(kP,
@@ -1256,8 +1424,8 @@ public class SmartMotorControllerConfig
    * @param kP              KP scalar for the PID Controller, the units passed in are in Meters and output is Voltage.
    * @param kI              KI scalar for the PID Controller, the units passed in are in Meters and output is Voltage.
    * @param kD              KD scalar for the PID Controller, the units passed in are in Meters and output is Voltage.
-   * @param maxVelocity     Maximum linear velocity for the Trapazoidal profile.
-   * @param maxAcceleration Maximum linear acceleration for the Trapazoidal profile.
+   * @param maxVelocity     Maximum linear velocity for the Trapezoidal profile.
+   * @param maxAcceleration Maximum linear acceleration for the Trapezoidal profile.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withClosedLoopController(double kP, double kI, double kD,
@@ -1289,8 +1457,8 @@ public class SmartMotorControllerConfig
    *                        Voltage.
    * @param kD              KD scalar for the PID Controller, the units passed in are in Rotations and output is
    *                        Voltage.
-   * @param maxVelocity     Maximum angular velocity for the Trapazoidal profile.
-   * @param maxAcceleration Maximum angular acceleration for the Trapazoidal profile.
+   * @param maxVelocity     Maximum angular velocity for the Trapezoidal profile.
+   * @param maxAcceleration Maximum angular acceleration for the Trapezoidal profile.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withClosedLoopController(double kP, double kI, double kD,
@@ -1372,6 +1540,18 @@ public class SmartMotorControllerConfig
       this.sim_elevatorFeedforward = Optional.empty();
       this.sim_simpleFeedforward = Optional.of(simpleFeedforward);
     }
+    return this;
+  }
+
+  /**
+   * Set the closed loop controller to be Linear or {@link Distance} based.
+   *
+   * @param linearClosedLoopController Closed loop controller is distance based when true, angle based when false.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public SmartMotorControllerConfig withLinearClosedLoopController(boolean linearClosedLoopController)
+  {
+    this.linearClosedLoopController = linearClosedLoopController;
     return this;
   }
 
@@ -1478,7 +1658,13 @@ public class SmartMotorControllerConfig
    */
   public Subsystem getSubsystem()
   {
-    return subsystem;
+    if (subsystem.isEmpty())
+    {
+      throw new SmartMotorControllerConfigurationException("Subsystem is undefined",
+                                                           "Subsystem cannot be created.",
+                                                           "withSubsystem(Subsystem)");
+    }
+    return subsystem.orElseThrow();
   }
 
   /**
@@ -1633,6 +1819,8 @@ public class SmartMotorControllerConfig
   public boolean getMotorInverted()
   {
     basicOptions.remove(BasicOptions.MotorInverted);
+    if (RobotBase.isSimulation())
+    {return false;}
     return motorInverted;
   }
 
@@ -1789,6 +1977,27 @@ public class SmartMotorControllerConfig
   }
 
   /**
+   * Get the loosely coupled follower motors.
+   *
+   * @return {@link SmartMotorController} list of loosely coupled followers.
+   */
+  public Optional<SmartMotorController[]> getLooselyCoupledFollowers()
+  {
+    basicOptions.remove(BasicOptions.LooselyCoupledFollowers);
+    return looselyCoupledFollowers;
+  }
+
+  /**
+   * Get the vendor specific configuration object to mutate with {@link SmartMotorControllerConfig} options.
+   *
+   * @return {@link SmartMotorController} vendor-specific configuration object.
+   */
+  public Optional<Object> getVendorConfig()
+  {
+    return vendorConfig;
+  }
+
+  /**
    * Reset the validation checks for all required options to be applied to {@link SmartMotorController} from
    * {@link SmartMotorController#applyConfig(SmartMotorControllerConfig)}.
    */
@@ -1816,6 +2025,9 @@ public class SmartMotorControllerConfig
     }
   }
 
+  /**
+   * Validate external encoder config options for the config.
+   */
   public void validateExternalEncoderOptions()
   {
     if (!externalEncoderOptions.isEmpty())
@@ -1839,6 +2051,8 @@ public class SmartMotorControllerConfig
   public boolean getExternalEncoderInverted()
   {
     externalEncoderOptions.remove(ExternalEncoderOptions.ExternalEncoderInverted);
+    if (RobotBase.isSimulation())
+    {return false;}
     return externalEncoderInverted;
   }
 
@@ -1908,6 +2122,10 @@ public class SmartMotorControllerConfig
      * Follower motors
      */
     Followers,
+    /**
+     * Loosely Coupled Follower Motors
+     */
+    LooselyCoupledFollowers,
     /**
      * Stator current limits.
      */

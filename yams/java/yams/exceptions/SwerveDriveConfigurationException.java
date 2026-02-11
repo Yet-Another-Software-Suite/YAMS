@@ -1,5 +1,8 @@
 package yams.exceptions;
 
+/**
+ * SwerveDrive Config Exception
+ */
 public class SwerveDriveConfigurationException extends RuntimeException {
     /**
      * SwerveDrive configuration exception.

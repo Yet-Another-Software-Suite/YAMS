@@ -12,10 +12,14 @@ import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
-import com.thethriftybot.ThriftyNova;
-import com.thethriftybot.ThriftyNova.CurrentType;
-import com.thethriftybot.ThriftyNova.EncoderType;
-import com.thethriftybot.ThriftyNova.ExternalEncoder;
+import com.thethriftybot.devices.ThriftyNova;
+import com.thethriftybot.devices.ThriftyNova.CurrentType;
+import com.thethriftybot.devices.ThriftyNova.EncoderType;
+import com.thethriftybot.devices.ThriftyNova.ExternalEncoder;
+import com.thethriftybot.devices.ThriftyNova.ThriftyNovaConfig;
+import com.thethriftybot.util.Conversion;
+import com.thethriftybot.util.Conversion.PositionUnit;
+import com.thethriftybot.util.Conversion.VelocityUnit;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -59,17 +63,31 @@ public class NovaWrapper extends SmartMotorController
    */
   private final ThriftyNova          m_nova;
   /**
+   * ThriftyNova Config object
+   */
+  private       ThriftyNovaConfig    m_nova_config;
+  /**
    * Motor characteristics controlled by the {@link ThriftyNova}.
    */
   private final DCMotor              m_motor;
   /**
    * Sim for ThriftyNova's.
    */
-  private       Optional<DCMotorSim> m_dcMotorSim = Optional.empty();
+  private       Optional<DCMotorSim> m_dcMotorSim         = Optional.empty();
   /**
    * Gearing for the {@link ThriftyNova}.
    */
   private       MechanismGearing     m_gearing;
+  /**
+   * Nova Conversion.
+   */
+  private       Conversion           m_positionConversion = new Conversion(PositionUnit.ROTATIONS,
+                                                                           EncoderType.INTERNAL);
+  /**
+   * Nova Conversion.
+   */
+  private       Conversion           m_velocityConversion = new Conversion(VelocityUnit.RADIANS_PER_SEC,
+                                                                           EncoderType.INTERNAL);
 
   /**
    * Construct the Nova Wrapper for the generic {@link SmartMotorController}.
@@ -81,6 +99,18 @@ public class NovaWrapper extends SmartMotorController
   public NovaWrapper(ThriftyNova controller, DCMotor motor, SmartMotorControllerConfig config)
   {
     m_nova = controller;
+    if (config.getVendorConfig().isPresent())
+    {
+      var genCfg = config.getVendorConfig().get();
+      if (!(genCfg instanceof ThriftyNovaConfig))
+      {
+        throw new SmartMotorControllerConfigurationException("ThriftyNovaConfig expected",
+                                                             "Invalid vendor config",
+                                                             ".withVendorConfig(new ThriftyNovaConfig())");
+      }
+      m_nova_config = (ThriftyNovaConfig) genCfg;
+    } else
+    {m_nova_config = new ThriftyNovaConfig();}
     this.m_motor = motor;
     this.m_config = config;
     setupSimulation();
@@ -98,9 +128,8 @@ public class NovaWrapper extends SmartMotorController
         m_dcMotorSim = Optional.of(new DCMotorSim(LinearSystemId.createDCMotorSystem(m_motor,
                                                                                      m_config.getMOI(),
                                                                                      m_config.getGearing()
-                                                                                             .getRotorToMechanismRatio()),
-                                                  m_motor,
-                                                  1.0 / 1024.0, 0));
+                                                                                             .getMechanismToRotorRatio()),
+                                                  m_motor));
 
         setSimSupplier(new DCMotorSimSupplier(m_dcMotorSim.get(), this));
       }
@@ -167,7 +196,8 @@ public class NovaWrapper extends SmartMotorController
   @Override
   public void setEncoderPosition(Angle angle)
   {
-    m_nova.setEncoderPosition(angle.in(Rotations));
+    m_nova.setEncoderPosition(m_positionConversion.toMotor(angle.times(m_gearing.getMechanismToRotorRatio())
+                                                                .in(Rotations)));
     m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismPosition(angle));
   }
 
@@ -181,6 +211,7 @@ public class NovaWrapper extends SmartMotorController
   public void setPosition(Angle angle)
   {
     setpointPosition = Optional.ofNullable(angle);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setPosition(angle);}});
   }
 
   @Override
@@ -196,21 +227,23 @@ public class NovaWrapper extends SmartMotorController
   }
 
   @Override
-  public void setVelocity(AngularVelocity angle)
+  public void setVelocity(AngularVelocity angularVelocity)
   {
-    setpointVelocity = Optional.ofNullable(angle);
+    setpointVelocity = Optional.ofNullable(angularVelocity);
+//    m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismVelocity(angularVelocity));
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setVelocity(angularVelocity);}});
   }
 
   @Override
   public boolean applyConfig(SmartMotorControllerConfig config)
   {
-
     this.m_config = config;
     m_config.resetValidationCheck();
     m_gearing = config.getGearing();
     m_expoPidController = config.getExponentiallyProfiledClosedLoopController();
     m_pidController = config.getClosedLoopController();
     m_simplePidController = config.getSimpleClosedLoopController();
+    m_looseFollowers = config.getLooselyCoupledFollowers();
 
     // Handle simple pid vs profile pid controller.
     if (m_expoPidController.isEmpty())
@@ -231,7 +264,7 @@ public class NovaWrapper extends SmartMotorController
     }
 
     config.getClosedLoopTolerance().ifPresent(tolerance -> {
-      if (config.getMechanismCircumference().isPresent())
+      if (config.getLinearClosedLoopControllerUse())
       {
         m_pidController.ifPresent(pidController -> pidController.setTolerance(config.convertFromMechanism(tolerance)
                                                                                     .in(Meters)));
@@ -286,6 +319,7 @@ public class NovaWrapper extends SmartMotorController
     }
 
     // Ramp rates
+//    m_nova_config.rampDown = m_nova_config.rampUp = config.getClosedLoopRampRate().in(Seconds);
     m_nova.setRampUp(config.getClosedLoopRampRate().in(Seconds));
     m_nova.setRampDown(config.getClosedLoopRampRate().in(Seconds));
     if (config.getOpenLoopRampRate().gt(Seconds.of(0)))
@@ -294,7 +328,11 @@ public class NovaWrapper extends SmartMotorController
           "[Error] ThriftyNova does not support separate closed loop and open loop ramp rates, using the SmartMotorControllerConfig.withClosedLoopRampRate() as both.");
     }
 
+    // Gearing
+    // Do nothing since not supported yet.
+
     // Inversions
+    m_nova_config.inverted = config.getMotorInverted();
     m_nova.setInverted(config.getMotorInverted());
     if (config.getEncoderInverted())
     {
@@ -304,22 +342,28 @@ public class NovaWrapper extends SmartMotorController
     // Current limits
     if (config.getSupplyStallCurrentLimit().isPresent())
     {
+      m_nova_config.currentType = CurrentType.SUPPLY;
+      m_nova_config.maxCurrent = (double) config.getSupplyStallCurrentLimit().getAsInt();
       m_nova.setMaxCurrent(CurrentType.SUPPLY, config.getSupplyStallCurrentLimit().getAsInt());
     }
     if (config.getStatorStallCurrentLimit().isPresent())
     {
+      m_nova_config.currentType = CurrentType.STATOR;
+      m_nova_config.maxCurrent = (double) config.getStatorStallCurrentLimit().getAsInt();
       m_nova.setMaxCurrent(CurrentType.STATOR, config.getStatorStallCurrentLimit().getAsInt());
     }
 
     // Voltage Compensation
     if (config.getVoltageCompensation().isPresent())
     {
+      m_nova_config.voltageCompensation = config.getVoltageCompensation().get().in(Volts);
       m_nova.setVoltageCompensation(config.getVoltageCompensation().get().in(Volts));
     }
 
     // Setup idle mode.
     if (config.getIdleMode().isPresent())
     {
+      m_nova_config.brakeMode = config.getIdleMode().get() == MotorMode.BRAKE;
       m_nova.setBrakeMode(config.getIdleMode().get() == MotorMode.BRAKE);
     }
 
@@ -334,24 +378,13 @@ public class NovaWrapper extends SmartMotorController
     if (config.getExternalEncoder().isPresent() && useExt)
     {
       Object externalEncoder = config.getExternalEncoder().get();
-      if (externalEncoder instanceof EncoderType)
+      if (externalEncoder instanceof ExternalEncoder)
       {
-        if (externalEncoder == EncoderType.QUAD)
-        {
-          m_nova.useEncoderType(EncoderType.QUAD);
-        } else if (externalEncoder == EncoderType.ABS)
-        {
-          m_nova.useEncoderType(EncoderType.ABS);
-        }
-        if (config.getStartingPosition().isEmpty())
-        {
-          if (externalEncoder == EncoderType.ABS)
-          {
-            m_nova.setEncoderPosition(m_nova.getPositionAbs());
-          }
-        }
-      } else if (externalEncoder instanceof ExternalEncoder)
-      {
+        m_nova_config.externalEncoder = (ExternalEncoder) externalEncoder;
+        m_nova_config.encoderType = EncoderType.ABS;
+        m_nova.useEncoderType(EncoderType.ABS);
+        m_positionConversion = new Conversion(PositionUnit.ROTATIONS, EncoderType.ABS);
+        m_velocityConversion = new Conversion(VelocityUnit.ROTATIONS_PER_MIN, EncoderType.ABS);
         m_nova.setExternalEncoder((ExternalEncoder) externalEncoder);
       } else
       {
@@ -429,6 +462,8 @@ public class NovaWrapper extends SmartMotorController
       m_simplePidController.ifPresent(pidController -> {pidController.enableContinuousInput(min, max);});
     }
 
+    if (m_config.getVendorConfig().isPresent())
+    {m_nova.applyConfig(m_nova_config);}
     config.validateBasicOptions();
     config.validateExternalEncoderOptions();
     return true;
@@ -467,7 +502,8 @@ public class NovaWrapper extends SmartMotorController
   @Override
   public Voltage getVoltage()
   {
-    return m_simSupplier.isPresent() ? m_simSupplier.get().getMechanismStatorVoltage() : Volts.of(m_nova.getVoltage());
+    return m_simSupplier.isPresent() ? m_simSupplier.get().getMechanismStatorVoltage() : Volts.of(
+        m_nova.getVoltage() * m_nova.get());
   }
 
   @Override
@@ -513,7 +549,8 @@ public class NovaWrapper extends SmartMotorController
       {
         // There should be an alert thrown here; but Alerts are not thread-safe.
         return RotationsPerSecond.of(
-            m_nova.getVelocityQuad() * m_config.getExternalEncoderGearing().getRotorToMechanismRatio());
+            m_velocityConversion.fromMotor(m_nova.getVelocityQuad()) *
+            m_config.getExternalEncoderGearing().getRotorToMechanismRatio());
       }
     }
     return getRotorVelocity().times(m_gearing.getRotorToMechanismRatio());
@@ -531,10 +568,12 @@ public class NovaWrapper extends SmartMotorController
       Object externalEncoder = m_config.getExternalEncoder().get();
       if (externalEncoder == EncoderType.ABS)
       {
-        return Rotations.of(m_nova.getPositionAbs() * m_config.getExternalEncoderGearing().getRotorToMechanismRatio());
+        return Rotations.of(m_positionConversion.fromMotor(m_nova.getPositionAbs()) *
+                            m_config.getExternalEncoderGearing().getRotorToMechanismRatio());
       } else if (externalEncoder == EncoderType.QUAD)
       {
-        return Rotations.of(m_nova.getPositionQuad() * m_config.getExternalEncoderGearing().getRotorToMechanismRatio());
+        return Rotations.of(m_positionConversion.fromMotor(m_nova.getPositionQuad()) *
+                            m_config.getExternalEncoderGearing().getRotorToMechanismRatio());
       }
     }
     return getRotorPosition().times(m_gearing.getRotorToMechanismRatio());
@@ -547,7 +586,7 @@ public class NovaWrapper extends SmartMotorController
     {
       return m_simSupplier.get().getRotorVelocity();
     }
-    return RotationsPerSecond.of(m_nova.getVelocity());
+    return RotationsPerSecond.of(m_velocityConversion.fromMotor(m_nova.getVelocity()));
   }
 
   @Override
@@ -557,7 +596,7 @@ public class NovaWrapper extends SmartMotorController
     {
       return m_simSupplier.get().getRotorPosition();
     }
-    return Rotations.of(m_nova.getPosition());
+    return Rotations.of(m_positionConversion.fromMotor(m_nova.getPosition()));
   }
 
   @Override

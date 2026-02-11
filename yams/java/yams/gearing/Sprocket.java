@@ -23,7 +23,7 @@ public class Sprocket
    *
    * @param sprocketReductionStage Sprocket teeth, in the form of "IN:OUT" => IN/OUT
    */
-  public Sprocket(double[] sprocketReductionStage)
+  public Sprocket(double... sprocketReductionStage)
   {
     setupStages(sprocketReductionStage);
   }
@@ -55,6 +55,7 @@ public class Sprocket
    * Construct the {@link Sprocket} with the reduction stages given.
    *
    * @param stages List of stages in the format of "IN:OUT".
+   * @return Sprocket representation
    */
   public static Sprocket fromStages(String... stages)
   {

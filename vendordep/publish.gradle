@@ -32,7 +32,7 @@ task libraryBuild() {}
 build.dependsOn outputVersions
 
 task copyAllOutputs(type: Copy) {
-    destinationDir file("$buildDir/allOutputs")
+    destinationDir = file("$buildDir/allOutputs")
     from versionFile
     dependsOn outputVersions
 }
@@ -158,11 +158,13 @@ task vendordepJsonZip(type: Zip) {
 }
 
 artifacts {
-    archives sourcesJar
-    archives javadocJar
-    archives outputJar
-    archives outputSourcesJar
-    archives outputJavadocJar
+    tasks.named("assemble") {
+        archives sourcesJar
+        archives javadocJar
+        archives outputJar
+        archives outputSourcesJar
+        archives outputJavadocJar
+    }
 }
 
 addTaskToCopyAllOutputs(outputSourcesJar)
@@ -228,16 +230,16 @@ model {
                 artifact javadocJar
 
                 artifactId = "${baseArtifactId}-java"
-                groupId artifactGroupId
-                version pubVersion
+                groupId = artifactGroupId
+                version = pubVersion
             }
 
             vendordep(MavenPublication) {
                 artifact vendordepJsonZip
 
                 artifactId = "${baseArtifactId}-vendordep"
-                groupId artifactGroupId
-                version pubVersion
+                groupId = artifactGroupId
+                version = pubVersion
             }
         }
     }

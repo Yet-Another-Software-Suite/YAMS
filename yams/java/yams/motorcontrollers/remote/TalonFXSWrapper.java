@@ -1,6 +1,5 @@
 package yams.motorcontrollers.remote;
 
-import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Milliseconds;
@@ -19,9 +18,12 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CANdiConfiguration;
 import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.configs.TalonFXSConfigurator;
+import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicExpoVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.CANdi;
@@ -32,6 +34,7 @@ import com.ctre.phoenix6.signals.ExternalFeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MagnetHealthValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.MotorArrangementValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
@@ -94,17 +97,39 @@ public class TalonFXSWrapper extends SmartMotorController
    */
   private final TalonFXSConfigurator          m_configurator;
   /**
+   * Control request slot.
+   */
+  private final int                           m_controlReqSlot    = 0;
+  /**
    * Velocity control request
    */
-  private final VelocityVoltage               m_velocityReq     = new VelocityVoltage(0).withSlot(0);
+  private final VelocityVoltage               m_simpleVelocityReq = new VelocityVoltage(0).withSlot(m_controlReqSlot);
   /**
-   * Position with trapazoidal profiling request.
+   * Position control request.
    */
-  private final MotionMagicVoltage            m_trapPositionReq = new MotionMagicVoltage(0).withSlot(0);
+  private final PositionVoltage               m_simplePositionReq = new PositionVoltage(0).withSlot(m_controlReqSlot);
+  /**
+   * Position with trapezoidal profiling request.
+   */
+  private final MotionMagicVoltage            m_trapPositionReq   = new MotionMagicVoltage(0).withSlot(m_controlReqSlot);
+  /**
+   * Velocity with trapezoidal profiling request.
+   */
+  private final MotionMagicVelocityVoltage    m_trapVelocityReq   = new MotionMagicVelocityVoltage(0).withSlot(
+      m_controlReqSlot);
   /**
    * Position with exponential profiling request.
    */
-  private final MotionMagicExpoVoltage        m_expoPositionReq = new MotionMagicExpoVoltage(0).withSlot(0);
+  private final MotionMagicExpoVoltage        m_expoPositionReq   = new MotionMagicExpoVoltage(0).withSlot(
+      m_controlReqSlot);
+  /**
+   * Position control request to use.
+   */
+  private       ControlRequest                m_positionReq       = m_simplePositionReq;
+  /**
+   * Velocity control request to use.
+   */
+  private       ControlRequest                m_velocityReq       = m_simpleVelocityReq;
   /**
    * Configuration of the motor
    */
@@ -144,23 +169,23 @@ public class TalonFXSWrapper extends SmartMotorController
   /**
    * Temperature status
    */
-  private final StatusSignal<Temperature> m_deviceTemperature;
+  private final StatusSignal<Temperature>     m_deviceTemperature;
   /**
    * {@link CANcoder} to use as external feedback sensor.
    */
-  private       Optional<CANcoder>        m_cancoder = Optional.empty();
+  private       Optional<CANcoder>            m_cancoder          = Optional.empty();
   /**
    * {@link CANdi} to use as external feedback sensor.
    */
-  private       Optional<CANdi>           m_candi    = Optional.empty();
+  private       Optional<CANdi>               m_candi             = Optional.empty();
   /**
    * Exponent profile enabled.
    */
-  private       boolean                   expEnabled = false;
+  private       boolean                       expEnabled          = false;
   /**
    * {@link DCMotorSim} for the {@link TalonFXS}.
    */
-  private       Optional<DCMotorSim>          m_dcmotorSim      = Optional.empty();
+  private       Optional<DCMotorSim>          m_dcmotorSim        = Optional.empty();
 
   /**
    * Create the {@link TalonFXS} wrapper
@@ -175,8 +200,24 @@ public class TalonFXSWrapper extends SmartMotorController
     this.m_dcmotor = motor;
     this.m_config = smartConfig;
     m_configurator = m_talonfxs.getConfigurator();
-    m_talonConfig = new TalonFXSConfiguration();
-    m_configurator.refresh(m_talonConfig);
+    if (smartConfig.getVendorConfig().isPresent())
+    {
+      var genCfg = smartConfig.getVendorConfig().get();
+      if (genCfg instanceof TalonFXSConfiguration)
+      {
+        m_talonConfig = (TalonFXSConfiguration) genCfg;
+      } else
+      {
+        throw new SmartMotorControllerConfigurationException(
+            "TalonFXSConfiguration is the only acceptable vendor config for TalonFXS",
+            "Cannot use supplied vendor config",
+            "withVendorConfig(new TalonFXSConfiguration())");
+      }
+    } else
+    {
+      m_talonConfig = new TalonFXSConfiguration();
+      m_configurator.refresh(m_talonConfig);
+    }
     m_mechanismPosition = m_talonfxs.getPosition();
     m_mechanismVelocity = m_talonfxs.getVelocity();
     m_dutyCycle = m_talonfxs.getDutyCycle();
@@ -241,7 +282,7 @@ public class TalonFXSWrapper extends SmartMotorController
         m_dcmotorSim = Optional.of(new DCMotorSim(LinearSystemId.createDCMotorSystem(m_dcmotor,
                                                                                      m_config.getMOI(),
                                                                                      m_config.getGearing()
-                                                                                             .getRotorToMechanismRatio()),
+                                                                                             .getMechanismToRotorRatio()),
                                                   m_dcmotor));
         setSimSupplier(new DCMotorSimSupplier(m_dcmotorSim.get(), this));
       }
@@ -269,26 +310,19 @@ public class TalonFXSWrapper extends SmartMotorController
   {
     if (RobotBase.isSimulation() && m_simSupplier.isPresent())
     {
-      if (!m_simSupplier.get().getUpdatedSim())
-      {
-        m_simSupplier.get().updateSimState();
-        m_simSupplier.get().starveUpdateSim();
-      }
       var talonFXSim = m_talonfxs.getSimState();
 
       // set the supply voltage of the TalonFX
-      talonFXSim.setSupplyVoltage(m_simSupplier.get().getMechanismSupplyVoltage());
+      talonFXSim.setSupplyVoltage(m_simSupplier.get().getMechanismSupplyVoltage()); // RoboRioSim.getVInVoltage()
 
       // get the motor voltage of the TalonFX
       var motorVoltage = talonFXSim.getMotorVoltageMeasure();
 
-      // use the motor voltage to calculate new position and velocity
-      // using WPILib's DCMotorSim class for physics simulation
-      // m_dcmotorSim.get().setInputVoltage(motorVoltage.in(Volts));
-//      m_dcmotorSim.ifPresent(sim -> {
-//        sim.setAngularVelocity(m_simSupplier.get().getMechanismVelocity().in(RadiansPerSecond));
-//        sim.update(config.getClosedLoopControlPeriod().in(Seconds));
-//      });
+      m_simSupplier.ifPresent(simSupplier -> {
+        simSupplier.setMechanismStatorVoltage(motorVoltage); // dcmotorSim.setInputVoltage(motorVoltage)
+        simSupplier.updateSimState(); // dcmotorSim.update(0.020)
+        simSupplier.starveUpdateSim(); // clear update once atomic
+      });
 
       // apply the new rotor position and velocity to the TalonFX;
       // note that this is rotor position/velocity (before gear ratio), but
@@ -450,7 +484,21 @@ public class TalonFXSWrapper extends SmartMotorController
     setpointPosition = Optional.ofNullable(angle);
     if (angle != null)
     {
-      m_talonfxs.setControl(expEnabled ? m_expoPositionReq.withPosition(angle) : m_trapPositionReq.withPosition(angle));
+      switch (m_positionReq.getName())
+      {
+        case "MotionMagicExpoVoltage":
+          m_talonfxs.setControl(m_expoPositionReq.withPosition(angle));
+          break;
+        case "MotionMagicVoltage":
+          m_talonfxs.setControl(m_trapPositionReq.withPosition(angle));
+          break;
+        case "PositionVoltage":
+        default:
+          m_talonfxs.setControl(m_simplePositionReq.withPosition(angle));
+          break;
+      }
+      m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setPosition(angle);}});
+
     }
   }
 
@@ -467,12 +515,24 @@ public class TalonFXSWrapper extends SmartMotorController
   }
 
   @Override
-  public void setVelocity(AngularVelocity angle)
+  public void setVelocity(AngularVelocity angularVelocity)
   {
-    setpointVelocity = Optional.ofNullable(angle);
-    if (angle != null)
+    setpointVelocity = Optional.ofNullable(angularVelocity);
+    // TODO: Cannot actually simulate velocity closed loop controllers yet.
+    if (angularVelocity != null)
     {
-      m_talonfxs.setControl(m_velocityReq.withVelocity(angle));
+      switch (m_velocityReq.getName())
+      {
+        case "MotionMagicVelocityVoltage":
+          m_talonfxs.setControl(m_trapVelocityReq.withVelocity(angularVelocity));
+          break;
+        case "VelocityVoltage":
+        default:
+          m_talonfxs.setControl(m_simpleVelocityReq.withVelocity(angularVelocity));
+          break;
+      }
+      m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setVelocity(angularVelocity);}});
+//      m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismVelocity(angularVelocity));
     }
   }
 
@@ -497,6 +557,7 @@ public class TalonFXSWrapper extends SmartMotorController
 
     m_configurator.refresh(m_talonConfig);
     this.m_config = config;
+    this.m_looseFollowers = config.getLooselyCoupledFollowers();
     // Closed loop controllers.
     if (config.getClosedLoopController().isPresent() && config.getSimpleClosedLoopController().isPresent())
     {
@@ -534,6 +595,8 @@ public class TalonFXSWrapper extends SmartMotorController
 //        m_talonConfig.MotionMagic.withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(controller.getConstraints().maxAcceleration));
 //
 //      }
+      m_positionReq = m_expoPositionReq;
+      m_velocityReq = m_trapVelocityReq;
     } else if (config.getClosedLoopController().isPresent())
     {
       ProfiledPIDController controller = config.getClosedLoopController().get();
@@ -552,7 +615,7 @@ public class TalonFXSWrapper extends SmartMotorController
       m_talonConfig.Slot0.kI = controller.getI();
       m_talonConfig.Slot0.kD = controller.getD();
 
-      if (config.getMechanismCircumference().isPresent())
+      if (config.getLinearClosedLoopControllerUse())
       {
 //        m_talonConfig.Slot0.kP = config.convertToMechanism(Meters.of(controller.getP())).in(Rotations);
 //        m_talonConfig.Slot0.kI = config.convertToMechanism(Meters.of(controller.getI())).in(Rotations);
@@ -570,20 +633,22 @@ public class TalonFXSWrapper extends SmartMotorController
         m_talonConfig.MotionMagic.withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(controller.getConstraints().maxAcceleration));
 
       }
+      m_positionReq = m_trapPositionReq;
+      m_velocityReq = m_trapVelocityReq;
     } else if (config.getSimpleClosedLoopController().isPresent())
     {
       PIDController controller = config.getSimpleClosedLoopController().get();
-      if (config.getMechanismCircumference().isPresent())
-      {
-        m_talonConfig.Slot0.kP = config.convertToMechanism(Meters.of(controller.getP())).in(Rotations);
-        m_talonConfig.Slot0.kI = config.convertToMechanism(Meters.of(controller.getI())).in(Rotations);
-        m_talonConfig.Slot0.kD = config.convertToMechanism(Meters.of(controller.getD())).in(Rotations);
-      } else
-      {
-        m_talonConfig.Slot0.kP = controller.getP();
-        m_talonConfig.Slot0.kI = controller.getI();
-        m_talonConfig.Slot0.kD = controller.getD();
-      }
+//      if (config.getMechanismCircumference().isPresent())
+//      {
+//        m_talonConfig.Slot0.kP = config.convertToMechanism(Meters.of(controller.getP())).in(Rotations);
+//        m_talonConfig.Slot0.kI = config.convertToMechanism(Meters.of(controller.getI())).in(Rotations);
+//        m_talonConfig.Slot0.kD = config.convertToMechanism(Meters.of(controller.getD())).in(Rotations);
+//      } else
+//      {
+      m_talonConfig.Slot0.kP = controller.getP();
+      m_talonConfig.Slot0.kI = controller.getI();
+      m_talonConfig.Slot0.kD = controller.getD();
+//      }
       if (controller.getErrorTolerance() != new PIDController(0, 0, 0).getErrorTolerance())
       {
         throw new IllegalArgumentException("[ERROR] Cannot set closed-loop controller error tolerance on " +
@@ -591,6 +656,8 @@ public class TalonFXSWrapper extends SmartMotorController
                                                                                   : "TalonFXS(" +
                                                                                     m_talonfxs.getDeviceID() + ")"));
       }
+      m_positionReq = m_simplePositionReq;
+      m_velocityReq = m_simpleVelocityReq;
     } else if (config.getMotorControllerMode() == ControlMode.CLOSED_LOOP)
     {
       throw new IllegalArgumentException("[ERROR] No closed loop configuration available!");
@@ -680,11 +747,13 @@ public class TalonFXSWrapper extends SmartMotorController
     // Soft limit
     if (config.getMechanismUpperLimit().isPresent())
     {
-      m_talonConfig.SoftwareLimitSwitch.withForwardSoftLimitThreshold(config.getMechanismUpperLimit().get());
+      m_talonConfig.SoftwareLimitSwitch.withForwardSoftLimitThreshold(config.getMechanismUpperLimit().get())
+                                       .withForwardSoftLimitEnable(true);
     }
     if (config.getMechanismLowerLimit().isPresent())
     {
-      m_talonConfig.SoftwareLimitSwitch.withReverseSoftLimitThreshold(config.getMechanismLowerLimit().get());
+      m_talonConfig.SoftwareLimitSwitch.withReverseSoftLimitThreshold(config.getMechanismLowerLimit().get())
+                                       .withReverseSoftLimitEnable(true);
     }
 
     // Configure external encoders
@@ -700,9 +769,9 @@ public class TalonFXSWrapper extends SmartMotorController
                                     " because an external encoder is used!", false);
       }
       // Set the gear ratio for external encoders.
-      m_talonConfig.ExternalFeedback.RotorToSensorRatio = config.getGearing().getRotorToMechanismRatio() *
+      m_talonConfig.ExternalFeedback.RotorToSensorRatio = config.getGearing().getMechanismToRotorRatio() *
                                                           config.getExternalEncoderGearing()
-                                                                .getMechanismToRotorRatio();
+                                                                .getRotorToMechanismRatio();
       // config.getExternalEncoderGearing().getMechanismToRotorRatio() *
       m_talonConfig.ExternalFeedback.SensorToMechanismRatio = config.getExternalEncoderGearing()
                                                                     .getMechanismToRotorRatio();
@@ -856,12 +925,16 @@ public class TalonFXSWrapper extends SmartMotorController
           if (follower.getFirst() instanceof TalonFXS)
           {
             applied = ((TalonFXS) follower.getFirst()).setControl(new Follower(m_talonfxs.getDeviceID(),
-                                                                               follower.getSecond()));
+                                                                               follower.getSecond()
+                                                                               ? MotorAlignmentValue.Opposed
+                                                                               : MotorAlignmentValue.Aligned));
 
           } else if (follower.getFirst() instanceof TalonFX)
           {
             applied = ((TalonFX) follower.getFirst()).setControl(new Follower(m_talonfxs.getDeviceID(),
-                                                                              follower.getSecond()));
+                                                                              follower.getSecond()
+                                                                              ? MotorAlignmentValue.Opposed
+                                                                              : MotorAlignmentValue.Aligned));
           } else
           {
             throw new IllegalArgumentException(
@@ -943,7 +1016,7 @@ public class TalonFXSWrapper extends SmartMotorController
   @Override
   public AngularVelocity getMechanismVelocity()
   {
-    if (m_cancoder.isPresent())
+    /*if (m_cancoder.isPresent())
     {
       return m_cancoder.get().getVelocity().getValue();
     }
@@ -957,14 +1030,14 @@ public class TalonFXSWrapper extends SmartMotorController
       {
         return m_candi.get().getPWM2Velocity().getValue();
       }
-    }
+    }*/
     return m_mechanismVelocity.refresh().getValue();
   }
 
   @Override
   public Angle getMechanismPosition()
   {
-    if (m_cancoder.isPresent())
+    /*if (m_cancoder.isPresent())
     {
       return m_cancoder.get().getPosition().getValue();
     }
@@ -978,7 +1051,7 @@ public class TalonFXSWrapper extends SmartMotorController
       {
         return m_candi.get().getPWM2Position().getValue();
       }
-    }
+    }*/
     return m_mechanismPosition.refresh().getValue();
   }
 
@@ -1268,7 +1341,8 @@ public class TalonFXSWrapper extends SmartMotorController
     if (m_config.getMechanismCircumference().isPresent() && m_config.getMechanismLowerLimit().isPresent())
     {
       m_config.withSoftLimit(m_config.convertFromMechanism(m_config.getMechanismLowerLimit().get()), upperLimit);
-      m_talonConfig.SoftwareLimitSwitch.withForwardSoftLimitThreshold(m_config.convertToMechanism(upperLimit));
+      m_talonConfig.SoftwareLimitSwitch.withForwardSoftLimitThreshold(m_config.convertToMechanism(upperLimit))
+                                       .withForwardSoftLimitEnable(true);
       forceConfigApply();
     }
   }
@@ -1279,7 +1353,8 @@ public class TalonFXSWrapper extends SmartMotorController
     if (m_config.getMechanismCircumference().isPresent() && m_config.getMechanismUpperLimit().isPresent())
     {
       m_config.withSoftLimit(lowerLimit, m_config.convertFromMechanism(m_config.getMechanismUpperLimit().get()));
-      m_talonConfig.SoftwareLimitSwitch.withReverseSoftLimitThreshold(m_config.convertToMechanism(lowerLimit));
+      m_talonConfig.SoftwareLimitSwitch.withReverseSoftLimitThreshold(m_config.convertToMechanism(lowerLimit))
+                                       .withReverseSoftLimitEnable(true);
       forceConfigApply();
     }
   }
@@ -1290,7 +1365,8 @@ public class TalonFXSWrapper extends SmartMotorController
     m_config.getMechanismLowerLimit().ifPresent(lowerLimit -> {
       m_config.withSoftLimit(lowerLimit, upperLimit);
     });
-    m_talonConfig.SoftwareLimitSwitch.withForwardSoftLimitThreshold(upperLimit);
+    m_talonConfig.SoftwareLimitSwitch.withForwardSoftLimitThreshold(upperLimit)
+                                     .withForwardSoftLimitEnable(true);
     forceConfigApply();
   }
 
@@ -1300,17 +1376,20 @@ public class TalonFXSWrapper extends SmartMotorController
     m_config.getMechanismUpperLimit().ifPresent(upperLimit -> {
       m_config.withSoftLimit(lowerLimit, upperLimit);
     });
-    m_talonConfig.SoftwareLimitSwitch.withReverseSoftLimitThreshold(lowerLimit);
+    m_talonConfig.SoftwareLimitSwitch.withReverseSoftLimitThreshold(lowerLimit)
+                                     .withReverseSoftLimitEnable(true);
     forceConfigApply();
   }
 
   /**
-   * Ensure setting is applied.
+   * Ensure setting is applied, retries every 10ms.
+   *
+   * @return {@link StatusCode} from CTRE
    */
   public StatusCode forceConfigApply()
   {
     StatusCode status = m_configurator.apply(m_talonConfig);
-    while (!status.isOK())
+    for (int i = 0; i < 10 && !status.isOK(); i++)
     {
       Timer.delay(Milliseconds.of(10).in(Seconds));
       status = m_configurator.apply(m_talonConfig);
@@ -1349,7 +1428,7 @@ public class TalonFXSWrapper extends SmartMotorController
   }
 
   @Override
-  protected Config getSysIdConfig(Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage, Time testDuration)
+  public Config getSysIdConfig(Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage, Time testDuration)
   {
     return new Config(stepVoltage,
                       maxVoltage,

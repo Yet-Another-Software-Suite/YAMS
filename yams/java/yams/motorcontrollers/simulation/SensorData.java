@@ -273,6 +273,50 @@ public class SensorData
   }
 
   /**
+   * Set the sensor value.
+   *
+   * @param val Integer value to set.
+   * @implNote The value is not checked for validity, ensure that this is the right data type for the field.
+   */
+  public void set(int val)
+  {
+    set(convert(val));
+  }
+
+  /**
+   * Set the sensor value.
+   *
+   * @param val Double value to set.
+   * @implNote The value is not checked for validity, ensure that this is the right data type for the field.
+   */
+  public void set(double val)
+  {
+    set(convert(val));
+  }
+
+  /**
+   * Set the sensor value.
+   *
+   * @param val Long value to set.
+   * @implNote The value is not checked for validity, ensure that this is the right data type for the field.
+   */
+  public void set(long val)
+  {
+    set(convert(val));
+  }
+
+  /**
+   * Set the sensor value.
+   *
+   * @param val Boolean value to set.
+   * @implNote The value is not checked for validity, ensure that this is the right data type for the field.
+   */
+  public void set(boolean val)
+  {
+    set(convert(val));
+  }
+
+  /**
    * Get the sensor value, real sensor value if the robot is real.
    *
    * @return Sensor value.

@@ -24,7 +24,7 @@ public class SmartMotorFactory
              "yams.motorcontrollers.remote.TalonFXSWrapper");
     register("com.revrobotics.spark.SparkBase",
              "yams.motorcontrollers.local.SparkWrapper");
-    register("com.thethriftybot.ThriftyNova",
+    register("com.thethriftybot.devices.ThriftyNova",
              "yams.motorcontrollers.local.NovaWrapper");
   }
 

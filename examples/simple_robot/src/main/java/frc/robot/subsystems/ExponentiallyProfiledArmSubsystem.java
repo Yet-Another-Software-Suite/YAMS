@@ -88,24 +88,24 @@ public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
    * {@link SmartMotorControllerConfig} for the arm motor.
    */
   private final SmartMotorControllerConfig      motorConfig    = new SmartMotorControllerConfig(this)
-      /*
-       * Basic Configuration options for the motor
-       */
-      .withMotorInverted(false)
-      .withIdleMode(MotorMode.BRAKE)
-      .withControlMode(ControlMode.CLOSED_LOOP)
-      .withGearing(gearing)
-      .withStatorCurrentLimit(Amps.of(40)) // Prevents our motor from continuously over-taxing itself when it is stuck.
-      .withClosedLoopRampRate(Seconds.of(0.25)) // Prevents our motor from rapid demand changes that could cause dramatic voltage drops, and current draw.
-      .withOpenLoopRampRate(Seconds.of(0.25)) // Same as above
-      .withTelemetry(motorTelemetryName,
-                     TelemetryVerbosity.HIGH) // Could have more fine-grained control over what gets reported with SmartMotorControllerTelemetryConfig
-      /*
-       * Closed loop configuration options for the motor.
-       */
-      .withClosedLoopController(pidController)
-      .withFeedforward(armFeedforward)
-      .withSoftLimit(softLowerLimit, softUpperLimit);
+                                                /*
+                                                 * Basic Configuration options for the motor
+                                                 */
+                                                .withMotorInverted(false)
+                                                .withIdleMode(MotorMode.BRAKE)
+                                                .withControlMode(ControlMode.CLOSED_LOOP)
+                                                .withGearing(gearing)
+                                                .withStatorCurrentLimit(Amps.of(40)) // Prevents our motor from continuously over-taxing itself when it is stuck.
+                                                .withClosedLoopRampRate(Seconds.of(0.25)) // Prevents our motor from rapid demand changes that could cause dramatic voltage drops, and current draw.
+                                                .withOpenLoopRampRate(Seconds.of(0.25)) // Same as above
+                                                .withTelemetry(motorTelemetryName,
+                                                               TelemetryVerbosity.HIGH) // Could have more fine-grained control over what gets reported with SmartMotorControllerTelemetryConfig
+                                                /*
+                                                 * Closed loop configuration options for the motor.
+                                                 */
+                                                .withClosedLoopController(pidController)
+                                                .withFeedforward(armFeedforward)
+                                                .withSoftLimit(softLowerLimit, softUpperLimit);
 
   /// Generic Smart Motor Controller with our options and vendor motor.
   private final SmartMotorController motor    = new SparkWrapper(armMotor, dcMotor, motorConfig);
