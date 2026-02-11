@@ -482,7 +482,7 @@ public class TalonFXSWrapper extends SmartMotorController
   public void setPosition(Angle angle)
   {
     setpointPosition = Optional.ofNullable(angle);
-    if (angle != null)
+    if (angle != null && m_lqrController.isEmpty())
     {
       switch (m_positionReq.getName())
       {
@@ -519,7 +519,7 @@ public class TalonFXSWrapper extends SmartMotorController
   {
     setpointVelocity = Optional.ofNullable(angularVelocity);
     // TODO: Cannot actually simulate velocity closed loop controllers yet.
-    if (angularVelocity != null)
+    if (angularVelocity != null && m_lqrController.isEmpty())
     {
       switch (m_velocityReq.getName())
       {
@@ -1420,6 +1420,11 @@ public class TalonFXSWrapper extends SmartMotorController
   @Override
   public Pair<Optional<List<BooleanTelemetryField>>, Optional<List<DoubleTelemetryField>>> getUnsupportedTelemetryFields()
   {
+    if (m_lqrController.isPresent())
+    {
+      return Pair.of(Optional.empty(),
+                     Optional.of(List.of(DoubleTelemetryField.kP, DoubleTelemetryField.kI, DoubleTelemetryField.kD)));
+    }
     return Pair.of(Optional.empty(), Optional.empty());
   }
 

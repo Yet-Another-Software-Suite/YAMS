@@ -1187,9 +1187,16 @@ public class SparkWrapper extends SmartMotorController
   @Override
   public Pair<Optional<List<BooleanTelemetryField>>, Optional<List<DoubleTelemetryField>>> getUnsupportedTelemetryFields()
   {
+    var list = new java.util.ArrayList<>(List.of(DoubleTelemetryField.SupplyCurrent,
+                                                 DoubleTelemetryField.SupplyCurrentLimit));
+    if (m_lqrController.isPresent())
+    {
+      list.add(DoubleTelemetryField.kP);
+      list.add(DoubleTelemetryField.kI);
+      list.add(DoubleTelemetryField.kD);
+    }
     return Pair.of(Optional.empty(),
-                   Optional.of(List.of(DoubleTelemetryField.SupplyCurrent,
-                                       DoubleTelemetryField.SupplyCurrentLimit)));
+                   Optional.of(list));
   }
 
   @Override

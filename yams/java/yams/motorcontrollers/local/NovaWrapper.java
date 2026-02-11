@@ -869,6 +869,11 @@ public class NovaWrapper extends SmartMotorController
   @Override
   public Pair<Optional<List<BooleanTelemetryField>>, Optional<List<DoubleTelemetryField>>> getUnsupportedTelemetryFields()
   {
+    if (m_lqrController.isPresent())
+    {
+      return Pair.of(Optional.empty(),
+                     Optional.of(List.of(DoubleTelemetryField.kP, DoubleTelemetryField.kI, DoubleTelemetryField.kD)));
+    }
     return Pair.of(Optional.empty(), Optional.empty());
   }
 }
