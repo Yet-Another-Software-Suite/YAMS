@@ -426,6 +426,10 @@ public class SparkWrapper extends SmartMotorController
           m_expoPidController.ifPresent(pidController -> pidController.setTolerance(tolerance.in(Rotations)));
         }
       });
+      if (m_lqrController.isPresent() && config.getClosedLoopTolerance().isPresent())
+      {
+        throw new IllegalArgumentException("[Error] Closed loop tolerance is not supported in LQR mode.");
+      }
 
       iterateClosedLoopController();
 

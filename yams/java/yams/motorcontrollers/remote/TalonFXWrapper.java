@@ -56,6 +56,7 @@ import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
@@ -596,6 +597,45 @@ public class TalonFXWrapper extends SmartMotorController
       }
       m_positionReq = m_simplePositionReq;
       m_velocityReq = m_simpleVelocityReq;
+    } else if (m_lqrController.isPresent())
+    {
+      if (m_config.getClosedLoopTolerance().isPresent())
+      {
+        throw new IllegalArgumentException("[ERROR] Cannot set closed-loop controller error tolerance on " +
+                                           (config.getTelemetryName().isPresent() ? getName()
+                                                                                  : "TalonFX(" +
+                                                                                    m_talonfx.getDeviceID() + ")"));
+      }
+
+      iterateClosedLoopController();
+
+      if (m_closedLoopControllerThread == null)
+      {
+        m_closedLoopControllerThread = new Notifier(this::iterateClosedLoopController);
+      } else
+      {
+        stopClosedLoopController();
+        m_closedLoopControllerThread.stop();
+        m_closedLoopControllerThread.close();
+        m_closedLoopControllerThread = new Notifier(this::iterateClosedLoopController);
+      }
+
+      if (config.getTelemetryName().isPresent())
+      {
+        m_closedLoopControllerThread.setName(config.getTelemetryName().get());
+      }
+      if (config.getMotorControllerMode() == ControlMode.CLOSED_LOOP)
+      {
+        startClosedLoopController();
+      } else
+      {
+        m_closedLoopControllerThread.stop();
+        if (config.getClosedLoopControlPeriod().isPresent())
+        {
+          throw new IllegalArgumentException("[Error] Closed loop control period is only supported in closed loop mode.");
+        }
+      }
+
     } else if (config.getMotorControllerMode() == ControlMode.CLOSED_LOOP)
     {
       throw new IllegalArgumentException("[ERROR] No closed loop configuration available!");
