@@ -11,8 +11,6 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.system.LinearSystemLoop;
-import edu.wpi.first.math.trajectory.ExponentialProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -33,10 +31,6 @@ public class LQRController
   private LQRType                      m_type;
   private LinearSystemLoop<?, ?, ?>    m_loop;
   private Time                         m_period;
-  private Optional<ExponentialProfile> m_expoProfile      = Optional.empty();
-  private Optional<TrapezoidProfile>   m_trapProfile      = Optional.empty();
-  private ExponentialProfile.State     m_currentExpoState = new ExponentialProfile.State();
-  private TrapezoidProfile.State       m_currentTrapState = new TrapezoidProfile.State();
 
   /**
    * Create a LQR Controller.
@@ -61,8 +55,6 @@ public class LQRController
     m_type = config.getType();
     m_loop = config.getLoop();
     m_period = config.getPeriod();
-    m_trapProfile = config.getTrapezoidalProfile();
-    m_expoProfile = config.getExponentialProfile();
   }
 
   /**
@@ -76,36 +68,6 @@ public class LQRController
     m_type = config.getType();
     m_loop = config.getLoop();
     m_period = config.getPeriod();
-    m_trapProfile = config.getTrapezoidalProfile();
-    m_expoProfile = config.getExponentialProfile();
-    m_currentExpoState = new ExponentialProfile.State();
-    m_currentTrapState = new TrapezoidProfile.State();
-  }
-
-  /**
-   * Set the motion profile.
-   *
-   * @param exponentialProfile Exponential profile to use, must be in meters/s or radians/s.
-   */
-  public void setProfile(ExponentialProfile exponentialProfile)
-  {
-    m_expoProfile = Optional.of(exponentialProfile);
-    m_trapProfile = Optional.empty();
-    m_currentExpoState = new ExponentialProfile.State();
-    m_currentTrapState = new TrapezoidProfile.State();
-  }
-
-  /**
-   * Set the motion profile.
-   *
-   * @param trapezoidProfile Trapezoid profile to use, must be in meters/s or radians/s.
-   */
-  public void setProfile(TrapezoidProfile trapezoidProfile)
-  {
-    m_expoProfile = Optional.empty();
-    m_trapProfile = Optional.of(trapezoidProfile);
-    m_currentExpoState = new ExponentialProfile.State();
-    m_currentTrapState = new TrapezoidProfile.State();
   }
 
   /**
@@ -128,8 +90,6 @@ public class LQRController
                                                                       velocity.in(RadiansPerSecond)));
       }
     }
-    m_currentExpoState = new ExponentialProfile.State(angle.in(Radians), velocity.in(RadiansPerSecond));
-    m_currentTrapState = new TrapezoidProfile.State(angle.in(Radians), velocity.in(RadiansPerSecond));
   }
 
   /**
@@ -145,8 +105,6 @@ public class LQRController
       ((LinearSystemLoop<N2, N1, N1>) m_loop).reset(VecBuilder.fill(distance.in(Meters),
                                                                     velocity.in(MetersPerSecond)));
     }
-    m_currentExpoState = new ExponentialProfile.State(distance.in(Meters), velocity.in(MetersPerSecond));
-    m_currentTrapState = new TrapezoidProfile.State(distance.in(Meters), velocity.in(MetersPerSecond));
   }
 
   /**
@@ -183,65 +141,6 @@ public class LQRController
     return Volts.of(loop.getU(0));
   }
 
-  /**
-   * Calculate the voltage for a Elevator LQR
-   *
-   * @param measured Measured distance of the elevator.
-   * @param position Setpoint distance of the elevator from the motion profile.
-   * @return {@link Voltage} to apply to the elevator.
-   */
-  public Voltage calculate(Distance measured, Distance position)
-  {
-    if (m_expoProfile.isPresent())
-    {
-      var goal    = new ExponentialProfile.State(position.in(Meters), 0.0);
-      var profile = m_expoProfile.get();
-      m_currentExpoState = profile.calculate(m_period.in(Seconds), m_currentExpoState, goal);
-      return calculate(measured,
-                       Meters.of(m_currentExpoState.position),
-                       MetersPerSecond.of(m_currentExpoState.velocity));
-    }
-    if (m_trapProfile.isPresent())
-    {
-      var goal    = new TrapezoidProfile.State(position.in(Meters), 0.0);
-      var profile = m_trapProfile.get();
-      m_currentTrapState = profile.calculate(m_period.in(Seconds), m_currentTrapState, goal);
-      return calculate(measured,
-                       Meters.of(m_currentTrapState.position),
-                       MetersPerSecond.of(m_currentTrapState.velocity));
-    }
-    return calculate(measured, position, MetersPerSecond.zero());
-  }
-
-  /**
-   * Calculate the voltage for an Arm LQR
-   *
-   * @param measured Measured angle from the arm.
-   * @param position {@link Angle} setpoint to go to.
-   * @return {@link Voltage} to apply to the arm.
-   */
-  public Voltage calculate(Angle measured, Angle position)
-  {
-    if (m_expoProfile.isPresent())
-    {
-      var goal    = new ExponentialProfile.State(position.in(Radians), 0.0);
-      var profile = m_expoProfile.get();
-      m_currentExpoState = profile.calculate(m_period.in(Seconds), m_currentExpoState, goal);
-      return calculate(measured,
-                       Radians.of(m_currentExpoState.position),
-                       RadiansPerSecond.of(m_currentExpoState.velocity));
-    }
-    if (m_trapProfile.isPresent())
-    {
-      var goal    = new TrapezoidProfile.State(position.in(Radians), 0.0);
-      var profile = m_trapProfile.get();
-      m_currentTrapState = profile.calculate(m_period.in(Seconds), m_currentTrapState, goal);
-      return calculate(measured,
-                       Radians.of(m_currentTrapState.position),
-                       RadiansPerSecond.of(m_currentTrapState.velocity));
-    }
-    return calculate(measured, position, RadiansPerSecond.zero());
-  }
 
   /**
    * Calculate the voltage for a Flywheel LQR
@@ -278,26 +177,6 @@ public class LQRController
   }
 
   /**
-   * Get the current exponential profile state.
-   *
-   * @return {@link ExponentialProfile.State} if it exists, otherwise {@link Optional#empty()}
-   */
-  public Optional<ExponentialProfile.State> getExponentialProfileState()
-  {
-    return m_expoProfile.isPresent() && m_type != LQRType.FLYWHEEL ? Optional.of(m_currentExpoState) : Optional.empty();
-  }
-
-  /**
-   * Get the current trapezoidal profile state.
-   *
-   * @return {@link TrapezoidProfile.State} if it exists, otherwise {@link Optional#empty()}
-   */
-  public Optional<TrapezoidProfile.State> getTrapezoidalProfileState()
-  {
-    return m_trapProfile.isPresent() && m_type != LQRType.FLYWHEEL ? Optional.of(m_currentTrapState) : Optional.empty();
-  }
-
-  /**
    * Get the type of LQR.
    *
    * @return {@link LQRType}
@@ -315,15 +194,5 @@ public class LQRController
   public Optional<LQRConfig> getConfig()
   {
     return m_config;
-  }
-
-  /**
-   * Has motion profile
-   *
-   * @return If motion profile exists
-   */
-  public boolean isProfiled()
-  {
-    return m_expoProfile.isPresent() || m_trapProfile.isPresent();
   }
 }

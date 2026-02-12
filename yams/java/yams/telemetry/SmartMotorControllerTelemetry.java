@@ -134,7 +134,7 @@ public class SmartMotorControllerTelemetry
         }
         case MotionProfile ->
         {
-          bt.set(cfg.getClosedLoopController().isPresent());
+          bt.set(cfg.getExponentialProfile().isPresent() || cfg.getTrapezoidProfile().isPresent());
         }
       }
     }

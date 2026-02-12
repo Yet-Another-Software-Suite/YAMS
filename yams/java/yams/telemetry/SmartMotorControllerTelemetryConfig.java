@@ -1,11 +1,7 @@
 package yams.telemetry;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -164,26 +160,25 @@ public class SmartMotorControllerTelemetryConfig
                                                                    .setDefaultValue(e));
     config.getStatorStallCurrentLimit().ifPresent(e -> doubleFields.get(DoubleTelemetryField.StatorCurrentLimit)
                                                                    .setDefaultValue(e));
-    config.getSimpleClosedLoopController().ifPresent(e -> {
+    config.getPID().ifPresent(e -> {
       doubleFields.get(DoubleTelemetryField.kP).setDefaultValue(e.getP());
       doubleFields.get(DoubleTelemetryField.kI).setDefaultValue(e.getI());
       doubleFields.get(DoubleTelemetryField.kD).setDefaultValue(e.getD());
     });
-    config.getClosedLoopController().ifPresent(e -> {
-      doubleFields.get(DoubleTelemetryField.kP).setDefaultValue(e.getP());
-      doubleFields.get(DoubleTelemetryField.kI).setDefaultValue(e.getI());
-      doubleFields.get(DoubleTelemetryField.kD).setDefaultValue(e.getD());
+    config.getTrapezoidProfile().ifPresent(e -> {
       doubleFields.get(DoubleTelemetryField.MotionProfileMaxAcceleration)
-                  .setDefaultValue(RotationsPerSecondPerSecond.of(e.getConstraints().maxAcceleration)
-                                                              .in(DegreesPerSecondPerSecond));
+                  .setDefaultValue(e.maxAcceleration);
       doubleFields.get(DoubleTelemetryField.MotionProfileMaxVelocity)
-                  .setDefaultValue(RotationsPerSecond.of(e.getConstraints().maxVelocity).in(DegreesPerSecond));
+                  .setDefaultValue(e.maxVelocity);
     });
-    config.getExponentiallyProfiledClosedLoopController().ifPresent(e -> {
-      doubleFields.get(DoubleTelemetryField.kP).setDefaultValue(e.getP());
-      doubleFields.get(DoubleTelemetryField.kI).setDefaultValue(e.getI());
-      doubleFields.get(DoubleTelemetryField.kD).setDefaultValue(e.getD());
-      // TODO: Add kV and kA
+    config.getExponentialProfile().ifPresent(e -> {
+      doubleFields.get(DoubleTelemetryField.MotionProfileMaxAcceleration).disable();
+      doubleFields.get(DoubleTelemetryField.MotionProfileMaxVelocity).disable();
+    });
+    config.getLQRClosedLoopController().ifPresent(e -> {
+      doubleFields.get(DoubleTelemetryField.kP).disable();
+      doubleFields.get(DoubleTelemetryField.kI).disable();
+      doubleFields.get(DoubleTelemetryField.kD).disable();
     });
     config.getArmFeedforward().ifPresent(e -> {
       doubleFields.get(DoubleTelemetryField.kG).enable();

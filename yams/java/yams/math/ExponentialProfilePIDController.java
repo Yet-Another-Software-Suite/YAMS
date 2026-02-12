@@ -1,8 +1,8 @@
 package yams.math;
 
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Milliseconds;
@@ -183,14 +183,6 @@ public class ExponentialProfilePIDController
                                                                          MechanismGearing gearing)
   {
     return createArmConstraints(maxVolts, motor, moi, gearing);
-//    var sysid = LinearSystemId.createFlywheelSystem(motor,
-//                                                    SingleJointedArmSim.estimateMOI(radius.in(Meters),
-//                                                                                    mass.in(Kilograms)),
-//                                                    gearing.getMechanismToRotorRatio());
-//    var A = RadiansPerSecond.of(sysid.getA(0, 0));
-//    var B = RadiansPerSecondPerSecond.of(sysid.getB(0, 0));
-//    return ExponentialProfile.Constraints.fromStateSpace(maxVolts.in(Volts), A.in(RotationsPerSecond), B.in(RotationsPerSecondPerSecond));
-////    return ExponentialProfile.Constraints.fromCharacteristics(maxVolts.in(Volts), -A/B, 1.0/B);
   }
 
   /**
@@ -207,14 +199,6 @@ public class ExponentialProfilePIDController
                                                                          Distance radius, MechanismGearing gearing)
   {
     return createArmConstraints(maxVolts, motor, mass, radius, gearing);
-//    var sysid = LinearSystemId.createFlywheelSystem(motor,
-//                                                    SingleJointedArmSim.estimateMOI(radius.in(Meters),
-//                                                                                    mass.in(Kilograms)),
-//                                                    gearing.getMechanismToRotorRatio());
-//    var A = RadiansPerSecond.of(sysid.getA(0, 0));
-//    var B = RadiansPerSecondPerSecond.of(sysid.getB(0, 0));
-//    return ExponentialProfile.Constraints.fromStateSpace(maxVolts.in(Volts), A.in(RotationsPerSecond), B.in(RotationsPerSecondPerSecond));
-////    return ExponentialProfile.Constraints.fromCharacteristics(maxVolts.in(Volts), -A/B, 1.0/B);
   }
 
   /**
