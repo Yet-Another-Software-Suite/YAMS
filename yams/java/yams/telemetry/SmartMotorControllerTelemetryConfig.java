@@ -2,6 +2,10 @@ package yams.telemetry;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Minute;
+import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -166,10 +170,22 @@ public class SmartMotorControllerTelemetryConfig
       doubleFields.get(DoubleTelemetryField.kD).setDefaultValue(e.getD());
     });
     config.getTrapezoidProfile().ifPresent(e -> {
-      doubleFields.get(DoubleTelemetryField.MotionProfileMaxAcceleration)
-                  .setDefaultValue(e.maxAcceleration);
-      doubleFields.get(DoubleTelemetryField.MotionProfileMaxVelocity)
-                  .setDefaultValue(e.maxVelocity);
+      if (config.getLinearClosedLoopControllerUse())
+      {
+        doubleFields.get(DoubleTelemetryField.MotionProfileMaxAcceleration)
+                    .setDefaultValue(e.maxAcceleration);
+        doubleFields.get(DoubleTelemetryField.MotionProfileMaxVelocity)
+                    .setDefaultValue(e.maxVelocity);
+      } else
+      {
+        if (config.getLinearClosedLoopControllerUse())
+        {
+          doubleFields.get(DoubleTelemetryField.MotionProfileMaxAcceleration)
+                      .setDefaultValue(RotationsPerSecondPerSecond.of(e.maxAcceleration).in(RPM.per(Minute)));
+          doubleFields.get(DoubleTelemetryField.MotionProfileMaxVelocity)
+                      .setDefaultValue(RotationsPerSecond.of(e.maxVelocity).in(RPM));
+        }
+      }
     });
     config.getExponentialProfile().ifPresent(e -> {
       doubleFields.get(DoubleTelemetryField.MotionProfileMaxAcceleration).disable();

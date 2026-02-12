@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Milliseconds;
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
@@ -366,11 +367,9 @@ public class SparkWrapper extends SmartMotorController
   public void setVelocity(AngularVelocity angularVelocity)
   {
     setpointVelocity = Optional.ofNullable(angularVelocity);
-    // TODO: Cannot actually simulate velocity closed loop controllers yet.
-    m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismVelocity(angularVelocity));
     if (m_lqr.isEmpty() && angularVelocity != null)
     {
-      m_sparkPidController.setSetpoint(angularVelocity.in(RotationsPerSecond),
+      m_sparkPidController.setSetpoint(setpointVelocity.orElse(RPM.of(0)).in(RotationsPerSecond),
                                        m_velocityControlType,
                                        m_closedLoopSlot);
     }

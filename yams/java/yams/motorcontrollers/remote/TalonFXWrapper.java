@@ -485,7 +485,6 @@ public class TalonFXWrapper extends SmartMotorController
   public void setVelocity(AngularVelocity angularVelocity)
   {
     setpointVelocity = Optional.ofNullable(angularVelocity);
-    // TODO: Cannot actually simulate velocity closed loop controllers yet.
     if (angularVelocity != null && m_lqr.isEmpty())
     {
       switch (m_velocityReq.getName())
