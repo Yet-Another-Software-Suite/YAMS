@@ -6,9 +6,10 @@ import static edu.wpi.first.units.Units.Fahrenheit;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -263,7 +264,7 @@ public class SmartMotorControllerTelemetry
               smartMotorController.setVelocity(MetersPerSecond.of(dt.get()));
             } else
             {
-              smartMotorController.setVelocity(dt.get() == 0 ? null : RotationsPerSecond.of(dt.get()));
+              smartMotorController.setVelocity(dt.get() == 0 ? null : RPM.of(dt.get()));
             }
             break;
           }
@@ -291,7 +292,7 @@ public class SmartMotorControllerTelemetry
             } else
             {
               smartMotorController.setMotionProfileMaxAcceleration(
-                  RotationsPerSecondPerSecond.of(dt.get()));
+                  RPM.per(Second).of(dt.get()));
             }
             break;
           }
@@ -302,7 +303,7 @@ public class SmartMotorControllerTelemetry
               smartMotorController.setMotionProfileMaxVelocity(MetersPerSecond.of(dt.get()));
             } else
             {
-              smartMotorController.setMotionProfileMaxVelocity(RotationsPerSecond.of(dt.get()));
+              smartMotorController.setMotionProfileMaxVelocity(RPM.of(dt.get()));
             }
             break;
           }

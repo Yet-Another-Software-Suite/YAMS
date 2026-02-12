@@ -152,7 +152,7 @@ public class DoubleTelemetry
         break;
       case "tunable_velocity":
         unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second"
-                                                      : "rotation_per_second";
+                                                      : "rotations_per_minute";
         break;
       case "velocity":
         unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second"
@@ -160,7 +160,7 @@ public class DoubleTelemetry
         break;
       case "tunable_acceleration":
         unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second_per_second"
-                                                      : "rotations_per_second_per_second";
+                                                      : "rotations_per_minute_per_second";
         break;
       case "acceleration":
         unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second_per_second"

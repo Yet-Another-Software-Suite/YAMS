@@ -231,7 +231,7 @@ public class NovaWrapper extends SmartMotorController
   public void setVelocity(AngularVelocity angularVelocity)
   {
     setpointVelocity = Optional.ofNullable(angularVelocity);
-    m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismVelocity(angularVelocity));
+//    m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismVelocity(angularVelocity));
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setVelocity(angularVelocity);}});
   }
 
