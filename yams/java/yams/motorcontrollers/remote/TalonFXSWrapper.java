@@ -624,9 +624,6 @@ public class TalonFXSWrapper extends SmartMotorController
           throw new IllegalArgumentException("[Error] Closed loop control period is only supported in closed loop mode.");
         }
       }
-    } else if (config.getMotorControllerMode() == ControlMode.CLOSED_LOOP)
-    {
-      throw new IllegalArgumentException("[ERROR] No closed loop configuration available!");
     }
 
     if (config.getClosedLoopTolerance().isPresent())
