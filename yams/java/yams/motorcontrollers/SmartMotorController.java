@@ -1184,4 +1184,10 @@ public abstract class SmartMotorController
     }
     telemetry.close();
   }
+
+  @Override
+  public String toString()
+  {
+    return getName();
+  }
 }

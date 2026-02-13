@@ -306,8 +306,6 @@ public class SmartMotorControllerConfig
   {
     this.vendorConfig = cfg.vendorConfig;
     this.subsystem = cfg.subsystem;
-    this.missingOptions.clear();
-    this.missingOptions.addAll(cfg.missingOptions);
     this.basicOptions = EnumSet.copyOf(cfg.basicOptions);
     this.externalEncoderOptions = EnumSet.copyOf(cfg.externalEncoderOptions);
     this.externalEncoder = cfg.externalEncoder;

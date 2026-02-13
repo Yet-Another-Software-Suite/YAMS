@@ -287,8 +287,7 @@ public class DoubleTelemetry
     subscriber.ifPresent(PubSub::close);
     if (subPublisher != null)
     {subPublisher.close();}
-    if (publisher != null)
-    {publisher.get().close();}
+    publisher.ifPresent(PubSub::close);
     dataTable.ifPresent(table -> table.getEntry(key).unpublish());
     tuningTable.ifPresent(table -> table.getEntry(key).unpublish());
   }
