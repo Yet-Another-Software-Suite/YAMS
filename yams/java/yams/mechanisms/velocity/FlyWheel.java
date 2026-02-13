@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.VoltageUnit;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -334,6 +335,15 @@ public class FlyWheel extends SmartVelocityMechanism
     return setSpeed(m_config.getAngularVelocity(speed)).withName(m_subsystem.getName() + " RunSpeed");
   }
 
+  /**
+   * Mechanism velocity setpoint.
+   *
+   * @return {@link AngularVelocity} setpoint of the FlyWheel.
+   */
+  public Optional<AngularVelocity> getMechanismSetpointVelocity() {return m_smc.getMechanismSetpointVelocity();}
+
+  @Deprecated
+  public Optional<Angle> getMechanismSetpoint(){return Optional.empty();}
   /**
    * Set the FlyWheel to the given speed.
    *
