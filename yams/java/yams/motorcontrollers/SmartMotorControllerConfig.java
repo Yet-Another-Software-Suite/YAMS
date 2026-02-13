@@ -59,6 +59,14 @@ public class SmartMotorControllerConfig
    */
   private       Optional<Object>                              vendorConfig                       = Optional.empty();
   /**
+   * Vendor specific position control request for the {@link SmartMotorController}.
+   */
+  private       Optional<Object>                              vendorPositionControlRequest                       = Optional.empty();
+  /**
+   * Vendor specific velocity control request for the {@link SmartMotorController}.
+   */
+  private       Optional<Object>                              vendorVelocityControlRequest                       = Optional.empty();
+  /**
    * Subsystem that the {@link SmartMotorController} controls.
    */
   private       Optional<Subsystem>                           subsystem                          = Optional.empty();
@@ -360,6 +368,34 @@ public class SmartMotorControllerConfig
   public SmartMotorControllerConfig withVendorConfig(Object vendorConfig)
   {
     this.vendorConfig = Optional.ofNullable(vendorConfig);
+    return this;
+  }
+
+  /**
+   * Set the vendor specific position control request for the {@link SmartMotorController} which will be used in closed loop position commands.
+   *
+   * @param vendorControlRequest Vendor specific control request. Must be of the correct type for the
+   *                     {@link SmartMotorController}.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   * @implSpec Apply any changes after the {@link SmartMotorController} is created to ensure accuracy.
+   */
+  public SmartMotorControllerConfig withVendorPositionControlRequest(Object vendorControlRequest)
+  {
+    this.vendorPositionControlRequest = Optional.ofNullable(vendorConfig);
+    return this;
+  }
+
+  /**
+   * Set the vendor specific velocity control request for the {@link SmartMotorController} which will be used in closed loop velocity commands.
+   *
+   * @param vendorControlRequest Vendor specific control request. Must be of the correct type for the
+   *                     {@link SmartMotorController}.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   * @implSpec Apply any changes after the {@link SmartMotorController} is created to ensure accuracy.
+   */
+  public SmartMotorControllerConfig withVendorVelocityControlRequest(Object vendorControlRequest)
+  {
+    this.vendorVelocityControlRequest = Optional.ofNullable(vendorConfig);
     return this;
   }
 
@@ -1998,6 +2034,28 @@ public class SmartMotorControllerConfig
   }
 
   /**
+   * Get the vendor specific position control type.
+   *
+   * @return {@link SmartMotorController} vendor-specific configuration object.
+   */
+  public Optional<Object> getVendorPositionControlRequest()
+  {
+    basicOptions.remove(BasicOptions.VendorPositionControlRequest);
+    return this.vendorPositionControlRequest;
+  }
+
+  /**
+   * Get the vendor specific velocity control type.
+   *
+   * @return {@link SmartMotorController} vendor-specific configuration object.
+   */
+  public Optional<Object> getVendorVelocityControlRequest()
+  {
+    basicOptions.remove(BasicOptions.VendorVelocityControlRequest);
+    return this.vendorVelocityControlRequest;
+  }  
+
+  /**
    * Reset the validation checks for all required options to be applied to {@link SmartMotorController} from
    * {@link SmartMotorController#applyConfig(SmartMotorControllerConfig)}.
    */
@@ -2175,7 +2233,14 @@ public class SmartMotorControllerConfig
      * Motion profiled closed loop controller.
      */
     ClosedLoopController,
-
+    /**
+     * Vendor position control request.
+     */
+    VendorPositionControlRequest,
+    /**
+     * Vendor velocity control request.
+     */
+    VendorVelocityControlRequest,
   }
 
   /**
