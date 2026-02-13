@@ -55,9 +55,8 @@ public class PivotTest
 
   private static SmartMotorControllerConfig createSMCConfig()
   {
-    SmartMotorControllerTestSubsystem subsystem = new SmartMotorControllerTestSubsystem();
 
-    return new SmartMotorControllerConfig(subsystem)
+    return new SmartMotorControllerConfig()
         .withClosedLoopController(4, 0, 0)
         .withSoftLimit(Degrees.of(-100), Degrees.of(100))
         .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4, 5)))
