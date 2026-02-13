@@ -62,7 +62,6 @@ public class ArmTest
         .withSoftLimit(Degrees.of(-100), Degrees.of(100))
         .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
         .withIdleMode(MotorMode.BRAKE)
-//      .withSpecificTelemetry("ArmMotor", motorTelemetryConfig)
         .withStatorCurrentLimit(Amps.of(40))
         .withMotorInverted(false)
         .withFeedforward(new ArmFeedforward(0, 0, 0, 0))
@@ -74,7 +73,6 @@ public class ArmTest
     ArmConfig config = new ArmConfig(smc)
         .withLength(Meters.of(0.135))
         .withHardLimit(Degrees.of(-100), Degrees.of(200))
-//        .withTelemetry("ArmExample", TelemetryVerbosity.HIGH)
         .withMass(Pounds.of(1))
         .withStartingPosition(Degrees.of(0));
     if (!(smc instanceof SparkWrapper || smc instanceof NovaWrapper))

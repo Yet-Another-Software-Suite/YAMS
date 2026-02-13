@@ -76,27 +76,27 @@ public abstract class SmartMotorController
   /**
    * Exponential profile for the closed loop controller.
    */
-  protected Optional<ExponentialProfile>       m_expoProfile                 = Optional.empty();
+  protected Optional<ExponentialProfile>                  m_expoProfile                 = Optional.empty();
   /**
    * Exponential profile state for the closed loop controller.
    */
-  protected Optional<ExponentialProfile.State> m_expoState                   = Optional.empty();
+  protected Optional<ExponentialProfile.State>            m_expoState                   = Optional.empty();
   /**
    * Trapezoidal profile for the closed loop controller.
    */
-  protected Optional<TrapezoidProfile>         m_trapezoidProfile            = Optional.empty();
+  protected Optional<TrapezoidProfile>                    m_trapezoidProfile            = Optional.empty();
   /**
    * Trapezoidal profile state for the closed loop controller.
    */
-  protected Optional<TrapezoidProfile.State>   m_trapState                   = Optional.empty();
+  protected Optional<TrapezoidProfile.State>              m_trapState                   = Optional.empty();
   /**
    * Simple PID controller for the motor controller.
    */
-  protected Optional<PIDController>            m_pid                         = Optional.empty();
+  protected Optional<PIDController>                       m_pid                         = Optional.empty();
   /**
    * LQR controller for the motor controller.
    */
-  protected Optional<LQRController>            m_lqr                         = Optional.empty();
+  protected Optional<LQRController>                       m_lqr                         = Optional.empty();
   /**
    * Setpoint position
    */
@@ -132,11 +132,11 @@ public abstract class SmartMotorController
   /**
    * Loosely coupled followers.
    */
-  protected Optional<SmartMotorController[]>   m_looseFollowers              = Optional.empty();
+  protected Optional<SmartMotorController[]>              m_looseFollowers              = Optional.empty();
   /**
    * Running status of the closed loop controller.
    */
-  private   boolean                            m_closedLoopControllerRunning = false;
+  private   boolean                                       m_closedLoopControllerRunning = false;
 
   /**
    * Create a {@link SmartMotorController} wrapper from the provided motor controller object.
@@ -300,10 +300,10 @@ public abstract class SmartMotorController
    */
   public void iterateClosedLoopController()
   {
-    ExponentialProfile.State nextExpoState = new ExponentialProfile.State(0.0, 0.0);
-    TrapezoidProfile.State   nextTrapState = new TrapezoidProfile.State(0.0, 0.0);
+    ExponentialProfile.State         nextExpoState          = new ExponentialProfile.State(0.0, 0.0);
+    TrapezoidProfile.State           nextTrapState          = new TrapezoidProfile.State(0.0, 0.0);
     AtomicReference<Double>          pidOutputVoltage       = new AtomicReference<>((double) 0);
-    AtomicReference<Double>  feedforward   = new AtomicReference<>(0.0);
+    AtomicReference<Double>          feedforward            = new AtomicReference<>(0.0);
     Optional<Angle>                  mechLowerLimit         = m_config.getMechanismLowerLimit();
     Optional<Angle>                  mechUpperLimit         = m_config.getMechanismUpperLimit();
     Optional<ArmFeedforward>         armFeedforward         = m_config.getArmFeedforward();
@@ -447,7 +447,7 @@ public abstract class SmartMotorController
     }
 
     armFeedforward.ifPresent(ff -> {
-      var profiled = (m_expoProfile.isPresent() || m_trapezoidProfile.isPresent()) && setpointPosition.isPresent();
+      var profiled = (m_expoProfile.isPresent() || m_trapezoidProfile.isPresent());
       if (profiled)
       {
         var currentVelocitySetpoint = RotationsPerSecond.of(
@@ -462,7 +462,7 @@ public abstract class SmartMotorController
       } else
       {
         // Not profiled, so using current velocity or setpoint velocity.
-        ff.calculateWithVelocities(getMechanismPosition().in(Radians), setpointPosition.get().in(Radians), 0);
+        ff.calculateWithVelocities(getMechanismPosition().in(Radians), getMechanismVelocity().in(RadiansPerSecond), 0);
       }
     });
 

@@ -35,7 +35,9 @@ public class LQRController
   /**
    * Create a LQR Controller.
    *
-   * @param loop {@link LinearSystemLoop} which can be derived from {@link LQRConfig}
+   * @param type   LQR Type.
+   * @param loop   {@link LinearSystemLoop} which can be derived from {@link LQRConfig}
+   * @param period Loop time.
    */
   public LQRController(LQRType type, LinearSystemLoop<?, ?, ?> loop, Time period)
   {
