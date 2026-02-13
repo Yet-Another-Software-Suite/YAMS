@@ -112,9 +112,9 @@ public class ArmTest
       switch (i)
       {
         case 0: break;
-        case 1: smcConfig = addExponentialProfile(smcConfig);
+        case 1: smcConfig = addTrapezoidalProfile(smcConfig);
           break;
-        case 2: smcConfig = addTrapezoidalProfile(smcConfig);
+        case 2: smcConfig = addExponentialProfile(smcConfig);
           break;
       }
       SparkMax  smax  = new SparkMax(10 + offset + i, MotorType.kBrushless);

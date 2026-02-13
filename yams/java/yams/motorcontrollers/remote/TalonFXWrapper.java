@@ -540,7 +540,6 @@ public class TalonFXWrapper extends SmartMotorController
                                                              .in(Rotations) : (1.0 / exp.B);
 
       m_positionReq = m_expoPositionReq;
-      m_velocityReq = m_trapVelocityReq;
     });
     m_config.getTrapezoidProfile().ifPresent(trap -> {
       m_trapezoidProfile = Optional.of(new TrapezoidProfile(trap));

@@ -4,10 +4,13 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Millisecond;
+import static edu.wpi.first.units.Units.Milliseconds;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -87,12 +90,12 @@ public class ShooterTest
 
   private static SmartMotorControllerConfig addExponentialProfile(SmartMotorControllerConfig cfg)
   {
-    return cfg.withExponentialProfile(Volts.of(12), RotationsPerSecond.of(40), RotationsPerSecondPerSecond.of(80));
+    return cfg.withExponentialProfile(Volts.of(12), RPM.of(6000), RPM.per(Second).of(9000));
   }
 
   private static SmartMotorControllerConfig addTrapezoidalProfile(SmartMotorControllerConfig cfg)
   {
-    return cfg.withTrapezoidalProfile(DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90));
+    return cfg.withTrapezoidalProfile(RPM.of(6000), RPM.per(Second).of(9000));
   }
 
   private static Stream<Arguments> createConfigs()
@@ -106,9 +109,9 @@ public class ShooterTest
       switch (i)
       {
         case 0: break;
-        case 1: smcConfig = addExponentialProfile(smcConfig);
+        case 1: smcConfig = addTrapezoidalProfile(smcConfig);
           break;
-        case 2: smcConfig = addTrapezoidalProfile(smcConfig);
+        case 2: smcConfig = addExponentialProfile(smcConfig);
           break;
       }
       SparkMax  smax  = new SparkMax(10 + offset + i, MotorType.kBrushless);
@@ -133,7 +136,7 @@ public class ShooterTest
                                                                                 "]) Vortex",
                                                                                 TelemetryVerbosity.HIGH)))));
       smcList.add(Arguments.of(setupTestSubsystem(new TalonFXSWrapper(tfxs,
-                                                                      DCMotor.getNEO(1),
+                                                                      DCMotor.getNEO(2),
                                                                       smcConfig.clone()
                                                                                .withSubsystem(new SmartMotorControllerTestSubsystem())
                                                                                .withTelemetry(
@@ -194,16 +197,30 @@ public class ShooterTest
     AtomicBoolean   testPassed = new AtomicBoolean(false);
 
     TestWithScheduler.schedule(velocityUp);
-    TestWithScheduler.cycle(Seconds.of(30), () -> {
-      if (smc.getDutyCycle() != 0)
-      {
-        testPassed.set(true);
-      }
-    });
     if (smc instanceof TalonFXSWrapper || smc instanceof TalonFXWrapper)
     {
-      Thread.sleep(20);
-      TestWithScheduler.cycle(Seconds.of(1));
+      TestWithScheduler.cycle(Seconds.of(1), () -> {
+        try
+        {
+          Thread.sleep((long) smc.getConfig().getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Millisecond));
+        } catch (Exception e) {}
+      });
+
+    } else
+    {
+      TestWithScheduler.cycle(Seconds.of(1), () -> {
+        try
+        {
+          Thread.sleep((long) smc.getConfig().getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Millisecond));
+        } catch (InterruptedException e)
+        {
+          throw new RuntimeException(e);
+        }
+        if (smc.getDutyCycle() != 0)
+        {
+          testPassed.set(true);
+        }
+      });
     }
 
     post = smc.getMechanismPosition();
