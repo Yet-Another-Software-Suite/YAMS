@@ -2040,6 +2040,7 @@ public class SmartMotorControllerConfig
    */
   public Optional<Object> getVendorPositionControlRequest()
   {
+    basicOptions.remove(BasicOptions.VendorPositionControlRequest);
     return this.vendorPositionControlRequest;
   }
 
@@ -2050,6 +2051,7 @@ public class SmartMotorControllerConfig
    */
   public Optional<Object> getVendorVelocityControlRequest()
   {
+    basicOptions.remove(BasicOptions.VendorVelocityControlRequest);
     return this.vendorVelocityControlRequest;
   }  
 
@@ -2231,7 +2233,14 @@ public class SmartMotorControllerConfig
      * Motion profiled closed loop controller.
      */
     ClosedLoopController,
-
+    /**
+     * Vendor position control request.
+     */
+    VendorPositionControlRequest,
+    /**
+     * Vendor velocity control request.
+     */
+    VendorVelocityControlRequest,
   }
 
   /**
