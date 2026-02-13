@@ -4,8 +4,10 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Millisecond;
 import static edu.wpi.first.units.Units.Milliseconds;
+import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
@@ -72,7 +74,7 @@ public class PivotTest
     PivotConfig config = new PivotConfig(smc)
         .withHardLimit(Degrees.of(-100), Degrees.of(150))
         .withStartingPosition(Degrees.of(0))
-        .withMOI(0.01);
+        .withMOI(Inches.of(4), Pounds.of(1));
     Pivot                             pivot  = new Pivot(config);
     SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.smc = smc;
@@ -85,7 +87,7 @@ public class PivotTest
 
   private static SmartMotorControllerConfig addExponentialProfile(SmartMotorControllerConfig cfg)
   {
-    return cfg.withExponentialProfile(Volts.of(12), RotationsPerSecond.of(40), RotationsPerSecondPerSecond.of(80));
+    return cfg.withExponentialProfile(Volts.of(12), DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90));
   }
 
   private static SmartMotorControllerConfig addTrapezoidalProfile(SmartMotorControllerConfig cfg)
@@ -329,13 +331,7 @@ public class PivotTest
     Command dutyCycleUp   = pivot.set(0.5);
     Command dutyCycleDown = pivot.set(-0.5);
 
-//    if (smc instanceof TalonFXWrapper || smc instanceof TalonFXSWrapper)
-//    {
-//      System.out.println("[WARNING] TalonFX and TalonFXS Does not work with CI on linux, skipping for now.");
-//    } else
-//    {
     dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
-//    }
 
     closeSMC(smc);
   }

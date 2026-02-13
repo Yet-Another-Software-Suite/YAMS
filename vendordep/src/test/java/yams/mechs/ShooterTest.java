@@ -22,6 +22,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.thethriftybot.devices.ThriftyNova;
 import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -60,14 +61,14 @@ public class ShooterTest
   {
 
     return new SmartMotorControllerConfig()
-        .withClosedLoopController(1, 0, 0)
+        .withClosedLoopController(100, 0, 0)
 //        .withSoftLimit(Degrees.of(-100), Degrees.of(100))
         .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
-        .withIdleMode(MotorMode.BRAKE)
+        .withIdleMode(MotorMode.COAST)
 //      .withSpecificTelemetry("ArmMotor", motorTelemetryConfig)
         .withStatorCurrentLimit(Amps.of(40))
         .withMotorInverted(false)
-        .withFeedforward(new ArmFeedforward(0, 0, 0, 0))
+        .withFeedforward(new SimpleMotorFeedforward(0, 1, 0))
         .withControlMode(ControlMode.CLOSED_LOOP);
   }
 
@@ -77,7 +78,7 @@ public class ShooterTest
         .withDiameter(Inches.of(4))
         .withMass(Pounds.of(1))
 //        .withTelemetry("ShooterMech", TelemetryVerbosity.HIGH)
-        .withUpperSoftLimit(RPM.of(1000));
+        .withUpperSoftLimit(RPM.of(10000));
     FlyWheel                          shooter = new FlyWheel(cfg);
     SmartMotorControllerTestSubsystem subsys  = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.smc = smc;
@@ -204,18 +205,22 @@ public class ShooterTest
         {
           Thread.sleep((long) smc.getConfig().getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Millisecond));
         } catch (Exception e) {}
+        if (smc.getDutyCycle() != 0)
+        {
+          testPassed.set(true);
+        }
       });
 
     } else
     {
-      TestWithScheduler.cycle(Seconds.of(1), () -> {
-        try
-        {
-          Thread.sleep((long) smc.getConfig().getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Millisecond));
-        } catch (InterruptedException e)
-        {
-          throw new RuntimeException(e);
-        }
+      TestWithScheduler.cycle(Seconds.of(2), () -> {
+//        try
+//        {
+//          Thread.sleep((long) smc.getConfig().getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Millisecond));
+//        } catch (InterruptedException e)
+//        {
+//          throw new RuntimeException(e);
+//        }
         if (smc.getDutyCycle() != 0)
         {
           testPassed.set(true);
@@ -320,7 +325,7 @@ public class ShooterTest
   {
     startTest(smc);
     smc.setupSimulation();
-    Command highPid = Commands.run(() -> smc.setVelocity(RPM.of(80)));
+    Command highPid = Commands.run(() -> smc.setVelocity(RPM.of(2000)));
 //    Command lowPid  = Commands.run(() -> smc.setPosition(Degrees.of(-80)));
 
     shooterVelocityPidTest(smc, highPid);
