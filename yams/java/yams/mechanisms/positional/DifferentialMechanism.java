@@ -270,22 +270,44 @@ public class DifferentialMechanism extends SmartPositionalMechanism
 
   public Command run(Angle tilt, Angle twist)
   {
-    return null;
+    return Commands.run(() -> {
+    var left  = m_config.getLeftMechanismPosition(tilt, twist);
+    var right = m_config.getRightMechanismPosition(tilt, twist);
+    m_leftSMC.setPosition(left);
+    m_rightSMC.setPosition(right);
+  }, m_subsystem).withName(getName() + " set position");
   }
 
   public Command run(Supplier<Angle> tilt, Supplier<Angle> twist)
   {
-    return null;
+    return Commands.run(() -> {
+    var left  = m_config.getLeftMechanismPosition(tilt.get(), twist.get());
+    var right = m_config.getRightMechanismPosition(tilt.get(), twist.get());
+    m_leftSMC.setPosition(left);
+    m_rightSMC.setPosition(right);
+  }, m_subsystem).withName(getName() + " set position");
   }
 
+  @Deprecated
   public Command runTo(Angle tilt, Angle twist)
   {
-    return null;
+    return Commands.runOnce(() -> {
+    var left  = m_config.getLeftMechanismPosition(tilt, twist);
+    var right = m_config.getRightMechanismPosition(tilt, twist);
+    m_leftSMC.setPosition(left);
+    m_rightSMC.setPosition(right);
+  }, m_subsystem).withName(getName() + " set position");
   }
 
+  @Deprecated
   public Command runTo(Supplier<Angle> tilt, Supplier<Angle> twist)
   {
-    return null;
+    return Commands.run(() -> {
+      var left  = m_config.getLeftMechanismPosition(tilt.get(), twist.get());
+      var right = m_config.getRightMechanismPosition(tilt.get(), twist.get());
+      m_leftSMC.setPosition(left);
+      m_rightSMC.setPosition(right);
+    }, m_subsystem).withName(getName() + " set position");
   }
 
   @Override
