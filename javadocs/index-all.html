@@ -123,6 +123,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Constructor for the Arm mechanism.</div>
 </dd>
+<dt><a href="yams/math/LQRConfig.LQRType.html#ARM" class="member-name-link">ARM</a> - Enum constant in enum class yams.math.<a href="yams/math/LQRConfig.LQRType.html" title="enum class in yams.math">LQRConfig.LQRType</a></dt>
+<dd>
+<div class="block">Arm LQR</div>
+</dd>
 <dt><a href="yams/mechanisms/config/ArmConfig.html" class="type-name-link" title="class in yams.mechanisms.config">ArmConfig</a> - Class in <a href="yams/mechanisms/config/package-summary.html">yams.mechanisms.config</a></dt>
 <dd>
 <div class="block">Arm configuration class.</div>
@@ -209,6 +213,22 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/math/ExponentialProfilePIDController.html#calculate(double,double,double)" class="member-name-link">calculate(double, double, double)</a> - Method in class yams.math.<a href="yams/math/ExponentialProfilePIDController.html" title="class in yams.math">ExponentialProfilePIDController</a></dt>
 <dd>
 <div class="block">Calculate the feedback, assuming previous state velocity.</div>
+</dd>
+<dt><a href="yams/math/LQRController.html#calculate(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">calculate(Angle, Angle, AngularVelocity)</a> - Method in class yams.math.<a href="yams/math/LQRController.html" title="class in yams.math">LQRController</a></dt>
+<dd>
+<div class="block">Calculate the voltage for an Arm LQR</div>
+</dd>
+<dt><a href="yams/math/LQRController.html#calculate(edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">calculate(AngularVelocity, AngularVelocity)</a> - Method in class yams.math.<a href="yams/math/LQRController.html" title="class in yams.math">LQRController</a></dt>
+<dd>
+<div class="block">Calculate the voltage for a Flywheel LQR</div>
+</dd>
+<dt><a href="yams/math/LQRController.html#calculate(edu.wpi.first.units.measure.Distance,edu.wpi.first.units.measure.Distance,edu.wpi.first.units.measure.LinearVelocity)" class="member-name-link">calculate(Distance, Distance, LinearVelocity)</a> - Method in class yams.math.<a href="yams/math/LQRController.html" title="class in yams.math">LQRController</a></dt>
+<dd>
+<div class="block">Calculate the voltage for a Elevator LQR</div>
+</dd>
+<dt><a href="yams/math/LQRController.html#calculate(edu.wpi.first.units.measure.LinearVelocity,edu.wpi.first.units.measure.LinearVelocity)" class="member-name-link">calculate(LinearVelocity, LinearVelocity)</a> - Method in class yams.math.<a href="yams/math/LQRController.html" title="class in yams.math">LQRController</a></dt>
+<dd>
+<div class="block">Calculate the voltage for a Flywheel LQR</div>
 </dd>
 <dt><a href="yams/units/YUnits.html#Chain" class="member-name-link">Chain</a> - Static variable in class yams.units.<a href="yams/units/YUnits.html" title="class in yams.units">YUnits</a></dt>
 <dd>
@@ -571,6 +591,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Construct the <a href="yams/mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> class for easy manipulation of an elevator.</div>
 </dd>
+<dt><a href="yams/math/LQRConfig.LQRType.html#ELEVATOR" class="member-name-link">ELEVATOR</a> - Enum constant in enum class yams.math.<a href="yams/math/LQRConfig.LQRType.html" title="enum class in yams.math">LQRConfig.LQRType</a></dt>
+<dd>
+<div class="block">Elevator LQR</div>
+</dd>
 <dt><a href="yams/mechanisms/config/ElevatorConfig.html" class="type-name-link" title="class in yams.mechanisms.config">ElevatorConfig</a> - Class in <a href="yams/mechanisms/config/package-summary.html">yams.mechanisms.config</a></dt>
 <dd>
 <div class="block">Elevator configuration class.</div>
@@ -673,6 +697,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/velocity/FlyWheel.html#%3Cinit%3E(yams.mechanisms.config.FlyWheelConfig)" class="member-name-link">FlyWheel(FlyWheelConfig)</a> - Constructor for class yams.mechanisms.velocity.<a href="yams/mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity">FlyWheel</a></dt>
 <dd>
 <div class="block">Construct the FlyWheel class</div>
+</dd>
+<dt><a href="yams/math/LQRConfig.LQRType.html#FLYWHEEL" class="member-name-link">FLYWHEEL</a> - Enum constant in enum class yams.math.<a href="yams/math/LQRConfig.LQRType.html" title="enum class in yams.math">LQRConfig.LQRType</a></dt>
+<dd>
+<div class="block">Flywheel LQR</div>
 </dd>
 <dt><a href="yams/mechanisms/config/FlyWheelConfig.html" class="type-name-link" title="class in yams.mechanisms.config">FlyWheelConfig</a> - Class in <a href="yams/mechanisms/config/package-summary.html">yams.mechanisms.config</a></dt>
 <dd>
@@ -929,11 +957,6 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the circumference of the <a href="yams/mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a>.</div>
 </dd>
-<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getClosedLoopController()" class="member-name-link">getClosedLoopController()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
-<dd>
-<div class="block">Get the controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or Meters if
- Mechanism Circumference is configured), the outputs are in Volts.</div>
-</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getClosedLoopControllerMaximumVoltage()" class="member-name-link">getClosedLoopControllerMaximumVoltage()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the closed loop maximum voltage.</div>
@@ -949,6 +972,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getClosedLoopTolerance()" class="member-name-link">getClosedLoopTolerance()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> closed loop controller tolerance.</div>
+</dd>
+<dt><a href="yams/math/LQRController.html#getConfig()" class="member-name-link">getConfig()</a> - Method in class yams.math.<a href="yams/math/LQRController.html" title="class in yams.math">LQRController</a></dt>
+<dd>
+<div class="block">Get the <a href="yams/math/LQRConfig.html" title="class in yams.math"><code>LQRConfig</code></a> for the LQR.</div>
 </dd>
 <dt><a href="yams/mechanisms/positional/Elevator.html#getConfig()" class="member-name-link">getConfig()</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional">Elevator</a></dt>
 <dd>
@@ -1078,10 +1105,13 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the encoder inversion state</div>
 </dd>
-<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getExponentiallyProfiledClosedLoopController()" class="member-name-link">getExponentiallyProfiledClosedLoopController()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getExponentialProfile()" class="member-name-link">getExponentialProfile()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Get the controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or Meters if
- Mechanism Circumference is configured), the outputs are in Volts.</div>
+<div class="block">Get the exponential profile for the closed loop controller on <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.html#getExponentialProfileState()" class="member-name-link">getExponentialProfileState()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
+<dd>
+<div class="block">Get the current encoder exponential profile state for the closed loop controller.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getExternalEncoder()" class="member-name-link">getExternalEncoder()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -1171,6 +1201,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the acceleration gain kA</div>
 </dd>
+<dt><a href="yams/math/LQRConfig.html#getKalmanFilter(edu.wpi.first.math.system.LinearSystem)" class="member-name-link">getKalmanFilter(LinearSystem&lt;?, ?, ?&gt;)</a> - Method in class yams.math.<a href="yams/math/LQRConfig.html" title="class in yams.math">LQRConfig</a></dt>
+<dd>
+<div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/KalmanFilter.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>KalmanFilter</code></a> for the LQR.</div>
+</dd>
 <dt><a href="yams/mechanisms/swerve/SwerveDrive.html#getKinematics()" class="member-name-link">getKinematics()</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
 <div class="block">Create the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveDriveKinematics.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveDriveKinematics</code></a> so you can recreate a new <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>SwerveDrivePoseEstimator</code></a>.</div>
@@ -1223,6 +1257,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the location of the <a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a> in meters from the center of rotation.</div>
 </dd>
+<dt><a href="yams/math/LQRConfig.html#getLoop()" class="member-name-link">getLoop()</a> - Method in class yams.math.<a href="yams/math/LQRConfig.html" title="class in yams.math">LQRConfig</a></dt>
+<dd>
+<div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/system/LinearSystemLoop.html" title="class or interface in edu.wpi.first.math.system" class="external-link"><code>LinearSystemLoop</code></a> with the currently configured LQR.</div>
+</dd>
+<dt><a href="yams/math/LQRConfig.html#getLoop(edu.wpi.first.math.system.LinearSystem,edu.wpi.first.math.controller.LinearQuadraticRegulator,edu.wpi.first.math.estimator.KalmanFilter)" class="member-name-link">getLoop(LinearSystem&lt;?, ?, ?&gt;, LinearQuadraticRegulator&lt;?, ?, ?&gt;, KalmanFilter&lt;?, ?, ?&gt;)</a> - Method in class yams.math.<a href="yams/math/LQRConfig.html" title="class in yams.math">LQRConfig</a></dt>
+<dd>
+<div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/system/LinearSystemLoop.html" title="class or interface in edu.wpi.first.math.system" class="external-link"><code>LinearSystemLoop</code></a>.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getLooselyCoupledFollowers()" class="member-name-link">getLooselyCoupledFollowers()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the loosely coupled follower motors.</div>
@@ -1242,6 +1284,11 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/config/FlyWheelConfig.html#getLowerSoftLimit()" class="member-name-link">getLowerSoftLimit()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></dt>
 <dd>
 <div class="block">Get the lower soft limit of the shooter.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getLQRClosedLoopController()" class="member-name-link">getLQRClosedLoopController()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Get the controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or Meters if
+ Mechanism Circumference is configured), the outputs are in Volts.</div>
 </dd>
 <dt><a href="yams/units/EasyCRTConfig.html#getMatchTolerance()" class="member-name-link">getMatchTolerance()</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
@@ -1373,6 +1420,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/SmartMechanism.html#getMechanismSetpoint()" class="member-name-link">getMechanismSetpoint()</a> - Method in class yams.mechanisms.<a href="yams/mechanisms/SmartMechanism.html" title="class in yams.mechanisms">SmartMechanism</a></dt>
 <dd>
 <div class="block">Get the <a href="yams/mechanisms/SmartMechanism.html" title="class in yams.mechanisms"><code>SmartMechanism</code></a>'s setpoint as an <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Angle</code></a> if it exists.</div>
+</dd>
+<dt><a href="yams/mechanisms/velocity/FlyWheel.html#getMechanismSetpoint()" class="member-name-link">getMechanismSetpoint()</a> - Method in class yams.mechanisms.velocity.<a href="yams/mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity">FlyWheel</a></dt>
+<dd>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated.</span></div>
+</dd>
+<dt><a href="yams/mechanisms/velocity/FlyWheel.html#getMechanismSetpointVelocity()" class="member-name-link">getMechanismSetpointVelocity()</a> - Method in class yams.mechanisms.velocity.<a href="yams/mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity">FlyWheel</a></dt>
+<dd>
+<div class="block">Mechanism velocity setpoint.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorController.html#getMechanismSetpointVelocity()" class="member-name-link">getMechanismSetpointVelocity()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>
@@ -1629,6 +1684,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the Proportional coefficient.</div>
 </dd>
+<dt><a href="yams/math/LQRConfig.html#getPeriod()" class="member-name-link">getPeriod()</a> - Method in class yams.math.<a href="yams/math/LQRConfig.html" title="class in yams.math">LQRConfig</a></dt>
+<dd>
+<div class="block">Get the loop time for the LQR.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getPID()" class="member-name-link">getPID()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Get the simple closed loop controller without motion profiling.</div>
+</dd>
 <dt><a href="yams/mechanisms/positional/Pivot.html#getPivotConfig()" class="member-name-link">getPivotConfig()</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Pivot.html" title="class in yams.mechanisms.positional">Pivot</a></dt>
 <dd>
 <div class="block">Get the <a href="yams/mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config"><code>PivotConfig</code></a> object for this <a href="yams/mechanisms/positional/Pivot.html" title="class in yams.mechanisms.positional"><code>Pivot</code></a></div>
@@ -1652,6 +1715,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/units/EasyCRTConfig.html#getRecommendedCrtGearPair()" class="member-name-link">getRecommendedCrtGearPair()</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Returns a recommended CRT gear pair if gear-search inputs are configured.</div>
+</dd>
+<dt><a href="yams/math/LQRConfig.html#getRegulator(edu.wpi.first.math.system.LinearSystem)" class="member-name-link">getRegulator(LinearSystem&lt;?, ?, ?&gt;)</a> - Method in class yams.math.<a href="yams/math/LQRConfig.html" title="class in yams.math">LQRConfig</a></dt>
+<dd>
+<div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/LinearQuadraticRegulator.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>LinearQuadraticRegulator</code></a>.</div>
 </dd>
 <dt><a href="yams/mechanisms/positional/Arm.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional">Arm</a></dt>
 <dd>
@@ -1784,10 +1851,6 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Sim color value</div>
 </dd>
-<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getSimpleClosedLoopController()" class="member-name-link">getSimpleClosedLoopController()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
-<dd>
-<div class="block">Get the simple closed loop controller without motion profiling.</div>
-</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getSimpleFeedforward()" class="member-name-link">getSimpleFeedforward()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>SimpleMotorFeedforward</code></a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link"><code>Optional</code></a>.</div>
@@ -1897,6 +1960,10 @@ loadScripts(document, 'script');</script>
 <div class="block">Get the SysIdConfig which may need to have modifications based on the SmartMotorController, like TalonFX and
  TalonFXS to record states correctly.</div>
 </dd>
+<dt><a href="yams/math/LQRConfig.html#getSystem()" class="member-name-link">getSystem()</a> - Method in class yams.math.<a href="yams/math/LQRConfig.html" title="class in yams.math">LQRConfig</a></dt>
+<dd>
+<div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/system/LinearSystem.html" title="class or interface in edu.wpi.first.math.system" class="external-link"><code>LinearSystem</code></a> for the LQR.</div>
+</dd>
 <dt><a href="yams/mechanisms/config/ArmConfig.html#getTelemetryName()" class="member-name-link">getTelemetryName()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></dt>
 <dd>
 <div class="block">Network Tables name for the <a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a></div>
@@ -1997,6 +2064,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the translation PID controller.</div>
 </dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.html#getTrapezoidalProfileState()" class="member-name-link">getTrapezoidalProfileState()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
+<dd>
+<div class="block">Get the current encoder trapezoidal profile state for the closed loop controller.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getTrapezoidProfile()" class="member-name-link">getTrapezoidProfile()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Get the trapezoidal motion profile for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
+</dd>
 <dt><a href="yams/telemetry/MechanismTelemetry.html#getTuningTable()" class="member-name-link">getTuningTable()</a> - Method in class yams.telemetry.<a href="yams/telemetry/MechanismTelemetry.html" title="class in yams.telemetry">MechanismTelemetry</a></dt>
 <dd>
 <div class="block">Get the tuning NetworkTable.</div>
@@ -2020,6 +2095,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/config/DifferentialMechanismConfig.html#getTwistStartingAngle()" class="member-name-link">getTwistStartingAngle()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/DifferentialMechanismConfig.html" title="class in yams.mechanisms.config">DifferentialMechanismConfig</a></dt>
 <dd>
 <div class="block">Get the starting angle of the <a href="yams/mechanisms/positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a> twist.</div>
+</dd>
+<dt><a href="yams/math/LQRConfig.html#getType()" class="member-name-link">getType()</a> - Method in class yams.math.<a href="yams/math/LQRConfig.html" title="class in yams.math">LQRConfig</a></dt>
+<dd>
+<div class="block">Get the <a href="yams/math/LQRConfig.LQRType.html" title="enum class in yams.math"><code>LQRConfig.LQRType</code></a> of the LQR.</div>
+</dd>
+<dt><a href="yams/math/LQRController.html#getType()" class="member-name-link">getType()</a> - Method in class yams.math.<a href="yams/math/LQRController.html" title="class in yams.math">LQRController</a></dt>
+<dd>
+<div class="block">Get the type of LQR.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/simulation/SensorData.html#getType()" class="member-name-link">getType()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/SensorData.html" title="class in yams.motorcontrollers.simulation">SensorData</a></dt>
 <dd>
@@ -2193,6 +2276,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Compare <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/system/plant/DCMotor.html" title="class or interface in edu.wpi.first.math.system.plant" class="external-link"><code>DCMotor</code></a>s to identify the given motor.</div>
 </dd>
+<dt><a href="yams/mechanisms/positional/DoubleJointedArm.html#isNear(edu.wpi.first.math.geometry.Translation2d,edu.wpi.first.units.measure.Distance)" class="member-name-link">isNear(Translation2d, Distance)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/DoubleJointedArm.html" title="class in yams.mechanisms.positional">DoubleJointedArm</a></dt>
+<dd>
+<div class="block">Is near the target within tolerance</div>
+</dd>
 <dt><a href="yams/mechanisms/positional/Arm.html#isNear(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)" class="member-name-link">isNear(Angle, Angle)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional">Arm</a></dt>
 <dd>
 <div class="block">Arm is near an angle.</div>
@@ -2295,6 +2382,30 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Low telemetry</div>
 </dd>
+<dt><a href="yams/math/LQRConfig.html" class="type-name-link" title="class in yams.math">LQRConfig</a> - Class in <a href="yams/math/package-summary.html">yams.math</a></dt>
+<dd>
+<div class="block">LQR Configuration for <a href="yams/math/LQRController.html" title="class in yams.math"><code>LQRController</code></a></div>
+</dd>
+<dt><a href="yams/math/LQRConfig.html#%3Cinit%3E(edu.wpi.first.math.system.plant.DCMotor,yams.gearing.MechanismGearing,edu.wpi.first.units.measure.MomentOfInertia)" class="member-name-link">LQRConfig(DCMotor, MechanismGearing, MomentOfInertia)</a> - Constructor for class yams.math.<a href="yams/math/LQRConfig.html" title="class in yams.math">LQRConfig</a></dt>
+<dd>
+<div class="block">Create a new LQR Configuration.</div>
+</dd>
+<dt><a href="yams/math/LQRConfig.LQRType.html" class="type-name-link" title="enum class in yams.math">LQRConfig.LQRType</a> - Enum Class in <a href="yams/math/package-summary.html">yams.math</a></dt>
+<dd>
+<div class="block">LQR Type</div>
+</dd>
+<dt><a href="yams/math/LQRController.html" class="type-name-link" title="class in yams.math">LQRController</a> - Class in <a href="yams/math/package-summary.html">yams.math</a></dt>
+<dd>
+<div class="block">Linear Quadratic Regulator (Regulator is a type of controller)</div>
+</dd>
+<dt><a href="yams/math/LQRController.html#%3Cinit%3E(yams.math.LQRConfig)" class="member-name-link">LQRController(LQRConfig)</a> - Constructor for class yams.math.<a href="yams/math/LQRController.html" title="class in yams.math">LQRController</a></dt>
+<dd>
+<div class="block">Create a LQR Controller.</div>
+</dd>
+<dt><a href="yams/math/LQRController.html#%3Cinit%3E(yams.math.LQRConfig.LQRType,edu.wpi.first.math.system.LinearSystemLoop,edu.wpi.first.units.measure.Time)" class="member-name-link">LQRController(LQRConfig.LQRType, LinearSystemLoop&lt;?, ?, ?&gt;, Time)</a> - Constructor for class yams.math.<a href="yams/math/LQRController.html" title="class in yams.math">LQRController</a></dt>
+<dd>
+<div class="block">Create a LQR Controller.</div>
+</dd>
 <dt><a href="yams/mechanisms/positional/Arm.html#lte(edu.wpi.first.units.measure.Angle)" class="member-name-link">lte(Angle)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional">Arm</a></dt>
 <dd>
 <div class="block">Less than or equal to angle</div>
@@ -2330,13 +2441,21 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Drive motor controller.</div>
 </dd>
-<dt><a href="yams/motorcontrollers/SmartMotorController.html#m_expoPidController" class="member-name-link">m_expoPidController</a> - Variable in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
+<dt><a href="yams/motorcontrollers/SmartMotorController.html#m_expoProfile" class="member-name-link">m_expoProfile</a> - Variable in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>
-<div class="block">Exponential profile PID controller for the motor controller.</div>
+<div class="block">Exponential profile for the closed loop controller.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.html#m_expoState" class="member-name-link">m_expoState</a> - Variable in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
+<dd>
+<div class="block">Exponential profile state for the closed loop controller.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorController.html#m_looseFollowers" class="member-name-link">m_looseFollowers</a> - Variable in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Loosely coupled followers.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.html#m_lqr" class="member-name-link">m_lqr</a> - Variable in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
+<dd>
+<div class="block">LQR controller for the motor controller.</div>
 </dd>
 <dt><a href="yams/mechanisms/positional/SmartPositionalMechanism.html#m_mechanismLigament" class="member-name-link">m_mechanismLigament</a> - Variable in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/SmartPositionalMechanism.html" title="class in yams.mechanisms.positional">SmartPositionalMechanism</a></dt>
 <dd>
@@ -2350,11 +2469,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Mechanism Window.</div>
 </dd>
-<dt><a href="yams/motorcontrollers/SmartMotorController.html#m_pidController" class="member-name-link">m_pidController</a> - Variable in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
-<dd>
-<div class="block">Profiled PID controller for the motor controller.</div>
-</dd>
-<dt><a href="yams/motorcontrollers/SmartMotorController.html#m_simplePidController" class="member-name-link">m_simplePidController</a> - Variable in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
+<dt><a href="yams/motorcontrollers/SmartMotorController.html#m_pid" class="member-name-link">m_pid</a> - Variable in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Simple PID controller for the motor controller.</div>
 </dd>
@@ -2373,6 +2488,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/SmartMechanism.html#m_telemetry" class="member-name-link">m_telemetry</a> - Variable in class yams.mechanisms.<a href="yams/mechanisms/SmartMechanism.html" title="class in yams.mechanisms">SmartMechanism</a></dt>
 <dd>
 <div class="block">Mechanism telemetry.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.html#m_trapezoidProfile" class="member-name-link">m_trapezoidProfile</a> - Variable in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
+<dd>
+<div class="block">Trapezoidal profile for the closed loop controller.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.html#m_trapState" class="member-name-link">m_trapState</a> - Variable in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
+<dd>
+<div class="block">Trapezoidal profile state for the closed loop controller.</div>
 </dd>
 <dt><a href="yams/mechanisms/positional/Arm.html#max()" class="member-name-link">max()</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional">Arm</a></dt>
 <dd>&nbsp;</dd>
@@ -2739,6 +2862,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Reset the controller, set the next setpoint to empty.</div>
 </dd>
+<dt><a href="yams/math/LQRController.html#reset(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">reset(Angle, AngularVelocity)</a> - Method in class yams.math.<a href="yams/math/LQRController.html" title="class in yams.math">LQRController</a></dt>
+<dd>
+<div class="block">Reset the Arm or Flywheel LQR.</div>
+</dd>
+<dt><a href="yams/math/LQRController.html#reset(edu.wpi.first.units.measure.Distance,edu.wpi.first.units.measure.LinearVelocity)" class="member-name-link">reset(Distance, LinearVelocity)</a> - Method in class yams.math.<a href="yams/math/LQRController.html" title="class in yams.math">LQRController</a></dt>
+<dd>
+<div class="block">Reset the Elevator LQR.</div>
+</dd>
 <dt><a href="yams/mechanisms/swerve/SwerveDrive.html#resetAzimuthPID()" class="member-name-link">resetAzimuthPID()</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
 <div class="block">Resets the azimuth PID controller.</div>
@@ -2789,7 +2920,9 @@ loadScripts(document, 'script');</script>
 <div class="block">1 <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/Units.html#Rotations" title="class or interface in edu.wpi.first.units" class="external-link"><code>Units.Rotations</code></a> per <a href="yams/units/YUnits.html#Year"><code>Year</code></a>.</div>
 </dd>
 <dt><a href="yams/mechanisms/positional/DoubleJointedArm.html#run(edu.wpi.first.math.geometry.Translation2d,boolean)" class="member-name-link">run(Translation2d, boolean)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/DoubleJointedArm.html" title="class in yams.mechanisms.positional">DoubleJointedArm</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the position of the DoubleJointedArm to be at pose in meters.</div>
+</dd>
 <dt><a href="yams/mechanisms/positional/Arm.html#run(edu.wpi.first.units.measure.Angle)" class="member-name-link">run(Angle)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional">Arm</a></dt>
 <dd>
 <div class="block">Set the arm to the given angle.</div>
@@ -2813,7 +2946,9 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the FlyWheel to the given speed.</div>
 </dd>
 <dt><a href="yams/mechanisms/positional/DoubleJointedArm.html#run(java.util.function.Supplier,java.util.function.Supplier)" class="member-name-link">run(Supplier&lt;Translation2d&gt;, Supplier&lt;Boolean&gt;)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/DoubleJointedArm.html" title="class in yams.mechanisms.positional">DoubleJointedArm</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the position of the DoubleJointedArm to be at pose in meters.</div>
+</dd>
 <dt><a href="yams/mechanisms/positional/Arm.html#run(java.util.function.Supplier)" class="member-name-link">run(Supplier&lt;Angle&gt;)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional">Arm</a></dt>
 <dd>
 <div class="block">Set the arm to the given angle via a supplier.</div>
@@ -2832,14 +2967,18 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Run the FlyWheel to a given velocity</div>
 </dd>
-<dt><a href="yams/mechanisms/positional/DoubleJointedArm.html#runTo(edu.wpi.first.math.geometry.Translation2d,boolean)" class="member-name-link">runTo(Translation2d, boolean)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/DoubleJointedArm.html" title="class in yams.mechanisms.positional">DoubleJointedArm</a></dt>
-<dd>&nbsp;</dd>
+<dt><a href="yams/mechanisms/positional/DoubleJointedArm.html#runTo(edu.wpi.first.math.geometry.Translation2d,boolean,edu.wpi.first.units.measure.Distance)" class="member-name-link">runTo(Translation2d, boolean, Distance)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/DoubleJointedArm.html" title="class in yams.mechanisms.positional">DoubleJointedArm</a></dt>
+<dd>
+<div class="block">Runs to the given target and stops the command.</div>
+</dd>
 <dt><a href="yams/mechanisms/positional/Arm.html#runTo(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)" class="member-name-link">runTo(Angle, Angle)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional">Arm</a></dt>
 <dd>
 <div class="block">Set the arm to the given angle then end the command.</div>
 </dd>
 <dt><a href="yams/mechanisms/positional/DifferentialMechanism.html#runTo(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)" class="member-name-link">runTo(Angle, Angle)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional">DifferentialMechanism</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated.</span></div>
+</dd>
 <dt><a href="yams/mechanisms/positional/Pivot.html#runTo(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)" class="member-name-link">runTo(Angle, Angle)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Pivot.html" title="class in yams.mechanisms.positional">Pivot</a></dt>
 <dd>
 <div class="block">Set the pivot to the given <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Angle</code></a> then end the command.</div>
@@ -2856,8 +2995,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Run the FlyWheel to a velocity within a tolerance then end the command.</div>
 </dd>
-<dt><a href="yams/mechanisms/positional/DoubleJointedArm.html#runTo(java.util.function.Supplier,java.util.function.Supplier)" class="member-name-link">runTo(Supplier&lt;Translation2d&gt;, Supplier&lt;Boolean&gt;)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/DoubleJointedArm.html" title="class in yams.mechanisms.positional">DoubleJointedArm</a></dt>
-<dd>&nbsp;</dd>
+<dt><a href="yams/mechanisms/positional/DoubleJointedArm.html#runTo(java.util.function.Supplier,java.util.function.Supplier,edu.wpi.first.units.measure.Distance)" class="member-name-link">runTo(Supplier&lt;Translation2d&gt;, Supplier&lt;Boolean&gt;, Distance)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/DoubleJointedArm.html" title="class in yams.mechanisms.positional">DoubleJointedArm</a></dt>
+<dd>
+<div class="block">Runs to the given target and stops the command.</div>
+</dd>
 <dt><a href="yams/mechanisms/positional/Arm.html#runTo(java.util.function.Supplier,edu.wpi.first.units.measure.Angle)" class="member-name-link">runTo(Supplier&lt;Angle&gt;, Angle)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional">Arm</a></dt>
 <dd>
 <div class="block">Set the arm to the given angle then end the command.</div>
@@ -2867,7 +3008,9 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the pivot to the given angle then end the command.</div>
 </dd>
 <dt><a href="yams/mechanisms/positional/DifferentialMechanism.html#runTo(java.util.function.Supplier,java.util.function.Supplier)" class="member-name-link">runTo(Supplier&lt;Angle&gt;, Supplier&lt;Angle&gt;)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional">DifferentialMechanism</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated.</span></div>
+</dd>
 <dt><a href="yams/mechanisms/velocity/FlyWheel.html#runTo(java.util.function.Supplier,edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">runTo(Supplier&lt;AngularVelocity&gt;, AngularVelocity)</a> - Method in class yams.mechanisms.velocity.<a href="yams/mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity">FlyWheel</a></dt>
 <dd>
 <div class="block">Run the FlyWheel to a velocity within a tolerance, then end the command.</div>
@@ -4153,6 +4296,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Multiply the sprocket reduction ratio by X.</div>
 </dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.html#toString()" class="member-name-link">toString()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/units/EasyCRTConfig.CrtGearPair.html#toString()" class="member-name-link">toString()</a> - Method in record class yams.units.<a href="yams/units/EasyCRTConfig.CrtGearPair.html" title="class in yams.units">EasyCRTConfig.CrtGearPair</a></dt>
 <dd>
 <div class="block">Returns a string representation of this record class.</div>
@@ -4188,6 +4333,10 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:U">U</h2>
 <dl class="index">
+<dt><a href="yams/math/LQRController.html#updateConfig(yams.math.LQRConfig)" class="member-name-link">updateConfig(LQRConfig)</a> - Method in class yams.math.<a href="yams/math/LQRController.html" title="class in yams.math">LQRController</a></dt>
+<dd>
+<div class="block">Update LQR based off config.</div>
+</dd>
 <dt><a href="yams/telemetry/MechanismTelemetry.html#updateLoopTime()" class="member-name-link">updateLoopTime()</a> - Method in class yams.telemetry.<a href="yams/telemetry/MechanismTelemetry.html" title="class in yams.telemetry">MechanismTelemetry</a></dt>
 <dd>
 <div class="block">Update the loop time.</div>
@@ -4263,6 +4412,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Validate external encoder config options for the config.</div>
 </dd>
+<dt><a href="yams/math/LQRConfig.LQRType.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class yams.math.<a href="yams/math/LQRConfig.LQRType.html" title="enum class in yams.math">LQRConfig.LQRType</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this class with the specified name.</div>
+</dd>
 <dt><a href="yams/mechanisms/config/MechanismPositionConfig.Plane.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class yams.mechanisms.config.<a href="yams/mechanisms/config/MechanismPositionConfig.Plane.html" title="enum class in yams.mechanisms.config">MechanismPositionConfig.Plane</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
@@ -4302,6 +4455,11 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/units/EasyCRT.CRTStatus.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class yams.units.<a href="yams/units/EasyCRT.CRTStatus.html" title="enum class in yams.units">EasyCRT.CRTStatus</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
+</dd>
+<dt><a href="yams/math/LQRConfig.LQRType.html#values()" class="member-name-link">values()</a> - Static method in enum class yams.math.<a href="yams/math/LQRConfig.LQRType.html" title="enum class in yams.math">LQRConfig.LQRType</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum class, in
+the order they are declared.</div>
 </dd>
 <dt><a href="yams/mechanisms/config/MechanismPositionConfig.Plane.html#values()" class="member-name-link">values()</a> - Static method in enum class yams.mechanisms.config.<a href="yams/mechanisms/config/MechanismPositionConfig.Plane.html" title="enum class in yams.mechanisms.config">MechanismPositionConfig.Plane</a></dt>
 <dd>
@@ -4445,6 +4603,10 @@ the order they are declared.</div>
 <dd>
 <div class="block">Sets encoder offsets added to raw absolute readings before wrap (in rotations).</div>
 </dd>
+<dt><a href="yams/math/LQRConfig.html#withAgressiveness(double)" class="member-name-link">withAgressiveness(double)</a> - Method in class yams.math.<a href="yams/math/LQRConfig.html" title="class in yams.math">LQRConfig</a></dt>
+<dd>
+<div class="block">Agressiveness of the LQR, howfast it will attempt to achieve the desired state.</div>
+</dd>
 <dt><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html#withAim(edu.wpi.first.math.geometry.Pose2d,java.util.function.BooleanSupplier)" class="member-name-link">withAim(Pose2d, BooleanSupplier)</a> - Method in class yams.mechanisms.swerve.utility.<a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></dt>
 <dd>
 <div class="block">Aim the <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> at this pose while driving.</div>
@@ -4464,6 +4626,10 @@ the order they are declared.</div>
 <dt><a href="yams/mechanisms/config/DifferentialMechanismConfig.html#withAngleSuppliers(java.util.function.Supplier,java.util.function.Supplier)" class="member-name-link">withAngleSuppliers(Supplier&lt;Angle&gt;, Supplier&lt;Angle&gt;)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/DifferentialMechanismConfig.html" title="class in yams.mechanisms.config">DifferentialMechanismConfig</a></dt>
 <dd>
 <div class="block">Setup suppliers for absolute encoders on the <a href="yams/mechanisms/positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a></div>
+</dd>
+<dt><a href="yams/math/LQRConfig.html#withArm(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.Angle)" class="member-name-link">withArm(Angle, AngularVelocity, Angle, AngularVelocity, Angle)</a> - Method in class yams.math.<a href="yams/math/LQRConfig.html" title="class in yams.math">LQRConfig</a></dt>
+<dd>
+<div class="block">Construct an Arm LQR Configuration.</div>
 </dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#withArmFeedforward()" class="member-name-link">withArmFeedforward()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
 <dd>
@@ -4485,7 +4651,7 @@ the order they are declared.</div>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(double,double,double)" class="member-name-link">withClosedLoopController(double, double, double)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if Mechanism Circumference is configured), the outputs are in Volts.</div>
+ Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(double,double,double,edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.AngularAcceleration)" class="member-name-link">withClosedLoopController(double, double, double, AngularVelocity, AngularAcceleration)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -4498,17 +4664,20 @@ the order they are declared.</div>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(edu.wpi.first.math.controller.PIDController)" class="member-name-link">withClosedLoopController(PIDController)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if Mechanism Circumference is configured), the outputs are in Volts.</div>
+ Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(edu.wpi.first.math.controller.ProfiledPIDController)" class="member-name-link">withClosedLoopController(ProfiledPIDController)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if Mechanism Circumference is configured), outputs are in Volts.</div>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span></div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(yams.math.ExponentialProfilePIDController)" class="member-name-link">withClosedLoopController(ExponentialProfilePIDController)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span></div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(yams.math.LQRController)" class="member-name-link">withClosedLoopController(LQRController)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
 <div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> with an exponential profile, the units passed
- in are in Rotations (or Meters if Mechanism Circumference is configured), outputs are in Volts.</div>
+ in are in Rotations (or Meters if linear closed loop controller configured), outputs are in Volts.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopControllerMaximumVoltage(edu.wpi.first.units.measure.Voltage)" class="member-name-link">withClosedLoopControllerMaximumVoltage(Voltage)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -4541,6 +4710,10 @@ the order they are declared.</div>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withContinuousWrapping(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)" class="member-name-link">withContinuousWrapping(Angle, Angle)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set continuous wrapping for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
+</dd>
+<dt><a href="yams/math/LQRConfig.html#withControlEffort(edu.wpi.first.units.measure.Voltage)" class="member-name-link">withControlEffort(Voltage)</a> - Method in class yams.math.<a href="yams/math/LQRConfig.html" title="class in yams.math">LQRConfig</a></dt>
+<dd>
+<div class="block">Set the control effort for the LQR.</div>
 </dd>
 <dt><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html#withControllerHeadingAxis(java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" class="member-name-link">withControllerHeadingAxis(DoubleSupplier, DoubleSupplier)</a> - Method in class yams.mechanisms.swerve.utility.<a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></dt>
 <dd>
@@ -4608,6 +4781,10 @@ the order they are declared.</div>
 <div class="block">Set the <a href="yams/mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> drum radius via the chain pitch (.25in or .35in) and teeth
  count.</div>
 </dd>
+<dt><a href="yams/math/LQRConfig.html#withElevator(edu.wpi.first.units.measure.Distance,edu.wpi.first.units.measure.LinearVelocity,edu.wpi.first.units.measure.Distance,edu.wpi.first.units.measure.LinearVelocity,edu.wpi.first.units.measure.Distance,edu.wpi.first.units.measure.Mass,edu.wpi.first.units.measure.Distance)" class="member-name-link">withElevator(Distance, LinearVelocity, Distance, LinearVelocity, Distance, Mass, Distance)</a> - Method in class yams.math.<a href="yams/math/LQRConfig.html" title="class in yams.math">LQRConfig</a></dt>
+<dd>
+<div class="block">Construct an Elevator LQR Configuration.</div>
+</dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#withElevatorFeedforward()" class="member-name-link">withElevatorFeedforward()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
 <dd>
 <div class="block">Enables the elevator feedforward logging if available.</div>
@@ -4619,6 +4796,18 @@ the order they are declared.</div>
 <dt><a href="yams/units/EasyCRTConfig.html#withEncoderRatios(double,double)" class="member-name-link">withEncoderRatios(double, double)</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Sets encoder rotations per mechanism rotation directly for encoder 1 and encoder 2.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withExponentialProfile(edu.wpi.first.units.measure.Voltage,edu.wpi.first.math.system.plant.DCMotor,edu.wpi.first.units.measure.Mass,edu.wpi.first.units.measure.Distance)" class="member-name-link">withExponentialProfile(Voltage, DCMotor, Mass, Distance)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/trajectory/ExponentialProfile.Constraints.html" title="class or interface in edu.wpi.first.math.trajectory" class="external-link"><code>ExponentialProfile.Constraints</code></a> for an elevator.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withExponentialProfile(edu.wpi.first.units.measure.Voltage,edu.wpi.first.math.system.plant.DCMotor,edu.wpi.first.units.measure.MomentOfInertia)" class="member-name-link">withExponentialProfile(Voltage, DCMotor, MomentOfInertia)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/trajectory/ExponentialProfile.Constraints.html" title="class or interface in edu.wpi.first.math.trajectory" class="external-link"><code>ExponentialProfile.Constraints</code></a> for an arm or flywheel.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withExponentialProfile(edu.wpi.first.units.measure.Voltage,edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.AngularAcceleration)" class="member-name-link">withExponentialProfile(Voltage, AngularVelocity, AngularAcceleration)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Create a generic constraints object.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withExternalEncoder(java.lang.Object)" class="member-name-link">withExternalEncoder(Object)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -4676,6 +4865,10 @@ the order they are declared.</div>
 <dt><a href="yams/mechanisms/config/SensorConfig.html#withField(java.lang.String,java.util.function.LongSupplier,long)" class="member-name-link">withField(String, LongSupplier, long)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SensorConfig.html" title="class in yams.mechanisms.config">SensorConfig</a></dt>
 <dd>
 <div class="block">Add a field to the sensor.</div>
+</dd>
+<dt><a href="yams/math/LQRConfig.html#withFlyWheel(edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">withFlyWheel(AngularVelocity, AngularVelocity, AngularVelocity)</a> - Method in class yams.math.<a href="yams/math/LQRConfig.html" title="class in yams.math">LQRConfig</a></dt>
+<dd>
+<div class="block">Construct a Flywheel LQR Configuration.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withFollowers(edu.wpi.first.math.Pair...)" class="member-name-link">withFollowers(Pair&lt;Object, Boolean&gt;...)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -4812,6 +5005,14 @@ the order they are declared.</div>
 <dt><a href="yams/mechanisms/config/MechanismPositionConfig.html#withMaxRobotLength(edu.wpi.first.units.measure.Distance)" class="member-name-link">withMaxRobotLength(Distance)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/MechanismPositionConfig.html" title="class in yams.mechanisms.config">MechanismPositionConfig</a></dt>
 <dd>
 <div class="block">Set the length of the robot for visualization purposes.</div>
+</dd>
+<dt><a href="yams/math/LQRConfig.html#withMaxVoltage(edu.wpi.first.units.measure.Voltage)" class="member-name-link">withMaxVoltage(Voltage)</a> - Method in class yams.math.<a href="yams/math/LQRConfig.html" title="class in yams.math">LQRConfig</a></dt>
+<dd>
+<div class="block">Set the maximum voltage for the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/system/LinearSystemLoop.html" title="class or interface in edu.wpi.first.math.system" class="external-link"><code>LinearSystemLoop</code></a>.</div>
+</dd>
+<dt><a href="yams/math/LQRConfig.html#withMeasurementDelay(edu.wpi.first.units.measure.Time)" class="member-name-link">withMeasurementDelay(Time)</a> - Method in class yams.math.<a href="yams/math/LQRConfig.html" title="class in yams.math">LQRConfig</a></dt>
+<dd>
+<div class="block">Set the measurement delay of the LQR.</div>
 </dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#withMeasurementPosition()" class="member-name-link">withMeasurementPosition()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
 <dd>
@@ -4962,9 +5163,21 @@ the order they are declared.</div>
 <dd>
 <div class="block">Enables the output voltage logging if available.</div>
 </dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withProfile(edu.wpi.first.math.trajectory.ExponentialProfile.Constraints)" class="member-name-link">withProfile(ExponentialProfile.Constraints)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Set the exponential profile</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withProfile(edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints)" class="member-name-link">withProfile(TrapezoidProfile.Constraints)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Set the trapezoidal motion profile for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
+</dd>
 <dt><a href="yams/mechanisms/config/MechanismPositionConfig.html#withRelativePosition(edu.wpi.first.math.geometry.Translation3d)" class="member-name-link">withRelativePosition(Translation3d)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/MechanismPositionConfig.html" title="class in yams.mechanisms.config">MechanismPositionConfig</a></dt>
 <dd>
 <div class="block">Set the position of the <a href="yams/mechanisms/positional/SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a> relative to the robot.</div>
+</dd>
+<dt><a href="yams/math/LQRConfig.html#withRelms(edu.wpi.first.units.measure.Voltage)" class="member-name-link">withRelms(Voltage)</a> - Method in class yams.math.<a href="yams/math/LQRConfig.html" title="class in yams.math">LQRConfig</a></dt>
+<dd>
+<div class="block">Set the control effort for the LQR.</div>
 </dd>
 <dt><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html#withRobotRelative()" class="member-name-link">withRobotRelative()</a> - Method in class yams.mechanisms.swerve.utility.<a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></dt>
 <dd>
@@ -5022,9 +5235,13 @@ the order they are declared.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimClosedLoopController(edu.wpi.first.math.controller.ProfiledPIDController)" class="member-name-link">withSimClosedLoopController(ProfiledPIDController)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span></div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimClosedLoopController(yams.math.ExponentialProfilePIDController)" class="member-name-link">withSimClosedLoopController(ExponentialProfilePIDController)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span></div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimClosedLoopController(yams.math.LQRController)" class="member-name-link">withSimClosedLoopController(LQRController)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </dd>
@@ -5308,6 +5525,14 @@ the order they are declared.</div>
 <dt><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html#withTranslationOnly(java.util.function.BooleanSupplier)" class="member-name-link">withTranslationOnly(BooleanSupplier)</a> - Method in class yams.mechanisms.swerve.utility.<a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></dt>
 <dd>
 <div class="block">Enable locking of rotation and only translating, overrides everything.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withTrapezoidalProfile(edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.AngularAcceleration)" class="member-name-link">withTrapezoidalProfile(AngularVelocity, AngularAcceleration)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Set the angular trapezoidal motion profile for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withTrapezoidalProfile(edu.wpi.first.units.measure.LinearVelocity,edu.wpi.first.units.measure.LinearAcceleration)" class="member-name-link">withTrapezoidalProfile(LinearVelocity, LinearAcceleration)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Set the linear trapezoidal motion profile for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </dd>
 <dt><a href="yams/mechanisms/config/DifferentialMechanismConfig.html#withTwistStartingPosition(edu.wpi.first.units.measure.Angle)" class="member-name-link">withTwistStartingPosition(Angle)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/DifferentialMechanismConfig.html" title="class in yams.mechanisms.config">DifferentialMechanismConfig</a></dt>
 <dd>
