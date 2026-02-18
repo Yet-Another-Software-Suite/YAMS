@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Rotations;
 
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -102,7 +103,7 @@ public class Arm extends SmartPositionalMechanism
                                             "Cannot create simulation.",
                                             "withHardLimit(Angle,Angle)");
       }
-      if (config.getStartingAngle().isEmpty())
+      if (config.getStartingAngle().isEmpty() && motor.getConfig().getZeroOffset().isEmpty())
       {
         throw new ArmConfigurationException("Arm starting angle is empty",
                                             "Cannot create simulation.",
@@ -115,7 +116,7 @@ public class Arm extends SmartPositionalMechanism
                                                   config.getLowerHardLimit().get().in(Radians),
                                                   config.getUpperHardLimit().get().in(Radians),
                                                   true,
-                                                  config.getStartingAngle().get().in(Radians),
+                                                  config.getStartingAngle().orElse(Rotations.zero()).in(Radians),
                                                   0.002 / 4096.0,
                                                   0.0));// Add noise with a std-dev of 1 tick
       m_smc.setSimSupplier(new ArmSimSupplier(m_sim.get(), m_smc));
@@ -137,13 +138,15 @@ public class Arm extends SmartPositionalMechanism
 
       m_mechanismLigament = m_mechanismRoot.append(new MechanismLigament2d(getName(),
                                                                            config.getLength().get().in(Meters),
-                                                                           config.getStartingAngle().get().in(Degrees),
+                                                                           config.getStartingAngle()
+                                                                                 .orElse(Rotations.zero()).in(Degrees),
                                                                            6,
                                                                            config.getSimColor()));
       m_setpointLigament = m_mechanismRoot.append(new MechanismLigament2d("Setpoint",
                                                                           config.getLength().get()
                                                                                 .in(Meters),
-                                                                          config.getStartingAngle().get()
+                                                                          config.getStartingAngle()
+                                                                                .orElse(Rotations.zero())
                                                                                 .in(Degrees),
                                                                           3,
                                                                           new Color8Bit(Color.kWhite)));
