@@ -1353,7 +1353,7 @@ public class SmartMotorControllerConfig
                                                                 AngularVelocity maxVelocity,
                                                                 AngularAcceleration maxAcceleration)
   {
-    this.sim_pid = Optional.of(new PIDController(controller.getP(), controller.getI(), controller.getD()));
+    this.sim_pid = Optional.of(new PIDController(kP,kI,kD));
     this.sim_lqr = Optional.empty();
     this.sim_exponentialProfile = Optional.empty();
     this.sim_trapezoidProfile = Optional.of(new Constraints(maxVelocity.in(RotationsPerSecond),
