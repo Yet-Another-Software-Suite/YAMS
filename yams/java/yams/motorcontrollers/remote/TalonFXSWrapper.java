@@ -755,9 +755,7 @@ public class TalonFXSWrapper extends SmartMotorController
         // Zero offset
         if (config.getZeroOffset().isPresent())
         {
-          cfg.MagnetSensor.withMagnetOffset(encoder.getPosition().getValue()
-                                                   .plus(Rotations.of(cfg.MagnetSensor.MagnetOffset))
-                                                   .minus(config.getZeroOffset().get()));
+          cfg.MagnetSensor.withMagnetOffset(config.getZeroOffset().get());
           m_talonConfig.ExternalFeedback.AbsoluteSensorOffset = 0;
         }
         // Discontinuity Point
@@ -789,9 +787,7 @@ public class TalonFXSWrapper extends SmartMotorController
           // Zero offset
           if (config.getZeroOffset().isPresent())
           {
-            cfg.PWM1.withAbsoluteSensorOffset(encoder.getPWM1Position().getValue()
-                                                     .plus(Rotations.of(cfg.PWM1.AbsoluteSensorOffset))
-                                                     .minus(config.getZeroOffset().get()));
+            cfg.PWM1.withAbsoluteSensorOffset(config.getZeroOffset().get());
             m_talonConfig.ExternalFeedback.AbsoluteSensorOffset = 0;
 
           }
@@ -806,9 +802,7 @@ public class TalonFXSWrapper extends SmartMotorController
           // Zero offset
           if (config.getZeroOffset().isPresent())
           {
-            cfg.PWM2.withAbsoluteSensorOffset(encoder.getPWM2Position().getValue()
-                                                     .plus(Rotations.of(cfg.PWM2.AbsoluteSensorOffset))
-                                                     .minus(config.getZeroOffset().get()));
+            cfg.PWM2.withAbsoluteSensorOffset(config.getZeroOffset().get());
             m_talonConfig.ExternalFeedback.AbsoluteSensorOffset = 0;
           }
           // Discontinuity point
