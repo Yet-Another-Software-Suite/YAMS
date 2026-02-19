@@ -255,7 +255,7 @@ public class SmartMotorControllerTelemetry
           }
           case TunableSetpointVelocity ->
           {
-            if (dt.get() == 0 && smartMotorController.getMechanismSetpointVelocity().isEmpty())
+            if (dt.get() == 0)
             {
               continue;
             }

@@ -341,6 +341,7 @@ public class SparkWrapper extends SmartMotorController
   @Override
   public void setPosition(Angle angle)
   {
+    setpointVelocity = Optional.empty();
     setpointPosition = Optional.ofNullable(angle);
     if (m_expoProfile.isEmpty() && m_lqr.isEmpty() && angle != null)
     {
@@ -366,6 +367,7 @@ public class SparkWrapper extends SmartMotorController
   @Override
   public void setVelocity(AngularVelocity angularVelocity)
   {
+    setpointPosition = Optional.empty();
     setpointVelocity = Optional.ofNullable(angularVelocity);
     if (m_lqr.isEmpty() && angularVelocity != null)
     {
