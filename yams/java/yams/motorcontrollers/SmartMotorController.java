@@ -407,21 +407,22 @@ public abstract class SmartMotorController
       double finalSetpoint        = setpoint;
       double finalVelocityProfile = velocityProfile;
       m_pid.ifPresent(pidController -> pidOutputVoltage.set(pidController.calculate(finalMeasured, finalSetpoint)));
-      if (m_config.getLinearClosedLoopControllerUse())
-      {
-        m_lqr.ifPresent(lqrController -> pidOutputVoltage.set(lqrController.calculate(getMeasurementPosition(),
-                                                                                      Meters.of(finalSetpoint),
-                                                                                      MetersPerSecond.of(
-                                                                                          finalVelocityProfile))
-                                                                           .in(Volts)));
-      } else
-      {
-        m_lqr.ifPresent(lqrController -> pidOutputVoltage.set(lqrController.calculate(getMechanismPosition(),
-                                                                                      Rotations.of(finalSetpoint),
-                                                                                      RotationsPerSecond.of(
-                                                                                          finalVelocityProfile))
-                                                                           .in(Volts)));
-      }
+      m_lqr.ifPresent(lqrController ->
+                      {
+                        if (m_config.getLinearClosedLoopControllerUse())
+                        {
+                          pidOutputVoltage.set(lqrController.calculate(Meters.of(finalMeasured),
+                                                                       Meters.of(finalSetpoint),
+                                                                       MetersPerSecond.of(finalVelocityProfile))
+                                                            .in(Volts));
+                        } else
+                        {
+                          pidOutputVoltage.set(lqrController.calculate(Rotations.of(finalMeasured),
+                                                                       Rotations.of(finalSetpoint),
+                                                                       RotationsPerSecond.of(finalVelocityProfile))
+                                                            .in(Volts));
+                        }
+                      });
 
     } else if (setpointVelocity.isPresent())
     {
@@ -432,21 +433,25 @@ public abstract class SmartMotorController
       {
         setpoint = m_config.convertFromMechanism(setpointVelocity.get()).in(MetersPerSecond);
         velocity = getMeasurementVelocity().in(MetersPerSecond);
-        // Handle LQR here bc its unit sensitive
-        m_lqr.ifPresent(lqrController -> pidOutputVoltage.set(lqrController.calculate(getMeasurementVelocity(),
-                                                                                      m_config.convertFromMechanism(
-                                                                                          setpointVelocity.get()))
-                                                                           .in(Volts)));
-      } else
-      {
-        m_lqr.ifPresent(lqrController -> pidOutputVoltage.set(lqrController.calculate(getMechanismVelocity(),
-                                                                                      setpointVelocity.orElseThrow())
-                                                                           .in(Volts)));
       }
 
       double finalVelocity = velocity;
       double finalSetpoint = setpoint;
       m_pid.ifPresent(pidController -> pidOutputVoltage.set(pidController.calculate(finalVelocity, finalSetpoint)));
+      m_lqr.ifPresent(lqrController ->
+                      {
+                        if (m_config.getLinearClosedLoopControllerUse())
+                        {
+                          pidOutputVoltage.set(lqrController.calculate(MetersPerSecond.of(finalVelocity),
+                                                                       MetersPerSecond.of(finalSetpoint))
+                                                            .in(Volts));
+                        } else
+                        {
+                          pidOutputVoltage.set(lqrController.calculate(RotationsPerSecond.of(finalVelocity),
+                                                                       RotationsPerSecond.of(finalSetpoint))
+                                                            .in(Volts));
+                        }
+                      });
     }
 
     armFeedforward.ifPresent(ff -> {
