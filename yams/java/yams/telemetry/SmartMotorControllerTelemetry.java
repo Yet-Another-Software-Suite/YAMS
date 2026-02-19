@@ -249,13 +249,14 @@ public class SmartMotorControllerTelemetry
               smartMotorController.setPosition(Meters.of(dt.get()));
             } else
             {
+              System.out.println("Tuning " + dt.getField() + " degrees.");
               smartMotorController.setPosition(Degrees.of(dt.get()));
             }
             break;
           }
           case TunableSetpointVelocity ->
           {
-            if (dt.get() == 0 && smartMotorController.getMechanismSetpointVelocity().isEmpty())
+            if (dt.get() == 0 || smartMotorController.getMechanismSetpointVelocity().isEmpty())
             {
               continue;
             }

@@ -211,6 +211,7 @@ public class NovaWrapper extends SmartMotorController
   @Override
   public void setPosition(Angle angle)
   {
+    setpointVelocity = Optional.empty();
     setpointPosition = Optional.ofNullable(angle);
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setPosition(angle);}});
   }
@@ -230,6 +231,7 @@ public class NovaWrapper extends SmartMotorController
   @Override
   public void setVelocity(AngularVelocity angularVelocity)
   {
+    setpointPosition = Optional.empty();
     setpointVelocity = Optional.ofNullable(angularVelocity);
 //    m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismVelocity(angularVelocity));
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setVelocity(angularVelocity);}});
