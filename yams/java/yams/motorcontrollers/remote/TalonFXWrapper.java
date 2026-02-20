@@ -545,12 +545,23 @@ public class TalonFXWrapper extends SmartMotorController
     });
     m_config.getTrapezoidProfile().ifPresent(trap -> {
       m_trapezoidProfile = Optional.of(new TrapezoidProfile(trap));
-      m_talonConfig.MotionMagic.MotionMagicCruiseVelocity = m_config.getLinearClosedLoopControllerUse() ?
+      if (m_config.getVelocityTrapezoidalProfileInUse())
+      {
+        m_talonConfig.MotionMagic.MotionMagicAcceleration = m_config.getLinearClosedLoopControllerUse() ?
                                                             m_config.convertToMechanism(Meters.of(trap.maxVelocity))
                                                                     .in(Rotations) : trap.maxVelocity;
-      m_talonConfig.MotionMagic.MotionMagicAcceleration = m_config.getLinearClosedLoopControllerUse() ?
-                                                          m_config.convertToMechanism(Meters.of(trap.maxAcceleration))
-                                                                  .in(Rotations) : trap.maxAcceleration;
+        m_talonConfig.MotionMagic.MotionMagicJerk = m_config.getLinearClosedLoopControllerUse() ?
+                                                    m_config.convertToMechanism(Meters.of(trap.maxAcceleration))
+                                                            .in(Rotations) : trap.maxAcceleration;
+      } else
+      {
+        m_talonConfig.MotionMagic.MotionMagicCruiseVelocity = m_config.getLinearClosedLoopControllerUse() ?
+                                                              m_config.convertToMechanism(Meters.of(trap.maxVelocity))
+                                                                      .in(Rotations) : trap.maxVelocity;
+        m_talonConfig.MotionMagic.MotionMagicAcceleration = m_config.getLinearClosedLoopControllerUse() ?
+                                                            m_config.convertToMechanism(Meters.of(trap.maxAcceleration))
+                                                                    .in(Rotations) : trap.maxAcceleration;
+      }
       m_positionReq = m_trapPositionReq;
       m_velocityReq = m_trapVelocityReq;
     });
@@ -1028,7 +1039,12 @@ public class TalonFXWrapper extends SmartMotorController
                                                                             m_config.getTrapezoidProfile()
                                                                                     .orElseThrow().maxAcceleration)));
     }
-    m_talonConfig.MotionMagic.withMotionMagicCruiseVelocity(m_config.convertToMechanism(maxVelocity));
+    if (m_config.getVelocityTrapezoidalProfileInUse())
+    {
+      m_talonConfig.MotionMagic.MotionMagicAcceleration = m_config.convertToMechanism(maxVelocity)
+                                                                  .in(RotationsPerSecond);
+    } else
+    {m_talonConfig.MotionMagic.withMotionMagicCruiseVelocity(m_config.convertToMechanism(maxVelocity));}
     forceConfigApply();
   }
 
@@ -1041,7 +1057,12 @@ public class TalonFXWrapper extends SmartMotorController
                                                                                     .orElseThrow().maxVelocity,
                                                                             maxAcceleration.in(MetersPerSecondPerSecond))));
     }
-    m_talonConfig.MotionMagic.withMotionMagicAcceleration(m_config.convertToMechanism(maxAcceleration));
+    if (m_config.getVelocityTrapezoidalProfileInUse())
+    {
+      m_talonConfig.MotionMagic.MotionMagicJerk = m_config.convertToMechanism(maxAcceleration).in(
+          RotationsPerSecondPerSecond);
+    } else
+    {m_talonConfig.MotionMagic.withMotionMagicAcceleration(m_config.convertToMechanism(maxAcceleration));}
     forceConfigApply();
   }
 
@@ -1054,7 +1075,11 @@ public class TalonFXWrapper extends SmartMotorController
                                                                             m_config.getTrapezoidProfile()
                                                                                     .orElseThrow().maxAcceleration)));
     }
-    m_talonConfig.MotionMagic.withMotionMagicCruiseVelocity(maxVelocity);
+    if (m_config.getVelocityTrapezoidalProfileInUse())
+    {
+      m_talonConfig.MotionMagic.MotionMagicAcceleration = maxVelocity.in(RotationsPerSecond);
+    } else
+    {m_talonConfig.MotionMagic.withMotionMagicCruiseVelocity(maxVelocity);}
     forceConfigApply();
   }
 
@@ -1068,7 +1093,11 @@ public class TalonFXWrapper extends SmartMotorController
                                   .orElseThrow().maxVelocity,
                           maxAcceleration.in(RotationsPerSecondPerSecond))));
     }
-    m_talonConfig.MotionMagic.withMotionMagicAcceleration(maxAcceleration);
+    if (m_config.getVelocityTrapezoidalProfileInUse())
+    {
+      m_talonConfig.MotionMagic.MotionMagicJerk = maxAcceleration.in(RotationsPerSecondPerSecond);
+    } else
+    {m_talonConfig.MotionMagic.withMotionMagicAcceleration(maxAcceleration);}
     forceConfigApply();
   }
 
