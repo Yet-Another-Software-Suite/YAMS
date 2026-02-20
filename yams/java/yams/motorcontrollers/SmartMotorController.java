@@ -300,8 +300,11 @@ public abstract class SmartMotorController
    */
   public void iterateClosedLoopController()
   {
-    ExponentialProfile.State         nextExpoState          = new ExponentialProfile.State(0.0, 0.0);
-    TrapezoidProfile.State           nextTrapState          = new TrapezoidProfile.State(0.0, 0.0);
+    AtomicReference<Boolean> velocityTrapezoidalProfile = new AtomicReference<>(false);
+    AtomicReference<ExponentialProfile.State> nextExpoState =
+        new AtomicReference<>(new ExponentialProfile.State(0.0, 0.0));
+    AtomicReference<TrapezoidProfile.State> nextTrapState =
+        new AtomicReference<>(new TrapezoidProfile.State(0.0, 0.0));
     AtomicReference<Double>          pidOutputVoltage       = new AtomicReference<>((double) 0);
     AtomicReference<Double>          feedforward            = new AtomicReference<>(0.0);
     Optional<Angle>                  mechLowerLimit         = m_config.getMechanismLowerLimit();
@@ -361,22 +364,42 @@ public abstract class SmartMotorController
 
       if (m_expoProfile.isPresent())
       {
-        nextExpoState = m_expoProfile.get().calculate(loopTime,
-                                                      m_expoState
-                                                          .orElse(new ExponentialProfile.State(position, velocity)),
-                                                      new ExponentialProfile.State(setpoint, 0));
+        nextExpoState.set(m_expoProfile.get().calculate(loopTime,
+                                                        m_expoState
+                                                            .orElse(new ExponentialProfile.State(position, velocity)),
+                                                        new ExponentialProfile.State(setpoint, 0)));
       } else if (m_trapezoidProfile.isPresent())
       {
-        nextTrapState = m_trapezoidProfile.get().calculate(loopTime,
-                                                           m_trapState
-                                                               .orElse(new TrapezoidProfile.State(position, velocity)),
-                                                           new TrapezoidProfile.State(setpoint, 0));
+        nextTrapState.set(m_trapezoidProfile.get().calculate(loopTime,
+                                                             m_trapState
+                                                                 .orElse(new TrapezoidProfile.State(position,
+                                                                                                    velocity)),
+                                                             new TrapezoidProfile.State(setpoint, 0)));
+      }
+    } else if (setpointVelocity.isPresent())
+    {
+      var setpoint = setpointVelocity.get().in(RotationsPerSecond);
+      var velocity = getMechanismVelocity().in(RotationsPerSecond);
+      var loopTime = m_config.getClosedLoopControlPeriod()
+                             .orElse(Milliseconds.of(20)).in(Seconds);
+
+      // Change position and velocity to Meters and Meters per Second
+      if (m_config.getLinearClosedLoopControllerUse())
+      {
+        velocity = getMeasurementVelocity().in(MetersPerSecond);
+        setpoint = m_config.convertFromMechanism(setpointVelocity.orElseThrow()).in(MetersPerSecond);
+      }
+
+      if (m_trapezoidProfile.isPresent())
+      {
+        // TODO: 2027, Derive acceleration from SMCs
+        nextTrapState.set(m_trapezoidProfile.get().calculate(loopTime,
+                                                             m_trapState
+                                                                 .orElse(new TrapezoidProfile.State(velocity, 0)),
+                                                             new TrapezoidProfile.State(setpoint, 0)));
+        velocityTrapezoidalProfile.set(true);
       }
     }
-
-    // Create effectively final states
-    TrapezoidProfile.State   finalNextTrapState = nextTrapState;
-    ExponentialProfile.State finalNextExpoState = nextExpoState;
 
     // Get the PID output
     if (setpointPosition.isPresent())
@@ -394,12 +417,12 @@ public abstract class SmartMotorController
 
       if (m_expoProfile.isPresent())
       {
-        setpoint = finalNextExpoState.position; // Rotations or Meters; depending on config
-        velocityProfile = finalNextExpoState.velocity; // RotationsPerSecond or MetersPerSecond; depending on config
-      } else if (m_trapezoidProfile.isPresent())
+        setpoint = nextExpoState.get().position; // Rotations or Meters; depending on config
+        velocityProfile = nextExpoState.get().velocity; // RotationsPerSecond or MetersPerSecond; depending on config
+      } else if (m_trapezoidProfile.isPresent() && !m_config.getVelocityTrapezoidalProfileInUse())
       {
-        setpoint = finalNextTrapState.position; // Rotations or Meters; depending on config
-        velocityProfile = finalNextTrapState.velocity; // RotationsPerSecond or MetersPerSecond; depending on config
+        setpoint = nextTrapState.get().position; // Rotations or Meters; depending on config
+        velocityProfile = nextTrapState.get().velocity; // RotationsPerSecond or MetersPerSecond; depending on config
       }
 
       // Set the controller
@@ -429,10 +452,19 @@ public abstract class SmartMotorController
 
       var setpoint = setpointVelocity.get().in(RotationsPerSecond);
       var velocity = getMechanismVelocity().in(RotationsPerSecond);
+
+      // Set the measured value and setpoint to Meters, if linear
       if (m_config.getLinearClosedLoopControllerUse())
       {
-        setpoint = m_config.convertFromMechanism(setpointVelocity.get()).in(MetersPerSecond);
         velocity = getMeasurementVelocity().in(MetersPerSecond);
+        setpoint = m_config.convertFromMechanism(setpointVelocity.get())
+                           .in(MetersPerSecond); // Convert setpoint to Meters
+      }
+
+      if (m_trapezoidProfile.isPresent() && m_config.getVelocityTrapezoidalProfileInUse())
+      {
+        setpoint = nextTrapState.get().position; // Poorly named, in a velocity control loop, this is the setpoint velocity.
+        var acceleration = nextTrapState.get().velocity; // Again poorly named, this is the setpoint acceleration.
       }
 
       double finalVelocity = velocity;
@@ -456,39 +488,46 @@ public abstract class SmartMotorController
 
     armFeedforward.ifPresent(ff -> {
       var profiled = (m_expoProfile.isPresent() || m_trapezoidProfile.isPresent());
-      if (profiled)
+      if (profiled && !velocityTrapezoidalProfile.get())
       {
         var currentVelocitySetpoint = RotationsPerSecond.of(
             m_trapState.isPresent() ? m_trapState.get().velocity
                                     : (m_expoState.isPresent() ? m_expoState.get().velocity : 0.0));
         var nextVelocitySetpoint = RotationsPerSecond.of(
-            m_trapezoidProfile.isPresent() ? finalNextTrapState.velocity
-                                           : (m_expoProfile.isPresent() ? finalNextExpoState.velocity : 0.0));
+            m_trapezoidProfile.isPresent() ? nextTrapState.get().velocity
+                                           : (m_expoProfile.isPresent() ? nextExpoState.get().velocity : 0.0));
         feedforward.set(ff.calculateWithVelocities(getMechanismPosition().in(Radians),
                                                    currentVelocitySetpoint.in(RadiansPerSecond),
                                                    nextVelocitySetpoint.in(RadiansPerSecond)));
       } else
       {
+        // When using a velocity profile the next velocity is the "position" (poorly named)
+        var nextVelocitySetpoint = velocityTrapezoidalProfile.get() ? nextTrapState.get().position
+                                                                    : setpointVelocity.orElse(RotationsPerSecond.zero())
+                                                                                      .in(RotationsPerSecond);
         // Not profiled, so using current velocity or setpoint velocity.
-        ff.calculateWithVelocities(getMechanismPosition().in(Radians), getMechanismVelocity().in(RadiansPerSecond), 0);
+        ff.calculateWithVelocities(getMechanismPosition().in(Radians),
+                                   getMechanismVelocity().in(RadiansPerSecond),
+                                   nextVelocitySetpoint);
       }
     });
 
     elevatorFeedforward.ifPresent(ff -> {
       var profiled = (m_expoProfile.isPresent() || m_trapezoidProfile.isPresent()) && setpointPosition.isPresent();
-      if (profiled)
+      if (profiled && !velocityTrapezoidalProfile.get())
       {
         var currentVelocitySetpoint = MetersPerSecond.of(
             m_trapState.isPresent() ? m_trapState.get().velocity
                                     : (m_expoState.isPresent() ? m_expoState.get().velocity : 0.0));
         var nextVelocitySetpoint = MetersPerSecond.of(
-            m_trapezoidProfile.isPresent() ? finalNextTrapState.velocity
-                                           : (m_expoProfile.isPresent() ? finalNextExpoState.velocity : 0.0));
+            m_trapezoidProfile.isPresent() ? nextTrapState.get().velocity
+                                           : (m_expoProfile.isPresent() ? nextExpoState.get().velocity : 0.0));
 
         feedforward.set(ff.calculateWithVelocities(currentVelocitySetpoint.in(MetersPerSecond),
                                                    nextVelocitySetpoint.in(MetersPerSecond)));
       } else
       {
+        // TODO: Implement velocity profile
         // Not profiled, so using current velocity or setpoint velocity.
         feedforward.set(ff.calculateWithVelocities(getMeasurementVelocity().in(MetersPerSecond), 0));
       }
@@ -496,31 +535,34 @@ public abstract class SmartMotorController
 
     simpleMotorFeedforward.ifPresent(ff -> {
       var profiled = (m_expoProfile.isPresent() || m_trapezoidProfile.isPresent());
-      if (profiled)
+      if (profiled && !velocityTrapezoidalProfile.get())
       {
         var currentVelocitySetpoint = RotationsPerSecond.of(
             m_trapState.isPresent() ? m_trapState.get().velocity
                                     : (m_expoState.isPresent() ? m_expoState.get().velocity : 0.0));
         var nextVelocitySetpoint = RotationsPerSecond.of(
-            m_trapezoidProfile.isPresent() ? finalNextTrapState.velocity
-                                           : (m_expoProfile.isPresent() ? finalNextExpoState.velocity : 0.0));
+            m_trapezoidProfile.isPresent() ? nextTrapState.get().velocity
+                                           : (m_expoProfile.isPresent() ? nextExpoState.get().velocity : 0.0));
         feedforward.set(ff.calculateWithVelocities(currentVelocitySetpoint.in(RotationsPerSecond),
                                                    nextVelocitySetpoint.in(RotationsPerSecond)));
 
       } else
       {
+        // When using a velocity profile the next velocity is the "position" (poorly named)
+        var nextVelocitySetpoint = velocityTrapezoidalProfile.get() ? nextTrapState.get().position
+                                                                    : setpointVelocity.orElse(RotationsPerSecond.zero())
+                                                                                      .in(RotationsPerSecond);
         // Not profiled, so using current velocity, or setpoint velocity.
         feedforward.set(ff.calculateWithVelocities(getMechanismVelocity().in(RotationsPerSecond),
-                                                   setpointVelocity.orElse(RotationsPerSecond.zero())
-                                                                   .in(RotationsPerSecond)));
+                                                   nextVelocitySetpoint));
       }
     });
 
     // Set the current states in the class.
     if (m_expoProfile.isPresent())
-    {m_expoState = Optional.of(finalNextExpoState);}
+    {m_expoState = Optional.of(nextExpoState.get());}
     if (m_trapezoidProfile.isPresent())
-    {m_trapState = Optional.of(finalNextTrapState);}
+    {m_trapState = Optional.of(nextTrapState.get());}
 
     // Boundary check.
     if (mechUpperLimit.isPresent())

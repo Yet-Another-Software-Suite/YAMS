@@ -12,6 +12,7 @@ import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -27,6 +28,8 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.ExponentialProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.units.AngularAccelerationUnit;
+import edu.wpi.first.units.LinearAccelerationUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -39,6 +42,7 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -274,7 +278,11 @@ public class SmartMotorControllerConfig
   /**
    * Linear or {@link Distance} based closed loop controller.
    */
-  public        boolean                                       linearClosedLoopController         = false;
+  private boolean linearClosedLoopController = false;
+  /**
+   * Velocity trapezoidal profile.
+   */
+  private boolean velocityTrapezoidalProfile = false;
 
   /**
    * Construct the {@link SmartMotorControllerConfig} for the {@link Subsystem}
@@ -355,6 +363,7 @@ public class SmartMotorControllerConfig
     this.moi = cfg.moi;
     this.looselyCoupledFollowers = cfg.looselyCoupledFollowers;
     this.linearClosedLoopController = cfg.linearClosedLoopController;
+    this.velocityTrapezoidalProfile = cfg.velocityTrapezoidalProfile;
   }
 
   @Override
@@ -1353,11 +1362,58 @@ public class SmartMotorControllerConfig
                                                                 AngularVelocity maxVelocity,
                                                                 AngularAcceleration maxAcceleration)
   {
-    this.sim_pid = Optional.of(new PIDController(kP,kI,kD));
+    this.sim_pid = Optional.of(new PIDController(kP, kI, kD));
     this.sim_lqr = Optional.empty();
     this.sim_exponentialProfile = Optional.empty();
     this.sim_trapezoidProfile = Optional.of(new Constraints(maxVelocity.in(RotationsPerSecond),
                                                             maxAcceleration.in(RotationsPerSecondPerSecond)));
+    return this;
+  }
+
+  /**
+   * Set the closed loop controller for the {@link SmartMotorController}. Units are Rotations per Second.
+   *
+   * @param kP              KP scalar for the PID Controller, the units passed in are in Rotations.
+   * @param kI              KI scalar for the PID Controller, the units passed in are in Rotations.
+   * @param kD              KD scalar for the PID Controller, the units passed in are in Rotations.
+   * @param maxAcceleration Maximum angular acceleration for the Trapezoidal profile.
+   * @param maxJerk         Maximum angular jerk for the Trapezoidal profile.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public SmartMotorControllerConfig withSimClosedLoopController(double kP, double kI, double kD,
+                                                                AngularAcceleration maxAcceleration,
+                                                                Velocity<AngularAccelerationUnit> maxJerk)
+  {
+    this.sim_pid = Optional.of(new PIDController(kP, kI, kD));
+    this.sim_lqr = Optional.empty();
+    this.sim_exponentialProfile = Optional.empty();
+    this.sim_trapezoidProfile = Optional.of(new Constraints(maxAcceleration.in(RotationsPerSecondPerSecond),
+                                                            maxJerk.in(RotationsPerSecondPerSecond.per(Second))));
+    velocityTrapezoidalProfile = true;
+    return this;
+  }
+
+  /**
+   * Set the closed loop controller for the {@link SmartMotorController}. Units are Meters per Second.
+   *
+   * @param kP              KP scalar for the PID Controller, the units passed in are in Meters per second.
+   * @param kI              KI scalar for the PID Controller, the units passed in are in Meters per second..
+   * @param kD              KD scalar for the PID Controller, the units passed in are in Meters per second..
+   * @param maxAcceleration Maximum linear acceleration for the Trapezoidal profile.
+   * @param maxJerk         Maximum linear jerk for the Trapezoidal profile.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public SmartMotorControllerConfig withSimClosedLoopController(double kP, double kI, double kD,
+                                                                LinearAcceleration maxAcceleration,
+                                                                Velocity<LinearAccelerationUnit> maxJerk)
+  {
+    this.sim_pid = Optional.of(new PIDController(kP, kI, kD));
+    this.sim_lqr = Optional.empty();
+    this.sim_exponentialProfile = Optional.empty();
+    this.sim_trapezoidProfile = Optional.of(new Constraints(maxAcceleration.in(MetersPerSecondPerSecond),
+                                                            maxJerk.in(MetersPerSecondPerSecond.per(Second))));
+    velocityTrapezoidalProfile = true;
+    linearClosedLoopController = true;
     return this;
   }
 
@@ -1429,6 +1485,43 @@ public class SmartMotorControllerConfig
     this.exponentialProfile = Optional.empty();
     this.trapezoidProfile = Optional.of(new TrapezoidProfile.Constraints(maxVel.in(
         RotationsPerSecond), maxAccel.in(RotationsPerSecondPerSecond)));
+    return this;
+  }
+
+  /**
+   * Set the angular velocity trapezoidal profile for the {@link SmartMotorController}.
+   *
+   * @param maxAccel Max acceleration for the profile.
+   * @param maxJerk  Max velocity for the profile.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public SmartMotorControllerConfig withTrapezoidalProfile(AngularAcceleration maxAccel,
+                                                           Velocity<AngularAccelerationUnit> maxJerk)
+  {
+    this.exponentialProfile = Optional.empty();
+    this.trapezoidProfile = Optional.of(new TrapezoidProfile.Constraints(maxAccel.in(RotationsPerSecondPerSecond),
+                                                                         maxJerk.in(RotationsPerSecondPerSecond.per(
+                                                                             Second))));
+    velocityTrapezoidalProfile = true;
+    return this;
+  }
+
+  /**
+   * Set the linear velocity trapezoidal profile for the {@link SmartMotorController}.
+   *
+   * @param maxAccel Max acceleration for the profile.
+   * @param maxJerk  Max velocity for the profile.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public SmartMotorControllerConfig withTrapezoidalProfile(LinearAcceleration maxAccel,
+                                                           Velocity<LinearAccelerationUnit> maxJerk)
+  {
+    this.exponentialProfile = Optional.empty();
+    this.trapezoidProfile = Optional.of(new TrapezoidProfile.Constraints(maxAccel.in(MetersPerSecondPerSecond),
+                                                                         maxJerk.in(MetersPerSecondPerSecond.per(
+                                                                             Second))));
+    velocityTrapezoidalProfile = true;
+    linearClosedLoopController = true;
     return this;
   }
 
@@ -1642,6 +1735,50 @@ public class SmartMotorControllerConfig
   }
 
   /**
+   * Set the closed loop controller for the {@link SmartMotorController}. Units are Rotations.
+   *
+   * @param kP              KP scalar for the PID Controller, the units passed in are in Rotations and output is
+   *                        Voltage.
+   * @param kI              KI scalar for the PID Controller, the units passed in are in Rotations and output is
+   *                        Voltage.
+   * @param kD              KD scalar for the PID Controller, the units passed in are in Rotations and output is
+   *                        Voltage.
+   * @param maxAcceleration Maximum angular acceleration for the Trapezoidal profile.
+   * @param maxJerk         Maximum angular jerk for the Trapezoidal profile.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public SmartMotorControllerConfig withClosedLoopController(double kP, double kI, double kD,
+                                                             AngularAcceleration maxAcceleration,
+                                                             Velocity<AngularAccelerationUnit> maxJerk)
+  {
+    this.pid = Optional.of(new PIDController(kP, kI, kD));
+    this.lqr = Optional.empty();
+    return withTrapezoidalProfile(maxAcceleration, maxJerk);
+  }
+
+  /**
+   * Set the closed loop controller for the {@link SmartMotorController}. Units are Meters.
+   *
+   * @param kP              KP scalar for the PID Controller, the units passed in are in Rotations and output is
+   *                        Voltage.
+   * @param kI              KI scalar for the PID Controller, the units passed in are in Rotations and output is
+   *                        Voltage.
+   * @param kD              KD scalar for the PID Controller, the units passed in are in Rotations and output is
+   *                        Voltage.
+   * @param maxAcceleration Maximum angular acceleration for the Trapezoidal profile.
+   * @param maxJerk         Maximum angular jerk for the Trapezoidal profile.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public SmartMotorControllerConfig withClosedLoopController(double kP, double kI, double kD,
+                                                             LinearAcceleration maxAcceleration,
+                                                             Velocity<LinearAccelerationUnit> maxJerk)
+  {
+    this.pid = Optional.of(new PIDController(kP, kI, kD));
+    this.lqr = Optional.empty();
+    return withTrapezoidalProfile(maxAcceleration, maxJerk);
+  }
+
+  /**
    * Get the controller for the {@link SmartMotorController}, the units passed in are in Rotations (or Meters if
    * Mechanism Circumference is configured), the outputs are in Volts.
    *
@@ -1728,6 +1865,18 @@ public class SmartMotorControllerConfig
   public SmartMotorControllerConfig withLinearClosedLoopController(boolean linearClosedLoopController)
   {
     this.linearClosedLoopController = linearClosedLoopController;
+    return this;
+  }
+
+  /**
+   * Set the trapezoidal profile to be read explicitly as a velocity profile.
+   *
+   * @param velocityTrapezoidalProfile The trapezoidal profile is read explicitly as a velocity profile.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public SmartMotorControllerConfig withVelocityTrapezoidalProfile(boolean velocityTrapezoidalProfile)
+  {
+    this.velocityTrapezoidalProfile = velocityTrapezoidalProfile;
     return this;
   }
 
@@ -1841,6 +1990,48 @@ public class SmartMotorControllerConfig
                                                            "withSubsystem(Subsystem)");
     }
     return subsystem.orElseThrow();
+  }
+
+  /**
+   * Convert {@link Velocity<LinearAccelerationUnit>} to  {@link Velocity<AngularAccelerationUnit>} using the
+   * {@link SmartMotorControllerConfig#mechanismCircumference}
+   *
+   * @param jerk Linear jerk to convert.
+   * @return Equivalent angular jerk.
+   */
+  public Velocity<AngularAccelerationUnit> convertToMechanism(Velocity<LinearAccelerationUnit> jerk)
+  {
+    if (mechanismCircumference.isEmpty())
+    {
+      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
+                                                           "Cannot convert LinearVelocity to AngularVelocity.",
+                                                           "withMechanismCircumference(Distance)");
+
+    }
+
+    return RotationsPerSecondPerSecond.per(Second).of(
+        jerk.in(MetersPerSecondPerSecond.per(Second)) / mechanismCircumference.get().in(Meters));
+  }
+
+  /**
+   * Convert {@link Velocity<AngularAccelerationUnit>} to  {@link Velocity<LinearAccelerationUnit>} using the
+   * {@link SmartMotorControllerConfig#mechanismCircumference}
+   *
+   * @param jerk Angular jerk to convert.
+   * @return Equivalent angular jerk.
+   */
+  public Velocity<LinearAccelerationUnit> convertFromMechanism(Velocity<AngularAccelerationUnit> jerk)
+  {
+    if (mechanismCircumference.isEmpty())
+    {
+      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
+                                                           "Cannot convert LinearVelocity to AngularVelocity.",
+                                                           "withMechanismCircumference(Distance)");
+
+    }
+
+    return MetersPerSecondPerSecond.per(Second).of(
+        jerk.in(RotationsPerSecondPerSecond.per(Second)) * mechanismCircumference.get().in(Meters));
   }
 
   /**
@@ -2161,6 +2352,16 @@ public class SmartMotorControllerConfig
   {
     basicOptions.remove(BasicOptions.LooselyCoupledFollowers);
     return looselyCoupledFollowers;
+  }
+
+  /**
+   * Velocity trapezoidal profile configured.
+   *
+   * @return true, if trapezoidal profile is configured as a velocity profile. false otherwise.
+   */
+  public boolean getVelocityTrapezoidalProfileInUse()
+  {
+    return velocityTrapezoidalProfile;
   }
 
   /**
