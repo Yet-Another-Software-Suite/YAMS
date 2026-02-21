@@ -3,8 +3,8 @@
   <groupId>yams</groupId>
   <artifactId>YAMS-java</artifactId>
   <versioning>
-    <latest>2026.2.20</latest>
-    <release>2026.2.20</release>
+    <latest>2026.2.21</latest>
+    <release>2026.2.21</release>
     <versions>
       <version>2025.9.2</version>
       <version>2025.9.4</version>
@@ -52,7 +52,8 @@
       <version>2026.2.18</version>
       <version>2026.2.19</version>
       <version>2026.2.20</version>
+      <version>2026.2.21</version>
     </versions>
-    <lastUpdated>20260221030453</lastUpdated>
+    <lastUpdated>20260221134535</lastUpdated>
   </versioning>
 </metadata>
