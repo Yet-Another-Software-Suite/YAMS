@@ -4,8 +4,10 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Minute;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Second;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -67,8 +69,6 @@ public class SmartMotorControllerTelemetryConfig
         doubleFields.get(DoubleTelemetryField.ClosedloopRampRate).enable();
         doubleFields.get(DoubleTelemetryField.MeasurementLowerLimit).enable();
         doubleFields.get(DoubleTelemetryField.MeasurementUpperLimit).enable();
-        doubleFields.get(DoubleTelemetryField.MotionProfileMaxAcceleration).enable();
-        doubleFields.get(DoubleTelemetryField.MotionProfileMaxVelocity).enable();
         doubleFields.get(DoubleTelemetryField.kS).enable();
         doubleFields.get(DoubleTelemetryField.kV).enable();
         doubleFields.get(DoubleTelemetryField.kG).enable();
@@ -170,26 +170,52 @@ public class SmartMotorControllerTelemetryConfig
       doubleFields.get(DoubleTelemetryField.kD).setDefaultValue(e.getD());
     });
     config.getTrapezoidProfile().ifPresent(e -> {
-      if (config.getLinearClosedLoopControllerUse())
+      doubleFields.get(DoubleTelemetryField.ExponentialProfileMaxInput).disable();
+      doubleFields.get(DoubleTelemetryField.ExponentialProfileKA).disable();
+      doubleFields.get(DoubleTelemetryField.ExponentialProfileKV).disable();
+
+      doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxAcceleration).enable();
+      if (config.getVelocityTrapezoidalProfileInUse())
       {
-        doubleFields.get(DoubleTelemetryField.MotionProfileMaxAcceleration)
+        var maxJerk = RotationsPerSecondPerSecond.per(Second).of(e.maxAcceleration);
+        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxJerk).setDefaultValue(maxJerk.in(RPM.per(Second)
+                                                                                                       .per(Second)));
+        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxJerk).enable();
+        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxVelocity).disable();
+      } else if (config.getLinearClosedLoopControllerUse())
+      {
+        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxAcceleration)
                     .setDefaultValue(e.maxAcceleration);
-        doubleFields.get(DoubleTelemetryField.MotionProfileMaxVelocity)
+        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxVelocity)
                     .setDefaultValue(e.maxVelocity);
+        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxVelocity).enable();
+        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxJerk).disable();
       } else
       {
-        if (config.getLinearClosedLoopControllerUse())
-        {
-          doubleFields.get(DoubleTelemetryField.MotionProfileMaxAcceleration)
-                      .setDefaultValue(RotationsPerSecondPerSecond.of(e.maxAcceleration).in(RPM.per(Minute)));
-          doubleFields.get(DoubleTelemetryField.MotionProfileMaxVelocity)
-                      .setDefaultValue(RotationsPerSecond.of(e.maxVelocity).in(RPM));
-        }
+        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxAcceleration)
+                    .setDefaultValue(RotationsPerSecondPerSecond.of(e.maxAcceleration).in(RPM.per(Minute)));
+        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxVelocity)
+                    .setDefaultValue(RotationsPerSecond.of(e.maxVelocity).in(RPM));
+        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxVelocity).enable();
+        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxJerk).disable();
       }
     });
     config.getExponentialProfile().ifPresent(e -> {
-      doubleFields.get(DoubleTelemetryField.MotionProfileMaxAcceleration).disable();
-      doubleFields.get(DoubleTelemetryField.MotionProfileMaxVelocity).disable();
+      doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxAcceleration).disable();
+      doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxVelocity).disable();
+      doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxJerk).disable();
+
+      doubleFields.get(DoubleTelemetryField.ExponentialProfileKA).enable();
+      doubleFields.get(DoubleTelemetryField.ExponentialProfileKV).enable();
+      doubleFields.get(DoubleTelemetryField.ExponentialProfileMaxInput).enable();
+      var defaultkV = config.getLinearClosedLoopControllerUse() ?
+                      config.convertToMechanism(Meters.of(-e.A / e.B)).in(Rotations) : (-e.A / e.B);
+      var defaultkA = config.getLinearClosedLoopControllerUse() ?
+                      config.convertToMechanism(Meters.of(1.0 / e.B)).in(Rotations) : (1.0 / e.B);
+      var defaultMaxInput = e.maxInput;
+      doubleFields.get(DoubleTelemetryField.ExponentialProfileKA).setDefaultValue(defaultkA);
+      doubleFields.get(DoubleTelemetryField.ExponentialProfileKV).setDefaultValue(defaultkV);
+      doubleFields.get(DoubleTelemetryField.ExponentialProfileMaxInput).setDefaultValue(defaultMaxInput);
     });
     config.getLQRClosedLoopController().ifPresent(e -> {
       doubleFields.get(DoubleTelemetryField.kP).disable();
@@ -211,6 +237,7 @@ public class SmartMotorControllerTelemetryConfig
       doubleFields.get(DoubleTelemetryField.kG).setDefaultValue(e.getKg());
     });
     config.getSimpleFeedforward().ifPresent(e -> {
+      doubleFields.get(DoubleTelemetryField.kG).disable();
       doubleFields.get(DoubleTelemetryField.kS).setDefaultValue(e.getKs());
       doubleFields.get(DoubleTelemetryField.kV).setDefaultValue(e.getKv());
       doubleFields.get(DoubleTelemetryField.kA).setDefaultValue(e.getKa());

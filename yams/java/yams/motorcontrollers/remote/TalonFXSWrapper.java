@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -49,6 +50,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.ExponentialProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.units.AngularAccelerationUnit;
 import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -70,6 +72,7 @@ import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
@@ -1117,12 +1120,49 @@ public class TalonFXSWrapper extends SmartMotorController
                                   .orElseThrow().maxVelocity,
                           maxAcceleration.in(RotationsPerSecondPerSecond))));
     }
-    if (m_config.getVelocityTrapezoidalProfileInUse())
-    {
-      m_talonConfig.MotionMagic.MotionMagicJerk = maxAcceleration.in(RotationsPerSecondPerSecond);
-    } else
-    {m_talonConfig.MotionMagic.withMotionMagicAcceleration(maxAcceleration);}
+    m_talonConfig.MotionMagic.withMotionMagicAcceleration(maxAcceleration);
     forceConfigApply();
+  }
+
+  @Override
+  public void setMotionProfileMaxJerk(Velocity<AngularAccelerationUnit> maxJerk)
+  {
+    if (m_trapezoidProfile.isPresent())
+    {
+      m_trapezoidProfile = Optional.of(new TrapezoidProfile(
+          new Constraints(m_config.getTrapezoidProfile()
+                                  .orElseThrow().maxVelocity,
+                          maxJerk.in(RotationsPerSecondPerSecond.per(Second)))));
+    }
+    m_talonConfig.MotionMagic.MotionMagicJerk = maxJerk.in(RotationsPerSecondPerSecond.per(Second));
+    forceConfigApply();
+  }
+
+  @Override
+  public void setExponentialProfile(OptionalDouble kV, OptionalDouble kA, Optional<Voltage> maxInput)
+  {
+    if (m_expoProfile.isPresent() && m_config.getExponentialProfile().isPresent())
+    {
+      var exp = m_config.getExponentialProfile().get();
+      var defaultkV = m_config.getLinearClosedLoopControllerUse() ?
+                      m_config.convertToMechanism(Meters.of(-exp.A / exp.B))
+                              .in(Rotations) :
+                      (-exp.A / exp.B);
+      var defaultkA = m_config.getLinearClosedLoopControllerUse() ?
+                      m_config.convertToMechanism(Meters.of(1.0 / exp.B))
+                              .in(Rotations) : (1.0 / exp.B);
+      var defaultMaxInput = exp.maxInput;
+      m_expoProfile = Optional.of(new ExponentialProfile(ExponentialProfile.Constraints
+                                                             .fromCharacteristics(kV.orElse(defaultkV),
+                                                                                  kA.orElse(defaultkA),
+                                                                                  maxInput.orElse(Volts.of(
+                                                                                              defaultMaxInput))
+                                                                                          .in(Volts))));
+
+      m_talonConfig.MotionMagic.MotionMagicExpo_kV = kV.orElse(defaultkV);
+      m_talonConfig.MotionMagic.MotionMagicExpo_kA = kA.orElse(defaultkA);
+      forceConfigApply();
+    }
   }
 
   @Override

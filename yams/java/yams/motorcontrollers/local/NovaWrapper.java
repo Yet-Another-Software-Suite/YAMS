@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -26,6 +27,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.ExponentialProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.units.AngularAccelerationUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -35,6 +37,7 @@ import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
@@ -43,6 +46,7 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.gearing.MechanismGearing;
 import yams.motorcontrollers.SmartMotorController;
@@ -639,6 +643,41 @@ public class NovaWrapper extends SmartMotorController
                                                                                     .orElseThrow().maxVelocity,
                                                                             maxAcceleration.in(
                                                                                 RotationsPerSecondPerSecond))));
+    }
+  }
+
+  @Override
+  public void setMotionProfileMaxJerk(Velocity<AngularAccelerationUnit> maxJerk)
+  {
+    if (m_trapezoidProfile.isPresent())
+    {
+      m_trapezoidProfile = Optional.of(new TrapezoidProfile(new Constraints(m_config.getTrapezoidProfile()
+                                                                                    .orElseThrow().maxVelocity,
+                                                                            maxJerk.in(
+                                                                                RotationsPerSecondPerSecond.per(Second)))));
+    }
+  }
+
+  @Override
+  public void setExponentialProfile(OptionalDouble kV, OptionalDouble kA, Optional<Voltage> maxInput)
+  {
+    if (m_expoProfile.isPresent() && m_config.getExponentialProfile().isPresent())
+    {
+      var exp = m_config.getExponentialProfile().get();
+      var defaultkV = m_config.getLinearClosedLoopControllerUse() ?
+                      m_config.convertToMechanism(Meters.of(-exp.A / exp.B))
+                              .in(Rotations) :
+                      (-exp.A / exp.B);
+      var defaultkA = m_config.getLinearClosedLoopControllerUse() ?
+                      m_config.convertToMechanism(Meters.of(1.0 / exp.B))
+                              .in(Rotations) : (1.0 / exp.B);
+      var defaultMaxInput = exp.maxInput;
+      m_expoProfile = Optional.of(new ExponentialProfile(ExponentialProfile.Constraints
+                                                             .fromCharacteristics(kV.orElse(defaultkV),
+                                                                                  kA.orElse(defaultkA),
+                                                                                  maxInput.orElse(Volts.of(
+                                                                                              defaultMaxInput))
+                                                                                          .in(Volts))));
     }
   }
 
