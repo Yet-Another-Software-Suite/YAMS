@@ -15,6 +15,8 @@ import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.networktables.NetworkTable;
 import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalDouble;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
@@ -283,7 +285,7 @@ public class SmartMotorControllerTelemetry
           case MeasurementLowerLimit -> smartMotorController.setMeasurementLowerLimit(Meters.of(dt.get()));
           case MechanismUpperLimit -> smartMotorController.setMechanismUpperLimit(Degrees.of(dt.get()));
           case MechanismLowerLimit -> smartMotorController.setMechanismLowerLimit(Degrees.of(dt.get()));
-          case MotionProfileMaxAcceleration ->
+          case TrapezoidalProfileMaxAcceleration ->
           {
             if (cfg.getLinearClosedLoopControllerUse())
             {
@@ -296,7 +298,7 @@ public class SmartMotorControllerTelemetry
             }
             break;
           }
-          case MotionProfileMaxVelocity ->
+          case TrapezoidalProfileMaxVelocity ->
           {
             if (cfg.getLinearClosedLoopControllerUse())
             {
@@ -306,6 +308,28 @@ public class SmartMotorControllerTelemetry
               smartMotorController.setMotionProfileMaxVelocity(RPM.of(dt.get()));
             }
             break;
+          }
+          case TrapezoidalProfileMaxJerk ->
+          {
+            smartMotorController.setMotionProfileMaxJerk(RPM.per(Second).per(Second).of(dt.get()));
+          }
+          case ExponentialProfileKA ->
+          {
+            smartMotorController.setExponentialProfile(OptionalDouble.empty(),
+                                                       OptionalDouble.of(dt.get()),
+                                                       Optional.empty());
+          }
+          case ExponentialProfileKV ->
+          {
+            smartMotorController.setExponentialProfile(OptionalDouble.of(dt.get()),
+                                                       OptionalDouble.empty(),
+                                                       Optional.empty());
+          }
+          case ExponentialProfileMaxInput ->
+          {
+            smartMotorController.setExponentialProfile(OptionalDouble.empty(),
+                                                       OptionalDouble.empty(),
+                                                       Optional.of(Volts.of(dt.get())));
           }
         }
       }
@@ -437,13 +461,32 @@ public class SmartMotorControllerTelemetry
   public enum DoubleTelemetryField
   {
     /**
-     * Motion profile maximum velocity, could be in MPS or RPS
+     * Exponential profile kV
      */
-    MotionProfileMaxVelocity("closedloop/motionprofile/maxVelocity", 0, true, "tunable_velocity"),
+    ExponentialProfileKV("closedloop/motionprofile/kV", 0, true, "none"),
     /**
-     * Motion profile maximum accelerartion, could be in MPS^2 or RPS^2
+     * Exponential profile kA
      */
-    MotionProfileMaxAcceleration("closedloop/motionprofile/maxAcceleration", 0, true, "tunable_acceleration"),
+    ExponentialProfileKA("closedloop/motionprofile/kA", 0, true, "none"),
+    /**
+     * Exponential profile maxInput
+     */
+    ExponentialProfileMaxInput("closedloop/motionprofile/maxInput", 12, true, "volts"),
+    /**
+     * Motion profile maximum velocity, could be in MPS or RPM
+     */
+    TrapezoidalProfileMaxVelocity("closedloop/motionprofile/maxVelocity", 0, true, "tunable_velocity"),
+    /**
+     * Motion profile maximum accelerartion, could be in MPS^2 or RPM/s
+     */
+    TrapezoidalProfileMaxAcceleration("closedloop/motionprofile/maxAcceleration", 0, true, "tunable_acceleration"),
+    /**
+     * Trapezoidal profile maximum jerk, could be in MPS^3 or RPM/s^2
+     */
+    TrapezoidalProfileMaxJerk("closedloop/motionprofile/maxJerk",
+                              0,
+                              true,
+                              "rotations_per_minute_per_second_per_second"),
     /**
      * kS
      */

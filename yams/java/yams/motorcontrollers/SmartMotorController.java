@@ -26,6 +26,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.units.AngularAccelerationUnit;
 import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -47,6 +48,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.concurrent.atomic.AtomicReference;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.gearing.MechanismGearing;
@@ -1029,6 +1031,22 @@ public abstract class SmartMotorController
    * @param maxAcceleration Maximum acceleration, will be translated to RotationsPerSecondPerSecond.
    */
   public abstract void setMotionProfileMaxAcceleration(AngularAcceleration maxAcceleration);
+
+  /**
+   * Set the maximum jerk for the trapezoidal profile for the feedback controller.
+   *
+   * @param maxJerk Maximum jerk, will be translated to RotationsPerSecondPerSecondPerSecond.
+   */
+  public abstract void setMotionProfileMaxJerk(Velocity<AngularAccelerationUnit> maxJerk);
+
+  /**
+   * Set the exponential profile fields.
+   *
+   * @param kV       kV for the exponential profile.
+   * @param kA       kA for the exponential profile.
+   * @param maxInput Maximum input for the exponential profile.
+   */
+  public abstract void setExponentialProfile(OptionalDouble kV, OptionalDouble kA, Optional<Voltage> maxInput);
 
   /**
    * Set kP for the feedback controller PID.
