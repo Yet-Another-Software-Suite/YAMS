@@ -23,7 +23,9 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicExpoVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.CANdi;
@@ -121,6 +123,16 @@ public class TalonFXWrapper extends SmartMotorController
    */
   private final MotionMagicExpoVoltage        m_expoPositionReq   = new MotionMagicExpoVoltage(0).withSlot(
       m_controlReqSlot);
+  /**
+   * Torque current velocity control request
+   */
+  private final VelocityTorqueCurrentFOC      m_torqueCurrentVelocityReq = new VelocityTorqueCurrentFOC(0).withSlot(
+    m_controlReqSlot);
+  /**
+   * Torque current position control request
+   */
+  private final PositionTorqueCurrentFOC      m_torqueCurrentPositionReq = new PositionTorqueCurrentFOC(0).withSlot(
+    m_controlReqSlot);
   /**
    * Position control request to use.
    */
@@ -461,6 +473,9 @@ public class TalonFXWrapper extends SmartMotorController
         case "MotionMagicExpoVoltage":
           m_talonfx.setControl(m_expoPositionReq.withPosition(angle));
           break;
+        case "PositionTorqueCurrentFOC":
+          m_talonfx.setControl(m_torqueCurrentPositionReq.withPosition(angle));
+          break;
         case "MotionMagicVoltage":
           m_talonfx.setControl(m_trapPositionReq.withPosition(angle));
           break;
@@ -496,6 +511,9 @@ public class TalonFXWrapper extends SmartMotorController
       {
         case "MotionMagicVelocityVoltage":
           m_talonfx.setControl(m_trapVelocityReq.withVelocity(angularVelocity));
+          break;
+        case "VelocityTorqueCurrentFOC":
+          m_talonfx.setControl(m_torqueCurrentVelocityReq.withVelocity(angularVelocity));
           break;
         case "VelocityVoltage":
         default:
@@ -614,6 +632,34 @@ public class TalonFXWrapper extends SmartMotorController
       throw new SmartMotorControllerConfigurationException("Closed loop tolerance is not available on TalonFX",
                                                            "Cannot set closed loop tolerance on TalonFX",
                                                            ".withClosedLoopTolerance");
+    }
+
+    if(config.getVendorPositionControlRequest().isPresent()){
+      var genControlRequest = config.getVendorPositionControlRequest().get();
+      if (genControlRequest instanceof ControlRequest)
+      {
+        m_positionReq = (ControlRequest) genControlRequest;
+      } else
+      {
+        throw new SmartMotorControllerConfigurationException(
+            "ControlRequest is the only acceptable vendor config type for TalonFXWrapper",
+            "Vendor control request is unable to be applied",
+            ".withVendorPositionControlRequest(new PositionVoltage(0))");
+      }
+    }
+
+    if(config.getVendorVelocityControlRequest().isPresent()){
+      var genControlRequest = config.getVendorVelocityControlRequest().get();
+      if (genControlRequest instanceof ControlRequest)
+      {
+        m_velocityReq = (ControlRequest) genControlRequest;
+      } else
+      {
+        throw new SmartMotorControllerConfigurationException(
+            "ControlRequest is the only acceptable vendor config type for TalonFXWrapper",
+            "Vendor control request is unable to be applied",
+            ".withVendorVelocityControlRequest(new VelocityVoltage(0))");
+      }
     }
 
     // Fetch the controller mode to satisfy the requirement of knowing the control mode.
