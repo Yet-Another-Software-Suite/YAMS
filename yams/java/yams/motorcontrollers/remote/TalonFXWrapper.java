@@ -830,10 +830,15 @@ public class TalonFXWrapper extends SmartMotorController
                                                             .times(config.getGearing().getMechanismToRotorRatio()));
         }
         StatusCode applied;
+        int iterations = 0;
         do
         {
           applied = m_talonfx.setPosition(config.getStartingPosition().get());
           Timer.delay(Milliseconds.of(10).in(Seconds));
+          iterations++;
+          if (iterations > 100) {
+            break;
+          }
         } while (!applied.isOK());
 
       }
