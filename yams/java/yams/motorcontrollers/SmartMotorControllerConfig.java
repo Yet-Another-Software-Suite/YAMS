@@ -67,6 +67,10 @@ public class SmartMotorControllerConfig
 {
 
   /**
+   * Reset old configurations, so they are no longer persistent.
+   */
+  private boolean resetPreviousConfig        = true;
+  /**
    * Vendor specific configuration for the {@link SmartMotorController}.
    */
   private       Optional<Object>                              vendorConfig                       = Optional.empty();
@@ -312,6 +316,7 @@ public class SmartMotorControllerConfig
    */
   private SmartMotorControllerConfig(SmartMotorControllerConfig cfg)
   {
+    this.resetPreviousConfig = cfg.resetPreviousConfig;
     this.vendorConfig = cfg.vendorConfig;
     this.subsystem = cfg.subsystem;
     this.basicOptions = EnumSet.copyOf(cfg.basicOptions);
@@ -520,6 +525,19 @@ public class SmartMotorControllerConfig
   public SmartMotorControllerConfig withMotorInverted(boolean motorInverted)
   {
     this.motorInverted = motorInverted;
+    return this;
+  }
+
+  /**
+   * Set the {@link SmartMotorController} to reset the old configurations and only apply what is given to
+   * {@link SmartMotorControllerConfig}
+   *
+   * @param resetPreviousConfig Reset the old config?
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public SmartMotorControllerConfig withResetPreviousConfig(boolean resetPreviousConfig)
+  {
+    this.resetPreviousConfig = resetPreviousConfig;
     return this;
   }
 
@@ -2375,6 +2393,17 @@ public class SmartMotorControllerConfig
   }
 
   /**
+   * Reset the old config?
+   *
+   * @return Should reset old config
+   */
+  public boolean getResetPreviousConfig()
+  {
+    basicOptions.remove(BasicOptions.resetPreviousConfig);
+    return resetPreviousConfig;
+  }
+
+  /**
    * Reset the validation checks for all required options to be applied to {@link SmartMotorController} from
    * {@link SmartMotorController#applyConfig(SmartMotorControllerConfig)}.
    */
@@ -2433,11 +2462,16 @@ public class SmartMotorControllerConfig
     return externalEncoderInverted;
   }
 
+
   /**
    * Basic Options that should be applied to every {@link SmartMotorController}
    */
   private enum BasicOptions
   {
+    /**
+     * Persist the old config.
+     */
+    resetPreviousConfig,
     /**
      * Control Mode
      */

@@ -727,7 +727,8 @@ public class SparkWrapper extends SmartMotorController
     config.validateBasicOptions();
     config.validateExternalEncoderOptions();
     return configureSpark(() -> m_spark.configure(m_sparkBaseConfig,
-                                                  ResetMode.kNoResetSafeParameters,
+                                                  m_config.getResetPreviousConfig() ? ResetMode.kResetSafeParameters
+                                                                                    : ResetMode.kNoResetSafeParameters,
                                                   PersistMode.kPersistParameters));
   }
 
