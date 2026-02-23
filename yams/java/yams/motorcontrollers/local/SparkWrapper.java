@@ -724,11 +724,12 @@ public class SparkWrapper extends SmartMotorController
       throw new IllegalArgumentException("[ERROR] Spark relative encoder cannot be inverted!");
     }
 
+    var resetMode = m_config.getResetPreviousConfig() ? ResetMode.kResetSafeParameters
+                                                      : ResetMode.kNoResetSafeParameters;
     config.validateBasicOptions();
     config.validateExternalEncoderOptions();
     return configureSpark(() -> m_spark.configure(m_sparkBaseConfig,
-                                                  m_config.getResetPreviousConfig() ? ResetMode.kResetSafeParameters
-                                                                                    : ResetMode.kNoResetSafeParameters,
+                                                  resetMode,
                                                   PersistMode.kPersistParameters));
   }
 
