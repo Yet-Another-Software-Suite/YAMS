@@ -215,7 +215,8 @@ public class TalonFXWrapper extends SmartMotorController
     } else
     {
       m_talonConfig = new TalonFXConfiguration();
-      m_configurator.refresh(m_talonConfig);
+      if (!m_config.getResetPreviousConfig())
+      {m_configurator.refresh(m_talonConfig);}
     }
     m_mechanismPosition = m_talonfx.getPosition();
     m_mechanismVelocity = m_talonfx.getVelocity();
@@ -524,7 +525,8 @@ public class TalonFXWrapper extends SmartMotorController
   public boolean applyConfig(SmartMotorControllerConfig config)
   {
     config.resetValidationCheck();
-    m_configurator.refresh(m_talonConfig);
+    if (!m_config.getResetPreviousConfig())
+    {m_configurator.refresh(m_talonConfig);}
     this.m_config = config;
     this.m_looseFollowers = config.getLooselyCoupledFollowers();
     m_lqr = config.getLQRClosedLoopController();

@@ -251,6 +251,12 @@ public class NovaWrapper extends SmartMotorController
     m_pid = config.getPID();
     m_looseFollowers = config.getLooselyCoupledFollowers();
 
+    // Reset the Nova, if configured
+    if (m_config.getResetPreviousConfig())
+    {
+      m_nova.factoryReset();
+    }
+
     // Handle simple pid vs profile pid controller.
     m_config.getTrapezoidProfile().ifPresent(tp -> {
       m_trapezoidProfile = Optional.of(new TrapezoidProfile(tp));
