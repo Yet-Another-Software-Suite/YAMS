@@ -104,4 +104,14 @@ public class ShooterSubsystem extends SubsystemBase
     {return false;}
     return motor.getMechanismVelocity().isNear(motor.getMechanismSetpointVelocity().orElseThrow(), tolerance);
   }
+
+  public void setVelocitySetpoint(AngularVelocity speed)
+  {
+    shooter.setMechanismVelocitySetpoint(speed);
+  }
+
+  public void setDutyCycleSetpoint(double dutyCycle)
+  {
+    shooter.setDutyCycleSetpoint(dutyCycle);
+  }
 }

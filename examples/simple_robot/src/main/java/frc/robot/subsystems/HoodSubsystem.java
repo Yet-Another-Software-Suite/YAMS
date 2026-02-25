@@ -5,22 +5,14 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.TalonFXS;
 import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -37,23 +29,23 @@ import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.remote.TalonFXSWrapper;
 
-public class TurretSubsystem extends SubsystemBase
+public class HoodSubsystem extends SubsystemBase
 {
 
-  private final TalonFXS                   turretMotor      = new TalonFXS(1);//, MotorType.kBrushless);
+  private final TalonFXS                   hoodMotor        = new TalonFXS(9);//, MotorType.kBrushless);
   private final SmartMotorControllerConfig motorConfig      = new SmartMotorControllerConfig(this)
       .withClosedLoopController(4, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
       .withSoftLimit(Degrees.of(-30), Degrees.of(100))
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
       .withIdleMode(MotorMode.BRAKE)
-      .withTelemetry("TurretMotor", TelemetryVerbosity.HIGH)
+      .withTelemetry("HoodMotor", TelemetryVerbosity.HIGH)
       .withStatorCurrentLimit(Amps.of(40))
       .withMotorInverted(false)
       .withClosedLoopRampRate(Seconds.of(0.25))
       .withOpenLoopRampRate(Seconds.of(0.25))
       .withFeedforward(new ArmFeedforward(0, 0, 0, 0))
       .withControlMode(ControlMode.CLOSED_LOOP);
-  private final SmartMotorController       motor            = new TalonFXSWrapper(turretMotor,
+  private final SmartMotorController       motor            = new TalonFXSWrapper(hoodMotor,
                                                                                   DCMotor.getNEO(1),
                                                                                   motorConfig);
   private final MechanismPositionConfig    robotToMechanism = new MechanismPositionConfig()
@@ -62,15 +54,12 @@ public class TurretSubsystem extends SubsystemBase
       .withRelativePosition(new Translation3d(Meters.of(-0.25), Meters.of(0), Meters.of(0.5)));
   private final PivotConfig                m_config         = new PivotConfig(motor)
       .withHardLimit(Degrees.of(-100), Degrees.of(200))
-      .withTelemetry("TurretExample", TelemetryVerbosity.HIGH)
+      .withTelemetry("HoodExample", TelemetryVerbosity.HIGH)
       .withStartingPosition(Degrees.of(0))
       .withMechanismPositionConfig(robotToMechanism);
-  private final Pivot                      turret           = new Pivot(m_config);
+  private final Pivot                      hood             = new Pivot(m_config);
 
-  // Robot to turret transform, from center of robot to turret.
-  private final Transform3d roboToTurret = new Transform3d(Feet.of(-1.5), Feet.of(0), Feet.of(0.5), Rotation3d.kZero);
-
-  public TurretSubsystem()
+  public HoodSubsystem()
   {
     // TODO: Set the default command, if any, for this subsystem by calling setDefaultCommand(command)
     //       in the constructor or in the robot coordination class, such as RobotContainer.
@@ -78,58 +67,33 @@ public class TurretSubsystem extends SubsystemBase
     //       such as SpeedControllers, Encoders, DigitalInputs, etc.
   }
 
-  public Pose2d getPose(Pose2d robotPose)
-  {
-    return robotPose.plus(new Transform2d(
-        roboToTurret.getTranslation().toTranslation2d(), roboToTurret.getRotation().toRotation2d()));
-  }
-
-  public ChassisSpeeds getVelocity(ChassisSpeeds robotVelocity, Angle robotAngle)
-  {
-    var robotAngleRads = robotAngle.in(Radians);
-    double turretVelocityX =
-        robotVelocity.vxMetersPerSecond
-        + robotVelocity.omegaRadiansPerSecond
-          * (roboToTurret.getY() * Math.cos(robotAngleRads)
-             - roboToTurret.getX() * Math.sin(robotAngleRads));
-    double turretVelocityY =
-        robotVelocity.vyMetersPerSecond
-        + robotVelocity.omegaRadiansPerSecond
-          * (roboToTurret.getX() * Math.cos(robotAngleRads)
-             - roboToTurret.getY() * Math.sin(robotAngleRads));
-
-    return new ChassisSpeeds(turretVelocityX,
-                             turretVelocityY,
-                             robotVelocity.omegaRadiansPerSecond + motor.getMechanismVelocity().in(RadiansPerSecond));
-  }
-
   public void periodic()
   {
-    turret.updateTelemetry();
+    hood.updateTelemetry();
   }
 
   public void simulationPeriodic()
   {
-    turret.simIterate();
+    hood.simIterate();
   }
 
-  public Command turretCmd(double dutycycle)
+  public Command hoodCmd(double dutycycle)
   {
-    return turret.set(dutycycle);
+    return hood.set(dutycycle);
   }
 
   public Command sysId()
   {
-    return turret.sysId(Volts.of(3), Volts.of(3).per(Second), Second.of(30));
+    return hood.sysId(Volts.of(3), Volts.of(3).per(Second), Second.of(30));
   }
 
   public Command setAngle(Angle angle)
   {
-    return turret.setAngle(angle);
+    return hood.setAngle(angle);
   }
 
-  public void setAngleSetpoint(Angle measure)
+  public void setAngleSetpoint(Angle angle)
   {
-    turret.setMechanismPositionSetpoint(measure);
+    hood.setMechanismPositionSetpoint(angle);
   }
 }
