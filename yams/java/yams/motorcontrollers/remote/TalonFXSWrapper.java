@@ -232,8 +232,8 @@ public class TalonFXSWrapper extends SmartMotorController
     boolean found = false;
     for (int i = 0; i < 6; i++)
     {
-      DCMotor minion = new DCMotor(12, 3.1, 200.46, 1.43, RPM.of(7200).in(RadiansPerSecond), i);
-      if (isMotor(motor, minion))
+      //DCMotor minion = new DCMotor(12, 3.1, 200.46, 1.43, RPM.of(7200).in(RadiansPerSecond), i);
+      if (isMotor(motor, DCMotor.getMinion(i)))
       {
         m_talonConfig.Commutation.withAdvancedHallSupport(AdvancedHallSupportValue.Enabled);
         m_talonConfig.Commutation.withMotorArrangement(MotorArrangementValue.Minion_JST);
