@@ -1,54 +1,121 @@
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Milliseconds;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Seconds;
 
-import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
+import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import java.util.List;
+import frc.robot.subsystems.HoodSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.TurretSubsystem;
 import java.util.function.Supplier;
+import yams.mechanisms.swerve.SwerveDrive;
 
 
 /**
- * Largely written by Eeshwar based off their blog at https://blog.eeshwark.com/robotblog/shooting-on-the-fly
+ * Adapted from 6328 Mechanical Advantage!
+ * Original source is here: https://github.com/Mechanical-Advantage/RobotCode2026Public/blob/alpha-bot-turret/src/main/java/org/littletonrobotics/frc2026/subsystems/launcher/LaunchCalculator.java
  */
 public class ShootOnTheMoveCommand extends Command
 {
 
-  private final Supplier<Pose2d>        robotPose;
-  private final Supplier<ChassisSpeeds> fieldOrientedChassisSpeeds;
-  private final Pose2d                  goalPose;
+  private final double     loopPeriodSecs = Milliseconds.of(20).in(Seconds);
+  // Outputs
+  private       Rotation2d lastTurretAngle;
+  private       double     lastHoodAngle;
+  private       Rotation2d turretAngle;
+  private       double     hoodAngle      = Double.NaN;
 
-  // Tuned Constants
-  /**
-   * Time in seconds between when the robot is told to move and when the shooter actually shoots.
-   */
-  private final double                     latency      = 0.15;
-  /**
-   * Maps Distance to RPM
-   */
-  private final InterpolatingDoubleTreeMap shooterTable = new InterpolatingDoubleTreeMap();
+  // Private Variables
+  private              TurretSubsystem                          turret;
+  private              ShooterSubsystem                         shooterSubsystem;
+  private              HoodSubsystem                            hoodSubsystem;
+  private              Supplier<ChassisSpeeds>                  _fieldRelativeVelocity;
+  private              Supplier<Pose2d>                         estimatedPose;
+  private              Field2d                                  debugField             = new Field2d();
+  private static final InterpolatingTreeMap<Double, Rotation2d> launchHoodAngleMap     =
+      new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Rotation2d::interpolate);
+  private static final InterpolatingDoubleTreeMap               launchFlywheelSpeedMap =
+      new InterpolatingDoubleTreeMap();
+  private static final InterpolatingDoubleTreeMap               timeOfFlightMap        =
+      new InterpolatingDoubleTreeMap();
 
+  // Tuning Constants
+  private final Debouncer shootingDebounce = new Debouncer(0.1, DebounceType.kFalling);
+  private final double    phaseDelay       = 0.05;
+  private       Distance  minDistance      = Feet.of(1);
+  private       Distance  maxDistance      = Meters.of(5);
 
-  public ShootOnTheMoveCommand(Supplier<Pose2d> currentPose, Supplier<ChassisSpeeds> fieldOrientedChassisSpeeds,
-                               Pose2d goal)
+  static
   {
-    robotPose = currentPose;
-    this.fieldOrientedChassisSpeeds = fieldOrientedChassisSpeeds;
-    this.goalPose = goal;
+    // These should be found on your robot
+    launchHoodAngleMap.put(1.34, Rotation2d.fromDegrees(19.0));
+    launchHoodAngleMap.put(1.78, Rotation2d.fromDegrees(19.0));
+    launchHoodAngleMap.put(2.17, Rotation2d.fromDegrees(24.0));
+    launchHoodAngleMap.put(2.81, Rotation2d.fromDegrees(27.0));
+    launchHoodAngleMap.put(3.82, Rotation2d.fromDegrees(29.0));
+    launchHoodAngleMap.put(4.09, Rotation2d.fromDegrees(30.0));
+    launchHoodAngleMap.put(4.40, Rotation2d.fromDegrees(31.0));
+    launchHoodAngleMap.put(4.77, Rotation2d.fromDegrees(32.0));
+    launchHoodAngleMap.put(5.57, Rotation2d.fromDegrees(32.0));
+    launchHoodAngleMap.put(5.60, Rotation2d.fromDegrees(35.0));
 
-    // Test Results
-    for (var entry : List.of(Pair.of(Meters.of(1), RPM.of((1000))),
-                             Pair.of(Meters.of(2), RPM.of(2000)),
-                             Pair.of(Meters.of(3), RPM.of(3000)))
-    )
-    {shooterTable.put(entry.getFirst().in(Meters), entry.getSecond().in(RPM));}
+    launchFlywheelSpeedMap.put(1.34, 2100.0);
+    launchFlywheelSpeedMap.put(1.78, 2200.0);
+    launchFlywheelSpeedMap.put(2.17, 2200.0);
+    launchFlywheelSpeedMap.put(2.81, 2300.0);
+    launchFlywheelSpeedMap.put(3.82, 2500.0);
+    launchFlywheelSpeedMap.put(4.09, 2550.0);
+    launchFlywheelSpeedMap.put(4.40, 2600.0);
+    launchFlywheelSpeedMap.put(4.77, 2650.0);
+    launchFlywheelSpeedMap.put(5.57, 2750.0);
+    launchFlywheelSpeedMap.put(5.60, 2900.0);
 
-    addRequirements();
+    timeOfFlightMap.put(5.68, 1.16);
+    timeOfFlightMap.put(4.55, 1.12);
+    timeOfFlightMap.put(3.15, 1.11);
+    timeOfFlightMap.put(1.88, 1.09);
+    timeOfFlightMap.put(1.38, 0.90);
+  }
+
+  public ShootOnTheMoveCommand(TurretSubsystem turret, ShooterSubsystem shooter, HoodSubsystem hood,
+                               SwerveDrive swerveDrive)
+  {
+    SmartDashboard.putData("ShootOnTheMoveField", debugField);
+    estimatedPose = () -> {
+      // Calculate estimated pose while accounting for phase delay
+      ChassisSpeeds robotRelativeVelocity = swerveDrive.getRobotRelativeSpeed();
+      var           robotPose             = swerveDrive.getPose();
+      robotPose = robotPose.exp(
+          new Twist2d(
+              robotRelativeVelocity.vxMetersPerSecond * phaseDelay,
+              robotRelativeVelocity.vyMetersPerSecond * phaseDelay,
+              robotRelativeVelocity.omegaRadiansPerSecond * phaseDelay));
+      // Optional, add logging here
+      debugField.setRobotPose(robotPose);
+      return robotPose;
+    };
+    _fieldRelativeVelocity = swerveDrive::getFieldRelativeSpeed;
+
+    addRequirements(turret, shooter, hood);
+
   }
 
   @Override
@@ -60,46 +127,57 @@ public class ShootOnTheMoveCommand extends Command
   @Override
   public void execute()
   {
-    // Please look here for the original authors work!
-    // https://blog.eeshwark.com/robotblog/shooting-on-the-fly
-    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    // YASS did not come up with this
-    // -------------------------------------------------------
+    // Get estimated pose
+    var robotPose             = estimatedPose.get();
+    var fieldRelativeVelocity = _fieldRelativeVelocity.get();
 
-    var robotSpeed = fieldOrientedChassisSpeeds.get();
-    // 1. LATENCY COMP
-    Translation2d futurePos = robotPose.get().getTranslation().plus(
-        new Translation2d(robotSpeed.vxMetersPerSecond, robotSpeed.vyMetersPerSecond).times(latency)
-                                                                   );
+    // Calculate distance from turret to target
+    Translation2d target =
+        AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
+    Pose2d turretPosition         = turret.getPose(robotPose);
+    double turretToTargetDistance = target.getDistance(turretPosition.getTranslation());
 
-    // 2. GET TARGET VECTOR
-    Translation2d goalLocation = goalPose.getTranslation();
-    Translation2d targetVec    = goalLocation.minus(futurePos);
-    double        dist         = targetVec.getNorm();
+    // Calculate field relative turret velocity
+    Angle         robotAngle     = robotPose.getRotation().getMeasure();
+    ChassisSpeeds turretVelocity = turret.getVelocity(fieldRelativeVelocity, robotAngle);
 
-    // 3. CALCULATE IDEAL SHOT (Stationary)
-    // Note: This returns HORIZONTAL velocity component
-    double idealHorizontalSpeed = shooterTable.get(dist);
+    // Account for imparted velocity by robot (turret) to offset
+    double timeOfFlight;
+    Pose2d lookaheadPose                   = turretPosition;
+    double lookaheadTurretToTargetDistance = turretToTargetDistance;
+    for (int i = 0; i < 20; i++)
+    {
+      timeOfFlight = timeOfFlightMap.get(lookaheadTurretToTargetDistance);
+      double offsetX = turretVelocity.vxMetersPerSecond * timeOfFlight;
+      double offsetY = turretVelocity.vyMetersPerSecond * timeOfFlight;
+      lookaheadPose =
+          new Pose2d(
+              turretPosition.getTranslation().plus(new Translation2d(offsetX, offsetY)),
+              turretPosition.getRotation());
+      lookaheadTurretToTargetDistance = target.getDistance(lookaheadPose.getTranslation());
+    }
 
-    // 4. VECTOR SUBTRACTION
-    Translation2d robotVelVec = new Translation2d(robotSpeed.vxMetersPerSecond, robotSpeed.vyMetersPerSecond);
-    Translation2d shotVec     = targetVec.div(dist).times(idealHorizontalSpeed).minus(robotVelVec);
-
-    // 5. CONVERT TO CONTROLS
-    double turretAngle        = shotVec.getAngle().getDegrees();
-    double newHorizontalSpeed = shotVec.getNorm();
-
-    // 6. SOLVE FOR NEW PITCH/RPM
-    // Assuming constant total exit velocity, variable hood:
-    double totalExitVelocity = 15.0; // m/s
-    // Clamp to avoid domain errors if we need more speed than possible
-    double ratio    = Math.min(newHorizontalSpeed / totalExitVelocity, 1.0);
-    double newPitch = Math.acos(ratio);
-
-    // 7. SET OUTPUTS
-    //turret.setAngle(turretAngle); // Could also just set the swerveDrive to point towards this angle like AlignToGoal
-    //hood.setAngle(Math.toDegrees(newPitch));
-    //shooter.setRPM(MetersPerSecond.of(totalExitVelocity));
+    // Calculate parameters accounted for imparted velocity
+    turretAngle = target.minus(lookaheadPose.getTranslation()).getAngle();
+    hoodAngle = launchHoodAngleMap.get(lookaheadTurretToTargetDistance).getRadians();
+    if (lastTurretAngle == null) {lastTurretAngle = turretAngle;}
+    if (Double.isNaN(lastHoodAngle)) {lastHoodAngle = hoodAngle;}
+    lastTurretAngle = turretAngle;
+    lastHoodAngle = hoodAngle;
+    var lookaheadTurretToTargetDistanceMeasure = Meters.of(lookaheadTurretToTargetDistance);
+    if (lookaheadTurretToTargetDistanceMeasure.gte(minDistance) &&
+        lookaheadTurretToTargetDistanceMeasure.lte(maxDistance))
+    {
+      var shooterRPM = RPM.of(launchFlywheelSpeedMap.get(lookaheadTurretToTargetDistance));
+      turret.setAngleSetpoint(turretAngle.getMeasure());
+      hoodSubsystem.setAngleSetpoint(Radians.of(hoodAngle));
+      shooterSubsystem.setVelocitySetpoint(shooterRPM);
+      if (shootingDebounce.calculate(shooterSubsystem.getVelocity().isNear(shooterRPM, RPM.of(10))))
+      {
+        // Set indexer to go vrooooom
+        // HERE
+      }
+    }
 
   }
 
@@ -113,6 +191,6 @@ public class ShootOnTheMoveCommand extends Command
   @Override
   public void end(boolean interrupted)
   {
-
+    shooterSubsystem.setDutyCycleSetpoint(0);
   }
 }
