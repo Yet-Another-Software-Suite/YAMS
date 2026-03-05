@@ -84,23 +84,27 @@ public class TurretSubsystem extends SubsystemBase
         roboToTurret.getTranslation().toTranslation2d(), roboToTurret.getRotation().toRotation2d()));
   }
 
-  public ChassisSpeeds getVelocity(ChassisSpeeds robotVelocity, Angle robotAngle)
+ public ChassisSpeeds getVelocity(ChassisSpeeds robotVelocity, Angle robotAngle)
   {
-    var robotAngleRads = robotAngle.in(Radians);
-    double turretVelocityX =
-        robotVelocity.vxMetersPerSecond
-        + robotVelocity.omegaRadiansPerSecond
-          * (roboToTurret.getY() * Math.cos(robotAngleRads)
-             - roboToTurret.getX() * Math.sin(robotAngleRads));
-    double turretVelocityY =
-        robotVelocity.vyMetersPerSecond
-        + robotVelocity.omegaRadiansPerSecond
-          * (roboToTurret.getX() * Math.cos(robotAngleRads)
-             - roboToTurret.getY() * Math.sin(robotAngleRads));
 
-    return new ChassisSpeeds(turretVelocityX,
-                             turretVelocityY,
-                             robotVelocity.omegaRadiansPerSecond + motor.getMechanismVelocity().in(RadiansPerSecond));
+      Translation2d rRobot = roboToTurret.getTranslation().toTranslation2d(); // in robot frame
+      Translation2d rWorld = rRobot.rotateBy(Rotation2d.fromRadians(robotAngleRads)); // rotate into field frame
+
+      double omega = robotVelocity.omegaRadiansPerSecond; // robot yaw rate (rad/s)
+
+      // rotational linear velocity at turret (v_rot = ω × r_world)
+      double vRotX = -omega * rWorld.getY();
+      double vRotY =  omega * rWorld.getX();
+
+      // final turret linear velocity in field frame
+      double turretVx = robotVelocity.vxMetersPerSecond + vRotX;
+      double turretVy = robotVelocity.vyMetersPerSecond + vRotY;
+
+      // turret angular velocity in field frame
+      double turretOmega = omega + motor.getMechanismVelocity().in(RadiansPerSecond);
+
+      return new ChassisSpeeds(turretVx, turretVy, turretOmega);
+
   }
 
   public void periodic()
