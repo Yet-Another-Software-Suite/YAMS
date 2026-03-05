@@ -241,7 +241,7 @@ public class FlyWheel extends SmartVelocityMechanism
     {
       m_config.getCircumference(); // Circumference check
       return Commands.startRun(m_smc::startClosedLoopController,
-                               () -> m_config.getAngularVelocity((LinearVelocity) velocity.get()),
+                               () -> m_smc.setVelocity(m_config.getAngularVelocity((LinearVelocity) velocity.get())),
                                m_subsystem)
                      .withName(cmdName);
     }
