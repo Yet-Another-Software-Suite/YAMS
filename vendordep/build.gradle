@@ -127,8 +127,7 @@ javadoc {
                 'https://github.wpilib.org/allwpilib/docs/release/java/',
                 'https://codedocs.revrobotics.com/java/',
                 'https://api.ctr-electronics.com/phoenix6/stable/java/',
-                'https://api.ctr-electronics.com/phoenix/stable/java/',
-                "https://www.kauailabs.com/public_files/navx-mxp/apidocs/java/"
+                'https://api.ctr-electronics.com/phoenix/stable/java/'
         tags 'todo:X"',
             'apiNote:a:API Note:',
             'implSpec:a:Implementation Requirements:',
