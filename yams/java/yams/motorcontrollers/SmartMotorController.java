@@ -192,22 +192,6 @@ public abstract class SmartMotorController
       }
 
     }
-    if (isMotor(getDCMotor(), DCMotor.getNEO(1)))
-    {
-      if (m_config.getStatorStallCurrentLimit().isEmpty())
-      {
-        throw new SmartMotorControllerConfigurationException("Stator current limit is not defined for NEO!",
-                                                             "Safety check failed.",
-                                                             "withStatorCurrentLimit(Current)");
-      } else if (m_config.getStatorStallCurrentLimit().getAsInt() > 60)
-      {
-        throw new SmartMotorControllerConfigurationException("Stator current limit is too high for NEO!",
-                                                             "Safety check failed.",
-                                                             "withStatorCurrentLimit(Current) where the Current is under 60A");
-
-      }
-
-    }
   }
 
   /**
