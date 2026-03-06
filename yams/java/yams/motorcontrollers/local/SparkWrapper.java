@@ -303,7 +303,8 @@ public class SparkWrapper extends SmartMotorController
     m_sparkBaseConfig.idleMode(mode == MotorMode.BRAKE ? IdleMode.kBrake : IdleMode.kCoast);
     configureSpark(() -> m_spark.configure(m_sparkBaseConfig,
                                            ResetMode.kNoResetSafeParameters,
-                                           PersistMode.kPersistParameters));
+                                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                                     : PersistMode.kPersistParameters));
   }
 
   @Override
@@ -644,13 +645,15 @@ public class SparkWrapper extends SmartMotorController
         {
           ((SparkMax) follower.getFirst()).configure(new SparkMaxConfig().follow(m_spark, follower.getSecond()),
                                                      ResetMode.kNoResetSafeParameters,
-                                                     PersistMode.kPersistParameters);
+                                                     DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                                               : PersistMode.kPersistParameters);
 
         } else if (follower.getFirst() instanceof SparkFlex)
         {
           ((SparkFlex) follower.getFirst()).configure(new SparkFlexConfig().follow(m_spark, follower.getSecond()),
                                                       ResetMode.kNoResetSafeParameters,
-                                                      PersistMode.kPersistParameters);
+                                                      DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                                                : PersistMode.kPersistParameters);
 
         } else
         {
@@ -730,7 +733,8 @@ public class SparkWrapper extends SmartMotorController
     config.validateExternalEncoderOptions();
     return configureSpark(() -> m_spark.configure(m_sparkBaseConfig,
                                                   resetMode,
-                                                  PersistMode.kPersistParameters));
+                                                  DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                                            : PersistMode.kPersistParameters));
   }
 
   @Override
@@ -835,7 +839,10 @@ public class SparkWrapper extends SmartMotorController
   {
     m_config.withMotorInverted(inverted);
     m_sparkBaseConfig.inverted(inverted);
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
   }
 
   @Override
@@ -848,7 +855,10 @@ public class SparkWrapper extends SmartMotorController
 //    }
 //    sparkBaseConfig.analogSensor.inverted(inverted);
     m_sparkBaseConfig.encoder.inverted(inverted);
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
   }
 
   @Override
@@ -862,7 +872,10 @@ public class SparkWrapper extends SmartMotorController
     }
     m_sparkBaseConfig.closedLoop.maxMotion.cruiseVelocity(m_config.convertToMechanism(maxVelocity)
                                                                   .in(RotationsPerSecond));
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
   }
 
   @Override
@@ -876,7 +889,10 @@ public class SparkWrapper extends SmartMotorController
     }
     m_sparkBaseConfig.closedLoop.maxMotion.maxAcceleration(m_config.convertToMechanism(maxAcceleration)
                                                                    .in(RotationsPerSecondPerSecond));
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
   }
 
   @Override
@@ -889,7 +905,10 @@ public class SparkWrapper extends SmartMotorController
                                                                                     .orElseThrow().maxAcceleration)));
     }
     m_sparkBaseConfig.closedLoop.maxMotion.cruiseVelocity(maxVelocity.in(RotationsPerSecond));
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
   }
 
   @Override
@@ -903,7 +922,10 @@ public class SparkWrapper extends SmartMotorController
                                                                                 RotationsPerSecondPerSecond))));
     }
     m_sparkBaseConfig.closedLoop.maxMotion.maxAcceleration(maxAcceleration.in(RotationsPerSecondPerSecond));
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
   }
 
   @Override
@@ -917,7 +939,10 @@ public class SparkWrapper extends SmartMotorController
                                                                                 RotationsPerSecondPerSecond.per(Second)))));
     }
     m_sparkBaseConfig.closedLoop.maxMotion.maxAcceleration(maxJerk.in(RotationsPerSecondPerSecond.per(Second)));
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
   }
 
   @Override
@@ -950,7 +975,11 @@ public class SparkWrapper extends SmartMotorController
       simplePidController.setP(kP);
     });
     m_sparkBaseConfig.closedLoop.p(kP);
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
   }
 
   @Override
@@ -960,7 +989,10 @@ public class SparkWrapper extends SmartMotorController
       simplePidController.setI(kI);
     });
     m_sparkBaseConfig.closedLoop.i(kI);
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
 
   }
 
@@ -971,7 +1003,10 @@ public class SparkWrapper extends SmartMotorController
       simplePidController.setD(kD);
     });
     m_sparkBaseConfig.closedLoop.d(kD);
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
   }
 
   @Override
@@ -983,7 +1018,10 @@ public class SparkWrapper extends SmartMotorController
       simplePidController.setD(kD);
     });
     m_sparkBaseConfig.closedLoop.pid(kP, kI, kD);
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
   }
 
   @Override
@@ -999,7 +1037,10 @@ public class SparkWrapper extends SmartMotorController
       elevatorFeedforward.setKs(kS);
     });
     m_sparkBaseConfig.closedLoop.feedForward.kS(kS);
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
   }
 
   @Override
@@ -1015,7 +1056,10 @@ public class SparkWrapper extends SmartMotorController
       elevatorFeedforward.setKv(kV);
     });
     m_sparkBaseConfig.closedLoop.feedForward.kV(kV);
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
   }
 
   @Override
@@ -1031,7 +1075,10 @@ public class SparkWrapper extends SmartMotorController
       elevatorFeedforward.setKa(kA);
     });
     m_sparkBaseConfig.closedLoop.feedForward.kA(kA);
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
   }
 
   @Override
@@ -1050,7 +1097,10 @@ public class SparkWrapper extends SmartMotorController
     {
       m_sparkBaseConfig.closedLoop.feedForward.kCos(kG);
     }
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
   }
 
   @Override
@@ -1076,7 +1126,10 @@ public class SparkWrapper extends SmartMotorController
       m_sparkBaseConfig.closedLoop.feedForward.kG(kG);
     });
     m_sparkBaseConfig.closedLoop.feedForward.kS(kS).kV(kV).kA(kA);
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
   }
 
   @Override
@@ -1084,7 +1137,10 @@ public class SparkWrapper extends SmartMotorController
   {
     m_config.withStatorCurrentLimit(currentLimit);
     m_sparkBaseConfig.smartCurrentLimit((int) currentLimit.in(Amps));
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
   }
 
   @Deprecated
@@ -1098,7 +1154,10 @@ public class SparkWrapper extends SmartMotorController
   {
     m_config.withClosedLoopRampRate(rampRate);
     m_sparkBaseConfig.closedLoopRampRate(rampRate.in(Seconds));
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
   }
 
   @Override
@@ -1106,7 +1165,10 @@ public class SparkWrapper extends SmartMotorController
   {
     m_config.withOpenLoopRampRate(rampRate);
     m_sparkBaseConfig.openLoopRampRate(rampRate.in(Seconds));
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
   }
 
   @Override
@@ -1116,7 +1178,10 @@ public class SparkWrapper extends SmartMotorController
     {
       m_config.withSoftLimit(m_config.convertFromMechanism(m_config.getMechanismLowerLimit().get()), upperLimit);
       m_sparkBaseConfig.softLimit.forwardSoftLimit(m_config.convertToMechanism(upperLimit).in(Rotations));
-      m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+      m_spark.configureAsync(m_sparkBaseConfig,
+                             ResetMode.kNoResetSafeParameters,
+                             DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                       : PersistMode.kPersistParameters);
     }
   }
 
@@ -1127,7 +1192,10 @@ public class SparkWrapper extends SmartMotorController
     {
       m_config.withSoftLimit(lowerLimit, m_config.convertFromMechanism(m_config.getMechanismUpperLimit().get()));
       m_sparkBaseConfig.softLimit.reverseSoftLimit(m_config.convertToMechanism(lowerLimit).in(Rotations));
-      m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+      m_spark.configureAsync(m_sparkBaseConfig,
+                             ResetMode.kNoResetSafeParameters,
+                             DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                       : PersistMode.kPersistParameters);
     }
   }
 
@@ -1138,7 +1206,10 @@ public class SparkWrapper extends SmartMotorController
       m_config.withSoftLimit(lowerLimit, upperLimit);
     });
     m_sparkBaseConfig.softLimit.forwardSoftLimit(upperLimit.in(Rotations));
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
   }
 
   @Override
@@ -1148,7 +1219,10 @@ public class SparkWrapper extends SmartMotorController
       m_config.withSoftLimit(lowerLimit, upperLimit);
     });
     m_sparkBaseConfig.softLimit.reverseSoftLimit(lowerLimit.in(Rotations));
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
   }
 
   @Override
