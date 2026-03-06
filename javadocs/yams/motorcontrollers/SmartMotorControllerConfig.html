@@ -780,6 +780,16 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>SimpleMotorFeedforward</code></a> for <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, units are in Rotations.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimStartingPosition(edu.wpi.first.units.measure.Angle)" class="member-name-link">withSimStartingPosition</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;simStartingAngle)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Set the starting angle of the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> to be used only in simulation</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimStartingPosition(edu.wpi.first.units.measure.Distance)" class="member-name-link">withSimStartingPosition</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;simStartingAngle)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Set the starting angle of the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> to be used only in simulation</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSoftLimit(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)" class="member-name-link">withSoftLimit</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;low,
  <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;high)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -1058,6 +1068,32 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>startingAngle</code> - Starting Mechanism Distance.</dd>
+<dt>Returns:</dt>
+<dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="withSimStartingPosition(edu.wpi.first.units.measure.Angle)">
+<h3>withSimStartingPosition</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withSimStartingPosition</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;simStartingAngle)</span></div>
+<div class="block">Set the starting angle of the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> to be used only in simulation</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>simStartingAngle</code> - Starting Mechanism Angle.</dd>
+<dt>Returns:</dt>
+<dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="withSimStartingPosition(edu.wpi.first.units.measure.Distance)">
+<h3>withSimStartingPosition</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withSimStartingPosition</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;simStartingAngle)</span></div>
+<div class="block">Set the starting angle of the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> to be used only in simulation</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>simStartingAngle</code> - Starting Mechanism Distance.</dd>
 <dt>Returns:</dt>
 <dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining.</dd>
 </dl>
