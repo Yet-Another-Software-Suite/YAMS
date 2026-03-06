@@ -96,14 +96,14 @@ public class SmartMotorControllerTelemetryConfig
       {
         if (!dt.enabled)
         {
-          System.err.println("DT " + dt.getField().name() + " is DISABLED!!");
+          //System.err.println("DT " + dt.getField().name() + " is DISABLED!!");
         }
       }
       for (BooleanTelemetry dt : boolFields.values())
       {
         if (!dt.enabled)
         {
-          System.err.println("BT " + dt.getField().name() + " is DISABLED!!");
+          //System.err.println("BT " + dt.getField().name() + " is DISABLED!!");
         }
       }
     }

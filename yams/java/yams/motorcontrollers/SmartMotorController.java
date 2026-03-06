@@ -849,8 +849,8 @@ public abstract class SmartMotorController
    */
   public void setupTelemetry(NetworkTable telemetry, NetworkTable tuning)
   {
-    System.out.println(
-        "=====================================================\nSETUP TELEMETRY\n=====================================================");
+//    System.out.println(
+//        "=====================================================\nSETUP TELEMETRY\n=====================================================");
     if (parentTable.isEmpty())
     {
       parentTable = Optional.of(telemetry);
