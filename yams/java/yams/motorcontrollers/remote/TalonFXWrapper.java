@@ -580,6 +580,7 @@ public class TalonFXWrapper extends SmartMotorController
                                                                                   : "TalonFX(" +
                                                                                     m_talonfx.getDeviceID() + ")"));
       }
+      System.err.println("====== TalonFX(" + m_talonfx.getDeviceID() + ")Using RIO Closed Loop Controller ======");
 
       iterateClosedLoopController();
 

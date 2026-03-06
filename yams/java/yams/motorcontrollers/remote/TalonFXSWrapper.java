@@ -4,8 +4,6 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
@@ -611,6 +609,7 @@ public class TalonFXSWrapper extends SmartMotorController
                                                                                   : "TalonFX(" +
                                                                                     m_talonfxs.getDeviceID() + ")"));
       }
+      System.err.println("====== TalonFXS(" + m_talonfxs.getDeviceID() + ")Using RIO Closed Loop Controller ======");
 
       iterateClosedLoopController();
 

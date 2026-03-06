@@ -421,6 +421,7 @@ public class SparkWrapper extends SmartMotorController
     // Handle closed loop controller thread
     if (m_expoProfile.isPresent() || m_lqr.isPresent())
     {
+      System.err.println("====== Spark(" + m_spark.getDeviceId() + ") Using RIO Closed Loop Controller ======");
       iterateClosedLoopController();
 
       if (m_closedLoopControllerThread == null)
