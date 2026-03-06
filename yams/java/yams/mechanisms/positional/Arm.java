@@ -331,7 +331,7 @@ public class Arm extends SmartPositionalMechanism
    * @param angle     {@link Angle} to go to.
    * @param tolerance Tolerance {@link Angle}
    * @return {@link Command} that sets the arm to the desired angle.
-   * @implNote This command will not stop. It should NOT be used when there is a default command on the Subsystem.
+   * @implNote This command will stop, but the last control request to the motor controller will continue. It should NOT be used when there is a default command on the Subsystem.
    */
   public Command runTo(Supplier<Angle> angle, Angle tolerance)
   {
