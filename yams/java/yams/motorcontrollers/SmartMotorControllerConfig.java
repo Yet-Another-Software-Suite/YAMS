@@ -247,6 +247,10 @@ public class SmartMotorControllerConfig
    */
   private       Optional<Angle>                               startingPosition                   = Optional.empty();
   /**
+   * {@link SmartMotorController} starting angle to be used during simulation.
+   */
+  private       Optional<Angle>                               sim_startingPosition                = Optional.empty();
+  /**
    * Maximum voltage output for the motor controller while using the closed loop controller.
    */
   private       Optional<Voltage>                             closedLoopControllerMaximumVoltage = Optional.empty();
@@ -359,6 +363,7 @@ public class SmartMotorControllerConfig
     this.motorInverted = cfg.motorInverted;
     this.useExternalEncoder = cfg.useExternalEncoder;
     this.startingPosition = cfg.startingPosition;
+    this.sim_startingPosition = cfg.sim_startingPosition;
     this.closedLoopControllerMaximumVoltage = cfg.closedLoopControllerMaximumVoltage;
     this.feedbackSynchronizationThreshold = cfg.feedbackSynchronizationThreshold;
     this.motorControllerMode = cfg.motorControllerMode;
@@ -491,6 +496,31 @@ public class SmartMotorControllerConfig
   {
     return withStartingPosition(convertToMechanism(startingAngle));
   }
+
+  /**
+   * Set the starting angle of the {@link SmartMotorController} to be used only in simulation
+   *
+   * @param simStartingAngle Starting Mechanism Angle.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public SmartMotorControllerConfig withSimStartingPosition(Angle simStartingAngle)
+  {
+    this.sim_startingPosition = Optional.ofNullable(simStartingAngle);
+    return this;
+  }
+
+  /**
+   * Set the starting angle of the {@link SmartMotorController} to be used only in simulation
+   *
+   * @param simStartingAngle Starting Mechanism Distance.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public SmartMotorControllerConfig withSimStartingPosition(Distance simStartingAngle)
+  {
+    return withSimStartingPosition(convertToMechanism(simStartingAngle));
+  }
+
+
 
   /**
    * Set the external encoder to be the primary feedback device for the PID controller.
@@ -1526,7 +1556,7 @@ public class SmartMotorControllerConfig
 
   /**
    * Set the linear velocity trapezoidal profile for the {@link SmartMotorController}.
-   *
+   * 
    * @param maxAccel Max acceleration for the profile.
    * @param maxJerk  Max velocity for the profile.
    * @return {@link SmartMotorControllerConfig} for chaining.
@@ -2228,6 +2258,9 @@ public class SmartMotorControllerConfig
   public Optional<Angle> getStartingPosition()
   {
     basicOptions.remove(BasicOptions.StartingPosition);
+    if (RobotBase.isSimulation() && sim_startingPosition.isPresent()) {
+      return sim_startingPosition;
+    }
     return startingPosition;
   }
 
