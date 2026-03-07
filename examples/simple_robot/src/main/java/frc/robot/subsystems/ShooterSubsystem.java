@@ -22,6 +22,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.NovaWrapper;
+import yams.telemetry.SmartMotorControllerTelemetryConfig;
 
 public class ShooterSubsystem extends SubsystemBase
 {
@@ -33,7 +34,11 @@ public class ShooterSubsystem extends SubsystemBase
       .withClosedLoopController(1, 0, 0)
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
       .withIdleMode(MotorMode.COAST)
-      .withTelemetry("ShooterMotor", TelemetryVerbosity.HIGH)
+      .withTelemetry("ShooterMotor",
+                     new SmartMotorControllerTelemetryConfig()
+                         .withTelemetryVerbosity(TelemetryVerbosity.HIGH)
+                         .withDataLogName("YAMS/ShooterMotor")
+                         .withNetworkTables(false))
 //      .withStatorCurrentLimit(Amps.of(40))
       .withMotorInverted(false)
       .withFeedforward(new SimpleMotorFeedforward(0, 0, 0))

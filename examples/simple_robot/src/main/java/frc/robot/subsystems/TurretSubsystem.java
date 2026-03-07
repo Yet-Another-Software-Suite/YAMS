@@ -16,9 +16,11 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -88,7 +90,7 @@ public class TurretSubsystem extends SubsystemBase
   {
 
       Translation2d rRobot = roboToTurret.getTranslation().toTranslation2d(); // in robot frame
-      Translation2d rWorld = rRobot.rotateBy(Rotation2d.fromRadians(robotAngleRads)); // rotate into field frame
+    Translation2d rWorld = rRobot.rotateBy(Rotation2d.fromRadians(robotAngle.in(Radians))); // rotate into field frame
 
       double omega = robotVelocity.omegaRadiansPerSecond; // robot yaw rate (rad/s)
 

@@ -78,11 +78,15 @@ public class SmartMotorControllerTelemetry
       boolFields = config.getBoolFields(smartMotorController);
       for (Map.Entry<DoubleTelemetryField, DoubleTelemetry> entry : doubleFields.entrySet())
       {
-        entry.getValue().transformUnit(smcConfig).setupNetworkTables(dataNetworkTable, tuningNetworkTable);
+        if (config.getNT4Enabled())
+        {entry.getValue().transformUnit(smcConfig).setupNetworkTables(dataNetworkTable, tuningNetworkTable);}
+        config.getDataLogName().ifPresent(name -> entry.getValue().transformUnit(smcConfig).setupDataLog(name));
       }
-      for (Map.Entry<DoubleTelemetryField, DoubleTelemetry> entry : doubleFields.entrySet())
+      for (Map.Entry<BooleanTelemetryField, BooleanTelemetry> entry : boolFields.entrySet())
       {
-        entry.getValue().transformUnit(smcConfig).setupNetworkTables(dataNetworkTable, tuningNetworkTable);
+        if (config.getNT4Enabled())
+        {entry.getValue().setupNetworkTables(dataNetworkTable, tuningNetworkTable);}
+        config.getDataLogName().ifPresent(name -> entry.getValue().setupDataLog(name));
       }
 
     }
@@ -377,27 +381,27 @@ public class SmartMotorControllerTelemetry
     /**
      * Mechanism upper limit
      */
-    MechanismUpperLimit("limits/Mechanism Upper Limit", false, false),
+    MechanismUpperLimit("limits/mechanism/upper", false, false),
     /**
      * Mechanism lower limit.
      */
-    MechanismLowerLimit("limits/Mechanism Lower Limit", false, false),
+    MechanismLowerLimit("limits/mechanism/lower", false, false),
     /**
      * Temperature limit if available.
      */
-    TemperatureLimit("limits/Temperature Limit", false, false),
+    TemperatureLimit("limits/temperature", false, false),
     /**
      * Velocity control currently getting used.
      */
-    VelocityControl("control/Velocity Control", false, false),
+    VelocityControl("control/closedloop/velocity", false, false),
     /**
      * Elevator feedforward currently getting used.
      */
-    ElevatorFeedForward("control/Elevator Feedforward", false, false),
+    ElevatorFeedForward("control/feedforward/elevator", false, false),
     /**
      * Arm feedforward currently getting used.
      */
-    ArmFeedForward("control/Arm Feedforward", false, false),
+    ArmFeedForward("control/feedforward/arm", false, false),
     /**
      * Simple motor feedforward currently getting used.
      */
@@ -405,7 +409,7 @@ public class SmartMotorControllerTelemetry
     /**
      * Motion profile currently getting used.
      */
-    MotionProfile("control/Motion Profile", false, false),
+    MotionProfile("control/closedloop/profiled", false, false),
     /**
      * Motor inversion.
      */

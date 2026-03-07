@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.Second;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
@@ -24,6 +25,14 @@ public class SmartMotorControllerTelemetryConfig
 {
 
   /**
+   * DataLog entry name
+   */
+  private Optional<String> dataLogName  = Optional.empty();
+  /**
+   * Enable telemetry over network tables.
+   */
+  private boolean          NT4Telemetry = true;
+  /**
    * {@link BooleanTelemetryField}s to enable or disable.
    */
   private final Map<BooleanTelemetryField, BooleanTelemetry> boolFields   = Arrays.stream(BooleanTelemetryField.values())
@@ -36,6 +45,42 @@ public class SmartMotorControllerTelemetryConfig
   private final Map<DoubleTelemetryField, DoubleTelemetry>   doubleFields = Arrays.stream(DoubleTelemetryField.values())
                                                                                   .collect(Collectors.toMap(e -> e,
                                                                                                             DoubleTelemetryField::create));
+
+  /**
+   * Set up a DataLog entry for this {@link SmartMotorController}
+   *
+   * @param dataLogName DataLog entry name
+   * @return {@link SmartMotorControllerTelemetryConfig} for chaining.
+   */
+  public SmartMotorControllerTelemetryConfig withDataLogName(String dataLogName)
+  {
+    this.dataLogName = Optional.ofNullable(dataLogName);
+    return this;
+  }
+
+  /**
+   * Enable or disable NT4 Telemetry. This will not create NT4 entries and is generally only advisable during
+   * competition matches.
+   *
+   * @param NT4Telemetry NT4 Boolean
+   * @return {@link SmartMotorControllerTelemetryConfig} for chaining.
+   */
+  public SmartMotorControllerTelemetryConfig withNetworkTables(boolean NT4Telemetry)
+  {
+    this.NT4Telemetry = NT4Telemetry;
+    return this;
+  }
+
+  /**
+   * Disable NetworkTable output.
+   *
+   * @return Disable NT4 telemetry.
+   */
+  public SmartMotorControllerTelemetryConfig withoutNetworkTables()
+  {
+    this.NT4Telemetry = false;
+    return this;
+  }
 
   /**
    * Setup with {@link TelemetryVerbosity}
@@ -108,6 +153,26 @@ public class SmartMotorControllerTelemetryConfig
       }
     }
     return this;
+  }
+
+  /**
+   * Get the entry name for the smart motor controller in DataLog.
+   *
+   * @return DataLog entry name.
+   */
+  public Optional<String> getDataLogName()
+  {
+    return dataLogName;
+  }
+
+  /**
+   * Log telemetry to NT4?
+   *
+   * @return should Telemetry be sent to NT4.
+   */
+  public boolean getNT4Enabled()
+  {
+    return NT4Telemetry;
   }
 
   /**
