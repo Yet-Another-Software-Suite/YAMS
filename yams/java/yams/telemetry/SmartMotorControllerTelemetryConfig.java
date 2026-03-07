@@ -72,6 +72,17 @@ public class SmartMotorControllerTelemetryConfig
   }
 
   /**
+   * Disable NetworkTable output.
+   *
+   * @return Disable NT4 telemetry.
+   */
+  public SmartMotorControllerTelemetryConfig withoutNetworkTables()
+  {
+    this.NT4Telemetry = false;
+    return this;
+  }
+
+  /**
    * Setup with {@link TelemetryVerbosity}
    *
    * @param verbosity {@link TelemetryVerbosity} to use.

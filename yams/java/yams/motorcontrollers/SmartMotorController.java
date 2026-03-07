@@ -1,11 +1,11 @@
 package yams.motorcontrollers;
 
-import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Milliseconds;
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
@@ -881,21 +881,20 @@ public abstract class SmartMotorController
                 "=====================================================\nSET ENCODER TO ZERO\n=====================================================");
             System.out.println(
                 "Current Mechanism Position: " + getMechanismPosition().in(Degrees) + "° Current Velocity: " +
-                getRotorVelocity());
+                getMechanismVelocity().in(DegreesPerSecond));
             setEncoderPosition(Rotations.zero());
           }, m_config.getSubsystem());
           setEncoderToZero.setName("ZeroEncoder");
           setEncoderToZero.setSubsystem(m_config.getSubsystem().getName());
 
-          Debouncer              currentDebouncer  = new Debouncer(0.1);
-          Debouncer              velocityDebouncer = new Debouncer(0.25);
+          Debouncer velocityDebouncer = new Debouncer(0.5);
           AtomicReference<Angle> startingAngle     = new AtomicReference<>(Rotations.zero());
           Command testUpCommand = Commands.startRun(() -> {
 
                                             System.out.println(
                                                 "=====================================================\nTEST UP\n=====================================================");
                                             System.out.println(
-                                                "Test will end whe Mechanism Velocity exceeds or equals 3°/s OR the Stator current exceeds 40A OR after 0.5 seconds");
+                                                "Test will end whe Mechanism Velocity exceeds or equals 10RPM after 30seconds");
                                             stopClosedLoopController();
                                             setDutyCycle(0);
                                             startingAngle.set(getMechanismPosition());
@@ -903,10 +902,8 @@ public abstract class SmartMotorController
 
                                             setDutyCycle(getDutyCycle() + 0.001);
                                           }, m_config.getSubsystem()).until(() -> velocityDebouncer.calculate(
-                                              getMechanismVelocity().abs(DegreesPerSecond) >= 3) ||
-                                                                                  currentDebouncer.calculate(
-                                                                                      getStatorCurrent().gte(Amps.of(40))))
-                                          .withTimeout(Seconds.of(0.5))
+                                              getMechanismVelocity().abs(RPM) >= 10))
+                                          .withTimeout(Seconds.of(30))
                                           .finallyDo(() -> {
                                             setDutyCycle(0);
                                             if (getMechanismPosition().lte(startingAngle.get()))
@@ -919,7 +916,7 @@ public abstract class SmartMotorController
                                               System.out.println(
                                                   "=====================================================\nTEST DOWN\n=====================================================");
                                               System.out.println(
-                                                  "Test will end whe Mechanism Velocity exceeds or equals 3°/s OR the Stator current exceeds 40A after 0.5seconds");
+                                                  "Test will end whe Mechanism Velocity exceeds or equals 10RPM after 30seconds");
                                               stopClosedLoopController();
                                               setDutyCycle(0);
                                               startingAngle.set(getMechanismPosition());
@@ -927,10 +924,8 @@ public abstract class SmartMotorController
 
                                               setDutyCycle(getDutyCycle() - 0.001);
                                             }, m_config.getSubsystem()).until(() -> velocityDebouncer.calculate(
-                                                getMechanismVelocity().abs(DegreesPerSecond) >= 3) ||
-                                                                                    currentDebouncer.calculate(
-                                                                                        getStatorCurrent().gte(Amps.of(40))))
-                                            .withTimeout(Seconds.of(0.5))
+                                                getMechanismVelocity().abs(RPM) >= 10))
+                                            .withTimeout(Seconds.of(30))
                                             .finallyDo(() -> {
                                               setDutyCycle(0);
                                               if (getMechanismPosition().gte(startingAngle.get()))
@@ -939,10 +934,10 @@ public abstract class SmartMotorController
                                             });
           testDownCommand.setName("Down");
           testDownCommand.setSubsystem(m_config.getSubsystem().getName());
+          SmartDashboard.putData(telemetryPathStr + "/ZeroEncoder", setEncoderToZero);
           SmartMotorControllerCommandRegistry.addCommand("Live Tuning",
                                                          m_config.getSubsystem(),
                                                          () -> this.telemetry.applyTuningValues(this));
-          SmartDashboard.putData(telemetryPathStr + "/ZeroEncoder", setEncoderToZero);
           SmartDashboard.putData(telemetryPathStr + "/Up", testUpCommand);
           SmartDashboard.putData(telemetryPathStr + "/Down", testDownCommand);
         }
