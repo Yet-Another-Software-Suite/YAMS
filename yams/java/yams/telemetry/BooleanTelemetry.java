@@ -9,6 +9,9 @@ import edu.wpi.first.networktables.BooleanSubscriber;
 import edu.wpi.first.networktables.BooleanTopic;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.PubSub;
+import edu.wpi.first.util.datalog.BooleanLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.Timer;
 import java.util.Optional;
 import yams.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
 
@@ -33,7 +36,7 @@ public class BooleanTelemetry
   /**
    * Enabled?
    */
-  protected     boolean                     enabled     = false;
+  protected boolean                     enabled      = false;
   /**
    * Default value.
    */
@@ -45,27 +48,31 @@ public class BooleanTelemetry
   /**
    * Publisher.
    */
-  private       BooleanPublisher            publisher   = null;
+  private   BooleanPublisher            publisher    = null;
   /**
    * Subscriber.
    */
-  private       Optional<BooleanSubscriber> subscriber  = Optional.empty();
+  private   Optional<BooleanSubscriber> subscriber   = Optional.empty();
   /**
    * Sub publisher.
    */
-  private       BooleanPublisher            pubSub      = null;
+  private   BooleanPublisher            pubSub       = null;
   /**
    * pub or sub topic.
    */
   private       BooleanTopic                topic;
   /**
+   * DataLog entry.
+   */
+  private   Optional<BooleanLogEntry>   dataLogEntry = Optional.empty();
+  /**
    * Tuning table
    */
-  private       Optional<NetworkTable>      tuningTable = Optional.empty();
+  private   Optional<NetworkTable>      tuningTable  = Optional.empty();
   /**
    * Data table.
    */
-  private       Optional<NetworkTable>      dataTable   = Optional.empty();
+  private   Optional<NetworkTable>      dataTable    = Optional.empty();
 
   /**
    * Setup boolean telemetry for a field.
@@ -109,6 +116,24 @@ public class BooleanTelemetry
   }
 
   /**
+   * Setup the DataLog entry for this telemetry field.
+   *
+   * @param prefix Prefix of the entry.
+   */
+  public void setupDataLog(String prefix)
+  {
+    if (!tunable)
+    {
+      if (!prefix.endsWith("/"))
+      {prefix += "/";}
+      dataLogEntry = Optional.of(new BooleanLogEntry(DataLogManager.getLog(),
+                                                     prefix + key,
+                                                     (long) Timer.getFPGATimestamp()));
+    }
+  }
+
+
+  /**
    * Setup network tables.
    *
    * @param dataTable Data tables.
@@ -126,6 +151,8 @@ public class BooleanTelemetry
    */
   public boolean set(boolean value)
   {
+    if (dataLogEntry.isPresent())
+    {dataLogEntry.get().append(value);}
     if (subscriber.isPresent())
     {
       boolean tuningValue = subscriber.get().get(defaultValue);
