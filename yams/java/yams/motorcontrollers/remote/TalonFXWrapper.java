@@ -979,46 +979,22 @@ public class TalonFXWrapper extends SmartMotorController
         switch (((ControlRequest) req).getName())
         {
           case "MotionMagicDutyCycle":
-            m_positionReq = ((MotionMagicDutyCycle) req);
-            break;
           case "MotionMagicExpoDutyCycle":
-            m_positionReq = ((MotionMagicExpoDutyCycle) req);
-            break;
           case "MotionMagicExpoVoltage":
-            m_positionReq = ((MotionMagicExpoVoltage) req);
-            break;
           case "MotionMagicTorqueCurrentFOC":
-            m_positionReq = ((MotionMagicTorqueCurrentFOC) req);
+          case "MotionMagicVoltage":
+          case "PositionDutyCycle":
+          case "PositionTorqueCurrentFOC":
+          case "PositionVoltage":
+            m_positionReq = ((ControlRequest) req);
             break;
           case "MotionMagicVelocityDutyCycle":
-            m_velocityReq = ((MotionMagicVelocityDutyCycle) req);
-            break;
           case "MotionMagicVelocityTorqueCurrentFOC":
-            m_velocityReq = ((MotionMagicVelocityTorqueCurrentFOC) req);
-            break;
           case "MotionMagicVelocityVoltage":
-            m_velocityReq = ((MotionMagicVelocityVoltage) req);
-            break;
-          case "MotionMagicVoltage":
-            m_positionReq = ((MotionMagicVoltage) req);
-            break;
-          case "PositionDutyCycle":
-            m_positionReq = ((PositionDutyCycle) req);
-            break;
-          case "PositionTorqueCurrentFOC":
-            m_positionReq = ((PositionTorqueCurrentFOC) req);
-            break;
-          case "PositionVoltage":
-            m_positionReq = ((PositionVoltage) req);
-            break;
           case "VelocityDutyCycle":
-            m_velocityReq = ((VelocityDutyCycle) req);
-            break;
           case "VelocityTorqueCurrentFOC":
-            m_velocityReq = ((VelocityTorqueCurrentFOC) req);
-            break;
           case "VelocityVoltage":
-            m_velocityReq = ((VelocityVoltage) req);
+            m_velocityReq = ((ControlRequest) req);
             break;
           default:
             throw new SmartMotorControllerConfigurationException(
