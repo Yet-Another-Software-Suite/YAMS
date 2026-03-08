@@ -81,14 +81,6 @@ public class SparkWrapper extends SmartMotorController
 {
 
   /**
-   * Spark configuration retry count.
-   */
-  private final int                               CONFIG_RETRIES            = 4;
-  /**
-   * Spark configuration retry delay.
-   */
-  private final double                            CONFIG_RETRY_DELAY        = Milliseconds.of(5).in(Seconds);
-  /**
    * Spark motor controller
    */
   private final SparkBase                         m_spark;
@@ -206,13 +198,13 @@ public class SparkWrapper extends SmartMotorController
    */
   private boolean configureSpark(Supplier<REVLibError> config)
   {
-    for (int i = 0; i < CONFIG_RETRIES; i++)
+    for (int i = 0; i < 8; i++)
     {
       if (config.get() == REVLibError.kOk)
       {
         return true;
       }
-      Timer.delay(CONFIG_RETRY_DELAY);
+      Timer.delay(Milliseconds.of(1));
     }
     return false;
   }
@@ -348,9 +340,9 @@ public class SparkWrapper extends SmartMotorController
     setpointPosition = Optional.ofNullable(angle);
     if (m_expoProfile.isEmpty() && m_lqr.isEmpty() && angle != null)
     {
-      m_sparkPidController.setSetpoint(angle.in(Rotations),
-                                       m_positionControlType,
-                                       m_closedLoopSlot);
+      configureSpark(() -> m_sparkPidController.setSetpoint(angle.in(Rotations),
+                                                            m_positionControlType,
+                                                            m_closedLoopSlot));
     }
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setPosition(angle);}});
   }
@@ -374,9 +366,9 @@ public class SparkWrapper extends SmartMotorController
     setpointVelocity = Optional.ofNullable(angularVelocity);
     if (m_lqr.isEmpty() && angularVelocity != null)
     {
-      m_sparkPidController.setSetpoint(setpointVelocity.orElse(RPM.of(0)).in(RotationsPerSecond),
-                                       m_velocityControlType,
-                                       m_closedLoopSlot);
+      configureSpark(() -> m_sparkPidController.setSetpoint(setpointVelocity.orElse(RPM.of(0)).in(RotationsPerSecond),
+                                                            m_velocityControlType,
+                                                            m_closedLoopSlot));
     }
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setVelocity(angularVelocity);}});
   }
@@ -728,6 +720,14 @@ public class SparkWrapper extends SmartMotorController
       throw new IllegalArgumentException("[ERROR] Spark relative encoder cannot be inverted!");
     }
 
+    if (config.getVendorControlRequest().isPresent())
+    {
+      throw new SmartMotorControllerConfigurationException(
+          "Spark(" + m_spark.getDeviceId() + ") does not support the custom control requests!",
+          "Cannot use given control request",
+          "withVendorControlRequest()");
+    }
+
     var resetMode = m_config.getResetPreviousConfig() ? ResetMode.kResetSafeParameters
                                                       : ResetMode.kNoResetSafeParameters;
     config.validateBasicOptions();
@@ -750,6 +750,12 @@ public class SparkWrapper extends SmartMotorController
   public void setDutyCycle(double dutyCycle)
   {
     m_spark.set(dutyCycle);
+    if (dutyCycle == 0.0)
+    {
+      m_looseFollowers.ifPresent(looseFollower -> {
+        for (var follower : looseFollower) {follower.setDutyCycle(dutyCycle);}
+      });
+    }
 //    m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismStatorDutyCycle(dutyCycle));
   }
 
@@ -779,6 +785,8 @@ public class SparkWrapper extends SmartMotorController
   public void setVoltage(Voltage voltage)
   {
     m_spark.setVoltage(voltage);
+//    if (voltage.in(Volts) == 0.0)
+//    {m_looseFollowers.ifPresent(looseFollower -> {for (var follower : looseFollower) {follower.setVoltage(voltage);}});}
     m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismStatorVoltage(voltage));
   }
 

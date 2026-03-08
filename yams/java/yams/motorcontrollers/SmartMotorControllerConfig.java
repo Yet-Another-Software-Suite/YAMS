@@ -69,11 +69,15 @@ public class SmartMotorControllerConfig
   /**
    * Reset old configurations, so they are no longer persistent.
    */
-  private boolean resetPreviousConfig        = true;
+  private boolean          resetPreviousConfig        = true;
   /**
    * Vendor specific configuration for the {@link SmartMotorController}.
    */
   private       Optional<Object>                              vendorConfig                       = Optional.empty();
+  /**
+   * Vendor specific control request for the {@link SmartMotorController}
+   */
+  private Optional<Object> vendorControlRequest       = Optional.empty();
   /**
    * Subsystem that the {@link SmartMotorController} controls.
    */
@@ -249,7 +253,7 @@ public class SmartMotorControllerConfig
   /**
    * {@link SmartMotorController} starting angle to be used during simulation.
    */
-  private       Optional<Angle>                               sim_startingPosition                = Optional.empty();
+  private Optional<Angle>  sim_startingPosition       = Optional.empty();
   /**
    * Maximum voltage output for the motor controller while using the closed loop controller.
    */
@@ -286,11 +290,11 @@ public class SmartMotorControllerConfig
   /**
    * Linear or {@link Distance} based closed loop controller.
    */
-  private boolean linearClosedLoopController = false;
+  private boolean          linearClosedLoopController = false;
   /**
    * Velocity trapezoidal profile.
    */
-  private boolean velocityTrapezoidalProfile = false;
+  private boolean          velocityTrapezoidalProfile = false;
 
   /**
    * Construct the {@link SmartMotorControllerConfig} for the {@link Subsystem}
@@ -322,6 +326,7 @@ public class SmartMotorControllerConfig
   {
     this.resetPreviousConfig = cfg.resetPreviousConfig;
     this.vendorConfig = cfg.vendorConfig;
+    this.vendorControlRequest = cfg.vendorControlRequest;
     this.subsystem = cfg.subsystem;
     this.basicOptions = EnumSet.copyOf(cfg.basicOptions);
     this.externalEncoderOptions = EnumSet.copyOf(cfg.externalEncoderOptions);
@@ -395,6 +400,19 @@ public class SmartMotorControllerConfig
   public SmartMotorControllerConfig withVendorConfig(Object vendorConfig)
   {
     this.vendorConfig = Optional.ofNullable(vendorConfig);
+    return this;
+  }
+
+  /**
+   * Set the vendor specific control request for the {@link SmartMotorController} which will be used in place of default
+   * or calculated ones.
+   *
+   * @param vendorControlRequest Vendor specific control request for velocity or position.
+   * @return {@link SmartMotorControllerConfig} for chaining
+   */
+  public SmartMotorControllerConfig withVendorControlRequest(Object vendorControlRequest)
+  {
+    this.vendorControlRequest = Optional.ofNullable(vendorControlRequest);
     return this;
   }
 
@@ -519,7 +537,6 @@ public class SmartMotorControllerConfig
   {
     return withSimStartingPosition(convertToMechanism(simStartingAngle));
   }
-
 
 
   /**
@@ -1556,7 +1573,7 @@ public class SmartMotorControllerConfig
 
   /**
    * Set the linear velocity trapezoidal profile for the {@link SmartMotorController}.
-   * 
+   *
    * @param maxAccel Max acceleration for the profile.
    * @param maxJerk  Max velocity for the profile.
    * @return {@link SmartMotorControllerConfig} for chaining.
@@ -2258,7 +2275,8 @@ public class SmartMotorControllerConfig
   public Optional<Angle> getStartingPosition()
   {
     basicOptions.remove(BasicOptions.StartingPosition);
-    if (RobotBase.isSimulation() && sim_startingPosition.isPresent()) {
+    if (RobotBase.isSimulation() && sim_startingPosition.isPresent())
+    {
       return sim_startingPosition;
     }
     return startingPosition;
@@ -2495,12 +2513,27 @@ public class SmartMotorControllerConfig
     return externalEncoderInverted;
   }
 
+  /**
+   * Get the vendor specific control request.
+   *
+   * @return Vendor specific control request for velocity or position.
+   */
+  public Optional<Object> getVendorControlRequest()
+  {
+    basicOptions.remove(BasicOptions.VendorControlRequest);
+    return vendorControlRequest;
+  }
+
 
   /**
    * Basic Options that should be applied to every {@link SmartMotorController}
    */
   private enum BasicOptions
   {
+    /**
+     * Vendor specific control request for velocity or position.
+     */
+    VendorControlRequest,
     /**
      * Persist the old config.
      */

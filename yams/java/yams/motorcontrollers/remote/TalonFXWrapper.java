@@ -20,10 +20,19 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
+import com.ctre.phoenix6.controls.MotionMagicExpoDutyCycle;
 import com.ctre.phoenix6.controls.MotionMagicExpoVoltage;
+import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.MotionMagicVelocityDutyCycle;
+import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.CANdi;
@@ -68,6 +77,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
+import java.util.function.Supplier;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
@@ -450,6 +460,21 @@ public class TalonFXWrapper extends SmartMotorController
     setEncoderPosition(m_config.convertToMechanism(distance));
   }
 
+  /**
+   * Ensure the controls request is sent successfully.
+   *
+   * @param controlRequest Control request to send.
+   */
+  private void ensureRequest(Supplier<StatusCode> controlRequest)
+  {
+    for (int i = 0; i < 8; i++)
+    {
+      if (controlRequest.get() == StatusCode.OK)
+      {return;}
+      Timer.delay(Milliseconds.of(1));
+    }
+  }
+
   @Override
   public void setPosition(Angle angle)
   {
@@ -459,16 +484,34 @@ public class TalonFXWrapper extends SmartMotorController
     {
       switch (m_positionReq.getName())
       {
+        case "MotionMagicDutyCycle":
+          ensureRequest(() -> m_talonfx.setControl(((MotionMagicDutyCycle) m_positionReq).withPosition(angle)));
+          break;
+        case "MotionMagicExpoDutyCycle":
+          ensureRequest(() -> m_talonfx.setControl(((MotionMagicExpoDutyCycle) m_positionReq).withPosition(angle)));
+          break;
         case "MotionMagicExpoVoltage":
-          m_talonfx.setControl(m_expoPositionReq.withPosition(angle));
+          ensureRequest(() -> m_talonfx.setControl(((MotionMagicExpoVoltage) m_positionReq).withPosition(angle)));
+          break;
+        case "MotionMagicTorqueCurrentFOC":
+          ensureRequest(() -> m_talonfx.setControl(((MotionMagicTorqueCurrentFOC) m_positionReq).withPosition(angle)));
           break;
         case "MotionMagicVoltage":
-          m_talonfx.setControl(m_trapPositionReq.withPosition(angle));
+          ensureRequest(() -> m_talonfx.setControl(((MotionMagicVoltage) m_positionReq).withPosition(angle)));
+          break;
+        case "PositionDutyCycle":
+          ensureRequest(() -> m_talonfx.setControl(((PositionDutyCycle) m_positionReq).withPosition(angle)));
+          break;
+        case "PositionTorqueCurrentFOC":
+          ensureRequest(() -> m_talonfx.setControl(((PositionTorqueCurrentFOC) m_positionReq).withPosition(angle)));
           break;
         case "PositionVoltage":
-        default:
-          m_talonfx.setControl(m_simplePositionReq.withPosition(angle));
+          ensureRequest(() -> m_talonfx.setControl(((PositionVoltage) m_positionReq).withPosition(angle)));
           break;
+        default:
+          throw new SmartMotorControllerConfigurationException(
+              "TalonFX(" + m_talonfx.getDeviceID() + ") does not support the '" + m_positionReq.getName() +
+              "' control request!", "Cannot use given control request", "withVendorControlRequest()");
       }
       m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setPosition(angle);}});
     }
@@ -495,13 +538,32 @@ public class TalonFXWrapper extends SmartMotorController
     {
       switch (m_velocityReq.getName())
       {
+        case "MotionMagicVelocityDutyCycle":
+          ensureRequest(() -> m_talonfx.setControl(((MotionMagicVelocityDutyCycle) m_velocityReq).withVelocity(
+              angularVelocity)));
+          break;
+        case "MotionMagicVelocityTorqueCurrentFOC":
+          ensureRequest(() -> m_talonfx.setControl(((MotionMagicVelocityTorqueCurrentFOC) m_velocityReq).withVelocity(
+              angularVelocity)));
+          break;
         case "MotionMagicVelocityVoltage":
-          m_talonfx.setControl(m_trapVelocityReq.withVelocity(angularVelocity));
+          ensureRequest(() -> m_talonfx.setControl(((MotionMagicVelocityVoltage) m_velocityReq).withVelocity(
+              angularVelocity)));
+          break;
+        case "VelocityDutyCycle":
+          ensureRequest(() -> m_talonfx.setControl(((VelocityDutyCycle) m_velocityReq).withVelocity(angularVelocity)));
+          break;
+        case "VelocityTorqueCurrentFOC":
+          ensureRequest(() -> m_talonfx.setControl(((VelocityTorqueCurrentFOC) m_velocityReq).withVelocity(
+              angularVelocity)));
           break;
         case "VelocityVoltage":
-        default:
-          m_talonfx.setControl(m_simpleVelocityReq.withVelocity(angularVelocity));
+          ensureRequest(() -> m_talonfx.setControl(((VelocityVoltage) m_velocityReq).withVelocity(angularVelocity)));
           break;
+        default:
+          throw new SmartMotorControllerConfigurationException(
+              "TalonFX(" + m_talonfx.getDeviceID() + ") does not support the '" + m_velocityReq.getName() +
+              "' control request!", "Cannot use given control request", "withVendorControlRequest()");
       }
       m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setVelocity(angularVelocity);}});
 //      m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismVelocity(angularVelocity));
@@ -518,6 +580,12 @@ public class TalonFXWrapper extends SmartMotorController
   public void setDutyCycle(double dutyCycle)
   {
     m_talonfx.set(dutyCycle);
+    if (dutyCycle == 0.0)
+    {
+      m_looseFollowers.ifPresent(looseFollower -> {
+        for (var follower : looseFollower) {follower.setDutyCycle(dutyCycle);}
+      });
+    }
     //m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismStatorDutyCycle(dutyCycle));
   }
 
@@ -837,7 +905,8 @@ public class TalonFXWrapper extends SmartMotorController
           applied = m_talonfx.setPosition(config.getStartingPosition().get());
           Timer.delay(Milliseconds.of(10).in(Seconds));
           iterations++;
-          if (iterations > 100) {
+          if (iterations > 100)
+          {
             break;
           }
         } while (!applied.isOK());
@@ -902,6 +971,44 @@ public class TalonFXWrapper extends SmartMotorController
       config.clearFollowers();
     }
 
+    if (config.getVendorControlRequest().isPresent())
+    {
+      var req = config.getVendorControlRequest().get();
+      if (req instanceof ControlRequest)
+      {
+        switch (((ControlRequest) req).getName())
+        {
+          case "MotionMagicDutyCycle":
+          case "MotionMagicExpoDutyCycle":
+          case "MotionMagicExpoVoltage":
+          case "MotionMagicTorqueCurrentFOC":
+          case "MotionMagicVoltage":
+          case "PositionDutyCycle":
+          case "PositionTorqueCurrentFOC":
+          case "PositionVoltage":
+            m_positionReq = ((ControlRequest) req);
+            break;
+          case "MotionMagicVelocityDutyCycle":
+          case "MotionMagicVelocityTorqueCurrentFOC":
+          case "MotionMagicVelocityVoltage":
+          case "VelocityDutyCycle":
+          case "VelocityTorqueCurrentFOC":
+          case "VelocityVoltage":
+            m_velocityReq = ((ControlRequest) req);
+            break;
+          default:
+            throw new SmartMotorControllerConfigurationException(
+                "TalonFX(" + m_talonfx.getDeviceID() + ") does not support the '" + ((ControlRequest) req).getName() +
+                "' control request!", "Cannot use given control request", "withVendorControlRequest()");
+        }
+      } else
+      {
+        throw new SmartMotorControllerConfigurationException(
+            "TalonFX(" + m_talonfx.getDeviceID() + ") does not support the '" + ((ControlRequest) req).getName() +
+            "' control request!", "Cannot use given control request", "withVendorControlRequest()");
+      }
+    }
+
     // Unsupported options.
     // TODO: This isn't really unsupported but needs to be adjusted to 1microsecond since the control loop runs at that speed
     if (config.getClosedLoopControlPeriod().isPresent())
@@ -949,6 +1056,8 @@ public class TalonFXWrapper extends SmartMotorController
   public void setVoltage(Voltage voltage)
   {
     m_talonfx.setVoltage(voltage.in(Volts));
+//    if (voltage.in(Volts) == 0.0)
+//    {m_looseFollowers.ifPresent(looseFollower -> {for (var follower : looseFollower) {follower.setVoltage(voltage);}});}
   }
 
   @Override
