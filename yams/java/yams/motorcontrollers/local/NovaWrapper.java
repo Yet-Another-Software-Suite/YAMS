@@ -456,6 +456,14 @@ public class NovaWrapper extends SmartMotorController
       m_pid.ifPresent(pidController -> {pidController.enableContinuousInput(min, max);});
     }
 
+    if (config.getVendorControlRequest().isPresent())
+    {
+      throw new SmartMotorControllerConfigurationException(
+          "ThriftyNova(" + m_nova.getID() + ") does not support the custom control requests!",
+          "Cannot use given control request",
+          "withVendorControlRequest()");
+    }
+
     if (m_config.getVendorConfig().isPresent())
     {m_nova.applyConfig(m_nova_config);}
     config.validateBasicOptions();
@@ -475,6 +483,12 @@ public class NovaWrapper extends SmartMotorController
   {
     m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismStatorDutyCycle(dutyCycle));
     m_nova.set(dutyCycle);
+    if (dutyCycle == 0.0)
+    {
+      m_looseFollowers.ifPresent(looseFollower -> {
+        for (var follower : looseFollower) {follower.setDutyCycle(dutyCycle);}
+      });
+    }
   }
 
   @Override
@@ -504,7 +518,9 @@ public class NovaWrapper extends SmartMotorController
   public void setVoltage(Voltage voltage)
   {
     m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismStatorVoltage(voltage));
-    m_nova.setVoltage(voltage);
+//    m_nova.setVoltage(voltage);
+//    if (voltage.in(Volts) == 0.0)
+    {m_looseFollowers.ifPresent(looseFollower -> {for (var follower : looseFollower) {follower.setVoltage(voltage);}});}
   }
 
   @Override
