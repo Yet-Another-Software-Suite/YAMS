@@ -1051,6 +1051,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the Differential coefficient.</div>
 </dd>
+<dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#getDataLogName()" class="member-name-link">getDataLogName()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
+<dd>
+<div class="block">Get the entry name for the smart motor controller in DataLog.</div>
+</dd>
 <dt><a href="yams/telemetry/MechanismTelemetry.html#getDataTable()" class="member-name-link">getDataTable()</a> - Method in class yams.telemetry.<a href="yams/telemetry/MechanismTelemetry.html" title="class in yams.telemetry">MechanismTelemetry</a></dt>
 <dd>
 <div class="block">Get the telemetry NetworkTable.</div>
@@ -1686,6 +1690,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the next velocity from <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/trajectory/ExponentialProfile.html" title="class or interface in edu.wpi.first.math.trajectory" class="external-link"><code>ExponentialProfile</code></a></div>
 </dd>
+<dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#getNT4Enabled()" class="member-name-link">getNT4Enabled()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
+<dd>
+<div class="block">Log telemetry to NT4?</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getOpenLoopRampRate()" class="member-name-link">getOpenLoopRampRate()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the open loop ramp rate.</div>
@@ -2197,6 +2205,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getVendorConfig()" class="member-name-link">getVendorConfig()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the vendor specific configuration object to mutate with <a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> options.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getVendorControlRequest()" class="member-name-link">getVendorControlRequest()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Get the vendor specific control request.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getVerbosity()" class="member-name-link">getVerbosity()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -3817,6 +3829,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Sets the error which is considered tolerable for use with atSetpoint().</div>
 </dd>
+<dt><a href="yams/telemetry/BooleanTelemetry.html#setupDataLog(java.lang.String)" class="member-name-link">setupDataLog(String)</a> - Method in class yams.telemetry.<a href="yams/telemetry/BooleanTelemetry.html" title="class in yams.telemetry">BooleanTelemetry</a></dt>
+<dd>
+<div class="block">Setup the DataLog entry for this telemetry field.</div>
+</dd>
+<dt><a href="yams/telemetry/DoubleTelemetry.html#setupDataLog(java.lang.String)" class="member-name-link">setupDataLog(String)</a> - Method in class yams.telemetry.<a href="yams/telemetry/DoubleTelemetry.html" title="class in yams.telemetry">DoubleTelemetry</a></dt>
+<dd>
+<div class="block">Setup the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/util/datalog/DataLog.html" title="class or interface in edu.wpi.first.util.datalog" class="external-link"><code>DataLog</code></a> with this entry.</div>
+</dd>
 <dt><a href="yams/telemetry/MechanismTelemetry.html#setupLoopTime()" class="member-name-link">setupLoopTime()</a> - Method in class yams.telemetry.<a href="yams/telemetry/MechanismTelemetry.html" title="class in yams.telemetry">MechanismTelemetry</a></dt>
 <dd>
 <div class="block">Setup loop time publisher.</div>
@@ -4661,7 +4681,7 @@ the order they are declared.</div>
 <dd>
 <div class="block">Agressiveness of the LQR, howfast it will attempt to achieve the desired state.</div>
 </dd>
-<dt><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html#withAim(edu.wpi.first.math.geometry.Pose2d,java.util.function.BooleanSupplier)" class="member-name-link">withAim(Pose2d, BooleanSupplier)</a> - Method in class yams.mechanisms.swerve.utility.<a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></dt>
+<dt><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html#withAim(java.util.function.Supplier,java.util.function.BooleanSupplier)" class="member-name-link">withAim(Supplier&lt;Pose2d&gt;, BooleanSupplier)</a> - Method in class yams.mechanisms.swerve.utility.<a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></dt>
 <dd>
 <div class="block">Aim the <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> at this pose while driving.</div>
 </dd>
@@ -4817,6 +4837,10 @@ the order they are declared.</div>
 <dt><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html#withCubeTranslationControllerAxis(java.util.function.BooleanSupplier)" class="member-name-link">withCubeTranslationControllerAxis(BooleanSupplier)</a> - Method in class yams.mechanisms.swerve.utility.<a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></dt>
 <dd>
 <div class="block">Cube the translation axis magnitude for a non-linear control scheme.</div>
+</dd>
+<dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#withDataLogName(java.lang.String)" class="member-name-link">withDataLogName(String)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
+<dd>
+<div class="block">Set up a DataLog entry for this <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
 </dd>
 <dt><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html#withDeadband(double)" class="member-name-link">withDeadband(double)</a> - Method in class yams.mechanisms.swerve.utility.<a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></dt>
 <dd>
@@ -5213,6 +5237,10 @@ the order they are declared.</div>
 <dd>
 <div class="block">Set the plane that the mechanism is on, used for position calculations.</div>
 </dd>
+<dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#withNetworkTables(boolean)" class="member-name-link">withNetworkTables(boolean)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
+<dd>
+<div class="block">Enable or disable NT4 Telemetry.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withOpenLoopRampRate(edu.wpi.first.units.measure.Time)" class="member-name-link">withOpenLoopRampRate(Time)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the open loop ramp rate.</div>
@@ -5220,6 +5248,10 @@ the order they are declared.</div>
 <dt><a href="yams/mechanisms/config/SwerveModuleConfig.html#withOptimization(boolean)" class="member-name-link">withOptimization(boolean)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></dt>
 <dd>
 <div class="block">Use <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html#optimize(edu.wpi.first.math.geometry.Rotation2d)" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState.optimize(Rotation2d)</code></a> to optimize each state.</div>
+</dd>
+<dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#withoutNetworkTables()" class="member-name-link">withoutNetworkTables()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
+<dd>
+<div class="block">Disable NetworkTable output.</div>
 </dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#withOutputVoltage()" class="member-name-link">withOutputVoltage()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
 <dd>
@@ -5648,6 +5680,11 @@ the order they are declared.</div>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withVendorConfig(java.lang.Object)" class="member-name-link">withVendorConfig(Object)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the vendor specific config for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> which will be used as a base.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withVendorControlRequest(java.lang.Object)" class="member-name-link">withVendorControlRequest(Object)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Set the vendor specific control request for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> which will be used in place of default
+ or calculated ones.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withVoltageCompensation(edu.wpi.first.units.measure.Voltage)" class="member-name-link">withVoltageCompensation(Voltage)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>

@@ -447,7 +447,7 @@ loadScripts(document, 'script');</script>
 <dt>Returns:</dt>
 <dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> that sets the arm to the desired angle.</dd>
 <dt>Implementation Note:</dt>
-<dd>This command will not stop. It should NOT be used when there is a default command on the Subsystem.</dd>
+<dd>This command will stop, but the last control request to the motor controller will continue. It should NOT be used when there is a default command on the Subsystem.</dd>
 </dl>
 </section>
 </li>
