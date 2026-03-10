@@ -981,8 +981,8 @@ public class SparkWrapper extends SmartMotorController
                                                                                   maxInput.orElse(Volts.of(
                                                                                               defaultMaxInput))
                                                                                           .in(Volts))));
+      m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setExponentialProfile(kV, kA, maxInput);}});
     }
-    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setExponentialProfile(kV, kA, maxInput);}});
   }
 
   @Override
