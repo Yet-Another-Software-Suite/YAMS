@@ -1181,6 +1181,7 @@ public class TalonFXSWrapper extends SmartMotorController
     } else
     {m_talonConfig.MotionMagic.withMotionMagicCruiseVelocity(m_config.convertToMechanism(maxVelocity));}
     forceConfigApply();
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMotionProfileMaxVelocity(maxVelocity);}});
   }
 
   @Override
@@ -1199,6 +1200,7 @@ public class TalonFXSWrapper extends SmartMotorController
     } else
     {m_talonConfig.MotionMagic.withMotionMagicAcceleration(m_config.convertToMechanism(maxAcceleration));}
     forceConfigApply();
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMotionProfileMaxAcceleration(maxAcceleration);}});
   }
 
   @Override
@@ -1216,6 +1218,7 @@ public class TalonFXSWrapper extends SmartMotorController
     } else
     {m_talonConfig.MotionMagic.withMotionMagicCruiseVelocity(maxVelocity);}
     forceConfigApply();
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMotionProfileMaxVelocity(maxVelocity);}});
   }
 
   @Override
@@ -1230,6 +1233,7 @@ public class TalonFXSWrapper extends SmartMotorController
     }
     m_talonConfig.MotionMagic.withMotionMagicAcceleration(maxAcceleration);
     forceConfigApply();
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMotionProfileMaxAcceleration(maxAcceleration);}});
   }
 
   @Override
@@ -1244,6 +1248,7 @@ public class TalonFXSWrapper extends SmartMotorController
     }
     m_talonConfig.MotionMagic.MotionMagicJerk = maxJerk.in(RotationsPerSecondPerSecond.per(Second));
     forceConfigApply();
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMotionProfileMaxJerk(maxJerk);}});
   }
 
   @Override
@@ -1270,6 +1275,7 @@ public class TalonFXSWrapper extends SmartMotorController
       m_talonConfig.MotionMagic.MotionMagicExpo_kV = kV.orElse(defaultkV);
       m_talonConfig.MotionMagic.MotionMagicExpo_kA = kA.orElse(defaultkA);
       forceConfigApply();
+      m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setExponentialProfile(kV, kA, maxInput);}});
     }
   }
 
@@ -1281,6 +1287,7 @@ public class TalonFXSWrapper extends SmartMotorController
     });
     m_talonConfig.Slot0.kP = kP;
     forceConfigApply();
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKp(kP);}});
   }
 
   @Override
@@ -1291,6 +1298,7 @@ public class TalonFXSWrapper extends SmartMotorController
     });
     m_talonConfig.Slot0.kI = kI;
     forceConfigApply();
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKi(kI);}});
   }
 
   @Override
@@ -1301,6 +1309,7 @@ public class TalonFXSWrapper extends SmartMotorController
     });
     m_talonConfig.Slot0.kD = kD;
     forceConfigApply();
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKd(kD);}});
   }
 
   @Override
@@ -1315,6 +1324,7 @@ public class TalonFXSWrapper extends SmartMotorController
     m_talonConfig.Slot0.kI = kI;
     m_talonConfig.Slot0.kD = kD;
     forceConfigApply();
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setFeedback(kP, kI, kD);}});
   }
 
   @Override
@@ -1331,6 +1341,7 @@ public class TalonFXSWrapper extends SmartMotorController
     });
     m_talonConfig.Slot0.kS = kS;
     forceConfigApply();
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKs(kS);}});
   }
 
   @Override
@@ -1347,6 +1358,7 @@ public class TalonFXSWrapper extends SmartMotorController
     });
     m_talonConfig.Slot0.kV = kV;
     forceConfigApply();
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKv(kV);}});
   }
 
   @Override
@@ -1363,6 +1375,7 @@ public class TalonFXSWrapper extends SmartMotorController
     });
     m_talonConfig.Slot0.kA = kA;
     forceConfigApply();
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKa(kA);}});
   }
 
   @Override
@@ -1377,6 +1390,7 @@ public class TalonFXSWrapper extends SmartMotorController
     System.out.println("Setting kG to " + kG);
     m_talonConfig.Slot0.kG = kG;
     forceConfigApply();
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKg(kG);}});
   }
 
   @Override
@@ -1406,6 +1420,7 @@ public class TalonFXSWrapper extends SmartMotorController
     m_talonConfig.Slot0.kA = kA;
     m_talonConfig.Slot0.kG = kG;
     forceConfigApply();
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setFeedforward(kS, kV, kA, kG);}});
   }
 
   @Override
@@ -1415,6 +1430,7 @@ public class TalonFXSWrapper extends SmartMotorController
     m_talonConfig.CurrentLimits.withStatorCurrentLimit(currentLimit);
     m_talonConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     forceConfigApply();
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setStatorCurrentLimit(currentLimit);}});
   }
 
   @Deprecated
@@ -1423,6 +1439,7 @@ public class TalonFXSWrapper extends SmartMotorController
     m_talonConfig.CurrentLimits.withSupplyCurrentLimit(currentLimit);
     m_talonConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     forceConfigApply();
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setSupplyCurrentLimit(currentLimit);}});
   }
 
   @Override
@@ -1431,6 +1448,7 @@ public class TalonFXSWrapper extends SmartMotorController
     m_config.withClosedLoopRampRate(rampRate);
     m_talonConfig.ClosedLoopRamps.withDutyCycleClosedLoopRampPeriod(rampRate);
     forceConfigApply();
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setClosedLoopRampRate(rampRate);}});
   }
 
   @Override
@@ -1439,6 +1457,7 @@ public class TalonFXSWrapper extends SmartMotorController
     m_config.withOpenLoopRampRate(rampRate);
     m_talonConfig.OpenLoopRamps.withDutyCycleOpenLoopRampPeriod(rampRate);
     forceConfigApply();
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setOpenLoopRampRate(rampRate);}});
   }
 
   @Override
@@ -1450,6 +1469,7 @@ public class TalonFXSWrapper extends SmartMotorController
       m_talonConfig.SoftwareLimitSwitch.withForwardSoftLimitThreshold(m_config.convertToMechanism(upperLimit))
                                        .withForwardSoftLimitEnable(true);
       forceConfigApply();
+      m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMeasurementUpperLimit(upperLimit);}});
     }
   }
 
@@ -1461,6 +1481,7 @@ public class TalonFXSWrapper extends SmartMotorController
       m_config.withSoftLimit(lowerLimit, m_config.convertFromMechanism(m_config.getMechanismUpperLimit().get()));
       m_talonConfig.SoftwareLimitSwitch.withReverseSoftLimitThreshold(m_config.convertToMechanism(lowerLimit));
       forceConfigApply();
+      m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMeasurementLowerLimit(lowerLimit);}});
     }
   }
 
@@ -1472,6 +1493,7 @@ public class TalonFXSWrapper extends SmartMotorController
     });
     m_talonConfig.SoftwareLimitSwitch.withForwardSoftLimitThreshold(upperLimit).withForwardSoftLimitEnable(true);
     forceConfigApply();
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismUpperLimit(upperLimit);}});
   }
 
   @Override
@@ -1482,6 +1504,7 @@ public class TalonFXSWrapper extends SmartMotorController
     });
     m_talonConfig.SoftwareLimitSwitch.withReverseSoftLimitThreshold(lowerLimit);
     forceConfigApply();
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismLowerLimit(lowerLimit);}});
   }
 
   /**

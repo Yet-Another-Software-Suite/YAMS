@@ -885,6 +885,7 @@ public class SparkWrapper extends SmartMotorController
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                      : PersistMode.kPersistParameters);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMotionProfileMaxVelocity(maxVelocity);}});
   }
 
   @Override
@@ -902,6 +903,7 @@ public class SparkWrapper extends SmartMotorController
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                      : PersistMode.kPersistParameters);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMotionProfileMaxAcceleration(maxAcceleration);}});
   }
 
   @Override
@@ -918,6 +920,7 @@ public class SparkWrapper extends SmartMotorController
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                      : PersistMode.kPersistParameters);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMotionProfileMaxVelocity(maxVelocity);}});
   }
 
   @Override
@@ -935,6 +938,7 @@ public class SparkWrapper extends SmartMotorController
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                      : PersistMode.kPersistParameters);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMotionProfileMaxAcceleration(maxAcceleration);}});
   }
 
   @Override
@@ -952,6 +956,7 @@ public class SparkWrapper extends SmartMotorController
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                      : PersistMode.kPersistParameters);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMotionProfileMaxJerk(maxJerk);}});
   }
 
   @Override
@@ -975,6 +980,7 @@ public class SparkWrapper extends SmartMotorController
                                                                                               defaultMaxInput))
                                                                                           .in(Volts))));
     }
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setExponentialProfile(kV, kA, maxInput);}});
   }
 
   @Override
@@ -989,6 +995,7 @@ public class SparkWrapper extends SmartMotorController
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                      : PersistMode.kPersistParameters);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKp(kP);}});
   }
 
   @Override
@@ -1002,6 +1009,7 @@ public class SparkWrapper extends SmartMotorController
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                      : PersistMode.kPersistParameters);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKi(kI);}});
 
   }
 
@@ -1016,6 +1024,8 @@ public class SparkWrapper extends SmartMotorController
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                      : PersistMode.kPersistParameters);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKd(kD);}});
+
   }
 
   @Override
@@ -1031,6 +1041,7 @@ public class SparkWrapper extends SmartMotorController
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                      : PersistMode.kPersistParameters);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setFeedback(kP, kI, kD);}});
   }
 
   @Override
@@ -1050,6 +1061,7 @@ public class SparkWrapper extends SmartMotorController
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                      : PersistMode.kPersistParameters);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKs(kS);}});
   }
 
   @Override
@@ -1069,6 +1081,7 @@ public class SparkWrapper extends SmartMotorController
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                      : PersistMode.kPersistParameters);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKv(kV);}});
   }
 
   @Override
@@ -1088,6 +1101,7 @@ public class SparkWrapper extends SmartMotorController
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                      : PersistMode.kPersistParameters);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKa(kA);}});
   }
 
   @Override
@@ -1110,6 +1124,8 @@ public class SparkWrapper extends SmartMotorController
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                      : PersistMode.kPersistParameters);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKg(kG);}});
+
   }
 
   @Override
@@ -1139,6 +1155,7 @@ public class SparkWrapper extends SmartMotorController
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                      : PersistMode.kPersistParameters);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setFeedforward(kS, kV, kA, kG);}});
   }
 
   @Override
@@ -1150,12 +1167,14 @@ public class SparkWrapper extends SmartMotorController
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                      : PersistMode.kPersistParameters);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setStatorCurrentLimit(currentLimit);}});
   }
 
   @Deprecated
   /// Unsupported.
   public void setSupplyCurrentLimit(Current currentLimit)
   {
+//    m_looseFollowers.ifPresent(smcs -> {for(var f : smcs){f.setSupplyCurrentLimit(currentLimit);}});
   }
 
   @Override
@@ -1167,6 +1186,7 @@ public class SparkWrapper extends SmartMotorController
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                      : PersistMode.kPersistParameters);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setClosedLoopRampRate(rampRate);}});
   }
 
   @Override
@@ -1178,6 +1198,7 @@ public class SparkWrapper extends SmartMotorController
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                      : PersistMode.kPersistParameters);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setOpenLoopRampRate(rampRate);}});
   }
 
   @Override
@@ -1191,6 +1212,7 @@ public class SparkWrapper extends SmartMotorController
                              ResetMode.kNoResetSafeParameters,
                              DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                        : PersistMode.kPersistParameters);
+      m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMeasurementUpperLimit(upperLimit);}});
     }
   }
 
@@ -1205,6 +1227,7 @@ public class SparkWrapper extends SmartMotorController
                              ResetMode.kNoResetSafeParameters,
                              DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                        : PersistMode.kPersistParameters);
+      m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMeasurementLowerLimit(lowerLimit);}});
     }
   }
 
@@ -1219,6 +1242,7 @@ public class SparkWrapper extends SmartMotorController
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                      : PersistMode.kPersistParameters);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismUpperLimit(upperLimit);}});
   }
 
   @Override
@@ -1232,6 +1256,7 @@ public class SparkWrapper extends SmartMotorController
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                      : PersistMode.kPersistParameters);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismLowerLimit(lowerLimit);}});
   }
 
   @Override

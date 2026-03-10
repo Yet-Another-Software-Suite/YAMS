@@ -631,6 +631,7 @@ public class NovaWrapper extends SmartMotorController
       m_trapezoidProfile = Optional.of(new TrapezoidProfile(new Constraints(maxVelocity.in(MetersPerSecond),
                                                                             m_config.getTrapezoidProfile()
                                                                                     .orElseThrow().maxAcceleration)));
+      m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMotionProfileMaxVelocity(maxVelocity);}});
     }
   }
 
@@ -642,6 +643,7 @@ public class NovaWrapper extends SmartMotorController
       m_trapezoidProfile = Optional.of(new TrapezoidProfile(new Constraints(m_config.getTrapezoidProfile()
                                                                                     .orElseThrow().maxVelocity,
                                                                             maxAcceleration.in(MetersPerSecondPerSecond))));
+      m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMotionProfileMaxAcceleration(maxAcceleration);}});
     }
   }
 
@@ -653,6 +655,7 @@ public class NovaWrapper extends SmartMotorController
       m_trapezoidProfile = Optional.of(new TrapezoidProfile(new Constraints(maxVelocity.in(RotationsPerSecond),
                                                                             m_config.getTrapezoidProfile()
                                                                                     .orElseThrow().maxAcceleration)));
+      m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMotionProfileMaxVelocity(maxVelocity);}});
     }
   }
 
@@ -665,6 +668,7 @@ public class NovaWrapper extends SmartMotorController
                                                                                     .orElseThrow().maxVelocity,
                                                                             maxAcceleration.in(
                                                                                 RotationsPerSecondPerSecond))));
+      m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMotionProfileMaxAcceleration(maxAcceleration);}});
     }
   }
 
@@ -677,6 +681,8 @@ public class NovaWrapper extends SmartMotorController
                                                                                     .orElseThrow().maxVelocity,
                                                                             maxJerk.in(
                                                                                 RotationsPerSecondPerSecond.per(Second)))));
+      m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMotionProfileMaxJerk(maxJerk);}});
+
     }
   }
 
@@ -700,6 +706,7 @@ public class NovaWrapper extends SmartMotorController
                                                                                   maxInput.orElse(Volts.of(
                                                                                               defaultMaxInput))
                                                                                           .in(Volts))));
+      m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setExponentialProfile(kV, kA, maxInput);}});
     }
   }
 
@@ -709,6 +716,7 @@ public class NovaWrapper extends SmartMotorController
     m_pid.ifPresent(simplePidController -> {
       simplePidController.setP(kP);
     });
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKp(kP);}});
   }
 
   @Override
@@ -717,7 +725,7 @@ public class NovaWrapper extends SmartMotorController
     m_pid.ifPresent(simplePidController -> {
       simplePidController.setI(kI);
     });
-
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKp(kI);}});
   }
 
   @Override
@@ -726,6 +734,7 @@ public class NovaWrapper extends SmartMotorController
     m_pid.ifPresent(simplePidController -> {
       simplePidController.setD(kD);
     });
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKd(kD);}});
   }
 
   @Override
@@ -734,6 +743,7 @@ public class NovaWrapper extends SmartMotorController
     setKp(kP);
     setKi(kI);
     setKd(kD);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setFeedback(kP, kI, kD);}});
   }
 
   @Override
@@ -748,6 +758,7 @@ public class NovaWrapper extends SmartMotorController
     m_config.getElevatorFeedforward().ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKs(kS);
     });
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKs(kS);}});
   }
 
   @Override
@@ -762,6 +773,7 @@ public class NovaWrapper extends SmartMotorController
     m_config.getElevatorFeedforward().ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKv(kV);
     });
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKv(kV);}});
   }
 
   @Override
@@ -776,6 +788,7 @@ public class NovaWrapper extends SmartMotorController
     m_config.getElevatorFeedforward().ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKa(kA);
     });
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKa(kA);}});
   }
 
   @Override
@@ -787,6 +800,7 @@ public class NovaWrapper extends SmartMotorController
     m_config.getElevatorFeedforward().ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKg(kG);
     });
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKg(kG);}});
   }
 
   @Override
@@ -796,6 +810,7 @@ public class NovaWrapper extends SmartMotorController
     setKv(kV);
     setKa(kA);
     setKg(kG);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setFeedforward(kS, kV, kA, kG);}});
   }
 
   @Override
@@ -803,6 +818,7 @@ public class NovaWrapper extends SmartMotorController
   {
     m_config.withStatorCurrentLimit(currentLimit);
     m_nova.setMaxCurrent(CurrentType.STATOR, currentLimit.in(Amps));
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setStatorCurrentLimit(currentLimit);}});
   }
 
   @Override
@@ -810,6 +826,7 @@ public class NovaWrapper extends SmartMotorController
   {
     m_config.withSupplyCurrentLimit(currentLimit);
     m_nova.setMaxCurrent(CurrentType.SUPPLY, currentLimit.in(Amps));
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setSupplyCurrentLimit(currentLimit);}});
   }
 
   @Override
@@ -818,12 +835,14 @@ public class NovaWrapper extends SmartMotorController
     m_config.withClosedLoopRampRate(rampRate);
     m_nova.setRampUp(rampRate.in(Seconds));
     m_nova.setRampDown(rampRate.in(Seconds));
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setClosedLoopRampRate(rampRate);}});
   }
 
   @Deprecated
   /// Unsupported
   public void setOpenLoopRampRate(Time rampRate)
   {
+//    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setOpenLoopRampRate(rampRate);}});
   }
 
   @Override
@@ -832,6 +851,7 @@ public class NovaWrapper extends SmartMotorController
     if (m_config.getMechanismCircumference().isPresent() && m_config.getMechanismLowerLimit().isPresent())
     {
       m_config.withSoftLimit(m_config.convertFromMechanism(m_config.getMechanismLowerLimit().get()), upperLimit);
+      m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMeasurementUpperLimit(upperLimit);}});
     }
   }
 
@@ -841,6 +861,7 @@ public class NovaWrapper extends SmartMotorController
     if (m_config.getMechanismCircumference().isPresent() && m_config.getMechanismUpperLimit().isPresent())
     {
       m_config.withSoftLimit(lowerLimit, m_config.convertFromMechanism(m_config.getMechanismUpperLimit().get()));
+      m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMeasurementLowerLimit(lowerLimit);}});
     }
   }
 
@@ -850,6 +871,7 @@ public class NovaWrapper extends SmartMotorController
     m_config.getMechanismLowerLimit().ifPresent(lowerLimit -> {
       m_config.withSoftLimit(lowerLimit, upperLimit);
     });
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismUpperLimit(upperLimit);}});
   }
 
   @Override
@@ -858,6 +880,8 @@ public class NovaWrapper extends SmartMotorController
     m_config.getMechanismUpperLimit().ifPresent(upperLimit -> {
       m_config.withSoftLimit(lowerLimit, upperLimit);
     });
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismUpperLimit(lowerLimit);}});
+
   }
 
   @Override
