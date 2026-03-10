@@ -967,6 +967,8 @@ public abstract class SmartMotorController
     {
       setupTelemetry();
     }
+    // TODO: Uncomment after the 2026 season
+//    m_looseFollowers.ifPresent(smcs -> {for(var f : smcs){f.updateTelemetry();}});
   }
 
   /**
