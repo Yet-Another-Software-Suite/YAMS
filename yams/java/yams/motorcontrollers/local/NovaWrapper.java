@@ -727,7 +727,7 @@ public class NovaWrapper extends SmartMotorController
     m_pid.ifPresent(simplePidController -> {
       simplePidController.setI(kI);
     });
-    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKp(kI);}});
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKi(kI);}});
   }
 
   @Override
@@ -882,7 +882,7 @@ public class NovaWrapper extends SmartMotorController
     m_config.getMechanismUpperLimit().ifPresent(upperLimit -> {
       m_config.withSoftLimit(lowerLimit, upperLimit);
     });
-    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismUpperLimit(lowerLimit);}});
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismLowerLimit(lowerLimit);}});
 
   }
 
