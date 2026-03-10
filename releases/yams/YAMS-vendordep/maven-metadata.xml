@@ -3,8 +3,8 @@
   <groupId>yams</groupId>
   <artifactId>YAMS-vendordep</artifactId>
   <versioning>
-    <latest>2026.3.10</latest>
-    <release>2026.3.10</release>
+    <latest>2026.3.10.1</latest>
+    <release>2026.3.10.1</release>
     <versions>
       <version>2025.9.2</version>
       <version>2025.9.4</version>
@@ -57,7 +57,8 @@
       <version>2026.2.24</version>
       <version>2026.3.5</version>
       <version>2026.3.10</version>
+      <version>2026.3.10.1</version>
     </versions>
-    <lastUpdated>20260310144204</lastUpdated>
+    <lastUpdated>20260310164427</lastUpdated>
   </versioning>
 </metadata>
