@@ -176,6 +176,8 @@ public class NovaWrapper extends SmartMotorController
 //        sim.setAngularVelocity(m_simSupplier.get().getMechanismVelocity().in(RadiansPerSecond));
 //        sim.update(config.getClosedLoopControlPeriod().in(Seconds));
 //      });
+      // TODO: Uncomment after the 2026 season
+//      m_looseFollowers.ifPresent(smcs -> {for(var f : smcs){f.simIterate();}});
     }
   }
 
