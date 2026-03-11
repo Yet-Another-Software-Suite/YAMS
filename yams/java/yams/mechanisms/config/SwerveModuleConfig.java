@@ -28,11 +28,11 @@ public class SwerveModuleConfig
   /**
    * {@link SmartMotorController} for the {@link yams.mechanisms.swerve.SwerveModule}
    */
-  private Optional<SmartMotorController> driveMotor;
+  private Optional<SmartMotorController> driveMotor   = Optional.empty();
   /**
    * {@link SmartMotorController} for the {@link yams.mechanisms.swerve.SwerveModule}
    */
-  private Optional<SmartMotorController> azimuthMotor;
+  private Optional<SmartMotorController> azimuthMotor = Optional.empty();
   /**
    * Telemetry name.
    */

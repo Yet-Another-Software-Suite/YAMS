@@ -27,7 +27,7 @@ public class ArmConfig
   /**
    * {@link SmartMotorController} for the {@link yams.mechanisms.positional.Arm}
    */
-  private   Optional<SmartMotorController> motor;
+  private Optional<SmartMotorController> motor = Optional.empty();
   /**
    * The network root of the mechanism (Optional).
    */

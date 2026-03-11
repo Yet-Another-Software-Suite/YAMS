@@ -34,7 +34,7 @@ public class FlyWheelConfig
   /**
    * {@link SmartMotorController} for the {@link FlyWheel}
    */
-  private   Optional<SmartMotorController> motor;
+  private Optional<SmartMotorController> motor = Optional.empty();
   /**
    * The network root of the mechanism (Optional).
    */
