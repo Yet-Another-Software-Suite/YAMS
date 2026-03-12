@@ -2249,7 +2249,7 @@ public class SmartMotorControllerConfig
   public Optional<Boolean> getMotorInverted()
   {
     basicOptions.remove(BasicOptions.MotorInverted);
-    if (RobotBase.isSimulation())
+    if (RobotBase.isSimulation() && motorInverted.isPresent())
     {return Optional.of(false);}
     return motorInverted;
   }
@@ -2506,7 +2506,7 @@ public class SmartMotorControllerConfig
   public Optional<Boolean> getExternalEncoderInverted()
   {
     externalEncoderOptions.remove(ExternalEncoderOptions.ExternalEncoderInverted);
-    if (RobotBase.isSimulation())
+    if (RobotBase.isSimulation() && externalEncoderInverted.isPresent())
     {return Optional.of(false);}
     return externalEncoderInverted;
   }
