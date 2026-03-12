@@ -68,6 +68,10 @@ public class PivotConfig
    */
   private   Optional<Angle>                startingPosition        = Optional.empty();
   /**
+   * Simulated starting position.
+   */
+  private Optional<Angle> simStartingPosition = Optional.empty();
+  /**
    * Soft limits of the pivot motor {@link SmartMotorController} closed loop controller. (LowerLimit, UpperLimit)
    */
   private   Optional<Pair<Angle, Angle>>   softLimits              = Optional.empty();
@@ -104,6 +108,7 @@ public class PivotConfig
    */
   public PivotConfig(PivotConfig cfg)
   {
+    this.simStartingPosition = cfg.simStartingPosition;
     this.motor = cfg.motor;
     this.networkRoot = cfg.networkRoot;
     this.telemetryName = cfg.telemetryName;
@@ -122,6 +127,18 @@ public class PivotConfig
   public PivotConfig clone()
   {
     return new PivotConfig(this);
+  }
+
+  /**
+   * Set the simulation starting position of the pivot. Only ever used in simulation.
+   *
+   * @param position {@link Angle} of the starting position of the pivot.
+   * @return {@link PivotConfig} for chaining.
+   */
+  public PivotConfig withSimStartingPosition(Angle position)
+  {
+    this.simStartingPosition = Optional.ofNullable(position);
+    return this;
   }
 
   /**
@@ -162,7 +179,8 @@ public class PivotConfig
    * Configure the MOI directly instead of estimating it with the length and mass of the
    * {@link yams.mechanisms.positional.Pivot} for simulation.
    *
-   * @param MOI Moment of Inertia of the {@link yams.mechanisms.positional.Pivot}. in {@link edu.wpi.first.units.Units#KilogramSquareMeters}
+   * @param MOI Moment of Inertia of the {@link yams.mechanisms.positional.Pivot}. in
+   *            {@link edu.wpi.first.units.Units#KilogramSquareMeters}
    * @return {@link PivotConfig} for chaining.
    * @implNote Please use {@link #withMOI(MomentOfInertia)} instead. Default unit is KilogramSquareMeters
    */

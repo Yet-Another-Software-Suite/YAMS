@@ -66,6 +66,7 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.function.Supplier;
 import yams.exceptions.SmartMotorControllerConfigurationException;
+import yams.gearing.MechanismGearing;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
@@ -451,9 +452,9 @@ public class SparkWrapper extends SmartMotorController
     double velocityConversionFactor = config.getGearing().getRotorToMechanismRatio() / 60.0;
 
     // Set base config options
-    m_sparkBaseConfig.openLoopRampRate(config.getOpenLoopRampRate().in(Seconds))
-                     .closedLoopRampRate(config.getClosedLoopRampRate().in(Seconds))
-                     .inverted(config.getMotorInverted());
+    config.getOpenLoopRampRate().ifPresent(rate -> m_sparkBaseConfig.openLoopRampRate(rate.in(Seconds)));
+    config.getClosedLoopRampRate().ifPresent(rate -> m_sparkBaseConfig.closedLoopRampRate(rate.in(Seconds)));
+    config.getMotorInverted().ifPresent(m_sparkBaseConfig::inverted);
     m_sparkBaseConfig.encoder.positionConversionFactor(positionConversionFactor)
                              .velocityConversionFactor(velocityConversionFactor);
 
@@ -560,11 +561,12 @@ public class SparkWrapper extends SmartMotorController
       Object externalEncoder = config.getExternalEncoder().get();
       if (externalEncoder instanceof SparkAbsoluteEncoder)
       {
-        double absoluteEncoderConversionFactor = config.getExternalEncoderGearing().getRotorToMechanismRatio();
+        double absoluteEncoderConversionFactor = config.getExternalEncoderGearing().orElse(MechanismGearing.kOne)
+                                                       .getRotorToMechanismRatio();
         m_sparkAbsoluteEncoder = Optional.of((SparkAbsoluteEncoder) externalEncoder);
         m_sparkBaseConfig.absoluteEncoder.positionConversionFactor(absoluteEncoderConversionFactor)
-                                         .velocityConversionFactor(absoluteEncoderConversionFactor / 60)
-                                         .inverted(config.getExternalEncoderInverted());
+                                         .velocityConversionFactor(absoluteEncoderConversionFactor / 60);
+        config.getExternalEncoderInverted().ifPresent(m_sparkBaseConfig.absoluteEncoder::inverted);
         // Set the absolute encoder as the primary feedback sensor for closed loop control.
         m_sparkBaseConfig.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
 
@@ -614,7 +616,7 @@ public class SparkWrapper extends SmartMotorController
                                                              ".withExternalEncoderZeroOffset");
       }
 
-      if (config.getExternalEncoderInverted())
+      if (config.getExternalEncoderInverted().isPresent())
       {
         throw new SmartMotorControllerConfigurationException(
             "External encoder cannot be inverted because no external encoder exists",
@@ -622,7 +624,7 @@ public class SparkWrapper extends SmartMotorController
             "withExternalEncoderInverted");
       }
 
-      if (config.getExternalEncoderGearing().getRotorToMechanismRatio() != 1.0)
+      if (config.getExternalEncoderGearing().isPresent())
       {
         throw new SmartMotorControllerConfigurationException(
             "External encoder gearing is not supported when there is no external encoder",
@@ -666,7 +668,7 @@ public class SparkWrapper extends SmartMotorController
                                                            ".withZeroOffset");
     }
 
-    if (config.getExternalEncoderInverted() && config.getExternalEncoder().isEmpty() && !useExternalEncoder)
+    if (config.getExternalEncoderInverted().isPresent() && config.getExternalEncoder().isEmpty() && !useExternalEncoder)
     {
       throw new SmartMotorControllerConfigurationException(
           "External encoder cannot be inverted because no external encoder exists",
@@ -674,7 +676,7 @@ public class SparkWrapper extends SmartMotorController
           "withExternalEncoderInverted");
     }
 
-    if (config.getExternalEncoderGearing().getRotorToMechanismRatio() != 1.0 && config.getExternalEncoder().isEmpty() &&
+    if (config.getExternalEncoderGearing().isPresent() && config.getExternalEncoder().isEmpty() &&
         !useExternalEncoder)
     {
       throw new SmartMotorControllerConfigurationException(
@@ -717,7 +719,7 @@ public class SparkWrapper extends SmartMotorController
           "withFeedbackSynchronizationThreshold");
     }
 
-    if (config.getEncoderInverted())
+    if (config.getEncoderInverted().isPresent())
     {
       throw new IllegalArgumentException("[ERROR] Spark relative encoder cannot be inverted!");
     }

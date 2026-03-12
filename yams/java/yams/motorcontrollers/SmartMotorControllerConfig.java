@@ -13,7 +13,6 @@ import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Second;
-import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.hal.HAL;
@@ -69,7 +68,7 @@ public class SmartMotorControllerConfig
   /**
    * Reset old configurations, so they are no longer persistent.
    */
-  private boolean          resetPreviousConfig        = true;
+  private boolean                    resetPreviousConfig        = true;
   /**
    * Vendor specific configuration for the {@link SmartMotorController}.
    */
@@ -77,7 +76,7 @@ public class SmartMotorControllerConfig
   /**
    * Vendor specific control request for the {@link SmartMotorController}
    */
-  private Optional<Object> vendorControlRequest       = Optional.empty();
+  private Optional<Object>           vendorControlRequest       = Optional.empty();
   /**
    * Subsystem that the {@link SmartMotorController} controls.
    */
@@ -104,7 +103,7 @@ public class SmartMotorControllerConfig
   /**
    * External encoder inversion state.
    */
-  private       boolean                                       externalEncoderInverted            = false;
+  private Optional<Boolean>          externalEncoderInverted    = Optional.empty();
   /**
    * Follower motors and inversion.
    */
@@ -172,8 +171,7 @@ public class SmartMotorControllerConfig
   /**
    * External encoder gearing, defaults to 1:1.
    */
-  private       MechanismGearing                              externalEncoderGearing             = new MechanismGearing(
-      1);
+  private Optional<MechanismGearing> externalEncoderGearing     = Optional.empty();
   /**
    * Mechanism Circumference for distance calculations.
    */
@@ -185,11 +183,11 @@ public class SmartMotorControllerConfig
   /**
    * Open loop ramp rate, amount of time to go from 0 to 100 speed..
    */
-  private       Time                                          openLoopRampRate                   = Seconds.of(0);
+  private Optional<Time>             openLoopRampRate           = Optional.empty();
   /**
    * Closed loop ramp rate, amount of time to go from 0 to 100 speed.
    */
-  private       Time                                          closeLoopRampRate                  = Seconds.of(0);
+  private Optional<Time>             closeLoopRampRate          = Optional.empty();
   /**
    * Set the stator current limit in Amps for the {@link SmartMotorController}
    */
@@ -237,11 +235,11 @@ public class SmartMotorControllerConfig
   /**
    * The encoder readings are inverted.
    */
-  private       boolean                                       encoderInverted                    = false;
+  private Optional<Boolean>          encoderInverted            = Optional.empty();
   /**
    * The motor is inverted.
    */
-  private       boolean                                       motorInverted                      = false;
+  private Optional<Boolean>          motorInverted              = Optional.empty();
   /**
    * Use the provided external encoder if set.
    */
@@ -253,7 +251,7 @@ public class SmartMotorControllerConfig
   /**
    * {@link SmartMotorController} starting angle to be used during simulation.
    */
-  private Optional<Angle>  sim_startingPosition       = Optional.empty();
+  private Optional<Angle>            sim_startingPosition       = Optional.empty();
   /**
    * Maximum voltage output for the motor controller while using the closed loop controller.
    */
@@ -290,11 +288,11 @@ public class SmartMotorControllerConfig
   /**
    * Linear or {@link Distance} based closed loop controller.
    */
-  private boolean          linearClosedLoopController = false;
+  private boolean                    linearClosedLoopController = false;
   /**
    * Velocity trapezoidal profile.
    */
-  private boolean          velocityTrapezoidalProfile = false;
+  private boolean                    velocityTrapezoidalProfile = false;
 
   /**
    * Construct the {@link SmartMotorControllerConfig} for the {@link Subsystem}
@@ -444,7 +442,7 @@ public class SmartMotorControllerConfig
    */
   public SmartMotorControllerConfig withExternalEncoderInverted(boolean externalEncoderInverted)
   {
-    this.externalEncoderInverted = externalEncoderInverted;
+    this.externalEncoderInverted = Optional.of(externalEncoderInverted);
     return this;
   }
 
@@ -559,7 +557,7 @@ public class SmartMotorControllerConfig
    */
   public SmartMotorControllerConfig withEncoderInverted(boolean inverted)
   {
-    this.encoderInverted = inverted;
+    this.encoderInverted = Optional.of(inverted);
     return this;
   }
 
@@ -571,7 +569,7 @@ public class SmartMotorControllerConfig
    */
   public SmartMotorControllerConfig withMotorInverted(boolean motorInverted)
   {
-    this.motorInverted = motorInverted;
+    this.motorInverted = Optional.of(motorInverted);
     return this;
   }
 
@@ -1043,7 +1041,7 @@ public class SmartMotorControllerConfig
    */
   public SmartMotorControllerConfig withClosedLoopRampRate(Time rate)
   {
-    this.closeLoopRampRate = rate;
+    this.closeLoopRampRate = Optional.of(rate);
     return this;
   }
 
@@ -1056,7 +1054,7 @@ public class SmartMotorControllerConfig
    */
   public SmartMotorControllerConfig withOpenLoopRampRate(Time rate)
   {
-    this.openLoopRampRate = rate;
+    this.openLoopRampRate = Optional.of(rate);
     return this;
   }
 
@@ -2004,7 +2002,7 @@ public class SmartMotorControllerConfig
    *
    * @return Open loop ramp rate.
    */
-  public Time getOpenLoopRampRate()
+  public Optional<Time> getOpenLoopRampRate()
   {
     basicOptions.remove(BasicOptions.OpenLoopRampRate);
     return openLoopRampRate;
@@ -2015,7 +2013,7 @@ public class SmartMotorControllerConfig
    *
    * @return Closed loop ramp.
    */
-  public Time getClosedLoopRampRate()
+  public Optional<Time> getClosedLoopRampRate()
   {
     basicOptions.remove(BasicOptions.ClosedLoopRampRate);
     return closeLoopRampRate;
@@ -2237,7 +2235,7 @@ public class SmartMotorControllerConfig
    *
    * @return encoder inversion state
    */
-  public boolean getEncoderInverted()
+  public Optional<Boolean> getEncoderInverted()
   {
     basicOptions.remove(BasicOptions.EncoderInverted);
     return encoderInverted;
@@ -2248,11 +2246,11 @@ public class SmartMotorControllerConfig
    *
    * @return moto inversion state.
    */
-  public boolean getMotorInverted()
+  public Optional<Boolean> getMotorInverted()
   {
     basicOptions.remove(BasicOptions.MotorInverted);
     if (RobotBase.isSimulation())
-    {return false;}
+    {return Optional.of(false);}
     return motorInverted;
   }
 
@@ -2320,7 +2318,7 @@ public class SmartMotorControllerConfig
    *
    * @return External encoder gearing.
    */
-  public MechanismGearing getExternalEncoderGearing()
+  public Optional<MechanismGearing> getExternalEncoderGearing()
   {
     externalEncoderOptions.remove(ExternalEncoderOptions.ExternalGearing);
     return externalEncoderGearing;
@@ -2343,7 +2341,7 @@ public class SmartMotorControllerConfig
           "You have been warned! (^.^) - Rivet",
           true);
     }
-    this.externalEncoderGearing = externalEncoderGearing;
+    this.externalEncoderGearing = Optional.of(externalEncoderGearing);
     return this;
   }
 
@@ -2364,7 +2362,7 @@ public class SmartMotorControllerConfig
           "You have been warned! (^.^) - Rivet",
           true);
     }
-    this.externalEncoderGearing = new MechanismGearing(reductionRatio);
+    this.externalEncoderGearing = Optional.of(new MechanismGearing(reductionRatio));
     return this;
   }
 
@@ -2505,11 +2503,11 @@ public class SmartMotorControllerConfig
    *
    * @return External encoder inversion state
    */
-  public boolean getExternalEncoderInverted()
+  public Optional<Boolean> getExternalEncoderInverted()
   {
     externalEncoderOptions.remove(ExternalEncoderOptions.ExternalEncoderInverted);
     if (RobotBase.isSimulation())
-    {return false;}
+    {return Optional.of(false);}
     return externalEncoderInverted;
   }
 
