@@ -331,8 +331,20 @@ public class SmartMotorControllerTelemetryConfig
     {
       boolFields.get(BooleanTelemetryField.SimpleMotorFeedForward).disable();
     }
-    boolFields.get(BooleanTelemetryField.MotorInversion).setDefaultValue(config.getMotorInverted());
-    boolFields.get(BooleanTelemetryField.EncoderInversion).setDefaultValue(config.getEncoderInverted());
+    if (config.getMotorInverted().isPresent())
+    {
+      boolFields.get(BooleanTelemetryField.MotorInversion).setDefaultValue(config.getMotorInverted().get());
+    } else
+    {
+      boolFields.get(BooleanTelemetryField.MotorInversion).disable();
+    }
+    if (config.getEncoderInverted().isPresent())
+    {
+      boolFields.get(BooleanTelemetryField.EncoderInversion).setDefaultValue(config.getEncoderInverted().get());
+    } else
+    {
+      boolFields.get(BooleanTelemetryField.EncoderInversion).disable();
+    }
     return boolFields;
   }
 
