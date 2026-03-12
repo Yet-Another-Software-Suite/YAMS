@@ -318,9 +318,13 @@ public class NovaWrapper extends SmartMotorController
 
     // Ramp rates
 //    m_nova_config.rampDown = m_nova_config.rampUp = config.getClosedLoopRampRate().in(Seconds);
-    m_nova.setRampUp(config.getClosedLoopRampRate().in(Seconds));
-    m_nova.setRampDown(config.getClosedLoopRampRate().in(Seconds));
-    if (config.getOpenLoopRampRate().gt(Seconds.of(0)))
+    config.getClosedLoopRampRate().ifPresent(rampRate -> {
+      m_nova.setRampUp(rampRate.in(Seconds));
+      m_nova.setRampDown(rampRate.in(Seconds));
+      m_nova_config.rampUp = rampRate.in(Seconds);
+      m_nova_config.rampDown = rampRate.in(Seconds);
+    });
+    if (config.getOpenLoopRampRate().isPresent())
     {
       throw new IllegalArgumentException(
           "[Error] ThriftyNova does not support separate closed loop and open loop ramp rates, using the SmartMotorControllerConfig.withClosedLoopRampRate() as both.");
@@ -330,9 +334,11 @@ public class NovaWrapper extends SmartMotorController
     // Do nothing since not supported yet.
 
     // Inversions
-    m_nova_config.inverted = config.getMotorInverted();
-    m_nova.setInverted(config.getMotorInverted());
-    if (config.getEncoderInverted())
+    config.getMotorInverted().ifPresent(inverted -> {
+      m_nova.setInverted(inverted);
+      m_nova_config.inverted = inverted;
+    });
+    if (config.getEncoderInverted().isPresent())
     {
       throw new IllegalArgumentException("[ERROR] ThriftyNova does not support encoder inversions.");
     }
@@ -398,7 +404,7 @@ public class NovaWrapper extends SmartMotorController
                                                              ".withExternalEncoderZeroOffset");
 //        m_nova.setAbsOffset(config.getZeroOffset().get().in(Rotations));
       }
-      if (config.getExternalEncoderGearing().getRotorToMechanismRatio() != 1.0)
+      if (config.getExternalEncoderGearing().isPresent())
       {
         // Do nothing, applied later.
       }
@@ -412,7 +418,7 @@ public class NovaWrapper extends SmartMotorController
                                                              ".withExternalEncoderZeroOffset");
       }
 
-      if (config.getExternalEncoderGearing().getRotorToMechanismRatio() != 1.0)
+      if (config.getExternalEncoderGearing().isPresent())
       {
         throw new SmartMotorControllerConfigurationException(
             "External encoder gearing is not supported when there is no external encoder",
@@ -421,7 +427,7 @@ public class NovaWrapper extends SmartMotorController
       }
     }
 
-    if (config.getExternalEncoderInverted())
+    if (config.getExternalEncoderInverted().isPresent())
     {
       throw new SmartMotorControllerConfigurationException(
           "External encoder cannot be inverted because no external encoder exists",
@@ -562,7 +568,7 @@ public class NovaWrapper extends SmartMotorController
         // There should be an alert thrown here; but Alerts are not thread-safe.
         return RotationsPerSecond.of(
             m_velocityConversion.fromMotor(m_nova.getVelocityQuad()) *
-            m_config.getExternalEncoderGearing().getRotorToMechanismRatio());
+            m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getRotorToMechanismRatio());
       }
     }
     return getRotorVelocity().times(m_gearing.getRotorToMechanismRatio());
@@ -581,11 +587,13 @@ public class NovaWrapper extends SmartMotorController
       if (externalEncoder == EncoderType.ABS)
       {
         return Rotations.of(m_positionConversion.fromMotor(m_nova.getPositionAbs()) *
-                            m_config.getExternalEncoderGearing().getRotorToMechanismRatio());
+                            m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne)
+                                    .getRotorToMechanismRatio());
       } else if (externalEncoder == EncoderType.QUAD)
       {
         return Rotations.of(m_positionConversion.fromMotor(m_nova.getPositionQuad()) *
-                            m_config.getExternalEncoderGearing().getRotorToMechanismRatio());
+                            m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne)
+                                    .getRotorToMechanismRatio());
       }
     }
     return getRotorPosition().times(m_gearing.getRotorToMechanismRatio());

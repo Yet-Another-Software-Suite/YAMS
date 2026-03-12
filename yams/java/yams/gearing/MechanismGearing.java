@@ -9,6 +9,10 @@ public class MechanismGearing
 {
 
   /**
+   * 1:1 Mechanism Gearing.
+   */
+  public static final MechanismGearing kOne = new MechanismGearing(1.0);
+  /**
    * Mechanism gearbox attached to the motor.
    */
   private final GearBox            gearBox;

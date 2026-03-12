@@ -6,6 +6,7 @@ import edu.wpi.first.math.Pair;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import java.util.Optional;
@@ -24,64 +25,68 @@ public class ElevatorConfig
   /**
    * {@link SmartMotorController} for the {@link yams.mechanisms.positional.Elevator}
    */
-  private Optional<SmartMotorController>         motor = Optional.empty();
+  private   Optional<SmartMotorController>     motor                   = Optional.empty();
   /**
    * The network root of the mechanism (Optional).
    */
   @Deprecated
-  protected     Optional<String>             networkRoot             = Optional.empty();
+  protected Optional<String>                   networkRoot             = Optional.empty();
   /**
    * Telemetry name.
    */
-  private       Optional<String>             telemetryName           = Optional.empty();
+  private   Optional<String>                   telemetryName           = Optional.empty();
   /**
    * Telemetry verbosity
    */
-  private       Optional<TelemetryVerbosity> telemetryVerbosity      = Optional.empty();
+  private   Optional<TelemetryVerbosity>       telemetryVerbosity      = Optional.empty();
   /**
    * Lower Hard Limit for the {@link yams.mechanisms.positional.Elevator} to be representing in simulation.
    */
-  private       Optional<Distance>           lowerHardLimit          = Optional.empty();
+  private   Optional<Distance>                 lowerHardLimit          = Optional.empty();
   /**
    * Upper hard limit for the {@link yams.mechanisms.positional.Elevator} representing in simulation.
    */
-  private       Optional<Distance>           upperHardLimit          = Optional.empty();
+  private   Optional<Distance>                 upperHardLimit          = Optional.empty();
   /**
    * {@link yams.mechanisms.positional.Elevator} angle for simulation.
    */
-  private       Angle                        angle                   = Degrees.of(90);
+  private   Angle                              angle                   = Degrees.of(90);
   /**
    * {@link yams.mechanisms.positional.Elevator} carriage mass for simulation.
    */
-  private       Optional<Mass>               carriageWeight          = Optional.empty();
+  private   Optional<Mass>                     carriageWeight          = Optional.empty();
   /**
    * Sim color value
    */
-  private       Color8Bit                    simColor                = new Color8Bit(Color.kOrange);
+  private   Color8Bit                          simColor                = new Color8Bit(Color.kOrange);
   /**
    * Mechanism position configuration for the {@link yams.mechanisms.positional.Pivot} (Optional).
    */
-  private       MechanismPositionConfig mechanismPositionConfig = new MechanismPositionConfig();
+  private   MechanismPositionConfig            mechanismPositionConfig = new MechanismPositionConfig();
   /**
    * Drum radius of the elevator spool, or the sprocket pitch * teeth.
    */
-  private Optional<Distance>            drumCircumference       = Optional.empty();
+  private   Optional<Distance>                 drumCircumference       = Optional.empty();
   /**
    * Elevator stages, applied to the motor controller config gearing by dividing it by the number of stages given.
    */
-  private OptionalInt                   stages                  = OptionalInt.empty();
+  private   OptionalInt                        stages                  = OptionalInt.empty();
   /**
    * Starting height to set the motor's encoder to.
    */
-  private Optional<Distance> startingHeight = Optional.empty();
+  private   Optional<Distance>                 startingHeight          = Optional.empty();
+  /**
+   * Simulated starting height.
+   */
+  private   Optional<Distance>                 simStartingHeight       = Optional.empty();
   /**
    * Soft limits of the {@link SmartMotorController} closed loop controller. Can be exceeded. (LowerLimit, UpperLimit)
    */
-  private Optional<Pair<Distance, Distance>> softLimits = Optional.empty();
+  private   Optional<Pair<Distance, Distance>> softLimits              = Optional.empty();
   /**
    * Disable gravity on the elevator simulation.
    */
-  private boolean       isElevatorHorizontal          = false;
+  private   boolean                            isElevatorHorizontal    = false;
 
   /**
    * Elevator Configuration class
@@ -108,6 +113,8 @@ public class ElevatorConfig
    */
   private ElevatorConfig(ElevatorConfig cfg)
   {
+    this.isElevatorHorizontal = cfg.isElevatorHorizontal;
+    this.simStartingHeight = cfg.simStartingHeight;
     this.motor = cfg.motor;
     this.drumCircumference = cfg.drumCircumference;
     this.stages = cfg.stages;
@@ -131,6 +138,18 @@ public class ElevatorConfig
   }
 
   /**
+   * Set the simulated starting height of the elevator. Only used during simulation.
+   *
+   * @param height {@link Distance} of the elevator on start.
+   * @return {@link ElevatorConfig} for chaining.
+   */
+  public ElevatorConfig withSimStartingHeight(Distance height)
+  {
+    simStartingHeight = Optional.ofNullable(height);
+    return this;
+  }
+
+  /**
    * Set the {@link SmartMotorController} for the {@link yams.mechanisms.positional.Elevator}
    *
    * @param motorController Primary {@link SmartMotorController} for the {@link yams.mechanisms.positional.Elevator}
@@ -139,10 +158,10 @@ public class ElevatorConfig
   public ElevatorConfig withSmartMotorController(SmartMotorController motorController)
   {
     motor = Optional.of(motorController);
-    drumCircumference.ifPresent(drumRadius->motor.get().getConfig().withMechanismCircumference(drumRadius));
+    drumCircumference.ifPresent(drumRadius -> motor.get().getConfig().withMechanismCircumference(drumRadius));
     stages.ifPresent(this::withCascadingElevatorStages);
     startingHeight.ifPresent(this::withStartingHeight);
-    softLimits.ifPresent(softLimits->withSoftLimits(softLimits.getFirst(), softLimits.getSecond()));
+    softLimits.ifPresent(softLimits -> withSoftLimits(softLimits.getFirst(), softLimits.getSecond()));
     return this;
   }
 
@@ -276,10 +295,9 @@ public class ElevatorConfig
   public ElevatorConfig withStartingHeight(Distance startingPosition)
   {
     startingHeight = Optional.ofNullable(startingPosition);
-    motor.ifPresent(motor->motor.getConfig().withStartingPosition(startingPosition));
+    motor.ifPresent(motor -> motor.getConfig().withStartingPosition(startingPosition));
     return this;
   }
-
 
 
   /**
@@ -291,8 +309,8 @@ public class ElevatorConfig
    */
   public ElevatorConfig withSoftLimits(Distance lowerLimit, Distance upperLimit)
   {
-    softLimits = Optional.of(Pair.of(lowerLimit,upperLimit));
-    motor.ifPresent(motor->motor.getConfig().withSoftLimit(lowerLimit, upperLimit));
+    softLimits = Optional.of(Pair.of(lowerLimit, upperLimit));
+    motor.ifPresent(motor -> motor.getConfig().withSoftLimit(lowerLimit, upperLimit));
     return this;
   }
 
@@ -312,8 +330,7 @@ public class ElevatorConfig
 
   /**
    * Set elevator as horizontal to avoid gravity simulation
-   * 
-   * 
+   *
    * @return {@link ElevatorConfig} for chaining.
    */
   public ElevatorConfig withHorizontalElevator()
@@ -389,11 +406,18 @@ public class ElevatorConfig
    */
   public Optional<Distance> getStartingHeight()
   {
-    return motor.orElseThrow().getConfig().getStartingPosition().isPresent() ? Optional.of(motor.orElseThrow().getConfig()
-                                                                                  .convertFromMechanism(motor.orElseThrow().getConfig()
-                                                                                                             .getStartingPosition()
-                                                                                                             .get()))
-                                                               : Optional.empty();
+    if (RobotBase.isSimulation() && simStartingHeight.isPresent())
+    {
+      return simStartingHeight;
+    }
+    return motor.orElseThrow().getConfig().getStartingPosition().isPresent() ? Optional.of(motor.orElseThrow()
+                                                                                                .getConfig()
+                                                                                                .convertFromMechanism(
+                                                                                                    motor.orElseThrow()
+                                                                                                         .getConfig()
+                                                                                                         .getStartingPosition()
+                                                                                                         .get()))
+                                                                             : Optional.empty();
   }
 
   /**

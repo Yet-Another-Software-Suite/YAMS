@@ -8,6 +8,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
@@ -27,7 +28,7 @@ public class ArmConfig
   /**
    * {@link SmartMotorController} for the {@link yams.mechanisms.positional.Arm}
    */
-  private Optional<SmartMotorController> motor = Optional.empty();
+  private Optional<SmartMotorController> motor               = Optional.empty();
   /**
    * The network root of the mechanism (Optional).
    */
@@ -77,6 +78,10 @@ public class ArmConfig
    */
   private   Optional<Angle>                startingPosition        = Optional.empty();
   /**
+   * Simulated starting position.
+   */
+  private Optional<Angle>                simStartingPosition = Optional.empty();
+  /**
    * Lower and upper soft limits of the arms closed loop controller. (LowerLimit, UpperLimit)
    */
   private   Optional<Pair<Angle, Angle>>   softLimits              = Optional.empty();
@@ -108,6 +113,7 @@ public class ArmConfig
    */
   private ArmConfig(ArmConfig cfg)
   {
+    this.simStartingPosition = cfg.simStartingPosition;
     motor = cfg.motor;
     networkTableName = cfg.networkTableName;
     telemetryName = cfg.telemetryName;
@@ -129,6 +135,18 @@ public class ArmConfig
   public ArmConfig clone()
   {
     return new ArmConfig(this);
+  }
+
+  /**
+   * Set the simulation starting position of the arm. Only ever used in simulation.
+   *
+   * @param simStartingPosition {@link Angle} of the starting position of the arm.
+   * @return {@link ArmConfig} for chaining.
+   */
+  public ArmConfig withSimStartingPosition(Angle simStartingPosition)
+  {
+    this.simStartingPosition = Optional.ofNullable(simStartingPosition);
+    return this;
   }
 
   /**
@@ -433,6 +451,10 @@ public class ArmConfig
    */
   public Optional<Angle> getStartingAngle()
   {
+    if (RobotBase.isSimulation() && simStartingPosition.isPresent())
+    {
+      return simStartingPosition;
+    }
     return startingPosition;
   }
 

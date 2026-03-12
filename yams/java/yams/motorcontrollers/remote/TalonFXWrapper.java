@@ -79,6 +79,7 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.function.Supplier;
 import yams.exceptions.SmartMotorControllerConfigurationException;
+import yams.gearing.MechanismGearing;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
@@ -308,9 +309,11 @@ public class TalonFXWrapper extends SmartMotorController
         var cancoderSim = m_cancoder.get().getSimState();
         cancoderSim.setSupplyVoltage(m_simSupplier.get().getMechanismSupplyVoltage());
         cancoderSim.setVelocity(m_simSupplier.get().getMechanismVelocity()
-                                             .times(m_config.getExternalEncoderGearing().getMechanismToRotorRatio()));
+                                             .times(m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne)
+                                                            .getMechanismToRotorRatio()));
         cancoderSim.setRawPosition(m_simSupplier.get().getMechanismPosition()
                                                 .times(m_config.getExternalEncoderGearing()
+                                                               .orElse(MechanismGearing.kOne)
                                                                .getMechanismToRotorRatio()));
         cancoderSim.setMagnetHealth(MagnetHealthValue.Magnet_Green);
       }
@@ -323,18 +326,22 @@ public class TalonFXWrapper extends SmartMotorController
           candiSim.setPwm1Connected(true);
           candiSim.setPwm1Position(m_simSupplier.get().getMechanismPosition()
                                                 .times(m_config.getExternalEncoderGearing()
+                                                               .orElse(MechanismGearing.kOne)
                                                                .getMechanismToRotorRatio()));
           candiSim.setPwm1Velocity(m_simSupplier.get().getMechanismVelocity()
                                                 .times(m_config.getExternalEncoderGearing()
+                                                               .orElse(MechanismGearing.kOne)
                                                                .getMechanismToRotorRatio()));
         } else if (useCANdiPWM2())
         {
           candiSim.setPwm2Connected(true);
           candiSim.setPwm2Position(m_simSupplier.get().getMechanismPosition()
                                                 .times(m_config.getExternalEncoderGearing()
+                                                               .orElse(MechanismGearing.kOne)
                                                                .getMechanismToRotorRatio()));
           candiSim.setPwm2Velocity(m_simSupplier.get().getMechanismVelocity()
                                                 .times(m_config.getExternalEncoderGearing()
+                                                               .orElse(MechanismGearing.kOne)
                                                                .getMechanismToRotorRatio()));
         }
       }
@@ -731,8 +738,10 @@ public class TalonFXWrapper extends SmartMotorController
     }
 
     // Motor inversion
-    m_talonConfig.MotorOutput.Inverted = config.getMotorInverted() ? InvertedValue.Clockwise_Positive
-                                                                   : InvertedValue.CounterClockwise_Positive;
+    config.getMotorInverted().ifPresent(inverted -> {
+      m_talonConfig.MotorOutput.Inverted =
+          inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
+    });
     // Idle mode
     if (config.getIdleMode().isPresent())
     {
@@ -746,12 +755,16 @@ public class TalonFXWrapper extends SmartMotorController
       m_talonConfig.Voltage.withPeakReverseVoltage(config.getClosedLoopControllerMaximumVoltage().get().times(-1));
     }
     // Ramp rates
-    m_talonConfig.ClosedLoopRamps.withDutyCycleClosedLoopRampPeriod(config.getClosedLoopRampRate());
-    m_talonConfig.OpenLoopRamps.withDutyCycleOpenLoopRampPeriod(config.getOpenLoopRampRate());
-    m_talonConfig.ClosedLoopRamps.withVoltageClosedLoopRampPeriod(config.getClosedLoopRampRate());
-    m_talonConfig.OpenLoopRamps.withVoltageOpenLoopRampPeriod(config.getOpenLoopRampRate());
-    m_talonConfig.ClosedLoopRamps.withTorqueClosedLoopRampPeriod(config.getClosedLoopRampRate());
-    m_talonConfig.OpenLoopRamps.withTorqueOpenLoopRampPeriod(config.getOpenLoopRampRate());
+    config.getClosedLoopRampRate().ifPresent(rampRate -> {
+      m_talonConfig.ClosedLoopRamps.withDutyCycleClosedLoopRampPeriod(rampRate)
+                                   .withVoltageClosedLoopRampPeriod(rampRate)
+                                   .withTorqueClosedLoopRampPeriod(rampRate);
+    });
+    config.getOpenLoopRampRate().ifPresent(rampRate -> {
+      m_talonConfig.OpenLoopRamps.withDutyCycleOpenLoopRampPeriod(rampRate)
+                                 .withVoltageOpenLoopRampPeriod(rampRate)
+                                 .withTorqueOpenLoopRampPeriod(rampRate);
+    });
     // Current limits
     if (config.getStatorStallCurrentLimit().isPresent())
     {
@@ -791,10 +804,10 @@ public class TalonFXWrapper extends SmartMotorController
       }
       // Set the gear ratio for external encoders.
       m_talonConfig.Feedback.RotorToSensorRatio = config.getGearing().getMechanismToRotorRatio() *
-                                                  config.getExternalEncoderGearing()
+                                                  config.getExternalEncoderGearing().orElse(MechanismGearing.kOne)
                                                         .getRotorToMechanismRatio();
       // config.getExternalEncoderGearing().getMechanismToRotorRatio() *
-      m_talonConfig.Feedback.SensorToMechanismRatio = config.getExternalEncoderGearing()
+      m_talonConfig.Feedback.SensorToMechanismRatio = config.getExternalEncoderGearing().orElse(MechanismGearing.kOne)
                                                             .getMechanismToRotorRatio();
       if (config.getExternalEncoder().get() instanceof CANcoder encoder)
       {
@@ -803,9 +816,11 @@ public class TalonFXWrapper extends SmartMotorController
         var cfg          = new CANcoderConfiguration();
         configurator.refresh(cfg);
         m_talonConfig.Feedback.FeedbackRemoteSensorID = encoder.getDeviceID();
-        cfg.MagnetSensor.withSensorDirection(
-            config.getExternalEncoderInverted() ? SensorDirectionValue.Clockwise_Positive
-                                                : SensorDirectionValue.CounterClockwise_Positive);
+        config.getExternalEncoderInverted().ifPresent(inversion -> {
+          cfg.MagnetSensor.withSensorDirection(
+              inversion ? SensorDirectionValue.Clockwise_Positive
+                        : SensorDirectionValue.CounterClockwise_Positive);
+        });
 
         // Configure feedback source for CANCoder
         m_talonConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
@@ -839,7 +854,7 @@ public class TalonFXWrapper extends SmartMotorController
         }
         if (useCANdiPWM1())
         {
-          cfg.PWM1.SensorDirection = config.getExternalEncoderInverted();
+          config.getExternalEncoderInverted().ifPresent(cfg.PWM1::withSensorDirection);
 
           // Zero offset
           if (config.getZeroOffset().isPresent())
@@ -855,7 +870,7 @@ public class TalonFXWrapper extends SmartMotorController
           }
         } else if (useCANdiPWM2())
         {
-          cfg.PWM2.SensorDirection = config.getExternalEncoderInverted();
+          config.getExternalEncoderInverted().ifPresent(cfg.PWM2::withSensorDirection);
           // Zero offset
           if (config.getZeroOffset().isPresent())
           {
@@ -873,14 +888,14 @@ public class TalonFXWrapper extends SmartMotorController
 
     } else
     {
-      if (config.getExternalEncoderInverted())
+      if (config.getExternalEncoderInverted().isPresent())
       {
         throw new SmartMotorControllerConfigurationException("External Encoder cannot be inverted if not present!",
                                                              "External encoder is not inverted!",
                                                              "withExternalEncoderInverted(false)");
       }
 
-      if (config.getExternalEncoderGearing().getMechanismToRotorRatio() != 1.0)
+      if (config.getExternalEncoderGearing().isPresent())
       {
         throw new SmartMotorControllerConfigurationException("External Encoder cannot be set if not present!",
                                                              "External encoder gearing is not 1.0!",
@@ -933,7 +948,7 @@ public class TalonFXWrapper extends SmartMotorController
     }
 
     // Invert the encoder.
-    if (config.getEncoderInverted())
+    if (config.getEncoderInverted().isPresent())
     {
       throw new SmartMotorControllerConfigurationException("Integrated encoder phase cannot be set",
                                                            "Cannot configure TalonFX!",
