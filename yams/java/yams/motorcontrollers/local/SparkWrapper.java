@@ -381,6 +381,13 @@ public class SparkWrapper extends SmartMotorController
   {
     config.resetValidationCheck();
 
+    for (int i = 0; i < 4; i++)
+    {
+      if (isMotor(m_motor, DCMotor.getMinion(i)))
+      {
+        m_sparkBaseConfig.advanceCommutation(120);
+      }
+    }
     if (m_spark.isFollower())
     {
       m_spark.pauseFollowerMode();
