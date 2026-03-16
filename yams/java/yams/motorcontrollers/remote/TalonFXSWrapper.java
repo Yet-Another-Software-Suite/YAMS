@@ -48,6 +48,7 @@ import com.ctre.phoenix6.signals.MotorArrangementValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.signals.SensorPhaseValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
@@ -676,6 +677,11 @@ public class TalonFXSWrapper extends SmartMotorController
       m_positionReq = m_trapPositionReq;
       m_velocityReq = m_trapVelocityReq;
     });
+    // Configure kS to work correctly when no profile is provided.
+    if (m_config.getTrapezoidProfile().isEmpty() && m_config.getExponentialProfile().isEmpty())
+    {
+      m_talonConfig.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
+    }
 
     if (m_lqr.isPresent())
     {

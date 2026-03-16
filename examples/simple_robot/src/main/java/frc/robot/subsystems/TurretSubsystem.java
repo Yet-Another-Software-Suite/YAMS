@@ -3,17 +3,13 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Feet;
-import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Second;
-import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
-import com.ctre.phoenix6.hardware.TalonFXS;
+import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -21,7 +17,6 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
@@ -29,7 +24,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
-import yams.mechanisms.config.MechanismPositionConfig;
 import yams.mechanisms.config.PivotConfig;
 import yams.mechanisms.positional.Pivot;
 import yams.motorcontrollers.SmartMotorController;
@@ -37,37 +31,47 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.remote.TalonFXSWrapper;
+import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class TurretSubsystem extends SubsystemBase
 {
 
-  private final TalonFXS                   turretMotor      = new TalonFXS(1);//, MotorType.kBrushless);
-  private final SmartMotorControllerConfig motorConfig      = new SmartMotorControllerConfig(this)
-      .withClosedLoopController(4, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
-      .withSoftLimit(Degrees.of(-30), Degrees.of(100))
-      .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
+  double[] ratio = {144 / 15, 5, 1.08};
+
+  SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
+      .withControlMode(ControlMode.CLOSED_LOOP)
+      .withSimClosedLoopController(0.0, 0.0, 0)
+      // 99.0, 0.0, .6
+      .withClosedLoopController(0.0, 0.0, 0)
+
+      // Configure Motor and Mechanism properties
+      .withGearing(new MechanismGearing(new GearBox(ratio)))
       .withIdleMode(MotorMode.BRAKE)
-      .withTelemetry("TurretMotor", TelemetryVerbosity.HIGH)
-      .withStatorCurrentLimit(Amps.of(40))
       .withMotorInverted(false)
-      .withClosedLoopRampRate(Seconds.of(0.25))
-      .withOpenLoopRampRate(Seconds.of(0.25))
-      .withFeedforward(new ArmFeedforward(0, 0, 0, 0))
-      .withControlMode(ControlMode.CLOSED_LOOP);
-  private final SmartMotorController       motor            = new TalonFXSWrapper(turretMotor,
-                                                                                  DCMotor.getNEO(1),
-                                                                                  motorConfig);
-  private final MechanismPositionConfig    robotToMechanism = new MechanismPositionConfig()
-      .withMaxRobotHeight(Meters.of(1.5))
-      .withMaxRobotLength(Meters.of(0.75))
-      .withRelativePosition(new Translation3d(Meters.of(-0.25), Meters.of(0), Meters.of(0.5)));
-  private final PivotConfig                m_config         = new PivotConfig(motor)
-      .withHardLimit(Degrees.of(-100), Degrees.of(200))
-      .withTelemetry("TurretExample", TelemetryVerbosity.HIGH)
-      .withStartingPosition(Degrees.of(0))
-      .withMechanismPositionConfig(robotToMechanism);
-  private final Pivot                      turret           = new Pivot(m_config);
+      .withFeedforward(new ArmFeedforward(0.5, 0.0, 5.0, 0))
+      .withSimFeedforward(new ArmFeedforward(0.5, 0.0, 5.0, 0))
+
+      // 0.0,5.5`
+      // Setup Telemetry
+      .withTelemetry("TurretMotor", TelemetryVerbosity.HIGH)
+      // Power Optimization
+      .withStatorCurrentLimit(Amps.of(60));
+  // .withClosedLoopRampRate(Seconds.of(0.0))
+
+  // .withOpenLoopRampRate(Seconds.of(0.0));
+  SmartMotorController motor = new TalonFXWrapper(new TalonFX(12),
+                                                  DCMotor.getKrakenX60(1),
+                                                  motorConfig);
+
+  PivotConfig m_config = new PivotConfig(motor)
+      .withStartingPosition(Degrees.of(0)) // Starting position of the Pivot
+      .withHardLimit(Degrees.of(-360), Degrees.of(360)) // Hard limit bc wiring prevents infinitpe spinning
+      // .withSoftLimits(Degrees.of(-360), Degrees.of(360))
+      .withTelemetry("Turret", TelemetryVerbosity.HIGH) // Telemetry
+      .withMOI(yams.units.YUnits.PoundSquareInches.of(0.01)); // MOI Calculation
+
+  private Pivot turret = new Pivot(m_config);
+
 
   // Robot to turret transform, from center of robot to turret.
   private final Transform3d roboToTurret = new Transform3d(Feet.of(-1.5), Feet.of(0), Feet.of(0.5), Rotation3d.kZero);
