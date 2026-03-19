@@ -325,6 +325,17 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the measurement upper limit, only works if mechanism circumference is defined.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setMechanismLimits(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)" class="member-name-link">setMechanismLimits</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;lower,
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;upper)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Set the Mechanism limits for the motor controller.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setMechanismLimitsEnabled(boolean)" class="member-name-link">setMechanismLimitsEnabled</a><wbr>(boolean&nbsp;enabled)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Enable or disable the mechanism/measurement limits in the motor controller.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setMechanismLowerLimit(edu.wpi.first.units.measure.Angle)" class="member-name-link">setMechanismLowerLimit</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;lowerLimit)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the mechanism lower limit.</div>
@@ -1202,6 +1213,36 @@ loadScripts(document, 'script');</script>
 <dd><code><a href="../SmartMotorController.html#setMechanismLowerLimit(edu.wpi.first.units.measure.Angle)">setMechanismLowerLimit</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>lowerLimit</code> - Lower limit, will be translated to rotations.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="setMechanismLimits(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)">
+<h3>setMechanismLimits</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setMechanismLimits</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;lower,
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;upper)</span></div>
+<div class="block"><span class="descfrm-type-label">Description copied from class:&nbsp;<code><a href="../SmartMotorController.html#setMechanismLimits(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)">SmartMotorController</a></code></span></div>
+<div class="block">Set the Mechanism limits for the motor controller.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../SmartMotorController.html#setMechanismLimits(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)">setMechanismLimits</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>lower</code> - Lower limit, will be translated to rotations.</dd>
+<dd><code>upper</code> - Upper limit, will be translated to rotations.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="setMechanismLimitsEnabled(boolean)">
+<h3>setMechanismLimitsEnabled</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setMechanismLimitsEnabled</span><wbr><span class="parameters">(boolean&nbsp;enabled)</span></div>
+<div class="block"><span class="descfrm-type-label">Description copied from class:&nbsp;<code><a href="../SmartMotorController.html#setMechanismLimitsEnabled(boolean)">SmartMotorController</a></code></span></div>
+<div class="block">Enable or disable the mechanism/measurement limits in the motor controller.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../SmartMotorController.html#setMechanismLimitsEnabled(boolean)">setMechanismLimitsEnabled</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>enabled</code> - Application of the limits</dd>
 </dl>
 </section>
 </li>
