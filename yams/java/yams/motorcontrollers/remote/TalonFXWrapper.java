@@ -243,13 +243,6 @@ public class TalonFXWrapper extends SmartMotorController
     m_deviceTemperature = m_talonfx.getDeviceTemp();
     m_closedLoopControllerThread = null;
 
-    for (int i = 0; i < 6; i++)
-    {
-      if (isMotor(motor, DCMotor.getFalcon500Foc(i)) ||
-          isMotor(motor, DCMotor.getKrakenX44Foc(i)) ||
-          isMotor(motor, DCMotor.getKrakenX60Foc(i)))
-      {enableFOC();}
-    }
     setupSimulation();
     applyConfig(smartConfig);
     checkConfigSafety();
