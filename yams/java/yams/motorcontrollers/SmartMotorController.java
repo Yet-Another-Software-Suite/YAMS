@@ -288,8 +288,8 @@ public abstract class SmartMotorController
                                                            .in(Seconds));
       }
       m_closedLoopControllerRunning = true;
-      if (m_config.getMechanismUpperLimit().isPresent() || m_config.getMechanismLowerLimit().isPresent())
-      {setMechanismLimitsEnabled(true);}
+//      if (m_config.getMechanismUpperLimit().isPresent() || m_config.getMechanismLowerLimit().isPresent())
+//      {setMechanismLimitsEnabled(true);}
     }
   }
 
