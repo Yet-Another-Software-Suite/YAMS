@@ -117,32 +117,27 @@ public class TalonFXSWrapper extends SmartMotorController
    * Velocity control request
    */
   private final VelocityVoltage               m_simpleVelocityReq = new VelocityVoltage(0)
-      .withSlot(m_controlReqSlot)
-      .withEnableFOC(false);
+      .withSlot(m_controlReqSlot);
   /**
    * Position control request.
    */
   private final PositionVoltage               m_simplePositionReq = new PositionVoltage(0)
-      .withSlot(m_controlReqSlot)
-      .withEnableFOC(false);
+      .withSlot(m_controlReqSlot);
   /**
    * Position with trapezoidal profiling request.
    */
   private final MotionMagicVoltage            m_trapPositionReq   = new MotionMagicVoltage(0)
-      .withSlot(m_controlReqSlot)
-      .withEnableFOC(false);
+      .withSlot(m_controlReqSlot);
   /**
    * Velocity with trapezoidal profiling request.
    */
   private final MotionMagicVelocityVoltage    m_trapVelocityReq   = new MotionMagicVelocityVoltage(0)
-      .withSlot(m_controlReqSlot)
-      .withEnableFOC(false);
+      .withSlot(m_controlReqSlot);
   /**
    * Position with exponential profiling request.
    */
   private final MotionMagicExpoVoltage        m_expoPositionReq   = new MotionMagicExpoVoltage(0)
-      .withSlot(m_controlReqSlot)
-      .withEnableFOC(false);
+      .withSlot(m_controlReqSlot);
   /**
    * Position control request to use.
    */
@@ -290,17 +285,66 @@ public class TalonFXSWrapper extends SmartMotorController
   }
 
   /**
+   * Configure FOC for the current position and velocity control requests.
+   *
+   * @param foc FOC state.
+   */
+  private void setFOC(boolean foc)
+  {
+    switch (m_positionReq.getName())
+    {
+      case "MotionMagicDutyCycle":
+        ((MotionMagicDutyCycle) m_positionReq).withEnableFOC(foc);
+        break;
+      case "MotionMagicExpoDutyCycle":
+        ((MotionMagicExpoDutyCycle) m_positionReq).withEnableFOC(foc);
+        break;
+      case "MotionMagicExpoVoltage":
+        ((MotionMagicExpoVoltage) m_positionReq).withEnableFOC(foc);
+        break;
+      case "MotionMagicVoltage":
+        ((MotionMagicVoltage) m_positionReq).withEnableFOC(foc);
+        break;
+      case "PositionDutyCycle":
+        ((PositionDutyCycle) m_positionReq).withEnableFOC(foc);
+        break;
+      case "PositionVoltage":
+        ((PositionVoltage) m_positionReq).withEnableFOC(foc);
+        break;
+      default:
+        throw new SmartMotorControllerConfigurationException(
+            "TalonFXS(" + m_talonfxs.getDeviceID() + ") does not support the '" + m_positionReq.getName() +
+            "' control request!", "Cannot use given control request", "withVendorControlRequest()");
+    }
+    switch (m_velocityReq.getName())
+    {
+      case "MotionMagicVelocityDutyCycle":
+        ((MotionMagicVelocityDutyCycle) m_velocityReq).withEnableFOC(foc);
+        break;
+      case "MotionMagicVelocityVoltage":
+        ((MotionMagicVelocityVoltage) m_velocityReq).withEnableFOC(foc);
+        break;
+      case "VelocityDutyCycle":
+        ((VelocityDutyCycle) m_velocityReq).withEnableFOC(foc);
+        break;
+      case "VelocityVoltage":
+        ((VelocityVoltage) m_velocityReq).withEnableFOC(foc);
+        break;
+      default:
+        throw new SmartMotorControllerConfigurationException(
+            "TalonFXS(" + m_talonfxs.getDeviceID() + ") does not support the '" + m_velocityReq.getName() +
+            "' control request!", "Cannot use given control request", "withVendorControlRequest()");
+    }
+  }
+
+  /**
    * Enable FOC control, ignored if the device isn't PRO licensed.
    *
    * @return {@link TalonFXSWrapper} for ease of use.
    */
   public TalonFXSWrapper enableFOC()
   {
-    m_simpleVelocityReq.withEnableFOC(true);
-    m_simplePositionReq.withEnableFOC(true);
-    m_trapPositionReq.withEnableFOC(true);
-    m_trapVelocityReq.withEnableFOC(true);
-    m_expoPositionReq.withEnableFOC(true);
+    setFOC(true);
     return this;
   }
 
@@ -311,14 +355,9 @@ public class TalonFXSWrapper extends SmartMotorController
    */
   public TalonFXSWrapper disableFOC()
   {
-    m_simpleVelocityReq.withEnableFOC(false);
-    m_simplePositionReq.withEnableFOC(false);
-    m_trapPositionReq.withEnableFOC(false);
-    m_trapVelocityReq.withEnableFOC(false);
-    m_expoPositionReq.withEnableFOC(false);
+    setFOC(false);
     return this;
   }
-
 
   @Override
   public void setupSimulation()
