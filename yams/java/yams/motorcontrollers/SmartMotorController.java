@@ -249,47 +249,37 @@ public abstract class SmartMotorController
 
   /**
    * Stop the closed loop controller.
-   * @implNote This turns off any soft limit that you may have configured.
+   *
    */
   public void stopClosedLoopController()
   {
-    if (m_closedLoopControllerRunning)
+    if (m_closedLoopControllerThread != null)
     {
-      if (m_closedLoopControllerThread != null)
-      {
-        m_closedLoopControllerThread.stop();
-      }
+      m_closedLoopControllerThread.stop();
       m_closedLoopControllerRunning = false;
-      if (m_config.getMechanismUpperLimit().isPresent() || m_config.getMechanismLowerLimit().isPresent())
-      {setMechanismLimitsEnabled(false);}
     }
   }
 
   /**
    * Start the closed loop controller with the period.
-   * @implNote This turns on any soft limit you may have configured.
+   *
    */
   public void startClosedLoopController()
   {
-    if (!m_closedLoopControllerRunning)
+    if (m_closedLoopControllerThread != null && m_config.getMotorControllerMode() == ControlMode.CLOSED_LOOP)
     {
-      if (m_closedLoopControllerThread != null && m_config.getMotorControllerMode() == ControlMode.CLOSED_LOOP)
+      m_pid.ifPresent(PIDController::reset);
+      m_trapState = getTrapezoidalProfileState();
+      m_expoState = getExponentialProfileState();
+      m_lqr.ifPresent(lqr -> lqr.reset(getMechanismPosition(), getMechanismVelocity()));
+      if (m_config.getLinearClosedLoopControllerUse())
       {
-        m_pid.ifPresent(PIDController::reset);
-        m_trapState = getTrapezoidalProfileState();
-        m_expoState = getExponentialProfileState();
-        m_lqr.ifPresent(lqr -> lqr.reset(getMechanismPosition(), getMechanismVelocity()));
-        if (m_config.getLinearClosedLoopControllerUse())
-        {
-          m_lqr.ifPresent(lqr -> lqr.reset(getMeasurementPosition(), getMeasurementVelocity()));
-        }
-        m_closedLoopControllerThread.stop();
-        m_closedLoopControllerThread.startPeriodic(m_config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20))
-                                                           .in(Seconds));
+        m_lqr.ifPresent(lqr -> lqr.reset(getMeasurementPosition(), getMeasurementVelocity()));
       }
+      m_closedLoopControllerThread.stop();
+      m_closedLoopControllerThread.startPeriodic(m_config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20))
+                                                         .in(Seconds));
       m_closedLoopControllerRunning = true;
-//      if (m_config.getMechanismUpperLimit().isPresent() || m_config.getMechanismLowerLimit().isPresent())
-//      {setMechanismLimitsEnabled(true);}
     }
   }
 
@@ -899,7 +889,7 @@ public abstract class SmartMotorController
           setEncoderToZero.setName("ZeroEncoder");
           setEncoderToZero.setSubsystem(m_config.getSubsystem().getName());
 
-          Debouncer velocityDebouncer = new Debouncer(0.5);
+          Debouncer              velocityDebouncer = new Debouncer(0.5);
           AtomicReference<Angle> startingAngle     = new AtomicReference<>(Rotations.zero());
           Command testUpCommand = Commands.startRun(() -> {
 
