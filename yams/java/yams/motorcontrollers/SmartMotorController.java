@@ -249,6 +249,7 @@ public abstract class SmartMotorController
 
   /**
    * Stop the closed loop controller.
+   *
    */
   public void stopClosedLoopController()
   {
@@ -261,6 +262,7 @@ public abstract class SmartMotorController
 
   /**
    * Start the closed loop controller with the period.
+   *
    */
   public void startClosedLoopController()
   {
@@ -887,7 +889,7 @@ public abstract class SmartMotorController
           setEncoderToZero.setName("ZeroEncoder");
           setEncoderToZero.setSubsystem(m_config.getSubsystem().getName());
 
-          Debouncer velocityDebouncer = new Debouncer(0.5);
+          Debouncer              velocityDebouncer = new Debouncer(0.5);
           AtomicReference<Angle> startingAngle     = new AtomicReference<>(Rotations.zero());
           Command testUpCommand = Commands.startRun(() -> {
 
@@ -1152,6 +1154,21 @@ public abstract class SmartMotorController
    * @param lowerLimit Lower limit, will be translated to rotations.
    */
   public abstract void setMechanismLowerLimit(Angle lowerLimit);
+
+  /**
+   * Set the Mechanism limits for the motor controller.
+   *
+   * @param lower Lower limit, will be translated to rotations.
+   * @param upper Upper limit, will be translated to rotations.
+   */
+  public abstract void setMechanismLimits(Angle lower, Angle upper);
+
+  /**
+   * Enable or disable the mechanism/measurement limits in the motor controller.
+   *
+   * @param enabled Application of the limits
+   */
+  public abstract void setMechanismLimitsEnabled(boolean enabled);
 
 
   /**
