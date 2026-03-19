@@ -113,25 +113,33 @@ public class TalonFXWrapper extends SmartMotorController
   /**
    * Velocity control request
    */
-  private final VelocityVoltage               m_simpleVelocityReq = new VelocityVoltage(0).withSlot(m_controlReqSlot);
+  private final VelocityVoltage               m_simpleVelocityReq = new VelocityVoltage(0)
+      .withSlot(m_controlReqSlot)
+      .withEnableFOC(false);
   /**
    * Position control request.
    */
-  private final PositionVoltage               m_simplePositionReq = new PositionVoltage(0).withSlot(m_controlReqSlot);
+  private final PositionVoltage               m_simplePositionReq = new PositionVoltage(0)
+      .withSlot(m_controlReqSlot)
+      .withEnableFOC(false);
   /**
    * Position with trapezoidal profiling request.
    */
-  private final MotionMagicVoltage            m_trapPositionReq   = new MotionMagicVoltage(0).withSlot(m_controlReqSlot);
+  private final MotionMagicVoltage            m_trapPositionReq   = new MotionMagicVoltage(0)
+      .withSlot(m_controlReqSlot)
+      .withEnableFOC(false);
   /**
    * Velocity with trapezoidal profiling request.
    */
-  private final MotionMagicVelocityVoltage    m_trapVelocityReq   = new MotionMagicVelocityVoltage(0).withSlot(
-      m_controlReqSlot);
+  private final MotionMagicVelocityVoltage    m_trapVelocityReq   = new MotionMagicVelocityVoltage(0)
+      .withSlot(m_controlReqSlot)
+      .withEnableFOC(false);
   /**
    * Position with exponential profiling request.
    */
-  private final MotionMagicExpoVoltage        m_expoPositionReq   = new MotionMagicExpoVoltage(0).withSlot(
-      m_controlReqSlot);
+  private final MotionMagicExpoVoltage        m_expoPositionReq   = new MotionMagicExpoVoltage(0)
+      .withSlot(m_controlReqSlot)
+      .withEnableFOC(false);
   /**
    * Position control request to use.
    */
@@ -240,9 +248,46 @@ public class TalonFXWrapper extends SmartMotorController
     m_deviceTemperature = m_talonfx.getDeviceTemp();
     m_closedLoopControllerThread = null;
 
+    for (int i = 0; i < 6; i++)
+    {
+      if (isMotor(motor, DCMotor.getFalcon500Foc(i)) ||
+          isMotor(motor, DCMotor.getKrakenX44Foc(i)) ||
+          isMotor(motor, DCMotor.getKrakenX60Foc(i)))
+      {enableFOC();}
+    }
     setupSimulation();
     applyConfig(smartConfig);
     checkConfigSafety();
+  }
+
+  /**
+   * Enable FOC control, ignored if the device isn't PRO licensed.
+   *
+   * @return {@link TalonFXWrapper} for ease of use.
+   */
+  public TalonFXWrapper enableFOC()
+  {
+    m_simpleVelocityReq.withEnableFOC(true);
+    m_simplePositionReq.withEnableFOC(true);
+    m_trapPositionReq.withEnableFOC(true);
+    m_trapVelocityReq.withEnableFOC(true);
+    m_expoPositionReq.withEnableFOC(true);
+    return this;
+  }
+
+  /**
+   * Disable FOC control, ignored if the device isn't PRO licensed.
+   *
+   * @return {@link TalonFXWrapper} for ease of use.
+   */
+  public TalonFXWrapper disableFOC()
+  {
+    m_simpleVelocityReq.withEnableFOC(false);
+    m_simplePositionReq.withEnableFOC(false);
+    m_trapPositionReq.withEnableFOC(false);
+    m_trapVelocityReq.withEnableFOC(false);
+    m_expoPositionReq.withEnableFOC(false);
+    return this;
   }
 
   @Override
@@ -918,7 +963,7 @@ public class TalonFXWrapper extends SmartMotorController
                                                             .times(config.getGearing().getMechanismToRotorRatio()));
         }
         StatusCode applied;
-        int iterations = 0;
+        int        iterations = 0;
         do
         {
           applied = m_talonfx.setPosition(config.getStartingPosition().get());
