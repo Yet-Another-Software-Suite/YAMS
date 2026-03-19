@@ -522,10 +522,12 @@ public class SparkWrapper extends SmartMotorController
 
     // Set Mechanism Limits
     config.getMechanismLowerLimit().ifPresent(lowerLimit -> {
-      m_sparkBaseConfig.softLimit.reverseSoftLimit(lowerLimit.in(Rotations)).reverseSoftLimitEnabled(true);
+      m_sparkBaseConfig.softLimit.reverseSoftLimit(lowerLimit.in(Rotations)).reverseSoftLimitEnabled(
+          config.getMotorControllerMode() == ControlMode.CLOSED_LOOP);
     });
     config.getMechanismUpperLimit().ifPresent(upperLimit -> {
-      m_sparkBaseConfig.softLimit.forwardSoftLimit(upperLimit.in(Rotations)).forwardSoftLimitEnabled(true);
+      m_sparkBaseConfig.softLimit.forwardSoftLimit(upperLimit.in(Rotations)).forwardSoftLimitEnabled(
+          config.getMotorControllerMode() == ControlMode.CLOSED_LOOP);
     });
 
     // Throw warning about supply stator limits on Spark's
@@ -1268,6 +1270,29 @@ public class SparkWrapper extends SmartMotorController
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                      : PersistMode.kPersistParameters);
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismLowerLimit(lowerLimit);}});
+  }
+
+  @Override
+  public void setMechanismLimits(Angle lower, Angle upper)
+  {
+    m_config.withSoftLimit(lower, upper);
+    m_sparkBaseConfig.softLimit.reverseSoftLimit(lower.in(Rotations)).forwardSoftLimit(upper.in(Rotations));
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismLimits(lower, upper);}});
+  }
+
+  @Override
+  public void setMechanismLimitsEnabled(boolean enabled)
+  {
+    m_sparkBaseConfig.softLimit.forwardSoftLimitEnabled(enabled).reverseSoftLimitEnabled(enabled);
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismLimitsEnabled(enabled);}});
   }
 
   @Override

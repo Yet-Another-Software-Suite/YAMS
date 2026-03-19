@@ -895,6 +895,20 @@ public class NovaWrapper extends SmartMotorController
   }
 
   @Override
+  public void setMechanismLimits(Angle lower, Angle upper)
+  {
+    m_config.withSoftLimit(lower, upper);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismLimits(lower, upper);}});
+  }
+
+  @Override
+  public void setMechanismLimitsEnabled(boolean enabled)
+  {
+    // Does nothing, bc its not used on the RIO.
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismLimitsEnabled(enabled);}});
+  }
+
+  @Override
   public Temperature getTemperature()
   {
     return Celsius.of(m_nova.getTemperature());

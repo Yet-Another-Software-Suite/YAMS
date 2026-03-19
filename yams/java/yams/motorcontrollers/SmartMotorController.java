@@ -252,9 +252,12 @@ public abstract class SmartMotorController
    */
   public void stopClosedLoopController()
   {
-    if (m_closedLoopControllerThread != null)
+    if (m_closedLoopControllerRunning)
     {
-      m_closedLoopControllerThread.stop();
+      if (m_closedLoopControllerThread != null)
+      {
+        m_closedLoopControllerThread.stop();
+      }
       m_closedLoopControllerRunning = false;
     }
   }
@@ -264,19 +267,22 @@ public abstract class SmartMotorController
    */
   public void startClosedLoopController()
   {
-    if (m_closedLoopControllerThread != null && m_config.getMotorControllerMode() == ControlMode.CLOSED_LOOP)
+    if (!m_closedLoopControllerRunning)
     {
-      m_pid.ifPresent(PIDController::reset);
-      m_trapState = getTrapezoidalProfileState();
-      m_expoState = getExponentialProfileState();
-      m_lqr.ifPresent(lqr -> lqr.reset(getMechanismPosition(), getMechanismVelocity()));
-      if (m_config.getLinearClosedLoopControllerUse())
+      if (m_closedLoopControllerThread != null && m_config.getMotorControllerMode() == ControlMode.CLOSED_LOOP)
       {
-        m_lqr.ifPresent(lqr -> lqr.reset(getMeasurementPosition(), getMeasurementVelocity()));
+        m_pid.ifPresent(PIDController::reset);
+        m_trapState = getTrapezoidalProfileState();
+        m_expoState = getExponentialProfileState();
+        m_lqr.ifPresent(lqr -> lqr.reset(getMechanismPosition(), getMechanismVelocity()));
+        if (m_config.getLinearClosedLoopControllerUse())
+        {
+          m_lqr.ifPresent(lqr -> lqr.reset(getMeasurementPosition(), getMeasurementVelocity()));
+        }
+        m_closedLoopControllerThread.stop();
+        m_closedLoopControllerThread.startPeriodic(m_config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20))
+                                                           .in(Seconds));
       }
-      m_closedLoopControllerThread.stop();
-      m_closedLoopControllerThread.startPeriodic(m_config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20))
-                                                         .in(Seconds));
       m_closedLoopControllerRunning = true;
     }
   }
@@ -1152,6 +1158,21 @@ public abstract class SmartMotorController
    * @param lowerLimit Lower limit, will be translated to rotations.
    */
   public abstract void setMechanismLowerLimit(Angle lowerLimit);
+
+  /**
+   * Set the Mechanism limits for the motor controller.
+   *
+   * @param lower Lower limit, will be translated to rotations.
+   * @param upper Upper limit, will be translated to rotations.
+   */
+  public abstract void setMechanismLimits(Angle lower, Angle upper);
+
+  /**
+   * Enable or disable the mechanism/measurement limits in the motor controller.
+   *
+   * @param enabled Application of the limits
+   */
+  public abstract void setMechanismLimitsEnabled(boolean enabled);
 
 
   /**
