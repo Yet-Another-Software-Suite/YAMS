@@ -113,25 +113,28 @@ public class TalonFXWrapper extends SmartMotorController
   /**
    * Velocity control request
    */
-  private final VelocityVoltage               m_simpleVelocityReq = new VelocityVoltage(0).withSlot(m_controlReqSlot);
+  private final VelocityVoltage               m_simpleVelocityReq = new VelocityVoltage(0)
+      .withSlot(m_controlReqSlot);
   /**
    * Position control request.
    */
-  private final PositionVoltage               m_simplePositionReq = new PositionVoltage(0).withSlot(m_controlReqSlot);
+  private final PositionVoltage               m_simplePositionReq = new PositionVoltage(0)
+      .withSlot(m_controlReqSlot);
   /**
    * Position with trapezoidal profiling request.
    */
-  private final MotionMagicVoltage            m_trapPositionReq   = new MotionMagicVoltage(0).withSlot(m_controlReqSlot);
+  private final MotionMagicVoltage            m_trapPositionReq   = new MotionMagicVoltage(0)
+      .withSlot(m_controlReqSlot);
   /**
    * Velocity with trapezoidal profiling request.
    */
-  private final MotionMagicVelocityVoltage    m_trapVelocityReq   = new MotionMagicVelocityVoltage(0).withSlot(
-      m_controlReqSlot);
+  private final MotionMagicVelocityVoltage    m_trapVelocityReq   = new MotionMagicVelocityVoltage(0)
+      .withSlot(m_controlReqSlot);
   /**
    * Position with exponential profiling request.
    */
-  private final MotionMagicExpoVoltage        m_expoPositionReq   = new MotionMagicExpoVoltage(0).withSlot(
-      m_controlReqSlot);
+  private final MotionMagicExpoVoltage        m_expoPositionReq   = new MotionMagicExpoVoltage(0)
+      .withSlot(m_controlReqSlot);
   /**
    * Position control request to use.
    */
@@ -243,6 +246,81 @@ public class TalonFXWrapper extends SmartMotorController
     setupSimulation();
     applyConfig(smartConfig);
     checkConfigSafety();
+  }
+
+  /**
+   * Configure FOC for the current position and velocity control requests.
+   *
+   * @param foc FOC state.
+   */
+  private void setFOC(boolean foc)
+  {
+    switch (m_positionReq.getName())
+    {
+      case "MotionMagicDutyCycle":
+        ((MotionMagicDutyCycle) m_positionReq).withEnableFOC(foc);
+        break;
+      case "MotionMagicExpoDutyCycle":
+        ((MotionMagicExpoDutyCycle) m_positionReq).withEnableFOC(foc);
+        break;
+      case "MotionMagicExpoVoltage":
+        ((MotionMagicExpoVoltage) m_positionReq).withEnableFOC(foc);
+        break;
+      case "MotionMagicVoltage":
+        ((MotionMagicVoltage) m_positionReq).withEnableFOC(foc);
+        break;
+      case "PositionDutyCycle":
+        ((PositionDutyCycle) m_positionReq).withEnableFOC(foc);
+        break;
+      case "PositionVoltage":
+        ((PositionVoltage) m_positionReq).withEnableFOC(foc);
+        break;
+      default:
+        throw new SmartMotorControllerConfigurationException(
+            "TalonFX(" + m_talonfx.getDeviceID() + ") does not support the '" + m_positionReq.getName() +
+            "' control request!", "Cannot use given control request", "withVendorControlRequest()");
+    }
+    switch (m_velocityReq.getName())
+    {
+      case "MotionMagicVelocityDutyCycle":
+        ((MotionMagicVelocityDutyCycle) m_velocityReq).withEnableFOC(foc);
+        break;
+      case "MotionMagicVelocityVoltage":
+        ((MotionMagicVelocityVoltage) m_velocityReq).withEnableFOC(foc);
+        break;
+      case "VelocityDutyCycle":
+        ((VelocityDutyCycle) m_velocityReq).withEnableFOC(foc);
+        break;
+      case "VelocityVoltage":
+        ((VelocityVoltage) m_velocityReq).withEnableFOC(foc);
+        break;
+      default:
+        throw new SmartMotorControllerConfigurationException(
+            "TalonFX(" + m_talonfx.getDeviceID() + ") does not support the '" + m_velocityReq.getName() +
+            "' control request!", "Cannot use given control request", "withVendorControlRequest()");
+    }
+  }
+
+  /**
+   * Enable FOC control, ignored if the device isn't PRO licensed.
+   *
+   * @return {@link TalonFXWrapper} for ease of use.
+   */
+  public TalonFXWrapper enableFOC()
+  {
+    setFOC(true);
+    return this;
+  }
+
+  /**
+   * Disable FOC control, ignored if the device isn't PRO licensed.
+   *
+   * @return {@link TalonFXWrapper} for ease of use.
+   */
+  public TalonFXWrapper disableFOC()
+  {
+    setFOC(false);
+    return this;
   }
 
   @Override
@@ -918,7 +996,7 @@ public class TalonFXWrapper extends SmartMotorController
                                                             .times(config.getGearing().getMechanismToRotorRatio()));
         }
         StatusCode applied;
-        int iterations = 0;
+        int        iterations = 0;
         do
         {
           applied = m_talonfx.setPosition(config.getStartingPosition().get());
