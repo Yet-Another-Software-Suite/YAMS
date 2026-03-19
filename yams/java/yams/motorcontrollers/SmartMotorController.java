@@ -249,6 +249,7 @@ public abstract class SmartMotorController
 
   /**
    * Stop the closed loop controller.
+   * @implNote This turns off any soft limit that you may have configured.
    */
   public void stopClosedLoopController()
   {
@@ -266,6 +267,7 @@ public abstract class SmartMotorController
 
   /**
    * Start the closed loop controller with the period.
+   * @implNote This turns on any soft limit you may have configured.
    */
   public void startClosedLoopController()
   {
