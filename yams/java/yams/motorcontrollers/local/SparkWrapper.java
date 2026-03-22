@@ -847,7 +847,7 @@ public class SparkWrapper extends SmartMotorController
   public AngularVelocity getRotorVelocity()
   {
     return RotationsPerSecond.of(
-        getMechanismPosition().in(Rotations) * m_config.getGearing().getMechanismToRotorRatio());
+        getMechanismVelocity().in(RotationsPerSecond) * m_config.getGearing().getMechanismToRotorRatio());
   }
 
   @Override
