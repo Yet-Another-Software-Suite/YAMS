@@ -268,37 +268,65 @@ public class DifferentialMechanism extends SmartPositionalMechanism
     }, m_subsystem).withName(getName() + " set position");
   }
 
+  /**
+   * Set the position of the differential mechanism.
+   *
+   * @param tilt  Tilt of the differential mechanism.
+   * @param twist Twist of the differential mechanism.
+   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand} to set the position.
+   */
   public Command run(Angle tilt, Angle twist)
   {
     return Commands.run(() -> {
-    var left  = m_config.getLeftMechanismPosition(tilt, twist);
-    var right = m_config.getRightMechanismPosition(tilt, twist);
-    m_leftSMC.setPosition(left);
-    m_rightSMC.setPosition(right);
-  }, m_subsystem).withName(getName() + " set position");
+      var left  = m_config.getLeftMechanismPosition(tilt, twist);
+      var right = m_config.getRightMechanismPosition(tilt, twist);
+      m_leftSMC.setPosition(left);
+      m_rightSMC.setPosition(right);
+    }, m_subsystem).withName(getName() + " set position");
   }
 
+  /**
+   * Run the differential mechanism to a position.
+   *
+   * @param tilt  Supplier of the tilt angle.
+   * @param twist Supplier of the twist angle.
+   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand} to run the differential mechanism to the position.
+   */
   public Command run(Supplier<Angle> tilt, Supplier<Angle> twist)
   {
     return Commands.run(() -> {
-    var left  = m_config.getLeftMechanismPosition(tilt.get(), twist.get());
-    var right = m_config.getRightMechanismPosition(tilt.get(), twist.get());
-    m_leftSMC.setPosition(left);
-    m_rightSMC.setPosition(right);
-  }, m_subsystem).withName(getName() + " set position");
+      var left  = m_config.getLeftMechanismPosition(tilt.get(), twist.get());
+      var right = m_config.getRightMechanismPosition(tilt.get(), twist.get());
+      m_leftSMC.setPosition(left);
+      m_rightSMC.setPosition(right);
+    }, m_subsystem).withName(getName() + " set position");
   }
 
+  /**
+   * Run the differential mechanism to a position.
+   *
+   * @param tilt  Supplier of the tilt angle.
+   * @param twist Supplier of the twist angle.
+   * @return {@link edu.wpi.first.wpilibj2.command.InstantCommand} to run the differential mechanism to the position.
+   */
   @Deprecated
   public Command runTo(Angle tilt, Angle twist)
   {
     return Commands.runOnce(() -> {
-    var left  = m_config.getLeftMechanismPosition(tilt, twist);
-    var right = m_config.getRightMechanismPosition(tilt, twist);
-    m_leftSMC.setPosition(left);
-    m_rightSMC.setPosition(right);
-  }, m_subsystem).withName(getName() + " set position");
+      var left  = m_config.getLeftMechanismPosition(tilt, twist);
+      var right = m_config.getRightMechanismPosition(tilt, twist);
+      m_leftSMC.setPosition(left);
+      m_rightSMC.setPosition(right);
+    }, m_subsystem).withName(getName() + " set position");
   }
 
+  /**
+   * Run the differential mechanism to a position.
+   *
+   * @param tilt  Supplier of the tilt angle.
+   * @param twist Supplier of the twist angle.
+   * @return {@link edu.wpi.first.wpilibj2.command.InstantCommand} to run the differential mechanism to the position.
+   */
   @Deprecated
   public Command runTo(Supplier<Angle> tilt, Supplier<Angle> twist)
   {

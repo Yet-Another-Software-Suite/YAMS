@@ -250,7 +250,7 @@ public class NovaWrapper extends SmartMotorController
     m_config.resetValidationCheck();
     m_gearing = config.getGearing();
     m_lqr = config.getLQRClosedLoopController();
-    m_pid = config.getPID();
+    m_pid = config.getPID(m_slot);
     m_looseFollowers = config.getLooselyCoupledFollowers();
 
     // Reset the Nova, if configured
@@ -759,13 +759,13 @@ public class NovaWrapper extends SmartMotorController
   @Override
   public void setKs(double kS)
   {
-    m_config.getSimpleFeedforward().ifPresent(simpleMotorFeedforward -> {
+    m_config.getSimpleFeedforward(m_slot).ifPresent(simpleMotorFeedforward -> {
       simpleMotorFeedforward.setKs(kS);
     });
-    m_config.getArmFeedforward().ifPresent(armFeedforward -> {
+    m_config.getArmFeedforward(m_slot).ifPresent(armFeedforward -> {
       armFeedforward.setKs(kS);
     });
-    m_config.getElevatorFeedforward().ifPresent(elevatorFeedforward -> {
+    m_config.getElevatorFeedforward(m_slot).ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKs(kS);
     });
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKs(kS);}});
@@ -774,13 +774,13 @@ public class NovaWrapper extends SmartMotorController
   @Override
   public void setKv(double kV)
   {
-    m_config.getSimpleFeedforward().ifPresent(simpleMotorFeedforward -> {
+    m_config.getSimpleFeedforward(m_slot).ifPresent(simpleMotorFeedforward -> {
       simpleMotorFeedforward.setKv(kV);
     });
-    m_config.getArmFeedforward().ifPresent(armFeedforward -> {
+    m_config.getArmFeedforward(m_slot).ifPresent(armFeedforward -> {
       armFeedforward.setKv(kV);
     });
-    m_config.getElevatorFeedforward().ifPresent(elevatorFeedforward -> {
+    m_config.getElevatorFeedforward(m_slot).ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKv(kV);
     });
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKv(kV);}});
@@ -789,13 +789,13 @@ public class NovaWrapper extends SmartMotorController
   @Override
   public void setKa(double kA)
   {
-    m_config.getSimpleFeedforward().ifPresent(simpleMotorFeedforward -> {
+    m_config.getSimpleFeedforward(m_slot).ifPresent(simpleMotorFeedforward -> {
       simpleMotorFeedforward.setKa(kA);
     });
-    m_config.getArmFeedforward().ifPresent(armFeedforward -> {
+    m_config.getArmFeedforward(m_slot).ifPresent(armFeedforward -> {
       armFeedforward.setKa(kA);
     });
-    m_config.getElevatorFeedforward().ifPresent(elevatorFeedforward -> {
+    m_config.getElevatorFeedforward(m_slot).ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKa(kA);
     });
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKa(kA);}});
@@ -804,10 +804,10 @@ public class NovaWrapper extends SmartMotorController
   @Override
   public void setKg(double kG)
   {
-    m_config.getArmFeedforward().ifPresent(armFeedforward -> {
+    m_config.getArmFeedforward(m_slot).ifPresent(armFeedforward -> {
       armFeedforward.setKg(kG);
     });
-    m_config.getElevatorFeedforward().ifPresent(elevatorFeedforward -> {
+    m_config.getElevatorFeedforward(m_slot).ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKg(kG);
     });
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKg(kG);}});
@@ -906,6 +906,13 @@ public class NovaWrapper extends SmartMotorController
   {
     // Does nothing, bc its not used on the RIO.
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismLimitsEnabled(enabled);}});
+  }
+
+  @Override
+  public void setClosedLoopSlot(ClosedLoopControllerSlot slot)
+  {
+    m_slot = slot;
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setClosedLoopSlot(slot);}});
   }
 
   @Override

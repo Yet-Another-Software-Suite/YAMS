@@ -76,6 +76,10 @@ public abstract class SmartMotorController
    */
   protected SmartMotorControllerConfig                    m_config;
   /**
+   * {@link ClosedLoopControllerSlot} for the closed loop controller.
+   */
+  protected ClosedLoopControllerSlot m_slot = ClosedLoopControllerSlot.SLOT_0;
+  /**
    * Exponential profile for the closed loop controller.
    */
   protected Optional<ExponentialProfile>                  m_expoProfile                 = Optional.empty();
@@ -297,9 +301,9 @@ public abstract class SmartMotorController
     AtomicReference<Double>          feedforward            = new AtomicReference<>(0.0);
     Optional<Angle>                  mechLowerLimit         = m_config.getMechanismLowerLimit();
     Optional<Angle>                  mechUpperLimit         = m_config.getMechanismUpperLimit();
-    Optional<ArmFeedforward>         armFeedforward         = m_config.getArmFeedforward();
-    Optional<ElevatorFeedforward>    elevatorFeedforward    = m_config.getElevatorFeedforward();
-    Optional<SimpleMotorFeedforward> simpleMotorFeedforward = m_config.getSimpleFeedforward();
+    Optional<ArmFeedforward>         armFeedforward         = m_config.getArmFeedforward(m_slot);
+    Optional<ElevatorFeedforward>    elevatorFeedforward    = m_config.getElevatorFeedforward(m_slot);
+    Optional<SimpleMotorFeedforward> simpleMotorFeedforward = m_config.getSimpleFeedforward(m_slot);
     Optional<Temperature>            temperatureCutoff      = m_config.getTemperatureCutoff();
     Optional<Voltage>                maximumVoltage         = m_config.getClosedLoopControllerMaximumVoltage();
     synchronizeRelativeEncoder();
@@ -1170,6 +1174,12 @@ public abstract class SmartMotorController
    */
   public abstract void setMechanismLimitsEnabled(boolean enabled);
 
+  /**
+   * Set the closed loop controller slot to use.
+   *
+   * @param slot Slot to use.
+   */
+  public abstract void setClosedLoopSlot(ClosedLoopControllerSlot slot);
 
   /**
    * Get the {@link SmartMotorController} temperature.
@@ -1255,5 +1265,38 @@ public abstract class SmartMotorController
   public String toString()
   {
     return getName();
+  }
+
+  /**
+   * Get the active closed loop controller slot.
+   *
+   * @return Active closed loop controller slot.
+   */
+  public ClosedLoopControllerSlot getClosedLoopControllerSlot()
+  {
+    return m_slot;
+  }
+
+  /**
+   * Current closed loop controller slot.
+   */
+  public enum ClosedLoopControllerSlot
+  {
+    /**
+     * Slot 0 is the default slot for the closed loop controller.
+     */
+    SLOT_0,
+    /**
+     * Slot 1 is the second slot for the closed loop controller.
+     */
+    SLOT_1,
+    /**
+     * Slot 2 is the third slot for the closed loop controller.
+     */
+    SLOT_2,
+    /**
+     * Slot 3 is the fourth slot for the closed loop controller.
+     */
+    SLOT_3
   }
 }

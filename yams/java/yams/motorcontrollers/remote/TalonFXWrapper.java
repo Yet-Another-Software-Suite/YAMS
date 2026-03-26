@@ -686,11 +686,17 @@ public class TalonFXWrapper extends SmartMotorController
     this.m_looseFollowers = config.getLooselyCoupledFollowers();
     m_lqr = config.getLQRClosedLoopController();
     // Closed loop controllers.
-    m_config.getPID().ifPresent(pid -> {
-      m_talonConfig.Slot0.kP = pid.getP();
-      m_talonConfig.Slot0.kI = pid.getI();
-      m_talonConfig.Slot0.kD = pid.getD();
-    });
+    for (var closedLoopControlSlot : ClosedLoopControllerSlot.values())
+    {
+      m_config.getPID(closedLoopControlSlot).ifPresent(pid -> {
+        switch (closedLoopControlSlot)
+        {
+          case SLOT_0 -> m_talonConfig.Slot0.withKP(pid.getP()).withKI(pid.getI()).withKD(pid.getD());
+          case SLOT_1 -> m_talonConfig.Slot1.withKP(pid.getP()).withKI(pid.getI()).withKD(pid.getD());
+          case SLOT_2 -> m_talonConfig.Slot2.withKP(pid.getP()).withKI(pid.getI()).withKD(pid.getD());
+        }
+      });
+    }
     m_config.getExponentialProfile().ifPresent(exp -> {
       m_expoProfile = Optional.of(new ExponentialProfile(exp));
       m_talonConfig.MotionMagic.MotionMagicExpo_kV = m_config.getLinearClosedLoopControllerUse() ?
@@ -778,41 +784,56 @@ public class TalonFXWrapper extends SmartMotorController
     config.getMotorControllerMode();
 
     // Feedforwards
-    Optional<ArmFeedforward>         armFeedforward         = m_config.getArmFeedforward();
-    Optional<ElevatorFeedforward>    elevatorFeedforward    = m_config.getElevatorFeedforward();
-    Optional<SimpleMotorFeedforward> simpleMotorFeedforward = m_config.getSimpleFeedforward();
-    if (armFeedforward.isPresent() || elevatorFeedforward.isPresent() ||
-        simpleMotorFeedforward.isPresent())
+    for (var closedLoopControlSlot : ClosedLoopControllerSlot.values())
     {
-      double kS = 0, kV = 0, kA = 0, kG = 0;
-      if (armFeedforward.isPresent())
+      Optional<ArmFeedforward>         armFeedforward         = m_config.getArmFeedforward(closedLoopControlSlot);
+      Optional<ElevatorFeedforward>    elevatorFeedforward    = m_config.getElevatorFeedforward(closedLoopControlSlot);
+      Optional<SimpleMotorFeedforward> simpleMotorFeedforward = m_config.getSimpleFeedforward(closedLoopControlSlot);
+      if (armFeedforward.isPresent() || elevatorFeedforward.isPresent() ||
+          simpleMotorFeedforward.isPresent())
       {
-        var ff = armFeedforward.get();
-        kS = ff.getKs();
-        kV = ff.getKv();
-        kA = ff.getKa();
-        kG = ff.getKg();
-        m_talonConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
-
-      } else if (elevatorFeedforward.isPresent())
-      {
-        var ff = elevatorFeedforward.get();
-        kS = ff.getKs();
-        kV = ff.getKv();
-        kA = ff.getKa();
-        kG = ff.getKg();
-        m_talonConfig.Slot0.GravityType = GravityTypeValue.Elevator_Static;
-      } else
-      {
-        var ff = simpleMotorFeedforward.get();
-        kS = ff.getKs();
-        kV = ff.getKv();
-        kA = ff.getKa();
+        double kS = 0, kV = 0, kA = 0, kG = 0;
+        if (armFeedforward.isPresent())
+        {
+          var ff = armFeedforward.get();
+          kS = ff.getKs();
+          kV = ff.getKv();
+          kA = ff.getKa();
+          kG = ff.getKg();
+          switch (closedLoopControlSlot)
+          {
+            case SLOT_0 -> m_talonConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+            case SLOT_1 -> m_talonConfig.Slot1.GravityType = GravityTypeValue.Arm_Cosine;
+            case SLOT_2 -> m_talonConfig.Slot2.GravityType = GravityTypeValue.Arm_Cosine;
+          }
+        } else if (elevatorFeedforward.isPresent())
+        {
+          var ff = elevatorFeedforward.get();
+          kS = ff.getKs();
+          kV = ff.getKv();
+          kA = ff.getKa();
+          kG = ff.getKg();
+          switch (closedLoopControlSlot)
+          {
+            case SLOT_0 -> m_talonConfig.Slot0.GravityType = GravityTypeValue.Elevator_Static;
+            case SLOT_1 -> m_talonConfig.Slot1.GravityType = GravityTypeValue.Elevator_Static;
+            case SLOT_2 -> m_talonConfig.Slot2.GravityType = GravityTypeValue.Elevator_Static;
+          }
+        } else
+        {
+          var ff = simpleMotorFeedforward.get();
+          kS = ff.getKs();
+          kV = ff.getKv();
+          kA = ff.getKa();
+        }
+        switch (closedLoopControlSlot)
+        {
+          case SLOT_0 -> m_talonConfig.Slot0.withKS(kS).withKV(kV).withKA(kA).withKG(kG);
+          case SLOT_1 -> m_talonConfig.Slot1.withKS(kS).withKV(kV).withKA(kA).withKG(kG);
+          case SLOT_2 -> m_talonConfig.Slot2.withKS(kS).withKV(kV).withKA(kA).withKG(kG);
+        }
       }
-      m_talonConfig.Slot0.kS = kS;
-      m_talonConfig.Slot0.kV = kV;
-      m_talonConfig.Slot0.kA = kA;
-      m_talonConfig.Slot0.kG = kG;
+      m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setClosedLoopSlot(closedLoopControlSlot);}});
     }
 
     // Motor inversion
@@ -1386,10 +1407,15 @@ public class TalonFXWrapper extends SmartMotorController
   @Override
   public void setKp(double kP)
   {
-    m_config.getPID().ifPresent(pidController -> {
+    m_config.getPID(m_slot).ifPresent(pidController -> {
       pidController.setP(kP);
     });
-    m_talonConfig.Slot0.kP = kP;
+    switch (m_slot)
+    {
+      case SLOT_0 -> m_talonConfig.Slot0.kP = kP;
+      case SLOT_1 -> m_talonConfig.Slot1.kP = kP;
+      case SLOT_2 -> m_talonConfig.Slot2.kP = kP;
+    }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKp(kP);}});
   }
@@ -1397,10 +1423,15 @@ public class TalonFXWrapper extends SmartMotorController
   @Override
   public void setKi(double kI)
   {
-    m_config.getPID().ifPresent(pidController -> {
+    m_config.getPID(m_slot).ifPresent(pidController -> {
       pidController.setI(kI);
     });
-    m_talonConfig.Slot0.kI = kI;
+    switch (m_slot)
+    {
+      case SLOT_0 -> m_talonConfig.Slot0.kI = kI;
+      case SLOT_1 -> m_talonConfig.Slot1.kI = kI;
+      case SLOT_2 -> m_talonConfig.Slot2.kI = kI;
+    }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKi(kI);}});
   }
@@ -1408,10 +1439,15 @@ public class TalonFXWrapper extends SmartMotorController
   @Override
   public void setKd(double kD)
   {
-    m_config.getPID().ifPresent(pidController -> {
+    m_config.getPID(m_slot).ifPresent(pidController -> {
       pidController.setD(kD);
     });
-    m_talonConfig.Slot0.kD = kD;
+    switch (m_slot)
+    {
+      case SLOT_0 -> m_talonConfig.Slot0.kD = kD;
+      case SLOT_1 -> m_talonConfig.Slot1.kD = kD;
+      case SLOT_2 -> m_talonConfig.Slot2.kD = kD;
+    }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKd(kD);}});
   }
@@ -1419,14 +1455,22 @@ public class TalonFXWrapper extends SmartMotorController
   @Override
   public void setFeedback(double kP, double kI, double kD)
   {
+    m_config.getPID(m_slot).ifPresent(pidController -> {
+      pidController.setP(kP);
+      pidController.setI(kI);
+      pidController.setD(kD);
+    });
     m_pid.ifPresent(simplePidController -> {
       simplePidController.setP(kP);
       simplePidController.setI(kI);
       simplePidController.setD(kD);
     });
-    m_talonConfig.Slot0.kP = kP;
-    m_talonConfig.Slot0.kI = kI;
-    m_talonConfig.Slot0.kD = kD;
+    switch (m_slot)
+    {
+      case SLOT_0 -> m_talonConfig.Slot0.withKP(kP).withKI(kI).withKD(kD);
+      case SLOT_1 -> m_talonConfig.Slot1.withKP(kP).withKI(kI).withKD(kD);
+      case SLOT_2 -> m_talonConfig.Slot2.withKP(kP).withKI(kI).withKD(kD);
+    }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setFeedback(kP, kI, kD);}});
   }
@@ -1434,16 +1478,21 @@ public class TalonFXWrapper extends SmartMotorController
   @Override
   public void setKs(double kS)
   {
-    m_config.getSimpleFeedforward().ifPresent(simpleMotorFeedforward -> {
+    m_config.getSimpleFeedforward(m_slot).ifPresent(simpleMotorFeedforward -> {
       simpleMotorFeedforward.setKs(kS);
     });
-    m_config.getArmFeedforward().ifPresent(armFeedforward -> {
+    m_config.getArmFeedforward(m_slot).ifPresent(armFeedforward -> {
       armFeedforward.setKs(kS);
     });
-    m_config.getElevatorFeedforward().ifPresent(elevatorFeedforward -> {
+    m_config.getElevatorFeedforward(m_slot).ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKs(kS);
     });
-    m_talonConfig.Slot0.kS = kS;
+    switch (m_slot)
+    {
+      case SLOT_0 -> m_talonConfig.Slot0.withKS(kS);
+      case SLOT_1 -> m_talonConfig.Slot1.withKS(kS);
+      case SLOT_2 -> m_talonConfig.Slot2.withKS(kS);
+    }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKs(kS);}});
   }
@@ -1451,16 +1500,21 @@ public class TalonFXWrapper extends SmartMotorController
   @Override
   public void setKv(double kV)
   {
-    m_config.getSimpleFeedforward().ifPresent(simpleMotorFeedforward -> {
+    m_config.getSimpleFeedforward(m_slot).ifPresent(simpleMotorFeedforward -> {
       simpleMotorFeedforward.setKv(kV);
     });
-    m_config.getArmFeedforward().ifPresent(armFeedforward -> {
+    m_config.getArmFeedforward(m_slot).ifPresent(armFeedforward -> {
       armFeedforward.setKv(kV);
     });
-    m_config.getElevatorFeedforward().ifPresent(elevatorFeedforward -> {
+    m_config.getElevatorFeedforward(m_slot).ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKv(kV);
     });
-    m_talonConfig.Slot0.kV = kV;
+    switch (m_slot)
+    {
+      case SLOT_0 -> m_talonConfig.Slot0.withKV(kV);
+      case SLOT_1 -> m_talonConfig.Slot1.withKV(kV);
+      case SLOT_2 -> m_talonConfig.Slot2.withKV(kV);
+    }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKv(kV);}});
   }
@@ -1468,17 +1522,21 @@ public class TalonFXWrapper extends SmartMotorController
   @Override
   public void setKa(double kA)
   {
-    m_config.getSimpleFeedforward().ifPresent(simpleMotorFeedforward -> {
+    m_config.getSimpleFeedforward(m_slot).ifPresent(simpleMotorFeedforward -> {
       simpleMotorFeedforward.setKa(kA);
     });
-    m_config.getArmFeedforward().ifPresent(armFeedforward -> {
+    m_config.getArmFeedforward(m_slot).ifPresent(armFeedforward -> {
       armFeedforward.setKa(kA);
     });
-    m_config.getElevatorFeedforward().ifPresent(elevatorFeedforward -> {
+    m_config.getElevatorFeedforward(m_slot).ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKa(kA);
-      m_config.withFeedforward(elevatorFeedforward);
     });
-    m_talonConfig.Slot0.kA = kA;
+    switch (m_slot)
+    {
+      case SLOT_0 -> m_talonConfig.Slot0.withKA(kA);
+      case SLOT_1 -> m_talonConfig.Slot1.withKA(kA);
+      case SLOT_2 -> m_talonConfig.Slot2.withKA(kA);
+    }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKa(kA);}});
   }
@@ -1486,15 +1544,18 @@ public class TalonFXWrapper extends SmartMotorController
   @Override
   public void setKg(double kG)
   {
-    m_config.getArmFeedforward().ifPresent(armFeedforward -> {
+    m_config.getArmFeedforward(m_slot).ifPresent(armFeedforward -> {
       armFeedforward.setKg(kG);
-      //m_config.withFeedforward(armFeedforward);
     });
-    m_config.getElevatorFeedforward().ifPresent(elevatorFeedforward -> {
+    m_config.getElevatorFeedforward(m_slot).ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKg(kG);
-      //m_config.withFeedforward(elevatorFeedforward);
     });
-    m_talonConfig.Slot0.kG = kG;
+    switch (m_slot)
+    {
+      case SLOT_0 -> m_talonConfig.Slot0.withKG(kG);
+      case SLOT_1 -> m_talonConfig.Slot1.withKG(kG);
+      case SLOT_2 -> m_talonConfig.Slot2.withKG(kG);
+    }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKg(kG);}});
   }
@@ -1502,29 +1563,41 @@ public class TalonFXWrapper extends SmartMotorController
   @Override
   public void setFeedforward(double kS, double kV, double kA, double kG)
   {
-    m_config.getSimpleFeedforward().ifPresent(simpleMotorFeedforward -> {
+    m_config.getSimpleFeedforward(m_slot).ifPresent(simpleMotorFeedforward -> {
       simpleMotorFeedforward.setKs(kS);
       simpleMotorFeedforward.setKv(kV);
       simpleMotorFeedforward.setKa(kA);
     });
-    m_config.getArmFeedforward().ifPresent(armFeedforward -> {
+    m_config.getArmFeedforward(m_slot).ifPresent(armFeedforward -> {
       armFeedforward.setKs(kS);
       armFeedforward.setKv(kV);
       armFeedforward.setKa(kA);
       armFeedforward.setKg(kG);
-      m_talonConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+      switch (m_slot)
+      {
+        case SLOT_0 -> m_talonConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+        case SLOT_1 -> m_talonConfig.Slot1.GravityType = GravityTypeValue.Arm_Cosine;
+        case SLOT_2 -> m_talonConfig.Slot2.GravityType = GravityTypeValue.Arm_Cosine;
+      }
     });
-    m_config.getElevatorFeedforward().ifPresent(elevatorFeedforward -> {
+    m_config.getElevatorFeedforward(m_slot).ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKs(kS);
       elevatorFeedforward.setKv(kV);
       elevatorFeedforward.setKa(kA);
       elevatorFeedforward.setKg(kG);
-      m_talonConfig.Slot0.GravityType = GravityTypeValue.Elevator_Static;
+      switch (m_slot)
+      {
+        case SLOT_0 -> m_talonConfig.Slot0.GravityType = GravityTypeValue.Elevator_Static;
+        case SLOT_1 -> m_talonConfig.Slot1.GravityType = GravityTypeValue.Elevator_Static;
+        case SLOT_2 -> m_talonConfig.Slot2.GravityType = GravityTypeValue.Elevator_Static;
+      }
     });
-    m_talonConfig.Slot0.kS = kS;
-    m_talonConfig.Slot0.kV = kV;
-    m_talonConfig.Slot0.kA = kA;
-    m_talonConfig.Slot0.kG = kG;
+    switch (m_slot)
+    {
+      case SLOT_0 -> m_talonConfig.Slot0.withKS(kS).withKV(kV).withKA(kA).withKG(kG);
+      case SLOT_1 -> m_talonConfig.Slot1.withKS(kS).withKV(kV).withKA(kA).withKG(kG);
+      case SLOT_2 -> m_talonConfig.Slot2.withKS(kS).withKV(kV).withKA(kA).withKG(kG);
+    }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setFeedforward(kS, kV, kA, kG);}});
   }
@@ -1629,6 +1702,66 @@ public class TalonFXWrapper extends SmartMotorController
     m_talonConfig.SoftwareLimitSwitch.withForwardSoftLimitEnable(enabled).withReverseSoftLimitEnable(enabled);
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismLimitsEnabled(enabled);}});
+  }
+
+  /**
+   * Set the closed loop controller slot to use.
+   *
+   * @param slot Slot to use.
+   * @implNote The TalonFX supports 3 slots, not 4!
+   */
+  @Override
+  public void setClosedLoopSlot(ClosedLoopControllerSlot slot)
+  {
+    if (slot.ordinal() >= ClosedLoopControllerSlot.SLOT_3.ordinal())
+    {
+      throw new IllegalArgumentException("Invalid slot: " + slot);
+    }
+    m_slot = slot;
+    switch (m_positionReq.getName())
+    {
+      case "MotionMagicDutyCycle":
+        ((MotionMagicDutyCycle) m_positionReq).withSlot(slot.ordinal());
+        break;
+      case "MotionMagicExpoDutyCycle":
+        ((MotionMagicExpoDutyCycle) m_positionReq).withSlot(slot.ordinal());
+        break;
+      case "MotionMagicExpoVoltage":
+        ((MotionMagicExpoVoltage) m_positionReq).withSlot(slot.ordinal());
+        break;
+      case "MotionMagicVoltage":
+        ((MotionMagicVoltage) m_positionReq).withSlot(slot.ordinal());
+        break;
+      case "PositionDutyCycle":
+        ((PositionDutyCycle) m_positionReq).withSlot(slot.ordinal());
+        break;
+      case "PositionVoltage":
+        ((PositionVoltage) m_positionReq).withSlot(slot.ordinal());
+        break;
+      default:
+        throw new SmartMotorControllerConfigurationException(
+            "TalonFX(" + m_talonfx.getDeviceID() + ") does not support the '" + m_positionReq.getName() +
+            "' control request!", "Cannot use given control request", "withVendorControlRequest()");
+    }
+    switch (m_velocityReq.getName())
+    {
+      case "MotionMagicVelocityDutyCycle":
+        ((MotionMagicVelocityDutyCycle) m_velocityReq).withSlot(slot.ordinal());
+        break;
+      case "MotionMagicVelocityVoltage":
+        ((MotionMagicVelocityVoltage) m_velocityReq).withSlot(slot.ordinal());
+        break;
+      case "VelocityDutyCycle":
+        ((VelocityDutyCycle) m_velocityReq).withSlot(slot.ordinal());
+        break;
+      case "VelocityVoltage":
+        ((VelocityVoltage) m_velocityReq).withSlot(slot.ordinal());
+        break;
+      default:
+        throw new SmartMotorControllerConfigurationException(
+            "TalonFX(" + m_talonfx.getDeviceID() + ") does not support the '" + m_velocityReq.getName() +
+            "' control request!", "Cannot use given control request", "withVendorControlRequest()");
+    }
   }
 
   @Override
