@@ -560,7 +560,13 @@ public class SparkWrapper extends SmartMotorController
       m_sparkRelativeEncoder.setPosition(config.getStartingPosition().get().in(Rotations));
     }
     // PID Wrapping
-    if (config.getMaxDiscontinuityPoint().isPresent())
+    if (config.getMaxDiscontinuityPoint().isPresent() && config.getMinDiscontinuityPoint().isPresent())
+    {
+      m_sparkBaseConfig.closedLoop
+          .positionWrappingInputRange(config.getMinDiscontinuityPoint().get().in(Rotations),
+                                      config.getMaxDiscontinuityPoint().get().in(Rotations))
+          .positionWrappingEnabled(true);
+    } else if (config.getMaxDiscontinuityPoint().isPresent())
     {
       m_sparkBaseConfig.closedLoop
           .positionWrappingMaxInput(config.getMaxDiscontinuityPoint().get().in(Rotations))
