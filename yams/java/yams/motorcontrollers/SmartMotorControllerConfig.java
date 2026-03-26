@@ -1254,6 +1254,7 @@ public class SmartMotorControllerConfig
   /**
    * Configure the {@link ArmFeedforward} for the
    *
+   * @param slot           {@link ClosedLoopControllerSlot} for the {@link ArmFeedforward}.
    * @param armFeedforward Arm feedforward for the {@link SmartMotorController}
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
@@ -1285,6 +1286,7 @@ public class SmartMotorControllerConfig
   /**
    * Get the {@link ElevatorFeedforward} {@link Optional}
    *
+   * @param slot {@link ClosedLoopControllerSlot} for the {@link ElevatorFeedforward}.
    * @return {@link ElevatorFeedforward} {@link Optional}
    */
   public Optional<ElevatorFeedforward> getElevatorFeedforward(ClosedLoopControllerSlot slot)
@@ -1366,6 +1368,7 @@ public class SmartMotorControllerConfig
   /**
    * Get the {@link SimpleMotorFeedforward} {@link Optional}.
    *
+   * @param slot {@link ClosedLoopControllerSlot} for the {@link SimpleMotorFeedforward}.
    * @return {@link SimpleMotorFeedforward} {@link Optional}
    */
   public Optional<SimpleMotorFeedforward> getSimpleFeedforward(ClosedLoopControllerSlot slot)
@@ -1648,7 +1651,7 @@ public class SmartMotorControllerConfig
    * @param maxJerk         Maximum linear jerk for the Trapezoidal profile.
    * @return {@link SmartMotorControllerConfig} for chaining.
    * @implNote This overrides existing trapezoidal profiles with the last one given in the chain!
-   * @deprecated Please use {@link #withTrapezoidalProfile(LinearAcceleration, Velocity<LinearAcceleration>)} to define
+   * @deprecated Please use {@link #withTrapezoidalProfile(LinearAcceleration, Velocity<LinearAccelerationUnit>)} to define
    * your trapezoidal profile.
    */
   @Deprecated(since = "2026", forRemoval = true)
