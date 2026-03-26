@@ -53,6 +53,10 @@ loadScripts(document, 'script');</script>
 <a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:H">H</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:K">K</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:O">O</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<a href="#I:W">W</a>&nbsp;<a href="#I:X">X</a>&nbsp;<a href="#I:Y">Y</a>&nbsp;<a href="#I:Z">Z</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="serialized-form.html">Serialized&nbsp;Form</a>
 <h2 class="title" id="I:A">A</h2>
 <dl class="index">
+<dt><a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html#ActiveClosedLoopControllerSlot" class="member-name-link">ActiveClosedLoopControllerSlot</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Active closed loop controller slot.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerCommandRegistry.html#addCommand(java.lang.String,edu.wpi.first.wpilibj2.command.Subsystem,java.lang.Runnable)" class="member-name-link">addCommand(String, Subsystem, Runnable)</a> - Static method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerCommandRegistry.html" title="class in yams.motorcontrollers">SmartMotorControllerCommandRegistry</a></dt>
 <dd>
 <div class="block">Add a command to the registry.</div>
@@ -935,7 +939,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the <a href="yams/mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a> for this <a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a>.</div>
 </dd>
-<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getArmFeedforward()" class="member-name-link">getArmFeedforward()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getArmFeedforward(yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">getArmFeedforward(SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/ArmFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>ArmFeedforward</code></a> if it is set.</div>
 </dd>
@@ -998,6 +1002,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getClosedLoopControllerMaximumVoltage()" class="member-name-link">getClosedLoopControllerMaximumVoltage()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the closed loop maximum voltage.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.html#getClosedLoopControllerSlot()" class="member-name-link">getClosedLoopControllerSlot()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
+<dd>
+<div class="block">Get the active closed loop controller slot.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getClosedLoopControlPeriod()" class="member-name-link">getClosedLoopControlPeriod()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -1131,7 +1139,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the duty cycle output of the motor controller.</div>
 </dd>
-<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getElevatorFeedforward()" class="member-name-link">getElevatorFeedforward()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getElevatorFeedforward(yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">getElevatorFeedforward(SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/ElevatorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>ElevatorFeedforward</code></a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link"><code>Optional</code></a></div>
 </dd>
@@ -1734,7 +1742,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the loop time for the LQR.</div>
 </dd>
-<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getPID()" class="member-name-link">getPID()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getPID(yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">getPID(SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the simple closed loop controller without motion profiling.</div>
 </dd>
@@ -1901,7 +1909,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Sim color value</div>
 </dd>
-<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getSimpleFeedforward()" class="member-name-link">getSimpleFeedforward()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getSimpleFeedforward(yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">getSimpleFeedforward(SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>SimpleMotorFeedforward</code></a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link"><code>Optional</code></a>.</div>
 </dd>
@@ -2535,6 +2543,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block"><a href="yams/motorcontrollers/SimSupplier.html" title="interface in yams.motorcontrollers"><code>SimSupplier</code></a> for the mechanism.</div>
 </dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.html#m_slot" class="member-name-link">m_slot</a> - Variable in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
+<dd>
+<div class="block"><a href="yams/motorcontrollers/SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.motorcontrollers"><code>SmartMotorController.ClosedLoopControllerSlot</code></a> for the closed loop controller.</div>
+</dd>
 <dt><a href="yams/mechanisms/SmartMechanism.html#m_smc" class="member-name-link">m_smc</a> - Variable in class yams.mechanisms.<a href="yams/mechanisms/SmartMechanism.html" title="class in yams.mechanisms">SmartMechanism</a></dt>
 <dd>
 <div class="block">Motor for the subsystem.</div>
@@ -2982,7 +2994,9 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the pivot to the given angle.</div>
 </dd>
 <dt><a href="yams/mechanisms/positional/DifferentialMechanism.html#run(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)" class="member-name-link">run(Angle, Angle)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional">DifferentialMechanism</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the position of the differential mechanism.</div>
+</dd>
 <dt><a href="yams/mechanisms/velocity/FlyWheel.html#run(edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">run(AngularVelocity)</a> - Method in class yams.mechanisms.velocity.<a href="yams/mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity">FlyWheel</a></dt>
 <dd>
 <div class="block">Set the FlyWheel to the given speed.</div>
@@ -3008,7 +3022,9 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the pivot to the given angle via a supplier.</div>
 </dd>
 <dt><a href="yams/mechanisms/positional/DifferentialMechanism.html#run(java.util.function.Supplier,java.util.function.Supplier)" class="member-name-link">run(Supplier&lt;Angle&gt;, Supplier&lt;Angle&gt;)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional">DifferentialMechanism</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Run the differential mechanism to a position.</div>
+</dd>
 <dt><a href="yams/mechanisms/positional/Elevator.html#run(java.util.function.Supplier)" class="member-name-link">run(Supplier&lt;Distance&gt;)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional">Elevator</a></dt>
 <dd>
 <div class="block">Set the height of the elevator.</div>
@@ -3244,6 +3260,22 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/SmartMotorController.html#setClosedLoopRampRate(edu.wpi.first.units.measure.Time)" class="member-name-link">setClosedLoopRampRate(Time)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Set the closed loop ramp rate.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/local/NovaWrapper.html#setClosedLoopSlot(yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">setClosedLoopSlot(SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/NovaWrapper.html" title="class in yams.motorcontrollers.local">NovaWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/local/SparkWrapper.html#setClosedLoopSlot(yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">setClosedLoopSlot(SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/SparkWrapper.html" title="class in yams.motorcontrollers.local">SparkWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/remote/TalonFXSWrapper.html#setClosedLoopSlot(yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">setClosedLoopSlot(SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.remote.<a href="yams/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXSWrapper</a></dt>
+<dd>
+<div class="block">Set the closed loop controller slot to use.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/remote/TalonFXWrapper.html#setClosedLoopSlot(yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">setClosedLoopSlot(SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.remote.<a href="yams/motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXWrapper</a></dt>
+<dd>
+<div class="block">Set the closed loop controller slot to use.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.html#setClosedLoopSlot(yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">setClosedLoopSlot(SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
+<dd>
+<div class="block">Set the closed loop controller slot to use.</div>
 </dd>
 <dt><a href="yams/math/ExponentialProfilePIDController.html#setConstraints(edu.wpi.first.math.trajectory.ExponentialProfile.Constraints)" class="member-name-link">setConstraints(ExponentialProfile.Constraints)</a> - Method in class yams.math.<a href="yams/math/ExponentialProfilePIDController.html" title="class in yams.math">ExponentialProfilePIDController</a></dt>
 <dd>
@@ -4053,6 +4085,22 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Provides sim functions for</div>
 </dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.ClosedLoopControllerSlot.html#SLOT_0" class="member-name-link">SLOT_0</a> - Enum constant in enum class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a></dt>
+<dd>
+<div class="block">Slot 0 is the default slot for the closed loop controller.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.ClosedLoopControllerSlot.html#SLOT_1" class="member-name-link">SLOT_1</a> - Enum constant in enum class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a></dt>
+<dd>
+<div class="block">Slot 1 is the second slot for the closed loop controller.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.ClosedLoopControllerSlot.html#SLOT_2" class="member-name-link">SLOT_2</a> - Enum constant in enum class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a></dt>
+<dd>
+<div class="block">Slot 2 is the third slot for the closed loop controller.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.ClosedLoopControllerSlot.html#SLOT_3" class="member-name-link">SLOT_3</a> - Enum constant in enum class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a></dt>
+<dd>
+<div class="block">Slot 3 is the fourth slot for the closed loop controller.</div>
+</dd>
 <dt><a href="yams/math/SmartMath.html" class="type-name-link" title="class in yams.math">SmartMath</a> - Class in <a href="yams/math/package-summary.html">yams.math</a></dt>
 <dd>
 <div class="block">SmartMath class to handle math operations.</div>
@@ -4071,6 +4119,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorController.html#%3Cinit%3E()" class="member-name-link">SmartMotorController()</a> - Constructor for class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.ClosedLoopControllerSlot.html" class="type-name-link" title="enum class in yams.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a> - Enum Class in <a href="yams/motorcontrollers/package-summary.html">yams.motorcontrollers</a></dt>
+<dd>
+<div class="block">Current closed loop controller slot.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerCommandRegistry.html" class="type-name-link" title="class in yams.motorcontrollers">SmartMotorControllerCommandRegistry</a> - Class in <a href="yams/motorcontrollers/package-summary.html">yams.motorcontrollers</a></dt>
 <dd>
 <div class="block">Registry for SmartMotorController commands.</div>
@@ -4432,6 +4484,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Check to see if the value has changed.</div>
 </dd>
+<dt><a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html#TunableClosedLoopControllerSlot" class="member-name-link">TunableClosedLoopControllerSlot</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Closed loop controller slot.</div>
+</dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html#TunableSetpointPosition" class="member-name-link">TunableSetpointPosition</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></dt>
 <dd>
 <div class="block">Setpoint position</div>
@@ -4546,6 +4602,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
 </dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.ClosedLoopControllerSlot.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this class with the specified name.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.ControlMode.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.ControlMode.html" title="enum class in yams.motorcontrollers">SmartMotorControllerConfig.ControlMode</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
@@ -4590,6 +4650,11 @@ the order they are declared.</div>
 the order they are declared.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/simulation/SensorData.HALValueType.html#values()" class="member-name-link">values()</a> - Static method in enum class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/SensorData.HALValueType.html" title="enum class in yams.motorcontrollers.simulation">SensorData.HALValueType</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum class, in
+the order they are declared.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.ClosedLoopControllerSlot.html#values()" class="member-name-link">values()</a> - Static method in enum class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a></dt>
 <dd>
 <div class="block">Returns an array containing the constants of this enum class, in
 the order they are declared.</div>
@@ -4773,32 +4838,88 @@ the order they are declared.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(double,double,double,edu.wpi.first.units.measure.AngularAcceleration,edu.wpi.first.units.measure.Velocity)" class="member-name-link">withClosedLoopController(double, double, double, AngularAcceleration, Velocity&lt;AngularAccelerationUnit&gt;)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">Use <a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withTrapezoidalProfile(edu.wpi.first.units.measure.AngularAcceleration,edu.wpi.first.units.measure.Velocity)"><code>SmartMotorControllerConfig.withTrapezoidalProfile(AngularAcceleration, Velocity&lt;AngularAccelerationUnit&gt;)</code></a> to define
+ your trapezoidal profile.</div>
+</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(double,double,double,edu.wpi.first.units.measure.AngularAcceleration,edu.wpi.first.units.measure.Velocity,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withClosedLoopController(double, double, double, AngularAcceleration, Velocity&lt;AngularAccelerationUnit&gt;, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">Use <a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withTrapezoidalProfile(edu.wpi.first.units.measure.AngularAcceleration,edu.wpi.first.units.measure.Velocity)"><code>SmartMotorControllerConfig.withTrapezoidalProfile(AngularAcceleration, Velocity&lt;AngularAccelerationUnit&gt;)</code></a> to define
+ your trapezoidal profile.</div>
+</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(double,double,double,edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.AngularAcceleration)" class="member-name-link">withClosedLoopController(double, double, double, AngularVelocity, AngularAcceleration)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">Please use <a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withTrapezoidalProfile(edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.AngularAcceleration)"><code>SmartMotorControllerConfig.withTrapezoidalProfile(AngularVelocity, AngularAcceleration)</code></a> to define your
+ trapezoidal profile.</div>
+</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(double,double,double,edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.AngularAcceleration,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withClosedLoopController(double, double, double, AngularVelocity, AngularAcceleration, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">Please use <a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withTrapezoidalProfile(edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.AngularAcceleration)"><code>SmartMotorControllerConfig.withTrapezoidalProfile(AngularVelocity, AngularAcceleration)</code></a> to define your
+ trapezoidal profile.</div>
+</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(double,double,double,edu.wpi.first.units.measure.LinearAcceleration,edu.wpi.first.units.measure.Velocity)" class="member-name-link">withClosedLoopController(double, double, double, LinearAcceleration, Velocity&lt;LinearAccelerationUnit&gt;)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">Use <a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withTrapezoidalProfile(edu.wpi.first.units.measure.LinearAcceleration,edu.wpi.first.units.measure.Velocity)"><code>SmartMotorControllerConfig.withTrapezoidalProfile(LinearAcceleration, Velocity&lt;LinearAccelerationUnit&gt;)</code></a> to define
+ your trapezoidal profile.</div>
+</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(double,double,double,edu.wpi.first.units.measure.LinearAcceleration,edu.wpi.first.units.measure.Velocity,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withClosedLoopController(double, double, double, LinearAcceleration, Velocity&lt;LinearAccelerationUnit&gt;, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">Use <a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withTrapezoidalProfile(edu.wpi.first.units.measure.LinearAcceleration,edu.wpi.first.units.measure.Velocity)"><code>SmartMotorControllerConfig.withTrapezoidalProfile(LinearAcceleration, Velocity&lt;LinearAccelerationUnit&gt;)</code></a> to define
+ your trapezoidal profile.</div>
+</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(double,double,double,edu.wpi.first.units.measure.LinearVelocity,edu.wpi.first.units.measure.LinearAcceleration)" class="member-name-link">withClosedLoopController(double, double, double, LinearVelocity, LinearAcceleration)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">Please use <a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withTrapezoidalProfile(edu.wpi.first.units.measure.LinearVelocity,edu.wpi.first.units.measure.LinearAcceleration)"><code>SmartMotorControllerConfig.withTrapezoidalProfile(LinearVelocity, LinearAcceleration)</code></a> to define your
+ trapezoidal profile.</div>
+</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(double,double,double,edu.wpi.first.units.measure.LinearVelocity,edu.wpi.first.units.measure.LinearAcceleration,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withClosedLoopController(double, double, double, LinearVelocity, LinearAcceleration, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">Please use <a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withTrapezoidalProfile(edu.wpi.first.units.measure.LinearVelocity,edu.wpi.first.units.measure.LinearAcceleration)"><code>SmartMotorControllerConfig.withTrapezoidalProfile(LinearVelocity, LinearAcceleration)</code></a> to define your
+ trapezoidal profile.</div>
+</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(double,double,double,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withClosedLoopController(double, double, double, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
+ Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(edu.wpi.first.math.controller.PIDController)" class="member-name-link">withClosedLoopController(PIDController)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
  Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
 </dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(edu.wpi.first.math.controller.PIDController,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withClosedLoopController(PIDController, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
+ Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(edu.wpi.first.math.controller.ProfiledPIDController)" class="member-name-link">withClosedLoopController(ProfiledPIDController)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span></div>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">Use <a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(double,double,double)"><code>SmartMotorControllerConfig.withClosedLoopController(double, double, double)</code></a> and
+ <a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withTrapezoidalProfile(edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.AngularAcceleration)"><code>SmartMotorControllerConfig.withTrapezoidalProfile(AngularVelocity, AngularAcceleration)</code></a>.</div>
+</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(yams.math.ExponentialProfilePIDController)" class="member-name-link">withClosedLoopController(ExponentialProfilePIDController)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span></div>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">Use <a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(double,double,double)"><code>SmartMotorControllerConfig.withClosedLoopController(double, double, double)</code></a> and
+ <a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withExponentialProfile(edu.wpi.first.math.trajectory.ExponentialProfile.Constraints)"><code>SmartMotorControllerConfig.withExponentialProfile(ExponentialProfile.Constraints)</code></a>.</div>
+</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(yams.math.LQRController)" class="member-name-link">withClosedLoopController(LQRController)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -4927,6 +5048,10 @@ the order they are declared.</div>
 <dd>
 <div class="block">Sets encoder rotations per mechanism rotation directly for encoder 1 and encoder 2.</div>
 </dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withExponentialProfile(edu.wpi.first.math.trajectory.ExponentialProfile.Constraints)" class="member-name-link">withExponentialProfile(ExponentialProfile.Constraints)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Set the exponential profile for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withExponentialProfile(edu.wpi.first.units.measure.Voltage,edu.wpi.first.math.system.plant.DCMotor,edu.wpi.first.units.measure.Mass,edu.wpi.first.units.measure.Distance)" class="member-name-link">withExponentialProfile(Voltage, DCMotor, Mass, Distance)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/trajectory/ExponentialProfile.Constraints.html" title="class or interface in edu.wpi.first.math.trajectory" class="external-link"><code>ExponentialProfile.Constraints</code></a> for an elevator.</div>
@@ -4972,11 +5097,23 @@ the order they are declared.</div>
 <dd>
 <div class="block">Configure the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/ArmFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>ArmFeedforward</code></a> for the</div>
 </dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withFeedforward(edu.wpi.first.math.controller.ArmFeedforward,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withFeedforward(ArmFeedforward, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Configure the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/ArmFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>ArmFeedforward</code></a> for the</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withFeedforward(edu.wpi.first.math.controller.ElevatorFeedforward)" class="member-name-link">withFeedforward(ElevatorFeedforward)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Configure <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/ElevatorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>ElevatorFeedforward</code></a> for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
 </dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withFeedforward(edu.wpi.first.math.controller.ElevatorFeedforward,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withFeedforward(ElevatorFeedforward, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Configure <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/ElevatorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>ElevatorFeedforward</code></a> for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withFeedforward(edu.wpi.first.math.controller.SimpleMotorFeedforward)" class="member-name-link">withFeedforward(SimpleMotorFeedforward)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Set the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>SimpleMotorFeedforward</code></a> for <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, units are in Rotations</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withFeedforward(edu.wpi.first.math.controller.SimpleMotorFeedforward,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withFeedforward(SimpleMotorFeedforward, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>SimpleMotorFeedforward</code></a> for <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, units are in Rotations</div>
 </dd>
@@ -5365,21 +5502,71 @@ the order they are declared.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimClosedLoopController(double,double,double,edu.wpi.first.units.measure.AngularAcceleration,edu.wpi.first.units.measure.Velocity)" class="member-name-link">withSimClosedLoopController(double, double, double, AngularAcceleration, Velocity&lt;AngularAccelerationUnit&gt;)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">Please use <a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withTrapezoidalProfile(edu.wpi.first.units.measure.AngularAcceleration,edu.wpi.first.units.measure.Velocity)"><code>SmartMotorControllerConfig.withTrapezoidalProfile(AngularAcceleration, Velocity&lt;AngularAccelerationUnit&gt;)</code></a> to
+ define your trapezoidal profile.</div>
+</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimClosedLoopController(double,double,double,edu.wpi.first.units.measure.AngularAcceleration,edu.wpi.first.units.measure.Velocity,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withSimClosedLoopController(double, double, double, AngularAcceleration, Velocity&lt;AngularAccelerationUnit&gt;, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">Please use <a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withTrapezoidalProfile(edu.wpi.first.units.measure.AngularAcceleration,edu.wpi.first.units.measure.Velocity)"><code>SmartMotorControllerConfig.withTrapezoidalProfile(AngularAcceleration, Velocity&lt;AngularAccelerationUnit&gt;)</code></a> to
+ define your trapezoidal profile.</div>
+</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimClosedLoopController(double,double,double,edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.AngularAcceleration)" class="member-name-link">withSimClosedLoopController(double, double, double, AngularVelocity, AngularAcceleration)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">Use <a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withTrapezoidalProfile(edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.AngularAcceleration)"><code>SmartMotorControllerConfig.withTrapezoidalProfile(AngularVelocity, AngularAcceleration)</code></a> to define your trapezoidal
+ profile.</div>
+</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimClosedLoopController(double,double,double,edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.AngularAcceleration,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withSimClosedLoopController(double, double, double, AngularVelocity, AngularAcceleration, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">Use <a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withTrapezoidalProfile(edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.AngularAcceleration)"><code>SmartMotorControllerConfig.withTrapezoidalProfile(AngularVelocity, AngularAcceleration)</code></a> to define your trapezoidal
+ profile.</div>
+</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimClosedLoopController(double,double,double,edu.wpi.first.units.measure.LinearAcceleration,edu.wpi.first.units.measure.Velocity)" class="member-name-link">withSimClosedLoopController(double, double, double, LinearAcceleration, Velocity&lt;LinearAccelerationUnit&gt;)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">Please use <a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withTrapezoidalProfile(edu.wpi.first.units.measure.LinearAcceleration,edu.wpi.first.units.measure.Velocity)"><code>SmartMotorControllerConfig.withTrapezoidalProfile(LinearAcceleration, Velocity&lt;LinearAccelerationUnit&gt;)</code></a> to
+ define your trapezoidal profile.</div>
+</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimClosedLoopController(double,double,double,edu.wpi.first.units.measure.LinearAcceleration,edu.wpi.first.units.measure.Velocity,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withSimClosedLoopController(double, double, double, LinearAcceleration, Velocity&lt;LinearAccelerationUnit&gt;, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">Please use <a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withTrapezoidalProfile(edu.wpi.first.units.measure.LinearAcceleration,edu.wpi.first.units.measure.Velocity)"><code>SmartMotorControllerConfig.withTrapezoidalProfile(LinearAcceleration, Velocity&lt;LinearAccelerationUnit&gt;)</code></a> to define
+ your trapezoidal profile.</div>
+</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimClosedLoopController(double,double,double,edu.wpi.first.units.measure.LinearVelocity,edu.wpi.first.units.measure.LinearAcceleration)" class="member-name-link">withSimClosedLoopController(double, double, double, LinearVelocity, LinearAcceleration)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">Use <a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withTrapezoidalProfile(edu.wpi.first.units.measure.LinearVelocity,edu.wpi.first.units.measure.LinearAcceleration)"><code>SmartMotorControllerConfig.withTrapezoidalProfile(LinearVelocity, LinearAcceleration)</code></a> to define your trapezoidal
+ profile.</div>
+</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimClosedLoopController(double,double,double,edu.wpi.first.units.measure.LinearVelocity,edu.wpi.first.units.measure.LinearAcceleration,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withSimClosedLoopController(double, double, double, LinearVelocity, LinearAcceleration, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">Use <a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withTrapezoidalProfile(edu.wpi.first.units.measure.LinearVelocity,edu.wpi.first.units.measure.LinearAcceleration)"><code>SmartMotorControllerConfig.withTrapezoidalProfile(LinearVelocity, LinearAcceleration)</code></a> to define your trapezoidal
+ profile.</div>
+</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimClosedLoopController(double,double,double,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withSimClosedLoopController(double, double, double, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
+ Meters if Mechanism Circumference is configured).</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimClosedLoopController(edu.wpi.first.math.controller.PIDController)" class="member-name-link">withSimClosedLoopController(PIDController)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
+ Meters if Mechanism Circumference is configured).</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimClosedLoopController(edu.wpi.first.math.controller.PIDController,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withSimClosedLoopController(PIDController, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
  Meters if Mechanism Circumference is configured).</div>
@@ -5424,11 +5611,23 @@ the order they are declared.</div>
 <dd>
 <div class="block">Configure the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/ArmFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>ArmFeedforward</code></a> for the</div>
 </dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimFeedforward(edu.wpi.first.math.controller.ArmFeedforward,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withSimFeedforward(ArmFeedforward, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Configure the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/ArmFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>ArmFeedforward</code></a> for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimFeedforward(edu.wpi.first.math.controller.ElevatorFeedforward)" class="member-name-link">withSimFeedforward(ElevatorFeedforward)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Configure <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/ElevatorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>ElevatorFeedforward</code></a> for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
 </dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimFeedforward(edu.wpi.first.math.controller.ElevatorFeedforward,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withSimFeedforward(ElevatorFeedforward, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Configure <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/ElevatorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>ElevatorFeedforward</code></a> for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimFeedforward(edu.wpi.first.math.controller.SimpleMotorFeedforward)" class="member-name-link">withSimFeedforward(SimpleMotorFeedforward)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Set the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>SimpleMotorFeedforward</code></a> for <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, units are in Rotations.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimFeedforward(edu.wpi.first.math.controller.SimpleMotorFeedforward,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withSimFeedforward(SimpleMotorFeedforward, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>SimpleMotorFeedforward</code></a> for <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, units are in Rotations.</div>
 </dd>
