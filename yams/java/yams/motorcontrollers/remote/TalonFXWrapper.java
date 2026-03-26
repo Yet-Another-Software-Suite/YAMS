@@ -833,6 +833,7 @@ public class TalonFXWrapper extends SmartMotorController
           case SLOT_2 -> m_talonConfig.Slot2.withKS(kS).withKV(kV).withKA(kA).withKG(kG);
         }
       }
+      m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.applyConfig(config);}});
     }
 
     // Motor inversion
@@ -1710,7 +1711,7 @@ public class TalonFXWrapper extends SmartMotorController
    * @implNote The TalonFX supports 3 slots, not 4!
    */
   @Override
-  public void setClosedLoopControllerSlot(ClosedLoopControllerSlot slot)
+  public void setClosedLoopSlot(ClosedLoopControllerSlot slot)
   {
     if (slot.ordinal() >= ClosedLoopControllerSlot.SLOT_3.ordinal())
     {

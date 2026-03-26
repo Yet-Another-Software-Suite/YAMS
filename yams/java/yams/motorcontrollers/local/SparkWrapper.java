@@ -1331,10 +1331,11 @@ public class SparkWrapper extends SmartMotorController
   }
 
   @Override
-  public void setClosedLoopControllerSlot(ClosedLoopControllerSlot slot)
+  public void setClosedLoopSlot(ClosedLoopControllerSlot slot)
   {
     m_slot = slot;
     m_closedLoopSlot = getSparkClosedLoopSlot(slot);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setClosedLoopSlot(slot);}});
   }
 
   @Override

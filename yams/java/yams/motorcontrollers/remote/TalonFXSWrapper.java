@@ -1702,7 +1702,7 @@ public class TalonFXSWrapper extends SmartMotorController
    * @implNote The TalonFX supports 3 slots, not 4!
    */
   @Override
-  public void setClosedLoopControllerSlot(ClosedLoopControllerSlot slot)
+  public void setClosedLoopSlot(ClosedLoopControllerSlot slot)
   {
     if (slot.ordinal() >= ClosedLoopControllerSlot.SLOT_3.ordinal())
     {
@@ -1753,6 +1753,7 @@ public class TalonFXSWrapper extends SmartMotorController
             "TalonFX(" + m_talonfxs.getDeviceID() + ") does not support the '" + m_velocityReq.getName() +
             "' control request!", "Cannot use given control request", "withVendorControlRequest()");
     }
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setClosedLoopSlot(slot);}});
   }
 
   /**

@@ -1179,7 +1179,7 @@ public abstract class SmartMotorController
    *
    * @param slot Slot to use.
    */
-  public abstract void setClosedLoopControllerSlot(ClosedLoopControllerSlot slot);
+  public abstract void setClosedLoopSlot(ClosedLoopControllerSlot slot);
 
   /**
    * Get the {@link SmartMotorController} temperature.

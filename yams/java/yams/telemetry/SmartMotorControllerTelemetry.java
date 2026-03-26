@@ -207,7 +207,7 @@ public class SmartMotorControllerTelemetry
             {
               var slot = ClosedLoopControllerSlot.values()[(int) dt.get()];
               if (!smartMotorController.getClosedLoopControllerSlot().equals(slot))
-              {smartMotorController.setClosedLoopControllerSlot(slot);}
+              {smartMotorController.setClosedLoopSlot(slot);}
             }
           }
           case TunableSetpointPosition ->
