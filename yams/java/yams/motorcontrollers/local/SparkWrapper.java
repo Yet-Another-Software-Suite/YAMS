@@ -132,7 +132,7 @@ public class SparkWrapper extends SmartMotorController
   /**
    * REV Closed loop slot.
    */
-  private final ClosedLoopSlot                    m_closedLoopSlot          = ClosedLoopSlot.kSlot0;
+  private ClosedLoopSlot m_closedLoopSlot = ClosedLoopSlot.kSlot0;
 
   /**
    * Create a {@link SmartMotorController} from {@link SparkMax} or {@link SparkFlex}
@@ -394,7 +394,7 @@ public class SparkWrapper extends SmartMotorController
       m_sparkBaseConfig.disableFollowerMode();
     }
     m_lqr = config.getLQRClosedLoopController();
-    m_pid = config.getPID();
+    m_pid = config.getPID(m_slot);
     m_looseFollowers = config.getLooselyCoupledFollowers();
 
     // Handle motion profile
@@ -470,34 +470,38 @@ public class SparkWrapper extends SmartMotorController
 
     // Set PID
     m_sparkBaseConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);
-    config.getPID().ifPresent(pidController -> {
-      m_sparkBaseConfig.closedLoop.pid(pidController.getP(),
-                                       pidController.getI(),
-                                       pidController.getD(),
-                                       m_closedLoopSlot);
-    });
+    for (var closedLoopControlSlot : ClosedLoopControllerSlot.values())
+    {
+      var sparkSlot = getSparkClosedLoopSlot(closedLoopControlSlot);
+      config.getPID(closedLoopControlSlot).ifPresent(pidController -> {
+        m_sparkBaseConfig.closedLoop.pid(pidController.getP(),
+                                         pidController.getI(),
+                                         pidController.getD(),
+                                         sparkSlot);
+      });
 
-    // Set feedforward values
-    config.getArmFeedforward().ifPresent(ff -> {
-      m_sparkBaseConfig.closedLoop.feedForward
-          .kS(ff.getKs())
-          .kV(ff.getKv())
-          .kA(ff.getKa())
-          .kCos(ff.getKg());
-    });
-    config.getElevatorFeedforward().ifPresent(ff -> {
-      m_sparkBaseConfig.closedLoop.feedForward
-          .kS(ff.getKs())
-          .kV(ff.getKv())
-          .kA(ff.getKa())
-          .kG(ff.getKg());
-    });
-    config.getSimpleFeedforward().ifPresent(ff -> {
-      m_sparkBaseConfig.closedLoop.feedForward
-          .kS(ff.getKs())
-          .kV(ff.getKv())
-          .kA(ff.getKa());
-    });
+      // Set feedforward values
+      config.getArmFeedforward(closedLoopControlSlot).ifPresent(ff -> {
+        m_sparkBaseConfig.closedLoop.feedForward
+            .kS(ff.getKs(), sparkSlot)
+            .kV(ff.getKv(), sparkSlot)
+            .kA(ff.getKa(), sparkSlot)
+            .kCos(ff.getKg(), sparkSlot);
+      });
+      config.getElevatorFeedforward(closedLoopControlSlot).ifPresent(ff -> {
+        m_sparkBaseConfig.closedLoop.feedForward
+            .kS(ff.getKs(), sparkSlot)
+            .kV(ff.getKv(), sparkSlot)
+            .kA(ff.getKa(), sparkSlot)
+            .kG(ff.getKg(), sparkSlot);
+      });
+      config.getSimpleFeedforward(closedLoopControlSlot).ifPresent(ff -> {
+        m_sparkBaseConfig.closedLoop.feedForward
+            .kS(ff.getKs(), sparkSlot)
+            .kV(ff.getKv(), sparkSlot)
+            .kA(ff.getKa(), sparkSlot);
+      });
+    }
 
     // LQR Doesnt handle tolerances
     if (m_lqr.isPresent() && config.getClosedLoopTolerance().isPresent())
@@ -999,10 +1003,11 @@ public class SparkWrapper extends SmartMotorController
   @Override
   public void setKp(double kP)
   {
+    m_config.getPID(m_slot).ifPresent(pid -> pid.setP(kP));
     m_pid.ifPresent(simplePidController -> {
       simplePidController.setP(kP);
     });
-    m_sparkBaseConfig.closedLoop.p(kP);
+    m_sparkBaseConfig.closedLoop.p(kP, m_closedLoopSlot);
 
     m_spark.configureAsync(m_sparkBaseConfig,
                            ResetMode.kNoResetSafeParameters,
@@ -1014,10 +1019,11 @@ public class SparkWrapper extends SmartMotorController
   @Override
   public void setKi(double kI)
   {
+    m_config.getPID(m_slot).ifPresent(simplePidController -> {simplePidController.setI(kI);});
     m_pid.ifPresent(simplePidController -> {
       simplePidController.setI(kI);
     });
-    m_sparkBaseConfig.closedLoop.i(kI);
+    m_sparkBaseConfig.closedLoop.i(kI, m_closedLoopSlot);
     m_spark.configureAsync(m_sparkBaseConfig,
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
@@ -1029,10 +1035,11 @@ public class SparkWrapper extends SmartMotorController
   @Override
   public void setKd(double kD)
   {
+    m_config.getPID(m_slot).ifPresent(simplePidController -> {simplePidController.setD(kD);});
     m_pid.ifPresent(simplePidController -> {
       simplePidController.setD(kD);
     });
-    m_sparkBaseConfig.closedLoop.d(kD);
+    m_sparkBaseConfig.closedLoop.d(kD, m_closedLoopSlot);
     m_spark.configureAsync(m_sparkBaseConfig,
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
@@ -1044,12 +1051,17 @@ public class SparkWrapper extends SmartMotorController
   @Override
   public void setFeedback(double kP, double kI, double kD)
   {
+    m_config.getPID(m_slot).ifPresent(simplePidController -> {
+      simplePidController.setP(kP);
+      simplePidController.setI(kI);
+      simplePidController.setD(kD);
+    });
     m_pid.ifPresent(simplePidController -> {
       simplePidController.setP(kP);
       simplePidController.setI(kI);
       simplePidController.setD(kD);
     });
-    m_sparkBaseConfig.closedLoop.pid(kP, kI, kD);
+    m_sparkBaseConfig.closedLoop.pid(kP, kI, kD, m_closedLoopSlot);
     m_spark.configureAsync(m_sparkBaseConfig,
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
@@ -1060,16 +1072,16 @@ public class SparkWrapper extends SmartMotorController
   @Override
   public void setKs(double kS)
   {
-    m_config.getSimpleFeedforward().ifPresent(simpleMotorFeedforward -> {
+    m_config.getSimpleFeedforward(m_slot).ifPresent(simpleMotorFeedforward -> {
       simpleMotorFeedforward.setKs(kS);
     });
-    m_config.getArmFeedforward().ifPresent(armFeedforward -> {
+    m_config.getArmFeedforward(m_slot).ifPresent(armFeedforward -> {
       armFeedforward.setKs(kS);
     });
-    m_config.getElevatorFeedforward().ifPresent(elevatorFeedforward -> {
+    m_config.getElevatorFeedforward(m_slot).ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKs(kS);
     });
-    m_sparkBaseConfig.closedLoop.feedForward.kS(kS);
+    m_sparkBaseConfig.closedLoop.feedForward.kS(kS, m_closedLoopSlot);
     m_spark.configureAsync(m_sparkBaseConfig,
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
@@ -1080,16 +1092,16 @@ public class SparkWrapper extends SmartMotorController
   @Override
   public void setKv(double kV)
   {
-    m_config.getSimpleFeedforward().ifPresent(simpleMotorFeedforward -> {
+    m_config.getSimpleFeedforward(m_slot).ifPresent(simpleMotorFeedforward -> {
       simpleMotorFeedforward.setKv(kV);
     });
-    m_config.getArmFeedforward().ifPresent(armFeedforward -> {
+    m_config.getArmFeedforward(m_slot).ifPresent(armFeedforward -> {
       armFeedforward.setKv(kV);
     });
-    m_config.getElevatorFeedforward().ifPresent(elevatorFeedforward -> {
+    m_config.getElevatorFeedforward(m_slot).ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKv(kV);
     });
-    m_sparkBaseConfig.closedLoop.feedForward.kV(kV);
+    m_sparkBaseConfig.closedLoop.feedForward.kV(kV, m_closedLoopSlot);
     m_spark.configureAsync(m_sparkBaseConfig,
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
@@ -1100,16 +1112,16 @@ public class SparkWrapper extends SmartMotorController
   @Override
   public void setKa(double kA)
   {
-    m_config.getSimpleFeedforward().ifPresent(simpleMotorFeedforward -> {
+    m_config.getSimpleFeedforward(m_slot).ifPresent(simpleMotorFeedforward -> {
       simpleMotorFeedforward.setKa(kA);
     });
-    m_config.getArmFeedforward().ifPresent(armFeedforward -> {
+    m_config.getArmFeedforward(m_slot).ifPresent(armFeedforward -> {
       armFeedforward.setKa(kA);
     });
-    m_config.getElevatorFeedforward().ifPresent(elevatorFeedforward -> {
+    m_config.getElevatorFeedforward(m_slot).ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKa(kA);
     });
-    m_sparkBaseConfig.closedLoop.feedForward.kA(kA);
+    m_sparkBaseConfig.closedLoop.feedForward.kA(kA, m_closedLoopSlot);
     m_spark.configureAsync(m_sparkBaseConfig,
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
@@ -1120,18 +1132,18 @@ public class SparkWrapper extends SmartMotorController
   @Override
   public void setKg(double kG)
   {
-    m_config.getArmFeedforward().ifPresent(armFeedforward -> {
+    m_config.getArmFeedforward(m_slot).ifPresent(armFeedforward -> {
       armFeedforward.setKg(kG);
     });
-    m_config.getElevatorFeedforward().ifPresent(elevatorFeedforward -> {
+    m_config.getElevatorFeedforward(m_slot).ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKg(kG);
     });
-    if (m_config.getArmFeedforward().isEmpty())
+    if (m_config.getArmFeedforward(m_slot).isEmpty())
     {
-      m_sparkBaseConfig.closedLoop.feedForward.kG(kG);
+      m_sparkBaseConfig.closedLoop.feedForward.kG(kG, m_closedLoopSlot);
     } else
     {
-      m_sparkBaseConfig.closedLoop.feedForward.kCos(kG);
+      m_sparkBaseConfig.closedLoop.feedForward.kCos(kG, m_closedLoopSlot);
     }
     m_spark.configureAsync(m_sparkBaseConfig,
                            ResetMode.kNoResetSafeParameters,
@@ -1144,26 +1156,26 @@ public class SparkWrapper extends SmartMotorController
   @Override
   public void setFeedforward(double kS, double kV, double kA, double kG)
   {
-    m_config.getSimpleFeedforward().ifPresent(simpleMotorFeedforward -> {
+    m_config.getSimpleFeedforward(m_slot).ifPresent(simpleMotorFeedforward -> {
       simpleMotorFeedforward.setKs(kS);
       simpleMotorFeedforward.setKv(kV);
       simpleMotorFeedforward.setKa(kA);
     });
-    m_config.getArmFeedforward().ifPresent(armFeedforward -> {
+    m_config.getArmFeedforward(m_slot).ifPresent(armFeedforward -> {
       armFeedforward.setKs(kS);
       armFeedforward.setKv(kV);
       armFeedforward.setKa(kA);
       armFeedforward.setKg(kG);
-      m_sparkBaseConfig.closedLoop.feedForward.kCos(kG);
+      m_sparkBaseConfig.closedLoop.feedForward.kCos(kG, m_closedLoopSlot);
     });
-    m_config.getElevatorFeedforward().ifPresent(elevatorFeedforward -> {
+    m_config.getElevatorFeedforward(m_slot).ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKs(kS);
       elevatorFeedforward.setKv(kV);
       elevatorFeedforward.setKa(kA);
       elevatorFeedforward.setKg(kG);
-      m_sparkBaseConfig.closedLoop.feedForward.kG(kG);
+      m_sparkBaseConfig.closedLoop.feedForward.kG(kG, m_closedLoopSlot);
     });
-    m_sparkBaseConfig.closedLoop.feedForward.kS(kS).kV(kV).kA(kA);
+    m_sparkBaseConfig.closedLoop.feedForward.kS(kS, m_closedLoopSlot).kV(kV, m_closedLoopSlot).kA(kA, m_closedLoopSlot);
     m_spark.configureAsync(m_sparkBaseConfig,
                            ResetMode.kNoResetSafeParameters,
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
@@ -1293,6 +1305,36 @@ public class SparkWrapper extends SmartMotorController
                            DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                      : PersistMode.kPersistParameters);
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismLimitsEnabled(enabled);}});
+  }
+
+  /**
+   * Convert generic slot into spark specific slot.
+   *
+   * @param slot {@link yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot} to convert
+   * @return spark specific slot {@link ClosedLoopSlot}
+   */
+  private ClosedLoopSlot getSparkClosedLoopSlot(ClosedLoopControllerSlot slot)
+  {
+    switch (slot)
+    {
+      case SLOT_0:
+        return ClosedLoopSlot.kSlot0;
+      case SLOT_1:
+        return ClosedLoopSlot.kSlot1;
+      case SLOT_2:
+        return ClosedLoopSlot.kSlot2;
+      case SLOT_3:
+        return ClosedLoopSlot.kSlot3;
+      default:
+        throw new IllegalArgumentException("Invalid slot: " + slot);
+    }
+  }
+
+  @Override
+  public void setClosedLoopControllerSlot(ClosedLoopControllerSlot slot)
+  {
+    m_slot = slot;
+    m_closedLoopSlot = getSparkClosedLoopSlot(slot);
   }
 
   @Override

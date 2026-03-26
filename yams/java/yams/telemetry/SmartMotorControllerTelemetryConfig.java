@@ -105,6 +105,7 @@ public class SmartMotorControllerTelemetryConfig
         boolFields.get(BooleanTelemetryField.EncoderInversion).enable();
         doubleFields.get(DoubleTelemetryField.TunableSetpointPosition).enable();
         doubleFields.get(DoubleTelemetryField.TunableSetpointVelocity).enable();
+        doubleFields.get(DoubleTelemetryField.TunableClosedLoopControllerSlot).enable();
         doubleFields.get(DoubleTelemetryField.MotorTemperature).enable();
         doubleFields.get(DoubleTelemetryField.MechanismLowerLimit).enable();
         doubleFields.get(DoubleTelemetryField.MechanismUpperLimit).enable();
@@ -126,6 +127,7 @@ public class SmartMotorControllerTelemetryConfig
         doubleFields.get(DoubleTelemetryField.StatorCurrent).enable();
         doubleFields.get(DoubleTelemetryField.SupplyCurrent).enable();
       case LOW:
+        doubleFields.get(DoubleTelemetryField.ActiveClosedLoopControllerSlot).enable();
         doubleFields.get(DoubleTelemetryField.SetpointPosition).enable();
         doubleFields.get(DoubleTelemetryField.SetpointVelocity).enable();
         doubleFields.get(DoubleTelemetryField.MeasurementPosition).enable();
@@ -202,7 +204,7 @@ public class SmartMotorControllerTelemetryConfig
       doubleFields.get(DoubleTelemetryField.SupplyCurrent).disable();
       doubleFields.get(DoubleTelemetryField.SupplyCurrentLimit).disable();
     }
-    if (config.getSimpleFeedforward().isEmpty())
+    if (config.getSimpleFeedforward(smc.getClosedLoopControllerSlot()).isEmpty())
     {
       doubleFields.get(DoubleTelemetryField.kG).disable();
     }
@@ -229,7 +231,7 @@ public class SmartMotorControllerTelemetryConfig
                                                                    .setDefaultValue(e));
     config.getStatorStallCurrentLimit().ifPresent(e -> doubleFields.get(DoubleTelemetryField.StatorCurrentLimit)
                                                                    .setDefaultValue(e));
-    config.getPID().ifPresent(e -> {
+    config.getPID(smc.getClosedLoopControllerSlot()).ifPresent(e -> {
       doubleFields.get(DoubleTelemetryField.kP).setDefaultValue(e.getP());
       doubleFields.get(DoubleTelemetryField.kI).setDefaultValue(e.getI());
       doubleFields.get(DoubleTelemetryField.kD).setDefaultValue(e.getD());
@@ -287,21 +289,21 @@ public class SmartMotorControllerTelemetryConfig
       doubleFields.get(DoubleTelemetryField.kI).disable();
       doubleFields.get(DoubleTelemetryField.kD).disable();
     });
-    config.getArmFeedforward().ifPresent(e -> {
+    config.getArmFeedforward(smc.getClosedLoopControllerSlot()).ifPresent(e -> {
       doubleFields.get(DoubleTelemetryField.kG).enable();
       doubleFields.get(DoubleTelemetryField.kS).setDefaultValue(e.getKs());
       doubleFields.get(DoubleTelemetryField.kV).setDefaultValue(e.getKv());
       doubleFields.get(DoubleTelemetryField.kA).setDefaultValue(e.getKa());
       doubleFields.get(DoubleTelemetryField.kG).setDefaultValue(e.getKg());
     });
-    config.getElevatorFeedforward().ifPresent(e -> {
+    config.getElevatorFeedforward(smc.getClosedLoopControllerSlot()).ifPresent(e -> {
       doubleFields.get(DoubleTelemetryField.kG).enable();
       doubleFields.get(DoubleTelemetryField.kS).setDefaultValue(e.getKs());
       doubleFields.get(DoubleTelemetryField.kV).setDefaultValue(e.getKv());
       doubleFields.get(DoubleTelemetryField.kA).setDefaultValue(e.getKa());
       doubleFields.get(DoubleTelemetryField.kG).setDefaultValue(e.getKg());
     });
-    config.getSimpleFeedforward().ifPresent(e -> {
+    config.getSimpleFeedforward(smc.getClosedLoopControllerSlot()).ifPresent(e -> {
       doubleFields.get(DoubleTelemetryField.kG).disable();
       doubleFields.get(DoubleTelemetryField.kS).setDefaultValue(e.getKs());
       doubleFields.get(DoubleTelemetryField.kV).setDefaultValue(e.getKv());
@@ -319,15 +321,15 @@ public class SmartMotorControllerTelemetryConfig
   public Map<BooleanTelemetryField, BooleanTelemetry> getBoolFields(SmartMotorController smc)
   {
     var config = smc.getConfig();
-    if (config.getArmFeedforward().isEmpty())
+    if (config.getArmFeedforward(smc.getClosedLoopControllerSlot()).isEmpty())
     {
       boolFields.get(BooleanTelemetryField.ArmFeedForward).disable();
     }
-    if (config.getElevatorFeedforward().isEmpty())
+    if (config.getElevatorFeedforward(smc.getClosedLoopControllerSlot()).isEmpty())
     {
       boolFields.get(BooleanTelemetryField.ElevatorFeedForward).disable();
     }
-    if (config.getSimpleFeedforward().isEmpty())
+    if (config.getSimpleFeedforward(smc.getClosedLoopControllerSlot()).isEmpty())
     {
       boolFields.get(BooleanTelemetryField.SimpleMotorFeedForward).disable();
     }
