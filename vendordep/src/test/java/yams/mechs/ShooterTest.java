@@ -104,7 +104,7 @@ public class ShooterTest
     ArrayList<Arguments> smcList = new ArrayList<>();
     offset += 1;
 
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 4; i++)
     {
       var smcConfig = createSMCConfig();
       switch (i)
@@ -114,6 +114,7 @@ public class ShooterTest
           break;
         case 2: smcConfig = addExponentialProfile(smcConfig);
           break;
+        case 3: smcConfig.withClosedLoopController(0,0,0);
       }
       SparkMax  smax  = new SparkMax(10 + offset + i, MotorType.kBrushless);
       SparkFlex sflex = new SparkFlex(20 + offset + i, MotorType.kBrushless);
