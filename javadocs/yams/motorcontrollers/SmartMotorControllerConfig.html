@@ -892,8 +892,8 @@ loadScripts(document, 'script');</script>
  <a href="SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a>&nbsp;slot)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6">
 <div class="block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
-<div class="deprecation-comment">Please use <a href="#withTrapezoidalProfile(edu.wpi.first.units.measure.LinearAcceleration,edu.wpi.first.units.measure.Velocity)"><code>withTrapezoidalProfile(LinearAcceleration, Velocity&lt;LinearAccelerationUnit&gt;)</code></a> to define
- your trapezoidal profile.</div>
+<div class="deprecation-comment">Please use <a href="#withTrapezoidalProfile(edu.wpi.first.units.measure.LinearAcceleration,edu.wpi.first.units.measure.Velocity)"><code>withTrapezoidalProfile(LinearAcceleration, Velocity&lt;LinearAccelerationUnit&gt;)</code></a> to
+ define your trapezoidal profile.</div>
 </div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
@@ -1236,6 +1236,8 @@ loadScripts(document, 'script');</script>
 <dd><code>externalEncoderInverted</code> - External encoder inversion state.</dd>
 <dt>Returns:</dt>
 <dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining.</dd>
+<dt>Implementation Note:</dt>
+<dd>This may mean the zero offset you gather should be negated.</dd>
 </dl>
 </section>
 </li>
@@ -2404,8 +2406,8 @@ loadScripts(document, 'script');</script>
  <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/LinearAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">LinearAccelerationUnit</a>&gt;&nbsp;maxJerk,
  <a href="SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a>&nbsp;slot)</span></div>
 <div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
-<div class="deprecation-comment">Please use <a href="#withTrapezoidalProfile(edu.wpi.first.units.measure.LinearAcceleration,edu.wpi.first.units.measure.Velocity)"><code>withTrapezoidalProfile(LinearAcceleration, Velocity&lt;LinearAccelerationUnit&gt;)</code></a> to define
- your trapezoidal profile.</div>
+<div class="deprecation-comment">Please use <a href="#withTrapezoidalProfile(edu.wpi.first.units.measure.LinearAcceleration,edu.wpi.first.units.measure.Velocity)"><code>withTrapezoidalProfile(LinearAcceleration, Velocity&lt;LinearAccelerationUnit&gt;)</code></a> to
+ define your trapezoidal profile.</div>
 </div>
 <div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>. Units are Meters per Second.</div>
 <dl class="notes">
