@@ -449,6 +449,7 @@ public class SmartMotorControllerConfig
    *
    * @param externalEncoderInverted External encoder inversion state.
    * @return {@link SmartMotorControllerConfig} for chaining.
+   * @implNote This may mean the zero offset you gather should be negated.
    */
   public SmartMotorControllerConfig withExternalEncoderInverted(boolean externalEncoderInverted)
   {
@@ -622,8 +623,7 @@ public class SmartMotorControllerConfig
                                                            "Cannot set zero offset.",
                                                            "withMechanismCircumference(Distance)");
     }
-    zeroOffset = Optional.ofNullable(convertToMechanism(distance));
-    return this;
+    return withExternalEncoderZeroOffset(convertToMechanism(distance));
   }
 
   /**
@@ -634,6 +634,11 @@ public class SmartMotorControllerConfig
    */
   public SmartMotorControllerConfig withExternalEncoderZeroOffset(Angle angle)
   {
+    if (angle != null && angle.lt(Rotations.of(0)))
+    {
+      // Zero offsets cannot be negative.
+      angle = angle.plus(Rotations.of(1));
+    }
     zeroOffset = Optional.ofNullable(angle);
     return this;
   }
@@ -1651,8 +1656,8 @@ public class SmartMotorControllerConfig
    * @param maxJerk         Maximum linear jerk for the Trapezoidal profile.
    * @return {@link SmartMotorControllerConfig} for chaining.
    * @implNote This overrides existing trapezoidal profiles with the last one given in the chain!
-   * @deprecated Please use {@link #withTrapezoidalProfile(LinearAcceleration, Velocity<LinearAccelerationUnit>)} to define
-   * your trapezoidal profile.
+   * @deprecated Please use {@link #withTrapezoidalProfile(LinearAcceleration, Velocity<LinearAccelerationUnit>)} to
+   * define your trapezoidal profile.
    */
   @Deprecated(since = "2026", forRemoval = true)
   public SmartMotorControllerConfig withSimClosedLoopController(double kP, double kI, double kD,
