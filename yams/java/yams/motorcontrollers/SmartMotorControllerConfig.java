@@ -2351,7 +2351,7 @@ public class SmartMotorControllerConfig
     {
       this.armFeedforward.remove(slot);
       this.elevatorFeedforward.remove(slot);
-      this.simpleFeedforward.remove(slot);
+      this.simpleFeedforward.put(slot, simpleFeedforward);
     }
     return this;
   }
