@@ -833,7 +833,6 @@ public class TalonFXWrapper extends SmartMotorController
           case SLOT_2 -> m_talonConfig.Slot2.withKS(kS).withKV(kV).withKA(kA).withKG(kG);
         }
       }
-      m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setClosedLoopSlot(closedLoopControlSlot);}});
     }
 
     // Motor inversion
