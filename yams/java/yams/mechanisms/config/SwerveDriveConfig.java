@@ -180,6 +180,10 @@ public class SwerveDriveConfig
    */
   public SwerveDriveConfig withSimRotationController(PIDController controller)
   {
+    if (controller != null)
+    {
+      controller.enableContinuousInput(-Math.PI, Math.PI);
+    }
     simRotationController = Optional.ofNullable(controller);
     return this;
   }
