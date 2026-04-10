@@ -96,7 +96,7 @@ public class DerivativeTimeFilter
     if (debouncer.hasElapsed(debouncePeriod))
     {
       long   currentFpgaTime_ms = RobotController.getFPGATime();
-      double derivative         = derivative(current, Microseconds.of(current - lastFpgaTime_ms));
+      double derivative         = derivative(current, Microseconds.of(currentFpgaTime_ms - lastFpgaTime_ms));
       lastFpgaTime_ms = currentFpgaTime_ms;
       return derivative;
     }
