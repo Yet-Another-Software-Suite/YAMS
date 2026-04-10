@@ -462,6 +462,26 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Set a deadband for all controller axis.</div>
 </dd>
+<dt><a href="yams/math/DerivativeTimeFilter.html#derivative(double)" class="member-name-link">derivative(double)</a> - Method in class yams.math.<a href="yams/math/DerivativeTimeFilter.html" title="class in yams.math">DerivativeTimeFilter</a></dt>
+<dd>
+<div class="block">Get the derivative of the current value over the time since the last call to this function.</div>
+</dd>
+<dt><a href="yams/math/DerivativeTimeFilter.html#derivative(double,edu.wpi.first.units.measure.Time)" class="member-name-link">derivative(double, Time)</a> - Method in class yams.math.<a href="yams/math/DerivativeTimeFilter.html" title="class in yams.math">DerivativeTimeFilter</a></dt>
+<dd>
+<div class="block">Get the derivative of the current value over the specified delta.</div>
+</dd>
+<dt><a href="yams/math/DerivativeTimeFilter.html" class="type-name-link" title="class in yams.math">DerivativeTimeFilter</a> - Class in <a href="yams/math/package-summary.html">yams.math</a></dt>
+<dd>
+<div class="block">Find the derivative of a value over time in microseconds.</div>
+</dd>
+<dt><a href="yams/math/DerivativeTimeFilter.html#%3Cinit%3E(double,edu.wpi.first.units.measure.Time)" class="member-name-link">DerivativeTimeFilter(double, Time)</a> - Constructor for class yams.math.<a href="yams/math/DerivativeTimeFilter.html" title="class in yams.math">DerivativeTimeFilter</a></dt>
+<dd>
+<div class="block">Create a derivative filter with an initial value</div>
+</dd>
+<dt><a href="yams/math/DerivativeTimeFilter.html#%3Cinit%3E(edu.wpi.first.units.measure.Time)" class="member-name-link">DerivativeTimeFilter(Time)</a> - Constructor for class yams.math.<a href="yams/math/DerivativeTimeFilter.html" title="class in yams.math">DerivativeTimeFilter</a></dt>
+<dd>
+<div class="block">Create a derivative filter with no initial value</div>
+</dd>
 <dt><a href="yams/mechanisms/positional/DifferentialMechanism.html" class="type-name-link" title="class in yams.mechanisms.positional">DifferentialMechanism</a> - Class in <a href="yams/mechanisms/positional/package-summary.html">yams.mechanisms.positional</a></dt>
 <dd>
 <div class="block">Arm mechanism.</div>
@@ -700,6 +720,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/math/ExponentialProfilePIDController.html#%3Cinit%3E(edu.wpi.first.math.controller.PIDController,edu.wpi.first.math.trajectory.ExponentialProfile.Constraints)" class="member-name-link">ExponentialProfilePIDController(PIDController, ExponentialProfile.Constraints)</a> - Constructor for class yams.math.<a href="yams/math/ExponentialProfilePIDController.html" title="class in yams.math">ExponentialProfilePIDController</a></dt>
 <dd>
 <div class="block">Constructor.</div>
+</dd>
+<dt><a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html#ExternalEncoderPosition" class="member-name-link">ExternalEncoderPosition</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">External encoder position in rotations.</div>
+</dd>
+<dt><a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html#ExternalEncoderVelocity" class="member-name-link">ExternalEncoderVelocity</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">External encoder velocity in rotations per second.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:F">F</h2>
@@ -1051,6 +1079,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the constraints.</div>
 </dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getContinuousWrapping()" class="member-name-link">getContinuousWrapping()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Get the continuous wrapping point for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> encoder.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getContinuousWrappingMin()" class="member-name-link">getContinuousWrappingMin()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Get the continuous wrapping point for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> encoder.</div>
+</dd>
 <dt><a href="yams/math/ExponentialProfilePIDController.html#getCurrentAngle()" class="member-name-link">getCurrentAngle()</a> - Method in class yams.math.<a href="yams/math/ExponentialProfilePIDController.html" title="class in yams.math">ExponentialProfilePIDController</a></dt>
 <dd>
 <div class="block">Get the current angle.</div>
@@ -1167,6 +1203,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the external encoder.</div>
 </dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getExternalEncoderDiscontinuityPoint()" class="member-name-link">getExternalEncoderDiscontinuityPoint()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Get the external encoder discontinuity point.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getExternalEncoderGearing()" class="member-name-link">getExternalEncoderGearing()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the external encoder gearing, default is 1:1 on a MAXPlanetary.</div>
@@ -1174,6 +1214,30 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getExternalEncoderInverted()" class="member-name-link">getExternalEncoderInverted()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get whether or not the external encoder is inverted.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/local/NovaWrapper.html#getExternalEncoderPosition()" class="member-name-link">getExternalEncoderPosition()</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/NovaWrapper.html" title="class in yams.motorcontrollers.local">NovaWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/local/SparkWrapper.html#getExternalEncoderPosition()" class="member-name-link">getExternalEncoderPosition()</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/SparkWrapper.html" title="class in yams.motorcontrollers.local">SparkWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/remote/TalonFXSWrapper.html#getExternalEncoderPosition()" class="member-name-link">getExternalEncoderPosition()</a> - Method in class yams.motorcontrollers.remote.<a href="yams/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXSWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/remote/TalonFXWrapper.html#getExternalEncoderPosition()" class="member-name-link">getExternalEncoderPosition()</a> - Method in class yams.motorcontrollers.remote.<a href="yams/motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.html#getExternalEncoderPosition()" class="member-name-link">getExternalEncoderPosition()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
+<dd>
+<div class="block">Get the rotations of the mechanism according to the external encoder.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/local/NovaWrapper.html#getExternalEncoderVelocity()" class="member-name-link">getExternalEncoderVelocity()</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/NovaWrapper.html" title="class in yams.motorcontrollers.local">NovaWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/local/SparkWrapper.html#getExternalEncoderVelocity()" class="member-name-link">getExternalEncoderVelocity()</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/SparkWrapper.html" title="class in yams.motorcontrollers.local">SparkWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/remote/TalonFXSWrapper.html#getExternalEncoderVelocity()" class="member-name-link">getExternalEncoderVelocity()</a> - Method in class yams.motorcontrollers.remote.<a href="yams/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXSWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/remote/TalonFXWrapper.html#getExternalEncoderVelocity()" class="member-name-link">getExternalEncoderVelocity()</a> - Method in class yams.motorcontrollers.remote.<a href="yams/motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.html#getExternalEncoderVelocity()" class="member-name-link">getExternalEncoderVelocity()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
+<dd>
+<div class="block">Get the velocity of the mechanism according to the external encoder.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getFeedbackSynchronizationThreshold()" class="member-name-link">getFeedbackSynchronizationThreshold()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -1344,10 +1408,6 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the maximum allowed modular error between predicted and measured encoder 2.</div>
 </dd>
-<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getMaxDiscontinuityPoint()" class="member-name-link">getMaxDiscontinuityPoint()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
-<dd>
-<div class="block">Get the discontinuity point for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> encoder.</div>
-</dd>
 <dt><a href="yams/mechanisms/config/SwerveDriveConfig.html#getMaximumChassisAngularVelocity()" class="member-name-link">getMaximumChassisAngularVelocity()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
 <div class="block">Get the maximum angular speed of the chassis.</div>
@@ -1367,6 +1427,19 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/units/EasyCRTConfig.html#getMaxMechanismAngle()" class="member-name-link">getMaxMechanismAngle()</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Returns the maximum allowed mechanism rotations.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/local/NovaWrapper.html#getMeasurementAcceleration()" class="member-name-link">getMeasurementAcceleration()</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/NovaWrapper.html" title="class in yams.motorcontrollers.local">NovaWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/local/SparkWrapper.html#getMeasurementAcceleration()" class="member-name-link">getMeasurementAcceleration()</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/SparkWrapper.html" title="class in yams.motorcontrollers.local">SparkWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/remote/TalonFXSWrapper.html#getMeasurementAcceleration()" class="member-name-link">getMeasurementAcceleration()</a> - Method in class yams.motorcontrollers.remote.<a href="yams/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXSWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/remote/TalonFXWrapper.html#getMeasurementAcceleration()" class="member-name-link">getMeasurementAcceleration()</a> - Method in class yams.motorcontrollers.remote.<a href="yams/motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.html#getMeasurementAcceleration()" class="member-name-link">getMeasurementAcceleration()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
+<dd>
+<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted with the
+ <a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
 </dd>
 <dt><a href="yams/motorcontrollers/local/NovaWrapper.html#getMeasurementPosition()" class="member-name-link">getMeasurementPosition()</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/NovaWrapper.html" title="class in yams.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
@@ -1393,6 +1466,19 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted with the
  <a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/local/NovaWrapper.html#getMechanismAcceleration()" class="member-name-link">getMechanismAcceleration()</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/NovaWrapper.html" title="class in yams.motorcontrollers.local">NovaWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/local/SparkWrapper.html#getMechanismAcceleration()" class="member-name-link">getMechanismAcceleration()</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/SparkWrapper.html" title="class in yams.motorcontrollers.local">SparkWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/remote/TalonFXSWrapper.html#getMechanismAcceleration()" class="member-name-link">getMechanismAcceleration()</a> - Method in class yams.motorcontrollers.remote.<a href="yams/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXSWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/remote/TalonFXWrapper.html#getMechanismAcceleration()" class="member-name-link">getMechanismAcceleration()</a> - Method in class yams.motorcontrollers.remote.<a href="yams/motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.html#getMechanismAcceleration()" class="member-name-link">getMechanismAcceleration()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
+<dd>
+<div class="block">Get the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularAcceleration.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularAcceleration</code></a>, calculating it on the robot controller if necessary by taking the
+ derivative of the velocity.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getMechanismCircumference()" class="member-name-link">getMechanismCircumference()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -1539,10 +1625,6 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/config/MechanismPositionConfig.html#getMechanismY(edu.wpi.first.units.measure.Distance)" class="member-name-link">getMechanismY(Distance)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/MechanismPositionConfig.html" title="class in yams.mechanisms.config">MechanismPositionConfig</a></dt>
 <dd>
 <div class="block">Gets the distance in the y-direction appropriate for visualizing on a Mechanism2d, defaults to the given distance.</div>
-</dd>
-<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getMinDiscontinuityPoint()" class="member-name-link">getMinDiscontinuityPoint()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
-<dd>
-<div class="block">Get the discontinuity point for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> encoder.</div>
 </dd>
 <dt><a href="yams/mechanisms/config/ElevatorConfig.html#getMinimumHeight()" class="member-name-link">getMinimumHeight()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></dt>
 <dd>
@@ -2601,6 +2683,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">The length of the robot in meters.</div>
 </dd>
+<dt><a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html#MeasurementAcceleration" class="member-name-link">MeasurementAcceleration</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Measurement acceleration.</div>
+</dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html#MeasurementLowerLimit" class="member-name-link">MeasurementLowerLimit</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></dt>
 <dd>
 <div class="block">Measurement lower limit.</div>
@@ -2616,6 +2702,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html#MeasurementVelocity" class="member-name-link">MeasurementVelocity</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></dt>
 <dd>
 <div class="block">Measurement velocity.</div>
+</dd>
+<dt><a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html#MechanismAcceleration" class="member-name-link">MechanismAcceleration</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Mechanism acceleration in rotations per second per second.</div>
 </dd>
 <dt><a href="yams/gearing/MechanismGearing.html" class="type-name-link" title="class in yams.gearing">MechanismGearing</a> - Class in <a href="yams/gearing/package-summary.html">yams.gearing</a></dt>
 <dd>
@@ -5067,6 +5157,10 @@ the order they are declared.</div>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withExternalEncoder(java.lang.Object)" class="member-name-link">withExternalEncoder(Object)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the external encoder which is attached to the motor type sent used by <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withExternalEncoderDiscontinuityPoint(edu.wpi.first.units.measure.Angle)" class="member-name-link">withExternalEncoderDiscontinuityPoint(Angle)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Set the external encoder absolute position to wrap around a defined discontinuity point.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withExternalEncoderGearing(double)" class="member-name-link">withExternalEncoderGearing(double)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>

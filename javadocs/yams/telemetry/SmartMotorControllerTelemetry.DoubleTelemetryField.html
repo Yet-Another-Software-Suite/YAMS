@@ -129,6 +129,14 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">Exponential profile maxInput</div>
 </div>
+<div class="col-first odd-row-color"><code><a href="#ExternalEncoderPosition" class="member-name-link">ExternalEncoderPosition</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">External encoder position in rotations.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="#ExternalEncoderVelocity" class="member-name-link">ExternalEncoderVelocity</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">External encoder velocity in rotations per second.</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#kA" class="member-name-link">kA</a></code></div>
 <div class="col-last odd-row-color">
 <div class="block">kA</div>
@@ -157,21 +165,29 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color">
 <div class="block">kV</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#MeasurementLowerLimit" class="member-name-link">MeasurementLowerLimit</a></code></div>
+<div class="col-first even-row-color"><code><a href="#MeasurementAcceleration" class="member-name-link">MeasurementAcceleration</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">Measurement acceleration.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#MeasurementLowerLimit" class="member-name-link">MeasurementLowerLimit</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Measurement lower limit.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#MeasurementPosition" class="member-name-link">MeasurementPosition</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#MeasurementPosition" class="member-name-link">MeasurementPosition</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Measurement position</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#MeasurementUpperLimit" class="member-name-link">MeasurementUpperLimit</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#MeasurementUpperLimit" class="member-name-link">MeasurementUpperLimit</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Measurement upper limit.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#MeasurementVelocity" class="member-name-link">MeasurementVelocity</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#MeasurementVelocity" class="member-name-link">MeasurementVelocity</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Measurement velocity.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#MechanismAcceleration" class="member-name-link">MechanismAcceleration</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Mechanism acceleration in rotations per second per second.</div>
 </div>
 <div class="col-first even-row-color"><code><a href="#MechanismLowerLimit" class="member-name-link">MechanismLowerLimit</a></code></div>
 <div class="col-last even-row-color">
@@ -497,6 +513,13 @@ the order they are declared.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="MeasurementAcceleration">
+<h3>MeasurementAcceleration</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">MeasurementAcceleration</span></div>
+<div class="block">Measurement acceleration.</div>
+</section>
+</li>
+<li>
 <section class="detail" id="MeasurementLowerLimit">
 <h3>MeasurementLowerLimit</h3>
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">MeasurementLowerLimit</span></div>
@@ -525,6 +548,13 @@ the order they are declared.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="MechanismAcceleration">
+<h3>MechanismAcceleration</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">MechanismAcceleration</span></div>
+<div class="block">Mechanism acceleration in rotations per second per second.</div>
+</section>
+</li>
+<li>
 <section class="detail" id="MechanismLowerLimit">
 <h3>MechanismLowerLimit</h3>
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">MechanismLowerLimit</span></div>
@@ -550,6 +580,20 @@ the order they are declared.</div>
 <h3>RotorVelocity</h3>
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">RotorVelocity</span></div>
 <div class="block">Rotor velocity in rotations.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="ExternalEncoderPosition">
+<h3>ExternalEncoderPosition</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">ExternalEncoderPosition</span></div>
+<div class="block">External encoder position in rotations.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="ExternalEncoderVelocity">
+<h3>ExternalEncoderVelocity</h3>
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">ExternalEncoderVelocity</span></div>
+<div class="block">External encoder velocity in rotations per second.</div>
 </section>
 </li>
 <li>
