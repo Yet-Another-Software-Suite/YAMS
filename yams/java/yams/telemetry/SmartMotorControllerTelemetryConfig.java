@@ -132,10 +132,14 @@ public class SmartMotorControllerTelemetryConfig
         doubleFields.get(DoubleTelemetryField.SetpointVelocity).enable();
         doubleFields.get(DoubleTelemetryField.MeasurementPosition).enable();
         doubleFields.get(DoubleTelemetryField.MeasurementVelocity).enable();
+        doubleFields.get(DoubleTelemetryField.MeasurementAcceleration).enable();
         doubleFields.get(DoubleTelemetryField.MechanismPosition).enable();
         doubleFields.get(DoubleTelemetryField.MechanismVelocity).enable();
+        doubleFields.get(DoubleTelemetryField.MechanismAcceleration).enable();
         doubleFields.get(DoubleTelemetryField.RotorPosition).enable();
         doubleFields.get(DoubleTelemetryField.RotorVelocity).enable();
+        doubleFields.get(DoubleTelemetryField.ExternalEncoderPosition).enable();
+        doubleFields.get(DoubleTelemetryField.ExternalEncoderVelocity).enable();
     }
     if (verbosity == TelemetryVerbosity.HIGH)
     {
@@ -309,6 +313,14 @@ public class SmartMotorControllerTelemetryConfig
       doubleFields.get(DoubleTelemetryField.kV).setDefaultValue(e.getKv());
       doubleFields.get(DoubleTelemetryField.kA).setDefaultValue(e.getKa());
     });
+    if (smc.getExternalEncoderPosition().isEmpty())
+    {
+      doubleFields.get(DoubleTelemetryField.ExternalEncoderPosition).disable();
+    }
+    if (smc.getExternalEncoderVelocity().isEmpty())
+    {
+      doubleFields.get(DoubleTelemetryField.ExternalEncoderVelocity).disable();
+    }
     return doubleFields;
   }
 

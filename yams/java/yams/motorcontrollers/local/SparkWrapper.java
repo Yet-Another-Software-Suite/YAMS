@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Microsecond;
 import static edu.wpi.first.units.Units.Milliseconds;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Rotations;
@@ -67,6 +68,7 @@ import java.util.OptionalDouble;
 import java.util.function.Supplier;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.gearing.MechanismGearing;
+import yams.math.DerivativeTimeFilter;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
@@ -132,7 +134,12 @@ public class SparkWrapper extends SmartMotorController
   /**
    * REV Closed loop slot.
    */
-  private ClosedLoopSlot m_closedLoopSlot = ClosedLoopSlot.kSlot0;
+  private ClosedLoopSlot       m_closedLoopSlot     = ClosedLoopSlot.kSlot0;
+  /**
+   * Acceleration filter.
+   */
+  private DerivativeTimeFilter m_accelerationFilter = new DerivativeTimeFilter(Milliseconds.of(
+      20));
 
   /**
    * Create a {@link SmartMotorController} from {@link SparkMax} or {@link SparkFlex}
@@ -537,7 +544,7 @@ public class SparkWrapper extends SmartMotorController
     // Throw warning about supply stator limits on Spark's
     if (config.getSupplyStallCurrentLimit().isPresent())
     {
-      DriverStation.reportError("[WARNING] Supply stall currently not supported on Spark", true);
+      m_sparkBaseConfig.secondaryCurrentLimit(config.getSupplyStallCurrentLimit().getAsInt());
     }
     // Handle stator current limit.
     if (config.getStatorStallCurrentLimit().isPresent())
@@ -560,22 +567,22 @@ public class SparkWrapper extends SmartMotorController
       m_sparkRelativeEncoder.setPosition(config.getStartingPosition().get().in(Rotations));
     }
     // PID Wrapping
-    if (config.getMaxDiscontinuityPoint().isPresent() && config.getMinDiscontinuityPoint().isPresent())
+    if (config.getContinuousWrapping().isPresent() && config.getContinuousWrappingMin().isPresent())
     {
       m_sparkBaseConfig.closedLoop
-          .positionWrappingInputRange(config.getMinDiscontinuityPoint().get().in(Rotations),
-                                      config.getMaxDiscontinuityPoint().get().in(Rotations))
+          .positionWrappingInputRange(config.getContinuousWrappingMin().get().in(Rotations),
+                                      config.getContinuousWrapping().get().in(Rotations))
           .positionWrappingEnabled(true);
-    } else if (config.getMaxDiscontinuityPoint().isPresent())
+    } else if (config.getContinuousWrapping().isPresent())
     {
       m_sparkBaseConfig.closedLoop
-          .positionWrappingMaxInput(config.getMaxDiscontinuityPoint().get().in(Rotations))
+          .positionWrappingMaxInput(config.getContinuousWrapping().get().in(Rotations))
           .positionWrappingEnabled(true);
     }
 
     // Setup external encoder.
     boolean useExternalEncoder = config.getUseExternalFeedback();
-    if (config.getExternalEncoder().isPresent() && useExternalEncoder)
+    if (config.getExternalEncoder().isPresent())
     {
       Object externalEncoder = config.getExternalEncoder().get();
       if (externalEncoder instanceof SparkAbsoluteEncoder)
@@ -587,11 +594,18 @@ public class SparkWrapper extends SmartMotorController
                                          .velocityConversionFactor(absoluteEncoderConversionFactor / 60);
         config.getExternalEncoderInverted().ifPresent(m_sparkBaseConfig.absoluteEncoder::inverted);
         // Set the absolute encoder as the primary feedback sensor for closed loop control.
-        m_sparkBaseConfig.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
+        if (useExternalEncoder)
+        {m_sparkBaseConfig.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder);}
 
         if (config.getZeroOffset().isPresent())
         {
           m_sparkBaseConfig.absoluteEncoder.zeroOffset(config.getZeroOffset().get().in(Rotations));
+        }
+
+        if (config.getExternalEncoderDiscontinuityPoint().isPresent())
+        {
+          m_sparkBaseConfig.absoluteEncoder.zeroCentered(config.getExternalEncoderDiscontinuityPoint().get()
+                                                               .isEquivalent(Rotations.of(0.5)));
         }
 
         if (RobotBase.isSimulation())
@@ -627,7 +641,13 @@ public class SparkWrapper extends SmartMotorController
 
     } else
     {
-
+      if (config.getExternalEncoderDiscontinuityPoint().isPresent())
+      {
+        throw new SmartMotorControllerConfigurationException(
+            "External encoder zero center is only available for external encoders",
+            "External encoder zero center could not be applied",
+            ".withExternalEncoderZeroCenter");
+      }
       if (config.getZeroOffset().isPresent())
       {
         throw new SmartMotorControllerConfigurationException("Zero offset is only available for external encoders",
@@ -832,8 +852,15 @@ public class SparkWrapper extends SmartMotorController
   }
 
   @Override
+  public LinearAcceleration getMeasurementAcceleration()
+  {
+    return m_config.convertFromMechanism(getMechanismAcceleration());
+  }
+
+  @Override
   public AngularVelocity getMechanismVelocity()
   {
+    // TODO: Fix this for 2027
     if (m_sparkAbsoluteEncoder.isPresent() && m_config.getUseExternalFeedback())
     {
       return RotationsPerSecond.of(m_sparkAbsoluteEncoder.get().getVelocity());
@@ -843,8 +870,16 @@ public class SparkWrapper extends SmartMotorController
   }
 
   @Override
+  public AngularAcceleration getMechanismAcceleration()
+  {
+    return RotationsPerSecond.per(Microsecond).of(m_accelerationFilter.derivative(getMechanismVelocity().in(
+        RotationsPerSecond)));
+  }
+
+  @Override
   public Angle getMechanismPosition()
   {
+    // TODO: Fix this for 2027
     Angle pos = Rotations.of(m_sparkRelativeEncoder.getPosition());
     if (m_sparkAbsoluteEncoder.isPresent() && m_config.getUseExternalFeedback())
     {
@@ -864,6 +899,18 @@ public class SparkWrapper extends SmartMotorController
   public Angle getRotorPosition()
   {
     return Rotations.of(getMechanismPosition().in(Rotations) * m_config.getGearing().getMechanismToRotorRatio());
+  }
+
+  @Override
+  public Optional<Angle> getExternalEncoderPosition()
+  {
+    return m_sparkAbsoluteEncoder.map(absoluteEncoder -> Rotations.of(absoluteEncoder.getPosition()));
+  }
+
+  @Override
+  public Optional<AngularVelocity> getExternalEncoderVelocity()
+  {
+    return m_sparkAbsoluteEncoder.map(absoluteEncoder -> RotationsPerSecond.of(absoluteEncoder.getVelocity()));
   }
 
   @Override

@@ -815,12 +815,28 @@ public abstract class SmartMotorController
   public abstract Distance getMeasurementPosition();
 
   /**
+   * Get the usable measurement of the motor for mechanisms operating under distance units converted with the
+   * {@link SmartMotorControllerConfig}
+   *
+   * @return Measurement acceleration of the mechanism post-gearing.
+   */
+  public abstract LinearAcceleration getMeasurementAcceleration();
+
+  /**
    * Get the Mechanism {@link AngularVelocity} taking the configured {@link MechanismGearing} into the measurement
    * applied via the {@link SmartMotorControllerConfig}.
    *
    * @return Mechanism {@link AngularVelocity}
    */
   public abstract AngularVelocity getMechanismVelocity();
+
+  /**
+   * Get the Mechanism {@link AngularAcceleration}, calculating it on the robot controller if necessary by taking the
+   * derivative of the velocity.
+   *
+   * @return Mechanism {@link AngularAcceleration}
+   */
+  public abstract AngularAcceleration getMechanismAcceleration();
 
   /**
    * Get the mechanism {@link Angle} taking the configured {@link MechanismGearing} from
@@ -844,6 +860,20 @@ public abstract class SmartMotorController
    * @return {@link Angle} of the relative encoder in the motor.
    */
   public abstract Angle getRotorPosition();
+
+  /**
+   * Get the rotations of the mechanism according to the external encoder.
+   *
+   * @return {@link Angle} of the external encoder in the mechanism.
+   */
+  public abstract Optional<Angle> getExternalEncoderPosition();
+
+  /**
+   * Get the velocity of the mechanism according to the external encoder.
+   *
+   * @return {@link AngularVelocity} of the external encoder in the mechanism.
+   */
+  public abstract Optional<AngularVelocity> getExternalEncoderVelocity();
 
   /**
    * Update the telemetry under the motor name under the given {@link NetworkTable}

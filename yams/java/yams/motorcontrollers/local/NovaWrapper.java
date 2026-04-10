@@ -5,6 +5,8 @@ import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Microsecond;
+import static edu.wpi.first.units.Units.Milliseconds;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -49,6 +51,7 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.gearing.MechanismGearing;
+import yams.math.DerivativeTimeFilter;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
@@ -93,6 +96,10 @@ public class NovaWrapper extends SmartMotorController
    */
   private       Conversion           m_velocityConversion = new Conversion(VelocityUnit.RADIANS_PER_SEC,
                                                                            EncoderType.INTERNAL);
+  /**
+   * Previous filter.
+   */
+  private DerivativeTimeFilter m_accelFilter = new DerivativeTimeFilter(Milliseconds.of(20));
 
   /**
    * Construct the Nova Wrapper for the generic {@link SmartMotorController}.
@@ -379,30 +386,35 @@ public class NovaWrapper extends SmartMotorController
 
     // External Encoder
     boolean useExt = config.getUseExternalFeedback();
-    if (config.getExternalEncoder().isPresent() && useExt)
+    if (config.getExternalEncoder().isPresent())
     {
       Object externalEncoder = config.getExternalEncoder().get();
       if (externalEncoder instanceof ExternalEncoder)
       {
         m_nova_config.externalEncoder = (ExternalEncoder) externalEncoder;
         m_nova_config.encoderType = EncoderType.ABS;
-        m_nova.useEncoderType(EncoderType.ABS);
         m_positionConversion = new Conversion(PositionUnit.ROTATIONS, EncoderType.ABS);
         m_velocityConversion = new Conversion(VelocityUnit.ROTATIONS_PER_MIN, EncoderType.ABS);
         m_nova.setExternalEncoder((ExternalEncoder) externalEncoder);
+        if (useExt)
+        {m_nova.useEncoderType(EncoderType.ABS);}
       } else
       {
         throw new IllegalArgumentException(
             "[ERROR] Unsupported external encoder: " + externalEncoder.getClass().getSimpleName() +
             ".\n\tPlease use an `EncoderType` instead.");
       }
-
+      if (config.getExternalEncoderDiscontinuityPoint().isPresent())
+      {
+        throw new SmartMotorControllerConfigurationException("Zero center is unavailable for ThriftyNova",
+                                                             "Zero center could not be applied",
+                                                             ".withExternalEncoderZeroOffset");
+      }
       if (config.getZeroOffset().isPresent())
       {
         throw new SmartMotorControllerConfigurationException("Zero offset is unavailable for ThriftyNova",
                                                              "Zero offset could not be applied",
                                                              ".withExternalEncoderZeroOffset");
-//        m_nova.setAbsOffset(config.getZeroOffset().get().in(Rotations));
       }
       if (config.getExternalEncoderGearing().isPresent())
       {
@@ -411,6 +423,12 @@ public class NovaWrapper extends SmartMotorController
 
     } else
     {
+      if (config.getExternalEncoderDiscontinuityPoint().isPresent())
+      {
+        throw new SmartMotorControllerConfigurationException("Zero center is unavailable for ThriftyNova",
+                                                             "Zero center could not be applied",
+                                                             ".withExternalEncoderZeroOffset");
+      }
       if (config.getZeroOffset().isPresent())
       {
         throw new SmartMotorControllerConfigurationException("Zero offset is only available for external encoders",
@@ -451,15 +469,15 @@ public class NovaWrapper extends SmartMotorController
       }
     }
 
-    if (config.getMaxDiscontinuityPoint().isPresent() &&
+    if (config.getContinuousWrapping().isPresent() &&
         !(m_expoProfile.isPresent() || m_trapezoidProfile.isPresent() || m_pid.isPresent()))
     {
       throw new IllegalArgumentException(
           "[ERROR] ThriftyNova does not support discontinuity points, or we have not implemented this.");
-    } else if (config.getMaxDiscontinuityPoint().isPresent() && config.getMinDiscontinuityPoint().isPresent())
+    } else if (config.getContinuousWrapping().isPresent() && config.getContinuousWrappingMin().isPresent())
     {
-      var max = config.getMaxDiscontinuityPoint().get().in(Rotations);
-      var min = config.getMinDiscontinuityPoint().get().in(Rotations);
+      var max = config.getContinuousWrapping().get().in(Rotations);
+      var min = config.getContinuousWrappingMin().get().in(Rotations);
 
       m_pid.ifPresent(pidController -> {pidController.enableContinuousInput(min, max);});
     }
@@ -550,8 +568,15 @@ public class NovaWrapper extends SmartMotorController
   }
 
   @Override
+  public LinearAcceleration getMeasurementAcceleration()
+  {
+    return m_config.convertFromMechanism(getMechanismAcceleration());
+  }
+
+  @Override
   public AngularVelocity getMechanismVelocity()
   {
+    // TODO: Fix this for 2027
     if (m_simSupplier.isPresent())
     {
       return m_simSupplier.get().getMechanismVelocity();
@@ -575,8 +600,16 @@ public class NovaWrapper extends SmartMotorController
   }
 
   @Override
+  public AngularAcceleration getMechanismAcceleration()
+  {
+    return RotationsPerSecond.per(Microsecond).of(m_accelFilter.derivative(getMechanismVelocity().in(
+        RotationsPerSecond)));
+  }
+
+  @Override
   public Angle getMechanismPosition()
   {
+    // TODO: Fix this for 2027
     if (m_simSupplier.isPresent())
     {
       return m_simSupplier.get().getMechanismPosition();
@@ -617,6 +650,43 @@ public class NovaWrapper extends SmartMotorController
       return m_simSupplier.get().getRotorPosition();
     }
     return Rotations.of(m_positionConversion.fromMotor(m_nova.getPosition()));
+  }
+
+  @Override
+  public Optional<Angle> getExternalEncoderPosition()
+  {
+    if (m_config.getExternalEncoder().isPresent())
+    {
+      Object externalEncoder = m_config.getExternalEncoder().get();
+      if (externalEncoder == EncoderType.ABS)
+      {
+        return Optional.of(Rotations.of(m_positionConversion.fromMotor(m_nova.getPositionAbs()) *
+                                        m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne)
+                                                .getRotorToMechanismRatio()));
+      } else if (externalEncoder == EncoderType.QUAD)
+      {
+        return Optional.of(Rotations.of(m_positionConversion.fromMotor(m_nova.getPositionQuad()) *
+                                        m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne)
+                                                .getRotorToMechanismRatio()));
+      }
+    }
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<AngularVelocity> getExternalEncoderVelocity()
+  {
+    if (m_config.getExternalEncoder().isPresent())
+    {
+      Object externalEncoder = m_config.getExternalEncoder().get();
+      if (externalEncoder == EncoderType.QUAD)
+      {
+        return Optional.of(RotationsPerSecond.of(m_velocityConversion.fromMotor(m_nova.getVelocityQuad()) *
+                                                 m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne)
+                                                         .getRotorToMechanismRatio()));
+      }
+    }
+    return Optional.empty();
   }
 
   @Override

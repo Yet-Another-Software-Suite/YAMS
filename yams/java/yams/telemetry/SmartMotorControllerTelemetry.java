@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
@@ -158,10 +159,17 @@ public class SmartMotorControllerTelemetry
         case MeasurementVelocity ->
             cfg.getMechanismCircumference().ifPresent(circumference -> dt.set(smc.getMeasurementVelocity()
                                                                                  .in(MetersPerSecond)));
+        case MeasurementAcceleration ->
+            cfg.getMechanismCircumference().ifPresent(c -> dt.set(smc.getMeasurementAcceleration()
+                                                                     .in(MetersPerSecondPerSecond)));
         case MechanismPosition -> dt.set(smc.getMechanismPosition().in(Rotations));
         case MechanismVelocity -> dt.set(smc.getMechanismVelocity().in(RotationsPerSecond));
+        case MechanismAcceleration -> dt.set(smc.getMechanismAcceleration().in(RotationsPerSecondPerSecond));
         case RotorPosition -> dt.set(smc.getRotorPosition().in(Rotations));
         case RotorVelocity -> dt.set(smc.getRotorVelocity().in(RotationsPerSecond));
+        case ExternalEncoderPosition -> dt.set(smc.getExternalEncoderPosition().orElse(Rotations.zero()).in(Rotations));
+        case ExternalEncoderVelocity -> dt.set(smc.getExternalEncoderVelocity().orElse(RotationsPerSecond.zero())
+                                                  .in(RotationsPerSecond));
         case ActiveClosedLoopControllerSlot -> dt.set(smc.getClosedLoopControllerSlot().ordinal());
       }
     }
@@ -538,6 +546,10 @@ public class SmartMotorControllerTelemetry
      */
     MeasurementVelocity("measurement/velocity", 0, false, "meters_per_second"),
     /**
+     * Measurement acceleration.
+     */
+    MeasurementAcceleration("measurement/acceleration", 0, false, "meters_per_second_per_second"),
+    /**
      * Measurement lower limit.
      */
     MeasurementLowerLimit("measurement/limit/lower", 0, true, "meters"),
@@ -554,6 +566,10 @@ public class SmartMotorControllerTelemetry
      */
     MechanismVelocity("mechanism/velocity", 0, false, "rotations_per_second"),
     /**
+     * Mechanism acceleration in rotations per second per second.
+     */
+    MechanismAcceleration("mechanism/acceleration", 0, false, "rotations_per_second_per_second"),
+    /**
      * Mechanism lower limit in rotations.
      */
     MechanismLowerLimit("mechanism/limit/lower", 0, true, "degrees"),
@@ -569,6 +585,14 @@ public class SmartMotorControllerTelemetry
      * Rotor velocity in rotations.
      */
     RotorVelocity("rotor/velocity", 0, false, "rotations_per_second"),
+    /**
+     * External encoder position in rotations.
+     */
+    ExternalEncoderPosition("externalencoder/position", 0, false, "rotations"),
+    /**
+     * External encoder velocity in rotations per second.
+     */
+    ExternalEncoderVelocity("externalencoder/velocity", 0, false, "rotations_per_second"),
     /**
      * Closed loop dutycyle ramp rate.
      */
