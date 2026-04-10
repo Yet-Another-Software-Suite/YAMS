@@ -1,6 +1,7 @@
 package yams.motorcontrollers;
 
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
@@ -128,4 +129,10 @@ public interface SimSupplier
    */
   Current getCurrentDraw();
 
+  /**
+   * Get the rotor acceleration.
+   *
+   * @return Rotor acceleration.
+   */
+  AngularAcceleration getRotorAcceleration();
 }

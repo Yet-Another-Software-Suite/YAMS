@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.thethriftybot.devices.ThriftyNova;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -21,33 +20,28 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.local.NovaWrapper;
-import yams.telemetry.SmartMotorControllerTelemetryConfig;
+import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class ShooterSubsystem extends SubsystemBase
 {
 
-  private final ThriftyNova                flywheelMotor1         = new ThriftyNova(1);
+  private final TalonFX                    flywheelMotor1         = new TalonFX(1);
   private final TalonFX                    flywheelMotor2         = new TalonFX(2);
   private final boolean                    flywheelMotor2Inverted = true;
   private final SmartMotorControllerConfig motorConfig            = new SmartMotorControllerConfig(this)
       .withClosedLoopController(1, 0, 0)
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
       .withIdleMode(MotorMode.COAST)
-      .withTelemetry("ShooterMotor",
-                     new SmartMotorControllerTelemetryConfig()
-                         .withTelemetryVerbosity(TelemetryVerbosity.HIGH)
-                         .withDataLogName("YAMS/ShooterMotor")
-                         .withNetworkTables(false))
+      .withTelemetry("ShooterMotor", TelemetryVerbosity.HIGH)
 //      .withStatorCurrentLimit(Amps.of(40))
       .withMotorInverted(false)
       .withFeedforward(new SimpleMotorFeedforward(0, 0, 0))
 //      .withVendorConfig(new TalonFXConfiguration().withVoltage(new VoltageConfigs().withPeakReverseVoltage(0)))
 //      .withFollowers(Pair.of(flywheelMotor2, flywheelMotor2Inverted))
       .withControlMode(ControlMode.CLOSED_LOOP);
-  private final SmartMotorController       motor                  = new NovaWrapper(flywheelMotor1,
-                                                                                    DCMotor.getNEO(2),
-                                                                                    motorConfig);
+  private final SmartMotorController       motor                  = new TalonFXWrapper(flywheelMotor1,
+                                                                                       DCMotor.getNEO(2),
+                                                                                       motorConfig);
   private final FlyWheelConfig             shooterConfig          = new FlyWheelConfig(motor)
       // Diameter of the flywheel.
       .withDiameter(Inches.of(4))

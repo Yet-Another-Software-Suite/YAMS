@@ -7,8 +7,10 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Microsecond;
 import static edu.wpi.first.units.Units.Milliseconds;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -18,6 +20,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
@@ -43,6 +46,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import yams.exceptions.ElevatorConfigurationException;
 import yams.gearing.MechanismGearing;
+import yams.math.DerivativeTimeFilter;
 import yams.mechanisms.config.ElevatorConfig;
 import yams.mechanisms.config.MechanismPositionConfig;
 import yams.mechanisms.config.MechanismPositionConfig.Plane;
@@ -134,6 +138,9 @@ public class Elevator extends SmartPositionalMechanism
       {
         final Supplier<Double> pos = m_sim.get()::getPositionMeters;
         final Supplier<Double> mps = m_sim.get()::getVelocityMetersPerSecond;
+        final DerivativeTimeFilter mpsps = new DerivativeTimeFilter(pos.get(),
+                                                                    smcConfig.getClosedLoopControlPeriod()
+                                                                             .orElse(Milliseconds.of(20)));
         boolean inputFed   = false;
         boolean updatedSim = false;
 
@@ -257,6 +264,12 @@ public class Elevator extends SmartPositionalMechanism
         public Current getCurrentDraw()
         {
           return Amps.of(m_sim.get().getCurrentDrawAmps());
+        }
+
+        @Override
+        public AngularAcceleration getRotorAcceleration()
+        {
+          return RotationsPerSecond.per(Microsecond).of(mpsps.derivative(getRotorVelocity().in(RotationsPerSecond)));
         }
       });
       m_mechanismWindow = new Mechanism2d(config.getMaximumHeight().get().in(Meters) * 2,

@@ -386,6 +386,7 @@ public class TalonFXWrapper extends SmartMotorController
       // DCMotorSim returns mechanism position/velocity (after gear ratio)
       talonFXSim.setRawRotorPosition(m_simSupplier.get().getRotorPosition());
       talonFXSim.setRotorVelocity(m_simSupplier.get().getRotorVelocity());
+      talonFXSim.setRotorAcceleration(m_simSupplier.get().getRotorAcceleration());
 
       if (m_cancoder.isPresent())
       {
