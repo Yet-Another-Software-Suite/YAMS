@@ -239,6 +239,10 @@ public class SmartMotorControllerConfig
    */
   private       Optional<Angle>                                           zeroOffset                         = Optional.empty();
   /**
+   * External absolute encoder discontinuity point.
+   */
+  private Optional<Angle> externalEncoderDiscontinuityPoint = Optional.empty();
+  /**
    * Temperature cutoff for the {@link SmartMotorController} to prevent running if above.
    */
   private       Optional<Temperature>                                     temperatureCutoff                  = Optional.empty();
@@ -275,13 +279,13 @@ public class SmartMotorControllerConfig
    */
   private       ControlMode                                               motorControllerMode                = ControlMode.CLOSED_LOOP;
   /**
-   * Encoder discontinuity point.
+   * Closed loop controller continuous wrapping point.
    */
-  private       Optional<Angle>                                           maxDiscontinuityPoint              = Optional.empty();
+  private Optional<Angle> maxContinuousWrappingAngle        = Optional.empty();
   /**
-   * Encoder discontinuity point.
+   * Closed loop controller continuous wrapping point.
    */
-  private       Optional<Angle>                                           minDiscontinuityPoint              = Optional.empty();
+  private Optional<Angle> minContinuousWrappingAngle        = Optional.empty();
   /**
    * Closed loop controller tolerance.
    */
@@ -371,6 +375,7 @@ public class SmartMotorControllerConfig
     this.verbosity = cfg.verbosity;
     this.specifiedTelemetryConfig = cfg.specifiedTelemetryConfig;
     this.zeroOffset = cfg.zeroOffset;
+    this.externalEncoderDiscontinuityPoint = cfg.externalEncoderDiscontinuityPoint;
     this.temperatureCutoff = cfg.temperatureCutoff;
     this.encoderInverted = cfg.encoderInverted;
     this.motorInverted = cfg.motorInverted;
@@ -380,8 +385,8 @@ public class SmartMotorControllerConfig
     this.closedLoopControllerMaximumVoltage = cfg.closedLoopControllerMaximumVoltage;
     this.feedbackSynchronizationThreshold = cfg.feedbackSynchronizationThreshold;
     this.motorControllerMode = cfg.motorControllerMode;
-    this.maxDiscontinuityPoint = cfg.maxDiscontinuityPoint;
-    this.minDiscontinuityPoint = cfg.minDiscontinuityPoint;
+    this.maxContinuousWrappingAngle = cfg.maxContinuousWrappingAngle;
+    this.minContinuousWrappingAngle = cfg.minContinuousWrappingAngle;
     this.closedLoopTolerance = cfg.closedLoopTolerance;
     this.moi = cfg.moi;
     this.looselyCoupledFollowers = cfg.looselyCoupledFollowers;
@@ -627,6 +632,27 @@ public class SmartMotorControllerConfig
   }
 
   /**
+   * Set the external encoder absolute position to wrap around a defined discontinuity point.
+   *
+   * @param discontinuityPoint Discontinuity point of the external encoder, when provided 0.5rot the external encoder
+   *                           will read between [-0.5, 0.5]; when provided 1rot the external encoder will read between
+   *                           [0, 1].
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   * @implNote Only works for External Absolute Encoders.
+   */
+  public SmartMotorControllerConfig withExternalEncoderDiscontinuityPoint(Angle discontinuityPoint)
+  {
+    if (!discontinuityPoint.isEquivalent(Rotations.of(1)) && !discontinuityPoint.isEquivalent(Rotations.of(0.5)))
+    {
+      throw new SmartMotorControllerConfigurationException("Cannot set external encoder discontinuity point",
+                                                           "Discontinuity point must be 0.5 or 1 rotations",
+                                                           "withExternalEncoderDiscontinuityPoint(Rotations.of(0.5)");
+    }
+    externalEncoderDiscontinuityPoint = Optional.of(discontinuityPoint);
+    return this;
+  }
+
+  /**
    * Set the zero offset of the {@link SmartMotorController}'s external Encoder.
    *
    * @param angle {@link Angle} to 0.
@@ -676,8 +702,8 @@ public class SmartMotorControllerConfig
                                                            "withClosedLoopController()");
     }
 
-    maxDiscontinuityPoint = Optional.of(top);
-    minDiscontinuityPoint = Optional.of(bottom);
+    maxContinuousWrappingAngle = Optional.of(top);
+    minContinuousWrappingAngle = Optional.of(bottom);
     return this;
   }
 
@@ -2776,46 +2802,51 @@ public class SmartMotorControllerConfig
   }
 
   /**
-   * Get the discontinuity point for the {@link SmartMotorController} encoder.
+   * Get the continuous wrapping point for the {@link SmartMotorController} encoder.
    *
    * @return {@link Angle} where the encoder wraps around.
    */
-  public Optional<Angle> getMaxDiscontinuityPoint()
+  public Optional<Angle> getContinuousWrapping()
   {
-    if (maxDiscontinuityPoint.isPresent() && minDiscontinuityPoint.isPresent() && !minDiscontinuityPoint.get().equals(
-        Rotations.of(maxDiscontinuityPoint.get().in(Rotations) - 1)))
+    if (maxContinuousWrappingAngle.isPresent() && minContinuousWrappingAngle.isPresent() &&
+        !minContinuousWrappingAngle.get().equals(
+            Rotations.of(maxContinuousWrappingAngle.get().in(Rotations) - 1)))
     {
       throw new SmartMotorControllerConfigurationException("Bounds are not correct!",
                                                            "Cannot get the discontinuity point.",
                                                            "withContinuousWrapping(Rotations.of(" +
-                                                           Rotations.of(maxDiscontinuityPoint.get().in(Rotations) - 1)
+                                                           Rotations.of(
+                                                                        maxContinuousWrappingAngle.get().in(Rotations) - 1)
                                                                     .in(Rotations) + "),Rotations.of(" +
-                                                           maxDiscontinuityPoint.get().in(Rotations) + ")) instead ");
+                                                           maxContinuousWrappingAngle.get().in(Rotations) +
+                                                           ")) instead ");
     }
-    basicOptions.remove(BasicOptions.DiscontinuityPoint);
-    return maxDiscontinuityPoint;
+    basicOptions.remove(BasicOptions.ContinuousWrapping);
+    return maxContinuousWrappingAngle;
 
   }
 
   /**
-   * Get the discontinuity point for the {@link SmartMotorController} encoder.
+   * Get the continuous wrapping point for the {@link SmartMotorController} encoder.
    *
    * @return {@link Angle} where the encoder wraps around.
    */
-  public Optional<Angle> getMinDiscontinuityPoint()
+  public Optional<Angle> getContinuousWrappingMin()
   {
-    if (maxDiscontinuityPoint.isPresent() && minDiscontinuityPoint.isPresent() && !minDiscontinuityPoint.get().equals(
-        Rotations.of(maxDiscontinuityPoint.get().in(Rotations) - 1)))
+    if (maxContinuousWrappingAngle.isPresent() && minContinuousWrappingAngle.isPresent() &&
+        !minContinuousWrappingAngle.get().equals(
+            Rotations.of(maxContinuousWrappingAngle.get().in(Rotations) - 1)))
     {
       throw new SmartMotorControllerConfigurationException("Bounds are not correct!",
                                                            "Cannot get the discontinuity point.",
                                                            "withContinuousWrapping(Rotations.of(" +
-                                                           Rotations.of(maxDiscontinuityPoint.get().in(Rotations) - 1)
+                                                           Rotations.of(
+                                                                        maxContinuousWrappingAngle.get().in(Rotations) - 1)
                                                                     .in(Rotations) + "),Rotations.of(" +
-                                                           maxDiscontinuityPoint.get().in(Rotations) + ")) instead ");
+                                                           maxContinuousWrappingAngle.get().in(Rotations) +
+                                                           ")) instead ");
     }
-//    basicOptions.remove(BasicOptions.DiscontinuityPoint);
-    return minDiscontinuityPoint;
+    return minContinuousWrappingAngle;
 
   }
 
@@ -2931,6 +2962,17 @@ public class SmartMotorControllerConfig
     return vendorControlRequest;
   }
 
+  /**
+   * Get the external encoder discontinuity point.
+   *
+   * @return External encoder discontinuity point.
+   */
+  public Optional<Angle> getExternalEncoderDiscontinuityPoint()
+  {
+    externalEncoderOptions.remove(ExternalEncoderOptions.DiscontinuityPoint);
+    return externalEncoderDiscontinuityPoint;
+  }
+
 
   /**
    * Basic Options that should be applied to every {@link SmartMotorController}
@@ -2976,7 +3018,7 @@ public class SmartMotorControllerConfig
     /**
      * Continuous Wrapping
      */
-    DiscontinuityPoint,
+    ContinuousWrapping,
     /**
      * Closed Loop Tolerance
      */
@@ -3073,6 +3115,10 @@ public class SmartMotorControllerConfig
      * External encoder offset.
      */
     ZeroOffset,
+    /**
+     * External encoder zero centered.
+     */
+    DiscontinuityPoint,
     /**
      * Use the encoder as a feedback device.
      */
