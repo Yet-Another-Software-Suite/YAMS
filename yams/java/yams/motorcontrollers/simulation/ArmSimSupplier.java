@@ -1,14 +1,17 @@
 package yams.motorcontrollers.simulation;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Microsecond;
 import static edu.wpi.first.units.Units.Milliseconds;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Time;
@@ -17,6 +20,7 @@ import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import java.util.function.Supplier;
 import yams.gearing.MechanismGearing;
+import yams.math.DerivativeTimeFilter;
 import yams.motorcontrollers.SimSupplier;
 import yams.motorcontrollers.SmartMotorController;
 
@@ -29,6 +33,7 @@ public class ArmSimSupplier implements SimSupplier
   private       boolean             inputFed   = false;
   private       boolean             simUpdated = false;
   private final Supplier<Double>    motorDutyCycleSupplier;
+  private final DerivativeTimeFilter accel;
   private final SingleJointedArmSim sim;
   private final MechanismGearing    mechGearing;
   private final Time                period;
@@ -49,6 +54,7 @@ public class ArmSimSupplier implements SimSupplier
     mechGearing = config.getGearing();
     period = config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20));
     motor = smartMotorController.getDCMotor();
+    accel = new DerivativeTimeFilter(period);
   }
 
   @Override
@@ -178,5 +184,11 @@ public class ArmSimSupplier implements SimSupplier
   public Current getCurrentDraw()
   {
     return Amps.of(sim.getCurrentDrawAmps());
+  }
+
+  @Override
+  public AngularAcceleration getRotorAcceleration()
+  {
+    return RotationsPerSecond.per(Microsecond).of(accel.derivative(getRotorVelocity().in(RotationsPerSecond)));
   }
 }

@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Time;
@@ -178,5 +179,11 @@ public class DCMotorSimSupplier implements SimSupplier
   public Current getCurrentDraw()
   {
     return Amps.of(sim.getCurrentDrawAmps());
+  }
+
+  @Override
+  public AngularAcceleration getRotorAcceleration()
+  {
+    return sim.getAngularAcceleration();
   }
 }
