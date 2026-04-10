@@ -860,6 +860,7 @@ public class SparkWrapper extends SmartMotorController
   @Override
   public AngularVelocity getMechanismVelocity()
   {
+    // TODO: Fix this for 2027
     if (m_sparkAbsoluteEncoder.isPresent() && m_config.getUseExternalFeedback())
     {
       return RotationsPerSecond.of(m_sparkAbsoluteEncoder.get().getVelocity());
@@ -878,6 +879,7 @@ public class SparkWrapper extends SmartMotorController
   @Override
   public Angle getMechanismPosition()
   {
+    // TODO: Fix this for 2027
     Angle pos = Rotations.of(m_sparkRelativeEncoder.getPosition());
     if (m_sparkAbsoluteEncoder.isPresent() && m_config.getUseExternalFeedback())
     {
