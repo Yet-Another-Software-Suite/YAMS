@@ -347,7 +347,7 @@ public class LQRConfig
       {
         return new KalmanFilter<N2, N1, N1>(Nat.N2(),
                                             Nat.N1(),
-                                            (LinearSystem<N2, N1, N1>) plant,
+                                            (LinearSystem<N2, N1, N1>) (plant.slice(0)),
                                             (Vector<N2>) m_modelStdDevs.orElseThrow(),
                                             (Vector<N1>) m_encoderStdDevs.orElseThrow(),
                                             m_period.in(Seconds));
