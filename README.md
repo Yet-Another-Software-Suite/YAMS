@@ -69,7 +69,8 @@ public class ArmSubsystem extends SubsystemBase {
   private final TalonFXS armMotor = new TalonFXS(1);
   private final SmartMotorController motor = new TalonFXSWrapper(armMotor, DCMotor.getNEO(1),
       new SmartMotorControllerConfig(this)
-          .withClosedLoopController(4, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
+          .withClosedLoopController(4, 0, 0)
+          .withTrapezoidalProfile(DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
           .withSoftLimit(Degrees.of(-30), Degrees.of(100))
           .withGearing(gearing(gearbox(3, 4)))
           .withIdleMode(MotorMode.BRAKE)
