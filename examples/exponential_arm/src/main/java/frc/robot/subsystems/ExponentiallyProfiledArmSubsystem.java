@@ -145,10 +145,10 @@ public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
    * position is unreliable, like startup. Threshold is only detected if exceeded for 0.4 seconds, and the motor moves
    * less than 2 degrees per second.
    *
-   * @param threshhold The current threshold held when the Arm is at its hard limit.
+   * @param threshold The current threshold held when the Arm is at its hard limit.
    * @return
    */
-  public Command homing(Current threshhold)
+  public Command homing(Current threshold)
   {
     Debouncer       currentDebouncer  = new Debouncer(0.4); // Current threshold is only detected if exceeded for 0.4 seconds.
      Voltage        StopVolts         = Volts.of(0); // Volts to stop the homing routine.
@@ -157,7 +157,7 @@ public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
     AngularVelocity velocityThreshold = DegreesPerSecond.of(2); // The maximum amount of movement for the arm to be considered "hitting the hard limit".
     return Commands.startRun(motor::stopClosedLoopController, // Stop the closed loop controller
                              () -> motor.setVoltage(runVolts)) // Set the voltage of the motor
-                   .until(() -> currentDebouncer.calculate(motor.getStatorCurrent().gte(threshhold) &&
+                   .until(() -> currentDebouncer.calculate(motor.getStatorCurrent().gte(threshold) &&
                                                            motor.getMechanismVelocity().abs(DegreesPerSecond) <=
                                                            velocityThreshold.in(DegreesPerSecond)))
                    .finallyDo(() -> {
