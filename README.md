@@ -101,7 +101,7 @@ public class ArmSubsystem extends SubsystemBase {
     return arm.setAngle(angle);
   }
 }
-````
+```
 
 More detailed examples for **Elevator** and **Pivot** mechanisms can be found in the `/examples` folder (or your team’s repo if it includes all three like above).
 
