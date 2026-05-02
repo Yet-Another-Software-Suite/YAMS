@@ -84,7 +84,7 @@ public class ElevatorSubsystem extends SubsystemBase
       .withFeedforward(new ElevatorFeedforward(0, 0.1, 0, 0))
       .withStatorCurrentLimit(Amps.of(40))
       .withMotorInverted(false)
-      .withSoftLimit(Meters.of(0), Meters.of(2))
+      .withSoftLimits(Meters.of(0), Meters.of(2))
       .withGearing(gearing)
       .withIdleMode(MotorMode.BRAKE)
       .withTelemetry("ElevatorMotor", TelemetryVerbosity.HIGH)

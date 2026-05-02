@@ -35,7 +35,7 @@ public class HoodSubsystem extends SubsystemBase
   private final TalonFXS                   hoodMotor        = new TalonFXS(9);//, MotorType.kBrushless);
   private final SmartMotorControllerConfig motorConfig      = new SmartMotorControllerConfig(this)
       .withClosedLoopController(4, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
-      .withSoftLimit(Degrees.of(-30), Degrees.of(100))
+      .withSoftLimits(Degrees.of(-30), Degrees.of(100))
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
       .withIdleMode(MotorMode.BRAKE)
       .withTelemetry("HoodMotor", TelemetryVerbosity.HIGH)
@@ -53,7 +53,7 @@ public class HoodSubsystem extends SubsystemBase
       .withMaxRobotLength(Meters.of(0.75))
       .withRelativePosition(new Translation3d(Meters.of(-0.25), Meters.of(0), Meters.of(0.5)));
   private final PivotConfig                m_config         = new PivotConfig(motor)
-      .withHardLimit(Degrees.of(-100), Degrees.of(200))
+      .withHardLimits(Degrees.of(-100), Degrees.of(200))
       .withTelemetry("HoodExample", TelemetryVerbosity.HIGH)
       .withStartingPosition(Degrees.of(0))
       .withMechanismPositionConfig(robotToMechanism);

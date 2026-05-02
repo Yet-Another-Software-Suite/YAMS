@@ -60,7 +60,7 @@ public class PivotTest
 
     return new SmartMotorControllerConfig()
         .withClosedLoopController(4, 0, 0)
-        .withSoftLimit(Degrees.of(-100), Degrees.of(100))
+        .withSoftLimits(Degrees.of(-100), Degrees.of(100))
         .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4, 5)))
         .withIdleMode(MotorMode.BRAKE)
         .withStatorCurrentLimit(Amps.of(40))
@@ -72,7 +72,7 @@ public class PivotTest
   private static Pivot createPivot(SmartMotorController smc)
   {
     PivotConfig config = new PivotConfig(smc)
-        .withHardLimit(Degrees.of(-100), Degrees.of(150))
+        .withHardLimits(Degrees.of(-100), Degrees.of(150))
         .withStartingPosition(Degrees.of(0))
         .withMOI(Inches.of(4), Pounds.of(1));
     Pivot                             pivot  = new Pivot(config);

@@ -105,7 +105,7 @@ public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
                                                  */
                                                 .withClosedLoopController(pidController)
                                                 .withFeedforward(armFeedforward)
-                                                .withSoftLimit(softLowerLimit, softUpperLimit);
+                                                .withSoftLimits(softLowerLimit, softUpperLimit);
 
   /// Generic Smart Motor Controller with our options and vendor motor.
   private final SmartMotorController motor    = new SparkWrapper(armMotor, dcMotor, motorConfig);
@@ -122,7 +122,7 @@ public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
       /*
        * Simulation configuration options for the arm.
        */
-      .withHardLimit(hardLowerLimit, hardUpperLimit);
+      .withHardLimits(hardLowerLimit, hardUpperLimit);
   // Arm mechanism
   private final Arm                  arm      = new Arm(m_config);
 

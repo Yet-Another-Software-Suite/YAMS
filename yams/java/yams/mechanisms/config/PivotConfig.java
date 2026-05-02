@@ -287,7 +287,7 @@ public class PivotConfig
   public PivotConfig withSoftLimits(Angle lowerLimit, Angle upperLimit)
   {
     softLimits = Optional.of(Pair.of(lowerLimit, upperLimit));
-    motor.ifPresent(motor -> motor.getConfig().withSoftLimit(lowerLimit, upperLimit));
+    motor.ifPresent(motor -> motor.getConfig().withSoftLimits(lowerLimit, upperLimit));
     return this;
   }
 
@@ -313,7 +313,7 @@ public class PivotConfig
    * @param max Angle where the physical stop appears
    * @return {@link PivotConfig} for chaining.
    */
-  public PivotConfig withHardLimit(Angle min, Angle max)
+  public PivotConfig withHardLimits(Angle min, Angle max)
   {
     lowerHardLimit = Optional.ofNullable(min);
     upperHardLimit = Optional.ofNullable(max);

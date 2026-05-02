@@ -191,7 +191,7 @@ public class FlyWheelConfig
    * @param high Maximum velocity of the shooter.
    * @return {@link FlyWheelConfig} for chaining.
    */
-  public FlyWheelConfig withSoftLimit(AngularVelocity low, AngularVelocity high)
+  public FlyWheelConfig withSoftLimits(AngularVelocity low, AngularVelocity high)
   {
     minVelocity = Optional.ofNullable(low);
     maxVelocity = Optional.ofNullable(high);
@@ -231,7 +231,7 @@ public class FlyWheelConfig
     {
       throw new FlyWheelConfigurationException("Speedometer max velocity is not set.",
                                                "Cannot use speedometer simulation!",
-                                               "Set it with useSpeedometerSimulation(AngularVelocity) or withSoftLimit(AngularVelocity, AngularVelocity)");
+                                               "Set it with useSpeedometerSimulation(AngularVelocity) or withSoftLimits(AngularVelocity, AngularVelocity)");
     }
     this.useSpeedometer = true;
     return this;

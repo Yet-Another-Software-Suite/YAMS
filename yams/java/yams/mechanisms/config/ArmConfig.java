@@ -331,7 +331,7 @@ public class ArmConfig
   public ArmConfig withSoftLimits(Angle lowerLimit, Angle upperLimit)
   {
     softLimits = Optional.of(Pair.of(lowerLimit, upperLimit));
-    motor.ifPresent(motor -> motor.getConfig().withSoftLimit(lowerLimit, upperLimit));
+    motor.ifPresent(motor -> motor.getConfig().withSoftLimits(lowerLimit, upperLimit));
     return this;
   }
 
@@ -357,7 +357,7 @@ public class ArmConfig
    * @param max Angle where the physical stop appears
    * @return {@link ArmConfig} for chaining.
    */
-  public ArmConfig withHardLimit(Angle min, Angle max)
+  public ArmConfig withHardLimits(Angle min, Angle max)
   {
     lowerHardLimit = Optional.ofNullable(min);
     upperHardLimit = Optional.ofNullable(max);

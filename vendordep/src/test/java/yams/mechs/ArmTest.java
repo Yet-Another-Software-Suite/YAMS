@@ -61,7 +61,7 @@ public class ArmTest
 
     return new SmartMotorControllerConfig()
         .withClosedLoopController(5, 0, 0)
-        .withSoftLimit(Degrees.of(-100), Degrees.of(100))
+        .withSoftLimits(Degrees.of(-100), Degrees.of(100))
         .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
         .withIdleMode(MotorMode.BRAKE)
         .withStatorCurrentLimit(Amps.of(40))
@@ -74,7 +74,7 @@ public class ArmTest
   {
     ArmConfig config = new ArmConfig(smc)
         .withLength(Inches.of(4))
-        .withHardLimit(Degrees.of(-100), Degrees.of(200))
+        .withHardLimits(Degrees.of(-100), Degrees.of(200))
         .withMass(Pounds.of(1))
         .withStartingPosition(Degrees.of(0));
     if (!(smc instanceof SparkWrapper || smc instanceof NovaWrapper))

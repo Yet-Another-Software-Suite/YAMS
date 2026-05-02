@@ -95,13 +95,13 @@ public class Arm extends SmartPositionalMechanism
       {
         throw new ArmConfigurationException("Arm lower hard limit is empty",
                                             "Cannot create simulation.",
-                                            "withHardLimit(Angle,Angle)");
+                                            "withHardLimits(Angle,Angle)");
       }
       if (config.getUpperHardLimit().isEmpty())
       {
         throw new ArmConfigurationException("Arm upper hard limit is empty",
                                             "Cannot create simulation.",
-                                            "withHardLimit(Angle,Angle)");
+                                            "withHardLimits(Angle,Angle)");
       }
       if (config.getStartingAngle().isEmpty() && motor.getConfig().getZeroOffset().isEmpty())
       {
@@ -365,7 +365,7 @@ public class Arm extends SmartPositionalMechanism
     }
     throw new ArmConfigurationException("Arm upper hard and motor controller soft limit is empty",
                                         "Cannot create max trigger.",
-                                        "withHardLimit(Angle,Angle)");
+                                        "withHardLimits(Angle,Angle)");
   }
 
   @Override
@@ -381,7 +381,7 @@ public class Arm extends SmartPositionalMechanism
     }
     throw new ArmConfigurationException("Arm lower hard and motor controller soft limit is empty",
                                         "Cannot create min trigger.",
-                                        "withHardLimit(Angle,Angle)");
+                                        "withHardLimits(Angle,Angle)");
   }
 
   @Override
@@ -400,7 +400,7 @@ public class Arm extends SmartPositionalMechanism
     {
       throw new ArmConfigurationException("Arm upper hard and motor controller soft limit is empty",
                                           "Cannot create SysIdRoutine.",
-                                          "withHardLimit(Angle,Angle)");
+                                          "withHardLimits(Angle,Angle)");
     }
     if (m_smc.getConfig().getMechanismLowerLimit().isPresent())
     {
@@ -412,7 +412,7 @@ public class Arm extends SmartPositionalMechanism
     {
       throw new ArmConfigurationException("Arm lower hard and motor controller soft limit is empty",
                                           "Cannot create SysIdRoutine.",
-                                          "withHardLimit(Angle,Angle)");
+                                          "withHardLimits(Angle,Angle)");
     }
     Trigger maxTrigger = gte(max);
     Trigger minTrigger = lte(min);

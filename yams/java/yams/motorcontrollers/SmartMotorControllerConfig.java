@@ -682,7 +682,7 @@ public class SmartMotorControllerConfig
     {
       throw new SmartMotorControllerConfigurationException("Soft limits set while configuring continuous wrapping",
                                                            "Cannot set continuous wrapping",
-                                                           "withSoftLimit(Angle,Angle) should be removed");
+                                                           "withSoftLimits(Angle,Angle) should be removed");
     }
     if (linearClosedLoopController)
     {
@@ -848,7 +848,7 @@ public class SmartMotorControllerConfig
    * @param high High distance soft limit.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
-  public SmartMotorControllerConfig withSoftLimit(Distance low, Distance high)
+  public SmartMotorControllerConfig withSoftLimits(Distance low, Distance high)
   {
     if (mechanismCircumference.isEmpty())
     {
@@ -921,7 +921,7 @@ public class SmartMotorControllerConfig
    * @param high High angle soft limit.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
-  public SmartMotorControllerConfig withSoftLimit(Angle low, Angle high)
+  public SmartMotorControllerConfig withSoftLimits(Angle low, Angle high)
   {
     mechanismLowerLimit = Optional.ofNullable(low);
     mechanismUpperLimit = Optional.ofNullable(high);

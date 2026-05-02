@@ -1284,7 +1284,7 @@ public class SparkWrapper extends SmartMotorController
   {
     if (m_config.getMechanismCircumference().isPresent() && m_config.getMechanismLowerLimit().isPresent())
     {
-      m_config.withSoftLimit(m_config.convertFromMechanism(m_config.getMechanismLowerLimit().get()), upperLimit);
+      m_config.withSoftLimits(m_config.convertFromMechanism(m_config.getMechanismLowerLimit().get()), upperLimit);
       m_sparkBaseConfig.softLimit.forwardSoftLimit(m_config.convertToMechanism(upperLimit).in(Rotations));
       m_spark.configureAsync(m_sparkBaseConfig,
                              ResetMode.kNoResetSafeParameters,
@@ -1299,7 +1299,7 @@ public class SparkWrapper extends SmartMotorController
   {
     if (m_config.getMechanismCircumference().isPresent() && m_config.getMechanismUpperLimit().isPresent())
     {
-      m_config.withSoftLimit(lowerLimit, m_config.convertFromMechanism(m_config.getMechanismUpperLimit().get()));
+      m_config.withSoftLimits(lowerLimit, m_config.convertFromMechanism(m_config.getMechanismUpperLimit().get()));
       m_sparkBaseConfig.softLimit.reverseSoftLimit(m_config.convertToMechanism(lowerLimit).in(Rotations));
       m_spark.configureAsync(m_sparkBaseConfig,
                              ResetMode.kNoResetSafeParameters,
@@ -1313,7 +1313,7 @@ public class SparkWrapper extends SmartMotorController
   public void setMechanismUpperLimit(Angle upperLimit)
   {
     m_config.getMechanismLowerLimit().ifPresent(lowerLimit -> {
-      m_config.withSoftLimit(lowerLimit, upperLimit);
+      m_config.withSoftLimits(lowerLimit, upperLimit);
     });
     m_sparkBaseConfig.softLimit.forwardSoftLimit(upperLimit.in(Rotations));
     m_spark.configureAsync(m_sparkBaseConfig,
@@ -1327,7 +1327,7 @@ public class SparkWrapper extends SmartMotorController
   public void setMechanismLowerLimit(Angle lowerLimit)
   {
     m_config.getMechanismUpperLimit().ifPresent(upperLimit -> {
-      m_config.withSoftLimit(lowerLimit, upperLimit);
+      m_config.withSoftLimits(lowerLimit, upperLimit);
     });
     m_sparkBaseConfig.softLimit.reverseSoftLimit(lowerLimit.in(Rotations));
     m_spark.configureAsync(m_sparkBaseConfig,
@@ -1340,7 +1340,7 @@ public class SparkWrapper extends SmartMotorController
   @Override
   public void setMechanismLimits(Angle lower, Angle upper)
   {
-    m_config.withSoftLimit(lower, upper);
+    m_config.withSoftLimits(lower, upper);
     m_sparkBaseConfig.softLimit.reverseSoftLimit(lower.in(Rotations)).forwardSoftLimit(upper.in(Rotations));
     m_spark.configureAsync(m_sparkBaseConfig,
                            ResetMode.kNoResetSafeParameters,

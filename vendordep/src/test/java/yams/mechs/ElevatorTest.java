@@ -58,7 +58,7 @@ public class ElevatorTest
     return new SmartMotorControllerConfig()
         .withMechanismCircumference(Meters.of(Inches.of(0.25).in(Meters) * 22))
         .withClosedLoopController(4, 0, 0)
-        .withSoftLimit(Meters.of(0), Meters.of(5))
+        .withSoftLimits(Meters.of(0), Meters.of(5))
         .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
         .withIdleMode(MotorMode.BRAKE)
 //        .withTelemetry("ElevatorMotor", TelemetryVerbosity.HIGH)

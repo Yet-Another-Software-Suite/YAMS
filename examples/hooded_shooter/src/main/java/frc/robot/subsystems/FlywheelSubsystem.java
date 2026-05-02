@@ -58,7 +58,7 @@ public class FlywheelSubsystem extends SubsystemBase
       .withDiameter(Inches.of(4))
       .withMass(Pounds.of(1))
       .withTelemetry("FlywheelMech", TelemetryVerbosity.HIGH)
-      .withSoftLimit(RPM.of(-5000), RPM.of(5000))
+      .withSoftLimits(RPM.of(-5000), RPM.of(5000))
       .withSpeedometerSimulation(RPM.of(7500));
 
   private final FlyWheel flywheel = new FlyWheel(flywheelConfig);

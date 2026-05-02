@@ -62,7 +62,7 @@ public class ShooterTest
 
     return new SmartMotorControllerConfig()
         .withClosedLoopController(100, 0, 0)
-//        .withSoftLimit(Degrees.of(-100), Degrees.of(100))
+//        .withSoftLimits(Degrees.of(-100), Degrees.of(100))
         .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
         .withIdleMode(MotorMode.COAST)
 //      .withSpecificTelemetry("ArmMotor", motorTelemetryConfig)

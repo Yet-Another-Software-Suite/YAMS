@@ -96,7 +96,7 @@ public class ExponentiallyProfiledElevatorSubsystem extends SubsystemBase
        */
       .withClosedLoopController(pidController)
       .withFeedforward(elevatorFeedforward)
-      .withSoftLimit(softLowerLimit, softUpperLimit);
+      .withSoftLimits(softLowerLimit, softUpperLimit);
   /// Generic Smart Motor Controller with our options and vendor motor.
   private final SmartMotorController motor         = new SparkWrapper(elevatorMotor, dcMotor, motorConfig);
   /// Elevator-specific options
