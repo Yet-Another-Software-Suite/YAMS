@@ -428,19 +428,19 @@ public class SensorData
      */
     kBoolean(HALValue.kBoolean),
     /**
-     * Double type type {@link HALValue#kDouble}
+     * Double type {@link HALValue#kDouble}
      */
     kDouble(HALValue.kDouble),
     /**
-     * Enum type type {@link HALValue#kEnum}
+     * Enum type {@link HALValue#kEnum}
      */
     kEnum(HALValue.kEnum),
     /**
-     * Int type type {@link HALValue#kInt}
+     * Int type {@link HALValue#kInt}
      */
     kInt(HALValue.kInt),
     /**
-     * Long type type {@link HALValue#kLong}
+     * Long type {@link HALValue#kLong}
      */
     kLong(HALValue.kLong);
 
