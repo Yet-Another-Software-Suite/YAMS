@@ -424,7 +424,7 @@ public class ExponentialProfilePIDController
   /**
    * Returns the error tolerance of this controller. Defaults to 0.05.
    *
-   * @return the error tolerance of the controlle
+   * @return the error tolerance of the controller
    */
   public double getPositionTolerance()
   {

@@ -619,24 +619,24 @@ public class SwerveDrive
                             DriveSysIdTestType driveType)
   {
     // Get the config from the drive motor to support custom logging by CTRE and REV.
-    Config sysIdConfig = m_modules[0].m_dirveMotorController.getSysIdConfig(maxVoltage, stepVoltage, testDuration);
+    Config sysIdConfig = m_modules[0].m_driveMotorController.getSysIdConfig(maxVoltage, stepVoltage, testDuration);
     var    testSlice   = testDuration.div(4);
     var routine = new SysIdRoutine(sysIdConfig,
                                    new SysIdRoutine.Mechanism(
                                        (voltage) -> {
                                          for (var mod : m_modules)
                                          {
-                                           mod.m_dirveMotorController.setVoltage(voltage);
+                                           mod.m_driveMotorController.setVoltage(voltage);
                                          }
                                        },
                                        log -> {
                                          for (var mod : m_modules)
                                          {
-                                           log.motor(mod.m_dirveMotorController.getName())
+                                           log.motor(mod.m_driveMotorController.getName())
                                               .voltage(
-                                                  mod.m_dirveMotorController.getVoltage())
-                                              .angularPosition(mod.m_dirveMotorController.getMechanismPosition())
-                                              .angularVelocity(mod.m_dirveMotorController.getMechanismVelocity());
+                                                  mod.m_driveMotorController.getVoltage())
+                                              .angularPosition(mod.m_driveMotorController.getMechanismPosition())
+                                              .angularVelocity(mod.m_driveMotorController.getMechanismVelocity());
                                          }
                                        },
                                        m_config.getSubsystem()));
@@ -658,7 +658,7 @@ public class SwerveDrive
                    .andThen(Commands.runOnce(() -> {
                      for (var mod : m_modules)
                      {
-                       mod.m_dirveMotorController.stopClosedLoopController();
+                       mod.m_driveMotorController.stopClosedLoopController();
                      }
                    }))
                    .andThen(routine.dynamic(Direction.kForward).withTimeout(testSlice))
@@ -666,7 +666,7 @@ public class SwerveDrive
                    .andThen(routine.quasistatic(Direction.kForward).withTimeout(testSlice))
                    .andThen(routine.quasistatic(Direction.kReverse).withTimeout(testSlice))
                    .finallyDo(() -> {
-                     for (var mod : m_modules) {mod.m_dirveMotorController.startClosedLoopController();}
+                     for (var mod : m_modules) {mod.m_driveMotorController.startClosedLoopController();}
                    })
                    .andThen(Commands.print("Done with drive sysId!"));
   }

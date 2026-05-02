@@ -1,0 +1,9 @@
+.\vendordep\build.gradle:71: thirdparty ==> third party, third-party
+.\vendordep\src\test\java\yams\helpers\MockHardwareExtension.java:18: afterAll ==> after all
+.\vendordep\src\test\java\yams\mechs\ArmTest.java:381: afterAll ==> after all
+.\vendordep\src\test\java\yams\mechs\ElevatorTest.java:393: afterAll ==> after all
+.\vendordep\src\test\java\yams\mechs\PivotTest.java:365: afterAll ==> after all
+.\vendordep\src\test\java\yams\mechs\ShooterTest.java:382: afterAll ==> after all
+.\yams\java\yams\math\LQRConfig.java:158: relms ==> realms, elms, helms, reams
+.\yams\java\yams\math\LQRConfig.java:163: relms ==> realms, elms, helms, reams
+.\yams\java\yams\math\LQRConfig.java:165: relms ==> realms, elms, helms, reams

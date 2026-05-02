@@ -121,7 +121,7 @@ public class DoubleJointedArm extends SmartPositionalMechanism
     if (lowerConfig.getLength().isEmpty() || upperConfig.getLength().isEmpty())
     {
       throw new DoubleJointedArmConfigurationException(
-          "Arm legnths must be defined to calculate current end position of the Double Jointed Arm!",
+          "Arm lengths must be defined to calculate current end position of the Double Jointed Arm!",
           "Cannot create mechanism",
           "withLength(Distance)");
     }

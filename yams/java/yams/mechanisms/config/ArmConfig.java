@@ -72,7 +72,7 @@ public class ArmConfig
   /**
    * Horizontal zero of the arm's absolute encoder.
    */
-  private   Optional<Angle>                horizantalZero          = Optional.empty();
+  private   Optional<Angle>                horizontalZero          = Optional.empty();
   /**
    * Starting position of the arms motor controller encoder.
    */
@@ -128,7 +128,7 @@ public class ArmConfig
     startingPosition = cfg.startingPosition;
     softLimits = cfg.softLimits;
     continuousWrapping = cfg.continuousWrapping;
-    horizantalZero = cfg.horizantalZero;
+    horizontalZero = cfg.horizontalZero;
   }
 
   @Override
@@ -169,7 +169,7 @@ public class ArmConfig
     {
       motorController.getConfig().withMomentOfInertia(length.get(), weight.get());
     }
-    horizantalZero.ifPresent(this::withHorizontalZero);
+    horizontalZero.ifPresent(this::withHorizontalZero);
     startingPosition.ifPresent(this::withStartingPosition);
     softLimits.ifPresent(limits -> withSoftLimits(limits.getFirst(), limits.getSecond()));
     continuousWrapping.ifPresent(wrapping -> withWrapping(wrapping.getFirst(), wrapping.getSecond()));
@@ -303,7 +303,7 @@ public class ArmConfig
    */
   public ArmConfig withHorizontalZero(Angle horizontalZero)
   {
-    this.horizantalZero = Optional.ofNullable(horizontalZero);
+    this.horizontalZero = Optional.ofNullable(horizontalZero);
     motor.ifPresent(motor -> motor.getConfig().withExternalEncoderZeroOffset(horizontalZero));
     return this;
   }

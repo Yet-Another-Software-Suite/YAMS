@@ -751,7 +751,7 @@ public abstract class SmartMotorController
   /**
    * Get the duty cycle output of the motor controller.
    *
-   * @return DutyCyle of the motor controller.
+   * @return DutyCycle of the motor controller.
    */
   public abstract double getDutyCycle();
 
