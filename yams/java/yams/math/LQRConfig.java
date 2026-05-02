@@ -207,12 +207,12 @@ public class LQRConfig
   /**
    * Aggressiveness of the LQR, how fast it will attempt to achieve the desired state.
    *
-   * @param agressiveness Usually 10, arbitrary scale.
+   * @param aggressiveness Usually 10, arbitrary scale.
    * @return {@link LQRConfig} for chaining.
    */
-  public LQRConfig withAgressiveness(double agressiveness)
+  public LQRConfig withAggressiveness(double aggressiveness)
   {
-    m_aggressiveness = OptionalDouble.of(agressiveness);
+    m_aggressiveness = OptionalDouble.of(aggressiveness);
     return this;
   }
 
