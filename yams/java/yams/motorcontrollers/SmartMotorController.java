@@ -930,7 +930,7 @@ public abstract class SmartMotorController
                                             System.out.println(
                                                 "=====================================================\nTEST UP\n=====================================================");
                                             System.out.println(
-                                                "Test will end whe Mechanism Velocity exceeds or equals 10RPM after 30seconds");
+                                                "Test will end when Mechanism Velocity exceeds or equals 10RPM after 30seconds");
                                             stopClosedLoopController();
                                             setDutyCycle(0);
                                             startingAngle.set(getMechanismPosition());
@@ -952,7 +952,7 @@ public abstract class SmartMotorController
                                               System.out.println(
                                                   "=====================================================\nTEST DOWN\n=====================================================");
                                               System.out.println(
-                                                  "Test will end whe Mechanism Velocity exceeds or equals 10RPM after 30seconds");
+                                                  "Test will end when Mechanism Velocity exceeds or equals 10RPM after 30seconds");
                                               stopClosedLoopController();
                                               setDutyCycle(0);
                                               startingAngle.set(getMechanismPosition());

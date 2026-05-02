@@ -400,7 +400,7 @@ public class FlyWheel extends SmartVelocityMechanism
     {
       throw new FlyWheelConfigurationException("FlyWheel upper hard and motor controller soft limit is empty",
                                                "Cannot create SysIdRoutine.",
-                                               "withSoftLimits(Angle,Angle)");
+                                               "withSoftLimits(AngularVelocity,AngularVelocity)");
     }
     if (m_config.getLowerSoftLimit().isPresent())
     {
@@ -409,7 +409,7 @@ public class FlyWheel extends SmartVelocityMechanism
     {
       throw new FlyWheelConfigurationException("FlyWheel lower hard and motor controller soft limit is empty",
                                                "Cannot create SysIdRoutine.",
-                                               "withSoftLimits(Angle,Angle)");
+                                               "withSoftLimits(AngularVelocity,AngularVelocity)");
     }
     Trigger maxTrigger = gte(max);
     Trigger minTrigger = lte(min);
