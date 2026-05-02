@@ -263,7 +263,7 @@ public class ExponentialProfilePIDController
   }
 
   /**
-   * Reset the PID and profile with the given postion and velocity as the measured position and velocity.
+   * Reset the PID and profile with the given position and velocity as the measured position and velocity.
    *
    * @param position Measured position
    * @param velocity Measured velocity.

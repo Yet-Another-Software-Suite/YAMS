@@ -510,7 +510,7 @@ public class SparkWrapper extends SmartMotorController
       });
     }
 
-    // LQR Doesnt handle tolerances
+    // LQR doesn't handle tolerances
     if (m_lqr.isPresent() && config.getClosedLoopTolerance().isPresent())
     {
       throw new IllegalArgumentException("[Error] Closed loop tolerance is not supported in LQR mode.");

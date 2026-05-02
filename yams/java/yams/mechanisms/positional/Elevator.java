@@ -373,7 +373,7 @@ public class Elevator extends SmartPositionalMechanism
       m_smc.getSimSupplier().get().updateSimState();
       m_smc.simIterate();
       m_smc.getSimSupplier().get().starveUpdateSim();
-      // It is impossible for an elevator to go bellow the minimum height, it would break...
+      // It is impossible for an elevator to go below the minimum height, it would break...
       if (m_config.getMinimumHeight().isPresent() && getHeight().lt(m_config.getMinimumHeight().get()))
       {
 //        m_motor.simIterate(RotationsPerSecond.of(0));

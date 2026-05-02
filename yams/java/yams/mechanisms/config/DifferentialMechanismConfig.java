@@ -95,7 +95,7 @@ public class DifferentialMechanismConfig
    * @param left  Left {@link SmartMotorController} configured with the gearing up to the tilt movement if
    *              synchronized.
    * @param right Right {@link SmartMotorController} configured with the gearing up to the tilt movement if
-   *              syncrhonized.
+   *              synchronized.
    */
   public DifferentialMechanismConfig(SmartMotorController left, SmartMotorController right)
   {
@@ -319,7 +319,7 @@ public class DifferentialMechanismConfig
   }
 
   /**
-   * Aet the gearing for the differential mechanism if it isnt 1:1. Separate from gearing to the bevel gears.
+   * Set the gearing for the differential mechanism if it isn't 1:1. Separate from gearing to the bevel gears.
    *
    * @param gearing Gearing for the bevel gears.
    * @return {@link DifferentialMechanismConfig} for chaining

@@ -749,7 +749,7 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds>
   /**
    * Apply the scalar value if it exists.
    *
-   * @param axisValue Axis value to apply teh scalar too.
+   * @param axisValue Axis value to apply the scalar to.
    * @return Axis value scaled by scalar value.
    */
   private double applyRotationalScalar(double axisValue)

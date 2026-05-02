@@ -271,7 +271,7 @@ public class SmartMotorControllerConfig
    */
   private       Optional<Voltage>                                         closedLoopControllerMaximumVoltage = Optional.empty();
   /**
-   * Feedback synchronization threshhold.
+   * Feedback synchronization threshold.
    */
   private       Optional<Angle>                                           feedbackSynchronizationThreshold   = Optional.empty();
   /**
@@ -475,7 +475,7 @@ public class SmartMotorControllerConfig
   }
 
   /**
-   * Set the feedback synchronization threshhold so the relative encoder synchronizes with the absolute encoder at this
+   * Set the feedback synchronization threshold so the relative encoder synchronizes with the absolute encoder at this
    * point.
    *
    * @param angle {@link Angle} to exceed.
@@ -737,7 +737,7 @@ public class SmartMotorControllerConfig
    * Set the {@link SmartMotorController} closed loop controller tolerance via distance.
    *
    * @param tolerance {@link Distance} tolerance.
-   * @return {@link SmartMotorControllerConfig} fpr chaining.
+   * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withClosedLoopTolerance(Distance tolerance)
   {
@@ -2738,7 +2738,7 @@ public class SmartMotorControllerConfig
   }
 
   /**
-   * Get the motor controller mdoe to use.
+   * Get the motor controller mode to use.
    *
    * @return {@link ControlMode} to use.
    */

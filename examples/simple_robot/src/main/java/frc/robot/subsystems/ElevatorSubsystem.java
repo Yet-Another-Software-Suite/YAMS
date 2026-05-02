@@ -63,12 +63,12 @@ public class ElevatorSubsystem extends SubsystemBase
 //      .withClosedLoopController(4, 0, 0, MetersPerSecond.of(0.5), MetersPerSecondPerSecond.of(0.5)) // Trapezoidal Profile PID Controller
       .withSoftLimits(Meters.of(0), Meters.of(2))
       .withGearing(gearing)
-//      .withExternalEncoder(armMotor.getAbsoluteEncoder()) // External Encoder if you need one, really shouldnt be used for Elevators
+//      .withExternalEncoder(armMotor.getAbsoluteEncoder()) // External Encoder if you need one, really shouldn't be used for Elevators
       .withIdleMode(MotorMode.BRAKE)
       .withTelemetry("ElevatorMotor", TelemetryVerbosity.HIGH)
 //      .withSpecificTelemetry("ElevatorMotor", motorTelemetryConfig) // Specific Telemetry
       .withStatorCurrentLimit(Amps.of(40))
-//      .withVoltageCompensation(Volts.of(12)) // Voltage compensation isnt available on all controllers
+//      .withVoltageCompensation(Volts.of(12)) // Voltage compensation isn't available on all controllers
       .withMotorInverted(false)
 //      .withClosedLoopRampRate(Seconds.of(0.25)) // Closed Loop Ramp Rate not necessary
 //      .withOpenLoopRampRate(Seconds.of(0.25)) // Open Loop Ramp Rate not necessary

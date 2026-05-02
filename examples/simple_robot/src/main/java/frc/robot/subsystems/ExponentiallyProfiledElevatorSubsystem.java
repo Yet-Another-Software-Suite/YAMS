@@ -129,11 +129,11 @@ public class ExponentiallyProfiledElevatorSubsystem extends SubsystemBase
   }
 
   /**
-   * Reset the encoder to the lowest position when the current threshhold is reached. Should be used when the Elevator
-   * position is unreliable, like startup. Threshhold is only detected if exceeded for 0.4 seconds, and the motor moves
+   * Reset the encoder to the lowest position when the current threshold is reached. Should be used when the Elevator
+   * position is unreliable, like startup. Threshold is only detected if exceeded for 0.4 seconds, and the motor moves
    * less than 2 degrees per second.
    *
-   * @param threshhold The current threshhold held when the Elevator is at it's hard limit.
+   * @param threshhold The current threshold held when the Elevator is at its hard limit.
    * @return
    */
   public Command homing(Current threshhold)
