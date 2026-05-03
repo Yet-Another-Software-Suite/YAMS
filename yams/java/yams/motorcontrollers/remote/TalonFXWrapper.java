@@ -1713,7 +1713,7 @@ public class TalonFXWrapper extends SmartMotorController
   {
     if (m_config.getMechanismCircumference().isPresent() && m_config.getMechanismLowerLimit().isPresent())
     {
-      m_config.withSoftLimit(m_config.convertFromMechanism(m_config.getMechanismLowerLimit().get()), upperLimit);
+      m_config.withSoftLimits(m_config.convertFromMechanism(m_config.getMechanismLowerLimit().get()), upperLimit);
       m_talonConfig.SoftwareLimitSwitch.withForwardSoftLimitThreshold(m_config.convertToMechanism(upperLimit))
                                        .withForwardSoftLimitEnable(true);
       forceConfigApply();
@@ -1726,7 +1726,7 @@ public class TalonFXWrapper extends SmartMotorController
   {
     if (m_config.getMechanismCircumference().isPresent() && m_config.getMechanismUpperLimit().isPresent())
     {
-      m_config.withSoftLimit(lowerLimit, m_config.convertFromMechanism(m_config.getMechanismUpperLimit().get()));
+      m_config.withSoftLimits(lowerLimit, m_config.convertFromMechanism(m_config.getMechanismUpperLimit().get()));
       m_talonConfig.SoftwareLimitSwitch.withReverseSoftLimitThreshold(m_config.convertToMechanism(lowerLimit))
                                        .withReverseSoftLimitEnable(true);
       forceConfigApply();
@@ -1738,7 +1738,7 @@ public class TalonFXWrapper extends SmartMotorController
   public void setMechanismUpperLimit(Angle upperLimit)
   {
     m_config.getMechanismLowerLimit().ifPresent(lowerLimit -> {
-      m_config.withSoftLimit(lowerLimit, upperLimit);
+      m_config.withSoftLimits(lowerLimit, upperLimit);
     });
     m_talonConfig.SoftwareLimitSwitch.withForwardSoftLimitEnable(true)
                                      .withForwardSoftLimitThreshold(upperLimit);
@@ -1750,7 +1750,7 @@ public class TalonFXWrapper extends SmartMotorController
   public void setMechanismLowerLimit(Angle lowerLimit)
   {
     m_config.getMechanismUpperLimit().ifPresent(upperLimit -> {
-      m_config.withSoftLimit(lowerLimit, upperLimit);
+      m_config.withSoftLimits(lowerLimit, upperLimit);
     });
     m_talonConfig.SoftwareLimitSwitch.withReverseSoftLimitEnable(true)
                                      .withReverseSoftLimitThreshold(lowerLimit);
@@ -1761,7 +1761,7 @@ public class TalonFXWrapper extends SmartMotorController
   @Override
   public void setMechanismLimits(Angle lower, Angle upper)
   {
-    m_config.withSoftLimit(lower, upper);
+    m_config.withSoftLimits(lower, upper);
     m_talonConfig.SoftwareLimitSwitch.withForwardSoftLimitThreshold(upper).withReverseSoftLimitThreshold(lower);
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismLimits(lower, upper);}});

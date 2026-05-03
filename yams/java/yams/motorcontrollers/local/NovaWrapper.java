@@ -930,7 +930,7 @@ public class NovaWrapper extends SmartMotorController
   {
     if (m_config.getMechanismCircumference().isPresent() && m_config.getMechanismLowerLimit().isPresent())
     {
-      m_config.withSoftLimit(m_config.convertFromMechanism(m_config.getMechanismLowerLimit().get()), upperLimit);
+      m_config.withSoftLimits(m_config.convertFromMechanism(m_config.getMechanismLowerLimit().get()), upperLimit);
       m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMeasurementUpperLimit(upperLimit);}});
     }
   }
@@ -940,7 +940,7 @@ public class NovaWrapper extends SmartMotorController
   {
     if (m_config.getMechanismCircumference().isPresent() && m_config.getMechanismUpperLimit().isPresent())
     {
-      m_config.withSoftLimit(lowerLimit, m_config.convertFromMechanism(m_config.getMechanismUpperLimit().get()));
+      m_config.withSoftLimits(lowerLimit, m_config.convertFromMechanism(m_config.getMechanismUpperLimit().get()));
       m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMeasurementLowerLimit(lowerLimit);}});
     }
   }
@@ -949,7 +949,7 @@ public class NovaWrapper extends SmartMotorController
   public void setMechanismUpperLimit(Angle upperLimit)
   {
     m_config.getMechanismLowerLimit().ifPresent(lowerLimit -> {
-      m_config.withSoftLimit(lowerLimit, upperLimit);
+      m_config.withSoftLimits(lowerLimit, upperLimit);
     });
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismUpperLimit(upperLimit);}});
   }
@@ -958,7 +958,7 @@ public class NovaWrapper extends SmartMotorController
   public void setMechanismLowerLimit(Angle lowerLimit)
   {
     m_config.getMechanismUpperLimit().ifPresent(upperLimit -> {
-      m_config.withSoftLimit(lowerLimit, upperLimit);
+      m_config.withSoftLimits(lowerLimit, upperLimit);
     });
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismLowerLimit(lowerLimit);}});
 
@@ -967,7 +967,7 @@ public class NovaWrapper extends SmartMotorController
   @Override
   public void setMechanismLimits(Angle lower, Angle upper)
   {
-    m_config.withSoftLimit(lower, upper);
+    m_config.withSoftLimits(lower, upper);
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismLimits(lower, upper);}});
   }
 

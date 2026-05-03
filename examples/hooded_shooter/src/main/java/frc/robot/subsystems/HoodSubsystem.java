@@ -50,7 +50,7 @@ public class HoodSubsystem extends SubsystemBase {
     private final ArmConfig hoodConfig = new ArmConfig(hoodSMC)
             .withTelemetry("HoodMech", TelemetryVerbosity.HIGH)
             .withSoftLimits(Degrees.of(5), Degrees.of(100))
-            .withHardLimit(Degrees.of(0), Degrees.of(120)); // The Hood can be modeled as an arm since it has a
+            .withHardLimits(Degrees.of(0), Degrees.of(120)); // The Hood can be modeled as an arm since it has a
                                                             // gravitational force acted upon based on the angle its in
 
     private final Arm hood = new Arm(hoodConfig);

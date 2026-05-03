@@ -47,7 +47,7 @@ public class RobotContainer
     drive.setDefaultCommand(drive.drive(drive.getChassisSpeedsSupplier(
             xboxController::getLeftY,
             xboxController::getLeftX,
-            () -> xboxController.getRightX() * -1))); // Lamba expression to invert the right joystick axis.
+            () -> xboxController.getRightX() * -1))); // Lambda expression to invert the right joystick axis.
     /// Enable breakdown publishing for MapleSim, and place game pieces on the field.
     SimulatedArena.getInstance().enableBreakdownPublishing();
     SimulatedArena.getInstance().placeGamePiecesOnField();

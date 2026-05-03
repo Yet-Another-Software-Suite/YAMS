@@ -121,7 +121,7 @@ public class DoubleJointedArm extends SmartPositionalMechanism
     if (lowerConfig.getLength().isEmpty() || upperConfig.getLength().isEmpty())
     {
       throw new DoubleJointedArmConfigurationException(
-          "Arm legnths must be defined to calculate current end position of the Double Jointed Arm!",
+          "Arm lengths must be defined to calculate current end position of the Double Jointed Arm!",
           "Cannot create mechanism",
           "withLength(Distance)");
     }
@@ -156,13 +156,13 @@ public class DoubleJointedArm extends SmartPositionalMechanism
       {
         throw new DoubleJointedArmConfigurationException("Arm lower hard limit is empty",
                                                          "Cannot create simulation.",
-                                                         "withHardLimit(Angle,Angle)");
+                                                         "withHardLimits(Angle,Angle)");
       }
       if (lowerConfig.getUpperHardLimit().isEmpty() || upperConfig.getUpperHardLimit().isEmpty())
       {
         throw new DoubleJointedArmConfigurationException("Arm upper hard limit is empty",
                                                          "Cannot create simulation.",
-                                                         "withHardLimit(Angle,Angle)");
+                                                         "withHardLimits(Angle,Angle)");
       }
 
       // Setup Sim

@@ -113,7 +113,7 @@ public class ArmSubsystem extends SubsystemBase {
   private SmartMotorController armSMC = new TalonFXWrapper(armMotor, DCMotor.getFalcon500(1), smcConfig);
 
   private ArmConfig armCfg = new ArmConfig(armSMC)
-      .withHardLimit(Degrees.of(-25), Degrees.of(141))
+      .withHardLimits(Degrees.of(-25), Degrees.of(141))
       .withStartingPosition(Degrees.of(141))
       .withLength(Feet.of((14.0 / 12)))
       .withMOI(ArmConstants.MOI)

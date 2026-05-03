@@ -19,8 +19,8 @@ public class ShooterSubsystem {
 
     private Supplier<AngularVelocity> flywheelVelocitySupplier = () -> DegreesPerSecond.of(0);
 
-    private PIDController hoodPIDCOntroller = new PIDController(10, 0, 0);
-    private PIDController turretPIDCOntroller = new PIDController(12, 0, 0);
+    private PIDController hoodPIDController = new PIDController(10, 0, 0);
+    private PIDController turretPIDController = new PIDController(12, 0, 0);
 
     public ShooterSubsystem(VisionSubsystem vision) {
         // Will make both hood and turret repeatedly try to correct themself to point at
@@ -30,7 +30,7 @@ public class ShooterSubsystem {
         hood.setDefaultCommand(hood.setDutyCycle(() -> {
             var results = vision.getClosestTag();
             if (results.isPresent()) {
-                return hoodPIDCOntroller.calculate(results.get().skew, 0);
+                return hoodPIDController.calculate(results.get().skew, 0);
             }
             return 0.0;
         }));
@@ -38,7 +38,7 @@ public class ShooterSubsystem {
         turret.setDefaultCommand(turret.setDutyCycle(() -> {
             var results = vision.getClosestTag();
             if (results.isPresent()) {
-                return turretPIDCOntroller.calculate(results.get().yaw, 0);
+                return turretPIDController.calculate(results.get().yaw, 0);
             }
             return 0.0;
         }));

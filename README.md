@@ -71,7 +71,7 @@ public class ArmSubsystem extends SubsystemBase {
       new SmartMotorControllerConfig(this)
           .withClosedLoopController(4, 0, 0)
           .withTrapezoidalProfile(DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
-          .withSoftLimit(Degrees.of(-30), Degrees.of(100))
+          .withSoftLimits(Degrees.of(-30), Degrees.of(100))
           .withGearing(gearing(gearbox(3, 4)))
           .withIdleMode(MotorMode.BRAKE)
           .withTelemetry("ArmMotor", TelemetryVerbosity.HIGH)
@@ -82,7 +82,7 @@ public class ArmSubsystem extends SubsystemBase {
 
   private final Arm arm = new Arm(new ArmConfig(motor)
       .withLength(Meters.of(0.135))
-      .withHardLimit(Degrees.of(-100), Degrees.of(200))
+      .withHardLimits(Degrees.of(-100), Degrees.of(200))
       .withStartingPosition(Degrees.of(0))
       .withTelemetry("ArmExample", TelemetryVerbosity.HIGH)
   );
@@ -101,7 +101,7 @@ public class ArmSubsystem extends SubsystemBase {
     return arm.setAngle(angle);
   }
 }
-````
+```
 
 More detailed examples for **Elevator** and **Pivot** mechanisms can be found in the `/examples` folder (or your team’s repo if it includes all three like above).
 

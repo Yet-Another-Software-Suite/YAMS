@@ -3,7 +3,7 @@
 This guide shows how to configure the EasyCRT solver (`EasyCRT` + `EasyCRTConfig`)
 
 ## How the solver works
-- You supply two absolute enocder angles (wrapping to [0,1) is taken care of by the config) plus their rotations-per-mechanism-rotation ratios.
+- You supply two absolute encoder angles (wrapping to [0,1) is taken care of by the config) plus their rotations-per-mechanism-rotation ratios.
 - The solver enumerates every mechanism angle that fits encoder 1 within the allowed mechanism range, predicts what encoder 2 should read, and measures modular error.
 - The best match inside your tolerance becomes the mechanism angle; near ties become `AMBIGUOUS`; no in-range match becomes `NO_SOLUTION`.
 - The iteration count stays reasonable. Typical solves are tens of iterations. Log `getLastIterations()` to view this. The gear recommender also filters gear pairs whose theoretical iterations exceed your limit.
@@ -41,7 +41,7 @@ Pick ONE path per encoder to define rotations per mechanism rotation.
     easyCrt.withAbsoluteEncoder1GearingStages(12, 36, 18, 60); // 12->36, then 18->60
     easyCrt.withAbsoluteEncoder2GearingStages(12, 60);         // single stage 12->60
     ```
-- **Inversion**: Configure both in one place (preferred). We reccomend that offsets be applied in the config to avoid confusion, but if your vendor's encoder supports on-device offsets, that is fine, however DO NOT set them in both places:
+- **Inversion**: Configure both in one place (preferred). We recommend that offsets be applied in the config to avoid confusion, but if your vendor's encoder supports on-device offsets, that is fine, however DO NOT set them in both places:
   ```java
   easyCrt.withAbsoluteEncoderInversions(/* enc1 inverted */ false,
                                     /* enc2 inverted */ true);

@@ -310,7 +310,7 @@ public class ElevatorConfig
   public ElevatorConfig withSoftLimits(Distance lowerLimit, Distance upperLimit)
   {
     softLimits = Optional.of(Pair.of(lowerLimit, upperLimit));
-    motor.ifPresent(motor -> motor.getConfig().withSoftLimit(lowerLimit, upperLimit));
+    motor.ifPresent(motor -> motor.getConfig().withSoftLimits(lowerLimit, upperLimit));
     return this;
   }
 

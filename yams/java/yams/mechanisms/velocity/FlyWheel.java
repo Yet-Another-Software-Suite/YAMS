@@ -372,7 +372,7 @@ public class FlyWheel extends SmartVelocityMechanism
     }
     throw new FlyWheelConfigurationException("FlyWheel upper soft limit is empty",
                                              "Cannot create max trigger.",
-                                             "withUpperSoftLimit(AngularVelocity) OR withSoftLimit(AngularVelocity,AngularVelocity)");
+                                             "withUpperSoftLimit(AngularVelocity) OR withSoftLimits(AngularVelocity,AngularVelocity)");
   }
 
   @Override
@@ -384,7 +384,7 @@ public class FlyWheel extends SmartVelocityMechanism
     }
     throw new FlyWheelConfigurationException("FlyWheel upper soft limit is empty",
                                              "Cannot create max trigger.",
-                                             "withLowerSoftLimit(AngularVelocity) OR withSoftLimit(AngularVelocity,AngularVelocity)");
+                                             "withLowerSoftLimit(AngularVelocity) OR withSoftLimits(AngularVelocity,AngularVelocity)");
   }
 
   @Override
@@ -400,7 +400,7 @@ public class FlyWheel extends SmartVelocityMechanism
     {
       throw new FlyWheelConfigurationException("FlyWheel upper hard and motor controller soft limit is empty",
                                                "Cannot create SysIdRoutine.",
-                                               "withSoftLimit(Angle,Angle)");
+                                               "withSoftLimits(AngularVelocity,AngularVelocity)");
     }
     if (m_config.getLowerSoftLimit().isPresent())
     {
@@ -409,7 +409,7 @@ public class FlyWheel extends SmartVelocityMechanism
     {
       throw new FlyWheelConfigurationException("FlyWheel lower hard and motor controller soft limit is empty",
                                                "Cannot create SysIdRoutine.",
-                                               "withSoftLimit(Angle,Angle)");
+                                               "withSoftLimits(AngularVelocity,AngularVelocity)");
     }
     Trigger maxTrigger = gte(max);
     Trigger minTrigger = lte(min);

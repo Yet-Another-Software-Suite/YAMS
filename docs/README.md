@@ -32,7 +32,7 @@ layout:
 
 Less guesswork, no complexity—just your first successful mechanism, fast.
 
-Setting up your first mechanism should be easy and painless and thats exactly what YAMS aims to provide.
+Setting up your first mechanism should be easy and painless, and that's exactly what YAMS aims to provide.
 
 YAMS provides an effortless programming experience by neatly dividing the process into distinct steps: SmartMotorController Configuration, SmartMotorController creation, Mechanism configuration, and Mechanism creation. This structured approach simplifies the integration of mechanisms like Arms, Elevators, Turrets, and more, allowing developers to effortlessly manage and control them using commands from Mechanism classes. Built exclusively for WPILib command-based programming, YAMS also offers sophisticated features such as advanced telemetry and live tuning, ensuring a streamlined and efficient development process for all supported mechanisms.
 
@@ -45,7 +45,7 @@ YAMS provides an effortless programming experience by neatly dividing the proces
 // Create your motor controller config
 SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withClosedLoopController(4, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
-      .withSoftLimit(Degrees.of(-30), Degrees.of(100))
+      .withSoftLimits(Degrees.of(-30), Degrees.of(100))
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
       .withIdleMode(MotorMode.BRAKE)
       .withTelemetry("ArmMotor", TelemetryVerbosity.HIGH)
@@ -63,7 +63,7 @@ SmartMotorController       motor       = new TalonFXSWrapper(armMotor, DCMotor.g
 // Create your mechanism config
 ArmConfig                  config    = new ArmConfig(motor)
       .withLength(Meters.of(0.135))
-      .withHardLimit(Degrees.of(-100), Degrees.of(200))
+      .withHardLimits(Degrees.of(-100), Degrees.of(200))
       .withTelemetry("ArmExample", TelemetryVerbosity.HIGH)
       .withMass(Pounds.of(1))
       .withStartingPosition(Degrees.of(0))

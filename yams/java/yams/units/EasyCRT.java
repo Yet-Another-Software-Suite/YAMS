@@ -39,7 +39,7 @@ public class EasyCRT {
      */
     AMBIGUOUS,
     /**
-     * No solve attempts have occured.
+     * No solve attempts have occurred.
      */
     NOT_ATTEMPTED,
     /**

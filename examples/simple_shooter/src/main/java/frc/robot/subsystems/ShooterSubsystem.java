@@ -71,7 +71,7 @@ public class ShooterSubsystem extends SubsystemBase
       .withDiameter(Inches.of(4))
       .withMass(Pounds.of(1))
       .withTelemetry("ShooterMech", TelemetryVerbosity.HIGH)
-      .withSoftLimit(RPM.of(-500), RPM.of(500))
+      .withSoftLimits(RPM.of(-500), RPM.of(500))
       .withSpeedometerSimulation(RPM.of(750));
   private final FlyWheel       shooter       = new FlyWheel(shooterConfig);
 

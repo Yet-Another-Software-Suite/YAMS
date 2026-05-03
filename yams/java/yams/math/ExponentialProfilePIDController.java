@@ -263,7 +263,7 @@ public class ExponentialProfilePIDController
   }
 
   /**
-   * Reset the PID and profile with the given postion and velocity as the measured position and velocity.
+   * Reset the PID and profile with the given position and velocity as the measured position and velocity.
    *
    * @param position Measured position
    * @param velocity Measured velocity.
@@ -424,7 +424,7 @@ public class ExponentialProfilePIDController
   /**
    * Returns the error tolerance of this controller. Defaults to 0.05.
    *
-   * @return the error tolerance of the controlle
+   * @return the error tolerance of the controller
    */
   public double getPositionTolerance()
   {

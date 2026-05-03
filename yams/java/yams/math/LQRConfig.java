@@ -134,7 +134,7 @@ public class LQRConfig
    */
   private       Optional<Time>               m_measurementDelay   = Optional.empty();
   /**
-   * Agressiveness.
+   * Aggressiveness.
    */
   private       OptionalDouble               m_aggressiveness     = OptionalDouble.empty();
 
@@ -205,14 +205,14 @@ public class LQRConfig
   }
 
   /**
-   * Agressiveness of the LQR, howfast it will attempt to achieve the desired state.
+   * Aggressiveness of the LQR, how fast it will attempt to achieve the desired state.
    *
-   * @param agressiveness Usually 10, arbitrary scale.
+   * @param aggressiveness Usually 10, arbitrary scale.
    * @return {@link LQRConfig} for chaining.
    */
-  public LQRConfig withAgressiveness(double agressiveness)
+  public LQRConfig withAggressiveness(double aggressiveness)
   {
-    m_aggressiveness = OptionalDouble.of(agressiveness);
+    m_aggressiveness = OptionalDouble.of(aggressiveness);
     return this;
   }
 

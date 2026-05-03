@@ -105,7 +105,7 @@ public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
        */
       .withClosedLoopController(pidController)
       .withFeedforward(armFeedforward)
-      .withSoftLimit(softLowerLimit, softUpperLimit);
+      .withSoftLimits(softLowerLimit, softUpperLimit);
 
   /// Generic Smart Motor Controller with out options and vendor motor.
   private final SmartMotorController motor    = new SparkWrapper(armMotor, dcMotor, motorConfig);
@@ -122,7 +122,7 @@ public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
       /*
        * Simulation configuration options for the arm.
        */
-      .withHardLimit(hardLowerLimit, hardUpperLimit);
+      .withHardLimits(hardLowerLimit, hardUpperLimit);
   // Arm mechanism
   private final Arm                  arm      = new Arm(m_config);
 
@@ -141,14 +141,14 @@ public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
   }
 
   /**
-   * Reset the encoder to the lowest position when the current threshhold is reached. Should be used when the Arm
-   * position is unreliable, like startup. Threshhold is only detected if exceeded for 0.4 seconds, and the motor moves
+   * Reset the encoder to the lowest position when the current threshold is reached. Should be used when the Arm
+   * position is unreliable, like startup. Threshold is only detected if exceeded for 0.4 seconds, and the motor moves
    * less than 2 degrees per second.
    *
-   * @param threshhold The current threshhold held when the Arm is at it's hard limit.
+   * @param threshold The current threshold held when the Arm is at its hard limit.
    * @return
    */
-  public Command homing(Current threshhold)
+  public Command homing(Current threshold)
   {
     Debouncer       currentDebouncer  = new Debouncer(0.4); // Current threshold is only detected if exceeded for 0.4 seconds.
      Voltage        StopVolts         = Volts.of(0); // Volts to stop the homing routine.
@@ -157,7 +157,7 @@ public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
     AngularVelocity velocityThreshold = DegreesPerSecond.of(2); // The maximum amount of movement for the arm to be considered "hitting the hard limit".
     return Commands.startRun(motor::stopClosedLoopController, // Stop the closed loop controller
                              () -> motor.setVoltage(runVolts)) // Set the voltage of the motor
-                   .until(() -> currentDebouncer.calculate(motor.getStatorCurrent().gte(threshhold) &&
+                   .until(() -> currentDebouncer.calculate(motor.getStatorCurrent().gte(threshold) &&
                                                            motor.getMechanismVelocity().abs(DegreesPerSecond) <=
                                                            velocityThreshold.in(DegreesPerSecond)))
                    .finallyDo(() -> {

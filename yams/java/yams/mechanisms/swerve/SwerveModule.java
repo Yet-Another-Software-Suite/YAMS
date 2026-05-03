@@ -20,7 +20,7 @@ public class SwerveModule
   /**
    * Drive motor controller.
    */
-  protected final SmartMotorController m_dirveMotorController;
+  protected final SmartMotorController m_driveMotorController;
   /**
    * Azimuth motor controller.
    */
@@ -42,7 +42,7 @@ public class SwerveModule
   public SwerveModule(SwerveModuleConfig config)
   {
     m_config = config;
-    m_dirveMotorController = config.getDriveMotor();
+    m_driveMotorController = config.getDriveMotor();
     m_azimuthMotorController = config.getAzimuthMotor();
     if (m_config.getTelemetryName().isEmpty())
     {
@@ -59,7 +59,7 @@ public class SwerveModule
                                                            "External encoder could not be used",
                                                            "withUseExternalFeedbackEncoder(true)");
     }
-    m_telemetry.setupTelemetry("swerve/" + getName() + "/drive", m_dirveMotorController);
+    m_telemetry.setupTelemetry("swerve/" + getName() + "/drive", m_driveMotorController);
     m_telemetry.setupTelemetry("swerve/" + getName() + "/azimuth", m_azimuthMotorController);
     seedAzimuthEncoder();
   }
@@ -104,7 +104,7 @@ public class SwerveModule
   public void setSwerveModuleState(SwerveModuleState state)
   {
     state = m_config.getOptimizedState(state);
-    m_dirveMotorController.setVelocity(MetersPerSecond.of(state.speedMetersPerSecond));
+    m_driveMotorController.setVelocity(MetersPerSecond.of(state.speedMetersPerSecond));
     m_azimuthMotorController.setPosition(state.angle.getMeasure());
   }
 
@@ -115,7 +115,7 @@ public class SwerveModule
    */
   public SwerveModuleState getState()
   {
-    return new SwerveModuleState(m_dirveMotorController.getMeasurementVelocity(),
+    return new SwerveModuleState(m_driveMotorController.getMeasurementVelocity(),
                                  new Rotation2d(m_azimuthMotorController.getMechanismPosition()));
   }
 
@@ -126,7 +126,7 @@ public class SwerveModule
    */
   public SwerveModulePosition getPosition()
   {
-    return new SwerveModulePosition(m_dirveMotorController.getMeasurementPosition(),
+    return new SwerveModulePosition(m_driveMotorController.getMeasurementPosition(),
                                     new Rotation2d(m_azimuthMotorController.getMechanismPosition()));
   }
 
@@ -135,7 +135,7 @@ public class SwerveModule
    */
   public void updateTelemetry()
   {
-    m_dirveMotorController.updateTelemetry();
+    m_driveMotorController.updateTelemetry();
     m_azimuthMotorController.updateTelemetry();
     m_telemetry.updateLoopTime();
   }
@@ -145,7 +145,7 @@ public class SwerveModule
    */
   public void simIterate()
   {
-    m_dirveMotorController.simIterate();
+    m_driveMotorController.simIterate();
     m_azimuthMotorController.simIterate();
   }
 
@@ -166,6 +166,6 @@ public class SwerveModule
    */
   public SmartMotorController getDriveMotorController()
   {
-    return m_dirveMotorController;
+    return m_driveMotorController;
   }
 }

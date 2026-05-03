@@ -117,7 +117,7 @@ public class ArmSubsystem extends SubsystemBase
 
 
   private ArmConfig armCfg = new ArmConfig(intakeSMC)
-      .withHardLimit(Degrees.of(-25), Degrees.of(141))
+      .withHardLimits(Degrees.of(-25), Degrees.of(141))
       .withStartingPosition(Degrees.of(141))
       .withLength(Feet.of((14.0 / 12)))
       .withMOI(intakeConstants.MOI)
