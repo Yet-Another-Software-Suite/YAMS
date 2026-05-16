@@ -33,6 +33,8 @@ import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -95,19 +97,23 @@ public class SwerveDrive
   /**
    * Timer for simulation purposes only. Not used in real robot code.
    */
-  private final Timer              m_simTimer     = new Timer();
+  private final Timer                                   m_simTimer     = new Timer();
   /**
    * The config for the drive.
    */
-  private final SwerveDriveConfig  m_config;
+  private final SwerveDriveConfig                       m_config;
   /**
    * Mechanism telemetry.
    */
-  private final MechanismTelemetry m_telemetry    = new MechanismTelemetry();
+  private final MechanismTelemetry                      m_telemetry    = new MechanismTelemetry();
   /**
    * Simulated Gyro Angle. Used for simulation purposes only. Not used in real robot code.
    */
-  private       Angle              m_simGyroAngle = Rotations.of(0);
+  private       Angle                                   m_simGyroAngle = Rotations.of(0);
+  /**
+   * Field to display the robot's pose.
+   */
+  private       Field2d                                 m_field2d      = new Field2d();
 
   /**
    * Create a SwerveDrive.
@@ -144,7 +150,8 @@ public class SwerveDrive
     m_posePublisher = poseTopic.publish();
     m_desiredModuleStatesPublisher = desiredModuleStatesTopic.publish();
     m_currentModuleStatesPublisher = currentModuleStatesTopic.publish();
-
+    m_field2d.setRobotPose(getPose());
+    SmartDashboard.putData("Mechanisms/"+getName()+"/field", m_field2d);
     // Report as YAGSL bc this will become apart of YAGSL in 2027...
     HAL.report(kResourceType_RobotDrive, kRobotDriveSwerve_YAGSL);
   }
@@ -481,6 +488,7 @@ public class SwerveDrive
     m_fieldRelativeChassisSpeedsPublisher.accept(getFieldRelativeSpeed());
     Arrays.stream(m_modules).forEach(SwerveModule::updateTelemetry);
     m_telemetry.updateLoopTime();
+    m_field2d.setRobotPose(getPose());
   }
 
   /**

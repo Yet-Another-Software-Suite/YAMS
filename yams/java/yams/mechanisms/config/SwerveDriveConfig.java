@@ -621,4 +621,14 @@ public class SwerveDriveConfig
   {
     return subsystem;
   }
+
+  /**
+   * Use an external feedback sensor for the {@link yams.mechanisms.swerve.SwerveModule}s.
+   *
+   * @return External feedback sensor for the {@link yams.mechanisms.swerve.SwerveModule}s.
+   */
+  public boolean useExternalFeedbackSensor()
+  {
+    return true;
+  }
 }
