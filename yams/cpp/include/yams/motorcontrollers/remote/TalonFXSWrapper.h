@@ -69,7 +69,6 @@ class TalonFXSWrapper : public SmartMotorController {
 
   void SetIdleMode(MotorMode mode) override;
   void SetMotorInverted(bool inverted) override;
-  void SetEncoderInverted(bool inverted) override;
   void SetKp(double kP) override;
   void SetKi(double kI) override;
   void SetKd(double kD) override;

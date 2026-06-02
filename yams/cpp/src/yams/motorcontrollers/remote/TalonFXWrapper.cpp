@@ -171,16 +171,6 @@ void TalonFXWrapper::SimIterate() {
   sim.SetSupplyVoltage(frc::sim::RoboRioSim::GetVInVoltage());
 }
 
-// ---- Encoder sync -----------------------------------------------------------
-
-void TalonFXWrapper::SeedRelativeEncoder() {
-  // TalonFX uses an absolute sensor internally; no seeding needed unless external
-}
-
-void TalonFXWrapper::SynchronizeRelativeEncoder() {
-  // TalonFX with CANcoder handles fusion automatically
-}
-
 // ---- Open-loop outputs ------------------------------------------------------
 
 void TalonFXWrapper::SetDutyCycle(double dutyCycle) {
@@ -252,11 +242,6 @@ void TalonFXWrapper::SetEncoderPosition(units::meter_t distance) {
   }
 }
 
-void TalonFXWrapper::SetEncoderVelocity(units::degrees_per_second_t velocity) {
-  // Not directly settable on TalonFX outside simulation
-}
-
-void TalonFXWrapper::SetEncoderVelocity(units::meters_per_second_t velocity) {}
 
 // ---- Encoder reads ----------------------------------------------------------
 

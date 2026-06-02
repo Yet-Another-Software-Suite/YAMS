@@ -127,8 +127,6 @@ void SparkWrapper::SimIterate() {
 void SparkWrapper::SeedRelativeEncoder() {
   if (m_absEncoder) m_relEncoder->SetPosition(m_absEncoder->GetPosition() * 360.0);
 }
-void SparkWrapper::SynchronizeRelativeEncoder() {}
-
 // ---- Open-loop outputs ------------------------------------------------------
 
 void SparkWrapper::SetDutyCycle(double dc) { m_spark->Set(dc); }
@@ -190,8 +188,7 @@ void SparkWrapper::SetEncoderPosition(units::meter_t distance) {
   if (auto circ = m_config.GetMechanismCircumference(); circ)
     SetEncoderPosition(units::degree_t{distance.value() / circ->value() * 360.0});
 }
-void SparkWrapper::SetEncoderVelocity(units::degrees_per_second_t) {}
-void SparkWrapper::SetEncoderVelocity(units::meters_per_second_t) {}
+
 
 // ---- Encoder reads ----------------------------------------------------------
 
@@ -316,7 +313,6 @@ void SparkWrapper::SetFeedback(double kP, double kI, double kD) {
   CommitConfig();
 }
 
-void SparkWrapper::SetKs(double) {}
 void SparkWrapper::SetKv(double kV) {
   auto doConfig = [&](SparkBaseConfig& cfg) { cfg.closedLoop.feedForward.kV(kV); };
   if (m_maxConfig)
@@ -325,8 +321,6 @@ void SparkWrapper::SetKv(double kV) {
     doConfig(*m_flexConfig);
   CommitConfig();
 }
-void SparkWrapper::SetKa(double) {}
-void SparkWrapper::SetKg(double) {}
 void SparkWrapper::SetFeedforward(double, double kV, double, double) { SetKv(kV); }
 
 void SparkWrapper::SetStatorCurrentLimit(units::ampere_t limit) {
@@ -367,13 +361,6 @@ void SparkWrapper::SetOpenLoopRampRate(units::second_t r) {
   CommitConfig();
 }
 
-void SparkWrapper::SetMechanismUpperLimit(units::degree_t) {}
-void SparkWrapper::SetMechanismLowerLimit(units::degree_t) {}
-void SparkWrapper::SetMechanismLimits(units::degree_t, units::degree_t) {}
-void SparkWrapper::SetMechanismLimitsEnabled(bool) {}
-void SparkWrapper::SetMeasurementUpperLimit(units::meter_t) {}
-void SparkWrapper::SetMeasurementLowerLimit(units::meter_t) {}
-
 void SparkWrapper::SetMotionProfileMaxVelocity(units::degrees_per_second_t vel) {
   auto doConfig = [&](SparkBaseConfig& cfg) {
     cfg.closedLoop.maxMotion.CruiseVelocity(vel.value());
@@ -406,13 +393,6 @@ void SparkWrapper::SetMotionProfileMaxAcceleration(units::meters_per_second_squa
     SetMotionProfileMaxAcceleration(
         units::degrees_per_second_squared_t{acc.value() / circ->value() * 360.0});
 }
-
-void SparkWrapper::SetMotionProfileMaxJerk(
-    units::unit_t<units::compound_unit<units::angular_acceleration::degrees_per_second_squared,
-                                       units::inverse<units::seconds>>>) {}
-
-void SparkWrapper::SetExponentialProfile(std::optional<double>, std::optional<double>,
-                                         std::optional<units::volt_t>) {}
 
 void SparkWrapper::SetClosedLoopSlot(ClosedLoopControllerSlot slot) {
   m_slot = slot;

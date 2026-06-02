@@ -50,8 +50,8 @@ class SmartMotorController {
   virtual void SimIterate() = 0;
 
   // ---- Encoder sync -------------------------------------------------------
-  virtual void SeedRelativeEncoder() = 0;
-  virtual void SynchronizeRelativeEncoder() = 0;
+  virtual void SeedRelativeEncoder() {}
+  virtual void SynchronizeRelativeEncoder() {}
 
   // ---- Open-loop outputs --------------------------------------------------
   virtual void SetDutyCycle(double dutyCycle) = 0;
@@ -68,8 +68,8 @@ class SmartMotorController {
   // ---- Encoder writes -----------------------------------------------------
   virtual void SetEncoderPosition(units::degree_t angle) = 0;
   virtual void SetEncoderPosition(units::meter_t distance) = 0;
-  virtual void SetEncoderVelocity(units::degrees_per_second_t velocity) = 0;
-  virtual void SetEncoderVelocity(units::meters_per_second_t velocity) = 0;
+  virtual void SetEncoderVelocity(units::degrees_per_second_t velocity) {}
+  virtual void SetEncoderVelocity(units::meters_per_second_t velocity) {}
 
   // ---- Encoder reads ------------------------------------------------------
   virtual units::degree_t GetMechanismPosition() = 0;
@@ -93,26 +93,26 @@ class SmartMotorController {
   // ---- Configuration setters (live tuning) --------------------------------
   virtual void SetIdleMode(MotorMode mode) = 0;
   virtual void SetMotorInverted(bool inverted) = 0;
-  virtual void SetEncoderInverted(bool inverted) = 0;
+  virtual void SetEncoderInverted(bool inverted) {}
   virtual void SetKp(double kP) = 0;
   virtual void SetKi(double kI) = 0;
   virtual void SetKd(double kD) = 0;
   virtual void SetFeedback(double kP, double kI, double kD) = 0;
-  virtual void SetKs(double kS) = 0;
+  virtual void SetKs(double kS) {}
   virtual void SetKv(double kV) = 0;
-  virtual void SetKa(double kA) = 0;
-  virtual void SetKg(double kG) = 0;
+  virtual void SetKa(double kA) {}
+  virtual void SetKg(double kG) {}
   virtual void SetFeedforward(double kS, double kV, double kA, double kG) = 0;
   virtual void SetStatorCurrentLimit(units::ampere_t currentLimit) = 0;
   virtual void SetSupplyCurrentLimit(units::ampere_t currentLimit) = 0;
   virtual void SetClosedLoopRampRate(units::second_t rampRate) = 0;
   virtual void SetOpenLoopRampRate(units::second_t rampRate) = 0;
-  virtual void SetMechanismUpperLimit(units::degree_t upperLimit) = 0;
-  virtual void SetMechanismLowerLimit(units::degree_t lowerLimit) = 0;
-  virtual void SetMechanismLimits(units::degree_t lower, units::degree_t upper) = 0;
-  virtual void SetMechanismLimitsEnabled(bool enabled) = 0;
-  virtual void SetMeasurementUpperLimit(units::meter_t upperLimit) = 0;
-  virtual void SetMeasurementLowerLimit(units::meter_t lowerLimit) = 0;
+  virtual void SetMechanismUpperLimit(units::degree_t upperLimit) {}
+  virtual void SetMechanismLowerLimit(units::degree_t lowerLimit) {}
+  virtual void SetMechanismLimits(units::degree_t lower, units::degree_t upper) {}
+  virtual void SetMechanismLimitsEnabled(bool enabled) {}
+  virtual void SetMeasurementUpperLimit(units::meter_t upperLimit) {}
+  virtual void SetMeasurementLowerLimit(units::meter_t lowerLimit) {}
   virtual void SetMotionProfileMaxVelocity(units::degrees_per_second_t maxVelocity) = 0;
   virtual void SetMotionProfileMaxVelocity(units::meters_per_second_t maxVelocity) = 0;
   virtual void SetMotionProfileMaxAcceleration(units::degrees_per_second_squared_t maxAcc) = 0;
@@ -120,9 +120,9 @@ class SmartMotorController {
   virtual void SetMotionProfileMaxJerk(
       units::unit_t<units::compound_unit<units::angular_acceleration::degrees_per_second_squared,
                                          units::inverse<units::seconds>>>
-          maxJerk) = 0;
+          maxJerk) {}
   virtual void SetExponentialProfile(std::optional<double> kV, std::optional<double> kA,
-                                     std::optional<units::volt_t> maxInput) = 0;
+                                     std::optional<units::volt_t> maxInput) {}
   virtual void SetClosedLoopSlot(ClosedLoopControllerSlot slot) = 0;
 
   // ---- Closed-loop controller thread --------------------------------------

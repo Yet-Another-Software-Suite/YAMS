@@ -3,7 +3,7 @@
 
 > A flexible, extensible FRC mechanism library built for elevators, arms, turrets, and more — with simulation and telemetry included.
 
-**YAMS** is a WPILib-compatible library that provides a **unified and extensible interface** for common FRC mechanisms like **elevators**, **arms**, and **pivots** (e.g., turrets). It emphasizes clean separation of control, simulation, and configuration, while offering first-class support for **telemetry**, **feedforward**, and **tuning**.
+**YAMS** is a WPILib-compatible library that provides a **unified and extensible interface** for common FRC mechanisms like **elevators**, **arms**, and **pivots** (e.g., turrets). It supports both **Java and native C++** development, and emphasizes clean separation of control, simulation, and configuration while offering first-class support for **telemetry**, **feedforward**, and **tuning**.
 
 ---
 
@@ -20,6 +20,7 @@
 - Unified interfaces for `Arm`, `Elevator`, and `Pivot` mechanisms  
 -  CTRE-style configuration: familiar and readable  
 - SmartMotorController abstraction: consistent API for different motor vendors (REV, CTRE, etc.)  
+- Native C++ port for WPILib 2026  
 - Physics-based simulation support (`simIterate()`)  
 - Built-in telemetry (works with AdvantageKit, NT, and custom logging)  
 - Composable and declarative configuration style  
@@ -37,12 +38,14 @@
      `https://yet-another-software-suite.github.io/YAMS/yams.json`
    - Press Enter to install
 
+   > The native C++ port is available in `yams/cpp`. The vendordep build already includes the C++ source and headers from `vendordep/build.gradle`.
+
 ---
 
 
 ## Examples
 
-The repository contains several example projects under the `/examples` folder demonstrating how to use YAMS for arms, elevators, pivots, and combined subsystems.
+The repository contains several example projects under the `/examples` folder demonstrating how to use YAMS for arms, elevators, pivots, and combined subsystems. It also includes the native C++ port source tree under `/yams/cpp`.
 
 These example projects do **not** include YAMS as a dependency via Maven or vendordep directly. Instead, they use a modified `build.gradle` that links the YAMS source code located in the `/yams` folder relative to the example.
 
@@ -101,6 +104,21 @@ public class ArmSubsystem extends SubsystemBase {
     return arm.setAngle(angle);
   }
 }
+```
+
+## Quick C++ Example
+
+A native C++ port is available under `/yams/cpp`. Include the port header in your C++ WPILib project and configure your mechanism using the same core YAMS abstractions.
+
+```cpp
+#include <yams/YAMS.h>
+
+using namespace yams;
+using namespace yams::motorcontrollers;
+using namespace yams::mechanisms::positional;
+
+// Create motor wrapper and config, then build a native Arm mechanism.
+// See `yams/cpp/include` and `vendordep/build.gradle` for the compiled C++ port.
 ```
 
 More detailed examples for **Elevator** and **Pivot** mechanisms can be found in the `/examples` folder (or your team’s repo if it includes all three like above).

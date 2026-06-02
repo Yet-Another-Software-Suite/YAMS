@@ -38,7 +38,6 @@ class TalonFXWrapper : public SmartMotorController {
 
   // ---- Encoder sync -------------------------------------------------------
   void SeedRelativeEncoder() override;
-  void SynchronizeRelativeEncoder() override;
 
   // ---- Open-loop outputs --------------------------------------------------
   void SetDutyCycle(double dutyCycle) override;
@@ -55,8 +54,6 @@ class TalonFXWrapper : public SmartMotorController {
   // ---- Encoder writes -----------------------------------------------------
   void SetEncoderPosition(units::degree_t angle) override;
   void SetEncoderPosition(units::meter_t distance) override;
-  void SetEncoderVelocity(units::degrees_per_second_t velocity) override;
-  void SetEncoderVelocity(units::meters_per_second_t velocity) override;
 
   // ---- Encoder reads ------------------------------------------------------
   units::degree_t GetMechanismPosition() override;
@@ -80,7 +77,6 @@ class TalonFXWrapper : public SmartMotorController {
   // ---- Configuration setters (live tuning) --------------------------------
   void SetIdleMode(MotorMode mode) override;
   void SetMotorInverted(bool inverted) override;
-  void SetEncoderInverted(bool inverted) override;
   void SetKp(double kP) override;
   void SetKi(double kI) override;
   void SetKd(double kD) override;

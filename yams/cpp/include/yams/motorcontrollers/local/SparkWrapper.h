@@ -37,7 +37,6 @@ class SparkWrapper : public SmartMotorController {
 
   // ---- Encoder sync -------------------------------------------------------
   void SeedRelativeEncoder() override;
-  void SynchronizeRelativeEncoder() override;
 
   // ---- Open-loop outputs --------------------------------------------------
   void SetDutyCycle(double dutyCycle) override;
@@ -84,31 +83,16 @@ class SparkWrapper : public SmartMotorController {
   void SetKi(double kI) override;
   void SetKd(double kD) override;
   void SetFeedback(double kP, double kI, double kD) override;
-  void SetKs(double kS) override;
   void SetKv(double kV) override;
-  void SetKa(double kA) override;
-  void SetKg(double kG) override;
   void SetFeedforward(double kS, double kV, double kA, double kG) override;
   void SetStatorCurrentLimit(units::ampere_t currentLimit) override;
   void SetSupplyCurrentLimit(units::ampere_t currentLimit) override;
   void SetClosedLoopRampRate(units::second_t rampRate) override;
   void SetOpenLoopRampRate(units::second_t rampRate) override;
-  void SetMechanismUpperLimit(units::degree_t upperLimit) override;
-  void SetMechanismLowerLimit(units::degree_t lowerLimit) override;
-  void SetMechanismLimits(units::degree_t lower, units::degree_t upper) override;
-  void SetMechanismLimitsEnabled(bool enabled) override;
-  void SetMeasurementUpperLimit(units::meter_t upperLimit) override;
-  void SetMeasurementLowerLimit(units::meter_t lowerLimit) override;
   void SetMotionProfileMaxVelocity(units::degrees_per_second_t maxVelocity) override;
   void SetMotionProfileMaxVelocity(units::meters_per_second_t maxVelocity) override;
   void SetMotionProfileMaxAcceleration(units::degrees_per_second_squared_t maxAcc) override;
   void SetMotionProfileMaxAcceleration(units::meters_per_second_squared_t maxAcc) override;
-  void SetMotionProfileMaxJerk(
-      units::unit_t<units::compound_unit<units::angular_acceleration::degrees_per_second_squared,
-                                         units::inverse<units::seconds>>>
-          maxJerk) override;
-  void SetExponentialProfile(std::optional<double> kV, std::optional<double> kA,
-                             std::optional<units::volt_t> maxInput) override;
   void SetClosedLoopSlot(ClosedLoopControllerSlot slot) override;
 
   SmartMotorControllerConfig& GetConfig() override;
