@@ -20,7 +20,7 @@ public class DerivativeTimeFilter
   /**
    * Last FPGA time in microseconds
    */
-  private long   lastFpgaTime_ms;
+  private long   lastFpgaTime_us;
   /**
    * Current derivation value within the loop period.
    */
@@ -44,7 +44,7 @@ public class DerivativeTimeFilter
   public DerivativeTimeFilter(double initial, Time debouncerPeriod)
   {
     last = initial;
-    lastFpgaTime_ms = RobotController.getFPGATime();
+    lastFpgaTime_us = RobotController.getFPGATime();
     debouncer = new Timer();
     this.debouncePeriod = debouncerPeriod;
     debouncer.start();
@@ -58,7 +58,7 @@ public class DerivativeTimeFilter
   public DerivativeTimeFilter(Time debouncerPeriod)
   {
     last = 0;
-    lastFpgaTime_ms = 0;
+    lastFpgaTime_us = 0;
     debouncer = new Timer();
     this.debouncePeriod = debouncerPeriod;
     debouncer.start();
@@ -95,9 +95,9 @@ public class DerivativeTimeFilter
   {
     if (debouncer.hasElapsed(debouncePeriod))
     {
-      long   currentFpgaTime_ms = RobotController.getFPGATime();
-      double derivative         = derivative(current, Microseconds.of(currentFpgaTime_ms - lastFpgaTime_ms));
-      lastFpgaTime_ms = currentFpgaTime_ms;
+      long   currentFpgaTime_us = RobotController.getFPGATime();
+      double derivative         = derivative(current, Microseconds.of(currentFpgaTime_us - lastFpgaTime_us));
+      lastFpgaTime_us = currentFpgaTime_us;
       return derivative;
     }
 
