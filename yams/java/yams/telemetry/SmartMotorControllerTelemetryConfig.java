@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.telemetry;
 
 import static edu.wpi.first.units.Units.Degrees;
@@ -23,7 +26,6 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  */
 public class SmartMotorControllerTelemetryConfig
 {
-
   /**
    * DataLog entry name
    */

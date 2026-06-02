@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.motorcontrollers.remote;
 
 import static edu.wpi.first.units.Units.Meters;
@@ -94,7 +97,6 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  */
 public class TalonFXWrapper extends SmartMotorController
 {
-
   /**
    * {@link TalonFX} motor controller
    */
@@ -353,7 +355,6 @@ public class TalonFXWrapper extends SmartMotorController
   @Override
   public void seedRelativeEncoder()
   {
-
   }
 
   @Override

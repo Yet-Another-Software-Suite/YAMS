@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.motorcontrollers;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -14,7 +17,6 @@ import java.util.Map;
  */
 public class SmartMotorControllerCommandRegistry
 {
-
   /**
    * HashMap with the Subsystem name as the key and the shared command which runs all runnables added to the subsystem.
    */

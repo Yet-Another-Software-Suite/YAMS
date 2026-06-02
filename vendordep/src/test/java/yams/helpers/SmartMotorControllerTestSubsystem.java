@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.helpers;
 
 import edu.wpi.first.units.measure.Angle;
@@ -8,7 +11,6 @@ import yams.motorcontrollers.SmartMotorController;
 
 public class SmartMotorControllerTestSubsystem extends SubsystemBase
 {
-
   public SmartMotorController smc;
   public Runnable             mechSimPeriodic     = null;
   public Runnable             mechUpdateTelemetry = null;

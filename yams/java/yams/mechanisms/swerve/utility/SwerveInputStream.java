@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechanisms.swerve.utility;
 
 import static edu.wpi.first.units.Units.Centimeters;
@@ -58,7 +61,6 @@ import yams.mechanisms.swerve.SwerveDrive;
  */
 public class SwerveInputStream implements Supplier<ChassisSpeeds>
 {
-
   /**
    * Translation suppliers.
    */
@@ -68,7 +70,7 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds>
    */
   private final DoubleSupplier                  controllerTranslationY;
   /**
-   * {@link yams.mechanisms.swerve.SwerveDrive} object for transformations.
+   * {@link SwerveDrive} object for transformations.
    */
   private final SwerveDrive                     swerveDrive;
   /**

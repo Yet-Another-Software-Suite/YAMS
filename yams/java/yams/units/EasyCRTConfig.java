@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.units;
 
 import static edu.wpi.first.units.Units.Rotations;
@@ -16,7 +19,6 @@ import yams.gearing.MechanismGearing;
  * Configuration for the EasyCRT solver. Made by team 6911.
  */
 public class EasyCRTConfig {
-
   /**
    * Supplies the absolute angle measurement for encoder 1.
    */
@@ -198,7 +200,6 @@ public class EasyCRTConfig {
       int driveGearTeeth,
       int absoluteEncoder1PinionTeeth,
       int absoluteEncoder2PinionTeeth) {
-
     requireNonZeroFinite(commonRatio, "commonRatio");
     requirePositiveTeeth(driveGearTeeth, "EncoderDriveGearTeeth");
     requirePositiveTeeth(absoluteEncoder1PinionTeeth, "Encoder1GearTeeth");

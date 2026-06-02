@@ -49,36 +49,36 @@ ext.addTaskToCopyAllOutputs = { task ->
 def artifactGroupId = 'yams'
 def baseArtifactId = 'YAMS'
 //def driverZipBaseName = "_GROUP_com_vendor_frc_ID_${baseArtifactId}-driver_CLS"
-//def zipBaseName = "_GROUP_com_vendor_frc_ID_${baseArtifactId}-cpp_CLS"
+def zipBaseName = "_GROUP_yam_ID_${baseArtifactId}-cpp_CLS"
 def javaBaseName = "_GROUP_yams_ID_${baseArtifactId}-java_CLS"
 
-//task cppHeadersZip(type: Zip) {
-//    destinationDirectory = outputsFolder
-//    archiveBaseName = zipBaseName
-//    archiveClassifier = "headers"
-//
-//    from(licenseFile) {
-//        into '/'
-//    }
-//
-//    from('src/main/native/include') {
-//        into '/'
-//    }
-//}
-//
-//task cppSourceZip(type: Zip) {
-//    destinationDirectory = outputsFolder
-//    archiveBaseName = zipBaseName
-//    archiveClassifier = "sources"
-//
-//    from(licenseFile) {
-//        into '/'
-//    }
-//
-//    from('src/main/native/cpp') {
-//        into '/'
-//    }
-//}
+task cppHeadersZip(type: Zip) {
+    destinationDirectory = outputsFolder
+    archiveBaseName = zipBaseName
+    archiveClassifier = "headers"
+
+    from(licenseFile) {
+        into '/'
+    }
+
+    from('src/main/native/include') {
+        into '/'
+    }
+}
+
+task cppSourceZip(type: Zip) {
+    destinationDirectory = outputsFolder
+    archiveBaseName = zipBaseName
+    archiveClassifier = "sources"
+
+    from(licenseFile) {
+        into '/'
+    }
+
+    from('src/main/native/cpp') {
+        into '/'
+    }
+}
 //
 //task cppDriverHeadersZip(type: Zip) {
 //    destinationDirectory = outputsFolder
@@ -94,10 +94,10 @@ def javaBaseName = "_GROUP_yams_ID_${baseArtifactId}-java_CLS"
 //    }
 //}
 
-//build.dependsOn cppHeadersZip
-//addTaskToCopyAllOutputs(cppHeadersZip)
-//build.dependsOn cppSourceZip
-//addTaskToCopyAllOutputs(cppSourceZip)
+build.dependsOn cppHeadersZip
+addTaskToCopyAllOutputs(cppHeadersZip)
+build.dependsOn cppSourceZip
+addTaskToCopyAllOutputs(cppSourceZip)
 //build.dependsOn cppDriverHeadersZip
 //addTaskToCopyAllOutputs(cppDriverHeadersZip)
 
@@ -197,22 +197,22 @@ publishing {
 
 model {
     publishing {
-//        def taskList = createComponentZipTasks($.components, ['Vendor'], zipBaseName, Zip, project, includeStandardZipFormat)
+        def taskList = createComponentZipTasks($.components, ['Vendor'], zipBaseName, Zip, project, includeStandardZipFormat)
 //
 //        def driverTaskList = createComponentZipTasks($.components, ['VendorDriver'], driverZipBaseName, Zip, project, includeStandardZipFormat)
 //
         publications {
-//            cpp(MavenPublication) {
-//                taskList.each {
-//                    artifact it
-//                }
-//                artifact cppHeadersZip
-//                artifact cppSourceZip
-//
-//                artifactId = "${baseArtifactId}-cpp"
-//                groupId artifactGroupId
-//                version pubVersion
-//            }
+            cpp(MavenPublication) {
+                taskList.each {
+                    artifact it
+                }
+                artifact cppHeadersZip
+                artifact cppSourceZip
+
+                artifactId = "${baseArtifactId}-cpp"
+                groupId artifactGroupId
+                version pubVersion
+            }
 //            driver(MavenPublication) {
 //                driverTaskList.each {
 //                    artifact it

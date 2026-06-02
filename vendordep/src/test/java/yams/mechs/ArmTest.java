@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechs;
 
 import static edu.wpi.first.units.Units.Amps;
@@ -55,10 +58,8 @@ import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class ArmTest
 {
-
   private static SmartMotorControllerConfig createPIDSMCConfig()
   {
-
     return new SmartMotorControllerConfig()
         .withClosedLoopController(5, 0, 0)
         .withSoftLimits(Degrees.of(-100), Degrees.of(100))

@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechanisms.positional;
 
 import static edu.wpi.first.units.Units.Degrees;
@@ -39,7 +42,6 @@ import yams.motorcontrollers.simulation.ArmSimSupplier;
  */
 public class DoubleJointedArm extends SmartPositionalMechanism
 {
-
   /**
    * Upper arm {@link SmartMotorController}
    */
@@ -151,7 +153,6 @@ public class DoubleJointedArm extends SmartPositionalMechanism
 
     if (RobotBase.isSimulation())
     {
-
       if (lowerConfig.getLowerHardLimit().isEmpty() || upperConfig.getLowerHardLimit().isEmpty())
       {
         throw new DoubleJointedArmConfigurationException("Arm lower hard limit is empty",

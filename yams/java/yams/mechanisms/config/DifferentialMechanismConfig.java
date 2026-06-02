@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechanisms.config;
 
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
@@ -17,6 +20,7 @@ import java.util.function.Supplier;
 import yams.exceptions.DifferentialMechanismConfigurationException;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
+import yams.mechanisms.positional.Pivot;
 import yams.mechanisms.config.MechanismPositionConfig.Plane;
 import yams.mechanisms.positional.DifferentialMechanism;
 import yams.motorcontrollers.SmartMotorController;
@@ -28,7 +32,6 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  */
 public class DifferentialMechanismConfig
 {
-
   /**
    * {@link SmartMotorController} for the {@link DifferentialMechanism}
    */
@@ -293,7 +296,7 @@ public class DifferentialMechanismConfig
   }
 
   /**
-   * Configure telemetry for the {@link yams.mechanisms.positional.Pivot} mechanism.
+   * Configure telemetry for the {@link Pivot} mechanism.
    *
    * @param telemetryName      Telemetry NetworkTable name to appear under "SmartDashboard/"
    * @param telemetryVerbosity Telemetry verbosity to apply.
@@ -416,9 +419,9 @@ public class DifferentialMechanismConfig
 
 
   /**
-   * Get the telemetry verbosity of the {@link yams.mechanisms.positional.Pivot}
+   * Get the telemetry verbosity of the {@link Pivot}
    *
-   * @return {@link TelemetryVerbosity} of the {@link yams.mechanisms.positional.Pivot}
+   * @return {@link TelemetryVerbosity} of the {@link Pivot}
    */
   public Optional<TelemetryVerbosity> getTelemetryVerbosity()
   {
@@ -426,7 +429,7 @@ public class DifferentialMechanismConfig
   }
 
   /**
-   * Network Tables name for the {@link yams.mechanisms.positional.Pivot}
+   * Network Tables name for the {@link Pivot}
    *
    * @return Network Tables name.
    */

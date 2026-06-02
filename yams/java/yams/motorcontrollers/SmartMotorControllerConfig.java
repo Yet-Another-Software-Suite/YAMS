@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.motorcontrollers;
 
 import static edu.wpi.first.hal.FRCNetComm.tResourceType.kResourceType_YAMS;
@@ -66,7 +69,6 @@ import yams.telemetry.SmartMotorControllerTelemetryConfig;
  */
 public class SmartMotorControllerConfig
 {
-
   /**
    * Reset old configurations, so they are no longer persistent.
    */

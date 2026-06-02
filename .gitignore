@@ -3,6 +3,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/java,gradle,intellij+all,visualstudiocode,eclipse,netbeans,linux,macos,windows
 # Edit at https://www.toptal.com/developers/gitignore?templates=java,gradle,intellij+all,visualstudiocode,eclipse,netbeans,linux,macos,windows
 
+.claude
+
 ### Eclipse ###
 .metadata
 bin/

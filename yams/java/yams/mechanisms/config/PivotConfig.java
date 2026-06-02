@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechanisms.config;
 
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
@@ -16,6 +19,8 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import yams.exceptions.PivotConfigurationException;
 import yams.mechanisms.config.MechanismPositionConfig.Plane;
+import yams.mechanisms.positional.Elevator;
+import yams.mechanisms.positional.Pivot;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
@@ -25,9 +30,8 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  */
 public class PivotConfig
 {
-
   /**
-   * {@link SmartMotorController} for the {@link yams.mechanisms.positional.Pivot}
+   * {@link SmartMotorController} for the {@link Pivot}
    */
   private   Optional<SmartMotorController> motor;
   /**
@@ -44,15 +48,15 @@ public class PivotConfig
    */
   private   Optional<TelemetryVerbosity>   telemetryVerbosity      = Optional.empty();
   /**
-   * Lower Hard Limit for the {@link yams.mechanisms.positional.Pivot} to be representing in simulation.
+   * Lower Hard Limit for the {@link Pivot} to be representing in simulation.
    */
   private   Optional<Angle>                lowerHardLimit          = Optional.empty();
   /**
-   * Upper hard limit for the {@link yams.mechanisms.positional.Pivot} representing in simulation.
+   * Upper hard limit for the {@link Pivot} representing in simulation.
    */
   private   Optional<Angle>                upperHardLimit          = Optional.empty();
   /**
-   * {@link yams.mechanisms.positional.Pivot} MOI from CAD software. If not given estimated with length and weight.
+   * {@link Pivot} MOI from CAD software. If not given estimated with length and weight.
    */
   private   OptionalDouble                 moi                     = OptionalDouble.empty();
   /**
@@ -60,7 +64,7 @@ public class PivotConfig
    */
   private   Color8Bit                      simColor                = new Color8Bit(Color.kOrange);
   /**
-   * Mechanism position configuration for the {@link yams.mechanisms.positional.Pivot}
+   * Mechanism position configuration for the {@link Pivot}
    */
   private   MechanismPositionConfig        mechanismPositionConfig = new MechanismPositionConfig();
   /**
@@ -83,7 +87,7 @@ public class PivotConfig
   /**
    * Pivot Configuration class
    *
-   * @param motorController Primary {@link SmartMotorController} for the {@link yams.mechanisms.positional.Pivot}
+   * @param motorController Primary {@link SmartMotorController} for the {@link Pivot}
    */
   public PivotConfig(SmartMotorController motorController)
   {
@@ -142,9 +146,9 @@ public class PivotConfig
   }
 
   /**
-   * Configure the {@link SmartMotorController} for the {@link yams.mechanisms.positional.Pivot}
+   * Configure the {@link SmartMotorController} for the {@link Pivot}
    *
-   * @param motorController {@link SmartMotorController} for the {@link yams.mechanisms.positional.Pivot}.
+   * @param motorController {@link SmartMotorController} for the {@link Pivot}.
    * @return {@link PivotConfig} for chaining.
    */
   public PivotConfig withSmartMotorController(SmartMotorController motorController)
@@ -177,9 +181,9 @@ public class PivotConfig
 
   /**
    * Configure the MOI directly instead of estimating it with the length and mass of the
-   * {@link yams.mechanisms.positional.Pivot} for simulation.
+   * {@link Pivot} for simulation.
    *
-   * @param MOI Moment of Inertia of the {@link yams.mechanisms.positional.Pivot}. in
+   * @param MOI Moment of Inertia of the {@link Pivot}. in
    *            {@link edu.wpi.first.units.Units#KilogramSquareMeters}
    * @return {@link PivotConfig} for chaining.
    * @implNote Please use {@link #withMOI(MomentOfInertia)} instead. Default unit is KilogramSquareMeters
@@ -194,9 +198,9 @@ public class PivotConfig
 
   /**
    * Configure the MOI directly instead of estimating it with the length and mass of the
-   * {@link yams.mechanisms.positional.Pivot} for simulation.
+   * {@link Pivot} for simulation.
    *
-   * @param MOI Moment of Inertia of the {@link yams.mechanisms.positional.Pivot}
+   * @param MOI Moment of Inertia of the {@link Pivot}
    * @return {@link PivotConfig} for chaining.
    */
   public PivotConfig withMOI(MomentOfInertia MOI)
@@ -208,10 +212,10 @@ public class PivotConfig
 
   /**
    * Configure the MOI directly instead of estimating it with the length and mass of the
-   * {@link yams.mechanisms.positional.Pivot} for simulation.
+   * {@link Pivot} for simulation.
    *
-   * @param length Length of the {@link yams.mechanisms.positional.Pivot}.
-   * @param weight Weight of the {@link yams.mechanisms.positional.Pivot}
+   * @param length Length of the {@link Pivot}.
+   * @param weight Weight of the {@link Pivot}
    * @return {@link PivotConfig} for chaining.
    */
   public PivotConfig withMOI(Distance length, Mass weight)
@@ -222,7 +226,7 @@ public class PivotConfig
   }
 
   /**
-   * Configure telemetry for the {@link yams.mechanisms.positional.Pivot} mechanism.
+   * Configure telemetry for the {@link Pivot} mechanism.
    *
    * @param telemetryName      Telemetry NetworkTable name to appear under "SmartDashboard/"
    * @param telemetryVerbosity Telemetry verbosity to apply.
@@ -236,7 +240,7 @@ public class PivotConfig
   }
 
   /**
-   * Configure telemetry for the {@link yams.mechanisms.positional.Pivot} mechanism.
+   * Configure telemetry for the {@link Pivot} mechanism.
    *
    * @param telemetryName      Telemetry NetworkTable name to appear under "SmartDashboard/"
    * @param telemetryVerbosity Telemetry verbosity to apply.
@@ -255,7 +259,7 @@ public class PivotConfig
   /**
    * Set the elevator mechanism position configuration.
    *
-   * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link yams.mechanisms.positional.Elevator}
+   * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link Elevator}
    * @return {@link PivotConfig} for chaining
    */
   public PivotConfig withMechanismPositionConfig(MechanismPositionConfig mechanismPositionConfig)
@@ -332,7 +336,7 @@ public class PivotConfig
 
 
   /**
-   * Get the moment of inertia for the {@link yams.mechanisms.positional.Pivot} simulation.
+   * Get the moment of inertia for the {@link Pivot} simulation.
    *
    * @return Moment of Inertia.
    */
@@ -348,7 +352,7 @@ public class PivotConfig
   }
 
   /**
-   * Get the Upper hard limit of the {@link yams.mechanisms.positional.Pivot}.
+   * Get the Upper hard limit of the {@link Pivot}.
    *
    * @return {@link Angle} hard limit.
    */
@@ -358,7 +362,7 @@ public class PivotConfig
   }
 
   /**
-   * Get the lower hard limit of the {@link yams.mechanisms.positional.Pivot}
+   * Get the lower hard limit of the {@link Pivot}
    *
    * @return {@link Angle} hard limit.
    */
@@ -368,9 +372,9 @@ public class PivotConfig
   }
 
   /**
-   * Get the telemetry verbosity of the {@link yams.mechanisms.positional.Pivot}
+   * Get the telemetry verbosity of the {@link Pivot}
    *
-   * @return {@link TelemetryVerbosity} of the {@link yams.mechanisms.positional.Pivot}
+   * @return {@link TelemetryVerbosity} of the {@link Pivot}
    */
   public Optional<TelemetryVerbosity> getTelemetryVerbosity()
   {
@@ -378,7 +382,7 @@ public class PivotConfig
   }
 
   /**
-   * Network Tables name for the {@link yams.mechanisms.positional.Pivot}
+   * Network Tables name for the {@link Pivot}
    *
    * @return Network Tables name.
    */
@@ -388,9 +392,9 @@ public class PivotConfig
   }
 
   /**
-   * Get the starting angle of the {@link yams.mechanisms.positional.Pivot}
+   * Get the starting angle of the {@link Pivot}
    *
-   * @return {@link Angle} of the {@link yams.mechanisms.positional.Pivot}
+   * @return {@link Angle} of the {@link Pivot}
    */
   public Optional<Angle> getStartingAngle()
   {
@@ -398,9 +402,9 @@ public class PivotConfig
   }
 
   /**
-   * Get the {@link SmartMotorController} of the {@link yams.mechanisms.positional.Pivot}
+   * Get the {@link SmartMotorController} of the {@link Pivot}
    *
-   * @return {@link SmartMotorController} for the {@link yams.mechanisms.positional.Pivot}
+   * @return {@link SmartMotorController} for the {@link Pivot}
    */
   public SmartMotorController getMotor()
   {

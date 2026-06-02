@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.motorcontrollers.simulation;
 
 import static edu.wpi.first.units.Units.Amps;
@@ -26,7 +29,6 @@ import yams.motorcontrollers.SmartMotorController;
  */
 public class DCMotorSimSupplier implements SimSupplier
 {
-
   private boolean          inputFed   = false;
   private       boolean          simUpdated = false;
   private final Supplier<Double> motorDutyCycleSupplier;
@@ -68,7 +70,6 @@ public class DCMotorSimSupplier implements SimSupplier
         //Thread.sleep(1);
       } catch (Exception e)
       {
-
       }
       feedUpdateSim();
     }

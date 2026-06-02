@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.math;
 
 import static edu.wpi.first.units.Units.Microseconds;
@@ -12,7 +15,6 @@ import edu.wpi.first.wpilibj.Timer;
  */
 public class DerivativeTimeFilter
 {
-
   /**
    * Last value to derive from.
    */

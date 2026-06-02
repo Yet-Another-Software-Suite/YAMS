@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechanisms;
 
 import edu.wpi.first.math.geometry.Translation3d;
@@ -23,7 +26,6 @@ import yams.telemetry.MechanismTelemetry;
  */
 public abstract class SmartMechanism
 {
-
   /**
    * Subsystem for the Mechanism.
    */
@@ -123,7 +125,7 @@ public abstract class SmartMechanism
   }
 
   /**
-   * Set the DutyCycle of the {@link yams.motorcontrollers.SmartMotorController}.
+   * Set the DutyCycle of the {@link SmartMotorController}.
    *
    * @param dutycycle [-1,1] to set.
    * @return {@link Command}
@@ -136,7 +138,7 @@ public abstract class SmartMechanism
   }
 
   /**
-   * Set the DutyCycle of the {@link yams.motorcontrollers.SmartMotorController}.
+   * Set the DutyCycle of the {@link SmartMotorController}.
    *
    * @param dutycycle [-1,1] to set via an {@link Supplier}.
    * @return {@link Command}
@@ -150,9 +152,9 @@ public abstract class SmartMechanism
   }
 
   /**
-   * Set the voltage of the {@link yams.motorcontrollers.SmartMotorController}.
+   * Set the voltage of the {@link SmartMotorController}.
    *
-   * @param volts {@link Voltage} of the {@link yams.motorcontrollers.SmartMotorController} to set.
+   * @param volts {@link Voltage} of the {@link SmartMotorController} to set.
    * @return {@link Command}
    */
   public Command setVoltage(Voltage volts)
@@ -163,9 +165,9 @@ public abstract class SmartMechanism
   }
 
   /**
-   * Set the voltage of the {@link yams.motorcontrollers.SmartMotorController}.
+   * Set the voltage of the {@link SmartMotorController}.
    *
-   * @param volts {@link Voltage} of the {@link yams.motorcontrollers.SmartMotorController} to set, via a
+   * @param volts {@link Voltage} of the {@link SmartMotorController} to set, via a
    *              {@link Supplier}.
    * @return {@link Command}
    */

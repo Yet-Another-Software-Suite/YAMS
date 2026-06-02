@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.motorcontrollers.local;
 
 import static edu.wpi.first.units.Units.Amps;
@@ -82,7 +85,6 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  */
 public class SparkWrapper extends SmartMotorController
 {
-
   /**
    * Spark motor controller
    */
@@ -1363,7 +1365,7 @@ public class SparkWrapper extends SmartMotorController
   /**
    * Convert generic slot into spark specific slot.
    *
-   * @param slot {@link yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot} to convert
+   * @param slot {@link ClosedLoopControllerSlot} to convert
    * @return spark specific slot {@link ClosedLoopSlot}
    */
   private ClosedLoopSlot getSparkClosedLoopSlot(ClosedLoopControllerSlot slot)

@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechanisms.config;
 
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
@@ -15,6 +18,9 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import yams.exceptions.ArmConfigurationException;
+import yams.mechanisms.positional.Arm;
+import yams.mechanisms.positional.Elevator;
+import yams.mechanisms.positional.Pivot;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
@@ -24,9 +30,8 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  */
 public class ArmConfig
 {
-
   /**
-   * {@link SmartMotorController} for the {@link yams.mechanisms.positional.Arm}
+   * {@link SmartMotorController} for the {@link Arm}
    */
   private Optional<SmartMotorController> motor               = Optional.empty();
   /**
@@ -42,23 +47,23 @@ public class ArmConfig
    */
   private   Optional<TelemetryVerbosity>   telemetryVerbosity      = Optional.empty();
   /**
-   * Lower Hard Limit for the {@link yams.mechanisms.positional.Arm} to be representing in simulation.
+   * Lower Hard Limit for the {@link Arm} to be representing in simulation.
    */
   private   Optional<Angle>                lowerHardLimit          = Optional.empty();
   /**
-   * Upper hard limit for the {@link yams.mechanisms.positional.Arm} representing in simulation.
+   * Upper hard limit for the {@link Arm} representing in simulation.
    */
   private   Optional<Angle>                upperHardLimit          = Optional.empty();
   /**
-   * {@link yams.mechanisms.positional.Arm} length for simulation.
+   * {@link Arm} length for simulation.
    */
   private   Optional<Distance>             length                  = Optional.empty();
   /**
-   * {@link yams.mechanisms.positional.Arm} mass for simulation.
+   * {@link Arm} mass for simulation.
    */
   private   Optional<Mass>                 weight                  = Optional.empty();
   /**
-   * {@link yams.mechanisms.positional.Arm} MOI from CAD software. If not given estimated with length and weight.
+   * {@link Arm} MOI from CAD software. If not given estimated with length and weight.
    */
   private   OptionalDouble                 moi                     = OptionalDouble.empty();
   /**
@@ -66,7 +71,7 @@ public class ArmConfig
    */
   private   Color8Bit                      simColor                = new Color8Bit(Color.kOrange);
   /**
-   * Mechanism position configuration for the {@link yams.mechanisms.positional.Pivot} (Optional).
+   * Mechanism position configuration for the {@link Pivot} (Optional).
    */
   private   MechanismPositionConfig        mechanismPositionConfig = new MechanismPositionConfig();
   /**
@@ -93,7 +98,7 @@ public class ArmConfig
   /**
    * Arm Configuration class
    *
-   * @param motorController Primary {@link SmartMotorController} for the {@link yams.mechanisms.positional.Arm}
+   * @param motorController Primary {@link SmartMotorController} for the {@link Arm}
    */
   public ArmConfig(SmartMotorController motorController)
   {
@@ -150,9 +155,9 @@ public class ArmConfig
   }
 
   /**
-   * Configure the {@link SmartMotorController} for the {@link yams.mechanisms.positional.Arm}
+   * Configure the {@link SmartMotorController} for the {@link Arm}
    *
-   * @param motorController Primary {@link SmartMotorController} for the {@link yams.mechanisms.positional.Arm}
+   * @param motorController Primary {@link SmartMotorController} for the {@link Arm}
    * @return {@link ArmConfig} for chaining.
    */
   public ArmConfig withSmartMotorController(SmartMotorController motorController)
@@ -191,9 +196,9 @@ public class ArmConfig
 
   /**
    * Configure the MOI directly instead of estimating it with the length and mass of the
-   * {@link yams.mechanisms.positional.Arm} for simulation.
+   * {@link Arm} for simulation.
    *
-   * @param MOI Moment of Inertia of the {@link yams.mechanisms.positional.Arm}. in {@link Units#KilogramSquareMeters}
+   * @param MOI Moment of Inertia of the {@link Arm}. in {@link Units#KilogramSquareMeters}
    * @return {@link ArmConfig} for chaining.
    * @implNote Please use {@link #withMOI(MomentOfInertia)} instead. Default unit is KilogramSquareMeters
    */
@@ -207,9 +212,9 @@ public class ArmConfig
 
   /**
    * Configure the MOI directly instead of estimating it with the length and mass of the
-   * {@link yams.mechanisms.positional.Arm} for simulation.
+   * {@link Arm} for simulation.
    *
-   * @param MOI Moment of Inertia of the {@link yams.mechanisms.positional.Arm}
+   * @param MOI Moment of Inertia of the {@link Arm}
    * @return {@link ArmConfig} for chaining.
    */
   public ArmConfig withMOI(MomentOfInertia MOI)
@@ -220,9 +225,9 @@ public class ArmConfig
   }
 
   /**
-   * Configure the {@link yams.mechanisms.positional.Arm}s length for simulation.
+   * Configure the {@link Arm}s length for simulation.
    *
-   * @param distance Length of the {@link yams.mechanisms.positional.Arm}.
+   * @param distance Length of the {@link Arm}.
    * @return {@link ArmConfig} for chaining.
    */
   public ArmConfig withLength(Distance distance)
@@ -236,9 +241,9 @@ public class ArmConfig
   }
 
   /**
-   * Configure the {@link yams.mechanisms.positional.Arm}s {@link Mass} for simulation.
+   * Configure the {@link Arm}s {@link Mass} for simulation.
    *
-   * @param mass {@link Mass} of the {@link yams.mechanisms.positional.Arm}
+   * @param mass {@link Mass} of the {@link Arm}
    * @return {@link ArmConfig} for chaining.
    */
   public ArmConfig withMass(Mass mass)
@@ -252,7 +257,7 @@ public class ArmConfig
   }
 
   /**
-   * Configure telemetry for the {@link yams.mechanisms.positional.Arm} mechanism.
+   * Configure telemetry for the {@link Arm} mechanism.
    *
    * @param telemetryName      Telemetry NetworkTable name to appear under "SmartDashboard/"
    * @param telemetryVerbosity Telemetry verbosity to apply.
@@ -266,7 +271,7 @@ public class ArmConfig
   }
 
   /**
-   * Configure telemetry for the {@link yams.mechanisms.positional.Arm} mechanism.
+   * Configure telemetry for the {@link Arm} mechanism.
    *
    * @param networkRoot        Telemetry NetworkTable
    * @param telemetryName      Telemetry NetworkTable name to appear under _networkTableName_
@@ -285,7 +290,7 @@ public class ArmConfig
   /**
    * Set the elevator mechanism position configuration.
    *
-   * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link yams.mechanisms.positional.Elevator}
+   * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link Elevator}
    * @return {@link PivotConfig} for chaining
    */
   public ArmConfig withMechanismPositionConfig(MechanismPositionConfig mechanismPositionConfig)
@@ -375,7 +380,7 @@ public class ArmConfig
   }
 
   /**
-   * Get the Length of the {@link yams.mechanisms.positional.Arm}
+   * Get the Length of the {@link Arm}
    *
    * @return {@link Distance} of the Arm.
    */
@@ -385,7 +390,7 @@ public class ArmConfig
   }
 
   /**
-   * Get the moment of inertia for the {@link yams.mechanisms.positional.Arm} simulation.
+   * Get the moment of inertia for the {@link Arm} simulation.
    *
    * @return Moment of Inertia.
    */
@@ -405,7 +410,7 @@ public class ArmConfig
   }
 
   /**
-   * Get the Upper hard limit of the {@link yams.mechanisms.positional.Arm}.
+   * Get the Upper hard limit of the {@link Arm}.
    *
    * @return {@link Angle} hard limit.
    */
@@ -415,7 +420,7 @@ public class ArmConfig
   }
 
   /**
-   * Get the lower hard limit of the {@link yams.mechanisms.positional.Arm}
+   * Get the lower hard limit of the {@link Arm}
    *
    * @return {@link Angle} hard limit.
    */
@@ -425,9 +430,9 @@ public class ArmConfig
   }
 
   /**
-   * Get the telemetry verbosity of the {@link yams.mechanisms.positional.Arm}
+   * Get the telemetry verbosity of the {@link Arm}
    *
-   * @return {@link TelemetryVerbosity} of the {@link yams.mechanisms.positional.Arm}
+   * @return {@link TelemetryVerbosity} of the {@link Arm}
    */
   public Optional<TelemetryVerbosity> getTelemetryVerbosity()
   {
@@ -435,7 +440,7 @@ public class ArmConfig
   }
 
   /**
-   * Network Tables name for the {@link yams.mechanisms.positional.Arm}
+   * Network Tables name for the {@link Arm}
    *
    * @return Network Tables name.
    */
@@ -445,9 +450,9 @@ public class ArmConfig
   }
 
   /**
-   * Get the starting angle of the {@link yams.mechanisms.positional.Arm}
+   * Get the starting angle of the {@link Arm}
    *
-   * @return {@link Angle} of the {@link yams.mechanisms.positional.Arm}
+   * @return {@link Angle} of the {@link Arm}
    */
   public Optional<Angle> getStartingAngle()
   {
@@ -459,9 +464,9 @@ public class ArmConfig
   }
 
   /**
-   * Get the {@link SmartMotorController} of the {@link yams.mechanisms.positional.Arm}
+   * Get the {@link SmartMotorController} of the {@link Arm}
    *
-   * @return {@link SmartMotorController} for the {@link yams.mechanisms.positional.Arm}
+   * @return {@link SmartMotorController} for the {@link Arm}
    */
   public SmartMotorController getMotor()
   {

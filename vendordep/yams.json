@@ -1,21 +1,39 @@
 {
-    "fileName": "yams.json",
-    "name": "Yet Another Mechanism System",
-    "version": "${version}",
-    "frcYear": "2026",
-    "uuid": "a1051e86-a979-4880-a28b-a0d5362d1d96",
-    "mavenUrls": [
-        "https://yet-another-software-suite.github.io/YAMS/releases/"
-    ],
-    "jsonUrl": "https://yet-another-software-suite.github.io/YAMS/yams.json",
-    "javaDependencies": [
-        {
-            "groupId": "${groupId}",
-            "artifactId": "${artifactId}-java",
-            "version": "${version}"
-        }
-    ],
-    "cppDependencies": [],
-    "jniDependencies": [],
-    "requires": []
+  "fileName": "yams.json",
+  "name": "Yet Another Mechanism System",
+  "version": "${version}",
+  "frcYear": "2026",
+  "uuid": "a1051e86-a979-4880-a28b-a0d5362d1d96",
+  "mavenUrls": [
+    "https://yet-another-software-suite.github.io/YAMS/releases/"
+  ],
+  "jsonUrl": "https://yet-another-software-suite.github.io/YAMS/yams.json",
+  "javaDependencies": [
+    {
+      "groupId": "${groupId}",
+      "artifactId": "${artifactId}-java",
+      "version": "${version}"
+    }
+  ],
+  "cppDependencies": [
+    {
+      "groupId": "${groupId}",
+      "artifactId": "${artifactId}-cpp",
+      "version": "${version}",
+      "libName": "YAMS",
+      "headerClassifier": "headers",
+      "sharedLibrary": false,
+      "skipInvalidPlatforms": true,
+      "binaryPlatforms": [
+        "windowsx86-64",
+        "linuxarm64",
+        "linuxx86-64",
+        "linuxathena",
+        "linuxarm32",
+        "osxuniversal"
+      ]
+    }
+  ],
+  "jniDependencies": [],
+  "requires": []
 }

@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.motorcontrollers;
 
 import static edu.wpi.first.units.Units.Degrees;
@@ -66,7 +69,6 @@ import yams.telemetry.SmartMotorControllerTelemetryConfig;
  */
 public abstract class SmartMotorController
 {
-
   /**
    * Telemetry.
    */
@@ -441,7 +443,6 @@ public abstract class SmartMotorController
 
     } else if (setpointVelocity.isPresent())
     {
-
       var setpoint = setpointVelocity.get().in(RotationsPerSecond);
       var velocity = getMechanismVelocity().in(RotationsPerSecond);
 
@@ -926,7 +927,6 @@ public abstract class SmartMotorController
           Debouncer              velocityDebouncer = new Debouncer(0.5);
           AtomicReference<Angle> startingAngle     = new AtomicReference<>(Rotations.zero());
           Command testUpCommand = Commands.startRun(() -> {
-
                                             System.out.println(
                                                 "=====================================================\nTEST UP\n=====================================================");
                                             System.out.println(
@@ -935,7 +935,6 @@ public abstract class SmartMotorController
                                             setDutyCycle(0);
                                             startingAngle.set(getMechanismPosition());
                                           }, () -> {
-
                                             setDutyCycle(getDutyCycle() + 0.001);
                                           }, m_config.getSubsystem()).until(() -> velocityDebouncer.calculate(
                                               getMechanismVelocity().abs(RPM) >= 10))
@@ -957,7 +956,6 @@ public abstract class SmartMotorController
                                               setDutyCycle(0);
                                               startingAngle.set(getMechanismPosition());
                                             }, () -> {
-
                                               setDutyCycle(getDutyCycle() - 0.001);
                                             }, m_config.getSubsystem()).until(() -> velocityDebouncer.calculate(
                                                 getMechanismVelocity().abs(RPM) >= 10))

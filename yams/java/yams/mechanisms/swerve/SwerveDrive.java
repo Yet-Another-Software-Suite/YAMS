@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechanisms.swerve;
 
 import static edu.wpi.first.hal.FRCNetComm.tInstances.kRobotDriveSwerve_YAGSL;
@@ -53,7 +56,6 @@ import yams.telemetry.MechanismTelemetry;
  */
 public class SwerveDrive
 {
-
   /**
    * The modules of the drive.
    */

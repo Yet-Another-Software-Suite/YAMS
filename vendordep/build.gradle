@@ -142,6 +142,66 @@ def systemArch = getCurrentArch()
 
 model {
   components {
+      YAMS(NativeLibrarySpec) {
+          sources {
+              cpp {
+                  source {
+                      srcDirs "$rootDir/../yams/cpp/src"
+                      include '**/*.cpp'
+                  }
+                  exportedHeaders {
+                      srcDirs "$rootDir/../yams/cpp/include"
+                  }
+              }
+          }
+          nativeUtils.useRequiredLibrary(it, 'wpilib_shared')
+          // Enable run tasks for this component
+          wpi.cpp.enableExternalTasks(it)
+
+          // Enable simulation for this component
+          wpi.sim.enable(it)
+          // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
+          wpi.cpp.vendor.cpp(it)
+          wpi.cpp.deps.wpilib(it)
+      }
+  }
+  testSuites {
+      YAMSTest {
+          sources.cpp {
+              source {
+                  srcDir 'src/test/native/cpp'
+                  include '**/*.cpp'
+              }
+              exportedHeaders {
+                  srcDirs 'src/test/native/include'
+              }
+          }
+
+            // Enable run tasks for this component
+            wpi.cpp.enableExternalTasks(it)
+
+            // Enable simulation for this component
+            wpi.sim.enable(it)
+            // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
+            wpi.cpp.vendor.cpp(it)
+            wpi.cpp.deps.wpilib(it)
+
+          binaries.all {
+//              lib library: 'VendorDriver', linkage: 'shared'
+
+              def arch = it.targetPlatform.name
+              if (systemArch == arch && it.buildType.name == 'debug') {
+                  def filePath = it.tasks.install.installDirectory.get().toString() + File.separatorChar + 'lib'
+                  test.dependsOn it.tasks.install
+                  test.systemProperty 'java.library.path', filePath
+                  test.environment 'LD_LIBRARY_PATH', filePath
+                  test.workingDir filePath
+              }
+          }
+
+          nativeUtils.useRequiredLibrary(it, "wpilib_executable_shared", "googletest_static")
+      }
+
   }
 }
 

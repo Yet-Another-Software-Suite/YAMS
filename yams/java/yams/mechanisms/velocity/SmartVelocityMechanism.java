@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechanisms.velocity;
 
 import edu.wpi.first.units.VoltageUnit;
@@ -16,7 +19,6 @@ import yams.motorcontrollers.SmartMotorController;
  */
 public abstract class SmartVelocityMechanism extends SmartMechanism
 {
-
   /**
    * The root point of the Mechanism.
    */

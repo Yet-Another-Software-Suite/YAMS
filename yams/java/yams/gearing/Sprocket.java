@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.gearing;
 
 import yams.exceptions.InvalidStageGivenException;
@@ -8,7 +11,6 @@ import yams.exceptions.NoStagesGivenException;
  */
 public class Sprocket
 {
-
   /**
    * Stages in the Sprocket chain.
    */

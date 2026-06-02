@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.motorcontrollers;
 
 import java.lang.reflect.Constructor;
@@ -10,7 +13,6 @@ import java.util.Optional;
  */
 public class SmartMotorFactory
 {
-
   /**
    * Available motor controller constructors.
    */
@@ -137,7 +139,6 @@ public class SmartMotorFactory
    */
   public interface MotorControllerConstructor
   {
-
     /**
      * Create a motor controller instance.
      *

@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechanisms.velocity;
 
 import static edu.wpi.first.units.Units.Degrees;
@@ -47,7 +50,6 @@ import yams.motorcontrollers.simulation.DCMotorSimSupplier;
  */
 public class FlyWheel extends SmartVelocityMechanism
 {
-
   /**
    * FlyWheel config.
    */

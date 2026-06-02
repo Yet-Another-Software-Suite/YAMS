@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.motorcontrollers;
 
 import edu.wpi.first.units.measure.Angle;
@@ -11,7 +14,6 @@ import edu.wpi.first.units.measure.Voltage;
  */
 public interface SimSupplier
 {
-
   /**
    * Update the sim state.
    */

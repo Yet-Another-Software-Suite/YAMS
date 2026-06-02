@@ -1,7 +1,8 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Rotations;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -12,22 +13,17 @@ import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.Angle;
+
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorFactory;
-import yams.units.EasyCRT;
-import yams.units.EasyCRTConfig;
 
 public class SmartMotorFactoryTest
 {
-
   @BeforeAll
   static void setupMockFactories()
   {
@@ -102,7 +98,6 @@ public class SmartMotorFactoryTest
   {
     class DummyController
     {
-
     }
 
     DummyController dummy = new DummyController();

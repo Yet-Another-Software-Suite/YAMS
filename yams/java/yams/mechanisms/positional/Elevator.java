@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechanisms.positional;
 
 import static edu.wpi.first.units.Units.Amps;
@@ -59,7 +62,6 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
  */
 public class Elevator extends SmartPositionalMechanism
 {
-
   /**
    * Config class for the elevator.
    */
