@@ -13,10 +13,10 @@
 
 #include <chrono>
 #include <cmath>
-#include <string>
-#include <thread>
 #include <cstdio>
 #include <memory>
+#include <string>
+#include <thread>
 
 #include "helpers/MockHardware.h"
 #include "helpers/MotorControllerFactory.h"

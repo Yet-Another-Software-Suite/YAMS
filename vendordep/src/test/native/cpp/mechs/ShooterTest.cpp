@@ -13,9 +13,9 @@
 
 #include <chrono>
 #include <cmath>
+#include <cstdio>
 #include <string>
 #include <thread>
-#include <cstdio>
 
 #include "helpers/MockHardware.h"
 #include "helpers/MotorControllerFactory.h"
