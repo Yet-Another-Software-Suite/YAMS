@@ -1,0 +1,12 @@
+cppHeaderFileInclude {
+  \.h$
+}
+
+cppSrcFileInclude {
+  \.cpp$
+}
+
+generatedFileExclude {
+  ^build/
+  ^gradle/
+}
