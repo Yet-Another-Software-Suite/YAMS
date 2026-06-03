@@ -23,6 +23,7 @@ namespace yams::mechanisms::positional {
  */
 class SmartPositionalMechanism : public SmartMechanism {
  public:
+  SmartPositionalMechanism() : SmartMechanism() {}
   virtual ~SmartPositionalMechanism() = default;
 
   // ---- Pure virtual interface -----------------------------------------------
