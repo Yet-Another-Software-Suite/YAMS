@@ -122,7 +122,6 @@ static void VelocityPIDTestBody(SmartMotorController* smc, bool isCTRE) {
     if (smc->GetDutyCycle() != 0.0) passed = true;
   });
 
-  auto postAngle = smc->GetMechanismPosition();
   auto postVel = smc->GetMechanismVelocity();
 
   EXPECT_TRUE(std::abs(postVel.value() - preVel.value()) > 0.05 || passed)
