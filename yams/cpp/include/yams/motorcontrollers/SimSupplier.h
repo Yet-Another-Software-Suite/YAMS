@@ -4,9 +4,11 @@
 #pragma once
 
 #include <units/angle.h>
+#include <units/angular_acceleration.h>
 #include <units/angular_velocity.h>
 #include <units/length.h>
 #include <units/velocity.h>
+#include <units/voltage.h>
 
 namespace yams::motorcontrollers {
 
@@ -22,6 +24,14 @@ class SimSupplier {
 
   /** Advance the simulation by one loop iteration. */
   virtual void UpdateSim() = 0;
+
+  /**
+   * Directly set the motor input voltage, bypassing the duty-cycle supplier.
+   * Used when the hardware sim state (e.g. TalonFX) provides voltage directly.
+   *
+   * @param volts Input voltage to inject.
+   */
+  virtual void SetInputVoltage(units::volt_t volts) = 0;
 
   /**
    * Get the simulated mechanism position.
@@ -50,6 +60,20 @@ class SimSupplier {
    * @return Rotor velocity in degrees per second.
    */
   virtual units::degrees_per_second_t GetRotorVelocity() = 0;
+
+  /**
+   * Get the simulated mechanism angular acceleration.
+   *
+   * @return Mechanism acceleration in degrees per second squared.
+   */
+  virtual units::degrees_per_second_squared_t GetMechanismAcceleration() = 0;
+
+  /**
+   * Get the simulated rotor angular acceleration.
+   *
+   * @return Rotor acceleration in degrees per second squared.
+   */
+  virtual units::degrees_per_second_squared_t GetRotorAcceleration() = 0;
 
   /**
    * Set the simulated mechanism position.

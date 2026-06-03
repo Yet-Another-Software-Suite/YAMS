@@ -14,6 +14,7 @@
 #include <ctre/phoenix6/TalonFX.hpp>
 #include <ctre/phoenix6/TalonFXS.hpp>
 #include <memory>
+#include <ostream>
 #include <string>
 #include <vector>
 
@@ -30,7 +31,10 @@ namespace yams::test {
 using namespace motorcontrollers;
 
 // Unique CAN IDs across all test instances, incremented atomically.
-inline std::atomic<int> gCanIdCounter{10};
+// Wraps within 1-62 (the valid Phoenix 6 / REV CAN device ID range).
+inline std::atomic<int> gCanIdCounter{0};
+
+inline int NextCanId() { return (gCanIdCounter.fetch_add(1) % 62) + 1; }
 
 enum class HardwareType { SparkMax, SparkFlex, TalonFXS, TalonFX };
 enum class ProfileType { None, Trapezoid, Exponential };
@@ -40,6 +44,10 @@ struct MotorTestParam {
   ProfileType profile;
   std::string name;
 };
+
+// Lets gtest print human-readable param info in failure messages instead of a
+// raw hex dump.
+inline void PrintTo(const MotorTestParam& p, std::ostream* os) { *os << p.name; }
 
 // Concrete hardware objects that must outlive the wrapper.
 struct HardwareBundle {
@@ -77,7 +85,7 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
   bundle.subsystem = std::make_unique<TestSubsystem>();
   cfg.WithSubsystem(bundle.subsystem.get());
 
-  int canId = gCanIdCounter.fetch_add(1);
+  int canId = NextCanId();
 
   switch (param.hardware) {
     case HardwareType::SparkMax: {

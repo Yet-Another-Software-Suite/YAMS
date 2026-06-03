@@ -52,7 +52,16 @@ Pivot::Pivot(const config::PivotConfig& config) : SmartPositionalMechanism(), m_
 
 // ---- SmartMechanism overrides -----------------------------------------------
 
-void Pivot::SimIterate() { m_smc->SimIterate(); }
+void Pivot::SimIterate() {
+  if (auto* ss = m_smc->GetSimSupplier()) {
+    ss->UpdateSim();
+    m_smc->SetEncoderPosition(ss->GetMechanismPosition());
+    m_smc->SetEncoderVelocity(ss->GetMechanismVelocity());
+    ss->FeedWatchdog();
+  } else {
+    m_smc->SimIterate();
+  }
+}
 
 void Pivot::UpdateTelemetry() { m_smc->UpdateTelemetry(); }
 

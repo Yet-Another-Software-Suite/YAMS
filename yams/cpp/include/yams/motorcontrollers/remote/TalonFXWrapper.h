@@ -42,6 +42,9 @@ class TalonFXWrapper : public SmartMotorController {
   TalonFXWrapper(ctre::phoenix6::hardware::TalonFX& talon, frc::DCMotor dcMotor,
                  const SmartMotorControllerConfig& config);
 
+  // ---- Telemetry ----------------------------------------------------------
+  telemetry::UnsupportedTelemetryFields GetUnsupportedTelemetryFields() override;
+
   // ---- Configuration ------------------------------------------------------
   bool ApplyConfig(const SmartMotorControllerConfig& config) override;
 

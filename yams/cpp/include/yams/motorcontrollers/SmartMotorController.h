@@ -29,8 +29,11 @@
 #include <string>
 #include <vector>
 
+#include "SimSupplier.h"
 #include "SmartMotorControllerConfig.h"
 #include "yams/math/LQRController.h"
+#include "yams/telemetry/SmartMotorControllerTelemetry.h"
+#include "yams/telemetry/SmartMotorControllerTelemetryConfig.h"
 
 namespace yams::motorcontrollers {
 
@@ -66,6 +69,22 @@ class SmartMotorController {
 
   /** Advance the motor simulation by one loop iteration. */
   virtual void SimIterate() = 0;
+
+  /**
+   * Attach a SimSupplier that provides physics-model position and velocity for
+   * simulation.  When set, mechanism SimIterate() calls will use this supplier
+   * instead of the internal DCMotorSim.
+   *
+   * @param supplier Shared SimSupplier instance, or nullptr to detach.
+   */
+  void SetSimSupplier(std::shared_ptr<SimSupplier> supplier);
+
+  /**
+   * Get the attached SimSupplier, or nullptr if none is set.
+   *
+   * @return Raw pointer to the SimSupplier (valid as long as the shared_ptr is held).
+   */
+  SimSupplier* GetSimSupplier() const;
 
   // ---- Encoder sync -------------------------------------------------------
 
@@ -512,6 +531,23 @@ class SmartMotorController {
   /** Publish the current sensor readings and setpoints to NetworkTables. */
   void UpdateTelemetry();
 
+  /**
+   * Return telemetry fields not supported by this motor controller implementation.
+   *
+   * Subclasses override this to disable fields for hardware that lacks certain signals
+   * (e.g. SPARK controllers do not expose supply current).
+   *
+   * @return Struct with optional lists of unsupported boolean and double fields.
+   */
+  virtual telemetry::UnsupportedTelemetryFields GetUnsupportedTelemetryFields();
+
+  /**
+   * Get the active closed-loop gain slot.
+   *
+   * @return Current ClosedLoopControllerSlot.
+   */
+  ClosedLoopControllerSlot GetClosedLoopControllerSlot() const;
+
   // ---- SysId --------------------------------------------------------------
 
   /**
@@ -587,6 +623,7 @@ class SmartMotorController {
  protected:
   SmartMotorControllerConfig m_config;
   ClosedLoopControllerSlot m_slot{ClosedLoopControllerSlot::SLOT_0};
+  std::shared_ptr<SimSupplier> m_simSupplier;
 
   std::optional<frc::PIDController> m_pid;
   std::optional<math::LQRController> m_lqr;
@@ -607,6 +644,9 @@ class SmartMotorController {
   std::shared_ptr<nt::NetworkTable> m_parentTable;
   std::shared_ptr<nt::NetworkTable> m_telemetryTable;
   std::shared_ptr<nt::NetworkTable> m_tuningTable;
+
+  telemetry::SmartMotorControllerTelemetry m_telemetry;
+  telemetry::SmartMotorControllerTelemetryConfig m_telemetryConfig;
 
  private:
   std::optional<frc::TrapezoidProfile<units::turns>::State> GetTrapezoidalProfileState();

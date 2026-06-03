@@ -304,10 +304,20 @@ void SmartMotorController::SetupTelemetry(std::shared_ptr<nt::NetworkTable> data
                                           std::shared_ptr<nt::NetworkTable> tuningTable) {
   if (m_parentTable) return;  // already set up
   m_parentTable = dataTable;
-  if (m_config.GetTelemetryName()) {
-    m_telemetryTable = dataTable->GetSubTable(GetName());
-    m_tuningTable = tuningTable->GetSubTable(GetName());
-  }
+  if (!m_config.GetTelemetryName()) return;
+
+  m_telemetryTable = dataTable->GetSubTable(GetName());
+  m_tuningTable = tuningTable->GetSubTable(GetName());
+
+  auto verbosity = m_config.GetVerbosity().value_or(
+      SmartMotorControllerConfig::TelemetryVerbosity::LOW);
+  m_telemetryConfig.WithTelemetryVerbosity(verbosity);
+
+  auto& dfields = m_telemetryConfig.GetDoubleFields(*this);
+  auto& bfields = m_telemetryConfig.GetBoolFields(*this);
+  m_telemetry.SetupTelemetry(*this, m_telemetryTable, m_tuningTable, dfields, bfields,
+                             m_telemetryConfig.GetNT4Enabled(),
+                             m_telemetryConfig.GetDataLogName());
 }
 
 void SmartMotorController::SetupTelemetry() {
@@ -316,14 +326,20 @@ void SmartMotorController::SetupTelemetry() {
 }
 
 void SmartMotorController::UpdateTelemetry() {
-  if (m_telemetryTable && m_config.GetVerbosity()) {
-    // Publish basic values to NT
-    m_telemetryTable->GetEntry("position_deg").SetDouble(GetMechanismPosition().value());
-    m_telemetryTable->GetEntry("velocity_dps").SetDouble(GetMechanismVelocity().value());
-    m_telemetryTable->GetEntry("voltage_V").SetDouble(GetVoltage().value());
-    m_telemetryTable->GetEntry("stator_A").SetDouble(GetStatorCurrent().value());
-    m_telemetryTable->GetEntry("temp_C").SetDouble(GetTemperature().value());
+  if (!m_telemetryTable) return;
+  m_telemetry.Publish(*this);
+  if (m_telemetry.TuningEnabled()) {
+    m_telemetry.ApplyTuningValues(*this);
   }
+}
+
+telemetry::UnsupportedTelemetryFields SmartMotorController::GetUnsupportedTelemetryFields() {
+  return {};  // base: no unsupported fields
+}
+
+SmartMotorController::ClosedLoopControllerSlot
+SmartMotorController::GetClosedLoopControllerSlot() const {
+  return m_slot;
 }
 
 // ---- SysId ----------------------------------------------------------------
@@ -404,5 +420,13 @@ void SmartMotorController::Close() {
     m_closedLoopControllerThread.reset();
   }
 }
+
+// ---- SimSupplier ------------------------------------------------------------
+
+void SmartMotorController::SetSimSupplier(std::shared_ptr<SimSupplier> supplier) {
+  m_simSupplier = std::move(supplier);
+}
+
+SimSupplier* SmartMotorController::GetSimSupplier() const { return m_simSupplier.get(); }
 
 }  // namespace yams::motorcontrollers

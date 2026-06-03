@@ -79,6 +79,46 @@ task cppSourceZip(type: Zip) {
         into '/'
     }
 }
+
+def doxygenOutputDir = file("$buildDir/doxygen")
+
+task generateDoxygen(type: Exec) {
+    description = 'Generates Doxygen HTML documentation for C++ headers'
+    group = 'Documentation'
+
+    inputs.dir("$rootDir/../yams/cpp/include")
+    outputs.dir(doxygenOutputDir)
+
+    doFirst {
+        doxygenOutputDir.mkdirs()
+        file("$buildDir/Doxyfile").text = """\
+PROJECT_NAME           = "YAMS"
+PROJECT_BRIEF          = "Yet Another Mechanism System"
+OUTPUT_DIRECTORY       = ${doxygenOutputDir.absolutePath}
+INPUT                  = ${file("$rootDir/../yams/cpp/include").absolutePath}
+RECURSIVE              = YES
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+GENERATE_XML           = NO
+HTML_OUTPUT            = html
+EXTRACT_ALL            = YES
+FILE_PATTERNS          = *.h *.hpp
+QUIET                  = YES
+"""
+    }
+
+    commandLine 'doxygen', file("$buildDir/Doxyfile")
+}
+
+task cppDoxygenZip(type: Zip, dependsOn: generateDoxygen) {
+    destinationDirectory = outputsFolder
+    archiveBaseName = zipBaseName
+    archiveClassifier = "cppapi"
+
+    from(doxygenOutputDir) {
+        into '/'
+    }
+}
 //
 //task cppDriverHeadersZip(type: Zip) {
 //    destinationDirectory = outputsFolder
@@ -181,6 +221,9 @@ build.dependsOn outputJar
 build.dependsOn vendordepJsonZip
 build.dependsOn cppHeadersZip
 build.dependsOn cppSourceZip
+build.dependsOn cppDoxygenZip
+
+addTaskToCopyAllOutputs(cppDoxygenZip)
 
 libraryBuild.dependsOn build
 
@@ -213,6 +256,7 @@ model {
                 }
                 artifact cppHeadersZip
                 artifact cppSourceZip
+                artifact cppDoxygenZip
 
                 artifactId = "${baseArtifactId}-cpp"
                 groupId = artifactGroupId

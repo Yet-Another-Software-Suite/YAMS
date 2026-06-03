@@ -9,8 +9,11 @@
 #include <rev/SparkFlex.h>
 #include <rev/SparkMax.h>
 #include <rev/SparkRelativeEncoder.h>
+#include <rev/SparkSim.h>
 #include <rev/config/SparkFlexConfig.h>
 #include <rev/config/SparkMaxConfig.h>
+#include <rev/sim/SparkAbsoluteEncoderSim.h>
+#include <rev/sim/SparkRelativeEncoderSim.h>
 
 #include <memory>
 #include <optional>
@@ -49,6 +52,9 @@ class SparkWrapper : public SmartMotorController {
    */
   SparkWrapper(rev::spark::SparkFlex& spark, frc::DCMotor motor,
                const SmartMotorControllerConfig& config);
+
+  // ---- Telemetry ----------------------------------------------------------
+  telemetry::UnsupportedTelemetryFields GetUnsupportedTelemetryFields() override;
 
   // ---- Configuration ------------------------------------------------------
   bool ApplyConfig(const SmartMotorControllerConfig& config) override;
@@ -150,6 +156,9 @@ class SparkWrapper : public SmartMotorController {
   std::optional<rev::spark::SparkFlexConfig> m_flexConfig;
 
   std::optional<frc::sim::DCMotorSim> m_motorSim;
+  std::optional<rev::spark::SparkSim> m_sparkSim;
+  std::optional<rev::spark::SparkRelativeEncoderSim> m_relEncoderSim;
+  std::optional<rev::spark::SparkAbsoluteEncoderSim> m_absEncoderSim;
   math::DerivativeTimeFilter m_accelFilter{20_ms};
 
   rev::spark::SparkLowLevel::ControlType m_positionControlType{

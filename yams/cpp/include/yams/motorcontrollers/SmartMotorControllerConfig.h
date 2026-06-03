@@ -16,6 +16,7 @@
 #include <units/angular_velocity.h>
 #include <units/current.h>
 #include <units/length.h>
+#include <units/moment_of_inertia.h>
 #include <units/temperature.h>
 #include <units/time.h>
 #include <units/velocity.h>
@@ -426,6 +427,14 @@ class SmartMotorControllerConfig {
    */
   SmartMotorControllerConfig& WithSimMotor(frc::DCMotor motor);
 
+  /**
+   * Set the moment of inertia of the mechanism for simulation.
+   *
+   * @param moi Moment of inertia in kg·m².
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithMOI(units::kilogram_square_meter_t moi);
+
   // === Getters ============================================================
 
   /** Aggregated PID and feedforward gains for one closed-loop slot. */
@@ -524,6 +533,8 @@ class SmartMotorControllerConfig {
   std::optional<units::ampere_t> GetStatorCurrentLimit() const;
   /** @return Optional stator stall current limit (integer amps). */
   std::optional<int> GetStatorStallCurrentLimit() const;
+  /** @return Optional supply stall current limit (integer amps). */
+  std::optional<int> GetSupplyStallCurrentLimit() const;
   /** @return Optional supply current limit. */
   std::optional<units::ampere_t> GetSupplyCurrentLimit() const;
   /** @return Optional temperature cutoff. */
@@ -542,10 +553,10 @@ class SmartMotorControllerConfig {
   /** @return Optional closed-loop ramp rate. */
   std::optional<units::second_t> GetClosedLoopRampRate() const;
 
-  /** @return true if the motor output direction is inverted. */
-  bool GetMotorInverted() const;
-  /** @return true if the encoder direction is inverted. */
-  bool GetEncoderInverted() const;
+  /** @return Inverted state if explicitly configured, otherwise empty. */
+  std::optional<bool> GetMotorInverted() const;
+  /** @return Encoder inverted state if explicitly configured, otherwise empty. */
+  std::optional<bool> GetEncoderInverted() const;
   /** @return true if a velocity trapezoidal profile is configured. */
   bool GetVelocityTrapezoidalProfileInUse() const;
 
@@ -557,6 +568,8 @@ class SmartMotorControllerConfig {
   frc2::SubsystemBase* GetSubsystem() const;
   /** @return Optional DC motor model for simulation. */
   std::optional<frc::DCMotor> GetSimMotor() const;
+  /** @return Moment of inertia for simulation (kg·m²). */
+  units::kilogram_square_meter_t GetMOI() const;
 
   /** @return Optional mechanism gearing. */
   const std::optional<gearing::MechanismGearing>& GetMotorGearing() const;
@@ -642,9 +655,9 @@ class SmartMotorControllerConfig {
   std::optional<units::second_t> m_openLoopRampRate;
   std::optional<units::second_t> m_closedLoopRampRate;
 
-  // Inversion
-  bool m_motorInverted{false};
-  bool m_encoderInverted{false};
+  // Inversion — empty means the user never called WithMotorInverted / WithEncoderInverted.
+  std::optional<bool> m_motorInverted;
+  std::optional<bool> m_encoderInverted;
 
   // Gearing / linear
   std::optional<gearing::MechanismGearing> m_motorGearing;
@@ -661,6 +674,7 @@ class SmartMotorControllerConfig {
 
   frc2::SubsystemBase* m_subsystem{nullptr};
   std::optional<frc::DCMotor> m_simMotor;
+  units::kilogram_square_meter_t m_moi{0.001_kg_sq_m};
 };
 
 }  // namespace yams::motorcontrollers

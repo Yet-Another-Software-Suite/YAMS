@@ -39,6 +39,11 @@
 #include "yams/motorcontrollers/SmartMotorControllerConfig.h"
 #include "yams/motorcontrollers/SmartMotorFactory.h"
 
+// ---- Simulation Suppliers --------------------------------------------------
+#include "yams/motorcontrollers/simulation/ArmSimSupplier.h"
+#include "yams/motorcontrollers/simulation/DCMotorSimSupplier.h"
+#include "yams/motorcontrollers/simulation/ElevatorSimSupplier.h"
+
 // ---- Motor Controller Wrappers ---------------------------------------------
 #include "yams/motorcontrollers/local/SparkWrapper.h"
 #include "yams/motorcontrollers/remote/TalonFXSWrapper.h"
@@ -61,8 +66,22 @@
 #include "yams/mechanisms/velocity/FlyWheel.h"
 #include "yams/mechanisms/velocity/SmartVelocityMechanism.h"
 
+// ---- Swerve Mechanism Configs ----------------------------------------------
+#include "yams/mechanisms/config/SwerveModuleConfig.h"
+
+// ---- Swerve Mechanisms -----------------------------------------------------
+#include "yams/mechanisms/swerve/SwerveDrive.h"
+#include "yams/mechanisms/swerve/SwerveDriveConfig.h"
+#include "yams/mechanisms/swerve/SwerveModule.h"
+
+// ---- Telemetry -------------------------------------------------------------
+#include "yams/telemetry/MechanismTelemetry.h"
+#include "yams/telemetry/SmartMotorControllerTelemetry.h"
+#include "yams/telemetry/SmartMotorControllerTelemetryConfig.h"
+
 // ---- Exceptions ------------------------------------------------------------
 #include "yams/exceptions/InvalidStageGivenException.h"
 #include "yams/exceptions/NoStagesGivenException.h"
 #include "yams/exceptions/SmartMotorControllerConfigurationException.h"
+#include "yams/exceptions/SwerveDriveConfigurationException.h"
 #include "yams/exceptions/YamsException.h"

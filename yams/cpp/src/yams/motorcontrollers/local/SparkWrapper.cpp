@@ -10,6 +10,8 @@
 #include <rev/ConfigureTypes.h>
 #include <units/moment_of_inertia.h>
 
+#include "yams/motorcontrollers/simulation/DCMotorSimSupplier.h"
+
 using namespace rev::spark;
 
 namespace yams::motorcontrollers::local {
@@ -46,7 +48,7 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& cfg) {
   m_config = cfg;
 
   auto doConfig = [&](SparkBaseConfig& sparkCfg) {
-    sparkCfg.Inverted(cfg.GetMotorInverted());
+    if (auto inv = cfg.GetMotorInverted(); inv) sparkCfg.Inverted(*inv);
     sparkCfg.SetIdleMode(cfg.GetIdleMode() == SmartMotorControllerConfig::MotorMode::BRAKE
                              ? SparkBaseConfig::IdleMode::kBrake
                              : SparkBaseConfig::IdleMode::kCoast);
@@ -82,7 +84,7 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& cfg) {
       m_velocityControlType = SparkLowLevel::ControlType::kMAXMotionVelocityControl;
     }
 
-    sparkCfg.encoder.Inverted(cfg.GetEncoderInverted());
+    if (auto inv = cfg.GetEncoderInverted(); inv) sparkCfg.encoder.Inverted(*inv);
     if (auto offset = cfg.GetAbsoluteEncoderZeroOffset(); offset)
       sparkCfg.absoluteEncoder.ZeroOffset(offset->value() / 360.0);
   };
@@ -107,19 +109,52 @@ void SparkWrapper::CommitConfig() {
 // ---- Simulation -------------------------------------------------------------
 
 void SparkWrapper::SetupSimulation() {
-  if (!frc::RobotBase::IsSimulation()) return;
-  if (auto simMotor = m_config.GetSimMotor(); simMotor) {
-    auto plant =
-        frc::LinearSystemId::DCMotorSystem(*simMotor, units::kilogram_square_meter_t{0.001}, 1.0);
-    m_motorSim.emplace(plant, *simMotor);
+  if (!frc::RobotBase::IsSimulation() || m_sparkSim) return;
+
+  auto simMotor = m_config.GetSimMotor();
+  auto& gearing = m_config.GetMotorGearing();
+  if (!simMotor || !gearing) return;
+
+  auto plant =
+      frc::LinearSystemId::DCMotorSystem(*simMotor, m_config.GetMOI(), gearing->GetMechanismToRotorRatio());
+  m_motorSim.emplace(plant, *simMotor);
+
+  auto period = m_config.GetClosedLoopControlPeriod().value_or(20_ms);
+  SetSimSupplier(std::make_shared<simulation::DCMotorSimSupplier>(
+      *m_motorSim, [this]() { return GetDutyCycle(); }, *gearing, period));
+
+  m_sparkSim.emplace(m_spark, &m_motor);
+
+  if (m_maxConfig)
+    m_relEncoderSim.emplace(static_cast<rev::spark::SparkMax*>(m_spark));
+  else if (m_flexConfig)
+    m_relEncoderSim.emplace(static_cast<rev::spark::SparkFlex*>(m_spark));
+
+  if (m_absEncoder) {
+    if (m_maxConfig)
+      m_absEncoderSim.emplace(static_cast<rev::spark::SparkMax*>(m_spark));
+    else if (m_flexConfig)
+      m_absEncoderSim.emplace(static_cast<rev::spark::SparkFlex*>(m_spark));
   }
 }
 
 void SparkWrapper::SimIterate() {
-  if (!m_motorSim) return;
-  double inputVolts = m_spark->GetAppliedOutput() * frc::sim::RoboRioSim::GetVInVoltage().value();
-  m_motorSim->SetInputVoltage(units::volt_t{inputVolts});
-  m_motorSim->Update(20_ms);
+  if (!frc::RobotBase::IsSimulation() || !m_simSupplier || !m_sparkSim) return;
+
+  if (m_simSupplier->IsWatchdogExpired())
+    m_simSupplier->UpdateSim();
+
+  units::second_t dt = m_config.GetClosedLoopControlPeriod().value_or(20_ms);
+  units::turns_per_second_t mechVelRps = m_simSupplier->GetMechanismVelocity();
+  double vbus = frc::sim::RoboRioSim::GetVInVoltage().value();
+
+  m_sparkSim->iterate(mechVelRps.value(), vbus, dt.value());
+
+  if (m_relEncoderSim)
+    m_relEncoderSim->iterate(mechVelRps.value(), dt.value());
+
+  if (m_absEncoderSim)
+    m_absEncoderSim->iterate(mechVelRps.value(), dt.value());
 }
 
 // ---- Encoder sync -----------------------------------------------------------
@@ -422,5 +457,12 @@ void SparkWrapper::SetClosedLoopSlot(ClosedLoopControllerSlot slot) {
 SmartMotorControllerConfig& SparkWrapper::GetConfig() { return m_config; }
 void* SparkWrapper::GetMotorController() { return m_spark; }
 void* SparkWrapper::GetMotorControllerConfig() { return nullptr; }
+
+telemetry::UnsupportedTelemetryFields SparkWrapper::GetUnsupportedTelemetryFields() {
+  return {std::nullopt,
+          std::vector<telemetry::DoubleTelemetryField>{
+              telemetry::DoubleTelemetryField::SupplyCurrent,
+              telemetry::DoubleTelemetryField::SupplyCurrentLimit}};
+}
 
 }  // namespace yams::motorcontrollers::local

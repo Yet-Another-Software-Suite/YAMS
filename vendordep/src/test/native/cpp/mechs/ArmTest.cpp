@@ -100,7 +100,6 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
     std::this_thread::sleep_for(std::chrono::milliseconds(20));
     SchedulerHelper::RunForDuration(1.0_s);
   }
-
   auto postVel = smc->GetMechanismVelocity();
   auto postAngle = smc->GetMechanismPosition();
 
@@ -109,7 +108,9 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
   if (isCTRE && !moved) {
     std::printf("[WARNING] TalonFX/TalonFXS arm duty-cycle inconclusive.\n");
   } else {
-    EXPECT_TRUE(moved) << "Arm did not move during duty-cycle test";
+    EXPECT_TRUE(moved) << "Arm did not move during duty-cycle test"
+                       << " preVel=" << preVel.value() << " preAngle=" << preAngle.value()
+                       << " postVel=" << postVel.value() << " postAngle=" << postAngle.value();
   }
 }
 
@@ -129,7 +130,8 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE) {
 
   auto postAngle = smc->GetMechanismPosition();
   EXPECT_TRUE(std::abs(postAngle.value() - preAngle.value()) > 0.05 || passed)
-      << "Arm did not move toward PID setpoint";
+      << "Arm did not move toward PID setpoint"
+      << " preAngle=" << preAngle.value() << " postAngle=" << postAngle.value();
 }
 
 // ---- Fixture ----------------------------------------------------------------
@@ -151,6 +153,7 @@ class ArmTest : public ::testing::TestWithParam<MotorTestParam> {
 
 TEST_P(ArmTest, SMCDutyCycle) {
   auto& param = GetParam();
+  SCOPED_TRACE(param.name);
   auto cfg = MakeArmSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();
@@ -162,6 +165,7 @@ TEST_P(ArmTest, SMCDutyCycle) {
 
 TEST_P(ArmTest, SMCPositionPID) {
   auto& param = GetParam();
+  SCOPED_TRACE(param.name);
   auto cfg = MakeArmSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();
@@ -173,6 +177,7 @@ TEST_P(ArmTest, SMCPositionPID) {
 
 TEST_P(ArmTest, ArmDutyCycle) {
   auto& param = GetParam();
+  SCOPED_TRACE(param.name);
   auto cfg = MakeArmSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();
@@ -189,6 +194,7 @@ TEST_P(ArmTest, ArmDutyCycle) {
 
 TEST_P(ArmTest, ArmPositionPID) {
   auto& param = GetParam();
+  SCOPED_TRACE(param.name);
   auto cfg = MakeArmSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();

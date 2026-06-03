@@ -44,7 +44,16 @@ FlyWheel::FlyWheel(const config::FlyWheelConfig& config) : SmartVelocityMechanis
 
 // ---- SmartMechanism overrides -----------------------------------------------
 
-void FlyWheel::SimIterate() { m_smc->SimIterate(); }
+void FlyWheel::SimIterate() {
+  if (auto* ss = m_smc->GetSimSupplier()) {
+    ss->UpdateSim();
+    m_smc->SetEncoderPosition(ss->GetMechanismPosition());
+    m_smc->SetEncoderVelocity(ss->GetMechanismVelocity());
+    ss->FeedWatchdog();
+  } else {
+    m_smc->SimIterate();
+  }
+}
 
 void FlyWheel::UpdateTelemetry() { m_smc->UpdateTelemetry(); }
 

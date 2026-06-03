@@ -26,8 +26,10 @@ jobs:
       - name: Build vendordep
         run: ./gradlew build
         working-directory: ${{ env.workingDirectory }}
-      - name: Unit tests
+      - name: Java Unit tests
         run: ./gradlew test
+      - name: C++ Unit tests
+        run: ./gradlew googleTest
         working-directory: ${{ env.workingDirectory }}
       - name: Publish vendordep
         run: ./gradlew publish

@@ -18,6 +18,7 @@
 #include <memory>
 
 #include "helpers/MockHardware.h"
+#include "helpers/MotorControllerFactory.h"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.h"
 #include "yams/motorcontrollers/SmartMotorFactory.h"
 #include "yams/motorcontrollers/local/SparkWrapper.h"
@@ -37,13 +38,13 @@ class SmartMotorFactoryTest : public ::testing::Test {
 };
 
 TEST_F(SmartMotorFactoryTest, CreateTalonFXWrapperIsNonNull) {
-  ctre::phoenix6::hardware::TalonFX talon{1};
+  ctre::phoenix6::hardware::TalonFX talon{NextCanId()};
   auto smc = SmartMotorFactory::Create(talon, frc::DCMotor::KrakenX60(1), BasicConfig());
   EXPECT_NE(smc, nullptr) << "Factory should create a TalonFXWrapper";
 }
 
 TEST_F(SmartMotorFactoryTest, CreateTalonFXWrapperIsCorrectType) {
-  ctre::phoenix6::hardware::TalonFX talon{2};
+  ctre::phoenix6::hardware::TalonFX talon{NextCanId()};
   auto smc = SmartMotorFactory::Create(talon, frc::DCMotor::KrakenX60(1), BasicConfig());
   ASSERT_NE(smc, nullptr);
   EXPECT_NE(dynamic_cast<remote::TalonFXWrapper*>(smc.get()), nullptr)
@@ -51,14 +52,14 @@ TEST_F(SmartMotorFactoryTest, CreateTalonFXWrapperIsCorrectType) {
 }
 
 TEST_F(SmartMotorFactoryTest, CreateTalonFXSWrapperIsNonNull) {
-  ctre::phoenix6::hardware::TalonFXS talon{3};
+  ctre::phoenix6::hardware::TalonFXS talon{NextCanId()};
   auto smc = SmartMotorFactory::Create(
       talon, frc::DCMotor::NEO(1), remote::TalonFXSWrapper::MotorArrangement::NEO, BasicConfig());
   EXPECT_NE(smc, nullptr) << "Factory should create a TalonFXSWrapper";
 }
 
 TEST_F(SmartMotorFactoryTest, CreateTalonFXSWrapperIsCorrectType) {
-  ctre::phoenix6::hardware::TalonFXS talon{4};
+  ctre::phoenix6::hardware::TalonFXS talon{NextCanId()};
   auto smc = SmartMotorFactory::Create(
       talon, frc::DCMotor::NEO(1), remote::TalonFXSWrapper::MotorArrangement::NEO, BasicConfig());
   ASSERT_NE(smc, nullptr);
@@ -67,13 +68,13 @@ TEST_F(SmartMotorFactoryTest, CreateTalonFXSWrapperIsCorrectType) {
 }
 
 TEST_F(SmartMotorFactoryTest, CreateSparkMaxWrapperIsNonNull) {
-  rev::spark::SparkMax spark{5, rev::spark::SparkLowLevel::MotorType::kBrushless};
+  rev::spark::SparkMax spark{NextCanId(), rev::spark::SparkLowLevel::MotorType::kBrushless};
   auto smc = SmartMotorFactory::Create(spark, frc::DCMotor::NEO(1), BasicConfig());
   EXPECT_NE(smc, nullptr) << "Factory should create a SparkWrapper for SparkMax";
 }
 
 TEST_F(SmartMotorFactoryTest, CreateSparkMaxWrapperIsCorrectType) {
-  rev::spark::SparkMax spark{6, rev::spark::SparkLowLevel::MotorType::kBrushless};
+  rev::spark::SparkMax spark{NextCanId(), rev::spark::SparkLowLevel::MotorType::kBrushless};
   auto smc = SmartMotorFactory::Create(spark, frc::DCMotor::NEO(1), BasicConfig());
   ASSERT_NE(smc, nullptr);
   EXPECT_NE(dynamic_cast<local::SparkWrapper*>(smc.get()), nullptr)
@@ -81,13 +82,13 @@ TEST_F(SmartMotorFactoryTest, CreateSparkMaxWrapperIsCorrectType) {
 }
 
 TEST_F(SmartMotorFactoryTest, CreateSparkFlexWrapperIsNonNull) {
-  rev::spark::SparkFlex spark{7, rev::spark::SparkLowLevel::MotorType::kBrushless};
+  rev::spark::SparkFlex spark{NextCanId(), rev::spark::SparkLowLevel::MotorType::kBrushless};
   auto smc = SmartMotorFactory::Create(spark, frc::DCMotor::NeoVortex(1), BasicConfig());
   EXPECT_NE(smc, nullptr) << "Factory should create a SparkWrapper for SparkFlex";
 }
 
 TEST_F(SmartMotorFactoryTest, CreateSparkFlexWrapperIsCorrectType) {
-  rev::spark::SparkFlex spark{8, rev::spark::SparkLowLevel::MotorType::kBrushless};
+  rev::spark::SparkFlex spark{NextCanId(), rev::spark::SparkLowLevel::MotorType::kBrushless};
   auto smc = SmartMotorFactory::Create(spark, frc::DCMotor::NeoVortex(1), BasicConfig());
   ASSERT_NE(smc, nullptr);
   EXPECT_NE(dynamic_cast<local::SparkWrapper*>(smc.get()), nullptr)

@@ -259,6 +259,11 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimMotor(frc::DCMoto
   m_simMotor = motor;
   return *this;
 }
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithMOI(
+    units::kilogram_square_meter_t moi) {
+  m_moi = moi;
+  return *this;
+}
 
 // ---- Getters -------------------------------------------------------------
 
@@ -318,6 +323,10 @@ std::optional<int> SmartMotorControllerConfig::GetStatorStallCurrentLimit() cons
   if (!m_statorCurrentLimit) return std::nullopt;
   return static_cast<int>(m_statorCurrentLimit->value());
 }
+std::optional<int> SmartMotorControllerConfig::GetSupplyStallCurrentLimit() const {
+  if (!m_supplyCurrentLimit) return std::nullopt;
+  return static_cast<int>(m_supplyCurrentLimit->value());
+}
 std::optional<units::ampere_t> SmartMotorControllerConfig::GetSupplyCurrentLimit() const {
   return m_supplyCurrentLimit;
 }
@@ -345,8 +354,12 @@ std::optional<units::second_t> SmartMotorControllerConfig::GetClosedLoopRampRate
   return m_closedLoopRampRate;
 }
 
-bool SmartMotorControllerConfig::GetMotorInverted() const { return m_motorInverted; }
-bool SmartMotorControllerConfig::GetEncoderInverted() const { return m_encoderInverted; }
+std::optional<bool> SmartMotorControllerConfig::GetMotorInverted() const {
+  return m_motorInverted;
+}
+std::optional<bool> SmartMotorControllerConfig::GetEncoderInverted() const {
+  return m_encoderInverted;
+}
 bool SmartMotorControllerConfig::GetVelocityTrapezoidalProfileInUse() const {
   return m_velocityTrapProfile;
 }
@@ -360,6 +373,7 @@ SmartMotorControllerConfig::GetVerbosity() const {
 }
 frc2::SubsystemBase* SmartMotorControllerConfig::GetSubsystem() const { return m_subsystem; }
 std::optional<frc::DCMotor> SmartMotorControllerConfig::GetSimMotor() const { return m_simMotor; }
+units::kilogram_square_meter_t SmartMotorControllerConfig::GetMOI() const { return m_moi; }
 
 const std::optional<gearing::MechanismGearing>& SmartMotorControllerConfig::GetMotorGearing()
     const {

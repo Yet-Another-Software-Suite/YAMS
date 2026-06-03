@@ -54,7 +54,16 @@ Elevator::Elevator(const config::ElevatorConfig& config) : SmartPositionalMechan
 
 // ---- SmartMechanism overrides -----------------------------------------------
 
-void Elevator::SimIterate() { m_smc->SimIterate(); }
+void Elevator::SimIterate() {
+  if (auto* ss = m_smc->GetSimSupplier()) {
+    ss->UpdateSim();
+    m_smc->SetEncoderPosition(ss->GetMechanismPosition());
+    m_smc->SetEncoderVelocity(ss->GetMechanismVelocity());
+    ss->FeedWatchdog();
+  } else {
+    m_smc->SimIterate();
+  }
+}
 
 void Elevator::UpdateTelemetry() { m_smc->UpdateTelemetry(); }
 

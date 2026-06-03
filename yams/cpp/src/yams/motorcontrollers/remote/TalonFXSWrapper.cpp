@@ -13,6 +13,8 @@
 
 #include <cmath>
 
+#include "yams/motorcontrollers/simulation/DCMotorSimSupplier.h"
+
 using namespace ctre::phoenix6;
 
 namespace yams::motorcontrollers::remote {
@@ -46,9 +48,9 @@ bool TalonFXSWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   m_config = config;
   auto& cfg = m_talonConfig;
 
-  cfg.MotorOutput.Inverted = config.GetMotorInverted()
-                                 ? signals::InvertedValue::Clockwise_Positive
-                                 : signals::InvertedValue::CounterClockwise_Positive;
+  if (auto inv = config.GetMotorInverted(); inv)
+    cfg.MotorOutput.Inverted = *inv ? signals::InvertedValue::Clockwise_Positive
+                                    : signals::InvertedValue::CounterClockwise_Positive;
 
   cfg.MotorOutput.NeutralMode = config.GetIdleMode() == SmartMotorControllerConfig::MotorMode::BRAKE
                                     ? signals::NeutralModeValue::Brake
@@ -127,22 +129,41 @@ bool TalonFXSWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
 // ---- Simulation -------------------------------------------------------------
 
 void TalonFXSWrapper::SetupSimulation() {
-  if (!frc::RobotBase::IsSimulation()) return;
-  if (auto simMotor = m_config.GetSimMotor(); simMotor) {
-    auto plant =
-        frc::LinearSystemId::DCMotorSystem(*simMotor, units::kilogram_square_meter_t{0.001}, 1.0);
-    m_motorSim.emplace(plant, *simMotor);
-  }
+  if (!frc::RobotBase::IsSimulation() || m_simSupplier) return;
+
+  auto simMotor = m_config.GetSimMotor();
+  auto& gearing = m_config.GetMotorGearing();
+  if (!simMotor || !gearing) return;
+
+  auto plant =
+      frc::LinearSystemId::DCMotorSystem(*simMotor, m_config.GetMOI(), gearing->GetMechanismToRotorRatio());
+  m_motorSim.emplace(plant, *simMotor);
+
+  auto period = m_config.GetClosedLoopControlPeriod().value_or(20_ms);
+  SetSimSupplier(std::make_shared<simulation::DCMotorSimSupplier>(
+      *m_motorSim, [this]() { return GetDutyCycle(); }, *gearing, period));
 }
 
 void TalonFXSWrapper::SimIterate() {
-  if (!m_motorSim) return;
+  if (!frc::RobotBase::IsSimulation() || !m_simSupplier) return;
+
   auto& sim = m_talon.GetSimState();
-  m_motorSim->SetInputVoltage(sim.GetMotorVoltage());
-  m_motorSim->Update(20_ms);
-  sim.SetRawRotorPosition(units::turn_t{m_motorSim->GetAngularPosition()});
-  sim.SetRotorVelocity(units::turns_per_second_t{m_motorSim->GetAngularVelocity()});
   sim.SetSupplyVoltage(frc::sim::RoboRioSim::GetVInVoltage());
+
+  m_simSupplier->SetInputVoltage(sim.GetMotorVoltage());
+  m_simSupplier->UpdateSim();
+
+  sim.SetRawRotorPosition(units::turn_t{m_simSupplier->GetRotorPosition()});
+  sim.SetRotorVelocity(units::turns_per_second_t{m_simSupplier->GetRotorVelocity()});
+  sim.SetRotorAcceleration(units::turns_per_second_squared_t{m_simSupplier->GetRotorAcceleration()});
+
+  if (m_cancoder) {
+    auto& cancoderSim = m_cancoder->get().GetSimState();
+    cancoderSim.SetSupplyVoltage(frc::sim::RoboRioSim::GetVInVoltage());
+    cancoderSim.SetVelocity(units::turns_per_second_t{m_simSupplier->GetMechanismVelocity()});
+    cancoderSim.SetRawPosition(units::turn_t{m_simSupplier->GetMechanismPosition()});
+    cancoderSim.SetMagnetHealth(ctre::phoenix6::signals::MagnetHealthValue::Magnet_Green);
+  }
 }
 
 void TalonFXSWrapper::SeedRelativeEncoder() {}
@@ -453,5 +474,9 @@ void TalonFXSWrapper::SetClosedLoopSlot(ClosedLoopControllerSlot slot) {
 SmartMotorControllerConfig& TalonFXSWrapper::GetConfig() { return m_config; }
 void* TalonFXSWrapper::GetMotorController() { return &m_talon; }
 void* TalonFXSWrapper::GetMotorControllerConfig() { return &m_talonConfig; }
+
+telemetry::UnsupportedTelemetryFields TalonFXSWrapper::GetUnsupportedTelemetryFields() {
+  return {};  // TalonFXS supports all telemetry fields
+}
 
 }  // namespace yams::motorcontrollers::remote

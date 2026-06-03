@@ -1,4 +1,5 @@
 import edu.wpi.first.toolchain.*
+import org.gradle.nativeplatform.test.tasks.RunTestExecutable
 
 plugins {
   id 'cpp'
@@ -38,11 +39,6 @@ sourceSets {
             srcDir "$rootDir/../yams/java/"
         }
     }
-//    test {
-//        java {
-//            srcDir "src/test/java"
-//        }
-//    }
 }
 
 var javaVersion = "17"
@@ -110,6 +106,20 @@ tasks.test {
     enabled = !gradle.startParameter.taskNames.contains('build')
 }
 
+task googleTest {
+    description = 'Runs the Google Test C++ unit tests for the current platform'
+    group = 'Verification'
+}
+
+tasks.whenTaskAdded { task ->
+    if (task instanceof RunTestExecutable) {
+        task.enabled = !gradle.startParameter.taskNames.contains('build')
+        if (task.name.contains(NativePlatforms.desktop.capitalize()) && task.name.contains('Debug')) {
+            googleTest.dependsOn task
+        }
+    }
+}
+
 if (project.hasProperty('onlylinuxathena') || project.hasProperty('onlylinuxarm32') || project.hasProperty('onlylinuxarm64') || project.hasProperty('onlywindowsarm64') || project.hasProperty('onlylinuxsystemcore')) {
     test.enabled = false
 }
@@ -167,6 +177,9 @@ model {
   }
   testSuites {
       YAMSTest {
+          binaries.all {
+              buildable = !gradle.startParameter.taskNames.contains('build')
+          }
           sources.cpp {
               source {
                   srcDir 'src/test/native/cpp'

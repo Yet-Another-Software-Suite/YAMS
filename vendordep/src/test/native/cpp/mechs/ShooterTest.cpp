@@ -104,7 +104,9 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
   if (isCTRE && !moved) {
     std::printf("[WARNING] TalonFX/TalonFXS shooter duty-cycle inconclusive.\n");
   } else {
-    EXPECT_TRUE(moved) << "Shooter did not spin during duty-cycle test";
+    EXPECT_TRUE(moved) << "Shooter did not spin during duty-cycle test"
+                       << " preVel=" << preVel.value() << " preAngle=" << preAngle.value()
+                       << " postVel=" << postVel.value() << " postAngle=" << postAngle.value();
   }
 }
 
@@ -113,8 +115,8 @@ static void VelocityPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   bool passed = false;
 
   // ~2000 RPM = 2000/60 rps * 360 deg/rot = 12000 deg/s
-  auto cmd =
-      frc2::cmd::Run([smc] { smc->SetVelocity(units::degrees_per_second_t{12000.0}); }, {smc->GetConfig().GetSubsystem()});
+  auto cmd = frc2::cmd::Run([smc] { smc->SetVelocity(units::degrees_per_second_t{12000.0}); },
+                            {smc->GetConfig().GetSubsystem()});
   frc2::CommandScheduler::GetInstance().Schedule(cmd);
 
   SchedulerHelper::RunForDuration(isCTRE ? 1.0_s : 2.0_s, [&] {
@@ -124,7 +126,8 @@ static void VelocityPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   auto postVel = smc->GetMechanismVelocity();
 
   EXPECT_TRUE(std::abs(postVel.value() - preVel.value()) > 0.05 || passed)
-      << "Shooter velocity did not change toward PID setpoint";
+      << "Shooter velocity did not change toward PID setpoint"
+      << " preVel=" << preVel.value() << " postVel=" << postVel.value();
 }
 
 // ---- Fixture ----------------------------------------------------------------
@@ -146,6 +149,7 @@ class ShooterTest : public ::testing::TestWithParam<MotorTestParam> {
 
 TEST_P(ShooterTest, SMCDutyCycle) {
   auto& param = GetParam();
+  SCOPED_TRACE(param.name);
   auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();
@@ -157,6 +161,7 @@ TEST_P(ShooterTest, SMCDutyCycle) {
 
 TEST_P(ShooterTest, SMCVelocityPID) {
   auto& param = GetParam();
+  SCOPED_TRACE(param.name);
   auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();
@@ -168,6 +173,7 @@ TEST_P(ShooterTest, SMCVelocityPID) {
 
 TEST_P(ShooterTest, ShooterDutyCycle) {
   auto& param = GetParam();
+  SCOPED_TRACE(param.name);
   auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();
@@ -184,6 +190,7 @@ TEST_P(ShooterTest, ShooterDutyCycle) {
 
 TEST_P(ShooterTest, ShooterVelocityPID) {
   auto& param = GetParam();
+  SCOPED_TRACE(param.name);
   auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();

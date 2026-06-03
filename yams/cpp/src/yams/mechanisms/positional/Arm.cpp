@@ -52,7 +52,16 @@ Arm::Arm(const config::ArmConfig& config) : SmartPositionalMechanism(), m_armCon
 
 // ---- SmartMechanism overrides -----------------------------------------------
 
-void Arm::SimIterate() { m_smc->SimIterate(); }
+void Arm::SimIterate() {
+  if (auto* ss = m_smc->GetSimSupplier()) {
+    ss->UpdateSim();
+    m_smc->SetEncoderPosition(ss->GetMechanismPosition());
+    m_smc->SetEncoderVelocity(ss->GetMechanismVelocity());
+    ss->FeedWatchdog();
+  } else {
+    m_smc->SimIterate();
+  }
+}
 
 void Arm::UpdateTelemetry() { m_smc->UpdateTelemetry(); }
 

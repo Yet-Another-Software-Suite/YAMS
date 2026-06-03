@@ -105,7 +105,9 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
   if (isCTRE && !moved) {
     std::printf("[WARNING] TalonFX/TalonFXS duty-cycle test inconclusive on this OS.\n");
   } else {
-    EXPECT_TRUE(moved) << "Motor did not move during duty-cycle test";
+    EXPECT_TRUE(moved) << "Motor did not move during duty-cycle test"
+                       << " preVel=" << preVel.value() << " preDist=" << preDist.value()
+                       << " postVel=" << postVel.value() << " postDist=" << postDist.value();
   }
 }
 
@@ -126,7 +128,8 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE) {
 
   auto postDist = smc->GetMeasurementPosition();
   EXPECT_TRUE(std::abs(postDist.value() - preDist.value()) > 0.005 || passed)
-      << "Elevator did not move toward PID setpoint";
+      << "Elevator did not move toward PID setpoint"
+      << " preDist=" << preDist.value() << " postDist=" << postDist.value();
 }
 
 // ---- Parameterised fixture --------------------------------------------------
@@ -148,6 +151,7 @@ class ElevatorTest : public ::testing::TestWithParam<MotorTestParam> {
 
 TEST_P(ElevatorTest, SMCDutyCycle) {
   auto& param = GetParam();
+  SCOPED_TRACE(param.name);
   auto cfg = MakeElevatorSMCConfig(param.profile, nullptr, param.name);
   auto subsys = std::make_unique<TestSubsystem>();
   cfg.WithSubsystem(subsys.get());
@@ -161,6 +165,7 @@ TEST_P(ElevatorTest, SMCDutyCycle) {
 
 TEST_P(ElevatorTest, SMCPositionPID) {
   auto& param = GetParam();
+  SCOPED_TRACE(param.name);
   auto cfg = MakeElevatorSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();
@@ -172,6 +177,7 @@ TEST_P(ElevatorTest, SMCPositionPID) {
 
 TEST_P(ElevatorTest, ElevatorDutyCycle) {
   auto& param = GetParam();
+  SCOPED_TRACE(param.name);
   auto cfg = MakeElevatorSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();
@@ -188,6 +194,7 @@ TEST_P(ElevatorTest, ElevatorDutyCycle) {
 
 TEST_P(ElevatorTest, ElevatorPositionPID) {
   auto& param = GetParam();
+  SCOPED_TRACE(param.name);
   auto cfg = MakeElevatorSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();
