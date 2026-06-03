@@ -66,14 +66,14 @@ static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, Test
   return cfg;
 }
 
-static FlyWheel CreateShooter(SmartMotorController* smc, TestSubsystem* subsys) {
+static FlyWheel* CreateShooter(SmartMotorController* smc, TestSubsystem* subsys) {
   FlyWheelConfig cfg;
   cfg.WithMotorController(smc).WithSubsystem(subsys).WithRollerDiameter(
       units::meter_t{4.0 * 0.0254});  // 4 inches
   FlyWheel shooter{cfg};
   subsys->m_mechSimPeriodic = [&shooter] { shooter.SimIterate(); };
   subsys->m_mechUpdateTelemetry = [&shooter] { shooter.UpdateTelemetry(); };
-  return shooter;
+  return &shooter;
 }
 
 // ---- Shared test bodies -----------------------------------------------------
@@ -177,7 +177,7 @@ TEST_P(ShooterTest, ShooterDutyCycle) {
   bundle.subsystem->m_testRunning = true;
 
   auto shooter = CreateShooter(bundle.smc, bundle.subsystem.get());
-  auto upCmd = shooter.Set(0.5);
+  auto upCmd = shooter->Set(0.5);
   frc2::CommandScheduler::GetInstance().Schedule(upCmd);
 
   DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
@@ -193,7 +193,7 @@ TEST_P(ShooterTest, ShooterVelocityPID) {
 
   // ~80 RPM = 80/60 * 360 ≈ 480 deg/s
   auto shooter = CreateShooter(bundle.smc, bundle.subsystem.get());
-  auto highPid = shooter.Spin(units::degrees_per_second_t{480.0});
+  auto highPid = shooter->Spin(units::degrees_per_second_t{480.0});
   frc2::CommandScheduler::GetInstance().Schedule(highPid);
 
   VelocityPIDTestBody(bundle.smc, IsCTRE(bundle));

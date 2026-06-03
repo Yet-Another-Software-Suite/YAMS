@@ -65,7 +65,7 @@ static SmartMotorControllerConfig MakeElevatorSMCConfig(ProfileType profile, Tes
   return cfg;
 }
 
-static positional::Elevator CreateElevator(SmartMotorController* smc, TestSubsystem* subsys) {
+static positional::Elevator* CreateElevator(SmartMotorController* smc, TestSubsystem* subsys) {
   ElevatorConfig cfg;
   cfg.WithMotorController(smc)
       .WithSubsystem(subsys)
@@ -75,7 +75,7 @@ static positional::Elevator CreateElevator(SmartMotorController* smc, TestSubsys
   positional::Elevator elevator{cfg};
   subsys->m_mechSimPeriodic = [&elevator] { elevator.SimIterate(); };
   subsys->m_mechUpdateTelemetry = [&elevator] { elevator.UpdateTelemetry(); };
-  return elevator;
+  return &elevator;
 }
 
 // ---- Shared test bodies -----------------------------------------------------
@@ -178,11 +178,12 @@ TEST_P(ElevatorTest, ElevatorDutyCycle) {
   bundle.subsystem->m_testRunning = true;
 
   auto elevator = CreateElevator(bundle.smc, bundle.subsystem.get());
-  auto upCmd = elevator.Set(1.0);
+  auto upCmd = elevator->Set(1.0);
   frc2::CommandScheduler::GetInstance().Schedule(upCmd);
 
   DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
   CloseBundle(bundle);
+  delete elevator;
 }
 
 TEST_P(ElevatorTest, ElevatorPositionPID) {
@@ -193,7 +194,7 @@ TEST_P(ElevatorTest, ElevatorPositionPID) {
   bundle.subsystem->m_testRunning = true;
 
   auto elevator = CreateElevator(bundle.smc, bundle.subsystem.get());
-  auto highPid = elevator.GoToHeight(2.0_m);
+  auto highPid = elevator->GoToHeight(2.0_m);
   frc2::CommandScheduler::GetInstance().Schedule(highPid);
 
   PositionPIDTestBody(bundle.smc, IsCTRE(bundle));

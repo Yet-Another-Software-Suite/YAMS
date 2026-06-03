@@ -61,7 +61,7 @@ static SmartMotorControllerConfig MakePivotSMCConfig(ProfileType profile, TestSu
   return cfg;
 }
 
-static positional::Pivot CreatePivot(SmartMotorController* smc, TestSubsystem* subsys) {
+static positional::Pivot* CreatePivot(SmartMotorController* smc, TestSubsystem* subsys) {
   PivotConfig cfg;
   cfg.WithMotorController(smc)
       .WithSubsystem(subsys)
@@ -71,7 +71,7 @@ static positional::Pivot CreatePivot(SmartMotorController* smc, TestSubsystem* s
   positional::Pivot pivot{cfg};
   subsys->m_mechSimPeriodic = [&pivot] { pivot.SimIterate(); };
   subsys->m_mechUpdateTelemetry = [&pivot] { pivot.UpdateTelemetry(); };
-  return pivot;
+  return &pivot;
 }
 
 // ---- Shared test bodies -----------------------------------------------------
@@ -172,7 +172,7 @@ TEST_P(PivotTest, PivotDutyCycle) {
   bundle.subsystem->m_testRunning = true;
 
   auto pivot = CreatePivot(bundle.smc, bundle.subsystem.get());
-  auto upCmd = pivot.Set(0.5);
+  auto upCmd = pivot->Set(0.5);
   frc2::CommandScheduler::GetInstance().Schedule(upCmd);
 
   DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
@@ -187,7 +187,7 @@ TEST_P(PivotTest, PivotPositionPID) {
   bundle.subsystem->m_testRunning = true;
 
   auto pivot = CreatePivot(bundle.smc, bundle.subsystem.get());
-  auto highPid = pivot.GoToAngle(80.0_deg);
+  auto highPid = pivot->GoToAngle(80.0_deg);
   frc2::CommandScheduler::GetInstance().Schedule(highPid);
 
   PositionPIDTestBody(bundle.smc, IsCTRE(bundle));

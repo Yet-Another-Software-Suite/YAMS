@@ -63,7 +63,7 @@ static SmartMotorControllerConfig MakeArmSMCConfig(ProfileType profile, TestSubs
   return cfg;
 }
 
-static positional::Arm CreateArm(SmartMotorController* smc, TestSubsystem* subsys, bool isCTRE) {
+static positional::Arm* CreateArm(SmartMotorController* smc, TestSubsystem* subsys, bool isCTRE) {
   ArmConfig cfg;
   cfg.WithMotorController(smc)
       .WithSubsystem(subsys)
@@ -77,7 +77,7 @@ static positional::Arm CreateArm(SmartMotorController* smc, TestSubsystem* subsy
   positional::Arm arm{cfg};
   subsys->m_mechSimPeriodic = [&arm] { arm.SimIterate(); };
   subsys->m_mechUpdateTelemetry = [&arm] { arm.UpdateTelemetry(); };
-  return arm;
+  return &arm;
 }
 
 // ---- Shared test bodies -----------------------------------------------------
@@ -179,7 +179,7 @@ TEST_P(ArmTest, ArmDutyCycle) {
   bundle.subsystem->m_testRunning = true;
 
   auto arm = CreateArm(bundle.smc, bundle.subsystem.get(), IsCTRE(bundle));
-  auto upCmd = arm.Set(0.5);
+  auto upCmd = arm->Set(0.5);
   frc2::CommandScheduler::GetInstance().Schedule(upCmd);
 
   DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
@@ -194,7 +194,7 @@ TEST_P(ArmTest, ArmPositionPID) {
   bundle.subsystem->m_testRunning = true;
 
   auto arm = CreateArm(bundle.smc, bundle.subsystem.get(), IsCTRE(bundle));
-  auto highPid = arm.GoToAngle(80.0_deg);
+  auto highPid = arm->GoToAngle(80.0_deg);
   frc2::CommandScheduler::GetInstance().Schedule(highPid);
 
   PositionPIDTestBody(bundle.smc, IsCTRE(bundle));
