@@ -29,6 +29,7 @@ namespace yams::mechanisms {
  */
 class SmartMechanism {
  public:
+  SmartMechanism() = default;
   virtual ~SmartMechanism() = default;
 
   // ---- Pure virtual interface -----------------------------------------------
