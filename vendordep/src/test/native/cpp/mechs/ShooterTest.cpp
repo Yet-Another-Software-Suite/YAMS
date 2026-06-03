@@ -109,7 +109,6 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
 }
 
 static void VelocityPIDTestBody(SmartMotorController* smc, bool isCTRE) {
-  auto preAngle = smc->GetMechanismPosition();
   auto preVel = smc->GetMechanismVelocity();
   bool passed = false;
 
