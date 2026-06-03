@@ -18,7 +18,7 @@ namespace yams::mechanisms::positional {
 
 // ---- Constructor ------------------------------------------------------------
 
-Elevator::Elevator(const config::ElevatorConfig& config) : SmartPositionalMechanism(), m_elevatorConfig{config} {
+Elevator::Elevator(const config::ElevatorConfig& config) : SmartMechanism(), SmartPositionalMechanism(), m_elevatorConfig{config} {
   m_smc = config.GetMotorController();
   m_subsystem = config.GetSubsystem();
 
