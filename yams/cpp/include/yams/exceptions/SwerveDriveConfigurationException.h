@@ -14,6 +14,11 @@ namespace yams {
  */
 class SwerveDriveConfigurationException : public YamsException {
  public:
+  /**
+   * Construct a SwerveDriveConfigurationException.
+   *
+   * @param message Description of the configuration error.
+   */
   explicit SwerveDriveConfigurationException(const std::string& message)
       : YamsException("[SwerveDrive Configuration Error]\n" + message) {}
 };

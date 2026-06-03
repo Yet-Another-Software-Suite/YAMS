@@ -224,10 +224,16 @@ class SwerveDriveConfig {
   /** Get the starting pose. */
   frc::Pose2d GetInitialPose() const;
 
+  /** @return Optional maximum chassis linear speed for wheel-speed desaturation. */
   std::optional<units::meters_per_second_t> GetMaximumChassisLinearVelocity() const;
+
+  /** @return Optional maximum chassis angular speed for wheel-speed desaturation. */
   std::optional<units::degrees_per_second_t> GetMaximumChassisAngularVelocity() const;
+  /** @return Optional maximum module linear speed for wheel-speed desaturation. */
   std::optional<units::meters_per_second_t> GetMaximumModuleLinearVelocity() const;
+  /** @return Optional override centre of rotation (empty = robot centre). */
   std::optional<frc::Translation2d> GetCenterOfRotation() const;
+  /** @return Optional telemetry verbosity level. */
   std::optional<TelemetryVerbosity> GetTelemetryVerbosity() const;
 
   /**

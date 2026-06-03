@@ -57,29 +57,50 @@ class SmartMotorControllerTelemetryConfig {
 
   // ---- Individual field enable methods ------------------------------------
 
+  /** Enable mechanism lower-limit logging. @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithMechanismLowerLimit();
+  /** Enable mechanism upper-limit logging. @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithMechanismUpperLimit();
+  /** Enable temperature-limit (over-temp flag) logging. @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithTemperatureLimit();
+  /** Enable velocity-control active flag logging. @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithVelocityControl();
+  /** Enable elevator feedforward active flag logging. @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithElevatorFeedforward();
+  /** Enable arm feedforward active flag logging. @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithArmFeedforward();
+  /** Enable simple motor feedforward active flag logging. @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithSimpleFeedforward();
+  /** Enable motion profile active flag logging. @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithMotionProfile();
+  /** Enable setpoint position logging (read-only). @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithSetpointPosition();
+  /** Enable setpoint velocity logging (read-only). @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithSetpointVelocity();
+  /** Enable output voltage logging. @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithOutputVoltage();
+  /** Enable stator current logging. @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithStatorCurrent();
+  /** Enable motor temperature logging. @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithTemperature();
+  /** Enable linear measurement position logging. @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithMeasurementPosition();
+  /** Enable linear measurement velocity logging. @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithMeasurementVelocity();
+  /** Enable mechanism angular position logging. @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithMechanismPosition();
+  /** Enable mechanism angular velocity logging. @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithMechanismVelocity();
+  /** Enable raw rotor position logging. @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithRotorPosition();
+  /** Enable raw rotor velocity logging. @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithRotorVelocity();
 
   // ---- Accessors ----------------------------------------------------------
 
+  /** @return Optional DataLog prefix path if configured. */
   std::optional<std::string> GetDataLogName() const;
+  /** @return true if NT4 output is enabled. */
   bool GetNT4Enabled() const;
 
   /**
