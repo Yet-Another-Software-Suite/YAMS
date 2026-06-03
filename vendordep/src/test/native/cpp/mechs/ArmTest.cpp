@@ -74,7 +74,7 @@ static positional::Arm* CreateArm(SmartMotorController* smc, TestSubsystem* subs
   // withHorizontalZero only for CTRE controllers in the Java tests
   // (not a config option in our C++ ArmConfig yet; add if needed)
 
-  positional::Arm arm = new positional::Arm(cfg);
+  positional::Arm* arm = new positional::Arm(cfg);
   subsys->m_mechSimPeriodic = [arm] { arm->SimIterate(); };
   subsys->m_mechUpdateTelemetry = [arm] { arm->UpdateTelemetry(); };
   return arm;
