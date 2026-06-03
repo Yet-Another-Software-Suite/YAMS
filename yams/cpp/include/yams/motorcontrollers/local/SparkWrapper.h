@@ -21,10 +21,32 @@
 
 namespace yams::motorcontrollers::local {
 
+/**
+ * SmartMotorController implementation for REV SPARK Max and SPARK Flex motor controllers.
+ *
+ * Supports both SPARK Max and SPARK Flex hardware via a common internal interface.
+ * Wraps REV SparkBase, SparkClosedLoopController, and encoder objects to satisfy the
+ * SmartMotorController contract.
+ */
 class SparkWrapper : public SmartMotorController {
  public:
+  /**
+   * Construct a SparkWrapper around a SPARK Max.
+   *
+   * @param spark  SPARK Max hardware object (must outlive this wrapper).
+   * @param motor  DC motor model used for simulation.
+   * @param config Initial SmartMotorControllerConfig to apply.
+   */
   SparkWrapper(rev::spark::SparkMax& spark, frc::DCMotor motor,
                const SmartMotorControllerConfig& config);
+
+  /**
+   * Construct a SparkWrapper around a SPARK Flex.
+   *
+   * @param spark  SPARK Flex hardware object (must outlive this wrapper).
+   * @param motor  DC motor model used for simulation.
+   * @param config Initial SmartMotorControllerConfig to apply.
+   */
   SparkWrapper(rev::spark::SparkFlex& spark, frc::DCMotor motor,
                const SmartMotorControllerConfig& config);
 

@@ -3,6 +3,17 @@
 
 #pragma once
 
+/**
+ * @file YAMS.h
+ * @brief Convenience header that includes the entire YAMS C++ library.
+ *
+ * YAMS — Yet Another Mechanism System (C++ port).
+ * Requires WPILib 2026, REVLib, and CTRE Phoenix 6.
+ *
+ * Include this single header to access all gearing, math, unit, motor-controller,
+ * mechanism, and exception types provided by YAMS.
+ */
+
 // YAMS — Yet Another Mechanism System (C++ port)
 // WPILib 2026 | REVLib | Phoenix 6
 

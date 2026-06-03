@@ -9,8 +9,18 @@
 
 namespace yams {
 
+/**
+ * Thrown when a SmartMotorControllerConfig is incomplete or contains conflicting settings.
+ */
 class SmartMotorControllerConfigurationException : public YamsException {
  public:
+  /**
+   * Construct a SmartMotorControllerConfigurationException.
+   *
+   * @param issue  Short description of what is misconfigured.
+   * @param result Description of the undesirable consequence.
+   * @param fix    Suggested remediation for the caller.
+   */
   SmartMotorControllerConfigurationException(const std::string& issue, const std::string& result,
                                              const std::string& fix)
       : YamsException(

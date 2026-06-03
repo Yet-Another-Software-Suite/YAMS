@@ -12,6 +12,13 @@
 #include <units/time.h>
 #include <units/velocity.h>
 
+/**
+ * @namespace yams::units
+ * Additional unit type aliases supplementing the WPILib units library.
+ *
+ * Provides imperial distance units (hand, yard, cubit, fathom, furlong, mile, league),
+ * extended time units (hour, day, week, fortnight, year), and derived angular rate types.
+ */
 namespace yams::units {
 
 // === Distance Units (imperial) ===

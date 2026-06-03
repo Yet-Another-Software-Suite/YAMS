@@ -8,8 +8,18 @@
 
 namespace yams {
 
+/**
+ * Base exception class for all YAMS runtime errors.
+ *
+ * All YAMS exceptions derive from this class, which itself extends std::runtime_error.
+ */
 class YamsException : public std::runtime_error {
  public:
+  /**
+   * Construct a YamsException with the given message.
+   *
+   * @param message Human-readable description of the error.
+   */
   explicit YamsException(const std::string& message) : std::runtime_error(message) {}
 };
 

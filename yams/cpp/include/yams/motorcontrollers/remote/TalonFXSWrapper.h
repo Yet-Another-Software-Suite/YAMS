@@ -22,10 +22,26 @@
 
 namespace yams::motorcontrollers::remote {
 
+/**
+ * SmartMotorController implementation for the CTRE TalonFXS motor controller (Phoenix 6).
+ *
+ * The TalonFXS supports third-party brushed and brushless motors (e.g. REV NEO, Minion).
+ * Wraps a TalonFXS hardware object and exposes the full SmartMotorController interface
+ * including MotionMagic profiles, CANcoder/CANdi synchronization, and simulation support.
+ */
 class TalonFXSWrapper : public SmartMotorController {
  public:
+  /** Motor type attached to the TalonFXS external motor port. */
   enum class MotorArrangement { Minion, NEO, NEO550, NEOVortex, Brushed_2Wire, Brushed_3Wire };
 
+  /**
+   * Construct a TalonFXSWrapper.
+   *
+   * @param talon       TalonFXS hardware object (must outlive this wrapper).
+   * @param dcMotor     DC motor model used for simulation.
+   * @param arrangement Motor type connected to the TalonFXS.
+   * @param config      Initial SmartMotorControllerConfig to apply.
+   */
   TalonFXSWrapper(ctre::phoenix6::hardware::TalonFXS& talon, frc::DCMotor dcMotor,
                   MotorArrangement arrangement, const SmartMotorControllerConfig& config);
 
@@ -105,7 +121,18 @@ class TalonFXSWrapper : public SmartMotorController {
   void* GetMotorController() override;
   void* GetMotorControllerConfig() override;
 
+  /**
+   * Attach a CANcoder for absolute position feedback and encoder synchronization.
+   *
+   * @param cancoder CANcoder hardware object (must outlive this wrapper).
+   */
   void WithCANcoder(ctre::phoenix6::hardware::CANcoder& cancoder);
+
+  /**
+   * Attach a CANdi for absolute position feedback and encoder synchronization.
+   *
+   * @param candi CANdi hardware object (must outlive this wrapper).
+   */
   void WithCANdi(ctre::phoenix6::hardware::CANdi& candi);
 
  private:

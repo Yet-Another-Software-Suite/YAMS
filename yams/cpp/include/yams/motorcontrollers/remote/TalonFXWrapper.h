@@ -24,8 +24,21 @@
 
 namespace yams::motorcontrollers::remote {
 
+/**
+ * SmartMotorController implementation for the CTRE TalonFX motor controller (Phoenix 6).
+ *
+ * Wraps a TalonFX hardware object and exposes the full SmartMotorController interface
+ * including MotionMagic profiles, CANcoder/CANdi synchronization, and simulation support.
+ */
 class TalonFXWrapper : public SmartMotorController {
  public:
+  /**
+   * Construct a TalonFXWrapper.
+   *
+   * @param talon   TalonFX hardware object (must outlive this wrapper).
+   * @param dcMotor DC motor model used for simulation.
+   * @param config  Initial SmartMotorControllerConfig to apply.
+   */
   TalonFXWrapper(ctre::phoenix6::hardware::TalonFX& talon, frc::DCMotor dcMotor,
                  const SmartMotorControllerConfig& config);
 
@@ -117,7 +130,19 @@ class TalonFXWrapper : public SmartMotorController {
   void* GetMotorControllerConfig() override;
 
   // ---- CANcoder / CANdi support -------------------------------------------
+
+  /**
+   * Attach a CANcoder for absolute position feedback and encoder synchronization.
+   *
+   * @param cancoder CANcoder hardware object (must outlive this wrapper).
+   */
   void WithCANcoder(ctre::phoenix6::hardware::CANcoder& cancoder);
+
+  /**
+   * Attach a CANdi for absolute position feedback and encoder synchronization.
+   *
+   * @param candi CANdi hardware object (must outlive this wrapper).
+   */
   void WithCANdi(ctre::phoenix6::hardware::CANdi& candi);
 
  private:
