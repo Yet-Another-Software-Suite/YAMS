@@ -33,7 +33,7 @@ signals::ExternalFeedbackSensorSourceValue TalonFXSWrapper::ArrangementToFeedbac
 TalonFXSWrapper::TalonFXSWrapper(hardware::TalonFXS& talon, frc::DCMotor dcMotor,
                                  MotorArrangement arrangement,
                                  const SmartMotorControllerConfig& config)
-    : m_talon(talon), m_dcMotor(dcMotor), m_arrangement(arrangement) {
+    : SmartMotorController(), m_talon(talon), m_dcMotor(dcMotor), m_arrangement(arrangement) {
   m_config = config;
   SetupSimulation();
   ApplyConfig(config);

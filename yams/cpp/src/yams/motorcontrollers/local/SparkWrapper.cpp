@@ -23,7 +23,7 @@ SparkWrapper::SparkWrapper(SparkMax& spark, frc::DCMotor motor,
 
 SparkWrapper::SparkWrapper(SparkFlex& spark, frc::DCMotor motor,
                            const SmartMotorControllerConfig& cfg)
-    : m_motor(motor) {
+    : SmartMotorController(), m_motor(motor) {
   m_flexConfig.emplace();  // default-construct SparkFlexConfig in-place
   Init(&spark, motor, cfg);
 }

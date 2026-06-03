@@ -19,7 +19,7 @@ namespace yams::motorcontrollers::remote {
 
 TalonFXWrapper::TalonFXWrapper(hardware::TalonFX& talon, frc::DCMotor dcMotor,
                                const SmartMotorControllerConfig& config)
-    : m_talon(talon), m_dcMotor(dcMotor) {
+    : SmartMotorController(), m_talon(talon), m_dcMotor(dcMotor) {
   m_config = config;
   SetupSimulation();
   ApplyConfig(config);

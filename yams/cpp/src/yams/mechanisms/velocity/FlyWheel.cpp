@@ -24,7 +24,7 @@ namespace yams::mechanisms::velocity {
 
 // ---- Constructor ------------------------------------------------------------
 
-FlyWheel::FlyWheel(const config::FlyWheelConfig& config) : m_flyWheelConfig{config} {
+FlyWheel::FlyWheel(const config::FlyWheelConfig& config) : SmartVelocityMechanism(), m_flyWheelConfig{config} {
   m_smc = config.GetMotorController();
   m_subsystem = config.GetSubsystem();
 
