@@ -16,7 +16,7 @@ namespace yams::motorcontrollers::local {
 
 SparkWrapper::SparkWrapper(SparkMax& spark, frc::DCMotor motor,
                            const SmartMotorControllerConfig& cfg)
-    : m_motor(motor) {
+    : SmartMotorController(), m_motor(motor) {
   m_maxConfig.emplace();  // default-construct SparkMaxConfig in-place
   Init(&spark, motor, cfg);
 }
