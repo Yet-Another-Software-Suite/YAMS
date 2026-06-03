@@ -18,7 +18,7 @@ namespace yams::mechanisms::positional {
 
 // ---- Constructor ------------------------------------------------------------
 
-Arm::Arm(const config::ArmConfig& config) : SmartMechanism(), SmartPositionalMechanism(), m_armConfig{config} {
+Arm::Arm(const config::ArmConfig& config) : SmartPositionalMechanism(), m_armConfig{config} {
   m_smc = config.GetMotorController();
   m_subsystem = config.GetSubsystem();
 
