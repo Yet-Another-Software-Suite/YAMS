@@ -211,6 +211,16 @@ void TalonFXSWrapper::SetEncoderPosition(units::meter_t distance) {
     m_talon.SetPosition(units::turn_t{distance.value() / circ->value()});
 }
 
+void TalonFXSWrapper::SetEncoderVelocity(units::degrees_per_second_t velocity) {
+  // TalonFXS doesn't support setting encoder velocity directly
+  (void)velocity;
+}
+
+void TalonFXSWrapper::SetEncoderVelocity(units::meters_per_second_t velocity) {
+  // TalonFXS doesn't support setting encoder velocity directly
+  (void)velocity;
+}
+
 // ---- Encoder reads ----------------------------------------------------------
 
 units::degree_t TalonFXSWrapper::GetMechanismPosition() { return m_talon.GetPosition().GetValue(); }
