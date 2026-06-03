@@ -18,7 +18,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 17
-      - run: chmod +x gradlew
+      - run: chmod +x gradlew && sudo apt-get install -y doxygen-html
         working-directory: ${{ env.workingDirectory }}
       - name: Install roboRio toolchain
         run: ./gradlew installRoboRioToolchain
