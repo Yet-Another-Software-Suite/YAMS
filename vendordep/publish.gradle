@@ -61,7 +61,7 @@ task cppHeadersZip(type: Zip) {
         into '/'
     }
 
-    from('src/main/native/include') {
+    from("$rootDir/../yams/cpp/include") {
         into '/'
     }
 }
@@ -75,7 +75,7 @@ task cppSourceZip(type: Zip) {
         into '/'
     }
 
-    from('src/main/native/cpp') {
+    from("$rootDir/../yams/cpp/src") {
         into '/'
     }
 }
@@ -171,11 +171,16 @@ addTaskToCopyAllOutputs(outputSourcesJar)
 addTaskToCopyAllOutputs(outputJavadocJar)
 addTaskToCopyAllOutputs(outputJar)
 addTaskToCopyAllOutputs(vendordepJsonZip)
+addTaskToCopyAllOutputs(cppHeadersZip)
+addTaskToCopyAllOutputs(cppSourceZip)
+
 
 build.dependsOn outputSourcesJar
 build.dependsOn outputJavadocJar
 build.dependsOn outputJar
 build.dependsOn vendordepJsonZip
+build.dependsOn cppHeadersZip
+build.dependsOn cppSourceZip
 
 libraryBuild.dependsOn build
 
@@ -197,7 +202,7 @@ publishing {
 
 model {
     publishing {
-        def taskList = createComponentZipTasks($.components, ['Vendor'], zipBaseName, Zip, project, includeStandardZipFormat)
+        def taskList = createComponentZipTasks($.components, ['YAMS'], zipBaseName, Zip, project, includeStandardZipFormat)
 //
 //        def driverTaskList = createComponentZipTasks($.components, ['VendorDriver'], driverZipBaseName, Zip, project, includeStandardZipFormat)
 //
@@ -210,8 +215,8 @@ model {
                 artifact cppSourceZip
 
                 artifactId = "${baseArtifactId}-cpp"
-                groupId artifactGroupId
-                version pubVersion
+                groupId = artifactGroupId
+                version = pubVersion
             }
 //            driver(MavenPublication) {
 //                driverTaskList.each {

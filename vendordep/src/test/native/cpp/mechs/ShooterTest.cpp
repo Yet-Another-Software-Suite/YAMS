@@ -114,9 +114,8 @@ static void VelocityPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   bool passed = false;
 
   // ~2000 RPM = 2000/60 rps * 360 deg/rot = 12000 deg/s
-  constexpr units::degrees_per_second_t kTargetVel{12000.0};
   auto cmd =
-      frc2::cmd::Run([smc] { smc->SetVelocity(kTargetVel); }, {smc->GetConfig().GetSubsystem()});
+      frc2::cmd::Run([smc] { smc->SetVelocity(units::degrees_per_second_t{12000.0}); }, {smc->GetConfig().GetSubsystem()});
   frc2::CommandScheduler::GetInstance().Schedule(cmd);
 
   SchedulerHelper::RunForDuration(isCTRE ? 1.0_s : 2.0_s, [&] {
