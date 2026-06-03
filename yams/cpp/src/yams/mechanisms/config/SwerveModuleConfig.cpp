@@ -9,6 +9,8 @@
 #include <cmath>
 #include <numbers>
 #include <stdexcept>
+#include <utility>
+#include <string>
 
 namespace yams::mechanisms::config {
 
@@ -115,9 +117,7 @@ motorcontrollers::SmartMotorController* SwerveModuleConfig::GetAzimuthMotor() co
   return m_azimuthMotor;
 }
 
-std::optional<std::string> SwerveModuleConfig::GetTelemetryName() const {
-  return m_telemetryName;
-}
+std::optional<std::string> SwerveModuleConfig::GetTelemetryName() const { return m_telemetryName; }
 
 std::optional<SwerveModuleConfig::TelemetryVerbosity> SwerveModuleConfig::GetTelemetryVerbosity()
     const {
@@ -131,8 +131,7 @@ bool SwerveModuleConfig::GetStateOptimization() const { return m_stateOptimizati
 units::degree_t SwerveModuleConfig::GetAbsoluteEncoderAngle() const {
   if (m_absoluteEncoderSupplier) {
     auto rawAngle = (*m_absoluteEncoderSupplier)();
-    auto geared =
-        rawAngle * m_absoluteEncoderGearbox.GetInputToOutputConversionFactor();
+    auto geared = rawAngle * m_absoluteEncoderGearbox.GetInputToOutputConversionFactor();
     auto offset = m_absoluteEncoderOffset.value_or(units::degree_t{0});
     return geared - offset;
   }
@@ -142,8 +141,7 @@ units::degree_t SwerveModuleConfig::GetAbsoluteEncoderAngle() const {
 
 double SwerveModuleConfig::GetCosineCompensatedVelocity(
     const frc::SwerveModuleState& desiredState) const {
-  auto diff =
-      desiredState.angle - frc::Rotation2d{units::radian_t{GetAbsoluteEncoderAngle()}};
+  auto diff = desiredState.angle - frc::Rotation2d{units::radian_t{GetAbsoluteEncoderAngle()}};
   double cosineScalar = diff.Cos();
   if (cosineScalar < 0.0) cosineScalar = 1.0;
   return desiredState.speed.value() * cosineScalar;
@@ -152,9 +150,8 @@ double SwerveModuleConfig::GetCosineCompensatedVelocity(
 frc::SwerveModuleState SwerveModuleConfig::GetOptimizedState(frc::SwerveModuleState state) const {
   if (m_minimumVelocity) {
     if (units::math::abs(state.speed) <= *m_minimumVelocity) {
-      state = frc::SwerveModuleState{
-          units::meters_per_second_t{0},
-          frc::Rotation2d{units::radian_t{GetAbsoluteEncoderAngle()}}};
+      state = frc::SwerveModuleState{units::meters_per_second_t{0},
+                                     frc::Rotation2d{units::radian_t{GetAbsoluteEncoderAngle()}}};
     }
   }
   if (m_stateOptimization) {

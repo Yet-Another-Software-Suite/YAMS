@@ -6,6 +6,8 @@
 #include <frc/Timer.h>
 #include <networktables/NetworkTableInstance.h>
 #include <wpi/json.h>
+#include <string>
+#include <memory>
 
 #include "yams/motorcontrollers/SmartMotorController.h"
 
@@ -18,7 +20,7 @@ void MechanismTelemetry::SetupLoopTime() {
 }
 
 void MechanismTelemetry::SetupTelemetry(const std::string& mechanismName,
-                                         motorcontrollers::SmartMotorController& motorController) {
+                                        motorcontrollers::SmartMotorController& motorController) {
   auto inst = nt::NetworkTableInstance::GetDefault();
   m_tuningNetworkTable = inst.GetTable("Tuning")->GetSubTable(mechanismName);
   m_networkTable = inst.GetTable("Mechanisms")->GetSubTable(mechanismName);

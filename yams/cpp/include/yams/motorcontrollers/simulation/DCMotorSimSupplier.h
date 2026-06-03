@@ -33,10 +33,8 @@ class DCMotorSimSupplier : public SimSupplier {
    * @param gearing           Mechanism gearing used to derive rotor position/velocity.
    * @param period            Simulation update period.
    */
-  DCMotorSimSupplier(frc::sim::DCMotorSim& sim,
-                     std::function<double()> dutyCycleSupplier,
-                     const gearing::MechanismGearing& gearing,
-                     units::second_t period);
+  DCMotorSimSupplier(frc::sim::DCMotorSim& sim, std::function<double()> dutyCycleSupplier,
+                     const gearing::MechanismGearing& gearing, units::second_t period);
 
   void UpdateSim() override;
   void SetInputVoltage(units::volt_t volts) override;

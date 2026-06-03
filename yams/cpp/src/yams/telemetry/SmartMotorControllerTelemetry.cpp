@@ -15,6 +15,10 @@
 #include <wpi/json.h>
 
 #include <stdexcept>
+#include <utility>
+#include <memory>
+#include <unordered_map>
+#include <string>
 
 #include "yams/exceptions/SmartMotorControllerConfigurationException.h"
 #include "yams/motorcontrollers/SmartMotorController.h"
@@ -37,9 +41,7 @@ DoubleTelemetry::DoubleTelemetry(std::string key, double defaultVal, DoubleTelem
       m_defaultValue{defaultVal},
       m_cachedValue{defaultVal} {}
 
-void DoubleTelemetry::SetDefaultValue(double value) {
-  m_cachedValue = m_defaultValue = value;
-}
+void DoubleTelemetry::SetDefaultValue(double value) { m_cachedValue = m_defaultValue = value; }
 
 void DoubleTelemetry::SetupNetworkTables(std::shared_ptr<nt::NetworkTable> dataTable,
                                          std::shared_ptr<nt::NetworkTable> tuningTable) {
@@ -145,7 +147,7 @@ void DoubleTelemetry::Close() {
 // ============================================================================
 
 BooleanTelemetry::BooleanTelemetry(std::string key, bool defaultVal, BooleanTelemetryField field,
-                                    bool tunable)
+                                   bool tunable)
     : m_field{field},
       m_key{std::move(key)},
       m_tunable{tunable},
@@ -158,7 +160,7 @@ void BooleanTelemetry::SetDefaultValue(bool value) {
 }
 
 void BooleanTelemetry::SetupNetworkTables(std::shared_ptr<nt::NetworkTable> dataTable,
-                                           std::shared_ptr<nt::NetworkTable> tuningTable) {
+                                          std::shared_ptr<nt::NetworkTable> tuningTable) {
   m_dataTable = dataTable;
   m_tuningTable = tuningTable;
   if (tuningTable && m_tunable) {
@@ -279,16 +281,13 @@ void SmartMotorControllerTelemetry::Publish(SmartMotorController& smc) {
     if (!bt.IsEnabled()) continue;
     switch (bt.GetField()) {
       case BooleanTelemetryField::MechanismUpperLimit:
-        if (auto lim = cfg.GetMechanismUpperLimit())
-          bt.Set(smc.GetMechanismPosition() >= *lim);
+        if (auto lim = cfg.GetMechanismUpperLimit()) bt.Set(smc.GetMechanismPosition() >= *lim);
         break;
       case BooleanTelemetryField::MechanismLowerLimit:
-        if (auto lim = cfg.GetMechanismLowerLimit())
-          bt.Set(smc.GetMechanismPosition() <= *lim);
+        if (auto lim = cfg.GetMechanismLowerLimit()) bt.Set(smc.GetMechanismPosition() <= *lim);
         break;
       case BooleanTelemetryField::TemperatureLimit:
-        if (auto cutoff = cfg.GetTemperatureCutoff())
-          bt.Set(smc.GetTemperature() >= *cutoff);
+        if (auto cutoff = cfg.GetTemperatureCutoff()) bt.Set(smc.GetTemperature() >= *cutoff);
         break;
       case BooleanTelemetryField::VelocityControl:
         bt.Set(smc.GetMechanismSetpointVelocity().has_value());
@@ -338,24 +337,20 @@ void SmartMotorControllerTelemetry::Publish(SmartMotorController& smc) {
         dt.Set(smc.GetStatorCurrent().value());
         break;
       case DoubleTelemetryField::SupplyCurrent:
-        if (auto sc = smc.GetSupplyCurrent())
-          dt.Set(sc->value());
+        if (auto sc = smc.GetSupplyCurrent()) dt.Set(sc->value());
         break;
       case DoubleTelemetryField::MotorTemperature:
         // Celsius → Fahrenheit
         dt.Set(smc.GetTemperature().value() * 9.0 / 5.0 + 32.0);
         break;
       case DoubleTelemetryField::MeasurementPosition:
-        if (cfg.GetMechanismCircumference())
-          dt.Set(smc.GetMeasurementPosition().value());
+        if (cfg.GetMechanismCircumference()) dt.Set(smc.GetMeasurementPosition().value());
         break;
       case DoubleTelemetryField::MeasurementVelocity:
-        if (cfg.GetMechanismCircumference())
-          dt.Set(smc.GetMeasurementVelocity().value());
+        if (cfg.GetMechanismCircumference()) dt.Set(smc.GetMeasurementVelocity().value());
         break;
       case DoubleTelemetryField::MeasurementAcceleration:
-        if (cfg.GetMechanismCircumference())
-          dt.Set(smc.GetMeasurementAcceleration().value());
+        if (cfg.GetMechanismCircumference()) dt.Set(smc.GetMeasurementAcceleration().value());
         break;
       case DoubleTelemetryField::MechanismPosition:
         dt.Set(smc.GetMechanismPosition().value() / 360.0);
@@ -376,14 +371,11 @@ void SmartMotorControllerTelemetry::Publish(SmartMotorController& smc) {
         dt.Set(smc.GetExternalEncoderPosition().value_or(units::degree_t{0}).value() / 360.0);
         break;
       case DoubleTelemetryField::ExternalEncoderVelocity:
-        dt.Set(smc.GetExternalEncoderVelocity()
-                   .value_or(units::degrees_per_second_t{0})
-                   .value() /
+        dt.Set(smc.GetExternalEncoderVelocity().value_or(units::degrees_per_second_t{0}).value() /
                360.0);
         break;
       case DoubleTelemetryField::ActiveClosedLoopControllerSlot:
-        dt.Set(static_cast<double>(
-            static_cast<int>(smc.GetClosedLoopControllerSlot())));
+        dt.Set(static_cast<double>(static_cast<int>(smc.GetClosedLoopControllerSlot())));
         break;
       default:
         break;
@@ -502,8 +494,9 @@ void SmartMotorControllerTelemetry::ApplyTuningValues(SmartMotorController& smc)
         break;
       case DoubleTelemetryField::TrapezoidalProfileMaxJerk:
         smc.SetMotionProfileMaxJerk(
-            units::unit_t<units::compound_unit<units::angular_acceleration::degrees_per_second_squared,
-                                               units::inverse<units::seconds>>>{dt.Get() * 6.0});
+            units::unit_t<
+                units::compound_unit<units::angular_acceleration::degrees_per_second_squared,
+                                     units::inverse<units::seconds>>>{dt.Get() * 6.0});
         break;
       case DoubleTelemetryField::ExponentialProfileKA:
         smc.SetExponentialProfile(std::nullopt, dt.Get(), std::nullopt);

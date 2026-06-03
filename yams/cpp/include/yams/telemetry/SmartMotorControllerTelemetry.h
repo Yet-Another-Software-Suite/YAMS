@@ -26,61 +26,62 @@ namespace yams::telemetry {
 
 /** Identifies a double-valued telemetry field published by a SmartMotorController. */
 enum class DoubleTelemetryField {
-  ExponentialProfileKV,              ///< Exponential profile kV constant (tunable).
-  ExponentialProfileKA,              ///< Exponential profile kA constant (tunable).
-  ExponentialProfileMaxInput,        ///< Exponential profile maximum input voltage (tunable).
-  TrapezoidalProfileMaxVelocity,     ///< Trapezoidal profile max velocity — RPM or m/s (tunable).
-  TrapezoidalProfileMaxAcceleration, ///< Trapezoidal profile max acceleration — RPM/s or m/s² (tunable).
-  TrapezoidalProfileMaxJerk,         ///< Trapezoidal profile max jerk — RPM/s² (tunable).
-  TunableClosedLoopControllerSlot,   ///< Live-tunable closed-loop gain slot selector.
-  ActiveClosedLoopControllerSlot,    ///< Currently active closed-loop gain slot (read-only).
-  kS,                                ///< Static friction feedforward gain kS (tunable).
-  kV,                                ///< Velocity feedforward gain kV (tunable).
-  kA,                                ///< Acceleration feedforward gain kA (tunable).
-  kG,                                ///< Gravity feedforward gain kG (tunable).
-  kP,                                ///< Proportional feedback gain kP (tunable).
-  kI,                                ///< Integral feedback gain kI (tunable).
-  kD,                                ///< Derivative feedback gain kD (tunable).
-  TunableSetpointPosition,           ///< Live-tunable position setpoint — degrees or meters.
-  SetpointPosition,                  ///< Read-only position setpoint — rotations or meters.
-  TunableSetpointVelocity,           ///< Live-tunable velocity setpoint — RPM or m/s.
-  SetpointVelocity,                  ///< Read-only velocity setpoint — RPS or m/s.
-  OutputVoltage,                     ///< Voltage currently applied to the motor (V).
-  StatorCurrent,                     ///< Stator (output) current draw (A).
-  StatorCurrentLimit,                ///< Configured stator current limit (A, tunable).
-  SupplyCurrent,                     ///< Supply (input) current draw (A).
-  SupplyCurrentLimit,                ///< Configured supply current limit (A, tunable).
-  MotorTemperature,                  ///< Motor controller temperature (°F).
-  MeasurementPosition,               ///< Linear measurement position (m).
-  MeasurementVelocity,               ///< Linear measurement velocity (m/s).
-  MeasurementAcceleration,           ///< Linear measurement acceleration (m/s²).
-  MeasurementLowerLimit,             ///< Configured lower linear soft limit (m, tunable).
-  MeasurementUpperLimit,             ///< Configured upper linear soft limit (m, tunable).
-  MechanismPosition,                 ///< Mechanism position in rotations.
-  MechanismVelocity,                 ///< Mechanism velocity in rotations per second.
-  MechanismAcceleration,             ///< Mechanism acceleration in rotations per second squared.
-  MechanismLowerLimit,               ///< Configured lower angular soft limit (degrees, tunable).
-  MechanismUpperLimit,               ///< Configured upper angular soft limit (degrees, tunable).
-  RotorPosition,                     ///< Raw rotor position in rotations.
-  RotorVelocity,                     ///< Raw rotor velocity in rotations per second.
-  ExternalEncoderPosition,           ///< External (absolute) encoder position in rotations.
-  ExternalEncoderVelocity,           ///< External (absolute) encoder velocity in rotations per second.
-  ClosedloopRampRate,                ///< Closed-loop duty-cycle ramp rate (s, tunable).
-  OpenloopRampRate,                  ///< Open-loop duty-cycle ramp rate (s, tunable).
+  ExponentialProfileKV,               ///< Exponential profile kV constant (tunable).
+  ExponentialProfileKA,               ///< Exponential profile kA constant (tunable).
+  ExponentialProfileMaxInput,         ///< Exponential profile maximum input voltage (tunable).
+  TrapezoidalProfileMaxVelocity,      ///< Trapezoidal profile max velocity — RPM or m/s (tunable).
+  TrapezoidalProfileMaxAcceleration,  ///< Trapezoidal profile max acceleration — RPM/s or m/s²
+                                      ///< (tunable).
+  TrapezoidalProfileMaxJerk,          ///< Trapezoidal profile max jerk — RPM/s² (tunable).
+  TunableClosedLoopControllerSlot,    ///< Live-tunable closed-loop gain slot selector.
+  ActiveClosedLoopControllerSlot,     ///< Currently active closed-loop gain slot (read-only).
+  kS,                                 ///< Static friction feedforward gain kS (tunable).
+  kV,                                 ///< Velocity feedforward gain kV (tunable).
+  kA,                                 ///< Acceleration feedforward gain kA (tunable).
+  kG,                                 ///< Gravity feedforward gain kG (tunable).
+  kP,                                 ///< Proportional feedback gain kP (tunable).
+  kI,                                 ///< Integral feedback gain kI (tunable).
+  kD,                                 ///< Derivative feedback gain kD (tunable).
+  TunableSetpointPosition,            ///< Live-tunable position setpoint — degrees or meters.
+  SetpointPosition,                   ///< Read-only position setpoint — rotations or meters.
+  TunableSetpointVelocity,            ///< Live-tunable velocity setpoint — RPM or m/s.
+  SetpointVelocity,                   ///< Read-only velocity setpoint — RPS or m/s.
+  OutputVoltage,                      ///< Voltage currently applied to the motor (V).
+  StatorCurrent,                      ///< Stator (output) current draw (A).
+  StatorCurrentLimit,                 ///< Configured stator current limit (A, tunable).
+  SupplyCurrent,                      ///< Supply (input) current draw (A).
+  SupplyCurrentLimit,                 ///< Configured supply current limit (A, tunable).
+  MotorTemperature,                   ///< Motor controller temperature (°F).
+  MeasurementPosition,                ///< Linear measurement position (m).
+  MeasurementVelocity,                ///< Linear measurement velocity (m/s).
+  MeasurementAcceleration,            ///< Linear measurement acceleration (m/s²).
+  MeasurementLowerLimit,              ///< Configured lower linear soft limit (m, tunable).
+  MeasurementUpperLimit,              ///< Configured upper linear soft limit (m, tunable).
+  MechanismPosition,                  ///< Mechanism position in rotations.
+  MechanismVelocity,                  ///< Mechanism velocity in rotations per second.
+  MechanismAcceleration,              ///< Mechanism acceleration in rotations per second squared.
+  MechanismLowerLimit,                ///< Configured lower angular soft limit (degrees, tunable).
+  MechanismUpperLimit,                ///< Configured upper angular soft limit (degrees, tunable).
+  RotorPosition,                      ///< Raw rotor position in rotations.
+  RotorVelocity,                      ///< Raw rotor velocity in rotations per second.
+  ExternalEncoderPosition,            ///< External (absolute) encoder position in rotations.
+  ExternalEncoderVelocity,  ///< External (absolute) encoder velocity in rotations per second.
+  ClosedloopRampRate,       ///< Closed-loop duty-cycle ramp rate (s, tunable).
+  OpenloopRampRate,         ///< Open-loop duty-cycle ramp rate (s, tunable).
 };
 
 /** Identifies a boolean-valued telemetry field published by a SmartMotorController. */
 enum class BooleanTelemetryField {
-  MechanismUpperLimit,    ///< true when the mechanism is at or past its upper angular limit.
-  MechanismLowerLimit,    ///< true when the mechanism is at or past its lower angular limit.
-  TemperatureLimit,       ///< true when the motor temperature has reached the cutoff threshold.
-  VelocityControl,        ///< true when a velocity setpoint is active.
-  ElevatorFeedForward,    ///< true when an elevator feedforward model is configured.
-  ArmFeedForward,         ///< true when an arm feedforward model is configured.
-  SimpleMotorFeedForward, ///< true when a simple motor feedforward model is configured.
-  MotionProfile,          ///< true when a motion profile (trapezoidal or exponential) is active.
-  MotorInversion,         ///< true when the motor output direction is inverted (tunable).
-  EncoderInversion,       ///< true when the encoder count direction is inverted (tunable).
+  MechanismUpperLimit,     ///< true when the mechanism is at or past its upper angular limit.
+  MechanismLowerLimit,     ///< true when the mechanism is at or past its lower angular limit.
+  TemperatureLimit,        ///< true when the motor temperature has reached the cutoff threshold.
+  VelocityControl,         ///< true when a velocity setpoint is active.
+  ElevatorFeedForward,     ///< true when an elevator feedforward model is configured.
+  ArmFeedForward,          ///< true when an arm feedforward model is configured.
+  SimpleMotorFeedForward,  ///< true when a simple motor feedforward model is configured.
+  MotionProfile,           ///< true when a motion profile (trapezoidal or exponential) is active.
+  MotorInversion,          ///< true when the motor output direction is inverted (tunable).
+  EncoderInversion,        ///< true when the encoder count direction is inverted (tunable).
 };
 
 // ---- UnsupportedTelemetryFields ---------------------------------------------
@@ -341,13 +342,12 @@ class SmartMotorControllerTelemetry {
    * @param nt4Enabled   Whether to publish to NT4.
    * @param dataLogName  Optional DataLog prefix.
    */
-  void SetupTelemetry(
-      motorcontrollers::SmartMotorController& smc,
-      std::shared_ptr<nt::NetworkTable> publishTable,
-      std::shared_ptr<nt::NetworkTable> tuningTable,
-      std::unordered_map<DoubleTelemetryField, DoubleTelemetry>& doubleFields,
-      std::unordered_map<BooleanTelemetryField, BooleanTelemetry>& boolFields, bool nt4Enabled,
-      std::optional<std::string> dataLogName);
+  void SetupTelemetry(motorcontrollers::SmartMotorController& smc,
+                      std::shared_ptr<nt::NetworkTable> publishTable,
+                      std::shared_ptr<nt::NetworkTable> tuningTable,
+                      std::unordered_map<DoubleTelemetryField, DoubleTelemetry>& doubleFields,
+                      std::unordered_map<BooleanTelemetryField, BooleanTelemetry>& boolFields,
+                      bool nt4Enabled, std::optional<std::string> dataLogName);
 
   /**
    * Publish current motor controller state to NetworkTables / DataLog.

@@ -9,7 +9,9 @@
 #include <rev/ClosedLoopTypes.h>
 #include <rev/ConfigureTypes.h>
 #include <units/moment_of_inertia.h>
+
 #include <iostream>
+#include <vector>
 
 #include "yams/motorcontrollers/simulation/DCMotorSimSupplier.h"
 
@@ -116,8 +118,8 @@ void SparkWrapper::SetupSimulation() {
   auto& gearing = m_config.GetMotorGearing();
   if (!simMotor || !gearing) return;
 
-  auto plant =
-      frc::LinearSystemId::DCMotorSystem(*simMotor, m_config.GetMOI(), gearing->GetMechanismToRotorRatio());
+  auto plant = frc::LinearSystemId::DCMotorSystem(*simMotor, m_config.GetMOI(),
+                                                  gearing->GetMechanismToRotorRatio());
   m_motorSim.emplace(plant, *simMotor);
 
   auto period = m_config.GetClosedLoopControlPeriod().value_or(20_ms);
@@ -142,8 +144,7 @@ void SparkWrapper::SetupSimulation() {
 void SparkWrapper::SimIterate() {
   if (!frc::RobotBase::IsSimulation() || !m_simSupplier || !m_sparkSim) return;
 
-  if (m_simSupplier->IsWatchdogExpired())
-    m_simSupplier->UpdateSim();
+  if (m_simSupplier->IsWatchdogExpired()) m_simSupplier->UpdateSim();
 
   units::second_t dt = m_config.GetClosedLoopControlPeriod().value_or(20_ms);
   units::turns_per_second_t mechVelRps = m_simSupplier->GetMechanismVelocity();
@@ -152,11 +153,9 @@ void SparkWrapper::SimIterate() {
   m_sparkSim->iterate(mechVelRps.value(), vbus, dt.value());
   std::cout << m_sparkSim->GetPosition();
 
-  if (m_relEncoderSim)
-    m_relEncoderSim->iterate(mechVelRps.value(), dt.value());
+  if (m_relEncoderSim) m_relEncoderSim->iterate(mechVelRps.value(), dt.value());
 
-  if (m_absEncoderSim)
-    m_absEncoderSim->iterate(mechVelRps.value(), dt.value());
+  if (m_absEncoderSim) m_absEncoderSim->iterate(mechVelRps.value(), dt.value());
 }
 
 // ---- Encoder sync -----------------------------------------------------------
@@ -461,10 +460,9 @@ void* SparkWrapper::GetMotorController() { return m_spark; }
 void* SparkWrapper::GetMotorControllerConfig() { return nullptr; }
 
 telemetry::UnsupportedTelemetryFields SparkWrapper::GetUnsupportedTelemetryFields() {
-  return {std::nullopt,
-          std::vector<telemetry::DoubleTelemetryField>{
-              telemetry::DoubleTelemetryField::SupplyCurrent,
-              telemetry::DoubleTelemetryField::SupplyCurrentLimit}};
+  return {std::nullopt, std::vector<telemetry::DoubleTelemetryField>{
+                            telemetry::DoubleTelemetryField::SupplyCurrent,
+                            telemetry::DoubleTelemetryField::SupplyCurrentLimit}};
 }
 
 }  // namespace yams::motorcontrollers::local

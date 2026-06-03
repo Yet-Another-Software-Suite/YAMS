@@ -12,6 +12,7 @@
 #include <cstdio>
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "yams/exceptions/SmartMotorControllerConfigurationException.h"
 
@@ -309,15 +310,14 @@ void SmartMotorController::SetupTelemetry(std::shared_ptr<nt::NetworkTable> data
   m_telemetryTable = dataTable->GetSubTable(GetName());
   m_tuningTable = tuningTable->GetSubTable(GetName());
 
-  auto verbosity = m_config.GetVerbosity().value_or(
-      SmartMotorControllerConfig::TelemetryVerbosity::LOW);
+  auto verbosity =
+      m_config.GetVerbosity().value_or(SmartMotorControllerConfig::TelemetryVerbosity::LOW);
   m_telemetryConfig.WithTelemetryVerbosity(verbosity);
 
   auto& dfields = m_telemetryConfig.GetDoubleFields(*this);
   auto& bfields = m_telemetryConfig.GetBoolFields(*this);
   m_telemetry.SetupTelemetry(*this, m_telemetryTable, m_tuningTable, dfields, bfields,
-                             m_telemetryConfig.GetNT4Enabled(),
-                             m_telemetryConfig.GetDataLogName());
+                             m_telemetryConfig.GetNT4Enabled(), m_telemetryConfig.GetDataLogName());
 }
 
 void SmartMotorController::SetupTelemetry() {
@@ -337,8 +337,8 @@ telemetry::UnsupportedTelemetryFields SmartMotorController::GetUnsupportedTeleme
   return {};  // base: no unsupported fields
 }
 
-SmartMotorController::ClosedLoopControllerSlot
-SmartMotorController::GetClosedLoopControllerSlot() const {
+SmartMotorController::ClosedLoopControllerSlot SmartMotorController::GetClosedLoopControllerSlot()
+    const {
   return m_slot;
 }
 

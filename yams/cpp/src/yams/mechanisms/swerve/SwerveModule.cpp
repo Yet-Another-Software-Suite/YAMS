@@ -9,6 +9,7 @@
 #include <units/angle.h>
 
 #include <stdexcept>
+#include <string>
 
 namespace yams::mechanisms::swerve {
 
@@ -26,12 +27,9 @@ SwerveModule::SwerveModule(const config::SwerveModuleConfig& config)
   // Set up motor telemetry under the swerve hierarchy.
   auto instance = nt::NetworkTableInstance::GetDefault();
   auto driveTable = instance.GetTable("SmartDashboard/swerve/" + GetName() + "/drive");
-  auto driveTuning =
-      instance.GetTable("SmartDashboard/swerve/" + GetName() + "/drive/tuning");
-  auto azimuthTable =
-      instance.GetTable("SmartDashboard/swerve/" + GetName() + "/azimuth");
-  auto azimuthTuning =
-      instance.GetTable("SmartDashboard/swerve/" + GetName() + "/azimuth/tuning");
+  auto driveTuning = instance.GetTable("SmartDashboard/swerve/" + GetName() + "/drive/tuning");
+  auto azimuthTable = instance.GetTable("SmartDashboard/swerve/" + GetName() + "/azimuth");
+  auto azimuthTuning = instance.GetTable("SmartDashboard/swerve/" + GetName() + "/azimuth/tuning");
 
   m_driveMotorController->SetupTelemetry(driveTable, driveTuning);
   m_azimuthMotorController->SetupTelemetry(azimuthTable, azimuthTuning);

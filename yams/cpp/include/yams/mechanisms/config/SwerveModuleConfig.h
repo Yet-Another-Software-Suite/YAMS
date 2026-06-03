@@ -49,8 +49,9 @@ class SwerveModuleConfig {
    * @param azimuthMotor Azimuth motor controller.
    * @return *this for chaining.
    */
-  SwerveModuleConfig& WithSmartMotorController(motorcontrollers::SmartMotorController* driveMotor,
-                                               motorcontrollers::SmartMotorController* azimuthMotor);
+  SwerveModuleConfig& WithSmartMotorController(
+      motorcontrollers::SmartMotorController* driveMotor,
+      motorcontrollers::SmartMotorController* azimuthMotor);
 
   /**
    * Enable or disable cosine compensation of the drive velocity.

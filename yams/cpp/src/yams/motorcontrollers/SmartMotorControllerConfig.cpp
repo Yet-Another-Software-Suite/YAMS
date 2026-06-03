@@ -354,9 +354,7 @@ std::optional<units::second_t> SmartMotorControllerConfig::GetClosedLoopRampRate
   return m_closedLoopRampRate;
 }
 
-std::optional<bool> SmartMotorControllerConfig::GetMotorInverted() const {
-  return m_motorInverted;
-}
+std::optional<bool> SmartMotorControllerConfig::GetMotorInverted() const { return m_motorInverted; }
 std::optional<bool> SmartMotorControllerConfig::GetEncoderInverted() const {
   return m_encoderInverted;
 }

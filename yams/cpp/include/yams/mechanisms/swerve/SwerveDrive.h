@@ -31,6 +31,7 @@
 #include <cassert>
 #include <optional>
 #include <string>
+#include <utility>
 
 #include "yams/mechanisms/swerve/SwerveDriveConfig.h"
 #include "yams/mechanisms/swerve/SwerveModule.h"
@@ -121,9 +122,9 @@ class SwerveDrive {
               frc::ChassisSpeeds{
                   units::meters_per_second_t{poseDiff.X().value() * translationScalar},
                   units::meters_per_second_t{poseDiff.Y().value() * translationScalar},
-                  units::radians_per_second_t{azimuthPID.Calculate(
-                      currentPose.Rotation().Radians().value(),
-                      pose.Rotation().Radians().value())}},
+                  units::radians_per_second_t{
+                      azimuthPID.Calculate(currentPose.Rotation().Radians().value(),
+                                           pose.Rotation().Radians().value())}},
               frc::Rotation2d{units::radian_t{GetGyroAngle()}});
         }))
         .WithName("Drive to Pose");
@@ -272,8 +273,8 @@ class SwerveDrive {
       mod->SimIterate();
     }
     auto speeds = m_kinematics.ToChassisSpeeds(GetModuleStates());
-    m_simGyroAngle += units::degree_t{
-        units::degrees_per_second_t{speeds.omega}.value() * m_simTimer.Get().value()};
+    m_simGyroAngle += units::degree_t{units::degrees_per_second_t{speeds.omega}.value() *
+                                      m_simTimer.Get().value()};
     m_simTimer.Reset();
   }
 
@@ -381,12 +382,10 @@ class SwerveDrive {
   units::degree_t m_simGyroAngle{0};
 
   void UpdatePoseEstimator() {
-    m_poseEstimator.Update(frc::Rotation2d{units::radian_t{GetGyroAngle()}},
-                           GetModulePositions());
+    m_poseEstimator.Update(frc::Rotation2d{units::radian_t{GetGyroAngle()}}, GetModulePositions());
   }
 
-  static frc::SwerveDriveKinematics<NumModules> BuildKinematics(
-      const SwerveDriveConfig& config) {
+  static frc::SwerveDriveKinematics<NumModules> BuildKinematics(const SwerveDriveConfig& config) {
     assert(config.GetModules().size() == NumModules);
     wpi::array<frc::Translation2d, NumModules> locations{wpi::empty_array};
     for (size_t i = 0; i < NumModules; ++i) {

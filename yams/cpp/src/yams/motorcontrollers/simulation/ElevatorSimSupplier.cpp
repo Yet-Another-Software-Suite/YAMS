@@ -4,14 +4,14 @@
 #include "yams/motorcontrollers/simulation/ElevatorSimSupplier.h"
 
 #include <frc/simulation/RoboRioSim.h>
+#include <utility>
 
 namespace yams::motorcontrollers::simulation {
 
 ElevatorSimSupplier::ElevatorSimSupplier(frc::sim::ElevatorSim& sim,
                                          std::function<double()> dutyCycleSupplier,
                                          const gearing::MechanismGearing& gearing,
-                                         units::meter_t circumference,
-                                         units::second_t period)
+                                         units::meter_t circumference, units::second_t period)
     : m_sim(sim),
       m_dutyCycleSupplier(std::move(dutyCycleSupplier)),
       m_gearing(gearing),
@@ -79,8 +79,7 @@ void ElevatorSimSupplier::SetInputVoltage(units::volt_t volts) {
 
 // ---- Private helpers --------------------------------------------------------
 
-units::degree_t ElevatorSimSupplier::LinearToMechanismAngle(
-    units::meter_t position) const {
+units::degree_t ElevatorSimSupplier::LinearToMechanismAngle(units::meter_t position) const {
   // (meters / circumference) * 360 degrees per revolution
   return units::degree_t{(position.value() / m_circumference.value()) * 360.0};
 }
@@ -90,8 +89,7 @@ units::degrees_per_second_t ElevatorSimSupplier::LinearToMechanismVelocity(
   return units::degrees_per_second_t{(velocity.value() / m_circumference.value()) * 360.0};
 }
 
-units::meter_t ElevatorSimSupplier::MechanismAngleToLinear(
-    units::degree_t angle) const {
+units::meter_t ElevatorSimSupplier::MechanismAngleToLinear(units::degree_t angle) const {
   // (degrees / 360) * circumference
   return units::meter_t{(angle.value() / 360.0) * m_circumference.value()};
 }

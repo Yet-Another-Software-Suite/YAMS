@@ -4,6 +4,7 @@
 #include "yams/motorcontrollers/simulation/DCMotorSimSupplier.h"
 
 #include <frc/simulation/RoboRioSim.h>
+#include <utility>
 
 namespace yams::motorcontrollers::simulation {
 
@@ -26,9 +27,7 @@ void DCMotorSimSupplier::UpdateSim() {
   m_sim.Update(m_period);
 }
 
-units::degree_t DCMotorSimSupplier::GetMechanismPosition() {
-  return m_sim.GetAngularPosition();
-}
+units::degree_t DCMotorSimSupplier::GetMechanismPosition() { return m_sim.GetAngularPosition(); }
 
 units::degrees_per_second_t DCMotorSimSupplier::GetMechanismVelocity() {
   return m_sim.GetAngularVelocity();
@@ -50,9 +49,7 @@ units::degrees_per_second_squared_t DCMotorSimSupplier::GetRotorAcceleration() {
   return GetMechanismAcceleration() * m_gearing.GetMechanismToRotorRatio();
 }
 
-void DCMotorSimSupplier::SetMechanismPosition(units::degree_t angle) {
-  m_sim.SetAngle(angle);
-}
+void DCMotorSimSupplier::SetMechanismPosition(units::degree_t angle) { m_sim.SetAngle(angle); }
 
 void DCMotorSimSupplier::SetMechanismVelocity(units::degrees_per_second_t velocity) {
   m_sim.SetAngularVelocity(velocity);

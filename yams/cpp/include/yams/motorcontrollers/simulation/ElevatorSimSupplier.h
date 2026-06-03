@@ -40,10 +40,8 @@ class ElevatorSimSupplier : public SimSupplier {
    * @param circumference     Drum/sprocket circumference (m) for linear↔angular conversion.
    * @param period            Simulation update period.
    */
-  ElevatorSimSupplier(frc::sim::ElevatorSim& sim,
-                      std::function<double()> dutyCycleSupplier,
-                      const gearing::MechanismGearing& gearing,
-                      units::meter_t circumference,
+  ElevatorSimSupplier(frc::sim::ElevatorSim& sim, std::function<double()> dutyCycleSupplier,
+                      const gearing::MechanismGearing& gearing, units::meter_t circumference,
                       units::second_t period);
 
   void UpdateSim() override;
@@ -74,11 +72,9 @@ class ElevatorSimSupplier : public SimSupplier {
   bool m_watchdogFed{false};
 
   units::degree_t LinearToMechanismAngle(units::meter_t position) const;
-  units::degrees_per_second_t LinearToMechanismVelocity(
-      units::meters_per_second_t velocity) const;
+  units::degrees_per_second_t LinearToMechanismVelocity(units::meters_per_second_t velocity) const;
   units::meter_t MechanismAngleToLinear(units::degree_t angle) const;
-  units::meters_per_second_t MechanismVelocityToLinear(
-      units::degrees_per_second_t velocity) const;
+  units::meters_per_second_t MechanismVelocityToLinear(units::degrees_per_second_t velocity) const;
 };
 
 }  // namespace yams::motorcontrollers::simulation

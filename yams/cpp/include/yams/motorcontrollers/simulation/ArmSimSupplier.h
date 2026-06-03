@@ -34,10 +34,8 @@ class ArmSimSupplier : public SimSupplier {
    * @param gearing           Mechanism gearing used to derive rotor position/velocity.
    * @param period            Simulation update period.
    */
-  ArmSimSupplier(frc::sim::SingleJointedArmSim& sim,
-                 std::function<double()> dutyCycleSupplier,
-                 const gearing::MechanismGearing& gearing,
-                 units::second_t period);
+  ArmSimSupplier(frc::sim::SingleJointedArmSim& sim, std::function<double()> dutyCycleSupplier,
+                 const gearing::MechanismGearing& gearing, units::second_t period);
 
   void UpdateSim() override;
   void SetInputVoltage(units::volt_t volts) override;

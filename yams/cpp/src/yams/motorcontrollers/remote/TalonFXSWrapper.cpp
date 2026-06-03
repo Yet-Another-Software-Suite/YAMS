@@ -135,8 +135,8 @@ void TalonFXSWrapper::SetupSimulation() {
   auto& gearing = m_config.GetMotorGearing();
   if (!simMotor || !gearing) return;
 
-  auto plant =
-      frc::LinearSystemId::DCMotorSystem(*simMotor, m_config.GetMOI(), gearing->GetMechanismToRotorRatio());
+  auto plant = frc::LinearSystemId::DCMotorSystem(*simMotor, m_config.GetMOI(),
+                                                  gearing->GetMechanismToRotorRatio());
   m_motorSim.emplace(plant, *simMotor);
 
   auto period = m_config.GetClosedLoopControlPeriod().value_or(20_ms);
@@ -155,7 +155,8 @@ void TalonFXSWrapper::SimIterate() {
 
   sim.SetRawRotorPosition(units::turn_t{m_simSupplier->GetRotorPosition()});
   sim.SetRotorVelocity(units::turns_per_second_t{m_simSupplier->GetRotorVelocity()});
-  sim.SetRotorAcceleration(units::turns_per_second_squared_t{m_simSupplier->GetRotorAcceleration()});
+  sim.SetRotorAcceleration(
+      units::turns_per_second_squared_t{m_simSupplier->GetRotorAcceleration()});
 
   if (m_cancoder) {
     auto& cancoderSim = m_cancoder->get().GetSimState();

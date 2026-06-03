@@ -6,6 +6,9 @@
 #include <units/angle.h>
 #include <units/length.h>
 
+#include <string>
+#include <unordered_map>
+
 #include "yams/motorcontrollers/SmartMotorController.h"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.h"
 
@@ -273,11 +276,13 @@ SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithTe
 
 // ---- Individual field enables -----------------------------------------------
 
-SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithMechanismLowerLimit() {
+SmartMotorControllerTelemetryConfig&
+SmartMotorControllerTelemetryConfig::WithMechanismLowerLimit() {
   m_boolFields.at(BooleanTelemetryField::MechanismLowerLimit).Enable();
   return *this;
 }
-SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithMechanismUpperLimit() {
+SmartMotorControllerTelemetryConfig&
+SmartMotorControllerTelemetryConfig::WithMechanismUpperLimit() {
   m_boolFields.at(BooleanTelemetryField::MechanismUpperLimit).Enable();
   return *this;
 }
@@ -289,7 +294,8 @@ SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithVe
   m_boolFields.at(BooleanTelemetryField::VelocityControl).Enable();
   return *this;
 }
-SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithElevatorFeedforward() {
+SmartMotorControllerTelemetryConfig&
+SmartMotorControllerTelemetryConfig::WithElevatorFeedforward() {
   m_boolFields.at(BooleanTelemetryField::ElevatorFeedForward).Enable();
   return *this;
 }
@@ -325,11 +331,13 @@ SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithTe
   m_doubleFields.at(DoubleTelemetryField::MotorTemperature).Enable();
   return *this;
 }
-SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithMeasurementPosition() {
+SmartMotorControllerTelemetryConfig&
+SmartMotorControllerTelemetryConfig::WithMeasurementPosition() {
   m_doubleFields.at(DoubleTelemetryField::MeasurementPosition).Enable();
   return *this;
 }
-SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithMeasurementVelocity() {
+SmartMotorControllerTelemetryConfig&
+SmartMotorControllerTelemetryConfig::WithMeasurementVelocity() {
   m_doubleFields.at(DoubleTelemetryField::MeasurementVelocity).Enable();
   return *this;
 }
@@ -355,9 +363,7 @@ SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithRo
 std::optional<std::string> SmartMotorControllerTelemetryConfig::GetDataLogName() const {
   return m_dataLogName;
 }
-bool SmartMotorControllerTelemetryConfig::GetNT4Enabled() const {
-  return m_nt4Telemetry;
-}
+bool SmartMotorControllerTelemetryConfig::GetNT4Enabled() const { return m_nt4Telemetry; }
 
 std::unordered_map<DoubleTelemetryField, DoubleTelemetry>&
 SmartMotorControllerTelemetryConfig::GetDoubleFields(SmartMotorController& smc) {

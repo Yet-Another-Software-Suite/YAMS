@@ -27,12 +27,12 @@ class EasyCRTConfig {
  public:
   /** Candidate gear pair returned by the CRT gear recommendation search. */
   struct CrtGearPair {
-    int gearA;               ///< Tooth count of encoder 1 gear.
-    int gearB;               ///< Tooth count of encoder 2 gear.
-    int lcm;                 ///< Least-common-multiple of gearA and gearB.
-    ::units::turn_t coverage; ///< Unique angular coverage provided by this pair.
-    int gcd;                 ///< Greatest-common-divisor of gearA and gearB.
-    int theoreticalIterations; ///< Maximum iterations the solver will need.
+    int gearA;                  ///< Tooth count of encoder 1 gear.
+    int gearB;                  ///< Tooth count of encoder 2 gear.
+    int lcm;                    ///< Least-common-multiple of gearA and gearB.
+    ::units::turn_t coverage;   ///< Unique angular coverage provided by this pair.
+    int gcd;                    ///< Greatest-common-divisor of gearA and gearB.
+    int theoreticalIterations;  ///< Maximum iterations the solver will need.
   };
 
   /**

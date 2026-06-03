@@ -8,6 +8,8 @@
 
 #include <cmath>
 #include <stdexcept>
+#include <utility>
+#include <vector>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -131,18 +133,18 @@ frc2::SubsystemBase* SwerveDriveConfig::GetSubsystem() const { return m_subsyste
 
 frc::Pose2d SwerveDriveConfig::GetInitialPose() const { return m_initialPose; }
 
-std::optional<units::meters_per_second_t>
-SwerveDriveConfig::GetMaximumChassisLinearVelocity() const {
+std::optional<units::meters_per_second_t> SwerveDriveConfig::GetMaximumChassisLinearVelocity()
+    const {
   return m_maximumChassisLinearVelocity;
 }
 
-std::optional<units::degrees_per_second_t>
-SwerveDriveConfig::GetMaximumChassisAngularVelocity() const {
+std::optional<units::degrees_per_second_t> SwerveDriveConfig::GetMaximumChassisAngularVelocity()
+    const {
   return m_maximumChassisAngularVelocity;
 }
 
-std::optional<units::meters_per_second_t>
-SwerveDriveConfig::GetMaximumModuleLinearVelocity() const {
+std::optional<units::meters_per_second_t> SwerveDriveConfig::GetMaximumModuleLinearVelocity()
+    const {
   return m_maximumModuleLinearVelocity;
 }
 
@@ -150,8 +152,8 @@ std::optional<frc::Translation2d> SwerveDriveConfig::GetCenterOfRotation() const
   return m_centerOfRotation;
 }
 
-std::optional<SwerveDriveConfig::TelemetryVerbosity>
-SwerveDriveConfig::GetTelemetryVerbosity() const {
+std::optional<SwerveDriveConfig::TelemetryVerbosity> SwerveDriveConfig::GetTelemetryVerbosity()
+    const {
   return m_telemetryVerbosity;
 }
 
@@ -171,10 +173,10 @@ units::degree_t SwerveDriveConfig::GetGyroAngle() const {
 
 frc::ChassisSpeeds SwerveDriveConfig::AngularVelocitySkewCorrection(
     frc::ChassisSpeeds robotRelativeVelocity) const {
-  double scaleFactor = frc::RobotBase::IsSimulation()
-                           ? m_simAngularVelocityScaleFactor.value_or(
-                                 m_angularVelocityScaleFactor.value_or(0.0))
-                           : m_angularVelocityScaleFactor.value_or(0.0);
+  double scaleFactor =
+      frc::RobotBase::IsSimulation()
+          ? m_simAngularVelocityScaleFactor.value_or(m_angularVelocityScaleFactor.value_or(0.0))
+          : m_angularVelocityScaleFactor.value_or(0.0);
 
   auto angularVelocityRad = units::radian_t{
       units::radians_per_second_t{(*m_gyroAngularVelocitySupplier)()}.value() * scaleFactor};
@@ -225,8 +227,8 @@ frc::Translation2d SwerveDriveConfig::CubeTranslation(frc::Translation2d transla
   if (std::hypot(translation.X().value(), translation.Y().value()) <= 1.0e-6) {
     return translation;
   }
-  return frc::Translation2d{
-      units::meter_t{std::pow(translation.Norm().value(), 3)}, translation.Angle()};
+  return frc::Translation2d{units::meter_t{std::pow(translation.Norm().value(), 3)},
+                            translation.Angle()};
 }
 
 frc::Translation2d SwerveDriveConfig::ScaleTranslation(frc::Translation2d translation,

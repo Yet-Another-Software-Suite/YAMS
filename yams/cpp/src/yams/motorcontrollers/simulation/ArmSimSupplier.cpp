@@ -4,13 +4,13 @@
 #include "yams/motorcontrollers/simulation/ArmSimSupplier.h"
 
 #include <frc/simulation/RoboRioSim.h>
+#include <utility>
 
 namespace yams::motorcontrollers::simulation {
 
 ArmSimSupplier::ArmSimSupplier(frc::sim::SingleJointedArmSim& sim,
                                std::function<double()> dutyCycleSupplier,
-                               const gearing::MechanismGearing& gearing,
-                               units::second_t period)
+                               const gearing::MechanismGearing& gearing, units::second_t period)
     : m_sim(sim),
       m_dutyCycleSupplier(std::move(dutyCycleSupplier)),
       m_gearing(gearing),
@@ -26,13 +26,9 @@ void ArmSimSupplier::UpdateSim() {
   m_sim.Update(m_period);
 }
 
-units::degree_t ArmSimSupplier::GetMechanismPosition() {
-  return m_sim.GetAngle();
-}
+units::degree_t ArmSimSupplier::GetMechanismPosition() { return m_sim.GetAngle(); }
 
-units::degrees_per_second_t ArmSimSupplier::GetMechanismVelocity() {
-  return m_sim.GetVelocity();
-}
+units::degrees_per_second_t ArmSimSupplier::GetMechanismVelocity() { return m_sim.GetVelocity(); }
 
 units::degrees_per_second_squared_t ArmSimSupplier::GetMechanismAcceleration() {
   return units::degrees_per_second_squared_t{0.0};

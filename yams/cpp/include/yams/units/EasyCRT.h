@@ -25,11 +25,11 @@ class EasyCRT {
  public:
   /** Result status of the most recent solve attempt. */
   enum class CRTStatus {
-    OK,             ///< Solve succeeded with a unique solution.
-    NO_SOLUTION,    ///< No candidate fell within the match tolerance.
-    AMBIGUOUS,      ///< Two nearly-equal candidates both fell within tolerance.
-    NOT_ATTEMPTED,  ///< No solve has been attempted yet.
-    INVALID_CONFIG, ///< Solve was skipped due to an invalid configuration.
+    OK,              ///< Solve succeeded with a unique solution.
+    NO_SOLUTION,     ///< No candidate fell within the match tolerance.
+    AMBIGUOUS,       ///< Two nearly-equal candidates both fell within tolerance.
+    NOT_ATTEMPTED,   ///< No solve has been attempted yet.
+    INVALID_CONFIG,  ///< Solve was skipped due to an invalid configuration.
   };
 
   /**
