@@ -70,10 +70,10 @@ static FlyWheel* CreateShooter(SmartMotorController* smc, TestSubsystem* subsys)
   FlyWheelConfig cfg;
   cfg.WithMotorController(smc).WithSubsystem(subsys).WithRollerDiameter(
       units::meter_t{4.0 * 0.0254});  // 4 inches
-  FlyWheel shooter{cfg};
-  subsys->m_mechSimPeriodic = [&shooter] { shooter.SimIterate(); };
-  subsys->m_mechUpdateTelemetry = [&shooter] { shooter.UpdateTelemetry(); };
-  return &shooter;
+  FlyWheel shooter = new FlyWheel(cfg);
+  subsys->m_mechSimPeriodic = [shooter] { shooter->SimIterate(); };
+  subsys->m_mechUpdateTelemetry = [shooter] { shooter->UpdateTelemetry(); };
+  return shooter;
 }
 
 // ---- Shared test bodies -----------------------------------------------------
@@ -182,6 +182,7 @@ TEST_P(ShooterTest, ShooterDutyCycle) {
 
   DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
   CloseBundle(bundle);
+  delete shooter;
 }
 
 TEST_P(ShooterTest, ShooterVelocityPID) {
@@ -198,6 +199,7 @@ TEST_P(ShooterTest, ShooterVelocityPID) {
 
   VelocityPIDTestBody(bundle.smc, IsCTRE(bundle));
   CloseBundle(bundle);
+  delete shooter;
 }
 
 INSTANTIATE_TEST_SUITE_P(AllControllersTests, ShooterTest, ::testing::ValuesIn(AllMotorParams()),

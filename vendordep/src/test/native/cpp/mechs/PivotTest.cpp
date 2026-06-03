@@ -68,10 +68,10 @@ static positional::Pivot* CreatePivot(SmartMotorController* smc, TestSubsystem* 
       .WithMinAngle(-100.0_deg)
       .WithMaxAngle(150.0_deg)
       .WithStartingAngle(0.0_deg);
-  positional::Pivot pivot{cfg};
-  subsys->m_mechSimPeriodic = [&pivot] { pivot.SimIterate(); };
-  subsys->m_mechUpdateTelemetry = [&pivot] { pivot.UpdateTelemetry(); };
-  return &pivot;
+  positional::Pivot pivot = new positional::Pivot(cfg);
+  subsys->m_mechSimPeriodic = [pivot] { pivot->SimIterate(); };
+  subsys->m_mechUpdateTelemetry = [pivot] { pivot->UpdateTelemetry(); };
+  return pivot;
 }
 
 // ---- Shared test bodies -----------------------------------------------------
@@ -177,6 +177,7 @@ TEST_P(PivotTest, PivotDutyCycle) {
 
   DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
   CloseBundle(bundle);
+  delete pivot;
 }
 
 TEST_P(PivotTest, PivotPositionPID) {
@@ -192,6 +193,7 @@ TEST_P(PivotTest, PivotPositionPID) {
 
   PositionPIDTestBody(bundle.smc, IsCTRE(bundle));
   CloseBundle(bundle);
+  delete pivot;
 }
 
 INSTANTIATE_TEST_SUITE_P(AllControllersTests, PivotTest, ::testing::ValuesIn(AllMotorParams()),

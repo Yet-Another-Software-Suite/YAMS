@@ -74,10 +74,10 @@ static positional::Arm* CreateArm(SmartMotorController* smc, TestSubsystem* subs
   // withHorizontalZero only for CTRE controllers in the Java tests
   // (not a config option in our C++ ArmConfig yet; add if needed)
 
-  positional::Arm arm{cfg};
-  subsys->m_mechSimPeriodic = [&arm] { arm.SimIterate(); };
-  subsys->m_mechUpdateTelemetry = [&arm] { arm.UpdateTelemetry(); };
-  return &arm;
+  positional::Arm arm = new positional::Arm(cfg);
+  subsys->m_mechSimPeriodic = [arm] { arm->SimIterate(); };
+  subsys->m_mechUpdateTelemetry = [arm] { arm->UpdateTelemetry(); };
+  return arm;
 }
 
 // ---- Shared test bodies -----------------------------------------------------
@@ -184,6 +184,7 @@ TEST_P(ArmTest, ArmDutyCycle) {
 
   DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
   CloseBundle(bundle);
+  delete arm;
 }
 
 TEST_P(ArmTest, ArmPositionPID) {
@@ -199,6 +200,7 @@ TEST_P(ArmTest, ArmPositionPID) {
 
   PositionPIDTestBody(bundle.smc, IsCTRE(bundle));
   CloseBundle(bundle);
+  delete arm;
 }
 
 INSTANTIATE_TEST_SUITE_P(AllControllersTests, ArmTest, ::testing::ValuesIn(AllMotorParams()),

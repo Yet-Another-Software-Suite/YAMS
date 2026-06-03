@@ -72,10 +72,10 @@ static positional::Elevator* CreateElevator(SmartMotorController* smc, TestSubsy
       .WithStartingHeight(0.0_m)
       .WithMinimumHeight(0.0_m)
       .WithMaximumHeight(3.0_m);
-  positional::Elevator elevator{cfg};
-  subsys->m_mechSimPeriodic = [&elevator] { elevator.SimIterate(); };
-  subsys->m_mechUpdateTelemetry = [&elevator] { elevator.UpdateTelemetry(); };
-  return &elevator;
+  positional::Elevator elevator = new positional::Elevator(cfg);
+  subsys->m_mechSimPeriodic = [elevator] { elevator->SimIterate(); };
+  subsys->m_mechUpdateTelemetry = [elevator] { elevator->UpdateTelemetry(); };
+  return elevator;
 }
 
 // ---- Shared test bodies -----------------------------------------------------
@@ -199,6 +199,7 @@ TEST_P(ElevatorTest, ElevatorPositionPID) {
 
   PositionPIDTestBody(bundle.smc, IsCTRE(bundle));
   CloseBundle(bundle);
+  delete elevator;
 }
 
 INSTANTIATE_TEST_SUITE_P(AllControllersTests, ElevatorTest, ::testing::ValuesIn(AllMotorParams()),
