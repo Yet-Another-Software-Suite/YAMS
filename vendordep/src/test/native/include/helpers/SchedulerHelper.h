@@ -29,7 +29,7 @@ class SchedulerHelper {
     int steps = static_cast<int>(units::millisecond_t{duration}.value() / heartbeatMs);
     for (int i = 0; i < steps; ++i) {
       frc2::CommandScheduler::GetInstance().Run();
-      frc::sim::SimHooks::StepTimingAsync(units::millisecond_t{heartbeatMs});
+      frc::sim::StepTimingAsync(units::millisecond_t{(double)heartbeatMs});
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
       if (cycleCallback) cycleCallback();
     }

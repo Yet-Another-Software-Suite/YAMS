@@ -186,7 +186,7 @@ model {
             wpi.cpp.vendor.cpp(it)
             wpi.cpp.deps.wpilib(it)
 
-          binaries.all {
+          /*binaries.all {
 //              lib library: 'VendorDriver', linkage: 'shared'
 
               def arch = it.targetPlatform.name
@@ -197,7 +197,7 @@ model {
                   test.environment 'LD_LIBRARY_PATH', filePath
                   test.workingDir filePath
               }
-          }
+          }*/
 
           nativeUtils.useRequiredLibrary(it, "wpilib_executable_shared", "googletest_static")
       }

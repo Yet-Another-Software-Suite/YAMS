@@ -83,8 +83,8 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
 
   auto* subsys = static_cast<TestSubsystem*>(smc->GetConfig().GetSubsystem());
   auto cmd = subsys->SetDutyCycle(0.5);
-  frc2::CommandScheduler::GetInstance().Schedule(&cmd.Unwrap());
-  frc2::CommandScheduler::GetInstance().Schedule(&cmd.Unwrap());  // schedule twice like Java
+  frc2::CommandScheduler::GetInstance().Schedule(cmd);
+  frc2::CommandScheduler::GetInstance().Schedule(cmd);  // schedule twice like Java
 
   SchedulerHelper::RunForDuration(1.0_s, [&] {
     if (smc->GetDutyCycle() != 0.0) passed = true;
@@ -112,7 +112,7 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE) {
 
   auto cmd =
       frc2::cmd::Run([smc] { smc->SetPosition(80.0_deg); }, {smc->GetConfig().GetSubsystem()});
-  frc2::CommandScheduler::GetInstance().Schedule(&cmd.Unwrap());
+  frc2::CommandScheduler::GetInstance().Schedule(cmd);
 
   SchedulerHelper::RunForDuration(isCTRE ? 1.0_s : 20.0_s, [&] {
     std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(
@@ -173,7 +173,7 @@ TEST_P(PivotTest, PivotDutyCycle) {
 
   auto pivot = CreatePivot(bundle.smc, bundle.subsystem.get());
   auto upCmd = pivot.Set(0.5);
-  frc2::CommandScheduler::GetInstance().Schedule(&upCmd.Unwrap());
+  frc2::CommandScheduler::GetInstance().Schedule(upCmd);
 
   DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
   CloseBundle(bundle);
@@ -188,7 +188,7 @@ TEST_P(PivotTest, PivotPositionPID) {
 
   auto pivot = CreatePivot(bundle.smc, bundle.subsystem.get());
   auto highPid = pivot.GoToAngle(80.0_deg);
-  frc2::CommandScheduler::GetInstance().Schedule(&highPid.Unwrap());
+  frc2::CommandScheduler::GetInstance().Schedule(highPid);
 
   PositionPIDTestBody(bundle.smc, IsCTRE(bundle));
   CloseBundle(bundle);

@@ -87,7 +87,7 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
 
   auto* subsys = static_cast<TestSubsystem*>(smc->GetConfig().GetSubsystem());
   auto cmd = subsys->SetDutyCycle(1.0);
-  frc2::CommandScheduler::GetInstance().Schedule(&cmd.Unwrap());
+  frc2::CommandScheduler::GetInstance().Schedule(cmd);
 
   SchedulerHelper::RunForDuration(1.0_s, [&] {
     if (smc->GetDutyCycle() != 0.0) passed = true;
@@ -114,7 +114,7 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   bool passed = false;
 
   auto cmd = frc2::cmd::Run([smc] { smc->SetPosition(2.0_m); }, {smc->GetConfig().GetSubsystem()});
-  frc2::CommandScheduler::GetInstance().Schedule(&cmd.Unwrap());
+  frc2::CommandScheduler::GetInstance().Schedule(cmd);
 
   units::millisecond_t period{
       smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms).value() * 1000.0};
@@ -179,7 +179,7 @@ TEST_P(ElevatorTest, ElevatorDutyCycle) {
 
   auto elevator = CreateElevator(bundle.smc, bundle.subsystem.get());
   auto upCmd = elevator.Set(1.0);
-  frc2::CommandScheduler::GetInstance().Schedule(&upCmd.Unwrap());
+  frc2::CommandScheduler::GetInstance().Schedule(upCmd);
 
   DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
   CloseBundle(bundle);
@@ -194,7 +194,7 @@ TEST_P(ElevatorTest, ElevatorPositionPID) {
 
   auto elevator = CreateElevator(bundle.smc, bundle.subsystem.get());
   auto highPid = elevator.GoToHeight(2.0_m);
-  frc2::CommandScheduler::GetInstance().Schedule(&highPid.Unwrap());
+  frc2::CommandScheduler::GetInstance().Schedule(highPid);
 
   PositionPIDTestBody(bundle.smc, IsCTRE(bundle));
   CloseBundle(bundle);

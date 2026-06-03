@@ -85,8 +85,8 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
 
   auto* subsys = static_cast<TestSubsystem*>(smc->GetConfig().GetSubsystem());
   auto cmd = subsys->SetDutyCycle(0.5);
-  frc2::CommandScheduler::GetInstance().Schedule(&cmd.Unwrap());
-  frc2::CommandScheduler::GetInstance().Schedule(&cmd.Unwrap());
+  frc2::CommandScheduler::GetInstance().Schedule(cmd);
+  frc2::CommandScheduler::GetInstance().Schedule(cmd);
 
   SchedulerHelper::RunForDuration(1.0_s, [&] {
     if (smc->GetDutyCycle() != 0.0) passed = true;
@@ -117,7 +117,7 @@ static void VelocityPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   constexpr units::degrees_per_second_t kTargetVel{12000.0};
   auto cmd =
       frc2::cmd::Run([smc] { smc->SetVelocity(kTargetVel); }, {smc->GetConfig().GetSubsystem()});
-  frc2::CommandScheduler::GetInstance().Schedule(&cmd.Unwrap());
+  frc2::CommandScheduler::GetInstance().Schedule(cmd);
 
   SchedulerHelper::RunForDuration(isCTRE ? 1.0_s : 2.0_s, [&] {
     if (smc->GetDutyCycle() != 0.0) passed = true;
@@ -178,7 +178,7 @@ TEST_P(ShooterTest, ShooterDutyCycle) {
 
   auto shooter = CreateShooter(bundle.smc, bundle.subsystem.get());
   auto upCmd = shooter.Set(0.5);
-  frc2::CommandScheduler::GetInstance().Schedule(&upCmd.Unwrap());
+  frc2::CommandScheduler::GetInstance().Schedule(upCmd);
 
   DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
   CloseBundle(bundle);
@@ -194,7 +194,7 @@ TEST_P(ShooterTest, ShooterVelocityPID) {
   // ~80 RPM = 80/60 * 360 ≈ 480 deg/s
   auto shooter = CreateShooter(bundle.smc, bundle.subsystem.get());
   auto highPid = shooter.Spin(units::degrees_per_second_t{480.0});
-  frc2::CommandScheduler::GetInstance().Schedule(&highPid.Unwrap());
+  frc2::CommandScheduler::GetInstance().Schedule(highPid);
 
   VelocityPIDTestBody(bundle.smc, IsCTRE(bundle));
   CloseBundle(bundle);

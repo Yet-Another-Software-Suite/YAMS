@@ -21,7 +21,7 @@ inline void InitializeHardware() {
   frc::sim::DriverStationSim::SetTest(false);
   frc::sim::DriverStationSim::SetEnabled(true);
   frc::sim::DriverStationSim::NotifyNewData();
-  frc::sim::SimHooks::StepTiming(0.0_s);
+  frc::sim::StepTiming(0.0_s);
 }
 
 inline void TeardownHardware() {
