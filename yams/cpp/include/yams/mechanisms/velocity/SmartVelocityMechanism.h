@@ -23,6 +23,8 @@ namespace yams::mechanisms::velocity {
  */
 class SmartVelocityMechanism : public SmartMechanism {
  public:
+
+  SmartVelocityMechanism() : SmartMechanism() {}
   virtual ~SmartVelocityMechanism() = default;
 
   // ---- Pure virtual interface -----------------------------------------------
