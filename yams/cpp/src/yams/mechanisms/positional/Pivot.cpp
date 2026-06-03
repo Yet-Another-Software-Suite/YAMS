@@ -18,7 +18,7 @@ namespace yams::mechanisms::positional {
 
 // ---- Constructor ------------------------------------------------------------
 
-Pivot::Pivot(const config::PivotConfig& config) : m_pivotConfig{config} {
+Pivot::Pivot(const config::PivotConfig& config) :SmartPositionalMechanism(), m_pivotConfig{config} {
   m_smc = config.GetMotorController();
   m_subsystem = config.GetSubsystem();
 
