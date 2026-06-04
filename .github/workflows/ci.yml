@@ -28,6 +28,7 @@ jobs:
         working-directory: ${{ env.workingDirectory }}
       - name: Java Unit tests
         run: ./gradlew test
+        working-directory: ${{ env.workingDirectory }}
       - name: C++ Unit tests
         run: ./gradlew googleTest
         working-directory: ${{ env.workingDirectory }}
