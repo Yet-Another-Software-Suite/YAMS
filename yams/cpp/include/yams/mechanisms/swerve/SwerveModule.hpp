@@ -8,8 +8,8 @@
 
 #include <string>
 
-#include "yams/mechanisms/config/SwerveModuleConfig.h"
-#include "yams/motorcontrollers/SmartMotorController.h"
+#include "yams/mechanisms/config/SwerveModuleConfig.hpp"
+#include "yams/motorcontrollers/SmartMotorController.hpp"
 
 namespace yams::mechanisms::swerve {
 

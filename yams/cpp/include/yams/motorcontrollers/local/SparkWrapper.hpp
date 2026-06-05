@@ -19,8 +19,8 @@
 #include <optional>
 #include <variant>
 
-#include "yams/math/DerivativeTimeFilter.h"
-#include "yams/motorcontrollers/SmartMotorController.h"
+#include "yams/math/DerivativeTimeFilter.hpp"
+#include "yams/motorcontrollers/SmartMotorController.hpp"
 
 namespace yams::motorcontrollers::local {
 

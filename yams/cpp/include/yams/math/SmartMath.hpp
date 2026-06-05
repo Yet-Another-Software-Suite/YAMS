@@ -6,7 +6,7 @@
 #include <initializer_list>
 #include <stdexcept>
 
-#include "yams/exceptions/NoStagesGivenException.h"
+#include "yams/exceptions/NoStagesGivenException.hpp"
 
 namespace yams::math {
 

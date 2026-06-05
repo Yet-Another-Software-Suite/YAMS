@@ -20,11 +20,11 @@
 #include <ctre/phoenix6/TalonFX.hpp>
 
 #include <yams/gearing/GearBox.h>
-#include "yams/gearing/MechanismGearing.h"
-#include "yams/mechanisms/config/PivotConfig.h"
-#include "yams/mechanisms/positional/Pivot.h"
-#include "yams/motorcontrollers/SmartMotorControllerConfig.h"
-#include "yams/motorcontrollers/remote/TalonFXWrapper.h"
+#include "yams/gearing/MechanismGearing.hpp"
+#include "yams/mechanisms/config/PivotConfig.hpp"
+#include "yams/mechanisms/positional/Pivot.hpp"
+#include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
+#include "yams/motorcontrollers/remote/TalonFXWrapper.hpp"
 
 class TurretSubsystem : public frc2::SubsystemBase {
  public:

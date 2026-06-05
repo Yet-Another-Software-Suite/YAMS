@@ -17,12 +17,12 @@
 
 #include <ctre/phoenix6/TalonFX.hpp>
 
-#include "yams/gearing/GearBox.h"
-#include "yams/gearing/MechanismGearing.h"
-#include "yams/mechanisms/config/FlyWheelConfig.h"
-#include "yams/mechanisms/velocity/FlyWheel.h"
-#include "yams/motorcontrollers/SmartMotorControllerConfig.h"
-#include "yams/motorcontrollers/remote/TalonFXWrapper.h"
+#include "yams/gearing/GearBox.hpp"
+#include "yams/gearing/MechanismGearing.hpp"
+#include "yams/mechanisms/config/FlyWheelConfig.hpp"
+#include "yams/mechanisms/velocity/FlyWheel.hpp"
+#include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
+#include "yams/motorcontrollers/remote/TalonFXWrapper.hpp"
 
 class ShooterSubsystem : public frc2::SubsystemBase {
  public:

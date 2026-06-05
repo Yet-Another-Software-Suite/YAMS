@@ -20,8 +20,8 @@
 #include "helpers/MockHardware.h"
 #include "helpers/MotorControllerFactory.h"
 #include "helpers/SchedulerHelper.h"
-#include "yams/mechanisms/config/FlyWheelConfig.h"
-#include "yams/mechanisms/velocity/FlyWheel.h"
+#include "yams/mechanisms/config/FlyWheelConfig.hpp"
+#include "yams/mechanisms/velocity/FlyWheel.hpp"
 
 namespace yams::test {
 

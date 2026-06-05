@@ -16,7 +16,7 @@
 #include <string>
 
 #include "SmartVelocityMechanism.h"
-#include "yams/mechanisms/config/FlyWheelConfig.h"
+#include "yams/mechanisms/config/FlyWheelConfig.hpp"
 
 namespace yams::mechanisms::velocity {
 

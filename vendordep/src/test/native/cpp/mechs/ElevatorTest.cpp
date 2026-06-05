@@ -21,8 +21,8 @@
 #include "helpers/MockHardware.h"
 #include "helpers/MotorControllerFactory.h"
 #include "helpers/SchedulerHelper.h"
-#include "yams/mechanisms/config/ElevatorConfig.h"
-#include "yams/mechanisms/positional/Elevator.h"
+#include "yams/mechanisms/config/ElevatorConfig.hpp"
+#include "yams/mechanisms/positional/Elevator.hpp"
 
 namespace yams::test {
 

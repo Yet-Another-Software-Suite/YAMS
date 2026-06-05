@@ -15,12 +15,12 @@
 
 #include <ctre/phoenix6/TalonFXS.hpp>
 
-#include "yams/gearing/GearBox.h"
-#include "yams/gearing/MechanismGearing.h"
-#include "yams/mechanisms/config/PivotConfig.h"
-#include "yams/mechanisms/positional/Pivot.h"
-#include "yams/motorcontrollers/SmartMotorControllerConfig.h"
-#include "yams/motorcontrollers/remote/TalonFXSWrapper.h"
+#include "yams/gearing/GearBox.hpp"
+#include "yams/gearing/MechanismGearing.hpp"
+#include "yams/mechanisms/config/PivotConfig.hpp"
+#include "yams/mechanisms/positional/Pivot.hpp"
+#include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
+#include "yams/motorcontrollers/remote/TalonFXSWrapper.hpp"
 
 class HoodSubsystem : public frc2::SubsystemBase {
  public:

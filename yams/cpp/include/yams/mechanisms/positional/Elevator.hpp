@@ -13,7 +13,7 @@
 #include <string>
 
 #include "SmartPositionalMechanism.h"
-#include "yams/mechanisms/config/ElevatorConfig.h"
+#include "yams/mechanisms/config/ElevatorConfig.hpp"
 
 namespace yams::mechanisms::positional {
 

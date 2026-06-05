@@ -14,9 +14,9 @@
 #include <optional>
 #include <string>
 
-#include "yams/gearing/GearBox.h"
-#include "yams/motorcontrollers/SmartMotorController.h"
-#include "yams/motorcontrollers/SmartMotorControllerConfig.h"
+#include "yams/gearing/GearBox.hpp"
+#include "yams/motorcontrollers/SmartMotorController.hpp"
+#include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 
 namespace yams::mechanisms::config {
 

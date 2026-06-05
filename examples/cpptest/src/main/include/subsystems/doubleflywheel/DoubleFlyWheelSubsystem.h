@@ -17,10 +17,10 @@
 
 #include <ctre/phoenix6/TalonFX.hpp>
 
-#include "yams/gearing/GearBox.h"
-#include "yams/gearing/MechanismGearing.h"
-#include "yams/motorcontrollers/SmartMotorControllerConfig.h"
-#include "yams/motorcontrollers/remote/TalonFXWrapper.h"
+#include "yams/gearing/GearBox.hpp"
+#include "yams/gearing/MechanismGearing.hpp"
+#include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
+#include "yams/motorcontrollers/remote/TalonFXWrapper.hpp"
 
 class DoubleFlyWheelSubsystem : public frc2::SubsystemBase {
  public:

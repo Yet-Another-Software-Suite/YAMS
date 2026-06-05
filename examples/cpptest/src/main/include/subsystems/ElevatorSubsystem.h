@@ -15,12 +15,12 @@
 
 #include <rev/SparkMax.h>
 
-#include "yams/gearing/GearBox.h"
-#include "yams/gearing/MechanismGearing.h"
-#include "yams/mechanisms/config/ElevatorConfig.h"
-#include "yams/mechanisms/positional/Elevator.h"
-#include "yams/motorcontrollers/SmartMotorControllerConfig.h"
-#include "yams/motorcontrollers/local/SparkWrapper.h"
+#include "yams/gearing/GearBox.hpp"
+#include "yams/gearing/MechanismGearing.hpp"
+#include "yams/mechanisms/config/ElevatorConfig.hpp"
+#include "yams/mechanisms/positional/Elevator.hpp"
+#include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
+#include "yams/motorcontrollers/local/SparkWrapper.hpp"
 
 class ElevatorSubsystem : public frc2::SubsystemBase {
  public:

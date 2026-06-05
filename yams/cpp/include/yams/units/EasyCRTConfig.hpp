@@ -11,8 +11,8 @@
 #include <string>
 #include <vector>
 
-#include "yams/gearing/GearBox.h"
-#include "yams/gearing/MechanismGearing.h"
+#include "yams/gearing/GearBox.hpp"
+#include "yams/gearing/MechanismGearing.hpp"
 
 namespace yams::units {
 

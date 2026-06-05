@@ -19,11 +19,11 @@
 
 #include "helpers/MockHardware.h"
 #include "helpers/MotorControllerFactory.h"
-#include "yams/motorcontrollers/SmartMotorControllerConfig.h"
-#include "yams/motorcontrollers/SmartMotorFactory.h"
-#include "yams/motorcontrollers/local/SparkWrapper.h"
-#include "yams/motorcontrollers/remote/TalonFXSWrapper.h"
-#include "yams/motorcontrollers/remote/TalonFXWrapper.h"
+#include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
+#include "yams/motorcontrollers/SmartMotorFactory.hpp"
+#include "yams/motorcontrollers/local/SparkWrapper.hpp"
+#include "yams/motorcontrollers/remote/TalonFXSWrapper.hpp"
+#include "yams/motorcontrollers/remote/TalonFXWrapper.hpp"
 
 namespace yams::test {
 

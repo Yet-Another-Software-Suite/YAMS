@@ -23,14 +23,14 @@
 #include <ctre/phoenix6/Pigeon2.hpp>
 #include <rev/SparkMax.h>
 
-#include "yams/gearing/GearBox.h"
-#include "yams/gearing/MechanismGearing.h"
-#include "yams/mechanisms/config/SwerveModuleConfig.h"
-#include "yams/mechanisms/swerve/SwerveDrive.h"
-#include "yams/mechanisms/swerve/SwerveDriveConfig.h"
-#include "yams/mechanisms/swerve/SwerveModule.h"
-#include "yams/motorcontrollers/SmartMotorControllerConfig.h"
-#include "yams/motorcontrollers/local/SparkWrapper.h"
+#include "yams/gearing/GearBox.hpp"
+#include "yams/gearing/MechanismGearing.hpp"
+#include "yams/mechanisms/config/SwerveModuleConfig.hpp"
+#include "yams/mechanisms/swerve/SwerveDrive.hpp"
+#include "yams/mechanisms/swerve/SwerveDriveConfig.hpp"
+#include "yams/mechanisms/swerve/SwerveModule.hpp"
+#include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
+#include "yams/motorcontrollers/local/SparkWrapper.hpp"
 
 class SwerveSubsystem : public frc2::SubsystemBase {
  public:

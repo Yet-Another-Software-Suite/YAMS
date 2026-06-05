@@ -10,7 +10,7 @@
 #include <units/time.h>
 #include <units/voltage.h>
 
-#include "yams/mechanisms/SmartMechanism.h"
+#include "yams/mechanisms/SmartMechanism.hpp"
 
 namespace yams::mechanisms::velocity {
 

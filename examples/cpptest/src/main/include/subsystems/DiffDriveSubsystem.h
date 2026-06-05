@@ -14,10 +14,10 @@
 
 #include <rev/SparkMax.h>
 
-#include "yams/gearing/GearBox.h"
-#include "yams/gearing/MechanismGearing.h"
-#include "yams/motorcontrollers/SmartMotorControllerConfig.h"
-#include "yams/motorcontrollers/local/SparkWrapper.h"
+#include "yams/gearing/GearBox.hpp"
+#include "yams/gearing/MechanismGearing.hpp"
+#include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
+#include "yams/motorcontrollers/local/SparkWrapper.hpp"
 
 class DiffDriveSubsystem : public frc2::SubsystemBase {
  public:

@@ -31,9 +31,9 @@
 
 #include "SimSupplier.h"
 #include "SmartMotorControllerConfig.h"
-#include "yams/math/LQRController.h"
-#include "yams/telemetry/SmartMotorControllerTelemetry.h"
-#include "yams/telemetry/SmartMotorControllerTelemetryConfig.h"
+#include "yams/math/LQRController.hpp"
+#include "yams/telemetry/SmartMotorControllerTelemetry.hpp"
+#include "yams/telemetry/SmartMotorControllerTelemetryConfig.hpp"
 
 namespace yams::motorcontrollers {
 

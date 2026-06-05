@@ -26,8 +26,8 @@
 #include <string>
 #include <vector>
 
-#include "yams/gearing/MechanismGearing.h"
-#include "yams/math/LQRConfig.h"
+#include "yams/gearing/MechanismGearing.hpp"
+#include "yams/math/LQRConfig.hpp"
 
 namespace yams::motorcontrollers {
 

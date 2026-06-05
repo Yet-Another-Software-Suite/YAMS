@@ -7,8 +7,8 @@
 #include <string>
 #include <unordered_map>
 
-#include "yams/motorcontrollers/SmartMotorControllerConfig.h"
-#include "yams/telemetry/SmartMotorControllerTelemetry.h"
+#include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
+#include "yams/telemetry/SmartMotorControllerTelemetry.hpp"
 
 namespace yams::telemetry {
 

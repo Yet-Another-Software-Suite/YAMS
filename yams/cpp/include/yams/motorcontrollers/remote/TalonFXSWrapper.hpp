@@ -7,74 +7,67 @@
 
 #include <ctre/phoenix6/CANcoder.hpp>
 #include <ctre/phoenix6/CANdi.hpp>
-#include <ctre/phoenix6/TalonFX.hpp>
+#include <ctre/phoenix6/TalonFXS.hpp>
 #include <ctre/phoenix6/controls/DutyCycleOut.hpp>
-#include <ctre/phoenix6/controls/Follower.hpp>
 #include <ctre/phoenix6/controls/MotionMagicExpoVoltage.hpp>
 #include <ctre/phoenix6/controls/MotionMagicVelocityVoltage.hpp>
 #include <ctre/phoenix6/controls/MotionMagicVoltage.hpp>
 #include <ctre/phoenix6/controls/PositionVoltage.hpp>
 #include <ctre/phoenix6/controls/VelocityVoltage.hpp>
 #include <ctre/phoenix6/controls/VoltageOut.hpp>
-#include <memory>
 #include <optional>
 
-#include "yams/math/DerivativeTimeFilter.h"
-#include "yams/motorcontrollers/SmartMotorController.h"
+#include "yams/math/DerivativeTimeFilter.hpp"
+#include "yams/motorcontrollers/SmartMotorController.hpp"
 
 namespace yams::motorcontrollers::remote {
 
 /**
- * SmartMotorController implementation for the CTRE TalonFX motor controller (Phoenix 6).
+ * SmartMotorController implementation for the CTRE TalonFXS motor controller (Phoenix 6).
  *
- * Wraps a TalonFX hardware object and exposes the full SmartMotorController interface
+ * The TalonFXS supports third-party brushed and brushless motors (e.g. REV NEO, Minion).
+ * Wraps a TalonFXS hardware object and exposes the full SmartMotorController interface
  * including MotionMagic profiles, CANcoder/CANdi synchronization, and simulation support.
  */
-class TalonFXWrapper : public SmartMotorController {
+class TalonFXSWrapper : public SmartMotorController {
  public:
-  /**
-   * Construct a TalonFXWrapper.
-   *
-   * @param talon   TalonFX hardware object (must outlive this wrapper).
-   * @param dcMotor DC motor model used for simulation.
-   * @param config  Initial SmartMotorControllerConfig to apply.
-   */
-  TalonFXWrapper(ctre::phoenix6::hardware::TalonFX& talon, frc::DCMotor dcMotor,
-                 const SmartMotorControllerConfig& config);
+  /** Motor type attached to the TalonFXS external motor port. */
+  enum class MotorArrangement { Minion, NEO, NEO550, NEOVortex, Brushed_2Wire, Brushed_3Wire };
 
-  // ---- Telemetry ----------------------------------------------------------
+  /**
+   * Construct a TalonFXSWrapper.
+   *
+   * @param talon       TalonFXS hardware object (must outlive this wrapper).
+   * @param dcMotor     DC motor model used for simulation.
+   * @param arrangement Motor type connected to the TalonFXS.
+   * @param config      Initial SmartMotorControllerConfig to apply.
+   */
+  TalonFXSWrapper(ctre::phoenix6::hardware::TalonFXS& talon, frc::DCMotor dcMotor,
+                  MotorArrangement arrangement, const SmartMotorControllerConfig& config);
+
   telemetry::UnsupportedTelemetryFields GetUnsupportedTelemetryFields() override;
 
-  // ---- Configuration ------------------------------------------------------
   bool ApplyConfig(const SmartMotorControllerConfig& config) override;
-
-  // ---- Simulation ---------------------------------------------------------
   void SetupSimulation() override;
   void SimIterate() override;
-
-  // ---- Encoder sync -------------------------------------------------------
   void SeedRelativeEncoder() override;
   void SynchronizeRelativeEncoder() override;
 
-  // ---- Open-loop outputs --------------------------------------------------
   void SetDutyCycle(double dutyCycle) override;
   double GetDutyCycle() override;
   void SetVoltage(units::volt_t voltage) override;
   units::volt_t GetVoltage() override;
 
-  // ---- Closed-loop setpoints ----------------------------------------------
   void SetPosition(units::degree_t angle) override;
   void SetPosition(units::meter_t distance) override;
   void SetVelocity(units::degrees_per_second_t velocity) override;
   void SetVelocity(units::meters_per_second_t velocity) override;
 
-  // ---- Encoder writes -----------------------------------------------------
   void SetEncoderPosition(units::degree_t angle) override;
   void SetEncoderPosition(units::meter_t distance) override;
   void SetEncoderVelocity(units::degrees_per_second_t velocity) override;
   void SetEncoderVelocity(units::meters_per_second_t velocity) override;
 
-  // ---- Encoder reads ------------------------------------------------------
   units::degree_t GetMechanismPosition() override;
   units::degrees_per_second_t GetMechanismVelocity() override;
   units::degrees_per_second_squared_t GetMechanismAcceleration() override;
@@ -87,13 +80,11 @@ class TalonFXWrapper : public SmartMotorController {
   std::optional<units::degree_t> GetExternalEncoderPosition() override;
   std::optional<units::degrees_per_second_t> GetExternalEncoderVelocity() override;
 
-  // ---- Motor status -------------------------------------------------------
   std::optional<units::ampere_t> GetSupplyCurrent() override;
   units::ampere_t GetStatorCurrent() override;
   units::celsius_t GetTemperature() override;
   frc::DCMotor GetDCMotor() override;
 
-  // ---- Configuration setters (live tuning) --------------------------------
   void SetIdleMode(MotorMode mode) override;
   void SetMotorInverted(bool inverted) override;
   void SetEncoderInverted(bool inverted) override;
@@ -132,8 +123,6 @@ class TalonFXWrapper : public SmartMotorController {
   void* GetMotorController() override;
   void* GetMotorControllerConfig() override;
 
-  // ---- CANcoder / CANdi support -------------------------------------------
-
   /**
    * Attach a CANcoder for absolute position feedback and encoder synchronization.
    *
@@ -149,11 +138,11 @@ class TalonFXWrapper : public SmartMotorController {
   void WithCANdi(ctre::phoenix6::hardware::CANdi& candi);
 
  private:
-  ctre::phoenix6::hardware::TalonFX& m_talon;
+  ctre::phoenix6::hardware::TalonFXS& m_talon;
   frc::DCMotor m_dcMotor;
-  ctre::phoenix6::configs::TalonFXConfiguration m_talonConfig;
+  MotorArrangement m_arrangement;
+  ctre::phoenix6::configs::TalonFXSConfiguration m_talonConfig;
 
-  // Control requests
   ctre::phoenix6::controls::VelocityVoltage m_simpleVelocityReq{0_tps};
   ctre::phoenix6::controls::PositionVoltage m_simplePositionReq{0_tr};
   ctre::phoenix6::controls::MotionMagicVoltage m_trapPositionReq{0_tr};
@@ -162,22 +151,13 @@ class TalonFXWrapper : public SmartMotorController {
   ctre::phoenix6::controls::VoltageOut m_voltageReq{0_V};
   ctre::phoenix6::controls::DutyCycleOut m_dutyCycleReq{0.0};
 
-  // External sensors
   std::optional<std::reference_wrapper<ctre::phoenix6::hardware::CANcoder>> m_cancoder;
   std::optional<std::reference_wrapper<ctre::phoenix6::hardware::CANdi>> m_candi;
 
-  // Simulation
   std::optional<frc::sim::DCMotorSim> m_motorSim;
-
   math::DerivativeTimeFilter m_accelFilter{20_ms};
 
-  void ApplyPIDConfig();
-  void ApplyFeedforwardConfig();
-  void ApplyLimitsConfig();
-  void ApplyMotionMagicConfig();
-
-  units::turns_per_second_t ToTPS(units::degrees_per_second_t v) const;
-  units::turn_t ToTurns(units::degree_t a) const;
+  ctre::phoenix6::signals::ExternalFeedbackSensorSourceValue ArrangementToFeedbackSource() const;
 };
 
 }  // namespace yams::motorcontrollers::remote

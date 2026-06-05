@@ -20,8 +20,8 @@
 #include "helpers/MockHardware.h"
 #include "helpers/MotorControllerFactory.h"
 #include "helpers/SchedulerHelper.h"
-#include "yams/mechanisms/config/ArmConfig.h"
-#include "yams/mechanisms/positional/Arm.h"
+#include "yams/mechanisms/config/ArmConfig.hpp"
+#include "yams/mechanisms/positional/Arm.hpp"
 
 namespace yams::test {
 

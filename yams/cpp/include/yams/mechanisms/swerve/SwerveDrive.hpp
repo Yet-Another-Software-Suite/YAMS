@@ -33,8 +33,8 @@
 #include <string>
 #include <utility>
 
-#include "yams/mechanisms/swerve/SwerveDriveConfig.h"
-#include "yams/mechanisms/swerve/SwerveModule.h"
+#include "yams/mechanisms/swerve/SwerveDriveConfig.hpp"
+#include "yams/mechanisms/swerve/SwerveModule.hpp"
 
 namespace yams::mechanisms::swerve {
 

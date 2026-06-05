@@ -13,43 +13,44 @@
 #include <string>
 
 #include "SmartPositionalMechanism.h"
-#include "yams/mechanisms/config/ArmConfig.h"
+#include "yams/mechanisms/config/PivotConfig.hpp"
 
 namespace yams::mechanisms::positional {
 
 /**
- * Smart mechanism implementation for a single-jointed arm.
+ * Smart mechanism implementation for a pivot joint.
  *
- * Drives an arm joint using a SmartMotorController configured for
- * mechanism-space (degree) closed-loop angular control.
+ * Similar to an Arm but intended for mechanisms that rotate a fixed-length
+ * assembly (e.g. a shooter hood or wrist) rather than a cantilevered arm with
+ * a meaningful length.  Uses mechanism-space (degree) closed-loop control.
  */
-class Arm : public SmartPositionalMechanism {
+class Pivot : public SmartPositionalMechanism {
  public:
   /**
-   * Construct an Arm from an ArmConfig.
+   * Construct a Pivot from a PivotConfig.
    *
-   * @param config Fully-populated arm configuration.
+   * @param config Fully-populated pivot configuration.
    */
-  explicit Arm(const config::ArmConfig& config);
+  explicit Pivot(const config::PivotConfig& config);
 
   // ---- SmartMechanism overrides ---------------------------------------------
 
-  /** Advance the arm's simulation by one loop iteration. */
+  /** Advance the pivot's simulation by one loop iteration. */
   void SimIterate() override;
 
-  /** Publish arm telemetry to NetworkTables / SmartDashboard. */
+  /** Publish pivot telemetry to NetworkTables / SmartDashboard. */
   void UpdateTelemetry() override;
 
   /** Update the Mechanism2d ligament to reflect the current angle. */
   void VisualizationUpdate() override;
 
-  /** Get the human-readable name of this arm. */
+  /** Get the human-readable name of this pivot. */
   std::string GetName() const override;
 
   // ---- SmartPositionalMechanism overrides -----------------------------------
 
   /**
-   * Trigger that becomes true when the arm is at or past its maximum
+   * Trigger that becomes true when the pivot is at or past its maximum
    * configured angle.
    *
    * @return Trigger for the upper angular hard limit.
@@ -57,7 +58,7 @@ class Arm : public SmartPositionalMechanism {
   frc2::Trigger Max() override;
 
   /**
-   * Trigger that becomes true when the arm is at or past its minimum
+   * Trigger that becomes true when the pivot is at or past its minimum
    * configured angle.
    *
    * @return Trigger for the lower angular hard limit.
@@ -65,7 +66,7 @@ class Arm : public SmartPositionalMechanism {
   frc2::Trigger Min() override;
 
   /**
-   * Build a SysId characterisation routine for this arm.
+   * Build a SysId characterisation routine for this pivot.
    *
    * @param maxVoltage  Maximum voltage for the quasistatic test.
    * @param step        Voltage ramp rate for the dynamic test (V/s).
@@ -75,18 +76,18 @@ class Arm : public SmartPositionalMechanism {
   frc2::CommandPtr SysId(units::volt_t maxVoltage, frc2::sysid::ramp_rate_t step,
                          units::second_t duration) override;
 
-  // ---- Arm-specific interface -----------------------------------------------
+  // ---- Pivot-specific interface ---------------------------------------------
 
   /**
-   * Command the arm to move to a fixed angle and hold it.
+   * Command the pivot to move to a fixed angle and hold it.
    *
-   * @param angle Target joint angle.
+   * @param angle Target pivot angle.
    * @return CommandPtr that requires the configured subsystem.
    */
   frc2::CommandPtr GoToAngle(units::degree_t angle);
 
   /**
-   * Command the arm to track a supplier-provided angle setpoint.
+   * Command the pivot to track a supplier-provided angle setpoint.
    *
    * @param angle Supplier returning the desired angle each loop.
    * @return CommandPtr that requires the configured subsystem.
@@ -94,14 +95,14 @@ class Arm : public SmartPositionalMechanism {
   frc2::CommandPtr GoToAngle(std::function<units::degree_t()> angle);
 
   /**
-   * Get the current joint angle from the motor encoder.
+   * Get the current pivot angle from the motor encoder.
    *
    * @return Current mechanism angle in degrees.
    */
   units::degree_t GetAngle() const;
 
   /**
-   * Check whether the arm is within tolerance of a target angle.
+   * Check whether the pivot is within tolerance of a target angle.
    *
    * @param target    Desired angle.
    * @param tolerance Allowable error (default 1 deg).
@@ -110,7 +111,7 @@ class Arm : public SmartPositionalMechanism {
   bool IsAtAngle(units::degree_t target, units::degree_t tolerance = units::degree_t{1.0}) const;
 
   /**
-   * Trigger that becomes true when the arm is within tolerance of a target
+   * Trigger that becomes true when the pivot is within tolerance of a target
    * angle.
    *
    * @param target    Desired angle.
@@ -120,8 +121,8 @@ class Arm : public SmartPositionalMechanism {
   frc2::Trigger AtAngle(units::degree_t target, units::degree_t tolerance = units::degree_t{1.0});
 
  private:
-  config::ArmConfig m_armConfig;
-  std::string m_name{"Arm"};
+  config::PivotConfig m_pivotConfig;
+  std::string m_name{"Pivot"};
 };
 
 }  // namespace yams::mechanisms::positional

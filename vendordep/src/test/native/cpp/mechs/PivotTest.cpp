@@ -19,8 +19,8 @@
 #include "helpers/MockHardware.h"
 #include "helpers/MotorControllerFactory.h"
 #include "helpers/SchedulerHelper.h"
-#include "yams/mechanisms/config/PivotConfig.h"
-#include "yams/mechanisms/positional/Pivot.h"
+#include "yams/mechanisms/config/PivotConfig.hpp"
+#include "yams/mechanisms/positional/Pivot.hpp"
 
 namespace yams::test {
 

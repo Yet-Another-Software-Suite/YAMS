@@ -17,12 +17,12 @@
 #include <ctre/phoenix6/CANcoder.hpp>
 #include <ctre/phoenix6/TalonFX.hpp>
 
-#include "yams/gearing/GearBox.h"
-#include "yams/gearing/MechanismGearing.h"
-#include "yams/mechanisms/config/ArmConfig.h"
-#include "yams/mechanisms/positional/Arm.h"
-#include "yams/motorcontrollers/SmartMotorControllerConfig.h"
-#include "yams/motorcontrollers/remote/TalonFXWrapper.h"
+#include "yams/gearing/GearBox.hpp"
+#include "yams/gearing/MechanismGearing.hpp"
+#include "yams/mechanisms/config/ArmConfig.hpp"
+#include "yams/mechanisms/positional/Arm.hpp"
+#include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
+#include "yams/motorcontrollers/remote/TalonFXWrapper.hpp"
 
 class ArmSubsystem : public frc2::SubsystemBase {
  public:

@@ -19,12 +19,12 @@
 #include <vector>
 
 #include "TestSubsystem.h"
-#include "yams/gearing/GearBox.h"
-#include "yams/gearing/MechanismGearing.h"
-#include "yams/motorcontrollers/SmartMotorControllerConfig.h"
-#include "yams/motorcontrollers/local/SparkWrapper.h"
-#include "yams/motorcontrollers/remote/TalonFXSWrapper.h"
-#include "yams/motorcontrollers/remote/TalonFXWrapper.h"
+#include "yams/gearing/GearBox.hpp"
+#include "yams/gearing/MechanismGearing.hpp"
+#include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
+#include "yams/motorcontrollers/local/SparkWrapper.hpp"
+#include "yams/motorcontrollers/remote/TalonFXSWrapper.hpp"
+#include "yams/motorcontrollers/remote/TalonFXWrapper.hpp"
 
 namespace yams::test {
 

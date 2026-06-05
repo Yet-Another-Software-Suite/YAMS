@@ -9,7 +9,7 @@
 #include <optional>
 #include <string>
 
-#include "yams/motorcontrollers/SmartMotorController.h"
+#include "yams/motorcontrollers/SmartMotorController.hpp"
 
 namespace yams::mechanisms::config {
 

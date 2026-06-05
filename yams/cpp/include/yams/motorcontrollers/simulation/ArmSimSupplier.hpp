@@ -12,8 +12,8 @@
 
 #include <functional>
 
-#include "yams/gearing/MechanismGearing.h"
-#include "yams/motorcontrollers/SimSupplier.h"
+#include "yams/gearing/MechanismGearing.hpp"
+#include "yams/motorcontrollers/SimSupplier.hpp"
 
 namespace yams::motorcontrollers::simulation {
 

@@ -11,11 +11,11 @@
 #include <ctre/phoenix6/TalonFXS.hpp>
 #include <memory>
 
-#include "yams/motorcontrollers/SmartMotorController.h"
-#include "yams/motorcontrollers/SmartMotorControllerConfig.h"
-#include "yams/motorcontrollers/local/SparkWrapper.h"
-#include "yams/motorcontrollers/remote/TalonFXSWrapper.h"
-#include "yams/motorcontrollers/remote/TalonFXWrapper.h"
+#include "yams/motorcontrollers/SmartMotorController.hpp"
+#include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
+#include "yams/motorcontrollers/local/SparkWrapper.hpp"
+#include "yams/motorcontrollers/remote/TalonFXSWrapper.hpp"
+#include "yams/motorcontrollers/remote/TalonFXWrapper.hpp"
 
 namespace yams::motorcontrollers {
 

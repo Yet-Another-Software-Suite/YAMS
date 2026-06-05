@@ -19,8 +19,8 @@
 #include <optional>
 #include <vector>
 
-#include "yams/mechanisms/swerve/SwerveModule.h"
-#include "yams/motorcontrollers/SmartMotorControllerConfig.h"
+#include "yams/mechanisms/swerve/SwerveModule.hpp"
+#include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 
 namespace yams::mechanisms::swerve {
 
