@@ -68,7 +68,7 @@ bool DCMotorSimSupplier::IsWatchdogExpired() { return !m_watchdogFed; }
 
 void DCMotorSimSupplier::FeedWatchdog() { m_watchdogFed = true; }
 
-units::ampere_t DCMotorSimSupplier::GetCurrentDrawAmps() { return m_sim.GetCurrentDrawAmps(); }
+units::ampere_t DCMotorSimSupplier::GetCurrentDrawAmps() { return m_sim.GetCurrentDraw(); }
 
 void DCMotorSimSupplier::SetInputVoltage(units::volt_t volts) {
   m_sim.SetInputVoltage(volts);

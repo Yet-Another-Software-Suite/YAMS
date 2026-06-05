@@ -67,7 +67,7 @@ bool ArmSimSupplier::IsWatchdogExpired() { return !m_watchdogFed; }
 
 void ArmSimSupplier::FeedWatchdog() { m_watchdogFed = true; }
 
-units::ampere_t ArmSimSupplier::GetCurrentDrawAmps() { return m_sim.GetCurrentDrawAmps(); }
+units::ampere_t ArmSimSupplier::GetCurrentDrawAmps() { return m_sim.GetCurrentDraw(); }
 
 void ArmSimSupplier::SetInputVoltage(units::volt_t volts) {
   m_sim.SetInputVoltage(volts);

@@ -146,7 +146,7 @@ frc2::Trigger Pivot::Lte(units::degree_t angle) {
 }
 
 frc2::Trigger Pivot::Between(units::degree_t start, units::degree_t end) {
-  return Gte(start).And(Lte(end));
+  return Gte(start) && (Lte(end));
 }
 
 frc2::Trigger Pivot::IsNear(units::degree_t angle, units::degree_t within) {

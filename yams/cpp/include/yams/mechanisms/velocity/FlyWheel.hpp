@@ -212,7 +212,7 @@ class FlyWheel : public SmartVelocityMechanism {
    * @return Trigger for the near condition.
    */
   frc2::Trigger IsNear(units::degrees_per_second_t velocity,
-                       units::degrees_per_second_t within = units::degrees_per_second_t{5.0});
+                       units::degrees_per_second_t within = units::degrees_per_second_t{5.0}) const;
 
   // ---- Direct setpoint setters -----------------------------------------------
 

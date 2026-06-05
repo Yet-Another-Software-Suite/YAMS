@@ -73,7 +73,7 @@ bool ElevatorSimSupplier::IsWatchdogExpired() { return !m_watchdogFed; }
 
 void ElevatorSimSupplier::FeedWatchdog() { m_watchdogFed = true; }
 
-units::ampere_t ElevatorSimSupplier::GetCurrentDrawAmps() { return m_sim.GetCurrentDrawAmps(); }
+units::ampere_t ElevatorSimSupplier::GetCurrentDrawAmps() { return m_sim.GetCurrentDraw(); }
 
 void ElevatorSimSupplier::SetInputVoltage(units::volt_t volts) {
   m_sim.SetInputVoltage(volts);

@@ -143,7 +143,7 @@ frc2::Trigger Arm::Lte(units::degree_t angle) {
 }
 
 frc2::Trigger Arm::Between(units::degree_t start, units::degree_t end) {
-  return Gte(start).And(Lte(end));
+  return Gte(start) && (Lte(end));
 }
 
 frc2::Trigger Arm::IsNear(units::degree_t angle, units::degree_t within) {

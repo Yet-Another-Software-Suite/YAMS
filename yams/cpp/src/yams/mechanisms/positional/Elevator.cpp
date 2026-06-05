@@ -144,7 +144,7 @@ frc2::Trigger Elevator::Lte(units::meter_t height) {
 }
 
 frc2::Trigger Elevator::Between(units::meter_t start, units::meter_t end) {
-  return Gte(start).And(Lte(end));
+  return Gte(start) && (Lte(end));
 }
 
 frc2::Trigger Elevator::IsNear(units::meter_t height, units::meter_t within) {

@@ -212,11 +212,11 @@ frc2::Trigger FlyWheel::Lte(units::degrees_per_second_t velocity) {
 
 frc2::Trigger FlyWheel::Between(units::degrees_per_second_t start,
                                 units::degrees_per_second_t end) {
-  return Gte(start).And(Lte(end));
+  return Gte(start) && (Lte(end));
 }
 
 frc2::Trigger FlyWheel::IsNear(units::degrees_per_second_t velocity,
-                               units::degrees_per_second_t within) {
+                               units::degrees_per_second_t within) const {
   return frc2::Trigger{[this, velocity, within] {
     return std::abs(GetVelocity().value() - velocity.value()) <= within.value();
   }};
