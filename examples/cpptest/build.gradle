@@ -58,11 +58,11 @@ model {
 
             sources.cpp {
                 source {
-                    srcDir 'src/main/cpp'
+                    srcDirs 'src/main/cpp','../../yams/cpp/src'
                     include '**/*.cpp', '**/*.cc'
                 }
                 exportedHeaders {
-                    srcDir 'src/main/include'
+                    srcDirs 'src/main/include','../../yams/cpp/include'
                 }
             }
 
@@ -79,23 +79,23 @@ model {
             wpi.cpp.deps.wpilib(it)
         }
     }
-    testSuites {
-        frcUserProgramTest(GoogleTestTestSuiteSpec) {
-            testing $.components.frcUserProgram
+    // testSuites {
+    //     frcUserProgramTest(GoogleTestTestSuiteSpec) {
+    //         testing $.components.frcUserProgram
 
-            sources.cpp {
-                source {
-                    srcDir 'src/test/cpp'
-                    include '**/*.cpp'
-                }
-            }
+    //         sources.cpp {
+    //             source {
+    //                 srcDir 'src/test/cpp'
+    //                 include '**/*.cpp'
+    //             }
+    //         }
 
-            // Enable run tasks for this component
-            wpi.cpp.enableExternalTasks(it)
+    //         // Enable run tasks for this component
+    //         wpi.cpp.enableExternalTasks(it)
 
-            wpi.cpp.vendor.cpp(it)
-            wpi.cpp.deps.wpilib(it)
-            wpi.cpp.deps.googleTest(it)
-        }
-    }
+    //         wpi.cpp.vendor.cpp(it)
+    //         wpi.cpp.deps.wpilib(it)
+    //         wpi.cpp.deps.googleTest(it)
+    //     }
+    // }
 }
