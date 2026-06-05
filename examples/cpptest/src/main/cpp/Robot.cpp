@@ -58,6 +58,10 @@ void Robot::TeleopInit() {
  */
 void Robot::TeleopPeriodic() {}
 
+void Robot::TestInit() {
+  frc2::CommandScheduler::GetInstance().CancelAll();
+}
+
 /**
  * This function is called periodically during test mode.
  */
