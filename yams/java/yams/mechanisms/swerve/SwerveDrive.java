@@ -138,7 +138,7 @@ public class SwerveDrive
                                               .getStructArrayTopic("states/current", SwerveModuleState.struct);
     var poseTopic = m_telemetry.getDataTable().getStructTopic("pose", Pose2d.struct);
     var gyroTopic = m_telemetry.getDataTable().getDoubleTopic("gyro");
-    gyroTopic.setProperties(wpi::json{{"units", "degrees"}});
+    gyroTopic.setProperties("{\"units\", \"degrees\"}");
     var desiredRobotRelativeChassisSpeedsTopic = m_telemetry.getDataTable()
                                                             .getStructTopic("chassis/desired", ChassisSpeeds.struct);
     var fieldRelativeChassisSpeedsTopic = m_telemetry.getDataTable()

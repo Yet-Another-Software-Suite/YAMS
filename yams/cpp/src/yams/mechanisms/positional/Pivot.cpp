@@ -3,6 +3,10 @@
 
 #include "yams/mechanisms/positional/Pivot.hpp"
 
+#include <frc/geometry/Rotation3d.h>
+#include <frc/geometry/Translation3d.h>
+#include <frc/simulation/BatterySim.h>
+#include <frc/simulation/RoboRioSim.h>
 #include <frc/smartdashboard/Mechanism2d.h>
 #include <frc/smartdashboard/MechanismLigament2d.h>
 #include <frc/smartdashboard/MechanismRoot2d.h>
@@ -56,11 +60,20 @@ Pivot::Pivot(const config::PivotConfig& config)
 void Pivot::SimIterate() {
   if (auto* ss = m_smc->GetSimSupplier()) {
     ss->UpdateSim();
-    m_smc->SetEncoderPosition(ss->GetMechanismPosition());
-    m_smc->SetEncoderVelocity(ss->GetMechanismVelocity());
-    ss->FeedWatchdog();
-  } else {
     m_smc->SimIterate();
+    ss->FeedWatchdog();
+
+    if (m_pivotConfig.GetMinAngle() && ss->GetMechanismVelocity().value() < 0.0 &&
+        GetAngle() < *m_pivotConfig.GetMinAngle()) {
+      m_smc->SetEncoderPosition(*m_pivotConfig.GetMinAngle());
+    }
+    if (m_pivotConfig.GetMaxAngle() && ss->GetMechanismVelocity().value() > 0.0 &&
+        GetAngle() > *m_pivotConfig.GetMaxAngle()) {
+      m_smc->SetEncoderPosition(*m_pivotConfig.GetMaxAngle());
+    }
+    frc::sim::RoboRioSim::SetVInVoltage(
+        frc::sim::BatterySim::Calculate({ss->GetCurrentDrawAmps()}));
+    VisualizationUpdate();
   }
 }
 
@@ -99,24 +112,61 @@ frc2::CommandPtr Pivot::SysId(units::volt_t maxVoltage, frc2::sysid::ramp_rate_t
 
 // ---- Pivot-specific interface -----------------------------------------------
 
-frc2::CommandPtr Pivot::GoToAngle(units::degree_t angle) {
+frc2::CommandPtr Pivot::Run(units::degree_t angle) {
   return frc2::cmd::Run([this, angle] { SetMechanismPositionSetpoint(angle); }, {m_subsystem})
-      .WithName(m_name + " GoToAngle");
+      .WithName(m_name + " Run");
 }
 
-frc2::CommandPtr Pivot::GoToAngle(std::function<units::degree_t()> angle) {
+frc2::CommandPtr Pivot::Run(std::function<units::degree_t()> angle) {
   return frc2::cmd::Run([this, angle] { SetMechanismPositionSetpoint(angle()); }, {m_subsystem})
-      .WithName(m_name + " GoToAngle Supplier");
+      .WithName(m_name + " Run Supplier");
 }
+
+frc2::CommandPtr Pivot::RunTo(units::degree_t angle, units::degree_t tolerance) {
+  frc2::Trigger near = IsNear(angle, tolerance).Debounce(units::second_t{0.1});
+  return frc2::cmd::RunOnce([this, angle] { SetMechanismPositionSetpoint(angle); }, {m_subsystem})
+      .AndThen(frc2::cmd::WaitUntil([near] { return near.Get(); }))
+      .WithName(m_name + " RunTo");
+}
+
+frc2::CommandPtr Pivot::RunTo(std::function<units::degree_t()> angle, units::degree_t tolerance) {
+  units::degree_t target = angle();
+  frc2::Trigger near = IsNear(target, tolerance).Debounce(units::second_t{0.1});
+  return frc2::cmd::RunOnce([this, target] { SetMechanismPositionSetpoint(target); }, {m_subsystem})
+      .AndThen(frc2::cmd::WaitUntil([near] { return near.Get(); }))
+      .WithName(m_name + " RunTo Supplier");
+}
+
+frc2::Trigger Pivot::Gte(units::degree_t angle) {
+  return frc2::Trigger{[this, angle] { return GetAngle() >= angle; }};
+}
+
+frc2::Trigger Pivot::Lte(units::degree_t angle) {
+  return frc2::Trigger{[this, angle] { return GetAngle() <= angle; }};
+}
+
+frc2::Trigger Pivot::Between(units::degree_t start, units::degree_t end) {
+  return Gte(start).And(Lte(end));
+}
+
+frc2::Trigger Pivot::IsNear(units::degree_t angle, units::degree_t within) {
+  return frc2::Trigger{[this, angle, within] {
+    return std::abs(GetAngle().value() - angle.value()) <= within.value();
+  }};
+}
+
+const config::PivotConfig& Pivot::GetConfig() const { return m_pivotConfig; }
+
+frc::Translation3d Pivot::GetRelativeMechanismPosition() const {
+  if (m_mechanismLigament) {
+    return frc::Translation3d{units::meter_t{m_mechanismLigament->GetLength()},
+                              frc::Rotation3d{0_rad, 0_rad, units::radian_t{GetAngle()}}};
+  }
+  return frc::Translation3d{};
+}
+
+void Pivot::SetAngle(units::degree_t angle) { SetMechanismPositionSetpoint(angle); }
 
 units::degree_t Pivot::GetAngle() const { return m_smc->GetMechanismPosition(); }
-
-bool Pivot::IsAtAngle(units::degree_t target, units::degree_t tolerance) const {
-  return std::abs(GetAngle().value() - target.value()) <= tolerance.value();
-}
-
-frc2::Trigger Pivot::AtAngle(units::degree_t target, units::degree_t tolerance) {
-  return frc2::Trigger{[this, target, tolerance] { return IsAtAngle(target, tolerance); }};
-}
 
 }  // namespace yams::mechanisms::positional

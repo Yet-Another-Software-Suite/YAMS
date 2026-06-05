@@ -53,6 +53,7 @@ class DCMotorSimSupplier : public SimSupplier {
 
   bool IsWatchdogExpired() override;
   void FeedWatchdog() override;
+  units::ampere_t GetCurrentDrawAmps() override;
 
  private:
   frc::sim::DCMotorSim& m_sim;

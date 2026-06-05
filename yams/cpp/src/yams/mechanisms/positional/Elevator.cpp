@@ -3,6 +3,10 @@
 
 #include "yams/mechanisms/positional/Elevator.hpp"
 
+#include <frc/geometry/Rotation3d.h>
+#include <frc/geometry/Translation3d.h>
+#include <frc/simulation/BatterySim.h>
+#include <frc/simulation/RoboRioSim.h>
 #include <frc/smartdashboard/Mechanism2d.h>
 #include <frc/smartdashboard/MechanismLigament2d.h>
 #include <frc/smartdashboard/MechanismRoot2d.h>
@@ -58,11 +62,14 @@ Elevator::Elevator(const config::ElevatorConfig& config)
 void Elevator::SimIterate() {
   if (auto* ss = m_smc->GetSimSupplier()) {
     ss->UpdateSim();
-    m_smc->SetEncoderPosition(ss->GetMechanismPosition());
-    m_smc->SetEncoderVelocity(ss->GetMechanismVelocity());
-    ss->FeedWatchdog();
-  } else {
     m_smc->SimIterate();
+    ss->FeedWatchdog();
+
+    if (!m_elevatorConfig.GetMinHeight() || GetHeight() >= *m_elevatorConfig.GetMinHeight()) {
+      frc::sim::RoboRioSim::SetVInVoltage(
+          frc::sim::BatterySim::Calculate({ss->GetCurrentDrawAmps()}));
+    }
+    VisualizationUpdate();
   }
 }
 
@@ -101,24 +108,62 @@ frc2::CommandPtr Elevator::SysId(units::volt_t maxVoltage, frc2::sysid::ramp_rat
 
 // ---- Elevator-specific interface --------------------------------------------
 
-frc2::CommandPtr Elevator::GoToHeight(units::meter_t height) {
+frc2::CommandPtr Elevator::Run(units::meter_t height) {
   return frc2::cmd::Run([this, height] { SetMeasurementPositionSetpoint(height); }, {m_subsystem})
-      .WithName(m_name + " GoToHeight");
+      .WithName(m_name + " Run");
 }
 
-frc2::CommandPtr Elevator::GoToHeight(std::function<units::meter_t()> height) {
+frc2::CommandPtr Elevator::Run(std::function<units::meter_t()> height) {
   return frc2::cmd::Run([this, height] { SetMeasurementPositionSetpoint(height()); }, {m_subsystem})
-      .WithName(m_name + " GoToHeight Supplier");
+      .WithName(m_name + " Run Supplier");
 }
+
+frc2::CommandPtr Elevator::RunTo(units::meter_t height, units::meter_t tolerance) {
+  frc2::Trigger near = IsNear(height, tolerance).Debounce(units::second_t{0.1});
+  return frc2::cmd::RunOnce([this, height] { SetMeasurementPositionSetpoint(height); },
+                            {m_subsystem})
+      .AndThen(frc2::cmd::WaitUntil([near] { return near.Get(); }))
+      .WithName(m_name + " RunTo");
+}
+
+frc2::CommandPtr Elevator::RunTo(std::function<units::meter_t()> height, units::meter_t tolerance) {
+  units::meter_t target = height();
+  frc2::Trigger near = IsNear(target, tolerance).Debounce(units::second_t{0.1});
+  return frc2::cmd::RunOnce([this, target] { SetMeasurementPositionSetpoint(target); },
+                            {m_subsystem})
+      .AndThen(frc2::cmd::WaitUntil([near] { return near.Get(); }))
+      .WithName(m_name + " RunTo Supplier");
+}
+
+frc2::Trigger Elevator::Gte(units::meter_t height) {
+  return frc2::Trigger{[this, height] { return GetHeight() >= height; }};
+}
+
+frc2::Trigger Elevator::Lte(units::meter_t height) {
+  return frc2::Trigger{[this, height] { return GetHeight() <= height; }};
+}
+
+frc2::Trigger Elevator::Between(units::meter_t start, units::meter_t end) {
+  return Gte(start).And(Lte(end));
+}
+
+frc2::Trigger Elevator::IsNear(units::meter_t height, units::meter_t within) {
+  return frc2::Trigger{[this, height, within] {
+    return std::abs(GetHeight().value() - height.value()) <= within.value();
+  }};
+}
+
+const config::ElevatorConfig& Elevator::GetConfig() const { return m_elevatorConfig; }
+
+frc::Translation3d Elevator::GetRelativeMechanismPosition() const {
+  if (m_mechanismLigament) {
+    return frc::Translation3d{0_m, 0_m, units::meter_t{m_mechanismLigament->GetLength()}};
+  }
+  return frc::Translation3d{};
+}
+
+void Elevator::SetHeight(units::meter_t height) { SetMeasurementPositionSetpoint(height); }
 
 units::meter_t Elevator::GetHeight() const { return m_smc->GetMeasurementPosition(); }
-
-bool Elevator::IsAtHeight(units::meter_t target, units::meter_t tolerance) const {
-  return std::abs(GetHeight().value() - target.value()) <= tolerance.value();
-}
-
-frc2::Trigger Elevator::AtHeight(units::meter_t target, units::meter_t tolerance) {
-  return frc2::Trigger{[this, target, tolerance] { return IsAtHeight(target, tolerance); }};
-}
 
 }  // namespace yams::mechanisms::positional

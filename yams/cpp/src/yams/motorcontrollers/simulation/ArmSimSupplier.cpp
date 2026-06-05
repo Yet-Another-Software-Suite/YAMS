@@ -4,6 +4,7 @@
 #include "yams/motorcontrollers/simulation/ArmSimSupplier.hpp"
 
 #include <frc/simulation/RoboRioSim.h>
+
 #include <utility>
 
 namespace yams::motorcontrollers::simulation {
@@ -65,6 +66,8 @@ void ArmSimSupplier::SetRotorVelocity(units::degrees_per_second_t velocity) {
 bool ArmSimSupplier::IsWatchdogExpired() { return !m_watchdogFed; }
 
 void ArmSimSupplier::FeedWatchdog() { m_watchdogFed = true; }
+
+units::ampere_t ArmSimSupplier::GetCurrentDrawAmps() { return m_sim.GetCurrentDrawAmps(); }
 
 void ArmSimSupplier::SetInputVoltage(units::volt_t volts) {
   m_sim.SetInputVoltage(volts);

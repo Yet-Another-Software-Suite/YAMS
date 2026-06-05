@@ -3,6 +3,10 @@
 
 #include "yams/mechanisms/positional/Arm.hpp"
 
+#include <frc/geometry/Rotation3d.h>
+#include <frc/geometry/Translation3d.h>
+#include <frc/simulation/BatterySim.h>
+#include <frc/simulation/RoboRioSim.h>
 #include <frc/smartdashboard/Mechanism2d.h>
 #include <frc/smartdashboard/MechanismLigament2d.h>
 #include <frc/smartdashboard/MechanismRoot2d.h>
@@ -55,11 +59,20 @@ Arm::Arm(const config::ArmConfig& config) : SmartPositionalMechanism(), m_armCon
 void Arm::SimIterate() {
   if (auto* ss = m_smc->GetSimSupplier()) {
     ss->UpdateSim();
-    m_smc->SetEncoderPosition(ss->GetMechanismPosition());
-    m_smc->SetEncoderVelocity(ss->GetMechanismVelocity());
-    ss->FeedWatchdog();
-  } else {
     m_smc->SimIterate();
+    ss->FeedWatchdog();
+
+    if (m_armConfig.GetMinAngle() && ss->GetMechanismVelocity().value() < 0.0 &&
+        GetAngle() < *m_armConfig.GetMinAngle()) {
+      m_smc->SetEncoderPosition(*m_armConfig.GetMinAngle());
+    }
+    if (m_armConfig.GetMaxAngle() && ss->GetMechanismVelocity().value() > 0.0 &&
+        GetAngle() > *m_armConfig.GetMaxAngle()) {
+      m_smc->SetEncoderPosition(*m_armConfig.GetMaxAngle());
+    }
+    frc::sim::RoboRioSim::SetVInVoltage(
+        frc::sim::BatterySim::Calculate({ss->GetCurrentDrawAmps()}));
+    VisualizationUpdate();
   }
 }
 
@@ -96,24 +109,61 @@ frc2::CommandPtr Arm::SysId(units::volt_t maxVoltage, frc2::sysid::ramp_rate_t s
 
 // ---- Arm-specific interface -------------------------------------------------
 
-frc2::CommandPtr Arm::GoToAngle(units::degree_t angle) {
+frc2::CommandPtr Arm::Run(units::degree_t angle) {
   return frc2::cmd::Run([this, angle] { SetMechanismPositionSetpoint(angle); }, {m_subsystem})
-      .WithName(m_name + " GoToAngle");
+      .WithName(m_name + " Run");
 }
 
-frc2::CommandPtr Arm::GoToAngle(std::function<units::degree_t()> angle) {
+frc2::CommandPtr Arm::Run(std::function<units::degree_t()> angle) {
   return frc2::cmd::Run([this, angle] { SetMechanismPositionSetpoint(angle()); }, {m_subsystem})
-      .WithName(m_name + " GoToAngle Supplier");
+      .WithName(m_name + " Run Supplier");
 }
+
+frc2::CommandPtr Arm::RunTo(units::degree_t angle, units::degree_t tolerance) {
+  frc2::Trigger near = IsNear(angle, tolerance).Debounce(units::second_t{0.1});
+  return frc2::cmd::RunOnce([this, angle] { SetMechanismPositionSetpoint(angle); }, {m_subsystem})
+      .AndThen(frc2::cmd::WaitUntil([near] { return near.Get(); }))
+      .WithName(m_name + " RunTo");
+}
+
+frc2::CommandPtr Arm::RunTo(std::function<units::degree_t()> angle, units::degree_t tolerance) {
+  units::degree_t target = angle();
+  frc2::Trigger near = IsNear(target, tolerance).Debounce(units::second_t{0.1});
+  return frc2::cmd::RunOnce([this, target] { SetMechanismPositionSetpoint(target); }, {m_subsystem})
+      .AndThen(frc2::cmd::WaitUntil([near] { return near.Get(); }))
+      .WithName(m_name + " RunTo Supplier");
+}
+
+frc2::Trigger Arm::Gte(units::degree_t angle) {
+  return frc2::Trigger{[this, angle] { return GetAngle() >= angle; }};
+}
+
+frc2::Trigger Arm::Lte(units::degree_t angle) {
+  return frc2::Trigger{[this, angle] { return GetAngle() <= angle; }};
+}
+
+frc2::Trigger Arm::Between(units::degree_t start, units::degree_t end) {
+  return Gte(start).And(Lte(end));
+}
+
+frc2::Trigger Arm::IsNear(units::degree_t angle, units::degree_t within) {
+  return frc2::Trigger{[this, angle, within] {
+    return std::abs(GetAngle().value() - angle.value()) <= within.value();
+  }};
+}
+
+const config::ArmConfig& Arm::GetConfig() const { return m_armConfig; }
+
+frc::Translation3d Arm::GetRelativeMechanismPosition() const {
+  if (m_mechanismLigament) {
+    return frc::Translation3d{units::meter_t{m_mechanismLigament->GetLength()},
+                              frc::Rotation3d{0_rad, 0_rad, units::radian_t{GetAngle()}}};
+  }
+  return frc::Translation3d{};
+}
+
+void Arm::SetAngle(units::degree_t angle) { SetMechanismPositionSetpoint(angle); }
 
 units::degree_t Arm::GetAngle() const { return m_smc->GetMechanismPosition(); }
-
-bool Arm::IsAtAngle(units::degree_t target, units::degree_t tolerance) const {
-  return std::abs(GetAngle().value() - target.value()) <= tolerance.value();
-}
-
-frc2::Trigger Arm::AtAngle(units::degree_t target, units::degree_t tolerance) {
-  return frc2::Trigger{[this, target, tolerance] { return IsAtAngle(target, tolerance); }};
-}
 
 }  // namespace yams::mechanisms::positional

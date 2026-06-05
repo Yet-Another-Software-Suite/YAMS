@@ -54,6 +54,7 @@ class ArmSimSupplier : public SimSupplier {
 
   bool IsWatchdogExpired() override;
   void FeedWatchdog() override;
+  units::ampere_t GetCurrentDrawAmps() override;
 
  private:
   frc::sim::SingleJointedArmSim& m_sim;

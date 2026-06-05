@@ -6,6 +6,7 @@
 #include <units/angle.h>
 #include <units/angular_acceleration.h>
 #include <units/angular_velocity.h>
+#include <units/current.h>
 #include <units/length.h>
 #include <units/velocity.h>
 #include <units/voltage.h>
@@ -112,6 +113,13 @@ class SimSupplier {
 
   /** Feed the simulation watchdog to indicate the sim state is current. */
   virtual void FeedWatchdog() = 0;
+
+  /**
+   * Get the current draw from the simulated motor.
+   *
+   * @return Current draw in amperes.
+   */
+  virtual units::ampere_t GetCurrentDrawAmps() = 0;
 };
 
 }  // namespace yams::motorcontrollers

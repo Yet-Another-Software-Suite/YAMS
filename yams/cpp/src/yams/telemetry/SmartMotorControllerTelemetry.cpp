@@ -14,11 +14,11 @@
 #include <units/voltage.h>
 #include <wpi/json.h>
 
-#include <stdexcept>
-#include <utility>
 #include <memory>
-#include <unordered_map>
+#include <stdexcept>
 #include <string>
+#include <unordered_map>
+#include <utility>
 
 #include "yams/exceptions/SmartMotorControllerConfigurationException.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"

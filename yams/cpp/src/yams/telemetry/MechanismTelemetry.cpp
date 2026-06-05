@@ -6,8 +6,9 @@
 #include <frc/Timer.h>
 #include <networktables/NetworkTableInstance.h>
 #include <wpi/json.h>
-#include <string>
+
 #include <memory>
+#include <string>
 
 #include "yams/motorcontrollers/SmartMotorController.hpp"
 

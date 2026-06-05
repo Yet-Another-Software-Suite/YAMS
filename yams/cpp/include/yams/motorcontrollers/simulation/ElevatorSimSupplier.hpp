@@ -61,6 +61,7 @@ class ElevatorSimSupplier : public SimSupplier {
 
   bool IsWatchdogExpired() override;
   void FeedWatchdog() override;
+  units::ampere_t GetCurrentDrawAmps() override;
 
  private:
   frc::sim::ElevatorSim& m_sim;

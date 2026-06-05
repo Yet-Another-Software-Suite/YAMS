@@ -17,10 +17,10 @@
 
 #include <ctre/phoenix6/CANcoder.hpp>
 #include <ctre/phoenix6/Pigeon2.hpp>
-#include <string>
 #include <functional>
 #include <memory>
 #include <optional>
+#include <string>
 
 #include "yams/gearing/GearBox.hpp"
 #include "yams/gearing/MechanismGearing.hpp"

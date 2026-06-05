@@ -55,7 +55,7 @@ void ElevatorSubsystem::SimulationPeriodic() { m_elevator->SimIterate(); }
 frc2::CommandPtr ElevatorSubsystem::ElevCmd(double dutycycle) { return m_elevator->Set(dutycycle); }
 
 frc2::CommandPtr ElevatorSubsystem::SetHeight(units::meter_t height) {
-  return m_elevator->GoToHeight(height);
+  return m_elevator->Run(height);
 }
 
 frc2::CommandPtr ElevatorSubsystem::SysId() {

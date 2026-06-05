@@ -9,8 +9,8 @@
 #include <cmath>
 #include <numbers>
 #include <stdexcept>
-#include <utility>
 #include <string>
+#include <utility>
 
 namespace yams::mechanisms::config {
 

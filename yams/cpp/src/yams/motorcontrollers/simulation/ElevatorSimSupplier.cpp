@@ -4,6 +4,7 @@
 #include "yams/motorcontrollers/simulation/ElevatorSimSupplier.hpp"
 
 #include <frc/simulation/RoboRioSim.h>
+
 #include <utility>
 
 namespace yams::motorcontrollers::simulation {
@@ -71,6 +72,8 @@ void ElevatorSimSupplier::SetRotorVelocity(units::degrees_per_second_t velocity)
 bool ElevatorSimSupplier::IsWatchdogExpired() { return !m_watchdogFed; }
 
 void ElevatorSimSupplier::FeedWatchdog() { m_watchdogFed = true; }
+
+units::ampere_t ElevatorSimSupplier::GetCurrentDrawAmps() { return m_sim.GetCurrentDrawAmps(); }
 
 void ElevatorSimSupplier::SetInputVoltage(units::volt_t volts) {
   m_sim.SetInputVoltage(volts);

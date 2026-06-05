@@ -41,11 +41,11 @@ units::degrees_per_second_t ShooterSubsystem::GetVelocity() const {
 }
 
 frc2::CommandPtr ShooterSubsystem::SetVelocity(units::degrees_per_second_t speed) {
-  return m_shooter->Spin(speed);
+  return m_shooter->Run(speed);
 }
 
 frc2::CommandPtr ShooterSubsystem::SetVelocity(std::function<units::degrees_per_second_t()> speed) {
-  return m_shooter->Spin(speed);
+  return m_shooter->Run(speed);
 }
 
 frc2::CommandPtr ShooterSubsystem::Set(double dutyCycle) { return m_shooter->Set(dutyCycle); }
@@ -67,7 +67,7 @@ void ShooterSubsystem::SetSurfaceSpeedSetpoint(units::meters_per_second_t speed)
 }
 
 bool ShooterSubsystem::ReadyToShoot(units::degrees_per_second_t tolerance) const {
-  return m_shooter->AtVelocity(GetVelocity(), tolerance);
+  return m_shooter->IsNear(GetVelocity(), tolerance).Get();
 }
 
 void ShooterSubsystem::Periodic() { m_shooter->UpdateTelemetry(); }

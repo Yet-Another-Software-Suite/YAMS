@@ -4,6 +4,10 @@
 #include "yams/mechanisms/velocity/FlyWheel.hpp"
 
 #include <frc/DriverStation.h>
+#include <frc/geometry/Rotation3d.h>
+#include <frc/geometry/Translation3d.h>
+#include <frc/simulation/BatterySim.h>
+#include <frc/simulation/RoboRioSim.h>
 #include <frc/smartdashboard/Mechanism2d.h>
 #include <frc/smartdashboard/MechanismLigament2d.h>
 #include <frc/smartdashboard/MechanismRoot2d.h>
@@ -48,11 +52,12 @@ FlyWheel::FlyWheel(const config::FlyWheelConfig& config)
 void FlyWheel::SimIterate() {
   if (auto* ss = m_smc->GetSimSupplier()) {
     ss->UpdateSim();
-    m_smc->SetEncoderPosition(ss->GetMechanismPosition());
-    m_smc->SetEncoderVelocity(ss->GetMechanismVelocity());
-    ss->FeedWatchdog();
-  } else {
     m_smc->SimIterate();
+    ss->FeedWatchdog();
+
+    frc::sim::RoboRioSim::SetVInVoltage(
+        frc::sim::BatterySim::Calculate({ss->GetCurrentDrawAmps()}));
+    VisualizationUpdate();
   }
 }
 
@@ -92,64 +97,160 @@ frc2::CommandPtr FlyWheel::SysId(units::volt_t maxVoltage, frc2::sysid::ramp_rat
                              routine.Dynamic(frc2::sysid::Direction::kReverse));
 }
 
-// ---- FlyWheel-specific interface --------------------------------------------
+// ---- Run / RunTo / comparison / setpoint interface --------------------------
 
-frc2::CommandPtr FlyWheel::Spin(units::degrees_per_second_t velocity) {
+frc2::CommandPtr FlyWheel::Run(units::degrees_per_second_t velocity) {
   return frc2::cmd::Run([this, velocity] { SetMechanismVelocitySetpoint(velocity); }, {m_subsystem})
-      .WithName(m_name + " Spin");
+      .WithName(m_name + " Run");
 }
 
-frc2::CommandPtr FlyWheel::Spin(std::function<units::degrees_per_second_t()> velocity) {
+frc2::CommandPtr FlyWheel::Run(std::function<units::degrees_per_second_t()> velocity) {
   return frc2::cmd::Run([this, velocity] { SetMechanismVelocitySetpoint(velocity()); },
                         {m_subsystem})
-      .WithName(m_name + " Spin Supplier");
+      .WithName(m_name + " Run Supplier");
 }
 
-frc2::CommandPtr FlyWheel::SpinSurface(units::meters_per_second_t surfaceSpeed) {
+frc2::CommandPtr FlyWheel::Run(units::meters_per_second_t surfaceSpeed) {
   auto diameter = m_flyWheelConfig.GetRollerDiameter();
   if (!diameter) {
-    std::fprintf(stderr,
-                 "[YAMS] %s SpinSurface: no roller diameter configured, command is a no-op.\n",
+    std::fprintf(stderr, "[YAMS] %s Run: no roller diameter configured, command is a no-op.\n",
                  m_name.c_str());
     return frc2::cmd::None();
   }
-
-  // surface_speed = omega * radius  =>  omega = surface_speed / radius
-  // radius = diameter / 2
   units::meter_t radius = *diameter / 2.0;
-
-  // Convert m/s → deg/s:  omega_deg_s = (v / r) * (180 / pi)
   return frc2::cmd::Run(
              [this, surfaceSpeed, radius] {
-               units::degrees_per_second_t angularVelocity{(surfaceSpeed.value() / radius.value()) *
-                                                           (180.0 / std::numbers::pi)};
-               SetMechanismVelocitySetpoint(angularVelocity);
+               SetMechanismVelocitySetpoint(units::degrees_per_second_t{
+                   (surfaceSpeed.value() / radius.value()) * (180.0 / std::numbers::pi)});
              },
              {m_subsystem})
-      .WithName(m_name + " SpinSurface");
+      .WithName(m_name + " Run Surface");
 }
 
-units::degrees_per_second_t FlyWheel::GetVelocity() const { return m_smc->GetMechanismVelocity(); }
-
-units::meters_per_second_t FlyWheel::GetSurfaceSpeed() const {
+frc2::CommandPtr FlyWheel::Run(std::function<units::meters_per_second_t()> surfaceSpeed) {
   auto diameter = m_flyWheelConfig.GetRollerDiameter();
   if (!diameter) {
-    return units::meters_per_second_t{0.0};
+    std::fprintf(stderr, "[YAMS] %s Run: no roller diameter configured, command is a no-op.\n",
+                 m_name.c_str());
+    return frc2::cmd::None();
   }
   units::meter_t radius = *diameter / 2.0;
-  // v = omega * r  (convert deg/s → rad/s first)
-  double omegaRadPerSec = GetVelocity().value() * (std::numbers::pi / 180.0);
-  return units::meters_per_second_t{omegaRadPerSec * radius.value()};
+  return frc2::cmd::Run(
+             [this, surfaceSpeed, radius] {
+               SetMechanismVelocitySetpoint(units::degrees_per_second_t{
+                   (surfaceSpeed().value() / radius.value()) * (180.0 / std::numbers::pi)});
+             },
+             {m_subsystem})
+      .WithName(m_name + " Run Surface Supplier");
 }
 
-bool FlyWheel::AtVelocity(units::degrees_per_second_t target,
-                          units::degrees_per_second_t tolerance) const {
-  return std::abs(GetVelocity().value() - target.value()) <= tolerance.value();
+frc2::CommandPtr FlyWheel::RunTo(units::degrees_per_second_t velocity,
+                                 units::degrees_per_second_t tolerance) {
+  frc2::Trigger near = IsNear(velocity, tolerance).Debounce(units::second_t{0.1});
+  return frc2::cmd::RunOnce(
+             [this, velocity] {
+               m_smc->StartClosedLoopController();
+               m_smc->SetVelocity(velocity);
+             },
+             {m_subsystem})
+      .AndThen(frc2::cmd::WaitUntil([near] { return near.Get(); }))
+      .WithName(m_name + " RunTo");
 }
 
-frc2::Trigger FlyWheel::IsAtVelocity(units::degrees_per_second_t target,
-                                     units::degrees_per_second_t tolerance) {
-  return frc2::Trigger{[this, target, tolerance] { return AtVelocity(target, tolerance); }};
+frc2::CommandPtr FlyWheel::RunTo(std::function<units::degrees_per_second_t()> velocity,
+                                 units::degrees_per_second_t tolerance) {
+  units::degrees_per_second_t target = velocity();
+  frc2::Trigger near = IsNear(target, tolerance).Debounce(units::second_t{0.1});
+  return frc2::cmd::RunOnce(
+             [this, target] {
+               m_smc->StartClosedLoopController();
+               m_smc->SetVelocity(target);
+             },
+             {m_subsystem})
+      .AndThen(frc2::cmd::WaitUntil([near] { return near.Get(); }))
+      .WithName(m_name + " RunTo Supplier");
 }
+
+frc2::CommandPtr FlyWheel::RunTo(units::meters_per_second_t velocity,
+                                 units::meters_per_second_t tolerance) {
+  auto diameter = m_flyWheelConfig.GetRollerDiameter();
+  if (!diameter) {
+    std::fprintf(stderr, "[YAMS] %s RunTo: no roller diameter configured, command is a no-op.\n",
+                 m_name.c_str());
+    return frc2::cmd::None();
+  }
+  units::meter_t radius = *diameter / 2.0;
+  double convFactor = (180.0 / std::numbers::pi) / radius.value();
+  return RunTo(units::degrees_per_second_t{velocity.value() * convFactor},
+               units::degrees_per_second_t{tolerance.value() * convFactor});
+}
+
+frc2::CommandPtr FlyWheel::RunTo(std::function<units::meters_per_second_t()> velocity,
+                                 units::meters_per_second_t tolerance) {
+  auto diameter = m_flyWheelConfig.GetRollerDiameter();
+  if (!diameter) {
+    std::fprintf(stderr, "[YAMS] %s RunTo: no roller diameter configured, command is a no-op.\n",
+                 m_name.c_str());
+    return frc2::cmd::None();
+  }
+  units::meter_t radius = *diameter / 2.0;
+  double convFactor = (180.0 / std::numbers::pi) / radius.value();
+  return RunTo(
+      [velocity, convFactor] {
+        return units::degrees_per_second_t{velocity().value() * convFactor};
+      },
+      units::degrees_per_second_t{tolerance.value() * convFactor});
+}
+
+frc2::Trigger FlyWheel::Gte(units::degrees_per_second_t velocity) {
+  return frc2::Trigger{[this, velocity] { return GetVelocity() >= velocity; }};
+}
+
+frc2::Trigger FlyWheel::Lte(units::degrees_per_second_t velocity) {
+  return frc2::Trigger{[this, velocity] { return GetVelocity() <= velocity; }};
+}
+
+frc2::Trigger FlyWheel::Between(units::degrees_per_second_t start,
+                                units::degrees_per_second_t end) {
+  return Gte(start).And(Lte(end));
+}
+
+frc2::Trigger FlyWheel::IsNear(units::degrees_per_second_t velocity,
+                               units::degrees_per_second_t within) {
+  return frc2::Trigger{[this, velocity, within] {
+    return std::abs(GetVelocity().value() - velocity.value()) <= within.value();
+  }};
+}
+
+void FlyWheel::SetVelocity(units::degrees_per_second_t velocity) {
+  SetMechanismVelocitySetpoint(velocity);
+}
+
+void FlyWheel::SetSurfaceSpeed(units::meters_per_second_t speed) {
+  SetMeasurementVelocitySetpoint(speed);
+}
+
+void FlyWheel::SetMeasurementVelocitySetpoint(units::meters_per_second_t velocity) {
+  auto diameter = m_flyWheelConfig.GetRollerDiameter();
+  if (!diameter) {
+    return;
+  }
+  units::meter_t radius = *diameter / 2.0;
+  SetMechanismVelocitySetpoint(units::degrees_per_second_t{(velocity.value() / radius.value()) *
+                                                           (180.0 / std::numbers::pi)});
+}
+
+frc::Translation3d FlyWheel::GetRelativeMechanismPosition() const {
+  if (m_mechanismLigament) {
+    return frc::Translation3d{
+        units::meter_t{m_mechanismLigament->GetLength()},
+        frc::Rotation3d{0_rad, 0_rad, units::radian_t{m_mechanismLigament->GetAngle()}}};
+  }
+  return frc::Translation3d{};
+}
+
+const config::FlyWheelConfig& FlyWheel::GetConfig() const { return m_flyWheelConfig; }
+
+units::degrees_per_second_t FlyWheel::GetVelocity() const { return m_smc->GetMechanismVelocity(); }
 
 }  // namespace yams::mechanisms::velocity

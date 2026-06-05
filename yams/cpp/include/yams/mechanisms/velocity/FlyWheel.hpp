@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <frc/geometry/Translation3d.h>
 #include <frc2/command/CommandPtr.h>
 #include <frc2/command/button/Trigger.h>
 #include <units/angle.h>
@@ -82,69 +83,180 @@ class FlyWheel : public SmartVelocityMechanism {
   // ---- FlyWheel-specific interface ------------------------------------------
 
   /**
-   * Command the flywheel to spin at a fixed angular velocity and hold it.
-   *
-   * @param velocity Target angular velocity in degrees per second.
-   * @return CommandPtr that requires the configured subsystem.
-   */
-  frc2::CommandPtr Spin(units::degrees_per_second_t velocity);
-
-  /**
-   * Command the flywheel to track a supplier-provided angular velocity.
-   *
-   * @param velocity Supplier returning the desired angular velocity each loop.
-   * @return CommandPtr that requires the configured subsystem.
-   */
-  frc2::CommandPtr Spin(std::function<units::degrees_per_second_t()> velocity);
-
-  /**
-   * Command the flywheel to reach a target surface (tangential) speed.
-   *
-   * Requires that a roller diameter was provided in the config.  If no
-   * diameter is configured, the command falls back to a no-op warning.
-   *
-   * @param surfaceSpeed Desired surface speed in metres per second.
-   * @return CommandPtr that requires the configured subsystem.
-   */
-  frc2::CommandPtr SpinSurface(units::meters_per_second_t surfaceSpeed);
-
-  /**
    * Get the current angular velocity of the flywheel.
    *
    * @return Current mechanism velocity in degrees per second.
    */
   units::degrees_per_second_t GetVelocity() const;
 
-  /**
-   * Get the current surface speed of the roller.
-   *
-   * Returns zero if no roller diameter is configured.
-   *
-   * @return Surface speed in metres per second.
-   */
-  units::meters_per_second_t GetSurfaceSpeed() const;
+  // ---- Run / RunTo interface ------------------------------------------------
 
   /**
-   * Check whether the flywheel is within tolerance of a target velocity.
+   * Set the flywheel to the given angular velocity.
    *
-   * @param target    Desired angular velocity.
-   * @param tolerance Allowable error (default 5 deg/s).
-   * @return true if |current − target| ≤ tolerance.
+   * @param velocity FlyWheel angular velocity to go to.
+   * @return CommandPtr that sets the flywheel to the desired speed.
    */
-  bool AtVelocity(units::degrees_per_second_t target,
-                  units::degrees_per_second_t tolerance = units::degrees_per_second_t{5.0}) const;
+  frc2::CommandPtr Run(units::degrees_per_second_t velocity);
 
   /**
-   * Trigger that becomes true when the flywheel is within tolerance of a
-   * target velocity.
+   * Set the flywheel to the given angular velocity via a supplier.
    *
-   * @param target    Desired angular velocity.
-   * @param tolerance Allowable error (default 5 deg/s).
-   * @return Trigger for the at-velocity condition.
+   * @param velocity Supplier returning the desired angular velocity each loop.
+   * @return CommandPtr that sets the flywheel to the desired speed.
    */
-  frc2::Trigger IsAtVelocity(units::degrees_per_second_t target,
-                             units::degrees_per_second_t tolerance = units::degrees_per_second_t{
-                                 5.0});
+  frc2::CommandPtr Run(std::function<units::degrees_per_second_t()> velocity);
+
+  /**
+   * Set the flywheel to the given surface speed.
+   *
+   * Requires that a roller diameter was provided in the config.
+   *
+   * @param surfaceSpeed Desired surface speed in metres per second.
+   * @return CommandPtr that sets the flywheel to the desired surface speed.
+   */
+  frc2::CommandPtr Run(units::meters_per_second_t surfaceSpeed);
+
+  /**
+   * Set the flywheel to the given surface speed via a supplier.
+   *
+   * Requires that a roller diameter was provided in the config.
+   *
+   * @param surfaceSpeed Supplier returning the desired surface speed each loop.
+   * @return CommandPtr that sets the flywheel to the desired surface speed.
+   */
+  frc2::CommandPtr Run(std::function<units::meters_per_second_t()> surfaceSpeed);
+
+  /**
+   * Run the flywheel to an angular velocity within a tolerance, then end the command.
+   *
+   * @param velocity  Target angular velocity.
+   * @param tolerance Allowable error.
+   * @return CommandPtr that ends once the flywheel is near the target velocity.
+   * @note Do not use with a default command on the subsystem, as it will override the setting after this ends.
+   */
+  frc2::CommandPtr RunTo(units::degrees_per_second_t velocity,
+                         units::degrees_per_second_t tolerance = units::degrees_per_second_t{5.0});
+
+  /**
+   * Run the flywheel to a supplier-provided angular velocity within a tolerance, then end the command.
+   *
+   * The supplier is evaluated once when the command is created.
+   *
+   * @param velocity  Supplier returning the target angular velocity.
+   * @param tolerance Allowable error.
+   * @return CommandPtr that ends once the flywheel is near the target velocity.
+   * @note Do not use with a default command on the subsystem, as it will override the setting after this ends.
+   */
+  frc2::CommandPtr RunTo(std::function<units::degrees_per_second_t()> velocity,
+                         units::degrees_per_second_t tolerance = units::degrees_per_second_t{5.0});
+
+  /**
+   * Run the flywheel to a surface speed within a tolerance, then end the command.
+   *
+   * Requires that a roller diameter was provided in the config.
+   *
+   * @param velocity  Target surface speed.
+   * @param tolerance Allowable error.
+   * @return CommandPtr that ends once the flywheel is near the target surface speed.
+   * @note Do not use with a default command on the subsystem, as it will override the setting after this ends.
+   */
+  frc2::CommandPtr RunTo(units::meters_per_second_t velocity,
+                         units::meters_per_second_t tolerance);
+
+  /**
+   * Run the flywheel to a supplier-provided surface speed within a tolerance, then end the command.
+   *
+   * Requires that a roller diameter was provided in the config.
+   *
+   * @param velocity  Supplier returning the target surface speed.
+   * @param tolerance Allowable error.
+   * @return CommandPtr that ends once the flywheel is near the target surface speed.
+   * @note Do not use with a default command on the subsystem, as it will override the setting after this ends.
+   */
+  frc2::CommandPtr RunTo(std::function<units::meters_per_second_t()> velocity,
+                         units::meters_per_second_t tolerance);
+
+  // ---- Comparison triggers ---------------------------------------------------
+
+  /**
+   * Trigger that fires while the flywheel angular velocity is >= the given velocity.
+   *
+   * @param velocity Reference angular velocity.
+   * @return Trigger for the >= condition.
+   */
+  frc2::Trigger Gte(units::degrees_per_second_t velocity);
+
+  /**
+   * Trigger that fires while the flywheel angular velocity is <= the given velocity.
+   *
+   * @param velocity Reference angular velocity.
+   * @return Trigger for the <= condition.
+   */
+  frc2::Trigger Lte(units::degrees_per_second_t velocity);
+
+  /**
+   * Trigger that fires while the flywheel angular velocity is between start and end (inclusive).
+   *
+   * @param start Lower bound.
+   * @param end   Upper bound.
+   * @return Trigger for the range condition.
+   */
+  frc2::Trigger Between(units::degrees_per_second_t start, units::degrees_per_second_t end);
+
+  /**
+   * Trigger that fires while the flywheel is within tolerance of a velocity.
+   *
+   * @param velocity Reference angular velocity.
+   * @param within   Tolerance.
+   * @return Trigger for the near condition.
+   */
+  frc2::Trigger IsNear(units::degrees_per_second_t velocity,
+                       units::degrees_per_second_t within = units::degrees_per_second_t{5.0});
+
+  // ---- Direct setpoint setters -----------------------------------------------
+
+  /**
+   * Directly command the flywheel to an angular velocity setpoint (non-command).
+   *
+   * @param velocity Desired angular velocity.
+   */
+  void SetVelocity(units::degrees_per_second_t velocity);
+
+  /**
+   * Directly command the flywheel to a surface speed setpoint (non-command).
+   *
+   * Requires roller diameter to be configured; no-op otherwise.
+   *
+   * @param speed Desired surface speed.
+   */
+  void SetSurfaceSpeed(units::meters_per_second_t speed);
+
+  /**
+   * Set flywheel velocity from a linear surface speed (base-class override).
+   *
+   * Converts the surface speed to angular velocity using the configured roller diameter.
+   * Requires roller diameter to be configured; no-op otherwise.
+   *
+   * @param velocity Desired surface speed.
+   */
+  void SetMeasurementVelocitySetpoint(units::meters_per_second_t velocity);
+
+  // ---- Misc ------------------------------------------------------------------
+
+  /**
+   * Get the 3-D position of the flywheel relative to the robot origin.
+   *
+   * @return Translation3d representing the mechanism endpoint.
+   */
+  frc::Translation3d GetRelativeMechanismPosition() const;
+
+  /**
+   * Get the configuration used to construct this flywheel.
+   *
+   * @return Const reference to the FlyWheelConfig.
+   */
+  const config::FlyWheelConfig& GetConfig() const;
 
  private:
   config::FlyWheelConfig m_flyWheelConfig;

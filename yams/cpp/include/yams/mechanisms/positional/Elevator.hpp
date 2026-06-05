@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <frc/geometry/Translation3d.h>
 #include <frc2/command/CommandPtr.h>
 #include <frc2/command/button/Trigger.h>
 #include <units/length.h>
@@ -78,20 +79,42 @@ class Elevator : public SmartPositionalMechanism {
   // ---- Elevator-specific interface ------------------------------------------
 
   /**
-   * Command the elevator to move to a fixed height and hold it.
+   * Set the height of the elevator.
    *
-   * @param height Target carriage height.
-   * @return CommandPtr that requires the configured subsystem.
+   * @param height Height of the elevator to reach.
+   * @return CommandPtr that sets the elevator height, runs continuously.
    */
-  frc2::CommandPtr GoToHeight(units::meter_t height);
+  frc2::CommandPtr Run(units::meter_t height);
 
   /**
-   * Command the elevator to track a supplier-provided height setpoint.
+   * Set the height of the elevator via a supplier.
    *
    * @param height Supplier returning the desired height each loop.
-   * @return CommandPtr that requires the configured subsystem.
+   * @return CommandPtr that sets the elevator height, runs continuously.
    */
-  frc2::CommandPtr GoToHeight(std::function<units::meter_t()> height);
+  frc2::CommandPtr Run(std::function<units::meter_t()> height);
+
+  /**
+   * Command the elevator to a fixed height, then end when within tolerance.
+   *
+   * @param height    Target carriage height.
+   * @param tolerance Acceptable error.
+   * @return CommandPtr that ends once the elevator is near the target.
+   */
+  frc2::CommandPtr RunTo(units::meter_t height,
+                         units::meter_t tolerance = units::meter_t{0.01});
+
+  /**
+   * Command the elevator to a height from a supplier, then end when within tolerance.
+   *
+   * The supplier is evaluated once when the command is created.
+   *
+   * @param height    Supplier for the target height.
+   * @param tolerance Acceptable error.
+   * @return CommandPtr that ends once the elevator is near the target.
+   */
+  frc2::CommandPtr RunTo(std::function<units::meter_t()> height,
+                         units::meter_t tolerance = units::meter_t{0.01});
 
   /**
    * Get the current carriage height from the motor encoder.
@@ -101,23 +124,59 @@ class Elevator : public SmartPositionalMechanism {
   units::meter_t GetHeight() const;
 
   /**
-   * Check whether the elevator is within tolerance of a target height.
+   * Trigger that fires while the elevator height is >= the given height.
    *
-   * @param target    Desired height.
-   * @param tolerance Allowable error (default 0.01 m).
-   * @return true if |current − target| ≤ tolerance.
+   * @param height Reference height.
+   * @return Trigger for the >= condition.
    */
-  bool IsAtHeight(units::meter_t target, units::meter_t tolerance = units::meter_t{0.01}) const;
+  frc2::Trigger Gte(units::meter_t height);
 
   /**
-   * Trigger that becomes true when the elevator is within tolerance of a
-   * target height.
+   * Trigger that fires while the elevator height is <= the given height.
    *
-   * @param target    Desired height.
-   * @param tolerance Allowable error (default 0.01 m).
-   * @return Trigger for the at-height condition.
+   * @param height Reference height.
+   * @return Trigger for the <= condition.
    */
-  frc2::Trigger AtHeight(units::meter_t target, units::meter_t tolerance = units::meter_t{0.01});
+  frc2::Trigger Lte(units::meter_t height);
+
+  /**
+   * Trigger that fires while the elevator height is between start and end (inclusive).
+   *
+   * @param start Lower bound.
+   * @param end   Upper bound.
+   * @return Trigger for the range condition.
+   */
+  frc2::Trigger Between(units::meter_t start, units::meter_t end);
+
+  /**
+   * Trigger that fires while the elevator is within tolerance of a height.
+   *
+   * @param height Reference height.
+   * @param within Tolerance.
+   * @return Trigger for the near condition.
+   */
+  frc2::Trigger IsNear(units::meter_t height, units::meter_t within = units::meter_t{0.01});
+
+  /**
+   * Get the configuration used to construct this elevator.
+   *
+   * @return Const reference to the ElevatorConfig.
+   */
+  const config::ElevatorConfig& GetConfig() const;
+
+  /**
+   * Get the 3-D position of the elevator carriage relative to the robot origin.
+   *
+   * @return Translation3d representing the current carriage position.
+   */
+  frc::Translation3d GetRelativeMechanismPosition() const;
+
+  /**
+   * Directly command the elevator to a height setpoint (non-command, for use in periodic).
+   *
+   * @param height Desired carriage height.
+   */
+  void SetHeight(units::meter_t height);
 
  private:
   config::ElevatorConfig m_elevatorConfig;

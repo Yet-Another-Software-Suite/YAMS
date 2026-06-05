@@ -85,6 +85,4 @@ frc2::CommandPtr TurretSubsystem::SysId() {
   return m_turret->SysId(units::volt_t{3}, frc2::sysid::ramp_rate_t{3.0}, units::second_t{30});
 }
 
-frc2::CommandPtr TurretSubsystem::SetAngle(units::degree_t angle) {
-  return m_turret->GoToAngle(angle);
-}
+frc2::CommandPtr TurretSubsystem::SetAngle(units::degree_t angle) { return m_turret->Run(angle); }

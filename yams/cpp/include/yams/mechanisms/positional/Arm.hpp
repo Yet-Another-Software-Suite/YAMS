@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <frc/geometry/Translation3d.h>
 #include <frc2/command/CommandPtr.h>
 #include <frc2/command/button/Trigger.h>
 #include <units/angle.h>
@@ -78,20 +79,42 @@ class Arm : public SmartPositionalMechanism {
   // ---- Arm-specific interface -----------------------------------------------
 
   /**
-   * Command the arm to move to a fixed angle and hold it.
+   * Set the arm to the given angle.
    *
-   * @param angle Target joint angle.
+   * @param angle Arm angle to go to.
    * @return CommandPtr that requires the configured subsystem.
    */
-  frc2::CommandPtr GoToAngle(units::degree_t angle);
+  frc2::CommandPtr Run(units::degree_t angle);
 
   /**
-   * Command the arm to track a supplier-provided angle setpoint.
+   * Set the arm to the given angle via a supplier.
    *
-   * @param angle Supplier returning the desired angle each loop.
+   * @param angle Supplier returning the desired arm angle each loop.
    * @return CommandPtr that requires the configured subsystem.
    */
-  frc2::CommandPtr GoToAngle(std::function<units::degree_t()> angle);
+  frc2::CommandPtr Run(std::function<units::degree_t()> angle);
+
+  /**
+   * Command the arm to a fixed angle, then end when within tolerance.
+   *
+   * @param angle     Target joint angle.
+   * @param tolerance Acceptable error.
+   * @return CommandPtr that ends once the arm is near the target.
+   */
+  frc2::CommandPtr RunTo(units::degree_t angle,
+                         units::degree_t tolerance = units::degree_t{1.0});
+
+  /**
+   * Command the arm to an angle from a supplier, then end when within tolerance.
+   *
+   * The supplier is evaluated once when the command is created.
+   *
+   * @param angle     Supplier for the target angle.
+   * @param tolerance Acceptable error.
+   * @return CommandPtr that ends once the arm is near the target.
+   */
+  frc2::CommandPtr RunTo(std::function<units::degree_t()> angle,
+                         units::degree_t tolerance = units::degree_t{1.0});
 
   /**
    * Get the current joint angle from the motor encoder.
@@ -101,23 +124,59 @@ class Arm : public SmartPositionalMechanism {
   units::degree_t GetAngle() const;
 
   /**
-   * Check whether the arm is within tolerance of a target angle.
+   * Trigger that fires while the arm angle is >= the given angle.
    *
-   * @param target    Desired angle.
-   * @param tolerance Allowable error (default 1 deg).
-   * @return true if |current − target| ≤ tolerance.
+   * @param angle Reference angle.
+   * @return Trigger for the >= condition.
    */
-  bool IsAtAngle(units::degree_t target, units::degree_t tolerance = units::degree_t{1.0}) const;
+  frc2::Trigger Gte(units::degree_t angle);
 
   /**
-   * Trigger that becomes true when the arm is within tolerance of a target
-   * angle.
+   * Trigger that fires while the arm angle is <= the given angle.
    *
-   * @param target    Desired angle.
-   * @param tolerance Allowable error (default 1 deg).
-   * @return Trigger for the at-angle condition.
+   * @param angle Reference angle.
+   * @return Trigger for the <= condition.
    */
-  frc2::Trigger AtAngle(units::degree_t target, units::degree_t tolerance = units::degree_t{1.0});
+  frc2::Trigger Lte(units::degree_t angle);
+
+  /**
+   * Trigger that fires while the arm angle is between start and end (inclusive).
+   *
+   * @param start Lower bound.
+   * @param end   Upper bound.
+   * @return Trigger for the range condition.
+   */
+  frc2::Trigger Between(units::degree_t start, units::degree_t end);
+
+  /**
+   * Trigger that fires while the arm is within tolerance of an angle.
+   *
+   * @param angle  Reference angle.
+   * @param within Tolerance.
+   * @return Trigger for the near condition.
+   */
+  frc2::Trigger IsNear(units::degree_t angle, units::degree_t within = units::degree_t{1.0});
+
+  /**
+   * Get the configuration used to construct this arm.
+   *
+   * @return Const reference to the ArmConfig.
+   */
+  const config::ArmConfig& GetConfig() const;
+
+  /**
+   * Get the 3-D position of the arm tip relative to the robot origin.
+   *
+   * @return Translation3d representing the mechanism endpoint.
+   */
+  frc::Translation3d GetRelativeMechanismPosition() const;
+
+  /**
+   * Directly command the arm to an angle setpoint (non-command, for use in periodic).
+   *
+   * @param angle Desired joint angle.
+   */
+  void SetAngle(units::degree_t angle);
 
  private:
   config::ArmConfig m_armConfig;

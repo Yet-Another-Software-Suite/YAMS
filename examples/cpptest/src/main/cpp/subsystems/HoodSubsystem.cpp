@@ -57,4 +57,4 @@ frc2::CommandPtr HoodSubsystem::SysId() {
   return m_hood->SysId(units::volt_t{3}, frc2::sysid::ramp_rate_t{3.0}, units::second_t{30});
 }
 
-frc2::CommandPtr HoodSubsystem::SetAngle(units::degree_t angle) { return m_hood->GoToAngle(angle); }
+frc2::CommandPtr HoodSubsystem::SetAngle(units::degree_t angle) { return m_hood->Run(angle); }
