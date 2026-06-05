@@ -151,7 +151,6 @@ void SparkWrapper::SimIterate() {
   double vbus = frc::sim::RoboRioSim::GetVInVoltage().value();
 
   m_sparkSim->iterate(mechVelRps.value(), vbus, dt.value());
-  std::cout << m_sparkSim->GetPosition();
 
   if (m_relEncoderSim) m_relEncoderSim->iterate(mechVelRps.value(), dt.value());
 
