@@ -5,6 +5,9 @@
 
 .claude
 
+examples/generated
+examples/skeleton
+
 ### Eclipse ###
 .metadata
 bin/
@@ -207,7 +210,8 @@ replay_pid*
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
+
 
 # Thumbnails
 ._*
