@@ -1,7 +1,7 @@
 // Copyright (c) 2026 YAMS Contributors
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "yams/telemetry/SmartMotorControllerTelemetryConfig.h"
+#include "yams/telemetry/SmartMotorControllerTelemetryConfig.hpp"
 
 #include <units/angle.h>
 #include <units/length.h>
@@ -9,8 +9,8 @@
 #include <string>
 #include <unordered_map>
 
-#include "yams/motorcontrollers/SmartMotorController.h"
-#include "yams/motorcontrollers/SmartMotorControllerConfig.h"
+#include "yams/motorcontrollers/SmartMotorController.hpp"
+#include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 
 namespace yams::telemetry {
 

@@ -7,7 +7,7 @@
 
 #include <optional>
 
-#include "EasyCRTConfig.h"
+#include "EasyCRTConfig.hpp"
 
 namespace yams::units {
 

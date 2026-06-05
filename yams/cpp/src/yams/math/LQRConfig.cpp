@@ -1,7 +1,7 @@
 // Copyright (c) 2026 YAMS Contributors
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "yams/math/LQRConfig.h"
+#include "yams/math/LQRConfig.hpp"
 
 #include <frc/EigenCore.h>
 #include <frc/system/plant/LinearSystemId.h>

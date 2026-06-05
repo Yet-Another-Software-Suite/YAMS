@@ -1,7 +1,7 @@
 // Copyright (c) 2026 YAMS Contributors
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "yams/telemetry/MechanismTelemetry.h"
+#include "yams/telemetry/MechanismTelemetry.hpp"
 
 #include <frc/Timer.h>
 #include <networktables/NetworkTableInstance.h>
@@ -9,7 +9,7 @@
 #include <string>
 #include <memory>
 
-#include "yams/motorcontrollers/SmartMotorController.h"
+#include "yams/motorcontrollers/SmartMotorController.hpp"
 
 namespace yams::telemetry {
 

@@ -1,7 +1,7 @@
 // Copyright (c) 2026 YAMS Contributors
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "yams/motorcontrollers/SmartMotorController.h"
+#include "yams/motorcontrollers/SmartMotorController.hpp"
 
 #include <frc/DriverStation.h>
 #include <frc/MathUtil.h>
@@ -14,7 +14,7 @@
 #include <string>
 #include <utility>
 
-#include "yams/exceptions/SmartMotorControllerConfigurationException.h"
+#include "yams/exceptions/SmartMotorControllerConfigurationException.hpp"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846

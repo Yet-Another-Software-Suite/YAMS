@@ -1,13 +1,13 @@
 // Copyright (c) 2026 YAMS Contributors
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "yams/gearing/Sprocket.h"
+#include "yams/gearing/Sprocket.hpp"
 
 #include <string>
 #include <vector>
 
-#include "yams/exceptions/InvalidStageGivenException.h"
-#include "yams/exceptions/NoStagesGivenException.h"
+#include "yams/exceptions/InvalidStageGivenException.hpp"
+#include "yams/exceptions/NoStagesGivenException.hpp"
 
 namespace yams::gearing {
 

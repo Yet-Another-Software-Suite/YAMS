@@ -1,7 +1,7 @@
 // Copyright (c) 2026 YAMS Contributors
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "yams/motorcontrollers/local/SparkWrapper.h"
+#include "yams/motorcontrollers/local/SparkWrapper.hpp"
 
 #include <frc/RobotBase.h>
 #include <frc/simulation/RoboRioSim.h>
@@ -13,7 +13,7 @@
 #include <iostream>
 #include <vector>
 
-#include "yams/motorcontrollers/simulation/DCMotorSimSupplier.h"
+#include "yams/motorcontrollers/simulation/DCMotorSimSupplier.hpp"
 
 using namespace rev::spark;
 

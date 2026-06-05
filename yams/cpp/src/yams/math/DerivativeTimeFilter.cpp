@@ -1,7 +1,7 @@
 // Copyright (c) 2026 YAMS Contributors
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "yams/math/DerivativeTimeFilter.h"
+#include "yams/math/DerivativeTimeFilter.hpp"
 
 #include <frc/RobotController.h>
 #include <units/time.h>

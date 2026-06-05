@@ -1,7 +1,7 @@
 // Copyright (c) 2026 YAMS Contributors
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "yams/motorcontrollers/remote/TalonFXWrapper.h"
+#include "yams/motorcontrollers/remote/TalonFXWrapper.hpp"
 
 #include <frc/DriverStation.h>
 #include <frc/RobotBase.h>
@@ -13,7 +13,7 @@
 
 #include <cmath>
 
-#include "yams/motorcontrollers/simulation/DCMotorSimSupplier.h"
+#include "yams/motorcontrollers/simulation/DCMotorSimSupplier.hpp"
 
 using namespace ctre::phoenix6;
 

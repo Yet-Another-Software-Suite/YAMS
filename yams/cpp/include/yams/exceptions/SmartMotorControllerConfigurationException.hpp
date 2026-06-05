@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include "YamsException.h"
+#include "YamsException.hpp"
 
 namespace yams {
 

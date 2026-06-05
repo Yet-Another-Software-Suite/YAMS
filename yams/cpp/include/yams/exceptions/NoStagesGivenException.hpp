@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "YamsException.h"
+#include "YamsException.hpp"
 
 namespace yams {
 

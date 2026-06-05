@@ -1,13 +1,13 @@
 // Copyright (c) 2026 YAMS Contributors
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "yams/motorcontrollers/SmartMotorFactory.h"
+#include "yams/motorcontrollers/SmartMotorFactory.hpp"
 
 #include <memory>
 
-#include "yams/motorcontrollers/local/SparkWrapper.h"
-#include "yams/motorcontrollers/remote/TalonFXSWrapper.h"
-#include "yams/motorcontrollers/remote/TalonFXWrapper.h"
+#include "yams/motorcontrollers/local/SparkWrapper.hpp"
+#include "yams/motorcontrollers/remote/TalonFXSWrapper.hpp"
+#include "yams/motorcontrollers/remote/TalonFXWrapper.hpp"
 
 namespace yams::motorcontrollers {
 

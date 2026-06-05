@@ -13,7 +13,7 @@
 #include <optional>
 #include <variant>
 
-#include "LQRConfig.h"
+#include "LQRConfig.hpp"
 
 namespace yams::math {
 

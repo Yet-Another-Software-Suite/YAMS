@@ -5,8 +5,8 @@
 
 #include <optional>
 
-#include "GearBox.h"
-#include "Sprocket.h"
+#include "GearBox.hpp"
+#include "Sprocket.hpp"
 
 namespace yams::gearing {
 

@@ -12,7 +12,7 @@
 #include <functional>
 #include <string>
 
-#include "SmartPositionalMechanism.h"
+#include "SmartPositionalMechanism.hpp"
 #include "yams/mechanisms/config/ArmConfig.hpp"
 
 namespace yams::mechanisms::positional {

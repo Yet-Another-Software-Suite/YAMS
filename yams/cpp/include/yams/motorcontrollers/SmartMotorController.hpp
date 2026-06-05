@@ -29,8 +29,8 @@
 #include <string>
 #include <vector>
 
-#include "SimSupplier.h"
-#include "SmartMotorControllerConfig.h"
+#include "SimSupplier.hpp"
+#include "SmartMotorControllerConfig.hpp"
 #include "yams/math/LQRController.hpp"
 #include "yams/telemetry/SmartMotorControllerTelemetry.hpp"
 #include "yams/telemetry/SmartMotorControllerTelemetryConfig.hpp"

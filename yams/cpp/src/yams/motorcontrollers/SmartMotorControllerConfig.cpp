@@ -1,7 +1,7 @@
 // Copyright (c) 2026 YAMS Contributors
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "yams/motorcontrollers/SmartMotorControllerConfig.h"
+#include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 
 #include <cmath>
 #include <stdexcept>

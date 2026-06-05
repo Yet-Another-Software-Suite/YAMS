@@ -1,7 +1,7 @@
 // Copyright (c) 2026 YAMS Contributors
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "yams/mechanisms/swerve/SwerveDriveConfig.h"
+#include "yams/mechanisms/swerve/SwerveDriveConfig.hpp"
 
 #include <frc/RobotBase.h>
 #include <units/math.h>

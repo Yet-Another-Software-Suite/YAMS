@@ -1,14 +1,14 @@
 // Copyright (c) 2026 YAMS Contributors
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "yams/gearing/GearBox.h"
+#include "yams/gearing/GearBox.hpp"
 
 #include <stdexcept>
 #include <string>
 #include <vector>
 
-#include "yams/exceptions/InvalidStageGivenException.h"
-#include "yams/exceptions/NoStagesGivenException.h"
+#include "yams/exceptions/InvalidStageGivenException.hpp"
+#include "yams/exceptions/NoStagesGivenException.hpp"
 
 namespace yams::gearing {
 
