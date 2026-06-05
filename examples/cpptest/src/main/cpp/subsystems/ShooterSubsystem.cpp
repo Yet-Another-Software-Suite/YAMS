@@ -1,6 +1,5 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "subsystems/ShooterSubsystem.h"
 
@@ -17,8 +16,7 @@ using namespace yams::mechanisms;
 using Cfg = SmartMotorControllerConfig;
 
 ShooterSubsystem::ShooterSubsystem() {
-  m_motorConfig
-      .WithSubsystem(this)
+  m_motorConfig.WithSubsystem(this)
       .WithFeedback(1, 0, 0)
       .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
       .WithIdleMode(Cfg::MotorMode::COAST)
@@ -30,8 +28,7 @@ ShooterSubsystem::ShooterSubsystem() {
   m_motor.emplace(m_flywheelMotor1, frc::DCMotor::NEO(2), m_motorConfig);
 
   // 4-inch diameter flywheel wheel
-  m_shooterConfig
-      .WithMotorController(&m_motor.value())
+  m_shooterConfig.WithMotorController(&m_motor.value())
       .WithSubsystem(this)
       .WithRollerDiameter(units::meter_t{4.0 * 0.0254})
       .WithTelemetryName("ShooterMech");
@@ -47,14 +44,11 @@ frc2::CommandPtr ShooterSubsystem::SetVelocity(units::degrees_per_second_t speed
   return m_shooter->Spin(speed);
 }
 
-frc2::CommandPtr ShooterSubsystem::SetVelocity(
-    std::function<units::degrees_per_second_t()> speed) {
+frc2::CommandPtr ShooterSubsystem::SetVelocity(std::function<units::degrees_per_second_t()> speed) {
   return m_shooter->Spin(speed);
 }
 
-frc2::CommandPtr ShooterSubsystem::Set(double dutyCycle) {
-  return m_shooter->Set(dutyCycle);
-}
+frc2::CommandPtr ShooterSubsystem::Set(double dutyCycle) { return m_shooter->Set(dutyCycle); }
 
 frc2::CommandPtr ShooterSubsystem::Set(std::function<double()> dutyCycle) {
   return m_shooter->Set(dutyCycle);
@@ -76,10 +70,6 @@ bool ShooterSubsystem::ReadyToShoot(units::degrees_per_second_t tolerance) const
   return m_shooter->AtVelocity(GetVelocity(), tolerance);
 }
 
-void ShooterSubsystem::Periodic() {
-  m_shooter->UpdateTelemetry();
-}
+void ShooterSubsystem::Periodic() { m_shooter->UpdateTelemetry(); }
 
-void ShooterSubsystem::SimulationPeriodic() {
-  m_shooter->SimIterate();
-}
+void ShooterSubsystem::SimulationPeriodic() { m_shooter->SimIterate(); }

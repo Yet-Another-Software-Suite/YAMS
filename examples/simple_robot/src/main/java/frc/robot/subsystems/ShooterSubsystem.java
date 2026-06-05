@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Inches;
@@ -24,7 +27,6 @@ import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class ShooterSubsystem extends SubsystemBase
 {
-
   private final TalonFX                    flywheelMotor1         = new TalonFX(1);
   private final TalonFX                    flywheelMotor2         = new TalonFX(2);
   private final boolean                    flywheelMotor2Inverted = true;

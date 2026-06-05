@@ -1,6 +1,5 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
 
 #pragma once
 
@@ -15,9 +14,8 @@
 #include <units/time.h>
 #include <units/voltage.h>
 
-#include <optional>
-
 #include <ctre/phoenix6/TalonFX.hpp>
+#include <optional>
 
 #include "yams/gearing/GearBox.hpp"
 #include "yams/gearing/MechanismGearing.hpp"
@@ -31,8 +29,7 @@ class TurretSubsystem : public frc2::SubsystemBase {
   TurretSubsystem();
 
   frc::Pose2d GetPose(frc::Pose2d robotPose) const;
-  frc::ChassisSpeeds GetVelocity(frc::ChassisSpeeds robotVelocity,
-                                 units::degree_t robotAngle) const;
+  frc::ChassisSpeeds GetVelocity(frc::ChassisSpeeds robotVelocity, units::degree_t robotAngle);
 
   void SetAngleSetpoint(units::degree_t angle);
 

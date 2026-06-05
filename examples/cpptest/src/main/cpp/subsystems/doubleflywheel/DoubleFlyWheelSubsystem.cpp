@@ -1,6 +1,5 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "subsystems/doubleflywheel/DoubleFlyWheelSubsystem.h"
 
@@ -16,8 +15,7 @@ using namespace yams::gearing;
 using Cfg = SmartMotorControllerConfig;
 
 DoubleFlyWheelSubsystem::DoubleFlyWheelSubsystem() {
-  m_lowerConfig
-      .WithSubsystem(this)
+  m_lowerConfig.WithSubsystem(this)
       .WithClosedLoopMode()
       .WithIdleMode(Cfg::MotorMode::COAST)
       .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
@@ -27,8 +25,7 @@ DoubleFlyWheelSubsystem::DoubleFlyWheelSubsystem() {
       .WithMotorInverted(false)
       .WithTelemetry("LowerFlyWheel", Cfg::TelemetryVerbosity::HIGH);
 
-  m_upperConfig
-      .WithSubsystem(this)
+  m_upperConfig.WithSubsystem(this)
       .WithClosedLoopMode()
       .WithIdleMode(Cfg::MotorMode::COAST)
       .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
@@ -50,8 +47,7 @@ frc2::CommandPtr DoubleFlyWheelSubsystem::SetDutyCycle(double lower, double uppe
       .WithName("Set Duty Cycle (Double FlyWheel)");
 }
 
-frc2::CommandPtr DoubleFlyWheelSubsystem::SetVoltage(units::volt_t lower,
-                                                      units::volt_t upper) {
+frc2::CommandPtr DoubleFlyWheelSubsystem::SetVoltage(units::volt_t lower, units::volt_t upper) {
   return Run([this, lower, upper] {
            m_lowerFlyWheel->SetVoltage(lower);
            m_upperFlyWheel->SetVoltage(upper);
@@ -60,7 +56,7 @@ frc2::CommandPtr DoubleFlyWheelSubsystem::SetVoltage(units::volt_t lower,
 }
 
 frc2::CommandPtr DoubleFlyWheelSubsystem::SetVelocity(units::degrees_per_second_t lower,
-                                                       units::degrees_per_second_t upper) {
+                                                      units::degrees_per_second_t upper) {
   return Run([this, lower, upper] {
     m_lowerFlyWheel->SetVelocity(lower);
     m_upperFlyWheel->SetVelocity(upper);

@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems;
 
 
@@ -21,7 +24,6 @@ import yams.motorcontrollers.local.SparkWrapper;
 
 public class DiffDriveSubsystem extends SubsystemBase
 {
-
   private MechanismGearing gearing = new MechanismGearing(3, 4);
   private Distance         wheelDiameter = Inches.of(4);
 

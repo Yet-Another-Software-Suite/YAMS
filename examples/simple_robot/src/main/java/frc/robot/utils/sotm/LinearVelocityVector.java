@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.utils.sotm;
 
 import static edu.wpi.first.units.Units.RPM;
@@ -14,7 +17,6 @@ import edu.wpi.first.units.measure.Time;
  */
 public class LinearVelocityVector
 {
-
   /**
    * Position of the robot (WPILib coordinate system).
    */

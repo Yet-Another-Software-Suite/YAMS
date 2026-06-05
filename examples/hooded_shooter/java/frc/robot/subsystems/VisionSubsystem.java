@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems;
 
 import java.util.Comparator;
@@ -62,7 +65,6 @@ public class VisionSubsystem extends SubsystemBase {
 
         camera.getAllUnreadResults().forEach((result) -> {
             if (result.getBestTarget().getFiducialId() > 0) {
-
             }
         });
     }

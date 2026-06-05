@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems;
 
 
@@ -43,7 +46,6 @@ import yams.motorcontrollers.local.SparkWrapper;
  */
 public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
 {
-
   private final String           motorTelemetryName = "ExponentiallyProfiledArmMotor";
   private final String           mechTelemetryName  = "ExponentiallyProfiledArm";
   private final SparkMax         armMotor           = new SparkMax(1, MotorType.kBrushless);

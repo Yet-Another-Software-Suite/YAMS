@@ -28,6 +28,7 @@
 #include <units/time.h>
 #include <units/velocity.h>
 #include <wpi/array.h>
+#include <wpi/json.h>
 
 #include <cassert>
 #include <optional>

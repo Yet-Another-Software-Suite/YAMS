@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems;
 
 
@@ -48,7 +51,6 @@ import yams.motorcontrollers.local.SparkWrapper;
 
 public class SwerveSubsystem extends SubsystemBase
 {
-
   private AngularVelocity          maximumChassisSpeedsAngularVelocity = DegreesPerSecond.of(720);
   private LinearVelocity           maximumChassisSpeedsLinearVelocity  = MetersPerSecond.of(4);
   private SwerveDrivePoseEstimator visionPoseEstimator;
@@ -62,7 +64,6 @@ public class SwerveSubsystem extends SubsystemBase
   @AutoLog
   public static class SwerveInputs
   {
-
     public SwerveModulePosition[] positions           = new SwerveModulePosition[4];
     public SwerveModuleState[]    states              = new SwerveModuleState[4];
     public Angle                  gyroRotation        = Degrees.of(0);
@@ -302,4 +303,3 @@ public class SwerveSubsystem extends SubsystemBase
     drive.simIterate();
   }
 }
-

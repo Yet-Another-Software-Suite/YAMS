@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems;
 
 
@@ -35,7 +38,6 @@ import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class TurretSubsystem extends SubsystemBase
 {
-
   double[] ratio = {144 / 15, 5, 1.08};
 
   SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
@@ -92,7 +94,6 @@ public class TurretSubsystem extends SubsystemBase
 
  public ChassisSpeeds getVelocity(ChassisSpeeds robotVelocity, Angle robotAngle)
   {
-
       Translation2d rRobot = roboToTurret.getTranslation().toTranslation2d(); // in robot frame
     Translation2d rWorld = rRobot.rotateBy(Rotation2d.fromRadians(robotAngle.in(Radians))); // rotate into field frame
 

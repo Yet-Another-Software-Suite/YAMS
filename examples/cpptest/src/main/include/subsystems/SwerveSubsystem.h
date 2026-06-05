@@ -1,6 +1,5 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
 
 #pragma once
 
@@ -12,16 +11,16 @@
 #include <frc/system/plant/DCMotor.h>
 #include <frc2/command/CommandPtr.h>
 #include <frc2/command/SubsystemBase.h>
+#include <rev/SparkMax.h>
 #include <units/angle.h>
 #include <units/length.h>
 
+#include <ctre/phoenix6/CANcoder.hpp>
+#include <ctre/phoenix6/Pigeon2.hpp>
+#include <string>
 #include <functional>
 #include <memory>
 #include <optional>
-
-#include <ctre/phoenix6/CANcoder.hpp>
-#include <ctre/phoenix6/Pigeon2.hpp>
-#include <rev/SparkMax.h>
 
 #include "yams/gearing/GearBox.hpp"
 #include "yams/gearing/MechanismGearing.hpp"

@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems.akit;
 
 
@@ -42,7 +45,6 @@ import yams.motorcontrollers.local.SparkWrapper;
  */
 public class ElevatorSubsystem extends SubsystemBase
 {
-
   /**
    * AdvantageKit identifies inputs via the "Replay Bubble". Everything going to the SMC is an Output. Everything coming
    * from the SMC is an Input.
@@ -50,7 +52,6 @@ public class ElevatorSubsystem extends SubsystemBase
   @AutoLog
   public static class ElevatorInputs
   {
-
     public Distance       position = Meters.of(0);
     public LinearVelocity velocity = MetersPerSecond.of(0);
     public Distance       setpoint = Meters.of(0);

@@ -1,6 +1,5 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "RobotContainer.h"
 
@@ -30,8 +29,9 @@ void RobotContainer::ConfigureBindings() {
   // m_xboxController.Button(4).WhileTrue(m_shooter.Set(0.5));
 
   // Swerve bindings (uncomment with SwerveSubsystem):
-  // m_xboxController.Button(1).WhileTrue(m_drive.SetRobotRelativeChassisSpeeds({0.5_mps, 0_mps, 0_rad_per_s}));
-  // m_xboxController.Button(5).WhileTrue(m_drive.DriveToPose(frc::Pose2d{3_m, 3_m, frc::Rotation2d{30_deg}}));
+  // m_xboxController.Button(1).WhileTrue(m_drive.SetRobotRelativeChassisSpeeds({0.5_mps, 0_mps,
+  // 0_rad_per_s})); m_xboxController.Button(5).WhileTrue(m_drive.DriveToPose(frc::Pose2d{3_m, 3_m,
+  // frc::Rotation2d{30_deg}}));
 
   // Arm bindings (uncomment with ArmSubsystem):
   // m_xboxController.Button(1).WhileTrue(m_arm.ArmCmd(0.5));

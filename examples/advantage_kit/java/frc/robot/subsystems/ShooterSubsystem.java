@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
@@ -35,7 +38,6 @@ import yams.motorcontrollers.local.SparkWrapper;
  * AdvantageKit Shooter Subsystem, capable of replaying the shooter.
  */
 public class ShooterSubsystem extends SubsystemBase {
-
   /**
    * AdvantageKit identifies inputs via the "Replay Bubble". Everything going to
    * the SMC is an Output. Everything coming
@@ -43,7 +45,6 @@ public class ShooterSubsystem extends SubsystemBase {
    */
   @AutoLog
   public static class ShooterInputs {
-
     public AngularVelocity velocity = DegreesPerSecond.of(0);
     public AngularVelocity setpoint = DegreesPerSecond.of(0);
     public Voltage volts = Volts.of(0);

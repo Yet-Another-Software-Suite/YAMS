@@ -1,4 +1,5 @@
-// Copyright (c) FIRST and other WPILib contributors.
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
 
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
@@ -20,7 +21,6 @@ import frc.robot.subsystems.SwerveSubsystem;
 
 public class RobotContainer
 {
-
   private final SwerveSubsystem drive = new SwerveSubsystem();
 
   private final CommandXboxController xboxController = new CommandXboxController(0);
@@ -37,7 +37,6 @@ public class RobotContainer
 
   private void configureBindings()
   {
-
     xboxController.button(1).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisSpeeds(0.5, 0, 0)));
     xboxController.button(2).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisSpeeds(-0.5, 0, 0)));
     xboxController.button(3).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisSpeeds(0, 0.5, 0)));

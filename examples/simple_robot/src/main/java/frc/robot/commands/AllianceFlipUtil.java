@@ -1,9 +1,5 @@
-// Copyright (c) 2025-2026 Littleton Robotics
-// http://github.com/Mechanical-Advantage
-//
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file at
-// the root directory of this project.
+// Copyright (c) 2025-2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
 
 package frc.robot.commands;
 
@@ -17,7 +13,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 
 public class AllianceFlipUtil
 {
-
   public static double applyX(double x)
   {
     return shouldFlip() ? FieldConstants.fieldLength - x : x;

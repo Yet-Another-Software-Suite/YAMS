@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
@@ -29,7 +32,6 @@ import yams.motorcontrollers.local.SparkWrapper;
  */
 public class IndexerSubsystem extends SubsystemBase
 {
-
   /**
    * AdvantageKit identifies inputs via the "Replay Bubble". Everything going to the SMC is an Output. Everything coming
    * from the SMC is an Input.
@@ -37,7 +39,6 @@ public class IndexerSubsystem extends SubsystemBase
   @AutoLog
   public static class IndexerInputs
   {
-
     public AngularVelocity velocity = DegreesPerSecond.of(0);
     public Voltage         volts    = Volts.of(0);
     public Current         current  = Amps.of(0);

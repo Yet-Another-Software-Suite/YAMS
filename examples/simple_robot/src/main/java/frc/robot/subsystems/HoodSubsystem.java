@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems;
 
 
@@ -31,7 +34,6 @@ import yams.motorcontrollers.remote.TalonFXSWrapper;
 
 public class HoodSubsystem extends SubsystemBase
 {
-
   private final TalonFXS                   hoodMotor        = new TalonFXS(9);//, MotorType.kBrushless);
   private final SmartMotorControllerConfig motorConfig      = new SmartMotorControllerConfig(this)
       .withClosedLoopController(4, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))

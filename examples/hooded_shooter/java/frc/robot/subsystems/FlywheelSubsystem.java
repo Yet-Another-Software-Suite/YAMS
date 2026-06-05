@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
@@ -35,7 +38,6 @@ import yams.motorcontrollers.local.SparkWrapper;
 
 public class FlywheelSubsystem extends SubsystemBase
 {
-
   private final Distance flywheelDiameter = Inches.of(4);
   private final SparkMax flywheelMotor    = new SparkMax(1, MotorType.kBrushless);
 

@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.Degrees;
@@ -25,7 +28,6 @@ import java.util.function.Supplier;
  */
 public class ShootOnTheMoveCommand extends Command
 {
-
   // Subsystems
   private final TurretSubsystem   turretSubsystem;
   private final HoodSubsystem     hoodSubsystem;
@@ -89,7 +91,6 @@ public class ShootOnTheMoveCommand extends Command
   @Override
   public void initialize()
   {
-
   }
 
   @Override
@@ -146,6 +147,5 @@ public class ShootOnTheMoveCommand extends Command
   @Override
   public void end(boolean interrupted)
   {
-
   }
 }

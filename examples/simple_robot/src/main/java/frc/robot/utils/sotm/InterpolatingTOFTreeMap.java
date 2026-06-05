@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.utils.sotm;
 
 import static edu.wpi.first.units.Units.Milliseconds;
@@ -12,7 +15,6 @@ import java.util.List;
 
 public class InterpolatingTOFTreeMap
 {
-
   public  Time                       latencyCompensation = Milliseconds.of(150);
   private Distance                   m_flywheelCircumference;
   private List<LinearVelocityVector> m_measurements;

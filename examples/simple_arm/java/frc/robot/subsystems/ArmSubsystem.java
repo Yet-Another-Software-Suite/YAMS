@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems;
 
 
@@ -37,9 +40,8 @@ import yams.motorcontrollers.local.SparkWrapper;
 
 public class ArmSubsystem extends SubsystemBase
 {
-
   private final ThriftyNova                armMotor    = new ThriftyNova(1);
-  
+
   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withClosedLoopController(4, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
       .withSoftLimits(Degrees.of(-30), Degrees.of(100))
@@ -54,7 +56,7 @@ public class ArmSubsystem extends SubsystemBase
   private final SmartMotorController       motor            = new NovaWrapper(armMotor,
                                                                               DCMotor.getNEO(1),
                                                                               motorConfig);
-  
+
   private       ArmConfig m_config = new ArmConfig(motor)
       .withLength(Meters.of(0.135))
       .withHardLimits(Degrees.of(-100), Degrees.of(200))
@@ -93,4 +95,3 @@ public class ArmSubsystem extends SubsystemBase
     return arm.setAngle(angle);
   }
 }
-

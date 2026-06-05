@@ -1,6 +1,5 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "subsystems/DiffDriveSubsystem.h"
 
@@ -15,8 +14,7 @@ DiffDriveSubsystem::DiffDriveSubsystem() {
   MechanismGearing gearing{GearBox::FromReductionStages({3.0, 4.0})};
   const units::meter_t wheelDiameter{4.0 * 0.0254};
 
-  m_leftConfig
-      .WithSubsystem(this)
+  m_leftConfig.WithSubsystem(this)
       .WithOpenLoopMode()
       .WithMotorGearing(gearing)
       .WithIdleMode(Cfg::MotorMode::COAST)
@@ -24,8 +22,7 @@ DiffDriveSubsystem::DiffDriveSubsystem() {
       .WithMechanismCircumference(wheelDiameter * 3.14159265)
       .WithTelemetry("LeftMotorMain", Cfg::TelemetryVerbosity::LOW);
 
-  m_rightConfig
-      .WithSubsystem(this)
+  m_rightConfig.WithSubsystem(this)
       .WithOpenLoopMode()
       .WithMotorGearing(gearing)
       .WithIdleMode(Cfg::MotorMode::COAST)
@@ -47,12 +44,12 @@ frc2::CommandPtr DiffDriveSubsystem::Stop() {
 }
 
 frc2::CommandPtr DiffDriveSubsystem::TankDrive(std::function<double()> left,
-                                                std::function<double()> right) {
+                                               std::function<double()> right) {
   return Run([this, left, right] { m_drive->TankDrive(left(), right()); });
 }
 
 frc2::CommandPtr DiffDriveSubsystem::ArcadeDrive(std::function<double()> xSpeed,
-                                                   std::function<double()> zRotation) {
+                                                 std::function<double()> zRotation) {
   return Run([this, xSpeed, zRotation] { m_drive->ArcadeDrive(xSpeed(), zRotation()); });
 }
 

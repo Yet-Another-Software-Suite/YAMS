@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems;
 
 
@@ -21,8 +24,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class IntakeRollerSubsystem extends SubsystemBase
 {
-
-
   public static final double kWristMomentOfInertia = 0.00032; // kg * m^2
 
   private final SparkMax m_rollerMotor = new SparkMax(30, MotorType.kBrushless);

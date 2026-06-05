@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
@@ -56,7 +59,6 @@ public class HoodSubsystem extends SubsystemBase {
     private final Arm hood = new Arm(hoodConfig);
 
     public HoodSubsystem() {
-
     }
 
     public Command setAngle(Angle angle) {

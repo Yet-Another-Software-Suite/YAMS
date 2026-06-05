@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems;
 
 
@@ -36,7 +39,6 @@ import yams.motorcontrollers.simulation.Sensor;
 
 public class ArmSubsystem extends SubsystemBase
 {
-
   private final CANcoder                   cancoder    = new CANcoder(2);
   private final TalonFX                    armMotor    = new TalonFX(1);
   //  private final SmartMotorControllerTelemetryConfig motorTelemetryConfig = new SmartMotorControllerTelemetryConfig()

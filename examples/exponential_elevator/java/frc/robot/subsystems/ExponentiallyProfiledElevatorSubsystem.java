@@ -1,3 +1,6 @@
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems;
 
 
@@ -168,4 +171,3 @@ public class ExponentiallyProfiledElevatorSubsystem extends SubsystemBase
     return m_elevator.sysId(Volts.of(12), Volts.of(12).per(Second), Second.of(30));
   }
 }
-

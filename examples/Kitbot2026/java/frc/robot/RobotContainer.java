@@ -1,6 +1,5 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
 
 package frc.robot;
 
@@ -53,7 +52,7 @@ public class RobotContainer {
       m_diffDriveSubsystem.arcadeDrive(
           m_driverController :: getLeftY,
           m_driverController :: getRightX));
-    
+
      m_driverController.button(1).whileTrue(m_intakeSubsystem.out(0.8));
      m_driverController.button(2).whileTrue(m_intakeSubsystem.in(0.8));
      m_driverController.button(3).whileTrue(m_shooterSubsystem.setVelocity(RotationsPerSecond.of(200)));

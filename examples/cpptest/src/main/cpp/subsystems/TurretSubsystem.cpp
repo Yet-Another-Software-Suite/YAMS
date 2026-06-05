@@ -1,6 +1,5 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// Copyright (c) 2026 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "subsystems/TurretSubsystem.h"
 
@@ -23,11 +22,9 @@ using namespace yams::mechanisms;
 using Cfg = SmartMotorControllerConfig;
 
 TurretSubsystem::TurretSubsystem()
-    : m_roboToTurret{frc::Translation3d{units::foot_t{-1.5}, units::foot_t{0},
-                                        units::foot_t{0.5}},
+    : m_roboToTurret{frc::Translation3d{units::foot_t{-1.5}, units::foot_t{0}, units::foot_t{0.5}},
                      frc::Rotation3d{}} {
-  m_motorConfig
-      .WithSubsystem(this)
+  m_motorConfig.WithSubsystem(this)
       .WithClosedLoopMode()
       .WithFeedback(0.0, 0.0, 0)
       .WithMotorGearing(MechanismGearing{GearBox({144.0 / 15.0, 5.0, 1.08})})
@@ -39,8 +36,7 @@ TurretSubsystem::TurretSubsystem()
 
   m_motor.emplace(m_talonFX, frc::DCMotor::KrakenX60(1), m_motorConfig);
 
-  m_pivotConfig
-      .WithMotorController(&m_motor.value())
+  m_pivotConfig.WithMotorController(&m_motor.value())
       .WithSubsystem(this)
       .WithStartingAngle(units::degree_t{0})
       .WithMinAngle(units::degree_t{-360})
@@ -51,13 +47,12 @@ TurretSubsystem::TurretSubsystem()
 }
 
 frc::Pose2d TurretSubsystem::GetPose(frc::Pose2d robotPose) const {
-  return robotPose.Plus(frc::Transform2d{
-      m_roboToTurret.Translation().ToTranslation2d(),
-      m_roboToTurret.Rotation().ToRotation2d()});
+  return robotPose.TransformBy(frc::Transform2d{m_roboToTurret.Translation().ToTranslation2d(),
+                                                m_roboToTurret.Rotation().ToRotation2d()});
 }
 
 frc::ChassisSpeeds TurretSubsystem::GetVelocity(frc::ChassisSpeeds robotVelocity,
-                                                 units::degree_t robotAngle) const {
+                                                units::degree_t robotAngle) {
   auto rRobot = m_roboToTurret.Translation().ToTranslation2d();
   auto rWorld = rRobot.RotateBy(frc::Rotation2d{robotAngle});
 
@@ -80,21 +75,14 @@ void TurretSubsystem::SetAngleSetpoint(units::degree_t angle) {
   m_turret->SetMechanismPositionSetpoint(angle);
 }
 
-void TurretSubsystem::Periodic() {
-  m_turret->UpdateTelemetry();
-}
+void TurretSubsystem::Periodic() { m_turret->UpdateTelemetry(); }
 
-void TurretSubsystem::SimulationPeriodic() {
-  m_turret->SimIterate();
-}
+void TurretSubsystem::SimulationPeriodic() { m_turret->SimIterate(); }
 
-frc2::CommandPtr TurretSubsystem::TurretCmd(double dutycycle) {
-  return m_turret->Set(dutycycle);
-}
+frc2::CommandPtr TurretSubsystem::TurretCmd(double dutycycle) { return m_turret->Set(dutycycle); }
 
 frc2::CommandPtr TurretSubsystem::SysId() {
-  return m_turret->SysId(units::volt_t{3}, frc2::sysid::ramp_rate_t{3.0},
-                         units::second_t{30});
+  return m_turret->SysId(units::volt_t{3}, frc2::sysid::ramp_rate_t{3.0}, units::second_t{30});
 }
 
 frc2::CommandPtr TurretSubsystem::SetAngle(units::degree_t angle) {

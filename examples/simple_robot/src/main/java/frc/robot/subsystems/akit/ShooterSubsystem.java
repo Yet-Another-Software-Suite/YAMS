@@ -1,3 +1,6 @@
+// Copyright (c) 2025 YAMS Contributors
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems.akit;
 
 import static edu.wpi.first.units.Units.Amps;
@@ -36,7 +39,6 @@ import yams.motorcontrollers.local.SparkWrapper;
  */
 public class ShooterSubsystem extends SubsystemBase
 {
-
   /**
    * AdvantageKit identifies inputs via the "Replay Bubble". Everything going to the SMC is an Output. Everything coming
    * from the SMC is an Input.
