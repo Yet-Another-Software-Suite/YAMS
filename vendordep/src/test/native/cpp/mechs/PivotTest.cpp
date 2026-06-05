@@ -196,7 +196,7 @@ TEST_P(PivotTest, PivotPositionPID) {
   bundle.subsystem->m_testRunning = true;
 
   auto pivot = CreatePivot(bundle.smc, bundle.subsystem.get());
-  auto highPid = pivot->GoToAngle(80.0_deg);
+  auto highPid = pivot->RunTo(80.0_deg);
   frc2::CommandScheduler::GetInstance().Schedule(highPid);
 
   PositionPIDTestBody(bundle.smc, IsCTRE(bundle));

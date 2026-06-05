@@ -198,7 +198,7 @@ TEST_P(ShooterTest, ShooterVelocityPID) {
 
   // ~80 RPM = 80/60 * 360 ≈ 480 deg/s
   auto shooter = CreateShooter(bundle.smc, bundle.subsystem.get());
-  auto highPid = shooter->Spin(units::degrees_per_second_t{480.0});
+  auto highPid = shooter->RunTo(units::degrees_per_second_t{480.0});
   frc2::CommandScheduler::GetInstance().Schedule(highPid);
 
   VelocityPIDTestBody(bundle.smc, IsCTRE(bundle));

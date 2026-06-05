@@ -201,7 +201,7 @@ TEST_P(ArmTest, ArmPositionPID) {
   bundle.subsystem->m_testRunning = true;
 
   auto arm = CreateArm(bundle.smc, bundle.subsystem.get(), IsCTRE(bundle));
-  auto highPid = arm->GoToAngle(80.0_deg);
+  auto highPid = arm->RunTo(80.0_deg);
   frc2::CommandScheduler::GetInstance().Schedule(highPid);
 
   PositionPIDTestBody(bundle.smc, IsCTRE(bundle));

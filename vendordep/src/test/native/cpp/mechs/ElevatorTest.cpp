@@ -201,7 +201,7 @@ TEST_P(ElevatorTest, ElevatorPositionPID) {
   bundle.subsystem->m_testRunning = true;
 
   auto elevator = CreateElevator(bundle.smc, bundle.subsystem.get());
-  auto highPid = elevator->GoToHeight(2.0_m);
+  auto highPid = elevator->RunTo(2.0_m);
   frc2::CommandScheduler::GetInstance().Schedule(highPid);
 
   PositionPIDTestBody(bundle.smc, IsCTRE(bundle));
