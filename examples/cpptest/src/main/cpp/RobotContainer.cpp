@@ -15,7 +15,7 @@ RobotContainer::RobotContainer() {
   // m_flyWheelSubsystem.SetDefaultCommand(m_flyWheelSubsystem.SetDutyCycle(0, 0));
   // m_arm.SetDefaultCommand(m_arm.ArmCmd(0));
   // m_elevator.SetDefaultCommand(m_elevator.ElevCmd(0));
-  m_turret.SetDefaultCommand(m_turret.TurretCmd(0.0));
+  //m_turret.SetDefaultCommand(m_turret.TurretCmd(0.0));
   // m_drive.SetDefaultCommand(m_drive.SetRobotRelativeChassisSpeeds(frc::ChassisSpeeds{}));
 
   ConfigureBindings();

@@ -326,7 +326,7 @@ void SmartMotorController::SetupTelemetry() {
 }
 
 void SmartMotorController::UpdateTelemetry() {
-  if (!m_telemetryTable) return;
+  if (!m_telemetryTable) SetupTelemetry();
   m_telemetry.Publish(*this);
   if (m_telemetry.TuningEnabled()) {
     m_telemetry.ApplyTuningValues(*this);
