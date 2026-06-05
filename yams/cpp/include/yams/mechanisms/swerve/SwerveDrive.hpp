@@ -10,6 +10,7 @@
 #include <frc/geometry/Rotation2d.h>
 #include <frc/geometry/Translation2d.h>
 #include <frc/kinematics/ChassisSpeeds.h>
+#include <frc/kinematics/struct/ChassisSpeedsStruct.h>
 #include <frc/kinematics/SwerveDriveKinematics.h>
 #include <frc/kinematics/SwerveModulePosition.h>
 #include <frc/kinematics/SwerveModuleState.h>
@@ -63,18 +64,18 @@ class SwerveDrive {
     auto table = inst.GetTable("SmartDashboard/" + GetName());
 
     m_desiredModuleStatesPublisher =
-        table->GetStructArrayTopic<frc::SwerveModuleState>("states/desired").Publish();
+        table->template GetStructArrayTopic<frc::SwerveModuleState>("states/desired").Publish();
     m_currentModuleStatesPublisher =
-        table->GetStructArrayTopic<frc::SwerveModuleState>("states/current").Publish();
-    m_posePublisher = table->GetStructTopic<frc::Pose2d>("pose").Publish();
+        table->template GetStructArrayTopic<frc::SwerveModuleState>("states/current").Publish();
+    m_posePublisher = table->template GetStructTopic<frc::Pose2d>("pose").Publish();
     m_desiredRobotRelChassisSpeedsPublisher =
-        table->GetStructTopic<frc::ChassisSpeeds>("chassis/desired").Publish();
+        table->template GetStructTopic<frc::ChassisSpeeds>("chassis/desired").Publish();
     m_currentRobotRelChassisSpeedsPublisher =
-        table->GetStructTopic<frc::ChassisSpeeds>("chassis/current").Publish();
+        table->template GetStructTopic<frc::ChassisSpeeds>("chassis/current").Publish();
     m_fieldRelChassisSpeedsPublisher =
-        table->GetStructTopic<frc::ChassisSpeeds>("chassis/field").Publish();
+        table->template GetStructTopic<frc::ChassisSpeeds>("chassis/field").Publish();
     auto gyroTopic = table->GetDoubleTopic("gyro");
-    gyroTopic.SetProperties("{\"unit\":\"degrees\"}");
+    gyroTopic.SetProperties(wpi::json{{"units", "degrees"}});
     m_gyroPublisher = gyroTopic.Publish();
 
     m_field2d.SetRobotPose(GetPose());

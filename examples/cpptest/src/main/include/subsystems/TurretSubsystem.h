@@ -19,7 +19,7 @@
 
 #include <ctre/phoenix6/TalonFX.hpp>
 
-#include <yams/gearing/GearBox.h>
+#include "yams/gearing/GearBox.hpp"
 #include "yams/gearing/MechanismGearing.hpp"
 #include "yams/mechanisms/config/PivotConfig.hpp"
 #include "yams/mechanisms/positional/Pivot.hpp"
