@@ -163,7 +163,7 @@ void TalonFXWrapper::SimIterate() {
   if (!frc::RobotBase::IsSimulation() || !m_simSupplier) return;
 
   auto& sim = m_talon.GetSimState();
-  sim.SetSupplyVoltage(frc::sim::RoboRioSim::GetVInVoltage());
+  sim.SetSupplyVoltage(m_simSupplier->GetMechanismSupplyVoltage());
 
   m_simSupplier->SetInputVoltage(sim.GetMotorVoltage());
   m_simSupplier->UpdateSim();
@@ -175,7 +175,7 @@ void TalonFXWrapper::SimIterate() {
 
   if (m_cancoder) {
     auto& cancoderSim = m_cancoder->get().GetSimState();
-    cancoderSim.SetSupplyVoltage(frc::sim::RoboRioSim::GetVInVoltage());
+    cancoderSim.SetSupplyVoltage(m_simSupplier->GetMechanismSupplyVoltage());
     cancoderSim.SetVelocity(units::turns_per_second_t{m_simSupplier->GetMechanismVelocity()});
     cancoderSim.SetRawPosition(units::turn_t{m_simSupplier->GetMechanismPosition()});
     cancoderSim.SetMagnetHealth(ctre::phoenix6::signals::MagnetHealthValue::Magnet_Green);

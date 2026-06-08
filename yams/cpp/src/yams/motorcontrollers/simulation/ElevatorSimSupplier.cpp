@@ -22,8 +22,7 @@ ElevatorSimSupplier::ElevatorSimSupplier(frc::sim::ElevatorSim& sim,
 void ElevatorSimSupplier::UpdateSim() {
   m_watchdogFed = false;
   if (!m_inputFed) {
-    m_lastInputVoltage =
-        units::volt_t{m_dutyCycleSupplier() * frc::sim::RoboRioSim::GetVInVoltage().value()};
+    m_lastInputVoltage = units::volt_t{m_dutyCycleSupplier() * GetMechanismSupplyVoltage().value()};
     m_sim.SetInputVoltage(m_lastInputVoltage);
   }
   m_inputFed = false;
@@ -80,6 +79,10 @@ void ElevatorSimSupplier::SetInputVoltage(units::volt_t volts) {
   m_lastInputVoltage = volts;
   m_sim.SetInputVoltage(volts);
   m_inputFed = true;
+}
+
+units::volt_t ElevatorSimSupplier::GetMechanismSupplyVoltage() {
+  return frc::sim::RoboRioSim::GetVInVoltage();
 }
 
 units::volt_t ElevatorSimSupplier::GetMechanismStatorVoltage() { return m_lastInputVoltage; }

@@ -54,6 +54,7 @@ class DCMotorSimSupplier : public SimSupplier {
   bool IsWatchdogExpired() override;
   void FeedWatchdog() override;
   units::ampere_t GetCurrentDrawAmps() override;
+  units::volt_t GetMechanismSupplyVoltage() override;
   units::volt_t GetMechanismStatorVoltage() override;
   void SetMechanismStatorVoltage(units::volt_t volts) override;
 

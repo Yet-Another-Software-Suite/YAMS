@@ -149,13 +149,13 @@ void SparkWrapper::SetupSimulation() {
 }
 
 void SparkWrapper::SimIterate() {
-  if (!frc::RobotBase::IsSimulation() || !m_simSupplier || !m_sparkSim) return;
+  // if (!frc::RobotBase::IsSimulation() || !m_simSupplier || !m_sparkSim) return;
 
   if (m_simSupplier->IsWatchdogExpired()) m_simSupplier->UpdateSim();
 
   units::second_t dt = m_config.GetClosedLoopControlPeriod().value_or(20_ms);
   units::turns_per_second_t mechVelRps = m_simSupplier->GetMechanismVelocity();
-  double vbus = frc::sim::RoboRioSim::GetVInVoltage().value();
+  double vbus = m_simSupplier->GetMechanismSupplyVoltage().value();
 
   m_sparkSim->iterate(mechVelRps.value(), vbus, dt.value());
 

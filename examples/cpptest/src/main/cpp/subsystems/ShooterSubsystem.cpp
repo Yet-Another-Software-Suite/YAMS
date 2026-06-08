@@ -18,7 +18,7 @@ using Cfg = SmartMotorControllerConfig;
 
 ShooterSubsystem::ShooterSubsystem() {
   m_motorConfig.WithSubsystem(this)
-      .WithFeedback(1, 0, 0)
+      .WithFeedback(10, 0, 0)
       .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
       .WithIdleMode(Cfg::MotorMode::COAST)
       .WithTelemetry("ShooterMotor", Cfg::TelemetryVerbosity::HIGH)

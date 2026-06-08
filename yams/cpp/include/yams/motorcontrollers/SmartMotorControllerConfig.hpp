@@ -694,7 +694,7 @@ class SmartMotorControllerConfig {
 
   frc2::SubsystemBase* m_subsystem{nullptr};
   std::optional<frc::DCMotor> m_simMotor;
-  units::kilogram_square_meter_t m_moi{0.001_kg_sq_m};
+  units::kilogram_square_meter_t m_moi{0.0001_kg_sq_m};
   std::optional<units::degree_t> m_startingPosition;
 };
 

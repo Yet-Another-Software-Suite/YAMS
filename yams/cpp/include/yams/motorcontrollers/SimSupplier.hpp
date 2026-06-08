@@ -122,6 +122,13 @@ class SimSupplier {
   virtual units::ampere_t GetCurrentDrawAmps() = 0;
 
   /**
+   * Get the supply voltage available to the simulated motor controller (bus voltage).
+   *
+   * @return Supply voltage in volts.
+   */
+  virtual units::volt_t GetMechanismSupplyVoltage() = 0;
+
+  /**
    * Get the last voltage applied to the simulated motor.
    *
    * @return Stator voltage in volts.

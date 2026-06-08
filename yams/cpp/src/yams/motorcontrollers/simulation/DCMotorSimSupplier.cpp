@@ -21,8 +21,7 @@ DCMotorSimSupplier::DCMotorSimSupplier(frc::sim::DCMotorSim& sim,
 void DCMotorSimSupplier::UpdateSim() {
   m_watchdogFed = false;
   if (!m_inputFed) {
-    m_lastInputVoltage =
-        units::volt_t{m_dutyCycleSupplier() * frc::sim::RoboRioSim::GetVInVoltage().value()};
+    m_lastInputVoltage = units::volt_t{m_dutyCycleSupplier() * GetMechanismSupplyVoltage().value()};
     m_sim.SetInputVoltage(m_lastInputVoltage);
   }
   m_inputFed = false;
@@ -75,6 +74,10 @@ void DCMotorSimSupplier::SetInputVoltage(units::volt_t volts) {
   m_lastInputVoltage = volts;
   m_sim.SetInputVoltage(volts);
   m_inputFed = true;
+}
+
+units::volt_t DCMotorSimSupplier::GetMechanismSupplyVoltage() {
+  return frc::sim::RoboRioSim::GetVInVoltage();
 }
 
 units::volt_t DCMotorSimSupplier::GetMechanismStatorVoltage() { return m_lastInputVoltage; }
