@@ -15,6 +15,7 @@
 
 #include <cmath>
 #include <numbers>
+#include <iostream>
 
 using namespace yams::motorcontrollers;
 using namespace yams::gearing;
@@ -79,7 +80,7 @@ void TurretSubsystem::Periodic() { m_turret->UpdateTelemetry(); }
 
 void TurretSubsystem::SimulationPeriodic() { m_turret->SimIterate(); }
 
-frc2::CommandPtr TurretSubsystem::TurretCmd(double dutycycle) { return m_turret->Set(dutycycle); }
+frc2::CommandPtr TurretSubsystem::TurretCmd(double dutycycle) { return Run([this, dutycycle] {m_motor->SetDutyCycle(dutycycle);std::cout<<"HIIII";}); }
 
 frc2::CommandPtr TurretSubsystem::SysId() {
   return m_turret->SysId(units::volt_t{3}, frc2::sysid::ramp_rate_t{3.0}, units::second_t{30});

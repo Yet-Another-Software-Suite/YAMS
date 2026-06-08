@@ -4,8 +4,11 @@
 #pragma once
 
 #include <frc2/command/SubsystemBase.h>
+#include <frc/util/Color.h>
+#include <frc/util/Color8Bit.h>
 #include <units/angle.h>
 #include <units/angular_velocity.h>
+#include <units/moment_of_inertia.h>
 
 #include <optional>
 #include <string>
@@ -75,6 +78,22 @@ class PivotConfig {
    */
   PivotConfig& WithMaxAngle(units::degree_t angle);
 
+  /**
+   * Set the moment of inertia of the pivot (required for simulation).
+   *
+   * @param moi Pivot MOI in kg·m².
+   * @return *this for chaining.
+   */
+  PivotConfig& WithMOI(units::kilogram_square_meter_t moi);
+
+  /**
+   * Set the Mechanism2d simulation colour for the pivot ligament (default: green).
+   *
+   * @param color Desired colour.
+   * @return *this for chaining.
+   */
+  PivotConfig& WithSimColor(const frc::Color8Bit& color);
+
   // ---- Getters ---------------------------------------------------------------
 
   /** Get the motor controller pointer. */
@@ -89,11 +108,17 @@ class PivotConfig {
   /** Get the optional starting angle. */
   std::optional<units::degree_t> GetStartingAngle() const;
 
-  /** Get the optional minimum angle. */
+  /** Get the optional minimum (lower hard-limit) angle. */
   std::optional<units::degree_t> GetMinAngle() const;
 
-  /** Get the optional maximum angle. */
+  /** Get the optional maximum (upper hard-limit) angle. */
   std::optional<units::degree_t> GetMaxAngle() const;
+
+  /** Get the optional moment of inertia. */
+  std::optional<units::kilogram_square_meter_t> GetMOI() const;
+
+  /** Get the Mechanism2d simulation colour. */
+  frc::Color8Bit GetSimColor() const;
 
  private:
   motorcontrollers::SmartMotorController* m_smc{nullptr};
@@ -102,6 +127,8 @@ class PivotConfig {
   std::optional<units::degree_t> m_startingAngle;
   std::optional<units::degree_t> m_minAngle;
   std::optional<units::degree_t> m_maxAngle;
+  std::optional<units::kilogram_square_meter_t> m_moi;
+  frc::Color8Bit m_simColor{frc::Color::kGreen};
 };
 
 }  // namespace yams::mechanisms::config

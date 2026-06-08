@@ -42,6 +42,16 @@ ArmConfig& ArmConfig::WithArmLength(units::meter_t length) {
   return *this;
 }
 
+ArmConfig& ArmConfig::WithMOI(units::kilogram_square_meter_t moi) {
+  m_moi = moi;
+  return *this;
+}
+
+ArmConfig& ArmConfig::WithSimColor(const frc::Color8Bit& color) {
+  m_simColor = color;
+  return *this;
+}
+
 motorcontrollers::SmartMotorController* ArmConfig::GetMotorController() const { return m_smc; }
 
 frc2::SubsystemBase* ArmConfig::GetSubsystem() const { return m_subsystem; }
@@ -55,5 +65,9 @@ std::optional<units::degree_t> ArmConfig::GetMinAngle() const { return m_minAngl
 std::optional<units::degree_t> ArmConfig::GetMaxAngle() const { return m_maxAngle; }
 
 std::optional<units::meter_t> ArmConfig::GetArmLength() const { return m_armLength; }
+
+std::optional<units::kilogram_square_meter_t> ArmConfig::GetMOI() const { return m_moi; }
+
+frc::Color8Bit ArmConfig::GetSimColor() const { return m_simColor; }
 
 }  // namespace yams::mechanisms::config

@@ -4,6 +4,7 @@
 #pragma once
 
 #include <frc/geometry/Translation3d.h>
+#include <frc/simulation/DCMotorSim.h>
 #include <frc2/command/CommandPtr.h>
 #include <frc2/command/button/Trigger.h>
 #include <units/angle.h>
@@ -14,6 +15,7 @@
 #include <units/voltage.h>
 
 #include <functional>
+#include <optional>
 #include <string>
 
 #include "SmartVelocityMechanism.hpp"
@@ -261,6 +263,7 @@ class FlyWheel : public SmartVelocityMechanism {
  private:
   config::FlyWheelConfig m_flyWheelConfig;
   std::string m_name{"FlyWheel"};
+  std::optional<frc::sim::DCMotorSim> m_dcMotorSim;
 };
 
 }  // namespace yams::mechanisms::velocity

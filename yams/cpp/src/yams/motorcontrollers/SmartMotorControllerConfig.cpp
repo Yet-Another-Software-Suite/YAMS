@@ -264,6 +264,18 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithMOI(
   m_moi = moi;
   return *this;
 }
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithStartingPosition(
+    units::degree_t startingAngle) {
+  m_startingPosition = startingAngle;
+  return *this;
+}
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithStartingPosition(
+    units::meter_t startingDistance) {
+  if (m_mechanismCircumference)
+    m_startingPosition =
+        units::degree_t{startingDistance.value() / m_mechanismCircumference->value() * 360.0};
+  return *this;
+}
 
 // ---- Getters -------------------------------------------------------------
 
@@ -372,6 +384,9 @@ SmartMotorControllerConfig::GetVerbosity() const {
 frc2::SubsystemBase* SmartMotorControllerConfig::GetSubsystem() const { return m_subsystem; }
 std::optional<frc::DCMotor> SmartMotorControllerConfig::GetSimMotor() const { return m_simMotor; }
 units::kilogram_square_meter_t SmartMotorControllerConfig::GetMOI() const { return m_moi; }
+std::optional<units::degree_t> SmartMotorControllerConfig::GetStartingPosition() const {
+  return m_startingPosition;
+}
 
 const std::optional<gearing::MechanismGearing>& SmartMotorControllerConfig::GetMotorGearing()
     const {

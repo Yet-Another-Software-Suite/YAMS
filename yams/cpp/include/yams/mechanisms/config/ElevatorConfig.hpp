@@ -4,7 +4,11 @@
 #pragma once
 
 #include <frc2/command/SubsystemBase.h>
+#include <frc/util/Color.h>
+#include <frc/util/Color8Bit.h>
+#include <units/angle.h>
 #include <units/length.h>
+#include <units/mass.h>
 #include <units/velocity.h>
 
 #include <optional>
@@ -73,6 +77,46 @@ class ElevatorConfig {
    */
   ElevatorConfig& WithMaximumHeight(units::meter_t height);
 
+  /**
+   * Set the carriage mass (required for simulation).
+   *
+   * @param mass Carriage mass in kg.
+   * @return *this for chaining.
+   */
+  ElevatorConfig& WithCarriageMass(units::kilogram_t mass);
+
+  /**
+   * Set the drive drum radius (required for simulation).
+   *
+   * @param radius Drum radius in meters.
+   * @return *this for chaining.
+   */
+  ElevatorConfig& WithDrumRadius(units::meter_t radius);
+
+  /**
+   * Mark the elevator as horizontal (disables gravity simulation).
+   *
+   * @param horizontal True to treat the elevator as horizontal.
+   * @return *this for chaining.
+   */
+  ElevatorConfig& WithIsHorizontal(bool horizontal);
+
+  /**
+   * Set the Mechanism2d simulation colour for the elevator ligament (default: orange).
+   *
+   * @param color Desired colour.
+   * @return *this for chaining.
+   */
+  ElevatorConfig& WithSimColor(const frc::Color8Bit& color);
+
+  /**
+   * Set the angle of the elevator ligament in the Mechanism2d window (default: 90°/vertical).
+   *
+   * @param angle Ligament angle.
+   * @return *this for chaining.
+   */
+  ElevatorConfig& WithAngle(units::degree_t angle);
+
   // ---- Getters ---------------------------------------------------------------
 
   /** Get the motor controller pointer. */
@@ -93,6 +137,21 @@ class ElevatorConfig {
   /** Get the optional maximum height. */
   std::optional<units::meter_t> GetMaxHeight() const;
 
+  /** Get the optional carriage mass. */
+  std::optional<units::kilogram_t> GetCarriageMass() const;
+
+  /** Get the optional drum radius. */
+  std::optional<units::meter_t> GetDrumRadius() const;
+
+  /** Returns true when the elevator is configured as horizontal (gravity disabled). */
+  bool IsHorizontal() const;
+
+  /** Get the Mechanism2d simulation colour. */
+  frc::Color8Bit GetSimColor() const;
+
+  /** Get the Mechanism2d ligament angle (default: 90°). */
+  units::degree_t GetAngle() const;
+
  private:
   motorcontrollers::SmartMotorController* m_smc{nullptr};
   frc2::SubsystemBase* m_subsystem{nullptr};
@@ -100,6 +159,11 @@ class ElevatorConfig {
   std::optional<units::meter_t> m_startingHeight;
   std::optional<units::meter_t> m_minHeight;
   std::optional<units::meter_t> m_maxHeight;
+  std::optional<units::kilogram_t> m_carriageMass;
+  std::optional<units::meter_t> m_drumRadius;
+  bool m_isHorizontal{false};
+  frc::Color8Bit m_simColor{frc::Color::kOrange};
+  units::degree_t m_angle{90.0};
 };
 
 }  // namespace yams::mechanisms::config

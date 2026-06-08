@@ -4,6 +4,8 @@
 #pragma once
 
 #include <frc/geometry/Translation3d.h>
+#include <frc/simulation/ElevatorSim.h>
+#include <frc/smartdashboard/MechanismLigament2d.h>
 #include <frc2/command/CommandPtr.h>
 #include <frc2/command/button/Trigger.h>
 #include <units/length.h>
@@ -11,6 +13,7 @@
 #include <units/voltage.h>
 
 #include <functional>
+#include <optional>
 #include <string>
 
 #include "SmartPositionalMechanism.hpp"
@@ -181,6 +184,8 @@ class Elevator : public SmartPositionalMechanism {
  private:
   config::ElevatorConfig m_elevatorConfig;
   std::string m_name{"Elevator"};
+  std::optional<frc::sim::ElevatorSim> m_elevatorSim;
+  frc::MechanismLigament2d* m_setpointLigament{nullptr};
 };
 
 }  // namespace yams::mechanisms::positional

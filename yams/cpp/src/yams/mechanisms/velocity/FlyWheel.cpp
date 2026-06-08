@@ -4,6 +4,7 @@
 #include "yams/mechanisms/velocity/FlyWheel.hpp"
 
 #include <frc/DriverStation.h>
+#include <frc/RobotBase.h>
 #include <frc/geometry/Rotation3d.h>
 #include <frc/geometry/Translation3d.h>
 #include <frc/simulation/BatterySim.h>
@@ -12,17 +13,23 @@
 #include <frc/smartdashboard/MechanismLigament2d.h>
 #include <frc/smartdashboard/MechanismRoot2d.h>
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <frc/system/plant/LinearSystemId.h>
 #include <frc/util/Color8Bit.h>
 #include <frc2/command/Commands.h>
 #include <units/angle.h>
 #include <units/angular_velocity.h>
 #include <units/length.h>
 #include <units/math.h>
+#include <units/time.h>
 
 #include <cmath>
 #include <cstdio>
+#include <memory>
 #include <numbers>
 #include <string>
+
+#include "yams/gearing/MechanismGearing.hpp"
+#include "yams/motorcontrollers/simulation/DCMotorSimSupplier.hpp"
 
 namespace yams::mechanisms::velocity {
 
@@ -37,14 +44,44 @@ FlyWheel::FlyWheel(const config::FlyWheelConfig& config)
     m_name = config.GetTelemetryName();
   }
 
-  // Build a Mechanism2d window — a spinning disc representation.
-  constexpr double kRadius = 0.3;
-  m_mechanismWindow.emplace(kRadius * 2.0 + 0.2, kRadius * 2.0 + 0.2);
-  m_mechanismRoot = m_mechanismWindow->GetRoot(m_name + " Root", kRadius + 0.1, kRadius + 0.1);
-  m_mechanismLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
-      m_name + " Spoke", kRadius, 0_deg, 6, frc::Color8Bit{frc::Color::kYellow});
+  if (frc::RobotBase::IsSimulation()) {
+    // Create the DCMotorSim using LinearSystemId, then wire up the DCMotorSimSupplier.
+    frc::DCMotor dcMotor = m_smc->GetDCMotor();
+    auto& gearingOpt = m_smc->GetConfig().GetMotorGearing();
+    gearing::MechanismGearing gearing = gearingOpt.value_or(gearing::MechanismGearing::kOne);
 
-  frc::SmartDashboard::PutData(m_name, &(*m_mechanismWindow));
+    auto plant = frc::LinearSystemId::DCMotorSystem(dcMotor, m_smc->GetConfig().GetMOI(),
+                                                    gearing.GetMechanismToRotorRatio());
+    m_dcMotorSim.emplace(plant, dcMotor);
+
+    units::second_t period = m_smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms);
+    m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::DCMotorSimSupplier>(
+        *m_dcMotorSim, [this]() { return m_smc->GetDutyCycle(); }, gearing, period));
+
+    // Size the window from the configured roller diameter; default to 36 in (0.9144 m) like Java.
+    units::meter_t shooterLength = config.GetRollerDiameter().value_or(units::meter_t{0.9144});
+
+    double len = shooterLength.value();
+    m_mechanismWindow.emplace(len * 2.0, len * 2.0);
+    m_mechanismRoot = m_mechanismWindow->GetRoot(m_name + "Root", len, len);
+    m_mechanismLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(m_name, len, 0_deg, 6,
+                                                                            config.GetSimColor());
+
+    if (config.IsUsingSpeedometerSimulation() && config.GetSpeedometerMaxVelocity().has_value()) {
+      double maxVel = config.GetSpeedometerMaxVelocity().value().value();
+      double upperVal = config.GetUpperSoftLimit().value_or(units::degrees_per_second_t{0}).value();
+      double lowerVal = config.GetLowerSoftLimit().value_or(units::degrees_per_second_t{0}).value();
+
+      m_mechanismRoot->Append<frc::MechanismLigament2d>(
+          m_name + " Upper Limit", len, units::degree_t{270.0 - upperVal / maxVel * 180.0}, 6,
+          frc::Color8Bit{frc::Color::kHotPink});
+      m_mechanismRoot->Append<frc::MechanismLigament2d>(
+          m_name + " Lower Limit", len, units::degree_t{270.0 - lowerVal / maxVel * 180.0}, 6,
+          frc::Color8Bit{frc::Color::kYellow});
+    }
+
+    frc::SmartDashboard::PutData(m_name + "/mechanism", &(*m_mechanismWindow));
+  }
 }
 
 // ---- SmartMechanism overrides -----------------------------------------------
@@ -64,13 +101,17 @@ void FlyWheel::SimIterate() {
 void FlyWheel::UpdateTelemetry() { m_smc->UpdateTelemetry(); }
 
 void FlyWheel::VisualizationUpdate() {
-  // Rotate the spoke angle proportionally to visualise spinning.
-  if (m_mechanismLigament) {
-    // Accumulate angle based on current velocity (visual only — not precise).
-    units::degree_t currentAngle{m_mechanismLigament->GetAngle()};
-    // Advance by a fixed small step in the direction of current velocity.
-    double sign = (GetVelocity().value() >= 0.0) ? 1.0 : -1.0;
-    m_mechanismLigament->SetAngle(currentAngle + units::degree_t{sign * 5.0});
+  if (!m_mechanismLigament) {
+    return;
+  }
+
+  if (m_flyWheelConfig.IsUsingSpeedometerSimulation() &&
+      m_flyWheelConfig.GetSpeedometerMaxVelocity().has_value()) {
+    double maxVel = m_flyWheelConfig.GetSpeedometerMaxVelocity().value().value();
+    double curVel = m_smc->GetMechanismVelocity().value();
+    m_mechanismLigament->SetAngle(units::degree_t{270.0 - curVel / maxVel * 180.0});
+  } else {
+    m_mechanismLigament->SetAngle(units::degree_t{m_smc->GetMechanismPosition().value()});
   }
 }
 

@@ -3,6 +3,7 @@
 
 #include "yams/mechanisms/positional/Elevator.hpp"
 
+#include <frc/RobotBase.h>
 #include <frc/geometry/Rotation3d.h>
 #include <frc/geometry/Translation3d.h>
 #include <frc/simulation/BatterySim.h>
@@ -11,12 +12,21 @@
 #include <frc/smartdashboard/MechanismLigament2d.h>
 #include <frc/smartdashboard/MechanismRoot2d.h>
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <frc/util/Color.h>
 #include <frc/util/Color8Bit.h>
 #include <frc2/command/Commands.h>
 #include <units/length.h>
+#include <units/time.h>
 
+#include <array>
 #include <cmath>
+#include <memory>
+#include <numbers>
 #include <string>
+
+#include "yams/exceptions/ElevatorConfigurationException.hpp"
+#include "yams/gearing/MechanismGearing.hpp"
+#include "yams/motorcontrollers/simulation/ElevatorSimSupplier.hpp"
 
 namespace yams::mechanisms::positional {
 
@@ -44,23 +54,98 @@ Elevator::Elevator(const config::ElevatorConfig& config)
     m_smc->SetEncoderPosition(*startH);
   }
 
-  // Build a Mechanism2d window for visualisation.
-  double windowHeight = 3.0;  // metres — generous default
-  if (auto maxH = config.GetMaxHeight()) {
-    windowHeight = maxH->value() + 0.2;
-  }
-  m_mechanismWindow.emplace(1.0, windowHeight);
-  m_mechanismRoot = m_mechanismWindow->GetRoot(m_name + " Root", 0.5, 0.0);
-  m_mechanismLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
-      m_name + " Carriage", GetHeight().value(), 90_deg, 6, frc::Color8Bit{frc::Color::kOrange});
+  if (frc::RobotBase::IsSimulation()) {
+    // Configuration checks.
+    if (!config.GetCarriageMass().has_value()) {
+      throw ElevatorConfigurationException("Mass is not configured!", "Cannot create simulator",
+                                           "WithCarriageMass(units::kilogram_t)");
+    }
+    if (!config.GetMinHeight().has_value()) {
+      throw ElevatorConfigurationException("Minimum height is not configured!",
+                                           "Cannot create simulator",
+                                           "WithMinimumHeight(units::meter_t)");
+    }
+    if (!config.GetMaxHeight().has_value()) {
+      throw ElevatorConfigurationException("Maximum height is not configured!",
+                                           "Cannot create simulator",
+                                           "WithMaximumHeight(units::meter_t)");
+    }
+    if (!config.GetStartingHeight().has_value()) {
+      throw ElevatorConfigurationException("Starting height is not configured!",
+                                           "Cannot create simulator",
+                                           "WithStartingHeight(units::meter_t)");
+    }
+    if (!config.GetDrumRadius().has_value()) {
+      throw ElevatorConfigurationException("Drum radius is not configured!",
+                                           "Cannot create simulator",
+                                           "WithDrumRadius(units::meter_t)");
+    }
 
-  frc::SmartDashboard::PutData(m_name, &(*m_mechanismWindow));
+    m_smc->SetupSimulation();
+
+    frc::DCMotor dcMotor = m_smc->GetDCMotor();
+    auto& gearingOpt = m_smc->GetConfig().GetMotorGearing();
+    gearing::MechanismGearing gearing = gearingOpt.value_or(gearing::MechanismGearing::kOne);
+
+    units::meter_t drumRadius = config.GetDrumRadius().value();
+    bool simulateGravity = !config.IsHorizontal();
+
+    m_elevatorSim.emplace(
+        dcMotor, gearing.GetMechanismToRotorRatio(), config.GetCarriageMass().value(), drumRadius,
+        config.GetMinHeight().value(), config.GetMaxHeight().value(), simulateGravity,
+        config.GetStartingHeight().value(), std::array<double, 2>{0.01 / 4096.0, 0.01 / 4096.0});
+
+    units::meter_t circumference{2.0 * std::numbers::pi * drumRadius.value()};
+    units::second_t period = m_smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms);
+    m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::ElevatorSimSupplier>(
+        *m_elevatorSim, [this]() { return m_smc->GetDutyCycle(); }, gearing, circumference,
+        period));
+
+    // Build Mechanism2d window.
+    double maxH = config.GetMaxHeight().value().value();
+    double startH = config.GetStartingHeight().value().value();
+    units::degree_t angle = config.GetAngle();
+    constexpr double kSoftOffset = 6.0 * 0.0254;  // 6 inches
+    constexpr double kHardOffset = 8.0 * 0.0254;  // 8 inches
+
+    m_mechanismWindow.emplace(maxH * 2.0, maxH * 2.0);
+    m_mechanismRoot = m_mechanismWindow->GetRoot(m_name + "Root", maxH, 0.0);
+
+    auto smcLowerLimit = m_smc->GetConfig().GetMechanismLowerLimit();
+    auto smcUpperLimit = m_smc->GetConfig().GetMechanismUpperLimit();
+    if (smcLowerLimit.has_value()) {
+      m_mechanismWindow->GetRoot("MinSoft", maxH - kSoftOffset, 0.0)
+          ->Append<frc::MechanismLigament2d>(
+              "Limit", m_smc->GetConfig().ConvertFromMechanism(smcLowerLimit.value()).value(),
+              angle, 3, frc::Color8Bit{frc::Color::kYellow});
+    }
+    if (smcUpperLimit.has_value()) {
+      m_mechanismWindow->GetRoot("MaxSoft", maxH - kSoftOffset, 0.0)
+          ->Append<frc::MechanismLigament2d>(
+              "Limit", m_smc->GetConfig().ConvertFromMechanism(smcUpperLimit.value()).value(),
+              angle, 3, frc::Color8Bit{frc::Color::kHotPink});
+    }
+    m_mechanismWindow->GetRoot("MinHard", maxH - kHardOffset, 0.0)
+        ->Append<frc::MechanismLigament2d>("Limit", config.GetMinHeight().value().value(), angle, 3,
+                                           frc::Color8Bit{frc::Color::kRed});
+    m_mechanismWindow->GetRoot("MaxHard", maxH - kHardOffset, 0.0)
+        ->Append<frc::MechanismLigament2d>("Limit", config.GetMaxHeight().value().value(), angle, 3,
+                                           frc::Color8Bit{frc::Color::kLimeGreen});
+
+    m_mechanismLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
+        m_name, startH, angle, 6, config.GetSimColor());
+    m_setpointLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
+        "Setpoint", startH, angle, 3, frc::Color8Bit{frc::Color::kWhite});
+
+    frc::SmartDashboard::PutData(m_name + "/mechanism", &(*m_mechanismWindow));
+  }
 }
 
 // ---- SmartMechanism overrides -----------------------------------------------
 
 void Elevator::SimIterate() {
-  if (auto* ss = m_smc->GetSimSupplier()) {
+  if (m_elevatorSim.has_value() && m_smc->GetSimSupplier()) {
+    auto* ss = m_smc->GetSimSupplier();
     ss->UpdateSim();
     m_smc->SimIterate();
     ss->FeedWatchdog();
@@ -78,6 +163,13 @@ void Elevator::UpdateTelemetry() { m_smc->UpdateTelemetry(); }
 void Elevator::VisualizationUpdate() {
   if (m_mechanismLigament) {
     m_mechanismLigament->SetLength(GetHeight().value());
+  }
+  if (m_setpointLigament) {
+    auto setpoint = m_smc->GetMechanismPositionSetpoint();
+    if (setpoint.has_value()) {
+      m_setpointLigament->SetLength(
+          m_smc->GetConfig().ConvertFromMechanism(setpoint.value()).value());
+    }
   }
 }
 

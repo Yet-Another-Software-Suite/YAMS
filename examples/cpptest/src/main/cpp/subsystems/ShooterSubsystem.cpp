@@ -9,6 +9,7 @@
 #include <units/length.h>
 #include <units/time.h>
 #include <units/voltage.h>
+#include <iostream>
 
 using namespace yams::motorcontrollers;
 using namespace yams::gearing;
@@ -25,7 +26,7 @@ ShooterSubsystem::ShooterSubsystem() {
       .WithSimpleFeedforward(0, 0, 0)
       .WithClosedLoopMode();
 
-  m_motor.emplace(m_flywheelMotor1, frc::DCMotor::NEO(2), m_motorConfig);
+  m_motor.emplace(m_flywheelMotor1, frc::DCMotor::KrakenX44(2), m_motorConfig);
 
   // 4-inch diameter flywheel wheel
   m_shooterConfig.WithMotorController(&m_motor.value())
@@ -72,4 +73,4 @@ bool ShooterSubsystem::ReadyToShoot(units::degrees_per_second_t tolerance) const
 
 void ShooterSubsystem::Periodic() { m_shooter->UpdateTelemetry(); }
 
-void ShooterSubsystem::SimulationPeriodic() { m_shooter->SimIterate(); }
+void ShooterSubsystem::SimulationPeriodic() { m_shooter->SimIterate();}

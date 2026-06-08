@@ -23,10 +23,10 @@ RobotContainer::RobotContainer() {
 
 void RobotContainer::ConfigureBindings() {
   // Shooter bindings (uncomment with ShooterSubsystem):
-  // m_xboxController.Button(1).WhileTrue(m_shooter.SetVelocity(units::degrees_per_second_t{6000}));
-  // m_xboxController.Button(2).WhileTrue(m_shooter.SetVelocity(units::degrees_per_second_t{-6000}));
-  // m_xboxController.Button(3).WhileTrue(m_shooter.Set(0.0));
-  // m_xboxController.Button(4).WhileTrue(m_shooter.Set(0.5));
+  m_xboxController.Button(1).WhileTrue(m_shooter.SetVelocity(units::degrees_per_second_t{6000}));
+  m_xboxController.Button(2).WhileTrue(m_shooter.SetVelocity(units::degrees_per_second_t{-6000}));
+  m_xboxController.Button(3).WhileTrue(m_shooter.Set(0.0));
+  m_xboxController.Button(4).WhileTrue(m_shooter.Set(0.5));
 
   // Swerve bindings (uncomment with SwerveSubsystem):
   // m_xboxController.Button(1).WhileTrue(m_drive.SetRobotRelativeChassisSpeeds({0.5_mps, 0_mps,
@@ -45,9 +45,9 @@ void RobotContainer::ConfigureBindings() {
   // m_xboxController.Button(3).WhileTrue(m_elevator.SysId());
 
   // Turret bindings:
-  m_xboxController.Button(1).WhileTrue(m_turret.TurretCmd(0.2));
-  m_xboxController.Button(2).WhileTrue(m_turret.TurretCmd(-0.2));
-  m_xboxController.Button(3).WhileTrue(m_turret.SysId());
+  // m_xboxController.Button(1).WhileTrue(m_turret.TurretCmd(1));
+  // m_xboxController.Button(2).WhileTrue(m_turret.TurretCmd(-1));
+  // m_xboxController.Button(3).WhileTrue(m_turret.SysId());
 }
 
 frc2::CommandPtr RobotContainer::GetAutonomousCommand() {

@@ -3,6 +3,7 @@
 
 #include "yams/mechanisms/positional/Arm.hpp"
 
+#include <frc/RobotBase.h>
 #include <frc/geometry/Rotation3d.h>
 #include <frc/geometry/Translation3d.h>
 #include <frc/simulation/BatterySim.h>
@@ -11,12 +12,20 @@
 #include <frc/smartdashboard/MechanismLigament2d.h>
 #include <frc/smartdashboard/MechanismRoot2d.h>
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <frc/system/plant/DCMotor.h>
+#include <frc/util/Color.h>
 #include <frc/util/Color8Bit.h>
 #include <frc2/command/Commands.h>
 #include <units/angle.h>
+#include <units/time.h>
 
 #include <cmath>
+#include <memory>
 #include <string>
+
+#include "yams/exceptions/ArmConfigurationException.hpp"
+#include "yams/gearing/MechanismGearing.hpp"
+#include "yams/motorcontrollers/simulation/ArmSimSupplier.hpp"
 
 namespace yams::mechanisms::positional {
 
@@ -42,31 +51,92 @@ Arm::Arm(const config::ArmConfig& config) : SmartPositionalMechanism(), m_armCon
   if (auto startA = config.GetStartingAngle()) {
     m_smc->SetEncoderPosition(*startA);
   }
+  if (frc::RobotBase::IsSimulation()) {
+    // Configuration checks — throw descriptive exceptions like Java does.
+    if (!config.GetArmLength().has_value()) {
+      throw ArmConfigurationException("Arm Length is empty", "Cannot create simulation.",
+                                      "WithArmLength(units::meter_t)");
+    }
+    if (!config.GetMinAngle().has_value()) {
+      throw ArmConfigurationException("Arm lower hard limit is empty", "Cannot create simulation.",
+                                      "WithMinAngle(units::degree_t)");
+    }
+    if (!config.GetMaxAngle().has_value()) {
+      throw ArmConfigurationException("Arm upper hard limit is empty", "Cannot create simulation.",
+                                      "WithMaxAngle(units::degree_t)");
+    }
+    if (!config.GetStartingAngle().has_value() &&
+        !m_smc->GetConfig().GetAbsoluteEncoderZeroOffset().has_value()) {
+      throw ArmConfigurationException("Arm starting angle is empty", "Cannot create simulation.",
+                                      "WithStartingAngle(units::degree_t)");
+    }
+    if (!config.GetMOI().has_value()) {
+      throw ArmConfigurationException("Arm MOI is empty", "Cannot create simulation.",
+                                      "WithMOI(units::kilogram_square_meter_t)");
+    }
 
-  // Build a Mechanism2d window for visualisation.
-  double armLengthM = config.GetArmLength().value_or(units::meter_t{1.0}).value();
-  m_mechanismWindow.emplace(armLengthM * 2.0 + 0.4, armLengthM * 2.0 + 0.4);
-  m_mechanismRoot =
-      m_mechanismWindow->GetRoot(m_name + " Root", armLengthM + 0.2, armLengthM + 0.2);
-  m_mechanismLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
-      m_name + " Joint", armLengthM, GetAngle(), 6, frc::Color8Bit{frc::Color::kAqua});
+    auto& gearingOpt = m_smc->GetConfig().GetMotorGearing();
+    gearing::MechanismGearing gearing = gearingOpt.value_or(gearing::MechanismGearing::kOne);
 
-  frc::SmartDashboard::PutData(m_name, &(*m_mechanismWindow));
+    units::radian_t startAngle = config.GetStartingAngle().value_or(0_deg);
+
+    m_armSim.emplace(m_smc->GetDCMotor(), gearing.GetMechanismToRotorRatio(),
+                     config.GetMOI().value(), config.GetArmLength().value(),
+                     units::radian_t{config.GetMinAngle().value()},
+                     units::radian_t{config.GetMaxAngle().value()}, true, startAngle,
+                     std::array<double, 2>{0, 0.002 / 4096.0});
+
+    units::second_t period = m_smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms);
+    m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::ArmSimSupplier>(
+        *m_armSim, [this]() { return m_smc->GetDutyCycle(); }, gearing, period));
+
+    // Build Mechanism2d window.
+    double armLengthM = config.GetArmLength().value().value();
+    m_mechanismWindow.emplace(armLengthM * 2.0 + 0.4, armLengthM * 2.0 + 0.4);
+    m_mechanismRoot =
+        m_mechanismWindow->GetRoot(m_name + "Root", armLengthM + 0.2, armLengthM + 0.2);
+
+    units::degree_t startDeg = startAngle;
+    m_mechanismLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
+        m_name, armLengthM, startDeg, 6, config.GetSimColor());
+    m_setpointLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
+        "Setpoint", armLengthM, startDeg, 3, frc::Color8Bit{frc::Color::kWhite});
+
+    constexpr double kTickLength = 3.0 * 0.0254;  // 3 inches in metres
+    m_mechanismRoot->Append<frc::MechanismLigament2d>("MaxHard", kTickLength,
+                                                      config.GetMaxAngle().value(), 4,
+                                                      frc::Color8Bit{frc::Color::kLimeGreen});
+    m_mechanismRoot->Append<frc::MechanismLigament2d>(
+        "MinHard", kTickLength, config.GetMinAngle().value(), 4, frc::Color8Bit{frc::Color::kRed});
+
+    auto smcUpperLimit = m_smc->GetConfig().GetMechanismUpperLimit();
+    auto smcLowerLimit = m_smc->GetConfig().GetMechanismLowerLimit();
+    if (smcUpperLimit.has_value() && smcLowerLimit.has_value()) {
+      m_mechanismRoot->Append<frc::MechanismLigament2d>(
+          "MaxSoft", kTickLength, smcUpperLimit.value(), 4, frc::Color8Bit{frc::Color::kHotPink});
+      m_mechanismRoot->Append<frc::MechanismLigament2d>(
+          "MinSoft", kTickLength, smcLowerLimit.value(), 4, frc::Color8Bit{frc::Color::kYellow});
+    }
+
+    frc::SmartDashboard::PutData(m_name + "/mechanism", &(*m_mechanismWindow));
+    m_smc->SetupSimulation();
+  }
 }
 
 // ---- SmartMechanism overrides -----------------------------------------------
 
 void Arm::SimIterate() {
-  if (auto* ss = m_smc->GetSimSupplier()) {
+  if (m_armSim.has_value() && m_smc->GetSimSupplier()) {
+    auto* ss = m_smc->GetSimSupplier();
     ss->UpdateSim();
     m_smc->SimIterate();
     ss->FeedWatchdog();
 
-    if (m_armConfig.GetMinAngle() && ss->GetMechanismVelocity().value() < 0.0 &&
+    if (m_armConfig.GetMinAngle() && m_armSim->GetVelocity().value() < 0.0 &&
         GetAngle() < *m_armConfig.GetMinAngle()) {
       m_smc->SetEncoderPosition(*m_armConfig.GetMinAngle());
     }
-    if (m_armConfig.GetMaxAngle() && ss->GetMechanismVelocity().value() > 0.0 &&
+    if (m_armConfig.GetMaxAngle() && m_armSim->GetVelocity().value() > 0.0 &&
         GetAngle() > *m_armConfig.GetMaxAngle()) {
       m_smc->SetEncoderPosition(*m_armConfig.GetMaxAngle());
     }
@@ -81,6 +151,9 @@ void Arm::UpdateTelemetry() { m_smc->UpdateTelemetry(); }
 void Arm::VisualizationUpdate() {
   if (m_mechanismLigament) {
     m_mechanismLigament->SetAngle(GetAngle());
+  }
+  if (m_setpointLigament) {
+    m_setpointLigament->SetAngle(m_smc->GetMechanismPositionSetpoint().value_or(GetAngle()));
   }
 }
 

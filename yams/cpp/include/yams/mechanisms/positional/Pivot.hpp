@@ -4,6 +4,8 @@
 #pragma once
 
 #include <frc/geometry/Translation3d.h>
+#include <frc/simulation/DCMotorSim.h>
+#include <frc/smartdashboard/MechanismLigament2d.h>
 #include <frc2/command/CommandPtr.h>
 #include <frc2/command/button/Trigger.h>
 #include <units/angle.h>
@@ -11,6 +13,7 @@
 #include <units/voltage.h>
 
 #include <functional>
+#include <optional>
 #include <string>
 
 #include "SmartPositionalMechanism.hpp"
@@ -182,6 +185,8 @@ class Pivot : public SmartPositionalMechanism {
  private:
   config::PivotConfig m_pivotConfig;
   std::string m_name{"Pivot"};
+  std::optional<frc::sim::DCMotorSim> m_dcMotorSim;
+  frc::MechanismLigament2d* m_setpointLigament{nullptr};
 };
 
 }  // namespace yams::mechanisms::positional

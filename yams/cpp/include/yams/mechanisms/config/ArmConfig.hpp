@@ -4,9 +4,12 @@
 #pragma once
 
 #include <frc2/command/SubsystemBase.h>
+#include <frc/util/Color.h>
+#include <frc/util/Color8Bit.h>
 #include <units/angle.h>
 #include <units/angular_velocity.h>
 #include <units/length.h>
+#include <units/moment_of_inertia.h>
 
 #include <optional>
 #include <string>
@@ -82,6 +85,22 @@ class ArmConfig {
    */
   ArmConfig& WithArmLength(units::meter_t length);
 
+  /**
+   * Set the moment of inertia of the arm (required for simulation).
+   *
+   * @param moi Arm moment of inertia in kg·m².
+   * @return *this for chaining.
+   */
+  ArmConfig& WithMOI(units::kilogram_square_meter_t moi);
+
+  /**
+   * Set the Mechanism2d simulation colour for the arm ligament (default: aqua).
+   *
+   * @param color Desired colour.
+   * @return *this for chaining.
+   */
+  ArmConfig& WithSimColor(const frc::Color8Bit& color);
+
   // ---- Getters ---------------------------------------------------------------
 
   /** Get the motor controller pointer. */
@@ -96,14 +115,20 @@ class ArmConfig {
   /** Get the optional starting angle. */
   std::optional<units::degree_t> GetStartingAngle() const;
 
-  /** Get the optional minimum angle. */
+  /** Get the optional minimum (lower hard-limit) angle. */
   std::optional<units::degree_t> GetMinAngle() const;
 
-  /** Get the optional maximum angle. */
+  /** Get the optional maximum (upper hard-limit) angle. */
   std::optional<units::degree_t> GetMaxAngle() const;
 
   /** Get the optional arm length. */
   std::optional<units::meter_t> GetArmLength() const;
+
+  /** Get the optional moment of inertia. */
+  std::optional<units::kilogram_square_meter_t> GetMOI() const;
+
+  /** Get the Mechanism2d simulation colour. */
+  frc::Color8Bit GetSimColor() const;
 
  private:
   motorcontrollers::SmartMotorController* m_smc{nullptr};
@@ -113,6 +138,8 @@ class ArmConfig {
   std::optional<units::degree_t> m_minAngle;
   std::optional<units::degree_t> m_maxAngle;
   std::optional<units::meter_t> m_armLength;
+  std::optional<units::kilogram_square_meter_t> m_moi;
+  frc::Color8Bit m_simColor{frc::Color::kAqua};
 };
 
 }  // namespace yams::mechanisms::config

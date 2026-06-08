@@ -112,32 +112,39 @@ void SparkWrapper::CommitConfig() {
 // ---- Simulation -------------------------------------------------------------
 
 void SparkWrapper::SetupSimulation() {
-  if (!frc::RobotBase::IsSimulation() || m_sparkSim) return;
+  if (!frc::RobotBase::IsSimulation()) return;
 
-  auto simMotor = m_config.GetSimMotor();
-  auto& gearing = m_config.GetMotorGearing();
-  if (!simMotor || !gearing) return;
+  if (!m_sparkSim) {
+    auto simMotor = m_config.GetSimMotor();
+    auto& gearing = m_config.GetMotorGearing();
+    if (!simMotor || !gearing) return;
 
-  auto plant = frc::LinearSystemId::DCMotorSystem(*simMotor, m_config.GetMOI(),
-                                                  gearing->GetMechanismToRotorRatio());
-  m_motorSim.emplace(plant, *simMotor);
+    auto plant = frc::LinearSystemId::DCMotorSystem(*simMotor, m_config.GetMOI(),
+                                                    gearing->GetMechanismToRotorRatio());
+    m_motorSim.emplace(plant, *simMotor);
 
-  auto period = m_config.GetClosedLoopControlPeriod().value_or(20_ms);
-  SetSimSupplier(std::make_shared<simulation::DCMotorSimSupplier>(
-      *m_motorSim, [this]() { return GetDutyCycle(); }, *gearing, period));
+    auto period = m_config.GetClosedLoopControlPeriod().value_or(20_ms);
+    SetSimSupplier(std::make_shared<simulation::DCMotorSimSupplier>(
+        *m_motorSim, [this]() { return GetDutyCycle(); }, *gearing, period));
 
-  m_sparkSim.emplace(m_spark, &m_motor);
+    m_sparkSim.emplace(m_spark, &m_motor);
 
-  if (m_maxConfig)
-    m_relEncoderSim.emplace(static_cast<rev::spark::SparkMax*>(m_spark));
-  else if (m_flexConfig)
-    m_relEncoderSim.emplace(static_cast<rev::spark::SparkFlex*>(m_spark));
-
-  if (m_absEncoder) {
     if (m_maxConfig)
-      m_absEncoderSim.emplace(static_cast<rev::spark::SparkMax*>(m_spark));
+      m_relEncoderSim.emplace(static_cast<rev::spark::SparkMax*>(m_spark));
     else if (m_flexConfig)
-      m_absEncoderSim.emplace(static_cast<rev::spark::SparkFlex*>(m_spark));
+      m_relEncoderSim.emplace(static_cast<rev::spark::SparkFlex*>(m_spark));
+
+    if (m_absEncoder) {
+      if (m_maxConfig)
+        m_absEncoderSim.emplace(static_cast<rev::spark::SparkMax*>(m_spark));
+      else if (m_flexConfig)
+        m_absEncoderSim.emplace(static_cast<rev::spark::SparkFlex*>(m_spark));
+    }
+  }
+
+  if (auto startPos = m_config.GetStartingPosition()) {
+    m_sparkSim->SetPosition(startPos->value() / 360.0);
+    if (m_relEncoderSim) m_relEncoderSim->SetPosition(startPos->value());
   }
 }
 
@@ -166,7 +173,10 @@ void SparkWrapper::SynchronizeRelativeEncoder() {}
 
 // ---- Open-loop outputs ------------------------------------------------------
 
-void SparkWrapper::SetDutyCycle(double dc) { m_spark->Set(dc); }
+void SparkWrapper::SetDutyCycle(double dc) {
+  m_spark->Set(dc);
+  std::cout << dc;
+}
 double SparkWrapper::GetDutyCycle() { return m_spark->GetAppliedOutput(); }
 
 void SparkWrapper::SetVoltage(units::volt_t voltage) { m_spark->SetVoltage(voltage); }
@@ -220,6 +230,9 @@ void SparkWrapper::SetVelocity(units::meters_per_second_t velocity) {
 
 void SparkWrapper::SetEncoderPosition(units::degree_t angle) {
   m_relEncoder->SetPosition(angle.value());
+  if (m_relEncoderSim) m_relEncoderSim->SetPosition(angle.value());
+  if (m_absEncoderSim) m_absEncoderSim->SetPosition(angle.value() / 360.0);
+  if (m_simSupplier) m_simSupplier->SetMechanismPosition(angle);
 }
 void SparkWrapper::SetEncoderPosition(units::meter_t distance) {
   if (auto circ = m_config.GetMechanismCircumference(); circ)

@@ -435,6 +435,24 @@ class SmartMotorControllerConfig {
    */
   SmartMotorControllerConfig& WithMOI(units::kilogram_square_meter_t moi);
 
+  /**
+   * Set the starting mechanism position (seeds the encoder and sim objects on init).
+   *
+   * @param startingAngle Starting mechanism angle in degrees.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithStartingPosition(units::degree_t startingAngle);
+
+  /**
+   * Set the starting mechanism position from a linear distance.
+   *
+   * Requires WithMechanismCircumference to be set for the conversion.
+   *
+   * @param startingDistance Starting mechanism distance.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithStartingPosition(units::meter_t startingDistance);
+
   // === Getters ============================================================
 
   /** Aggregated PID and feedforward gains for one closed-loop slot. */
@@ -570,6 +588,8 @@ class SmartMotorControllerConfig {
   std::optional<frc::DCMotor> GetSimMotor() const;
   /** @return Moment of inertia for simulation (kg·m²). */
   units::kilogram_square_meter_t GetMOI() const;
+  /** @return Optional starting mechanism position (degrees). */
+  std::optional<units::degree_t> GetStartingPosition() const;
 
   /** @return Optional mechanism gearing. */
   const std::optional<gearing::MechanismGearing>& GetMotorGearing() const;
@@ -675,6 +695,7 @@ class SmartMotorControllerConfig {
   frc2::SubsystemBase* m_subsystem{nullptr};
   std::optional<frc::DCMotor> m_simMotor;
   units::kilogram_square_meter_t m_moi{0.001_kg_sq_m};
+  std::optional<units::degree_t> m_startingPosition;
 };
 
 }  // namespace yams::motorcontrollers

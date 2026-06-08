@@ -4,6 +4,8 @@
 #pragma once
 
 #include <frc/geometry/Translation3d.h>
+#include <frc/simulation/SingleJointedArmSim.h>
+#include <frc/smartdashboard/MechanismLigament2d.h>
 #include <frc2/command/CommandPtr.h>
 #include <frc2/command/button/Trigger.h>
 #include <units/angle.h>
@@ -11,6 +13,7 @@
 #include <units/voltage.h>
 
 #include <functional>
+#include <optional>
 #include <string>
 
 #include "SmartPositionalMechanism.hpp"
@@ -181,6 +184,8 @@ class Arm : public SmartPositionalMechanism {
  private:
   config::ArmConfig m_armConfig;
   std::string m_name{"Arm"};
+  std::optional<frc::sim::SingleJointedArmSim> m_armSim;
+  frc::MechanismLigament2d* m_setpointLigament{nullptr};
 };
 
 }  // namespace yams::mechanisms::positional

@@ -3,6 +3,7 @@
 
 #include "yams/mechanisms/positional/Pivot.hpp"
 
+#include <frc/RobotBase.h>
 #include <frc/geometry/Rotation3d.h>
 #include <frc/geometry/Translation3d.h>
 #include <frc/simulation/BatterySim.h>
@@ -11,12 +12,20 @@
 #include <frc/smartdashboard/MechanismLigament2d.h>
 #include <frc/smartdashboard/MechanismRoot2d.h>
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <frc/system/plant/LinearSystemId.h>
+#include <frc/util/Color.h>
 #include <frc/util/Color8Bit.h>
 #include <frc2/command/Commands.h>
 #include <units/angle.h>
+#include <units/time.h>
 
 #include <cmath>
+#include <memory>
 #include <string>
+
+#include "yams/exceptions/PivotConfigurationException.hpp"
+#include "yams/gearing/MechanismGearing.hpp"
+#include "yams/motorcontrollers/simulation/DCMotorSimSupplier.hpp"
 
 namespace yams::mechanisms::positional {
 
@@ -44,30 +53,87 @@ Pivot::Pivot(const config::PivotConfig& config)
     m_smc->SetEncoderPosition(*startA);
   }
 
-  // Build a Mechanism2d window for visualisation.
-  // Use a fixed ligament length of 0.5 m to represent the rotating assembly.
-  constexpr double kLigamentLength = 0.5;
-  m_mechanismWindow.emplace(1.2, 1.2);
-  m_mechanismRoot = m_mechanismWindow->GetRoot(m_name + " Root", 0.6, 0.6);
-  m_mechanismLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
-      m_name + " Arm", kLigamentLength, GetAngle(), 6, frc::Color8Bit{frc::Color::kGreen});
+  if (frc::RobotBase::IsSimulation()) {
+    // Configuration checks.
+    if (!config.GetMinAngle().has_value()) {
+      throw PivotConfigurationException("Pivot lower hard limit is empty",
+                                        "Cannot create simulation.",
+                                        "WithMinAngle(units::degree_t)");
+    }
+    if (!config.GetMaxAngle().has_value()) {
+      throw PivotConfigurationException("Pivot upper hard limit is empty",
+                                        "Cannot create simulation.",
+                                        "WithMaxAngle(units::degree_t)");
+    }
+    if (!config.GetStartingAngle().has_value()) {
+      throw PivotConfigurationException("Pivot starting angle is empty",
+                                        "Cannot create simulation.",
+                                        "WithStartingAngle(units::degree_t)");
+    }
+    if (!config.GetMOI().has_value()) {
+      throw PivotConfigurationException("Pivot MOI is empty", "Cannot create simulation.",
+                                        "WithMOI(units::kilogram_square_meter_t)");
+    }
 
-  frc::SmartDashboard::PutData(m_name, &(*m_mechanismWindow));
+    // Create DCMotorSim and wire up DCMotorSimSupplier.
+    frc::DCMotor dcMotor = m_smc->GetDCMotor();
+    auto& gearingOpt = m_smc->GetConfig().GetMotorGearing();
+    gearing::MechanismGearing gearing = gearingOpt.value_or(gearing::MechanismGearing::kOne);
+
+    auto plant = frc::LinearSystemId::DCMotorSystem(dcMotor, config.GetMOI().value(),
+                                                    gearing.GetMechanismToRotorRatio());
+    m_dcMotorSim.emplace(plant, dcMotor);
+
+    units::second_t period = m_smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms);
+    m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::DCMotorSimSupplier>(
+        *m_dcMotorSim, [this]() { return m_smc->GetDutyCycle(); }, gearing, period));
+
+    // Build Mechanism2d — fixed 36-inch ligament length like Java.
+    constexpr double kPivotLen = 36.0 * 0.0254;  // 36 inches in metres
+    m_mechanismWindow.emplace(kPivotLen * 2.0, kPivotLen * 2.0);
+    m_mechanismRoot = m_mechanismWindow->GetRoot(m_name + "Root", kPivotLen, kPivotLen);
+
+    units::degree_t startDeg = config.GetStartingAngle().value();
+    m_mechanismLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
+        m_name, kPivotLen, startDeg, 6, config.GetSimColor());
+    m_setpointLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
+        "Setpoint", kPivotLen, startDeg, 3, frc::Color8Bit{frc::Color::kWhite});
+
+    constexpr double kTickLen = 3.0 * 0.0254;  // 3 inches in metres
+    m_mechanismRoot->Append<frc::MechanismLigament2d>("MaxHard", kTickLen,
+                                                      config.GetMaxAngle().value(), 4,
+                                                      frc::Color8Bit{frc::Color::kLimeGreen});
+    m_mechanismRoot->Append<frc::MechanismLigament2d>(
+        "MinHard", kTickLen, config.GetMinAngle().value(), 4, frc::Color8Bit{frc::Color::kRed});
+
+    auto smcUpperLimit = m_smc->GetConfig().GetMechanismUpperLimit();
+    auto smcLowerLimit = m_smc->GetConfig().GetMechanismLowerLimit();
+    if (smcUpperLimit.has_value() && smcLowerLimit.has_value()) {
+      m_mechanismRoot->Append<frc::MechanismLigament2d>("MaxSoft", kTickLen, smcUpperLimit.value(),
+                                                        4, frc::Color8Bit{frc::Color::kHotPink});
+      m_mechanismRoot->Append<frc::MechanismLigament2d>("MinSoft", kTickLen, smcLowerLimit.value(),
+                                                        4, frc::Color8Bit{frc::Color::kYellow});
+    }
+
+    frc::SmartDashboard::PutData(m_name + "/mechanism", &(*m_mechanismWindow));
+  }
 }
 
 // ---- SmartMechanism overrides -----------------------------------------------
 
 void Pivot::SimIterate() {
-  if (auto* ss = m_smc->GetSimSupplier()) {
+  if (m_dcMotorSim.has_value() && m_smc->GetSimSupplier()) {
+    auto* ss = m_smc->GetSimSupplier();
     ss->UpdateSim();
     m_smc->SimIterate();
     ss->FeedWatchdog();
 
-    if (m_pivotConfig.GetMinAngle() && ss->GetMechanismVelocity().value() < 0.0 &&
+    double simVelRadPerSec = m_dcMotorSim->GetAngularVelocity().value();
+    if (m_pivotConfig.GetMinAngle() && simVelRadPerSec < 0.0 &&
         GetAngle() < *m_pivotConfig.GetMinAngle()) {
       m_smc->SetEncoderPosition(*m_pivotConfig.GetMinAngle());
     }
-    if (m_pivotConfig.GetMaxAngle() && ss->GetMechanismVelocity().value() > 0.0 &&
+    if (m_pivotConfig.GetMaxAngle() && simVelRadPerSec > 0.0 &&
         GetAngle() > *m_pivotConfig.GetMaxAngle()) {
       m_smc->SetEncoderPosition(*m_pivotConfig.GetMaxAngle());
     }
@@ -82,6 +148,9 @@ void Pivot::UpdateTelemetry() { m_smc->UpdateTelemetry(); }
 void Pivot::VisualizationUpdate() {
   if (m_mechanismLigament) {
     m_mechanismLigament->SetAngle(GetAngle());
+  }
+  if (m_setpointLigament) {
+    m_setpointLigament->SetAngle(m_smc->GetMechanismPositionSetpoint().value_or(GetAngle()));
   }
 }
 
