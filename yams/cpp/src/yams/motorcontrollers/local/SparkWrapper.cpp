@@ -156,7 +156,7 @@ void SparkWrapper::SimIterate() {
   units::second_t dt = m_config.GetClosedLoopControlPeriod().value_or(20_ms);
   units::turns_per_second_t mechVelRps = m_simSupplier->GetMechanismVelocity();
   double vbus = m_simSupplier->GetMechanismSupplyVoltage().value();
-  std::cout << mechVelRps << " rotor"<<std::endl;
+  std::cout << mechVelRps.value() << " rotor"<<std::endl;
   m_sparkSim->iterate(mechVelRps.value(), vbus, dt.value());
 
   if (m_relEncoderSim) m_relEncoderSim->iterate(mechVelRps.value(), dt.value());
