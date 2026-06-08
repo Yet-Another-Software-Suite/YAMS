@@ -39,21 +39,23 @@ class DCMotorSimSupplier : public SimSupplier {
   void UpdateSim() override;
   void SetInputVoltage(units::volt_t volts) override;
 
-  units::degree_t GetMechanismPosition() override;
-  units::degrees_per_second_t GetMechanismVelocity() override;
-  units::degrees_per_second_squared_t GetMechanismAcceleration() override;
-  units::degree_t GetRotorPosition() override;
-  units::degrees_per_second_t GetRotorVelocity() override;
-  units::degrees_per_second_squared_t GetRotorAcceleration() override;
+  units::turn_t GetMechanismPosition() override;
+  units::turns_per_second_t GetMechanismVelocity() override;
+  units::turns_per_second_squared_t GetMechanismAcceleration() override;
+  units::turn_t GetRotorPosition() override;
+  units::turns_per_second_t GetRotorVelocity() override;
+  units::turns_per_second_squared_t GetRotorAcceleration() override;
 
-  void SetMechanismPosition(units::degree_t angle) override;
-  void SetMechanismVelocity(units::degrees_per_second_t velocity) override;
-  void SetRotorPosition(units::degree_t angle) override;
-  void SetRotorVelocity(units::degrees_per_second_t velocity) override;
+  void SetMechanismPosition(units::turn_t angle) override;
+  void SetMechanismVelocity(units::turns_per_second_t velocity) override;
+  void SetRotorPosition(units::turn_t angle) override;
+  void SetRotorVelocity(units::turns_per_second_t velocity) override;
 
   bool IsWatchdogExpired() override;
   void FeedWatchdog() override;
   units::ampere_t GetCurrentDrawAmps() override;
+  units::volt_t GetMechanismStatorVoltage() override;
+  void SetMechanismStatorVoltage(units::volt_t volts) override;
 
  private:
   frc::sim::DCMotorSim& m_sim;
@@ -62,6 +64,7 @@ class DCMotorSimSupplier : public SimSupplier {
   units::second_t m_period;
   bool m_inputFed{false};
   bool m_watchdogFed{false};
+  units::volt_t m_lastInputVoltage{0};
 };
 
 }  // namespace yams::motorcontrollers::simulation

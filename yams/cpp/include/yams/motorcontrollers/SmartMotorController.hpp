@@ -16,6 +16,7 @@
 #include <units/acceleration.h>
 #include <units/angle.h>
 #include <units/angular_acceleration.h>
+#include <units/angular_jerk.h>
 #include <units/angular_velocity.h>
 #include <units/current.h>
 #include <units/length.h>
@@ -131,7 +132,7 @@ class SmartMotorController {
    *
    * @param angle Target mechanism angle.
    */
-  virtual void SetPosition(units::degree_t angle) = 0;
+  virtual void SetPosition(units::turn_t angle) = 0;
 
   /**
    * Command a linear measurement position setpoint (closed-loop).
@@ -145,7 +146,7 @@ class SmartMotorController {
    *
    * @param velocity Target mechanism angular velocity.
    */
-  virtual void SetVelocity(units::degrees_per_second_t velocity) = 0;
+  virtual void SetVelocity(units::turns_per_second_t velocity) = 0;
 
   /**
    * Command a linear measurement velocity setpoint (closed-loop).
@@ -161,7 +162,7 @@ class SmartMotorController {
    *
    * @param angle Mechanism angle to write.
    */
-  virtual void SetEncoderPosition(units::degree_t angle) = 0;
+  virtual void SetEncoderPosition(units::turn_t angle) = 0;
 
   /**
    * Write a linear distance into the encoder (seeds the position).
@@ -175,7 +176,7 @@ class SmartMotorController {
    *
    * @param velocity Angular velocity to write.
    */
-  virtual void SetEncoderVelocity(units::degrees_per_second_t velocity) = 0;
+  virtual void SetEncoderVelocity(units::turns_per_second_t velocity) = 0;
 
   /**
    * Write a linear velocity into the encoder.
@@ -189,37 +190,37 @@ class SmartMotorController {
   /**
    * Get the mechanism position from the motor encoder (applies gearing).
    *
-   * @return Mechanism position in degrees.
+   * @return Mechanism position in turns.
    */
-  virtual units::degree_t GetMechanismPosition() = 0;
+  virtual units::turn_t GetMechanismPosition() = 0;
 
   /**
    * Get the mechanism velocity from the motor encoder (applies gearing).
    *
-   * @return Mechanism velocity in degrees per second.
+   * @return Mechanism velocity in turns per second.
    */
-  virtual units::degrees_per_second_t GetMechanismVelocity() = 0;
+  virtual units::turns_per_second_t GetMechanismVelocity() = 0;
 
   /**
    * Get the mechanism acceleration (derived from velocity).
    *
-   * @return Mechanism acceleration in degrees per second squared.
+   * @return Mechanism acceleration in turns per second squared.
    */
-  virtual units::degrees_per_second_squared_t GetMechanismAcceleration() = 0;
+  virtual units::turns_per_second_squared_t GetMechanismAcceleration() = 0;
 
   /**
    * Get the raw rotor position (no gearing applied).
    *
-   * @return Rotor position in degrees.
+   * @return Rotor position in turns.
    */
-  virtual units::degree_t GetRotorPosition() = 0;
+  virtual units::turn_t GetRotorPosition() = 0;
 
   /**
    * Get the raw rotor velocity (no gearing applied).
    *
-   * @return Rotor velocity in degrees per second.
+   * @return Rotor velocity in turns per second.
    */
-  virtual units::degrees_per_second_t GetRotorVelocity() = 0;
+  virtual units::turns_per_second_t GetRotorVelocity() = 0;
 
   /**
    * Get the linear measurement position (applies circumference conversion).
@@ -410,14 +411,14 @@ class SmartMotorController {
    *
    * @param upperLimit Upper angle limit.
    */
-  virtual void SetMechanismUpperLimit(units::degree_t upperLimit) = 0;
+  virtual void SetMechanismUpperLimit(units::turn_t upperLimit) = 0;
 
   /**
    * Set the lower angular soft limit for the mechanism.
    *
    * @param lowerLimit Lower angle limit.
    */
-  virtual void SetMechanismLowerLimit(units::degree_t lowerLimit) = 0;
+  virtual void SetMechanismLowerLimit(units::turn_t lowerLimit) = 0;
 
   /**
    * Set both angular soft limits for the mechanism.
@@ -425,7 +426,7 @@ class SmartMotorController {
    * @param lower Lower angle limit.
    * @param upper Upper angle limit.
    */
-  virtual void SetMechanismLimits(units::degree_t lower, units::degree_t upper) = 0;
+  virtual void SetMechanismLimits(units::turn_t lower, units::turn_t upper) = 0;
 
   /**
    * Enable or disable the mechanism angular soft limits.
@@ -453,7 +454,7 @@ class SmartMotorController {
    *
    * @param maxVelocity Maximum mechanism angular velocity.
    */
-  virtual void SetMotionProfileMaxVelocity(units::degrees_per_second_t maxVelocity) = 0;
+  virtual void SetMotionProfileMaxVelocity(units::turns_per_second_t maxVelocity) = 0;
 
   /**
    * Set the maximum linear velocity for the motion profile.
@@ -467,7 +468,7 @@ class SmartMotorController {
    *
    * @param maxAcc Maximum mechanism angular acceleration.
    */
-  virtual void SetMotionProfileMaxAcceleration(units::degrees_per_second_squared_t maxAcc) = 0;
+  virtual void SetMotionProfileMaxAcceleration(units::turns_per_second_squared_t maxAcc) = 0;
 
   /**
    * Set the maximum linear acceleration for the motion profile.
@@ -481,10 +482,7 @@ class SmartMotorController {
    *
    * @param maxJerk Maximum angular jerk (degrees/s²/s).
    */
-  virtual void SetMotionProfileMaxJerk(
-      units::unit_t<units::compound_unit<units::angular_acceleration::degrees_per_second_squared,
-                                         units::inverse<units::seconds>>>
-          maxJerk) = 0;
+  virtual void SetMotionProfileMaxJerk(units::angular_jerk::turns_per_second_cubed_t maxJerk) = 0;
 
   /**
    * Configure or update the exponential motion profile parameters.
@@ -568,14 +566,14 @@ class SmartMotorController {
    *
    * @return Optional mechanism angle setpoint.
    */
-  std::optional<units::degree_t> GetMechanismPositionSetpoint() const;
+  std::optional<units::turn_t> GetMechanismPositionSetpoint() const;
 
   /**
    * Get the last commanded mechanism velocity setpoint.
    *
    * @return Optional mechanism angular velocity setpoint.
    */
-  std::optional<units::degrees_per_second_t> GetMechanismSetpointVelocity() const;
+  std::optional<units::turns_per_second_t> GetMechanismSetpointVelocity() const;
 
   /**
    * Get a mutable reference to the current configuration.
@@ -635,8 +633,8 @@ class SmartMotorController {
   // Linear motion profile state
   std::optional<frc::TrapezoidProfile<units::meters>::State> m_linearTrapState;
 
-  std::optional<units::degree_t> m_setpointPosition;
-  std::optional<units::degrees_per_second_t> m_setpointVelocity;
+  std::optional<units::turn_t> m_setpointPosition;
+  std::optional<units::turns_per_second_t> m_setpointVelocity;
 
   std::unique_ptr<frc::Notifier> m_closedLoopControllerThread;
   bool m_closedLoopControllerRunning{false};

@@ -26,7 +26,7 @@ ShooterSubsystem::ShooterSubsystem() {
       .WithSimpleFeedforward(0, 0, 0)
       .WithClosedLoopMode();
 
-  m_motor.emplace(m_flywheelMotor1, frc::DCMotor::KrakenX44(2), m_motorConfig);
+  m_motor.emplace(m_flywheelMotor1, frc::DCMotor::NEO(2), m_motorConfig);
 
   // 4-inch diameter flywheel wheel
   m_shooterConfig.WithMotorController(&m_motor.value())

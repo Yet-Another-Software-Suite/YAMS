@@ -19,7 +19,7 @@
 // #include "subsystems/doubleflywheel/DoubleFlyWheelSubsystem.h"
 
 class RobotContainer {
- public:;
+ public:
   RobotContainer();
 
   frc2::CommandPtr GetAutonomousCommand();

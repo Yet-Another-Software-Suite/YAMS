@@ -84,13 +84,13 @@ class SmartMechanism {
   // ---- Direct setpoint helpers (no command wrapper) -------------------------
 
   /** Start closed-loop control and set a mechanism angular velocity setpoint. */
-  void SetMechanismVelocitySetpoint(units::degrees_per_second_t velocity);
+  void SetMechanismVelocitySetpoint(units::turns_per_second_t velocity);
 
   /** Start closed-loop control and set a linear measurement velocity setpoint. */
   void SetMeasurementVelocitySetpoint(units::meters_per_second_t velocity);
 
   /** Start closed-loop control and set a mechanism angle setpoint. */
-  void SetMechanismPositionSetpoint(units::degree_t angle);
+  void SetMechanismPositionSetpoint(units::turn_t angle);
 
   /** Start closed-loop control and set a linear measurement position setpoint. */
   void SetMeasurementPositionSetpoint(units::meter_t distance);
@@ -119,7 +119,7 @@ class SmartMechanism {
    *
    * @return Optional angle setpoint.
    */
-  std::optional<units::degree_t> GetMechanismSetpoint();
+  std::optional<units::turn_t> GetMechanismSetpoint();
 
   /**
    * Get a pointer to the Mechanism2d window, or nullptr if not initialised.

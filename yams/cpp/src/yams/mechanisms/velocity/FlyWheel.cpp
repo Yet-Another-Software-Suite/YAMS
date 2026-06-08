@@ -108,10 +108,10 @@ void FlyWheel::VisualizationUpdate() {
   if (m_flyWheelConfig.IsUsingSpeedometerSimulation() &&
       m_flyWheelConfig.GetSpeedometerMaxVelocity().has_value()) {
     double maxVel = m_flyWheelConfig.GetSpeedometerMaxVelocity().value().value();
-    double curVel = m_smc->GetMechanismVelocity().value();
+    double curVel = units::degrees_per_second_t{m_smc->GetMechanismVelocity()}.value();
     m_mechanismLigament->SetAngle(units::degree_t{270.0 - curVel / maxVel * 180.0});
   } else {
-    m_mechanismLigament->SetAngle(units::degree_t{m_smc->GetMechanismPosition().value()});
+    m_mechanismLigament->SetAngle(units::degree_t{m_smc->GetMechanismPosition()});
   }
 }
 

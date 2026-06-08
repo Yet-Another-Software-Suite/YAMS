@@ -63,23 +63,23 @@ class TalonFXWrapper : public SmartMotorController {
   units::volt_t GetVoltage() override;
 
   // ---- Closed-loop setpoints ----------------------------------------------
-  void SetPosition(units::degree_t angle) override;
+  void SetPosition(units::turn_t angle) override;
   void SetPosition(units::meter_t distance) override;
-  void SetVelocity(units::degrees_per_second_t velocity) override;
+  void SetVelocity(units::turns_per_second_t velocity) override;
   void SetVelocity(units::meters_per_second_t velocity) override;
 
   // ---- Encoder writes -----------------------------------------------------
-  void SetEncoderPosition(units::degree_t angle) override;
+  void SetEncoderPosition(units::turn_t angle) override;
   void SetEncoderPosition(units::meter_t distance) override;
-  void SetEncoderVelocity(units::degrees_per_second_t velocity) override;
+  void SetEncoderVelocity(units::turns_per_second_t velocity) override;
   void SetEncoderVelocity(units::meters_per_second_t velocity) override;
 
   // ---- Encoder reads ------------------------------------------------------
-  units::degree_t GetMechanismPosition() override;
-  units::degrees_per_second_t GetMechanismVelocity() override;
-  units::degrees_per_second_squared_t GetMechanismAcceleration() override;
-  units::degree_t GetRotorPosition() override;
-  units::degrees_per_second_t GetRotorVelocity() override;
+  units::turn_t GetMechanismPosition() override;
+  units::turns_per_second_t GetMechanismVelocity() override;
+  units::turns_per_second_squared_t GetMechanismAcceleration() override;
+  units::turn_t GetRotorPosition() override;
+  units::turns_per_second_t GetRotorVelocity() override;
   units::meter_t GetMeasurementPosition() override;
   units::meters_per_second_t GetMeasurementVelocity() override;
   units::meters_per_second_squared_t GetMeasurementAcceleration() override;
@@ -110,20 +110,17 @@ class TalonFXWrapper : public SmartMotorController {
   void SetSupplyCurrentLimit(units::ampere_t currentLimit) override;
   void SetClosedLoopRampRate(units::second_t rampRate) override;
   void SetOpenLoopRampRate(units::second_t rampRate) override;
-  void SetMechanismUpperLimit(units::degree_t upperLimit) override;
-  void SetMechanismLowerLimit(units::degree_t lowerLimit) override;
-  void SetMechanismLimits(units::degree_t lower, units::degree_t upper) override;
+  void SetMechanismUpperLimit(units::turn_t upperLimit) override;
+  void SetMechanismLowerLimit(units::turn_t lowerLimit) override;
+  void SetMechanismLimits(units::turn_t lower, units::turn_t upper) override;
   void SetMechanismLimitsEnabled(bool enabled) override;
   void SetMeasurementUpperLimit(units::meter_t upperLimit) override;
   void SetMeasurementLowerLimit(units::meter_t lowerLimit) override;
-  void SetMotionProfileMaxVelocity(units::degrees_per_second_t maxVelocity) override;
+  void SetMotionProfileMaxVelocity(units::turns_per_second_t maxVelocity) override;
   void SetMotionProfileMaxVelocity(units::meters_per_second_t maxVelocity) override;
-  void SetMotionProfileMaxAcceleration(units::degrees_per_second_squared_t maxAcc) override;
+  void SetMotionProfileMaxAcceleration(units::turns_per_second_squared_t maxAcc) override;
   void SetMotionProfileMaxAcceleration(units::meters_per_second_squared_t maxAcc) override;
-  void SetMotionProfileMaxJerk(
-      units::unit_t<units::compound_unit<units::angular_acceleration::degrees_per_second_squared,
-                                         units::inverse<units::seconds>>>
-          maxJerk) override;
+  void SetMotionProfileMaxJerk(units::angular_jerk::turns_per_second_cubed_t maxJerk) override;
   void SetExponentialProfile(std::optional<double> kV, std::optional<double> kA,
                              std::optional<units::volt_t> maxInput) override;
   void SetClosedLoopSlot(ClosedLoopControllerSlot slot) override;
@@ -176,8 +173,6 @@ class TalonFXWrapper : public SmartMotorController {
   void ApplyLimitsConfig();
   void ApplyMotionMagicConfig();
 
-  units::turns_per_second_t ToTPS(units::degrees_per_second_t v) const;
-  units::turn_t ToTurns(units::degree_t a) const;
 };
 
 }  // namespace yams::motorcontrollers::remote

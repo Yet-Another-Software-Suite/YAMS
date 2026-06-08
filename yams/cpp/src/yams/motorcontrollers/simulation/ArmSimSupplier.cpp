@@ -20,46 +20,47 @@ ArmSimSupplier::ArmSimSupplier(frc::sim::SingleJointedArmSim& sim,
 void ArmSimSupplier::UpdateSim() {
   m_watchdogFed = false;
   if (!m_inputFed) {
-    m_sim.SetInputVoltage(
-        units::volt_t{m_dutyCycleSupplier() * frc::sim::RoboRioSim::GetVInVoltage().value()});
+    m_lastInputVoltage =
+        units::volt_t{m_dutyCycleSupplier() * frc::sim::RoboRioSim::GetVInVoltage().value()};
+    m_sim.SetInputVoltage(m_lastInputVoltage);
   }
   m_inputFed = false;
   m_sim.Update(m_period);
 }
 
-units::degree_t ArmSimSupplier::GetMechanismPosition() { return m_sim.GetAngle(); }
+units::turn_t ArmSimSupplier::GetMechanismPosition() { return m_sim.GetAngle(); }
 
-units::degrees_per_second_t ArmSimSupplier::GetMechanismVelocity() { return m_sim.GetVelocity(); }
+units::turns_per_second_t ArmSimSupplier::GetMechanismVelocity() { return m_sim.GetVelocity(); }
 
-units::degrees_per_second_squared_t ArmSimSupplier::GetMechanismAcceleration() {
-  return units::degrees_per_second_squared_t{0.0};
+units::turns_per_second_squared_t ArmSimSupplier::GetMechanismAcceleration() {
+  return units::turns_per_second_squared_t{0.0};
 }
 
-units::degree_t ArmSimSupplier::GetRotorPosition() {
+units::turn_t ArmSimSupplier::GetRotorPosition() {
   return GetMechanismPosition() * m_gearing.GetMechanismToRotorRatio();
 }
 
-units::degrees_per_second_t ArmSimSupplier::GetRotorVelocity() {
+units::turns_per_second_t ArmSimSupplier::GetRotorVelocity() {
   return GetMechanismVelocity() * m_gearing.GetMechanismToRotorRatio();
 }
 
-units::degrees_per_second_squared_t ArmSimSupplier::GetRotorAcceleration() {
-  return units::degrees_per_second_squared_t{0.0};
+units::turns_per_second_squared_t ArmSimSupplier::GetRotorAcceleration() {
+  return units::turns_per_second_squared_t{0.0};
 }
 
-void ArmSimSupplier::SetMechanismPosition(units::degree_t angle) {
+void ArmSimSupplier::SetMechanismPosition(units::turn_t angle) {
   m_sim.SetState(units::radian_t{angle}, m_sim.GetVelocity());
 }
 
-void ArmSimSupplier::SetMechanismVelocity(units::degrees_per_second_t velocity) {
+void ArmSimSupplier::SetMechanismVelocity(units::turns_per_second_t velocity) {
   m_sim.SetState(m_sim.GetAngle(), units::radians_per_second_t{velocity});
 }
 
-void ArmSimSupplier::SetRotorPosition(units::degree_t angle) {
+void ArmSimSupplier::SetRotorPosition(units::turn_t angle) {
   SetMechanismPosition(angle / m_gearing.GetMechanismToRotorRatio());
 }
 
-void ArmSimSupplier::SetRotorVelocity(units::degrees_per_second_t velocity) {
+void ArmSimSupplier::SetRotorVelocity(units::turns_per_second_t velocity) {
   SetMechanismVelocity(velocity / m_gearing.GetMechanismToRotorRatio());
 }
 
@@ -70,8 +71,13 @@ void ArmSimSupplier::FeedWatchdog() { m_watchdogFed = true; }
 units::ampere_t ArmSimSupplier::GetCurrentDrawAmps() { return m_sim.GetCurrentDraw(); }
 
 void ArmSimSupplier::SetInputVoltage(units::volt_t volts) {
+  m_lastInputVoltage = volts;
   m_sim.SetInputVoltage(volts);
   m_inputFed = true;
 }
+
+units::volt_t ArmSimSupplier::GetMechanismStatorVoltage() { return m_lastInputVoltage; }
+
+void ArmSimSupplier::SetMechanismStatorVoltage(units::volt_t volts) { SetInputVoltage(volts); }
 
 }  // namespace yams::motorcontrollers::simulation

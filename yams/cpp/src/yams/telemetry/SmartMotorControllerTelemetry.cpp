@@ -353,19 +353,19 @@ void SmartMotorControllerTelemetry::Publish(SmartMotorController& smc) {
         if (cfg.GetMechanismCircumference()) dt.Set(smc.GetMeasurementAcceleration().value());
         break;
       case DoubleTelemetryField::MechanismPosition:
-        dt.Set(smc.GetMechanismPosition().value() / 360.0);
+        dt.Set(smc.GetMechanismPosition().value());
         break;
       case DoubleTelemetryField::MechanismVelocity:
-        dt.Set(smc.GetMechanismVelocity().value() / 360.0);
+        dt.Set(smc.GetMechanismVelocity().value());
         break;
       case DoubleTelemetryField::MechanismAcceleration:
-        dt.Set(smc.GetMechanismAcceleration().value() / 360.0);
+        dt.Set(smc.GetMechanismAcceleration().value());
         break;
       case DoubleTelemetryField::RotorPosition:
-        dt.Set(smc.GetRotorPosition().value() / 360.0);
+        dt.Set(smc.GetRotorPosition().value());
         break;
       case DoubleTelemetryField::RotorVelocity:
-        dt.Set(smc.GetRotorVelocity().value() / 360.0);
+        dt.Set(smc.GetRotorVelocity().value());
         break;
       case DoubleTelemetryField::ExternalEncoderPosition:
         dt.Set(smc.GetExternalEncoderPosition().value_or(units::degree_t{0}).value() / 360.0);

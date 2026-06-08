@@ -39,7 +39,7 @@ frc2::CommandPtr SmartMechanism::SetVoltage(std::function<units::volt_t()> volts
 
 // ---- Direct setpoint helpers ------------------------------------------------
 
-void SmartMechanism::SetMechanismVelocitySetpoint(units::degrees_per_second_t velocity) {
+void SmartMechanism::SetMechanismVelocitySetpoint(units::turns_per_second_t velocity) {
   m_smc->StartClosedLoopController();
   m_smc->SetVelocity(velocity);
 }
@@ -49,7 +49,7 @@ void SmartMechanism::SetMeasurementVelocitySetpoint(units::meters_per_second_t v
   m_smc->SetVelocity(velocity);
 }
 
-void SmartMechanism::SetMechanismPositionSetpoint(units::degree_t angle) {
+void SmartMechanism::SetMechanismPositionSetpoint(units::turn_t angle) {
   m_smc->StartClosedLoopController();
   m_smc->SetPosition(angle);
 }
@@ -73,7 +73,7 @@ void SmartMechanism::SetDutyCycleSetpoint(double dutycycle) {
 
 motorcontrollers::SmartMotorController* SmartMechanism::GetMotorController() { return m_smc; }
 
-std::optional<units::degree_t> SmartMechanism::GetMechanismSetpoint() {
+std::optional<units::turn_t> SmartMechanism::GetMechanismSetpoint() {
   return m_smc->GetMechanismPositionSetpoint();
 }
 

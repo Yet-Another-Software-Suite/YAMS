@@ -196,7 +196,7 @@ void SmartMotorController::IterateClosedLoopController() {
                                    units::radians_per_second_t{nxtVelRad})
                        .value();
       } else {
-        auto setV = m_setpointVelocity.value_or(units::degrees_per_second_t{0});
+        auto setV = m_setpointVelocity.value_or(units::turns_per_second_t{0});
         ffOutput = armFF
                        ->Calculate(units::radian_t{units::radian_t{GetMechanismPosition()}.value()},
                                    units::radians_per_second_t{GetMechanismVelocity()},
@@ -233,7 +233,7 @@ void SmartMotorController::IterateClosedLoopController() {
             simFF->Calculate(units::turns_per_second_t{curV}, units::turns_per_second_t{nxtV})
                 .value();
       } else {
-        auto nxtV = m_setpointVelocity.value_or(units::degrees_per_second_t{0});
+        auto nxtV = m_setpointVelocity.value_or(units::turns_per_second_t{0});
         ffOutput = simFF
                        ->Calculate(units::turns_per_second_t{GetMechanismVelocity()},
                                    units::turns_per_second_t{nxtV})
@@ -378,11 +378,11 @@ frc2::sysid::SysIdRoutine SmartMotorController::SysId(units::volt_t maxVoltage,
 
 // ---- Misc -----------------------------------------------------------------
 
-std::optional<units::degree_t> SmartMotorController::GetMechanismPositionSetpoint() const {
+std::optional<units::turn_t> SmartMotorController::GetMechanismPositionSetpoint() const {
   return m_setpointPosition;
 }
 
-std::optional<units::degrees_per_second_t> SmartMotorController::GetMechanismSetpointVelocity()
+std::optional<units::turns_per_second_t> SmartMotorController::GetMechanismSetpointVelocity()
     const {
   return m_setpointVelocity;
 }

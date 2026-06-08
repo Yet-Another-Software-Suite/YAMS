@@ -11,7 +11,7 @@
 #include <units/velocity.h>
 #include <units/voltage.h>
 
-#include <ctre/phoenix6/TalonFX.hpp>
+#include <rev/SparkMax.h>
 #include <functional>
 #include <optional>
 
@@ -20,7 +20,7 @@
 #include "yams/mechanisms/config/FlyWheelConfig.hpp"
 #include "yams/mechanisms/velocity/FlyWheel.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
-#include "yams/motorcontrollers/remote/TalonFXWrapper.hpp"
+#include "yams/motorcontrollers/local/SparkWrapper.hpp"
 
 class ShooterSubsystem : public frc2::SubsystemBase {
  public:
@@ -42,11 +42,11 @@ class ShooterSubsystem : public frc2::SubsystemBase {
   void SimulationPeriodic() override;
 
  private:
-  ctre::phoenix6::hardware::TalonFX m_flywheelMotor1{1};
-  ctre::phoenix6::hardware::TalonFX m_flywheelMotor2{2};
+ rev::spark::SparkMax m_flywheelMotor1{3, rev::spark::SparkMax::MotorType::kBrushless};
+ rev::spark::SparkMax m_flywheelMotor2{4, rev::spark::SparkMax::MotorType::kBrushless};
 
   yams::motorcontrollers::SmartMotorControllerConfig m_motorConfig;
-  std::optional<yams::motorcontrollers::remote::TalonFXWrapper> m_motor;
+  std::optional<yams::motorcontrollers::local::SparkWrapper> m_motor;
 
   yams::mechanisms::config::FlyWheelConfig m_shooterConfig;
   std::optional<yams::mechanisms::velocity::FlyWheel> m_shooter;
