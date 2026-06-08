@@ -18,13 +18,13 @@ ArmSimSupplier::ArmSimSupplier(frc::sim::SingleJointedArmSim& sim,
       m_period(period) {}
 
 void ArmSimSupplier::UpdateSim() {
-  m_watchdogFed = false;
   if (!m_inputFed) {
     m_lastInputVoltage = units::volt_t{m_dutyCycleSupplier() * GetMechanismSupplyVoltage().value()};
     m_sim.SetInputVoltage(m_lastInputVoltage);
   }
   m_inputFed = false;
   m_sim.Update(m_period);
+  FeedWatchdog();
 }
 
 units::turn_t ArmSimSupplier::GetMechanismPosition() { return m_sim.GetAngle(); }
@@ -66,6 +66,8 @@ void ArmSimSupplier::SetRotorVelocity(units::turns_per_second_t velocity) {
 bool ArmSimSupplier::IsWatchdogExpired() { return !m_watchdogFed; }
 
 void ArmSimSupplier::FeedWatchdog() { m_watchdogFed = true; }
+
+void ArmSimSupplier::StarveWatchdog() { m_watchdogFed = false; }
 
 units::ampere_t ArmSimSupplier::GetCurrentDrawAmps() { return m_sim.GetCurrentDraw(); }
 

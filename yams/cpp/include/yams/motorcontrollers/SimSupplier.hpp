@@ -114,6 +114,9 @@ class SimSupplier {
   /** Feed the simulation watchdog to indicate the sim state is current. */
   virtual void FeedWatchdog() = 0;
 
+  /** Stale the simulation watchdog so the next SimIterate triggers an update. */
+  virtual void StarveWatchdog() = 0;
+
   /**
    * Get the current draw from the simulated motor.
    *

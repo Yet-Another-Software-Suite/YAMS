@@ -19,13 +19,13 @@ DCMotorSimSupplier::DCMotorSimSupplier(frc::sim::DCMotorSim& sim,
       m_period(period) {}
 
 void DCMotorSimSupplier::UpdateSim() {
-  m_watchdogFed = false;
   if (!m_inputFed) {
     m_lastInputVoltage = units::volt_t{m_dutyCycleSupplier() * GetMechanismSupplyVoltage().value()};
     m_sim.SetInputVoltage(m_lastInputVoltage);
   }
   m_inputFed = false;
   m_sim.Update(m_period);
+  FeedWatchdog();
 }
 
 units::turn_t DCMotorSimSupplier::GetMechanismPosition() { return m_sim.GetAngularPosition(); }
@@ -67,6 +67,8 @@ void DCMotorSimSupplier::SetRotorVelocity(units::turns_per_second_t velocity) {
 bool DCMotorSimSupplier::IsWatchdogExpired() { return !m_watchdogFed; }
 
 void DCMotorSimSupplier::FeedWatchdog() { m_watchdogFed = true; }
+
+void DCMotorSimSupplier::StarveWatchdog() { m_watchdogFed = false; }
 
 units::ampere_t DCMotorSimSupplier::GetCurrentDrawAmps() { return m_sim.GetCurrentDraw(); }
 

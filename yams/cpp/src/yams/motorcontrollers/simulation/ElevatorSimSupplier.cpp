@@ -20,13 +20,13 @@ ElevatorSimSupplier::ElevatorSimSupplier(frc::sim::ElevatorSim& sim,
       m_period(period) {}
 
 void ElevatorSimSupplier::UpdateSim() {
-  m_watchdogFed = false;
   if (!m_inputFed) {
     m_lastInputVoltage = units::volt_t{m_dutyCycleSupplier() * GetMechanismSupplyVoltage().value()};
     m_sim.SetInputVoltage(m_lastInputVoltage);
   }
   m_inputFed = false;
   m_sim.Update(m_period);
+  FeedWatchdog();
 }
 
 units::turn_t ElevatorSimSupplier::GetMechanismPosition() {
@@ -72,6 +72,8 @@ void ElevatorSimSupplier::SetRotorVelocity(units::turns_per_second_t velocity) {
 bool ElevatorSimSupplier::IsWatchdogExpired() { return !m_watchdogFed; }
 
 void ElevatorSimSupplier::FeedWatchdog() { m_watchdogFed = true; }
+
+void ElevatorSimSupplier::StarveWatchdog() { m_watchdogFed = false; }
 
 units::ampere_t ElevatorSimSupplier::GetCurrentDrawAmps() { return m_sim.GetCurrentDraw(); }
 

@@ -54,6 +54,7 @@ class ArmSimSupplier : public SimSupplier {
 
   bool IsWatchdogExpired() override;
   void FeedWatchdog() override;
+  void StarveWatchdog() override;
   units::ampere_t GetCurrentDrawAmps() override;
   units::volt_t GetMechanismSupplyVoltage() override;
   units::volt_t GetMechanismStatorVoltage() override;

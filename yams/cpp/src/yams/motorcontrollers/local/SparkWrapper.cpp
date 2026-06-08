@@ -151,7 +151,7 @@ void SparkWrapper::SetupSimulation() {
 void SparkWrapper::SimIterate() {
   // if (!frc::RobotBase::IsSimulation() || !m_simSupplier || !m_sparkSim) return;
 
-  if (m_simSupplier->IsWatchdogExpired()) m_simSupplier->UpdateSim();
+  m_simSupplier->UpdateSim();
 
   units::second_t dt = m_config.GetClosedLoopControlPeriod().value_or(20_ms);
   units::turns_per_second_t mechVelRps = m_simSupplier->GetMechanismVelocity();
