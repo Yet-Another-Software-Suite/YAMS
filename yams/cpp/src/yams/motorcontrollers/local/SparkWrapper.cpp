@@ -174,7 +174,7 @@ void SparkWrapper::SynchronizeRelativeEncoder() {}
 // ---- Open-loop outputs ------------------------------------------------------
 
 void SparkWrapper::SetDutyCycle(double dc) { m_spark->Set(dc); }
-double SparkWrapper::GetDutyCycle() { return m_spark->GetAppliedOutput(); }
+double SparkWrapper::GetDutyCycle() { return m_sparkSim.has_value() ? m_sparkSim.value().GetAppliedOutput() : m_spark->GetAppliedOutput(); }
 
 void SparkWrapper::SetVoltage(units::volt_t voltage) { m_spark->SetVoltage(voltage); }
 
