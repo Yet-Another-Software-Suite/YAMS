@@ -133,6 +133,8 @@ javadoc {
     title = "Yet Another Mechanism System API"
     destinationDir = file("$releasePath/javadocs")
     options {
+        encoding = 'UTF-8'
+        charSet = 'UTF-8'
         links "https://docs.oracle.com/en/java/javase/$javaVersion/docs/api/",
                 'https://github.wpilib.org/allwpilib/docs/release/java/',
                 'https://codedocs.revrobotics.com/java/',
