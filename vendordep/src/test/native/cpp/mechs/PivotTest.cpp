@@ -48,9 +48,8 @@ static SmartMotorControllerConfig MakePivotSMCConfig(ProfileType profile, TestSu
   switch (profile) {
     case ProfileType::Trapezoid:
       cfg.WithTrapezoidProfile(
-          units::degrees_per_second_t{360.0},
-          units::unit_t<units::compound_unit<units::angular_velocity::degrees_per_second,
-                                             units::inverse<units::seconds>>>{90.0});
+          1_rps,
+          0.5_rps_per_second);
       break;
     case ProfileType::Exponential:
       cfg.WithExponentialProfile(0.7, 0.05, 12.0_V);
