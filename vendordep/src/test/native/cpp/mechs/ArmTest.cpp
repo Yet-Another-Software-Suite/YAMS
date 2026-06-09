@@ -70,6 +70,7 @@ static positional::Arm* CreateArm(SmartMotorController* smc, TestSubsystem* subs
       .WithArmLength(units::meter_t{4.0 * 0.0254})  // 4 inches → meters
       .WithMinAngle(-100.0_deg)
       .WithMaxAngle(200.0_deg)
+      .WithMOI(units::kilogram_square_meter_t{0.01})
       .WithStartingAngle(0.0_deg);
   // withHorizontalZero only for CTRE controllers in the Java tests
   // (not a config option in our C++ ArmConfig yet; add if needed)
