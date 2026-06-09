@@ -72,6 +72,7 @@ static positional::Elevator* CreateElevator(SmartMotorController* smc, TestSubsy
       .WithStartingHeight(0.0_m)
       .WithMinimumHeight(0.0_m)
       .WithCarriageMass(2_lb)
+      .WithDrumRadius(0.22_in * 24.0 / (2.0 * M_PI))
       .WithMaximumHeight(3.0_m);
   positional::Elevator* elevator = new positional::Elevator(cfg);
   subsys->m_mechSimPeriodic = [elevator] { elevator->SimIterate(); };
