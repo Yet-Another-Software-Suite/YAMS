@@ -13,15 +13,47 @@ on:
 
 jobs:
   build-cross:
+    name: Release - ${{ matrix.artifact-name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - container: wpilib/roborio-cross-ubuntu:2026-22.04
+            artifact-name: athena
+            build-options: "-Ponlylinuxathena"
+          - container: wpilib/raspbian-cross-ubuntu:bookworm-22.04
+            artifact-name: arm32
+            build-options: "-Ponlylinuxarm32"
+          - container: wpilib/aarch64-cross-ubuntu:bookworm-22.04
+            artifact-name: arm64
+            build-options: "-Ponlylinuxarm64"
+    runs-on: ubuntu-22.04
+    container: ${{ matrix.container }}
+    env:
+      releaseVersion: ${{ inputs.releaseVersion }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure git safe directory
+        run: git config --global --add safe.directory /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}
+      - name: Publish
+        run: ./gradlew publish ${{ matrix.build-options }}
+        working-directory: vendordep
+      - uses: actions/upload-artifact@v4
+        with:
+          name: maven-${{ matrix.artifact-name }}
+          path: vendordep/build/maven/
+
+  build-host:
+    name: Release - ${{ matrix.artifact-name }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: windows-latest
-            name: windows
-            gradlew: gradlew.bat
+            artifact-name: windows
+            gradlew: ./gradlew.bat
           - os: macos-latest
-            name: macos
+            artifact-name: macos
             gradlew: ./gradlew
     runs-on: ${{ matrix.os }}
     env:
@@ -31,37 +63,30 @@ jobs:
         working-directory: vendordep
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
-
+      - name: Make gradlew executable
+        if: runner.os != 'Windows'
+        run: chmod +x gradlew
       - name: Install doxygen (Windows)
         if: runner.os == 'Windows'
         run: choco install doxygen.install -y
-
       - name: Install doxygen (macOS)
         if: runner.os == 'macOS'
         run: brew install doxygen
-
-      - name: Install roboRIO toolchain
-        run: ${{ matrix.gradlew }} installRoboRioToolchain
-
-      - name: Build
-        run: ${{ matrix.gradlew }} build
-
-      - name: Publish to local maven
-        run: ${{ matrix.gradlew }} publish
-
-      - name: Upload maven artifacts (${{ matrix.name }})
-        uses: actions/upload-artifact@v4
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Publish
+        run: ${{ matrix.gradlew }} publish -Pbuildalldesktop
+      - uses: actions/upload-artifact@v4
         with:
-          name: maven-${{ matrix.name }}
+          name: maven-${{ matrix.artifact-name }}
           path: vendordep/build/maven/
 
   release:
-    needs: build-cross
+    name: Release - Linux (publish)
+    needs: [build-cross, build-host]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -87,24 +112,17 @@ jobs:
       - run: chmod +x gradlew
         working-directory: ${{ env.workingDirectory }}
 
-      - name: Install doxygen
+      - name: Install doxygen and graphviz
         run: sudo apt-get install -y doxygen graphviz
 
-      - name: Install roboRIO toolchain
-        run: ./gradlew installRoboRioToolchain
-        working-directory: ${{ env.workingDirectory }}
+      - uses: gradle/actions/setup-gradle@v4
 
-      - name: Download Windows maven artifacts
+      - name: Download cross-platform maven artifacts
         uses: actions/download-artifact@v4
         with:
-          name: maven-windows
-          path: cross/windows/
-
-      - name: Download macOS maven artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: maven-macos
-          path: cross/macos/
+          pattern: maven-*
+          path: cross/
+          merge-multiple: false
 
       - name: Checkout gh-pages branch
         uses: actions/checkout@v4
@@ -114,10 +132,11 @@ jobs:
 
       - name: Merge cross-platform artifacts into maven
         run: |
-          cp -r cross/windows/. vendordep/build/maven/
-          cp -r cross/macos/. vendordep/build/maven/
+          for dir in cross/maven-*/; do
+            cp -r "$dir." vendordep/build/maven/
+          done
 
-      - name: Build and publish (Linux)
+      - name: Build and publish (Linux — fixes maven metadata)
         run: ./gradlew publish
         working-directory: ${{ env.workingDirectory }}
 
