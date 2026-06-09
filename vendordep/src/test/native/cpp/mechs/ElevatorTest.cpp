@@ -38,13 +38,13 @@ static SmartMotorControllerConfig MakeElevatorSMCConfig(ProfileType profile, Tes
   constexpr double circumferenceM = 22.0 * (0.25 * 0.0254);
 
   SmartMotorControllerConfig cfg;
-  cfg.WithFeedback(4.0, 0.0, 0.0)
+  cfg.WithFeedback(5.0, 0.0, 0.0)
       .WithMechanismCircumference(units::meter_t{circumferenceM})
       .WithMeasurementLimits(0.0_m, 5.0_m)
       .WithMotorGearing(
           gearing::MechanismGearing{gearing::GearBox::FromReductionStages({3.0, 4.0})})
       .WithIdleMode(SmartMotorControllerConfig::MotorMode::BRAKE)
-      .WithStatorCurrentLimit(40.0_A)
+      .WithStatorCurrentLimit(60.0_A)
       .WithMotorInverted(false)
       .WithElevatorFeedforward(0.0, 0.0, 0.0)
       .WithClosedLoopMode()
