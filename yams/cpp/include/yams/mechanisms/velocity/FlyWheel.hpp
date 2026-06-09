@@ -10,9 +10,7 @@
 #include <units/angle.h>
 #include <units/angular_velocity.h>
 #include <units/length.h>
-#include <units/time.h>
 #include <units/velocity.h>
-#include <units/voltage.h>
 
 #include <functional>
 #include <optional>
@@ -70,17 +68,6 @@ class FlyWheel : public SmartVelocityMechanism {
    * @return Trigger for the lower velocity limit.
    */
   frc2::Trigger Min() override;
-
-  /**
-   * Build a SysId characterisation routine for this flywheel.
-   *
-   * @param maxVoltage  Maximum voltage for the quasistatic test.
-   * @param step        Voltage ramp rate for the dynamic test (V/s).
-   * @param duration    Duration of each test step.
-   * @return CommandPtr that runs the full SysId sequence.
-   */
-  frc2::CommandPtr SysId(units::volt_t maxVoltage, frc2::sysid::ramp_rate_t step,
-                         units::second_t duration) override;
 
   // ---- FlyWheel-specific interface ------------------------------------------
 

@@ -9,6 +9,7 @@
 #include <units/angle.h>
 #include <units/angular_acceleration.h>
 #include <units/angular_velocity.h>
+#include <units/moment_of_inertia.h>
 
 #include <chrono>
 #include <cmath>
@@ -42,14 +43,13 @@ static SmartMotorControllerConfig MakePivotSMCConfig(ProfileType profile, TestSu
       .WithMotorInverted(false)
       .WithSimpleFeedforward(1.0, 0.0, 0.0)
       .WithClosedLoopMode()
+      .WithMOI(units::kilogram_square_meter_t{0.0001})
       .WithSubsystem(subsys)
       .WithTelemetry(name);
 
   switch (profile) {
     case ProfileType::Trapezoid:
-      cfg.WithTrapezoidProfile(
-          1_rps,
-          0.5_rps / 1_s);
+      cfg.WithTrapezoidProfile(1_tps, 0.5_tr_per_s_sq);
       break;
     case ProfileType::Exponential:
       cfg.WithExponentialProfile(0.7, 0.05, 12.0_V);
@@ -66,7 +66,6 @@ static positional::Pivot* CreatePivot(SmartMotorController* smc, TestSubsystem* 
       .WithSubsystem(subsys)
       .WithMinAngle(-100.0_deg)
       .WithMaxAngle(150.0_deg)
-      .WithMOI(units::kilogram_square_meter_t{0.0001})
       .WithStartingAngle(0.0_deg);
   positional::Pivot* pivot = new positional::Pivot(cfg);
   subsys->m_mechSimPeriodic = [pivot] { pivot->SimIterate(); };

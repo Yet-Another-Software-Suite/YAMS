@@ -6,11 +6,9 @@
 #include <frc/system/plant/DCMotor.h>
 #include <frc2/command/CommandPtr.h>
 #include <frc2/command/SubsystemBase.h>
-#include <ctre/phoenix6/TalonFX.hpp>
 #include <units/length.h>
-#include <units/time.h>
-#include <units/voltage.h>
 
+#include <ctre/phoenix6/TalonFX.hpp>
 #include <optional>
 
 #include "yams/gearing/GearBox.hpp"
@@ -26,7 +24,6 @@ class ElevatorSubsystem : public frc2::SubsystemBase {
 
   frc2::CommandPtr ElevCmd(double dutycycle);
   frc2::CommandPtr SetHeight(units::meter_t height);
-  frc2::CommandPtr SysId();
 
   void Periodic() override;
   void SimulationPeriodic() override;

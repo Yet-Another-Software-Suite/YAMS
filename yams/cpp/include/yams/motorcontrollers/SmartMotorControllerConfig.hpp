@@ -16,6 +16,7 @@
 #include <units/angular_velocity.h>
 #include <units/current.h>
 #include <units/length.h>
+#include <units/mass.h>
 #include <units/moment_of_inertia.h>
 #include <units/temperature.h>
 #include <units/time.h>
@@ -217,6 +218,59 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithExponentialProfile(double kV, double kA, units::volt_t maxInput);
+
+  /**
+   * Derive an exponential motion profile from arm/flywheel system characteristics.
+   *
+   * Computes kV and kA from the motor model and moment of inertia via the
+   * flywheel velocity state-space model.  Uses the gearing configured via
+   * WithMotorGearing (defaults to 1:1 if not set).
+   *
+   * @param maxVolts Maximum input voltage.
+   * @param motor    DC motor model.
+   * @param moi      Moment of inertia of the mechanism.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithExponentialProfile(units::volt_t maxVolts, frc::DCMotor motor,
+                                                     units::kilogram_square_meter_t moi);
+
+  /**
+   * Derive a linear exponential motion profile from elevator system characteristics.
+   *
+   * Computes kV and kA from the motor model, carriage mass, and drum radius via the
+   * elevator velocity state-space model.  Also sets the mechanism circumference so
+   * that linear closed-loop mode is activated.
+   *
+   * @param maxVolts   Maximum input voltage.
+   * @param motor      DC motor model.
+   * @param mass       Mass of the elevator carriage.
+   * @param drumRadius Radius of the elevator drum.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithExponentialProfile(units::volt_t maxVolts, frc::DCMotor motor,
+                                                     units::kilogram_t mass,
+                                                     units::meter_t drumRadius);
+
+  /**
+   * Build an exponential motion profile from max velocity and acceleration constraints.
+   *
+   * @param maxVolts        Maximum input voltage.
+   * @param maxVelocity     Maximum angular velocity.
+   * @param maxAcceleration Maximum angular acceleration.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithExponentialProfile(
+      units::volt_t maxVolts, units::turns_per_second_t maxVelocity,
+      units::turns_per_second_squared_t maxAcceleration);
+
+  /**
+   * Set the exponential motion profile directly from a Constraints object.
+   *
+   * @param constraints Pre-built ExponentialProfile Constraints.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithExponentialProfile(
+      frc::ExponentialProfile<units::turns, units::volts>::Constraints constraints);
 
   // ---- LQR ---------------------------------------------------------------
 
@@ -436,6 +490,17 @@ class SmartMotorControllerConfig {
   SmartMotorControllerConfig& WithMOI(units::kilogram_square_meter_t moi);
 
   /**
+   * Estimate and set the moment of inertia for simulation from arm length and mass.
+   *
+   * Uses SingleJointedArmSim::EstimateMOI (1/3 * mass * length²).
+   *
+   * @param length Arm length.
+   * @param mass   Arm mass.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithMOI(units::meter_t length, units::kilogram_t mass);
+
+  /**
    * Set the starting mechanism position (seeds the encoder and sim objects on init).
    *
    * @param startingAngle Starting mechanism angle in degrees.
@@ -605,15 +670,20 @@ class SmartMotorControllerConfig {
 
   /** @return true if a trapezoidal motion profile is configured. */
   bool HasTrapezoidProfile() const;
-  /** @return true if an exponential motion profile is configured. */
+  /** @return true if an angular exponential motion profile is configured. */
   bool HasExponentialProfile() const;
+  /** @return true if a linear (meters-based) exponential motion profile is configured. */
+  bool HasLinearExponentialProfile() const;
 
   /** @return Optional angular trapezoidal profile. */
   std::optional<frc::TrapezoidProfile<units::turns>> GetTrapezoidProfile() const;
   /** @return Optional linear trapezoidal profile. */
   std::optional<frc::TrapezoidProfile<units::meters>> GetLinearTrapezoidProfile() const;
-  /** @return Optional exponential profile. */
+  /** @return Optional angular exponential profile. */
   std::optional<frc::ExponentialProfile<units::turns, units::volts>> GetExponentialProfile() const;
+  /** @return Optional linear (meters-based) exponential profile. */
+  std::optional<frc::ExponentialProfile<units::meters, units::volts>>
+  GetLinearExponentialProfile() const;
 
   /** @return Optional max angular velocity constraint for hardware configuration. */
   std::optional<units::turns_per_second_t> GetTrapMaxVelocityTurns() const;
@@ -651,6 +721,7 @@ class SmartMotorControllerConfig {
   std::optional<frc::TrapezoidProfile<units::turns>> m_trapProfile;
   std::optional<frc::TrapezoidProfile<units::meters>> m_linearTrapProfile;
   std::optional<frc::ExponentialProfile<units::turns, units::volts>> m_expoProfile;
+  std::optional<frc::ExponentialProfile<units::meters, units::volts>> m_linearExpoProfile;
   bool m_velocityTrapProfile{false};
   // Stored constraint values for hardware motor controller configuration
   std::optional<units::turns_per_second_t> m_trapMaxVelTurns;

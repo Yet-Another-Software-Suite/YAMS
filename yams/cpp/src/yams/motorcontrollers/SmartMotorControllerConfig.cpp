@@ -3,7 +3,11 @@
 
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 
+#include <frc/simulation/SingleJointedArmSim.h>
+#include <frc/system/plant/LinearSystemId.h>
+
 #include <cmath>
+#include <numbers>
 #include <stdexcept>
 #include <string>
 
@@ -133,6 +137,66 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
     double kV, double kA, units::volt_t maxInput) {
   using Profile = frc::ExponentialProfile<units::turns, units::volts>;
   m_expoProfile = Profile{Profile::Constraints{maxInput, Profile::kV_t{kV}, Profile::kA_t{kA}}};
+  m_linearExpoProfile = std::nullopt;
+  m_trapProfile = std::nullopt;
+  return *this;
+}
+
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
+    units::volt_t maxVolts, frc::DCMotor motor, units::kilogram_square_meter_t moi) {
+  using Profile = frc::ExponentialProfile<units::turns, units::volts>;
+  m_moi = moi;
+  double gearing = m_motorGearing ? m_motorGearing->GetMechanismToRotorRatio() : 1.0;
+  auto sys = frc::LinearSystemId::FlywheelSystem(motor, moi, gearing);
+  // A is [1/s], B is [(rad/s²)/V] from the flywheel velocity model.
+  // Convert to turns: kV [V/(turn/s)] = (-A/B) * 2π, kA [V/(turn/s²)] = (2π/B).
+  double A = sys.A()(0, 0);
+  double B = sys.B()(0, 0);
+  double kV = (-A / B) * (2.0 * std::numbers::pi);
+  double kA = (2.0 * std::numbers::pi) / B;
+  m_expoProfile = Profile{Profile::Constraints{maxVolts, Profile::kV_t{kV}, Profile::kA_t{kA}}};
+  m_linearExpoProfile = std::nullopt;
+  m_trapProfile = std::nullopt;
+  return *this;
+}
+
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
+    units::volt_t maxVolts, frc::DCMotor motor, units::kilogram_t mass, units::meter_t drumRadius) {
+  using LinearProfile = frc::ExponentialProfile<units::meters, units::volts>;
+  double gearing = m_motorGearing ? m_motorGearing->GetMechanismToRotorRatio() : 1.0;
+  auto sys = frc::LinearSystemId::ElevatorSystem(motor, mass, drumRadius, gearing);
+  // Extract velocity-row coefficients from the 2-state [position, velocity] system.
+  // A[1][1] is [1/s], B[1][0] is [(m/s²)/V] — already in meters, no conversion needed.
+  double A = sys.A()(1, 1);
+  double B = sys.B()(1, 0);
+  double kV = -A / B;   // [V·s/m = V/(m/s)]
+  double kA = 1.0 / B;  // [V·s²/m = V/(m/s²)]
+  m_linearExpoProfile = LinearProfile{
+      LinearProfile::Constraints{maxVolts, LinearProfile::kV_t{kV}, LinearProfile::kA_t{kA}}};
+  m_mechanismCircumference = 2.0 * std::numbers::pi * drumRadius;
+  m_expoProfile = std::nullopt;
+  m_trapProfile = std::nullopt;
+  m_linearTrapProfile = std::nullopt;
+  return *this;
+}
+
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
+    units::volt_t maxVolts, units::turns_per_second_t maxVelocity,
+    units::turns_per_second_squared_t maxAcceleration) {
+  using Profile = frc::ExponentialProfile<units::turns, units::volts>;
+  m_expoProfile = Profile{Profile::Constraints{maxVolts, Profile::kV_t{maxVolts / maxVelocity},
+                                               Profile::kA_t{maxVolts / maxAcceleration}}};
+  m_linearExpoProfile = std::nullopt;
+  m_trapProfile = std::nullopt;
+  return *this;
+}
+
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
+    frc::ExponentialProfile<units::turns, units::volts>::Constraints constraints) {
+  using Profile = frc::ExponentialProfile<units::turns, units::volts>;
+  m_expoProfile = Profile{constraints};
+  m_linearExpoProfile = std::nullopt;
+  m_trapProfile = std::nullopt;
   return *this;
 }
 
@@ -262,6 +326,12 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimMotor(frc::DCMoto
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithMOI(
     units::kilogram_square_meter_t moi) {
   m_moi = moi;
+  return *this;
+}
+
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithMOI(units::meter_t length,
+                                                                units::kilogram_t mass) {
+  m_moi = frc::sim::SingleJointedArmSim::EstimateMOI(length, mass);
   return *this;
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithStartingPosition(
@@ -410,6 +480,9 @@ bool SmartMotorControllerConfig::HasTrapezoidProfile() const {
   return m_trapProfile.has_value() || m_linearTrapProfile.has_value();
 }
 bool SmartMotorControllerConfig::HasExponentialProfile() const { return m_expoProfile.has_value(); }
+bool SmartMotorControllerConfig::HasLinearExponentialProfile() const {
+  return m_linearExpoProfile.has_value();
+}
 
 std::optional<frc::TrapezoidProfile<units::turns>> SmartMotorControllerConfig::GetTrapezoidProfile()
     const {
@@ -422,6 +495,10 @@ SmartMotorControllerConfig::GetLinearTrapezoidProfile() const {
 std::optional<frc::ExponentialProfile<units::turns, units::volts>>
 SmartMotorControllerConfig::GetExponentialProfile() const {
   return m_expoProfile;
+}
+std::optional<frc::ExponentialProfile<units::meters, units::volts>>
+SmartMotorControllerConfig::GetLinearExponentialProfile() const {
+  return m_linearExpoProfile;
 }
 
 std::optional<units::turns_per_second_t> SmartMotorControllerConfig::GetTrapMaxVelocityTurns()

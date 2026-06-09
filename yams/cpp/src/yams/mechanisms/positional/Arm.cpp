@@ -70,9 +70,9 @@ Arm::Arm(const config::ArmConfig& config) : SmartPositionalMechanism(), m_armCon
       throw ArmConfigurationException("Arm starting angle is empty", "Cannot create simulation.",
                                       "WithStartingAngle(units::degree_t)");
     }
-    if (!config.GetMOI().has_value()) {
+    if (!m_smc->GetConfig().GetMOI()) {
       throw ArmConfigurationException("Arm MOI is empty", "Cannot create simulation.",
-                                      "WithMOI(units::kilogram_square_meter_t)");
+                                      "smc->GetConfig().WithMOI(length, mass)");
     }
 
     auto& gearingOpt = m_smc->GetConfig().GetMotorGearing();
@@ -81,7 +81,7 @@ Arm::Arm(const config::ArmConfig& config) : SmartPositionalMechanism(), m_armCon
     units::radian_t startAngle = config.GetStartingAngle().value_or(0_deg);
 
     m_armSim.emplace(m_smc->GetDCMotor(), gearing.GetMechanismToRotorRatio(),
-                     config.GetMOI().value(), config.GetArmLength().value(),
+                     m_smc->GetConfig().GetMOI(), config.GetArmLength().value(),
                      units::radian_t{config.GetMinAngle().value()},
                      units::radian_t{config.GetMaxAngle().value()}, true, startAngle,
                      std::array<double, 2>{0, 0.002 / 4096.0});
@@ -169,15 +169,6 @@ frc2::Trigger Arm::Max() {
 frc2::Trigger Arm::Min() {
   return frc2::Trigger{
       [this] { return GetAngle() <= m_armConfig.GetMinAngle().value_or(units::degree_t{-36000}); }};
-}
-
-frc2::CommandPtr Arm::SysId(units::volt_t maxVoltage, frc2::sysid::ramp_rate_t step,
-                            units::second_t duration) {
-  auto routine = m_smc->SysId(maxVoltage, step, duration);
-  return frc2::cmd::Sequence(routine.Quasistatic(frc2::sysid::Direction::kForward),
-                             routine.Quasistatic(frc2::sysid::Direction::kReverse),
-                             routine.Dynamic(frc2::sysid::Direction::kForward),
-                             routine.Dynamic(frc2::sysid::Direction::kReverse));
 }
 
 // ---- Arm-specific interface -------------------------------------------------

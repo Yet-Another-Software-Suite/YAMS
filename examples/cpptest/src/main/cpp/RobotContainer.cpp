@@ -7,7 +7,6 @@
 #include <frc2/command/Commands.h>
 #include <frc2/command/button/Trigger.h>
 #include <units/angle.h>
-#include <units/voltage.h>
 
 RobotContainer::RobotContainer() {
   frc::DriverStation::SilenceJoystickConnectionWarning(true);
@@ -15,8 +14,8 @@ RobotContainer::RobotContainer() {
   // m_flyWheelSubsystem.SetDefaultCommand(m_flyWheelSubsystem.SetDutyCycle(0, 0));
   // m_arm.SetDefaultCommand(m_arm.ArmCmd(0));
   m_elevator.SetDefaultCommand(m_elevator.ElevCmd(0));
-  //m_turret.SetDefaultCommand(m_turret.TurretCmd(0.0));
-  // m_drive.SetDefaultCommand(m_drive.SetRobotRelativeChassisSpeeds(frc::ChassisSpeeds{}));
+  // m_turret.SetDefaultCommand(m_turret.TurretCmd(0.0));
+  //  m_drive.SetDefaultCommand(m_drive.SetRobotRelativeChassisSpeeds(frc::ChassisSpeeds{}));
 
   ConfigureBindings();
 }
@@ -42,12 +41,10 @@ void RobotContainer::ConfigureBindings() {
   // Elevator bindings (uncomment with ElevatorSubsystem):
   m_xboxController.Button(1).WhileTrue(m_elevator.SetHeight(1_m));
   m_xboxController.Button(2).WhileTrue(m_elevator.SetHeight(0_m));
-  m_xboxController.Button(3).WhileTrue(m_elevator.SysId());
 
   // Turret bindings:
   // m_xboxController.Button(1).WhileTrue(m_turret.TurretCmd(1));
   // m_xboxController.Button(2).WhileTrue(m_turret.TurretCmd(-1));
-  // m_xboxController.Button(3).WhileTrue(m_turret.SysId());
 }
 
 frc2::CommandPtr RobotContainer::GetAutonomousCommand() {

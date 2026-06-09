@@ -37,11 +37,6 @@ PivotConfig& PivotConfig::WithMaxAngle(units::degree_t angle) {
   return *this;
 }
 
-PivotConfig& PivotConfig::WithMOI(units::kilogram_square_meter_t moi) {
-  m_moi = moi;
-  return *this;
-}
-
 PivotConfig& PivotConfig::WithSimColor(const frc::Color8Bit& color) {
   m_simColor = color;
   return *this;
@@ -58,8 +53,6 @@ std::optional<units::degree_t> PivotConfig::GetStartingAngle() const { return m_
 std::optional<units::degree_t> PivotConfig::GetMinAngle() const { return m_minAngle; }
 
 std::optional<units::degree_t> PivotConfig::GetMaxAngle() const { return m_maxAngle; }
-
-std::optional<units::kilogram_square_meter_t> PivotConfig::GetMOI() const { return m_moi; }
 
 frc::Color8Bit PivotConfig::GetSimColor() const { return m_simColor; }
 

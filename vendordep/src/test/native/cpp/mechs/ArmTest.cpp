@@ -43,15 +43,13 @@ static SmartMotorControllerConfig MakeArmSMCConfig(ProfileType profile, TestSubs
       .WithMotorInverted(false)
       .WithArmFeedforward(0.0, 1.0, 0.0, 0.0)
       .WithClosedLoopMode()
+      .WithMOI(4_in, 1_lb)
       .WithSubsystem(subsys)
       .WithTelemetry(name);
 
   switch (profile) {
     case ProfileType::Trapezoid:
-      cfg.WithTrapezoidProfile(
-          units::degrees_per_second_t{180.0},
-          units::unit_t<units::compound_unit<units::angular_velocity::degrees_per_second,
-                                             units::inverse<units::seconds>>>{90.0});
+      cfg.WithTrapezoidProfile(180.0_deg_per_s, 90.0_deg_per_s_sq);
       break;
     case ProfileType::Exponential:
       // ~40 RPS max / 80 RPS² accel expressed as simple gains
@@ -67,10 +65,9 @@ static positional::Arm* CreateArm(SmartMotorController* smc, TestSubsystem* subs
   ArmConfig cfg;
   cfg.WithMotorController(smc)
       .WithSubsystem(subsys)
-      .WithArmLength(units::meter_t{4.0 * 0.0254})  // 4 inches → meters
+      .WithArmLength(4_in)  // 4 inches → meters
       .WithMinAngle(-100.0_deg)
       .WithMaxAngle(200.0_deg)
-      .WithMOI(units::kilogram_square_meter_t{0.01})
       .WithStartingAngle(0.0_deg);
   // withHorizontalZero only for CTRE controllers in the Java tests
   // (not a config option in our C++ ArmConfig yet; add if needed)

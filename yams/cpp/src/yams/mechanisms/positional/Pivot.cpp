@@ -70,9 +70,9 @@ Pivot::Pivot(const config::PivotConfig& config)
                                         "Cannot create simulation.",
                                         "WithStartingAngle(units::degree_t)");
     }
-    if (!config.GetMOI().has_value()) {
+    if (!m_smc->GetConfig().GetMOI()) {
       throw PivotConfigurationException("Pivot MOI is empty", "Cannot create simulation.",
-                                        "WithMOI(units::kilogram_square_meter_t)");
+                                        "smc->GetConfig().WithMOI(length, mass)");
     }
 
     // Create DCMotorSim and wire up DCMotorSimSupplier.
@@ -80,7 +80,7 @@ Pivot::Pivot(const config::PivotConfig& config)
     auto& gearingOpt = m_smc->GetConfig().GetMotorGearing();
     gearing::MechanismGearing gearing = gearingOpt.value_or(gearing::MechanismGearing::kOne);
 
-    auto plant = frc::LinearSystemId::DCMotorSystem(dcMotor, config.GetMOI().value(),
+    auto plant = frc::LinearSystemId::DCMotorSystem(dcMotor, m_smc->GetConfig().GetMOI(),
                                                     gearing.GetMechanismToRotorRatio());
     m_dcMotorSim.emplace(plant, dcMotor);
 
@@ -168,15 +168,6 @@ frc2::Trigger Pivot::Min() {
   return frc2::Trigger{[this] {
     return GetAngle() <= m_pivotConfig.GetMinAngle().value_or(units::degree_t{-36000});
   }};
-}
-
-frc2::CommandPtr Pivot::SysId(units::volt_t maxVoltage, frc2::sysid::ramp_rate_t step,
-                              units::second_t duration) {
-  auto routine = m_smc->SysId(maxVoltage, step, duration);
-  return frc2::cmd::Sequence(routine.Quasistatic(frc2::sysid::Direction::kForward),
-                             routine.Quasistatic(frc2::sysid::Direction::kReverse),
-                             routine.Dynamic(frc2::sysid::Direction::kForward),
-                             routine.Dynamic(frc2::sysid::Direction::kReverse));
 }
 
 // ---- Pivot-specific interface -----------------------------------------------

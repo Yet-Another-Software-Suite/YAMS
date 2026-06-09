@@ -21,7 +21,7 @@ namespace yams::motorcontrollers::simulation {
  *
  * Suitable for flywheel- and pivot-style mechanisms that use a simple DC motor
  * physics model.  The duty cycle is read from the motor controller each iteration
- * unless an explicit input voltage has been set (e.g., for SysId characterization).
+ * unless an explicit input voltage has been set externally.
  */
 class DCMotorSimSupplier : public SimSupplier {
  public:

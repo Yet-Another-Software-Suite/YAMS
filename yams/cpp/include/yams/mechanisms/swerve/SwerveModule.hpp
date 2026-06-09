@@ -69,7 +69,7 @@ class SwerveModule {
   config::SwerveModuleConfig m_config;
 
  public:
-  // Public so SwerveDrive can access them for SysId routines (mirrors Java protected fields).
+  // Public so SwerveDrive can access them directly (mirrors Java protected fields).
   motorcontrollers::SmartMotorController* m_driveMotorController;
   motorcontrollers::SmartMotorController* m_azimuthMotorController;
 };

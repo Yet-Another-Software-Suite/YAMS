@@ -7,7 +7,6 @@
 #include <units/angle.h>
 #include <units/current.h>
 #include <units/time.h>
-#include <units/voltage.h>
 
 using namespace yams::motorcontrollers;
 using namespace yams::gearing;
@@ -53,9 +52,5 @@ void ArmSubsystem::Periodic() {
 void ArmSubsystem::SimulationPeriodic() { m_arm->SimIterate(); }
 
 frc2::CommandPtr ArmSubsystem::ArmCmd(double dutycycle) { return m_arm->Set(dutycycle); }
-
-frc2::CommandPtr ArmSubsystem::SysId() {
-  return m_arm->SysId(units::volt_t{3}, frc2::sysid::ramp_rate_t{3.0}, units::second_t{30});
-}
 
 frc2::CommandPtr ArmSubsystem::SetAngle(units::degree_t angle) { return m_arm->Run(angle); }

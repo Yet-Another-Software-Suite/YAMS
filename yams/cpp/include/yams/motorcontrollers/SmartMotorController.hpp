@@ -11,7 +11,6 @@
 #include <frc/system/plant/DCMotor.h>
 #include <frc/trajectory/ExponentialProfile.h>
 #include <frc/trajectory/TrapezoidProfile.h>
-#include <frc2/command/sysid/SysIdRoutine.h>
 #include <networktables/NetworkTable.h>
 #include <units/acceleration.h>
 #include <units/angle.h>
@@ -545,19 +544,6 @@ class SmartMotorController {
    * @return Current ClosedLoopControllerSlot.
    */
   ClosedLoopControllerSlot GetClosedLoopControllerSlot() const;
-
-  // ---- SysId --------------------------------------------------------------
-
-  /**
-   * Build a SysId characterization routine for this motor controller.
-   *
-   * @param maxVoltage    Maximum voltage to apply during the quasistatic test.
-   * @param stepVoltage   Voltage ramp rate for the dynamic test (V/s).
-   * @param testDuration  Duration of each test step.
-   * @return Configured SysIdRoutine.
-   */
-  frc2::sysid::SysIdRoutine SysId(units::volt_t maxVoltage, frc2::sysid::ramp_rate_t stepVoltage,
-                                  units::second_t testDuration);
 
   // ---- Misc ---------------------------------------------------------------
 

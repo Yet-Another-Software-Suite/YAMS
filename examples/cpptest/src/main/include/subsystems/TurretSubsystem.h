@@ -11,8 +11,6 @@
 #include <frc2/command/CommandPtr.h>
 #include <frc2/command/SubsystemBase.h>
 #include <units/angle.h>
-#include <units/time.h>
-#include <units/voltage.h>
 
 #include <ctre/phoenix6/TalonFX.hpp>
 #include <optional>
@@ -34,7 +32,6 @@ class TurretSubsystem : public frc2::SubsystemBase {
   void SetAngleSetpoint(units::degree_t angle);
 
   frc2::CommandPtr TurretCmd(double dutycycle);
-  frc2::CommandPtr SysId();
   frc2::CommandPtr SetAngle(units::degree_t angle);
 
   void Periodic() override;

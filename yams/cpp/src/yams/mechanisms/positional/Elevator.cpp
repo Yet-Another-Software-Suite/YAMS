@@ -90,10 +90,11 @@ Elevator::Elevator(const config::ElevatorConfig& config)
     bool simulateGravity = !config.IsHorizontal();
     units::meter_t circumference = m_smc->GetConfig().GetMechanismCircumference().value();
 
-    m_elevatorSim.emplace(
-        dcMotor, gearing.GetMechanismToRotorRatio(), config.GetCarriageMass().value(), circumference / (2 * std::numbers::pi),
-        config.GetMinHeight().value(), config.GetMaxHeight().value(), simulateGravity,
-        config.GetStartingHeight().value(), std::array<double, 2>{0.01 / 4096.0, 0});
+    m_elevatorSim.emplace(dcMotor, gearing.GetMechanismToRotorRatio(),
+                          config.GetCarriageMass().value(), circumference / (2 * std::numbers::pi),
+                          config.GetMinHeight().value(), config.GetMaxHeight().value(),
+                          simulateGravity, config.GetStartingHeight().value(),
+                          std::array<double, 2>{0.01 / 4096.0, 0});
 
     units::second_t period = m_smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms);
     m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::ElevatorSimSupplier>(
@@ -186,15 +187,6 @@ frc2::Trigger Elevator::Min() {
   return frc2::Trigger{[this] {
     return GetHeight() <= m_elevatorConfig.GetMinHeight().value_or(units::meter_t{-99});
   }};
-}
-
-frc2::CommandPtr Elevator::SysId(units::volt_t maxVoltage, frc2::sysid::ramp_rate_t step,
-                                 units::second_t duration) {
-  auto routine = m_smc->SysId(maxVoltage, step, duration);
-  return frc2::cmd::Sequence(routine.Quasistatic(frc2::sysid::Direction::kForward),
-                             routine.Quasistatic(frc2::sysid::Direction::kReverse),
-                             routine.Dynamic(frc2::sysid::Direction::kForward),
-                             routine.Dynamic(frc2::sysid::Direction::kReverse));
 }
 
 // ---- Elevator-specific interface --------------------------------------------

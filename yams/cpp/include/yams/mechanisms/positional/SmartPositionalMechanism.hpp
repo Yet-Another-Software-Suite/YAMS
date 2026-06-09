@@ -5,10 +5,7 @@
 
 #include <frc/smartdashboard/MechanismLigament2d.h>
 #include <frc/smartdashboard/MechanismRoot2d.h>
-#include <frc2/command/CommandPtr.h>
 #include <frc2/command/button/Trigger.h>
-#include <units/time.h>
-#include <units/voltage.h>
 
 #include "yams/mechanisms/SmartMechanism.hpp"
 
@@ -18,8 +15,8 @@ namespace yams::mechanisms::positional {
  * Abstract base class for positionally-controlled mechanisms (arms, elevators,
  * pivots, etc.).
  *
- * Extends SmartMechanism with hardware limit triggers, a SysId routine
- * factory, and Mechanism2d ligament/root accessors for visualisation.
+ * Extends SmartMechanism with hardware limit triggers and Mechanism2d
+ * ligament/root accessors for visualisation.
  */
 class SmartPositionalMechanism : public SmartMechanism {
  public:
@@ -43,17 +40,6 @@ class SmartPositionalMechanism : public SmartMechanism {
    * @return Trigger for the minimum limit condition.
    */
   virtual frc2::Trigger Min() = 0;
-
-  /**
-   * Build a SysId characterisation routine for this mechanism.
-   *
-   * @param maxVoltage   Maximum voltage to apply during the quasistatic test.
-   * @param step         Voltage ramp rate for the dynamic test (V/s).
-   * @param duration     Duration of each test step.
-   * @return CommandPtr that runs the full SysId sequence.
-   */
-  virtual frc2::CommandPtr SysId(units::volt_t maxVoltage, frc2::sysid::ramp_rate_t step,
-                                 units::second_t duration) = 0;
 
   // ---- Visualisation accessors ----------------------------------------------
 

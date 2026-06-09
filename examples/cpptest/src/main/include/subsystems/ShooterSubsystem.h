@@ -6,12 +6,12 @@
 #include <frc/system/plant/DCMotor.h>
 #include <frc2/command/CommandPtr.h>
 #include <frc2/command/SubsystemBase.h>
+#include <rev/SparkMax.h>
 #include <units/angular_velocity.h>
 #include <units/time.h>
 #include <units/velocity.h>
 #include <units/voltage.h>
 
-#include <rev/SparkMax.h>
 #include <functional>
 #include <optional>
 
@@ -42,8 +42,8 @@ class ShooterSubsystem : public frc2::SubsystemBase {
   void SimulationPeriodic() override;
 
  private:
- rev::spark::SparkMax m_flywheelMotor1{3, rev::spark::SparkMax::MotorType::kBrushless};
- rev::spark::SparkMax m_flywheelMotor2{4, rev::spark::SparkMax::MotorType::kBrushless};
+  rev::spark::SparkMax m_flywheelMotor1{3, rev::spark::SparkMax::MotorType::kBrushless};
+  rev::spark::SparkMax m_flywheelMotor2{4, rev::spark::SparkMax::MotorType::kBrushless};
 
   yams::motorcontrollers::SmartMotorControllerConfig m_motorConfig;
   std::optional<yams::motorcontrollers::local::SparkWrapper> m_motor;

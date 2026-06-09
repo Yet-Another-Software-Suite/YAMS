@@ -129,15 +129,6 @@ frc2::Trigger FlyWheel::Min() {
   return frc2::Trigger{[] { return false; }};
 }
 
-frc2::CommandPtr FlyWheel::SysId(units::volt_t maxVoltage, frc2::sysid::ramp_rate_t step,
-                                 units::second_t duration) {
-  auto routine = m_smc->SysId(maxVoltage, step, duration);
-  return frc2::cmd::Sequence(routine.Quasistatic(frc2::sysid::Direction::kForward),
-                             routine.Quasistatic(frc2::sysid::Direction::kReverse),
-                             routine.Dynamic(frc2::sysid::Direction::kForward),
-                             routine.Dynamic(frc2::sysid::Direction::kReverse));
-}
-
 // ---- Run / RunTo / comparison / setpoint interface --------------------------
 
 frc2::CommandPtr FlyWheel::Run(units::degrees_per_second_t velocity) {

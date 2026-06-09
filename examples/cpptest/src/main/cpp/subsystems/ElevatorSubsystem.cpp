@@ -6,10 +6,9 @@
 #include <frc/system/plant/DCMotor.h>
 #include <units/current.h>
 #include <units/length.h>
-#include <units/time.h>
-#include <units/voltage.h>
-#include <numbers>
+
 #include <cmath>
+#include <numbers>
 
 using namespace yams::motorcontrollers;
 using namespace yams::gearing;
@@ -57,8 +56,4 @@ frc2::CommandPtr ElevatorSubsystem::ElevCmd(double dutycycle) { return m_elevato
 
 frc2::CommandPtr ElevatorSubsystem::SetHeight(units::meter_t height) {
   return m_elevator->Run(height);
-}
-
-frc2::CommandPtr ElevatorSubsystem::SysId() {
-  return m_elevator->SysId(units::volt_t{12}, frc2::sysid::ramp_rate_t{12.0}, units::second_t{30});
 }

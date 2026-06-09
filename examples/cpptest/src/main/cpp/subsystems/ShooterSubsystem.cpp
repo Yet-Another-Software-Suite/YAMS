@@ -9,6 +9,7 @@
 #include <units/length.h>
 #include <units/time.h>
 #include <units/voltage.h>
+
 #include <iostream>
 
 using namespace yams::motorcontrollers;
@@ -73,4 +74,4 @@ bool ShooterSubsystem::ReadyToShoot(units::degrees_per_second_t tolerance) const
 
 void ShooterSubsystem::Periodic() { m_shooter->UpdateTelemetry(); }
 
-void ShooterSubsystem::SimulationPeriodic() { m_shooter->SimIterate();}
+void ShooterSubsystem::SimulationPeriodic() { m_shooter->SimIterate(); }

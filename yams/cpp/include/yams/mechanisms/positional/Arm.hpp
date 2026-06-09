@@ -9,8 +9,6 @@
 #include <frc2/command/CommandPtr.h>
 #include <frc2/command/button/Trigger.h>
 #include <units/angle.h>
-#include <units/time.h>
-#include <units/voltage.h>
 
 #include <functional>
 #include <optional>
@@ -67,17 +65,6 @@ class Arm : public SmartPositionalMechanism {
    * @return Trigger for the lower angular hard limit.
    */
   frc2::Trigger Min() override;
-
-  /**
-   * Build a SysId characterisation routine for this arm.
-   *
-   * @param maxVoltage  Maximum voltage for the quasistatic test.
-   * @param step        Voltage ramp rate for the dynamic test (V/s).
-   * @param duration    Duration of each test step.
-   * @return CommandPtr that runs the full SysId sequence.
-   */
-  frc2::CommandPtr SysId(units::volt_t maxVoltage, frc2::sysid::ramp_rate_t step,
-                         units::second_t duration) override;
 
   // ---- Arm-specific interface -----------------------------------------------
 

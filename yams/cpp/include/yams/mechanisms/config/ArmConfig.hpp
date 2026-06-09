@@ -86,14 +86,6 @@ class ArmConfig {
   ArmConfig& WithArmLength(units::meter_t length);
 
   /**
-   * Set the moment of inertia of the arm (required for simulation).
-   *
-   * @param moi Arm moment of inertia in kg·m².
-   * @return *this for chaining.
-   */
-  ArmConfig& WithMOI(units::kilogram_square_meter_t moi);
-
-  /**
    * Set the Mechanism2d simulation colour for the arm ligament (default: aqua).
    *
    * @param color Desired colour.
@@ -124,9 +116,6 @@ class ArmConfig {
   /** Get the optional arm length. */
   std::optional<units::meter_t> GetArmLength() const;
 
-  /** Get the optional moment of inertia. */
-  std::optional<units::kilogram_square_meter_t> GetMOI() const;
-
   /** Get the Mechanism2d simulation colour. */
   frc::Color8Bit GetSimColor() const;
 
@@ -138,7 +127,6 @@ class ArmConfig {
   std::optional<units::degree_t> m_minAngle;
   std::optional<units::degree_t> m_maxAngle;
   std::optional<units::meter_t> m_armLength;
-  std::optional<units::kilogram_square_meter_t> m_moi;
   frc::Color8Bit m_simColor{frc::Color::kAqua};
 };
 

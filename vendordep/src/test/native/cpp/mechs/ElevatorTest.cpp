@@ -122,8 +122,10 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   units::millisecond_t period{
       smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms).value() * 1000.0};
 
-  SchedulerHelper::RunForDuration(1.0_s, [&] {
-    std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(period.value())));
+  SchedulerHelper::RunForDuration(isCTRE ? 1.0_s : 20.0_s, [&] {
+    if (isCTRE) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(period.value())));
+    }
     if (!isCTRE && smc->GetDutyCycle() != 0.0) passed = true;
   });
 

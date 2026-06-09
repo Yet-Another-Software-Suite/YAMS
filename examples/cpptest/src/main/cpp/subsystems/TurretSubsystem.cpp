@@ -11,11 +11,10 @@
 #include <units/angular_velocity.h>
 #include <units/current.h>
 #include <units/length.h>
-#include <units/voltage.h>
 
 #include <cmath>
-#include <numbers>
 #include <iostream>
+#include <numbers>
 
 using namespace yams::motorcontrollers;
 using namespace yams::gearing;
@@ -80,10 +79,11 @@ void TurretSubsystem::Periodic() { m_turret->UpdateTelemetry(); }
 
 void TurretSubsystem::SimulationPeriodic() { m_turret->SimIterate(); }
 
-frc2::CommandPtr TurretSubsystem::TurretCmd(double dutycycle) { return Run([this, dutycycle] {m_motor->SetDutyCycle(dutycycle);std::cout<<"HIIII";}); }
-
-frc2::CommandPtr TurretSubsystem::SysId() {
-  return m_turret->SysId(units::volt_t{3}, frc2::sysid::ramp_rate_t{3.0}, units::second_t{30});
+frc2::CommandPtr TurretSubsystem::TurretCmd(double dutycycle) {
+  return Run([this, dutycycle] {
+    m_motor->SetDutyCycle(dutycycle);
+    std::cout << "HIIII";
+  });
 }
 
 frc2::CommandPtr TurretSubsystem::SetAngle(units::degree_t angle) { return m_turret->Run(angle); }

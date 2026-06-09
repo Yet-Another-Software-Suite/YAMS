@@ -79,14 +79,6 @@ class PivotConfig {
   PivotConfig& WithMaxAngle(units::degree_t angle);
 
   /**
-   * Set the moment of inertia of the pivot (required for simulation).
-   *
-   * @param moi Pivot MOI in kg·m².
-   * @return *this for chaining.
-   */
-  PivotConfig& WithMOI(units::kilogram_square_meter_t moi);
-
-  /**
    * Set the Mechanism2d simulation colour for the pivot ligament (default: green).
    *
    * @param color Desired colour.
@@ -114,9 +106,6 @@ class PivotConfig {
   /** Get the optional maximum (upper hard-limit) angle. */
   std::optional<units::degree_t> GetMaxAngle() const;
 
-  /** Get the optional moment of inertia. */
-  std::optional<units::kilogram_square_meter_t> GetMOI() const;
-
   /** Get the Mechanism2d simulation colour. */
   frc::Color8Bit GetSimColor() const;
 
@@ -127,7 +116,6 @@ class PivotConfig {
   std::optional<units::degree_t> m_startingAngle;
   std::optional<units::degree_t> m_minAngle;
   std::optional<units::degree_t> m_maxAngle;
-  std::optional<units::kilogram_square_meter_t> m_moi;
   frc::Color8Bit m_simColor{frc::Color::kGreen};
 };
 

@@ -11,14 +11,11 @@
 #include <cmath>
 #include <cstdio>
 #include <memory>
+#include <numbers>
 #include <string>
 #include <utility>
 
 #include "yams/exceptions/SmartMotorControllerConfigurationException.hpp"
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 namespace yams::motorcontrollers {
 
@@ -167,11 +164,12 @@ void SmartMotorController::IterateClosedLoopController() {
     if (m_pid) pidOutput = m_pid->Calculate(measured, setpoint);
     if (m_lqr) {
       if (!linearMode) {
-        pidOutput = m_lqr
-                        ->Calculate(units::radian_t{measured * (2.0 * M_PI)},
-                                    units::radian_t{setpoint * (2.0 * M_PI)},
-                                    units::radians_per_second_t{velProfile * (2.0 * M_PI)})
-                        .value();
+        pidOutput =
+            m_lqr
+                ->Calculate(units::radian_t{measured * (2.0 * std::numbers::pi)},
+                            units::radian_t{setpoint * (2.0 * std::numbers::pi)},
+                            units::radians_per_second_t{velProfile * (2.0 * std::numbers::pi)})
+                .value();
       } else {
         pidOutput = m_lqr
                         ->Calculate(units::meter_t{measured}, units::meter_t{setpoint},
@@ -184,12 +182,13 @@ void SmartMotorController::IterateClosedLoopController() {
     if (auto armFF = m_config.GetArmFeedforward(m_slot); armFF) {
       auto profiled = m_config.HasTrapezoidProfile() || m_config.HasExponentialProfile();
       if (profiled) {
-        double curVelRad = m_trapState
-                               ? m_trapState->velocity.value() * (2.0 * M_PI)
-                               : (m_expoState ? m_expoState->velocity.value() * (2.0 * M_PI) : 0.0);
+        double curVelRad =
+            m_trapState
+                ? m_trapState->velocity.value() * (2.0 * std::numbers::pi)
+                : (m_expoState ? m_expoState->velocity.value() * (2.0 * std::numbers::pi) : 0.0);
         double nxtVelRad = m_config.GetTrapezoidProfile()
-                               ? nextTrapState.velocity.value() * (2.0 * M_PI)
-                               : nextExpoState.velocity.value() * (2.0 * M_PI);
+                               ? nextTrapState.velocity.value() * (2.0 * std::numbers::pi)
+                               : nextExpoState.velocity.value() * (2.0 * std::numbers::pi);
         ffOutput = armFF
                        ->Calculate(units::radian_t{units::radian_t{GetMechanismPosition()}.value()},
                                    units::radians_per_second_t{curVelRad},
@@ -254,10 +253,11 @@ void SmartMotorController::IterateClosedLoopController() {
     if (m_pid) pidOutput = m_pid->Calculate(measured, setpoint);
     if (m_lqr) {
       if (!linearMode) {
-        pidOutput = m_lqr
-                        ->Calculate(units::radians_per_second_t{measured * (2.0 * M_PI)},
-                                    units::radians_per_second_t{setpoint * (2.0 * M_PI)})
-                        .value();
+        pidOutput =
+            m_lqr
+                ->Calculate(units::radians_per_second_t{measured * (2.0 * std::numbers::pi)},
+                            units::radians_per_second_t{setpoint * (2.0 * std::numbers::pi)})
+                .value();
       } else {
         pidOutput = m_lqr
                         ->Calculate(units::meters_per_second_t{measured},
@@ -340,40 +340,6 @@ telemetry::UnsupportedTelemetryFields SmartMotorController::GetUnsupportedTeleme
 SmartMotorController::ClosedLoopControllerSlot SmartMotorController::GetClosedLoopControllerSlot()
     const {
   return m_slot;
-}
-
-// ---- SysId ----------------------------------------------------------------
-
-frc2::sysid::SysIdRoutine SmartMotorController::SysId(units::volt_t maxVoltage,
-                                                      frc2::sysid::ramp_rate_t stepVoltage,
-                                                      units::second_t testDuration) {
-  if (!m_config.GetTelemetryName()) {
-    throw SmartMotorControllerConfigurationException(
-        "Telemetry is undefined", "Cannot create SysIdRoutine", "WithTelemetry(name, verbosity)");
-  }
-  frc2::sysid::Config cfg{stepVoltage, maxVoltage, testDuration, {}};
-  if (m_config.GetLinearClosedLoopControllerUse()) {
-    return frc2::sysid::SysIdRoutine(
-        cfg, frc2::sysid::Mechanism{[this](units::volt_t v) { SetVoltage(v); },
-                                    [this](frc::sysid::SysIdRoutineLog* log) {
-                                      log->Motor(GetName())
-                                          .voltage(GetVoltage())
-                                          .velocity(GetMeasurementVelocity())
-                                          .position(GetMeasurementPosition());
-                                    },
-                                    m_config.GetSubsystem()});
-  } else {
-    return frc2::sysid::SysIdRoutine(
-        cfg,
-        frc2::sysid::Mechanism{[this](units::volt_t v) { SetVoltage(v); },
-                               [this](frc::sysid::SysIdRoutineLog* log) {
-                                 log->Motor(GetName())
-                                     .voltage(GetVoltage())
-                                     .velocity(units::turns_per_second_t{GetMechanismVelocity()})
-                                     .position(units::turn_t{GetMechanismPosition()});
-                               },
-                               m_config.GetSubsystem()});
-  }
 }
 
 // ---- Misc -----------------------------------------------------------------

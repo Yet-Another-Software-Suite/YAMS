@@ -7,13 +7,10 @@
 #include <units/math.h>
 
 #include <cmath>
+#include <numbers>
 #include <stdexcept>
 #include <utility>
 #include <vector>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 namespace yams::mechanisms::swerve {
 
@@ -104,7 +101,7 @@ SwerveDriveConfig& SwerveDriveConfig::WithTranslationController(frc::PIDControll
 }
 
 SwerveDriveConfig& SwerveDriveConfig::WithRotationController(frc::PIDController controller) {
-  controller.EnableContinuousInput(-M_PI, M_PI);
+  controller.EnableContinuousInput(-std::numbers::pi, std::numbers::pi);
   m_rotationController = std::move(controller);
   return *this;
 }
@@ -115,7 +112,7 @@ SwerveDriveConfig& SwerveDriveConfig::WithSimTranslationController(frc::PIDContr
 }
 
 SwerveDriveConfig& SwerveDriveConfig::WithSimRotationController(frc::PIDController controller) {
-  controller.EnableContinuousInput(-M_PI, M_PI);
+  controller.EnableContinuousInput(-std::numbers::pi, std::numbers::pi);
   m_simRotationController = std::move(controller);
   return *this;
 }
