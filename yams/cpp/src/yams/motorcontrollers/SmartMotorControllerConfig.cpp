@@ -10,6 +10,7 @@
 #include <numbers>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 namespace yams::motorcontrollers {
 
@@ -347,6 +348,11 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithStartingPosition(
   return *this;
 }
 
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithVendorControlRequest(std::any req) {
+  m_vendorControlRequest = std::move(req);
+  return *this;
+}
+
 // ---- Getters -------------------------------------------------------------
 
 const SmartMotorControllerConfig::PIDGains& SmartMotorControllerConfig::GetSlotGains(
@@ -456,6 +462,9 @@ std::optional<frc::DCMotor> SmartMotorControllerConfig::GetSimMotor() const { re
 units::kilogram_square_meter_t SmartMotorControllerConfig::GetMOI() const { return m_moi; }
 std::optional<units::degree_t> SmartMotorControllerConfig::GetStartingPosition() const {
   return m_startingPosition;
+}
+std::optional<std::any> SmartMotorControllerConfig::GetVendorControlRequest() const {
+  return m_vendorControlRequest;
 }
 
 const std::optional<gearing::MechanismGearing>& SmartMotorControllerConfig::GetMotorGearing()

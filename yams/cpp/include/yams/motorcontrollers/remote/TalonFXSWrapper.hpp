@@ -9,13 +9,24 @@
 #include <ctre/phoenix6/CANdi.hpp>
 #include <ctre/phoenix6/TalonFXS.hpp>
 #include <ctre/phoenix6/controls/DutyCycleOut.hpp>
+#include <ctre/phoenix6/controls/MotionMagicDutyCycle.hpp>
+#include <ctre/phoenix6/controls/MotionMagicExpoDutyCycle.hpp>
 #include <ctre/phoenix6/controls/MotionMagicExpoVoltage.hpp>
+#include <ctre/phoenix6/controls/MotionMagicTorqueCurrentFOC.hpp>
+#include <ctre/phoenix6/controls/MotionMagicVelocityDutyCycle.hpp>
+#include <ctre/phoenix6/controls/MotionMagicVelocityTorqueCurrentFOC.hpp>
 #include <ctre/phoenix6/controls/MotionMagicVelocityVoltage.hpp>
 #include <ctre/phoenix6/controls/MotionMagicVoltage.hpp>
+#include <ctre/phoenix6/controls/PositionDutyCycle.hpp>
+#include <ctre/phoenix6/controls/PositionTorqueCurrentFOC.hpp>
 #include <ctre/phoenix6/controls/PositionVoltage.hpp>
+#include <ctre/phoenix6/controls/VelocityDutyCycle.hpp>
+#include <ctre/phoenix6/controls/VelocityTorqueCurrentFOC.hpp>
 #include <ctre/phoenix6/controls/VelocityVoltage.hpp>
 #include <ctre/phoenix6/controls/VoltageOut.hpp>
+#include <any>
 #include <optional>
+#include <variant>
 
 #include "yams/math/DerivativeTimeFilter.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
@@ -140,11 +151,26 @@ class TalonFXSWrapper : public SmartMotorController {
   MotorArrangement m_arrangement;
   ctre::phoenix6::configs::TalonFXSConfiguration m_talonConfig;
 
-  ctre::phoenix6::controls::VelocityVoltage m_simpleVelocityReq{0_tps};
-  ctre::phoenix6::controls::PositionVoltage m_simplePositionReq{0_tr};
-  ctre::phoenix6::controls::MotionMagicVoltage m_trapPositionReq{0_tr};
-  ctre::phoenix6::controls::MotionMagicVelocityVoltage m_trapVelocityReq{0_tps};
-  ctre::phoenix6::controls::MotionMagicExpoVoltage m_expoPositionReq{0_tr};
+  // Active closed-loop control requests — variant selects the active request type
+  using PositionControlRequest = std::variant<
+      ctre::phoenix6::controls::PositionVoltage,
+      ctre::phoenix6::controls::PositionDutyCycle,
+      ctre::phoenix6::controls::PositionTorqueCurrentFOC,
+      ctre::phoenix6::controls::MotionMagicVoltage,
+      ctre::phoenix6::controls::MotionMagicDutyCycle,
+      ctre::phoenix6::controls::MotionMagicExpoVoltage,
+      ctre::phoenix6::controls::MotionMagicExpoDutyCycle,
+      ctre::phoenix6::controls::MotionMagicTorqueCurrentFOC>;
+  using VelocityControlRequest = std::variant<
+      ctre::phoenix6::controls::VelocityVoltage,
+      ctre::phoenix6::controls::VelocityDutyCycle,
+      ctre::phoenix6::controls::VelocityTorqueCurrentFOC,
+      ctre::phoenix6::controls::MotionMagicVelocityVoltage,
+      ctre::phoenix6::controls::MotionMagicVelocityDutyCycle,
+      ctre::phoenix6::controls::MotionMagicVelocityTorqueCurrentFOC>;
+
+  PositionControlRequest m_positionReq{ctre::phoenix6::controls::PositionVoltage{0_tr}};
+  VelocityControlRequest m_velocityReq{ctre::phoenix6::controls::VelocityVoltage{0_tps}};
   ctre::phoenix6::controls::VoltageOut m_voltageReq{0_V};
   ctre::phoenix6::controls::DutyCycleOut m_dutyCycleReq{0.0};
 

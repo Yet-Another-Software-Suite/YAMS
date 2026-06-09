@@ -121,7 +121,7 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE) {
     if (isCTRE)
       std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(
           smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms).value() * 1000.0)));
-    if (!isCTRE && smc->GetDutyCycle() != 0.0) passed = true;
+    if (smc->GetDutyCycle() != 0.0) passed = true;
   });
 
   auto postAngle = smc->GetMechanismPosition();

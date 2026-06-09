@@ -11,6 +11,9 @@ on:
         description: "Publish to WPILib"
         default: false
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build-cross:
     name: Release - ${{ matrix.artifact-name }}

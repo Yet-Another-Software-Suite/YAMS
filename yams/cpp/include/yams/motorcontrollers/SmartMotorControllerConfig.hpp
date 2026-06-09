@@ -23,6 +23,7 @@
 #include <units/velocity.h>
 #include <units/voltage.h>
 
+#include <any>
 #include <optional>
 #include <string>
 #include <vector>
@@ -518,6 +519,18 @@ class SmartMotorControllerConfig {
    */
   SmartMotorControllerConfig& WithStartingPosition(units::meter_t startingDistance);
 
+  /**
+   * Set a vendor-specific control request to use for position or velocity control.
+   *
+   * For TalonFX/TalonFXS: accepts any Phoenix 6 position or velocity ControlRequest
+   * (e.g. PositionDutyCycle, MotionMagicTorqueCurrentFOC, VelocityDutyCycle).
+   * The slot baked into the request object is honoured, overriding SetClosedLoopSlot.
+   *
+   * @param req Control request object (copied into std::any storage).
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithVendorControlRequest(std::any req);
+
   // === Getters ============================================================
 
   /** Aggregated PID and feedforward gains for one closed-loop slot. */
@@ -655,6 +668,8 @@ class SmartMotorControllerConfig {
   units::kilogram_square_meter_t GetMOI() const;
   /** @return Optional starting mechanism position (degrees). */
   std::optional<units::degree_t> GetStartingPosition() const;
+  /** @return Optional vendor-specific control request (set via WithVendorControlRequest). */
+  std::optional<std::any> GetVendorControlRequest() const;
 
   /** @return Optional mechanism gearing. */
   const std::optional<gearing::MechanismGearing>& GetMotorGearing() const;
@@ -767,6 +782,7 @@ class SmartMotorControllerConfig {
   std::optional<frc::DCMotor> m_simMotor;
   units::kilogram_square_meter_t m_moi{0.0001_kg_sq_m};
   std::optional<units::degree_t> m_startingPosition;
+  std::optional<std::any> m_vendorControlRequest;
 };
 
 }  // namespace yams::motorcontrollers

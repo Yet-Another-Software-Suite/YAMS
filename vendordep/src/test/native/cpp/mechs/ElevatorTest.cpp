@@ -112,7 +112,7 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
   }
 }
 
-static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE) {
+static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE, bool debugOutput = false) {
   auto preDist = smc->GetMeasurementPosition();
   bool passed = false;
 
@@ -122,11 +122,14 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   units::millisecond_t period{
       smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms).value() * 1000.0};
 
-  SchedulerHelper::RunForDuration(isCTRE ? 1.0_s : 20.0_s, [&] {
+  SchedulerHelper::RunForDuration(isCTRE ? 5.0_s : 20.0_s, [&] {
+    if (debugOutput) {
+      std::printf("[DEBUG] mechanism_position=%.6f turns, dutycyle=%.6f\n", smc->GetMechanismPosition().value(), smc->GetDutyCycle());
+    }
     if (isCTRE) {
       std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(period.value())));
     }
-    if (!isCTRE && smc->GetDutyCycle() != 0.0) passed = true;
+    if (smc->GetDutyCycle() != 0.0) passed = true;
   });
 
   auto postDist = smc->GetMeasurementPosition();
@@ -207,7 +210,7 @@ TEST_P(ElevatorTest, ElevatorPositionPID) {
   auto highPid = elevator->RunTo(2.0_m);
   frc2::CommandScheduler::GetInstance().Schedule(highPid);
 
-  PositionPIDTestBody(bundle.smc, IsCTRE(bundle));
+  PositionPIDTestBody(bundle.smc, IsCTRE(bundle), param.name == "TalonFXS_NoPro");
   CloseBundle(bundle);
   delete elevator;
 }

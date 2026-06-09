@@ -71,6 +71,39 @@ bool TalonFXWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     cfg.CurrentLimits.SupplyCurrentLimit = *supply;
   }
 
+  // Vendor control request — overrides the default profile-driven request
+  if (auto req = config.GetVendorControlRequest()) {
+    auto& r = *req;
+    if (auto* p = std::any_cast<controls::PositionVoltage>(&r))
+      m_positionReq = *p;
+    else if (auto* p = std::any_cast<controls::PositionDutyCycle>(&r))
+      m_positionReq = *p;
+    else if (auto* p = std::any_cast<controls::PositionTorqueCurrentFOC>(&r))
+      m_positionReq = *p;
+    else if (auto* p = std::any_cast<controls::MotionMagicVoltage>(&r))
+      m_positionReq = *p;
+    else if (auto* p = std::any_cast<controls::MotionMagicDutyCycle>(&r))
+      m_positionReq = *p;
+    else if (auto* p = std::any_cast<controls::MotionMagicExpoVoltage>(&r))
+      m_positionReq = *p;
+    else if (auto* p = std::any_cast<controls::MotionMagicExpoDutyCycle>(&r))
+      m_positionReq = *p;
+    else if (auto* p = std::any_cast<controls::MotionMagicTorqueCurrentFOC>(&r))
+      m_positionReq = *p;
+    else if (auto* p = std::any_cast<controls::VelocityVoltage>(&r))
+      m_velocityReq = *p;
+    else if (auto* p = std::any_cast<controls::VelocityDutyCycle>(&r))
+      m_velocityReq = *p;
+    else if (auto* p = std::any_cast<controls::VelocityTorqueCurrentFOC>(&r))
+      m_velocityReq = *p;
+    else if (auto* p = std::any_cast<controls::MotionMagicVelocityVoltage>(&r))
+      m_velocityReq = *p;
+    else if (auto* p = std::any_cast<controls::MotionMagicVelocityDutyCycle>(&r))
+      m_velocityReq = *p;
+    else if (auto* p = std::any_cast<controls::MotionMagicVelocityTorqueCurrentFOC>(&r))
+      m_velocityReq = *p;
+  }
+
   auto status = m_talon.GetConfigurator().Apply(cfg);
   return status.IsOK();
 }
@@ -103,15 +136,17 @@ void TalonFXWrapper::ApplyPIDConfig() {
 }
 
 void TalonFXWrapper::ApplyFeedforwardConfig() {
-  // Set gravity type for arm (kG on Slot0)
-  auto gains = m_config.GetSlotGains(ClosedLoopControllerSlot::SLOT_0);
-  if (gains.armFF) {
-    m_talonConfig.Slot0.kG = gains.kG;
-    m_talonConfig.Slot0.GravityType = signals::GravityTypeValue::Arm_Cosine;
-  } else if (gains.elevatorFF) {
-    m_talonConfig.Slot0.kG = gains.kG;
-    m_talonConfig.Slot0.GravityType = signals::GravityTypeValue::Elevator_Static;
-  }
+  auto applySlot = [&](auto& slotCfg, ClosedLoopControllerSlot slotEnum) {
+    auto gains = m_config.GetSlotGains(slotEnum);
+    slotCfg.kG = gains.kG;
+    if (gains.armFF)
+      slotCfg.GravityType = signals::GravityTypeValue::Arm_Cosine;
+    else if (gains.elevatorFF)
+      slotCfg.GravityType = signals::GravityTypeValue::Elevator_Static;
+  };
+  applySlot(m_talonConfig.Slot0, ClosedLoopControllerSlot::SLOT_0);
+  applySlot(m_talonConfig.Slot1, ClosedLoopControllerSlot::SLOT_1);
+  applySlot(m_talonConfig.Slot2, ClosedLoopControllerSlot::SLOT_2);
 }
 
 void TalonFXWrapper::ApplyLimitsConfig() {
@@ -129,6 +164,7 @@ void TalonFXWrapper::ApplyMotionMagicConfig() {
   bool hasTrap = m_config.HasTrapezoidProfile();
   bool hasExpo = m_config.HasExponentialProfile();
   bool velTrap = m_config.GetVelocityTrapezoidalProfileInUse();
+  int slotIdx = static_cast<int>(m_slot);
 
   if (hasTrap && !velTrap) {
     // Angular profile supplies velocity directly in TPS.  Linear profiles store
@@ -147,9 +183,17 @@ void TalonFXWrapper::ApplyMotionMagicConfig() {
     }
     if (cruiseVel) m_talonConfig.MotionMagic.MotionMagicCruiseVelocity = *cruiseVel;
     if (cruiseAcc) m_talonConfig.MotionMagic.MotionMagicAcceleration = *cruiseAcc;
+    m_positionReq = controls::MotionMagicVoltage{0_tr}.WithSlot(slotIdx);
+    m_velocityReq = controls::VelocityVoltage{0_tps}.WithSlot(slotIdx);
   } else if (hasTrap && velTrap) {
+    m_positionReq = controls::PositionVoltage{0_tr}.WithSlot(slotIdx);
+    m_velocityReq = controls::MotionMagicVelocityVoltage{0_tps}.WithSlot(slotIdx);
   } else if (hasExpo) {
+    m_positionReq = controls::MotionMagicExpoVoltage{0_tr}.WithSlot(slotIdx);
+    m_velocityReq = controls::VelocityVoltage{0_tps}.WithSlot(slotIdx);
   } else {
+    m_positionReq = controls::PositionVoltage{0_tr}.WithSlot(slotIdx);
+    m_velocityReq = controls::VelocityVoltage{0_tps}.WithSlot(slotIdx);
   }
 }
 
@@ -222,18 +266,10 @@ units::volt_t TalonFXWrapper::GetVoltage() { return m_talon.GetMotorVoltage().Ge
 
 void TalonFXWrapper::SetPosition(units::turn_t angle) {
   m_setpointPosition = angle;
-  if (m_config.GetMotorControllerMode() == ControlMode::CLOSED_LOOP &&
-      !m_closedLoopControllerRunning) {
-    bool hasTrap = m_config.HasTrapezoidProfile() && !m_config.GetVelocityTrapezoidalProfileInUse();
-    bool hasExpo = m_config.HasExponentialProfile();
-    if (hasTrap) {
-      m_talon.SetControl(m_trapPositionReq.WithPosition(angle));
-    } else if (hasExpo) {
-      m_talon.SetControl(m_expoPositionReq.WithPosition(angle));
-    } else {
-      m_talon.SetControl(m_simplePositionReq.WithPosition(angle));
-    }
-  }
+  if (m_config.GetMotorControllerMode() != ControlMode::CLOSED_LOOP ||
+      m_closedLoopControllerRunning)
+    return;
+  std::visit([&](auto& req) { m_talon.SetControl(req.WithPosition(angle)); }, m_positionReq);
 }
 
 void TalonFXWrapper::SetPosition(units::meter_t distance) {
@@ -243,13 +279,10 @@ void TalonFXWrapper::SetPosition(units::meter_t distance) {
 
 void TalonFXWrapper::SetVelocity(units::turns_per_second_t velocity) {
   m_setpointVelocity = velocity;
-  if (m_config.GetMotorControllerMode() == ControlMode::CLOSED_LOOP &&
-      !m_closedLoopControllerRunning) {
-    if (m_config.GetVelocityTrapezoidalProfileInUse())
-      m_talon.SetControl(m_trapVelocityReq.WithVelocity(velocity));
-    else
-      m_talon.SetControl(m_simpleVelocityReq.WithVelocity(velocity));
-  }
+  if (m_config.GetMotorControllerMode() != ControlMode::CLOSED_LOOP ||
+      m_closedLoopControllerRunning)
+    return;
+  std::visit([&](auto& req) { m_talon.SetControl(req.WithVelocity(velocity)); }, m_velocityReq);
 }
 
 void TalonFXWrapper::SetVelocity(units::meters_per_second_t velocity) {
@@ -357,16 +390,61 @@ void TalonFXWrapper::SetMotorInverted(bool inv) {
 void TalonFXWrapper::SetEncoderInverted(bool) {}
 
 void TalonFXWrapper::SetKp(double kP) {
-  m_talonConfig.Slot0.kP = kP;
-  m_talon.GetConfigurator().Apply(m_talonConfig.Slot0);
+  auto apply = [&](auto& slot) {
+    slot.kP = kP;
+    m_talon.GetConfigurator().Apply(slot);
+  };
+  switch (m_slot) {
+    case ClosedLoopControllerSlot::SLOT_0:
+      apply(m_talonConfig.Slot0);
+      break;
+    case ClosedLoopControllerSlot::SLOT_1:
+      apply(m_talonConfig.Slot1);
+      break;
+    case ClosedLoopControllerSlot::SLOT_2:
+      apply(m_talonConfig.Slot2);
+      break;
+    default:
+      break;
+  }
 }
 void TalonFXWrapper::SetKi(double kI) {
-  m_talonConfig.Slot0.kI = kI;
-  m_talon.GetConfigurator().Apply(m_talonConfig.Slot0);
+  auto apply = [&](auto& slot) {
+    slot.kI = kI;
+    m_talon.GetConfigurator().Apply(slot);
+  };
+  switch (m_slot) {
+    case ClosedLoopControllerSlot::SLOT_0:
+      apply(m_talonConfig.Slot0);
+      break;
+    case ClosedLoopControllerSlot::SLOT_1:
+      apply(m_talonConfig.Slot1);
+      break;
+    case ClosedLoopControllerSlot::SLOT_2:
+      apply(m_talonConfig.Slot2);
+      break;
+    default:
+      break;
+  }
 }
 void TalonFXWrapper::SetKd(double kD) {
-  m_talonConfig.Slot0.kD = kD;
-  m_talon.GetConfigurator().Apply(m_talonConfig.Slot0);
+  auto apply = [&](auto& slot) {
+    slot.kD = kD;
+    m_talon.GetConfigurator().Apply(slot);
+  };
+  switch (m_slot) {
+    case ClosedLoopControllerSlot::SLOT_0:
+      apply(m_talonConfig.Slot0);
+      break;
+    case ClosedLoopControllerSlot::SLOT_1:
+      apply(m_talonConfig.Slot1);
+      break;
+    case ClosedLoopControllerSlot::SLOT_2:
+      apply(m_talonConfig.Slot2);
+      break;
+    default:
+      break;
+  }
 }
 void TalonFXWrapper::SetFeedback(double kP, double kI, double kD) {
   SetKp(kP);
@@ -374,20 +452,85 @@ void TalonFXWrapper::SetFeedback(double kP, double kI, double kD) {
   SetKd(kD);
 }
 void TalonFXWrapper::SetKs(double kS) {
-  m_talonConfig.Slot0.kS = kS;
-  m_talon.GetConfigurator().Apply(m_talonConfig.Slot0);
+  auto apply = [&](auto& slot) {
+    slot.kS = kS;
+    m_talon.GetConfigurator().Apply(slot);
+  };
+  switch (m_slot) {
+    case ClosedLoopControllerSlot::SLOT_0:
+      apply(m_talonConfig.Slot0);
+      break;
+    case ClosedLoopControllerSlot::SLOT_1:
+      apply(m_talonConfig.Slot1);
+      break;
+    case ClosedLoopControllerSlot::SLOT_2:
+      apply(m_talonConfig.Slot2);
+      break;
+    default:
+      break;
+  }
 }
 void TalonFXWrapper::SetKv(double kV) {
-  m_talonConfig.Slot0.kV = kV;
-  m_talon.GetConfigurator().Apply(m_talonConfig.Slot0);
+  auto apply = [&](auto& slot) {
+    slot.kV = kV;
+    m_talon.GetConfigurator().Apply(slot);
+  };
+  switch (m_slot) {
+    case ClosedLoopControllerSlot::SLOT_0:
+      apply(m_talonConfig.Slot0);
+      break;
+    case ClosedLoopControllerSlot::SLOT_1:
+      apply(m_talonConfig.Slot1);
+      break;
+    case ClosedLoopControllerSlot::SLOT_2:
+      apply(m_talonConfig.Slot2);
+      break;
+    default:
+      break;
+  }
 }
 void TalonFXWrapper::SetKa(double kA) {
-  m_talonConfig.Slot0.kA = kA;
-  m_talon.GetConfigurator().Apply(m_talonConfig.Slot0);
+  auto apply = [&](auto& slot) {
+    slot.kA = kA;
+    m_talon.GetConfigurator().Apply(slot);
+  };
+  switch (m_slot) {
+    case ClosedLoopControllerSlot::SLOT_0:
+      apply(m_talonConfig.Slot0);
+      break;
+    case ClosedLoopControllerSlot::SLOT_1:
+      apply(m_talonConfig.Slot1);
+      break;
+    case ClosedLoopControllerSlot::SLOT_2:
+      apply(m_talonConfig.Slot2);
+      break;
+    default:
+      break;
+  }
 }
 void TalonFXWrapper::SetKg(double kG) {
-  m_talonConfig.Slot0.kG = kG;
-  m_talon.GetConfigurator().Apply(m_talonConfig.Slot0);
+  auto apply = [&](auto& slot) {
+    slot.kG = kG;
+    auto gains = m_config.GetSlotGains(m_slot);
+    if (gains.armFF)
+      slot.GravityType = signals::GravityTypeValue::Arm_Cosine;
+    else if (gains.elevatorFF)
+      slot.GravityType = signals::GravityTypeValue::Elevator_Static;
+    m_talon.GetConfigurator().Apply(slot);
+  };
+  switch (m_slot) {
+    case ClosedLoopControllerSlot::SLOT_0:
+      apply(m_talonConfig.Slot0);
+      break;
+    case ClosedLoopControllerSlot::SLOT_1:
+      apply(m_talonConfig.Slot1);
+      break;
+    case ClosedLoopControllerSlot::SLOT_2:
+      apply(m_talonConfig.Slot2);
+      break;
+    default:
+      break;
+  }
 }
 void TalonFXWrapper::SetFeedforward(double kS, double kV, double kA, double kG) {
   SetKs(kS);
@@ -478,19 +621,31 @@ void TalonFXWrapper::SetMotionProfileMaxJerk(units::angular_jerk::turns_per_seco
 
 void TalonFXWrapper::SetExponentialProfile(std::optional<double> kV, std::optional<double> kA,
                                            std::optional<units::volt_t> maxInput) {
-  if (kV) m_talonConfig.Slot0.kV = *kV;
-  if (kA) m_talonConfig.Slot0.kA = *kA;
-  m_talon.GetConfigurator().Apply(m_talonConfig);
+  auto apply = [&](auto& slot) {
+    if (kV) slot.kV = *kV;
+    if (kA) slot.kA = *kA;
+    m_talon.GetConfigurator().Apply(slot);
+  };
+  switch (m_slot) {
+    case ClosedLoopControllerSlot::SLOT_0:
+      apply(m_talonConfig.Slot0);
+      break;
+    case ClosedLoopControllerSlot::SLOT_1:
+      apply(m_talonConfig.Slot1);
+      break;
+    case ClosedLoopControllerSlot::SLOT_2:
+      apply(m_talonConfig.Slot2);
+      break;
+    default:
+      break;
+  }
 }
 
 void TalonFXWrapper::SetClosedLoopSlot(ClosedLoopControllerSlot slot) {
   m_slot = slot;
   int idx = static_cast<int>(slot);
-  m_simplePositionReq.WithSlot(idx);
-  m_simpleVelocityReq.WithSlot(idx);
-  m_trapPositionReq.WithSlot(idx);
-  m_trapVelocityReq.WithSlot(idx);
-  m_expoPositionReq.WithSlot(idx);
+  std::visit([idx](auto& req) { req.WithSlot(idx); }, m_positionReq);
+  std::visit([idx](auto& req) { req.WithSlot(idx); }, m_velocityReq);
 }
 
 SmartMotorControllerConfig& TalonFXWrapper::GetConfig() { return m_config; }

@@ -11,6 +11,7 @@
 #include <units/moment_of_inertia.h>
 
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 
 #include "yams/motorcontrollers/simulation/DCMotorSimSupplier.hpp"
@@ -104,6 +105,10 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& cfg) {
     if (auto offset = cfg.GetAbsoluteEncoderZeroOffset(); offset)
       sparkCfg.absoluteEncoder.ZeroOffset(offset->value() / 360.0);
   };
+
+  if (cfg.GetVendorControlRequest().has_value())
+    throw std::runtime_error(
+        "SparkWrapper does not support custom vendor control requests (WithVendorControlRequest).");
 
   if (m_maxConfig)
     doConfig(*m_maxConfig);
@@ -332,7 +337,9 @@ void SparkWrapper::SetEncoderInverted(bool inv) {
 }
 
 void SparkWrapper::SetKp(double kP) {
-  auto doConfig = [&](SparkBaseConfig& cfg) { cfg.closedLoop.P(kP); };
+  auto doConfig = [&](SparkBaseConfig& cfg) {
+    cfg.closedLoop.P(kP, static_cast<ClosedLoopSlot>(m_revSlot));
+  };
   if (m_maxConfig)
     doConfig(*m_maxConfig);
   else if (m_flexConfig)
@@ -341,7 +348,9 @@ void SparkWrapper::SetKp(double kP) {
 }
 
 void SparkWrapper::SetKi(double kI) {
-  auto doConfig = [&](SparkBaseConfig& cfg) { cfg.closedLoop.I(kI); };
+  auto doConfig = [&](SparkBaseConfig& cfg) {
+    cfg.closedLoop.I(kI, static_cast<ClosedLoopSlot>(m_revSlot));
+  };
   if (m_maxConfig)
     doConfig(*m_maxConfig);
   else if (m_flexConfig)
@@ -350,7 +359,9 @@ void SparkWrapper::SetKi(double kI) {
 }
 
 void SparkWrapper::SetKd(double kD) {
-  auto doConfig = [&](SparkBaseConfig& cfg) { cfg.closedLoop.D(kD); };
+  auto doConfig = [&](SparkBaseConfig& cfg) {
+    cfg.closedLoop.D(kD, static_cast<ClosedLoopSlot>(m_revSlot));
+  };
   if (m_maxConfig)
     doConfig(*m_maxConfig);
   else if (m_flexConfig)
@@ -359,7 +370,11 @@ void SparkWrapper::SetKd(double kD) {
 }
 
 void SparkWrapper::SetFeedback(double kP, double kI, double kD) {
-  auto doConfig = [&](SparkBaseConfig& cfg) { cfg.closedLoop.Pid(kP, kI, kD); };
+  auto doConfig = [&](SparkBaseConfig& cfg) {
+    cfg.closedLoop.P(kP, static_cast<ClosedLoopSlot>(m_revSlot));
+    cfg.closedLoop.I(kI, static_cast<ClosedLoopSlot>(m_revSlot));
+    cfg.closedLoop.D(kD, static_cast<ClosedLoopSlot>(m_revSlot));
+  };
   if (m_maxConfig)
     doConfig(*m_maxConfig);
   else if (m_flexConfig)
@@ -369,7 +384,9 @@ void SparkWrapper::SetFeedback(double kP, double kI, double kD) {
 
 void SparkWrapper::SetKs(double) {}
 void SparkWrapper::SetKv(double kV) {
-  auto doConfig = [&](SparkBaseConfig& cfg) { cfg.closedLoop.feedForward.kV(kV); };
+  auto doConfig = [&](SparkBaseConfig& cfg) {
+    cfg.closedLoop.feedForward.kV(kV, static_cast<ClosedLoopSlot>(m_revSlot));
+  };
   if (m_maxConfig)
     doConfig(*m_maxConfig);
   else if (m_flexConfig)
