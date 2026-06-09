@@ -76,10 +76,10 @@ jobs:
             echo "Attempt $i failed, retrying in 15s..."
             sleep 15
           done
-      - name: Java unit tests
-        run: ./gradlew test
       - name: C++ unit tests
         run: ./gradlew googleTest
+      - name: Java unit tests
+        run: ./gradlew test
       - name: Publish
         run: ./gradlew publish
       - uses: actions/upload-artifact@v4
