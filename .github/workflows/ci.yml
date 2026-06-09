@@ -15,7 +15,7 @@ jobs:
             gradlew: ./gradlew
           - os: windows-latest
             name: windows
-            gradlew: gradlew.bat
+            gradlew: ./gradlew.bat
           - os: macos-latest
             name: macos
             gradlew: ./gradlew
