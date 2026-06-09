@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - container: wpilib/roborio-cross-ubuntu:2026-22.04
+          - container: wpilib/roborio-cross-ubuntu:2025-22.04
             artifact-name: athena
             build-options: "-Ponlylinuxathena"
           - container: wpilib/raspbian-cross-ubuntu:bookworm-22.04
@@ -60,7 +60,16 @@ jobs:
       - run: chmod +x gradlew
       - name: Install doxygen and graphviz
         run: sudo apt-get install -y doxygen graphviz
+      - name: Cache roboRIO toolchain
+        id: toolchain-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/wpilib/2026/roborio
+          key: roborio-toolchain-linux
       - uses: gradle/actions/setup-gradle@v4
+      - name: Install roboRIO toolchain
+        if: steps.toolchain-cache.outputs.cache-hit != 'true'
+        run: ./gradlew installRoboRioToolchain
       - name: Java unit tests
         run: ./gradlew test
       - name: C++ unit tests
@@ -82,9 +91,11 @@ jobs:
           - os: windows-latest
             artifact-name: windows
             gradlew: ./gradlew.bat
+            toolchain-path: C:/Users/Public/wpilib/2026/roborio
           - os: macos-latest
             artifact-name: macos
             gradlew: ./gradlew
+            toolchain-path: ~/wpilib/2026/roborio
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -104,9 +115,18 @@ jobs:
       - name: Install doxygen (macOS)
         if: runner.os == 'macOS'
         run: brew install doxygen
+      - name: Cache roboRIO toolchain
+        id: toolchain-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ matrix.toolchain-path }}
+          key: roborio-toolchain-${{ matrix.artifact-name }}
       - uses: gradle/actions/setup-gradle@v4
+      - name: Install roboRIO toolchain
+        if: steps.toolchain-cache.outputs.cache-hit != 'true'
+        run: ${{ matrix.gradlew }} installRoboRioToolchain
       - name: Publish
-        run: ${{ matrix.gradlew }} publish -Pbuildalldesktop
+        run: ${{ matrix.gradlew }} publish
       - uses: actions/upload-artifact@v4
         with:
           name: maven-${{ matrix.artifact-name }}
