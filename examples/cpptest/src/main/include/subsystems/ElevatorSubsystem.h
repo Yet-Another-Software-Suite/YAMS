@@ -6,7 +6,7 @@
 #include <frc/system/plant/DCMotor.h>
 #include <frc2/command/CommandPtr.h>
 #include <frc2/command/SubsystemBase.h>
-#include <rev/SparkMax.h>
+#include <ctre/phoenix6/TalonFX.hpp>
 #include <units/length.h>
 #include <units/time.h>
 #include <units/voltage.h>
@@ -18,7 +18,7 @@
 #include "yams/mechanisms/config/ElevatorConfig.hpp"
 #include "yams/mechanisms/positional/Elevator.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
-#include "yams/motorcontrollers/local/SparkWrapper.hpp"
+#include "yams/motorcontrollers/remote/TalonFXWrapper.hpp"
 
 class ElevatorSubsystem : public frc2::SubsystemBase {
  public:
@@ -32,10 +32,10 @@ class ElevatorSubsystem : public frc2::SubsystemBase {
   void SimulationPeriodic() override;
 
  private:
-  rev::spark::SparkMax m_elevatorMotor{2, rev::spark::SparkMax::MotorType::kBrushless};
+  ctre::phoenix6::hardware::TalonFX m_elevatorMotor{2};
 
   yams::motorcontrollers::SmartMotorControllerConfig m_motorConfig;
-  std::optional<yams::motorcontrollers::local::SparkWrapper> m_motor;
+  std::optional<yams::motorcontrollers::remote::TalonFXWrapper> m_motor;
 
   yams::mechanisms::config::ElevatorConfig m_elevatorConfig;
   std::optional<yams::mechanisms::positional::Elevator> m_elevator;

@@ -86,14 +86,6 @@ class ElevatorConfig {
   ElevatorConfig& WithCarriageMass(units::kilogram_t mass);
 
   /**
-   * Set the drive drum radius (required for simulation).
-   *
-   * @param radius Drum radius in meters.
-   * @return *this for chaining.
-   */
-  ElevatorConfig& WithDrumRadius(units::meter_t radius);
-
-  /**
    * Mark the elevator as horizontal (disables gravity simulation).
    *
    * @param horizontal True to treat the elevator as horizontal.
@@ -139,9 +131,6 @@ class ElevatorConfig {
 
   /** Get the optional carriage mass. */
   std::optional<units::kilogram_t> GetCarriageMass() const;
-
-  /** Get the optional drum radius. */
-  std::optional<units::meter_t> GetDrumRadius() const;
 
   /** Returns true when the elevator is configured as horizontal (gravity disabled). */
   bool IsHorizontal() const;

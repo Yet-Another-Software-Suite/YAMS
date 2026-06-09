@@ -8,8 +8,8 @@
 #include <units/length.h>
 #include <units/time.h>
 #include <units/voltage.h>
-
 #include <numbers>
+#include <cmath>
 
 using namespace yams::motorcontrollers;
 using namespace yams::gearing;
@@ -25,8 +25,8 @@ ElevatorSubsystem::ElevatorSubsystem() {
 
   m_motorConfig.WithSubsystem(this)
       .WithMechanismCircumference(circumference)
-      .WithFeedback(30, 0, 0)
-      .WithExponentialProfile(0.0, 0.0, units::volt_t{12})
+      .WithFeedback(1, 0, 0)
+      // .WithExponentialProfile(0.0, 0.0, units::volt_t{12})
       .WithMeasurementLimits(units::meter_t{0}, units::meter_t{2})
       .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
       .WithIdleMode(Cfg::MotorMode::BRAKE)
@@ -36,13 +36,14 @@ ElevatorSubsystem::ElevatorSubsystem() {
       .WithElevatorFeedforward(0, 0, 0)
       .WithClosedLoopMode();
 
-  m_motor.emplace(m_elevatorMotor, frc::DCMotor::NEO(1), m_motorConfig);
+  m_motor.emplace(m_elevatorMotor, frc::DCMotor::KrakenX44(1), m_motorConfig);
 
   m_elevatorConfig.WithMotorController(&m_motor.value())
       .WithSubsystem(this)
       .WithStartingHeight(units::meter_t{0.5})
       .WithMinimumHeight(units::meter_t{0})
       .WithMaximumHeight(units::meter_t{3})
+      .WithCarriageMass(2.0_lb)
       .WithTelemetryName("Elevator");
 
   m_elevator.emplace(m_elevatorConfig);

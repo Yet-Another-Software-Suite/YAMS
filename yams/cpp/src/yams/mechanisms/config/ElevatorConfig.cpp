@@ -47,11 +47,6 @@ ElevatorConfig& ElevatorConfig::WithCarriageMass(units::kilogram_t mass) {
   return *this;
 }
 
-ElevatorConfig& ElevatorConfig::WithDrumRadius(units::meter_t radius) {
-  m_drumRadius = radius;
-  return *this;
-}
-
 ElevatorConfig& ElevatorConfig::WithIsHorizontal(bool horizontal) {
   m_isHorizontal = horizontal;
   return *this;
@@ -80,8 +75,6 @@ std::optional<units::meter_t> ElevatorConfig::GetMinHeight() const { return m_mi
 std::optional<units::meter_t> ElevatorConfig::GetMaxHeight() const { return m_maxHeight; }
 
 std::optional<units::kilogram_t> ElevatorConfig::GetCarriageMass() const { return m_carriageMass; }
-
-std::optional<units::meter_t> ElevatorConfig::GetDrumRadius() const { return m_drumRadius; }
 
 bool ElevatorConfig::IsHorizontal() const { return m_isHorizontal; }
 

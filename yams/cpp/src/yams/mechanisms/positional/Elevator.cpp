@@ -75,10 +75,10 @@ Elevator::Elevator(const config::ElevatorConfig& config)
                                            "Cannot create simulator",
                                            "WithStartingHeight(units::meter_t)");
     }
-    if (!config.GetDrumRadius().has_value()) {
-      throw ElevatorConfigurationException("Drum radius is not configured!",
+    if (!m_smc->GetConfig().GetMechanismCircumference().has_value()) {
+      throw ElevatorConfigurationException("Mechanism circumference is not configured!",
                                            "Cannot create simulator",
-                                           "WithDrumRadius(units::meter_t)");
+                                           "SMC.WithMechanismCircumference(units::meter_t)");
     }
 
     m_smc->SetupSimulation();
@@ -87,15 +87,14 @@ Elevator::Elevator(const config::ElevatorConfig& config)
     auto& gearingOpt = m_smc->GetConfig().GetMotorGearing();
     gearing::MechanismGearing gearing = gearingOpt.value_or(gearing::MechanismGearing::kOne);
 
-    units::meter_t drumRadius = config.GetDrumRadius().value();
     bool simulateGravity = !config.IsHorizontal();
+    units::meter_t circumference = m_smc->GetConfig().GetMechanismCircumference().value();
 
     m_elevatorSim.emplace(
-        dcMotor, gearing.GetMechanismToRotorRatio(), config.GetCarriageMass().value(), drumRadius,
+        dcMotor, gearing.GetMechanismToRotorRatio(), config.GetCarriageMass().value(), circumference / (2 * std::numbers::pi),
         config.GetMinHeight().value(), config.GetMaxHeight().value(), simulateGravity,
-        config.GetStartingHeight().value(), std::array<double, 2>{0.01 / 4096.0, 0.01 / 4096.0});
+        config.GetStartingHeight().value(), std::array<double, 2>{0.01 / 4096.0, 0});
 
-    units::meter_t circumference{2.0 * std::numbers::pi * drumRadius.value()};
     units::second_t period = m_smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms);
     m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::ElevatorSimSupplier>(
         *m_elevatorSim, [this]() { return m_smc->GetDutyCycle(); }, gearing, circumference,

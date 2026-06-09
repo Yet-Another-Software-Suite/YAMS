@@ -14,7 +14,7 @@ RobotContainer::RobotContainer() {
 
   // m_flyWheelSubsystem.SetDefaultCommand(m_flyWheelSubsystem.SetDutyCycle(0, 0));
   // m_arm.SetDefaultCommand(m_arm.ArmCmd(0));
-  // m_elevator.SetDefaultCommand(m_elevator.ElevCmd(0));
+  m_elevator.SetDefaultCommand(m_elevator.ElevCmd(0));
   //m_turret.SetDefaultCommand(m_turret.TurretCmd(0.0));
   // m_drive.SetDefaultCommand(m_drive.SetRobotRelativeChassisSpeeds(frc::ChassisSpeeds{}));
 
@@ -23,10 +23,10 @@ RobotContainer::RobotContainer() {
 
 void RobotContainer::ConfigureBindings() {
   // Shooter bindings (uncomment with ShooterSubsystem):
-  m_xboxController.Button(1).WhileTrue(m_shooter.SetVelocity(units::degrees_per_second_t{6000}));
-  m_xboxController.Button(2).WhileTrue(m_shooter.SetVelocity(units::degrees_per_second_t{-6000}));
-  m_xboxController.Button(3).WhileTrue(m_shooter.Set(0.0));
-  m_xboxController.Button(4).WhileTrue(m_shooter.Set(0.5));
+  // m_xboxController.Button(1).WhileTrue(m_shooter.SetVelocity(units::degrees_per_second_t{6000}));
+  // m_xboxController.Button(2).WhileTrue(m_shooter.SetVelocity(units::degrees_per_second_t{-6000}));
+  // m_xboxController.Button(3).WhileTrue(m_shooter.Set(0.0));
+  // m_xboxController.Button(4).WhileTrue(m_shooter.Set(0.5));
 
   // Swerve bindings (uncomment with SwerveSubsystem):
   // m_xboxController.Button(1).WhileTrue(m_drive.SetRobotRelativeChassisSpeeds({0.5_mps, 0_mps,
@@ -40,9 +40,9 @@ void RobotContainer::ConfigureBindings() {
   // m_xboxController.Button(4).WhileTrue(m_arm.SetAngle(units::degree_t{80}));
 
   // Elevator bindings (uncomment with ElevatorSubsystem):
-  // m_xboxController.Button(1).WhileTrue(m_elevator.SetHeight(1_m));
-  // m_xboxController.Button(2).WhileTrue(m_elevator.SetHeight(0_m));
-  // m_xboxController.Button(3).WhileTrue(m_elevator.SysId());
+  m_xboxController.Button(1).WhileTrue(m_elevator.SetHeight(1_m));
+  m_xboxController.Button(2).WhileTrue(m_elevator.SetHeight(0_m));
+  m_xboxController.Button(3).WhileTrue(m_elevator.SysId());
 
   // Turret bindings:
   // m_xboxController.Button(1).WhileTrue(m_turret.TurretCmd(1));

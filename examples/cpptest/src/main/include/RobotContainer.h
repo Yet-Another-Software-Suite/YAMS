@@ -11,8 +11,8 @@
 
 // Uncomment to enable additional subsystems:
 // #include "subsystems/ArmSubsystem.h"
-// #include "subsystems/ElevatorSubsystem.h"
-#include "subsystems/ShooterSubsystem.h"
+#include "subsystems/ElevatorSubsystem.h"
+// #include "subsystems/ShooterSubsystem.h"
 // #include "subsystems/HoodSubsystem.h"
 // #include "subsystems/SwerveSubsystem.h"
 // #include "subsystems/DiffDriveSubsystem.h"
@@ -30,8 +30,8 @@ class RobotContainer {
   // TurretSubsystem m_turret;
 
   // ArmSubsystem m_arm;
-  // ElevatorSubsystem m_elevator;
-  ShooterSubsystem m_shooter;
+  ElevatorSubsystem m_elevator;
+  // ShooterSubsystem m_shooter;
   // HoodSubsystem m_hood;
   // SwerveSubsystem m_drive;
   // DiffDriveSubsystem m_diffDrive;
