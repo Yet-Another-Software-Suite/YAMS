@@ -23,14 +23,32 @@ namespace yams::motorcontrollers::local {
 SparkWrapper::SparkWrapper(SparkMax& spark, frc::DCMotor motor,
                            const SmartMotorControllerConfig& cfg)
     : SmartMotorController(), m_motor(motor) {
-  m_maxConfig.emplace();  // default-construct SparkMaxConfig in-place
+  if (auto& vc = cfg.GetVendorConfig(); vc.has_value()) {
+    if (auto* p = std::any_cast<rev::spark::SparkMaxConfig>(&vc.value())) {
+      m_maxConfig.emplace(*p);
+    } else {
+      throw std::invalid_argument(
+          "SparkWrapper (SparkMax): WithVendorConfig requires a SparkMaxConfig");
+    }
+  } else {
+    m_maxConfig.emplace();
+  }
   Init(&spark, motor, cfg);
 }
 
 SparkWrapper::SparkWrapper(SparkFlex& spark, frc::DCMotor motor,
                            const SmartMotorControllerConfig& cfg)
     : SmartMotorController(), m_motor(motor) {
-  m_flexConfig.emplace();  // default-construct SparkFlexConfig in-place
+  if (auto& vc = cfg.GetVendorConfig(); vc.has_value()) {
+    if (auto* p = std::any_cast<rev::spark::SparkFlexConfig>(&vc.value())) {
+      m_flexConfig.emplace(*p);
+    } else {
+      throw std::invalid_argument(
+          "SparkWrapper (SparkFlex): WithVendorConfig requires a SparkFlexConfig");
+    }
+  } else {
+    m_flexConfig.emplace();
+  }
   Init(&spark, motor, cfg);
 }
 
@@ -72,11 +90,27 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& cfg) {
     sparkCfg.encoder.PositionConversionFactor(convFactor);
     sparkCfg.encoder.VelocityConversionFactor(convFactor / 60.0);
 
-    auto gains = cfg.GetSlotGains(SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_0);
-    // Use non-deprecated separate P/I/D methods + feedForward for kV
-    sparkCfg.closedLoop.Pid(gains.kP, gains.kI, gains.kD);
-    sparkCfg.closedLoop.feedForward.kV(gains.kV);
-    sparkCfg.closedLoop.IZone(0.0);
+    using Slot = SmartMotorControllerConfig::ClosedLoopControllerSlot;
+    for (auto slot : {Slot::SLOT_0, Slot::SLOT_1, Slot::SLOT_2, Slot::SLOT_3}) {
+      auto gains = cfg.GetSlotGains(slot);
+      auto revSlot = static_cast<ClosedLoopSlot>(static_cast<int>(slot));
+      sparkCfg.closedLoop.Pid(gains.kP, gains.kI, gains.kD, revSlot);
+      if (gains.armFF) {
+        sparkCfg.closedLoop.feedForward.kS(gains.kS, revSlot)
+            .kV(gains.kV, revSlot)
+            .kA(gains.kA, revSlot)
+            .kCos(gains.kG, revSlot);
+      } else if (gains.elevatorFF) {
+        sparkCfg.closedLoop.feedForward.kS(gains.kS, revSlot)
+            .kV(gains.kV, revSlot)
+            .kA(gains.kA, revSlot)
+            .kG(gains.kG, revSlot);
+      } else if (gains.simpleFF) {
+        sparkCfg.closedLoop.feedForward.kS(gains.kS, revSlot)
+            .kV(gains.kV, revSlot)
+            .kA(gains.kA, revSlot);
+      }
+    }
 
     if (cfg.HasTrapezoidProfile()) {
       // Angular profile supplies velocity directly in TPS.  Linear profiles store
@@ -104,6 +138,16 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& cfg) {
     if (auto inv = cfg.GetEncoderInverted(); inv) sparkCfg.encoder.Inverted(*inv);
     if (auto offset = cfg.GetAbsoluteEncoderZeroOffset(); offset)
       sparkCfg.absoluteEncoder.ZeroOffset(offset->value() / 360.0);
+
+    bool isClosedLoop = cfg.GetMotorControllerMode() == ControlMode::CLOSED_LOOP;
+    if (auto lower = cfg.GetMechanismLowerLimit()) {
+      units::turn_t lowerTurns{*lower};
+      sparkCfg.softLimit.ReverseSoftLimit(lowerTurns.value()).ReverseSoftLimitEnabled(isClosedLoop);
+    }
+    if (auto upper = cfg.GetMechanismUpperLimit()) {
+      units::turn_t upperTurns{*upper};
+      sparkCfg.softLimit.ForwardSoftLimit(upperTurns.value()).ForwardSoftLimitEnabled(isClosedLoop);
+    }
   };
 
   if (cfg.GetVendorControlRequest().has_value())
@@ -382,7 +426,16 @@ void SparkWrapper::SetFeedback(double kP, double kI, double kD) {
   CommitConfig();
 }
 
-void SparkWrapper::SetKs(double) {}
+void SparkWrapper::SetKs(double kS) {
+  auto doConfig = [&](SparkBaseConfig& cfg) {
+    cfg.closedLoop.feedForward.kS(kS, static_cast<ClosedLoopSlot>(m_revSlot));
+  };
+  if (m_maxConfig)
+    doConfig(*m_maxConfig);
+  else if (m_flexConfig)
+    doConfig(*m_flexConfig);
+  CommitConfig();
+}
 void SparkWrapper::SetKv(double kV) {
   auto doConfig = [&](SparkBaseConfig& cfg) {
     cfg.closedLoop.feedForward.kV(kV, static_cast<ClosedLoopSlot>(m_revSlot));
@@ -393,9 +446,45 @@ void SparkWrapper::SetKv(double kV) {
     doConfig(*m_flexConfig);
   CommitConfig();
 }
-void SparkWrapper::SetKa(double) {}
-void SparkWrapper::SetKg(double) {}
-void SparkWrapper::SetFeedforward(double, double kV, double, double) { SetKv(kV); }
+void SparkWrapper::SetKa(double kA) {
+  auto doConfig = [&](SparkBaseConfig& cfg) {
+    cfg.closedLoop.feedForward.kA(kA, static_cast<ClosedLoopSlot>(m_revSlot));
+  };
+  if (m_maxConfig)
+    doConfig(*m_maxConfig);
+  else if (m_flexConfig)
+    doConfig(*m_flexConfig);
+  CommitConfig();
+}
+void SparkWrapper::SetKg(double kG) {
+  auto doConfig = [&](SparkBaseConfig& cfg) {
+    if (m_config.GetArmFeedforward(m_slot))
+      cfg.closedLoop.feedForward.kCos(kG, static_cast<ClosedLoopSlot>(m_revSlot));
+    else
+      cfg.closedLoop.feedForward.kG(kG, static_cast<ClosedLoopSlot>(m_revSlot));
+  };
+  if (m_maxConfig)
+    doConfig(*m_maxConfig);
+  else if (m_flexConfig)
+    doConfig(*m_flexConfig);
+  CommitConfig();
+}
+void SparkWrapper::SetFeedforward(double kS, double kV, double kA, double kG) {
+  auto doConfig = [&](SparkBaseConfig& cfg) {
+    cfg.closedLoop.feedForward.kS(kS, static_cast<ClosedLoopSlot>(m_revSlot))
+        .kV(kV, static_cast<ClosedLoopSlot>(m_revSlot))
+        .kA(kA, static_cast<ClosedLoopSlot>(m_revSlot));
+    if (m_config.GetArmFeedforward(m_slot))
+      cfg.closedLoop.feedForward.kCos(kG, static_cast<ClosedLoopSlot>(m_revSlot));
+    else if (m_config.GetElevatorFeedforward(m_slot))
+      cfg.closedLoop.feedForward.kG(kG, static_cast<ClosedLoopSlot>(m_revSlot));
+  };
+  if (m_maxConfig)
+    doConfig(*m_maxConfig);
+  else if (m_flexConfig)
+    doConfig(*m_flexConfig);
+  CommitConfig();
+}
 
 void SparkWrapper::SetStatorCurrentLimit(units::ampere_t limit) {
   auto doConfig = [&](SparkBaseConfig& cfg) {
@@ -435,12 +524,75 @@ void SparkWrapper::SetOpenLoopRampRate(units::second_t r) {
   CommitConfig();
 }
 
-void SparkWrapper::SetMechanismUpperLimit(units::turn_t) {}
-void SparkWrapper::SetMechanismLowerLimit(units::turn_t) {}
-void SparkWrapper::SetMechanismLimits(units::turn_t, units::turn_t) {}
-void SparkWrapper::SetMechanismLimitsEnabled(bool) {}
-void SparkWrapper::SetMeasurementUpperLimit(units::meter_t) {}
-void SparkWrapper::SetMeasurementLowerLimit(units::meter_t) {}
+void SparkWrapper::SetMechanismUpperLimit(units::turn_t upper) {
+  if (auto lower = m_config.GetMechanismLowerLimit())
+    m_config.WithMechanismLimits(*lower, units::degree_t{upper});
+  auto doConfig = [&](SparkBaseConfig& cfg) { cfg.softLimit.ForwardSoftLimit(upper.value()); };
+  if (m_maxConfig)
+    doConfig(*m_maxConfig);
+  else if (m_flexConfig)
+    doConfig(*m_flexConfig);
+  CommitConfig();
+}
+void SparkWrapper::SetMechanismLowerLimit(units::turn_t lower) {
+  if (auto upper = m_config.GetMechanismUpperLimit())
+    m_config.WithMechanismLimits(units::degree_t{lower}, *upper);
+  auto doConfig = [&](SparkBaseConfig& cfg) { cfg.softLimit.ReverseSoftLimit(lower.value()); };
+  if (m_maxConfig)
+    doConfig(*m_maxConfig);
+  else if (m_flexConfig)
+    doConfig(*m_flexConfig);
+  CommitConfig();
+}
+void SparkWrapper::SetMechanismLimits(units::turn_t lower, units::turn_t upper) {
+  m_config.WithMechanismLimits(units::degree_t{lower}, units::degree_t{upper});
+  auto doConfig = [&](SparkBaseConfig& cfg) {
+    cfg.softLimit.ReverseSoftLimit(lower.value()).ForwardSoftLimit(upper.value());
+  };
+  if (m_maxConfig)
+    doConfig(*m_maxConfig);
+  else if (m_flexConfig)
+    doConfig(*m_flexConfig);
+  CommitConfig();
+}
+void SparkWrapper::SetMechanismLimitsEnabled(bool enabled) {
+  auto doConfig = [&](SparkBaseConfig& cfg) {
+    cfg.softLimit.ForwardSoftLimitEnabled(enabled).ReverseSoftLimitEnabled(enabled);
+  };
+  if (m_maxConfig)
+    doConfig(*m_maxConfig);
+  else if (m_flexConfig)
+    doConfig(*m_flexConfig);
+  CommitConfig();
+}
+void SparkWrapper::SetMeasurementUpperLimit(units::meter_t upper) {
+  auto circ = m_config.GetMechanismCircumference();
+  auto lowerAngle = m_config.GetMechanismLowerLimit();
+  if (!circ || !lowerAngle) return;
+  units::turn_t lowerTurns{*lowerAngle};
+  m_config.WithMeasurementLimits(units::meter_t{lowerTurns.value() * circ->value()}, upper);
+  units::turn_t upperTurns{upper.value() / circ->value()};
+  auto doConfig = [&](SparkBaseConfig& cfg) { cfg.softLimit.ForwardSoftLimit(upperTurns.value()); };
+  if (m_maxConfig)
+    doConfig(*m_maxConfig);
+  else if (m_flexConfig)
+    doConfig(*m_flexConfig);
+  CommitConfig();
+}
+void SparkWrapper::SetMeasurementLowerLimit(units::meter_t lower) {
+  auto circ = m_config.GetMechanismCircumference();
+  auto upperAngle = m_config.GetMechanismUpperLimit();
+  if (!circ || !upperAngle) return;
+  units::turn_t upperTurns{*upperAngle};
+  m_config.WithMeasurementLimits(lower, units::meter_t{upperTurns.value() * circ->value()});
+  units::turn_t lowerTurns{lower.value() / circ->value()};
+  auto doConfig = [&](SparkBaseConfig& cfg) { cfg.softLimit.ReverseSoftLimit(lowerTurns.value()); };
+  if (m_maxConfig)
+    doConfig(*m_maxConfig);
+  else if (m_flexConfig)
+    doConfig(*m_flexConfig);
+  CommitConfig();
+}
 
 void SparkWrapper::SetMotionProfileMaxVelocity(units::turns_per_second_t vel) {
   auto doConfig = [&](SparkBaseConfig& cfg) {
@@ -486,7 +638,11 @@ void SparkWrapper::SetClosedLoopSlot(ClosedLoopControllerSlot slot) {
 
 SmartMotorControllerConfig& SparkWrapper::GetConfig() { return m_config; }
 void* SparkWrapper::GetMotorController() { return m_spark; }
-void* SparkWrapper::GetMotorControllerConfig() { return nullptr; }
+void* SparkWrapper::GetMotorControllerConfig() {
+  if (m_maxConfig) return &m_maxConfig.value();
+  if (m_flexConfig) return &m_flexConfig.value();
+  return nullptr;
+}
 
 telemetry::UnsupportedTelemetryFields SparkWrapper::GetUnsupportedTelemetryFields() {
   return {std::nullopt, std::vector<telemetry::DoubleTelemetryField>{

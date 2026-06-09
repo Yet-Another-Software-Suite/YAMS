@@ -12,6 +12,7 @@
 #include <units/moment_of_inertia.h>
 
 #include <cmath>
+#include <stdexcept>
 
 #include "yams/motorcontrollers/simulation/DCMotorSimSupplier.hpp"
 
@@ -38,6 +39,14 @@ TalonFXSWrapper::TalonFXSWrapper(hardware::TalonFXS& talon, frc::DCMotor dcMotor
     : SmartMotorController(), m_talon(talon), m_dcMotor(dcMotor), m_arrangement(arrangement) {
   m_config = config;
   m_config.WithSimMotor(dcMotor);
+  if (auto& vc = config.GetVendorConfig(); vc.has_value()) {
+    if (auto* p = std::any_cast<configs::TalonFXSConfiguration>(&vc.value())) {
+      m_talonConfig = *p;
+    } else {
+      throw std::invalid_argument(
+          "TalonFXSWrapper: WithVendorConfig requires a TalonFXSConfiguration");
+    }
+  }
   SetupSimulation();
   ApplyConfig(config);
   CheckConfigSafety();

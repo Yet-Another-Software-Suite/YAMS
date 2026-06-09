@@ -124,7 +124,8 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE, bool deb
 
   SchedulerHelper::RunForDuration(isCTRE ? 1.0_s : 20.0_s, [&] {
     if (debugOutput) {
-      std::printf("[DEBUG] mechanism_position=%.6f turns, dutycyle=%.6f\n", smc->GetMechanismPosition().value(), smc->GetDutyCycle());
+      std::printf("[DEBUG] mechanism_position=%.6f turns, dutycyle=%.6f\n",
+                  smc->GetMechanismPosition().value(), smc->GetDutyCycle());
     }
     if (isCTRE) {
       std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(period.value())));

@@ -520,6 +520,25 @@ class SmartMotorControllerConfig {
   SmartMotorControllerConfig& WithStartingPosition(units::meter_t startingDistance);
 
   /**
+   * Set a vendor-specific hardware configuration to use as the base for this motor controller.
+   *
+   * The provided object is used as the starting point before SmartMotorControllerConfig options
+   * are applied on top. SmartMotorControllerConfig options always take precedence.
+   *
+   * Accepted types per wrapper:
+   *  - TalonFXWrapper:  ctre::phoenix6::configs::TalonFXConfiguration
+   *  - TalonFXSWrapper: ctre::phoenix6::configs::TalonFXSConfiguration
+   *  - SparkWrapper (Max):  rev::spark::SparkMaxConfig
+   *  - SparkWrapper (Flex): rev::spark::SparkFlexConfig
+   *
+   * Passing the wrong type for the wrapper will throw std::invalid_argument at construction time.
+   *
+   * @param cfg Vendor configuration object (stored via std::any).
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithVendorConfig(std::any cfg);
+
+  /**
    * Set a vendor-specific control request to use for position or velocity control.
    *
    * For TalonFX/TalonFXS: accepts any Phoenix 6 position or velocity ControlRequest
@@ -668,6 +687,8 @@ class SmartMotorControllerConfig {
   units::kilogram_square_meter_t GetMOI() const;
   /** @return Optional starting mechanism position (degrees). */
   std::optional<units::degree_t> GetStartingPosition() const;
+  /** @return Optional vendor-specific hardware config (set via WithVendorConfig). */
+  std::optional<std::any> GetVendorConfig() const;
   /** @return Optional vendor-specific control request (set via WithVendorControlRequest). */
   std::optional<std::any> GetVendorControlRequest() const;
 
@@ -782,6 +803,7 @@ class SmartMotorControllerConfig {
   std::optional<frc::DCMotor> m_simMotor;
   units::kilogram_square_meter_t m_moi{0.0001_kg_sq_m};
   std::optional<units::degree_t> m_startingPosition;
+  std::optional<std::any> m_vendorConfig;
   std::optional<std::any> m_vendorControlRequest;
 };
 

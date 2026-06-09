@@ -348,6 +348,11 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithStartingPosition(
   return *this;
 }
 
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithVendorConfig(std::any cfg) {
+  m_vendorConfig = std::move(cfg);
+  return *this;
+}
+
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithVendorControlRequest(std::any req) {
   m_vendorControlRequest = std::move(req);
   return *this;
@@ -463,6 +468,10 @@ units::kilogram_square_meter_t SmartMotorControllerConfig::GetMOI() const { retu
 std::optional<units::degree_t> SmartMotorControllerConfig::GetStartingPosition() const {
   return m_startingPosition;
 }
+std::optional<std::any> SmartMotorControllerConfig::GetVendorConfig() const {
+  return m_vendorConfig;
+}
+
 std::optional<std::any> SmartMotorControllerConfig::GetVendorControlRequest() const {
   return m_vendorControlRequest;
 }
