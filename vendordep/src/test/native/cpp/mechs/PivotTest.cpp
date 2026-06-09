@@ -4,6 +4,7 @@
 // Mirrors Java PivotTest — duty-cycle and position-PID tests for a rotary
 // pivot mechanism across all (HardwareType × ProfileType) combinations.
 
+#include <frc/system/plant/DCMotor.h>
 #include <frc2/command/Commands.h>
 #include <gtest/gtest.h>
 #include <units/angle.h>
@@ -31,28 +32,29 @@ using namespace mechanisms::config;
 
 // ---- Config helpers ---------------------------------------------------------
 
-static SmartMotorControllerConfig MakePivotSMCConfig(ProfileType profile, TestSubsystem* subsys,
+static SmartMotorControllerConfig MakePivotSMCConfig(ProfileType profile, HardwareType hardware,
+                                                     TestSubsystem* subsys,
                                                      const std::string& name) {
   SmartMotorControllerConfig cfg;
-  cfg.WithFeedback(5.0, 0.0, 0.0)
+  cfg.WithFeedback(8.0, 0.0, 0.0)
       .WithMechanismLimits(-100.0_deg, 100.0_deg)
       .WithMotorGearing(
-          gearing::MechanismGearing{gearing::GearBox::FromReductionStages({3.0, 4.0, 5.0})})
+          gearing::MechanismGearing{gearing::GearBox::FromReductionStages({3.0, 4.0})})
       .WithIdleMode(SmartMotorControllerConfig::MotorMode::BRAKE)
       .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
       .WithSimpleFeedforward(1.0, 0.0, 0.0)
       .WithClosedLoopMode()
-      .WithMOI(units::kilogram_square_meter_t{0.0001})
+      .WithMOI(12_in, 1_lb)
       .WithSubsystem(subsys)
       .WithTelemetry(name);
 
   switch (profile) {
     case ProfileType::Trapezoid:
-      cfg.WithTrapezoidProfile(1_tps, 0.5_tr_per_s_sq);
+      cfg.WithTrapezoidProfile(180.0_deg_per_s, 90.0_deg_per_s_sq);
       break;
     case ProfileType::Exponential:
-      cfg.WithExponentialProfile(0.7, 0.05, 12.0_V);
+      cfg.WithExponentialProfile(12.0_V, MotorForHardware(hardware), cfg.GetMOI());
       break;
     default:
       break;
@@ -148,7 +150,7 @@ class PivotTest : public ::testing::TestWithParam<MotorTestParam> {
 TEST_P(PivotTest, SMCDutyCycle) {
   auto& param = GetParam();
   SCOPED_TRACE(param.name);
-  auto cfg = MakePivotSMCConfig(param.profile, nullptr, param.name);
+  auto cfg = MakePivotSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
@@ -160,7 +162,7 @@ TEST_P(PivotTest, SMCDutyCycle) {
 TEST_P(PivotTest, SMCPositionPID) {
   auto& param = GetParam();
   SCOPED_TRACE(param.name);
-  auto cfg = MakePivotSMCConfig(param.profile, nullptr, param.name);
+  auto cfg = MakePivotSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
@@ -172,7 +174,7 @@ TEST_P(PivotTest, SMCPositionPID) {
 TEST_P(PivotTest, PivotDutyCycle) {
   auto& param = GetParam();
   SCOPED_TRACE(param.name);
-  auto cfg = MakePivotSMCConfig(param.profile, nullptr, param.name);
+  auto cfg = MakePivotSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
@@ -189,7 +191,7 @@ TEST_P(PivotTest, PivotDutyCycle) {
 TEST_P(PivotTest, PivotPositionPID) {
   auto& param = GetParam();
   SCOPED_TRACE(param.name);
-  auto cfg = MakePivotSMCConfig(param.profile, nullptr, param.name);
+  auto cfg = MakePivotSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;

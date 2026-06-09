@@ -71,7 +71,6 @@ inline SmartMotorControllerConfig MakeBaseConfig(ProfileType profile, double kP,
   cfg.WithFeedback(kP, 0.0, 0.0)
       .WithMotorGearing(gearing)
       .WithIdleMode(SmartMotorControllerConfig::MotorMode::BRAKE)
-      .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
       .WithClosedLoopMode()
       .WithSubsystem(subsys)
@@ -79,11 +78,24 @@ inline SmartMotorControllerConfig MakeBaseConfig(ProfileType profile, double kP,
   return cfg;
 }
 
+// Return the canonical DCMotor model for a given hardware type.
+inline frc::DCMotor MotorForHardware(HardwareType hw) {
+  switch (hw) {
+    case HardwareType::SparkMax:  return frc::DCMotor::NEO(1);
+    case HardwareType::SparkFlex: return frc::DCMotor::NeoVortex(1);
+    case HardwareType::TalonFXS:  return frc::DCMotor::NEO(2);
+    case HardwareType::TalonFX:   return frc::DCMotor::KrakenX60(1);
+  }
+  return frc::DCMotor::NEO(1);
+}
+
 // Create a bundle (hardware + subsystem + wrapper) for a given parameter set.
 inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControllerConfig cfg) {
   HardwareBundle bundle;
   bundle.subsystem = std::make_unique<TestSubsystem>();
   cfg.WithSubsystem(bundle.subsystem.get());
+
+  cfg.WithSimMotor(MotorForHardware(param.hardware));
 
   int canId = NextCanId();
 

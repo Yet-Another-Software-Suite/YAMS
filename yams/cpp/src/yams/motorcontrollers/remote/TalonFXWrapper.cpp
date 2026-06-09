@@ -115,13 +115,12 @@ void TalonFXWrapper::ApplyFeedforwardConfig() {
 }
 
 void TalonFXWrapper::ApplyLimitsConfig() {
-  bool limitEnabled = true;
   if (auto upper = m_config.GetMechanismUpperLimit(); upper) {
-    m_talonConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = limitEnabled;
+    m_talonConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
     m_talonConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = *upper;
   }
   if (auto lower = m_config.GetMechanismLowerLimit(); lower) {
-    m_talonConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = limitEnabled;
+    m_talonConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
     m_talonConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = *lower;
   }
 }
@@ -132,10 +131,22 @@ void TalonFXWrapper::ApplyMotionMagicConfig() {
   bool velTrap = m_config.GetVelocityTrapezoidalProfileInUse();
 
   if (hasTrap && !velTrap) {
-    if (auto v = m_config.GetTrapMaxVelocityTurns(); v)
-      m_talonConfig.MotionMagic.MotionMagicCruiseVelocity = *v;
-    if (auto a = m_config.GetTrapMaxAccelTurns(); a)
-      m_talonConfig.MotionMagic.MotionMagicAcceleration = *a;
+    // Angular profile supplies velocity directly in TPS.  Linear profiles store
+    // velocity in m/s; convert to TPS using the mechanism circumference.
+    auto cruiseVel = m_config.GetTrapMaxVelocityTurns();
+    auto cruiseAcc = m_config.GetTrapMaxAccelTurns();
+    if (!cruiseVel) {
+      if (auto linVel = m_config.GetTrapMaxVelocityLinear(); linVel)
+        if (auto circ = m_config.GetMechanismCircumference(); circ && circ->value() != 0.0)
+          cruiseVel = units::turns_per_second_t{linVel->value() / circ->value()};
+    }
+    if (!cruiseAcc) {
+      if (auto linAcc = m_config.GetTrapMaxAccelLinear(); linAcc)
+        if (auto circ = m_config.GetMechanismCircumference(); circ && circ->value() != 0.0)
+          cruiseAcc = units::turns_per_second_squared_t{linAcc->value() / circ->value()};
+    }
+    if (cruiseVel) m_talonConfig.MotionMagic.MotionMagicCruiseVelocity = *cruiseVel;
+    if (cruiseAcc) m_talonConfig.MotionMagic.MotionMagicAcceleration = *cruiseAcc;
   } else if (hasTrap && velTrap) {
   } else if (hasExpo) {
   } else {

@@ -4,6 +4,7 @@
 // Mirrors Java ArmTest — duty-cycle and position-PID tests for a single-jointed
 // arm across all (HardwareType × ProfileType) combinations.
 
+#include <frc/system/plant/DCMotor.h>
 #include <frc2/command/Commands.h>
 #include <gtest/gtest.h>
 #include <units/angle.h>
@@ -31,8 +32,8 @@ using namespace mechanisms::config;
 
 // ---- Config helpers ---------------------------------------------------------
 
-static SmartMotorControllerConfig MakeArmSMCConfig(ProfileType profile, TestSubsystem* subsys,
-                                                   const std::string& name) {
+static SmartMotorControllerConfig MakeArmSMCConfig(ProfileType profile, HardwareType hardware,
+                                                   TestSubsystem* subsys, const std::string& name) {
   SmartMotorControllerConfig cfg;
   cfg.WithFeedback(5.0, 0.0, 0.0)
       .WithMechanismLimits(-100.0_deg, 100.0_deg)
@@ -52,8 +53,7 @@ static SmartMotorControllerConfig MakeArmSMCConfig(ProfileType profile, TestSubs
       cfg.WithTrapezoidProfile(180.0_deg_per_s, 90.0_deg_per_s_sq);
       break;
     case ProfileType::Exponential:
-      // ~40 RPS max / 80 RPS² accel expressed as simple gains
-      cfg.WithExponentialProfile(0.5, 0.05, 12.0_V);
+      cfg.WithExponentialProfile(12.0_V, MotorForHardware(hardware), cfg.GetMOI());
       break;
     default:
       break;
@@ -152,7 +152,7 @@ class ArmTest : public ::testing::TestWithParam<MotorTestParam> {
 TEST_P(ArmTest, SMCDutyCycle) {
   auto& param = GetParam();
   SCOPED_TRACE(param.name);
-  auto cfg = MakeArmSMCConfig(param.profile, nullptr, param.name);
+  auto cfg = MakeArmSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
@@ -164,7 +164,7 @@ TEST_P(ArmTest, SMCDutyCycle) {
 TEST_P(ArmTest, SMCPositionPID) {
   auto& param = GetParam();
   SCOPED_TRACE(param.name);
-  auto cfg = MakeArmSMCConfig(param.profile, nullptr, param.name);
+  auto cfg = MakeArmSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
@@ -176,7 +176,7 @@ TEST_P(ArmTest, SMCPositionPID) {
 TEST_P(ArmTest, ArmDutyCycle) {
   auto& param = GetParam();
   SCOPED_TRACE(param.name);
-  auto cfg = MakeArmSMCConfig(param.profile, nullptr, param.name);
+  auto cfg = MakeArmSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
@@ -193,7 +193,7 @@ TEST_P(ArmTest, ArmDutyCycle) {
 TEST_P(ArmTest, ArmPositionPID) {
   auto& param = GetParam();
   SCOPED_TRACE(param.name);
-  auto cfg = MakeArmSMCConfig(param.profile, nullptr, param.name);
+  auto cfg = MakeArmSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;

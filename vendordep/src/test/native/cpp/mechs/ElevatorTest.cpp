@@ -4,6 +4,7 @@
 // Mirrors Java ElevatorTest — exercises duty-cycle and position-PID control
 // for each (HardwareType × ProfileType) combination using WPILib simulation.
 
+#include <frc/system/plant/DCMotor.h>
 #include <frc2/command/Commands.h>
 #include <gtest/gtest.h>
 #include <units/acceleration.h>
@@ -32,32 +33,31 @@ using namespace mechanisms::config;
 
 // ---- Config helpers ---------------------------------------------------------
 
-static SmartMotorControllerConfig MakeElevatorSMCConfig(ProfileType profile, TestSubsystem* subsys,
+static SmartMotorControllerConfig MakeElevatorSMCConfig(ProfileType profile, HardwareType hardware,
+                                                        TestSubsystem* subsys,
                                                         const std::string& name) {
   // 22 sprocket teeth × 0.25 in pitch = 5.5 in circumference ≈ 0.1397 m
-  constexpr double circumferenceM = 22.0 * (0.25 * 0.0254);
 
   SmartMotorControllerConfig cfg;
-  cfg.WithFeedback(5.0, 0.0, 0.0)
-      .WithMechanismCircumference(units::meter_t{circumferenceM})
+  cfg.WithFeedback(8.0, 0.0, 0.0)
+      .WithMechanismCircumference(0.25_in * 22)
       .WithMeasurementLimits(0.0_m, 5.0_m)
       .WithMotorGearing(
           gearing::MechanismGearing{gearing::GearBox::FromReductionStages({3.0, 4.0})})
       .WithIdleMode(SmartMotorControllerConfig::MotorMode::BRAKE)
-      .WithStatorCurrentLimit(60.0_A)
+      .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
-      .WithElevatorFeedforward(0.0, 0.0, 0.0)
+      .WithElevatorFeedforward(1.0, 0.0, 0.0)
       .WithClosedLoopMode()
       .WithSubsystem(subsys)
       .WithTelemetry(name);
 
   switch (profile) {
     case ProfileType::Trapezoid:
-      cfg.WithLinearTrapezoidProfile(0.1_mps, 0.5_mps_sq);
+      cfg.WithLinearTrapezoidProfile(1_mps, 0.5_mps_sq);
       break;
     case ProfileType::Exponential:
-      // Approximate exponential profile via kV/kA derived from NEO + 16 lb load
-      cfg.WithExponentialProfile(/*kV=*/0.5, /*kA=*/0.05, 12.0_V);
+      cfg.WithExponentialProfile(12.0_V, MotorForHardware(hardware), 1_lb, 0.25_in * 22.0);
       break;
     default:
       break;
@@ -155,7 +155,7 @@ class ElevatorTest : public ::testing::TestWithParam<MotorTestParam> {
 TEST_P(ElevatorTest, SMCDutyCycle) {
   auto& param = GetParam();
   SCOPED_TRACE(param.name);
-  auto cfg = MakeElevatorSMCConfig(param.profile, nullptr, param.name);
+  auto cfg = MakeElevatorSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto subsys = std::make_unique<TestSubsystem>();
   cfg.WithSubsystem(subsys.get());
   auto bundle = MakeBundle(param, cfg);
@@ -169,7 +169,7 @@ TEST_P(ElevatorTest, SMCDutyCycle) {
 TEST_P(ElevatorTest, SMCPositionPID) {
   auto& param = GetParam();
   SCOPED_TRACE(param.name);
-  auto cfg = MakeElevatorSMCConfig(param.profile, nullptr, param.name);
+  auto cfg = MakeElevatorSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
@@ -181,7 +181,7 @@ TEST_P(ElevatorTest, SMCPositionPID) {
 TEST_P(ElevatorTest, ElevatorDutyCycle) {
   auto& param = GetParam();
   SCOPED_TRACE(param.name);
-  auto cfg = MakeElevatorSMCConfig(param.profile, nullptr, param.name);
+  auto cfg = MakeElevatorSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
@@ -198,7 +198,7 @@ TEST_P(ElevatorTest, ElevatorDutyCycle) {
 TEST_P(ElevatorTest, ElevatorPositionPID) {
   auto& param = GetParam();
   SCOPED_TRACE(param.name);
-  auto cfg = MakeElevatorSMCConfig(param.profile, nullptr, param.name);
+  auto cfg = MakeElevatorSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;

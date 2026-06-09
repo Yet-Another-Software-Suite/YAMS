@@ -78,10 +78,22 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& cfg) {
     sparkCfg.closedLoop.IZone(0.0);
 
     if (cfg.HasTrapezoidProfile()) {
-      if (auto v = cfg.GetTrapMaxVelocityTurns(); v)
-        sparkCfg.closedLoop.maxMotion.CruiseVelocity(v->value());
-      if (auto a = cfg.GetTrapMaxAccelTurns(); a)
-        sparkCfg.closedLoop.maxMotion.MaxAcceleration(a->value());
+      // Angular profile supplies velocity directly in TPS.  Linear profiles store
+      // velocity in m/s; convert to TPS using the mechanism circumference.
+      auto cruiseVelTps = cfg.GetTrapMaxVelocityTurns();
+      auto cruiseAccTps = cfg.GetTrapMaxAccelTurns();
+      if (!cruiseVelTps) {
+        if (auto linVel = cfg.GetTrapMaxVelocityLinear(); linVel)
+          if (auto circ = cfg.GetMechanismCircumference(); circ && circ->value() != 0.0)
+            cruiseVelTps = units::turns_per_second_t{linVel->value() / circ->value()};
+      }
+      if (!cruiseAccTps) {
+        if (auto linAcc = cfg.GetTrapMaxAccelLinear(); linAcc)
+          if (auto circ = cfg.GetMechanismCircumference(); circ && circ->value() != 0.0)
+            cruiseAccTps = units::turns_per_second_squared_t{linAcc->value() / circ->value()};
+      }
+      if (cruiseVelTps) sparkCfg.closedLoop.maxMotion.CruiseVelocity(cruiseVelTps->value());
+      if (cruiseAccTps) sparkCfg.closedLoop.maxMotion.MaxAcceleration(cruiseAccTps->value());
       m_positionControlType = cfg.GetVelocityTrapezoidalProfileInUse()
                                   ? SparkLowLevel::ControlType::kVelocity
                                   : SparkLowLevel::ControlType::kMAXMotionPositionControl;

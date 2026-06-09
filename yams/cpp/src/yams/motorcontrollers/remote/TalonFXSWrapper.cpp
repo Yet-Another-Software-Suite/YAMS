@@ -104,9 +104,22 @@ bool TalonFXSWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   }
 
   if (config.HasTrapezoidProfile() && !config.GetVelocityTrapezoidalProfileInUse()) {
-    if (auto v = config.GetTrapMaxVelocityTurns(); v)
-      cfg.MotionMagic.MotionMagicCruiseVelocity = *v;
-    if (auto a = config.GetTrapMaxAccelTurns(); a) cfg.MotionMagic.MotionMagicAcceleration = *a;
+    // Angular profile supplies velocity directly in TPS.  Linear profiles store
+    // velocity in m/s; convert to TPS using the mechanism circumference.
+    auto cruiseVel = config.GetTrapMaxVelocityTurns();
+    auto cruiseAcc = config.GetTrapMaxAccelTurns();
+    if (!cruiseVel) {
+      if (auto linVel = config.GetTrapMaxVelocityLinear(); linVel)
+        if (auto circ = config.GetMechanismCircumference(); circ && circ->value() != 0.0)
+          cruiseVel = units::turns_per_second_t{linVel->value() / circ->value()};
+    }
+    if (!cruiseAcc) {
+      if (auto linAcc = config.GetTrapMaxAccelLinear(); linAcc)
+        if (auto circ = config.GetMechanismCircumference(); circ && circ->value() != 0.0)
+          cruiseAcc = units::turns_per_second_squared_t{linAcc->value() / circ->value()};
+    }
+    if (cruiseVel) cfg.MotionMagic.MotionMagicCruiseVelocity = *cruiseVel;
+    if (cruiseAcc) cfg.MotionMagic.MotionMagicAcceleration = *cruiseAcc;
   } else if (config.GetVelocityTrapezoidalProfileInUse()) {
   } else if (config.HasExponentialProfile()) {
   }
