@@ -86,6 +86,16 @@ task generateDoxygen(type: Exec) {
     description = 'Generates Doxygen HTML documentation for C++ headers'
     group = 'Documentation'
 
+    onlyIf {
+        try {
+            def result = ['doxygen', '--version'].execute()
+            result.waitFor()
+            result.exitValue() == 0
+        } catch (ignored) {
+            false
+        }
+    }
+
     inputs.dir("$rootDir/../yams/cpp/include")
     outputs.dir(doxygenOutputDir)
 
