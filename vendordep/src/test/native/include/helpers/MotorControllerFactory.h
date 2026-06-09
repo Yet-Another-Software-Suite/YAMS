@@ -107,14 +107,16 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
     case HardwareType::SparkMax: {
       bundle.sparkMax = std::make_unique<rev::spark::SparkMax>(
           canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
-      auto* wrapper = new local::SparkWrapper(*bundle.sparkMax, MotorForHardware(param.hardware), cfg);
+      auto* wrapper =
+          new local::SparkWrapper(*bundle.sparkMax, MotorForHardware(param.hardware), cfg);
       bundle.smc = wrapper;
       break;
     }
     case HardwareType::SparkFlex: {
       bundle.sparkFlex = std::make_unique<rev::spark::SparkFlex>(
           canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
-      auto* wrapper = new local::SparkWrapper(*bundle.sparkFlex, MotorForHardware(param.hardware), cfg);
+      auto* wrapper =
+          new local::SparkWrapper(*bundle.sparkFlex, MotorForHardware(param.hardware), cfg);
       bundle.smc = wrapper;
       break;
     }
@@ -128,7 +130,8 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
     }
     case HardwareType::TalonFX: {
       bundle.talonFX = std::make_unique<ctre::phoenix6::hardware::TalonFX>(canId);
-      auto* wrapper = new remote::TalonFXWrapper(*bundle.talonFX, MotorForHardware(param.hardware), cfg);
+      auto* wrapper =
+          new remote::TalonFXWrapper(*bundle.talonFX, MotorForHardware(param.hardware), cfg);
       bundle.smc = wrapper;
       break;
     }

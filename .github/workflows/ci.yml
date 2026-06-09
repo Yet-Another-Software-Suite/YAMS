@@ -3,39 +3,74 @@ on:
   push:
     branches: ["master"]
   pull_request:
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            name: linux
+            gradlew: ./gradlew
+          - os: windows-latest
+            name: windows
+            gradlew: gradlew.bat
+          - os: macos-latest
+            name: macos
+            gradlew: ./gradlew
+    runs-on: ${{ matrix.os }}
     permissions:
       contents: read
     env:
       releaseVersion: ${{ inputs.releaseVersion }}
       releaseName: ${{ github.event.release.name }}
-      workingDirectory: ${{github.workspace}}/vendordep
+    defaults:
+      run:
+        working-directory: vendordep
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v3
+
+      - uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: 17
-      - run: chmod +x gradlew && sudo apt-get install -y doxygen
-        working-directory: ${{ env.workingDirectory }}
-      - name: Install roboRio toolchain
-        run: ./gradlew installRoboRioToolchain
-        working-directory: ${{ env.workingDirectory }}
-      - name: Build vendordep
-        run: ./gradlew build
-        working-directory: ${{ env.workingDirectory }}
-      - name: Java Unit tests
-        run: ./gradlew test
-        working-directory: ${{ env.workingDirectory }}
-      - name: C++ Unit tests
-        run: ./gradlew googleTest
-        working-directory: ${{ env.workingDirectory }}
-      - name: Publish vendordep
-        run: ./gradlew publish
-        working-directory: ${{ env.workingDirectory }}
-      - name: Upload vendordep json, maven repository, and javadocs
-        uses: actions/upload-pages-artifact@v3
+
+      - name: Make gradlew executable
+        if: runner.os != 'Windows'
+        run: chmod +x gradlew
+
+      - name: Install doxygen (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y doxygen graphviz
+
+      - name: Install doxygen (Windows)
+        if: runner.os == 'Windows'
+        run: choco install doxygen.install -y
+
+      - name: Install doxygen (macOS)
+        if: runner.os == 'macOS'
+        run: brew install doxygen
+
+      - name: Install roboRIO toolchain
+        run: ${{ matrix.gradlew }} installRoboRioToolchain
+
+      - name: Build
+        run: ${{ matrix.gradlew }} build
+
+      - name: Java unit tests
+        if: runner.os == 'Linux'
+        run: ${{ matrix.gradlew }} test
+
+      - name: C++ unit tests
+        if: runner.os == 'Linux'
+        run: ${{ matrix.gradlew }} googleTest
+
+      - name: Publish to local maven
+        run: ${{ matrix.gradlew }} publish
+
+      - name: Upload maven artifacts (${{ matrix.name }})
+        uses: actions/upload-artifact@v4
         with:
-          path: ${{ env.workingDirectory }}/build/maven/
+          name: maven-${{ matrix.name }}
+          path: vendordep/build/maven/

@@ -31,4 +31,3 @@ jobs:
         with:
           name: docs
           path: pdfs
-

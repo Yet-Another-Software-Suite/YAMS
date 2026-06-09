@@ -80,7 +80,7 @@ task cppSourceZip(type: Zip) {
     }
 }
 
-def doxygenOutputDir = file("$buildDir/doxygen")
+def doxygenOutputDir = file("$releasePath/doxygen")
 
 task generateDoxygen(type: Exec) {
     description = 'Generates Doxygen HTML documentation for C++ headers'
@@ -108,6 +108,7 @@ QUIET                  = YES
     }
 
     commandLine 'doxygen', file("$buildDir/Doxyfile")
+    ignoreExitValue = true
 }
 
 task cppDoxygenZip(type: Zip, dependsOn: generateDoxygen) {

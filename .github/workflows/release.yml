@@ -10,8 +10,58 @@ on:
         type: boolean
         description: "Publish to WPILib"
         default: false
+
 jobs:
-  build:
+  build-cross:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            name: windows
+            gradlew: gradlew.bat
+          - os: macos-latest
+            name: macos
+            gradlew: ./gradlew
+    runs-on: ${{ matrix.os }}
+    env:
+      releaseVersion: ${{ inputs.releaseVersion }}
+    defaults:
+      run:
+        working-directory: vendordep
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install doxygen (Windows)
+        if: runner.os == 'Windows'
+        run: choco install doxygen.install -y
+
+      - name: Install doxygen (macOS)
+        if: runner.os == 'macOS'
+        run: brew install doxygen
+
+      - name: Install roboRIO toolchain
+        run: ${{ matrix.gradlew }} installRoboRioToolchain
+
+      - name: Build
+        run: ${{ matrix.gradlew }} build
+
+      - name: Publish to local maven
+        run: ${{ matrix.gradlew }} publish
+
+      - name: Upload maven artifacts (${{ matrix.name }})
+        uses: actions/upload-artifact@v4
+        with:
+          name: maven-${{ matrix.name }}
+          path: vendordep/build/maven/
+
+  release:
+    needs: build-cross
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -21,78 +71,87 @@ jobs:
       id-token: write
     env:
       releaseVersion: ${{ inputs.releaseVersion }}
-      workingDirectory: ${{github.workspace}}/vendordep
+      workingDirectory: ${{ github.workspace }}/vendordep
+    environment:
       name: github-pages
-      #url: ${{steps.deployment.outputs.page_url}}
-    
     steps:
       - run: git config --global user.name "thenetworkgrinch" && git config --global user.email "thenetworkgrinch@noreply.users.github.com"
+
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v3
+
+      - uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: 17
+
       - run: chmod +x gradlew
         working-directory: ${{ env.workingDirectory }}
-      - name: Install roboRio toolchain
+
+      - name: Install doxygen
+        run: sudo apt-get install -y doxygen graphviz
+
+      - name: Install roboRIO toolchain
         run: ./gradlew installRoboRioToolchain
         working-directory: ${{ env.workingDirectory }}
-      - name: Build vendordep
-        run: ./gradlew build
-        working-directory: ${{ env.workingDirectory }}
+
+      - name: Download Windows maven artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: maven-windows
+          path: cross/windows/
+
+      - name: Download macOS maven artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: maven-macos
+          path: cross/macos/
+
       - name: Checkout gh-pages branch
         uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: ${{ env.workingDirectory }}/build/maven/
-      - name: Publish vendordep
+
+      - name: Merge cross-platform artifacts into maven
+        run: |
+          cp -r cross/windows/. vendordep/build/maven/
+          cp -r cross/macos/. vendordep/build/maven/
+
+      - name: Build and publish (Linux)
         run: ./gradlew publish
         working-directory: ${{ env.workingDirectory }}
-      - name: Create new vendor JSON
-        run: cp ${{ env.workingDirectory }}/build/maven/yams.json ${{ env.workingDirectory }}/build/maven/yams-${{inputs.releaseVersion}}.json
-      - name: Upload pages
-        run: git add . && git commit -m "Automatically add YAMS version ${{inputs.releaseVersion}}" && git push
+
+      - name: Create versioned vendordep JSON
+        run: cp ${{ env.workingDirectory }}/build/maven/yams.json ${{ env.workingDirectory }}/build/maven/yams-${{ inputs.releaseVersion }}.json
+
+      - name: Push to gh-pages
+        run: git add . && git commit -m "Automatically add YAMS version ${{ inputs.releaseVersion }}" && git push
         working-directory: ${{ env.workingDirectory }}/build/maven/
+
       - name: Setup Pages
-        id: pages
         uses: actions/configure-pages@v5
-      - name: Upload vendordep json, maven repository, and javadocs
+
+      - name: Upload to GitHub Pages
         uses: actions/upload-pages-artifact@v4
         with:
-          name: 'github-pages'
+          name: github-pages
           retention-days: '90'
           path: ${{ env.workingDirectory }}/build/maven/
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
       - name: Output Pages Tree
         run: find ${{ env.workingDirectory }}/build/maven/ -type f
+
       - name: Create Vendor JSON Repo PR
         if: ${{ inputs.publish == true }}
         uses: wpilibsuite/vendor-json-repo/.github/actions/add_vendordep@main
         with:
           repo: Yet-Another-Software-Suite/vendor-json-repo
           token: ${{ secrets.PUBLISH_VENDOR_JSON_TOKEN }}
-          vendordep_file: ${{ env.workingDirectory }}/build/maven/yams-${{inputs.releaseVersion}}.json
-          pr_title: "Automatically add YAMS version ${{inputs.releaseVersion}}"
-          pr_branch: "publish_yams_${{inputs.releaseVersion}}"
+          vendordep_file: ${{ env.workingDirectory }}/build/maven/yams-${{ inputs.releaseVersion }}.json
+          pr_title: "Automatically add YAMS version ${{ inputs.releaseVersion }}"
+          pr_branch: "publish_yams_${{ inputs.releaseVersion }}"
         continue-on-error: true
-  #deploy:
-    #permissions:
-      #contents: write
-      #pages: write
-      #id-token: write
-    #environment:
-      #name: github-pages
-      #url: ${{steps.deployment.outputs.page_url}}
-    #runs-on: ubuntu-latest
-    #needs: build
-    #steps:
-  ##    - name: Deploy to GitHub Pages
-   ##     id: deployment
-   #     uses: actions/deploy-pages@v4
-
-
-
-
-
