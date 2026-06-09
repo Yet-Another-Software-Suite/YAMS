@@ -39,6 +39,7 @@ void SparkWrapper::Init(SparkBase* spark, frc::DCMotor motor,
   m_sparkPid = &spark->GetClosedLoopController();
   m_relEncoder = &spark->GetEncoder();
   m_config = cfg;
+  m_config.WithSimMotor(motor);
 
   SetupSimulation();
   ApplyConfig(cfg);
@@ -114,7 +115,7 @@ void SparkWrapper::CommitConfig() {
 void SparkWrapper::SetupSimulation() {
   if (!frc::RobotBase::IsSimulation()) return;
 
-  if (!m_sparkSim) {
+  if (!m_sparkSim.has_value()) {
     auto simMotor = m_config.GetSimMotor();
     auto& gearing = m_config.GetMotorGearing();
     if (!simMotor || !gearing) return;
@@ -150,18 +151,19 @@ void SparkWrapper::SetupSimulation() {
 
 void SparkWrapper::SimIterate() {
   // if (!frc::RobotBase::IsSimulation() || !m_simSupplier || !m_sparkSim) return;
+  if (m_simSupplier) {
+    if (m_simSupplier->IsWatchdogExpired()) {
+      m_simSupplier->UpdateSim();
+    }
+    units::second_t dt = m_config.GetClosedLoopControlPeriod().value_or(20_ms);
+    units::turns_per_second_t mechVelRps = m_simSupplier->GetMechanismVelocity();
+    double vbus = m_simSupplier->GetMechanismSupplyVoltage().value();
+    m_sparkSim->iterate(mechVelRps.value(), vbus, dt.value());
 
-  m_simSupplier->UpdateSim();
+    if (m_relEncoderSim) m_relEncoderSim->iterate(mechVelRps.value(), dt.value());
 
-  units::second_t dt = m_config.GetClosedLoopControlPeriod().value_or(20_ms);
-  units::turns_per_second_t mechVelRps = m_simSupplier->GetMechanismVelocity();
-  double vbus = m_simSupplier->GetMechanismSupplyVoltage().value();
-  std::cout << mechVelRps.value() << " rotor"<<std::endl;
-  m_sparkSim->iterate(mechVelRps.value(), vbus, dt.value());
-
-  if (m_relEncoderSim) m_relEncoderSim->iterate(mechVelRps.value(), dt.value());
-
-  if (m_absEncoderSim) m_absEncoderSim->iterate(mechVelRps.value(), dt.value());
+    if (m_absEncoderSim) m_absEncoderSim->iterate(mechVelRps.value(), dt.value());
+  }
 }
 
 // ---- Encoder sync -----------------------------------------------------------
@@ -174,7 +176,9 @@ void SparkWrapper::SynchronizeRelativeEncoder() {}
 // ---- Open-loop outputs ------------------------------------------------------
 
 void SparkWrapper::SetDutyCycle(double dc) { m_spark->Set(dc); }
-double SparkWrapper::GetDutyCycle() { return m_sparkSim.has_value() ? m_sparkSim.value().GetAppliedOutput() : m_spark->GetAppliedOutput(); }
+double SparkWrapper::GetDutyCycle() {
+  return m_sparkSim ? m_sparkSim.value().GetAppliedOutput() : m_spark->GetAppliedOutput();
+}
 
 void SparkWrapper::SetVoltage(units::volt_t voltage) { m_spark->SetVoltage(voltage); }
 

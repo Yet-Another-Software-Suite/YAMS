@@ -90,7 +90,7 @@ void FlyWheel::SimIterate() {
   if (auto* ss = m_smc->GetSimSupplier()) {
     ss->UpdateSim();
     m_smc->SimIterate();
-    ss->FeedWatchdog();
+    ss->StarveWatchdog();
 
     frc::sim::RoboRioSim::SetVInVoltage(
         frc::sim::BatterySim::Calculate({ss->GetCurrentDrawAmps()}));

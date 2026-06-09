@@ -18,6 +18,8 @@
   "C_Cpp.errorSquiggles": "enabled",
   "files.associations": {
     "type_traits": "cpp",
-    "optional": "cpp"
+    "optional": "cpp",
+    "ostream": "cpp",
+    "system_error": "cpp"
   }
 }

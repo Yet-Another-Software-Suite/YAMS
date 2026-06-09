@@ -25,7 +25,7 @@ void DCMotorSimSupplier::UpdateSim() {
   }
   m_inputFed = false;
   m_sim.Update(m_period);
-  FeedWatchdog();
+  StarveWatchdog();
 }
 
 units::turn_t DCMotorSimSupplier::GetMechanismPosition() { return m_sim.GetAngularPosition(); }
@@ -76,6 +76,7 @@ void DCMotorSimSupplier::SetInputVoltage(units::volt_t volts) {
   m_lastInputVoltage = volts;
   m_sim.SetInputVoltage(volts);
   m_inputFed = true;
+  FeedWatchdog();
 }
 
 units::volt_t DCMotorSimSupplier::GetMechanismSupplyVoltage() {

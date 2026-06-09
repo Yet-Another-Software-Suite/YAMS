@@ -126,7 +126,7 @@ void Pivot::SimIterate() {
     auto* ss = m_smc->GetSimSupplier();
     ss->UpdateSim();
     m_smc->SimIterate();
-    ss->FeedWatchdog();
+    ss->StarveWatchdog();
 
     double simVelRadPerSec = m_dcMotorSim->GetAngularVelocity().value();
     if (m_pivotConfig.GetMinAngle() && simVelRadPerSec < 0.0 &&

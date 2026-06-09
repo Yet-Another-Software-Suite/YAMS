@@ -130,7 +130,7 @@ void Arm::SimIterate() {
     auto* ss = m_smc->GetSimSupplier();
     ss->UpdateSim();
     m_smc->SimIterate();
-    ss->FeedWatchdog();
+    ss->StarveWatchdog();
 
     if (m_armConfig.GetMinAngle() && m_armSim->GetVelocity().value() < 0.0 &&
         GetAngle() < *m_armConfig.GetMinAngle()) {

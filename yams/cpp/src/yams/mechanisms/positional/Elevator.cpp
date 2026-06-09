@@ -148,7 +148,7 @@ void Elevator::SimIterate() {
     auto* ss = m_smc->GetSimSupplier();
     ss->UpdateSim();
     m_smc->SimIterate();
-    ss->FeedWatchdog();
+    ss->StarveWatchdog();
 
     if (!m_elevatorConfig.GetMinHeight() || GetHeight() >= *m_elevatorConfig.GetMinHeight()) {
       frc::sim::RoboRioSim::SetVInVoltage(
