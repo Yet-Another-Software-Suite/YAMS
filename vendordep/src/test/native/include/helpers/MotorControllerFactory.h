@@ -81,10 +81,14 @@ inline SmartMotorControllerConfig MakeBaseConfig(ProfileType profile, double kP,
 // Return the canonical DCMotor model for a given hardware type.
 inline frc::DCMotor MotorForHardware(HardwareType hw) {
   switch (hw) {
-    case HardwareType::SparkMax:  return frc::DCMotor::NEO(1);
-    case HardwareType::SparkFlex: return frc::DCMotor::NeoVortex(1);
-    case HardwareType::TalonFXS:  return frc::DCMotor::NEO(2);
-    case HardwareType::TalonFX:   return frc::DCMotor::KrakenX60(1);
+    case HardwareType::SparkMax:
+      return frc::DCMotor::NEO(1);
+    case HardwareType::SparkFlex:
+      return frc::DCMotor::NeoVortex(1);
+    case HardwareType::TalonFXS:
+      return frc::DCMotor::NEO(2);
+    case HardwareType::TalonFX:
+      return frc::DCMotor::KrakenX60(1);
   }
   return frc::DCMotor::NEO(1);
 }
@@ -103,28 +107,28 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
     case HardwareType::SparkMax: {
       bundle.sparkMax = std::make_unique<rev::spark::SparkMax>(
           canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
-      auto* wrapper = new local::SparkWrapper(*bundle.sparkMax, frc::DCMotor::NEO(1), cfg);
+      auto* wrapper = new local::SparkWrapper(*bundle.sparkMax, MotorForHardware(param.hardware), cfg);
       bundle.smc = wrapper;
       break;
     }
     case HardwareType::SparkFlex: {
       bundle.sparkFlex = std::make_unique<rev::spark::SparkFlex>(
           canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
-      auto* wrapper = new local::SparkWrapper(*bundle.sparkFlex, frc::DCMotor::NeoVortex(1), cfg);
+      auto* wrapper = new local::SparkWrapper(*bundle.sparkFlex, MotorForHardware(param.hardware), cfg);
       bundle.smc = wrapper;
       break;
     }
     case HardwareType::TalonFXS: {
       bundle.talonFXS = std::make_unique<ctre::phoenix6::hardware::TalonFXS>(canId);
       auto* wrapper =
-          new remote::TalonFXSWrapper(*bundle.talonFXS, frc::DCMotor::NEO(1),
+          new remote::TalonFXSWrapper(*bundle.talonFXS, MotorForHardware(param.hardware),
                                       remote::TalonFXSWrapper::MotorArrangement::NEO, cfg);
       bundle.smc = wrapper;
       break;
     }
     case HardwareType::TalonFX: {
       bundle.talonFX = std::make_unique<ctre::phoenix6::hardware::TalonFX>(canId);
-      auto* wrapper = new remote::TalonFXWrapper(*bundle.talonFX, frc::DCMotor::KrakenX60(1), cfg);
+      auto* wrapper = new remote::TalonFXWrapper(*bundle.talonFX, MotorForHardware(param.hardware), cfg);
       bundle.smc = wrapper;
       break;
     }
