@@ -37,6 +37,7 @@ TalonFXSWrapper::TalonFXSWrapper(hardware::TalonFXS& talon, frc::DCMotor dcMotor
                                  const SmartMotorControllerConfig& config)
     : SmartMotorController(), m_talon(talon), m_dcMotor(dcMotor), m_arrangement(arrangement) {
   m_config = config;
+  m_config.WithSimMotor(dcMotor);
   SetupSimulation();
   ApplyConfig(config);
   CheckConfigSafety();
