@@ -82,19 +82,21 @@ task cppSourceZip(type: Zip) {
 
 def doxygenOutputDir = file("$releasePath/doxygen")
 
+def doxygenAvailable = {
+    try {
+        def result = ['doxygen', '--version'].execute()
+        result.waitFor()
+        result.exitValue() == 0
+    } catch (ignored) {
+        false
+    }
+}()
+
 task generateDoxygen(type: Exec) {
     description = 'Generates Doxygen HTML documentation for C++ headers'
     group = 'Documentation'
 
-    onlyIf {
-        try {
-            def result = ['doxygen', '--version'].execute()
-            result.waitFor()
-            result.exitValue() == 0
-        } catch (ignored) {
-            false
-        }
-    }
+    onlyIf { doxygenAvailable }
 
     inputs.dir("$rootDir/../yams/cpp/include")
     outputs.dir(doxygenOutputDir)
@@ -122,6 +124,7 @@ QUIET                  = YES
 }
 
 task cppDoxygenZip(type: Zip, dependsOn: generateDoxygen) {
+    onlyIf { doxygenAvailable }
     destinationDirectory = outputsFolder
     archiveBaseName = zipBaseName
     archiveClassifier = "cppapi"
@@ -232,9 +235,10 @@ build.dependsOn outputJar
 build.dependsOn vendordepJsonZip
 build.dependsOn cppHeadersZip
 build.dependsOn cppSourceZip
-build.dependsOn cppDoxygenZip
-
-addTaskToCopyAllOutputs(cppDoxygenZip)
+if (doxygenAvailable) {
+    build.dependsOn cppDoxygenZip
+    addTaskToCopyAllOutputs(cppDoxygenZip)
+}
 
 libraryBuild.dependsOn build
 
@@ -267,7 +271,9 @@ model {
                 }
                 artifact cppHeadersZip
                 artifact cppSourceZip
-                artifact cppDoxygenZip
+                if (doxygenAvailable) {
+                    artifact cppDoxygenZip
+                }
 
                 artifactId = "${baseArtifactId}-cpp"
                 groupId = artifactGroupId

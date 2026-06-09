@@ -72,12 +72,6 @@ jobs:
       - name: Make gradlew executable
         if: runner.os != 'Windows'
         run: chmod +x gradlew
-      - name: Install doxygen (Windows)
-        if: runner.os == 'Windows'
-        run: choco install doxygen.install -y
-      - name: Install doxygen (macOS)
-        if: runner.os == 'macOS'
-        run: brew install doxygen
       - name: Cache roboRIO toolchain
         id: toolchain-cache
         uses: actions/cache@v4
