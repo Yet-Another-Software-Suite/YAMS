@@ -33,7 +33,7 @@ using namespace mechanisms::config;
 static SmartMotorControllerConfig MakePivotSMCConfig(ProfileType profile, TestSubsystem* subsys,
                                                      const std::string& name) {
   SmartMotorControllerConfig cfg;
-  cfg.WithFeedback(4.0, 0.0, 0.0)
+  cfg.WithFeedback(5.0, 0.0, 0.0)
       .WithMechanismLimits(-100.0_deg, 100.0_deg)
       .WithMotorGearing(
           gearing::MechanismGearing{gearing::GearBox::FromReductionStages({3.0, 4.0, 5.0})})
@@ -48,12 +48,12 @@ static SmartMotorControllerConfig MakePivotSMCConfig(ProfileType profile, TestSu
   switch (profile) {
     case ProfileType::Trapezoid:
       cfg.WithTrapezoidProfile(
-          units::degrees_per_second_t{180.0},
+          units::degrees_per_second_t{360.0},
           units::unit_t<units::compound_unit<units::angular_velocity::degrees_per_second,
                                              units::inverse<units::seconds>>>{90.0});
       break;
     case ProfileType::Exponential:
-      cfg.WithExponentialProfile(0.5, 0.05, 12.0_V);
+      cfg.WithExponentialProfile(0.7, 0.05, 12.0_V);
       break;
     default:
       break;
@@ -67,7 +67,7 @@ static positional::Pivot* CreatePivot(SmartMotorController* smc, TestSubsystem* 
       .WithSubsystem(subsys)
       .WithMinAngle(-100.0_deg)
       .WithMaxAngle(150.0_deg)
-      .WithMOI(units::kilogram_square_meter_t{0.001})
+      .WithMOI(units::kilogram_square_meter_t{0.0001})
       .WithStartingAngle(0.0_deg);
   positional::Pivot* pivot = new positional::Pivot(cfg);
   subsys->m_mechSimPeriodic = [pivot] { pivot->SimIterate(); };
