@@ -31,7 +31,6 @@ ShooterSubsystem::ShooterSubsystem() {
 
   // 4-inch diameter flywheel wheel
   m_shooterConfig.WithMotorController(&m_motor.value())
-      .WithSubsystem(this)
       .WithRollerDiameter(units::meter_t{4.0 * 0.0254})
       .WithTelemetryName("ShooterMech");
 
