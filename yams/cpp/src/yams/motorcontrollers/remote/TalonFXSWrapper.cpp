@@ -814,7 +814,7 @@ TalonFXSWrapper::~TalonFXSWrapper() {
     m_closedLoopControllerThread->Stop();
     m_closedLoopControllerThread.reset();
   }
-  delete &m_talon;
+  //delete &m_talon;
 }
 
 }  // namespace yams::motorcontrollers::remote
