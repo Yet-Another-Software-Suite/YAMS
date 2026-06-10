@@ -34,7 +34,6 @@ HoodSubsystem::HoodSubsystem() {
                   m_motorConfig);
 
   m_pivotConfig.WithMotorController(&m_motor.value())
-      .WithSubsystem(this)
       .WithMinAngle(units::degree_t{-100})
       .WithMaxAngle(units::degree_t{200})
       .WithTelemetryName("HoodExample");

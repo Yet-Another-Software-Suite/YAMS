@@ -32,7 +32,6 @@ ArmSubsystem::ArmSubsystem() {
   m_motor.emplace(m_armMotor, frc::DCMotor::KrakenX60(1), m_motorConfig);
 
   m_armConfig.WithMotorController(&m_motor.value())
-      .WithSubsystem(this)
       .WithArmLength(units::meter_t{0.135})
       .WithMinAngle(units::degree_t{-100})
       .WithMaxAngle(units::degree_t{200})

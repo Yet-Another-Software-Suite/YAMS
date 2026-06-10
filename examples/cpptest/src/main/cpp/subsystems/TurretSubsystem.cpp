@@ -38,7 +38,6 @@ TurretSubsystem::TurretSubsystem()
   m_motor.emplace(m_talonFX, frc::DCMotor::KrakenX60(1), m_motorConfig);
 
   m_pivotConfig.WithMotorController(&m_motor.value())
-      .WithSubsystem(this)
       .WithMinAngle(units::degree_t{-360})
       .WithMaxAngle(units::degree_t{360})
       .WithTelemetryName("Turret");

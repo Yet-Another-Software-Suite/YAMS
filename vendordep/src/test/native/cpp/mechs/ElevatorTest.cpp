@@ -68,11 +68,8 @@ static SmartMotorControllerConfig MakeElevatorSMCConfig(ProfileType profile, Har
 
 static positional::Elevator* CreateElevator(SmartMotorController* smc, TestSubsystem* subsys) {
   ElevatorConfig cfg;
-  cfg.WithMotorController(smc)
-      .WithSubsystem(subsys)
-      .WithMinimumHeight(0.0_m)
-      .WithCarriageMass(1_lb)
-      .WithMaximumHeight(3.0_m);
+  cfg.WithMotorController(smc).WithMinimumHeight(0.0_m).WithCarriageMass(1_lb).WithMaximumHeight(
+      3.0_m);
   positional::Elevator* elevator = new positional::Elevator(cfg);
   subsys->m_mechSimPeriodic = [elevator] { elevator->SimIterate(); };
   subsys->m_mechUpdateTelemetry = [elevator] { elevator->UpdateTelemetry(); };

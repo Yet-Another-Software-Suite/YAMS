@@ -39,7 +39,6 @@ ElevatorSubsystem::ElevatorSubsystem() {
   m_motor.emplace(m_elevatorMotor, frc::DCMotor::KrakenX44(1), m_motorConfig);
 
   m_elevatorConfig.WithMotorController(&m_motor.value())
-      .WithSubsystem(this)
       .WithMinimumHeight(units::meter_t{0})
       .WithMaximumHeight(units::meter_t{3})
       .WithCarriageMass(2.0_lb)
