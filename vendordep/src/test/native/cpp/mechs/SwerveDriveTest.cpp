@@ -72,7 +72,7 @@ class SwerveTestSubsystem : public frc2::SubsystemBase {
 static SmartMotorControllerConfig MakeDriveConfig(const std::string& name,
                                                   frc2::SubsystemBase* subsys) {
   SmartMotorControllerConfig cfg;
-  cfg.WithFeedback(0.1, 0.0, 0.0)
+  cfg.WithFeedback(1, 0.0, 0.0)
       .WithMechanismCircumference(units::meter_t{4.0_in * std::numbers::pi})
       .WithMotorGearing(gearing::MechanismGearing{gearing::GearBox::FromReductionStages({6.75})})
       .WithIdleMode(SmartMotorControllerConfig::MotorMode::BRAKE)
@@ -87,7 +87,7 @@ static SmartMotorControllerConfig MakeDriveConfig(const std::string& name,
 static SmartMotorControllerConfig MakeAzimuthConfig(const std::string& name,
                                                     frc2::SubsystemBase* subsys) {
   SmartMotorControllerConfig cfg;
-  cfg.WithFeedback(50.0, 0.0, 0.5)
+  cfg.WithFeedback(10.0, 0.0, 0.5)
       .WithMotorGearing(
           gearing::MechanismGearing{gearing::GearBox::FromReductionStages({150.0 / 7.0})})
       .WithIdleMode(SmartMotorControllerConfig::MotorMode::BRAKE)
