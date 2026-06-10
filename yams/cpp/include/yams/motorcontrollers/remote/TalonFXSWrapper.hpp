@@ -291,6 +291,11 @@ class TalonFXSWrapper : public SmartMotorController {
   math::DerivativeTimeFilter m_accelFilter{20_ms};
 
   ctre::phoenix6::signals::ExternalFeedbackSensorSourceValue ArrangementToFeedbackSource() const;
+
+  void ApplyPIDConfig();
+  void ApplyFeedforwardConfig();
+  void ApplyLimitsConfig();
+  void ApplyMotionMagicConfig();
 };
 
 }  // namespace yams::motorcontrollers::remote

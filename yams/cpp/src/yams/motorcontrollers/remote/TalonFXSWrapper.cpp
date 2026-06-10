@@ -185,92 +185,10 @@ bool TalonFXSWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     m_config.GetExternalEncoderDiscontinuityPoint();
   }
 
-  auto g0 = m_config.GetSlotGains(SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_0);
-  cfg.Slot0.kP = g0.kP;
-  cfg.Slot0.kI = g0.kI;
-  cfg.Slot0.kD = g0.kD;
-  cfg.Slot0.kS = g0.kS;
-  cfg.Slot0.kV = g0.kV;
-  cfg.Slot0.kA = g0.kA;
-  if (g0.armFF) {
-    cfg.Slot0.kG = g0.kG;
-    cfg.Slot0.GravityType = signals::GravityTypeValue::Arm_Cosine;
-  } else if (g0.elevatorFF) {
-    cfg.Slot0.kG = g0.kG;
-    cfg.Slot0.GravityType = signals::GravityTypeValue::Elevator_Static;
-  }
-
-  auto g1 = m_config.GetSlotGains(SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_1);
-  cfg.Slot1.kP = g1.kP;
-  cfg.Slot1.kI = g1.kI;
-  cfg.Slot1.kD = g1.kD;
-  cfg.Slot1.kS = g1.kS;
-  cfg.Slot1.kV = g1.kV;
-  cfg.Slot1.kA = g1.kA;
-  if (g1.armFF) {
-    cfg.Slot1.kG = g1.kG;
-    cfg.Slot1.GravityType = signals::GravityTypeValue::Arm_Cosine;
-  } else if (g1.elevatorFF) {
-    cfg.Slot1.kG = g1.kG;
-    cfg.Slot1.GravityType = signals::GravityTypeValue::Elevator_Static;
-  }
-
-  auto g2 = m_config.GetSlotGains(SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_2);
-  cfg.Slot2.kP = g2.kP;
-  cfg.Slot2.kI = g2.kI;
-  cfg.Slot2.kD = g2.kD;
-  cfg.Slot2.kS = g2.kS;
-  cfg.Slot2.kV = g2.kV;
-  cfg.Slot2.kA = g2.kA;
-  if (g2.armFF) {
-    cfg.Slot2.kG = g2.kG;
-    cfg.Slot2.GravityType = signals::GravityTypeValue::Arm_Cosine;
-  } else if (g2.elevatorFF) {
-    cfg.Slot2.kG = g2.kG;
-    cfg.Slot2.GravityType = signals::GravityTypeValue::Elevator_Static;
-  }
-
-  if (auto upper = m_config.GetMechanismUpperLimit(); upper) {
-    cfg.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    cfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold = *upper;
-  }
-  if (auto lower = m_config.GetMechanismLowerLimit(); lower) {
-    cfg.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-    cfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = *lower;
-  }
-
-  {
-    int slotIdx = static_cast<int>(m_slot);
-    if (m_config.HasTrapezoidProfile() && !m_config.GetVelocityTrapezoidalProfileInUse()) {
-      // Angular profile supplies velocity directly in TPS.  Linear profiles store
-      // velocity in m/s; convert to TPS using the mechanism circumference.
-      auto cruiseVel = m_config.GetTrapMaxVelocityTurns();
-      auto cruiseAcc = m_config.GetTrapMaxAccelTurns();
-      if (!cruiseVel) {
-        if (auto linVel = m_config.GetTrapMaxVelocityLinear(); linVel)
-          if (auto circ = m_config.GetMechanismCircumference(); circ && circ->value() != 0.0)
-            cruiseVel = units::turns_per_second_t{linVel->value() / circ->value()};
-      }
-      if (!cruiseAcc) {
-        if (auto linAcc = m_config.GetTrapMaxAccelLinear(); linAcc)
-          if (auto circ = m_config.GetMechanismCircumference(); circ && circ->value() != 0.0)
-            cruiseAcc = units::turns_per_second_squared_t{linAcc->value() / circ->value()};
-      }
-      if (cruiseVel) cfg.MotionMagic.MotionMagicCruiseVelocity = *cruiseVel;
-      if (cruiseAcc) cfg.MotionMagic.MotionMagicAcceleration = *cruiseAcc;
-      m_positionReq = controls::MotionMagicVoltage{0_tr}.WithSlot(slotIdx);
-      m_velocityReq = controls::VelocityVoltage{0_tps}.WithSlot(slotIdx);
-    } else if (m_config.GetVelocityTrapezoidalProfileInUse()) {
-      m_positionReq = controls::PositionVoltage{0_tr}.WithSlot(slotIdx);
-      m_velocityReq = controls::MotionMagicVelocityVoltage{0_tps}.WithSlot(slotIdx);
-    } else if (m_config.HasExponentialProfile()) {
-      m_positionReq = controls::MotionMagicExpoVoltage{0_tr}.WithSlot(slotIdx);
-      m_velocityReq = controls::VelocityVoltage{0_tps}.WithSlot(slotIdx);
-    } else {
-      m_positionReq = controls::PositionVoltage{0_tr}.WithSlot(slotIdx);
-      m_velocityReq = controls::VelocityVoltage{0_tps}.WithSlot(slotIdx);
-    }
-  }
+  ApplyPIDConfig();
+  ApplyFeedforwardConfig();
+  ApplyLimitsConfig();
+  ApplyMotionMagicConfig();
 
   if (auto r = m_config.GetOpenLoopRampRate(); r) cfg.OpenLoopRamps.VoltageOpenLoopRampPeriod = *r;
   if (auto r = m_config.GetClosedLoopRampRate(); r)
@@ -777,6 +695,96 @@ void* TalonFXSWrapper::GetMotorControllerConfig() { return &m_talonConfig; }
 
 telemetry::UnsupportedTelemetryFields TalonFXSWrapper::GetUnsupportedTelemetryFields() {
   return {};  // TalonFXS supports all telemetry fields
+}
+
+// ---- Config helpers ---------------------------------------------------------
+
+void TalonFXSWrapper::ApplyPIDConfig() {
+  auto g0 = m_config.GetSlotGains(ClosedLoopControllerSlot::SLOT_0);
+  m_talonConfig.Slot0.kP = g0.kP;
+  m_talonConfig.Slot0.kI = g0.kI;
+  m_talonConfig.Slot0.kD = g0.kD;
+  m_talonConfig.Slot0.kS = g0.kS;
+  m_talonConfig.Slot0.kV = g0.kV;
+  m_talonConfig.Slot0.kA = g0.kA;
+
+  auto g1 = m_config.GetSlotGains(ClosedLoopControllerSlot::SLOT_1);
+  m_talonConfig.Slot1.kP = g1.kP;
+  m_talonConfig.Slot1.kI = g1.kI;
+  m_talonConfig.Slot1.kD = g1.kD;
+  m_talonConfig.Slot1.kS = g1.kS;
+  m_talonConfig.Slot1.kV = g1.kV;
+  m_talonConfig.Slot1.kA = g1.kA;
+
+  auto g2 = m_config.GetSlotGains(ClosedLoopControllerSlot::SLOT_2);
+  m_talonConfig.Slot2.kP = g2.kP;
+  m_talonConfig.Slot2.kI = g2.kI;
+  m_talonConfig.Slot2.kD = g2.kD;
+  m_talonConfig.Slot2.kS = g2.kS;
+  m_talonConfig.Slot2.kV = g2.kV;
+  m_talonConfig.Slot2.kA = g2.kA;
+}
+
+void TalonFXSWrapper::ApplyFeedforwardConfig() {
+  auto applySlot = [&](auto& slotCfg, ClosedLoopControllerSlot slotEnum) {
+    auto gains = m_config.GetSlotGains(slotEnum);
+    slotCfg.kG = gains.kG;
+    if (gains.armFF)
+      slotCfg.GravityType = signals::GravityTypeValue::Arm_Cosine;
+    else if (gains.elevatorFF)
+      slotCfg.GravityType = signals::GravityTypeValue::Elevator_Static;
+  };
+  applySlot(m_talonConfig.Slot0, ClosedLoopControllerSlot::SLOT_0);
+  applySlot(m_talonConfig.Slot1, ClosedLoopControllerSlot::SLOT_1);
+  applySlot(m_talonConfig.Slot2, ClosedLoopControllerSlot::SLOT_2);
+}
+
+void TalonFXSWrapper::ApplyLimitsConfig() {
+  if (auto upper = m_config.GetMechanismUpperLimit(); upper) {
+    m_talonConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    m_talonConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = *upper;
+  }
+  if (auto lower = m_config.GetMechanismLowerLimit(); lower) {
+    m_talonConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+    m_talonConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = *lower;
+  }
+}
+
+void TalonFXSWrapper::ApplyMotionMagicConfig() {
+  bool hasTrap = m_config.HasTrapezoidProfile();
+  bool hasExpo = m_config.HasExponentialProfile();
+  bool velTrap = m_config.GetVelocityTrapezoidalProfileInUse();
+  int slotIdx = static_cast<int>(m_slot);
+
+  if (hasTrap && !velTrap) {
+    // Angular profile supplies velocity directly in TPS.  Linear profiles store
+    // velocity in m/s; convert to TPS using the mechanism circumference.
+    auto cruiseVel = m_config.GetTrapMaxVelocityTurns();
+    auto cruiseAcc = m_config.GetTrapMaxAccelTurns();
+    if (!cruiseVel) {
+      if (auto linVel = m_config.GetTrapMaxVelocityLinear(); linVel)
+        if (auto circ = m_config.GetMechanismCircumference(); circ && circ->value() != 0.0)
+          cruiseVel = units::turns_per_second_t{linVel->value() / circ->value()};
+    }
+    if (!cruiseAcc) {
+      if (auto linAcc = m_config.GetTrapMaxAccelLinear(); linAcc)
+        if (auto circ = m_config.GetMechanismCircumference(); circ && circ->value() != 0.0)
+          cruiseAcc = units::turns_per_second_squared_t{linAcc->value() / circ->value()};
+    }
+    if (cruiseVel) m_talonConfig.MotionMagic.MotionMagicCruiseVelocity = *cruiseVel;
+    if (cruiseAcc) m_talonConfig.MotionMagic.MotionMagicAcceleration = *cruiseAcc;
+    m_positionReq = controls::MotionMagicVoltage{0_tr}.WithSlot(slotIdx);
+    m_velocityReq = controls::VelocityVoltage{0_tps}.WithSlot(slotIdx);
+  } else if (hasTrap && velTrap) {
+    m_positionReq = controls::PositionVoltage{0_tr}.WithSlot(slotIdx);
+    m_velocityReq = controls::MotionMagicVelocityVoltage{0_tps}.WithSlot(slotIdx);
+  } else if (hasExpo) {
+    m_positionReq = controls::MotionMagicExpoVoltage{0_tr}.WithSlot(slotIdx);
+    m_velocityReq = controls::VelocityVoltage{0_tps}.WithSlot(slotIdx);
+  } else {
+    m_positionReq = controls::PositionVoltage{0_tr}.WithSlot(slotIdx);
+    m_velocityReq = controls::VelocityVoltage{0_tps}.WithSlot(slotIdx);
+  }
 }
 
 }  // namespace yams::motorcontrollers::remote
