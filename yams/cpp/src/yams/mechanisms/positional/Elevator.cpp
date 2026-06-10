@@ -91,10 +91,10 @@ Elevator::Elevator(const config::ElevatorConfig& config)
     units::meter_t circumference = m_smc->GetConfig().GetMechanismCircumference().value();
 
     m_elevatorSim.emplace(dcMotor, gearing.GetMechanismToRotorRatio(),
-                          config.GetCarriageMass().value(), circumference / (2 * std::numbers::pi),
+                          config.GetCarriageMass().value(), circumference / (2.0 * std::numbers::pi),
                           config.GetMinHeight().value(), config.GetMaxHeight().value(),
                           simulateGravity, config.GetStartingHeight().value(),
-                          std::array<double, 2>{0.01 / 4096.0, 0});
+                          std::array<double, 2>{0.01 / 4096.0, 0.01 / 4096.0});
 
     units::second_t period = m_smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms);
     m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::ElevatorSimSupplier>(
