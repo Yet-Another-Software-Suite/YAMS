@@ -39,7 +39,7 @@ TalonFXSWrapper::TalonFXSWrapper(hardware::TalonFXS& talon, frc::DCMotor dcMotor
     : SmartMotorController(), m_talon(talon), m_dcMotor(dcMotor), m_arrangement(arrangement) {
   m_config = config;
   m_config.WithSimMotor(dcMotor);
-  if (auto& vc = config.GetVendorConfig(); vc.has_value()) {
+  if (auto vc = config.GetVendorConfig(); vc.has_value()) {
     if (auto* p = std::any_cast<configs::TalonFXSConfiguration>(&vc.value())) {
       m_talonConfig = *p;
     } else {

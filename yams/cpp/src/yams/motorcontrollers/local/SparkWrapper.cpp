@@ -23,15 +23,14 @@ namespace yams::motorcontrollers::local {
 SparkWrapper::SparkWrapper(SparkMax& spark, frc::DCMotor motor,
                            const SmartMotorControllerConfig& cfg)
     : SmartMotorController(), m_motor(motor) {
-  if (auto& vc = cfg.GetVendorConfig(); vc.has_value()) {
+  m_maxConfig.emplace();
+  if (auto vc = cfg.GetVendorConfig(); vc.has_value()) {
     if (auto* p = std::any_cast<rev::spark::SparkMaxConfig>(&vc.value())) {
-      m_maxConfig.emplace(*p);
+      m_maxConfig->Apply(*p);
     } else {
       throw std::invalid_argument(
           "SparkWrapper (SparkMax): WithVendorConfig requires a SparkMaxConfig");
     }
-  } else {
-    m_maxConfig.emplace();
   }
   Init(&spark, motor, cfg);
 }
@@ -39,15 +38,14 @@ SparkWrapper::SparkWrapper(SparkMax& spark, frc::DCMotor motor,
 SparkWrapper::SparkWrapper(SparkFlex& spark, frc::DCMotor motor,
                            const SmartMotorControllerConfig& cfg)
     : SmartMotorController(), m_motor(motor) {
-  if (auto& vc = cfg.GetVendorConfig(); vc.has_value()) {
+  m_flexConfig.emplace();
+  if (auto vc = cfg.GetVendorConfig(); vc.has_value()) {
     if (auto* p = std::any_cast<rev::spark::SparkFlexConfig>(&vc.value())) {
-      m_flexConfig.emplace(*p);
+      m_flexConfig->Apply(*p);
     } else {
       throw std::invalid_argument(
           "SparkWrapper (SparkFlex): WithVendorConfig requires a SparkFlexConfig");
     }
-  } else {
-    m_flexConfig.emplace();
   }
   Init(&spark, motor, cfg);
 }
