@@ -87,6 +87,7 @@ class SparkWrapper : public SmartMotorController {
    */
   SparkWrapper(rev::spark::SparkFlex& spark, frc::DCMotor motor,
                const SmartMotorControllerConfig& config);
+   ~SparkWrapper();
 
   // ---- Telemetry ----------------------------------------------------------
   /** @copydoc SmartMotorController::GetUnsupportedTelemetryFields */

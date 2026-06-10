@@ -807,4 +807,12 @@ telemetry::UnsupportedTelemetryFields TalonFXWrapper::GetUnsupportedTelemetryFie
   return {};  // TalonFX supports all telemetry fields
 }
 
+TalonFXWrapper::~TalonFXWrapper() {
+  if (m_closedLoopControllerThread) {
+    m_closedLoopControllerThread->Stop();
+    m_closedLoopControllerThread.reset();
+  }
+  delete &m_talon;
+}
+
 }  // namespace yams::motorcontrollers::remote

@@ -749,4 +749,12 @@ telemetry::UnsupportedTelemetryFields SparkWrapper::GetUnsupportedTelemetryField
                             telemetry::DoubleTelemetryField::SupplyCurrentLimit}};
 }
 
+SparkWrapper::~SparkWrapper() {
+  if (m_closedLoopControllerThread) {
+    m_closedLoopControllerThread->Stop();
+    m_closedLoopControllerThread.reset();
+  }
+  delete m_spark;
+}
+
 }  // namespace yams::motorcontrollers::local

@@ -809,4 +809,12 @@ void TalonFXSWrapper::ApplyMotionMagicConfig() {
   }
 }
 
+TalonFXSWrapper::~TalonFXSWrapper() {
+  if (m_closedLoopControllerThread) {
+    m_closedLoopControllerThread->Stop();
+    m_closedLoopControllerThread.reset();
+  }
+  delete &m_talon;
+}
+
 }  // namespace yams::motorcontrollers::remote
