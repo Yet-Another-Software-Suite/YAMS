@@ -46,6 +46,15 @@ class SmartMotorControllerCommandRegistry {
    */
   static bool CommandExists(const std::string& cmdName, frc2::SubsystemBase* subsystem);
 
+  /**
+   * Destroy all registered commands and callbacks.
+   *
+   * Must be called before program exit while WPILib's SendableRegistry is
+   * still alive, otherwise the CommandPtr destructors will attempt to lock an
+   * already-destroyed mutex and crash (SIGSEGV/exit 139).
+   */
+  static void Clear();
+
  private:
   static std::unordered_map<std::string, frc2::CommandPtr> s_commands;
   static std::unordered_map<std::string, std::vector<std::function<void()>>> s_callbacks;

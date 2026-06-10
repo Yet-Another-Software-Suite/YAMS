@@ -50,4 +50,9 @@ bool SmartMotorControllerCommandRegistry::CommandExists(const std::string& cmdNa
   return s_commands.count(MakeKey(cmdName, subsystem)) > 0;
 }
 
+void SmartMotorControllerCommandRegistry::Clear() {
+  s_commands.clear();
+  s_callbacks.clear();
+}
+
 }  // namespace yams::motorcontrollers
