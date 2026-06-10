@@ -51,7 +51,7 @@ SwerveModuleConfig& SwerveModuleConfig::WithAbsoluteEncoderGearing(
 SwerveModuleConfig& SwerveModuleConfig::WithAbsoluteEncoderOffset(units::degree_t offset) {
   m_absoluteEncoderOffset = offset;
   if (m_azimuthMotor) {
-    m_azimuthMotor->GetConfig().WithAbsoluteEncoderZeroOffset(offset);
+    m_azimuthMotor->GetConfig().WithExternalEncoderZeroOffset(offset);
   }
   return *this;
 }

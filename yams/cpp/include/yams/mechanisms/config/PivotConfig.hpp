@@ -55,14 +55,6 @@ class PivotConfig {
   PivotConfig& WithTelemetryName(const std::string& name);
 
   /**
-   * Set the encoder starting angle (seeds the motor encoder on init).
-   *
-   * @param angle Starting angle of the pivot.
-   * @return *this for chaining.
-   */
-  PivotConfig& WithStartingAngle(units::degree_t angle);
-
-  /**
    * Set the minimum (lower hard) angle for simulation and soft-limit purposes.
    *
    * @param angle Minimum angle.
@@ -97,9 +89,6 @@ class PivotConfig {
   /** Get the telemetry name. */
   std::string GetTelemetryName() const;
 
-  /** Get the optional starting angle. */
-  std::optional<units::degree_t> GetStartingAngle() const;
-
   /** Get the optional minimum (lower hard-limit) angle. */
   std::optional<units::degree_t> GetMinAngle() const;
 
@@ -113,7 +102,6 @@ class PivotConfig {
   motorcontrollers::SmartMotorController* m_smc{nullptr};
   frc2::SubsystemBase* m_subsystem{nullptr};
   std::string m_telemetryName;
-  std::optional<units::degree_t> m_startingAngle;
   std::optional<units::degree_t> m_minAngle;
   std::optional<units::degree_t> m_maxAngle;
   frc::Color8Bit m_simColor{frc::Color::kGreen};

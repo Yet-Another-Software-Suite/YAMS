@@ -23,14 +23,15 @@ ElevatorSubsystem::ElevatorSubsystem() {
   const units::meter_t circumference{kCircumferenceIn * 0.0254};
 
   m_motorConfig.WithSubsystem(this)
-      .WithMechanismCircumference(circumference)
+      .WithMechanismCircumference(0.25_in,22)
+      .WithStartingPosition(units::meter_t{0.5})
       .WithFeedback(1, 0, 0)
       // .WithExponentialProfile(0.0, 0.0, units::volt_t{12})
-      .WithMeasurementLimits(units::meter_t{0}, units::meter_t{2})
       .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
+      .WithMeasurementLimits(units::meter_t{0}, units::meter_t{2})
       .WithIdleMode(Cfg::MotorMode::BRAKE)
       .WithTelemetry("ElevatorMotor", Cfg::TelemetryVerbosity::HIGH)
-      .WithStatorCurrentLimit(units::ampere_t{40})
+      .WithSupplyCurrentLimit(units::ampere_t{40})
       .WithMotorInverted(false)
       .WithElevatorFeedforward(0, 0, 0)
       .WithClosedLoopMode();
@@ -39,7 +40,6 @@ ElevatorSubsystem::ElevatorSubsystem() {
 
   m_elevatorConfig.WithMotorController(&m_motor.value())
       .WithSubsystem(this)
-      .WithStartingHeight(units::meter_t{0.5})
       .WithMinimumHeight(units::meter_t{0})
       .WithMaximumHeight(units::meter_t{3})
       .WithCarriageMass(2.0_lb)

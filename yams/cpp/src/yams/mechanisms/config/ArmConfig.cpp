@@ -22,11 +22,6 @@ ArmConfig& ArmConfig::WithTelemetryName(const std::string& name) {
   return *this;
 }
 
-ArmConfig& ArmConfig::WithStartingAngle(units::degree_t angle) {
-  m_startingAngle = angle;
-  return *this;
-}
-
 ArmConfig& ArmConfig::WithMinAngle(units::degree_t angle) {
   m_minAngle = angle;
   return *this;
@@ -52,8 +47,6 @@ motorcontrollers::SmartMotorController* ArmConfig::GetMotorController() const { 
 frc2::SubsystemBase* ArmConfig::GetSubsystem() const { return m_subsystem; }
 
 std::string ArmConfig::GetTelemetryName() const { return m_telemetryName; }
-
-std::optional<units::degree_t> ArmConfig::GetStartingAngle() const { return m_startingAngle; }
 
 std::optional<units::degree_t> ArmConfig::GetMinAngle() const { return m_minAngle; }
 

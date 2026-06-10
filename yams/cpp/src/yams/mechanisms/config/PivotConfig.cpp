@@ -22,11 +22,6 @@ PivotConfig& PivotConfig::WithTelemetryName(const std::string& name) {
   return *this;
 }
 
-PivotConfig& PivotConfig::WithStartingAngle(units::degree_t angle) {
-  m_startingAngle = angle;
-  return *this;
-}
-
 PivotConfig& PivotConfig::WithMinAngle(units::degree_t angle) {
   m_minAngle = angle;
   return *this;
@@ -47,8 +42,6 @@ motorcontrollers::SmartMotorController* PivotConfig::GetMotorController() const 
 frc2::SubsystemBase* PivotConfig::GetSubsystem() const { return m_subsystem; }
 
 std::string PivotConfig::GetTelemetryName() const { return m_telemetryName; }
-
-std::optional<units::degree_t> PivotConfig::GetStartingAngle() const { return m_startingAngle; }
 
 std::optional<units::degree_t> PivotConfig::GetMinAngle() const { return m_minAngle; }
 

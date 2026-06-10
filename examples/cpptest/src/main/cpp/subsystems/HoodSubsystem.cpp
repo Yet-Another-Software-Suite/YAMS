@@ -27,6 +27,7 @@ HoodSubsystem::HoodSubsystem() {
       .WithClosedLoopRampRate(units::second_t{0.25})
       .WithOpenLoopRampRate(units::second_t{0.25})
       .WithArmFeedforward(0, 0, 0, 0)
+      .WithStartingPosition(units::degree_t{0})
       .WithClosedLoopMode();
 
   m_motor.emplace(m_hoodMotor, frc::DCMotor::NEO(1), TalonFXSWrapper::MotorArrangement::NEO,
@@ -36,8 +37,7 @@ HoodSubsystem::HoodSubsystem() {
       .WithSubsystem(this)
       .WithMinAngle(units::degree_t{-100})
       .WithMaxAngle(units::degree_t{200})
-      .WithTelemetryName("HoodExample")
-      .WithStartingAngle(units::degree_t{0});
+      .WithTelemetryName("HoodExample");
 
   m_hood.emplace(m_pivotConfig);
 }

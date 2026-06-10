@@ -319,7 +319,7 @@ void SmartMotorControllerTelemetry::Publish(SmartMotorController& smc) {
           if (linear)
             dt.Set(cfg.ConvertFromMechanism(*sp).value());
           else
-            dt.Set(sp->value() / 360.0);  // degrees → rotations
+            dt.Set(sp->value());  // turn_t → rotations
         }
         break;
       case DoubleTelemetryField::SetpointVelocity:
@@ -327,7 +327,7 @@ void SmartMotorControllerTelemetry::Publish(SmartMotorController& smc) {
           if (linear)
             dt.Set(cfg.ConvertFromMechanism(*sv).value());
           else
-            dt.Set(sv->value() / 360.0);  // degrees/s → rotations/s
+            dt.Set(sv->value());  // turns_per_second_t → rotations/s
         }
         break;
       case DoubleTelemetryField::OutputVoltage:

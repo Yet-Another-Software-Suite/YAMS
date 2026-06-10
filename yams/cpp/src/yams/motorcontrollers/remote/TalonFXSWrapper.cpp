@@ -4,6 +4,7 @@
 #include "yams/motorcontrollers/remote/TalonFXSWrapper.hpp"
 
 #include <frc/DriverStation.h>
+#include <frc/Errors.h>
 #include <frc/RobotBase.h>
 #include <frc/simulation/RoboRioSim.h>
 #include <frc/system/plant/LinearSystemId.h>
@@ -14,6 +15,7 @@
 #include <cmath>
 #include <stdexcept>
 
+#include "yams/exceptions/SmartMotorControllerConfigurationException.hpp"
 #include "yams/motorcontrollers/simulation/DCMotorSimSupplier.hpp"
 
 using namespace ctre::phoenix6;
@@ -56,23 +58,134 @@ TalonFXSWrapper::TalonFXSWrapper(hardware::TalonFXS& talon, frc::DCMotor dcMotor
 
 bool TalonFXSWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   m_config = config;
+  m_config.ResetValidationCheck();
   auto& cfg = m_talonConfig;
 
-  if (auto inv = config.GetMotorInverted(); inv)
+  if (auto inv = m_config.GetMotorInverted(); inv)
     cfg.MotorOutput.Inverted = *inv ? signals::InvertedValue::Clockwise_Positive
                                     : signals::InvertedValue::CounterClockwise_Positive;
 
-  cfg.MotorOutput.NeutralMode = config.GetIdleMode() == SmartMotorControllerConfig::MotorMode::BRAKE
-                                    ? signals::NeutralModeValue::Brake
-                                    : signals::NeutralModeValue::Coast;
+  cfg.MotorOutput.NeutralMode =
+      m_config.GetIdleMode() == SmartMotorControllerConfig::MotorMode::BRAKE
+          ? signals::NeutralModeValue::Brake
+          : signals::NeutralModeValue::Coast;
 
-  if (auto& gearing = config.GetMotorGearing(); gearing)
+  // Consume control-mode option for validation tracking
+  m_config.GetMotorControllerMode();
+
+  // Encoder inversion is not supported on TalonFXS; warn if set
+  if (m_config.GetEncoderInverted().has_value())
+    FRC_ReportWarning("TalonFXSWrapper: EncoderInverted is not supported and will be ignored.");
+
+  // No software temperature cutoff in Phoenix 6; consume option for validation
+  m_config.GetTemperatureCutoff();
+
+  // Closed-loop peak voltage
+  if (auto maxV = m_config.GetClosedLoopControllerMaximumVoltage(); maxV) {
+    cfg.Voltage.PeakForwardVoltage = *maxV;
+    cfg.Voltage.PeakReverseVoltage = -*maxV;
+  }
+
+  if (auto& gearing = m_config.GetMotorGearing(); gearing)
     cfg.ExternalFeedback.SensorToMechanismRatio =
         units::dimensionless::scalar_t{gearing->GetMechanismToRotorRatio()};
 
   cfg.ExternalFeedback.ExternalFeedbackSensorSource = ArrangementToFeedbackSource();
 
-  auto g0 = config.GetSlotGains(SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_0);
+  // External encoder configuration (driven by SmartMotorControllerConfig)
+  if (auto enc = m_config.GetExternalEncoder();
+      enc.has_value() && m_config.GetUseExternalFeedback()) {
+    gearing::MechanismGearing motorGearing =
+        m_config.GetMotorGearing().value_or(gearing::MechanismGearing::kOne);
+    gearing::MechanismGearing extGearing =
+        m_config.GetExternalEncoderGearing().value_or(gearing::MechanismGearing::kOne);
+    cfg.ExternalFeedback.RotorToSensorRatio =
+        motorGearing.GetMechanismToRotorRatio() * extGearing.GetRotorToMechanismRatio();
+    cfg.ExternalFeedback.SensorToMechanismRatio = extGearing.GetMechanismToRotorRatio();
+
+    if (auto* pp = std::any_cast<hardware::CANcoder*>(&enc.value()); pp && *pp) {
+      m_cancoder = **pp;
+      auto& cancoderConfigurator = (*pp)->GetConfigurator();
+      configs::CANcoderConfiguration cancoderCfg;
+      cancoderConfigurator.Refresh(cancoderCfg);
+      cfg.ExternalFeedback.FeedbackRemoteSensorID = (*pp)->GetDeviceID();
+      if (auto inv = m_config.GetExternalEncoderInverted(); inv) {
+        cancoderCfg.MagnetSensor.SensorDirection =
+            *inv ? signals::SensorDirectionValue::Clockwise_Positive
+                 : signals::SensorDirectionValue::CounterClockwise_Positive;
+      }
+      cfg.ExternalFeedback.ExternalFeedbackSensorSource =
+          signals::ExternalFeedbackSensorSourceValue::FusedCANcoder;
+      if (auto offset = m_config.GetExternalEncoderZeroOffset(); offset) {
+        cancoderCfg.MagnetSensor.MagnetOffset = *offset;
+        cfg.ExternalFeedback.AbsoluteSensorOffset = 0.0_tr;
+      }
+      if (auto dp = m_config.GetExternalEncoderDiscontinuityPoint(); dp) {
+        cancoderCfg.MagnetSensor.AbsoluteSensorDiscontinuityPoint = *dp;
+      }
+      cancoderConfigurator.Apply(cancoderCfg);
+    } else if (auto* pp = std::any_cast<hardware::CANdi*>(&enc.value()); pp && *pp) {
+      m_candi = **pp;
+      auto& candiConfigurator = (*pp)->GetConfigurator();
+      configs::CANdiConfiguration candiCfg;
+      candiConfigurator.Refresh(candiCfg);
+      cfg.ExternalFeedback.FeedbackRemoteSensorID = (*pp)->GetDeviceID();
+      const bool isPWM2 = (cfg.ExternalFeedback.ExternalFeedbackSensorSource ==
+                               signals::ExternalFeedbackSensorSourceValue::SyncCANdiPWM2 ||
+                           cfg.ExternalFeedback.ExternalFeedbackSensorSource ==
+                               signals::ExternalFeedbackSensorSourceValue::RemoteCANdiPWM2);
+      const bool isPWM1 = (cfg.ExternalFeedback.ExternalFeedbackSensorSource ==
+                               signals::ExternalFeedbackSensorSourceValue::SyncCANdiPWM1 ||
+                           cfg.ExternalFeedback.ExternalFeedbackSensorSource ==
+                               signals::ExternalFeedbackSensorSourceValue::RemoteCANdiPWM1);
+      if (isPWM2)
+        cfg.ExternalFeedback.ExternalFeedbackSensorSource =
+            signals::ExternalFeedbackSensorSourceValue::FusedCANdiPWM2;
+      if (isPWM1)
+        cfg.ExternalFeedback.ExternalFeedbackSensorSource =
+            signals::ExternalFeedbackSensorSourceValue::FusedCANdiPWM1;
+      if (isPWM1) {
+        if (auto inv = m_config.GetExternalEncoderInverted(); inv)
+          candiCfg.PWM1.SensorDirection = *inv;
+        if (auto offset = m_config.GetExternalEncoderZeroOffset(); offset) {
+          candiCfg.PWM1.AbsoluteSensorOffset = *offset;
+          cfg.ExternalFeedback.AbsoluteSensorOffset = 0.0_tr;
+        }
+        if (auto dp = m_config.GetExternalEncoderDiscontinuityPoint(); dp)
+          candiCfg.PWM1.AbsoluteSensorDiscontinuityPoint = *dp;
+      } else if (isPWM2) {
+        if (auto inv = m_config.GetExternalEncoderInverted(); inv)
+          candiCfg.PWM2.SensorDirection = *inv;
+        if (auto offset = m_config.GetExternalEncoderZeroOffset(); offset) {
+          candiCfg.PWM2.AbsoluteSensorOffset = *offset;
+          cfg.ExternalFeedback.AbsoluteSensorOffset = 0.0_tr;
+        }
+        if (auto dp = m_config.GetExternalEncoderDiscontinuityPoint(); dp)
+          candiCfg.PWM2.AbsoluteSensorDiscontinuityPoint = *dp;
+      } else {
+        // Consume external encoder options even when no PWM source is active
+        m_config.GetExternalEncoderInverted();
+        m_config.GetExternalEncoderZeroOffset();
+        m_config.GetExternalEncoderDiscontinuityPoint();
+      }
+      candiConfigurator.Apply(candiCfg);
+    }
+  } else {
+    if (m_config.GetExternalEncoderInverted().has_value())
+      throw SmartMotorControllerConfigurationException(
+          "External Encoder cannot be inverted if not present!",
+          "External encoder is not inverted!", "WithExternalEncoderInverted(false)");
+    if (m_config.GetExternalEncoderGearing().has_value())
+      throw SmartMotorControllerConfigurationException(
+          "External Encoder cannot be set if not present!", "External encoder gearing is not 1.0!",
+          "WithExternalEncoderGearing(1.0)");
+    // Consume remaining external encoder options for validation tracking
+    m_config.GetUseExternalFeedback();
+    m_config.GetExternalEncoderZeroOffset();
+    m_config.GetExternalEncoderDiscontinuityPoint();
+  }
+
+  auto g0 = m_config.GetSlotGains(SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_0);
   cfg.Slot0.kP = g0.kP;
   cfg.Slot0.kI = g0.kI;
   cfg.Slot0.kD = g0.kD;
@@ -87,7 +200,7 @@ bool TalonFXSWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     cfg.Slot0.GravityType = signals::GravityTypeValue::Elevator_Static;
   }
 
-  auto g1 = config.GetSlotGains(SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_1);
+  auto g1 = m_config.GetSlotGains(SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_1);
   cfg.Slot1.kP = g1.kP;
   cfg.Slot1.kI = g1.kI;
   cfg.Slot1.kD = g1.kD;
@@ -102,7 +215,7 @@ bool TalonFXSWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     cfg.Slot1.GravityType = signals::GravityTypeValue::Elevator_Static;
   }
 
-  auto g2 = config.GetSlotGains(SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_2);
+  auto g2 = m_config.GetSlotGains(SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_2);
   cfg.Slot2.kP = g2.kP;
   cfg.Slot2.kI = g2.kI;
   cfg.Slot2.kD = g2.kD;
@@ -117,40 +230,40 @@ bool TalonFXSWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     cfg.Slot2.GravityType = signals::GravityTypeValue::Elevator_Static;
   }
 
-  if (auto upper = config.GetMechanismUpperLimit(); upper) {
+  if (auto upper = m_config.GetMechanismUpperLimit(); upper) {
     cfg.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    cfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold = units::turn_t{*upper};
+    cfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold = *upper;
   }
-  if (auto lower = config.GetMechanismLowerLimit(); lower) {
+  if (auto lower = m_config.GetMechanismLowerLimit(); lower) {
     cfg.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-    cfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = units::turn_t{*lower};
+    cfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = *lower;
   }
 
   {
     int slotIdx = static_cast<int>(m_slot);
-    if (config.HasTrapezoidProfile() && !config.GetVelocityTrapezoidalProfileInUse()) {
+    if (m_config.HasTrapezoidProfile() && !m_config.GetVelocityTrapezoidalProfileInUse()) {
       // Angular profile supplies velocity directly in TPS.  Linear profiles store
       // velocity in m/s; convert to TPS using the mechanism circumference.
-      auto cruiseVel = config.GetTrapMaxVelocityTurns();
-      auto cruiseAcc = config.GetTrapMaxAccelTurns();
+      auto cruiseVel = m_config.GetTrapMaxVelocityTurns();
+      auto cruiseAcc = m_config.GetTrapMaxAccelTurns();
       if (!cruiseVel) {
-        if (auto linVel = config.GetTrapMaxVelocityLinear(); linVel)
-          if (auto circ = config.GetMechanismCircumference(); circ && circ->value() != 0.0)
+        if (auto linVel = m_config.GetTrapMaxVelocityLinear(); linVel)
+          if (auto circ = m_config.GetMechanismCircumference(); circ && circ->value() != 0.0)
             cruiseVel = units::turns_per_second_t{linVel->value() / circ->value()};
       }
       if (!cruiseAcc) {
-        if (auto linAcc = config.GetTrapMaxAccelLinear(); linAcc)
-          if (auto circ = config.GetMechanismCircumference(); circ && circ->value() != 0.0)
+        if (auto linAcc = m_config.GetTrapMaxAccelLinear(); linAcc)
+          if (auto circ = m_config.GetMechanismCircumference(); circ && circ->value() != 0.0)
             cruiseAcc = units::turns_per_second_squared_t{linAcc->value() / circ->value()};
       }
       if (cruiseVel) cfg.MotionMagic.MotionMagicCruiseVelocity = *cruiseVel;
       if (cruiseAcc) cfg.MotionMagic.MotionMagicAcceleration = *cruiseAcc;
       m_positionReq = controls::MotionMagicVoltage{0_tr}.WithSlot(slotIdx);
       m_velocityReq = controls::VelocityVoltage{0_tps}.WithSlot(slotIdx);
-    } else if (config.GetVelocityTrapezoidalProfileInUse()) {
+    } else if (m_config.GetVelocityTrapezoidalProfileInUse()) {
       m_positionReq = controls::PositionVoltage{0_tr}.WithSlot(slotIdx);
       m_velocityReq = controls::MotionMagicVelocityVoltage{0_tps}.WithSlot(slotIdx);
-    } else if (config.HasExponentialProfile()) {
+    } else if (m_config.HasExponentialProfile()) {
       m_positionReq = controls::MotionMagicExpoVoltage{0_tr}.WithSlot(slotIdx);
       m_velocityReq = controls::VelocityVoltage{0_tps}.WithSlot(slotIdx);
     } else {
@@ -159,20 +272,20 @@ bool TalonFXSWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     }
   }
 
-  if (auto r = config.GetOpenLoopRampRate(); r) cfg.OpenLoopRamps.VoltageOpenLoopRampPeriod = *r;
-  if (auto r = config.GetClosedLoopRampRate(); r)
+  if (auto r = m_config.GetOpenLoopRampRate(); r) cfg.OpenLoopRamps.VoltageOpenLoopRampPeriod = *r;
+  if (auto r = m_config.GetClosedLoopRampRate(); r)
     cfg.ClosedLoopRamps.VoltageClosedLoopRampPeriod = *r;
 
-  if (auto stator = config.GetStatorCurrentLimit(); stator) {
+  if (auto stator = m_config.GetStatorCurrentLimit(); stator) {
     cfg.CurrentLimits.StatorCurrentLimitEnable = true;
     cfg.CurrentLimits.StatorCurrentLimit = *stator;
   }
-  if (auto supply = config.GetSupplyCurrentLimit(); supply) {
+  if (auto supply = m_config.GetSupplyCurrentLimit(); supply) {
     cfg.CurrentLimits.SupplyCurrentLimitEnable = true;
     cfg.CurrentLimits.SupplyCurrentLimit = *supply;
   }
 
-  if (auto req = config.GetVendorControlRequest()) {
+  if (auto req = m_config.GetVendorControlRequest()) {
     auto& r = *req;
     if (auto* p = std::any_cast<controls::PositionVoltage>(&r))
       m_positionReq = *p;
@@ -204,7 +317,22 @@ bool TalonFXSWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
       m_velocityReq = *p;
   }
 
-  return m_talon.GetConfigurator().Apply(cfg).IsOK();
+  auto status = m_talon.GetConfigurator().Apply(cfg);
+  if (auto startPos = m_config.GetStartingPosition()) {
+    if (m_cancoder) {
+      m_cancoder->get().SetPosition(*startPos);
+      if (frc::RobotBase::IsSimulation()) {
+        auto& cancoderSim = m_cancoder->get().GetSimState();
+        cancoderSim.SetRawPosition(*startPos);
+        cancoderSim.SetMagnetHealth(ctre::phoenix6::signals::MagnetHealthValue::Magnet_Green);
+      }
+    } else {
+      m_talon.SetPosition(*startPos);
+    }
+  }
+  m_config.ValidateBasicOptions();
+  m_config.ValidateExternalEncoderOptions();
+  return status.IsOK();
 }
 
 // ---- Simulation -------------------------------------------------------------
@@ -223,6 +351,11 @@ void TalonFXSWrapper::SetupSimulation() {
   auto period = m_config.GetClosedLoopControlPeriod().value_or(20_ms);
   SetSimSupplier(std::make_shared<simulation::DCMotorSimSupplier>(
       *m_motorSim, [this]() { return GetDutyCycle(); }, *gearing, period));
+  if (auto startPos = m_config.GetStartingPosition()) {
+    m_simSupplier->SetMechanismPosition(*startPos);
+    m_talon.GetSimState().SetRawRotorPosition(
+        units::turn_t{startPos->value() * gearing->GetMechanismToRotorRatio()});
+  }
 }
 
 void TalonFXSWrapper::SimIterate() {
@@ -361,18 +494,6 @@ units::celsius_t TalonFXSWrapper::GetTemperature() {
 }
 
 frc::DCMotor TalonFXSWrapper::GetDCMotor() { return m_dcMotor; }
-
-// ---- CANcoder / CANdi support -----------------------------------------------
-
-void TalonFXSWrapper::WithCANcoder(hardware::CANcoder& cancoder) {
-  m_cancoder = cancoder;
-  m_talonConfig.ExternalFeedback.FeedbackRemoteSensorID = cancoder.GetDeviceID();
-  m_talonConfig.ExternalFeedback.ExternalFeedbackSensorSource =
-      signals::ExternalFeedbackSensorSourceValue::FusedCANcoder;
-  m_talon.GetConfigurator().Apply(m_talonConfig);
-}
-
-void TalonFXSWrapper::WithCANdi(hardware::CANdi& candi) { m_candi = candi; }
 
 // ---- Live-tuning setters ---------------------------------------------------
 

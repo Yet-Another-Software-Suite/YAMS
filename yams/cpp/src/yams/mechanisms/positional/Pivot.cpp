@@ -48,8 +48,8 @@ Pivot::Pivot(const config::PivotConfig& config)
     m_smc->SetMechanismUpperLimit(*maxA);
   }
 
-  // Seed the encoder from the configured starting angle.
-  if (auto startA = config.GetStartingAngle()) {
+  // Seed the encoder from the configured starting position.
+  if (auto startA = m_smc->GetConfig().GetStartingPosition()) {
     m_smc->SetEncoderPosition(*startA);
   }
 
@@ -65,10 +65,10 @@ Pivot::Pivot(const config::PivotConfig& config)
                                         "Cannot create simulation.",
                                         "WithMaxAngle(units::degree_t)");
     }
-    if (!config.GetStartingAngle().has_value()) {
+    if (!m_smc->GetConfig().GetStartingPosition().has_value()) {
       throw PivotConfigurationException("Pivot starting angle is empty",
                                         "Cannot create simulation.",
-                                        "WithStartingAngle(units::degree_t)");
+                                        "smc.WithStartingPosition(units::degree_t)");
     }
     if (!m_smc->GetConfig().GetMOI()) {
       throw PivotConfigurationException("Pivot MOI is empty", "Cannot create simulation.",
@@ -93,7 +93,7 @@ Pivot::Pivot(const config::PivotConfig& config)
     m_mechanismWindow.emplace(kPivotLen * 2.0, kPivotLen * 2.0);
     m_mechanismRoot = m_mechanismWindow->GetRoot(m_name + "Root", kPivotLen, kPivotLen);
 
-    units::degree_t startDeg = config.GetStartingAngle().value();
+    units::degree_t startDeg = *m_smc->GetConfig().GetStartingPosition();
     m_mechanismLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
         m_name, kPivotLen, startDeg, 6, config.GetSimColor());
     m_setpointLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(

@@ -26,18 +26,17 @@ ArmSubsystem::ArmSubsystem() {
       .WithClosedLoopRampRate(units::second_t{0.25})
       .WithOpenLoopRampRate(units::second_t{0.25})
       .WithArmFeedforward(0, 0, 0, 0)
+      .WithStartingPosition(units::degree_t{0})
       .WithClosedLoopMode();
 
   m_motor.emplace(m_armMotor, frc::DCMotor::KrakenX60(1), m_motorConfig);
-  m_motor->WithCANcoder(m_cancoder);
 
   m_armConfig.WithMotorController(&m_motor.value())
       .WithSubsystem(this)
       .WithArmLength(units::meter_t{0.135})
       .WithMinAngle(units::degree_t{-100})
       .WithMaxAngle(units::degree_t{200})
-      .WithTelemetryName("ArmExample")
-      .WithStartingAngle(units::degree_t{0});
+      .WithTelemetryName("ArmExample");
 
   m_arm.emplace(m_armConfig);
 }

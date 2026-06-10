@@ -41,6 +41,7 @@ void RobotContainer::ConfigureBindings() {
   // Elevator bindings (uncomment with ElevatorSubsystem):
   m_xboxController.Button(1).WhileTrue(m_elevator.SetHeight(1_m));
   m_xboxController.Button(2).WhileTrue(m_elevator.SetHeight(0_m));
+  m_xboxController.Button(3).WhileTrue(m_elevator.ElevCmd(0.8));
 
   // Turret bindings:
   // m_xboxController.Button(1).WhileTrue(m_turret.TurretCmd(1));

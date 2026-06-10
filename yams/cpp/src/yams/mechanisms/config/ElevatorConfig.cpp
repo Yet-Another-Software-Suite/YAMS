@@ -27,11 +27,6 @@ ElevatorConfig& ElevatorConfig::WithTelemetryName(const std::string& name) {
   return *this;
 }
 
-ElevatorConfig& ElevatorConfig::WithStartingHeight(units::meter_t height) {
-  m_startingHeight = height;
-  return *this;
-}
-
 ElevatorConfig& ElevatorConfig::WithMinimumHeight(units::meter_t height) {
   m_minHeight = height;
   return *this;
@@ -67,8 +62,6 @@ motorcontrollers::SmartMotorController* ElevatorConfig::GetMotorController() con
 frc2::SubsystemBase* ElevatorConfig::GetSubsystem() const { return m_subsystem; }
 
 std::string ElevatorConfig::GetTelemetryName() const { return m_telemetryName; }
-
-std::optional<units::meter_t> ElevatorConfig::GetStartingHeight() const { return m_startingHeight; }
 
 std::optional<units::meter_t> ElevatorConfig::GetMinHeight() const { return m_minHeight; }
 

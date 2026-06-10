@@ -47,8 +47,8 @@ Arm::Arm(const config::ArmConfig& config) : SmartPositionalMechanism(), m_armCon
     m_smc->SetMechanismUpperLimit(*maxA);
   }
 
-  // Seed the encoder from the configured starting angle.
-  if (auto startA = config.GetStartingAngle()) {
+  // Seed the encoder from the configured starting position.
+  if (auto startA = m_smc->GetConfig().GetStartingPosition()) {
     m_smc->SetEncoderPosition(*startA);
   }
   if (frc::RobotBase::IsSimulation()) {
@@ -65,10 +65,10 @@ Arm::Arm(const config::ArmConfig& config) : SmartPositionalMechanism(), m_armCon
       throw ArmConfigurationException("Arm upper hard limit is empty", "Cannot create simulation.",
                                       "WithMaxAngle(units::degree_t)");
     }
-    if (!config.GetStartingAngle().has_value() &&
-        !m_smc->GetConfig().GetAbsoluteEncoderZeroOffset().has_value()) {
+    if (!m_smc->GetConfig().GetStartingPosition().has_value() &&
+        !m_smc->GetConfig().GetExternalEncoderZeroOffset().has_value()) {
       throw ArmConfigurationException("Arm starting angle is empty", "Cannot create simulation.",
-                                      "WithStartingAngle(units::degree_t)");
+                                      "smc.WithStartingPosition(units::degree_t)");
     }
     if (!m_smc->GetConfig().GetMOI()) {
       throw ArmConfigurationException("Arm MOI is empty", "Cannot create simulation.",
@@ -78,7 +78,8 @@ Arm::Arm(const config::ArmConfig& config) : SmartPositionalMechanism(), m_armCon
     auto& gearingOpt = m_smc->GetConfig().GetMotorGearing();
     gearing::MechanismGearing gearing = gearingOpt.value_or(gearing::MechanismGearing::kOne);
 
-    units::radian_t startAngle = config.GetStartingAngle().value_or(0_deg);
+    units::radian_t startAngle =
+        m_smc->GetConfig().GetStartingPosition().value_or(units::turn_t{0});
 
     m_armSim.emplace(m_smc->GetDCMotor(), gearing.GetMechanismToRotorRatio(),
                      m_smc->GetConfig().GetMOI(), config.GetArmLength().value(),

@@ -413,11 +413,13 @@ SmartMotorControllerTelemetryConfig::GetDoubleFields(SmartMotorController& smc) 
           .SetDefaultValue(cfg.ConvertFromMechanism(*lim).value());
   }
 
-  // Set mechanism limit defaults (in degrees)
+  // Set mechanism limit defaults (in degrees for human readability)
   if (auto lim = cfg.GetMechanismUpperLimit())
-    m_doubleFields.at(DoubleTelemetryField::MechanismUpperLimit).SetDefaultValue(lim->value());
+    m_doubleFields.at(DoubleTelemetryField::MechanismUpperLimit)
+        .SetDefaultValue(units::degree_t{*lim}.value());
   if (auto lim = cfg.GetMechanismLowerLimit())
-    m_doubleFields.at(DoubleTelemetryField::MechanismLowerLimit).SetDefaultValue(lim->value());
+    m_doubleFields.at(DoubleTelemetryField::MechanismLowerLimit)
+        .SetDefaultValue(units::degree_t{*lim}.value());
 
   // Current limit defaults
   if (auto lim = cfg.GetSupplyStallCurrentLimit())

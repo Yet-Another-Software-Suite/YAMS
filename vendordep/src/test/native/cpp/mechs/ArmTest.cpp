@@ -45,6 +45,7 @@ static SmartMotorControllerConfig MakeArmSMCConfig(ProfileType profile, Hardware
       .WithArmFeedforward(0.0, 1.0, 0.0, 0.0)
       .WithClosedLoopMode()
       .WithMOI(4_in, 1_lb)
+      .WithStartingPosition(0.0_deg)
       .WithSubsystem(subsys)
       .WithTelemetry(name);
 
@@ -67,8 +68,7 @@ static positional::Arm* CreateArm(SmartMotorController* smc, TestSubsystem* subs
       .WithSubsystem(subsys)
       .WithArmLength(4_in)  // 4 inches → meters
       .WithMinAngle(-100.0_deg)
-      .WithMaxAngle(200.0_deg)
-      .WithStartingAngle(0.0_deg);
+      .WithMaxAngle(200.0_deg);
   // withHorizontalZero only for CTRE controllers in the Java tests
   // (not a config option in our C++ ArmConfig yet; add if needed)
 

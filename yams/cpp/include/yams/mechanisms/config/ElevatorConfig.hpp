@@ -54,14 +54,6 @@ class ElevatorConfig {
   ElevatorConfig& WithTelemetryName(const std::string& name);
 
   /**
-   * Set the encoder starting height (seeds the motor encoder on init).
-   *
-   * @param height Starting height of the carriage.
-   * @return *this for chaining.
-   */
-  ElevatorConfig& WithStartingHeight(units::meter_t height);
-
-  /**
    * Set the minimum (lower hard) height for simulation and soft-limit purposes.
    *
    * @param height Minimum height.
@@ -120,9 +112,6 @@ class ElevatorConfig {
   /** Get the telemetry name. */
   std::string GetTelemetryName() const;
 
-  /** Get the optional starting height. */
-  std::optional<units::meter_t> GetStartingHeight() const;
-
   /** Get the optional minimum height. */
   std::optional<units::meter_t> GetMinHeight() const;
 
@@ -145,7 +134,6 @@ class ElevatorConfig {
   motorcontrollers::SmartMotorController* m_smc{nullptr};
   frc2::SubsystemBase* m_subsystem{nullptr};
   std::string m_telemetryName;
-  std::optional<units::meter_t> m_startingHeight;
   std::optional<units::meter_t> m_minHeight;
   std::optional<units::meter_t> m_maxHeight;
   std::optional<units::kilogram_t> m_carriageMass;

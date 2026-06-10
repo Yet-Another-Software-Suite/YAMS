@@ -254,19 +254,6 @@ class TalonFXSWrapper : public SmartMotorController {
    */
   void* GetMotorControllerConfig() override;
 
-  /**
-   * Attach a CANcoder for absolute position feedback and encoder synchronization.
-   *
-   * @param cancoder CANcoder hardware object (must outlive this wrapper).
-   */
-  void WithCANcoder(ctre::phoenix6::hardware::CANcoder& cancoder);
-
-  /**
-   * Attach a CANdi for absolute position feedback and encoder synchronization.
-   *
-   * @param candi CANdi hardware object (must outlive this wrapper).
-   */
-  void WithCANdi(ctre::phoenix6::hardware::CANdi& candi);
 
  private:
   ctre::phoenix6::hardware::TalonFXS& m_talon;

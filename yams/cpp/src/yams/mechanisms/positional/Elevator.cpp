@@ -49,9 +49,9 @@ Elevator::Elevator(const config::ElevatorConfig& config)
     m_smc->SetMeasurementUpperLimit(*maxH);
   }
 
-  // Seed the encoder from the configured starting height.
-  if (auto startH = config.GetStartingHeight()) {
-    m_smc->SetEncoderPosition(*startH);
+  // Seed the encoder from the configured starting position.
+  if (auto startPos = m_smc->GetConfig().GetStartingPosition()) {
+    m_smc->SetEncoderPosition(m_smc->GetConfig().ConvertFromMechanism(*startPos));
   }
 
   if (frc::RobotBase::IsSimulation()) {
@@ -70,10 +70,10 @@ Elevator::Elevator(const config::ElevatorConfig& config)
                                            "Cannot create simulator",
                                            "WithMaximumHeight(units::meter_t)");
     }
-    if (!config.GetStartingHeight().has_value()) {
-      throw ElevatorConfigurationException("Starting height is not configured!",
+    if (!m_smc->GetConfig().GetStartingPosition().has_value()) {
+      throw ElevatorConfigurationException("Starting position is not configured!",
                                            "Cannot create simulator",
-                                           "WithStartingHeight(units::meter_t)");
+                                           "smc.WithStartingPosition(units::meter_t)");
     }
     if (!m_smc->GetConfig().GetMechanismCircumference().has_value()) {
       throw ElevatorConfigurationException("Mechanism circumference is not configured!",
@@ -90,11 +90,14 @@ Elevator::Elevator(const config::ElevatorConfig& config)
     bool simulateGravity = !config.IsHorizontal();
     units::meter_t circumference = m_smc->GetConfig().GetMechanismCircumference().value();
 
-    m_elevatorSim.emplace(
-        dcMotor, gearing.GetMechanismToRotorRatio(), config.GetCarriageMass().value(),
-        circumference / (2.0 * std::numbers::pi), config.GetMinHeight().value(),
-        config.GetMaxHeight().value(), simulateGravity, config.GetStartingHeight().value(),
-        std::array<double, 2>{0.01 / 4096.0, 0.01 / 4096.0});
+    units::meter_t startH =
+        m_smc->GetConfig().ConvertFromMechanism(*m_smc->GetConfig().GetStartingPosition());
+
+    m_elevatorSim.emplace(dcMotor, gearing.GetMechanismToRotorRatio(),
+                          config.GetCarriageMass().value(),
+                          circumference / (2.0 * std::numbers::pi), config.GetMinHeight().value(),
+                          config.GetMaxHeight().value(), simulateGravity, startH,
+                          std::array<double, 2>{0.01 / 4096.0, 0.01 / 4096.0});
 
     units::second_t period = m_smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms);
     m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::ElevatorSimSupplier>(
@@ -103,7 +106,7 @@ Elevator::Elevator(const config::ElevatorConfig& config)
 
     // Build Mechanism2d window.
     double maxH = config.GetMaxHeight().value().value();
-    double startH = config.GetStartingHeight().value().value();
+    double startHValue = startH.value();
     units::degree_t angle = config.GetAngle();
     constexpr double kSoftOffset = 6.0 * 0.0254;  // 6 inches
     constexpr double kHardOffset = 8.0 * 0.0254;  // 8 inches
@@ -133,9 +136,9 @@ Elevator::Elevator(const config::ElevatorConfig& config)
                                            frc::Color8Bit{frc::Color::kLimeGreen});
 
     m_mechanismLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
-        m_name, startH, angle, 6, config.GetSimColor());
+        m_name, startHValue, angle, 6, config.GetSimColor());
     m_setpointLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
-        "Setpoint", startH, angle, 3, frc::Color8Bit{frc::Color::kWhite});
+        "Setpoint", startHValue, angle, 3, frc::Color8Bit{frc::Color::kWhite});
 
     frc::SmartDashboard::PutData(m_name + "/mechanism", &(*m_mechanismWindow));
   }

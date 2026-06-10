@@ -25,7 +25,9 @@
 
 #include <any>
 #include <optional>
+#include <set>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "yams/gearing/MechanismGearing.hpp"
@@ -304,16 +306,27 @@ class SmartMotorControllerConfig {
    */
   SmartMotorControllerConfig& WithMechanismCircumference(units::meter_t circumference);
 
+  /**
+   * Set the mechanism circumference from a sprocket or gear pitch and tooth count.
+   *
+   * Circumference is computed as @p gearPitch × @p teeth.
+   *
+   * @param gearPitch Distance between teeth (e.g. 0.25_in for #25 chain).
+   * @param teeth     Number of teeth on the sprocket or gear.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithMechanismCircumference(units::meter_t gearPitch, int teeth);
+
   // ---- Limits ------------------------------------------------------------
 
   /**
    * Set angular soft limits for the mechanism.
    *
-   * @param lower Lower angle limit.
-   * @param upper Upper angle limit.
+   * @param lower Lower angle limit (in turns; accepts any angular unit via implicit conversion).
+   * @param upper Upper angle limit (in turns; accepts any angular unit via implicit conversion).
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithMechanismLimits(units::degree_t lower, units::degree_t upper);
+  SmartMotorControllerConfig& WithMechanismLimits(units::turn_t lower, units::turn_t upper);
 
   /**
    * Set linear soft limits for the mechanism.
@@ -427,28 +440,93 @@ class SmartMotorControllerConfig {
   // ---- External encoder --------------------------------------------------
 
   /**
-   * Set the absolute encoder ticks-per-revolution conversion factor.
+   * Attach an external (absolute) encoder hardware object to this configuration.
    *
-   * @param factor Conversion factor from raw encoder units to mechanism rotations.
+   * The encoder object is stored as std::any and unpacked inside the motor-controller
+   * wrapper (e.g. SparkWrapper expects a `rev::spark::SparkAbsoluteEncoder*`;
+   * TalonFXWrapper / TalonFXSWrapper accept a `ctre::phoenix6::hardware::CANcoder*`
+   * or `ctre::phoenix6::hardware::CANdi*`).
+   *
+   * @note When passing a CANdi, the TalonFX(S) configuration must also have
+   *       `Feedback.FeedbackSensorSource` (TalonFX) or
+   *       `ExternalFeedback.ExternalFeedbackSensorSource` (TalonFXS) pre-set to one
+   *       of `SyncCANdiPWM1`, `RemoteCANdiPWM1`, `SyncCANdiPWM2`, or
+   *       `RemoteCANdiPWM2` via a vendor config so that ApplyConfig() knows which
+   *       PWM channel to configure. Without this, offset, inversion, and
+   *       discontinuity-point settings will not be applied to either channel.
+   *
+   * @param encoder External encoder hardware object pointer.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithAbsoluteEncoderConversionFactor(double factor);
+  SmartMotorControllerConfig& WithExternalEncoder(std::any encoder);
 
   /**
-   * Set the absolute encoder zero offset applied when seeding the relative encoder.
+   * Set whether the external encoder's position is used as the primary feedback
+   * source for the closed-loop controller (default: true when an encoder is attached).
    *
-   * @param offset Offset angle to subtract from the raw encoder reading.
+   * @param use true to route external encoder to the PID feedback input.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithAbsoluteEncoderOffset(units::degree_t offset);
+  SmartMotorControllerConfig& WithUseExternalFeedbackEncoder(bool use);
 
   /**
-   * Set the absolute encoder zero-point offset stored in the encoder hardware.
+   * Invert the external encoder independently of the motor output direction.
    *
-   * @param zeroOffset Hardware zero offset.
+   * @param inverted true to invert the external encoder reading.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithAbsoluteEncoderZeroOffset(units::degree_t zeroOffset);
+  SmartMotorControllerConfig& WithExternalEncoderInverted(bool inverted);
+
+  /**
+   * Override the external encoder position/velocity conversion factor directly.
+   *
+   * When set this takes priority over the gearing-derived conversion factor from
+   * WithExternalEncoderGearing. Prefer WithExternalEncoderGearing for type safety.
+   *
+   * @param factor Conversion factor (raw encoder units → mechanism turns).
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithExternalEncoderConversionFactor(double factor);
+
+  /**
+   * Set the external encoder zero-point offset stored in the encoder hardware.
+   *
+   * @param zeroOffset Hardware zero offset (turns).
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithExternalEncoderZeroOffset(units::turn_t zeroOffset);
+
+  /**
+   * Set the external encoder gearing (encoder to mechanism).
+   *
+   * Emits a driver station warning if the rotor-to-mechanism ratio exceeds 1, since
+   * the encoder may alias and report duplicate angles.
+   *
+   * @param gearing MechanismGearing describing the external encoder drive train.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithExternalEncoderGearing(
+      const gearing::MechanismGearing& gearing);
+
+  /**
+   * Set the external encoder gearing from a scalar reduction ratio.
+   *
+   * @param reductionRatio Reduction ratio (e.g. 3.0 for a 3:1 reduction).
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithExternalEncoderGearing(double reductionRatio);
+
+  /**
+   * Set the discontinuity point for absolute encoder wrapping.
+   *
+   * Must be exactly 0.5_tr (encoder reads [−0.5, 0.5]) or 1_tr (reads [0, 1]).
+   * Throws SmartMotorControllerConfigurationException otherwise.
+   *
+   * @param discontinuityPoint Wrap-around point (0.5 or 1 turns).
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithExternalEncoderDiscontinuityPoint(
+      units::turn_t discontinuityPoint);
 
   // ---- Telemetry ----------------------------------------------------------
 
@@ -482,6 +560,104 @@ class SmartMotorControllerConfig {
    */
   SmartMotorControllerConfig& WithSimMotor(frc::DCMotor motor);
 
+  // ---- Simulation overrides -----------------------------------------------
+
+  /**
+   * Override the starting mechanism position used in simulation.
+   *
+   * When running in simulation, GetStartingPosition() returns this value instead of the
+   * value set by WithStartingPosition().
+   *
+   * @param startingAngle Starting angle override for simulation.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithSimStartingPosition(units::degree_t startingAngle);
+
+  /**
+   * Override the starting mechanism position (linear) used in simulation.
+   *
+   * WithMechanismCircumference must be set before calling this overload.
+   *
+   * @param startingDistance Starting linear distance override for simulation.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithSimStartingPosition(units::meter_t startingDistance);
+
+  /**
+   * Override the arm feedforward for the specified slot in simulation.
+   *
+   * @param ff   ArmFeedforward to use in simulation.
+   * @param slot Gain slot to override (default SLOT_0).
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithSimFeedforward(
+      const frc::ArmFeedforward& ff,
+      ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
+
+  /**
+   * Override the elevator feedforward for the specified slot in simulation.
+   *
+   * @param ff   ElevatorFeedforward to use in simulation.
+   * @param slot Gain slot to override (default SLOT_0).
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithSimFeedforward(
+      const frc::ElevatorFeedforward& ff,
+      ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
+
+  /**
+   * Override the simple motor feedforward for the specified slot in simulation.
+   *
+   * @param ff   SimpleMotorFeedforward to use in simulation.
+   * @param slot Gain slot to override (default SLOT_0).
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithSimFeedforward(
+      const frc::SimpleMotorFeedforward<units::turns>& ff,
+      ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
+
+  /**
+   * Override the PID gains for the specified slot in simulation.
+   *
+   * @param kP   Proportional gain override.
+   * @param kI   Integral gain override.
+   * @param kD   Derivative gain override.
+   * @param slot Gain slot to override (default SLOT_0).
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithSimClosedLoopController(
+      double kP, double kI, double kD,
+      ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
+
+  /**
+   * Override the angular trapezoidal motion profile used in simulation.
+   *
+   * @param maxVelocity     Maximum angular velocity for simulation.
+   * @param maxAcceleration Maximum angular acceleration for simulation.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithSimTrapezoidProfile(
+      units::turns_per_second_t maxVelocity, units::turns_per_second_squared_t maxAcceleration);
+
+  /**
+   * Override the linear trapezoidal motion profile used in simulation.
+   *
+   * @param maxVelocity     Maximum linear velocity for simulation.
+   * @param maxAcceleration Maximum linear acceleration for simulation.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithSimTrapezoidProfile(
+      units::meters_per_second_t maxVelocity, units::meters_per_second_squared_t maxAcceleration);
+
+  /**
+   * Override the angular exponential motion profile used in simulation.
+   *
+   * @param constraints ExponentialProfile constraints for simulation.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithSimExponentialProfile(
+      frc::ExponentialProfile<units::turns, units::volts>::Constraints constraints);
+
   /**
    * Set the moment of inertia of the mechanism for simulation.
    *
@@ -504,6 +680,8 @@ class SmartMotorControllerConfig {
   /**
    * Set the starting mechanism position (seeds the encoder and sim objects on init).
    *
+   * Throws std::invalid_argument if WithStartingPosition(meter_t) was already called.
+   *
    * @param startingAngle Starting mechanism angle in degrees.
    * @return *this for chaining.
    */
@@ -512,9 +690,12 @@ class SmartMotorControllerConfig {
   /**
    * Set the starting mechanism position from a linear distance.
    *
-   * Requires WithMechanismCircumference to be set for the conversion.
+   * WithMechanismCircumference must be called before this overload. The distance is
+   * converted to an angle internally. Throws std::invalid_argument if
+   * WithMechanismCircumference has not been set, or if WithStartingPosition(degree_t)
+   * was already called.
    *
-   * @param startingDistance Starting mechanism distance.
+   * @param startingDistance Starting linear distance (e.g. starting height for an elevator).
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithStartingPosition(units::meter_t startingDistance);
@@ -537,6 +718,30 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithVendorConfig(std::any cfg);
+
+  // ---- Validation ------------------------------------------------------------
+
+  /**
+   * Reset the validation tracking sets so that a fresh ApplyConfig pass can be verified.
+   *
+   * Call this at the very start of ApplyConfig in every SmartMotorController wrapper.
+   */
+  void ResetValidationCheck() const;
+
+  /**
+   * Assert that every tracked basic config option was accessed during ApplyConfig.
+   *
+   * Throws SmartMotorControllerConfigurationException if any option was never fetched,
+   * indicating that the wrapper's ApplyConfig implementation is incomplete.
+   */
+  void ValidateBasicOptions() const;
+
+  /**
+   * Assert that every tracked external-encoder config option was accessed during ApplyConfig.
+   *
+   * Throws SmartMotorControllerConfigurationException if any option was never fetched.
+   */
+  void ValidateExternalEncoderOptions() const;
 
   /**
    * Set a vendor-specific control request to use for position or velocity control.
@@ -565,10 +770,13 @@ class SmartMotorControllerConfig {
   /**
    * Get all gains for the specified closed-loop slot.
    *
+   * In simulation, any overrides set via WithSimClosedLoopController or WithSimFeedforward
+   * are merged into the returned copy.
+   *
    * @param slot Gain slot to query.
-   * @return PIDGains for that slot.
+   * @return PIDGains for that slot (simulation overrides applied when in sim).
    */
-  const PIDGains& GetSlotGains(ClosedLoopControllerSlot slot) const;
+  PIDGains GetSlotGains(ClosedLoopControllerSlot slot) const;
 
   /**
    * Get the optional arm feedforward for the specified slot.
@@ -635,10 +843,10 @@ class SmartMotorControllerConfig {
    */
   bool GetLinearClosedLoopControllerUse() const;
 
-  /** @return Optional lower angular soft limit. */
-  std::optional<units::degree_t> GetMechanismLowerLimit() const;
-  /** @return Optional upper angular soft limit. */
-  std::optional<units::degree_t> GetMechanismUpperLimit() const;
+  /** @return Optional lower angular soft limit (in turns). */
+  std::optional<units::turn_t> GetMechanismLowerLimit() const;
+  /** @return Optional upper angular soft limit (in turns). */
+  std::optional<units::turn_t> GetMechanismUpperLimit() const;
   /** @return Optional lower linear soft limit. */
   std::optional<units::meter_t> GetMeasurementLowerLimit() const;
   /** @return Optional upper linear soft limit. */
@@ -685,8 +893,8 @@ class SmartMotorControllerConfig {
   std::optional<frc::DCMotor> GetSimMotor() const;
   /** @return Moment of inertia for simulation (kg·m²). */
   units::kilogram_square_meter_t GetMOI() const;
-  /** @return Optional starting mechanism position (degrees). */
-  std::optional<units::degree_t> GetStartingPosition() const;
+  /** @return Optional starting mechanism position (turns). */
+  std::optional<units::turn_t> GetStartingPosition() const;
   /** @return Optional vendor-specific hardware config (set via WithVendorConfig). */
   std::optional<std::any> GetVendorConfig() const;
   /** @return Optional vendor-specific control request (set via WithVendorControlRequest). */
@@ -697,12 +905,20 @@ class SmartMotorControllerConfig {
   /** @return Optional mechanism circumference for linear conversion. */
   std::optional<units::meter_t> GetMechanismCircumference() const;
 
-  /** @return Optional absolute encoder conversion factor. */
-  std::optional<double> GetAbsoluteEncoderConversionFactor() const;
-  /** @return Optional absolute encoder offset. */
-  std::optional<units::degree_t> GetAbsoluteEncoderOffset() const;
-  /** @return Optional absolute encoder zero offset. */
-  std::optional<units::degree_t> GetAbsoluteEncoderZeroOffset() const;
+  /** @return Optional external encoder hardware object (type-erased). */
+  std::optional<std::any> GetExternalEncoder() const;
+  /** @return true if the external encoder should be the PID feedback source. */
+  bool GetUseExternalFeedback() const;
+  /** @return Optional external encoder inversion override. */
+  std::optional<bool> GetExternalEncoderInverted() const;
+  /** @return Optional external encoder direct conversion factor override. */
+  std::optional<double> GetExternalEncoderConversionFactor() const;
+  /** @return Optional external encoder zero offset (turns). */
+  std::optional<units::turn_t> GetExternalEncoderZeroOffset() const;
+  /** @return Optional external encoder gearing. */
+  const std::optional<gearing::MechanismGearing>& GetExternalEncoderGearing() const;
+  /** @return Optional external encoder discontinuity point (turns). */
+  std::optional<units::turn_t> GetExternalEncoderDiscontinuityPoint() const;
 
   /** @return true if a trapezoidal motion profile is configured. */
   bool HasTrapezoidProfile() const;
@@ -731,27 +947,70 @@ class SmartMotorControllerConfig {
   std::optional<units::meters_per_second_squared_t> GetTrapMaxAccelLinear() const;
 
   /**
-   * Convert a mechanism angle to a linear distance using the configured circumference.
+   * Convert a mechanism position (turns) to a linear distance using the configured circumference.
    *
-   * @param mechanismAngle Mechanism angle to convert.
+   * @param mechanismPosition Mechanism position in turns to convert.
    * @return Equivalent linear distance.
    */
-  units::meter_t ConvertFromMechanism(units::degree_t mechanismAngle) const;
+  units::meter_t ConvertFromMechanism(units::turn_t mechanismPosition) const;
 
   /**
-   * Convert a mechanism angular velocity to a linear velocity using the configured circumference.
+   * Convert a mechanism velocity (turns/s) to a linear velocity using the configured circumference.
    *
-   * @param mechanismVelocity Mechanism angular velocity to convert.
+   * @param mechanismVelocity Mechanism velocity in turns/s to convert.
    * @return Equivalent linear velocity.
    */
   units::meters_per_second_t ConvertFromMechanism(
-      units::degrees_per_second_t mechanismVelocity) const;
+      units::turns_per_second_t mechanismVelocity) const;
 
  private:
   static constexpr int kNumSlots = 4;
 
   PIDGains m_slots[kNumSlots];
   int SlotIndex(ClosedLoopControllerSlot slot) const;
+
+  // Validation tracking — options that every ApplyConfig implementation must access
+  enum class BasicOptions {
+    VendorControlRequest,
+    ControlMode,
+    ClosedLoopMaxVoltage,
+    StartingPosition,
+    EncoderInverted,
+    MotorInverted,
+    TemperatureCutoff,
+    UpperLimit,
+    LowerLimit,
+    IdleMode,
+    StatorCurrentLimit,
+    SupplyCurrentLimit,
+    ClosedLoopRampRate,
+    OpenLoopRampRate,
+    ExternalEncoder,
+    Gearing,
+    SlotGains,
+    TrapezoidProfile,
+    ExponentialProfile,
+  };
+  enum class ExternalEncoderOptions {
+    ZeroOffset,
+    DiscontinuityPoint,
+    UseExternalFeedback,
+    ExternalGearing,
+    ExternalEncoderInverted,
+  };
+  static std::string_view ToString(BasicOptions opt);
+  static std::string_view ToString(ExternalEncoderOptions opt);
+  mutable std::set<BasicOptions> m_basicOptions;
+  mutable std::set<ExternalEncoderOptions> m_externalEncoderOptions;
+
+  // Per-slot simulation gain overrides
+  struct SimGainsOverride {
+    std::optional<double> kP, kI, kD;
+    std::optional<frc::ArmFeedforward> armFF;
+    std::optional<frc::ElevatorFeedforward> elevatorFF;
+    std::optional<frc::SimpleMotorFeedforward<units::turns>> simpleFF;
+  };
+  SimGainsOverride m_simGains[kNumSlots];
 
   // Profiles
   std::optional<frc::TrapezoidProfile<units::turns>> m_trapProfile;
@@ -766,8 +1025,8 @@ class SmartMotorControllerConfig {
   std::optional<units::meters_per_second_squared_t> m_trapMaxAccLinear;
 
   // Limits
-  std::optional<units::degree_t> m_mechLowerLimit;
-  std::optional<units::degree_t> m_mechUpperLimit;
+  std::optional<units::turn_t> m_mechLowerLimit;
+  std::optional<units::turn_t> m_mechUpperLimit;
   std::optional<units::meter_t> m_measLowerLimit;
   std::optional<units::meter_t> m_measUpperLimit;
   std::optional<units::ampere_t> m_statorCurrentLimit;
@@ -791,9 +1050,13 @@ class SmartMotorControllerConfig {
   std::optional<units::meter_t> m_mechanismCircumference;
 
   // External encoder
-  std::optional<double> m_absEncoderConversionFactor;
-  std::optional<units::degree_t> m_absEncoderOffset;
-  std::optional<units::degree_t> m_absEncoderZeroOffset;
+  std::optional<std::any> m_externalEncoder;
+  bool m_useExternalFeedback{true};
+  std::optional<bool> m_externalEncoderInverted;
+  std::optional<double> m_externalEncoderConversionFactor;
+  std::optional<units::turn_t> m_externalEncoderZeroOffset;
+  std::optional<gearing::MechanismGearing> m_externalEncoderGearing;
+  std::optional<units::turn_t> m_externalEncoderDiscontinuityPoint;
 
   // Telemetry
   std::optional<std::string> m_telemetryName;
@@ -802,7 +1065,15 @@ class SmartMotorControllerConfig {
   frc2::SubsystemBase* m_subsystem{nullptr};
   std::optional<frc::DCMotor> m_simMotor;
   units::kilogram_square_meter_t m_moi{0.0001_kg_sq_m};
-  std::optional<units::degree_t> m_startingPosition;
+  std::optional<units::turn_t> m_startingPosition;
+  std::optional<units::meter_t> m_startingPositionDistance;
+
+  // Simulation overrides
+  std::optional<units::turn_t> m_simStartingPosition;
+  std::optional<frc::TrapezoidProfile<units::turns>> m_simTrapProfile;
+  std::optional<frc::TrapezoidProfile<units::meters>> m_simLinearTrapProfile;
+  std::optional<frc::ExponentialProfile<units::turns, units::volts>> m_simExpoProfile;
+
   std::optional<std::any> m_vendorConfig;
   std::optional<std::any> m_vendorControlRequest;
 };

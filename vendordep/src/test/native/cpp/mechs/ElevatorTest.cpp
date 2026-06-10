@@ -41,6 +41,7 @@ static SmartMotorControllerConfig MakeElevatorSMCConfig(ProfileType profile, Har
   SmartMotorControllerConfig cfg;
   cfg.WithFeedback(8.0, 0.0, 0.0)
       .WithMechanismCircumference(0.25_in * 22)
+      .WithStartingPosition(0.0_m)
       .WithMeasurementLimits(0.0_m, 5.0_m)
       .WithMotorGearing(
           gearing::MechanismGearing{gearing::GearBox::FromReductionStages({3.0, 4.0})})
@@ -69,7 +70,6 @@ static positional::Elevator* CreateElevator(SmartMotorController* smc, TestSubsy
   ElevatorConfig cfg;
   cfg.WithMotorController(smc)
       .WithSubsystem(subsys)
-      .WithStartingHeight(0.0_m)
       .WithMinimumHeight(0.0_m)
       .WithCarriageMass(1_lb)
       .WithMaximumHeight(3.0_m);

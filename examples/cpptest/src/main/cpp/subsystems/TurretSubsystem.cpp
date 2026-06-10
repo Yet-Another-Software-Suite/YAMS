@@ -31,6 +31,7 @@ TurretSubsystem::TurretSubsystem()
       .WithIdleMode(Cfg::MotorMode::BRAKE)
       .WithMotorInverted(false)
       .WithArmFeedforward(0.5, 5.0, 0, 0.0)
+      .WithStartingPosition(units::degree_t{0})
       .WithTelemetry("TurretMotor", Cfg::TelemetryVerbosity::HIGH)
       .WithStatorCurrentLimit(units::ampere_t{60});
 
@@ -38,7 +39,6 @@ TurretSubsystem::TurretSubsystem()
 
   m_pivotConfig.WithMotorController(&m_motor.value())
       .WithSubsystem(this)
-      .WithStartingAngle(units::degree_t{0})
       .WithMinAngle(units::degree_t{-360})
       .WithMaxAngle(units::degree_t{360})
       .WithTelemetryName("Turret");
