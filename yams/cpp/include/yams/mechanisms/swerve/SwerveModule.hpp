@@ -15,6 +15,62 @@ namespace yams::mechanisms::swerve {
 
 /**
  * A single swerve module comprising a drive motor and an azimuth (steering) motor.
+ *
+ * Each module holds references to two SmartMotorControllers (drive and azimuth) and
+ * a SwerveModuleConfig that describes its physical properties and absolute encoder.
+ * Modules are normally owned by the subsystem and handed to SwerveDrive by pointer.
+ *
+ * ### Example usage (inside a subsystem constructor)
+ * @code{.cpp}
+ * using namespace yams::motorcontrollers;
+ * using namespace yams::motorcontrollers::remote;
+ * using namespace yams::gearing;
+ * using namespace yams::mechanisms::config;
+ * using Cfg = SmartMotorControllerConfig;
+ *
+ * // Declare as subsystem members:
+ * //   ctre::phoenix6::hardware::TalonFX     m_driveMotor{1};
+ * //   ctre::phoenix6::hardware::TalonFX     m_azimuthMotor{2};
+ * //   ctre::phoenix6::hardware::CANcoder    m_encoder{3};
+ * //   std::optional<TalonFXWrapper>         m_driveSMC;
+ * //   std::optional<TalonFXWrapper>         m_azimuthSMC;
+ * //   std::optional<SwerveModule>           m_module;
+ *
+ * SmartMotorControllerConfig driveCfg;
+ * driveCfg.WithSubsystem(this)
+ *         .WithMechanismCircumference(units::meter_t{4.0_in * std::numbers::pi})
+ *         .WithFeedback(0.1, 0.0, 0.0)
+ *         .WithMotorGearing(MechanismGearing{GearBox::FromStages({"6.75:1"})})
+ *         .WithStatorCurrentLimit(40.0_A)
+ *         .WithIdleMode(Cfg::MotorMode::BRAKE)
+ *         .WithTelemetry("FL_Drive", Cfg::TelemetryVerbosity::HIGH);
+ *
+ * SmartMotorControllerConfig azimuthCfg;
+ * azimuthCfg.WithSubsystem(this)
+ *           .WithFeedback(50.0, 0.0, 0.5)
+ *           .WithMotorGearing(MechanismGearing{GearBox::FromStages({"21.43:1"})})
+ *           .WithStatorCurrentLimit(20.0_A)
+ *           .WithClosedLoopMode()
+ *           .WithTelemetry("FL_Azimuth", Cfg::TelemetryVerbosity::HIGH);
+ *
+ * m_driveSMC.emplace(m_driveMotor, frc::DCMotor::KrakenX60(1), driveCfg);
+ * m_azimuthSMC.emplace(m_azimuthMotor, frc::DCMotor::KrakenX60(1), azimuthCfg);
+ *
+ * auto* enc = &m_encoder;
+ * SwerveModuleConfig moduleConfig{&m_driveSMC.value(), &m_azimuthSMC.value()};
+ * moduleConfig
+ *     .WithAbsoluteEncoder([enc]() -> units::degree_t {
+ *       return units::degree_t{units::turn_t{enc->GetAbsolutePosition().GetValue()}};
+ *     })
+ *     .WithAbsoluteEncoderOffset(15.0_deg)
+ *     .WithWheelDiameter(4.0_in)
+ *     .WithLocation(units::inch_t{12}, units::inch_t{12})
+ *     .WithOptimization(true)
+ *     .WithCosineCompensation(true)
+ *     .WithTelemetry("FrontLeft", Cfg::TelemetryVerbosity::HIGH);
+ *
+ * m_module.emplace(moduleConfig);
+ * @endcode
  */
 class SwerveModule {
  public:

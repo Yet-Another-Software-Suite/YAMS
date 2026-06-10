@@ -16,7 +16,48 @@ namespace yams::telemetry {
  * Configures which telemetry fields are published for a SmartMotorController.
  *
  * Use WithTelemetryVerbosity() for a preset bundle of fields, or enable individual
- * fields with the With*() methods.  Pass to SmartMotorController::SetupTelemetry().
+ * fields with the With*() methods.  Pass to SmartMotorController::WithTelemetry().
+ *
+ * ### Quick preset via SmartMotorControllerConfig
+ * @code{.cpp}
+ * // The simplest approach: name the motor in SmartMotorControllerConfig.
+ * // This enables HIGH-verbosity telemetry automatically.
+ * SmartMotorControllerConfig cfg;
+ * cfg.WithTelemetry("ArmMotor");                       // HIGH verbosity (default)
+ * cfg.WithTelemetry("ArmMotor", Cfg::TelemetryVerbosity::MID);  // or choose a level
+ * @endcode
+ *
+ * ### Fine-grained override via SmartMotorController::WithTelemetry()
+ * @code{.cpp}
+ * // After constructing the SmartMotorController, supply an explicit config
+ * // to override the preset chosen by SmartMotorControllerConfig::WithTelemetry().
+ * using Cfg = yams::motorcontrollers::SmartMotorControllerConfig;
+ * using TelCfg = yams::telemetry::SmartMotorControllerTelemetryConfig;
+ *
+ * ctre::phoenix6::hardware::TalonFX talon{1};
+ * TalonFXWrapper smc{talon, frc::DCMotor::KrakenX60(1), cfg};
+ *
+ * smc.WithTelemetry(
+ *     TelCfg{}
+ *         .WithTelemetryVerbosity(Cfg::TelemetryVerbosity::MID)
+ *         .WithMechanismPosition()
+ *         .WithMechanismVelocity()
+ *         .WithStatorCurrent()
+ *         .WithOutputVoltage()
+ *         .WithDataLogName("/Robot/Arm/Motor")
+ *         .WithoutNetworkTables());   // suppress NT4 during matches
+ * @endcode
+ *
+ * ### Logging-only (no NT4) with a custom field selection
+ * @code{.cpp}
+ * smc.WithTelemetry(
+ *     TelCfg{}
+ *         .WithRotorPosition()
+ *         .WithRotorVelocity()
+ *         .WithTemperature()
+ *         .WithDataLogName("/Robot/Shooter/Motor")
+ *         .WithoutNetworkTables());
+ * @endcode
  */
 class SmartMotorControllerTelemetryConfig {
  public:

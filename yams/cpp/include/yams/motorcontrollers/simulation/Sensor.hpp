@@ -24,6 +24,44 @@ namespace yams::motorcontrollers::simulation {
  * All fields report the real supplier value on a physical robot.  In
  * simulation they surface in the Glass UI and can be overridden with
  * trigger-based values for automated testing scenarios.
+ *
+ * ### Basic usage (construct directly)
+ * @code{.cpp}
+ * // Beam-break sensor: one boolean field backed by a real DIO channel.
+ * frc::DigitalInput beamBreak{0};
+ *
+ * Sensor sensor{"BeamBreak", {
+ *   SensorData{"Triggered", [&beamBreak] { return !beamBreak.Get(); }, false},
+ * }};
+ *
+ * // Read the value anywhere in the robot loop:
+ * bool triggered = sensor.GetAsBoolean("Triggered");
+ * @endcode
+ *
+ * ### Builder usage (SimSensorConfig)
+ * @code{.cpp}
+ * frc::DigitalInput beamBreak{0};
+ * frc::Encoder encoder{1, 2};
+ *
+ * SimSensorConfig cfg{"IntakeSensors"};
+ * cfg.WithField("BeamBreak",   [&beamBreak] { return !beamBreak.Get(); }, false)
+ *    .WithField("EncoderCount", [&encoder]  { return encoder.Get(); },     0)
+ *    // In simulation, assert the beam is broken from t=1s to t=3s:
+ *    .WithSimulatedValue("BeamBreak", 1_s, 3_s, true);
+ *
+ * Sensor& sensor = cfg.GetSensor();
+ *
+ * bool triggered  = sensor.GetAsBoolean("BeamBreak");
+ * int  ticks      = sensor.GetAsInt("EncoderCount");
+ * @endcode
+ *
+ * ### Trigger-based override
+ * @code{.cpp}
+ * // Force the beam-break to appear triggered whenever the arm is retracted.
+ * sensor.AddSimTrigger("BeamBreak",
+ *                       SensorData::Convert(true),
+ *                       [&arm] { return arm.GetAngle() < 10_deg; });
+ * @endcode
  */
 class Sensor {
  public:

@@ -25,6 +25,47 @@ namespace yams::mechanisms::positional {
  * Similar to an Arm but intended for mechanisms that rotate a fixed-length
  * assembly (e.g. a shooter hood or wrist) rather than a cantilevered arm with
  * a meaningful length.  Uses mechanism-space (degree) closed-loop control.
+ *
+ * ### Example usage (inside a subsystem constructor)
+ * @code{.cpp}
+ * using namespace yams::motorcontrollers;
+ * using namespace yams::motorcontrollers::remote;
+ * using namespace yams::gearing;
+ * using namespace yams::mechanisms::positional;
+ * using Cfg = SmartMotorControllerConfig;
+ *
+ * // Declare as subsystem members:
+ * //   ctre::phoenix6::hardware::TalonFXS m_talonFXS{3};
+ * //   std::optional<TalonFXSWrapper>      m_smc;
+ * //   PivotConfig                          m_pivotConfig;
+ * //   std::optional<Pivot>                 m_pivot;
+ *
+ * SmartMotorControllerConfig motorCfg;
+ * motorCfg.WithSubsystem(this)
+ *         .WithFeedback(4.0, 0.0, 0.0)
+ *         .WithTrapezoidProfile(units::turns_per_second_t{0.5},
+ *                               units::turns_per_second_squared_t{0.25})
+ *         .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
+ *         .WithIdleMode(Cfg::MotorMode::BRAKE)
+ *         .WithStatorCurrentLimit(40.0_A)
+ *         .WithMotorInverted(false)
+ *         .WithArmFeedforward(0.0, 0.0, 0.0, 0.0)
+ *         .WithClosedLoopMode()
+ *         .WithTelemetry("HoodMotor", Cfg::TelemetryVerbosity::HIGH);
+ *
+ * m_smc.emplace(m_talonFXS, frc::DCMotor::NEO(1),
+ *               TalonFXSWrapper::MotorArrangement::NEO, motorCfg);
+ *
+ * m_pivotConfig.WithMotorController(&m_smc.value())
+ *              .WithMinAngle(-100.0_deg)
+ *              .WithMaxAngle(200.0_deg)
+ *              .WithTelemetryName("HoodExample");
+ *
+ * m_pivot.emplace(m_pivotConfig);
+ *
+ * // In commands or bindings:
+ * m_pivot->RunTo(30.0_deg);
+ * @endcode
  */
 class Pivot : public SmartPositionalMechanism {
  public:

@@ -27,6 +27,46 @@ namespace yams::mechanisms::velocity {
  * Drives a spinning element using a SmartMotorController configured for
  * mechanism-space (degrees/second) closed-loop velocity control.  If a roller
  * diameter is provided, surface-speed commands and reads are also supported.
+ *
+ * ### Example usage (inside a subsystem constructor)
+ * @code{.cpp}
+ * using namespace yams::motorcontrollers;
+ * using namespace yams::motorcontrollers::remote;
+ * using namespace yams::gearing;
+ * using namespace yams::mechanisms::velocity;
+ * using Cfg = SmartMotorControllerConfig;
+ *
+ * // Declare as subsystem members:
+ * //   ctre::phoenix6::hardware::TalonFX m_talon{4};
+ * //   std::optional<TalonFXWrapper>     m_smc;
+ * //   FlyWheelConfig                     m_flyWheelConfig;
+ * //   std::optional<FlyWheel>            m_flyWheel;
+ *
+ * SmartMotorControllerConfig motorCfg;
+ * motorCfg.WithSubsystem(this)
+ *         .WithFeedback(100.0, 0.0, 0.0)
+ *         .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
+ *         .WithIdleMode(Cfg::MotorMode::COAST)
+ *         .WithStatorCurrentLimit(60.0_A)
+ *         .WithMotorInverted(false)
+ *         .WithSimpleFeedforward(0.0, 1.0, 0.0)
+ *         .WithClosedLoopMode()
+ *         .WithTelemetry("ShooterMotor", Cfg::TelemetryVerbosity::HIGH);
+ *
+ * m_smc.emplace(m_talon, frc::DCMotor::Falcon500(1), motorCfg);
+ *
+ * m_flyWheelConfig.WithMotorController(&m_smc.value())
+ *                 .WithRollerDiameter(4.0 * 0.0254_m)  // 4-inch roller
+ *                 .WithTelemetryName("Shooter");
+ *
+ * m_flyWheel.emplace(m_flyWheelConfig);
+ *
+ * // Run at a fixed angular velocity (~2000 RPM):
+ * m_flyWheel->Run(units::degrees_per_second_t{12000.0});
+ *
+ * // Or run at a surface speed (requires roller diameter):
+ * m_flyWheel->Run(10.0_mps);
+ * @endcode
  */
 class FlyWheel : public SmartVelocityMechanism {
  public:

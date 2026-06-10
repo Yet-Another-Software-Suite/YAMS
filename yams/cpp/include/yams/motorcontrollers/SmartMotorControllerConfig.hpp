@@ -322,6 +322,26 @@ class SmartMotorControllerConfig {
    */
   SmartMotorControllerConfig& WithMechanismCircumference(units::meter_t gearPitch, int teeth);
 
+  /**
+   * Set the mechanism circumference from a wheel or drum diameter.
+   *
+   * Circumference is computed as π × @p diameter.
+   *
+   * @param diameter Wheel or drum diameter.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithMechanismDiameter(units::meter_t diameter);
+
+  /**
+   * Set the mechanism circumference from a wheel or drum radius.
+   *
+   * Circumference is computed as 2π × @p radius.
+   *
+   * @param radius Wheel or drum radius.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithMechanismRadius(units::meter_t radius);
+
   // ---- Limits ------------------------------------------------------------
 
   /**

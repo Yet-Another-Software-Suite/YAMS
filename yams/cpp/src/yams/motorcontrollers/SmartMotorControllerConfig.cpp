@@ -348,6 +348,15 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithMechanismCircumferen
   return WithMechanismCircumference(gearPitch * teeth);
 }
 
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithMechanismDiameter(
+    units::meter_t diameter) {
+  return WithMechanismCircumference(diameter * std::numbers::pi);
+}
+
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithMechanismRadius(units::meter_t radius) {
+  return WithMechanismCircumference(radius * 2.0 * std::numbers::pi);
+}
+
 // ---- Limits --------------------------------------------------------------
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithMechanismLimits(units::turn_t lower,

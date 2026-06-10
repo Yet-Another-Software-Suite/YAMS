@@ -30,6 +30,41 @@ namespace yams::motorcontrollers::local {
  * Supports both SPARK Max and SPARK Flex hardware via a common internal interface.
  * Wraps REV SparkBase, SparkClosedLoopController, and encoder objects to satisfy the
  * SmartMotorController contract.
+ *
+ * ### Example usage — SPARK Max (inside a subsystem constructor)
+ * @code{.cpp}
+ * using namespace yams::motorcontrollers;
+ * using namespace yams::motorcontrollers::local;
+ * using namespace yams::gearing;
+ * using Cfg = SmartMotorControllerConfig;
+ *
+ * // Declare as subsystem members:
+ * //   rev::spark::SparkMax          m_sparkMax{3, rev::spark::SparkLowLevel::MotorType::kBrushless};
+ * //   std::optional<SparkWrapper>   m_smc;
+ *
+ * SmartMotorControllerConfig cfg;
+ * cfg.WithSubsystem(this)
+ *    .WithFeedback(1.0, 0.0, 0.0)
+ *    .WithMechanismCircumference(0.25_in, 22)
+ *    .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
+ *    .WithIdleMode(Cfg::MotorMode::BRAKE)
+ *    .WithSupplyCurrentLimit(40.0_A)
+ *    .WithMotorInverted(false)
+ *    .WithElevatorFeedforward(0.0, 0.0, 0.0)
+ *    .WithClosedLoopMode()
+ *    .WithTelemetry("ElevatorMotor", Cfg::TelemetryVerbosity::HIGH);
+ *
+ * m_smc.emplace(m_sparkMax, frc::DCMotor::NEO(1), cfg);
+ * @endcode
+ *
+ * ### Example usage — SPARK Flex
+ * @code{.cpp}
+ * // Declare as subsystem members:
+ * //   rev::spark::SparkFlex        m_sparkFlex{4, rev::spark::SparkLowLevel::MotorType::kBrushless};
+ * //   std::optional<SparkWrapper>  m_smc;
+ *
+ * m_smc.emplace(m_sparkFlex, frc::DCMotor::NeoVortex(1), cfg);
+ * @endcode
  */
 class SparkWrapper : public SmartMotorController {
  public:

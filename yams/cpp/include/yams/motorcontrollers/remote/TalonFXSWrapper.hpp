@@ -39,6 +39,34 @@ namespace yams::motorcontrollers::remote {
  * The TalonFXS supports third-party brushed and brushless motors (e.g. REV NEO, Minion).
  * Wraps a TalonFXS hardware object and exposes the full SmartMotorController interface
  * including MotionMagic profiles, CANcoder/CANdi synchronization, and simulation support.
+Q *
+ * ### Example usage (inside a subsystem constructor)
+ * @code{.cpp}
+ * using namespace yams::motorcontrollers;
+ * using namespace yams::motorcontrollers::remote;
+ * using namespace yams::gearing;
+ * using Cfg = SmartMotorControllerConfig;
+ *
+ * // Declare as subsystem members:
+ * //   ctre::phoenix6::hardware::TalonFXS m_talonFXS{2};
+ * //   std::optional<TalonFXSWrapper>      m_smc;
+ *
+ * SmartMotorControllerConfig cfg;
+ * cfg.WithSubsystem(this)
+ *    .WithFeedback(4.0, 0.0, 0.0)
+ *    .WithTrapezoidProfile(units::turns_per_second_t{0.5},
+ *                          units::turns_per_second_squared_t{0.25})
+ *    .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
+ *    .WithIdleMode(Cfg::MotorMode::BRAKE)
+ *    .WithStatorCurrentLimit(40.0_A)
+ *    .WithMotorInverted(false)
+ *    .WithArmFeedforward(0.0, 0.0, 0.0, 0.0)
+ *    .WithClosedLoopMode()
+ *    .WithTelemetry("HoodMotor", Cfg::TelemetryVerbosity::HIGH);
+ *
+ * m_smc.emplace(m_talonFXS, frc::DCMotor::NEO(1),
+ *               TalonFXSWrapper::MotorArrangement::NEO, cfg);
+ * @endcode
  */
 class TalonFXSWrapper : public SmartMotorController {
  public:

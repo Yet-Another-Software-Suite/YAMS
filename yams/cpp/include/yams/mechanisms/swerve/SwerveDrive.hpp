@@ -34,6 +34,7 @@
 #include <optional>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "yams/mechanisms/swerve/SwerveDriveConfig.hpp"
 #include "yams/mechanisms/swerve/SwerveModule.hpp"
@@ -43,7 +44,86 @@ namespace yams::mechanisms::swerve {
 /**
  * Swerve drive mechanism with pose estimation, telemetry, and simulation support.
  *
+ * Owns the kinematics, pose estimator, and all NT4 struct publishers.  Modules are
+ * created separately and handed in by pointer via SwerveDriveConfig.  Call
+ * UpdateTelemetry() every loop and SimIterate() in SimulationPeriodic().
+ *
  * @tparam NumModules Number of swerve modules (default 4).
+ *
+ * ### Example usage (inside a four-module subsystem)
+ * @code{.cpp}
+ * using namespace yams::motorcontrollers;
+ * using namespace yams::motorcontrollers::remote;
+ * using namespace yams::gearing;
+ * using namespace yams::mechanisms::swerve;
+ * using namespace yams::mechanisms::config;
+ * using Cfg = SmartMotorControllerConfig;
+ *
+ * // Declare as subsystem members:
+ * //   ctre::phoenix6::hardware::Pigeon2     m_pigeon{0};
+ * //   // Four sets of: TalonFX, TalonFX, CANcoder, optional<TalonFXWrapper> ×2,
+ * //   //               SwerveModuleConfig, optional<SwerveModule>
+ * //   std::optional<SwerveDrive<4>>         m_drive;
+ *
+ * // --- build modules (front-left shown; repeat for FR, BL, BR) ---
+ * SmartMotorControllerConfig driveCfg;
+ * driveCfg.WithSubsystem(this)
+ *         .WithMechanismCircumference(units::meter_t{4.0 * 0.0254 * std::numbers::pi})
+ *         .WithFeedback(0.1, 0.0, 0.0)
+ *         .WithMotorGearing(MechanismGearing{GearBox::FromStages({"6.75:1"})})
+ *         .WithStatorCurrentLimit(40.0_A)
+ *         .WithIdleMode(Cfg::MotorMode::BRAKE)
+ *         .WithTelemetry("FL_Drive", Cfg::TelemetryVerbosity::HIGH);
+ *
+ * SmartMotorControllerConfig azimuthCfg;
+ * azimuthCfg.WithSubsystem(this)
+ *           .WithFeedback(50.0, 0.0, 0.5)
+ *           .WithMotorGearing(MechanismGearing{GearBox::FromStages({"21.43:1"})})
+ *           .WithStatorCurrentLimit(20.0_A)
+ *           .WithClosedLoopMode()
+ *           .WithTelemetry("FL_Azimuth", Cfg::TelemetryVerbosity::HIGH);
+ *
+ * m_flDriveSMC.emplace(m_flDrive, frc::DCMotor::KrakenX60(1), driveCfg);
+ * m_flAzimuthSMC.emplace(m_flAzimuth, frc::DCMotor::KrakenX60(1), azimuthCfg);
+ *
+ * auto* enc = &m_flEncoder;
+ * SwerveModuleConfig flCfg{&m_flDriveSMC.value(), &m_flAzimuthSMC.value()};
+ * flCfg.WithAbsoluteEncoder([enc]() -> units::degree_t {
+ *         return units::degree_t{units::turn_t{enc->GetAbsolutePosition().GetValue()}};
+ *       })
+ *      .WithAbsoluteEncoderOffset(15.0_deg)
+ *      .WithWheelDiameter(4.0 * 0.0254_m)
+ *      .WithLocation(units::inch_t{12}, units::inch_t{12})
+ *      .WithOptimization(true)
+ *      .WithTelemetry("FrontLeft", Cfg::TelemetryVerbosity::HIGH);
+ * m_fl.emplace(flCfg);
+ * // ... repeat for m_fr, m_bl, m_br ...
+ *
+ * // --- build the drive ---
+ * SwerveDriveConfig driveCfg;
+ * driveCfg.WithSubsystem(this)
+ *         .WithModules({&m_fl.value(), &m_fr.value(), &m_bl.value(), &m_br.value()})
+ *         .WithGyro([this]() -> units::degree_t {
+ *           return units::degree_t{units::turn_t{m_pigeon.GetYaw().GetValue()}};
+ *         })
+ *         .WithMaximumChassisSpeed(4.5_mps, units::degrees_per_second_t{540})
+ *         .WithDiscretizationTime(0.02_s)
+ *         .WithStartingPose(frc::Pose2d{})
+ *         .WithTranslationController(frc::PIDController{2.0, 0.0, 0.0})
+ *         .WithRotationController(frc::PIDController{4.0, 0.0, 0.0});
+ * m_drive.emplace(std::move(driveCfg));
+ *
+ * // --- in Periodic() ---
+ * //   m_drive->UpdateTelemetry();
+ *
+ * // --- in SimulationPeriodic() ---
+ * //   m_drive->SimIterate();
+ *
+ * // --- drive with a joystick ---
+ * //   frc2::CommandPtr driveCmd = m_drive->Drive([this]() -> frc::ChassisSpeeds {
+ * //     return frc::ChassisSpeeds{xSpeed, ySpeed, rotSpeed};
+ * //   });
+ * @endcode
  */
 template <size_t NumModules = 4>
 class SwerveDrive {
@@ -143,7 +223,7 @@ class SwerveDrive {
     for (size_t i = 0; i < NumModules; ++i) {
       m_config.GetModules()[i]->SetSwerveModuleState(states[i]);
     }
-    m_desiredModuleStatesPublisher.Set(states);
+    m_desiredModuleStates = states;
   }
 
   /**
@@ -167,8 +247,8 @@ class SwerveDrive {
    * @param robotRelativeSpeeds Desired robot-relative chassis speeds.
    */
   void SetRobotRelativeChassisSpeeds(frc::ChassisSpeeds robotRelativeSpeeds) {
+    m_desiredChassisSpeeds = robotRelativeSpeeds;
     SetSwerveModuleStates(GetStateFromRobotRelativeChassisSpeeds(robotRelativeSpeeds));
-    m_desiredRobotRelChassisSpeedsPublisher.Set(robotRelativeSpeeds);
   }
 
   /**
@@ -192,7 +272,7 @@ class SwerveDrive {
                                  m_config.GetModules()[i]->GetConfig().GetLocation()->Angle()};
     }
     SetSwerveModuleStates(states);
-    m_desiredRobotRelChassisSpeedsPublisher.Set(frc::ChassisSpeeds{});
+    m_desiredChassisSpeeds = frc::ChassisSpeeds{};
   }
 
   // ---- Odometry & pose -------------------------------------------------------
@@ -210,7 +290,8 @@ class SwerveDrive {
   void ResetOdometry(frc::Pose2d pose) {
     m_poseEstimator.ResetPosition(frc::Rotation2d{units::radian_t{GetGyroAngle()}},
                                   GetModulePositions(), pose);
-    m_desiredModuleStatesPublisher.Set(m_kinematics.ToSwerveModuleStates(frc::ChassisSpeeds{}));
+    m_desiredChassisSpeeds = frc::ChassisSpeeds{};
+    m_desiredModuleStates = m_kinematics.ToSwerveModuleStates(frc::ChassisSpeeds{});
   }
 
   /**
@@ -252,15 +333,32 @@ class SwerveDrive {
    */
   void UpdateTelemetry() {
     UpdatePoseEstimator();
+    auto pose = GetPose();
+    auto currentStates = GetModuleStates();
+
     m_gyroPublisher.Set(units::degree_t{GetGyroAngle()}.value());
-    m_currentModuleStatesPublisher.Set(GetModuleStates());
-    m_posePublisher.Set(GetPose());
+    m_desiredModuleStatesPublisher.Set(m_desiredModuleStates);
+    m_currentModuleStatesPublisher.Set(currentStates);
+    m_posePublisher.Set(pose);
+    m_desiredRobotRelChassisSpeedsPublisher.Set(m_desiredChassisSpeeds);
     m_currentRobotRelChassisSpeedsPublisher.Set(GetRobotRelativeSpeed());
     m_fieldRelChassisSpeedsPublisher.Set(GetFieldRelativeSpeed());
+
     for (auto* mod : m_config.GetModules()) {
       mod->UpdateTelemetry();
     }
-    m_field2d.SetRobotPose(GetPose());
+
+    m_field2d.SetRobotPose(pose);
+    std::vector<frc::Pose2d> modulePoses;
+    modulePoses.reserve(NumModules);
+    for (size_t i = 0; i < NumModules; ++i) {
+      auto* mod = m_config.GetModules()[i];
+      auto location = *mod->GetConfig().GetLocation();
+      auto moduleTranslation = pose.Translation() + location.RotateBy(pose.Rotation());
+      auto moduleHeading = pose.Rotation() + currentStates[i].angle;
+      modulePoses.push_back(frc::Pose2d{moduleTranslation, moduleHeading});
+    }
+    m_field2d.GetObject("modules")->SetPoses(modulePoses);
   }
 
   /**
@@ -357,6 +455,15 @@ class SwerveDrive {
   void ResetAzimuthPID() { m_config.GetRotationPID().Reset(); }
   void ResetTranslationPID() { m_config.GetTranslationPID().Reset(); }
 
+  /**
+   * Set the standard deviations used for the vision pose estimator noise model.
+   *
+   * @param stdDevs Standard deviations {x_m, y_m, theta_rad}.
+   */
+  void SetVisionMeasurementStdDevs(const wpi::array<double, 3>& stdDevs) {
+    m_poseEstimator.SetVisionMeasurementStdDevs(stdDevs);
+  }
+
   /** Get the drive's unique name (always "swerve"). */
   std::string GetName() const { return "swerve"; }
 
@@ -382,6 +489,9 @@ class SwerveDrive {
   frc::Field2d m_field2d;
   frc::Timer m_simTimer;
   units::degree_t m_simGyroAngle{0};
+
+  wpi::array<frc::SwerveModuleState, NumModules> m_desiredModuleStates{wpi::empty_array};
+  frc::ChassisSpeeds m_desiredChassisSpeeds{};
 
   void UpdatePoseEstimator() {
     m_poseEstimator.Update(frc::Rotation2d{units::radian_t{GetGyroAngle()}}, GetModulePositions());

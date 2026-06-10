@@ -11,6 +11,8 @@
 #include <stdexcept>
 #include <string>
 
+#include "yams/exceptions/SmartMotorControllerConfigurationException.hpp"
+
 namespace yams::mechanisms::swerve {
 
 SwerveModule::SwerveModule(const config::SwerveModuleConfig& config)
@@ -22,6 +24,14 @@ SwerveModule::SwerveModule(const config::SwerveModuleConfig& config)
   }
   if (!m_config.GetLocation()) {
     throw std::invalid_argument("SwerveModuleConfig must have a position!");
+  }
+  // Mirror Java: if the azimuth motor has an external encoder configured but
+  // external feedback is not enabled, that encoder can never be used.
+  if (m_azimuthMotorController->GetConfig().GetExternalEncoder().has_value() &&
+      !m_azimuthMotorController->GetConfig().GetUseExternalFeedback()) {
+    throw SmartMotorControllerConfigurationException(
+        "External encoder cannot be used without external feedback",
+        "External encoder could not be used", "WithUseExternalFeedbackEncoder(true)");
   }
 
   // Set up motor telemetry under the swerve hierarchy.
@@ -39,7 +49,14 @@ SwerveModule::SwerveModule(const config::SwerveModuleConfig& config)
 
 void SwerveModule::SeedAzimuthEncoder() {
   if (frc::RobotBase::IsReal()) {
-    m_azimuthMotorController->SetEncoderPosition(m_config.GetAbsoluteEncoderAngle());
+    // Only seed from the absolute encoder when the motor is NOT using an
+    // external feedback encoder (e.g., a fused CANcoder on a TalonFX).  When
+    // external feedback is active the hardware already tracks the absolute
+    // angle; seeding would overwrite that with redundant data.
+    const auto& cfg = m_azimuthMotorController->GetConfig();
+    if (!cfg.GetExternalEncoder().has_value() || !cfg.GetUseExternalFeedback()) {
+      m_azimuthMotorController->SetEncoderPosition(m_config.GetAbsoluteEncoderAngle());
+    }
   }
 }
 

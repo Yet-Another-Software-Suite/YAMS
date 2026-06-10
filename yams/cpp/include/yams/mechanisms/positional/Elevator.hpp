@@ -24,6 +24,48 @@ namespace yams::mechanisms::positional {
  *
  * Drives a carriage along a linear axis using a SmartMotorController
  * configured for measurement-space (meter) closed-loop control.
+ *
+ * ### Example usage (inside a subsystem constructor)
+ * @code{.cpp}
+ * using namespace yams::motorcontrollers;
+ * using namespace yams::motorcontrollers::local;
+ * using namespace yams::gearing;
+ * using namespace yams::mechanisms::positional;
+ * using Cfg = SmartMotorControllerConfig;
+ *
+ * // Declare as subsystem members:
+ * //   rev::spark::SparkMax          m_sparkMax{2, rev::spark::SparkLowLevel::MotorType::kBrushless};
+ * //   std::optional<SparkWrapper>   m_smc;
+ * //   ElevatorConfig                 m_elevatorConfig;
+ * //   std::optional<Elevator>        m_elevator;
+ *
+ * SmartMotorControllerConfig motorCfg;
+ * motorCfg.WithSubsystem(this)
+ *         .WithFeedback(1.0, 0.0, 0.0)
+ *         .WithMechanismCircumference(0.25_in, 22)
+ *         .WithStartingPosition(0.5_m)
+ *         .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
+ *         .WithMeasurementLimits(0.0_m, 2.0_m)
+ *         .WithIdleMode(Cfg::MotorMode::BRAKE)
+ *         .WithSupplyCurrentLimit(40.0_A)
+ *         .WithMotorInverted(false)
+ *         .WithElevatorFeedforward(0.0, 0.0, 0.0)
+ *         .WithClosedLoopMode()
+ *         .WithTelemetry("ElevatorMotor", Cfg::TelemetryVerbosity::HIGH);
+ *
+ * m_smc.emplace(m_sparkMax, frc::DCMotor::NEO(1), motorCfg);
+ *
+ * m_elevatorConfig.WithMotorController(&m_smc.value())
+ *                 .WithMinimumHeight(0.0_m)
+ *                 .WithMaximumHeight(3.0_m)
+ *                 .WithCarriageMass(2.0_lb)
+ *                 .WithTelemetryName("Elevator");
+ *
+ * m_elevator.emplace(m_elevatorConfig);
+ *
+ * // In commands or bindings:
+ * m_elevator->RunTo(1.2_m);
+ * @endcode
  */
 class Elevator : public SmartPositionalMechanism {
  public:

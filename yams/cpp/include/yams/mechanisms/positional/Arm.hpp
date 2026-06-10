@@ -24,6 +24,47 @@ namespace yams::mechanisms::positional {
  *
  * Drives an arm joint using a SmartMotorController configured for
  * mechanism-space (degree) closed-loop angular control.
+ *
+ * ### Example usage (inside a subsystem constructor)
+ * @code{.cpp}
+ * using namespace yams::motorcontrollers;
+ * using namespace yams::motorcontrollers::remote;
+ * using namespace yams::gearing;
+ * using namespace yams::mechanisms::positional;
+ * using Cfg = SmartMotorControllerConfig;
+ *
+ * // Declare as subsystem members:
+ * //   ctre::phoenix6::hardware::TalonFX m_talon{1};
+ * //   std::optional<TalonFXWrapper>     m_smc;
+ * //   ArmConfig                          m_armConfig;
+ * //   std::optional<Arm>                 m_arm;
+ *
+ * SmartMotorControllerConfig motorCfg;
+ * motorCfg.WithSubsystem(this)
+ *         .WithFeedback(4.0, 0.0, 0.0)
+ *         .WithTrapezoidProfile(units::turns_per_second_t{0.5},
+ *                               units::turns_per_second_squared_t{0.25})
+ *         .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
+ *         .WithIdleMode(Cfg::MotorMode::BRAKE)
+ *         .WithStatorCurrentLimit(40.0_A)
+ *         .WithMotorInverted(false)
+ *         .WithArmFeedforward(0.0, 0.0, 0.0, 0.0)
+ *         .WithClosedLoopMode()
+ *         .WithTelemetry("ArmMotor", Cfg::TelemetryVerbosity::HIGH);
+ *
+ * m_smc.emplace(m_talon, frc::DCMotor::KrakenX60(1), motorCfg);
+ *
+ * m_armConfig.WithMotorController(&m_smc.value())
+ *            .WithMinAngle(-100.0_deg)
+ *            .WithMaxAngle(200.0_deg)
+ *            .WithArmLength(0.135_m)
+ *            .WithTelemetryName("ArmExample");
+ *
+ * m_arm.emplace(m_armConfig);
+ *
+ * // In commands or bindings:
+ * m_arm->RunTo(45.0_deg);
+ * @endcode
  */
 class Arm : public SmartPositionalMechanism {
  public:

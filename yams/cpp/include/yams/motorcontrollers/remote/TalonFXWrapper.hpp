@@ -40,6 +40,33 @@ namespace yams::motorcontrollers::remote {
  *
  * Wraps a TalonFX hardware object and exposes the full SmartMotorController interface
  * including MotionMagic profiles, CANcoder/CANdi synchronization, and simulation support.
+ *
+ * ### Example usage (inside a subsystem constructor)
+ * @code{.cpp}
+ * using namespace yams::motorcontrollers;
+ * using namespace yams::motorcontrollers::remote;
+ * using namespace yams::gearing;
+ * using Cfg = SmartMotorControllerConfig;
+ *
+ * // Declare as subsystem members:
+ * //   ctre::phoenix6::hardware::TalonFX m_talon{1};
+ * //   std::optional<TalonFXWrapper>      m_smc;
+ *
+ * SmartMotorControllerConfig cfg;
+ * cfg.WithSubsystem(this)
+ *    .WithFeedback(4.0, 0.0, 0.0)
+ *    .WithTrapezoidProfile(units::turns_per_second_t{0.5},
+ *                          units::turns_per_second_squared_t{0.25})
+ *    .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
+ *    .WithIdleMode(Cfg::MotorMode::BRAKE)
+ *    .WithStatorCurrentLimit(40.0_A)
+ *    .WithMotorInverted(false)
+ *    .WithArmFeedforward(0.0, 0.0, 0.0, 0.0)
+ *    .WithClosedLoopMode()
+ *    .WithTelemetry("ArmMotor", Cfg::TelemetryVerbosity::HIGH);
+ *
+ * m_smc.emplace(m_talon, frc::DCMotor::KrakenX60(1), cfg);
+ * @endcode
  */
 class TalonFXWrapper : public SmartMotorController {
  public:
