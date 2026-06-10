@@ -1,4 +1,4 @@
-// Copyright (c) 2026 YAMS Contributors
+// Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #pragma once
@@ -24,6 +24,7 @@
 #include <units/velocity.h>
 #include <units/voltage.h>
 
+#include <functional>
 #include <memory>
 #include <optional>
 #include <string>
@@ -529,6 +530,17 @@ class SmartMotorController {
   void UpdateTelemetry();
 
   /**
+   * Override the telemetry configuration used when publishing data to NetworkTables.
+   *
+   * Call before SetupTelemetry() or UpdateTelemetry() to apply fine-grained control over
+   * which fields are published.
+   *
+   * @param config SmartMotorControllerTelemetryConfig to apply.
+   * @return *this for chaining.
+   */
+  SmartMotorController& WithTelemetry(telemetry::SmartMotorControllerTelemetryConfig config);
+
+  /**
    * Return telemetry fields not supported by this motor controller implementation.
    *
    * Subclasses override this to disable fields for hardware that lacks certain signals
@@ -609,6 +621,39 @@ class SmartMotorController {
   ClosedLoopControllerSlot m_slot{ClosedLoopControllerSlot::SLOT_0};
   std::shared_ptr<SimSupplier> m_simSupplier;
 
+  /** Loosely coupled followers populated by LoadLooselyCoupledFollowers(). */
+  std::vector<SmartMotorController*> m_looseFollowers;
+
+  /**
+   * Populate m_looseFollowers from the current m_config.
+   * Call this at the end of each concrete ApplyConfig() implementation.
+   */
+  void LoadLooselyCoupledFollowers();
+
+  /**
+   * Forward a position setpoint to all loosely coupled followers.
+   * Call at the end of SetPosition(turn_t) in each concrete wrapper.
+   */
+  void ForwardPositionToFollowers(units::turn_t pos);
+
+  /**
+   * Forward a linear position setpoint to all loosely coupled followers.
+   * Call at the end of SetPosition(meter_t) in each concrete wrapper.
+   */
+  void ForwardPositionToFollowers(units::meter_t dist);
+
+  /**
+   * Forward a velocity setpoint to all loosely coupled followers.
+   * Call at the end of SetVelocity(turns_per_second_t) in each concrete wrapper.
+   */
+  void ForwardVelocityToFollowers(units::turns_per_second_t vel);
+
+  /**
+   * Forward a linear velocity setpoint to all loosely coupled followers.
+   * Call at the end of SetVelocity(meters_per_second_t) in each concrete wrapper.
+   */
+  void ForwardVelocityToFollowers(units::meters_per_second_t vel);
+
   std::optional<frc::PIDController> m_pid;
   std::optional<math::LQRController> m_lqr;
 
@@ -631,6 +676,7 @@ class SmartMotorController {
 
   telemetry::SmartMotorControllerTelemetry m_telemetry;
   telemetry::SmartMotorControllerTelemetryConfig m_telemetryConfig;
+  bool m_telemetryConfigExplicit{false};
 
  private:
   std::optional<frc::TrapezoidProfile<units::turns>::State> GetTrapezoidalProfileState();

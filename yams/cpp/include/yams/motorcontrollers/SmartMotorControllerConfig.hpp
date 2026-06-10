@@ -1,4 +1,4 @@
-// Copyright (c) 2026 YAMS Contributors
+// Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #pragma once
@@ -28,12 +28,17 @@
 #include <set>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "yams/gearing/MechanismGearing.hpp"
 #include "yams/math/LQRConfig.hpp"
 
 namespace yams::motorcontrollers {
+
+// Forward declaration to avoid circular dependency (SmartMotorController.hpp
+// includes this header, so we cannot include it here).
+class SmartMotorController;
 
 /**
  * Unified configuration for a SmartMotorController.
@@ -719,6 +724,54 @@ class SmartMotorControllerConfig {
    */
   SmartMotorControllerConfig& WithVendorConfig(std::any cfg);
 
+  // ---- Followers -------------------------------------------------------------
+
+  /**
+   * Configure tightly coupled hardware followers for this motor controller.
+   *
+   * Followers must be the same vendor as the master (CTRE or REV).
+   * TalonFX and TalonFXS are cross-compatible as Phoenix 6 followers.
+   * Type checking is performed inside the wrapper's ApplyConfig; passing an
+   * incompatible type emits a driver-station warning and is ignored.
+   *
+   * @param followers Vector of (hardware object pointer, opposeMasterDirection) pairs.
+   *                  Hardware pointers are stored via std::any.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithFollowers(
+      std::vector<std::pair<std::any, bool>> followers);
+
+  /**
+   * Configure loosely coupled SmartMotorController followers.
+   *
+   * Only position and velocity setpoint requests are forwarded to these followers;
+   * configurations are not transferred.  Typically used when follower motors have
+   * independent gains (e.g. inverted orientation) or a different controller brand.
+   *
+   * @param followers SmartMotorController instances to mirror setpoints.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithLooselyCoupledFollowers(
+      std::vector<SmartMotorController*> followers);
+
+  /** Get the list of tightly coupled hardware followers. */
+  const std::vector<std::pair<std::any, bool>>& GetFollowers() const;
+
+  /** Get the list of loosely coupled SmartMotorController followers. */
+  const std::vector<SmartMotorController*>& GetLooselyCoupledFollowers() const;
+
+  // ---- Clone -----------------------------------------------------------------
+
+  /**
+   * Return a deep copy of this configuration.
+   *
+   * Useful when multiple motor controllers share the same base config but
+   * need independent modifications (e.g. different inversion settings).
+   *
+   * @return Copy of this SmartMotorControllerConfig.
+   */
+  SmartMotorControllerConfig Clone() const;
+
   // ---- Validation ------------------------------------------------------------
 
   /**
@@ -1076,6 +1129,11 @@ class SmartMotorControllerConfig {
 
   std::optional<std::any> m_vendorConfig;
   std::optional<std::any> m_vendorControlRequest;
+
+  // Followers
+  std::vector<std::pair<std::any, bool>> m_followers;
+  std::vector<SmartMotorController*> m_looseFollowers;
+
 };
 
 }  // namespace yams::motorcontrollers

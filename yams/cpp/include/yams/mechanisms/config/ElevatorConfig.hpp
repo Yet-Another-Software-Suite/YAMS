@@ -1,9 +1,8 @@
-// Copyright (c) 2026 YAMS Contributors
+// Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #pragma once
 
-#include <frc2/command/SubsystemBase.h>
 #include <frc/util/Color.h>
 #include <frc/util/Color8Bit.h>
 #include <units/angle.h>
@@ -36,14 +35,6 @@ class ElevatorConfig {
    * @return *this for chaining.
    */
   ElevatorConfig& WithMotorController(motorcontrollers::SmartMotorController* smc);
-
-  /**
-   * Set the subsystem that owns the elevator (used for command requirements).
-   *
-   * @param subsystem Pointer to the subsystem.
-   * @return *this for chaining.
-   */
-  ElevatorConfig& WithSubsystem(frc2::SubsystemBase* subsystem);
 
   /**
    * Set the NetworkTables / SmartDashboard name for telemetry.
@@ -106,9 +97,6 @@ class ElevatorConfig {
   /** Get the motor controller pointer. */
   motorcontrollers::SmartMotorController* GetMotorController() const;
 
-  /** Get the subsystem pointer. */
-  frc2::SubsystemBase* GetSubsystem() const;
-
   /** Get the telemetry name. */
   std::string GetTelemetryName() const;
 
@@ -132,7 +120,6 @@ class ElevatorConfig {
 
  private:
   motorcontrollers::SmartMotorController* m_smc{nullptr};
-  frc2::SubsystemBase* m_subsystem{nullptr};
   std::string m_telemetryName;
   std::optional<units::meter_t> m_minHeight;
   std::optional<units::meter_t> m_maxHeight;

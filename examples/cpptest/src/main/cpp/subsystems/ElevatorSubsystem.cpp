@@ -1,4 +1,4 @@
-// Copyright (c) 2026 YAMS Contributors
+// Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "subsystems/ElevatorSubsystem.h"
@@ -23,7 +23,7 @@ ElevatorSubsystem::ElevatorSubsystem() {
   const units::meter_t circumference{kCircumferenceIn * 0.0254};
 
   m_motorConfig.WithSubsystem(this)
-      .WithMechanismCircumference(0.25_in,22)
+      .WithMechanismCircumference(0.25_in, 22)
       .WithStartingPosition(units::meter_t{0.5})
       .WithFeedback(1, 0, 0)
       // .WithExponentialProfile(0.0, 0.0, units::volt_t{12})

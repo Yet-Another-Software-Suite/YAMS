@@ -1,4 +1,4 @@
-// Copyright (c) 2026 YAMS Contributors
+// Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "yams/mechanisms/config/ElevatorConfig.hpp"
@@ -14,11 +14,6 @@ namespace yams::mechanisms::config {
 
 ElevatorConfig& ElevatorConfig::WithMotorController(motorcontrollers::SmartMotorController* smc) {
   m_smc = smc;
-  return *this;
-}
-
-ElevatorConfig& ElevatorConfig::WithSubsystem(frc2::SubsystemBase* subsystem) {
-  m_subsystem = subsystem;
   return *this;
 }
 
@@ -58,8 +53,6 @@ ElevatorConfig& ElevatorConfig::WithAngle(units::degree_t angle) {
 }
 
 motorcontrollers::SmartMotorController* ElevatorConfig::GetMotorController() const { return m_smc; }
-
-frc2::SubsystemBase* ElevatorConfig::GetSubsystem() const { return m_subsystem; }
 
 std::string ElevatorConfig::GetTelemetryName() const { return m_telemetryName; }
 

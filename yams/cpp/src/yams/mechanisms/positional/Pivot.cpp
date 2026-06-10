@@ -1,4 +1,4 @@
-// Copyright (c) 2026 YAMS Contributors
+// Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "yams/mechanisms/positional/Pivot.hpp"
@@ -34,7 +34,7 @@ namespace yams::mechanisms::positional {
 Pivot::Pivot(const config::PivotConfig& config)
     : SmartPositionalMechanism(), m_pivotConfig{config} {
   m_smc = config.GetMotorController();
-  m_subsystem = config.GetSubsystem();
+  m_subsystem = m_smc->GetConfig().GetSubsystem();
 
   if (!config.GetTelemetryName().empty()) {
     m_name = config.GetTelemetryName();

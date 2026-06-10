@@ -1,4 +1,4 @@
-// Copyright (c) 2026 YAMS Contributors
+// Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "yams/motorcontrollers/remote/TalonFXWrapper.hpp"
@@ -13,6 +13,7 @@
 #include <units/moment_of_inertia.h>
 
 #include <cmath>
+#include <ctre/phoenix6/TalonFXS.hpp>
 #include <stdexcept>
 
 #include "yams/exceptions/SmartMotorControllerConfigurationException.hpp"
@@ -237,6 +238,19 @@ bool TalonFXWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
       m_talon.SetPosition(*startPos);
     }
   }
+  // Tightly coupled followers — accept TalonFX and TalonFXS (same Phoenix 6 vendor)
+  for (auto& [hw, inverted] : m_config.GetFollowers()) {
+    if (auto* fx = std::any_cast<hardware::TalonFX*>(&hw)) {
+      (*fx)->SetControl(controls::Follower{m_talon.GetDeviceID(), inverted});
+    } else if (auto* fxs = std::any_cast<hardware::TalonFXS*>(&hw)) {
+      (*fxs)->SetControl(controls::Follower{m_talon.GetDeviceID(), inverted});
+    } else {
+      FRC_ReportWarning(
+          "TalonFXWrapper: follower is not a TalonFX or TalonFXS and will be ignored.");
+    }
+  }
+  LoadLooselyCoupledFollowers();
+
   m_config.ValidateBasicOptions();
   m_config.ValidateExternalEncoderOptions();
   return status.IsOK();
@@ -410,11 +424,15 @@ void TalonFXWrapper::SetPosition(units::turn_t angle) {
       m_closedLoopControllerRunning)
     return;
   std::visit([&](auto& req) { m_talon.SetControl(req.WithPosition(angle)); }, m_positionReq);
+  ForwardPositionToFollowers(angle);
 }
 
 void TalonFXWrapper::SetPosition(units::meter_t distance) {
-  if (auto circ = m_config.GetMechanismCircumference(); circ)
+  if (auto circ = m_config.GetMechanismCircumference(); circ) {
     SetPosition(units::turn_t{distance.value() / circ->value()});
+  } else {
+    ForwardPositionToFollowers(distance);
+  }
 }
 
 void TalonFXWrapper::SetVelocity(units::turns_per_second_t velocity) {
@@ -423,11 +441,15 @@ void TalonFXWrapper::SetVelocity(units::turns_per_second_t velocity) {
       m_closedLoopControllerRunning)
     return;
   std::visit([&](auto& req) { m_talon.SetControl(req.WithVelocity(velocity)); }, m_velocityReq);
+  ForwardVelocityToFollowers(velocity);
 }
 
 void TalonFXWrapper::SetVelocity(units::meters_per_second_t velocity) {
-  if (auto circ = m_config.GetMechanismCircumference(); circ)
+  if (auto circ = m_config.GetMechanismCircumference(); circ) {
     SetVelocity(units::turns_per_second_t{velocity.value() / circ->value()});
+  } else {
+    ForwardVelocityToFollowers(velocity);
+  }
 }
 
 // ---- Encoder writes ---------------------------------------------------------

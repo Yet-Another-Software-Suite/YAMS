@@ -1,4 +1,4 @@
-// Copyright (c) 2026 YAMS Contributors
+// Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "yams/mechanisms/velocity/FlyWheel.hpp"
@@ -38,7 +38,7 @@ namespace yams::mechanisms::velocity {
 FlyWheel::FlyWheel(const config::FlyWheelConfig& config)
     : SmartVelocityMechanism(), m_flyWheelConfig{config} {
   m_smc = config.GetMotorController();
-  m_subsystem = config.GetSubsystem();
+  m_subsystem = m_smc->GetConfig().GetSubsystem();
 
   if (!config.GetTelemetryName().empty()) {
     m_name = config.GetTelemetryName();
@@ -67,19 +67,6 @@ FlyWheel::FlyWheel(const config::FlyWheelConfig& config)
     m_mechanismLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(m_name, len, 0_deg, 6,
                                                                             config.GetSimColor());
 
-    if (config.IsUsingSpeedometerSimulation() && config.GetSpeedometerMaxVelocity().has_value()) {
-      double maxVel = config.GetSpeedometerMaxVelocity().value().value();
-      double upperVal = config.GetUpperSoftLimit().value_or(units::degrees_per_second_t{0}).value();
-      double lowerVal = config.GetLowerSoftLimit().value_or(units::degrees_per_second_t{0}).value();
-
-      m_mechanismRoot->Append<frc::MechanismLigament2d>(
-          m_name + " Upper Limit", len, units::degree_t{270.0 - upperVal / maxVel * 180.0}, 6,
-          frc::Color8Bit{frc::Color::kHotPink});
-      m_mechanismRoot->Append<frc::MechanismLigament2d>(
-          m_name + " Lower Limit", len, units::degree_t{270.0 - lowerVal / maxVel * 180.0}, 6,
-          frc::Color8Bit{frc::Color::kYellow});
-    }
-
     frc::SmartDashboard::PutData(m_name + "/mechanism", &(*m_mechanismWindow));
   }
 }
@@ -105,14 +92,7 @@ void FlyWheel::VisualizationUpdate() {
     return;
   }
 
-  if (m_flyWheelConfig.IsUsingSpeedometerSimulation() &&
-      m_flyWheelConfig.GetSpeedometerMaxVelocity().has_value()) {
-    double maxVel = m_flyWheelConfig.GetSpeedometerMaxVelocity().value().value();
-    double curVel = units::degrees_per_second_t{m_smc->GetMechanismVelocity()}.value();
-    m_mechanismLigament->SetAngle(units::degree_t{270.0 - curVel / maxVel * 180.0});
-  } else {
-    m_mechanismLigament->SetAngle(units::degree_t{m_smc->GetMechanismPosition()});
-  }
+  m_mechanismLigament->SetAngle(units::degree_t{m_smc->GetMechanismPosition()});
 }
 
 std::string FlyWheel::GetName() const { return m_name; }

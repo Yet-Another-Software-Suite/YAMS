@@ -1,4 +1,4 @@
-// Copyright (c) 2026 YAMS Contributors
+// Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "yams/motorcontrollers/local/SparkWrapper.hpp"
@@ -67,10 +67,13 @@ void SparkWrapper::Init(SparkBase* spark, frc::DCMotor motor,
 // ---- Configuration ----------------------------------------------------------
 
 bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& cfg) {
+  // If the device is currently a follower, applying a new config (without a follow directive)
+  // automatically clears follower mode, allowing it to be used as an independent master.
   m_config = cfg;
   m_config.ResetValidationCheck();
 
   auto doConfig = [&](SparkBaseConfig& sparkCfg) {
+    sparkCfg.DisableFollowerMode();  // Disable follower from the Spark.
     if (auto inv = m_config.GetMotorInverted(); inv) sparkCfg.Inverted(*inv);
     sparkCfg.SetIdleMode(m_config.GetIdleMode() == SmartMotorControllerConfig::MotorMode::BRAKE
                              ? SparkBaseConfig::IdleMode::kBrake
@@ -226,6 +229,25 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& cfg) {
     m_relEncoder->SetPosition(m_absEncoder->GetPosition());
   }
 
+  // Tightly coupled followers — accept SparkMax and SparkFlex only
+  for (auto& [hw, inverted] : m_config.GetFollowers()) {
+    if (auto* mx = std::any_cast<rev::spark::SparkMax*>(&hw)) {
+      SparkMaxConfig followCfg;
+      followCfg.Follow(*m_spark, inverted);
+      (*mx)->Configure(followCfg, rev::ResetMode::kNoResetSafeParameters,
+                       rev::PersistMode::kPersistParameters);
+    } else if (auto* fx = std::any_cast<rev::spark::SparkFlex*>(&hw)) {
+      SparkFlexConfig followCfg;
+      followCfg.Follow(*m_spark, inverted);
+      (*fx)->Configure(followCfg, rev::ResetMode::kNoResetSafeParameters,
+                       rev::PersistMode::kPersistParameters);
+    } else {
+      std::cerr << "[YAMS] SparkWrapper: follower is not a SparkMax or SparkFlex and will be "
+                   "ignored.\n";
+    }
+  }
+  LoadLooselyCoupledFollowers();
+
   m_config.ValidateBasicOptions();
   m_config.ValidateExternalEncoderOptions();
   return true;
@@ -329,11 +351,15 @@ void SparkWrapper::SetPosition(units::turn_t angle) {
       !m_closedLoopControllerRunning)
     m_sparkPid->SetSetpoint(angle.value(), m_positionControlType,
                             static_cast<ClosedLoopSlot>(m_revSlot));
+  ForwardPositionToFollowers(angle);
 }
 
 void SparkWrapper::SetPosition(units::meter_t distance) {
-  if (auto circ = m_config.GetMechanismCircumference(); circ)
+  if (auto circ = m_config.GetMechanismCircumference(); circ) {
     SetPosition(units::turn_t{distance.value() / circ->value()});
+  } else {
+    ForwardPositionToFollowers(distance);
+  }
 }
 
 void SparkWrapper::SetVelocity(units::turns_per_second_t velocity) {
@@ -342,11 +368,15 @@ void SparkWrapper::SetVelocity(units::turns_per_second_t velocity) {
       !m_closedLoopControllerRunning)
     m_sparkPid->SetSetpoint(velocity.value(), m_velocityControlType,
                             static_cast<ClosedLoopSlot>(m_revSlot));
+  ForwardVelocityToFollowers(velocity);
 }
 
 void SparkWrapper::SetVelocity(units::meters_per_second_t velocity) {
-  if (auto circ = m_config.GetMechanismCircumference(); circ)
+  if (auto circ = m_config.GetMechanismCircumference(); circ) {
     SetVelocity(units::turns_per_second_t{velocity.value() / circ->value()});
+  } else {
+    ForwardVelocityToFollowers(velocity);
+  }
 }
 
 // ---- Encoder writes ---------------------------------------------------------

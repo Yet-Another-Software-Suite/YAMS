@@ -1,4 +1,4 @@
-// Copyright (c) 2026 YAMS Contributors
+// Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "yams/mechanisms/config/ArmConfig.hpp"
@@ -9,11 +9,6 @@ namespace yams::mechanisms::config {
 
 ArmConfig& ArmConfig::WithMotorController(motorcontrollers::SmartMotorController* smc) {
   m_smc = smc;
-  return *this;
-}
-
-ArmConfig& ArmConfig::WithSubsystem(frc2::SubsystemBase* subsystem) {
-  m_subsystem = subsystem;
   return *this;
 }
 
@@ -43,8 +38,6 @@ ArmConfig& ArmConfig::WithSimColor(const frc::Color8Bit& color) {
 }
 
 motorcontrollers::SmartMotorController* ArmConfig::GetMotorController() const { return m_smc; }
-
-frc2::SubsystemBase* ArmConfig::GetSubsystem() const { return m_subsystem; }
 
 std::string ArmConfig::GetTelemetryName() const { return m_telemetryName; }
 

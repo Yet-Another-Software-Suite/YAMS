@@ -1,4 +1,4 @@
-// Copyright (c) 2026 YAMS Contributors
+// Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
@@ -14,6 +14,7 @@
 #include <stdexcept>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "yams/exceptions/SmartMotorControllerConfigurationException.hpp"
 
@@ -882,5 +883,32 @@ units::meters_per_second_t SmartMotorControllerConfig::ConvertFromMechanism(
   double circ = m_mechanismCircumference.value_or(units::meter_t{1.0}).value();
   return units::meters_per_second_t{mechanismVelocity.value() * circ};
 }
+
+// ---- Followers ----------------------------------------------------------------
+
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithFollowers(
+    std::vector<std::pair<std::any, bool>> followers) {
+  m_followers = std::move(followers);
+  return *this;
+}
+
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithLooselyCoupledFollowers(
+    std::vector<SmartMotorController*> followers) {
+  m_looseFollowers = std::move(followers);
+  return *this;
+}
+
+const std::vector<std::pair<std::any, bool>>& SmartMotorControllerConfig::GetFollowers() const {
+  return m_followers;
+}
+
+const std::vector<SmartMotorController*>& SmartMotorControllerConfig::GetLooselyCoupledFollowers()
+    const {
+  return m_looseFollowers;
+}
+
+// ---- Clone --------------------------------------------------------------------
+
+SmartMotorControllerConfig SmartMotorControllerConfig::Clone() const { return *this; }
 
 }  // namespace yams::motorcontrollers

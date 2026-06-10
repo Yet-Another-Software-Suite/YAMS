@@ -1,21 +1,29 @@
-// Copyright (c) 2026 YAMS Contributors
+// Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "yams/motorcontrollers/SmartMotorController.hpp"
 
 #include <frc/DriverStation.h>
 #include <frc/MathUtil.h>
+#include <frc/filter/Debouncer.h>
+#include <frc/smartdashboard/SmartDashboard.h>
+#include <frc2/command/Commands.h>
 #include <networktables/NetworkTableInstance.h>
+#include <units/angular_velocity.h>
+#include <units/time.h>
 
 #include <algorithm>
+#include <atomic>
 #include <cmath>
 #include <cstdio>
 #include <memory>
 #include <numbers>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "yams/exceptions/SmartMotorControllerConfigurationException.hpp"
+#include "yams/motorcontrollers/SmartMotorControllerCommandRegistry.hpp"
 
 namespace yams::motorcontrollers {
 
@@ -301,6 +309,13 @@ void SmartMotorController::IterateClosedLoopController() {
 
 // ---- Telemetry ------------------------------------------------------------
 
+SmartMotorController& SmartMotorController::WithTelemetry(
+    telemetry::SmartMotorControllerTelemetryConfig config) {
+  m_telemetryConfig = std::move(config);
+  m_telemetryConfigExplicit = true;
+  return *this;
+}
+
 void SmartMotorController::SetupTelemetry(std::shared_ptr<nt::NetworkTable> dataTable,
                                           std::shared_ptr<nt::NetworkTable> tuningTable) {
   if (m_parentTable) return;  // already set up
@@ -312,12 +327,41 @@ void SmartMotorController::SetupTelemetry(std::shared_ptr<nt::NetworkTable> data
 
   auto verbosity =
       m_config.GetVerbosity().value_or(SmartMotorControllerConfig::TelemetryVerbosity::LOW);
-  m_telemetryConfig.WithTelemetryVerbosity(verbosity);
+  if (!m_telemetryConfigExplicit) m_telemetryConfig.WithTelemetryVerbosity(verbosity);
 
   auto& dfields = m_telemetryConfig.GetDoubleFields(*this);
   auto& bfields = m_telemetryConfig.GetBoolFields(*this);
   m_telemetry.SetupTelemetry(*this, m_telemetryTable, m_tuningTable, dfields, bfields,
                              m_telemetryConfig.GetNT4Enabled(), m_telemetryConfig.GetDataLogName());
+
+  // Live tuning commands (requires subsystem and tuning enabled)
+  if (m_telemetry.TuningEnabled() && m_config.GetSubsystem() != nullptr) {
+    auto* subsystem = m_config.GetSubsystem();
+    auto tablePath = m_telemetryTable->GetPath().substr(1);
+    auto parts = [&]() {
+      std::vector<std::string> p;
+      std::string seg;
+      for (char c : tablePath) {
+        if (c == '/') {
+          if (!seg.empty()) {
+            p.push_back(seg);
+            seg.clear();
+          }
+        } else {
+          seg += c;
+        }
+      }
+      if (!seg.empty()) p.push_back(seg);
+      return p;
+    }();
+    auto motorName = parts.empty() ? GetName() : parts.back();
+    auto cmdPath =
+        "Mechanisms/Commands/" + (parts.empty() ? motorName : parts.front()) + "/" + motorName;
+
+    // Live Tuning command (one per subsystem, shared across all SMCs)
+    SmartMotorControllerCommandRegistry::AddCommand(
+        "Live Tuning", subsystem, [this] { m_telemetry.ApplyTuningValues(*this); });
+  }
 }
 
 void SmartMotorController::SetupTelemetry() {
@@ -394,5 +438,27 @@ void SmartMotorController::SetSimSupplier(std::shared_ptr<SimSupplier> supplier)
 }
 
 SimSupplier* SmartMotorController::GetSimSupplier() const { return m_simSupplier.get(); }
+
+// ---- Loosely coupled followers ----------------------------------------------
+
+void SmartMotorController::LoadLooselyCoupledFollowers() {
+  m_looseFollowers = m_config.GetLooselyCoupledFollowers();
+}
+
+void SmartMotorController::ForwardPositionToFollowers(units::turn_t pos) {
+  for (auto* f : m_looseFollowers) f->SetPosition(pos);
+}
+
+void SmartMotorController::ForwardPositionToFollowers(units::meter_t dist) {
+  for (auto* f : m_looseFollowers) f->SetPosition(dist);
+}
+
+void SmartMotorController::ForwardVelocityToFollowers(units::turns_per_second_t vel) {
+  for (auto* f : m_looseFollowers) f->SetVelocity(vel);
+}
+
+void SmartMotorController::ForwardVelocityToFollowers(units::meters_per_second_t vel) {
+  for (auto* f : m_looseFollowers) f->SetVelocity(vel);
+}
 
 }  // namespace yams::motorcontrollers
