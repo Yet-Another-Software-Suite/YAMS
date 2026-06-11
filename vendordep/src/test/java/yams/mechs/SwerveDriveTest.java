@@ -103,7 +103,7 @@ public class SwerveDriveTest
         .withMotorInverted(false)
         .withControlMode(ControlMode.CLOSED_LOOP)
         .withSubsystem(subsystem)
-        .withTelemetry(name, TelemetryVerbosity.NONE);
+        .withTelemetry(name, TelemetryVerbosity.HIGH);
   }
 
   private SmartMotorControllerConfig makeAzimuthSMCConfig(String name)
@@ -116,7 +116,7 @@ public class SwerveDriveTest
         .withMotorInverted(false)
         .withControlMode(ControlMode.CLOSED_LOOP)
         .withSubsystem(subsystem)
-        .withTelemetry(name, TelemetryVerbosity.NONE);
+        .withTelemetry(name, TelemetryVerbosity.HIGH);
   }
 
   private SwerveModule makeModule(
@@ -129,7 +129,7 @@ public class SwerveDriveTest
         .withWheelDiameter(Inches.of(4))
         .withLocation(Meters.of(front), Meters.of(left))
         .withOptimization(false)
-        .withTelemetry(name, TelemetryVerbosity.NONE);
+        .withTelemetry(name, TelemetryVerbosity.HIGH);
     return new SwerveModule(cfg);
   }
 

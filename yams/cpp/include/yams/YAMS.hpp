@@ -4,7 +4,6 @@
 #pragma once
 
 /**
- * @file YAMS.h
  * @brief Convenience header that includes the entire YAMS C++ library.
  *
  * YAMS — Yet Another Mechanism System (C++ port).
@@ -41,11 +40,6 @@
 #include "yams/motorcontrollers/simulation/ArmSimSupplier.hpp"
 #include "yams/motorcontrollers/simulation/DCMotorSimSupplier.hpp"
 #include "yams/motorcontrollers/simulation/ElevatorSimSupplier.hpp"
-
-// ---- Motor Controller Wrappers ---------------------------------------------
-#include "yams/motorcontrollers/local/SparkWrapper.hpp"
-#include "yams/motorcontrollers/remote/TalonFXSWrapper.hpp"
-#include "yams/motorcontrollers/remote/TalonFXWrapper.hpp"
 
 // ---- Mechanism Configs -----------------------------------------------------
 #include "yams/mechanisms/config/ArmConfig.hpp"

@@ -351,8 +351,8 @@ public class ShooterTest
   {
     startTest(smc);
     FlyWheel shooter = createShooter(smc);
-    Command  highPid = shooter.setSpeed(RPM.of(80));
-    Command  lowPid  = shooter.setSpeed(RPM.of(-80));
+    Command  highPid = shooter.run(RPM.of(80));
+    Command  lowPid  = shooter.run(RPM.of(-80));
 
     shooterVelocityPidTest(smc, highPid);
 

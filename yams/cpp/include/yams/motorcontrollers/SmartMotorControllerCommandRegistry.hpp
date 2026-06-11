@@ -20,7 +20,7 @@ namespace yams::motorcontrollers {
  * each one registers its live-tuning callback here.  The registry creates a single combined
  * command per subsystem that runs all registered callbacks on every periodic loop.
  *
- * The published SmartDashboard path is: Mechanisms/Commands/<SubsystemName>/<CommandName>
+ * The published SmartDashboard path is: Mechanisms/Commands/%SubsystemName%/%CommandName%
  */
 class SmartMotorControllerCommandRegistry {
  public:
