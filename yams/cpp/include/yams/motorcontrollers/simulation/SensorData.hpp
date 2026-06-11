@@ -27,8 +27,8 @@ class SensorData {
 
   // ---- Constructors -----------------------------------------------------------
 
-  SensorData(std::string name, std::function<HAL_Value()> supplier,
-             HAL_Value defaultValue, HALValueType type);
+  SensorData(std::string name, std::function<HAL_Value()> supplier, HAL_Value defaultValue,
+             HALValueType type);
   SensorData(std::string name, std::function<double()> supplier, double defaultVal);
   SensorData(std::string name, std::function<int()> supplier, int defaultVal);
   SensorData(std::string name, std::function<bool()> supplier, bool defaultVal);

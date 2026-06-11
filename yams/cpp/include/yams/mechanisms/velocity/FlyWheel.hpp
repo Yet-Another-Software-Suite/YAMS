@@ -162,20 +162,23 @@ class FlyWheel : public SmartVelocityMechanism {
    * @param velocity  Target angular velocity.
    * @param tolerance Allowable error.
    * @return CommandPtr that ends once the flywheel is near the target velocity.
-   * @note Do not use with a default command on the subsystem, as it will override the setting after this ends.
+   * @note Do not use with a default command on the subsystem, as it will override the setting after
+   * this ends.
    */
   frc2::CommandPtr RunTo(units::degrees_per_second_t velocity,
                          units::degrees_per_second_t tolerance = units::degrees_per_second_t{5.0});
 
   /**
-   * Run the flywheel to a supplier-provided angular velocity within a tolerance, then end the command.
+   * Run the flywheel to a supplier-provided angular velocity within a tolerance, then end the
+   * command.
    *
    * The supplier is evaluated once when the command is created.
    *
    * @param velocity  Supplier returning the target angular velocity.
    * @param tolerance Allowable error.
    * @return CommandPtr that ends once the flywheel is near the target velocity.
-   * @note Do not use with a default command on the subsystem, as it will override the setting after this ends.
+   * @note Do not use with a default command on the subsystem, as it will override the setting after
+   * this ends.
    */
   frc2::CommandPtr RunTo(std::function<units::degrees_per_second_t()> velocity,
                          units::degrees_per_second_t tolerance = units::degrees_per_second_t{5.0});
@@ -188,10 +191,10 @@ class FlyWheel : public SmartVelocityMechanism {
    * @param velocity  Target surface speed.
    * @param tolerance Allowable error.
    * @return CommandPtr that ends once the flywheel is near the target surface speed.
-   * @note Do not use with a default command on the subsystem, as it will override the setting after this ends.
+   * @note Do not use with a default command on the subsystem, as it will override the setting after
+   * this ends.
    */
-  frc2::CommandPtr RunTo(units::meters_per_second_t velocity,
-                         units::meters_per_second_t tolerance);
+  frc2::CommandPtr RunTo(units::meters_per_second_t velocity, units::meters_per_second_t tolerance);
 
   /**
    * Run the flywheel to a supplier-provided surface speed within a tolerance, then end the command.
@@ -201,7 +204,8 @@ class FlyWheel : public SmartVelocityMechanism {
    * @param velocity  Supplier returning the target surface speed.
    * @param tolerance Allowable error.
    * @return CommandPtr that ends once the flywheel is near the target surface speed.
-   * @note Do not use with a default command on the subsystem, as it will override the setting after this ends.
+   * @note Do not use with a default command on the subsystem, as it will override the setting after
+   * this ends.
    */
   frc2::CommandPtr RunTo(std::function<units::meters_per_second_t()> velocity,
                          units::meters_per_second_t tolerance);

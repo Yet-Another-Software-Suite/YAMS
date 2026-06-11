@@ -119,8 +119,7 @@ units::degree_t SwerveSubsystem::GetGyroAngle() { return m_drive->GetGyroAngle()
 SwerveInputStream<4> SwerveSubsystem::MakeDriveInputStream(
     frc2::CommandXboxController& controller) {
   return SwerveInputStream<4>::Of(
-             m_drive.value(),
-             [&controller] { return -controller.GetLeftY(); },
+             m_drive.value(), [&controller] { return -controller.GetLeftY(); },
              [&controller] { return -controller.GetLeftX(); })
       .WithControllerRotationAxis([&controller] { return controller.GetRightX(); })
       .WithDeadband(0.1)

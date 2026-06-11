@@ -530,8 +530,7 @@ class SmartMotorControllerConfig {
    * @param gearing MechanismGearing describing the external encoder drive train.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithExternalEncoderGearing(
-      const gearing::MechanismGearing& gearing);
+  SmartMotorControllerConfig& WithExternalEncoderGearing(const gearing::MechanismGearing& gearing);
 
   /**
    * Set the external encoder gearing from a scalar reduction ratio.
@@ -758,8 +757,7 @@ class SmartMotorControllerConfig {
    *                  Hardware pointers are stored via std::any.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithFollowers(
-      std::vector<std::pair<std::any, bool>> followers);
+  SmartMotorControllerConfig& WithFollowers(std::vector<std::pair<std::any, bool>> followers);
 
   /**
    * Configure loosely coupled SmartMotorController followers.
@@ -1007,8 +1005,8 @@ class SmartMotorControllerConfig {
   /** @return Optional angular exponential profile. */
   std::optional<frc::ExponentialProfile<units::turns, units::volts>> GetExponentialProfile() const;
   /** @return Optional linear (meters-based) exponential profile. */
-  std::optional<frc::ExponentialProfile<units::meters, units::volts>>
-  GetLinearExponentialProfile() const;
+  std::optional<frc::ExponentialProfile<units::meters, units::volts>> GetLinearExponentialProfile()
+      const;
 
   /** @return Optional max angular velocity constraint for hardware configuration. */
   std::optional<units::turns_per_second_t> GetTrapMaxVelocityTurns() const;
@@ -1153,7 +1151,6 @@ class SmartMotorControllerConfig {
   // Followers
   std::vector<std::pair<std::any, bool>> m_followers;
   std::vector<SmartMotorController*> m_looseFollowers;
-
 };
 
 }  // namespace yams::motorcontrollers

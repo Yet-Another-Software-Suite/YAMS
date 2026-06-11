@@ -22,7 +22,7 @@ class PivotConfigurationException : public YamsException {
    * @param fix    Suggested remediation for the caller.
    */
   PivotConfigurationException(const std::string& issue, const std::string& result,
-                               const std::string& fix)
+                              const std::string& fix)
       : YamsException(
             "[Pivot Configuration Error]\n"
             "Issue: " +

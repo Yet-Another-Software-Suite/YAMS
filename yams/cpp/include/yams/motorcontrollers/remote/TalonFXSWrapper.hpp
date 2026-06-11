@@ -5,6 +5,7 @@
 
 #include <frc/simulation/DCMotorSim.h>
 
+#include <any>
 #include <ctre/phoenix6/CANcoder.hpp>
 #include <ctre/phoenix6/CANdi.hpp>
 #include <ctre/phoenix6/TalonFXS.hpp>
@@ -24,7 +25,6 @@
 #include <ctre/phoenix6/controls/VelocityTorqueCurrentFOC.hpp>
 #include <ctre/phoenix6/controls/VelocityVoltage.hpp>
 #include <ctre/phoenix6/controls/VoltageOut.hpp>
-#include <any>
 #include <optional>
 #include <variant>
 
@@ -84,7 +84,7 @@ class TalonFXSWrapper : public SmartMotorController {
   TalonFXSWrapper(ctre::phoenix6::hardware::TalonFXS* talon, frc::DCMotor dcMotor,
                   MotorArrangement arrangement, const SmartMotorControllerConfig& config);
 
-          ~TalonFXSWrapper();
+  ~TalonFXSWrapper();
 
   // ---- Telemetry ----------------------------------------------------------
   /** @copydoc SmartMotorController::GetUnsupportedTelemetryFields */
@@ -247,11 +247,13 @@ class TalonFXSWrapper : public SmartMotorController {
    * @param maxVelocity Maximum linear velocity.
    */
   void SetMotionProfileMaxVelocity(units::meters_per_second_t maxVelocity) override;
-  /** @copydoc SmartMotorController::SetMotionProfileMaxAcceleration(units::turns_per_second_squared_t) */
+  /** @copydoc
+   * SmartMotorController::SetMotionProfileMaxAcceleration(units::turns_per_second_squared_t) */
   void SetMotionProfileMaxAcceleration(units::turns_per_second_squared_t maxAcc) override;
   /**
    * Set the maximum linear acceleration for the motion profile.
-   * Converts linear acceleration to turns per second squared using the configured mechanism circumference.
+   * Converts linear acceleration to turns per second squared using the configured mechanism
+   * circumference.
    *
    * @param maxAcc Maximum linear acceleration.
    */
@@ -284,7 +286,6 @@ class TalonFXSWrapper : public SmartMotorController {
    */
   void* GetMotorControllerConfig() override;
 
-
  private:
   ctre::phoenix6::hardware::TalonFXS* m_talon;
   frc::DCMotor m_dcMotor;
@@ -293,21 +294,19 @@ class TalonFXSWrapper : public SmartMotorController {
 
   // Active closed-loop control requests — variant selects the active request type
   using PositionControlRequest = std::variant<
-      ctre::phoenix6::controls::PositionVoltage,
-      ctre::phoenix6::controls::PositionDutyCycle,
+      ctre::phoenix6::controls::PositionVoltage, ctre::phoenix6::controls::PositionDutyCycle,
       ctre::phoenix6::controls::PositionTorqueCurrentFOC,
-      ctre::phoenix6::controls::MotionMagicVoltage,
-      ctre::phoenix6::controls::MotionMagicDutyCycle,
+      ctre::phoenix6::controls::MotionMagicVoltage, ctre::phoenix6::controls::MotionMagicDutyCycle,
       ctre::phoenix6::controls::MotionMagicExpoVoltage,
       ctre::phoenix6::controls::MotionMagicExpoDutyCycle,
       ctre::phoenix6::controls::MotionMagicTorqueCurrentFOC>;
-  using VelocityControlRequest = std::variant<
-      ctre::phoenix6::controls::VelocityVoltage,
-      ctre::phoenix6::controls::VelocityDutyCycle,
-      ctre::phoenix6::controls::VelocityTorqueCurrentFOC,
-      ctre::phoenix6::controls::MotionMagicVelocityVoltage,
-      ctre::phoenix6::controls::MotionMagicVelocityDutyCycle,
-      ctre::phoenix6::controls::MotionMagicVelocityTorqueCurrentFOC>;
+  using VelocityControlRequest =
+      std::variant<ctre::phoenix6::controls::VelocityVoltage,
+                   ctre::phoenix6::controls::VelocityDutyCycle,
+                   ctre::phoenix6::controls::VelocityTorqueCurrentFOC,
+                   ctre::phoenix6::controls::MotionMagicVelocityVoltage,
+                   ctre::phoenix6::controls::MotionMagicVelocityDutyCycle,
+                   ctre::phoenix6::controls::MotionMagicVelocityTorqueCurrentFOC>;
 
   PositionControlRequest m_positionReq{ctre::phoenix6::controls::PositionVoltage{0_tr}};
   VelocityControlRequest m_velocityReq{ctre::phoenix6::controls::VelocityVoltage{0_tps}};

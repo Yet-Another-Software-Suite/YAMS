@@ -133,8 +133,7 @@ class Pivot : public SmartPositionalMechanism {
    * @param tolerance Acceptable error.
    * @return CommandPtr that ends once the pivot is near the target.
    */
-  frc2::CommandPtr RunTo(units::degree_t angle,
-                         units::degree_t tolerance = units::degree_t{1.0});
+  frc2::CommandPtr RunTo(units::degree_t angle, units::degree_t tolerance = units::degree_t{1.0});
 
   /**
    * Command the pivot to an angle from a supplier, then end when within tolerance.

@@ -27,6 +27,8 @@
 #include <memory>
 #include <numbers>
 #include <optional>
+#include <string>
+#include <utility>
 
 #include "helpers/MockHardware.h"
 #include "helpers/MotorControllerFactory.h"
@@ -240,9 +242,7 @@ class SwerveDriveTest : public ::testing::Test {
 // ---- Tests -------------------------------------------------------------------
 
 // Drive constructs and destructs cleanly.
-TEST_F(SwerveDriveTest, ConstructionDoesNotCrash) {
-  EXPECT_TRUE(m_drive.has_value());
-}
+TEST_F(SwerveDriveTest, ConstructionDoesNotCrash) { EXPECT_TRUE(m_drive.has_value()); }
 
 // UpdateTelemetry and SimIterate run for several loops without crashing.
 TEST_F(SwerveDriveTest, TelemetryAndSimRunWithoutCrash) {

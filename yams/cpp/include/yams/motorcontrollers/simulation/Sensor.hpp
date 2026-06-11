@@ -14,7 +14,9 @@
 
 #include "yams/motorcontrollers/simulation/SensorData.hpp"
 
-namespace yams::mechanisms::config { class SimSensorConfig; }
+namespace yams::mechanisms::config {
+class SimSensorConfig;
+}
 
 namespace yams::motorcontrollers::simulation {
 
@@ -93,8 +95,7 @@ class Sensor {
   // ---- Trigger injection ------------------------------------------------------
 
   /** Set @p field to @p value whenever @p trigger returns true. */
-  void AddSimTrigger(const std::string& field, HAL_Value value,
-                     std::function<bool()> trigger);
+  void AddSimTrigger(const std::string& field, HAL_Value value, std::function<bool()> trigger);
 
  private:
   std::string m_sensorName;

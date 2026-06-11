@@ -13,7 +13,9 @@
 
 #include "yams/motorcontrollers/simulation/SensorData.hpp"
 
-namespace yams::motorcontrollers::simulation { class Sensor; }
+namespace yams::motorcontrollers::simulation {
+class Sensor;
+}
 
 namespace yams::mechanisms::config {
 
@@ -34,13 +36,13 @@ class SimSensorConfig {
   // ---- Field registration -----------------------------------------------------
 
   SimSensorConfig& WithField(const std::string& name, std::function<double()> supplier,
-                              double defaultVal);
+                             double defaultVal);
   SimSensorConfig& WithField(const std::string& name, std::function<int()> supplier,
-                              int defaultVal);
+                             int defaultVal);
   SimSensorConfig& WithField(const std::string& name, std::function<bool()> supplier,
-                              bool defaultVal);
+                             bool defaultVal);
   SimSensorConfig& WithField(const std::string& name, std::function<int64_t()> supplier,
-                              int64_t defaultVal);
+                             int64_t defaultVal);
 
   // ---- Match-time simulated value injection -----------------------------------
 
@@ -55,14 +57,14 @@ class SimSensorConfig {
 
   // ---- Trigger-based simulated value injection --------------------------------
 
-  SimSensorConfig& WithSimulatedValue(const std::string& fieldName,
-                                      std::function<bool()> trigger, double value);
-  SimSensorConfig& WithSimulatedValue(const std::string& fieldName,
-                                      std::function<bool()> trigger, int value);
-  SimSensorConfig& WithSimulatedValue(const std::string& fieldName,
-                                      std::function<bool()> trigger, int64_t value);
-  SimSensorConfig& WithSimulatedValue(const std::string& fieldName,
-                                      std::function<bool()> trigger, bool value);
+  SimSensorConfig& WithSimulatedValue(const std::string& fieldName, std::function<bool()> trigger,
+                                      double value);
+  SimSensorConfig& WithSimulatedValue(const std::string& fieldName, std::function<bool()> trigger,
+                                      int value);
+  SimSensorConfig& WithSimulatedValue(const std::string& fieldName, std::function<bool()> trigger,
+                                      int64_t value);
+  SimSensorConfig& WithSimulatedValue(const std::string& fieldName, std::function<bool()> trigger,
+                                      bool value);
 
   // ---- Accessors --------------------------------------------------------------
 

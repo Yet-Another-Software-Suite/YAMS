@@ -34,7 +34,8 @@ namespace yams::mechanisms::positional {
  * using Cfg = SmartMotorControllerConfig;
  *
  * // Declare as subsystem members:
- * //   rev::spark::SparkMax          m_sparkMax{2, rev::spark::SparkLowLevel::MotorType::kBrushless};
+ * //   rev::spark::SparkMax          m_sparkMax{2,
+ * rev::spark::SparkLowLevel::MotorType::kBrushless};
  * //   std::optional<SparkWrapper>   m_smc;
  * //   ElevatorConfig                 m_elevatorConfig;
  * //   std::optional<Elevator>        m_elevator;
@@ -133,8 +134,7 @@ class Elevator : public SmartPositionalMechanism {
    * @param tolerance Acceptable error.
    * @return CommandPtr that ends once the elevator is near the target.
    */
-  frc2::CommandPtr RunTo(units::meter_t height,
-                         units::meter_t tolerance = units::meter_t{0.01});
+  frc2::CommandPtr RunTo(units::meter_t height, units::meter_t tolerance = units::meter_t{0.01});
 
   /**
    * Command the elevator to a height from a supplier, then end when within tolerance.

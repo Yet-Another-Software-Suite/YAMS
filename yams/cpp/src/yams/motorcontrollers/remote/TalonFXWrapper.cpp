@@ -515,7 +515,9 @@ std::optional<units::ampere_t> TalonFXWrapper::GetSupplyCurrent() {
   return m_talon->GetSupplyCurrent().GetValue();
 }
 
-units::ampere_t TalonFXWrapper::GetStatorCurrent() { return m_talon->GetStatorCurrent().GetValue(); }
+units::ampere_t TalonFXWrapper::GetStatorCurrent() {
+  return m_talon->GetStatorCurrent().GetValue();
+}
 
 units::celsius_t TalonFXWrapper::GetTemperature() {
   return units::celsius_t{m_talon->GetDeviceTemp().GetValue().value()};
@@ -812,7 +814,7 @@ TalonFXWrapper::~TalonFXWrapper() {
     m_closedLoopControllerThread->Stop();
     m_closedLoopControllerThread.reset();
   }
-  //delete m_talon;
+  // delete m_talon;
 }
 
 }  // namespace yams::motorcontrollers::remote

@@ -318,7 +318,9 @@ void TalonFXSWrapper::SynchronizeRelativeEncoder() {}
 
 // ---- Open-loop outputs ------------------------------------------------------
 
-void TalonFXSWrapper::SetDutyCycle(double dc) { m_talon->SetControl(m_dutyCycleReq.WithOutput(dc)); }
+void TalonFXSWrapper::SetDutyCycle(double dc) {
+  m_talon->SetControl(m_dutyCycleReq.WithOutput(dc));
+}
 
 double TalonFXSWrapper::GetDutyCycle() { return m_talon->GetDutyCycle().GetValue(); }
 
@@ -814,7 +816,7 @@ TalonFXSWrapper::~TalonFXSWrapper() {
     m_closedLoopControllerThread->Stop();
     m_closedLoopControllerThread.reset();
   }
-  //delete m_talon;
+  // delete m_talon;
 }
 
 }  // namespace yams::motorcontrollers::remote

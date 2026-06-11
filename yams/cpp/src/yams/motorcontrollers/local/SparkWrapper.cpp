@@ -754,7 +754,7 @@ SparkWrapper::~SparkWrapper() {
     m_closedLoopControllerThread->Stop();
     m_closedLoopControllerThread.reset();
   }
-  //delete m_spark;
+  // delete m_spark;
 }
 
 }  // namespace yams::motorcontrollers::local

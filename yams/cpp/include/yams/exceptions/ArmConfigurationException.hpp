@@ -22,7 +22,7 @@ class ArmConfigurationException : public YamsException {
    * @param fix    Suggested remediation for the caller.
    */
   ArmConfigurationException(const std::string& issue, const std::string& result,
-                             const std::string& fix)
+                            const std::string& fix)
       : YamsException(
             "[Arm Configuration Error]\n"
             "Issue: " +

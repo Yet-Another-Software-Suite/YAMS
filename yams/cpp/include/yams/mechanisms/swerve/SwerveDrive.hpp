@@ -10,10 +10,10 @@
 #include <frc/geometry/Rotation2d.h>
 #include <frc/geometry/Translation2d.h>
 #include <frc/kinematics/ChassisSpeeds.h>
-#include <frc/kinematics/struct/ChassisSpeedsStruct.h>
 #include <frc/kinematics/SwerveDriveKinematics.h>
 #include <frc/kinematics/SwerveModulePosition.h>
 #include <frc/kinematics/SwerveModuleState.h>
+#include <frc/kinematics/struct/ChassisSpeedsStruct.h>
 #include <frc/smartdashboard/Field2d.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc2/command/CommandPtr.h>

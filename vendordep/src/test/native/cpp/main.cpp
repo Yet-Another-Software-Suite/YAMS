@@ -1,14 +1,14 @@
 // Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include <hal/HAL.h>
-
-#include <cstdlib>
-#include <csignal>
-#include <cstdio>
-#include <cstring>
 #include <cxxabi.h>
 #include <execinfo.h>
+#include <hal/HAL.h>
+
+#include <csignal>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "gtest/gtest.h"
 #include "helpers/ExceptionTracer.h"
@@ -35,11 +35,8 @@ static void SigsegvHandler(int /*sig*/) {
       *end = '+';  // restore
       if (status == 0 && demangled) {
         // Replace the mangled portion with the demangled name for display.
-        std::fprintf(stderr, "  #%-2d %.*s%s%s\n",
-                     i,
-                     static_cast<int>(begin + 1 - sym), sym,
-                     demangled,
-                     end);
+        std::fprintf(stderr, "  #%-2d %.*s%s%s\n", i, static_cast<int>(begin + 1 - sym), sym,
+                     demangled, end);
         std::free(demangled);
         continue;
       }

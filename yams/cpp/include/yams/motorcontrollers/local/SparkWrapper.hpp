@@ -39,7 +39,8 @@ namespace yams::motorcontrollers::local {
  * using Cfg = SmartMotorControllerConfig;
  *
  * // Declare as subsystem members:
- * //   rev::spark::SparkMax          m_sparkMax{3, rev::spark::SparkLowLevel::MotorType::kBrushless};
+ * //   rev::spark::SparkMax          m_sparkMax{3,
+ * rev::spark::SparkLowLevel::MotorType::kBrushless};
  * //   std::optional<SparkWrapper>   m_smc;
  *
  * SmartMotorControllerConfig cfg;
@@ -60,7 +61,8 @@ namespace yams::motorcontrollers::local {
  * ### Example usage — SPARK Flex
  * @code{.cpp}
  * // Declare as subsystem members:
- * //   rev::spark::SparkFlex        m_sparkFlex{4, rev::spark::SparkLowLevel::MotorType::kBrushless};
+ * //   rev::spark::SparkFlex        m_sparkFlex{4,
+ * rev::spark::SparkLowLevel::MotorType::kBrushless};
  * //   std::optional<SparkWrapper>  m_smc;
  *
  * m_smc.emplace(m_sparkFlex, frc::DCMotor::NeoVortex(1), cfg);
@@ -87,7 +89,7 @@ class SparkWrapper : public SmartMotorController {
    */
   SparkWrapper(rev::spark::SparkFlex& spark, frc::DCMotor motor,
                const SmartMotorControllerConfig& config);
-   ~SparkWrapper();
+  ~SparkWrapper();
 
   // ---- Telemetry ----------------------------------------------------------
   /** @copydoc SmartMotorController::GetUnsupportedTelemetryFields */
@@ -263,11 +265,13 @@ class SparkWrapper : public SmartMotorController {
    * @param maxVelocity Maximum linear velocity.
    */
   void SetMotionProfileMaxVelocity(units::meters_per_second_t maxVelocity) override;
-  /** @copydoc SmartMotorController::SetMotionProfileMaxAcceleration(units::turns_per_second_squared_t) */
+  /** @copydoc
+   * SmartMotorController::SetMotionProfileMaxAcceleration(units::turns_per_second_squared_t) */
   void SetMotionProfileMaxAcceleration(units::turns_per_second_squared_t maxAcc) override;
   /**
    * Set the maximum linear acceleration for the motion profile.
-   * Converts linear acceleration to turns per second squared using the configured mechanism circumference.
+   * Converts linear acceleration to turns per second squared using the configured mechanism
+   * circumference.
    *
    * @param maxAcc Maximum linear acceleration.
    */
@@ -324,7 +328,6 @@ class SparkWrapper : public SmartMotorController {
             const SmartMotorControllerConfig& config);
   void ApplyBaseConfig();
   void CommitConfig();
-
 };
 
 }  // namespace yams::motorcontrollers::local

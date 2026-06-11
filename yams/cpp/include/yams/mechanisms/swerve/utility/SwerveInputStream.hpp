@@ -20,6 +20,7 @@
 #include <numbers>
 #include <optional>
 #include <stdexcept>
+#include <utility>
 
 #include "yams/mechanisms/swerve/SwerveDrive.hpp"
 #include "yams/mechanisms/swerve/SwerveDriveConfig.hpp"
@@ -117,7 +118,8 @@ class SwerveInputStream {
     m_controllerHeadingY = std::move(headingY);
   }
 
-  /** Return a copy of this stream; subsequent With* calls on the copy do not affect the original. */
+  /** Return a copy of this stream; subsequent With* calls on the copy do not affect the original.
+   */
   SwerveInputStream Clone() const { return *this; }
 
   // ---- Builder methods -------------------------------------------------------
@@ -369,8 +371,7 @@ class SwerveInputStream {
         break;
       }
       case SwerveInputMode::ANGULAR_VELOCITY: {
-        omega = ApplyOmegaCube(ApplyRotationalScalar(
-                    ApplyDeadband(m_controllerOmega.value()()))) *
+        omega = ApplyOmegaCube(ApplyRotationalScalar(ApplyDeadband(m_controllerOmega.value()()))) *
                 maxAngular.value();
         break;
       }
@@ -378,11 +379,10 @@ class SwerveInputStream {
         auto& pid = m_swerveDrive->GetConfig().GetRotationPID();
         double headingTarget =
             std::atan2(m_controllerHeadingX.value()(), m_controllerHeadingY.value()());
-        omega = pid.Calculate(units::radian_t{m_swerveDrive->GetGyroAngle()}.value(),
-                              headingTarget);
+        omega =
+            pid.Calculate(units::radian_t{m_swerveDrive->GetGyroAngle()}.value(), headingTarget);
         if (m_axisDeadband.has_value() &&
-            std::abs(m_controllerHeadingX.value()()) +
-                    std::abs(m_controllerHeadingY.value()()) <
+            std::abs(m_controllerHeadingX.value()()) + std::abs(m_controllerHeadingY.value()()) <
                 m_axisDeadband.value()) {
           omega = 0.0;
         }
@@ -391,8 +391,7 @@ class SwerveInputStream {
       case SwerveInputMode::AIM: {
         auto& pid = m_swerveDrive->GetConfig().GetRotationPID();
         auto currentHeading = frc::Rotation2d{units::radian_t{m_swerveDrive->GetGyroAngle()}};
-        auto relativeTrl =
-            m_aimTarget.value()().RelativeTo(m_swerveDrive->GetPose()).Translation();
+        auto relativeTrl = m_aimTarget.value()().RelativeTo(m_swerveDrive->GetPose()).Translation();
         auto target = frc::Rotation2d{relativeTrl.X(), relativeTrl.Y()} + currentHeading;
         omega = pid.Calculate(currentHeading.Radians().value(), target.Radians().value());
         break;
@@ -548,8 +547,7 @@ class SwerveInputStream {
   frc::Translation2d ApplyAllianceAwareTranslation(frc::Translation2d translation) {
     if (m_allianceRelative.has_value() && m_allianceRelative.value()()) {
       if (m_robotRelative.has_value() && m_robotRelative.value()()) {
-        throw std::runtime_error{
-            "Cannot use robot-oriented control with alliance-aware movement!"};
+        throw std::runtime_error{"Cannot use robot-oriented control with alliance-aware movement!"};
       }
       auto alliance = frc::DriverStation::GetAlliance();
       if (alliance.has_value() && alliance.value() == frc::DriverStation::Alliance::kRed) {
@@ -561,10 +559,8 @@ class SwerveInputStream {
 
   frc::ChassisSpeeds ApplyTranslationHeadingOffset(frc::ChassisSpeeds speeds) {
     if (m_translationHeadingOffsetEnabled.has_value() &&
-        m_translationHeadingOffsetEnabled.value()() &&
-        m_translationHeadingOffset.has_value()) {
-      frc::Translation2d vec{units::meter_t{speeds.vx.value()},
-                              units::meter_t{speeds.vy.value()}};
+        m_translationHeadingOffsetEnabled.value()() && m_translationHeadingOffset.has_value()) {
+      frc::Translation2d vec{units::meter_t{speeds.vx.value()}, units::meter_t{speeds.vy.value()}};
       auto rotated = vec.RotateBy(m_translationHeadingOffset.value());
       return frc::ChassisSpeeds{units::meters_per_second_t{rotated.X().value()},
                                 units::meters_per_second_t{rotated.Y().value()}, speeds.omega};
