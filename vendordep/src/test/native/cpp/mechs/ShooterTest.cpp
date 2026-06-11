@@ -112,8 +112,8 @@ static void VelocityPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   auto preVel = smc->GetMechanismVelocity();
   bool passed = false;
 
-  auto cmd = frc2::cmd::Run([smc] { smc->SetVelocity(2000_rpm); },
-                            {smc->GetConfig().GetSubsystem()});
+  auto cmd =
+      frc2::cmd::Run([smc] { smc->SetVelocity(2000_rpm); }, {smc->GetConfig().GetSubsystem()});
   frc2::CommandScheduler::GetInstance().Schedule(cmd);
 
   SchedulerHelper::RunForDuration(2.0_s, [&] {
@@ -121,7 +121,7 @@ static void VelocityPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   });
 
   if (isCTRE) {
-      SchedulerHelper::RunForDuration(1.0_s);
+    SchedulerHelper::RunForDuration(1.0_s);
   }
 
   auto postVel = smc->GetMechanismVelocity();

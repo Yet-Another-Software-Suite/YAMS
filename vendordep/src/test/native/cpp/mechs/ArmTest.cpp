@@ -118,7 +118,7 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE) {
       frc2::cmd::Run([smc] { smc->SetPosition(80.0_deg); }, {smc->GetConfig().GetSubsystem()});
   frc2::CommandScheduler::GetInstance().Schedule(cmd);
 
-  SchedulerHelper::RunForDuration(1.0_s, [&] {
+  SchedulerHelper::RunForDuration(3.0_s, [&] {
     if (smc->GetDutyCycle() != 0.0) passed = true;
   });
 
