@@ -77,7 +77,7 @@ class TalonFXWrapper : public SmartMotorController {
    * @param dcMotor DC motor model used for simulation.
    * @param config  Initial SmartMotorControllerConfig to apply.
    */
-  TalonFXWrapper(ctre::phoenix6::hardware::TalonFX& talon, frc::DCMotor dcMotor,
+  TalonFXWrapper(ctre::phoenix6::hardware::TalonFX* talon, frc::DCMotor dcMotor,
                  const SmartMotorControllerConfig& config);
 
  ~TalonFXWrapper();
@@ -282,7 +282,7 @@ class TalonFXWrapper : public SmartMotorController {
 
 
  private:
-  ctre::phoenix6::hardware::TalonFX& m_talon;
+  ctre::phoenix6::hardware::TalonFX* m_talon;
   frc::DCMotor m_dcMotor;
   ctre::phoenix6::configs::TalonFXConfiguration m_talonConfig;
 

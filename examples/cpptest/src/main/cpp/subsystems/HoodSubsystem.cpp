@@ -30,7 +30,7 @@ HoodSubsystem::HoodSubsystem() {
       .WithStartingPosition(units::degree_t{0})
       .WithClosedLoopMode();
 
-  m_motor.emplace(m_hoodMotor, frc::DCMotor::NEO(1), TalonFXSWrapper::MotorArrangement::NEO,
+  m_motor.emplace(&m_hoodMotor, frc::DCMotor::NEO(1), TalonFXSWrapper::MotorArrangement::NEO,
                   m_motorConfig);
 
   m_pivotConfig.WithMotorController(&m_motor.value())

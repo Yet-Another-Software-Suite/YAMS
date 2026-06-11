@@ -3,14 +3,12 @@
 
 // Four-module swerve drive integration test.
 //
-// Hardware (8 TalonFX + 8 TalonFXWrapper) is created once for the entire suite
-// in SetUpTestSuite/TearDownTestSuite.  Per-test SetUp only builds the
-// lightweight SwerveModule and SwerveDrive objects from those shared SMCs.
-// This prevents the Phoenix simulation background thread from accessing freed
-// TalonFXSimState, which would otherwise cause a SIGSEGV at process exit when
-// TalonFX objects are destroyed per-test.
+// Hardware (8 TalonFX + 8 TalonFXWrapper) is created fresh per test in
+// SetUp/TearDown, mirroring the per-test pattern used by ArmTest.
+// Per-suite hardware kept CTRE's background simulation thread
+// (libCTRE_SimProTalonFX.so) iterating over long-lived objects, causing a
+// use-after-free SIGSEGV when they were freed after the last test.
 
-/*
 #include <frc/controller/PIDController.h>
 #include <frc/geometry/Pose2d.h>
 #include <frc/geometry/Rotation2d.h>
@@ -103,89 +101,48 @@ static SmartMotorControllerConfig MakeAzimuthConfig(const std::string& name,
 
 // ---- Test fixture ------------------------------------------------------------
 //
-// Hardware (TalonFX + TalonFXWrapper) lives for the entire test suite to keep
-// the Phoenix simulation state valid throughout.  Only the drive and modules
-// are recreated per-test.
+// Hardware (TalonFX + TalonFXWrapper) is allocated in SetUp and released in
+// TearDown, matching the ArmTest lifecycle.  TalonFXWrapper is closed and
+// deleted before TalonFX so the CTRE simulation thread never holds a pointer
+// to a freed device.  TeardownHardware() runs last so Phoenix can observe the
+// disabled state before the next test's InitializeHardware() re-enables it.
 
 class SwerveDriveTest : public ::testing::Test {
  protected:
-  // ---- Per-suite members (raw pointers; managed by SetUpTestSuite/TearDownTestSuite) ---
-  static SwerveTestSubsystem* s_sub;
-  static ctre::phoenix6::hardware::TalonFX* s_flDriveTalon;
-  static ctre::phoenix6::hardware::TalonFX* s_frDriveTalon;
-  static ctre::phoenix6::hardware::TalonFX* s_blDriveTalon;
-  static ctre::phoenix6::hardware::TalonFX* s_brDriveTalon;
-  static ctre::phoenix6::hardware::TalonFX* s_flAzimuthTalon;
-  static ctre::phoenix6::hardware::TalonFX* s_frAzimuthTalon;
-  static ctre::phoenix6::hardware::TalonFX* s_blAzimuthTalon;
-  static ctre::phoenix6::hardware::TalonFX* s_brAzimuthTalon;
-  static remote::TalonFXWrapper* s_flDriveSMC;
-  static remote::TalonFXWrapper* s_frDriveSMC;
-  static remote::TalonFXWrapper* s_blDriveSMC;
-  static remote::TalonFXWrapper* s_brDriveSMC;
-  static remote::TalonFXWrapper* s_flAzimuthSMC;
-  static remote::TalonFXWrapper* s_frAzimuthSMC;
-  static remote::TalonFXWrapper* s_blAzimuthSMC;
-  static remote::TalonFXWrapper* s_brAzimuthSMC;
-
-  static void SetUpTestSuite() {
+  void SetUp() override {
     InitializeHardware();
     SchedulerHelper::Enable();
-
-    s_sub = new SwerveTestSubsystem();
-
-    s_flDriveTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId());
-    s_frDriveTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId());
-    s_blDriveTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId());
-    s_brDriveTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId());
-    s_flAzimuthTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId());
-    s_frAzimuthTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId());
-    s_blAzimuthTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId());
-    s_brAzimuthTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId());
-
-    // TalonFXWrapper constructor calls SetupSimulation() automatically.
-    s_flDriveSMC = new remote::TalonFXWrapper(*s_flDriveTalon, frc::DCMotor::KrakenX60(1),
-                                              MakeDriveConfig("FL_Drive", s_sub));
-    s_frDriveSMC = new remote::TalonFXWrapper(*s_frDriveTalon, frc::DCMotor::KrakenX60(1),
-                                              MakeDriveConfig("FR_Drive", s_sub));
-    s_blDriveSMC = new remote::TalonFXWrapper(*s_blDriveTalon, frc::DCMotor::KrakenX60(1),
-                                              MakeDriveConfig("BL_Drive", s_sub));
-    s_brDriveSMC = new remote::TalonFXWrapper(*s_brDriveTalon, frc::DCMotor::KrakenX60(1),
-                                              MakeDriveConfig("BR_Drive", s_sub));
-    s_flAzimuthSMC = new remote::TalonFXWrapper(*s_flAzimuthTalon, frc::DCMotor::KrakenX60(1),
-                                                MakeAzimuthConfig("FL_Azimuth", s_sub));
-    s_frAzimuthSMC = new remote::TalonFXWrapper(*s_frAzimuthTalon, frc::DCMotor::KrakenX60(1),
-                                                MakeAzimuthConfig("FR_Azimuth", s_sub));
-    s_blAzimuthSMC = new remote::TalonFXWrapper(*s_blAzimuthTalon, frc::DCMotor::KrakenX60(1),
-                                                MakeAzimuthConfig("BL_Azimuth", s_sub));
-    s_brAzimuthSMC = new remote::TalonFXWrapper(*s_brAzimuthTalon, frc::DCMotor::KrakenX60(1),
-                                                MakeAzimuthConfig("BR_Azimuth", s_sub));
-  }
-
-  static void TearDownTestSuite() {
-    s_sub->m_drive = nullptr;
-    SchedulerHelper::CancelAll();
-    frc2::CommandScheduler::GetInstance().UnregisterSubsystem(s_sub);
-
-    for (auto* s : {s_flDriveSMC, s_frDriveSMC, s_blDriveSMC, s_brDriveSMC, s_flAzimuthSMC,
-                    s_frAzimuthSMC, s_blAzimuthSMC, s_brAzimuthSMC}) {
-      s->Close();
-      delete s;
-    }
-    for (auto* t :
-         {s_flDriveTalon, s_frDriveTalon, s_blDriveTalon, s_brDriveTalon, s_flAzimuthTalon,
-          s_frAzimuthTalon, s_blAzimuthTalon, s_brAzimuthTalon}) {
-      delete t;
-    }
-    delete s_sub;
-    TeardownHardware();
-  }
-
-  // ---- Per-test members -------------------------------------------------------
-
-  void SetUp() override {
     SchedulerHelper::CancelAll();
     m_simGyro = 0_deg;
+
+    m_sub = std::make_unique<SwerveTestSubsystem>();
+
+    // TalonFXWrapper constructor calls SetupSimulation() automatically.
+    m_flDriveTalon = std::make_unique<ctre::phoenix6::hardware::TalonFX>(NextCanId());
+    m_frDriveTalon = std::make_unique<ctre::phoenix6::hardware::TalonFX>(NextCanId());
+    m_blDriveTalon = std::make_unique<ctre::phoenix6::hardware::TalonFX>(NextCanId());
+    m_brDriveTalon = std::make_unique<ctre::phoenix6::hardware::TalonFX>(NextCanId());
+    m_flAzimuthTalon = std::make_unique<ctre::phoenix6::hardware::TalonFX>(NextCanId());
+    m_frAzimuthTalon = std::make_unique<ctre::phoenix6::hardware::TalonFX>(NextCanId());
+    m_blAzimuthTalon = std::make_unique<ctre::phoenix6::hardware::TalonFX>(NextCanId());
+    m_brAzimuthTalon = std::make_unique<ctre::phoenix6::hardware::TalonFX>(NextCanId());
+
+    m_flDriveSMC = new remote::TalonFXWrapper(m_flDriveTalon.get(), frc::DCMotor::KrakenX60(1),
+                                              MakeDriveConfig("FL_Drive", m_sub.get()));
+    m_frDriveSMC = new remote::TalonFXWrapper(m_frDriveTalon.get(), frc::DCMotor::KrakenX60(1),
+                                              MakeDriveConfig("FR_Drive", m_sub.get()));
+    m_blDriveSMC = new remote::TalonFXWrapper(m_blDriveTalon.get(), frc::DCMotor::KrakenX60(1),
+                                              MakeDriveConfig("BL_Drive", m_sub.get()));
+    m_brDriveSMC = new remote::TalonFXWrapper(m_brDriveTalon.get(), frc::DCMotor::KrakenX60(1),
+                                              MakeDriveConfig("BR_Drive", m_sub.get()));
+    m_flAzimuthSMC = new remote::TalonFXWrapper(m_flAzimuthTalon.get(), frc::DCMotor::KrakenX60(1),
+                                                MakeAzimuthConfig("FL_Azimuth", m_sub.get()));
+    m_frAzimuthSMC = new remote::TalonFXWrapper(m_frAzimuthTalon.get(), frc::DCMotor::KrakenX60(1),
+                                                MakeAzimuthConfig("FR_Azimuth", m_sub.get()));
+    m_blAzimuthSMC = new remote::TalonFXWrapper(m_blAzimuthTalon.get(), frc::DCMotor::KrakenX60(1),
+                                                MakeAzimuthConfig("BL_Azimuth", m_sub.get()));
+    m_brAzimuthSMC = new remote::TalonFXWrapper(m_brAzimuthTalon.get(), frc::DCMotor::KrakenX60(1),
+                                                MakeAzimuthConfig("BR_Azimuth", m_sub.get()));
 
     auto makeModuleCfg = [](remote::TalonFXWrapper* drive, remote::TalonFXWrapper* azimuth,
                             units::meter_t front, units::meter_t left,
@@ -195,18 +152,18 @@ class SwerveDriveTest : public ::testing::Test {
           .WithAbsoluteEncoderOffset(0.0_deg)
           .WithWheelDiameter(4.0_in)
           .WithLocation(front, left)
-          .WithOptimization(true)
+          .WithOptimization(false)
           .WithTelemetry(name, SwerveModuleConfig::TelemetryVerbosity::NONE);
       return cfg;
     };
 
-    m_fl.emplace(makeModuleCfg(s_flDriveSMC, s_flAzimuthSMC, kModuleX, kModuleY, "FL"));
-    m_fr.emplace(makeModuleCfg(s_frDriveSMC, s_frAzimuthSMC, kModuleX, -kModuleY, "FR"));
-    m_bl.emplace(makeModuleCfg(s_blDriveSMC, s_blAzimuthSMC, -kModuleX, kModuleY, "BL"));
-    m_br.emplace(makeModuleCfg(s_brDriveSMC, s_brAzimuthSMC, -kModuleX, -kModuleY, "BR"));
+    m_fl.emplace(makeModuleCfg(m_flDriveSMC, m_flAzimuthSMC, kModuleX, kModuleY, "FL"));
+    m_fr.emplace(makeModuleCfg(m_frDriveSMC, m_frAzimuthSMC, kModuleX, -kModuleY, "FR"));
+    m_bl.emplace(makeModuleCfg(m_blDriveSMC, m_blAzimuthSMC, -kModuleX, kModuleY, "BL"));
+    m_br.emplace(makeModuleCfg(m_brDriveSMC, m_brAzimuthSMC, -kModuleX, -kModuleY, "BR"));
 
     SwerveDriveConfig driveCfg;
-    driveCfg.WithSubsystem(s_sub)
+    driveCfg.WithSubsystem(m_sub.get())
         .WithModules({&m_fl.value(), &m_fr.value(), &m_bl.value(), &m_br.value()})
         .WithGyro([this] { return m_simGyro; })
         .WithStartingPose(frc::Pose2d{})
@@ -215,21 +172,62 @@ class SwerveDriveTest : public ::testing::Test {
         .WithRotationController(frc::PIDController{4.0, 0.0, 0.0});
     m_drive.emplace(std::move(driveCfg));
 
-    s_sub->m_drive = &m_drive.value();
+    m_sub->m_drive = &m_drive.value();
   }
 
   void TearDown() override {
-    s_sub->m_drive = nullptr;
+    m_sub->m_drive = nullptr;
     frc2::CommandScheduler::GetInstance().CancelAll();
     m_drive.reset();
     m_fl.reset();
     m_fr.reset();
     m_bl.reset();
     m_br.reset();
+
+    frc2::CommandScheduler::GetInstance().UnregisterSubsystem(m_sub.get());
+
+    // Stop YAMS threads and delete wrappers before releasing hardware.
+    for (auto* s : {m_flDriveSMC, m_frDriveSMC, m_blDriveSMC, m_brDriveSMC, m_flAzimuthSMC,
+                    m_frAzimuthSMC, m_blAzimuthSMC, m_brAzimuthSMC}) {
+      delete s;
+    }
+
+    // Release TalonFX objects after all wrappers are gone.
+    m_flDriveTalon.reset();
+    m_frDriveTalon.reset();
+    m_blDriveTalon.reset();
+    m_brDriveTalon.reset();
+    m_flAzimuthTalon.reset();
+    m_frAzimuthTalon.reset();
+    m_blAzimuthTalon.reset();
+    m_brAzimuthTalon.reset();
+
+    m_sub.reset();
+    TeardownHardware();
+    SchedulerHelper::CancelAll();
   }
 
-  // Simulated gyro angle — tests can mutate this to fake heading.
   units::degree_t m_simGyro{0};
+
+  std::unique_ptr<SwerveTestSubsystem> m_sub;
+
+  std::unique_ptr<ctre::phoenix6::hardware::TalonFX> m_flDriveTalon;
+  std::unique_ptr<ctre::phoenix6::hardware::TalonFX> m_frDriveTalon;
+  std::unique_ptr<ctre::phoenix6::hardware::TalonFX> m_blDriveTalon;
+  std::unique_ptr<ctre::phoenix6::hardware::TalonFX> m_brDriveTalon;
+  std::unique_ptr<ctre::phoenix6::hardware::TalonFX> m_flAzimuthTalon;
+  std::unique_ptr<ctre::phoenix6::hardware::TalonFX> m_frAzimuthTalon;
+  std::unique_ptr<ctre::phoenix6::hardware::TalonFX> m_blAzimuthTalon;
+  std::unique_ptr<ctre::phoenix6::hardware::TalonFX> m_brAzimuthTalon;
+
+  remote::TalonFXWrapper* m_flDriveSMC{nullptr};
+  remote::TalonFXWrapper* m_frDriveSMC{nullptr};
+  remote::TalonFXWrapper* m_blDriveSMC{nullptr};
+  remote::TalonFXWrapper* m_brDriveSMC{nullptr};
+  remote::TalonFXWrapper* m_flAzimuthSMC{nullptr};
+  remote::TalonFXWrapper* m_frAzimuthSMC{nullptr};
+  remote::TalonFXWrapper* m_blAzimuthSMC{nullptr};
+  remote::TalonFXWrapper* m_brAzimuthSMC{nullptr};
 
   std::optional<SwerveModule> m_fl;
   std::optional<SwerveModule> m_fr;
@@ -238,25 +236,6 @@ class SwerveDriveTest : public ::testing::Test {
 
   std::optional<SwerveDrive<4>> m_drive;
 };
-
-// Static member definitions.
-SwerveTestSubsystem* SwerveDriveTest::s_sub = nullptr;
-ctre::phoenix6::hardware::TalonFX* SwerveDriveTest::s_flDriveTalon = nullptr;
-ctre::phoenix6::hardware::TalonFX* SwerveDriveTest::s_frDriveTalon = nullptr;
-ctre::phoenix6::hardware::TalonFX* SwerveDriveTest::s_blDriveTalon = nullptr;
-ctre::phoenix6::hardware::TalonFX* SwerveDriveTest::s_brDriveTalon = nullptr;
-ctre::phoenix6::hardware::TalonFX* SwerveDriveTest::s_flAzimuthTalon = nullptr;
-ctre::phoenix6::hardware::TalonFX* SwerveDriveTest::s_frAzimuthTalon = nullptr;
-ctre::phoenix6::hardware::TalonFX* SwerveDriveTest::s_blAzimuthTalon = nullptr;
-ctre::phoenix6::hardware::TalonFX* SwerveDriveTest::s_brAzimuthTalon = nullptr;
-remote::TalonFXWrapper* SwerveDriveTest::s_flDriveSMC = nullptr;
-remote::TalonFXWrapper* SwerveDriveTest::s_frDriveSMC = nullptr;
-remote::TalonFXWrapper* SwerveDriveTest::s_blDriveSMC = nullptr;
-remote::TalonFXWrapper* SwerveDriveTest::s_brDriveSMC = nullptr;
-remote::TalonFXWrapper* SwerveDriveTest::s_flAzimuthSMC = nullptr;
-remote::TalonFXWrapper* SwerveDriveTest::s_frAzimuthSMC = nullptr;
-remote::TalonFXWrapper* SwerveDriveTest::s_blAzimuthSMC = nullptr;
-remote::TalonFXWrapper* SwerveDriveTest::s_brAzimuthSMC = nullptr;
 
 // ---- Tests -------------------------------------------------------------------
 
@@ -323,17 +302,14 @@ TEST_F(SwerveDriveTest, SetRobotRelativeSpeedsDoesNotCrash) {
       m_drive->SetRobotRelativeChassisSpeeds(frc::ChassisSpeeds{0_mps, 0_mps, 0_rad_per_s}));
 }
 
-
 // LockPose commands zero translational speed and corner-pointing module angles.
 TEST_F(SwerveDriveTest, LockPoseSetsXPattern) {
   m_drive->LockPose();
 
-  // Desired chassis speeds should be zero after locking.
   auto robotSpeeds = m_drive->GetRobotRelativeSpeed();
   EXPECT_NEAR(robotSpeeds.vx.value(), 0.0, 0.5);
   EXPECT_NEAR(robotSpeeds.vy.value(), 0.0, 0.5);
 
-  // Run sim and check azimuth convergence toward X-pattern corner angles.
   SchedulerHelper::RunForDuration(0.5_s);
   auto modules = m_drive->GetConfig().GetModules();
   for (size_t i = 0; i < 4; ++i) {
@@ -379,7 +355,7 @@ TEST_F(SwerveDriveTest, DriveCommandCallsSpeedSupplier) {
 // The Drive command declares the configured subsystem as a requirement.
 TEST_F(SwerveDriveTest, DriveCommandHasSubsystemRequirement) {
   auto cmd = m_drive->Drive([] { return frc::ChassisSpeeds{}; });
-  EXPECT_TRUE(cmd.HasRequirement(s_sub));
+  EXPECT_TRUE(cmd.HasRequirement(m_sub.get()));
 }
 
 // Scheduling a second Drive command interrupts the first.
@@ -407,4 +383,4 @@ TEST_F(SwerveDriveTest, SecondDriveCommandInterruptsFirst) {
   EXPECT_EQ(firstCalls, firstCallsAtInterrupt) << "cmd1 should have been cancelled";
 }
 
-}  */// namespace yams::test
+}  // namespace yams::test

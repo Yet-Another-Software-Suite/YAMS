@@ -29,7 +29,7 @@ ArmSubsystem::ArmSubsystem() {
       .WithStartingPosition(units::degree_t{0})
       .WithClosedLoopMode();
 
-  m_motor.emplace(m_armMotor, frc::DCMotor::KrakenX60(1), m_motorConfig);
+  m_motor.emplace(&m_armMotor, frc::DCMotor::KrakenX60(1), m_motorConfig);
 
   m_armConfig.WithMotorController(&m_motor.value())
       .WithArmLength(units::meter_t{0.135})

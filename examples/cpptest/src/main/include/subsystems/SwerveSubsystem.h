@@ -11,6 +11,7 @@
 #include <frc/system/plant/DCMotor.h>
 #include <frc2/command/CommandPtr.h>
 #include <frc2/command/SubsystemBase.h>
+#include <frc2/command/button/CommandXboxController.h>
 #include <rev/SparkMax.h>
 #include <units/angle.h>
 #include <units/length.h>
@@ -28,6 +29,7 @@
 #include "yams/mechanisms/swerve/SwerveDrive.hpp"
 #include "yams/mechanisms/swerve/SwerveDriveConfig.hpp"
 #include "yams/mechanisms/swerve/SwerveModule.hpp"
+#include "yams/mechanisms/swerve/utility/SwerveInputStream.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 #include "yams/motorcontrollers/local/SparkWrapper.hpp"
 
@@ -39,6 +41,26 @@ class SwerveSubsystem : public frc2::SubsystemBase {
   frc2::CommandPtr DriveToPose(frc::Pose2d pose);
   frc2::CommandPtr DriveRobotRelative(std::function<frc::ChassisSpeeds()> speedsSupplier);
   frc2::CommandPtr Lock();
+
+  /**
+   * Build a SwerveInputStream from an XboxController with typical competition settings:
+   * left stick → translation, right stick X → angular velocity, 0.1 deadband,
+   * 0.8 translation scale, cubed rotation, and alliance-relative field orientation.
+   *
+   * Store the returned stream and pass it to DriveCommand(), or capture it in a
+   * default-command lambda: m_drive->Drive([&stream]{ return stream.Get(); }).
+   */
+  yams::mechanisms::swerve::utility::SwerveInputStream<4> MakeDriveInputStream(
+      frc2::CommandXboxController& controller);
+
+  /**
+   * Return a command that drives the robot using MakeDriveInputStream().
+   * The stream is stored internally for the lifetime of the subsystem.
+   *
+   * Typical usage in RobotContainer:
+   *   m_drive.SetDefaultCommand(m_drive.DriveCommand(m_xboxController));
+   */
+  frc2::CommandPtr DriveCommand(frc2::CommandXboxController& controller);
 
   frc::Pose2d GetPose();
   frc::ChassisSpeeds GetFieldOrientedChassisSpeed();
@@ -88,6 +110,7 @@ class SwerveSubsystem : public frc2::SubsystemBase {
 
   // Drive
   std::optional<yams::mechanisms::swerve::SwerveDrive<4>> m_drive;
+  std::optional<yams::mechanisms::swerve::utility::SwerveInputStream<4>> m_driveStream;
 
   yams::mechanisms::swerve::SwerveModule CreateModule(
       rev::spark::SparkMax& drive, rev::spark::SparkMax& azimuth,

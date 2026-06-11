@@ -81,7 +81,7 @@ class TalonFXSWrapper : public SmartMotorController {
    * @param arrangement Motor type connected to the TalonFXS.
    * @param config      Initial SmartMotorControllerConfig to apply.
    */
-  TalonFXSWrapper(ctre::phoenix6::hardware::TalonFXS& talon, frc::DCMotor dcMotor,
+  TalonFXSWrapper(ctre::phoenix6::hardware::TalonFXS* talon, frc::DCMotor dcMotor,
                   MotorArrangement arrangement, const SmartMotorControllerConfig& config);
 
           ~TalonFXSWrapper();
@@ -286,7 +286,7 @@ class TalonFXSWrapper : public SmartMotorController {
 
 
  private:
-  ctre::phoenix6::hardware::TalonFXS& m_talon;
+  ctre::phoenix6::hardware::TalonFXS* m_talon;
   frc::DCMotor m_dcMotor;
   MotorArrangement m_arrangement;
   ctre::phoenix6::configs::TalonFXSConfiguration m_talonConfig;

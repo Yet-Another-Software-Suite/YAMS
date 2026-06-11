@@ -36,7 +36,7 @@ ElevatorSubsystem::ElevatorSubsystem() {
       .WithElevatorFeedforward(0, 0, 0)
       .WithClosedLoopMode();
 
-  m_motor.emplace(m_elevatorMotor, frc::DCMotor::KrakenX44(1), m_motorConfig);
+  m_motor.emplace(&m_elevatorMotor, frc::DCMotor::KrakenX44(1), m_motorConfig);
 
   m_elevatorConfig.WithMotorController(&m_motor.value())
       .WithMinimumHeight(units::meter_t{0})

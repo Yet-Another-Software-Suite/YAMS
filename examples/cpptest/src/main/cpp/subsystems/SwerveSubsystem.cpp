@@ -21,6 +21,7 @@ using namespace yams::motorcontrollers;
 using namespace yams::gearing;
 using namespace yams::mechanisms::swerve;
 using namespace yams::mechanisms::config;
+using namespace yams::mechanisms::swerve::utility;
 using Cfg = SmartMotorControllerConfig;
 
 yams::mechanisms::swerve::SwerveModule SwerveSubsystem::CreateModule(
@@ -114,6 +115,24 @@ frc::ChassisSpeeds SwerveSubsystem::GetFieldOrientedChassisSpeed() {
 }
 
 units::degree_t SwerveSubsystem::GetGyroAngle() { return m_drive->GetGyroAngle(); }
+
+SwerveInputStream<4> SwerveSubsystem::MakeDriveInputStream(
+    frc2::CommandXboxController& controller) {
+  return SwerveInputStream<4>::Of(
+             m_drive.value(),
+             [&controller] { return -controller.GetLeftY(); },
+             [&controller] { return -controller.GetLeftX(); })
+      .WithControllerRotationAxis([&controller] { return controller.GetRightX(); })
+      .WithDeadband(0.1)
+      .WithScaleTranslation(0.8)
+      .WithCubeRotationControllerAxis()
+      .WithAllianceRelativeControl();
+}
+
+frc2::CommandPtr SwerveSubsystem::DriveCommand(frc2::CommandXboxController& controller) {
+  m_driveStream.emplace(MakeDriveInputStream(controller));
+  return m_drive->Drive([this] { return (*m_driveStream)(); });
+}
 
 void SwerveSubsystem::Periodic() { m_drive->UpdateTelemetry(); }
 

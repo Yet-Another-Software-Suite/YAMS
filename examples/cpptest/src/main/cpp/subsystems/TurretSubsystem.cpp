@@ -35,7 +35,7 @@ TurretSubsystem::TurretSubsystem()
       .WithTelemetry("TurretMotor", Cfg::TelemetryVerbosity::HIGH)
       .WithStatorCurrentLimit(units::ampere_t{60});
 
-  m_motor.emplace(m_talonFX, frc::DCMotor::KrakenX60(1), m_motorConfig);
+  m_motor.emplace(&m_talonFX, frc::DCMotor::KrakenX60(1), m_motorConfig);
 
   m_pivotConfig.WithMotorController(&m_motor.value())
       .WithMinAngle(units::degree_t{-360})

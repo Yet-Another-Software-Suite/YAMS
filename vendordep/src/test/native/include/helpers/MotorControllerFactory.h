@@ -123,7 +123,7 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
     case HardwareType::TalonFXS: {
       bundle.talonFXS = std::make_unique<ctre::phoenix6::hardware::TalonFXS>(canId);
       auto* wrapper =
-          new remote::TalonFXSWrapper(*bundle.talonFXS, MotorForHardware(param.hardware),
+          new remote::TalonFXSWrapper(bundle.talonFXS.get(), MotorForHardware(param.hardware),
                                       remote::TalonFXSWrapper::MotorArrangement::NEO, cfg);
       bundle.smc = wrapper;
       break;
@@ -131,7 +131,7 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
     case HardwareType::TalonFX: {
       bundle.talonFX = std::make_unique<ctre::phoenix6::hardware::TalonFX>(canId);
       auto* wrapper =
-          new remote::TalonFXWrapper(*bundle.talonFX, MotorForHardware(param.hardware), cfg);
+          new remote::TalonFXWrapper(bundle.talonFX.get(), MotorForHardware(param.hardware), cfg);
       bundle.smc = wrapper;
       break;
     }
