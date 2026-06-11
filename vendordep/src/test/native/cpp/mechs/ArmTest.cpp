@@ -119,10 +119,12 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   frc2::CommandScheduler::GetInstance().Schedule(cmd);
 
   SchedulerHelper::RunForDuration(1.0_s, [&] {
-    std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(
-        smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms).value() * 1000.0)));
     if (smc->GetDutyCycle() != 0.0) passed = true;
   });
+
+  if (isCTRE) {
+    SchedulerHelper::RunForDuration(1.0_s);
+  }
 
   auto postAngle = smc->GetMechanismPosition();
   EXPECT_TRUE(std::abs(postAngle.value() - preAngle.value()) > 0.05 || passed)
