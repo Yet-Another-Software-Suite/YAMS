@@ -262,6 +262,8 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
   m_expoProfile = Profile{Profile::Constraints{maxInput, Profile::kV_t{kV}, Profile::kA_t{kA}}};
   m_linearExpoProfile = std::nullopt;
   m_trapProfile = std::nullopt;
+  m_expoMotionMagicKV = kV;
+  m_expoMotionMagicKA = kA;
   return *this;
 }
 
@@ -280,6 +282,8 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
   m_expoProfile = Profile{Profile::Constraints{maxVolts, Profile::kV_t{kV}, Profile::kA_t{kA}}};
   m_linearExpoProfile = std::nullopt;
   m_trapProfile = std::nullopt;
+  m_expoMotionMagicKV = kV;
+  m_expoMotionMagicKA = kA;
   return *this;
 }
 
@@ -300,6 +304,11 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
   m_expoProfile = std::nullopt;
   m_trapProfile = std::nullopt;
   m_linearTrapProfile = std::nullopt;
+  // Convert linear kV/kA to turns-based.
+  // kV_turns = kV_linear * circumference (V*s/m * m/turn = V*s/turn)
+  double circumferenceValue = m_mechanismCircumference->value();
+  m_expoMotionMagicKV = kV * circumferenceValue;
+  m_expoMotionMagicKA = kA * circumferenceValue;
   return *this;
 }
 
@@ -311,6 +320,8 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
                                                Profile::kA_t{maxVolts / maxAcceleration}}};
   m_linearExpoProfile = std::nullopt;
   m_trapProfile = std::nullopt;
+  m_expoMotionMagicKV = (maxVolts / maxVelocity).value();
+  m_expoMotionMagicKA = (maxVolts / maxAcceleration).value();
   return *this;
 }
 
@@ -320,6 +331,9 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
   m_expoProfile = Profile{constraints};
   m_linearExpoProfile = std::nullopt;
   m_trapProfile = std::nullopt;
+  // A is [1/s], B is [(turn/s²)/V]; derive kV [V*s/turn] and kA [V*s²/turn]
+  m_expoMotionMagicKV = -constraints.A.value() / constraints.B.value();
+  m_expoMotionMagicKA = 1.0 / constraints.B.value();
   return *this;
 }
 
@@ -879,6 +893,14 @@ std::optional<units::meters_per_second_squared_t>
 SmartMotorControllerConfig::GetTrapMaxAccelLinear() const {
   m_basicOptions.erase(BasicOptions::TrapezoidProfile);
   return m_trapMaxAccLinear;
+}
+
+std::optional<double> SmartMotorControllerConfig::GetExponentialProfileKV() const {
+  return m_expoMotionMagicKV;
+}
+
+std::optional<double> SmartMotorControllerConfig::GetExponentialProfileKA() const {
+  return m_expoMotionMagicKA;
 }
 
 units::meter_t SmartMotorControllerConfig::ConvertFromMechanism(

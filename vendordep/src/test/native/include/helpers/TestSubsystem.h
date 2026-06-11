@@ -52,14 +52,13 @@ class TestSubsystem : public frc2::SubsystemBase {
 
   void SimulationPeriodic() override {
     if (m_testRunning) {
-      if (m_isCTRE) {
-        (void)m_smc->GetMotorController();  // TalonFXWrapper/TalonFXSWrapper will wait for an
-                                            // updated status frame within 10ms
-      }
       if (m_mechSimPeriodic)
         m_mechSimPeriodic();
       else
         m_smc->SimIterate();
+      if (m_isCTRE) {
+        std::this_thread::sleep_for(std::chrono::milliseconds{10});
+      }
     }
   }
 

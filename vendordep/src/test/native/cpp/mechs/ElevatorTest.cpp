@@ -114,7 +114,7 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE, bool deb
   units::millisecond_t period{
       smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms).value() * 1000.0};
 
-  SchedulerHelper::RunForDuration(5.0_s, [&] {
+  SchedulerHelper::RunForDuration(1.0_s, [&] {
     if (debugOutput) {
       std::printf("[DEBUG] mechanism_position=%.6f turns, dutycyle=%.6f\n",
                   smc->GetMechanismPosition().value(), smc->GetDutyCycle());

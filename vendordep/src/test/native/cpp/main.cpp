@@ -9,6 +9,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <ctre/phoenix/platform/Platform.hpp>
+#include <iostream>
 
 #include "gtest/gtest.h"
 #include "helpers/ExceptionTracer.h"
@@ -18,9 +20,8 @@ static void SigsegvHandler(int /*sig*/) {
   void* frames[64];
   int count = backtrace(frames, 64);
   char** symbols = backtrace_symbols(frames, count);
-
+  std::cerr << "\n[CTRE] " << ctre::phoenix::platform::GetStackTrace(0) << std::endl;
   std::fprintf(stderr, "\n[YAMS] Caught SIGSEGV after tests — stack trace:\n");
-
   for (int i = 0; i < count; ++i) {
     // backtrace_symbols format: "module(mangled+offset) [address]"
     // Extract the mangled name between '(' and '+'/').

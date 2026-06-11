@@ -194,6 +194,17 @@ class SwerveDriveTest : public ::testing::Test {
       delete s;
     }
 
+    // Notify the CTRE sim layer before releasing hardware, matching CloseBundle.
+    constexpr auto kTalonFXType = ctre::phoenix::platform::DeviceType::P6_TalonFXType;
+    ctre::phoenix::platform::SimDestroy(kTalonFXType, m_flDriveTalon->GetDeviceID());
+    ctre::phoenix::platform::SimDestroy(kTalonFXType, m_frDriveTalon->GetDeviceID());
+    ctre::phoenix::platform::SimDestroy(kTalonFXType, m_blDriveTalon->GetDeviceID());
+    ctre::phoenix::platform::SimDestroy(kTalonFXType, m_brDriveTalon->GetDeviceID());
+    ctre::phoenix::platform::SimDestroy(kTalonFXType, m_flAzimuthTalon->GetDeviceID());
+    ctre::phoenix::platform::SimDestroy(kTalonFXType, m_frAzimuthTalon->GetDeviceID());
+    ctre::phoenix::platform::SimDestroy(kTalonFXType, m_blAzimuthTalon->GetDeviceID());
+    ctre::phoenix::platform::SimDestroy(kTalonFXType, m_brAzimuthTalon->GetDeviceID());
+
     // Release TalonFX objects after all wrappers are gone.
     m_flDriveTalon.reset();
     m_frDriveTalon.reset();

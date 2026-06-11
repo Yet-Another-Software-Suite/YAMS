@@ -1017,6 +1017,11 @@ class SmartMotorControllerConfig {
   /** @return Optional max linear acceleration constraint for hardware configuration. */
   std::optional<units::meters_per_second_squared_t> GetTrapMaxAccelLinear() const;
 
+  /** @return Optional kV for CTRE MotionMagicExpo (V*s/turn = V/(turn/s)). */
+  std::optional<double> GetExponentialProfileKV() const;
+  /** @return Optional kA for CTRE MotionMagicExpo (V*s²/turn = V/(turn/s²)). */
+  std::optional<double> GetExponentialProfileKA() const;
+
   /**
    * Convert a mechanism position (turns) to a linear distance using the configured circumference.
    *
@@ -1094,6 +1099,9 @@ class SmartMotorControllerConfig {
   std::optional<units::turns_per_second_squared_t> m_trapMaxAccTurns;
   std::optional<units::meters_per_second_t> m_trapMaxVelLinear;
   std::optional<units::meters_per_second_squared_t> m_trapMaxAccLinear;
+  // kV/kA in V*s/turn and V*s²/turn for direct CTRE MotionMagicExpo assignment
+  std::optional<double> m_expoMotionMagicKV;
+  std::optional<double> m_expoMotionMagicKA;
 
   // Limits
   std::optional<units::turn_t> m_mechLowerLimit;

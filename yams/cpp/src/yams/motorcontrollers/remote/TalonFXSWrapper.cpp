@@ -3,6 +3,7 @@
 
 #include "yams/motorcontrollers/remote/TalonFXSWrapper.hpp"
 
+#include <ctre/unit/pid_ff.h>
 #include <frc/DriverStation.h>
 #include <frc/Errors.h>
 #include <frc/RobotBase.h>
@@ -686,23 +687,13 @@ void TalonFXSWrapper::SetMotionProfileMaxJerk(units::angular_jerk::turns_per_sec
 
 void TalonFXSWrapper::SetExponentialProfile(std::optional<double> kV, std::optional<double> kA,
                                             std::optional<units::volt_t> maxInput) {
-  auto apply = [&](auto& slot) {
-    if (kV) slot.kV = *kV;
-    if (kA) slot.kA = *kA;
-    m_talon->GetConfigurator().Apply(slot);
-  };
-  switch (m_slot) {
-    case ClosedLoopControllerSlot::SLOT_0:
-      apply(m_talonConfig.Slot0);
-      break;
-    case ClosedLoopControllerSlot::SLOT_1:
-      apply(m_talonConfig.Slot1);
-      break;
-    case ClosedLoopControllerSlot::SLOT_2:
-      apply(m_talonConfig.Slot2);
-      break;
-    default:
-      break;
+  if (kV || kA) {
+    if (kV)
+      m_talonConfig.MotionMagic.MotionMagicExpo_kV = ctre::unit::volts_per_turn_per_second_t{*kV};
+    if (kA)
+      m_talonConfig.MotionMagic.MotionMagicExpo_kA =
+          ctre::unit::volts_per_turn_per_second_squared_t{*kA};
+    m_talon->GetConfigurator().Apply(m_talonConfig.MotionMagic);
   }
 }
 
@@ -714,12 +705,7 @@ void TalonFXSWrapper::SetClosedLoopSlot(ClosedLoopControllerSlot slot) {
 }
 
 SmartMotorControllerConfig& TalonFXSWrapper::GetConfig() { return m_config; }
-void* TalonFXSWrapper::GetMotorController() {
-  if (frc::RobotBase::IsSimulation()) {
-    m_talon->GetDutyCycle().WaitForUpdate(100_ms);
-  }
-  return m_talon;
-}
+void* TalonFXSWrapper::GetMotorController() { return m_talon; }
 void* TalonFXSWrapper::GetMotorControllerConfig() { return &m_talonConfig; }
 
 telemetry::UnsupportedTelemetryFields TalonFXSWrapper::GetUnsupportedTelemetryFields() {
@@ -781,7 +767,7 @@ void TalonFXSWrapper::ApplyLimitsConfig() {
 
 void TalonFXSWrapper::ApplyMotionMagicConfig() {
   bool hasTrap = m_config.HasTrapezoidProfile();
-  bool hasExpo = m_config.HasExponentialProfile();
+  bool hasExpo = m_config.HasExponentialProfile() || m_config.HasLinearExponentialProfile();
   bool velTrap = m_config.GetVelocityTrapezoidalProfileInUse();
   int slotIdx = static_cast<int>(m_slot);
 
@@ -805,12 +791,41 @@ void TalonFXSWrapper::ApplyMotionMagicConfig() {
     m_positionReq = controls::MotionMagicVoltage{0_tr}.WithSlot(slotIdx);
     m_velocityReq = controls::VelocityVoltage{0_tps}.WithSlot(slotIdx);
   } else if (hasTrap && velTrap) {
+    // Velocity trapezoidal: the profile's maxVelocity param becomes MotionMagicAcceleration,
+    // and maxAcceleration becomes MotionMagicJerk (one derivative up in velocity-space).
+    auto accel = m_config.GetTrapMaxVelocityTurns();
+    auto jerk = m_config.GetTrapMaxAccelTurns();
+    if (!accel) {
+      if (auto linVel = m_config.GetTrapMaxVelocityLinear(); linVel)
+        if (auto circ = m_config.GetMechanismCircumference(); circ && circ->value() != 0.0)
+          accel = units::turns_per_second_t{linVel->value() / circ->value()};
+    }
+    if (!jerk) {
+      if (auto linAcc = m_config.GetTrapMaxAccelLinear(); linAcc)
+        if (auto circ = m_config.GetMechanismCircumference(); circ && circ->value() != 0.0)
+          jerk = units::turns_per_second_squared_t{linAcc->value() / circ->value()};
+    }
+    if (accel)
+      m_talonConfig.MotionMagic.MotionMagicAcceleration =
+          units::turns_per_second_squared_t{accel->value()};
+    if (jerk)
+      m_talonConfig.MotionMagic.MotionMagicJerk =
+          units::angular_jerk::turns_per_second_cubed_t{jerk->value()};
     m_positionReq = controls::PositionVoltage{0_tr}.WithSlot(slotIdx);
     m_velocityReq = controls::MotionMagicVelocityVoltage{0_tps}.WithSlot(slotIdx);
   } else if (hasExpo) {
+    if (auto kV = m_config.GetExponentialProfileKV())
+      m_talonConfig.MotionMagic.MotionMagicExpo_kV = ctre::unit::volts_per_turn_per_second_t{*kV};
+    if (auto kA = m_config.GetExponentialProfileKA())
+      m_talonConfig.MotionMagic.MotionMagicExpo_kA =
+          ctre::unit::volts_per_turn_per_second_squared_t{*kA};
     m_positionReq = controls::MotionMagicExpoVoltage{0_tr}.WithSlot(slotIdx);
     m_velocityReq = controls::VelocityVoltage{0_tps}.WithSlot(slotIdx);
   } else {
+    using signals::StaticFeedforwardSignValue;
+    m_talonConfig.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue::UseClosedLoopSign;
+    m_talonConfig.Slot1.StaticFeedforwardSign = StaticFeedforwardSignValue::UseClosedLoopSign;
+    m_talonConfig.Slot2.StaticFeedforwardSign = StaticFeedforwardSignValue::UseClosedLoopSign;
     m_positionReq = controls::PositionVoltage{0_tr}.WithSlot(slotIdx);
     m_velocityReq = controls::VelocityVoltage{0_tps}.WithSlot(slotIdx);
   }

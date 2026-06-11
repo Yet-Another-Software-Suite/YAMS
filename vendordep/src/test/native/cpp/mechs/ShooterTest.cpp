@@ -115,6 +115,7 @@ static void VelocityPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   SchedulerHelper::RunForDuration(2.0_s, [&] {
     if (smc->GetDutyCycle() != 0.0) passed = true;
   });
+  if (isCTRE) std::this_thread::sleep_for(std::chrono::milliseconds{100});
 
   auto postVel = smc->GetMechanismVelocity();
 
