@@ -120,7 +120,6 @@ Arm::Arm(const config::ArmConfig& config) : SmartPositionalMechanism(), m_armCon
     }
 
     frc::SmartDashboard::PutData(m_name + "/mechanism", &(*m_mechanismWindow));
-    m_smc->SetupSimulation();
   }
 }
 

@@ -265,7 +265,8 @@ class SparkWrapper : public SmartMotorController {
    * @param maxVelocity Maximum linear velocity.
    */
   void SetMotionProfileMaxVelocity(units::meters_per_second_t maxVelocity) override;
-  /** @copydoc SmartMotorController::SetMotionProfileMaxAcceleration(units::turns_per_second_squared_t) */
+  /** @copydoc
+   * SmartMotorController::SetMotionProfileMaxAcceleration(units::turns_per_second_squared_t) */
   void SetMotionProfileMaxAcceleration(units::turns_per_second_squared_t maxAcc) override;
   /**
    * Set the maximum linear acceleration for the motion profile.

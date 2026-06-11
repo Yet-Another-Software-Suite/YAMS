@@ -91,10 +91,6 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
     if (smc->GetDutyCycle() != 0.0) passed = true;
   });
 
-  if (isCTRE) {
-    SchedulerHelper::RunForDuration(1.0_s);
-  }
-
   auto postVel = smc->GetMeasurementVelocity();
   auto postDist = smc->GetMeasurementPosition();
 
@@ -118,7 +114,7 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE, bool deb
   units::millisecond_t period{
       smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms).value() * 1000.0};
 
-  SchedulerHelper::RunForDuration(20.0_s, [&] {
+  SchedulerHelper::RunForDuration(5.0_s, [&] {
     if (debugOutput) {
       std::printf("[DEBUG] mechanism_position=%.6f turns, dutycyle=%.6f\n",
                   smc->GetMechanismPosition().value(), smc->GetDutyCycle());
@@ -156,7 +152,7 @@ TEST_P(ElevatorTest, SMCDutyCycle) {
   auto subsys = std::make_unique<TestSubsystem>();
   cfg.WithSubsystem(subsys.get());
   auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
+  //  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   DutyCycleTestBody(bundle.smc, IsCTRE(bundle));

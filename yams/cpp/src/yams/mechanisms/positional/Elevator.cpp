@@ -81,8 +81,6 @@ Elevator::Elevator(const config::ElevatorConfig& config)
                                            "SMC.WithMechanismCircumference(units::meter_t)");
     }
 
-    m_smc->SetupSimulation();
-
     frc::DCMotor dcMotor = m_smc->GetDCMotor();
     auto& gearingOpt = m_smc->GetConfig().GetMotorGearing();
     gearing::MechanismGearing gearing = gearingOpt.value_or(gearing::MechanismGearing::kOne);

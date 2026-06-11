@@ -127,6 +127,7 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
           new remote::TalonFXSWrapper(bundle.talonFXS.get(), MotorForHardware(param.hardware),
                                       remote::TalonFXSWrapper::MotorArrangement::NEO, cfg);
       bundle.smc = wrapper;
+      bundle.subsystem->m_isCTRE = true;
       break;
     }
     case HardwareType::TalonFX: {
@@ -134,6 +135,7 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
       auto* wrapper =
           new remote::TalonFXWrapper(bundle.talonFX.get(), MotorForHardware(param.hardware), cfg);
       bundle.smc = wrapper;
+      bundle.subsystem->m_isCTRE = true;
       break;
     }
   }
@@ -145,6 +147,15 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
 // True if the bundle wraps a CTRE TalonFX or TalonFXS.
 inline bool IsCTRE(const HardwareBundle& b) {
   return b.talonFX != nullptr || b.talonFXS != nullptr;
+}
+
+inline void WaitForDutyCycleCTRE(const HardwareBundle& b) {
+  if (b.talonFX != nullptr) {
+    b.talonFX->GetDutyCycle().WaitForUpdate(100_ms);
+  }
+  if (b.talonFXS != nullptr) {
+    b.talonFXS->GetDutyCycle().WaitForUpdate(100_ms);
+  }
 }
 
 // Standard teardown: unregister subsystem, close SMC, delete wrapper, then

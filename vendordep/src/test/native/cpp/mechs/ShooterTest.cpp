@@ -91,10 +91,6 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
     if (smc->GetDutyCycle() != 0.0) passed = true;
   });
 
-  if (isCTRE) {
-    SchedulerHelper::RunForDuration(1.0_s);
-  }
-
   auto postVel = smc->GetMechanismVelocity();
   auto postAngle = smc->GetMechanismPosition();
 
@@ -119,10 +115,6 @@ static void VelocityPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   SchedulerHelper::RunForDuration(2.0_s, [&] {
     if (smc->GetDutyCycle() != 0.0) passed = true;
   });
-
-  if (isCTRE) {
-    SchedulerHelper::RunForDuration(1.0_s);
-  }
 
   auto postVel = smc->GetMechanismVelocity();
 
@@ -153,7 +145,7 @@ TEST_P(ShooterTest, SMCDutyCycle) {
   SCOPED_TRACE(param.name);
   auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
+  //  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
@@ -165,7 +157,7 @@ TEST_P(ShooterTest, SMCVelocityPID) {
   SCOPED_TRACE(param.name);
   auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
+  //  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   VelocityPIDTestBody(bundle.smc, IsCTRE(bundle));
@@ -177,7 +169,7 @@ TEST_P(ShooterTest, ShooterDutyCycle) {
   SCOPED_TRACE(param.name);
   auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
+  //  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   auto shooter = CreateShooter(bundle.smc, bundle.subsystem.get());
@@ -194,7 +186,7 @@ TEST_P(ShooterTest, ShooterVelocityPID) {
   SCOPED_TRACE(param.name);
   auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
+  //  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   // ~80 RPM = 80/60 * 360 ≈ 480 deg/s

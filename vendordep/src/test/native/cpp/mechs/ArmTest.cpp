@@ -62,7 +62,7 @@ static SmartMotorControllerConfig MakeArmSMCConfig(ProfileType profile, Hardware
   return cfg;
 }
 
-static positional::Arm* CreateArm(SmartMotorController* smc, TestSubsystem* subsys, bool isCTRE) {
+static positional::Arm* CreateArm(SmartMotorController* smc, TestSubsystem* subsys) {
   ArmConfig cfg;
   cfg.WithMotorController(smc)
       .WithArmLength(4_in)  // 4 inches → meters
@@ -93,9 +93,6 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
     if (smc->GetDutyCycle() != 0.0) passed = true;
   });
 
-  if (isCTRE) {
-    SchedulerHelper::RunForDuration(1.0_s);
-  }
   auto postVel = smc->GetMechanismVelocity();
   auto postAngle = smc->GetMechanismPosition();
 
@@ -121,10 +118,6 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   SchedulerHelper::RunForDuration(3.0_s, [&] {
     if (smc->GetDutyCycle() != 0.0) passed = true;
   });
-
-  if (isCTRE) {
-    SchedulerHelper::RunForDuration(1.0_s);
-  }
 
   auto postAngle = smc->GetMechanismPosition();
   EXPECT_TRUE(std::abs(postAngle.value() - preAngle.value()) > 0.05 || passed)
@@ -178,10 +171,10 @@ TEST_P(ArmTest, ArmDutyCycle) {
   SCOPED_TRACE(param.name);
   auto cfg = MakeArmSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
+  //  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
-  auto arm = CreateArm(bundle.smc, bundle.subsystem.get(), IsCTRE(bundle));
+  auto arm = CreateArm(bundle.smc, bundle.subsystem.get());
   auto upCmd = arm->Set(0.5);
   frc2::CommandScheduler::GetInstance().Schedule(upCmd);
 
@@ -195,10 +188,10 @@ TEST_P(ArmTest, ArmPositionPID) {
   SCOPED_TRACE(param.name);
   auto cfg = MakeArmSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
+  //  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
-  auto arm = CreateArm(bundle.smc, bundle.subsystem.get(), IsCTRE(bundle));
+  auto arm = CreateArm(bundle.smc, bundle.subsystem.get());
   auto highPid = arm->RunTo(80.0_deg);
   frc2::CommandScheduler::GetInstance().Schedule(highPid);
 

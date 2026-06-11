@@ -22,6 +22,9 @@ inline void InitializeHardware() {
   frc::sim::DriverStationSim::SetEnabled(true);
   frc::sim::DriverStationSim::NotifyNewData();
   frc::sim::StepTiming(0.0_s);
+
+  /* delay ~100ms so the devices can start up and enable */
+  std::this_thread::sleep_for(std::chrono::milliseconds{100});
 }
 
 inline void TeardownHardware() {

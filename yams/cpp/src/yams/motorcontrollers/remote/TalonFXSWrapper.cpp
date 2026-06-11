@@ -714,7 +714,12 @@ void TalonFXSWrapper::SetClosedLoopSlot(ClosedLoopControllerSlot slot) {
 }
 
 SmartMotorControllerConfig& TalonFXSWrapper::GetConfig() { return m_config; }
-void* TalonFXSWrapper::GetMotorController() { return m_talon; }
+void* TalonFXSWrapper::GetMotorController() {
+  if (frc::RobotBase::IsSimulation()) {
+    m_talon->GetDutyCycle().WaitForUpdate(100_ms);
+  }
+  return m_talon;
+}
 void* TalonFXSWrapper::GetMotorControllerConfig() { return &m_talonConfig; }
 
 telemetry::UnsupportedTelemetryFields TalonFXSWrapper::GetUnsupportedTelemetryFields() {
