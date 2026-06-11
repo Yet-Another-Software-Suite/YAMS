@@ -127,7 +127,6 @@ public class FlyWheelConfig
                                                "withSmartMotorController(SmartMotorController)");
     }
     motor = Optional.of(motorController);
-    moi.ifPresent(this::withMOI);
     return this;
   }
 

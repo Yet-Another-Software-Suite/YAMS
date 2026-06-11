@@ -38,7 +38,7 @@ public class MechanismTelemetry
   public void setupLoopTime()
   {
     var loopTimePublisherTopic = networkTable.getDoubleTopic("loopTime");
-    loopTimePublisherTopic.setProperties("{\"units\", \"second\"}");
+    loopTimePublisherTopic.setProperties("{\"units\": \"second\"}");
     loopTimePublisher = Optional.of(loopTimePublisherTopic.publish());
   }
 

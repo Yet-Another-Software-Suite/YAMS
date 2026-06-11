@@ -353,9 +353,15 @@ public class TalonFXWrapper extends SmartMotorController
   @Override
   public void seedRelativeEncoder()
   {
+      throw new RuntimeException("Unsupported operation");
   }
 
-  @Override
+    @Override
+    public void synchronizeRelativeEncoder() {
+        throw new RuntimeException("Unsupported operation");
+    }
+
+    @Override
   public void simIterate()
   {
     if (RobotBase.isSimulation() && m_simSupplier.isPresent())
@@ -435,7 +441,11 @@ public class TalonFXWrapper extends SmartMotorController
     forceConfigApply();
   }
 
-  /**
+    @Override
+    public void setEncoderVelocity(AngularVelocity velocity) {
+    }
+
+    /**
    * Check if {@link CANdi} PWM1 is used as the
    * {@link com.ctre.phoenix6.configs.ExternalFeedbackConfigs#ExternalFeedbackSensorSource} in
    * {@link TalonFXConfiguration#Feedback}.

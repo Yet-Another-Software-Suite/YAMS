@@ -65,7 +65,7 @@ public class TurretSubsystem extends SubsystemBase
 
   PivotConfig m_config = new PivotConfig(motor)
       .withStartingPosition(Degrees.of(0)) // Starting position of the Pivot
-      .withHardLimit(Degrees.of(-360), Degrees.of(360)) // Hard limit bc wiring prevents infinitpe spinning
+      .withHardLimits(Degrees.of(-360), Degrees.of(360)) // Hard limit bc wiring prevents infinitpe spinning
       // .withSoftLimits(Degrees.of(-360), Degrees.of(360))
       .withTelemetry("Turret", TelemetryVerbosity.HIGH) // Telemetry
       .withMOI(yams.units.YUnits.PoundSquareInches.of(0.01)); // MOI Calculation

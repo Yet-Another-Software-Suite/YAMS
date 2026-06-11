@@ -519,4 +519,13 @@ public class DoubleJointedArm extends SmartPositionalMechanism
     }).withName(m_subsystem.getName() + " SetDutyCycle");
   }
 
+    @Override
+    public Trigger max() {
+        throw new RuntimeException("Unsupported operation");
+    }
+
+    @Override
+    public Trigger min() {
+        throw new  RuntimeException("Unsupported operation");
+    }
 }

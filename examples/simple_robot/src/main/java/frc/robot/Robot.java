@@ -1,4 +1,4 @@
-// Copyright (c) 2025 YAMS Contributors
+// Copyright (c) 2025-2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 // Open Source Software; you can modify and/or share it under the terms of

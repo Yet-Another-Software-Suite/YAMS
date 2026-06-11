@@ -67,7 +67,7 @@ public class ShooterSubsystem extends SubsystemBase
    * @param speed Speed to set.
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
    */
-  public Command setVelocity(AngularVelocity speed) {return shooter.setSpeed(speed);}
+  public Command setVelocity(AngularVelocity speed) {return shooter.run(speed);}
 
   /**
    * Set the dutycycle of the shooter.

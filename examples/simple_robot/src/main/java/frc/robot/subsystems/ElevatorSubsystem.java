@@ -10,8 +10,6 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Volts;
-import static yams.mechanisms.SmartMechanism.gearbox;
-import static yams.mechanisms.SmartMechanism.gearing;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkLowLevel;
@@ -56,12 +54,13 @@ public class ElevatorSubsystem extends SubsystemBase
   private final SmartMotorControllerConfig motorConfig        = new SmartMotorControllerConfig(this)
       .withMechanismCircumference(circumference)
 //      .withFollowers(Pair.of(new SparkMax(3, SparkLowLevel.MotorType.kBrushless), true))
-      .withClosedLoopController(new ExponentialProfilePIDController(30, 0, 0, ExponentialProfilePIDController
+      .withClosedLoopController(30, 0, 0)
+              .withExponentialProfile(ExponentialProfilePIDController
           .createElevatorConstraints(Volts.of(12),
                                      motors,
                                      weight,
                                      radius,
-                                     gearing)))
+                                     gearing))
 //      .withClosedLoopController(4, 0, 0, MetersPerSecond.of(0.5), MetersPerSecondPerSecond.of(0.5)) // Trapezoidal Profile PID Controller
       .withSoftLimits(Meters.of(0), Meters.of(2))
       .withGearing(gearing)

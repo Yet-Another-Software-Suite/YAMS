@@ -195,7 +195,7 @@ public class FlyWheel extends SmartVelocityMechanism
    */
   public Command run(AngularVelocity velocity)
   {
-    return setSpeed(() -> velocity).withName(m_subsystem.getName() + " " + getName() + " SetSpeed");
+    return Commands.run(()->m_smc.setVelocity(velocity), m_subsystem).withName(m_subsystem.getName() + " " + getName() + " SetSpeed");
   }
 
   /**
@@ -271,7 +271,7 @@ public class FlyWheel extends SmartVelocityMechanism
    */
   public Command run(LinearVelocity speed)
   {
-    return setSpeed(m_config.getAngularVelocity(speed)).withName(m_subsystem.getName() + " RunSpeed");
+    return run(m_config.getAngularVelocity(speed)).withName(m_subsystem.getName() + " RunSpeed");
   }
 
   /**

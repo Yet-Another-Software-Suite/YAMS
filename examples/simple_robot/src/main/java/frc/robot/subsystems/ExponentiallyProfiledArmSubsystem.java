@@ -104,7 +104,13 @@ public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
                                                 /*
                                                  * Closed loop configuration options for the motor.
                                                  */
-                                                .withClosedLoopController(pidController)
+                                                .withClosedLoopController(1,0,0)
+          .withExponentialProfile(ExponentialProfilePIDController.createArmConstraints(
+                  Volts.of(12),
+                  dcMotor,
+                  weight,
+                  length,
+                  gearing))
                                                 .withFeedforward(armFeedforward)
                                                 .withSoftLimits(softLowerLimit, softUpperLimit);
 

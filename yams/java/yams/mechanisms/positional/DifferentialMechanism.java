@@ -361,4 +361,13 @@ public class DifferentialMechanism extends SmartPositionalMechanism
     return m_config.getTelemetryName().orElse("DifferentialMechanism");
   }
 
+    @Override
+    public Trigger max() {
+        throw new RuntimeException("Unsupported operation");
+    }
+
+    @Override
+    public Trigger min() {
+        throw new RuntimeException("Unsupported operation");
+    }
 }
