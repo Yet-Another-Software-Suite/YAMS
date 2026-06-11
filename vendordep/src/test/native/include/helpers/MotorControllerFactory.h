@@ -87,7 +87,7 @@ inline frc::DCMotor MotorForHardware(HardwareType hw) {
     case HardwareType::SparkFlex:
       return frc::DCMotor::NeoVortex(1);
     case HardwareType::TalonFXS:
-      return frc::DCMotor::NEO(2);
+      return frc::DCMotor::NEO(1);
     case HardwareType::TalonFX:
       return frc::DCMotor::KrakenX60(1);
   }

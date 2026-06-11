@@ -421,18 +421,4 @@ public class Arm extends SmartPositionalMechanism
   {
     return m_config;
   }
-
-  @Override
-  @Deprecated
-  public void setMeasurementVelocitySetpoint(LinearVelocity velocity)
-  {
-    throw new RuntimeException("Unimplemented");
-  }
-
-  @Override
-  @Deprecated
-  public void setMeasurementPositionSetpoint(Distance distance)
-  {
-    throw new RuntimeException("Unimplemented");
-  }
 }
