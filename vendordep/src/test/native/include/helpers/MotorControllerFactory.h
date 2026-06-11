@@ -155,8 +155,8 @@ inline void CloseBundle(HardwareBundle& b) {
   b.subsystem->Close();
   delete b.smc;
   b.smc = nullptr;
-  b.talonFX.reset();
-  b.talonFXS.reset();
+  if (b.talonFX != nullptr) b.talonFX.reset();
+  if (b.talonFXS != nullptr) b.talonFXS.reset();
 }
 
 // All (hardware × profile) combinations used by each mechanism test suite.
