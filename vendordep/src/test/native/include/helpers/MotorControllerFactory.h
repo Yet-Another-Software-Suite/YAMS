@@ -146,12 +146,17 @@ inline bool IsCTRE(const HardwareBundle& b) {
   return b.talonFX != nullptr || b.talonFXS != nullptr;
 }
 
-// Standard teardown: unregister subsystem, close SMC, delete wrapper.
+// Standard teardown: unregister subsystem, close SMC, delete wrapper, then
+// release CTRE hardware.  The hardware must be reset here (not left to the
+// caller's HardwareBundle destructor) so the CTRE simulation thread never
+// holds a pointer to a freed device — matching the pattern in SwerveDriveTest.
 inline void CloseBundle(HardwareBundle& b) {
   frc2::CommandScheduler::GetInstance().UnregisterSubsystem(b.subsystem.get());
   b.subsystem->Close();
   delete b.smc;
   b.smc = nullptr;
+  b.talonFX.reset();
+  b.talonFXS.reset();
 }
 
 // All (hardware × profile) combinations used by each mechanism test suite.
