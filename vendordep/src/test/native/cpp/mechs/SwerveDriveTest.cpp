@@ -172,7 +172,7 @@ class SwerveDriveTest : public ::testing::Test {
       s->Close();
       delete s;
     }
-    /*for (auto* t :
+    for (auto* t :
          {s_flDriveTalon, s_frDriveTalon, s_blDriveTalon, s_brDriveTalon, s_flAzimuthTalon,
           s_frAzimuthTalon, s_blAzimuthTalon, s_brAzimuthTalon}) {
       delete t;
