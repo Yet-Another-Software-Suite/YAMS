@@ -32,7 +32,6 @@ public class RobotContainer
   {
     xboxController.button(1).whileTrue(elevator.setHeight(Meters.of(1)));
     xboxController.button(2).whileTrue(elevator.setHeight(Meters.of(0)));
-    xboxController.button(3).whileTrue(elevator.sysId());
     xboxController.button(4).whileTrue(elevator.elevCmd(-0.5));
     xboxController.button(5).whileTrue(elevator.elevCmd(0.5));
 

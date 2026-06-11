@@ -13,13 +13,8 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.units.measure.Velocity;
-import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
@@ -32,8 +27,6 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import java.util.Optional;
 import java.util.function.Supplier;
 import yams.exceptions.PivotConfigurationException;
@@ -320,53 +313,6 @@ public class Pivot extends SmartPositionalMechanism
     throw new PivotConfigurationException("Pivot lower hard and motor controller soft limit is empty",
                                         "Cannot create min trigger.",
                                         "withHardLimits(Angle,Angle)");
-  }
-
-  @Override
-  public Command sysId(Voltage maximumVoltage, Velocity<VoltageUnit> step, Time duration)
-  {
-    SysIdRoutine routine = m_smc.sysId(maximumVoltage, step, duration);
-    Angle        max;
-    Angle        min;
-    if (m_smc.getConfig().getMechanismUpperLimit().isPresent())
-    {
-      max = m_smc.getConfig().getMechanismUpperLimit().get().minus(Degrees.of(1));
-    } else if (m_config.getUpperHardLimit().isPresent())
-    {
-      max = m_config.getUpperHardLimit().get().minus(Degrees.of(1));
-    } else
-    {
-      throw new PivotConfigurationException("Pivot upper hard and motor controller soft limit is empty",
-                                            "Cannot create SysIdRoutine.",
-                                            "withHardLimits(Angle,Angle)");
-    }
-    if (m_smc.getConfig().getMechanismLowerLimit().isPresent())
-    {
-      min = m_smc.getConfig().getMechanismLowerLimit().get().plus(Degrees.of(1));
-    } else if (m_config.getLowerHardLimit().isPresent())
-    {
-      min = m_config.getLowerHardLimit().get().plus(Degrees.of(1));
-    } else
-    {
-      throw new PivotConfigurationException("Pivot lower hard and motor controller soft limit is empty",
-                                            "Cannot create SysIdRoutine.",
-                                            "withHardLimits(Angle,Angle)");
-    }
-    Trigger maxTrigger = gte(max);
-    Trigger minTrigger = lte(min);
-
-    Command group = Commands.print("Starting SysId")
-                            .andThen(Commands.runOnce(m_smc::stopClosedLoopController))
-                            .andThen(routine.dynamic(Direction.kForward).until(maxTrigger))
-                            .andThen(routine.dynamic(Direction.kReverse).until(minTrigger))
-                            .andThen(routine.quasistatic(Direction.kForward).until(maxTrigger))
-                            .andThen(routine.quasistatic(Direction.kReverse).until(minTrigger))
-                            .finallyDo(m_smc::startClosedLoopController);
-    if (m_config.getTelemetryName().isPresent())
-    {
-      group = group.andThen(Commands.print(getName() + " SysId test done."));
-    }
-    return group.withName(m_subsystem.getName() + " SysId");
   }
 
   @Override

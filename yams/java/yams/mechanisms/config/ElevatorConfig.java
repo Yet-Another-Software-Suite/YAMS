@@ -32,11 +32,6 @@ public class ElevatorConfig
    */
   private   Optional<SmartMotorController>     motor                   = Optional.empty();
   /**
-   * The network root of the mechanism (Optional).
-   */
-  @Deprecated
-  protected Optional<String>                   networkRoot             = Optional.empty();
-  /**
    * Telemetry name.
    */
   private   Optional<String>                   telemetryName           = Optional.empty();
@@ -130,7 +125,6 @@ public class ElevatorConfig
     this.carriageWeight = cfg.carriageWeight;
     this.telemetryName = cfg.telemetryName;
     this.telemetryVerbosity = cfg.telemetryVerbosity;
-    this.networkRoot = cfg.networkRoot;
     this.mechanismPositionConfig = cfg.mechanismPositionConfig;
     this.lowerHardLimit = cfg.lowerHardLimit;
     this.upperHardLimit = cfg.upperHardLimit;
@@ -243,23 +237,6 @@ public class ElevatorConfig
    */
   public ElevatorConfig withTelemetry(String telemetryName, TelemetryVerbosity telemetryVerbosity)
   {
-    this.telemetryName = Optional.ofNullable(telemetryName);
-    this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
-    return this;
-  }
-
-  /**
-   * Configure telemetry for the {@link Arm} mechanism.
-   *
-   * @param telemetryName      Telemetry NetworkTable name to appear under "SmartDashboard/"
-   * @param telemetryVerbosity Telemetry verbosity to apply.
-   * @param networkRoot        Network root to publish the telemetry under.
-   * @return {@link ElevatorConfig} for chaining.
-   */
-  @Deprecated
-  public ElevatorConfig withTelemetry(String networkRoot, String telemetryName, TelemetryVerbosity telemetryVerbosity)
-  {
-    this.networkRoot = Optional.ofNullable(networkRoot);
     this.telemetryName = Optional.ofNullable(telemetryName);
     this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
     return this;
@@ -492,14 +469,4 @@ public class ElevatorConfig
     return mechanismPositionConfig;
   }
 
-  /**
-   * Get the network root of the mechanism.
-   *
-   * @return Optional containing the network root if set, otherwise an empty Optional.
-   */
-  @Deprecated
-  public Optional<String> getNetworkRoot()
-  {
-    return networkRoot;
-  }
 }

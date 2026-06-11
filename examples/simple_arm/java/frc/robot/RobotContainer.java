@@ -35,7 +35,6 @@ public class RobotContainer
     xboxController.button(2).whileTrue(arm.armCmd(-0.5));
     xboxController.button(3).whileTrue(arm.setAngle(Degrees.of(30)));
     xboxController.button(4).whileTrue(arm.setAngle(Degrees.of(80)));
-    xboxController.button(5).whileTrue(arm.sysId());
   }
 
 

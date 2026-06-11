@@ -35,10 +35,6 @@ public class ArmConfig
    */
   private Optional<SmartMotorController> motor               = Optional.empty();
   /**
-   * The network root of the mechanism (Optional).
-   */
-  protected Optional<String>               networkTableName        = Optional.empty();
-  /**
    * Telemetry name.
    */
   private   Optional<String>               telemetryName           = Optional.empty();
@@ -120,7 +116,6 @@ public class ArmConfig
   {
     this.simStartingPosition = cfg.simStartingPosition;
     motor = cfg.motor;
-    networkTableName = cfg.networkTableName;
     telemetryName = cfg.telemetryName;
     telemetryVerbosity = cfg.telemetryVerbosity;
     lowerHardLimit = cfg.lowerHardLimit;
@@ -198,22 +193,6 @@ public class ArmConfig
    * Configure the MOI directly instead of estimating it with the length and mass of the
    * {@link Arm} for simulation.
    *
-   * @param MOI Moment of Inertia of the {@link Arm}. in {@link Units#KilogramSquareMeters}
-   * @return {@link ArmConfig} for chaining.
-   * @implNote Please use {@link #withMOI(MomentOfInertia)} instead. Default unit is KilogramSquareMeters
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public ArmConfig withMOI(double MOI)
-  {
-    motor.ifPresent(motor -> motor.getConfig().withMomentOfInertia(KilogramSquareMeters.of(MOI)));
-    this.moi = OptionalDouble.of(MOI);
-    return this;
-  }
-
-  /**
-   * Configure the MOI directly instead of estimating it with the length and mass of the
-   * {@link Arm} for simulation.
-   *
    * @param MOI Moment of Inertia of the {@link Arm}
    * @return {@link ArmConfig} for chaining.
    */
@@ -265,23 +244,6 @@ public class ArmConfig
    */
   public ArmConfig withTelemetry(String telemetryName, TelemetryVerbosity telemetryVerbosity)
   {
-    this.telemetryName = Optional.ofNullable(telemetryName);
-    this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
-    return this;
-  }
-
-  /**
-   * Configure telemetry for the {@link Arm} mechanism.
-   *
-   * @param networkRoot        Telemetry NetworkTable
-   * @param telemetryName      Telemetry NetworkTable name to appear under _networkTableName_
-   * @param telemetryVerbosity Telemetry verbosity to apply.
-   * @return {@link ArmConfig} for chaining.
-   */
-  @Deprecated
-  public ArmConfig withTelemetry(String networkRoot, String telemetryName, TelemetryVerbosity telemetryVerbosity)
-  {
-    this.networkTableName = Optional.ofNullable(networkRoot);
     this.telemetryName = Optional.ofNullable(telemetryName);
     this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
     return this;
@@ -494,14 +456,4 @@ public class ArmConfig
     return mechanismPositionConfig;
   }
 
-  /**
-   * Get the telemetry network subtable of the mechanism.
-   *
-   * @return Optional containing the telemetry network subtable if set, otherwise an empty Optional.
-   */
-  @Deprecated
-  public Optional<String> getTelemetryNetworkTableName()
-  {
-    return networkTableName;
-  }
 }

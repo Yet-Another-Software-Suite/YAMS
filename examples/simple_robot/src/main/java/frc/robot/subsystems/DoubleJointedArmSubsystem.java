@@ -105,8 +105,4 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
     jointedArm.simIterate();
   }
 
-  public Command sysId()
-  {
-    return jointedArm.sysId(Volts.of(3), Volts.of(3).per(Second), Second.of(30));
-  }
 }

@@ -10,7 +10,6 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.revrobotics.spark.SparkLowLevel;
@@ -141,11 +140,6 @@ public class ElevatorSubsystem extends SubsystemBase
   {
     Logger.recordOutput("Elevator/Setpoint", height);
     return m_elevator.setHeight(height);
-  }
-
-  public Command sysId()
-  {
-    return m_elevator.sysId(Volts.of(12), Volts.of(12).per(Second), Second.of(30));
   }
 
   public Distance getHeight()

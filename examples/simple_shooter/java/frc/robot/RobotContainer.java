@@ -31,7 +31,6 @@ public class RobotContainer
   {
     xboxController.button(1).whileTrue(shooter.setVelocity(RPM.of(300)));
     xboxController.button(2).whileTrue(shooter.setVelocity(RPM.of(0)));
-    xboxController.button(3).whileTrue(shooter.sysId());
     xboxController.button(4).whileTrue(shooter.setDutyCycle(-0.5));
     xboxController.button(5).whileTrue(shooter.setDutyCycle(0.5));
 

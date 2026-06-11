@@ -92,7 +92,7 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
   });
 
   if (isCTRE) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+//    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     SchedulerHelper::RunForDuration(1.0_s);
   }
 

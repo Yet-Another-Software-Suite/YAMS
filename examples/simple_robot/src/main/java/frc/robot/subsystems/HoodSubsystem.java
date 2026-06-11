@@ -9,9 +9,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.TalonFXS;
 import edu.wpi.first.math.controller.ArmFeedforward;
@@ -82,11 +80,6 @@ public class HoodSubsystem extends SubsystemBase
   public Command hoodCmd(double dutycycle)
   {
     return hood.set(dutycycle);
-  }
-
-  public Command sysId()
-  {
-    return hood.sysId(Volts.of(3), Volts.of(3).per(Second), Second.of(30));
   }
 
   public Command setAngle(Angle angle)

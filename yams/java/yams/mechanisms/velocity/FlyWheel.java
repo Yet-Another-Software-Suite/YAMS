@@ -7,20 +7,14 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
-
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.units.VoltageUnit;
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.units.measure.Velocity;
-import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
@@ -28,16 +22,11 @@ import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import java.util.Optional;
 import java.util.function.Supplier;
-import yams.exceptions.FlyWheelConfigurationException;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.FlyWheelConfig;
 import yams.mechanisms.config.MechanismPositionConfig;
@@ -103,21 +92,6 @@ public class FlyWheel extends SmartVelocityMechanism
       mechanismLigament = mechanismRoot.append(new MechanismLigament2d(getName(),
                                                                        ShooterLength.in(Meters),
                                                                        0, 6, config.getSimColor()));
-      if (config.isUsingSpeedometerSimulation() && config.getSpeedometerMaxVelocity().isPresent())
-      {
-        mechanismRoot.append(new MechanismLigament2d(getName() + " Upper Limit",
-                                                     ShooterLength.in(Meters),
-                                                     270 - config.getUpperSoftLimit().orElse(RPM.of(0)).in(RPM) /
-                                                           config.getSpeedometerMaxVelocity().orElse(RPM.of(20000))
-                                                                 .in(RPM) * 180,
-                                                     6, new Color8Bit(Color.kHotPink)));
-        mechanismRoot.append(new MechanismLigament2d(getName() + " Lower Limit",
-                                                     ShooterLength.in(Meters),
-                                                     270 - config.getLowerSoftLimit().orElse(RPM.of(0)).in(RPM) /
-                                                           config.getSpeedometerMaxVelocity().orElse(RPM.of(20000))
-                                                                 .in(RPM) * 180,
-                                                     6, new Color8Bit(Color.kYellow)));
-      }
       SmartDashboard.putData(getName() + "/mechanism", m_mechanismWindow);
     }
   }
@@ -183,43 +157,6 @@ public class FlyWheel extends SmartVelocityMechanism
   public Trigger isNear(AngularVelocity speed, AngularVelocity within)
   {
     return new Trigger(() -> getSpeed().isNear(speed, within));
-  }
-
-  /**
-   * Set the FlyWheel to the given speed.
-   *
-   * @param velocity FlyWheel speed to go to.
-   * @return {@link Command} that sets the FlyWheel to the desired speed.
-   */
-  public Command setSpeed(Supplier<AngularVelocity> velocity)
-  {
-    return run(velocity).withName(m_subsystem.getName() + " SetSpeed Supplier");
-  }
-
-  /**
-   * Set the FlyWheel to the given speed.
-   *
-   * @param velocity FlyWheel speed to go to.
-   * @return {@link Command} that sets the FlyWheel to the desired speed.
-   */
-  public Command setSpeed(AngularVelocity velocity)
-  {
-    // TODO: Deprecate this
-    /*m_config.getLowerSoftLimit().ifPresent(low -> {
-      if (low.gt(velocity))
-      {
-        DriverStation.reportWarning("[WARNING] You have requested to set " + getName() + " to " + velocity +
-                                    " which is lower than minimum velocity " + low + "!", false);
-      }
-    });
-    m_config.getUpperSoftLimit().ifPresent(high -> {
-      if (high.lt(velocity))
-      {
-        DriverStation.reportWarning("[WARNING] You have requested to set " + getName() + " to " + velocity +
-                                    " which is greater than maximum velocity " + high + "!", false);
-      }
-    });*/
-    return run(velocity).withName(m_subsystem.getName() + " " + getName() + " SetSpeed");
   }
 
   /**
@@ -344,8 +281,6 @@ public class FlyWheel extends SmartVelocityMechanism
    */
   public Optional<AngularVelocity> getMechanismSetpointVelocity() {return m_smc.getMechanismSetpointVelocity();}
 
-  @Deprecated
-  public Optional<Angle> getMechanismSetpoint(){return Optional.empty();}
   /**
    * Set the FlyWheel to the given speed.
    *
@@ -359,80 +294,15 @@ public class FlyWheel extends SmartVelocityMechanism
   }
 
   @Override
-  @Deprecated
-  public void setMeasurementPositionSetpoint(Distance distance)
-  {
-    throw new UnsupportedOperationException("FlyWheel does not have a position setpoint.");
-  }
-
-  @Override
   public Trigger max()
   {
-    if (m_config.getUpperSoftLimit().isPresent())
-    {
-      return new Trigger(gte(m_config.getUpperSoftLimit().get()));
-    }
-    throw new FlyWheelConfigurationException("FlyWheel upper soft limit is empty",
-                                             "Cannot create max trigger.",
-                                             "withUpperSoftLimit(AngularVelocity) OR withSoftLimits(AngularVelocity,AngularVelocity)");
+    throw new UnsupportedOperationException("Velocity soft limits have been removed from FlyWheel.");
   }
 
   @Override
   public Trigger min()
   {
-    if (m_config.getLowerSoftLimit().isPresent())
-    {
-      return new Trigger(gte(m_config.getLowerSoftLimit().get()));
-    }
-    throw new FlyWheelConfigurationException("FlyWheel upper soft limit is empty",
-                                             "Cannot create max trigger.",
-                                             "withLowerSoftLimit(AngularVelocity) OR withSoftLimits(AngularVelocity,AngularVelocity)");
-  }
-
-  @Override
-  public Command sysId(Voltage maximumVoltage, Velocity<VoltageUnit> step, Time duration)
-  {
-    SysIdRoutine    routine = m_smc.sysId(maximumVoltage, step, duration);
-    AngularVelocity max     = RPM.of(1000);
-    AngularVelocity min     = RPM.of(-1000);
-    if (m_config.getUpperSoftLimit().isPresent())
-    {
-      max = m_config.getUpperSoftLimit().get().minus(RPM.of(1));
-    } else
-    {
-      throw new FlyWheelConfigurationException("FlyWheel upper hard and motor controller soft limit is empty",
-                                               "Cannot create SysIdRoutine.",
-                                               "withSoftLimits(AngularVelocity,AngularVelocity)");
-    }
-    if (m_config.getLowerSoftLimit().isPresent())
-    {
-      min = m_config.getLowerSoftLimit().get().plus(RPM.of(1));
-    } else
-    {
-      throw new FlyWheelConfigurationException("FlyWheel lower hard and motor controller soft limit is empty",
-                                               "Cannot create SysIdRoutine.",
-                                               "withSoftLimits(AngularVelocity,AngularVelocity)");
-    }
-    Trigger maxTrigger = gte(max);
-    Trigger minTrigger = lte(min);
-
-    Command group = Commands.print("Starting SysId")
-                            .andThen(Commands.runOnce(m_smc::stopClosedLoopController))
-                            .andThen(routine.dynamic(Direction.kForward).until(maxTrigger)
-                                            .finallyDo(() -> System.err.println("Forward done")))
-                            .andThen(routine.dynamic(Direction.kReverse).until(minTrigger)
-                                            .finallyDo(() -> System.err.println("Reverse done")))
-                            .andThen(routine.quasistatic(Direction.kForward).until(maxTrigger)
-                                            .finallyDo(() -> System.err.println("Quasistatic forward done")))
-                            .andThen(routine.quasistatic(Direction.kReverse).until(minTrigger)
-                                            .finallyDo(() -> System.err.println("Quasistatic reverse done")));
-
-    if (m_config.getTelemetryName().isPresent())
-    {
-      group = group.andThen(Commands.print(getName() + " SysId test done."));
-    }
-    return group.withName(m_subsystem.getName() + " SysId")
-                .finallyDo(m_smc::startClosedLoopController);
+    throw new UnsupportedOperationException("Velocity soft limits have been removed from FlyWheel.");
   }
 
   @Override

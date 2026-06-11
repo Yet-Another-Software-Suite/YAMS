@@ -7,9 +7,7 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
 
 import java.util.function.Supplier;
 
@@ -76,14 +74,6 @@ public class HoodSubsystem extends SubsystemBase {
 
     public Angle getAngle() {
         return hood.getAngle();
-    }
-
-    public Command sysId() {
-        return hood.sysId(
-                Volts.of(4.0), // maximumVoltage
-                Volts.per(Second).of(0.5), // step
-                Seconds.of(8.0) // duration
-        );
     }
 
     public Command setDutyCycle(Supplier<Double> dutyCycleSupplier) {

@@ -10,9 +10,7 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Pounds;
-import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
 
 import java.util.function.Supplier;
 
@@ -78,14 +76,6 @@ public class TurretSubsystem extends SubsystemBase {
 
         public Angle getAngle() {
                 return turret.getAngle();
-        }
-
-        public Command sysId() {
-                return turret.sysId(
-                                Volts.of(4.0), // maximumVoltage
-                                Volts.per(Second).of(0.5), // step
-                                Seconds.of(8.0) // duration
-                );
         }
 
         public Command setDutyCycle(Supplier<Double> dutyCycleSupplier) {

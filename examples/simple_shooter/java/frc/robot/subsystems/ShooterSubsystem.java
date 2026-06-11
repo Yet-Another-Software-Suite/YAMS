@@ -13,10 +13,7 @@ import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
-import static edu.wpi.first.units.Units.VoltsPerRadianPerSecond;
 import static yams.mechanisms.SmartMechanism.gearbox;
 import static yams.mechanisms.SmartMechanism.gearing;
 
@@ -74,7 +71,6 @@ public class ShooterSubsystem extends SubsystemBase
       .withDiameter(Inches.of(4))
       .withMass(Pounds.of(1))
       .withTelemetry("ShooterMech", TelemetryVerbosity.HIGH)
-      .withSoftLimits(RPM.of(-500), RPM.of(500))
       .withSpeedometerSimulation(RPM.of(750));
   private final FlyWheel       shooter       = new FlyWheel(shooterConfig);
 
@@ -89,8 +85,6 @@ public class ShooterSubsystem extends SubsystemBase
   public Command setVelocity(Supplier<AngularVelocity> speed) {return shooter.setSpeed(speed);}
 
   public Command setDutyCycle(Supplier<Double> dutyCycle) {return shooter.set(dutyCycle);}
-
-  public Command sysId() {return shooter.sysId(Volts.of(10), Volts.of(1).per(Second), Seconds.of(5));}
 
   @Override
   public void periodic() {

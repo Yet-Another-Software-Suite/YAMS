@@ -9,7 +9,6 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Pounds;
-import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -172,11 +171,6 @@ public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
   public Command armCmd(double dutycycle)
   {
     return arm.set(dutycycle);
-  }
-
-  public Command sysId()
-  {
-    return arm.sysId(Volts.of(3), Volts.of(3).per(Second), Second.of(30));
   }
 
   public Command setAngle(Angle angle)

@@ -41,11 +41,6 @@ public class DifferentialMechanismConfig
    */
   private Optional<SmartMotorController>         rightMotorController = Optional.empty();
   /**
-   * The network root of the mechanism (Optional).
-   */
-  @Deprecated
-  protected     Optional<String>             networkRoot             = Optional.empty();
-  /**
    * Telemetry name.
    */
   private       Optional<String>             telemetryName           = Optional.empty();
@@ -136,7 +131,6 @@ public class DifferentialMechanismConfig
     this.length = cfg.length;
     this.simColor = cfg.simColor;
     this.mechanismPositionConfig = cfg.mechanismPositionConfig;
-    this.networkRoot = cfg.networkRoot;
   }
 
   @Override
@@ -237,21 +231,6 @@ public class DifferentialMechanismConfig
   public DifferentialMechanismConfig withSimColor(final Color8Bit simColor)
   {
     this.simColor = simColor;
-    return this;
-  }
-
-  /**
-   * Configure the MOI directly instead of estimating it with the length and mass of the {@link DifferentialMechanism}
-   * for simulation.
-   *
-   * @param MOI Moment of Inertia of the {@link DifferentialMechanism}. In {@link edu.wpi.first.units.Units#KilogramSquareMeters}
-   * @return {@link DifferentialMechanismConfig} for chaining.
-   * @implNote Please use {@link #withMOI(MomentOfInertia)} instead. Default unit is KilogramSquareMeters
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public DifferentialMechanismConfig withMOI(double MOI)
-  {
-    this.MOI = OptionalDouble.of(MOI);
     return this;
   }
 
@@ -559,14 +538,4 @@ public class DifferentialMechanismConfig
     return mechanismPositionConfig;
   }
 
-  /**
-   * Get the network root of the mechanism.
-   *
-   * @return Optional containing the network root if set, otherwise an empty Optional.
-   */
-  @Deprecated
-  public Optional<String> getNetworkRoot()
-  {
-    return networkRoot;
-  }
 }

@@ -166,8 +166,4 @@ public class ExponentiallyProfiledElevatorSubsystem extends SubsystemBase
     return m_elevator.setHeight(height);
   }
 
-  public Command sysId()
-  {
-    return m_elevator.sysId(Volts.of(12), Volts.of(12).per(Second), Second.of(30));
-  }
 }

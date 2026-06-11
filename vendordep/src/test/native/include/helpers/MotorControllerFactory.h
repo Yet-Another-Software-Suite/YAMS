@@ -11,6 +11,7 @@
 #include <rev/SparkMax.h>
 
 #include <atomic>
+#include <chrono>
 #include <ctre/phoenix6/TalonFX.hpp>
 #include <ctre/phoenix6/TalonFXS.hpp>
 #include <memory>
@@ -151,12 +152,13 @@ inline bool IsCTRE(const HardwareBundle& b) {
 // caller's HardwareBundle destructor) so the CTRE simulation thread never
 // holds a pointer to a freed device — matching the pattern in SwerveDriveTest.
 inline void CloseBundle(HardwareBundle& b) {
+  frc2::CommandScheduler::GetInstance().CancelAll();
   frc2::CommandScheduler::GetInstance().UnregisterSubsystem(b.subsystem.get());
   b.subsystem->Close();
   delete b.smc;
   b.smc = nullptr;
-  if (b.talonFX != nullptr) b.talonFX.reset();
-  if (b.talonFXS != nullptr) b.talonFXS.reset();
+  b.talonFX.reset();
+  b.talonFXS.reset();
 }
 
 // All (hardware × profile) combinations used by each mechanism test suite.

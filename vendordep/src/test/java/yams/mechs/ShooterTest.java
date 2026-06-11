@@ -72,9 +72,7 @@ public class ShooterTest
   {
     FlyWheelConfig cfg = new FlyWheelConfig(smc)
         .withDiameter(Inches.of(4))
-        .withMass(Pounds.of(1))
-//        .withTelemetry("ShooterMech", TelemetryVerbosity.HIGH)
-        .withUpperSoftLimit(RPM.of(10000));
+        .withMass(Pounds.of(1));
     FlyWheel                          shooter = new FlyWheel(cfg);
     SmartMotorControllerTestSubsystem subsys  = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.smc = smc;

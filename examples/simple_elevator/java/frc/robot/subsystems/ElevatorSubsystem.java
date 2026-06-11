@@ -10,8 +10,6 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Pounds;
-import static edu.wpi.first.units.Units.Second;
-import static edu.wpi.first.units.Units.Volts;
 import static yams.mechanisms.SmartMechanism.gearbox;
 import static yams.mechanisms.SmartMechanism.gearing;
 
@@ -101,8 +99,4 @@ public class ElevatorSubsystem extends SubsystemBase
     return m_elevator.setHeight(height);
   }
 
-  public Command sysId()
-  {
-    return m_elevator.sysId(Volts.of(12), Volts.of(12).per(Second), Second.of(30));
-  }
 }

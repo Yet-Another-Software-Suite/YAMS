@@ -8,8 +8,6 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Feet;
-import static edu.wpi.first.units.Units.Second;
-import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -143,13 +141,6 @@ public class ArmSubsystem extends SubsystemBase {
    * @param dutycycle [-1, 1] speed to set the arm too.
    */
   // public Command set(double dutycycle) { return arm.set(dutycycle);}
-
-  /**
-   * Run sysId on the {@link Arm}
-   */
-  public Command sysId() {
-    return arm.sysId(Volts.of(7), Volts.of(2).per(Second), Seconds.of(4));
-  }
 
   @Override
   public void periodic() {

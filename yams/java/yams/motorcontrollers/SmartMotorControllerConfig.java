@@ -23,7 +23,6 @@ import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
@@ -59,7 +58,6 @@ import java.util.OptionalInt;
 import java.util.Set;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.gearing.MechanismGearing;
-import yams.math.ExponentialProfilePIDController;
 import yams.math.LQRController;
 import yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
 import yams.telemetry.SmartMotorControllerTelemetryConfig;
@@ -892,21 +890,6 @@ public class SmartMotorControllerConfig
    * Add the mechanism moment of inertia to the {@link SmartMotorController}s simulation when not run under a formal
    * mechanism.
    *
-   * @param MOI Known moment of inertia. In {@link edu.wpi.first.units.Units#KilogramSquareMeters}
-   * @return {@link SmartMotorControllerConfig} for chaining
-   * @implNote Please use {@link #withMomentOfInertia(MomentOfInertia)} instead. Default unit is KilogramSquareMeters
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public SmartMotorControllerConfig withMomentOfInertia(double MOI)
-  {
-    moi = KilogramSquareMeters.of(MOI);
-    return this;
-  }
-
-  /**
-   * Add the mechanism moment of inertia to the {@link SmartMotorController}s simulation when not run under a formal
-   * mechanism.
-   *
    * @param MOI Known moment of inertia.
    * @return {@link SmartMotorControllerConfig} for chaining
    */
@@ -1416,25 +1399,6 @@ public class SmartMotorControllerConfig
    * Set the closed loop controller for the {@link SmartMotorController}. The units passed in are in Rotations (or
    * Meters if Mechanism Circumference is configured), and outputs are in Volts.
    *
-   * @param controller {@link ProfiledPIDController} to use, the units passed in are in Rotations (or Meters if
-   *                   Mechanism Circumference is configured), and output is Voltage.
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public SmartMotorControllerConfig withSimClosedLoopController(ExponentialProfilePIDController controller)
-  {
-    this.exponentialProfile = Optional.of(controller.getConstraints().orElseThrow());
-    this.trapezoidProfile = Optional.empty();
-    this.sim_pid.put(ClosedLoopControllerSlot.SLOT_0,
-                     new PIDController(controller.getP(), controller.getI(), controller.getD()));
-    this.sim_lqr = Optional.empty();
-    return this;
-  }
-
-  /**
-   * Set the closed loop controller for the {@link SmartMotorController}. The units passed in are in Rotations (or
-   * Meters if Mechanism Circumference is configured), and outputs are in Volts.
-   *
    * @param controller {@link LQRController} to use, the units passed in are in Rotations (or Meters if Mechanism
    *                   Circumference is configured), and output is Voltage.
    * @return {@link SmartMotorControllerConfig} for chaining.
@@ -1443,25 +1407,6 @@ public class SmartMotorControllerConfig
   {
     this.sim_pid.clear();
     this.sim_lqr = Optional.ofNullable(controller);
-    return this;
-  }
-
-  /**
-   * Set the closed loop controller for the {@link SmartMotorController}. The units passed in are in Rotations (or
-   * Meters if Mechanism Circumference is configured), and outputs are in Volts.
-   *
-   * @param controller {@link ProfiledPIDController} to use, the units passed in are in Rotations (or Meters if
-   *                   Mechanism Circumference is configured), and output is Voltage.
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public SmartMotorControllerConfig withSimClosedLoopController(ProfiledPIDController controller)
-  {
-    this.sim_exponentialProfile = Optional.empty();
-    this.sim_trapezoidProfile = Optional.of(controller.getConstraints());
-    this.sim_pid.put(ClosedLoopControllerSlot.SLOT_0,
-                     new PIDController(controller.getP(), controller.getI(), controller.getD()));
-    this.sim_lqr = Optional.empty();
     return this;
   }
 
@@ -1522,227 +1467,6 @@ public class SmartMotorControllerConfig
   public SmartMotorControllerConfig withSimClosedLoopController(PIDController controller)
   {
     return withSimClosedLoopController(controller, ClosedLoopControllerSlot.SLOT_0);
-  }
-
-  /**
-   * Set the closed loop controller for the {@link SmartMotorController}. Units are Meters.
-   *
-   * @param slot            Closed loop controller slot.
-   * @param kP              KP scalar for the PID Controller.
-   * @param kI              KI scalar for the PID Controller.
-   * @param kD              KD scalar for the PID Controller.
-   * @param maxVelocity     Maximum linear velocity for the Trapezoidal profile.
-   * @param maxAcceleration Maximum linear acceleration for the Trapezoidal profile.
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   * @implNote This overrides existing trapezoidal profiles with the last one given in the chain!
-   * @deprecated Use {@link #withTrapezoidalProfile(LinearVelocity, LinearAcceleration)} to define your trapezoidal
-   * profile.
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public SmartMotorControllerConfig withSimClosedLoopController(double kP, double kI, double kD,
-                                                                LinearVelocity maxVelocity,
-                                                                LinearAcceleration maxAcceleration,
-                                                                ClosedLoopControllerSlot slot)
-  {
-    linearClosedLoopController = true;
-    this.sim_pid.put(slot, new PIDController(kP, kI, kD));
-    this.sim_exponentialProfile = Optional.empty();
-    this.sim_trapezoidProfile = Optional.of(new Constraints(maxVelocity.in(MetersPerSecond),
-                                                            maxAcceleration.in(MetersPerSecondPerSecond)));
-    this.sim_lqr = Optional.empty();
-    return this;
-  }
-
-  /**
-   * Set the closed loop controller for the {@link SmartMotorController}. Units are Meters.
-   *
-   * @param kP              KP scalar for the PID Controller.
-   * @param kI              KI scalar for the PID Controller.
-   * @param kD              KD scalar for the PID Controller.
-   * @param maxVelocity     Maximum linear velocity for the Trapezoidal profile.
-   * @param maxAcceleration Maximum linear acceleration for the Trapezoidal profile.
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   * @implNote This overrides existing trapezoidal profiles with the last one given in the chain!
-   * @deprecated Use {@link #withTrapezoidalProfile(LinearVelocity, LinearAcceleration)} to define your trapezoidal
-   * profile.
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public SmartMotorControllerConfig withSimClosedLoopController(double kP, double kI, double kD,
-                                                                LinearVelocity maxVelocity,
-                                                                LinearAcceleration maxAcceleration)
-  {
-    return withSimClosedLoopController(kP, kI, kD, maxVelocity, maxAcceleration, ClosedLoopControllerSlot.SLOT_0);
-  }
-
-  /**
-   * Set the closed loop controller for the {@link SmartMotorController}. Units are Rotations.
-   *
-   * @param slot            Closed loop controller slot.
-   * @param kP              KP scalar for the PID Controller, the units passed in are in Rotations.
-   * @param kI              KI scalar for the PID Controller, the units passed in are in Rotations.
-   * @param kD              KD scalar for the PID Controller, the units passed in are in Rotations.
-   * @param maxVelocity     Maximum angular velocity for the Trapezoidal profile.
-   * @param maxAcceleration Maximum angular acceleration for the Trapezoidal profile.
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   * @implNote This overrides existing trapezoidal profiles with the last one given in the chain!
-   * @deprecated Use {@link #withTrapezoidalProfile(AngularVelocity, AngularAcceleration)} to define your trapezoidal
-   * profile.
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public SmartMotorControllerConfig withSimClosedLoopController(double kP, double kI, double kD,
-                                                                AngularVelocity maxVelocity,
-                                                                AngularAcceleration maxAcceleration,
-                                                                ClosedLoopControllerSlot slot)
-  {
-    this.sim_pid.put(slot, new PIDController(kP, kI, kD));
-    this.sim_lqr = Optional.empty();
-    this.sim_exponentialProfile = Optional.empty();
-    this.sim_trapezoidProfile = Optional.of(new Constraints(maxVelocity.in(RotationsPerSecond),
-                                                            maxAcceleration.in(RotationsPerSecondPerSecond)));
-    return this;
-  }
-
-  /**
-   * Set the closed loop controller for the {@link SmartMotorController}. Units are Rotations.
-   *
-   * @param kP              KP scalar for the PID Controller, the units passed in are in Rotations.
-   * @param kI              KI scalar for the PID Controller, the units passed in are in Rotations.
-   * @param kD              KD scalar for the PID Controller, the units passed in are in Rotations.
-   * @param maxVelocity     Maximum angular velocity for the Trapezoidal profile.
-   * @param maxAcceleration Maximum angular acceleration for the Trapezoidal profile.
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   * @implNote This overrides existing trapezoidal profiles with the last one given in the chain!
-   * @deprecated Use {@link #withTrapezoidalProfile(AngularVelocity, AngularAcceleration)} to define your trapezoidal
-   * profile.
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public SmartMotorControllerConfig withSimClosedLoopController(double kP, double kI, double kD,
-                                                                AngularVelocity maxVelocity,
-                                                                AngularAcceleration maxAcceleration)
-  {
-    return withSimClosedLoopController(kP, kI, kD, maxVelocity, maxAcceleration, ClosedLoopControllerSlot.SLOT_0);
-  }
-
-  /**
-   * Set the closed loop controller for the {@link SmartMotorController}. Units are Rotations per Second.
-   *
-   * @param slot            Closed loop controller slot.
-   * @param kP              KP scalar for the PID Controller, the units passed in are in Rotations.
-   * @param kI              KI scalar for the PID Controller, the units passed in are in Rotations.
-   * @param kD              KD scalar for the PID Controller, the units passed in are in Rotations.
-   * @param maxAcceleration Maximum angular acceleration for the Trapezoidal profile.
-   * @param maxJerk         Maximum angular jerk for the Trapezoidal profile.
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   * @implNote This overrides existing trapezoidal profiles with the last one given in the chain!
-   * @deprecated Please use {@link #withTrapezoidalProfile(AngularAcceleration, Velocity<AngularAccelerationUnit>)} to
-   * define your trapezoidal profile.
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public SmartMotorControllerConfig withSimClosedLoopController(double kP, double kI, double kD,
-                                                                AngularAcceleration maxAcceleration,
-                                                                Velocity<AngularAccelerationUnit> maxJerk,
-                                                                ClosedLoopControllerSlot slot)
-  {
-    this.sim_pid.put(slot, new PIDController(kP, kI, kD));
-    this.sim_lqr = Optional.empty();
-    this.sim_exponentialProfile = Optional.empty();
-    this.sim_trapezoidProfile = Optional.of(new Constraints(maxAcceleration.in(RotationsPerSecondPerSecond),
-                                                            maxJerk.in(RotationsPerSecondPerSecond.per(Second))));
-    velocityTrapezoidalProfile = true;
-    return this;
-  }
-
-  /**
-   * Set the closed loop controller for the {@link SmartMotorController}. Units are Rotations per Second.
-   *
-   * @param kP              KP scalar for the PID Controller, the units passed in are in Rotations.
-   * @param kI              KI scalar for the PID Controller, the units passed in are in Rotations.
-   * @param kD              KD scalar for the PID Controller, the units passed in are in Rotations.
-   * @param maxAcceleration Maximum angular acceleration for the Trapezoidal profile.
-   * @param maxJerk         Maximum angular jerk for the Trapezoidal profile.
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   * @implNote This overrides existing trapezoidal profiles with the last one given in the chain!
-   * @deprecated Please use {@link #withTrapezoidalProfile(AngularAcceleration, Velocity<AngularAccelerationUnit>)} to
-   * define your trapezoidal profile.
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public SmartMotorControllerConfig withSimClosedLoopController(double kP, double kI, double kD,
-                                                                AngularAcceleration maxAcceleration,
-                                                                Velocity<AngularAccelerationUnit> maxJerk)
-  {
-    return withSimClosedLoopController(kP, kI, kD, maxAcceleration, maxJerk, ClosedLoopControllerSlot.SLOT_0);
-  }
-
-  /**
-   * Set the closed loop controller for the {@link SmartMotorController}. Units are Meters per Second.
-   *
-   * @param slot            Closed loop controller slot.
-   * @param kP              KP scalar for the PID Controller, the units passed in are in Meters per second.
-   * @param kI              KI scalar for the PID Controller, the units passed in are in Meters per second..
-   * @param kD              KD scalar for the PID Controller, the units passed in are in Meters per second..
-   * @param maxAcceleration Maximum linear acceleration for the Trapezoidal profile.
-   * @param maxJerk         Maximum linear jerk for the Trapezoidal profile.
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   * @implNote This overrides existing trapezoidal profiles with the last one given in the chain!
-   * @deprecated Please use {@link #withTrapezoidalProfile(LinearAcceleration, Velocity<LinearAccelerationUnit>)} to
-   * define your trapezoidal profile.
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public SmartMotorControllerConfig withSimClosedLoopController(double kP, double kI, double kD,
-                                                                LinearAcceleration maxAcceleration,
-                                                                Velocity<LinearAccelerationUnit> maxJerk,
-                                                                ClosedLoopControllerSlot slot)
-  {
-    this.sim_pid.put(slot, new PIDController(kP, kI, kD));
-    this.sim_lqr = Optional.empty();
-    this.sim_exponentialProfile = Optional.empty();
-    this.sim_trapezoidProfile = Optional.of(new Constraints(maxAcceleration.in(MetersPerSecondPerSecond),
-                                                            maxJerk.in(MetersPerSecondPerSecond.per(Second))));
-    velocityTrapezoidalProfile = true;
-    linearClosedLoopController = true;
-    return this;
-  }
-
-  /**
-   * Set the closed loop controller for the {@link SmartMotorController}. Units are Meters per Second.
-   *
-   * @param kP              KP scalar for the PID Controller, the units passed in are in Meters per second.
-   * @param kI              KI scalar for the PID Controller, the units passed in are in Meters per second..
-   * @param kD              KD scalar for the PID Controller, the units passed in are in Meters per second..
-   * @param maxAcceleration Maximum linear acceleration for the Trapezoidal profile.
-   * @param maxJerk         Maximum linear jerk for the Trapezoidal profile.
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   * @implNote This overrides existing trapezoidal profiles with the last one given in the chain!
-   * @deprecated Please use {@link #withTrapezoidalProfile(LinearAcceleration, Velocity<LinearAccelerationUnit>)} to
-   * define your trapezoidal profile.
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public SmartMotorControllerConfig withSimClosedLoopController(double kP, double kI, double kD,
-                                                                LinearAcceleration maxAcceleration,
-                                                                Velocity<LinearAccelerationUnit> maxJerk)
-  {
-    return withSimClosedLoopController(kP, kI, kD, maxAcceleration, maxJerk, ClosedLoopControllerSlot.SLOT_0);
-  }
-
-  /**
-   * Set the closed loop controller for the {@link SmartMotorController}, the units passed in are in Rotations (or
-   * Meters if the linear closed loop controller is configured), outputs are in Volts.
-   *
-   * @param controller {@link ProfiledPIDController} to use, the units passed in are in Rotations and output is
-   *                   Voltage.
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   * @deprecated Use {@link #withClosedLoopController(double, double, double)} and
-   * {@link #withTrapezoidalProfile(AngularVelocity, AngularAcceleration)}.
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public SmartMotorControllerConfig withClosedLoopController(ProfiledPIDController controller)
-  {
-    this.exponentialProfile = Optional.empty();
-    this.trapezoidProfile = Optional.of(controller.getConstraints());
-    this.pid.put(ClosedLoopControllerSlot.SLOT_0,
-                 new PIDController(controller.getP(), controller.getI(), controller.getD()));
-    this.lqr = Optional.empty();
-    return this;
   }
 
   /**
@@ -1947,26 +1671,6 @@ public class SmartMotorControllerConfig
    * Set the closed loop controller for the {@link SmartMotorController} with an exponential profile, the units passed
    * in are in Rotations (or Meters if linear closed loop controller configured), outputs are in Volts.
    *
-   * @param controller {@link ExponentialProfilePIDController} to use, the units passed in are in Rotations and output
-   *                   is Voltage.
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   * @deprecated Use {@link #withClosedLoopController(double, double, double)} and
-   * {@link #withExponentialProfile(ExponentialProfile.Constraints)}.
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public SmartMotorControllerConfig withClosedLoopController(ExponentialProfilePIDController controller)
-  {
-    this.pid.put(ClosedLoopControllerSlot.SLOT_0,
-                 new PIDController(controller.getP(), controller.getI(), controller.getD()));
-    this.exponentialProfile = Optional.of(controller.getConstraints().orElseThrow());
-    this.lqr = Optional.empty();
-    return this;
-  }
-
-  /**
-   * Set the closed loop controller for the {@link SmartMotorController} with an exponential profile, the units passed
-   * in are in Rotations (or Meters if linear closed loop controller configured), outputs are in Volts.
-   *
    * @param controller {@link LQRController} to use, the units passed in are in Rotations and output is Voltage.
    * @return {@link SmartMotorControllerConfig} for chaining.
    * @implNote This clears all PIDs.
@@ -2043,212 +1747,6 @@ public class SmartMotorControllerConfig
   public SmartMotorControllerConfig withClosedLoopController(PIDController controller)
   {
     return withClosedLoopController(controller, ClosedLoopControllerSlot.SLOT_0);
-  }
-
-  /**
-   * Set the closed loop controller for the {@link SmartMotorController}. Units are Meters.
-   *
-   * @param slot            Closed loop controller slot.
-   * @param kP              KP scalar for the PID Controller, the units passed in are in Meters and output is Voltage.
-   * @param kI              KI scalar for the PID Controller, the units passed in are in Meters and output is Voltage.
-   * @param kD              KD scalar for the PID Controller, the units passed in are in Meters and output is Voltage.
-   * @param maxVelocity     Maximum linear velocity for the Trapezoidal profile.
-   * @param maxAcceleration Maximum linear acceleration for the Trapezoidal profile.
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   * @deprecated Please use {@link #withTrapezoidalProfile(LinearVelocity, LinearAcceleration)} to define your
-   * trapezoidal profile.
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public SmartMotorControllerConfig withClosedLoopController(double kP, double kI, double kD,
-                                                             LinearVelocity maxVelocity,
-                                                             LinearAcceleration maxAcceleration,
-                                                             ClosedLoopControllerSlot slot)
-  {
-    if (mechanismCircumference.isEmpty())
-    {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
-                                                           "Closed loop controller cannot be created.",
-                                                           "withMechanismCircumference(Distance)");
-    }
-    this.pid.put(slot, new PIDController(kP, kI, kD));
-    this.lqr = Optional.empty();
-    return withTrapezoidalProfile(maxVelocity, maxAcceleration);
-  }
-
-  /**
-   * Set the closed loop controller for the {@link SmartMotorController}. Units are Meters.
-   *
-   * @param kP              KP scalar for the PID Controller, the units passed in are in Meters and output is Voltage.
-   * @param kI              KI scalar for the PID Controller, the units passed in are in Meters and output is Voltage.
-   * @param kD              KD scalar for the PID Controller, the units passed in are in Meters and output is Voltage.
-   * @param maxVelocity     Maximum linear velocity for the Trapezoidal profile.
-   * @param maxAcceleration Maximum linear acceleration for the Trapezoidal profile.
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   * @deprecated Please use {@link #withTrapezoidalProfile(LinearVelocity, LinearAcceleration)} to define your
-   * trapezoidal profile.
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public SmartMotorControllerConfig withClosedLoopController(double kP, double kI, double kD,
-                                                             LinearVelocity maxVelocity,
-                                                             LinearAcceleration maxAcceleration)
-  {
-    return withClosedLoopController(kP, kI, kD, maxVelocity, maxAcceleration, ClosedLoopControllerSlot.SLOT_0);
-  }
-
-  /**
-   * Set the closed loop controller for the {@link SmartMotorController}. Units are Meters.
-   *
-   * @param slot            Closed loop controller slot.
-   * @param kP              KP scalar for the PID Controller, the units passed in are in Rotations and output is
-   *                        Voltage.
-   * @param kI              KI scalar for the PID Controller, the units passed in are in Rotations and output is
-   *                        Voltage.
-   * @param kD              KD scalar for the PID Controller, the units passed in are in Rotations and output is
-   *                        Voltage.
-   * @param maxVelocity     Maximum angular velocity for the Trapezoidal profile.
-   * @param maxAcceleration Maximum angular acceleration for the Trapezoidal profile.
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   * @implNote This will use only the last trapezoidal profile defined.
-   * @deprecated Please use {@link #withTrapezoidalProfile(AngularVelocity, AngularAcceleration)} to define your
-   * trapezoidal profile.
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public SmartMotorControllerConfig withClosedLoopController(double kP, double kI, double kD,
-                                                             AngularVelocity maxVelocity,
-                                                             AngularAcceleration maxAcceleration,
-                                                             ClosedLoopControllerSlot slot)
-  {
-    this.pid.put(slot, new PIDController(kP, kI, kD));
-    this.lqr = Optional.empty();
-    return withTrapezoidalProfile(maxVelocity, maxAcceleration);
-  }
-
-  /**
-   * Set the closed loop controller for the {@link SmartMotorController}. Units are Meters.
-   *
-   * @param kP              KP scalar for the PID Controller, the units passed in are in Rotations and output is
-   *                        Voltage.
-   * @param kI              KI scalar for the PID Controller, the units passed in are in Rotations and output is
-   *                        Voltage.
-   * @param kD              KD scalar for the PID Controller, the units passed in are in Rotations and output is
-   *                        Voltage.
-   * @param maxVelocity     Maximum angular velocity for the Trapezoidal profile.
-   * @param maxAcceleration Maximum angular acceleration for the Trapezoidal profile.
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   * @implNote This will use only the last trapezoidal profile defined.
-   * @deprecated Please use {@link #withTrapezoidalProfile(AngularVelocity, AngularAcceleration)} to define your
-   * trapezoidal profile.
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public SmartMotorControllerConfig withClosedLoopController(double kP, double kI, double kD,
-                                                             AngularVelocity maxVelocity,
-                                                             AngularAcceleration maxAcceleration)
-  {
-    return withClosedLoopController(kP, kI, kD, maxVelocity, maxAcceleration, ClosedLoopControllerSlot.SLOT_0);
-  }
-
-  /**
-   * Set the closed loop controller for the {@link SmartMotorController}. Units are Rotations.
-   *
-   * @param slot            Closed loop controller slot.
-   * @param kP              KP scalar for the PID Controller, the units passed in are in Rotations and output is
-   *                        Voltage.
-   * @param kI              KI scalar for the PID Controller, the units passed in are in Rotations and output is
-   *                        Voltage.
-   * @param kD              KD scalar for the PID Controller, the units passed in are in Rotations and output is
-   *                        Voltage.
-   * @param maxAcceleration Maximum angular acceleration for the Trapezoidal profile.
-   * @param maxJerk         Maximum angular jerk for the Trapezoidal profile.
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   * @implNote This will use only the last trapezoidal profile defined.
-   * @deprecated Use {@link #withTrapezoidalProfile(AngularAcceleration, Velocity<AngularAccelerationUnit>)} to define
-   * your trapezoidal profile.
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public SmartMotorControllerConfig withClosedLoopController(double kP, double kI, double kD,
-                                                             AngularAcceleration maxAcceleration,
-                                                             Velocity<AngularAccelerationUnit> maxJerk,
-                                                             ClosedLoopControllerSlot slot)
-  {
-    this.pid.put(slot, new PIDController(kP, kI, kD));
-    this.lqr = Optional.empty();
-    return withTrapezoidalProfile(maxAcceleration, maxJerk);
-  }
-
-  /**
-   * Set the closed loop controller for the {@link SmartMotorController}. Units are Rotations.
-   *
-   * @param kP              KP scalar for the PID Controller, the units passed in are in Rotations and output is
-   *                        Voltage.
-   * @param kI              KI scalar for the PID Controller, the units passed in are in Rotations and output is
-   *                        Voltage.
-   * @param kD              KD scalar for the PID Controller, the units passed in are in Rotations and output is
-   *                        Voltage.
-   * @param maxAcceleration Maximum angular acceleration for the Trapezoidal profile.
-   * @param maxJerk         Maximum angular jerk for the Trapezoidal profile.
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   * @implNote This will use only the last trapezoidal profile defined.
-   * @deprecated Use {@link #withTrapezoidalProfile(AngularAcceleration, Velocity<AngularAccelerationUnit>)} to define
-   * your trapezoidal profile.
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public SmartMotorControllerConfig withClosedLoopController(double kP, double kI, double kD,
-                                                             AngularAcceleration maxAcceleration,
-                                                             Velocity<AngularAccelerationUnit> maxJerk)
-  {
-    return withClosedLoopController(kP, kI, kD, maxAcceleration, maxJerk, ClosedLoopControllerSlot.SLOT_0);
-  }
-
-  /**
-   * Set the closed loop controller for the {@link SmartMotorController}. Units are Meters.
-   *
-   * @param slot            Closed loop controller slot.
-   * @param kP              KP scalar for the PID Controller, the units passed in are in Rotations and output is
-   *                        Voltage.
-   * @param kI              KI scalar for the PID Controller, the units passed in are in Rotations and output is
-   *                        Voltage.
-   * @param kD              KD scalar for the PID Controller, the units passed in are in Rotations and output is
-   *                        Voltage.
-   * @param maxAcceleration Maximum angular acceleration for the Trapezoidal profile.
-   * @param maxJerk         Maximum angular jerk for the Trapezoidal profile.
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   * @implNote This will use only the last trapezoidal profile defined.
-   * @deprecated Use {@link #withTrapezoidalProfile(LinearAcceleration, Velocity<LinearAccelerationUnit>)} to define
-   * your trapezoidal profile.
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public SmartMotorControllerConfig withClosedLoopController(double kP, double kI, double kD,
-                                                             LinearAcceleration maxAcceleration,
-                                                             Velocity<LinearAccelerationUnit> maxJerk,
-                                                             ClosedLoopControllerSlot slot)
-  {
-    this.pid.put(slot, new PIDController(kP, kI, kD));
-    this.lqr = Optional.empty();
-    return withTrapezoidalProfile(maxAcceleration, maxJerk);
-  }
-
-  /**
-   * Set the closed loop controller for the {@link SmartMotorController}. Units are Meters.
-   *
-   * @param kP              KP scalar for the PID Controller, the units passed in are in Rotations and output is
-   *                        Voltage.
-   * @param kI              KI scalar for the PID Controller, the units passed in are in Rotations and output is
-   *                        Voltage.
-   * @param kD              KD scalar for the PID Controller, the units passed in are in Rotations and output is
-   *                        Voltage.
-   * @param maxAcceleration Maximum angular acceleration for the Trapezoidal profile.
-   * @param maxJerk         Maximum angular jerk for the Trapezoidal profile.
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   * @implNote This will use only the last trapezoidal profile defined.
-   * @deprecated Use {@link #withTrapezoidalProfile(LinearAcceleration, Velocity<LinearAccelerationUnit>)} to define
-   * your trapezoidal profile.
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public SmartMotorControllerConfig withClosedLoopController(double kP, double kI, double kD,
-                                                             LinearAcceleration maxAcceleration,
-                                                             Velocity<LinearAccelerationUnit> maxJerk)
-  {
-    return withClosedLoopController(kP, kI, kD, maxAcceleration, maxJerk, ClosedLoopControllerSlot.SLOT_0);
   }
 
   /**

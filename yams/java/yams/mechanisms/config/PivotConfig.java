@@ -35,11 +35,6 @@ public class PivotConfig
    */
   private   Optional<SmartMotorController> motor;
   /**
-   * The network root of the mechanism (Optional).
-   */
-  @Deprecated
-  protected Optional<String>               networkRoot             = Optional.empty();
-  /**
    * Telemetry name.
    */
   private   Optional<String>               telemetryName           = Optional.empty();
@@ -114,7 +109,6 @@ public class PivotConfig
   {
     this.simStartingPosition = cfg.simStartingPosition;
     this.motor = cfg.motor;
-    this.networkRoot = cfg.networkRoot;
     this.telemetryName = cfg.telemetryName;
     this.telemetryVerbosity = cfg.telemetryVerbosity;
     this.lowerHardLimit = cfg.lowerHardLimit;
@@ -183,23 +177,6 @@ public class PivotConfig
    * Configure the MOI directly instead of estimating it with the length and mass of the
    * {@link Pivot} for simulation.
    *
-   * @param MOI Moment of Inertia of the {@link Pivot}. in
-   *            {@link edu.wpi.first.units.Units#KilogramSquareMeters}
-   * @return {@link PivotConfig} for chaining.
-   * @implNote Please use {@link #withMOI(MomentOfInertia)} instead. Default unit is KilogramSquareMeters
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public PivotConfig withMOI(double MOI)
-  {
-    motor.ifPresent(motor -> motor.getConfig().withMomentOfInertia(KilogramSquareMeters.of(MOI)));
-    this.moi = OptionalDouble.of(MOI);
-    return this;
-  }
-
-  /**
-   * Configure the MOI directly instead of estimating it with the length and mass of the
-   * {@link Pivot} for simulation.
-   *
    * @param MOI Moment of Inertia of the {@link Pivot}
    * @return {@link PivotConfig} for chaining.
    */
@@ -234,23 +211,6 @@ public class PivotConfig
    */
   public PivotConfig withTelemetry(String telemetryName, TelemetryVerbosity telemetryVerbosity)
   {
-    this.telemetryName = Optional.ofNullable(telemetryName);
-    this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
-    return this;
-  }
-
-  /**
-   * Configure telemetry for the {@link Pivot} mechanism.
-   *
-   * @param telemetryName      Telemetry NetworkTable name to appear under "SmartDashboard/"
-   * @param telemetryVerbosity Telemetry verbosity to apply.
-   * @param networkRoot        Network root to publish the telemetry under.
-   * @return {@link ArmConfig} for chaining.
-   */
-  @Deprecated
-  public PivotConfig withTelemetry(String networkRoot, String telemetryName, TelemetryVerbosity telemetryVerbosity)
-  {
-    this.networkRoot = Optional.ofNullable(networkRoot);
     this.telemetryName = Optional.ofNullable(telemetryName);
     this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
     return this;
@@ -433,14 +393,4 @@ public class PivotConfig
     return mechanismPositionConfig;
   }
 
-  /**
-   * Get the network root of the mechanism.
-   *
-   * @return Optional containing the network root if set, otherwise an empty Optional.
-   */
-  @Deprecated
-  public Optional<String> getNetworkRoot()
-  {
-    return networkRoot;
-  }
 }

@@ -30,7 +30,6 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.AngularAccelerationUnit;
-import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -47,8 +46,6 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -675,71 +672,6 @@ public abstract class SmartMotorController
    * @param angle Mechanism {@link AngularVelocity} to target.
    */
   public abstract void setVelocity(AngularVelocity angle);
-
-  /**
-   * Get the SysIdConfig which may need to have modifications based on the SmartMotorController, like TalonFX and
-   * TalonFXS to record states correctly.
-   *
-   * @param maxVoltage   Maximum voltage of the {@link SysIdRoutine}.
-   * @param stepVoltage  Step voltage for the dynamic test in {@link SysIdRoutine}.
-   * @param testDuration Duration of each {@link SysIdRoutine} run.
-   * @return {@link Config} of the {@link SysIdRoutine} to run.
-   */
-  public Config getSysIdConfig(Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage, Time testDuration)
-  {
-    return new Config(stepVoltage, maxVoltage, testDuration);
-  }
-
-  /**
-   * Run the  {@link SysIdRoutine} which runs to the maximum MEASUREMENT at the step voltage then down to the minimum
-   * MEASUREMENT with the step voltage then up to the maximum MEASUREMENT increasing each second by the step voltage
-   * generated via the {@link SmartMotorControllerConfig}.
-   *
-   * @param maxVoltage   Maximum voltage of the {@link SysIdRoutine}.
-   * @param stepVoltage  Step voltage for the dynamic test in {@link SysIdRoutine}.
-   * @param testDuration Duration of each {@link SysIdRoutine} run.
-   * @return Sequential command group of {@link SysIdRoutine} running all required tests to the configured MINIMUM and
-   * MAXIMUM MEASUREMENTS.
-   */
-  public SysIdRoutine sysId(Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage, Time testDuration)
-  {
-    SysIdRoutine sysIdRoutine = null;
-    if (m_config.getTelemetryName().isEmpty())
-    {
-      throw new SmartMotorControllerConfigurationException("Telemetry is undefined",
-                                                           "Cannot create SysIdRoutine",
-                                                           "withTelemetry(String,TelemetryVerbosity)");
-    }
-    Config sysIdConfig = getSysIdConfig(maxVoltage, stepVoltage, testDuration);
-    if (m_config.getLinearClosedLoopControllerUse())
-    {
-      sysIdRoutine = new SysIdRoutine(sysIdConfig,
-                                      new SysIdRoutine.Mechanism(
-                                          this::setVoltage,
-                                          log -> {
-                                            log.motor(getName())
-                                               .voltage(
-                                                   getVoltage())
-                                               .linearVelocity(getMeasurementVelocity())
-                                               .linearPosition(getMeasurementPosition());
-                                          },
-                                          m_config.getSubsystem()));
-    } else
-    {
-      sysIdRoutine = new SysIdRoutine(sysIdConfig,
-                                      new SysIdRoutine.Mechanism(
-                                          this::setVoltage,
-                                          log -> {
-                                            log.motor(getName())
-                                               .voltage(
-                                                   getVoltage())
-                                               .angularPosition(getMechanismPosition())
-                                               .angularVelocity(getMechanismVelocity());
-                                          },
-                                          m_config.getSubsystem()));
-    }
-    return sysIdRoutine;
-  }
 
   /**
    * Apply the {@link SmartMotorControllerConfig} to the {@link SmartMotorController}.

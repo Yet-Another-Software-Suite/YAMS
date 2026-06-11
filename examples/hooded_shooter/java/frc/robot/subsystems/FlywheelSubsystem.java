@@ -11,9 +11,7 @@ import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
@@ -60,7 +58,6 @@ public class FlywheelSubsystem extends SubsystemBase
       .withDiameter(Inches.of(4))
       .withMass(Pounds.of(1))
       .withTelemetry("FlywheelMech", TelemetryVerbosity.HIGH)
-      .withSoftLimits(RPM.of(-5000), RPM.of(5000))
       .withSpeedometerSimulation(RPM.of(7500));
 
   private final FlyWheel flywheel = new FlyWheel(flywheelConfig);
@@ -92,11 +89,6 @@ public class FlywheelSubsystem extends SubsystemBase
   public Command setDutyCycle(Supplier<Double> dutyCycle)
   {
     return flywheel.set(dutyCycle);
-  }
-
-  public Command sysId()
-  {
-    return flywheel.sysId(Volts.of(10), Volts.of(1).per(Second), Seconds.of(5));
   }
 
   @Override
