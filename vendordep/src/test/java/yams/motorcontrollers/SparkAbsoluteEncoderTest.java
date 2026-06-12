@@ -46,7 +46,7 @@ public class SparkAbsoluteEncoderTest
     @Test
     void testZeroCenteredTrueWith0_5DiscontinuityPoint()
     {
-        SparkMax sparkMax = new SparkMax(90, MotorType.kBrushless);
+        SparkMax sparkMax = new SparkMax(60, MotorType.kBrushless);
         SmartMotorControllerConfig config = baseConfig()
                 .withExternalEncoder(sparkMax.getAbsoluteEncoder())
                 .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5));
@@ -57,7 +57,7 @@ public class SparkAbsoluteEncoderTest
     @Test
     void testZeroCenteredFalseWith1_0DiscontinuityPoint()
     {
-        SparkMax sparkMax = new SparkMax(91, MotorType.kBrushless);
+        SparkMax sparkMax = new SparkMax(60, MotorType.kBrushless);
         SmartMotorControllerConfig config = baseConfig()
                 .withExternalEncoder(sparkMax.getAbsoluteEncoder())
                 .withExternalEncoderDiscontinuityPoint(Rotations.of(1));
@@ -68,7 +68,7 @@ public class SparkAbsoluteEncoderTest
     @Test
     void testExceptionWhenDiscontinuityPointWithoutEncoder()
     {
-        SparkMax sparkMax = new SparkMax(93, MotorType.kBrushless);
+        SparkMax sparkMax = new SparkMax(60, MotorType.kBrushless);
         SmartMotorControllerConfig config = baseConfig()
                 .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5));
         assertThrows(SmartMotorControllerConfigurationException.class,
