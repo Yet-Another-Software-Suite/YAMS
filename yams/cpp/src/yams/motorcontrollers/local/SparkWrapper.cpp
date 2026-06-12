@@ -220,11 +220,11 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& cfg) {
     }
     if (auto wrapMax = m_config.GetContinuousWrapping(); wrapMax) {
       if (auto wrapMin = m_config.GetContinuousWrappingMin(); wrapMin)
-        sparkCfg.closedLoop.positionWrappingInputRange(wrapMin->value(), wrapMax->value())
-            .positionWrappingEnabled(true);
+        sparkCfg.closedLoop.PositionWrappingInputRange(wrapMin->value(), wrapMax->value())
+            .PositionWrappingEnabled(true);
       else
-        sparkCfg.closedLoop.positionWrappingMaxInput(wrapMax->value())
-            .positionWrappingEnabled(true);
+        sparkCfg.closedLoop.PositionWrappingMaxInput(wrapMax->value())
+            .PositionWrappingEnabled(true);
     }
   };
 
