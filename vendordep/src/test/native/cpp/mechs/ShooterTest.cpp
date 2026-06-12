@@ -91,6 +91,11 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
     if (smc->GetDutyCycle() != 0.0) passed = true;
   });
 
+  if (isCTRE) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    SchedulerHelper::RunForDuration(1.0_s);
+  }
+
   auto postVel = smc->GetMechanismVelocity();
   auto postAngle = smc->GetMechanismPosition();
 
@@ -108,14 +113,14 @@ static void VelocityPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   auto preVel = smc->GetMechanismVelocity();
   bool passed = false;
 
-  auto cmd =
-      frc2::cmd::Run([smc] { smc->SetVelocity(2000_rpm); }, {smc->GetConfig().GetSubsystem()});
+  // ~2000 RPM = 2000/60 rps * 360 deg/rot = 12000 deg/s
+  auto cmd = frc2::cmd::Run([smc] { smc->SetVelocity(units::degrees_per_second_t{12000.0}); },
+                            {smc->GetConfig().GetSubsystem()});
   frc2::CommandScheduler::GetInstance().Schedule(cmd);
 
-  SchedulerHelper::RunForDuration(2.0_s, [&] {
+  SchedulerHelper::RunForDuration(isCTRE ? 1.0_s : 2.0_s, [&] {
     if (smc->GetDutyCycle() != 0.0) passed = true;
   });
-  if (isCTRE) std::this_thread::sleep_for(std::chrono::milliseconds{100});
 
   auto postVel = smc->GetMechanismVelocity();
 
@@ -146,7 +151,7 @@ TEST_P(ShooterTest, SMCDutyCycle) {
   SCOPED_TRACE(param.name);
   auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  //  bundle.smc->SetupSimulation();
+  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
@@ -158,7 +163,7 @@ TEST_P(ShooterTest, SMCVelocityPID) {
   SCOPED_TRACE(param.name);
   auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  //  bundle.smc->SetupSimulation();
+  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   VelocityPIDTestBody(bundle.smc, IsCTRE(bundle));
@@ -170,7 +175,7 @@ TEST_P(ShooterTest, ShooterDutyCycle) {
   SCOPED_TRACE(param.name);
   auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  //  bundle.smc->SetupSimulation();
+  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   auto shooter = CreateShooter(bundle.smc, bundle.subsystem.get());
@@ -187,7 +192,7 @@ TEST_P(ShooterTest, ShooterVelocityPID) {
   SCOPED_TRACE(param.name);
   auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  //  bundle.smc->SetupSimulation();
+  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   // ~80 RPM = 80/60 * 360 ≈ 480 deg/s
