@@ -14,7 +14,6 @@
 #include <chrono>
 #include <cmath>
 #include <cstdio>
-#include <iostream>
 #include <string>
 #include <thread>
 
@@ -36,8 +35,9 @@ using namespace mechanisms::velocity;
 static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, TestSubsystem* subsys,
                                                        const std::string& name) {
   SmartMotorControllerConfig cfg;
-  cfg.WithFeedback(10.0, 0.0, 0.0)
-      .WithMotorGearing(gearing::MechanismGearing{gearing::GearBox::FromReductionStages({1})})
+  cfg.WithFeedback(100.0, 0.0, 0.0)
+      .WithMotorGearing(
+          gearing::MechanismGearing{gearing::GearBox::FromReductionStages({3.0, 4.0})})
       .WithIdleMode(SmartMotorControllerConfig::MotorMode::COAST)
       .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
@@ -68,7 +68,7 @@ static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, Test
 
 static FlyWheel* CreateShooter(SmartMotorController* smc, TestSubsystem* subsys) {
   FlyWheelConfig cfg;
-  cfg.WithMotorController(smc).WithRollerDiameter(4_in);  // 4 inches
+  cfg.WithMotorController(smc).WithRollerDiameter(units::meter_t{4.0 * 0.0254});  // 4 inches
   FlyWheel* shooter = new FlyWheel(cfg);
   subsys->m_mechSimPeriodic = [shooter] { shooter->SimIterate(); };
   subsys->m_mechUpdateTelemetry = [shooter] { shooter->UpdateTelemetry(); };
@@ -83,12 +83,18 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
   bool passed = false;
 
   auto* subsys = static_cast<TestSubsystem*>(smc->GetConfig().GetSubsystem());
-  auto cmd = subsys->SetDutyCycle(1.0);
+  auto cmd = subsys->SetDutyCycle(0.5);
+  frc2::CommandScheduler::GetInstance().Schedule(cmd);
   frc2::CommandScheduler::GetInstance().Schedule(cmd);
 
   SchedulerHelper::RunForDuration(1.0_s, [&] {
     if (smc->GetDutyCycle() != 0.0) passed = true;
   });
+
+  if (isCTRE) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    SchedulerHelper::RunForDuration(1.0_s);
+  }
 
   auto postVel = smc->GetMechanismVelocity();
   auto postAngle = smc->GetMechanismPosition();
@@ -96,10 +102,6 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
   bool moved = (postVel > preVel) || (postAngle > preAngle) || passed;
   if (isCTRE && !moved) {
     std::printf("[WARNING] TalonFX/TalonFXS shooter duty-cycle inconclusive.\n");
-    std::cerr << "preVel=" << preVel.value() << std::endl
-              << "preAngle=" << preAngle.value() << std::endl
-              << "postVel=" << postVel.value() << std::endl
-              << "postAngle=" << postAngle.value() << std::endl;
   } else {
     EXPECT_TRUE(moved) << "Shooter did not spin during duty-cycle test"
                        << " preVel=" << preVel.value() << " preAngle=" << preAngle.value()
@@ -111,21 +113,18 @@ static void VelocityPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   auto preVel = smc->GetMechanismVelocity();
   bool passed = false;
 
-  auto cmd =
-      frc2::cmd::Run([smc] { smc->SetVelocity(4000_rpm); }, {smc->GetConfig().GetSubsystem()});
+  // ~2000 RPM = 2000/60 rps * 360 deg/rot = 12000 deg/s
+  auto cmd = frc2::cmd::Run([smc] { smc->SetVelocity(units::degrees_per_second_t{12000.0}); },
+                            {smc->GetConfig().GetSubsystem()});
   frc2::CommandScheduler::GetInstance().Schedule(cmd);
 
-  SchedulerHelper::RunForDuration(2.0_s, [&] {
+  SchedulerHelper::RunForDuration(isCTRE ? 1.0_s : 2.0_s, [&] {
     if (smc->GetDutyCycle() != 0.0) passed = true;
   });
 
   auto postVel = smc->GetMechanismVelocity();
-  if (!passed && isCTRE) {
-    std::printf("[WARNING] TalonFX/TalonFXS shooter velocity PID test inconclusive.\n");
-    std::cerr << "preVel=" << preVel.value() << std::endl
-              << "postVel=" << postVel.value() << std::endl;
-  }
-  EXPECT_TRUE(std::abs(postVel.value() - preVel.value()) > 0.05 || passed || isCTRE)
+
+  EXPECT_TRUE(std::abs(postVel.value() - preVel.value()) > 0.05 || passed)
       << "Shooter velocity did not change toward PID setpoint"
       << " preVel=" << preVel.value() << " postVel=" << postVel.value();
 }
@@ -152,7 +151,7 @@ TEST_P(ShooterTest, SMCDutyCycle) {
   SCOPED_TRACE(param.name);
   auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  //  bundle.smc->SetupSimulation();
+  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
@@ -164,7 +163,7 @@ TEST_P(ShooterTest, SMCVelocityPID) {
   SCOPED_TRACE(param.name);
   auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  //  bundle.smc->SetupSimulation();
+  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   VelocityPIDTestBody(bundle.smc, IsCTRE(bundle));
@@ -176,7 +175,7 @@ TEST_P(ShooterTest, ShooterDutyCycle) {
   SCOPED_TRACE(param.name);
   auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  //  bundle.smc->SetupSimulation();
+  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   auto shooter = CreateShooter(bundle.smc, bundle.subsystem.get());
@@ -193,7 +192,7 @@ TEST_P(ShooterTest, ShooterVelocityPID) {
   SCOPED_TRACE(param.name);
   auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  //  bundle.smc->SetupSimulation();
+  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   // ~80 RPM = 80/60 * 360 ≈ 480 deg/s

@@ -17,7 +17,6 @@
 #include <cstdio>
 #include <string>
 #include <thread>
-#include <iostream>
 
 #include "helpers/MockHardware.h"
 #include "helpers/MotorControllerFactory.h"
@@ -89,16 +88,17 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
     if (smc->GetDutyCycle() != 0.0) passed = true;
   });
 
+  if (isCTRE) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    SchedulerHelper::RunForDuration(1.0_s);
+  }
+
   auto postVel = smc->GetMechanismVelocity();
   auto postAngle = smc->GetMechanismPosition();
 
   bool moved = (postVel > preVel) || (postAngle > preAngle) || passed;
   if (isCTRE && !moved) {
     std::printf("[WARNING] TalonFX/TalonFXS pivot duty-cycle inconclusive.\n");
-    std::cerr << "preVel: " << preVel.value() << std::endl
-              << "postVel: " << postVel.value() << std::endl
-              << "preAngle: " << preAngle.value() << std::endl
-              << "postAngle: " << postAngle.value() << std::endl;
   } else {
     EXPECT_TRUE(moved) << "Pivot did not move during duty-cycle test"
                        << " preVel=" << preVel.value() << " preAngle=" << preAngle.value()
@@ -114,17 +114,15 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE) {
       frc2::cmd::Run([smc] { smc->SetPosition(80.0_deg); }, {smc->GetConfig().GetSubsystem()});
   frc2::CommandScheduler::GetInstance().Schedule(cmd);
 
-  SchedulerHelper::RunForDuration(2.0_s, [&] {
+  SchedulerHelper::RunForDuration(isCTRE ? 1.0_s : 20.0_s, [&] {
+    if (isCTRE)
+      std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(
+          smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms).value() * 1000.0)));
     if (smc->GetDutyCycle() != 0.0) passed = true;
   });
 
   auto postAngle = smc->GetMechanismPosition();
-  if (!passed && isCTRE) {
-    std::printf("[WARNING] TalonFX/TalonFXS pivot position-PID inconclusive.\n");
-    std::cerr << "preAngle: " << preAngle.value() << std::endl
-              << "postAngle: " << postAngle.value() << std::endl;
-  }
-  EXPECT_TRUE(std::abs(postAngle.value() - preAngle.value()) > 0.0003 || passed || isCTRE)
+  EXPECT_TRUE(std::abs(postAngle.value() - preAngle.value()) > 0.0003 || passed)
       << "Pivot did not move toward PID setpoint"
       << " preAngle=" << preAngle.value() << " postAngle=" << postAngle.value();
 }
@@ -151,7 +149,7 @@ TEST_P(PivotTest, SMCDutyCycle) {
   SCOPED_TRACE(param.name);
   auto cfg = MakePivotSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  //  bundle.smc->SetupSimulation();
+  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
@@ -163,7 +161,7 @@ TEST_P(PivotTest, SMCPositionPID) {
   SCOPED_TRACE(param.name);
   auto cfg = MakePivotSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  //  bundle.smc->SetupSimulation();
+  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   PositionPIDTestBody(bundle.smc, IsCTRE(bundle));
@@ -175,7 +173,7 @@ TEST_P(PivotTest, PivotDutyCycle) {
   SCOPED_TRACE(param.name);
   auto cfg = MakePivotSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  //  bundle.smc->SetupSimulation();
+  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   auto pivot = CreatePivot(bundle.smc, bundle.subsystem.get());
@@ -192,7 +190,7 @@ TEST_P(PivotTest, PivotPositionPID) {
   SCOPED_TRACE(param.name);
   auto cfg = MakePivotSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  //  bundle.smc->SetupSimulation();
+  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   auto pivot = CreatePivot(bundle.smc, bundle.subsystem.get());

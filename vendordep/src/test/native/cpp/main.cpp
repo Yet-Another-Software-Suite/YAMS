@@ -1,16 +1,14 @@
 // Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include <cxxabi.h>
-#include <execinfo.h>
 #include <hal/HAL.h>
 
+#include <cstdlib>
 #include <csignal>
 #include <cstdio>
-#include <cstdlib>
 #include <cstring>
-#include <ctre/phoenix/platform/Platform.hpp>
-#include <iostream>
+#include <cxxabi.h>
+#include <execinfo.h>
 
 #include "gtest/gtest.h"
 #include "helpers/ExceptionTracer.h"
@@ -20,8 +18,9 @@ static void SigsegvHandler(int /*sig*/) {
   void* frames[64];
   int count = backtrace(frames, 64);
   char** symbols = backtrace_symbols(frames, count);
-  std::cerr << "\n[CTRE] " << ctre::phoenix::platform::GetStackTrace(0) << std::endl;
+
   std::fprintf(stderr, "\n[YAMS] Caught SIGSEGV after tests — stack trace:\n");
+
   for (int i = 0; i < count; ++i) {
     // backtrace_symbols format: "module(mangled+offset) [address]"
     // Extract the mangled name between '(' and '+'/').
@@ -36,8 +35,11 @@ static void SigsegvHandler(int /*sig*/) {
       *end = '+';  // restore
       if (status == 0 && demangled) {
         // Replace the mangled portion with the demangled name for display.
-        std::fprintf(stderr, "  #%-2d %.*s%s%s\n", i, static_cast<int>(begin + 1 - sym), sym,
-                     demangled, end);
+        std::fprintf(stderr, "  #%-2d %.*s%s%s\n",
+                     i,
+                     static_cast<int>(begin + 1 - sym), sym,
+                     demangled,
+                     end);
         std::free(demangled);
         continue;
       }

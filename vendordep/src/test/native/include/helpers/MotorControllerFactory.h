@@ -11,9 +11,6 @@
 #include <rev/SparkMax.h>
 
 #include <atomic>
-#include <chrono>
-#include <ctre/phoenix/platform/DeviceType.hpp>
-#include <ctre/phoenix/platform/Platform.hpp>
 #include <ctre/phoenix6/TalonFX.hpp>
 #include <ctre/phoenix6/TalonFXS.hpp>
 #include <memory>
@@ -59,8 +56,6 @@ struct HardwareBundle {
   std::unique_ptr<rev::spark::SparkFlex> sparkFlex;
   std::unique_ptr<ctre::phoenix6::hardware::TalonFXS> talonFXS;
   std::unique_ptr<ctre::phoenix6::hardware::TalonFX> talonFX;
-  int canId;
-  ctre::phoenix::platform::DeviceType ctreDevice;
 
   std::unique_ptr<TestSubsystem> subsystem;
   SmartMotorController* smc{nullptr};
@@ -91,7 +86,7 @@ inline frc::DCMotor MotorForHardware(HardwareType hw) {
     case HardwareType::SparkFlex:
       return frc::DCMotor::NeoVortex(1);
     case HardwareType::TalonFXS:
-      return frc::DCMotor::NEO(1);
+      return frc::DCMotor::NEO(2);
     case HardwareType::TalonFX:
       return frc::DCMotor::KrakenX60(1);
   }
@@ -107,7 +102,6 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
   cfg.WithSimMotor(MotorForHardware(param.hardware));
 
   int canId = NextCanId();
-  bundle.canId = canId;
 
   switch (param.hardware) {
     case HardwareType::SparkMax: {
@@ -128,30 +122,17 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
     }
     case HardwareType::TalonFXS: {
       bundle.talonFXS = std::make_unique<ctre::phoenix6::hardware::TalonFXS>(canId);
-      std::this_thread::sleep_for(std::chrono::milliseconds{100});  // Let the device startup
-      bundle.ctreDevice = ctre::phoenix::platform::DeviceType::P6_TalonFXSType;
       auto* wrapper =
-          new remote::TalonFXSWrapper(bundle.talonFXS.get(), MotorForHardware(param.hardware),
+          new remote::TalonFXSWrapper(*bundle.talonFXS, MotorForHardware(param.hardware),
                                       remote::TalonFXSWrapper::MotorArrangement::NEO, cfg);
       bundle.smc = wrapper;
-      bundle.subsystem->m_isCTRE = true;
-      bundle.talonFXS->GetDutyCycle().SetUpdateFrequency(200_Hz);
-      bundle.talonFXS->GetPosition().SetUpdateFrequency(200_Hz);
-      bundle.talonFXS->GetVelocity().SetUpdateFrequency(200_Hz);
       break;
     }
     case HardwareType::TalonFX: {
       bundle.talonFX = std::make_unique<ctre::phoenix6::hardware::TalonFX>(canId);
-      std::this_thread::sleep_for(std::chrono::milliseconds{100});
-      bundle.ctreDevice = ctre::phoenix::platform::DeviceType::P6_TalonFXType;
-
       auto* wrapper =
-          new remote::TalonFXWrapper(bundle.talonFX.get(), MotorForHardware(param.hardware), cfg);
+          new remote::TalonFXWrapper(*bundle.talonFX, MotorForHardware(param.hardware), cfg);
       bundle.smc = wrapper;
-      bundle.subsystem->m_isCTRE = true;
-      bundle.talonFX->GetDutyCycle().SetUpdateFrequency(200_Hz);
-      bundle.talonFX->GetPosition().SetUpdateFrequency(200_Hz);
-      bundle.talonFX->GetVelocity().SetUpdateFrequency(200_Hz);
       break;
     }
   }
@@ -165,19 +146,12 @@ inline bool IsCTRE(const HardwareBundle& b) {
   return b.talonFX != nullptr || b.talonFXS != nullptr;
 }
 
-// Standard teardown: unregister subsystem, close SMC, delete wrapper, then
-// release CTRE hardware.  The hardware must be reset here (not left to the
-// caller's HardwareBundle destructor) so the CTRE simulation thread never
-// holds a pointer to a freed device — matching the pattern in SwerveDriveTest.
+// Standard teardown: unregister subsystem, close SMC, delete wrapper.
 inline void CloseBundle(HardwareBundle& b) {
-  frc2::CommandScheduler::GetInstance().CancelAll();
   frc2::CommandScheduler::GetInstance().UnregisterSubsystem(b.subsystem.get());
   b.subsystem->Close();
   delete b.smc;
   b.smc = nullptr;
-  if (IsCTRE(b)) ctre::phoenix::platform::SimDestroy(b.ctreDevice, b.canId);
-  b.talonFX.reset();
-  b.talonFXS.reset();
 }
 
 // All (hardware × profile) combinations used by each mechanism test suite.
