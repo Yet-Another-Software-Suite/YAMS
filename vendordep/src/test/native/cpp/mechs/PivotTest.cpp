@@ -114,6 +114,11 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   });
 
   auto postAngle = smc->GetMechanismPosition();
+  if (!passed && isCTRE) {
+    std::printf("[WARNING] TalonFX/TalonFXS pivot position-PID inconclusive.\n");
+    std::cerr << "preAngle: " << preAngle.value() << std::endl
+              << "postAngle: " << postAngle.value() << std::endl;
+  }
   EXPECT_TRUE(std::abs(postAngle.value() - preAngle.value()) > 0.0003 || passed || isCTRE)
       << "Pivot did not move toward PID setpoint"
       << " preAngle=" << preAngle.value() << " postAngle=" << postAngle.value();

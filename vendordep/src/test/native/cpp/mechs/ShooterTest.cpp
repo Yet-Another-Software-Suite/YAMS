@@ -14,6 +14,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstdio>
+#include <iostream>
 #include <string>
 #include <thread>
 
@@ -36,8 +37,7 @@ static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, Test
                                                        const std::string& name) {
   SmartMotorControllerConfig cfg;
   cfg.WithFeedback(10.0, 0.0, 0.0)
-      .WithMotorGearing(
-          gearing::MechanismGearing{gearing::GearBox::FromReductionStages({1})})
+      .WithMotorGearing(gearing::MechanismGearing{gearing::GearBox::FromReductionStages({1})})
       .WithIdleMode(SmartMotorControllerConfig::MotorMode::COAST)
       .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
@@ -55,7 +55,8 @@ static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, Test
       cfg.WithTrapezoidProfile(
           units::degrees_per_second_t{36000.0},
           units::unit_t<units::compound_unit<units::angular_velocity::degrees_per_second,
-                                             units::inverse<units::seconds>>>{54000.0} / 1_s);
+                                             units::inverse<units::seconds>>>{54000.0} /
+              1_s);
       break;
     case ProfileType::Exponential:
       cfg.WithExponentialProfile(0.5, 0.05, 12.0_V);
@@ -115,10 +116,14 @@ static void VelocityPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   SchedulerHelper::RunForDuration(2.0_s, [&] {
     if (smc->GetDutyCycle() != 0.0) passed = true;
   });
-//  if (isCTRE) std::this_thread::sleep_for(std::chrono::milliseconds{100});
+  //  if (isCTRE) std::this_thread::sleep_for(std::chrono::milliseconds{100});
 
   auto postVel = smc->GetMechanismVelocity();
-
+  if (!passed && isCTRE) {
+    std::printf("[WARNING] TalonFX/TalonFXS shooter velocity PID test inconclusive.\n");
+    std::cerr << "preVel=" << preVel.value() << std::endl
+              << "postVel=" << postVel.value() << std::endl;
+  }
   EXPECT_TRUE(std::abs(postVel.value() - preVel.value()) > 0.05 || passed || isCTRE)
       << "Shooter velocity did not change toward PID setpoint"
       << " preVel=" << preVel.value() << " postVel=" << postVel.value();
