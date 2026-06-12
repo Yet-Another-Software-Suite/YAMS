@@ -16,6 +16,7 @@
 #include <cmath>
 #include <cstdio>
 #include <string>
+#include <iostream>
 #include <thread>
 
 #include "helpers/MockHardware.h"

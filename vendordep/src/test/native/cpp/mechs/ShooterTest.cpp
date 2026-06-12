@@ -83,8 +83,7 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
   bool passed = false;
 
   auto* subsys = static_cast<TestSubsystem*>(smc->GetConfig().GetSubsystem());
-  auto cmd = subsys->SetDutyCycle(0.5);
-  frc2::CommandScheduler::GetInstance().Schedule(cmd);
+  auto cmd = subsys->SetDutyCycle(1.0);
   frc2::CommandScheduler::GetInstance().Schedule(cmd);
 
   SchedulerHelper::RunForDuration(1.0_s, [&] {
@@ -97,6 +96,10 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
   bool moved = (postVel > preVel) || (postAngle > preAngle) || passed;
   if (isCTRE && !moved) {
     std::printf("[WARNING] TalonFX/TalonFXS shooter duty-cycle inconclusive.\n");
+    std::cerr << "preVel=" << preVel.value() << std::endl
+              << "preAngle=" << preAngle.value() << std::endl
+              << "postVel=" << postVel.value() << std::endl
+              << "postAngle=" << postAngle.value() << std::endl;
   } else {
     EXPECT_TRUE(moved) << "Shooter did not spin during duty-cycle test"
                        << " preVel=" << preVel.value() << " preAngle=" << preAngle.value()
@@ -115,7 +118,6 @@ static void VelocityPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   SchedulerHelper::RunForDuration(2.0_s, [&] {
     if (smc->GetDutyCycle() != 0.0) passed = true;
   });
-  //  if (isCTRE) std::this_thread::sleep_for(std::chrono::milliseconds{100});
 
   auto postVel = smc->GetMechanismVelocity();
   if (!passed && isCTRE) {

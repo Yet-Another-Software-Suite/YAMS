@@ -53,7 +53,7 @@ public class SwerveDriveTest
 
   private static int nextCanId()
   {
-    return (kCanIdCounter.getAndIncrement() % 62) + 1;
+    return (kCanIdCounter.getAndIncrement() % 80) + 1;
   }
 
   // ---- Minimal swerve subsystem -----------------------------------------------

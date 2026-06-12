@@ -17,6 +17,7 @@
 #include <cstdio>
 #include <string>
 #include <thread>
+#include <iostream>
 
 #include "helpers/MockHardware.h"
 #include "helpers/MotorControllerFactory.h"
@@ -94,6 +95,10 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
   bool moved = (postVel > preVel) || (postAngle > preAngle) || passed;
   if (isCTRE && !moved) {
     std::printf("[WARNING] TalonFX/TalonFXS pivot duty-cycle inconclusive.\n");
+    std::cerr << "preVel: " << preVel.value() << std::endl
+              << "postVel: " << postVel.value() << std::endl
+              << "preAngle: " << preAngle.value() << std::endl
+              << "postAngle: " << postAngle.value() << std::endl;
   } else {
     EXPECT_TRUE(moved) << "Pivot did not move during duty-cycle test"
                        << " preVel=" << preVel.value() << " preAngle=" << preAngle.value()
