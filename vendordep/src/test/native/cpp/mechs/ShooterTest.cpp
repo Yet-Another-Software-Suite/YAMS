@@ -35,7 +35,7 @@ using namespace mechanisms::velocity;
 static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, TestSubsystem* subsys,
                                                        const std::string& name) {
   SmartMotorControllerConfig cfg;
-  cfg.WithFeedback(1.0, 0.0, 0.0)
+  cfg.WithFeedback(100.0, 0.0, 0.0)
       .WithMotorGearing(
           gearing::MechanismGearing{gearing::GearBox::FromReductionStages({3.0, 4.0})})
       .WithIdleMode(SmartMotorControllerConfig::MotorMode::COAST)
@@ -53,7 +53,7 @@ static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, Test
       // RPM.of(6000) ≈ 6000/60 rps = 100 rps → 36000 deg/s
       // RPM.per(Second).of(9000) ≈ 9000/60 rps² → 54000 deg/s²
       cfg.WithTrapezoidProfile(
-          6000_rpm,
+          units::degrees_per_second_t{36000.0},
           units::unit_t<units::compound_unit<units::angular_velocity::degrees_per_second,
                                              units::inverse<units::seconds>>>{54000.0});
       break;
@@ -68,7 +68,7 @@ static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, Test
 
 static FlyWheel* CreateShooter(SmartMotorController* smc, TestSubsystem* subsys) {
   FlyWheelConfig cfg;
-  cfg.WithMotorController(smc).WithRollerDiameter(4_in);  // 4 inches
+  cfg.WithMotorController(smc).WithRollerDiameter(units::meter_t{4.0 * 0.0254});  // 4 inches
   FlyWheel* shooter = new FlyWheel(cfg);
   subsys->m_mechSimPeriodic = [shooter] { shooter->SimIterate(); };
   subsys->m_mechUpdateTelemetry = [shooter] { shooter->UpdateTelemetry(); };
@@ -91,11 +91,6 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
     if (smc->GetDutyCycle() != 0.0) passed = true;
   });
 
-  if (isCTRE) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    SchedulerHelper::RunForDuration(1.0_s);
-  }
-
   auto postVel = smc->GetMechanismVelocity();
   auto postAngle = smc->GetMechanismPosition();
 
@@ -113,14 +108,14 @@ static void VelocityPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   auto preVel = smc->GetMechanismVelocity();
   bool passed = false;
 
-  // ~2000 RPM = 2000/60 rps * 360 deg/rot = 12000 deg/s
-  auto cmd = frc2::cmd::Run([smc] { smc->SetVelocity(units::degrees_per_second_t{12000.0}); },
-                            {smc->GetConfig().GetSubsystem()});
+  auto cmd =
+      frc2::cmd::Run([smc] { smc->SetVelocity(2000_rpm); }, {smc->GetConfig().GetSubsystem()});
   frc2::CommandScheduler::GetInstance().Schedule(cmd);
 
-  SchedulerHelper::RunForDuration(isCTRE ? 1.0_s : 2.0_s, [&] {
+  SchedulerHelper::RunForDuration(2.0_s, [&] {
     if (smc->GetDutyCycle() != 0.0) passed = true;
   });
+  if (isCTRE) std::this_thread::sleep_for(std::chrono::milliseconds{100});
 
   auto postVel = smc->GetMechanismVelocity();
 
@@ -151,7 +146,7 @@ TEST_P(ShooterTest, SMCDutyCycle) {
   SCOPED_TRACE(param.name);
   auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
+  //  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
@@ -163,7 +158,7 @@ TEST_P(ShooterTest, SMCVelocityPID) {
   SCOPED_TRACE(param.name);
   auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
+  //  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   VelocityPIDTestBody(bundle.smc, IsCTRE(bundle));
@@ -175,7 +170,7 @@ TEST_P(ShooterTest, ShooterDutyCycle) {
   SCOPED_TRACE(param.name);
   auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
+  //  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   auto shooter = CreateShooter(bundle.smc, bundle.subsystem.get());
@@ -192,7 +187,7 @@ TEST_P(ShooterTest, ShooterVelocityPID) {
   SCOPED_TRACE(param.name);
   auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
+  //  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   // ~80 RPM = 80/60 * 360 ≈ 480 deg/s

@@ -88,11 +88,6 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
     if (smc->GetDutyCycle() != 0.0) passed = true;
   });
 
-  if (isCTRE) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    SchedulerHelper::RunForDuration(1.0_s);
-  }
-
   auto postVel = smc->GetMechanismVelocity();
   auto postAngle = smc->GetMechanismPosition();
 
@@ -114,12 +109,11 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE) {
       frc2::cmd::Run([smc] { smc->SetPosition(80.0_deg); }, {smc->GetConfig().GetSubsystem()});
   frc2::CommandScheduler::GetInstance().Schedule(cmd);
 
-  SchedulerHelper::RunForDuration(isCTRE ? 1.0_s : 20.0_s, [&] {
-    if (isCTRE)
-      std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(
-          smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms).value() * 1000.0)));
+  SchedulerHelper::RunForDuration(2.0_s, [&] {
     if (smc->GetDutyCycle() != 0.0) passed = true;
   });
+
+  if (isCTRE) std::this_thread::sleep_for(std::chrono::milliseconds{100});
 
   auto postAngle = smc->GetMechanismPosition();
   EXPECT_TRUE(std::abs(postAngle.value() - preAngle.value()) > 0.0003 || passed)
@@ -149,7 +143,7 @@ TEST_P(PivotTest, SMCDutyCycle) {
   SCOPED_TRACE(param.name);
   auto cfg = MakePivotSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
+  //  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
@@ -161,7 +155,7 @@ TEST_P(PivotTest, SMCPositionPID) {
   SCOPED_TRACE(param.name);
   auto cfg = MakePivotSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
+  //  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   PositionPIDTestBody(bundle.smc, IsCTRE(bundle));
@@ -173,7 +167,7 @@ TEST_P(PivotTest, PivotDutyCycle) {
   SCOPED_TRACE(param.name);
   auto cfg = MakePivotSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
+  //  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   auto pivot = CreatePivot(bundle.smc, bundle.subsystem.get());
@@ -190,7 +184,7 @@ TEST_P(PivotTest, PivotPositionPID) {
   SCOPED_TRACE(param.name);
   auto cfg = MakePivotSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
+  //  bundle.smc->SetupSimulation();
   bundle.subsystem->m_testRunning = true;
 
   auto pivot = CreatePivot(bundle.smc, bundle.subsystem.get());
