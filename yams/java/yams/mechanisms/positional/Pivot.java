@@ -98,7 +98,7 @@ public class Pivot extends SmartPositionalMechanism
       {
         throw new PivotConfigurationException("Pivot starting angle is empty",
                                               "Cannot create simulation.",
-                                              "withStartingPosition(Angle)");
+                                              "SmartMotorControllerConfig.withStartingPosition(Angle)");
       }
       m_dcmotorSim = Optional.of(new DCMotorSim(LinearSystemId.createDCMotorSystem(dcMotor,
                                                                                    config.getMOI(),

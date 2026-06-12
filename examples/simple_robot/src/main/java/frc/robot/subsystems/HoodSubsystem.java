@@ -45,7 +45,8 @@ public class HoodSubsystem extends SubsystemBase
       .withClosedLoopRampRate(Seconds.of(0.25))
       .withOpenLoopRampRate(Seconds.of(0.25))
       .withFeedforward(new ArmFeedforward(0, 0, 0, 0))
-      .withControlMode(ControlMode.CLOSED_LOOP);
+      .withControlMode(ControlMode.CLOSED_LOOP)
+      .withStartingPosition(Degrees.of(0));
   private final SmartMotorController       motor            = new TalonFXSWrapper(hoodMotor,
                                                                                   DCMotor.getNEO(1),
                                                                                   motorConfig);
@@ -56,7 +57,6 @@ public class HoodSubsystem extends SubsystemBase
   private final PivotConfig                m_config         = new PivotConfig(motor)
       .withHardLimits(Degrees.of(-100), Degrees.of(200))
       .withTelemetry("HoodExample", TelemetryVerbosity.HIGH)
-      .withStartingPosition(Degrees.of(0))
       .withMechanismPositionConfig(robotToMechanism);
   private final Pivot                      hood             = new Pivot(m_config);
 

@@ -66,7 +66,8 @@ public class ArmTest
         .withStatorCurrentLimit(Amps.of(40))
         .withMotorInverted(false)
         .withFeedforward(new ArmFeedforward(0, 1, 0, 0))
-        .withControlMode(ControlMode.CLOSED_LOOP);
+        .withControlMode(ControlMode.CLOSED_LOOP)
+        .withStartingPosition(Degrees.of(0));
   }
 
   private static Arm createArm(SmartMotorController smc)
@@ -74,12 +75,7 @@ public class ArmTest
     ArmConfig config = new ArmConfig(smc)
         .withLength(Inches.of(4))
         .withHardLimits(Degrees.of(-100), Degrees.of(200))
-        .withMass(Pounds.of(1))
-        .withStartingPosition(Degrees.of(0));
-    if (!(smc instanceof SparkWrapper))
-    {
-      config.withHorizontalZero(Degrees.of(0));
-    }
+        .withMass(Pounds.of(1));
     Arm                               arm    = new Arm(config);
     SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.smc = smc;

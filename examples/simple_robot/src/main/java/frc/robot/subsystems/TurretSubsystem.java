@@ -55,7 +55,9 @@ public class TurretSubsystem extends SubsystemBase
       // Setup Telemetry
       .withTelemetry("TurretMotor", TelemetryVerbosity.HIGH)
       // Power Optimization
-      .withStatorCurrentLimit(Amps.of(60));
+      .withStatorCurrentLimit(Amps.of(60))
+      .withStartingPosition(Degrees.of(0)) // Starting position of the Pivot
+      .withMomentOfInertia(yams.units.YUnits.PoundSquareInches.of(0.01)); // MOI Calculation
   // .withClosedLoopRampRate(Seconds.of(0.0))
 
   // .withOpenLoopRampRate(Seconds.of(0.0));
@@ -64,11 +66,9 @@ public class TurretSubsystem extends SubsystemBase
                                                   motorConfig);
 
   PivotConfig m_config = new PivotConfig(motor)
-      .withStartingPosition(Degrees.of(0)) // Starting position of the Pivot
-      .withHardLimits(Degrees.of(-360), Degrees.of(360)) // Hard limit bc wiring prevents infinitpe spinning
+      .withHardLimits(Degrees.of(-360), Degrees.of(360)) // Hard limit bc wiring prevents infinite spinning
       // .withSoftLimits(Degrees.of(-360), Degrees.of(360))
-      .withTelemetry("Turret", TelemetryVerbosity.HIGH) // Telemetry
-      .withMOI(yams.units.YUnits.PoundSquareInches.of(0.01)); // MOI Calculation
+      .withTelemetry("Turret", TelemetryVerbosity.HIGH); // Telemetry
 
   private Pivot turret = new Pivot(m_config);
 

@@ -41,8 +41,10 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -142,6 +144,10 @@ public abstract class SmartMotorController
    * Running status of the closed loop controller.
    */
   private   boolean                                       m_closedLoopControllerRunning = false;
+  /**
+   * Alert shown when the closed loop controller is running on the RIO.
+   */
+  private   Alert                                         m_rioClosedLoopAlert          = null;
 
   /**
    * Create a {@link SmartMotorController} wrapper from the provided motor controller object.
@@ -260,6 +266,10 @@ public abstract class SmartMotorController
     {
       m_closedLoopControllerThread.stop();
       m_closedLoopControllerRunning = false;
+      if (m_rioClosedLoopAlert != null)
+      {
+        m_rioClosedLoopAlert.set(false);
+      }
     }
   }
 
@@ -283,6 +293,16 @@ public abstract class SmartMotorController
       m_closedLoopControllerThread.startPeriodic(m_config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20))
                                                          .in(Seconds));
       m_closedLoopControllerRunning = true;
+      if (RobotBase.isReal())
+      {
+        if (m_rioClosedLoopAlert == null)
+        {
+          m_rioClosedLoopAlert = new Alert("YAMS",
+                                           getName() + " closed loop controller is running on the RIO.",
+                                           Alert.AlertType.kWarning);
+        }
+        m_rioClosedLoopAlert.set(true);
+      }
     }
   }
 
@@ -1217,6 +1237,10 @@ public abstract class SmartMotorController
       m_closedLoopControllerThread.stop();
       m_closedLoopControllerThread.close();
       m_closedLoopControllerThread = null;
+    }
+    if (m_rioClosedLoopAlert != null)
+    {
+      m_rioClosedLoopAlert.set(false);
     }
     telemetry.close();
   }

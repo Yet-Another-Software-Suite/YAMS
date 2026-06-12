@@ -110,7 +110,7 @@ public class DoubleJointedArm extends SmartPositionalMechanism
     {
       throw new DoubleJointedArmConfigurationException("Arm starting angle is empty",
                                                        "Cannot create simulation.",
-                                                       "withStartingPosition(Angle)");
+                                                       "SmartMotorControllerConfig.withStartingPosition(Angle)");
     }
 
     // Check that the arm lengths are defined

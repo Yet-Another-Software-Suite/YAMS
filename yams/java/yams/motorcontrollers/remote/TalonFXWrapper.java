@@ -92,6 +92,17 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
 
 /**
  * TalonFX wrapper for a CTRE TalonFX motor controller.
+ *
+ * <p><b>External encoder discontinuity point support (CANcoder):</b>
+ * <ul>
+ *   <li>{@code 0.5} rotations — maps to {@code AbsoluteSensorDiscontinuityPoint = 0.5},
+ *       sensor range is [-0.5, 0.5)</li>
+ *   <li>{@code 1.0} rotations — maps to {@code AbsoluteSensorDiscontinuityPoint = 1.0},
+ *       sensor range is [0, 1)</li>
+ * </ul>
+ * Configuring a discontinuity point is optional for CANcoder; when omitted the CANcoder default
+ * is used. Set via
+ * {@link yams.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint}.
  */
 public class TalonFXWrapper extends SmartMotorController
 {

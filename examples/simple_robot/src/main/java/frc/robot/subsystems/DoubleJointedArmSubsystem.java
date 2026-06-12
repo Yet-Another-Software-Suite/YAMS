@@ -40,7 +40,8 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
           .withClosedLoopRampRate(Seconds.of(0.25))
           .withOpenLoopRampRate(Seconds.of(0.25))
           .withFeedforward(new ArmFeedforward(0, 0, 0, 0))
-          .withControlMode(SmartMotorControllerConfig.ControlMode.CLOSED_LOOP);
+          .withControlMode(SmartMotorControllerConfig.ControlMode.CLOSED_LOOP)
+          .withStartingPosition(Degrees.of(45));
   private final SmartMotorController       lowerSMC    = new SparkWrapper(lowerMotor,
           DCMotor.getNEO(1),
           lowerConfig);
@@ -48,8 +49,7 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
           .withLength(Feet.of(2))
           .withHardLimits(Degrees.of(-720), Degrees.of(720))
           .withTelemetry("LowerArm", SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
-          .withMass(Pounds.of(5))
-          .withStartingPosition(Degrees.of(45));
+          .withMass(Pounds.of(5));
   private final SparkMax                   upperMotor  = new SparkMax(2, SparkLowLevel.MotorType.kBrushless);
   private final SmartMotorControllerConfig upperConfig = new SmartMotorControllerConfig(this)
           .withClosedLoopController(16, 0, 0)
@@ -64,7 +64,8 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
           .withClosedLoopRampRate(Seconds.of(0.25))
           .withOpenLoopRampRate(Seconds.of(0.25))
           .withFeedforward(new ArmFeedforward(0, 0, 0, 0))
-          .withControlMode(SmartMotorControllerConfig.ControlMode.CLOSED_LOOP);
+          .withControlMode(SmartMotorControllerConfig.ControlMode.CLOSED_LOOP)
+          .withStartingPosition(Degrees.of(45));
   private final SmartMotorController       upperSMC    = new SparkWrapper(upperMotor,
                                                                           DCMotor.getNEO(1),
                                                                           upperConfig);
@@ -73,8 +74,7 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
       .withHardLimits(Degrees.of(-720), Degrees.of(720))
       .withTelemetry("UpperArm", SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
       .withMass(Pounds.of(2))
-      .withSimColor(new Color8Bit(Color.kDarkRed))
-      .withStartingPosition(Degrees.of(45));
+      .withSimColor(new Color8Bit(Color.kDarkRed));
   private final DoubleJointedArm jointedArm     = new DoubleJointedArm(lowerArmConfig, upperArmConfig);
 
   public DoubleJointedArmSubsystem()

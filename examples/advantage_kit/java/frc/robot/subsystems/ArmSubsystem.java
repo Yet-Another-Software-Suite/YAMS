@@ -101,15 +101,15 @@ public class ArmSubsystem extends SubsystemBase {
       .withMotorInverted(false)
       .withIdleMode(MotorMode.BRAKE)
 
-      .withStatorCurrentLimit(Amps.of(ArmConstants.STATOR_CURRENT_LIMIT));
+      .withStatorCurrentLimit(Amps.of(ArmConstants.STATOR_CURRENT_LIMIT))
+      .withStartingPosition(Degrees.of(141))
+      .withMomentOfInertia(ArmConstants.MOI);
 
   private SmartMotorController armSMC = new TalonFXWrapper(armMotor, DCMotor.getFalcon500(1), smcConfig);
 
   private ArmConfig armCfg = new ArmConfig(armSMC)
       .withHardLimits(Degrees.of(-25), Degrees.of(141))
-      .withStartingPosition(Degrees.of(141))
       .withLength(Feet.of((14.0 / 12)))
-      .withMOI(ArmConstants.MOI)
       .withTelemetry("Arm", TelemetryVerbosity.HIGH);
 
   // Arm Mechanism

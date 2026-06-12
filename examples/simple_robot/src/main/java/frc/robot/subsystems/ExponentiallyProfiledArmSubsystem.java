@@ -112,7 +112,8 @@ public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
                   length,
                   gearing))
                                                 .withFeedforward(armFeedforward)
-                                                .withSoftLimits(softLowerLimit, softUpperLimit);
+                                                .withSoftLimits(softLowerLimit, softUpperLimit)
+                                                .withStartingPosition(startingAngle); // The starting position should ONLY be defined if you are NOT using an absolute encoder.
 
   /// Generic Smart Motor Controller with our options and vendor motor.
   private final SmartMotorController motor    = new SparkWrapper(armMotor, dcMotor, motorConfig);
@@ -123,8 +124,7 @@ public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
        */
       .withLength(length)
       .withMass(weight)
-      .withStartingPosition(startingAngle) // The starting position should ONLY be defined if you are NOT using an absolute encoder.
-      //.withHorizontalZero(Degrees.of(0)) // The horizontal zero should ONLY be defined if you ARE using an absolute encoder.
+      //.withSimStartingPosition(Degrees.of(0)) // Override the starting position for simulation only.
       .withTelemetry(mechTelemetryName, TelemetryVerbosity.HIGH)
       /*
        * Simulation configuration options for the arm.

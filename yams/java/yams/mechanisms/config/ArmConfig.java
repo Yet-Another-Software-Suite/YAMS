@@ -3,20 +3,15 @@
 
 package yams.mechanisms.config;
 
-import static edu.wpi.first.units.Units.KilogramSquareMeters;
-
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import java.util.Optional;
-import java.util.OptionalDouble;
 import yams.exceptions.ArmConfigurationException;
 import yams.mechanisms.positional.Arm;
 import yams.mechanisms.positional.Elevator;
@@ -59,10 +54,6 @@ public class ArmConfig
    */
   private   Optional<Mass>                 weight                  = Optional.empty();
   /**
-   * {@link Arm} MOI from CAD software. If not given estimated with length and weight.
-   */
-  private   OptionalDouble                 moi                     = OptionalDouble.empty();
-  /**
    * Sim color value
    */
   private   Color8Bit                      simColor                = new Color8Bit(Color.kOrange);
@@ -71,25 +62,9 @@ public class ArmConfig
    */
   private   MechanismPositionConfig        mechanismPositionConfig = new MechanismPositionConfig();
   /**
-   * Horizontal zero of the arm's absolute encoder.
-   */
-  private   Optional<Angle>                horizontalZero          = Optional.empty();
-  /**
-   * Starting position of the arms motor controller encoder.
-   */
-  private   Optional<Angle>                startingPosition        = Optional.empty();
-  /**
    * Simulated starting position.
    */
   private Optional<Angle>                simStartingPosition = Optional.empty();
-  /**
-   * Lower and upper soft limits of the arms closed loop controller. (LowerLimit, UpperLimit)
-   */
-  private   Optional<Pair<Angle, Angle>>   softLimits              = Optional.empty();
-  /**
-   * Wrapping angles for the Arm applied to the motor controllers closed loop controller. (Min, Max)
-   */
-  private   Optional<Pair<Angle, Angle>>   continuousWrapping      = Optional.empty();
 
   /**
    * Arm Configuration class
@@ -122,13 +97,8 @@ public class ArmConfig
     upperHardLimit = cfg.upperHardLimit;
     length = cfg.length;
     weight = cfg.weight;
-    moi = cfg.moi;
     simColor = cfg.simColor;
     mechanismPositionConfig = cfg.mechanismPositionConfig;
-    startingPosition = cfg.startingPosition;
-    softLimits = cfg.softLimits;
-    continuousWrapping = cfg.continuousWrapping;
-    horizontalZero = cfg.horizontalZero;
   }
 
   @Override
@@ -164,15 +134,10 @@ public class ArmConfig
                                           ".withSmartMotorController(SmartMotorController)");
     }
     motor = Optional.of(motorController);
-    moi.ifPresent(moi -> motorController.getConfig().withMomentOfInertia(KilogramSquareMeters.of(moi)));
-    if (length.isPresent() && weight.isPresent() && moi.isEmpty())
+    if (length.isPresent() && weight.isPresent())
     {
       motorController.getConfig().withMomentOfInertia(length.get(), weight.get());
     }
-    horizontalZero.ifPresent(this::withHorizontalZero);
-    startingPosition.ifPresent(this::withStartingPosition);
-    softLimits.ifPresent(limits -> withSoftLimits(limits.getFirst(), limits.getSecond()));
-    continuousWrapping.ifPresent(wrapping -> withWrapping(wrapping.getFirst(), wrapping.getSecond()));
     return this;
   }
 
@@ -186,20 +151,6 @@ public class ArmConfig
   public ArmConfig withSimColor(final Color8Bit simColor)
   {
     this.simColor = simColor;
-    return this;
-  }
-
-  /**
-   * Configure the MOI directly instead of estimating it with the length and mass of the
-   * {@link Arm} for simulation.
-   *
-   * @param MOI Moment of Inertia of the {@link Arm}
-   * @return {@link ArmConfig} for chaining.
-   */
-  public ArmConfig withMOI(MomentOfInertia MOI)
-  {
-    motor.ifPresent(motor -> motor.getConfig().withMomentOfInertia(MOI));
-    this.moi = OptionalDouble.of(MOI.in(KilogramSquareMeters));
     return this;
   }
 
@@ -261,62 +212,6 @@ public class ArmConfig
     return this;
   }
 
-
-  /**
-   * Set the horizontal zero of the arms absolute encoder.
-   *
-   * @param horizontalZero Offset of the arm that will make the arm read 0 when horizontal.
-   * @return {@link ArmConfig} for chaining.
-   */
-  public ArmConfig withHorizontalZero(Angle horizontalZero)
-  {
-    this.horizontalZero = Optional.ofNullable(horizontalZero);
-    motor.ifPresent(motor -> motor.getConfig().withExternalEncoderZeroOffset(horizontalZero));
-    return this;
-  }
-
-  /**
-   * Set the arm starting angle of the motor controller encoder.
-   *
-   * @param startingPosition Starting position of the arm.
-   * @return {@link ArmConfig} for chaining
-   */
-  public ArmConfig withStartingPosition(Angle startingPosition)
-  {
-    this.startingPosition = Optional.ofNullable(startingPosition);
-    motor.ifPresent(motor -> motor.getConfig().withStartingPosition(startingPosition));
-    return this;
-  }
-
-  /**
-   * Set the arm soft limits. When exceeded the power will be set to 0.
-   *
-   * @param lowerLimit Minimum rotation of the arm.
-   * @param upperLimit Maximum rotation of the arm.
-   * @return {@link ArmConfig} for chaining.
-   */
-  public ArmConfig withSoftLimits(Angle lowerLimit, Angle upperLimit)
-  {
-    softLimits = Optional.of(Pair.of(lowerLimit, upperLimit));
-    motor.ifPresent(motor -> motor.getConfig().withSoftLimits(lowerLimit, upperLimit));
-    return this;
-  }
-
-  /**
-   * Wrap the arm around these angles. When the arm exceeds the maximum angle it will read as if it is the minimum
-   * angle.
-   *
-   * @param min Minimum angle for wrapping
-   * @param max Maximum angle for wrapping.
-   * @return {@link ArmConfig} for chaining.
-   */
-  public ArmConfig withWrapping(Angle min, Angle max)
-  {
-    continuousWrapping = Optional.of(Pair.of(min, max));
-    motor.ifPresent(motor -> motor.getConfig().withContinuousWrapping(min, max));
-    return this;
-  }
-
   /**
    * Set the Hard Limits for simulation
    *
@@ -353,22 +248,25 @@ public class ArmConfig
 
   /**
    * Get the moment of inertia for the {@link Arm} simulation.
+   * MOI must be configured via {@link SmartMotorControllerConfig#withMomentOfInertia(Distance, Mass)}
+   * or {@link SmartMotorControllerConfig#withMomentOfInertia(edu.wpi.first.units.measure.MomentOfInertia)}.
+   * Providing {@link #withLength(Distance)} and {@link #withMass(Mass)} will set it automatically.
    *
-   * @return Moment of Inertia.
+   * @return Moment of Inertia in KgMetersSquared.
    */
   public double getMOI()
   {
-    if (moi.isPresent())
+    if (motor.isPresent())
     {
-      return moi.getAsDouble();
+      return motor.get().getConfig().getMOI();
     }
     if (length.isPresent() && weight.isPresent())
     {
       return SingleJointedArmSim.estimateMOI(length.get().in(Units.Meters), weight.get().in(Units.Kilograms));
     }
-    throw new ArmConfigurationException("Arm length and weight or MOI must be set!",
+    throw new ArmConfigurationException("Arm MOI must be configured!",
                                         "Cannot get the MOI!",
-                                        "withLength(Distance).withMass(Mass) OR ArmConfig.withMOI()");
+                                        "SmartMotorControllerConfig.withMomentOfInertia(Distance, Mass) or withMomentOfInertia(MomentOfInertia)");
   }
 
   /**
@@ -412,7 +310,8 @@ public class ArmConfig
   }
 
   /**
-   * Get the starting angle of the {@link Arm}
+   * Get the starting angle of the {@link Arm}. Reads from {@link SmartMotorControllerConfig#getStartingPosition()}.
+   * Configure via {@link SmartMotorControllerConfig#withStartingPosition(Angle)}.
    *
    * @return {@link Angle} of the {@link Arm}
    */
@@ -422,7 +321,7 @@ public class ArmConfig
     {
       return simStartingPosition;
     }
-    return startingPosition;
+    return motor.flatMap(m -> m.getConfig().getStartingPosition());
   }
 
   /**

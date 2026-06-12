@@ -62,7 +62,8 @@ public class ArmSubsystem extends SubsystemBase
       .withControlMode(ControlMode.CLOSED_LOOP)
       .withExternalEncoder(cancoder)
       .withExternalEncoderGearing(0.5)
-      .withUseExternalFeedbackEncoder(true);
+      .withUseExternalFeedbackEncoder(true)
+      .withStartingPosition(Degrees.of(0));
 
   private final SmartMotorController    motor            = new TalonFXWrapper(armMotor,
                                                                               DCMotor.getKrakenX60(1),
@@ -77,8 +78,6 @@ public class ArmSubsystem extends SubsystemBase
       .withHardLimits(Degrees.of(-100), Degrees.of(200))
       .withTelemetry("ArmExample", TelemetryVerbosity.HIGH)
       .withMass(Pounds.of(1))
-      .withStartingPosition(Degrees.of(0))
-//      .withHorizontalZero(Degrees.of(0))
       .withMechanismPositionConfig(robotToMechanism);
   private final Arm       arm      = new Arm(m_config);
 

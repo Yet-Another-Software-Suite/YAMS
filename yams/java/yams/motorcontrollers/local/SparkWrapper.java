@@ -80,6 +80,15 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
 
 /**
  * Spark wrapper for REV Spark Motor controllers.
+ *
+ * <p><b>External encoder discontinuity point support (SparkAbsoluteEncoder):</b>
+ * <ul>
+ *   <li>{@code 0.5} rotations — sensor range is [-0.5, 0.5), {@code zeroCentered = true}</li>
+ *   <li>{@code 1.0} rotations — sensor range is [0, 1), {@code zeroCentered = false}</li>
+ * </ul>
+ * A discontinuity point <b>must</b> be configured via
+ * {@link yams.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint}
+ * whenever a {@link com.revrobotics.spark.SparkAbsoluteEncoder} is used as the external encoder.
  */
 public class SparkWrapper extends SmartMotorController
 {
