@@ -35,7 +35,7 @@ using namespace mechanisms::velocity;
 static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, TestSubsystem* subsys,
                                                        const std::string& name) {
   SmartMotorControllerConfig cfg;
-  cfg.WithFeedback(100.0, 0.0, 0.0)
+  cfg.WithFeedback(1.0, 0.0, 0.0)
       .WithMotorGearing(
           gearing::MechanismGearing{gearing::GearBox::FromReductionStages({3.0, 4.0})})
       .WithIdleMode(SmartMotorControllerConfig::MotorMode::COAST)
@@ -53,7 +53,7 @@ static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, Test
       // RPM.of(6000) ≈ 6000/60 rps = 100 rps → 36000 deg/s
       // RPM.per(Second).of(9000) ≈ 9000/60 rps² → 54000 deg/s²
       cfg.WithTrapezoidProfile(
-          units::degrees_per_second_t{36000.0},
+          6000_rpm,
           units::unit_t<units::compound_unit<units::angular_velocity::degrees_per_second,
                                              units::inverse<units::seconds>>>{54000.0});
       break;
@@ -68,7 +68,7 @@ static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, Test
 
 static FlyWheel* CreateShooter(SmartMotorController* smc, TestSubsystem* subsys) {
   FlyWheelConfig cfg;
-  cfg.WithMotorController(smc).WithRollerDiameter(units::meter_t{4.0 * 0.0254});  // 4 inches
+  cfg.WithMotorController(smc).WithRollerDiameter(4_in);  // 4 inches
   FlyWheel* shooter = new FlyWheel(cfg);
   subsys->m_mechSimPeriodic = [shooter] { shooter->SimIterate(); };
   subsys->m_mechUpdateTelemetry = [shooter] { shooter->UpdateTelemetry(); };

@@ -450,9 +450,9 @@ units::volt_t TalonFXWrapper::GetVoltage() { return m_talon->GetMotorVoltage().G
 
 void TalonFXWrapper::SetPosition(units::turn_t angle) {
   m_setpointPosition = angle;
-  if (m_config.GetMotorControllerMode() != ControlMode::CLOSED_LOOP ||
-      m_closedLoopControllerRunning)
-    return;
+//  if (m_config.GetMotorControllerMode() != ControlMode::CLOSED_LOOP ||
+//      m_closedLoopControllerRunning)
+//    return;
   std::visit([&](auto& req) { m_talon->SetControl(req.WithPosition(angle)); }, m_positionReq);
   ForwardPositionToFollowers(angle);
 }
@@ -467,9 +467,9 @@ void TalonFXWrapper::SetPosition(units::meter_t distance) {
 
 void TalonFXWrapper::SetVelocity(units::turns_per_second_t velocity) {
   m_setpointVelocity = velocity;
-  if (m_config.GetMotorControllerMode() != ControlMode::CLOSED_LOOP ||
-      m_closedLoopControllerRunning)
-    return;
+//  if (m_config.GetMotorControllerMode() != ControlMode::CLOSED_LOOP ||
+//      m_closedLoopControllerRunning)
+//    return;
   std::visit([&](auto& req) { m_talon->SetControl(req.WithVelocity(velocity)); }, m_velocityReq);
   ForwardVelocityToFollowers(velocity);
 }
