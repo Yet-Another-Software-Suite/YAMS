@@ -55,8 +55,7 @@ static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, Test
       cfg.WithTrapezoidProfile(
           units::degrees_per_second_t{36000.0},
           units::unit_t<units::compound_unit<units::angular_velocity::degrees_per_second,
-                                             units::inverse<units::seconds>>>{54000.0} /
-              1_s);
+                                             units::inverse<units::seconds>>>{54000.0});
       break;
     case ProfileType::Exponential:
       cfg.WithExponentialProfile(0.5, 0.05, 12.0_V);
