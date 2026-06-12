@@ -342,6 +342,10 @@ public class PivotConfig
     {
       return moi.getAsDouble();
     }
+    if (motor.isPresent() && motor.get().getConfig().isMoiExplicitlySet())
+    {
+      return motor.get().getConfig().getMOI();
+    }
     throw new PivotConfigurationException("Pivot MOI must be set!",
                                           "Cannot get the MOI!",
                                           "withLength(Distance).withMass(Mass) OR PivotConfig.withMOI()");

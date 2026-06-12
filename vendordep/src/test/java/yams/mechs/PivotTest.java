@@ -66,15 +66,15 @@ public class PivotTest
         .withStatorCurrentLimit(Amps.of(40))
         .withMotorInverted(false)
         .withFeedforward(new SimpleMotorFeedforward(1, 0, 0, 0.02))
-        .withControlMode(ControlMode.CLOSED_LOOP);
+        .withControlMode(ControlMode.CLOSED_LOOP)
+        .withStartingPosition(Degrees.of(0))
+        .withMomentOfInertia(Inches.of(4), Pounds.of(1));
   }
 
   private static Pivot createPivot(SmartMotorController smc)
   {
     PivotConfig config = new PivotConfig(smc)
-        .withHardLimits(Degrees.of(-100), Degrees.of(150))
-        .withStartingPosition(Degrees.of(0))
-        .withMOI(Inches.of(4), Pounds.of(1));
+        .withHardLimits(Degrees.of(-100), Degrees.of(150));
     Pivot                             pivot  = new Pivot(config);
     SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.smc = smc;

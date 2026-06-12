@@ -607,6 +607,13 @@ public class SparkWrapper extends SmartMotorController
           m_sparkBaseConfig.absoluteEncoder.zeroCentered(config.getExternalEncoderDiscontinuityPoint().get()
                                                                .isEquivalent(Rotations.of(0.5)));
         }
+        else
+        {
+          throw new SmartMotorControllerConfigurationException(
+              "SparkAbsoluteEncoder requires a discontinuity point to set zeroCentered correctly",
+              "zeroCentered state is ambiguous without a discontinuity point",
+              ".withExternalEncoderDiscontinuityPoint(Rotations.of(0.5)) or .withExternalEncoderDiscontinuityPoint(Rotations.of(1))");
+        }
 
         if (RobotBase.isSimulation())
         {

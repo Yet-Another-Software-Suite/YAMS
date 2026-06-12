@@ -293,6 +293,27 @@ public class SwerveModuleConfig
   }
 
   /**
+   * Set the discontinuity point for the absolute encoder on the azimuth {@link SmartMotorController}.
+   * Required when using a {@link com.revrobotics.spark.SparkAbsoluteEncoder} so that the zeroCentered
+   * mode can be determined. Use {@link edu.wpi.first.units.Units#Rotations Rotations.of(0.5)} for
+   * zero-centered output (-0.5 to 0.5), or {@link edu.wpi.first.units.Units#Rotations Rotations.of(1)}
+   * for unsigned output (0 to 1).
+   *
+   * @param discontinuityPoint Discontinuity point for the absolute encoder (must be 0.5 or 1 rotations).
+   * @return {@link SwerveModuleConfig} for chaining.
+   */
+  public SwerveModuleConfig withAbsoluteEncoderDiscontinuityPoint(Angle discontinuityPoint)
+  {
+    if (azimuthMotor.isPresent())
+    {
+      SmartMotorControllerConfig azimuthConfig = azimuthMotor.orElseThrow().getConfig();
+      if (azimuthConfig.getExternalEncoder().isPresent())
+      {azimuthConfig.withExternalEncoderDiscontinuityPoint(discontinuityPoint);}
+    }
+    return this;
+  }
+
+  /**
    * Set the wheel radius for the {@link SmartMotorController}, ideally should be set inside the drive motor
    * {@link SmartMotorControllerConfig}
    *

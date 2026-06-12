@@ -296,6 +296,10 @@ public class SmartMotorControllerConfig
   private       MomentOfInertia                                           moi                                = KilogramSquareMeters.of(
       0.02);
   /**
+   * Whether the moment of inertia was explicitly set by the user (vs. the default 0.02 kg*m^2).
+   */
+  private       boolean                                                   moiExplicitlySet                   = false;
+  /**
    * Loosely coupled followers.
    */
   private       Optional<SmartMotorController[]>                          looselyCoupledFollowers            = Optional.empty();
@@ -389,6 +393,7 @@ public class SmartMotorControllerConfig
     this.minContinuousWrappingAngle = cfg.minContinuousWrappingAngle;
     this.closedLoopTolerance = cfg.closedLoopTolerance;
     this.moi = cfg.moi;
+    this.moiExplicitlySet = cfg.moiExplicitlySet;
     this.looselyCoupledFollowers = cfg.looselyCoupledFollowers;
     this.linearClosedLoopController = cfg.linearClosedLoopController;
     this.velocityTrapezoidalProfile = cfg.velocityTrapezoidalProfile;
@@ -882,6 +887,7 @@ public class SmartMotorControllerConfig
     } else
     {
       moi = KilogramSquareMeters.of(SingleJointedArmSim.estimateMOI(length.in(Meters), weight.in(Kilograms)));
+      moiExplicitlySet = true;
     }
     return this;
   }
@@ -898,6 +904,7 @@ public class SmartMotorControllerConfig
   public SmartMotorControllerConfig withMomentOfInertia(double MOI)
   {
     moi = KilogramSquareMeters.of(MOI);
+    moiExplicitlySet = true;
     return this;
   }
 
@@ -911,7 +918,18 @@ public class SmartMotorControllerConfig
   public SmartMotorControllerConfig withMomentOfInertia(MomentOfInertia MOI)
   {
     moi = MOI;
+    moiExplicitlySet = true;
     return this;
+  }
+
+  /**
+   * Check if the moment of inertia was explicitly set by the user.
+   *
+   * @return {@code true} if {@link #withMomentOfInertia} was called, {@code false} if using the default.
+   */
+  public boolean isMoiExplicitlySet()
+  {
+    return moiExplicitlySet;
   }
 
   /**
@@ -1862,6 +1880,7 @@ public class SmartMotorControllerConfig
   public SmartMotorControllerConfig withExponentialProfile(Voltage maxVolts, DCMotor motor, MomentOfInertia moi)
   {
     this.moi = moi;
+    this.moiExplicitlySet = true;
     var sysid = LinearSystemId.createSingleJointedArmSystem(motor,
                                                             moi.in(KilogramSquareMeters),
                                                             gearing.getMechanismToRotorRatio());
