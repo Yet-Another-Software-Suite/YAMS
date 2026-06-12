@@ -811,6 +811,7 @@ void TalonFXSWrapper::ApplyLimitsConfig() {
     m_talonConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
     m_talonConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = *lower;
   }
+  m_talonConfig.ClosedLoopGeneral.ContinuousWrap = m_config.GetContinuousWrapping().has_value();
 }
 
 void TalonFXSWrapper::ApplyMotionMagicConfig() {

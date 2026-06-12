@@ -552,6 +552,18 @@ class SmartMotorControllerConfig {
   SmartMotorControllerConfig& WithExternalEncoderDiscontinuityPoint(
       units::turn_t discontinuityPoint);
 
+  /**
+   * Enable continuous position wrapping for the closed-loop controller.
+   *
+   * Throws SmartMotorControllerConfigurationException if soft limits or a linear
+   * mechanism circumference are already configured.
+   *
+   * @param min Bottom of the wrapping range (turns).
+   * @param max Top of the wrapping range (turns).
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithContinuousWrapping(units::turn_t min, units::turn_t max);
+
   // ---- Telemetry ----------------------------------------------------------
 
   /**
@@ -923,6 +935,12 @@ class SmartMotorControllerConfig {
   /** @return Optional upper linear soft limit. */
   std::optional<units::meter_t> GetMeasurementUpperLimit() const;
 
+  /** @return Optional upper continuous wrapping bound (turns). Erases ContinuousWrapping tracking.
+   */
+  std::optional<units::turn_t> GetContinuousWrapping() const;
+  /** @return Optional lower continuous wrapping bound (turns). */
+  std::optional<units::turn_t> GetContinuousWrappingMin() const;
+
   /** @return Optional stator current limit. */
   std::optional<units::ampere_t> GetStatorCurrentLimit() const;
   /** @return Optional stator stall current limit (integer amps). */
@@ -1068,6 +1086,7 @@ class SmartMotorControllerConfig {
     SlotGains,
     TrapezoidProfile,
     ExponentialProfile,
+    ContinuousWrapping,
   };
   enum class ExternalEncoderOptions {
     ZeroOffset,
@@ -1115,6 +1134,8 @@ class SmartMotorControllerConfig {
   std::optional<units::ampere_t> m_supplyCurrentLimit;
   std::optional<units::celsius_t> m_temperatureCutoff;
   std::optional<units::volt_t> m_closedLoopMaxVoltage;
+  std::optional<units::turn_t> m_continuousWrappingMin;
+  std::optional<units::turn_t> m_continuousWrappingMax;
 
   // Control behaviour
   ControlMode m_controlMode{ControlMode::CLOSED_LOOP};
