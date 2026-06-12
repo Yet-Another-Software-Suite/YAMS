@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.gearing.GearBox;
@@ -26,7 +27,9 @@ import yams.motorcontrollers.remote.TalonFXWrapper;
 
 /**
  * Tests for CANcoder integration with TalonFXWrapper via SmartMotorControllerConfig.
+ * @implNote Disabled until 2027, bc CTRE bug
  */
+@Disabled
 public class CANcoderTest
 {
     @BeforeEach
