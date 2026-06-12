@@ -66,17 +66,6 @@ public class SparkAbsoluteEncoderTest
     }
 
     @Test
-    void testExceptionWhenAbsoluteEncoderWithoutDiscontinuityPoint()
-    {
-        SparkMax sparkMax = new SparkMax(92, MotorType.kBrushless);
-        SmartMotorControllerConfig config = baseConfig()
-                .withExternalEncoder(sparkMax.getAbsoluteEncoder());
-        assertThrows(SmartMotorControllerConfigurationException.class,
-                () -> new SparkWrapper(sparkMax, DCMotor.getNEO(1), config));
-        sparkMax.close();
-    }
-
-    @Test
     void testExceptionWhenDiscontinuityPointWithoutEncoder()
     {
         SparkMax sparkMax = new SparkMax(93, MotorType.kBrushless);

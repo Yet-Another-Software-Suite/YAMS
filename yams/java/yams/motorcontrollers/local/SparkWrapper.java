@@ -553,7 +553,7 @@ public class SparkWrapper extends SmartMotorController
     // Throw warning about supply stator limits on Spark's
     if (config.getSupplyStallCurrentLimit().isPresent())
     {
-      m_sparkBaseConfig.secondaryCurrentLimit(config.getSupplyStallCurrentLimit().getAsInt());
+      throw new SmartMotorControllerConfigurationException("Supply current limits are not supported on Sparks", "Supply current limit not set","withStatorCurrentLimit");
     }
     // Handle stator current limit.
     if (config.getStatorStallCurrentLimit().isPresent())

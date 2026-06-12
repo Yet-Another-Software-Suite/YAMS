@@ -61,8 +61,8 @@ public class CANcoderTest
     @Test
     void testDiscontinuityPointApplied()
     {
-        TalonFX   talon    = new TalonFX(80);
-        CANcoder  cancoder = new CANcoder(86);
+        TalonFX   talon    = new TalonFX(61);
+        CANcoder  cancoder = new CANcoder(61);
         SmartMotorControllerConfig config = new SmartMotorControllerConfig()
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry("TalonFX(80) CANcoder DP0.5", TelemetryVerbosity.LOW)
@@ -84,8 +84,8 @@ public class CANcoderTest
     @Test
     void testDiscontinuityPoint1_0Accepted()
     {
-        TalonFX   talon    = new TalonFX(81);
-        CANcoder  cancoder = new CANcoder(87);
+        TalonFX   talon    = new TalonFX(60);
+        CANcoder  cancoder = new CANcoder(60);
         SmartMotorControllerConfig config = new SmartMotorControllerConfig()
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry("TalonFX(81) CANcoder DP1.0", TelemetryVerbosity.LOW)
@@ -120,8 +120,8 @@ public class CANcoderTest
     @Test
     void testZeroOffsetApplied()
     {
-        TalonFX   talon    = new TalonFX(83);
-        CANcoder  cancoder = new CANcoder(88);
+        TalonFX   talon    = new TalonFX(59);
+        CANcoder  cancoder = new CANcoder(59);
         SmartMotorControllerConfig config = new SmartMotorControllerConfig()
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry("TalonFX(83) CANcoder ZeroOffset", TelemetryVerbosity.LOW)
@@ -144,8 +144,8 @@ public class CANcoderTest
     @Test
     void testCANcoderConfiguredWithoutDiscontinuityPoint()
     {
-        TalonFX   talon    = new TalonFX(84);
-        CANcoder  cancoder = new CANcoder(89);
+        TalonFX   talon    = new TalonFX(58);
+        CANcoder  cancoder = new CANcoder(58);
         SmartMotorControllerConfig config = new SmartMotorControllerConfig()
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry("TalonFX(84) CANcoder NoDP", TelemetryVerbosity.LOW)
