@@ -14,10 +14,14 @@
 #include <units/moment_of_inertia.h>
 
 #include <cmath>
+#include <cstdio>
 #include <ctre/phoenix6/TalonFX.hpp>
+#include <memory>
 #include <stdexcept>
+#include <string>
 
 #include "yams/exceptions/SmartMotorControllerConfigurationException.hpp"
+#include "yams/math/LQRController.hpp"
 #include "yams/motorcontrollers/simulation/DCMotorSimSupplier.hpp"
 
 using namespace ctre::phoenix6;
@@ -238,6 +242,50 @@ bool TalonFXSWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   }
 
   auto status = m_talon->GetConfigurator().Apply(cfg);
+
+  // LQR is not supported natively by Phoenix 6; hand control to the RoboRIO when configured.
+  auto gains = m_config.GetSlotGains(m_slot);
+  if (gains.lqr) {
+    m_lqr = math::LQRController{*gains.lqr};
+  } else {
+    m_lqr.reset();
+  }
+  if (gains.kP != 0.0 || gains.kI != 0.0 || gains.kD != 0.0) {
+    m_pid = frc::PIDController{gains.kP, gains.kI, gains.kD};
+  } else {
+    m_pid.reset();
+  }
+
+  if (m_lqr.has_value()) {
+    int deviceId = static_cast<int>(m_talon->GetDeviceID());
+    std::string alertText =
+        "[YAMS] TalonFXS(" + std::to_string(deviceId) +
+        ") is running closed-loop control on the SystemCore (LQR active). "
+        "Gains are not consistent with Phoenix 6 hardware PID and control runs at a lower "
+        "frequency.";
+    m_rioControllerAlert.emplace(alertText, frc::Alert::AlertType::kWarning);
+    m_rioControllerAlert->Set(true);
+
+    std::fprintf(stderr, "====== TalonFXS(%d) Using RIO Closed Loop Controller ======\n", deviceId);
+
+    if (m_closedLoopControllerThread) {
+      StopClosedLoopController();
+      m_closedLoopControllerThread.reset();
+    }
+    m_closedLoopControllerThread =
+        std::make_unique<frc::Notifier>([this] { IterateClosedLoopController(); });
+    if (auto name = m_config.GetTelemetryName(); name) {
+      m_closedLoopControllerThread->SetName(*name);
+    }
+    if (m_config.GetMotorControllerMode() == ControlMode::CLOSED_LOOP) {
+      StartClosedLoopController();
+    }
+  } else if (m_closedLoopControllerThread) {
+    StopClosedLoopController();
+    m_closedLoopControllerThread.reset();
+    if (m_rioControllerAlert) m_rioControllerAlert->Set(false);
+  }
+
   if (auto startPos = m_config.GetStartingPosition()) {
     if (m_cancoder) {
       m_cancoder->get().SetPosition(*startPos);

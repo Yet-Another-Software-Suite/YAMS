@@ -264,6 +264,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
   m_trapProfile = std::nullopt;
   m_expoMotionMagicKV = kV;
   m_expoMotionMagicKA = kA;
+  m_expoMaxInput = maxInput;
   return *this;
 }
 
@@ -284,6 +285,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
   m_trapProfile = std::nullopt;
   m_expoMotionMagicKV = kV;
   m_expoMotionMagicKA = kA;
+  m_expoMaxInput = maxVolts;
   return *this;
 }
 
@@ -322,6 +324,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
   m_trapProfile = std::nullopt;
   m_expoMotionMagicKV = (maxVolts / maxVelocity).value();
   m_expoMotionMagicKA = (maxVolts / maxAcceleration).value();
+  m_expoMaxInput = maxVolts;
   return *this;
 }
 
@@ -334,6 +337,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
   // A is [1/s], B is [(turn/s²)/V]; derive kV [V*s/turn] and kA [V*s²/turn]
   m_expoMotionMagicKV = -constraints.A.value() / constraints.B.value();
   m_expoMotionMagicKA = 1.0 / constraints.B.value();
+  m_expoMaxInput = constraints.maxInput;
   return *this;
 }
 
@@ -901,6 +905,10 @@ std::optional<double> SmartMotorControllerConfig::GetExponentialProfileKV() cons
 
 std::optional<double> SmartMotorControllerConfig::GetExponentialProfileKA() const {
   return m_expoMotionMagicKA;
+}
+
+std::optional<units::volt_t> SmartMotorControllerConfig::GetExponentialProfileMaxInput() const {
+  return m_expoMaxInput;
 }
 
 units::meter_t SmartMotorControllerConfig::ConvertFromMechanism(

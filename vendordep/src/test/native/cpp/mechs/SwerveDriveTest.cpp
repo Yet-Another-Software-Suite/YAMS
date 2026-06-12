@@ -29,6 +29,8 @@
 #include <memory>
 #include <numbers>
 #include <optional>
+#include <string>
+#include <utility>
 
 #include "helpers/MockHardware.h"
 #include "helpers/MotorControllerFactory.h"

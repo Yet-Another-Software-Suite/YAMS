@@ -397,6 +397,19 @@ std::optional<units::turns_per_second_t> SmartMotorController::GetMechanismSetpo
   return m_setpointVelocity;
 }
 
+std::optional<units::meter_t> SmartMotorController::GetMeasurementPositionSetpoint() const {
+  if (!m_setpointPosition) return std::nullopt;
+  if (!m_config.GetMechanismCircumference()) return std::nullopt;
+  return m_config.ConvertFromMechanism(*m_setpointPosition);
+}
+
+std::optional<units::meters_per_second_t> SmartMotorController::GetMeasurementSetpointVelocity()
+    const {
+  if (!m_setpointVelocity) return std::nullopt;
+  if (!m_config.GetMechanismCircumference()) return std::nullopt;
+  return m_config.ConvertFromMechanism(*m_setpointVelocity);
+}
+
 std::string SmartMotorController::GetName() const {
   return m_config.GetTelemetryName().value_or("SmartMotorController");
 }

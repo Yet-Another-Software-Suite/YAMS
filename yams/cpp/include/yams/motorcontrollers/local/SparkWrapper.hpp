@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <frc/Alert.h>
 #include <frc/simulation/DCMotorSim.h>
 #include <rev/SparkAbsoluteEncoder.h>
 #include <rev/SparkClosedLoopController.h>
@@ -323,6 +324,8 @@ class SparkWrapper : public SmartMotorController {
       rev::spark::SparkLowLevel::ControlType::kVelocity};
 
   int m_revSlot{0};
+
+  std::optional<frc::Alert> m_rioControllerAlert;
 
   void Init(rev::spark::SparkBase* spark, frc::DCMotor motor,
             const SmartMotorControllerConfig& config);

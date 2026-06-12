@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include <frc/controller/LinearQuadraticRegulator.h>
+#include <frc/estimator/KalmanFilter.h>
+#include <frc/system/LinearSystem.h>
 #include <units/angle.h>
 #include <units/angular_velocity.h>
 #include <units/length.h>
@@ -10,7 +13,9 @@
 #include <units/velocity.h>
 #include <units/voltage.h>
 
+#include <memory>
 #include <optional>
+#include <utility>
 #include <variant>
 
 #include "LQRConfig.hpp"
@@ -22,19 +27,14 @@ namespace yams::math {
  *
  * Wraps a WPILib LinearSystemLoop to provide a common Calculate() interface for
  * flywheel (velocity), arm, and elevator (position + velocity) plant types.
+ *
+ * Internally the LQR gain matrix and Kalman filter are heap-allocated alongside
+ * the LinearSystemLoop so that the loop's internal raw pointers remain valid for
+ * the lifetime of this object. Never copy or std::move an LQRController while
+ * it is in use.
  */
 class LQRController {
  public:
-  /**
-   * Construct an LQRController from an already-built loop.
-   *
-   * @param type   Plant type (FLYWHEEL, ARM, or ELEVATOR).
-   * @param loop   Pre-built LinearSystemLoop variant.
-   * @param period Loop period.
-   */
-  LQRController(LQRConfig::LQRType type, std::variant<LQRConfig::Loop1, LQRConfig::Loop2> loop,
-                units::second_t period);
-
   /**
    * Construct an LQRController by building the loop from an LQRConfig.
    *
@@ -121,9 +121,48 @@ class LQRController {
   const std::optional<LQRConfig>& GetConfig() const;
 
  private:
+  // frc::LinearSystemLoop stores raw pointers to the LQR and Kalman filter passed to its
+  // constructor. These bundles heap-pin all three together so the pointers are never dangled.
+  struct FlywheelBundle {
+    frc::LinearQuadraticRegulator<1, 1> controller;
+    frc::KalmanFilter<1, 1, 1> observer;
+    LQRConfig::Loop1 loop;
+
+    FlywheelBundle(frc::LinearSystem<1, 1, 1> plant, frc::LinearQuadraticRegulator<1, 1> ctrl,
+                   frc::KalmanFilter<1, 1, 1> obs, units::volt_t maxV, units::second_t dt)
+        : controller{std::move(ctrl)},
+          observer{std::move(obs)},
+          loop{plant, controller, observer, maxV, dt} {}
+
+    FlywheelBundle(const FlywheelBundle&) = delete;
+    FlywheelBundle& operator=(const FlywheelBundle&) = delete;
+    FlywheelBundle(FlywheelBundle&&) = delete;
+    FlywheelBundle& operator=(FlywheelBundle&&) = delete;
+  };
+
+  struct ArmElevatorBundle {
+    frc::LinearQuadraticRegulator<2, 1> controller;
+    frc::KalmanFilter<2, 1, 1> observer;
+    LQRConfig::Loop2 loop;
+
+    ArmElevatorBundle(frc::LinearSystem<2, 1, 1> plant, frc::LinearQuadraticRegulator<2, 1> ctrl,
+                      frc::KalmanFilter<2, 1, 1> obs, units::volt_t maxV, units::second_t dt)
+        : controller{std::move(ctrl)},
+          observer{std::move(obs)},
+          loop{plant, controller, observer, maxV, dt} {}
+
+    ArmElevatorBundle(const ArmElevatorBundle&) = delete;
+    ArmElevatorBundle& operator=(const ArmElevatorBundle&) = delete;
+    ArmElevatorBundle(ArmElevatorBundle&&) = delete;
+    ArmElevatorBundle& operator=(ArmElevatorBundle&&) = delete;
+  };
+
+  static std::unique_ptr<FlywheelBundle> BuildFlywheel(const LQRConfig& cfg);
+  static std::unique_ptr<ArmElevatorBundle> BuildArmElevator(const LQRConfig& cfg);
+
   std::optional<LQRConfig> m_config;
   LQRConfig::LQRType m_type;
-  std::variant<LQRConfig::Loop1, LQRConfig::Loop2> m_loop;
+  std::variant<std::unique_ptr<FlywheelBundle>, std::unique_ptr<ArmElevatorBundle>> m_bundle;
   units::second_t m_period;
 };
 

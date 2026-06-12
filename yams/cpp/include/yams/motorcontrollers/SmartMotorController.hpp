@@ -574,6 +574,24 @@ class SmartMotorController {
   std::optional<units::turns_per_second_t> GetMechanismSetpointVelocity() const;
 
   /**
+   * Get the last commanded linear measurement position setpoint.
+   * Converts the internal mechanism-angle setpoint using the configured circumference.
+   *
+   * @return Optional linear position setpoint, or empty if no setpoint has been commanded or
+   *         no circumference is configured.
+   */
+  std::optional<units::meter_t> GetMeasurementPositionSetpoint() const;
+
+  /**
+   * Get the last commanded linear measurement velocity setpoint.
+   * Converts the internal mechanism-velocity setpoint using the configured circumference.
+   *
+   * @return Optional linear velocity setpoint, or empty if no setpoint has been commanded or
+   *         no circumference is configured.
+   */
+  std::optional<units::meters_per_second_t> GetMeasurementSetpointVelocity() const;
+
+  /**
    * Get a mutable reference to the current configuration.
    *
    * @return Reference to the SmartMotorControllerConfig.

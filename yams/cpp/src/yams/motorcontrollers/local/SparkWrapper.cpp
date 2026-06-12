@@ -3,6 +3,7 @@
 
 #include "yams/motorcontrollers/local/SparkWrapper.hpp"
 
+#include <frc/Alert.h>
 #include <frc/RobotBase.h>
 #include <frc/simulation/RoboRioSim.h>
 #include <frc/system/plant/LinearSystemId.h>
@@ -10,11 +11,15 @@
 #include <rev/ConfigureTypes.h>
 #include <units/moment_of_inertia.h>
 
+#include <cstdio>
 #include <iostream>
+#include <memory>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 #include "yams/exceptions/SmartMotorControllerConfigurationException.hpp"
+#include "yams/math/LQRController.hpp"
 #include "yams/motorcontrollers/simulation/DCMotorSimSupplier.hpp"
 
 using namespace rev::spark;
@@ -147,7 +152,9 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& cfg) {
       m_velocityControlType = SparkLowLevel::ControlType::kMAXMotionVelocityControl;
     }
 
-    // Spark MAX Motion does not support exponential profiles; consume option for validation
+    // Exponential profiles are not natively supported by SPARK hardware; the option is consumed
+    // here to satisfy validation tracking — actual profile execution uses the software controller
+    // started below.
     m_config.HasExponentialProfile();
 
     if (auto inv = m_config.GetEncoderInverted(); inv) sparkCfg.encoder.Inverted(*inv);
@@ -222,6 +229,56 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& cfg) {
   else if (m_flexConfig)
     doConfig(*m_flexConfig);
   CommitConfig();
+
+  // Load LQR from the active gain slot so IterateClosedLoopController can use it.
+  auto gains = m_config.GetSlotGains(m_slot);
+  if (gains.lqr) {
+    m_lqr = math::LQRController{*gains.lqr};
+  } else {
+    m_lqr.reset();
+  }
+
+  // Load software PID (used by IterateClosedLoopController when no LQR is present).
+  if (gains.kP != 0.0 || gains.kI != 0.0 || gains.kD != 0.0) {
+    m_pid = frc::PIDController{gains.kP, gains.kI, gains.kD};
+  } else {
+    m_pid.reset();
+  }
+
+  // SPARK hardware has no native exponential profile or LQR support.  When either is configured,
+  // the RoboRIO runs the closed-loop controller via a Notifier and sends voltage commands to the
+  // Spark.  SetPosition/SetVelocity are gated by m_closedLoopControllerRunning so they do not
+  // forward raw setpoints to the Spark hardware controller while the notifier is active.
+  bool needsRioController = m_config.HasExponentialProfile() || m_lqr.has_value();
+  if (needsRioController) {
+    int deviceId = m_spark->GetDeviceId();
+    std::string alertText =
+        "[YAMS] Spark(" + std::to_string(deviceId) +
+        ") is running closed-loop control on the SystemCore (exponential profile or LQR active). "
+        "Gains are not consistent with Spark hardware PID and control runs at a lower frequency.";
+    m_rioControllerAlert.emplace(alertText, frc::Alert::AlertType::kWarning);
+    m_rioControllerAlert->Set(true);
+
+    std::fprintf(stderr, "====== Spark(%d) Using RIO Closed Loop Controller ======\n", deviceId);
+
+    if (m_closedLoopControllerThread) {
+      StopClosedLoopController();
+      m_closedLoopControllerThread.reset();
+    }
+    m_closedLoopControllerThread =
+        std::make_unique<frc::Notifier>([this] { IterateClosedLoopController(); });
+    if (auto name = m_config.GetTelemetryName(); name) {
+      m_closedLoopControllerThread->SetName(*name);
+    }
+    if (m_config.GetMotorControllerMode() == ControlMode::CLOSED_LOOP) {
+      StartClosedLoopController();
+    }
+  } else if (m_closedLoopControllerThread) {
+    // Config no longer requires a software controller; tear it down.
+    StopClosedLoopController();
+    m_closedLoopControllerThread.reset();
+    if (m_rioControllerAlert) m_rioControllerAlert->Set(false);
+  }
 
   if (auto startPos = m_config.GetStartingPosition()) {
     m_relEncoder->SetPosition(startPos->value());
@@ -725,10 +782,30 @@ void SparkWrapper::SetMotionProfileMaxAcceleration(units::meters_per_second_squa
     SetMotionProfileMaxAcceleration(units::turns_per_second_squared_t{acc.value() / circ->value()});
 }
 
-void SparkWrapper::SetMotionProfileMaxJerk(units::angular_jerk::turns_per_second_cubed_t) {}
+void SparkWrapper::SetMotionProfileMaxJerk(units::angular_jerk::turns_per_second_cubed_t maxJerk) {
+  auto doConfig = [&](SparkBaseConfig& cfg) {
+    cfg.closedLoop.maxMotion.MaxAcceleration(maxJerk.value());
+  };
+  if (m_maxConfig)
+    doConfig(*m_maxConfig);
+  else if (m_flexConfig)
+    doConfig(*m_flexConfig);
+  CommitConfig();
+}
 
-void SparkWrapper::SetExponentialProfile(std::optional<double>, std::optional<double>,
-                                         std::optional<units::volt_t>) {}
+void SparkWrapper::SetExponentialProfile(std::optional<double> kV, std::optional<double> kA,
+                                         std::optional<units::volt_t> maxInput) {
+  if (!m_config.GetExponentialProfile()) return;
+
+  double newKV = kV.value_or(m_config.GetExponentialProfileKV().value_or(0.0));
+  double newKA = kA.value_or(m_config.GetExponentialProfileKA().value_or(0.0));
+  units::volt_t newMaxInput =
+      maxInput.value_or(m_config.GetExponentialProfileMaxInput().value_or(12_V));
+
+  m_config.WithExponentialProfile(newKV, newKA, newMaxInput);
+
+  for (auto* f : m_looseFollowers) f->SetExponentialProfile(kV, kA, maxInput);
+}
 
 void SparkWrapper::SetClosedLoopSlot(ClosedLoopControllerSlot slot) {
   m_slot = slot;

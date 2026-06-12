@@ -168,6 +168,8 @@ class LQRConfig {
   std::variant<Loop1, Loop2> GetLoop() const;
 
  private:
+  friend class LQRController;
+
   std::optional<LQRType> m_type;
   std::optional<frc::LinearSystem<1, 1, 1>> m_flywheelPlant;
   std::optional<frc::LinearSystem<2, 1, 1>> m_armElevatorPlant;

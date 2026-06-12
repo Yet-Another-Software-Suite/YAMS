@@ -1021,6 +1021,8 @@ class SmartMotorControllerConfig {
   std::optional<double> GetExponentialProfileKV() const;
   /** @return Optional kA for CTRE MotionMagicExpo (V*s²/turn = V/(turn/s²)). */
   std::optional<double> GetExponentialProfileKA() const;
+  /** @return Optional maximum input voltage for the exponential profile. */
+  std::optional<units::volt_t> GetExponentialProfileMaxInput() const;
 
   /**
    * Convert a mechanism position (turns) to a linear distance using the configured circumference.
@@ -1102,6 +1104,7 @@ class SmartMotorControllerConfig {
   // kV/kA in V*s/turn and V*s²/turn for direct CTRE MotionMagicExpo assignment
   std::optional<double> m_expoMotionMagicKV;
   std::optional<double> m_expoMotionMagicKA;
+  std::optional<units::volt_t> m_expoMaxInput;
 
   // Limits
   std::optional<units::turn_t> m_mechLowerLimit;

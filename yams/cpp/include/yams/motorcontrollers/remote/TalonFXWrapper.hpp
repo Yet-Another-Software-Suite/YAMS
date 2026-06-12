@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <frc/Alert.h>
 #include <frc/simulation/DCMotorSim.h>
 
 #include <any>
@@ -316,6 +317,8 @@ class TalonFXWrapper : public SmartMotorController {
   std::optional<frc::sim::DCMotorSim> m_motorSim;
 
   math::DerivativeTimeFilter m_accelFilter{20_ms};
+
+  std::optional<frc::Alert> m_rioControllerAlert;
 
   void ApplyPIDConfig();
   void ApplyFeedforwardConfig();
