@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.motorcontrollers.remote;
 
 import static edu.wpi.first.units.Units.Meters;
@@ -56,7 +59,6 @@ import edu.wpi.first.math.trajectory.ExponentialProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.AngularAccelerationUnit;
-import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -74,7 +76,6 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -91,10 +92,20 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
 
 /**
  * TalonFX wrapper for a CTRE TalonFX motor controller.
+ *
+ * <p><b>External encoder discontinuity point support (CANcoder):</b>
+ * <ul>
+ *   <li>{@code 0.5} rotations — maps to {@code AbsoluteSensorDiscontinuityPoint = 0.5},
+ *       sensor range is [-0.5, 0.5)</li>
+ *   <li>{@code 1.0} rotations — maps to {@code AbsoluteSensorDiscontinuityPoint = 1.0},
+ *       sensor range is [0, 1)</li>
+ * </ul>
+ * Configuring a discontinuity point is optional for CANcoder; when omitted the CANcoder default
+ * is used. Set via
+ * {@link yams.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint}.
  */
 public class TalonFXWrapper extends SmartMotorController
 {
-
   /**
    * {@link TalonFX} motor controller
    */
@@ -353,17 +364,15 @@ public class TalonFXWrapper extends SmartMotorController
   @Override
   public void seedRelativeEncoder()
   {
-
+      throw new RuntimeException("Unsupported operation");
   }
 
-  @Override
-  @Deprecated
-  public void synchronizeRelativeEncoder()
-  {
-    // Unused
-  }
+    @Override
+    public void synchronizeRelativeEncoder() {
+        throw new RuntimeException("Unsupported operation");
+    }
 
-  @Override
+    @Override
   public void simIterate()
   {
     if (RobotBase.isSimulation() && m_simSupplier.isPresent())
@@ -443,7 +452,11 @@ public class TalonFXWrapper extends SmartMotorController
     forceConfigApply();
   }
 
-  /**
+    @Override
+    public void setEncoderVelocity(AngularVelocity velocity) {
+    }
+
+    /**
    * Check if {@link CANdi} PWM1 is used as the
    * {@link com.ctre.phoenix6.configs.ExternalFeedbackConfigs#ExternalFeedbackSensorSource} in
    * {@link TalonFXConfiguration#Feedback}.
@@ -481,15 +494,6 @@ public class TalonFXWrapper extends SmartMotorController
           "[ERROR] CANdi PWM2 has been configured but is not present in SmartMotorControllerConfig!");
     }
     return configured;
-  }
-
-  @Override
-  @Deprecated
-  public void setEncoderVelocity(AngularVelocity velocity)
-  {
-    //m_simSupplier.ifPresent(mSim -> mSim.setMechanismVelocity(velocity));
-//    m_dcmotorSim.ifPresent(sim -> sim.setAngularVelocity(velocity.in(RadiansPerSecond)));
-    // Cannot set velocity of CANdi or CANCoder.
   }
 
   @Override
@@ -1865,12 +1869,4 @@ public class TalonFXWrapper extends SmartMotorController
     return Pair.of(Optional.empty(), Optional.empty());
   }
 
-  @Override
-  public Config getSysIdConfig(Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage, Time testDuration)
-  {
-    return new Config(stepVoltage,
-                      maxVoltage,
-                      testDuration,
-                      state -> SignalLogger.writeString("state", state.toString()));
-  }
 }

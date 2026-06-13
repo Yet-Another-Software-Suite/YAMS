@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechanisms.positional;
 
 import static edu.wpi.first.units.Units.Degrees;
@@ -7,14 +10,8 @@ import static edu.wpi.first.units.Units.Radians;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.units.measure.Velocity;
-import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
@@ -39,7 +36,6 @@ import yams.motorcontrollers.simulation.ArmSimSupplier;
  */
 public class DoubleJointedArm extends SmartPositionalMechanism
 {
-
   /**
    * Upper arm {@link SmartMotorController}
    */
@@ -114,7 +110,7 @@ public class DoubleJointedArm extends SmartPositionalMechanism
     {
       throw new DoubleJointedArmConfigurationException("Arm starting angle is empty",
                                                        "Cannot create simulation.",
-                                                       "withStartingPosition(Angle)");
+                                                       "SmartMotorControllerConfig.withStartingPosition(Angle)");
     }
 
     // Check that the arm lengths are defined
@@ -151,7 +147,6 @@ public class DoubleJointedArm extends SmartPositionalMechanism
 
     if (RobotBase.isSimulation())
     {
-
       if (lowerConfig.getLowerHardLimit().isEmpty() || upperConfig.getLowerHardLimit().isEmpty())
       {
         throw new DoubleJointedArmConfigurationException("Arm lower hard limit is empty",
@@ -444,13 +439,6 @@ public class DoubleJointedArm extends SmartPositionalMechanism
            m_upperArmConfig.getTelemetryName().orElse("Upper");
   }
 
-  @Override
-  @Deprecated
-  public Trigger max()
-  {
-    throw new RuntimeException("Unimplemented");
-  }
-
   /**
    * Get the shoulder angle of the DoubleJointedArm.
    *
@@ -531,88 +519,13 @@ public class DoubleJointedArm extends SmartPositionalMechanism
     }).withName(m_subsystem.getName() + " SetDutyCycle");
   }
 
-  @Override
-  @Deprecated
-  public Command set(double dutycycle)
-  {
-    throw new RuntimeException("Unimplemented");
-  }
+    @Override
+    public Trigger max() {
+        throw new RuntimeException("Unsupported operation");
+    }
 
-  @Override
-  @Deprecated
-  public Command set(Supplier<Double> dutycyle)
-  {
-    throw new RuntimeException("Unimplemented");
-  }
-
-  @Override
-  @Deprecated
-  public Command setVoltage(Voltage volts)
-  {
-    throw new RuntimeException("Unimplemented");
-  }
-
-  @Override
-  @Deprecated
-  public Command setVoltage(Supplier<Voltage> volts)
-  {
-    throw new RuntimeException("Unimplemented");
-  }
-
-  @Override
-  @Deprecated
-  public Trigger min()
-  {
-    throw new RuntimeException("Unimplemented");
-  }
-
-  @Override
-  @Deprecated
-  public Command sysId(Voltage maximumVoltage, Velocity<VoltageUnit> step, Time duration)
-  {
-    throw new RuntimeException("Unimplemented");
-  }
-
-  @Override
-  @Deprecated
-  public void setMeasurementVelocitySetpoint(LinearVelocity velocity)
-  {
-    throw new RuntimeException("Unimplemented");
-  }
-
-  @Override
-  @Deprecated
-  public void setMechanismVelocitySetpoint(AngularVelocity velocity)
-  {
-    throw new RuntimeException("Unimplemented");
-  }
-
-  @Override
-  @Deprecated
-  public void setMeasurementPositionSetpoint(Distance distance)
-  {
-    throw new RuntimeException("Unimplemented");
-  }
-
-  @Override
-  @Deprecated
-  public void setMechanismPositionSetpoint(Angle angle)
-  {
-    throw new RuntimeException("Unimplemented");
-  }
-
-  @Override
-  @Deprecated
-  public void setVoltageSetpoint(Voltage voltage)
-  {
-    throw new RuntimeException("Unimplemented");
-  }
-
-  @Override
-  @Deprecated
-  public void setDutyCycleSetpoint(double dutycycle)
-  {
-    throw new RuntimeException("Unimplemented");
-  }
-
+    @Override
+    public Trigger min() {
+        throw new  RuntimeException("Unsupported operation");
+    }
 }

@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechs;
 
 import static edu.wpi.first.units.Units.Amps;
@@ -17,7 +20,6 @@ import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.thethriftybot.devices.ThriftyNova;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Distance;
@@ -52,7 +54,6 @@ import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class ElevatorTest
 {
-
   private static SmartMotorControllerConfig createSMCConfig()
   {
     return new SmartMotorControllerConfig()
@@ -179,9 +180,6 @@ public class ElevatorTest
     } else if (motorController instanceof SparkFlex)
     {
       ((SparkFlex) motorController).close();
-    } else if (motorController instanceof ThriftyNova)
-    {
-//      ((ThriftyNova)motorController).close();
     } else if (motorController instanceof TalonFXS)
     {
       ((TalonFXS) motorController).close();

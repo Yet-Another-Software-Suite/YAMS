@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems;
 
 
@@ -59,18 +62,6 @@ public class ExponentiallyProfiledElevatorSubsystem extends SubsystemBase
   private final Distance            hardLowerLimit     = Meters.of(0);
   private final Distance            hardUpperLimit     = Meters.of(3);
   /*
-   * This is the STARTING PID Controller for the Elevator. If you are using a TalonFX or TalonFXS this will run on the motor controller itself.
-   */
-  private final ExponentialProfilePIDController pidController  = new ExponentialProfilePIDController(1,
-                                                                                                     0,
-                                                                                                     0,
-                                                                                                     ExponentialProfilePIDController.createElevatorConstraints(
-                                                                                                           Volts.of(12),
-                                                                                                           dcMotor,
-                                                                                                           weight,
-                                                                                                           radius,
-                                                                                                           gearing));
-  /*
    * This is the STARTING Feedforward for the Elevator. If you are using a TalonFX or TalonFXS this will run on the motor controller itself.
    */
   private final ElevatorFeedforward             elevatorFeedforward = new ElevatorFeedforward(0, 0, 0, 0);
@@ -94,7 +85,13 @@ public class ExponentiallyProfiledElevatorSubsystem extends SubsystemBase
       /*
        * Closed loop configuration options for the motor.
        */
-      .withClosedLoopController(pidController)
+      .withClosedLoopController(1,0,0)
+          .withExponentialProfile(ExponentialProfilePIDController.createElevatorConstraints(
+                  Volts.of(12),
+                  dcMotor,
+                  weight,
+                  radius,
+                  gearing))
       .withFeedforward(elevatorFeedforward)
       .withSoftLimits(softLowerLimit, softUpperLimit);
   /// Generic Smart Motor Controller with our options and vendor motor.
@@ -163,9 +160,4 @@ public class ExponentiallyProfiledElevatorSubsystem extends SubsystemBase
     return m_elevator.setHeight(height);
   }
 
-  public Command sysId()
-  {
-    return m_elevator.sysId(Volts.of(12), Volts.of(12).per(Second), Second.of(30));
-  }
 }
-

@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechanisms.config;
 
 import static edu.wpi.first.units.Units.Seconds;
@@ -19,7 +22,6 @@ import yams.motorcontrollers.simulation.SensorData;
  */
 public class SensorConfig
 {
-
   /**
    * Sensor name to display in the simulation window.
    */

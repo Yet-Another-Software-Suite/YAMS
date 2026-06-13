@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems;
 
 
@@ -6,8 +9,6 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Second;
-import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.controller.ArmFeedforward;
@@ -35,7 +36,6 @@ import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class TurretSubsystem extends SubsystemBase
 {
-
   double[] ratio = {144 / 15, 5, 1.08};
 
   SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
@@ -55,7 +55,9 @@ public class TurretSubsystem extends SubsystemBase
       // Setup Telemetry
       .withTelemetry("TurretMotor", TelemetryVerbosity.HIGH)
       // Power Optimization
-      .withStatorCurrentLimit(Amps.of(60));
+      .withStatorCurrentLimit(Amps.of(60))
+      .withStartingPosition(Degrees.of(0)) // Starting position of the Pivot
+      .withMomentOfInertia(yams.units.YUnits.PoundSquareInches.of(0.01)); // MOI Calculation
   // .withClosedLoopRampRate(Seconds.of(0.0))
 
   // .withOpenLoopRampRate(Seconds.of(0.0));
@@ -64,11 +66,9 @@ public class TurretSubsystem extends SubsystemBase
                                                   motorConfig);
 
   PivotConfig m_config = new PivotConfig(motor)
-      .withStartingPosition(Degrees.of(0)) // Starting position of the Pivot
-      .withHardLimit(Degrees.of(-360), Degrees.of(360)) // Hard limit bc wiring prevents infinitpe spinning
+      .withHardLimits(Degrees.of(-360), Degrees.of(360)) // Hard limit bc wiring prevents infinite spinning
       // .withSoftLimits(Degrees.of(-360), Degrees.of(360))
-      .withTelemetry("Turret", TelemetryVerbosity.HIGH) // Telemetry
-      .withMOI(yams.units.YUnits.PoundSquareInches.of(0.01)); // MOI Calculation
+      .withTelemetry("Turret", TelemetryVerbosity.HIGH); // Telemetry
 
   private Pivot turret = new Pivot(m_config);
 
@@ -92,7 +92,6 @@ public class TurretSubsystem extends SubsystemBase
 
  public ChassisSpeeds getVelocity(ChassisSpeeds robotVelocity, Angle robotAngle)
   {
-
       Translation2d rRobot = roboToTurret.getTranslation().toTranslation2d(); // in robot frame
     Translation2d rWorld = rRobot.rotateBy(Rotation2d.fromRadians(robotAngle.in(Radians))); // rotate into field frame
 
@@ -126,11 +125,6 @@ public class TurretSubsystem extends SubsystemBase
   public Command turretCmd(double dutycycle)
   {
     return turret.set(dutycycle);
-  }
-
-  public Command sysId()
-  {
-    return turret.sysId(Volts.of(3), Volts.of(3).per(Second), Second.of(30));
   }
 
   public Command setAngle(Angle angle)

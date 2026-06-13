@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechs;
 
 import static edu.wpi.first.units.Units.Amps;
@@ -19,7 +22,6 @@ import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.thethriftybot.devices.ThriftyNova;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
@@ -48,17 +50,14 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.local.NovaWrapper;
 import yams.motorcontrollers.local.SparkWrapper;
 import yams.motorcontrollers.remote.TalonFXSWrapper;
 import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class ArmTest
 {
-
   private static SmartMotorControllerConfig createPIDSMCConfig()
   {
-
     return new SmartMotorControllerConfig()
         .withClosedLoopController(5, 0, 0)
         .withSoftLimits(Degrees.of(-100), Degrees.of(100))
@@ -67,7 +66,8 @@ public class ArmTest
         .withStatorCurrentLimit(Amps.of(40))
         .withMotorInverted(false)
         .withFeedforward(new ArmFeedforward(0, 1, 0, 0))
-        .withControlMode(ControlMode.CLOSED_LOOP);
+        .withControlMode(ControlMode.CLOSED_LOOP)
+        .withStartingPosition(Degrees.of(0));
   }
 
   private static Arm createArm(SmartMotorController smc)
@@ -75,12 +75,7 @@ public class ArmTest
     ArmConfig config = new ArmConfig(smc)
         .withLength(Inches.of(4))
         .withHardLimits(Degrees.of(-100), Degrees.of(200))
-        .withMass(Pounds.of(1))
-        .withStartingPosition(Degrees.of(0));
-    if (!(smc instanceof SparkWrapper || smc instanceof NovaWrapper))
-    {
-      config.withHorizontalZero(Degrees.of(0));
-    }
+        .withMass(Pounds.of(1));
     Arm                               arm    = new Arm(config);
     SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.smc = smc;
@@ -178,9 +173,6 @@ public class ArmTest
     } else if (motorController instanceof SparkFlex)
     {
       ((SparkFlex) motorController).close();
-    } else if (motorController instanceof ThriftyNova)
-    {
-//      ((ThriftyNova)motorController).close();
     } else if (motorController instanceof TalonFXS)
     {
       ((TalonFXS) motorController).close();

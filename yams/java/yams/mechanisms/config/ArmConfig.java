@@ -1,20 +1,21 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechanisms.config;
 
-import static edu.wpi.first.units.Units.KilogramSquareMeters;
-
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import java.util.Optional;
-import java.util.OptionalDouble;
 import yams.exceptions.ArmConfigurationException;
+import yams.mechanisms.positional.Arm;
+import yams.mechanisms.positional.Elevator;
+import yams.mechanisms.positional.Pivot;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
@@ -24,15 +25,10 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  */
 public class ArmConfig
 {
-
   /**
-   * {@link SmartMotorController} for the {@link yams.mechanisms.positional.Arm}
+   * {@link SmartMotorController} for the {@link Arm}
    */
   private Optional<SmartMotorController> motor               = Optional.empty();
-  /**
-   * The network root of the mechanism (Optional).
-   */
-  protected Optional<String>               networkTableName        = Optional.empty();
   /**
    * Telemetry name.
    */
@@ -42,58 +38,38 @@ public class ArmConfig
    */
   private   Optional<TelemetryVerbosity>   telemetryVerbosity      = Optional.empty();
   /**
-   * Lower Hard Limit for the {@link yams.mechanisms.positional.Arm} to be representing in simulation.
+   * Lower Hard Limit for the {@link Arm} to be representing in simulation.
    */
   private   Optional<Angle>                lowerHardLimit          = Optional.empty();
   /**
-   * Upper hard limit for the {@link yams.mechanisms.positional.Arm} representing in simulation.
+   * Upper hard limit for the {@link Arm} representing in simulation.
    */
   private   Optional<Angle>                upperHardLimit          = Optional.empty();
   /**
-   * {@link yams.mechanisms.positional.Arm} length for simulation.
+   * {@link Arm} length for simulation.
    */
   private   Optional<Distance>             length                  = Optional.empty();
   /**
-   * {@link yams.mechanisms.positional.Arm} mass for simulation.
+   * {@link Arm} mass for simulation.
    */
   private   Optional<Mass>                 weight                  = Optional.empty();
-  /**
-   * {@link yams.mechanisms.positional.Arm} MOI from CAD software. If not given estimated with length and weight.
-   */
-  private   OptionalDouble                 moi                     = OptionalDouble.empty();
   /**
    * Sim color value
    */
   private   Color8Bit                      simColor                = new Color8Bit(Color.kOrange);
   /**
-   * Mechanism position configuration for the {@link yams.mechanisms.positional.Pivot} (Optional).
+   * Mechanism position configuration for the {@link Pivot} (Optional).
    */
   private   MechanismPositionConfig        mechanismPositionConfig = new MechanismPositionConfig();
-  /**
-   * Horizontal zero of the arm's absolute encoder.
-   */
-  private   Optional<Angle>                horizontalZero          = Optional.empty();
-  /**
-   * Starting position of the arms motor controller encoder.
-   */
-  private   Optional<Angle>                startingPosition        = Optional.empty();
   /**
    * Simulated starting position.
    */
   private Optional<Angle>                simStartingPosition = Optional.empty();
-  /**
-   * Lower and upper soft limits of the arms closed loop controller. (LowerLimit, UpperLimit)
-   */
-  private   Optional<Pair<Angle, Angle>>   softLimits              = Optional.empty();
-  /**
-   * Wrapping angles for the Arm applied to the motor controllers closed loop controller. (Min, Max)
-   */
-  private   Optional<Pair<Angle, Angle>>   continuousWrapping      = Optional.empty();
 
   /**
    * Arm Configuration class
    *
-   * @param motorController Primary {@link SmartMotorController} for the {@link yams.mechanisms.positional.Arm}
+   * @param motorController Primary {@link SmartMotorController} for the {@link Arm}
    */
   public ArmConfig(SmartMotorController motorController)
   {
@@ -115,20 +91,14 @@ public class ArmConfig
   {
     this.simStartingPosition = cfg.simStartingPosition;
     motor = cfg.motor;
-    networkTableName = cfg.networkTableName;
     telemetryName = cfg.telemetryName;
     telemetryVerbosity = cfg.telemetryVerbosity;
     lowerHardLimit = cfg.lowerHardLimit;
     upperHardLimit = cfg.upperHardLimit;
     length = cfg.length;
     weight = cfg.weight;
-    moi = cfg.moi;
     simColor = cfg.simColor;
     mechanismPositionConfig = cfg.mechanismPositionConfig;
-    startingPosition = cfg.startingPosition;
-    softLimits = cfg.softLimits;
-    continuousWrapping = cfg.continuousWrapping;
-    horizontalZero = cfg.horizontalZero;
   }
 
   @Override
@@ -150,9 +120,9 @@ public class ArmConfig
   }
 
   /**
-   * Configure the {@link SmartMotorController} for the {@link yams.mechanisms.positional.Arm}
+   * Configure the {@link SmartMotorController} for the {@link Arm}
    *
-   * @param motorController Primary {@link SmartMotorController} for the {@link yams.mechanisms.positional.Arm}
+   * @param motorController Primary {@link SmartMotorController} for the {@link Arm}
    * @return {@link ArmConfig} for chaining.
    */
   public ArmConfig withSmartMotorController(SmartMotorController motorController)
@@ -164,15 +134,10 @@ public class ArmConfig
                                           ".withSmartMotorController(SmartMotorController)");
     }
     motor = Optional.of(motorController);
-    moi.ifPresent(moi -> motorController.getConfig().withMomentOfInertia(KilogramSquareMeters.of(moi)));
-    if (length.isPresent() && weight.isPresent() && moi.isEmpty())
+    if (length.isPresent() && weight.isPresent())
     {
       motorController.getConfig().withMomentOfInertia(length.get(), weight.get());
     }
-    horizontalZero.ifPresent(this::withHorizontalZero);
-    startingPosition.ifPresent(this::withStartingPosition);
-    softLimits.ifPresent(limits -> withSoftLimits(limits.getFirst(), limits.getSecond()));
-    continuousWrapping.ifPresent(wrapping -> withWrapping(wrapping.getFirst(), wrapping.getSecond()));
     return this;
   }
 
@@ -190,39 +155,9 @@ public class ArmConfig
   }
 
   /**
-   * Configure the MOI directly instead of estimating it with the length and mass of the
-   * {@link yams.mechanisms.positional.Arm} for simulation.
+   * Configure the {@link Arm}s length for simulation.
    *
-   * @param MOI Moment of Inertia of the {@link yams.mechanisms.positional.Arm}. in {@link Units#KilogramSquareMeters}
-   * @return {@link ArmConfig} for chaining.
-   * @implNote Please use {@link #withMOI(MomentOfInertia)} instead. Default unit is KilogramSquareMeters
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public ArmConfig withMOI(double MOI)
-  {
-    motor.ifPresent(motor -> motor.getConfig().withMomentOfInertia(KilogramSquareMeters.of(MOI)));
-    this.moi = OptionalDouble.of(MOI);
-    return this;
-  }
-
-  /**
-   * Configure the MOI directly instead of estimating it with the length and mass of the
-   * {@link yams.mechanisms.positional.Arm} for simulation.
-   *
-   * @param MOI Moment of Inertia of the {@link yams.mechanisms.positional.Arm}
-   * @return {@link ArmConfig} for chaining.
-   */
-  public ArmConfig withMOI(MomentOfInertia MOI)
-  {
-    motor.ifPresent(motor -> motor.getConfig().withMomentOfInertia(MOI));
-    this.moi = OptionalDouble.of(MOI.in(KilogramSquareMeters));
-    return this;
-  }
-
-  /**
-   * Configure the {@link yams.mechanisms.positional.Arm}s length for simulation.
-   *
-   * @param distance Length of the {@link yams.mechanisms.positional.Arm}.
+   * @param distance Length of the {@link Arm}.
    * @return {@link ArmConfig} for chaining.
    */
   public ArmConfig withLength(Distance distance)
@@ -236,9 +171,9 @@ public class ArmConfig
   }
 
   /**
-   * Configure the {@link yams.mechanisms.positional.Arm}s {@link Mass} for simulation.
+   * Configure the {@link Arm}s {@link Mass} for simulation.
    *
-   * @param mass {@link Mass} of the {@link yams.mechanisms.positional.Arm}
+   * @param mass {@link Mass} of the {@link Arm}
    * @return {@link ArmConfig} for chaining.
    */
   public ArmConfig withMass(Mass mass)
@@ -252,7 +187,7 @@ public class ArmConfig
   }
 
   /**
-   * Configure telemetry for the {@link yams.mechanisms.positional.Arm} mechanism.
+   * Configure telemetry for the {@link Arm} mechanism.
    *
    * @param telemetryName      Telemetry NetworkTable name to appear under "SmartDashboard/"
    * @param telemetryVerbosity Telemetry verbosity to apply.
@@ -266,87 +201,14 @@ public class ArmConfig
   }
 
   /**
-   * Configure telemetry for the {@link yams.mechanisms.positional.Arm} mechanism.
-   *
-   * @param networkRoot        Telemetry NetworkTable
-   * @param telemetryName      Telemetry NetworkTable name to appear under _networkTableName_
-   * @param telemetryVerbosity Telemetry verbosity to apply.
-   * @return {@link ArmConfig} for chaining.
-   */
-  @Deprecated
-  public ArmConfig withTelemetry(String networkRoot, String telemetryName, TelemetryVerbosity telemetryVerbosity)
-  {
-    this.networkTableName = Optional.ofNullable(networkRoot);
-    this.telemetryName = Optional.ofNullable(telemetryName);
-    this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
-    return this;
-  }
-
-  /**
    * Set the elevator mechanism position configuration.
    *
-   * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link yams.mechanisms.positional.Elevator}
+   * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link Elevator}
    * @return {@link PivotConfig} for chaining
    */
   public ArmConfig withMechanismPositionConfig(MechanismPositionConfig mechanismPositionConfig)
   {
     this.mechanismPositionConfig = mechanismPositionConfig;
-    return this;
-  }
-
-
-  /**
-   * Set the horizontal zero of the arms absolute encoder.
-   *
-   * @param horizontalZero Offset of the arm that will make the arm read 0 when horizontal.
-   * @return {@link ArmConfig} for chaining.
-   */
-  public ArmConfig withHorizontalZero(Angle horizontalZero)
-  {
-    this.horizontalZero = Optional.ofNullable(horizontalZero);
-    motor.ifPresent(motor -> motor.getConfig().withExternalEncoderZeroOffset(horizontalZero));
-    return this;
-  }
-
-  /**
-   * Set the arm starting angle of the motor controller encoder.
-   *
-   * @param startingPosition Starting position of the arm.
-   * @return {@link ArmConfig} for chaining
-   */
-  public ArmConfig withStartingPosition(Angle startingPosition)
-  {
-    this.startingPosition = Optional.ofNullable(startingPosition);
-    motor.ifPresent(motor -> motor.getConfig().withStartingPosition(startingPosition));
-    return this;
-  }
-
-  /**
-   * Set the arm soft limits. When exceeded the power will be set to 0.
-   *
-   * @param lowerLimit Minimum rotation of the arm.
-   * @param upperLimit Maximum rotation of the arm.
-   * @return {@link ArmConfig} for chaining.
-   */
-  public ArmConfig withSoftLimits(Angle lowerLimit, Angle upperLimit)
-  {
-    softLimits = Optional.of(Pair.of(lowerLimit, upperLimit));
-    motor.ifPresent(motor -> motor.getConfig().withSoftLimits(lowerLimit, upperLimit));
-    return this;
-  }
-
-  /**
-   * Wrap the arm around these angles. When the arm exceeds the maximum angle it will read as if it is the minimum
-   * angle.
-   *
-   * @param min Minimum angle for wrapping
-   * @param max Maximum angle for wrapping.
-   * @return {@link ArmConfig} for chaining.
-   */
-  public ArmConfig withWrapping(Angle min, Angle max)
-  {
-    continuousWrapping = Optional.of(Pair.of(min, max));
-    motor.ifPresent(motor -> motor.getConfig().withContinuousWrapping(min, max));
     return this;
   }
 
@@ -375,7 +237,7 @@ public class ArmConfig
   }
 
   /**
-   * Get the Length of the {@link yams.mechanisms.positional.Arm}
+   * Get the Length of the {@link Arm}
    *
    * @return {@link Distance} of the Arm.
    */
@@ -385,27 +247,30 @@ public class ArmConfig
   }
 
   /**
-   * Get the moment of inertia for the {@link yams.mechanisms.positional.Arm} simulation.
+   * Get the moment of inertia for the {@link Arm} simulation.
+   * MOI must be configured via {@link SmartMotorControllerConfig#withMomentOfInertia(Distance, Mass)}
+   * or {@link SmartMotorControllerConfig#withMomentOfInertia(edu.wpi.first.units.measure.MomentOfInertia)}.
+   * Providing {@link #withLength(Distance)} and {@link #withMass(Mass)} will set it automatically.
    *
-   * @return Moment of Inertia.
+   * @return Moment of Inertia in KgMetersSquared.
    */
   public double getMOI()
   {
-    if (moi.isPresent())
+    if (motor.isPresent())
     {
-      return moi.getAsDouble();
+      return motor.get().getConfig().getMOI();
     }
     if (length.isPresent() && weight.isPresent())
     {
       return SingleJointedArmSim.estimateMOI(length.get().in(Units.Meters), weight.get().in(Units.Kilograms));
     }
-    throw new ArmConfigurationException("Arm length and weight or MOI must be set!",
+    throw new ArmConfigurationException("Arm MOI must be configured!",
                                         "Cannot get the MOI!",
-                                        "withLength(Distance).withMass(Mass) OR ArmConfig.withMOI()");
+                                        "SmartMotorControllerConfig.withMomentOfInertia(Distance, Mass) or withMomentOfInertia(MomentOfInertia)");
   }
 
   /**
-   * Get the Upper hard limit of the {@link yams.mechanisms.positional.Arm}.
+   * Get the Upper hard limit of the {@link Arm}.
    *
    * @return {@link Angle} hard limit.
    */
@@ -415,7 +280,7 @@ public class ArmConfig
   }
 
   /**
-   * Get the lower hard limit of the {@link yams.mechanisms.positional.Arm}
+   * Get the lower hard limit of the {@link Arm}
    *
    * @return {@link Angle} hard limit.
    */
@@ -425,9 +290,9 @@ public class ArmConfig
   }
 
   /**
-   * Get the telemetry verbosity of the {@link yams.mechanisms.positional.Arm}
+   * Get the telemetry verbosity of the {@link Arm}
    *
-   * @return {@link TelemetryVerbosity} of the {@link yams.mechanisms.positional.Arm}
+   * @return {@link TelemetryVerbosity} of the {@link Arm}
    */
   public Optional<TelemetryVerbosity> getTelemetryVerbosity()
   {
@@ -435,7 +300,7 @@ public class ArmConfig
   }
 
   /**
-   * Network Tables name for the {@link yams.mechanisms.positional.Arm}
+   * Network Tables name for the {@link Arm}
    *
    * @return Network Tables name.
    */
@@ -445,9 +310,10 @@ public class ArmConfig
   }
 
   /**
-   * Get the starting angle of the {@link yams.mechanisms.positional.Arm}
+   * Get the starting angle of the {@link Arm}. Reads from {@link SmartMotorControllerConfig#getStartingPosition()}.
+   * Configure via {@link SmartMotorControllerConfig#withStartingPosition(Angle)}.
    *
-   * @return {@link Angle} of the {@link yams.mechanisms.positional.Arm}
+   * @return {@link Angle} of the {@link Arm}
    */
   public Optional<Angle> getStartingAngle()
   {
@@ -455,13 +321,13 @@ public class ArmConfig
     {
       return simStartingPosition;
     }
-    return startingPosition;
+    return motor.flatMap(m -> m.getConfig().getStartingPosition());
   }
 
   /**
-   * Get the {@link SmartMotorController} of the {@link yams.mechanisms.positional.Arm}
+   * Get the {@link SmartMotorController} of the {@link Arm}
    *
-   * @return {@link SmartMotorController} for the {@link yams.mechanisms.positional.Arm}
+   * @return {@link SmartMotorController} for the {@link Arm}
    */
   public SmartMotorController getMotor()
   {
@@ -489,14 +355,4 @@ public class ArmConfig
     return mechanismPositionConfig;
   }
 
-  /**
-   * Get the telemetry network subtable of the mechanism.
-   *
-   * @return Optional containing the telemetry network subtable if set, otherwise an empty Optional.
-   */
-  @Deprecated
-  public Optional<String> getTelemetryNetworkTableName()
-  {
-    return networkTableName;
-  }
 }

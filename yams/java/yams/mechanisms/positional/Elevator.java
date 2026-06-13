@@ -1,7 +1,9 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechanisms.positional;
 
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Centimeters;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Kilograms;
@@ -18,15 +20,12 @@ import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
@@ -40,8 +39,6 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import java.util.Optional;
 import java.util.function.Supplier;
 import yams.exceptions.ElevatorConfigurationException;
@@ -59,7 +56,6 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
  */
 public class Elevator extends SmartPositionalMechanism
 {
-
   /**
    * Config class for the elevator.
    */
@@ -612,57 +608,6 @@ public class Elevator extends SmartPositionalMechanism
   public Trigger gte(Distance height)
   {
     return new Trigger(() -> getHeight().gte(height));
-  }
-
-  @Override
-  public Command sysId(Voltage maximumVoltage, Velocity<VoltageUnit> step, Time duration)
-  {
-    SysIdRoutine               routine     = m_smc.sysId(maximumVoltage, step, duration);
-    SmartMotorControllerConfig motorConfig = m_smc.getConfig();
-    Distance                   max;
-    Distance                   min;
-    if (m_smc.getConfig().getMechanismUpperLimit().isPresent())
-    {
-      max = motorConfig.convertFromMechanism(m_smc.getConfig().getMechanismUpperLimit().get())
-                       .minus(Centimeters.of(1));
-    } else if (m_config.getMaximumHeight().isPresent())
-    {
-      max = m_config.getMaximumHeight().get().minus(Centimeters.of(1));
-    } else
-    {
-      throw new ElevatorConfigurationException("Maximum height is not configured!",
-                                               "Cannot create SysIdRoutine!",
-                                               "withHardLimits(Distance,Distance)");
-
-    }
-    if (m_smc.getConfig().getMechanismLowerLimit().isPresent())
-    {
-      min = motorConfig.convertFromMechanism(m_smc.getConfig().getMechanismLowerLimit().get())
-                       .plus(Centimeters.of(10));
-    } else if (m_config.getMinimumHeight().isPresent())
-    {
-      min = m_config.getMinimumHeight().get().plus(Centimeters.of(1));
-    } else
-    {
-      throw new ElevatorConfigurationException("Minimum height is not configured!",
-                                               "Cannot create SysIdRoutine!",
-                                               "withHardLimits(Distance,Distance)");
-    }
-    Trigger maxTrigger = gte(max);
-    Trigger minTrigger = lte(min);
-
-    Command group = Commands.print("Starting SysId!")
-                            .beforeStarting(Commands.runOnce(m_smc::stopClosedLoopController))
-                            .andThen(routine.dynamic(Direction.kForward).until(maxTrigger).withTimeout(3))
-                            .andThen(routine.dynamic(Direction.kReverse).until(minTrigger))
-                            .andThen(routine.quasistatic(Direction.kForward).until(maxTrigger))
-                            .andThen(routine.quasistatic(Direction.kReverse).until(minTrigger).withTimeout(3))
-                            .finallyDo(m_smc::startClosedLoopController);
-    if (m_config.getTelemetryName().isPresent())
-    {
-      group = group.andThen(Commands.print(getName() + " SysId test done."));
-    }
-    return group.withName(m_subsystem.getName() + " SysId");
   }
 
   /**

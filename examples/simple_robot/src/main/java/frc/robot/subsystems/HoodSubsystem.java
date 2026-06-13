@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems;
 
 
@@ -6,9 +9,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.TalonFXS;
 import edu.wpi.first.math.controller.ArmFeedforward;
@@ -31,10 +32,10 @@ import yams.motorcontrollers.remote.TalonFXSWrapper;
 
 public class HoodSubsystem extends SubsystemBase
 {
-
   private final TalonFXS                   hoodMotor        = new TalonFXS(9);//, MotorType.kBrushless);
   private final SmartMotorControllerConfig motorConfig      = new SmartMotorControllerConfig(this)
-      .withClosedLoopController(4, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
+      .withClosedLoopController(4, 0, 0)
+          .withTrapezoidalProfile(DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
       .withSoftLimits(Degrees.of(-30), Degrees.of(100))
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
       .withIdleMode(MotorMode.BRAKE)
@@ -44,7 +45,8 @@ public class HoodSubsystem extends SubsystemBase
       .withClosedLoopRampRate(Seconds.of(0.25))
       .withOpenLoopRampRate(Seconds.of(0.25))
       .withFeedforward(new ArmFeedforward(0, 0, 0, 0))
-      .withControlMode(ControlMode.CLOSED_LOOP);
+      .withControlMode(ControlMode.CLOSED_LOOP)
+      .withStartingPosition(Degrees.of(0));
   private final SmartMotorController       motor            = new TalonFXSWrapper(hoodMotor,
                                                                                   DCMotor.getNEO(1),
                                                                                   motorConfig);
@@ -55,7 +57,6 @@ public class HoodSubsystem extends SubsystemBase
   private final PivotConfig                m_config         = new PivotConfig(motor)
       .withHardLimits(Degrees.of(-100), Degrees.of(200))
       .withTelemetry("HoodExample", TelemetryVerbosity.HIGH)
-      .withStartingPosition(Degrees.of(0))
       .withMechanismPositionConfig(robotToMechanism);
   private final Pivot                      hood             = new Pivot(m_config);
 
@@ -80,11 +81,6 @@ public class HoodSubsystem extends SubsystemBase
   public Command hoodCmd(double dutycycle)
   {
     return hood.set(dutycycle);
-  }
-
-  public Command sysId()
-  {
-    return hood.sysId(Volts.of(3), Volts.of(3).per(Second), Second.of(30));
   }
 
   public Command setAngle(Angle angle)

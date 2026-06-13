@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.motorcontrollers.local;
 
 import static edu.wpi.first.units.Units.Amps;
@@ -44,7 +47,6 @@ import edu.wpi.first.math.trajectory.ExponentialProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.AngularAccelerationUnit;
-import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -61,7 +63,6 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -79,10 +80,18 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
 
 /**
  * Spark wrapper for REV Spark Motor controllers.
+ *
+ * <p><b>External encoder discontinuity point support (SparkAbsoluteEncoder):</b>
+ * <ul>
+ *   <li>{@code 0.5} rotations — sensor range is [-0.5, 0.5), {@code zeroCentered = true}</li>
+ *   <li>{@code 1.0} rotations — sensor range is [0, 1), {@code zeroCentered = false}</li>
+ * </ul>
+ * A discontinuity point <b>must</b> be configured via
+ * {@link yams.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint}
+ * whenever a {@link com.revrobotics.spark.SparkAbsoluteEncoder} is used as the external encoder.
  */
 public class SparkWrapper extends SmartMotorController
 {
-
   /**
    * Spark motor controller
    */
@@ -544,7 +553,7 @@ public class SparkWrapper extends SmartMotorController
     // Throw warning about supply stator limits on Spark's
     if (config.getSupplyStallCurrentLimit().isPresent())
     {
-      m_sparkBaseConfig.secondaryCurrentLimit(config.getSupplyStallCurrentLimit().getAsInt());
+      throw new SmartMotorControllerConfigurationException("Supply current limits are not supported on Sparks", "Supply current limit not set","withStatorCurrentLimit");
     }
     // Handle stator current limit.
     if (config.getStatorStallCurrentLimit().isPresent())
@@ -1363,7 +1372,7 @@ public class SparkWrapper extends SmartMotorController
   /**
    * Convert generic slot into spark specific slot.
    *
-   * @param slot {@link yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot} to convert
+   * @param slot {@link ClosedLoopControllerSlot} to convert
    * @return spark specific slot {@link ClosedLoopSlot}
    */
   private ClosedLoopSlot getSparkClosedLoopSlot(ClosedLoopControllerSlot slot)
@@ -1423,10 +1432,4 @@ public class SparkWrapper extends SmartMotorController
                                        DoubleTelemetryField.SupplyCurrentLimit)));
   }
 
-  @Override
-  public Config getSysIdConfig(Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage, Time testDuration)
-  {
-    StatusLogger.start();
-    return new Config(stepVoltage, maxVoltage, testDuration);
-  }
 }

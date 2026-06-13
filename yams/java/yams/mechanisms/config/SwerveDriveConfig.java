@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechanisms.config;
 
 import static edu.wpi.first.units.Units.RadiansPerSecond;
@@ -19,6 +22,8 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.function.Supplier;
+
+import yams.mechanisms.swerve.SwerveDrive;
 import yams.mechanisms.swerve.SwerveModule;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
@@ -27,9 +32,8 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  */
 public class SwerveDriveConfig
 {
-
   /**
-   * {@link SwerveModule}s for the {@link yams.mechanisms.swerve.SwerveDrive}.
+   * {@link SwerveModule}s for the {@link SwerveDrive}.
    */
   private SwerveModule[]                      modules;
   /**
@@ -114,9 +118,9 @@ public class SwerveDriveConfig
   private Subsystem                           subsystem;
 
   /**
-   * Create the {@link SwerveDriveConfig} for the {@link yams.mechanisms.swerve.SwerveDrive}
+   * Create the {@link SwerveDriveConfig} for the {@link SwerveDrive}
    *
-   * @param modules         {@link SwerveModule}s for the {@link yams.mechanisms.swerve.SwerveDrive}
+   * @param modules         {@link SwerveModule}s for the {@link SwerveDrive}
    * @param swerveSubsystem SwerveDrive subsystem.
    */
   public SwerveDriveConfig(Subsystem swerveSubsystem, SwerveModule... modules)
@@ -126,7 +130,7 @@ public class SwerveDriveConfig
   }
 
   /**
-   * Create the {@link SwerveDriveConfig} for the {@link yams.mechanisms.swerve.SwerveDrive}
+   * Create the {@link SwerveDriveConfig} for the {@link SwerveDrive}
    *
    * @implNote Must define a Subsystem with {@link #withSubsystem(Subsystem)} and modules with
    * {@link #withModules(SwerveModule...)}
@@ -136,9 +140,9 @@ public class SwerveDriveConfig
   }
 
   /**
-   * Define a {@link Subsystem} for the {@link yams.mechanisms.swerve.SwerveDrive}
+   * Define a {@link Subsystem} for the {@link SwerveDrive}
    *
-   * @param subsystem {@link Subsystem} for the {@link yams.mechanisms.swerve.SwerveDrive}
+   * @param subsystem {@link Subsystem} for the {@link SwerveDrive}
    * @return {@link SwerveDriveConfig} for chaining.
    */
   public SwerveDriveConfig withSubsystem(Subsystem subsystem)
@@ -148,9 +152,9 @@ public class SwerveDriveConfig
   }
 
   /**
-   * Set the {@link SwerveModule}s for the {@link yams.mechanisms.swerve.SwerveDrive}.
+   * Set the {@link SwerveModule}s for the {@link SwerveDrive}.
    *
-   * @param modules {@link SwerveModule}s for the {@link yams.mechanisms.swerve.SwerveDrive}.
+   * @param modules {@link SwerveModule}s for the {@link SwerveDrive}.
    * @return {@link SwerveDriveConfig} for chaining.
    */
   public SwerveDriveConfig withModules(SwerveModule... modules)
@@ -302,7 +306,7 @@ public class SwerveDriveConfig
   }
 
   /**
-   * Get the {@link SwerveModule}s for the {@link yams.mechanisms.swerve.SwerveDrive}.
+   * Get the {@link SwerveModule}s for the {@link SwerveDrive}.
    *
    * @param gyro {@link Supplier} for the gyro.
    * @return {@link SwerveDriveConfig} for chaining.
@@ -397,7 +401,7 @@ public class SwerveDriveConfig
 //  }
 
   /**
-   * Configure telemetry for the {@link yams.mechanisms.swerve.SwerveModule} mechanism.
+   * Configure telemetry for the {@link SwerveModule} mechanism.
    *
    * @param telemetryVerbosity Telemetry verbosity to apply.
    * @return {@link SwerveDriveConfig} for chaining.
@@ -419,9 +423,9 @@ public class SwerveDriveConfig
   }
 
   /**
-   * Get the telemetry verbosity for the {@link yams.mechanisms.swerve.SwerveModule}.
+   * Get the telemetry verbosity for the {@link SwerveModule}.
    *
-   * @return {@link TelemetryVerbosity} for the {@link yams.mechanisms.swerve.SwerveModule}.
+   * @return {@link TelemetryVerbosity} for the {@link SwerveModule}.
    */
   public Optional<TelemetryVerbosity> getTelemetryVerbosity()
   {
@@ -429,9 +433,9 @@ public class SwerveDriveConfig
   }
 
   /**
-   * Get the {@link SwerveModule}s for the {@link yams.mechanisms.swerve.SwerveDrive}.
+   * Get the {@link SwerveModule}s for the {@link SwerveDrive}.
    *
-   * @return {@link SwerveModule}s for the {@link yams.mechanisms.swerve.SwerveDrive}.
+   * @return {@link SwerveModule}s for the {@link SwerveDrive}.
    */
   public SwerveModule[] getModules()
   {
@@ -623,9 +627,9 @@ public class SwerveDriveConfig
   }
 
   /**
-   * Use an external feedback sensor for the {@link yams.mechanisms.swerve.SwerveModule}s.
+   * Use an external feedback sensor for the {@link SwerveModule}s.
    *
-   * @return External feedback sensor for the {@link yams.mechanisms.swerve.SwerveModule}s.
+   * @return External feedback sensor for the {@link SwerveModule}s.
    */
   public boolean useExternalFeedbackSensor()
   {

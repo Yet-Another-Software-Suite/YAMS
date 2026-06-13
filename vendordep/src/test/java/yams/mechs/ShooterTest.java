@@ -1,15 +1,15 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechs;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Millisecond;
 import static edu.wpi.first.units.Units.Milliseconds;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
@@ -20,8 +20,6 @@ import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.thethriftybot.devices.ThriftyNova;
-import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
@@ -56,10 +54,8 @@ import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class ShooterTest
 {
-
   private static SmartMotorControllerConfig createSMCConfig()
   {
-
     return new SmartMotorControllerConfig()
         .withClosedLoopController(100, 0, 0)
 //        .withSoftLimits(Degrees.of(-100), Degrees.of(100))
@@ -76,9 +72,7 @@ public class ShooterTest
   {
     FlyWheelConfig cfg = new FlyWheelConfig(smc)
         .withDiameter(Inches.of(4))
-        .withMass(Pounds.of(1))
-//        .withTelemetry("ShooterMech", TelemetryVerbosity.HIGH)
-        .withUpperSoftLimit(RPM.of(10000));
+        .withMass(Pounds.of(1));
     FlyWheel                          shooter = new FlyWheel(cfg);
     SmartMotorControllerTestSubsystem subsys  = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.smc = smc;
@@ -177,9 +171,6 @@ public class ShooterTest
     } else if (motorController instanceof SparkFlex)
     {
       ((SparkFlex) motorController).close();
-    } else if (motorController instanceof ThriftyNova)
-    {
-//      ((ThriftyNova)motorController).close();
     } else if (motorController instanceof TalonFXS)
     {
       ((TalonFXS) motorController).close();
@@ -360,8 +351,8 @@ public class ShooterTest
   {
     startTest(smc);
     FlyWheel shooter = createShooter(smc);
-    Command  highPid = shooter.setSpeed(RPM.of(80));
-    Command  lowPid  = shooter.setSpeed(RPM.of(-80));
+    Command  highPid = shooter.run(RPM.of(80));
+    Command  lowPid  = shooter.run(RPM.of(-80));
 
     shooterVelocityPidTest(smc, highPid);
 

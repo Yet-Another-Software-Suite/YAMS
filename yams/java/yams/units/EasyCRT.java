@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.units;
 
 import static edu.wpi.first.units.Units.Rotations;
@@ -18,7 +21,7 @@ import java.util.Optional;
  * <p>This is <b>not</b> a textbook Chinese Remainder Theorem solve; it is a
  * "CRT-inspired" unwrapping method that is easier to keep stable with backlash and sensor
  * noise.
- * 
+ *
  * <p>Created by team 6911.
  */
 public class EasyCRT {
@@ -164,7 +167,6 @@ public class EasyCRT {
       double minMechanismRotations,
       double maxMechanismRotations,
       double matchTolerance) {
-
     lastIterations = 0;
     lastErrorRot = Double.NaN;
 

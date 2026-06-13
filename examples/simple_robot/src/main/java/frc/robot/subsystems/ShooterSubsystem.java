@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Inches;
@@ -24,7 +27,6 @@ import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class ShooterSubsystem extends SubsystemBase
 {
-
   private final TalonFX                    flywheelMotor1         = new TalonFX(1);
   private final TalonFX                    flywheelMotor2         = new TalonFX(2);
   private final boolean                    flywheelMotor2Inverted = true;
@@ -65,7 +67,7 @@ public class ShooterSubsystem extends SubsystemBase
    * @param speed Speed to set.
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
    */
-  public Command setVelocity(AngularVelocity speed) {return shooter.setSpeed(speed);}
+  public Command setVelocity(AngularVelocity speed) {return shooter.run(speed);}
 
   /**
    * Set the dutycycle of the shooter.

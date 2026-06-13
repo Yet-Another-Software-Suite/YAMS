@@ -1,3 +1,6 @@
+// Copyright (c) 2025-2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems.doubleflywheel;
 
 
@@ -32,7 +35,6 @@ import yams.motorcontrollers.remote.TalonFXWrapper;
  */
 public class DoubleFlyWheelSubsystem extends SubsystemBase
 {
-
   private SmartMotorControllerConfig lowerFlyWheelConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       .withIdleMode(MotorMode.COAST)
@@ -189,4 +191,3 @@ public class DoubleFlyWheelSubsystem extends SubsystemBase
     upperflyWheel.simIterate();
   }
 }
-

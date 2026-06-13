@@ -1,3 +1,6 @@
+// Copyright (c) 2025-2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.helpers;
 
 import edu.wpi.first.units.Units;
@@ -25,7 +28,7 @@ public final class SchedulerPumpHelper {
 
 	/**
 	 * Change the default heartbeat for the scheduler pump.
-	 * 
+	 *
 	 * @param defaultHeartbeatInMs Heartbeat in milliseconds
 	 */
 	public static void setDefaultHeartbeat(int defaultHeartbeatInMs) {
@@ -34,7 +37,7 @@ public final class SchedulerPumpHelper {
 
 	/**
 	 * Helper to figure out what heartbeat to use.
-	 * 
+	 *
 	 * @param optionalHeartbeatInMs Optional heartbeat in array form to simulate
 	 *                              optional parameters
 	 * @return The heartbeat to use

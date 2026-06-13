@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechanisms.swerve.utility;
 
 import static edu.wpi.first.units.Units.Centimeters;
@@ -18,7 +21,6 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N2;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -58,7 +60,6 @@ import yams.mechanisms.swerve.SwerveDrive;
  */
 public class SwerveInputStream implements Supplier<ChassisSpeeds>
 {
-
   /**
    * Translation suppliers.
    */
@@ -68,7 +69,7 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds>
    */
   private final DoubleSupplier                  controllerTranslationY;
   /**
-   * {@link yams.mechanisms.swerve.SwerveDrive} object for transformations.
+   * {@link SwerveDrive} object for transformations.
    */
   private final SwerveDrive                     swerveDrive;
   /**
@@ -324,61 +325,6 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds>
 
 
   /**
-   * Drive to a given pose with the provided {@link ProfiledPIDController}s
-   *
-   * @param pose               {@link Supplier<Pose2d>} for ease of use.
-   * @param xPIDController     PID controller for the translational axis, units are m/s.
-   * @param omegaPIDController PID Controller for rotational axis, units are rad/s.
-   * @return self
-   */
-  @Deprecated(since = "2025.10.31", forRemoval = true)
-  public SwerveInputStream driveToPose(Supplier<Pose2d> pose, ProfiledPIDController xPIDController,
-                                       ProfiledPIDController omegaPIDController)
-  {
-    omegaPIDController.reset(swerveDrive.getPose().getRotation().getRadians());
-    xPIDController.reset(swerveDrive.getPose().getTranslation().getDistance(pose.get().getTranslation()));
-    omegaPIDController.enableContinuousInput(-Math.PI, Math.PI);
-    xPIDController.setGoal(new State(0, 0));
-    driveToPose = Optional.of(pose);
-    driveToPoseTranslationPIDController = Optional.of(xPIDController);
-    driveToPoseOmegaPIDController = Optional.of(omegaPIDController);
-    return this;
-  }
-
-
-  /**
-   * Enable driving to the target pose.
-   *
-   * @param enabled Enable state of drive to pose.
-   * @return self.
-   */
-  @Deprecated(since = "2025.10.31", forRemoval = true)
-  public SwerveInputStream driveToPoseEnabled(BooleanSupplier enabled)
-  {
-    driveToPoseEnabled = Optional.of(enabled);
-    return this;
-  }
-
-  /**
-   * Enable driving to the target pose.
-   *
-   * @param enabled Enable state of drive to pose.
-   * @return self.
-   */
-  @Deprecated(since = "2025.10.31", forRemoval = true)
-  public SwerveInputStream driveToPoseEnabled(boolean enabled)
-  {
-    driveToPoseEnabled = enabled ? Optional.of(() -> enabled) : Optional.empty();
-    Pose2d swervePose = swerveDrive.getPose();
-//    driveToPoseXPIDController.ifPresent(profiledPIDController -> profiledPIDController.reset(swervePose.getX()));
-//    driveToPoseYPIDController.ifPresent(profiledPIDController -> profiledPIDController.reset(swervePose.getY()));
-//    driveToPoseOmegaPIDController.ifPresent(profiledPIDController -> profiledPIDController.reset(swervePose.getRotation()
-//                                                                                                           .getRadians()));
-    return this;
-  }
-
-
-  /**
    * Heading offset enabled boolean supplier.
    *
    * @param angle {@link Rotation2d} offset to apply
@@ -584,50 +530,19 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds>
 
 
   /**
-   * Reset the drive to pose PID controllers when switching targets.
-   */
-  @Deprecated(since = "2025.10.31", forRemoval = true)
-  public void resetDriveToPosePIDControllers()
-  {
-    driveToPoseOmegaPIDController.ifPresent(pid -> pid.reset(swerveDrive.getPose().getRotation().getRadians()));
-    driveToPoseTranslationPIDController.ifPresent(pid -> pid.reset(driveToPoseDistance().in(Meters)));
-  }
-
-  /**
-   * Get the drive to pose translation distance between the current pose and the target pose.
-   *
-   * @return {@link Distance} in meters between the current pose and the target pose.
-   */
-  @Deprecated(since = "2025.10.31", forRemoval = true)
-  private Distance driveToPoseDistance()
-  {
-    Pose2d swervePoseSetpoint = driveToPose.orElse(swerveDrive::getPose).get();
-    return swerveDrive.getDistanceFromPose(swervePoseSetpoint);
-  }
-
-  /**
-   * Get the drive to pose {@link Rotation2d} between the current pose and the target pose.
-   *
-   * @return Difference between the target pose and the current pose {@link Rotation2d} in radians..
-   */
-  @Deprecated(since = "2025.10.31", forRemoval = true)
-  private Rotation2d driveToPoseRotation()
-  {
-    Pose2d swervePoseSetpoint = driveToPose.orElse(swerveDrive::getPose).get();
-    Pose2d robotPose          = swerveDrive.getPose();
-    return swervePoseSetpoint.getRotation().minus(robotPose.getRotation());
-  }
-
-  /**
    * Find {@link SwerveInputMode} based off existing parameters of the {@link SwerveInputStream}
    *
    * @return The calculated {@link SwerveInputMode}, defaults to {@link SwerveInputMode#ANGULAR_VELOCITY}.
    */
   private SwerveInputMode findMode()
   {
-    if (driveToPoseEnabled.isPresent() && driveToPoseEnabled.get().getAsBoolean() && driveToPoseDistance().lte(
+    Pose2d   driveToPosePose     = driveToPose.orElse(swerveDrive::getPose).get();
+    Distance driveToPoseDist     = swerveDrive.getDistanceFromPose(driveToPosePose);
+    Pose2d   robotPoseForMode    = swerveDrive.getPose();
+    Rotation2d driveToPoseRot   = driveToPosePose.getRotation().minus(robotPoseForMode.getRotation());
+    if (driveToPoseEnabled.isPresent() && driveToPoseEnabled.get().getAsBoolean() && driveToPoseDist.lte(
         Centimeters.of(1)) &&
-        driveToPoseRotation().getMeasure().lte(Degrees.of(1)))
+        driveToPoseRot.getMeasure().lte(Degrees.of(1)))
     {
       if (driveToPose.isPresent())
       {
@@ -727,7 +642,9 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds>
       }
       case DRIVE_TO_POSE ->
       {
-        resetDriveToPosePIDControllers();
+        driveToPoseOmegaPIDController.ifPresent(pid -> pid.reset(swerveDrive.getPose().getRotation().getRadians()));
+        driveToPoseTranslationPIDController.ifPresent(
+            pid -> pid.reset(swerveDrive.getDistanceFromPose(driveToPose.orElse(swerveDrive::getPose).get()).in(Meters)));
 //        swerveDrive.resetAzimuthPID();
 //        swerveDrive.resetTranslationPID();
         break;

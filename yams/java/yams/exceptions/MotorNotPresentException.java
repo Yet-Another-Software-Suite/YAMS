@@ -1,13 +1,17 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.exceptions;
+
+import yams.mechanisms.SmartMechanism;
 
 /**
  * Custom exception for when there is no motor in the mechanism.
  */
 public class MotorNotPresentException extends RuntimeException
 {
-
   /**
-   * Create {@link RuntimeException} for {@link yams.mechanisms.SmartMechanism}
+   * Create {@link RuntimeException} for {@link SmartMechanism}
    *
    * @param mechanismType Name of the mechanism
    */

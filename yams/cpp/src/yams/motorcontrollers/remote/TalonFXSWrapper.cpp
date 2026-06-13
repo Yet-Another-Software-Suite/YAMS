@@ -1,0 +1,891 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
+#include "yams/motorcontrollers/remote/TalonFXSWrapper.hpp"
+
+#include <ctre/unit/pid_ff.h>
+#include <frc/DriverStation.h>
+#include <frc/Errors.h>
+#include <frc/RobotBase.h>
+#include <frc/simulation/RoboRioSim.h>
+#include <frc/system/plant/LinearSystemId.h>
+#include <units/angular_jerk.h>
+#include <units/dimensionless.h>
+#include <units/moment_of_inertia.h>
+
+#include <cmath>
+#include <cstdio>
+#include <ctre/phoenix6/TalonFX.hpp>
+#include <memory>
+#include <stdexcept>
+#include <string>
+
+#include "yams/exceptions/SmartMotorControllerConfigurationException.hpp"
+#include "yams/math/LQRController.hpp"
+#include "yams/motorcontrollers/simulation/DCMotorSimSupplier.hpp"
+
+using namespace ctre::phoenix6;
+
+namespace yams::motorcontrollers::remote {
+
+// ---- Motor arrangement → feedback source -----------------------------------
+
+signals::ExternalFeedbackSensorSourceValue TalonFXSWrapper::ArrangementToFeedbackSource() const {
+  switch (m_arrangement) {
+    case MotorArrangement::Minion:
+      return signals::ExternalFeedbackSensorSourceValue::PulseWidth;
+    default:
+      return signals::ExternalFeedbackSensorSourceValue::Quadrature;
+  }
+}
+
+// ---- Constructor ------------------------------------------------------------
+
+TalonFXSWrapper::TalonFXSWrapper(hardware::TalonFXS* talon, frc::DCMotor dcMotor,
+                                 MotorArrangement arrangement,
+                                 const SmartMotorControllerConfig& config)
+    : SmartMotorController(), m_talon(talon), m_dcMotor(dcMotor), m_arrangement(arrangement) {
+  m_config = config;
+  m_config.WithSimMotor(dcMotor);
+  if (auto vc = config.GetVendorConfig(); vc.has_value()) {
+    if (auto* p = std::any_cast<configs::TalonFXSConfiguration>(&vc.value())) {
+      m_talonConfig = *p;
+    } else {
+      throw std::invalid_argument(
+          "TalonFXSWrapper: WithVendorConfig requires a TalonFXSConfiguration");
+    }
+  }
+  SetupSimulation();
+  ApplyConfig(config);
+  CheckConfigSafety();
+}
+
+// ---- Configuration ----------------------------------------------------------
+
+bool TalonFXSWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
+  m_config = config;
+  m_config.ResetValidationCheck();
+  auto& cfg = m_talonConfig;
+
+  if (auto inv = m_config.GetMotorInverted(); inv)
+    cfg.MotorOutput.Inverted = *inv ? signals::InvertedValue::Clockwise_Positive
+                                    : signals::InvertedValue::CounterClockwise_Positive;
+
+  cfg.MotorOutput.NeutralMode =
+      m_config.GetIdleMode() == SmartMotorControllerConfig::MotorMode::BRAKE
+          ? signals::NeutralModeValue::Brake
+          : signals::NeutralModeValue::Coast;
+
+  // Consume control-mode option for validation tracking
+  m_config.GetMotorControllerMode();
+
+  // Encoder inversion is not supported on TalonFXS; warn if set
+  if (m_config.GetEncoderInverted().has_value())
+    FRC_ReportWarning("TalonFXSWrapper: EncoderInverted is not supported and will be ignored.");
+
+  // No software temperature cutoff in Phoenix 6; consume option for validation
+  m_config.GetTemperatureCutoff();
+
+  // Closed-loop peak voltage
+  if (auto maxV = m_config.GetClosedLoopControllerMaximumVoltage(); maxV) {
+    cfg.Voltage.PeakForwardVoltage = *maxV;
+    cfg.Voltage.PeakReverseVoltage = -*maxV;
+  }
+
+  if (auto& gearing = m_config.GetMotorGearing(); gearing)
+    cfg.ExternalFeedback.SensorToMechanismRatio =
+        units::dimensionless::scalar_t{gearing->GetMechanismToRotorRatio()};
+
+  cfg.ExternalFeedback.ExternalFeedbackSensorSource = ArrangementToFeedbackSource();
+
+  // External encoder configuration (driven by SmartMotorControllerConfig)
+  if (auto enc = m_config.GetExternalEncoder();
+      enc.has_value() && m_config.GetUseExternalFeedback()) {
+    gearing::MechanismGearing motorGearing =
+        m_config.GetMotorGearing().value_or(gearing::MechanismGearing::kOne);
+    gearing::MechanismGearing extGearing =
+        m_config.GetExternalEncoderGearing().value_or(gearing::MechanismGearing::kOne);
+    cfg.ExternalFeedback.RotorToSensorRatio =
+        motorGearing.GetMechanismToRotorRatio() * extGearing.GetRotorToMechanismRatio();
+    cfg.ExternalFeedback.SensorToMechanismRatio = extGearing.GetMechanismToRotorRatio();
+
+    if (auto* pp = std::any_cast<hardware::CANcoder*>(&enc.value()); pp && *pp) {
+      m_cancoder = **pp;
+      auto& cancoderConfigurator = (*pp)->GetConfigurator();
+      configs::CANcoderConfiguration cancoderCfg;
+      cancoderConfigurator.Refresh(cancoderCfg);
+      cfg.ExternalFeedback.FeedbackRemoteSensorID = (*pp)->GetDeviceID();
+      if (auto inv = m_config.GetExternalEncoderInverted(); inv) {
+        cancoderCfg.MagnetSensor.SensorDirection =
+            *inv ? signals::SensorDirectionValue::Clockwise_Positive
+                 : signals::SensorDirectionValue::CounterClockwise_Positive;
+      }
+      cfg.ExternalFeedback.ExternalFeedbackSensorSource =
+          signals::ExternalFeedbackSensorSourceValue::FusedCANcoder;
+      if (auto offset = m_config.GetExternalEncoderZeroOffset(); offset) {
+        cancoderCfg.MagnetSensor.MagnetOffset = *offset;
+        cfg.ExternalFeedback.AbsoluteSensorOffset = 0.0_tr;
+      }
+      if (auto dp = m_config.GetExternalEncoderDiscontinuityPoint(); dp) {
+        cancoderCfg.MagnetSensor.AbsoluteSensorDiscontinuityPoint = *dp;
+      }
+      cancoderConfigurator.Apply(cancoderCfg);
+    } else if (auto* pp = std::any_cast<hardware::CANdi*>(&enc.value()); pp && *pp) {
+      m_candi = **pp;
+      auto& candiConfigurator = (*pp)->GetConfigurator();
+      configs::CANdiConfiguration candiCfg;
+      candiConfigurator.Refresh(candiCfg);
+      cfg.ExternalFeedback.FeedbackRemoteSensorID = (*pp)->GetDeviceID();
+      const bool isPWM2 = (cfg.ExternalFeedback.ExternalFeedbackSensorSource ==
+                               signals::ExternalFeedbackSensorSourceValue::SyncCANdiPWM2 ||
+                           cfg.ExternalFeedback.ExternalFeedbackSensorSource ==
+                               signals::ExternalFeedbackSensorSourceValue::RemoteCANdiPWM2);
+      const bool isPWM1 = (cfg.ExternalFeedback.ExternalFeedbackSensorSource ==
+                               signals::ExternalFeedbackSensorSourceValue::SyncCANdiPWM1 ||
+                           cfg.ExternalFeedback.ExternalFeedbackSensorSource ==
+                               signals::ExternalFeedbackSensorSourceValue::RemoteCANdiPWM1);
+      if (isPWM2)
+        cfg.ExternalFeedback.ExternalFeedbackSensorSource =
+            signals::ExternalFeedbackSensorSourceValue::FusedCANdiPWM2;
+      if (isPWM1)
+        cfg.ExternalFeedback.ExternalFeedbackSensorSource =
+            signals::ExternalFeedbackSensorSourceValue::FusedCANdiPWM1;
+      if (isPWM1) {
+        if (auto inv = m_config.GetExternalEncoderInverted(); inv)
+          candiCfg.PWM1.SensorDirection = *inv;
+        if (auto offset = m_config.GetExternalEncoderZeroOffset(); offset) {
+          candiCfg.PWM1.AbsoluteSensorOffset = *offset;
+          cfg.ExternalFeedback.AbsoluteSensorOffset = 0.0_tr;
+        }
+        if (auto dp = m_config.GetExternalEncoderDiscontinuityPoint(); dp)
+          candiCfg.PWM1.AbsoluteSensorDiscontinuityPoint = *dp;
+      } else if (isPWM2) {
+        if (auto inv = m_config.GetExternalEncoderInverted(); inv)
+          candiCfg.PWM2.SensorDirection = *inv;
+        if (auto offset = m_config.GetExternalEncoderZeroOffset(); offset) {
+          candiCfg.PWM2.AbsoluteSensorOffset = *offset;
+          cfg.ExternalFeedback.AbsoluteSensorOffset = 0.0_tr;
+        }
+        if (auto dp = m_config.GetExternalEncoderDiscontinuityPoint(); dp)
+          candiCfg.PWM2.AbsoluteSensorDiscontinuityPoint = *dp;
+      } else {
+        // Consume external encoder options even when no PWM source is active
+        m_config.GetExternalEncoderInverted();
+        m_config.GetExternalEncoderZeroOffset();
+        m_config.GetExternalEncoderDiscontinuityPoint();
+      }
+      candiConfigurator.Apply(candiCfg);
+    }
+  } else {
+    if (m_config.GetExternalEncoderInverted().has_value())
+      throw SmartMotorControllerConfigurationException(
+          "External Encoder cannot be inverted if not present!",
+          "External encoder is not inverted!", "WithExternalEncoderInverted(false)");
+    if (m_config.GetExternalEncoderGearing().has_value())
+      throw SmartMotorControllerConfigurationException(
+          "External Encoder cannot be set if not present!", "External encoder gearing is not 1.0!",
+          "WithExternalEncoderGearing(1.0)");
+    // Consume remaining external encoder options for validation tracking
+    m_config.GetUseExternalFeedback();
+    m_config.GetExternalEncoderZeroOffset();
+    m_config.GetExternalEncoderDiscontinuityPoint();
+  }
+
+  ApplyPIDConfig();
+  ApplyFeedforwardConfig();
+  ApplyLimitsConfig();
+  ApplyMotionMagicConfig();
+
+  if (auto r = m_config.GetOpenLoopRampRate(); r) cfg.OpenLoopRamps.VoltageOpenLoopRampPeriod = *r;
+  if (auto r = m_config.GetClosedLoopRampRate(); r)
+    cfg.ClosedLoopRamps.VoltageClosedLoopRampPeriod = *r;
+
+  if (auto stator = m_config.GetStatorCurrentLimit(); stator) {
+    cfg.CurrentLimits.StatorCurrentLimitEnable = true;
+    cfg.CurrentLimits.StatorCurrentLimit = *stator;
+  }
+  if (auto supply = m_config.GetSupplyCurrentLimit(); supply) {
+    cfg.CurrentLimits.SupplyCurrentLimitEnable = true;
+    cfg.CurrentLimits.SupplyCurrentLimit = *supply;
+  }
+
+  if (auto req = m_config.GetVendorControlRequest()) {
+    auto& r = *req;
+    if (auto* p = std::any_cast<controls::PositionVoltage>(&r))
+      m_positionReq = *p;
+    else if (auto* p = std::any_cast<controls::PositionDutyCycle>(&r))
+      m_positionReq = *p;
+    else if (auto* p = std::any_cast<controls::PositionTorqueCurrentFOC>(&r))
+      m_positionReq = *p;
+    else if (auto* p = std::any_cast<controls::MotionMagicVoltage>(&r))
+      m_positionReq = *p;
+    else if (auto* p = std::any_cast<controls::MotionMagicDutyCycle>(&r))
+      m_positionReq = *p;
+    else if (auto* p = std::any_cast<controls::MotionMagicExpoVoltage>(&r))
+      m_positionReq = *p;
+    else if (auto* p = std::any_cast<controls::MotionMagicExpoDutyCycle>(&r))
+      m_positionReq = *p;
+    else if (auto* p = std::any_cast<controls::MotionMagicTorqueCurrentFOC>(&r))
+      m_positionReq = *p;
+    else if (auto* p = std::any_cast<controls::VelocityVoltage>(&r))
+      m_velocityReq = *p;
+    else if (auto* p = std::any_cast<controls::VelocityDutyCycle>(&r))
+      m_velocityReq = *p;
+    else if (auto* p = std::any_cast<controls::VelocityTorqueCurrentFOC>(&r))
+      m_velocityReq = *p;
+    else if (auto* p = std::any_cast<controls::MotionMagicVelocityVoltage>(&r))
+      m_velocityReq = *p;
+    else if (auto* p = std::any_cast<controls::MotionMagicVelocityDutyCycle>(&r))
+      m_velocityReq = *p;
+    else if (auto* p = std::any_cast<controls::MotionMagicVelocityTorqueCurrentFOC>(&r))
+      m_velocityReq = *p;
+  }
+
+  auto status = m_talon->GetConfigurator().Apply(cfg);
+
+  // LQR is not supported natively by Phoenix 6; hand control to the RoboRIO when configured.
+  auto gains = m_config.GetSlotGains(m_slot);
+  if (gains.lqr) {
+    m_lqr = math::LQRController{*gains.lqr};
+  } else {
+    m_lqr.reset();
+  }
+  if (gains.kP != 0.0 || gains.kI != 0.0 || gains.kD != 0.0) {
+    m_pid = frc::PIDController{gains.kP, gains.kI, gains.kD};
+  } else {
+    m_pid.reset();
+  }
+
+  if (m_lqr.has_value()) {
+    int deviceId = static_cast<int>(m_talon->GetDeviceID());
+    std::string alertText =
+        "[YAMS] TalonFXS(" + std::to_string(deviceId) +
+        ") is running closed-loop control on the SystemCore (LQR active). "
+        "Gains are not consistent with Phoenix 6 hardware PID and control runs at a lower "
+        "frequency.";
+    m_rioControllerAlert.emplace(alertText, frc::Alert::AlertType::kWarning);
+    m_rioControllerAlert->Set(true);
+
+    std::fprintf(stderr, "====== TalonFXS(%d) Using RIO Closed Loop Controller ======\n", deviceId);
+
+    if (m_closedLoopControllerThread) {
+      StopClosedLoopController();
+      m_closedLoopControllerThread.reset();
+    }
+    m_closedLoopControllerThread =
+        std::make_unique<frc::Notifier>([this] { IterateClosedLoopController(); });
+    if (auto name = m_config.GetTelemetryName(); name) {
+      m_closedLoopControllerThread->SetName(*name);
+    }
+    if (m_config.GetMotorControllerMode() == ControlMode::CLOSED_LOOP) {
+      StartClosedLoopController();
+    }
+  } else if (m_closedLoopControllerThread) {
+    StopClosedLoopController();
+    m_closedLoopControllerThread.reset();
+    if (m_rioControllerAlert) m_rioControllerAlert->Set(false);
+  }
+
+  if (auto startPos = m_config.GetStartingPosition()) {
+    if (m_cancoder) {
+      m_cancoder->get().SetPosition(*startPos);
+      if (frc::RobotBase::IsSimulation()) {
+        auto& cancoderSim = m_cancoder->get().GetSimState();
+        cancoderSim.SetRawPosition(*startPos);
+        cancoderSim.SetMagnetHealth(ctre::phoenix6::signals::MagnetHealthValue::Magnet_Green);
+      }
+    } else {
+      m_talon->SetPosition(*startPos);
+    }
+  }
+  // Tightly coupled followers — accept TalonFXS and TalonFX (same Phoenix 6 vendor)
+  for (auto& [hw, inverted] : m_config.GetFollowers()) {
+    if (auto* fxs = std::any_cast<hardware::TalonFXS*>(&hw)) {
+      (*fxs)->SetControl(controls::Follower{m_talon->GetDeviceID(), inverted});
+    } else if (auto* fx = std::any_cast<hardware::TalonFX*>(&hw)) {
+      (*fx)->SetControl(controls::Follower{m_talon->GetDeviceID(), inverted});
+    } else {
+      FRC_ReportWarning(
+          "TalonFXSWrapper: follower is not a TalonFXS or TalonFX and will be ignored.");
+    }
+  }
+  LoadLooselyCoupledFollowers();
+
+  m_config.ValidateBasicOptions();
+  m_config.ValidateExternalEncoderOptions();
+  return status.IsOK();
+}
+
+// ---- Simulation -------------------------------------------------------------
+
+void TalonFXSWrapper::SetupSimulation() {
+  if (!frc::RobotBase::IsSimulation() || m_simSupplier) return;
+
+  auto simMotor = m_config.GetSimMotor();
+  auto& gearing = m_config.GetMotorGearing();
+  if (!simMotor || !gearing) return;
+
+  auto plant = frc::LinearSystemId::DCMotorSystem(*simMotor, m_config.GetMOI(),
+                                                  gearing->GetMechanismToRotorRatio());
+  m_motorSim.emplace(plant, *simMotor);
+
+  auto period = m_config.GetClosedLoopControlPeriod().value_or(20_ms);
+  SetSimSupplier(std::make_shared<simulation::DCMotorSimSupplier>(
+      *m_motorSim, [this]() { return GetDutyCycle(); }, *gearing, period));
+  if (auto startPos = m_config.GetStartingPosition()) {
+    m_simSupplier->SetMechanismPosition(*startPos);
+    m_talon->GetSimState().SetRawRotorPosition(
+        units::turn_t{startPos->value() * gearing->GetMechanismToRotorRatio()});
+  }
+}
+
+void TalonFXSWrapper::SimIterate() {
+  if (!frc::RobotBase::IsSimulation() || !m_simSupplier) return;
+
+  auto& sim = m_talon->GetSimState();
+  sim.SetSupplyVoltage(m_simSupplier->GetMechanismSupplyVoltage());
+
+  m_simSupplier->SetInputVoltage(sim.GetMotorVoltage());
+  m_simSupplier->UpdateSim();
+
+  sim.SetRawRotorPosition(units::turn_t{m_simSupplier->GetRotorPosition()});
+  sim.SetRotorVelocity(units::turns_per_second_t{m_simSupplier->GetRotorVelocity()});
+  sim.SetRotorAcceleration(
+      units::turns_per_second_squared_t{m_simSupplier->GetRotorAcceleration()});
+
+  if (m_cancoder) {
+    auto& cancoderSim = m_cancoder->get().GetSimState();
+    cancoderSim.SetSupplyVoltage(m_simSupplier->GetMechanismSupplyVoltage());
+    cancoderSim.SetVelocity(units::turns_per_second_t{m_simSupplier->GetMechanismVelocity()});
+    cancoderSim.SetRawPosition(units::turn_t{m_simSupplier->GetMechanismPosition()});
+    cancoderSim.SetMagnetHealth(ctre::phoenix6::signals::MagnetHealthValue::Magnet_Green);
+  }
+}
+
+void TalonFXSWrapper::SeedRelativeEncoder() {}
+void TalonFXSWrapper::SynchronizeRelativeEncoder() {}
+
+// ---- Open-loop outputs ------------------------------------------------------
+
+void TalonFXSWrapper::SetDutyCycle(double dc) {
+  m_talon->SetControl(m_dutyCycleReq.WithOutput(dc));
+}
+
+double TalonFXSWrapper::GetDutyCycle() { return m_talon->GetDutyCycle().GetValue(); }
+
+void TalonFXSWrapper::SetVoltage(units::volt_t voltage) {
+  m_talon->SetControl(m_voltageReq.WithOutput(voltage));
+}
+
+units::volt_t TalonFXSWrapper::GetVoltage() { return m_talon->GetMotorVoltage().GetValue(); }
+
+// ---- Closed-loop setpoints --------------------------------------------------
+
+void TalonFXSWrapper::SetPosition(units::turn_t angle) {
+  m_setpointPosition = angle;
+  if (m_config.GetMotorControllerMode() != ControlMode::CLOSED_LOOP ||
+      m_closedLoopControllerRunning)
+    return;
+  std::visit([&](auto& req) { m_talon->SetControl(req.WithPosition(angle)); }, m_positionReq);
+  ForwardPositionToFollowers(angle);
+}
+
+void TalonFXSWrapper::SetPosition(units::meter_t distance) {
+  if (auto circ = m_config.GetMechanismCircumference(); circ) {
+    SetPosition(units::turn_t{distance.value() / circ->value()});
+  } else {
+    ForwardPositionToFollowers(distance);
+  }
+}
+
+void TalonFXSWrapper::SetVelocity(units::turns_per_second_t velocity) {
+  m_setpointVelocity = velocity;
+  if (m_config.GetMotorControllerMode() != ControlMode::CLOSED_LOOP ||
+      m_closedLoopControllerRunning)
+    return;
+  std::visit([&](auto& req) { m_talon->SetControl(req.WithVelocity(velocity)); }, m_velocityReq);
+  ForwardVelocityToFollowers(velocity);
+}
+
+void TalonFXSWrapper::SetVelocity(units::meters_per_second_t velocity) {
+  if (auto circ = m_config.GetMechanismCircumference(); circ) {
+    SetVelocity(units::turns_per_second_t{velocity.value() / circ->value()});
+  } else {
+    ForwardVelocityToFollowers(velocity);
+  }
+}
+
+// ---- Encoder writes ---------------------------------------------------------
+
+void TalonFXSWrapper::SetEncoderPosition(units::turn_t angle) { m_talon->SetPosition(angle); }
+
+void TalonFXSWrapper::SetEncoderPosition(units::meter_t distance) {
+  if (auto circ = m_config.GetMechanismCircumference(); circ)
+    m_talon->SetPosition(units::turn_t{distance.value() / circ->value()});
+}
+
+void TalonFXSWrapper::SetEncoderVelocity(units::turns_per_second_t) {}
+void TalonFXSWrapper::SetEncoderVelocity(units::meters_per_second_t) {}
+
+// ---- Encoder reads ----------------------------------------------------------
+
+units::turn_t TalonFXSWrapper::GetMechanismPosition() { return m_talon->GetPosition().GetValue(); }
+
+units::turns_per_second_t TalonFXSWrapper::GetMechanismVelocity() {
+  return m_talon->GetVelocity().GetValue();
+}
+
+units::turns_per_second_squared_t TalonFXSWrapper::GetMechanismAcceleration() {
+  return m_talon->GetAcceleration().GetValue();
+}
+
+units::turn_t TalonFXSWrapper::GetRotorPosition() { return m_talon->GetRotorPosition().GetValue(); }
+
+units::turns_per_second_t TalonFXSWrapper::GetRotorVelocity() {
+  return m_talon->GetRotorVelocity().GetValue();
+}
+
+units::meter_t TalonFXSWrapper::GetMeasurementPosition() {
+  auto circ = m_config.GetMechanismCircumference().value_or(1.0_m);
+  return units::meter_t{GetMechanismPosition().value() * circ.value()};
+}
+
+units::meters_per_second_t TalonFXSWrapper::GetMeasurementVelocity() {
+  auto circ = m_config.GetMechanismCircumference().value_or(1.0_m);
+  return units::meters_per_second_t{GetMechanismVelocity().value() * circ.value()};
+}
+
+units::meters_per_second_squared_t TalonFXSWrapper::GetMeasurementAcceleration() {
+  auto circ = m_config.GetMechanismCircumference().value_or(1.0_m);
+  return units::meters_per_second_squared_t{GetMechanismAcceleration().value() * circ.value()};
+}
+
+std::optional<units::degree_t> TalonFXSWrapper::GetExternalEncoderPosition() {
+  if (m_cancoder) return units::degree_t{m_cancoder->get().GetAbsolutePosition().GetValue()};
+  return std::nullopt;
+}
+
+std::optional<units::degrees_per_second_t> TalonFXSWrapper::GetExternalEncoderVelocity() {
+  if (m_cancoder) return units::degrees_per_second_t{m_cancoder->get().GetVelocity().GetValue()};
+  return std::nullopt;
+}
+
+// ---- Motor status -----------------------------------------------------------
+
+std::optional<units::ampere_t> TalonFXSWrapper::GetSupplyCurrent() {
+  return m_talon->GetSupplyCurrent().GetValue();
+}
+
+units::ampere_t TalonFXSWrapper::GetStatorCurrent() {
+  return m_talon->GetStatorCurrent().GetValue();
+}
+
+units::celsius_t TalonFXSWrapper::GetTemperature() {
+  return units::celsius_t{m_talon->GetDeviceTemp().GetValue().value()};
+}
+
+frc::DCMotor TalonFXSWrapper::GetDCMotor() { return m_dcMotor; }
+
+// ---- Live-tuning setters ---------------------------------------------------
+
+void TalonFXSWrapper::SetIdleMode(MotorMode mode) {
+  m_talonConfig.MotorOutput.NeutralMode = mode == MotorMode::BRAKE
+                                              ? signals::NeutralModeValue::Brake
+                                              : signals::NeutralModeValue::Coast;
+  m_talon->GetConfigurator().Apply(m_talonConfig.MotorOutput);
+}
+
+void TalonFXSWrapper::SetMotorInverted(bool inv) {
+  m_talonConfig.MotorOutput.Inverted = inv ? signals::InvertedValue::Clockwise_Positive
+                                           : signals::InvertedValue::CounterClockwise_Positive;
+  m_talon->GetConfigurator().Apply(m_talonConfig.MotorOutput);
+}
+
+void TalonFXSWrapper::SetEncoderInverted(bool) {}
+
+void TalonFXSWrapper::SetKp(double kP) {
+  auto apply = [&](auto& slot) {
+    slot.kP = kP;
+    m_talon->GetConfigurator().Apply(slot);
+  };
+  switch (m_slot) {
+    case ClosedLoopControllerSlot::SLOT_0:
+      apply(m_talonConfig.Slot0);
+      break;
+    case ClosedLoopControllerSlot::SLOT_1:
+      apply(m_talonConfig.Slot1);
+      break;
+    case ClosedLoopControllerSlot::SLOT_2:
+      apply(m_talonConfig.Slot2);
+      break;
+    default:
+      break;
+  }
+}
+void TalonFXSWrapper::SetKi(double kI) {
+  auto apply = [&](auto& slot) {
+    slot.kI = kI;
+    m_talon->GetConfigurator().Apply(slot);
+  };
+  switch (m_slot) {
+    case ClosedLoopControllerSlot::SLOT_0:
+      apply(m_talonConfig.Slot0);
+      break;
+    case ClosedLoopControllerSlot::SLOT_1:
+      apply(m_talonConfig.Slot1);
+      break;
+    case ClosedLoopControllerSlot::SLOT_2:
+      apply(m_talonConfig.Slot2);
+      break;
+    default:
+      break;
+  }
+}
+void TalonFXSWrapper::SetKd(double kD) {
+  auto apply = [&](auto& slot) {
+    slot.kD = kD;
+    m_talon->GetConfigurator().Apply(slot);
+  };
+  switch (m_slot) {
+    case ClosedLoopControllerSlot::SLOT_0:
+      apply(m_talonConfig.Slot0);
+      break;
+    case ClosedLoopControllerSlot::SLOT_1:
+      apply(m_talonConfig.Slot1);
+      break;
+    case ClosedLoopControllerSlot::SLOT_2:
+      apply(m_talonConfig.Slot2);
+      break;
+    default:
+      break;
+  }
+}
+void TalonFXSWrapper::SetFeedback(double kP, double kI, double kD) {
+  SetKp(kP);
+  SetKi(kI);
+  SetKd(kD);
+}
+void TalonFXSWrapper::SetKs(double kS) {
+  auto apply = [&](auto& slot) {
+    slot.kS = kS;
+    m_talon->GetConfigurator().Apply(slot);
+  };
+  switch (m_slot) {
+    case ClosedLoopControllerSlot::SLOT_0:
+      apply(m_talonConfig.Slot0);
+      break;
+    case ClosedLoopControllerSlot::SLOT_1:
+      apply(m_talonConfig.Slot1);
+      break;
+    case ClosedLoopControllerSlot::SLOT_2:
+      apply(m_talonConfig.Slot2);
+      break;
+    default:
+      break;
+  }
+}
+void TalonFXSWrapper::SetKv(double kV) {
+  auto apply = [&](auto& slot) {
+    slot.kV = kV;
+    m_talon->GetConfigurator().Apply(slot);
+  };
+  switch (m_slot) {
+    case ClosedLoopControllerSlot::SLOT_0:
+      apply(m_talonConfig.Slot0);
+      break;
+    case ClosedLoopControllerSlot::SLOT_1:
+      apply(m_talonConfig.Slot1);
+      break;
+    case ClosedLoopControllerSlot::SLOT_2:
+      apply(m_talonConfig.Slot2);
+      break;
+    default:
+      break;
+  }
+}
+void TalonFXSWrapper::SetKa(double kA) {
+  auto apply = [&](auto& slot) {
+    slot.kA = kA;
+    m_talon->GetConfigurator().Apply(slot);
+  };
+  switch (m_slot) {
+    case ClosedLoopControllerSlot::SLOT_0:
+      apply(m_talonConfig.Slot0);
+      break;
+    case ClosedLoopControllerSlot::SLOT_1:
+      apply(m_talonConfig.Slot1);
+      break;
+    case ClosedLoopControllerSlot::SLOT_2:
+      apply(m_talonConfig.Slot2);
+      break;
+    default:
+      break;
+  }
+}
+void TalonFXSWrapper::SetKg(double kG) {
+  auto apply = [&](auto& slot) {
+    slot.kG = kG;
+    auto gains = m_config.GetSlotGains(m_slot);
+    if (gains.armFF)
+      slot.GravityType = signals::GravityTypeValue::Arm_Cosine;
+    else if (gains.elevatorFF)
+      slot.GravityType = signals::GravityTypeValue::Elevator_Static;
+    m_talon->GetConfigurator().Apply(slot);
+  };
+  switch (m_slot) {
+    case ClosedLoopControllerSlot::SLOT_0:
+      apply(m_talonConfig.Slot0);
+      break;
+    case ClosedLoopControllerSlot::SLOT_1:
+      apply(m_talonConfig.Slot1);
+      break;
+    case ClosedLoopControllerSlot::SLOT_2:
+      apply(m_talonConfig.Slot2);
+      break;
+    default:
+      break;
+  }
+}
+void TalonFXSWrapper::SetFeedforward(double kS, double kV, double kA, double kG) {
+  SetKs(kS);
+  SetKv(kV);
+  SetKa(kA);
+  SetKg(kG);
+}
+
+void TalonFXSWrapper::SetStatorCurrentLimit(units::ampere_t limit) {
+  m_talonConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+  m_talonConfig.CurrentLimits.StatorCurrentLimit = limit;
+  m_talon->GetConfigurator().Apply(m_talonConfig.CurrentLimits);
+}
+
+void TalonFXSWrapper::SetSupplyCurrentLimit(units::ampere_t limit) {
+  m_talonConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+  m_talonConfig.CurrentLimits.SupplyCurrentLimit = limit;
+  m_talon->GetConfigurator().Apply(m_talonConfig.CurrentLimits);
+}
+
+void TalonFXSWrapper::SetClosedLoopRampRate(units::second_t r) {
+  m_talonConfig.ClosedLoopRamps.VoltageClosedLoopRampPeriod = r;
+  m_talon->GetConfigurator().Apply(m_talonConfig.ClosedLoopRamps);
+}
+
+void TalonFXSWrapper::SetOpenLoopRampRate(units::second_t r) {
+  m_talonConfig.OpenLoopRamps.VoltageOpenLoopRampPeriod = r;
+  m_talon->GetConfigurator().Apply(m_talonConfig.OpenLoopRamps);
+}
+
+void TalonFXSWrapper::SetMechanismUpperLimit(units::turn_t upper) {
+  m_talonConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+  m_talonConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = upper;
+  m_talon->GetConfigurator().Apply(m_talonConfig.SoftwareLimitSwitch);
+}
+
+void TalonFXSWrapper::SetMechanismLowerLimit(units::turn_t lower) {
+  m_talonConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+  m_talonConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = lower;
+  m_talon->GetConfigurator().Apply(m_talonConfig.SoftwareLimitSwitch);
+}
+
+void TalonFXSWrapper::SetMechanismLimits(units::turn_t lower, units::turn_t upper) {
+  SetMechanismLowerLimit(lower);
+  SetMechanismUpperLimit(upper);
+}
+
+void TalonFXSWrapper::SetMechanismLimitsEnabled(bool en) {
+  m_talonConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = en;
+  m_talonConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = en;
+  m_talon->GetConfigurator().Apply(m_talonConfig.SoftwareLimitSwitch);
+}
+
+void TalonFXSWrapper::SetMeasurementUpperLimit(units::meter_t upper) {
+  if (auto circ = m_config.GetMechanismCircumference(); circ)
+    SetMechanismUpperLimit(units::turn_t{upper.value() / circ->value()});
+}
+
+void TalonFXSWrapper::SetMeasurementLowerLimit(units::meter_t lower) {
+  if (auto circ = m_config.GetMechanismCircumference(); circ)
+    SetMechanismLowerLimit(units::turn_t{lower.value() / circ->value()});
+}
+
+void TalonFXSWrapper::SetMotionProfileMaxVelocity(units::turns_per_second_t vel) {
+  m_talonConfig.MotionMagic.MotionMagicCruiseVelocity = vel;
+  m_talon->GetConfigurator().Apply(m_talonConfig.MotionMagic);
+}
+
+void TalonFXSWrapper::SetMotionProfileMaxVelocity(units::meters_per_second_t vel) {
+  if (auto circ = m_config.GetMechanismCircumference(); circ)
+    SetMotionProfileMaxVelocity(units::turns_per_second_t{vel.value() / circ->value()});
+}
+
+void TalonFXSWrapper::SetMotionProfileMaxAcceleration(units::turns_per_second_squared_t acc) {
+  m_talonConfig.MotionMagic.MotionMagicAcceleration = acc;
+  m_talon->GetConfigurator().Apply(m_talonConfig.MotionMagic);
+}
+
+void TalonFXSWrapper::SetMotionProfileMaxAcceleration(units::meters_per_second_squared_t acc) {
+  if (auto circ = m_config.GetMechanismCircumference(); circ)
+    SetMotionProfileMaxAcceleration(units::turns_per_second_squared_t{acc.value() / circ->value()});
+}
+
+void TalonFXSWrapper::SetMotionProfileMaxJerk(units::angular_jerk::turns_per_second_cubed_t jerk) {
+  m_talonConfig.MotionMagic.MotionMagicJerk = jerk;
+  m_talon->GetConfigurator().Apply(m_talonConfig.MotionMagic);
+}
+
+void TalonFXSWrapper::SetExponentialProfile(std::optional<double> kV, std::optional<double> kA,
+                                            std::optional<units::volt_t> maxInput) {
+  if (kV || kA) {
+    if (kV)
+      m_talonConfig.MotionMagic.MotionMagicExpo_kV = ctre::unit::volts_per_turn_per_second_t{*kV};
+    if (kA)
+      m_talonConfig.MotionMagic.MotionMagicExpo_kA =
+          ctre::unit::volts_per_turn_per_second_squared_t{*kA};
+    m_talon->GetConfigurator().Apply(m_talonConfig.MotionMagic);
+  }
+}
+
+void TalonFXSWrapper::SetClosedLoopSlot(ClosedLoopControllerSlot slot) {
+  m_slot = slot;
+  int idx = static_cast<int>(slot);
+  std::visit([idx](auto& req) { req.WithSlot(idx); }, m_positionReq);
+  std::visit([idx](auto& req) { req.WithSlot(idx); }, m_velocityReq);
+}
+
+SmartMotorControllerConfig& TalonFXSWrapper::GetConfig() { return m_config; }
+void* TalonFXSWrapper::GetMotorController() { return m_talon; }
+void* TalonFXSWrapper::GetMotorControllerConfig() { return &m_talonConfig; }
+
+telemetry::UnsupportedTelemetryFields TalonFXSWrapper::GetUnsupportedTelemetryFields() {
+  return {};  // TalonFXS supports all telemetry fields
+}
+
+// ---- Config helpers ---------------------------------------------------------
+
+void TalonFXSWrapper::ApplyPIDConfig() {
+  auto g0 = m_config.GetSlotGains(ClosedLoopControllerSlot::SLOT_0);
+  m_talonConfig.Slot0.kP = g0.kP;
+  m_talonConfig.Slot0.kI = g0.kI;
+  m_talonConfig.Slot0.kD = g0.kD;
+  m_talonConfig.Slot0.kS = g0.kS;
+  m_talonConfig.Slot0.kV = g0.kV;
+  m_talonConfig.Slot0.kA = g0.kA;
+
+  auto g1 = m_config.GetSlotGains(ClosedLoopControllerSlot::SLOT_1);
+  m_talonConfig.Slot1.kP = g1.kP;
+  m_talonConfig.Slot1.kI = g1.kI;
+  m_talonConfig.Slot1.kD = g1.kD;
+  m_talonConfig.Slot1.kS = g1.kS;
+  m_talonConfig.Slot1.kV = g1.kV;
+  m_talonConfig.Slot1.kA = g1.kA;
+
+  auto g2 = m_config.GetSlotGains(ClosedLoopControllerSlot::SLOT_2);
+  m_talonConfig.Slot2.kP = g2.kP;
+  m_talonConfig.Slot2.kI = g2.kI;
+  m_talonConfig.Slot2.kD = g2.kD;
+  m_talonConfig.Slot2.kS = g2.kS;
+  m_talonConfig.Slot2.kV = g2.kV;
+  m_talonConfig.Slot2.kA = g2.kA;
+}
+
+void TalonFXSWrapper::ApplyFeedforwardConfig() {
+  auto applySlot = [&](auto& slotCfg, ClosedLoopControllerSlot slotEnum) {
+    auto gains = m_config.GetSlotGains(slotEnum);
+    slotCfg.kG = gains.kG;
+    if (gains.armFF)
+      slotCfg.GravityType = signals::GravityTypeValue::Arm_Cosine;
+    else if (gains.elevatorFF)
+      slotCfg.GravityType = signals::GravityTypeValue::Elevator_Static;
+  };
+  applySlot(m_talonConfig.Slot0, ClosedLoopControllerSlot::SLOT_0);
+  applySlot(m_talonConfig.Slot1, ClosedLoopControllerSlot::SLOT_1);
+  applySlot(m_talonConfig.Slot2, ClosedLoopControllerSlot::SLOT_2);
+}
+
+void TalonFXSWrapper::ApplyLimitsConfig() {
+  if (auto upper = m_config.GetMechanismUpperLimit(); upper) {
+    m_talonConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    m_talonConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = *upper;
+  }
+  if (auto lower = m_config.GetMechanismLowerLimit(); lower) {
+    m_talonConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+    m_talonConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = *lower;
+  }
+  m_talonConfig.ClosedLoopGeneral.ContinuousWrap = m_config.GetContinuousWrapping().has_value();
+}
+
+void TalonFXSWrapper::ApplyMotionMagicConfig() {
+  bool hasTrap = m_config.HasTrapezoidProfile();
+  bool hasExpo = m_config.HasExponentialProfile() || m_config.HasLinearExponentialProfile();
+  bool velTrap = m_config.GetVelocityTrapezoidalProfileInUse();
+  int slotIdx = static_cast<int>(m_slot);
+
+  if (hasTrap && !velTrap) {
+    // Angular profile supplies velocity directly in TPS.  Linear profiles store
+    // velocity in m/s; convert to TPS using the mechanism circumference.
+    auto cruiseVel = m_config.GetTrapMaxVelocityTurns();
+    auto cruiseAcc = m_config.GetTrapMaxAccelTurns();
+    if (!cruiseVel) {
+      if (auto linVel = m_config.GetTrapMaxVelocityLinear(); linVel)
+        if (auto circ = m_config.GetMechanismCircumference(); circ && circ->value() != 0.0)
+          cruiseVel = units::turns_per_second_t{linVel->value() / circ->value()};
+    }
+    if (!cruiseAcc) {
+      if (auto linAcc = m_config.GetTrapMaxAccelLinear(); linAcc)
+        if (auto circ = m_config.GetMechanismCircumference(); circ && circ->value() != 0.0)
+          cruiseAcc = units::turns_per_second_squared_t{linAcc->value() / circ->value()};
+    }
+    if (cruiseVel) m_talonConfig.MotionMagic.MotionMagicCruiseVelocity = *cruiseVel;
+    if (cruiseAcc) m_talonConfig.MotionMagic.MotionMagicAcceleration = *cruiseAcc;
+    m_positionReq = controls::MotionMagicVoltage{0_tr}.WithSlot(slotIdx);
+    m_velocityReq = controls::VelocityVoltage{0_tps}.WithSlot(slotIdx);
+  } else if (hasTrap && velTrap) {
+    // Velocity trapezoidal: the profile's maxVelocity param becomes MotionMagicAcceleration,
+    // and maxAcceleration becomes MotionMagicJerk (one derivative up in velocity-space).
+    auto accel = m_config.GetTrapMaxVelocityTurns();
+    auto jerk = m_config.GetTrapMaxAccelTurns();
+    if (!accel) {
+      if (auto linVel = m_config.GetTrapMaxVelocityLinear(); linVel)
+        if (auto circ = m_config.GetMechanismCircumference(); circ && circ->value() != 0.0)
+          accel = units::turns_per_second_t{linVel->value() / circ->value()};
+    }
+    if (!jerk) {
+      if (auto linAcc = m_config.GetTrapMaxAccelLinear(); linAcc)
+        if (auto circ = m_config.GetMechanismCircumference(); circ && circ->value() != 0.0)
+          jerk = units::turns_per_second_squared_t{linAcc->value() / circ->value()};
+    }
+    if (accel)
+      m_talonConfig.MotionMagic.MotionMagicAcceleration =
+          units::turns_per_second_squared_t{accel->value()};
+    if (jerk)
+      m_talonConfig.MotionMagic.MotionMagicJerk =
+          units::angular_jerk::turns_per_second_cubed_t{jerk->value()};
+    m_positionReq = controls::PositionVoltage{0_tr}.WithSlot(slotIdx);
+    m_velocityReq = controls::MotionMagicVelocityVoltage{0_tps}.WithSlot(slotIdx);
+  } else if (hasExpo) {
+    if (auto kV = m_config.GetExponentialProfileKV())
+      m_talonConfig.MotionMagic.MotionMagicExpo_kV = ctre::unit::volts_per_turn_per_second_t{*kV};
+    if (auto kA = m_config.GetExponentialProfileKA())
+      m_talonConfig.MotionMagic.MotionMagicExpo_kA =
+          ctre::unit::volts_per_turn_per_second_squared_t{*kA};
+    m_positionReq = controls::MotionMagicExpoVoltage{0_tr}.WithSlot(slotIdx);
+    m_velocityReq = controls::VelocityVoltage{0_tps}.WithSlot(slotIdx);
+  } else {
+    using signals::StaticFeedforwardSignValue;
+    m_talonConfig.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue::UseClosedLoopSign;
+    m_talonConfig.Slot1.StaticFeedforwardSign = StaticFeedforwardSignValue::UseClosedLoopSign;
+    m_talonConfig.Slot2.StaticFeedforwardSign = StaticFeedforwardSignValue::UseClosedLoopSign;
+    m_positionReq = controls::PositionVoltage{0_tr}.WithSlot(slotIdx);
+    m_velocityReq = controls::VelocityVoltage{0_tps}.WithSlot(slotIdx);
+  }
+}
+
+TalonFXSWrapper::~TalonFXSWrapper() {
+  if (m_closedLoopControllerThread) {
+    m_closedLoopControllerThread->Stop();
+    m_closedLoopControllerThread.reset();
+  }
+  // delete m_talon;
+}
+
+}  // namespace yams::motorcontrollers::remote

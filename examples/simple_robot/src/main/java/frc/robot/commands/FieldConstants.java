@@ -1,9 +1,5 @@
-// Copyright (c) 2025-2026 Littleton Robotics
-// http://github.com/Mechanical-Advantage
-//
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file at
-// the root directory of this project.
+// Copyright (c) 2025-2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
 
 package frc.robot.commands;
 
@@ -22,7 +18,6 @@ import edu.wpi.first.math.util.Units;
  */
 public class FieldConstants
 {
-
   public static final FieldType fieldType = FieldType.WELDED;
 
   // AprilTag related constants
@@ -42,7 +37,6 @@ public class FieldConstants
    */
   public static class LinesVertical
   {
-
     public static final double center          = fieldLength / 2.0;
     public static final double starting        =
         aprilTagLayout.getTagPose(26).get().getX();
@@ -65,7 +59,6 @@ public class FieldConstants
    */
   public static class LinesHorizontal
   {
-
     public static final double center = fieldWidth / 2.0;
 
     // Right of hub
@@ -88,7 +81,6 @@ public class FieldConstants
    */
   public static class Hub
   {
-
     // Dimensions
     public static final double width       = Units.inchesToMeters(47.0);
     public static final double height      =
@@ -148,7 +140,6 @@ public class FieldConstants
    */
   public static class LeftBump
   {
-
     // Dimensions
     public static final double width  = Units.inchesToMeters(73.0);
     public static final double height = Units.inchesToMeters(6.513);
@@ -176,7 +167,6 @@ public class FieldConstants
    */
   public static class RightBump
   {
-
     // Dimensions
     public static final double width  = Units.inchesToMeters(73.0);
     public static final double height = Units.inchesToMeters(6.513);
@@ -204,7 +194,6 @@ public class FieldConstants
    */
   public static class LeftTrench
   {
-
     // Dimensions
     public static final double width         = Units.inchesToMeters(65.65);
     public static final double depth         = Units.inchesToMeters(47.0);
@@ -227,7 +216,6 @@ public class FieldConstants
 
   public static class RightTrench
   {
-
     // Dimensions
     public static final double width         = Units.inchesToMeters(65.65);
     public static final double depth         = Units.inchesToMeters(47.0);
@@ -253,7 +241,6 @@ public class FieldConstants
    */
   public static class Tower
   {
-
     // Dimensions
     public static final double width             = Units.inchesToMeters(49.25);
     public static final double depth             = Units.inchesToMeters(45.0);
@@ -306,7 +293,6 @@ public class FieldConstants
 
   public static class Depot
   {
-
     // Dimensions
     public static final double width               = Units.inchesToMeters(42.0);
     public static final double depth               = Units.inchesToMeters(27.0);
@@ -324,7 +310,6 @@ public class FieldConstants
 
   public static class Outpost
   {
-
     // Dimensions
     public static final double width                    = Units.inchesToMeters(31.8);
     public static final double openingDistanceFromFloor = Units.inchesToMeters(28.1);

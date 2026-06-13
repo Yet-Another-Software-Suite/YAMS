@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.motorcontrollers.simulation;
 
 import edu.wpi.first.hal.HALValue;
@@ -20,7 +23,6 @@ import java.util.function.Supplier;
  */
 public class SensorData
 {
-
   /**
    * Sensor name.
    */

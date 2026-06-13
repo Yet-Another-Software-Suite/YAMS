@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams;
 
 import static edu.wpi.first.units.Units.Degrees;
@@ -12,7 +15,6 @@ import yams.units.EasyCRT;
 import yams.units.EasyCRTConfig;
 
 public class ChineseRemainderTheoremTest {
-
     private Angle readingTolerance = Degrees.of(0.001);
     private double precision = 10.0;
     private Angle absoluteEncoder1Reading = Degrees.of(0);

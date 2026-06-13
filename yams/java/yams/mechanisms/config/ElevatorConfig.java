@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechanisms.config;
 
 import static edu.wpi.first.units.Units.Degrees;
@@ -12,6 +15,9 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import java.util.Optional;
 import java.util.OptionalInt;
 import yams.exceptions.SmartMotorControllerConfigurationException;
+import yams.mechanisms.positional.Arm;
+import yams.mechanisms.positional.Elevator;
+import yams.mechanisms.positional.Pivot;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
@@ -21,16 +27,10 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  */
 public class ElevatorConfig
 {
-
   /**
-   * {@link SmartMotorController} for the {@link yams.mechanisms.positional.Elevator}
+   * {@link SmartMotorController} for the {@link Elevator}
    */
   private   Optional<SmartMotorController>     motor                   = Optional.empty();
-  /**
-   * The network root of the mechanism (Optional).
-   */
-  @Deprecated
-  protected Optional<String>                   networkRoot             = Optional.empty();
   /**
    * Telemetry name.
    */
@@ -40,19 +40,19 @@ public class ElevatorConfig
    */
   private   Optional<TelemetryVerbosity>       telemetryVerbosity      = Optional.empty();
   /**
-   * Lower Hard Limit for the {@link yams.mechanisms.positional.Elevator} to be representing in simulation.
+   * Lower Hard Limit for the {@link Elevator} to be representing in simulation.
    */
   private   Optional<Distance>                 lowerHardLimit          = Optional.empty();
   /**
-   * Upper hard limit for the {@link yams.mechanisms.positional.Elevator} representing in simulation.
+   * Upper hard limit for the {@link Elevator} representing in simulation.
    */
   private   Optional<Distance>                 upperHardLimit          = Optional.empty();
   /**
-   * {@link yams.mechanisms.positional.Elevator} angle for simulation.
+   * {@link Elevator} angle for simulation.
    */
   private   Angle                              angle                   = Degrees.of(90);
   /**
-   * {@link yams.mechanisms.positional.Elevator} carriage mass for simulation.
+   * {@link Elevator} carriage mass for simulation.
    */
   private   Optional<Mass>                     carriageWeight          = Optional.empty();
   /**
@@ -60,7 +60,7 @@ public class ElevatorConfig
    */
   private   Color8Bit                          simColor                = new Color8Bit(Color.kOrange);
   /**
-   * Mechanism position configuration for the {@link yams.mechanisms.positional.Pivot} (Optional).
+   * Mechanism position configuration for the {@link Pivot} (Optional).
    */
   private   MechanismPositionConfig            mechanismPositionConfig = new MechanismPositionConfig();
   /**
@@ -91,7 +91,7 @@ public class ElevatorConfig
   /**
    * Elevator Configuration class
    *
-   * @param motorController Primary {@link SmartMotorController} for the {@link yams.mechanisms.positional.Elevator}
+   * @param motorController Primary {@link SmartMotorController} for the {@link Elevator}
    */
   public ElevatorConfig(SmartMotorController motorController)
   {
@@ -102,7 +102,7 @@ public class ElevatorConfig
    * Elevator Configuration class
    *
    * @implNote You are REQUIRED to call {@link #withSmartMotorController(SmartMotorController)} before this is used with
-   * an {@link yams.mechanisms.positional.Elevator}
+   * an {@link Elevator}
    */
   public ElevatorConfig() {}
 
@@ -125,7 +125,6 @@ public class ElevatorConfig
     this.carriageWeight = cfg.carriageWeight;
     this.telemetryName = cfg.telemetryName;
     this.telemetryVerbosity = cfg.telemetryVerbosity;
-    this.networkRoot = cfg.networkRoot;
     this.mechanismPositionConfig = cfg.mechanismPositionConfig;
     this.lowerHardLimit = cfg.lowerHardLimit;
     this.upperHardLimit = cfg.upperHardLimit;
@@ -150,9 +149,9 @@ public class ElevatorConfig
   }
 
   /**
-   * Set the {@link SmartMotorController} for the {@link yams.mechanisms.positional.Elevator}
+   * Set the {@link SmartMotorController} for the {@link Elevator}
    *
-   * @param motorController Primary {@link SmartMotorController} for the {@link yams.mechanisms.positional.Elevator}
+   * @param motorController Primary {@link SmartMotorController} for the {@link Elevator}
    * @return {@link ElevatorConfig} for chaining.
    */
   public ElevatorConfig withSmartMotorController(SmartMotorController motorController)
@@ -166,7 +165,7 @@ public class ElevatorConfig
   }
 
   /**
-   * Set the {@link yams.mechanisms.positional.Elevator} drum radius.
+   * Set the {@link Elevator} drum radius.
    *
    * @param drumRadius Elevator drum radius
    * @return {@link ElevatorConfig} for chaining.
@@ -179,7 +178,7 @@ public class ElevatorConfig
   }
 
   /**
-   * Set the {@link yams.mechanisms.positional.Elevator} drum radius via the chain pitch (.25in or .35in) and teeth
+   * Set the {@link Elevator} drum radius via the chain pitch (.25in or .35in) and teeth
    * count.
    *
    * @param chainPitch Chain pitch.
@@ -206,9 +205,9 @@ public class ElevatorConfig
   }
 
   /**
-   * Configure the {@link yams.mechanisms.positional.Elevator}s angle for simulation.
+   * Configure the {@link Elevator}s angle for simulation.
    *
-   * @param angle Angle of the {@link yams.mechanisms.positional.Elevator}.
+   * @param angle Angle of the {@link Elevator}.
    * @return {@link ElevatorConfig} for chaining.
    */
   public ElevatorConfig withAngle(Angle angle)
@@ -218,9 +217,9 @@ public class ElevatorConfig
   }
 
   /**
-   * Configure the {@link yams.mechanisms.positional.Elevator}s {@link Mass} for simulation.
+   * Configure the {@link Elevator}s {@link Mass} for simulation.
    *
-   * @param mass {@link Mass} of the {@link yams.mechanisms.positional.Elevator}
+   * @param mass {@link Mass} of the {@link Elevator}
    * @return {@link ElevatorConfig} for chaining.
    */
   public ElevatorConfig withMass(Mass mass)
@@ -230,7 +229,7 @@ public class ElevatorConfig
   }
 
   /**
-   * Configure telemetry for the {@link yams.mechanisms.positional.Elevator} mechanism.
+   * Configure telemetry for the {@link Elevator} mechanism.
    *
    * @param telemetryName      Telemetry NetworkTable name to appear under "SmartDashboard/"
    * @param telemetryVerbosity Telemetry verbosity to apply.
@@ -238,23 +237,6 @@ public class ElevatorConfig
    */
   public ElevatorConfig withTelemetry(String telemetryName, TelemetryVerbosity telemetryVerbosity)
   {
-    this.telemetryName = Optional.ofNullable(telemetryName);
-    this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
-    return this;
-  }
-
-  /**
-   * Configure telemetry for the {@link yams.mechanisms.positional.Arm} mechanism.
-   *
-   * @param telemetryName      Telemetry NetworkTable name to appear under "SmartDashboard/"
-   * @param telemetryVerbosity Telemetry verbosity to apply.
-   * @param networkRoot        Network root to publish the telemetry under.
-   * @return {@link ElevatorConfig} for chaining.
-   */
-  @Deprecated
-  public ElevatorConfig withTelemetry(String networkRoot, String telemetryName, TelemetryVerbosity telemetryVerbosity)
-  {
-    this.networkRoot = Optional.ofNullable(networkRoot);
     this.telemetryName = Optional.ofNullable(telemetryName);
     this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
     return this;
@@ -277,7 +259,7 @@ public class ElevatorConfig
   /**
    * Set the elevator mechanism position configuration.
    *
-   * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link yams.mechanisms.positional.Elevator}
+   * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link Elevator}
    * @return {@link ElevatorConfig} for chaining
    */
   public ElevatorConfig withMechanismPositionConfig(MechanismPositionConfig mechanismPositionConfig)
@@ -350,7 +332,7 @@ public class ElevatorConfig
   }
 
   /**
-   * Get the Angle of the {@link yams.mechanisms.positional.Elevator}
+   * Get the Angle of the {@link Elevator}
    *
    * @return {@link Angle} of the Elevator.
    */
@@ -360,7 +342,7 @@ public class ElevatorConfig
   }
 
   /**
-   * Get the Upper hard limit of the {@link yams.mechanisms.positional.Elevator}.
+   * Get the Upper hard limit of the {@link Elevator}.
    *
    * @return {@link Distance} hard limit.
    */
@@ -370,7 +352,7 @@ public class ElevatorConfig
   }
 
   /**
-   * Get the lower hard limit of the {@link yams.mechanisms.positional.Elevator}
+   * Get the lower hard limit of the {@link Elevator}
    *
    * @return {@link Distance} hard limit.
    */
@@ -380,9 +362,9 @@ public class ElevatorConfig
   }
 
   /**
-   * Get the telemetry verbosity of the {@link yams.mechanisms.positional.Elevator}
+   * Get the telemetry verbosity of the {@link Elevator}
    *
-   * @return {@link TelemetryVerbosity} of the {@link yams.mechanisms.positional.Elevator}
+   * @return {@link TelemetryVerbosity} of the {@link Elevator}
    */
   public Optional<TelemetryVerbosity> getTelemetryVerbosity()
   {
@@ -390,7 +372,7 @@ public class ElevatorConfig
   }
 
   /**
-   * Network Tables name for the {@link yams.mechanisms.positional.Elevator}
+   * Network Tables name for the {@link Elevator}
    *
    * @return Network Tables name.
    */
@@ -400,9 +382,9 @@ public class ElevatorConfig
   }
 
   /**
-   * Get the starting height of the {@link yams.mechanisms.positional.Elevator}
+   * Get the starting height of the {@link Elevator}
    *
-   * @return {@link Distance} of the {@link yams.mechanisms.positional.Elevator}
+   * @return {@link Distance} of the {@link Elevator}
    */
   public Optional<Distance> getStartingHeight()
   {
@@ -421,9 +403,9 @@ public class ElevatorConfig
   }
 
   /**
-   * Get the {@link SmartMotorController} of the {@link yams.mechanisms.positional.Elevator}
+   * Get the {@link SmartMotorController} of the {@link Elevator}
    *
-   * @return {@link SmartMotorController} for the {@link yams.mechanisms.positional.Elevator}
+   * @return {@link SmartMotorController} for the {@link Elevator}
    */
   public SmartMotorController getMotor()
   {
@@ -441,7 +423,7 @@ public class ElevatorConfig
   }
 
   /**
-   * Get the {@link yams.mechanisms.positional.Elevator} drum radius.
+   * Get the {@link Elevator} drum radius.
    *
    * @return Drum radius of the elevator.
    */
@@ -457,7 +439,7 @@ public class ElevatorConfig
   }
 
   /**
-   * Get the {@link Mass} of the {@link yams.mechanisms.positional.Elevator} carriage.
+   * Get the {@link Mass} of the {@link Elevator} carriage.
    *
    * @return Carriage mass.
    */
@@ -487,14 +469,4 @@ public class ElevatorConfig
     return mechanismPositionConfig;
   }
 
-  /**
-   * Get the network root of the mechanism.
-   *
-   * @return Optional containing the network root if set, otherwise an empty Optional.
-   */
-  @Deprecated
-  public Optional<String> getNetworkRoot()
-  {
-    return networkRoot;
-  }
 }

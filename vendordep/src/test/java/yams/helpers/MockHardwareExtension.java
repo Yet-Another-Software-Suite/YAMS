@@ -1,3 +1,6 @@
+// Copyright (c) 2025-2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.helpers;
 
 import edu.wpi.first.hal.HAL;
@@ -10,7 +13,6 @@ import edu.wpi.first.wpilibj.simulation.SimHooks;
  * initialized to be able to run the scheduler.
  */
 public final class MockHardwareExtension {
-
 	public static void beforeAll() {
 		initializeHardware();
 	}

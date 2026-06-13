@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.math;
 
 import yams.exceptions.NoStagesGivenException;
@@ -7,7 +10,6 @@ import yams.exceptions.NoStagesGivenException;
  */
 public class SmartMath
 {
-
   /**
    * Create the sensor to mechanism ratio.
    *

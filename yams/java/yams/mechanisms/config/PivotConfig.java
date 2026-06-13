@@ -1,21 +1,19 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechanisms.config;
 
-import static edu.wpi.first.units.Units.KilogramSquareMeters;
-import static edu.wpi.first.units.Units.Kilograms;
-import static edu.wpi.first.units.Units.Meters;
-
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.units.measure.MomentOfInertia;
-import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import java.util.Optional;
-import java.util.OptionalDouble;
 import yams.exceptions.PivotConfigurationException;
 import yams.mechanisms.config.MechanismPositionConfig.Plane;
+import yams.mechanisms.positional.Elevator;
+import yams.mechanisms.positional.Pivot;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
@@ -25,16 +23,10 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  */
 public class PivotConfig
 {
-
   /**
-   * {@link SmartMotorController} for the {@link yams.mechanisms.positional.Pivot}
+   * {@link SmartMotorController} for the {@link Pivot}
    */
   private   Optional<SmartMotorController> motor;
-  /**
-   * The network root of the mechanism (Optional).
-   */
-  @Deprecated
-  protected Optional<String>               networkRoot             = Optional.empty();
   /**
    * Telemetry name.
    */
@@ -44,46 +36,30 @@ public class PivotConfig
    */
   private   Optional<TelemetryVerbosity>   telemetryVerbosity      = Optional.empty();
   /**
-   * Lower Hard Limit for the {@link yams.mechanisms.positional.Pivot} to be representing in simulation.
+   * Lower Hard Limit for the {@link Pivot} to be representing in simulation.
    */
   private   Optional<Angle>                lowerHardLimit          = Optional.empty();
   /**
-   * Upper hard limit for the {@link yams.mechanisms.positional.Pivot} representing in simulation.
+   * Upper hard limit for the {@link Pivot} representing in simulation.
    */
   private   Optional<Angle>                upperHardLimit          = Optional.empty();
-  /**
-   * {@link yams.mechanisms.positional.Pivot} MOI from CAD software. If not given estimated with length and weight.
-   */
-  private   OptionalDouble                 moi                     = OptionalDouble.empty();
   /**
    * Sim color value
    */
   private   Color8Bit                      simColor                = new Color8Bit(Color.kOrange);
   /**
-   * Mechanism position configuration for the {@link yams.mechanisms.positional.Pivot}
+   * Mechanism position configuration for the {@link Pivot}
    */
   private   MechanismPositionConfig        mechanismPositionConfig = new MechanismPositionConfig();
-  /**
-   * Starting position of the pivot {@link SmartMotorController} motor encoder.
-   */
-  private   Optional<Angle>                startingPosition        = Optional.empty();
   /**
    * Simulated starting position.
    */
   private Optional<Angle> simStartingPosition = Optional.empty();
-  /**
-   * Soft limits of the pivot motor {@link SmartMotorController} closed loop controller. (LowerLimit, UpperLimit)
-   */
-  private   Optional<Pair<Angle, Angle>>   softLimits              = Optional.empty();
-  /**
-   * Continuous wrapping of the pivot {@link SmartMotorController} closed loop controller. (Min, Max)
-   */
-  private   Optional<Pair<Angle, Angle>>   continuousWrapping      = Optional.empty();
 
   /**
    * Pivot Configuration class
    *
-   * @param motorController Primary {@link SmartMotorController} for the {@link yams.mechanisms.positional.Pivot}
+   * @param motorController Primary {@link SmartMotorController} for the {@link Pivot}
    */
   public PivotConfig(SmartMotorController motorController)
   {
@@ -110,17 +86,12 @@ public class PivotConfig
   {
     this.simStartingPosition = cfg.simStartingPosition;
     this.motor = cfg.motor;
-    this.networkRoot = cfg.networkRoot;
     this.telemetryName = cfg.telemetryName;
     this.telemetryVerbosity = cfg.telemetryVerbosity;
     this.lowerHardLimit = cfg.lowerHardLimit;
     this.upperHardLimit = cfg.upperHardLimit;
-    this.moi = cfg.moi;
     this.simColor = cfg.simColor;
     this.mechanismPositionConfig = cfg.mechanismPositionConfig;
-    this.startingPosition = cfg.startingPosition;
-    this.softLimits = cfg.softLimits;
-    this.continuousWrapping = cfg.continuousWrapping;
   }
 
   @Override
@@ -142,9 +113,9 @@ public class PivotConfig
   }
 
   /**
-   * Configure the {@link SmartMotorController} for the {@link yams.mechanisms.positional.Pivot}
+   * Configure the {@link SmartMotorController} for the {@link Pivot}
    *
-   * @param motorController {@link SmartMotorController} for the {@link yams.mechanisms.positional.Pivot}.
+   * @param motorController {@link SmartMotorController} for the {@link Pivot}.
    * @return {@link PivotConfig} for chaining.
    */
   public PivotConfig withSmartMotorController(SmartMotorController motorController)
@@ -156,10 +127,6 @@ public class PivotConfig
                                             "withSmartMotorController(SmartMotorController)");
     }
     motor = Optional.of(motorController);
-    startingPosition.ifPresent(this::withStartingPosition);
-    softLimits.ifPresent(softLimits -> withSoftLimits(softLimits.getFirst(), softLimits.getSecond()));
-    continuousWrapping.ifPresent(continuousWrapping -> withWrapping(continuousWrapping.getFirst(),
-                                                                    continuousWrapping.getSecond()));
     return this;
   }
 
@@ -176,53 +143,7 @@ public class PivotConfig
   }
 
   /**
-   * Configure the MOI directly instead of estimating it with the length and mass of the
-   * {@link yams.mechanisms.positional.Pivot} for simulation.
-   *
-   * @param MOI Moment of Inertia of the {@link yams.mechanisms.positional.Pivot}. in
-   *            {@link edu.wpi.first.units.Units#KilogramSquareMeters}
-   * @return {@link PivotConfig} for chaining.
-   * @implNote Please use {@link #withMOI(MomentOfInertia)} instead. Default unit is KilogramSquareMeters
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public PivotConfig withMOI(double MOI)
-  {
-    motor.ifPresent(motor -> motor.getConfig().withMomentOfInertia(KilogramSquareMeters.of(MOI)));
-    this.moi = OptionalDouble.of(MOI);
-    return this;
-  }
-
-  /**
-   * Configure the MOI directly instead of estimating it with the length and mass of the
-   * {@link yams.mechanisms.positional.Pivot} for simulation.
-   *
-   * @param MOI Moment of Inertia of the {@link yams.mechanisms.positional.Pivot}
-   * @return {@link PivotConfig} for chaining.
-   */
-  public PivotConfig withMOI(MomentOfInertia MOI)
-  {
-    motor.ifPresent(motor -> motor.getConfig().withMomentOfInertia(MOI));
-    this.moi = OptionalDouble.of(MOI.in(KilogramSquareMeters));
-    return this;
-  }
-
-  /**
-   * Configure the MOI directly instead of estimating it with the length and mass of the
-   * {@link yams.mechanisms.positional.Pivot} for simulation.
-   *
-   * @param length Length of the {@link yams.mechanisms.positional.Pivot}.
-   * @param weight Weight of the {@link yams.mechanisms.positional.Pivot}
-   * @return {@link PivotConfig} for chaining.
-   */
-  public PivotConfig withMOI(Distance length, Mass weight)
-  {
-    motor.ifPresent(motor -> motor.getConfig().withMomentOfInertia(length, weight));
-    this.moi = OptionalDouble.of(SingleJointedArmSim.estimateMOI(length.in(Meters), weight.in(Kilograms)));
-    return this;
-  }
-
-  /**
-   * Configure telemetry for the {@link yams.mechanisms.positional.Pivot} mechanism.
+   * Configure telemetry for the {@link Pivot} mechanism.
    *
    * @param telemetryName      Telemetry NetworkTable name to appear under "SmartDashboard/"
    * @param telemetryVerbosity Telemetry verbosity to apply.
@@ -236,73 +157,14 @@ public class PivotConfig
   }
 
   /**
-   * Configure telemetry for the {@link yams.mechanisms.positional.Pivot} mechanism.
-   *
-   * @param telemetryName      Telemetry NetworkTable name to appear under "SmartDashboard/"
-   * @param telemetryVerbosity Telemetry verbosity to apply.
-   * @param networkRoot        Network root to publish the telemetry under.
-   * @return {@link ArmConfig} for chaining.
-   */
-  @Deprecated
-  public PivotConfig withTelemetry(String networkRoot, String telemetryName, TelemetryVerbosity telemetryVerbosity)
-  {
-    this.networkRoot = Optional.ofNullable(networkRoot);
-    this.telemetryName = Optional.ofNullable(telemetryName);
-    this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
-    return this;
-  }
-
-  /**
    * Set the elevator mechanism position configuration.
    *
-   * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link yams.mechanisms.positional.Elevator}
+   * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link Elevator}
    * @return {@link PivotConfig} for chaining
    */
   public PivotConfig withMechanismPositionConfig(MechanismPositionConfig mechanismPositionConfig)
   {
     this.mechanismPositionConfig = mechanismPositionConfig;
-    return this;
-  }
-
-  /**
-   * Set the pivot starting position.
-   *
-   * @param startingPosition Starting position of the pivot.
-   * @return {@link PivotConfig} for chaining
-   */
-  public PivotConfig withStartingPosition(Angle startingPosition)
-  {
-    this.startingPosition = Optional.ofNullable(startingPosition);
-    motor.ifPresent(motor -> motor.getConfig().withStartingPosition(startingPosition));
-    return this;
-  }
-
-  /**
-   * Set the pivot soft limits. When exceeded the power will be set to 0.
-   *
-   * @param lowerLimit Minimum rotation of the pivot.
-   * @param upperLimit Maximum rotation of the pivot.
-   * @return {@link PivotConfig} for chaining.
-   */
-  public PivotConfig withSoftLimits(Angle lowerLimit, Angle upperLimit)
-  {
-    softLimits = Optional.of(Pair.of(lowerLimit, upperLimit));
-    motor.ifPresent(motor -> motor.getConfig().withSoftLimits(lowerLimit, upperLimit));
-    return this;
-  }
-
-  /**
-   * Wrap the pivot around these angles. When the pivot exceeds the maximum angle it will read as if it is the minimum
-   * angle.
-   *
-   * @param min Minimum angle for wrapping
-   * @param max Maximum angle for wrapping.
-   * @return {@link PivotConfig} for chaining.
-   */
-  public PivotConfig withWrapping(Angle min, Angle max)
-  {
-    continuousWrapping = Optional.of(Pair.of(min, max));
-    motor.ifPresent(motor -> motor.getConfig().withContinuousWrapping(min, max));
     return this;
   }
 
@@ -332,23 +194,25 @@ public class PivotConfig
 
 
   /**
-   * Get the moment of inertia for the {@link yams.mechanisms.positional.Pivot} simulation.
+   * Get the moment of inertia for the {@link Pivot} simulation.
+   * Must be configured via {@link SmartMotorControllerConfig#withMomentOfInertia(edu.wpi.first.units.measure.MomentOfInertia)}
+   * or {@link SmartMotorControllerConfig#withMomentOfInertia(Distance, Mass)}.
    *
-   * @return Moment of Inertia.
+   * @return Moment of Inertia in KgMetersSquared.
    */
   public double getMOI()
   {
-    if (moi.isPresent())
+    if (motor.isPresent())
     {
-      return moi.getAsDouble();
+      return motor.get().getConfig().getMOI();
     }
-    throw new PivotConfigurationException("Pivot MOI must be set!",
+    throw new PivotConfigurationException("Pivot MOI must be configured!",
                                           "Cannot get the MOI!",
-                                          "withLength(Distance).withMass(Mass) OR PivotConfig.withMOI()");
+                                          "SmartMotorControllerConfig.withMomentOfInertia(MomentOfInertia) or withMomentOfInertia(Distance, Mass)");
   }
 
   /**
-   * Get the Upper hard limit of the {@link yams.mechanisms.positional.Pivot}.
+   * Get the Upper hard limit of the {@link Pivot}.
    *
    * @return {@link Angle} hard limit.
    */
@@ -358,7 +222,7 @@ public class PivotConfig
   }
 
   /**
-   * Get the lower hard limit of the {@link yams.mechanisms.positional.Pivot}
+   * Get the lower hard limit of the {@link Pivot}
    *
    * @return {@link Angle} hard limit.
    */
@@ -368,9 +232,9 @@ public class PivotConfig
   }
 
   /**
-   * Get the telemetry verbosity of the {@link yams.mechanisms.positional.Pivot}
+   * Get the telemetry verbosity of the {@link Pivot}
    *
-   * @return {@link TelemetryVerbosity} of the {@link yams.mechanisms.positional.Pivot}
+   * @return {@link TelemetryVerbosity} of the {@link Pivot}
    */
   public Optional<TelemetryVerbosity> getTelemetryVerbosity()
   {
@@ -378,7 +242,7 @@ public class PivotConfig
   }
 
   /**
-   * Network Tables name for the {@link yams.mechanisms.positional.Pivot}
+   * Network Tables name for the {@link Pivot}
    *
    * @return Network Tables name.
    */
@@ -388,19 +252,24 @@ public class PivotConfig
   }
 
   /**
-   * Get the starting angle of the {@link yams.mechanisms.positional.Pivot}
+   * Get the starting angle of the {@link Pivot}. Reads from {@link SmartMotorControllerConfig#getStartingPosition()}.
+   * Configure via {@link SmartMotorControllerConfig#withStartingPosition(Angle)}.
    *
-   * @return {@link Angle} of the {@link yams.mechanisms.positional.Pivot}
+   * @return {@link Angle} of the {@link Pivot}
    */
   public Optional<Angle> getStartingAngle()
   {
+    if (RobotBase.isSimulation() && simStartingPosition.isPresent())
+    {
+      return simStartingPosition;
+    }
     return motor.orElseThrow().getConfig().getStartingPosition();
   }
 
   /**
-   * Get the {@link SmartMotorController} of the {@link yams.mechanisms.positional.Pivot}
+   * Get the {@link SmartMotorController} of the {@link Pivot}
    *
-   * @return {@link SmartMotorController} for the {@link yams.mechanisms.positional.Pivot}
+   * @return {@link SmartMotorController} for the {@link Pivot}
    */
   public SmartMotorController getMotor()
   {
@@ -429,14 +298,4 @@ public class PivotConfig
     return mechanismPositionConfig;
   }
 
-  /**
-   * Get the network root of the mechanism.
-   *
-   * @return Optional containing the network root if set, otherwise an empty Optional.
-   */
-  @Deprecated
-  public Optional<String> getNetworkRoot()
-  {
-    return networkRoot;
-  }
 }

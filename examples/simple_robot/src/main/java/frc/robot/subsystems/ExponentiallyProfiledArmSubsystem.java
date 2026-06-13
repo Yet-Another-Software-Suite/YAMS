@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems;
 
 
@@ -6,7 +9,6 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Pounds;
-import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -43,7 +45,6 @@ import yams.motorcontrollers.local.SparkWrapper;
  */
 public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
 {
-
   private final String           motorTelemetryName = "ExponentiallyProfiledArmMotor";
   private final String           mechTelemetryName  = "ExponentiallyProfiledArm";
   private final SparkMax         armMotor           = new SparkMax(1, MotorType.kBrushless);
@@ -103,9 +104,16 @@ public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
                                                 /*
                                                  * Closed loop configuration options for the motor.
                                                  */
-                                                .withClosedLoopController(pidController)
+                                                .withClosedLoopController(1,0,0)
+          .withExponentialProfile(ExponentialProfilePIDController.createArmConstraints(
+                  Volts.of(12),
+                  dcMotor,
+                  weight,
+                  length,
+                  gearing))
                                                 .withFeedforward(armFeedforward)
-                                                .withSoftLimits(softLowerLimit, softUpperLimit);
+                                                .withSoftLimits(softLowerLimit, softUpperLimit)
+                                                .withStartingPosition(startingAngle); // The starting position should ONLY be defined if you are NOT using an absolute encoder.
 
   /// Generic Smart Motor Controller with our options and vendor motor.
   private final SmartMotorController motor    = new SparkWrapper(armMotor, dcMotor, motorConfig);
@@ -116,8 +124,7 @@ public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
        */
       .withLength(length)
       .withMass(weight)
-      .withStartingPosition(startingAngle) // The starting position should ONLY be defined if you are NOT using an absolute encoder.
-      //.withHorizontalZero(Degrees.of(0)) // The horizontal zero should ONLY be defined if you ARE using an absolute encoder.
+      //.withSimStartingPosition(Degrees.of(0)) // Override the starting position for simulation only.
       .withTelemetry(mechTelemetryName, TelemetryVerbosity.HIGH)
       /*
        * Simulation configuration options for the arm.
@@ -175,8 +182,4 @@ public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
     return arm.setAngle(angle);
   }
 
-  public Command sysId()
-    {
-        return arm.sysId(Volts.of(3), Volts.of(3).per(Second), Second.of(30));
-    }
 }

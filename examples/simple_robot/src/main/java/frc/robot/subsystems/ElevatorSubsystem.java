@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems;
 
 
@@ -6,10 +9,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
-import static yams.mechanisms.SmartMechanism.gearbox;
-import static yams.mechanisms.SmartMechanism.gearing;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkLowLevel;
@@ -54,12 +54,13 @@ public class ElevatorSubsystem extends SubsystemBase
   private final SmartMotorControllerConfig motorConfig        = new SmartMotorControllerConfig(this)
       .withMechanismCircumference(circumference)
 //      .withFollowers(Pair.of(new SparkMax(3, SparkLowLevel.MotorType.kBrushless), true))
-      .withClosedLoopController(new ExponentialProfilePIDController(30, 0, 0, ExponentialProfilePIDController
+      .withClosedLoopController(30, 0, 0)
+              .withExponentialProfile(ExponentialProfilePIDController
           .createElevatorConstraints(Volts.of(12),
                                      motors,
                                      weight,
                                      radius,
-                                     gearing)))
+                                     gearing))
 //      .withClosedLoopController(4, 0, 0, MetersPerSecond.of(0.5), MetersPerSecondPerSecond.of(0.5)) // Trapezoidal Profile PID Controller
       .withSoftLimits(Meters.of(0), Meters.of(2))
       .withGearing(gearing)
@@ -116,8 +117,4 @@ public class ElevatorSubsystem extends SubsystemBase
     return m_elevator.setHeight(height);
   }
 
-  public Command sysId()
-  {
-    return m_elevator.sysId(Volts.of(12), Volts.of(12).per(Second), Second.of(30));
-  }
 }

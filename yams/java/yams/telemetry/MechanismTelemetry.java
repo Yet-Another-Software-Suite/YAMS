@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.telemetry;
 
 import edu.wpi.first.networktables.DoublePublisher;
@@ -12,7 +15,6 @@ import yams.motorcontrollers.SmartMotorController;
  */
 public class MechanismTelemetry
 {
-
   /**
    * Telemetry NetworkTable.
    */
@@ -36,7 +38,7 @@ public class MechanismTelemetry
   public void setupLoopTime()
   {
     var loopTimePublisherTopic = networkTable.getDoubleTopic("loopTime");
-    loopTimePublisherTopic.setProperties("{\"unit\":\"second\"}");
+    loopTimePublisherTopic.setProperties("{\"units\": \"second\"}");
     loopTimePublisher = Optional.of(loopTimePublisherTopic.publish());
   }
 

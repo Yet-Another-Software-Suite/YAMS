@@ -1,3 +1,6 @@
+// Copyright (c) 2025-2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.helpers;
 
 import edu.wpi.first.units.measure.Time;
@@ -13,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  */
 public class TestWithScheduler
 {
-
   public static void schedule(Command... cmd)
   {
     CommandScheduler.getInstance().schedule(cmd);

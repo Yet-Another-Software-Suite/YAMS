@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems;
 
 
@@ -7,9 +10,7 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Pounds;
-import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -36,7 +37,6 @@ import yams.motorcontrollers.simulation.Sensor;
 
 public class ArmSubsystem extends SubsystemBase
 {
-
   private final CANcoder                   cancoder    = new CANcoder(2);
   private final TalonFX                    armMotor    = new TalonFX(1);
   //  private final SmartMotorControllerTelemetryConfig motorTelemetryConfig = new SmartMotorControllerTelemetryConfig()
@@ -45,7 +45,8 @@ public class ArmSubsystem extends SubsystemBase
 //          .withMechanismLowerLimit()
 //          .withMechanismUpperLimit();
   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
-      .withClosedLoopController(4, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
+      .withClosedLoopController(4, 0, 0)
+    .withTrapezoidalProfile(DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
       .withSoftLimits(Degrees.of(-30), Degrees.of(100))
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
 //      .withExternalEncoder(armMotor.getAbsoluteEncoder())
@@ -61,7 +62,8 @@ public class ArmSubsystem extends SubsystemBase
       .withControlMode(ControlMode.CLOSED_LOOP)
       .withExternalEncoder(cancoder)
       .withExternalEncoderGearing(0.5)
-      .withUseExternalFeedbackEncoder(true);
+      .withUseExternalFeedbackEncoder(true)
+      .withStartingPosition(Degrees.of(0));
 
   private final SmartMotorController    motor            = new TalonFXWrapper(armMotor,
                                                                               DCMotor.getKrakenX60(1),
@@ -76,8 +78,6 @@ public class ArmSubsystem extends SubsystemBase
       .withHardLimits(Degrees.of(-100), Degrees.of(200))
       .withTelemetry("ArmExample", TelemetryVerbosity.HIGH)
       .withMass(Pounds.of(1))
-      .withStartingPosition(Degrees.of(0))
-//      .withHorizontalZero(Degrees.of(0))
       .withMechanismPositionConfig(robotToMechanism);
   private final Arm       arm      = new Arm(m_config);
 
@@ -111,11 +111,6 @@ public class ArmSubsystem extends SubsystemBase
   public Command armCmd(double dutycycle)
   {
     return arm.set(dutycycle);
-  }
-
-  public Command sysId()
-  {
-    return arm.sysId(Volts.of(3), Volts.of(3).per(Second), Second.of(30));
   }
 
   public Command setAngle(Angle angle)

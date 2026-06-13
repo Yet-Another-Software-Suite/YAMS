@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechanisms.config;
 
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
@@ -17,6 +20,7 @@ import java.util.function.Supplier;
 import yams.exceptions.DifferentialMechanismConfigurationException;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
+import yams.mechanisms.positional.Pivot;
 import yams.mechanisms.config.MechanismPositionConfig.Plane;
 import yams.mechanisms.positional.DifferentialMechanism;
 import yams.motorcontrollers.SmartMotorController;
@@ -28,7 +32,6 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  */
 public class DifferentialMechanismConfig
 {
-
   /**
    * {@link SmartMotorController} for the {@link DifferentialMechanism}
    */
@@ -37,11 +40,6 @@ public class DifferentialMechanismConfig
    * {@link SmartMotorController} for the {@link DifferentialMechanism}
    */
   private Optional<SmartMotorController>         rightMotorController = Optional.empty();
-  /**
-   * The network root of the mechanism (Optional).
-   */
-  @Deprecated
-  protected     Optional<String>             networkRoot             = Optional.empty();
   /**
    * Telemetry name.
    */
@@ -133,7 +131,6 @@ public class DifferentialMechanismConfig
     this.length = cfg.length;
     this.simColor = cfg.simColor;
     this.mechanismPositionConfig = cfg.mechanismPositionConfig;
-    this.networkRoot = cfg.networkRoot;
   }
 
   @Override
@@ -241,21 +238,6 @@ public class DifferentialMechanismConfig
    * Configure the MOI directly instead of estimating it with the length and mass of the {@link DifferentialMechanism}
    * for simulation.
    *
-   * @param MOI Moment of Inertia of the {@link DifferentialMechanism}. In {@link edu.wpi.first.units.Units#KilogramSquareMeters}
-   * @return {@link DifferentialMechanismConfig} for chaining.
-   * @implNote Please use {@link #withMOI(MomentOfInertia)} instead. Default unit is KilogramSquareMeters
-   */
-  @Deprecated(since = "2026", forRemoval = true)
-  public DifferentialMechanismConfig withMOI(double MOI)
-  {
-    this.MOI = OptionalDouble.of(MOI);
-    return this;
-  }
-
-  /**
-   * Configure the MOI directly instead of estimating it with the length and mass of the {@link DifferentialMechanism}
-   * for simulation.
-   *
    * @param MOI Moment of Inertia of the {@link DifferentialMechanism}
    * @return {@link DifferentialMechanismConfig} for chaining.
    */
@@ -293,7 +275,7 @@ public class DifferentialMechanismConfig
   }
 
   /**
-   * Configure telemetry for the {@link yams.mechanisms.positional.Pivot} mechanism.
+   * Configure telemetry for the {@link Pivot} mechanism.
    *
    * @param telemetryName      Telemetry NetworkTable name to appear under "SmartDashboard/"
    * @param telemetryVerbosity Telemetry verbosity to apply.
@@ -416,9 +398,9 @@ public class DifferentialMechanismConfig
 
 
   /**
-   * Get the telemetry verbosity of the {@link yams.mechanisms.positional.Pivot}
+   * Get the telemetry verbosity of the {@link Pivot}
    *
-   * @return {@link TelemetryVerbosity} of the {@link yams.mechanisms.positional.Pivot}
+   * @return {@link TelemetryVerbosity} of the {@link Pivot}
    */
   public Optional<TelemetryVerbosity> getTelemetryVerbosity()
   {
@@ -426,7 +408,7 @@ public class DifferentialMechanismConfig
   }
 
   /**
-   * Network Tables name for the {@link yams.mechanisms.positional.Pivot}
+   * Network Tables name for the {@link Pivot}
    *
    * @return Network Tables name.
    */
@@ -556,14 +538,4 @@ public class DifferentialMechanismConfig
     return mechanismPositionConfig;
   }
 
-  /**
-   * Get the network root of the mechanism.
-   *
-   * @return Optional containing the network root if set, otherwise an empty Optional.
-   */
-  @Deprecated
-  public Optional<String> getNetworkRoot()
-  {
-    return networkRoot;
-  }
 }

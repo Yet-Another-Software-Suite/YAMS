@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.mechanisms.swerve;
 
 import static edu.wpi.first.hal.FRCNetComm.tInstances.kRobotDriveSwerve_YAGSL;
@@ -38,9 +41,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -53,7 +53,6 @@ import yams.telemetry.MechanismTelemetry;
  */
 public class SwerveDrive
 {
-
   /**
    * The modules of the drive.
    */
@@ -114,6 +113,14 @@ public class SwerveDrive
    * Field to display the robot's pose.
    */
   private       Field2d                                 m_field2d      = new Field2d();
+  /**
+   * Last-commanded desired module states; cached and published from updateTelemetry.
+   */
+  private       SwerveModuleState[]                     m_desiredModuleStates;
+  /**
+   * Last-commanded desired robot-relative chassis speeds; cached and published from updateTelemetry.
+   */
+  private       ChassisSpeeds                           m_desiredChassisSpeeds = new ChassisSpeeds();
 
   /**
    * Create a SwerveDrive.
@@ -124,6 +131,8 @@ public class SwerveDrive
   {
     m_config = config;
     m_modules = config.getModules();
+    m_desiredModuleStates = new SwerveModuleState[m_modules.length];
+    Arrays.fill(m_desiredModuleStates, new SwerveModuleState());
     m_kinematics = getKinematics();
     m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics,
                                                    new Rotation2d(getGyroAngle()),
@@ -136,7 +145,7 @@ public class SwerveDrive
                                               .getStructArrayTopic("states/current", SwerveModuleState.struct);
     var poseTopic = m_telemetry.getDataTable().getStructTopic("pose", Pose2d.struct);
     var gyroTopic = m_telemetry.getDataTable().getDoubleTopic("gyro");
-    gyroTopic.setProperties("{\"unit\":\"degrees\"}");
+    gyroTopic.setProperties("{\"units\": \"degrees\"}");
     var desiredRobotRelativeChassisSpeedsTopic = m_telemetry.getDataTable()
                                                             .getStructTopic("chassis/desired", ChassisSpeeds.struct);
     var fieldRelativeChassisSpeedsTopic = m_telemetry.getDataTable()
@@ -204,9 +213,7 @@ public class SwerveDrive
           new SwerveModuleState(0, m_modules[i].getConfig().getLocation().orElseThrow().getAngle());
     }
     setSwerveModuleStates(desiredStates);
-
-    // Update kinematics because we are not using setModuleStates
-    m_desiredRobotRelativeChassisSpeedsPublisher.accept(new ChassisSpeeds());
+    m_desiredChassisSpeeds = new ChassisSpeeds();
   }
 
   /**
@@ -227,7 +234,7 @@ public class SwerveDrive
 //      }
       m_modules[i].setSwerveModuleState(states[i]);
     }
-    m_desiredModuleStatesPublisher.accept(states);
+    m_desiredModuleStates = states;
   }
 
   /**
@@ -251,8 +258,8 @@ public class SwerveDrive
    */
   public void setRobotRelativeChassisSpeeds(ChassisSpeeds robotRelativeChassisSpeeds)
   {
+    m_desiredChassisSpeeds = robotRelativeChassisSpeeds;
     setSwerveModuleStates(getStateFromRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds));
-    m_desiredRobotRelativeChassisSpeedsPublisher.accept(robotRelativeChassisSpeeds);
   }
 
   /**
@@ -348,9 +355,8 @@ public class SwerveDrive
 //      m_config.getMapleDriveSim().get().setSimulationWorldPose(pose);
 //    }
     m_poseEstimator.resetPosition(new Rotation2d(getGyroAngle()), getModulePositions(), pose);
-    ChassisSpeeds robotRelativeSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(new ChassisSpeeds(0, 0, 0),
-                                                                              new Rotation2d(getGyroAngle()));
-    m_desiredModuleStatesPublisher.accept(m_kinematics.toSwerveModuleStates(robotRelativeSpeeds));
+    m_desiredChassisSpeeds = new ChassisSpeeds();
+    m_desiredModuleStates = m_kinematics.toSwerveModuleStates(new ChassisSpeeds());
   }
 
   /**
@@ -481,14 +487,31 @@ public class SwerveDrive
   public void updateTelemetry()
   {
     updatePoseEstimator();
+    Pose2d             robotPose     = getPose();
+    SwerveModuleState[] currentStates = getModuleStates();
+
     m_gyroPublisher.accept(getGyroAngle().in(Degrees));
-    m_currentModuleStatesPublisher.accept(getModuleStates());
-    m_posePublisher.accept(getPose());
+    m_desiredModuleStatesPublisher.accept(m_desiredModuleStates);
+    m_currentModuleStatesPublisher.accept(currentStates);
+    m_posePublisher.accept(robotPose);
+    m_desiredRobotRelativeChassisSpeedsPublisher.accept(m_desiredChassisSpeeds);
     m_currentRobotRelativeChassisSpeedsPublisher.accept(getRobotRelativeSpeed());
     m_fieldRelativeChassisSpeedsPublisher.accept(getFieldRelativeSpeed());
+
     Arrays.stream(m_modules).forEach(SwerveModule::updateTelemetry);
     m_telemetry.updateLoopTime();
-    m_field2d.setRobotPose(getPose());
+
+    m_field2d.setRobotPose(robotPose);
+    Pose2d[] modulePoses = new Pose2d[m_modules.length];
+    for (int i = 0; i < m_modules.length; i++)
+    {
+      Translation2d location          = m_modules[i].getConfig().getLocation().orElseThrow();
+      Translation2d rotated           = location.rotateBy(robotPose.getRotation());
+      Translation2d moduleTranslation = robotPose.getTranslation().plus(rotated);
+      Rotation2d    moduleHeading     = robotPose.getRotation().plus(currentStates[i].angle);
+      modulePoses[i] = new Pose2d(moduleTranslation, moduleHeading);
+    }
+    m_field2d.getObject("modules").setPoses(modulePoses);
   }
 
   /**
@@ -573,111 +596,6 @@ public class SwerveDrive
     return m_config;
   }
 
-  /**
-   * Run SysId on an Azimuth (Steering/Angle) motor.
-   *
-   * @param module       {@link SwerveModule} to run SysId on.
-   * @param maxVoltage   Maximum voltage of the {@link SysIdRoutine}.
-   * @param stepVoltage  Step voltage for the dynamic test in {@link SysIdRoutine}.
-   * @param testDuration Duration of each {@link SysIdRoutine} run.
-   * @return {@link Command} to run SysId on the module.
-   */
-  public Command sysIdAzimuth(SwerveModule module, Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage,
-                              Time testDuration)
-  {
-    SmartMotorController smc       = module.m_azimuthMotorController;
-    SysIdRoutine         routine   = module.m_azimuthMotorController.sysId(maxVoltage, stepVoltage, testDuration);
-    var                  timeSlice = testDuration.div(4);
-    return Commands.print("Starting azimuth sysId on module " + module.getName() + "!")
-                   .andThen(Commands.runOnce(smc::stopClosedLoopController))
-                   .andThen(routine.dynamic(Direction.kForward).withTimeout(timeSlice))
-                   .andThen(routine.dynamic(Direction.kReverse).withTimeout(timeSlice))
-                   .andThen(routine.quasistatic(Direction.kForward).withTimeout(timeSlice))
-                   .andThen(routine.quasistatic(Direction.kReverse).withTimeout(timeSlice))
-                   .finallyDo(smc::startClosedLoopController)
-                   .andThen(Commands.print("Finished azimuth sysId on module " + module.getName() + "!"));
-  }
-
-  /**
-   * SysId test type for the drive motors.
-   */
-  public enum DriveSysIdTestType
-  {
-    /**
-     * Spin the robot in place to get the drive sysid.
-     */
-    SPIN,
-    /**
-     * Drive forward and backward to get the drive sysid.
-     */
-    DRIVE
-  }
-
-
-  /**
-   * Run SysId on the drive motors. Spins the robot in place to get the drive sysid.
-   *
-   * @param maxVoltage   Maximum voltage of the {@link SysIdRoutine}.
-   * @param stepVoltage  Step voltage for the dynamic test in {@link SysIdRoutine}.
-   * @param testDuration Duration of each {@link SysIdRoutine} run.
-   * @param driveType    SysId test type for the drive motors.
-   * @return {@link Command} to run SysId on the drive.
-   */
-  public Command sysIdDrive(Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage, Time testDuration,
-                            DriveSysIdTestType driveType)
-  {
-    // Get the config from the drive motor to support custom logging by CTRE and REV.
-    Config sysIdConfig = m_modules[0].m_driveMotorController.getSysIdConfig(maxVoltage, stepVoltage, testDuration);
-    var    testSlice   = testDuration.div(4);
-    var routine = new SysIdRoutine(sysIdConfig,
-                                   new SysIdRoutine.Mechanism(
-                                       (voltage) -> {
-                                         for (var mod : m_modules)
-                                         {
-                                           mod.m_driveMotorController.setVoltage(voltage);
-                                         }
-                                       },
-                                       log -> {
-                                         for (var mod : m_modules)
-                                         {
-                                           log.motor(mod.m_driveMotorController.getName())
-                                              .voltage(
-                                                  mod.m_driveMotorController.getVoltage())
-                                              .angularPosition(mod.m_driveMotorController.getMechanismPosition())
-                                              .angularVelocity(mod.m_driveMotorController.getMechanismVelocity());
-                                         }
-                                       },
-                                       m_config.getSubsystem()));
-    return Commands.print("Starting drive sysId!")
-                   .andThen(
-                       Commands.runOnce(() -> {
-                         SwerveModuleState[] rotaryStates = m_kinematics.toSwerveModuleStates(new ChassisSpeeds(0,
-                                                                                                                0,
-                                                                                                                1));
-                         for (int i = 0; i < m_modules.length; i++)
-                         {
-                           m_modules[i].m_azimuthMotorController.setPosition(
-                               driveType == DriveSysIdTestType.SPIN ? Radians.of(rotaryStates[i].angle.getRadians())
-                                                                    : Rotations.of(0));
-                         }
-                       }))
-                   .andThen(Commands.print("Waiting for wheels to align")
-                                    .andThen(Commands.waitSeconds(Seconds.of(1.5).in(Seconds))))
-                   .andThen(Commands.runOnce(() -> {
-                     for (var mod : m_modules)
-                     {
-                       mod.m_driveMotorController.stopClosedLoopController();
-                     }
-                   }))
-                   .andThen(routine.dynamic(Direction.kForward).withTimeout(testSlice))
-                   .andThen(routine.dynamic(Direction.kReverse).withTimeout(testSlice))
-                   .andThen(routine.quasistatic(Direction.kForward).withTimeout(testSlice))
-                   .andThen(routine.quasistatic(Direction.kReverse).withTimeout(testSlice))
-                   .finallyDo(() -> {
-                     for (var mod : m_modules) {mod.m_driveMotorController.startClosedLoopController();}
-                   })
-                   .andThen(Commands.print("Done with drive sysId!"));
-  }
 
   /**
    * Get a module by its name.

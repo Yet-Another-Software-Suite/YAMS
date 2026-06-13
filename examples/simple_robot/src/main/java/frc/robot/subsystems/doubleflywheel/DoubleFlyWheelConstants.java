@@ -1,3 +1,6 @@
+// Copyright (c) 2025-2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.subsystems.doubleflywheel;
 
 import static edu.wpi.first.units.Units.Inches;
@@ -12,7 +15,6 @@ import java.util.List;
 
 public class DoubleFlyWheelConstants
 {
-
   /**
    * Utility Class for storing a measurement of a double flywheel that is known to be correct.
    *
@@ -23,7 +25,6 @@ public class DoubleFlyWheelConstants
   private record DoubleFlyWheelMeasurement(Distance distance, AngularVelocity lowerVelocity,
                                            AngularVelocity upperVelocity)
   {
-
   }
 
   /**

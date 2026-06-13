@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package frc.robot.commands;
 
 
@@ -6,7 +9,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 
 public record Bounds(double minX, double maxX, double minY, double maxY)
 {
-
   /**
    * Whether the translation is contained within the bounds.
    */

@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.motorcontrollers;
 
 import static edu.wpi.first.units.Units.Degrees;
@@ -27,7 +30,6 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.AngularAccelerationUnit;
-import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -39,13 +41,13 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -66,7 +68,6 @@ import yams.telemetry.SmartMotorControllerTelemetryConfig;
  */
 public abstract class SmartMotorController
 {
-
   /**
    * Telemetry.
    */
@@ -143,6 +144,10 @@ public abstract class SmartMotorController
    * Running status of the closed loop controller.
    */
   private   boolean                                       m_closedLoopControllerRunning = false;
+  /**
+   * Alert shown when the closed loop controller is running on the RIO.
+   */
+  private   Alert                                         m_rioClosedLoopAlert          = null;
 
   /**
    * Create a {@link SmartMotorController} wrapper from the provided motor controller object.
@@ -261,6 +266,10 @@ public abstract class SmartMotorController
     {
       m_closedLoopControllerThread.stop();
       m_closedLoopControllerRunning = false;
+      if (m_rioClosedLoopAlert != null)
+      {
+        m_rioClosedLoopAlert.set(false);
+      }
     }
   }
 
@@ -284,6 +293,16 @@ public abstract class SmartMotorController
       m_closedLoopControllerThread.startPeriodic(m_config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20))
                                                          .in(Seconds));
       m_closedLoopControllerRunning = true;
+      if (RobotBase.isReal())
+      {
+        if (m_rioClosedLoopAlert == null)
+        {
+          m_rioClosedLoopAlert = new Alert("YAMS",
+                                           getName() + " closed loop controller is running on the RIO.",
+                                           Alert.AlertType.kWarning);
+        }
+        m_rioClosedLoopAlert.set(true);
+      }
     }
   }
 
@@ -441,7 +460,6 @@ public abstract class SmartMotorController
 
     } else if (setpointVelocity.isPresent())
     {
-
       var setpoint = setpointVelocity.get().in(RotationsPerSecond);
       var velocity = getMechanismVelocity().in(RotationsPerSecond);
 
@@ -676,71 +694,6 @@ public abstract class SmartMotorController
   public abstract void setVelocity(AngularVelocity angle);
 
   /**
-   * Get the SysIdConfig which may need to have modifications based on the SmartMotorController, like TalonFX and
-   * TalonFXS to record states correctly.
-   *
-   * @param maxVoltage   Maximum voltage of the {@link SysIdRoutine}.
-   * @param stepVoltage  Step voltage for the dynamic test in {@link SysIdRoutine}.
-   * @param testDuration Duration of each {@link SysIdRoutine} run.
-   * @return {@link Config} of the {@link SysIdRoutine} to run.
-   */
-  public Config getSysIdConfig(Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage, Time testDuration)
-  {
-    return new Config(stepVoltage, maxVoltage, testDuration);
-  }
-
-  /**
-   * Run the  {@link SysIdRoutine} which runs to the maximum MEASUREMENT at the step voltage then down to the minimum
-   * MEASUREMENT with the step voltage then up to the maximum MEASUREMENT increasing each second by the step voltage
-   * generated via the {@link SmartMotorControllerConfig}.
-   *
-   * @param maxVoltage   Maximum voltage of the {@link SysIdRoutine}.
-   * @param stepVoltage  Step voltage for the dynamic test in {@link SysIdRoutine}.
-   * @param testDuration Duration of each {@link SysIdRoutine} run.
-   * @return Sequential command group of {@link SysIdRoutine} running all required tests to the configured MINIMUM and
-   * MAXIMUM MEASUREMENTS.
-   */
-  public SysIdRoutine sysId(Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage, Time testDuration)
-  {
-    SysIdRoutine sysIdRoutine = null;
-    if (m_config.getTelemetryName().isEmpty())
-    {
-      throw new SmartMotorControllerConfigurationException("Telemetry is undefined",
-                                                           "Cannot create SysIdRoutine",
-                                                           "withTelemetry(String,TelemetryVerbosity)");
-    }
-    Config sysIdConfig = getSysIdConfig(maxVoltage, stepVoltage, testDuration);
-    if (m_config.getLinearClosedLoopControllerUse())
-    {
-      sysIdRoutine = new SysIdRoutine(sysIdConfig,
-                                      new SysIdRoutine.Mechanism(
-                                          this::setVoltage,
-                                          log -> {
-                                            log.motor(getName())
-                                               .voltage(
-                                                   getVoltage())
-                                               .linearVelocity(getMeasurementVelocity())
-                                               .linearPosition(getMeasurementPosition());
-                                          },
-                                          m_config.getSubsystem()));
-    } else
-    {
-      sysIdRoutine = new SysIdRoutine(sysIdConfig,
-                                      new SysIdRoutine.Mechanism(
-                                          this::setVoltage,
-                                          log -> {
-                                            log.motor(getName())
-                                               .voltage(
-                                                   getVoltage())
-                                               .angularPosition(getMechanismPosition())
-                                               .angularVelocity(getMechanismVelocity());
-                                          },
-                                          m_config.getSubsystem()));
-    }
-    return sysIdRoutine;
-  }
-
-  /**
    * Apply the {@link SmartMotorControllerConfig} to the {@link SmartMotorController}.
    *
    * @param config {@link SmartMotorControllerConfig} to use.
@@ -926,7 +879,6 @@ public abstract class SmartMotorController
           Debouncer              velocityDebouncer = new Debouncer(0.5);
           AtomicReference<Angle> startingAngle     = new AtomicReference<>(Rotations.zero());
           Command testUpCommand = Commands.startRun(() -> {
-
                                             System.out.println(
                                                 "=====================================================\nTEST UP\n=====================================================");
                                             System.out.println(
@@ -935,7 +887,6 @@ public abstract class SmartMotorController
                                             setDutyCycle(0);
                                             startingAngle.set(getMechanismPosition());
                                           }, () -> {
-
                                             setDutyCycle(getDutyCycle() + 0.001);
                                           }, m_config.getSubsystem()).until(() -> velocityDebouncer.calculate(
                                               getMechanismVelocity().abs(RPM) >= 10))
@@ -957,7 +908,6 @@ public abstract class SmartMotorController
                                               setDutyCycle(0);
                                               startingAngle.set(getMechanismPosition());
                                             }, () -> {
-
                                               setDutyCycle(getDutyCycle() - 0.001);
                                             }, m_config.getSubsystem()).until(() -> velocityDebouncer.calculate(
                                                 getMechanismVelocity().abs(RPM) >= 10))
@@ -1287,6 +1237,10 @@ public abstract class SmartMotorController
       m_closedLoopControllerThread.stop();
       m_closedLoopControllerThread.close();
       m_closedLoopControllerThread = null;
+    }
+    if (m_rioClosedLoopAlert != null)
+    {
+      m_rioClosedLoopAlert.set(false);
     }
     telemetry.close();
   }
