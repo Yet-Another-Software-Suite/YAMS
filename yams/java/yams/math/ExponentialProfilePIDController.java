@@ -39,6 +39,43 @@ import yams.gearing.MechanismGearing;
 /**
  * Exponential profile PID controller. Similar to {@link PIDController} or
  * {@link edu.wpi.first.math.controller.ProfiledPIDController}, but uses an {@link ExponentialProfile}
+ *
+ * <p>This controller combines an {@link ExponentialProfile} motion profile with a
+ * {@link PIDController} to achieve smooth, continuous position control. On each iteration the
+ * profile generates a feasible intermediate setpoint (position + velocity) that the PID then
+ * tracks, preventing large step demands from commanding unreachable states. The exponential profile
+ * shape respects the plant's natural first-order dynamics, making it well-suited for flywheels,
+ * arms, and elevators.
+ *
+ * <p>Use the static factory helpers ({@link #createArmConstraints}, {@link #createElevatorConstraints},
+ * {@link #createFlywheelConstraints}) to derive physically accurate
+ * {@link ExponentialProfile.Constraints} directly from motor and mechanism parameters.
+ *
+ * <h3>Example — arm position control</h3>
+ * <pre>{@code
+ * import static edu.wpi.first.units.Units.*;
+ *
+ * // Derive constraints from the physical arm model
+ * ExponentialProfile.Constraints armConstraints =
+ *     ExponentialProfilePIDController.createArmConstraints(
+ *         Volts.of(12),
+ *         DCMotor.getNEO(1),
+ *         KilogramSquareMeters.of(0.25),
+ *         MechanismGearing.ofReduction(60.0));
+ *
+ * // kP=1.0, kI=0.0, kD=0.0 — tune these for your mechanism
+ * ExponentialProfilePIDController armPID =
+ *     new ExponentialProfilePIDController(1.0, 0.0, 0.0, armConstraints);
+ *
+ * // In robotInit, seed the profile at the current sensor state:
+ * armPID.reset(encoder.getPosition(), 0.0);
+ *
+ * // In periodic, calculate output (positions in rotations):
+ * double output = armPID.calculate(
+ *         encoder.getPosition(),   // measured position (rotations)
+ *         targetPosition);          // desired position (rotations)
+ * motor.set(output);
+ * }</pre>
  */
 public class ExponentialProfilePIDController
 {

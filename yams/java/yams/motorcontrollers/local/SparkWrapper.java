@@ -89,6 +89,19 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * A discontinuity point <b>must</b> be configured via
  * {@link yams.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint}
  * whenever a {@link com.revrobotics.spark.SparkAbsoluteEncoder} is used as the external encoder.
+ *
+ * <h3>Example</h3>
+ * <pre>{@code
+ * // Configure and create a SPARK MAX (NEO motor) on CAN ID 3
+ * SmartMotorControllerConfig config = new SmartMotorControllerConfig()
+ *     .withInverted(false)
+ *     .withStatorCurrentLimit(Amps.of(40))
+ *     .withKp(0.2)
+ *     .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5)); // required for SparkAbsoluteEncoder
+ * SmartMotorController motor = SmartMotorFactory.create(
+ *     new CANSparkMax(3, MotorType.kBrushless), DCMotor.getNEO(1), config);
+ * Arm arm = new Arm(new ArmConfig(motor).withLength(Meters.of(0.6)));
+ * }</pre>
  */
 public class SparkWrapper extends SmartMotorController
 {

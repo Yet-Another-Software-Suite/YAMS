@@ -8,6 +8,37 @@ import yams.exceptions.NoStagesGivenException;
 
 /**
  * GearBox class to calculate input and output conversion factors and check if the current configuration is supported.
+ *
+ * <p>A {@link GearBox} models a multi-stage gear reduction (or increase). Each stage is defined
+ * by a ratio (driver teeth / driven teeth) or a plain ratio double. The overall ratio is the
+ * product of all individual stage ratios.</p>
+ *
+ * <p>You can construct a {@link GearBox} in several ways:</p>
+ * <ul>
+ *   <li><b>{@code fromTeeth(int...)}</b> — provide alternating driver/driven tooth counts</li>
+ *   <li><b>{@code fromStages(String...)}</b> — provide stages as {@code "IN:OUT"} strings</li>
+ *   <li><b>{@code fromReductionStages(double...)}</b> — provide per-stage ratios directly</li>
+ * </ul>
+ *
+ * <h3>Example</h3>
+ * <pre>{@code
+ * // 5:1 single-stage gearbox (12-tooth driver meshing with a 60-tooth driven gear)
+ * GearBox fiveToOne = GearBox.fromTeeth(12, 60);
+ *
+ * // 25:1 two-stage gearbox (each stage is 5:1)
+ * GearBox twoStage = GearBox.fromTeeth(12, 60, 12, 60);
+ *
+ * // Equivalent using "IN:OUT" stage strings
+ * GearBox fromStrings = GearBox.fromStages("12:60", "12:60");
+ *
+ * // Equivalent using raw reduction ratios (driver/driven per stage)
+ * GearBox fromRatios = GearBox.fromReductionStages(12.0 / 60.0, 12.0 / 60.0);
+ *
+ * // Get the overall input-to-output conversion factor (< 1.0 means reduction)
+ * double factor = fiveToOne.getInputToOutputConversionFactor(); // 0.2  (1/5)
+ * // Get the overall output-to-input conversion factor (the reduction ratio itself)
+ * double reduction = fiveToOne.getOutputToInputConversionFactor(); // 5.0
+ * }</pre>
  */
 public class GearBox
 {

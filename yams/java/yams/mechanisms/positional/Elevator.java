@@ -53,6 +53,27 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
 
 /**
  * Elevator mechanism.
+ *
+ * <h3>Usage Example</h3>
+ * <pre>{@code
+ * SmartMotorController motor = SmartMotorFactory.create(
+ *     new TalonFX(4), DCMotor.getKrakenX60(1),
+ *     new SmartMotorControllerConfig().withKp(0.5).withKg(0.4));
+ * Elevator elevator = new Elevator(
+ *     new ElevatorConfig(motor).withDrumRadius(Inches.of(1.0)));
+ *
+ * // Move to heights
+ * Command toHigh = elevator.setHeight(Meters.of(1.2));
+ * Command toLow  = elevator.runTo(Meters.of(0.05), Meters.of(0.01));
+ *
+ * // Trigger bindings
+ * elevator.isNear(Meters.of(1.2), Meters.of(0.02)).onTrue(shooter.shoot());
+ * elevator.max().onTrue(Commands.print("Elevator at max"));
+ *
+ * // In periodic():
+ * elevator.simIterate();
+ * elevator.updateTelemetry();
+ * }</pre>
  */
 public class Elevator extends SmartPositionalMechanism
 {

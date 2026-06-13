@@ -7,6 +7,38 @@ import java.util.Optional;
 
 /**
  * Mechanism gearing for conversions from the motor output to the mechanism output.
+ *
+ * <p>{@link MechanismGearing} combines a {@link GearBox} (and an optional {@link Sprocket})
+ * into a single object that describes the complete power-transmission path between the motor
+ * and the mechanism. It is the primary object passed to motor-controller configuration helpers
+ * (such as {@code SmartMotorControllerConfig}) so that encoder readings can be automatically
+ * scaled to real-world mechanism positions or velocities.</p>
+ *
+ * <p>Constructors available:</p>
+ * <ul>
+ *   <li><b>{@code new MechanismGearing(double)}</b> — single overall reduction ratio</li>
+ *   <li><b>{@code new MechanismGearing(double...)}</b> — one ratio per gearbox stage</li>
+ *   <li><b>{@code new MechanismGearing(GearBox)}</b> — pre-built {@link GearBox}</li>
+ *   <li><b>{@code new MechanismGearing(GearBox, Sprocket)}</b> — gearbox followed by a chain/belt stage</li>
+ * </ul>
+ *
+ * <h3>Example</h3>
+ * <pre>{@code
+ * // Simple 10:1 gearbox attached directly to the mechanism
+ * MechanismGearing simple = new MechanismGearing(10.0);
+ *
+ * // Two-stage gearbox (5:1 then 3:1 = 15:1 overall)
+ * MechanismGearing twoStage = new MechanismGearing(5.0, 3.0);
+ *
+ * // Gearbox followed by a 2:1 chain-drive sprocket stage
+ * GearBox gearBox  = GearBox.fromTeeth(12, 60);          // 5:1
+ * Sprocket sprocket = Sprocket.fromStages("18:36");       // 2:1
+ * MechanismGearing combined = new MechanismGearing(gearBox, sprocket); // 10:1 overall
+ *
+ * // Query the ratios
+ * double rotorToMech = combined.getRotorToMechanismRatio(); // motor rotations per mechanism rotation
+ * double mechToRotor = combined.getMechanismToRotorRatio(); // mechanism rotations per motor rotation
+ * }</pre>
  */
 public class MechanismGearing
 {

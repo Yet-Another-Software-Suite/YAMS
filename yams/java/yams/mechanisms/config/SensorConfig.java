@@ -19,6 +19,41 @@ import yams.motorcontrollers.simulation.SensorData;
 
 /**
  * Sensor configuration for simulated and real sensors.
+ *
+ * <p>{@code SensorConfig} describes a named sensor that can expose one or more typed fields
+ * (double, int, boolean, long) to both the real robot and the simulation environment. It is
+ * used to wire hardware sensors — such as limit switches, encoders, or custom I/O devices —
+ * into YAMS's simulation framework so that the same code path runs identically in simulation
+ * and on a real robot.
+ *
+ * <p>Each field is registered with a live supplier (the real hardware value) and a default
+ * value used when simulation overrides are not active. Simulated values can be injected by
+ * match-time window or by an arbitrary {@link java.util.function.BooleanSupplier} trigger,
+ * allowing a team to script realistic sensor behaviour during automated testing.
+ *
+ * <p>The finished configuration is converted to a {@link yams.motorcontrollers.simulation.Sensor}
+ * via {@link #getSensor()}, which handles the real/simulated value arbitration at runtime.
+ *
+ * <h3>Example</h3>
+ * <pre>{@code
+ * import static edu.wpi.first.units.Units.Seconds;
+ * import yams.mechanisms.config.SensorConfig;
+ *
+ * // Hardware limit switch wired to a DIO channel
+ * DigitalInput limitSwitch = new DigitalInput(0);
+ *
+ * SensorConfig forwardLimit = new SensorConfig("ForwardLimitSwitch")
+ *     .withField("triggered", limitSwitch::get, false)
+ *     // Simulate the switch being pressed between 10 s and 12 s of match time
+ *     .withSimulatedValue("triggered", Seconds.of(10), Seconds.of(12), true);
+ *
+ * // Custom encoder exposing position and velocity
+ * SensorConfig encoderConfig = new SensorConfig("ArmEncoder")
+ *     .withField("positionRotations", myEncoder::getPosition, 0.0)
+ *     .withField("velocityRPM",       myEncoder::getVelocity, 0.0)
+ *     // Override position to 2.5 rotations whenever a BooleanSupplier fires
+ *     .withSimulatedValue("positionRotations", () -> Robot.isInTest(), 2.5);
+ * }</pre>
  */
 public class SensorConfig
 {

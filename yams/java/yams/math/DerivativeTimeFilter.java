@@ -12,6 +12,29 @@ import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Find the derivative of a value over time in microseconds.
+ *
+ * <p>This filter computes a rate-of-change (derivative) estimate from successive measurements
+ * timestamped with the FPGA clock. A built-in debounce timer prevents the derivative from being
+ * recalculated faster than the configured period, which avoids amplifying high-frequency sensor
+ * noise that would otherwise cause derivative kick.
+ *
+ * <p>Two {@code derivative()} overloads are available:
+ * <ul>
+ *   <li>{@link #derivative(double)} — uses the FPGA clock to measure elapsed time automatically.</li>
+ *   <li>{@link #derivative(double, edu.wpi.first.units.measure.Time)} — uses a caller-supplied
+ *       delta-time (useful when the loop period is already known).</li>
+ * </ul>
+ *
+ * <h3>Example</h3>
+ * <pre>{@code
+ * import static edu.wpi.first.units.Units.Milliseconds;
+ *
+ * // Debounce period matches the 20 ms robot loop
+ * DerivativeTimeFilter filter = new DerivativeTimeFilter(0.0, Milliseconds.of(20));
+ *
+ * // In periodic:
+ * double velocity = filter.derivative(encoder.getPosition());
+ * }</pre>
  */
 public class DerivativeTimeFilter
 {

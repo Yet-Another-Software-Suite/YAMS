@@ -24,6 +24,24 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
 /**
  * Elevator configuration class.
+ *
+ * <h3>Configuration Example</h3>
+ * <pre>{@code
+ * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
+ *     .withKp(0.5)
+ *     .withKs(0.1)
+ *     .withKg(0.4)
+ *     .withKv(0.12)
+ *     .withStatorCurrentLimit(Amps.of(40));
+ * SmartMotorController motor = SmartMotorFactory.create(
+ *     new TalonFX(4), DCMotor.getKrakenX60(1), motorConfig);
+ *
+ * ElevatorConfig config = new ElevatorConfig(motor)
+ *     .withDrumRadius(Inches.of(1.0))          // spool radius
+ *     .withMass(Kilograms.of(4.0))             // carriage mass
+ *     .withTelemetry("Elevator", TelemetryVerbosity.HIGH)
+ *     .withSimStartingHeight(Meters.of(0));
+ * }</pre>
  */
 public class ElevatorConfig
 {

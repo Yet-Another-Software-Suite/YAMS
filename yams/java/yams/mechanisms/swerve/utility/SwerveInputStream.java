@@ -57,6 +57,42 @@ import yams.mechanisms.swerve.SwerveDrive;
  *                                                            .headingWhile(true); // Enable heading based control.
  * }
  * </pre>
+ *
+ * <h3>Joystick-to-{@link yams.mechanisms.swerve.SwerveDrive} adapter</h3>
+ * <p>
+ * {@link SwerveInputStream} acts as a bridge between raw controller axis values (in the range
+ * {@code [-1, 1]}) and the {@link ChassisSpeeds} that {@link yams.mechanisms.swerve.SwerveDrive}
+ * expects.  It handles deadbands, axis scaling, non-linear (cubed) response curves, field-relative
+ * / alliance-relative flipping, and multiple drive modes (angular-velocity, heading-snap,
+ * translation-only, aim-at-target, drive-to-pose).  Because it implements
+ * {@link java.util.function.Supplier}{@code <}{@link ChassisSpeeds}{@code >} it can be passed
+ * directly to a command that calls {@code swerveDrive.drive(inputStream.get())}.
+ * </p>
+ *
+ * <h3>Typical usage with an {@link XboxController}</h3>
+ * <pre>{@code
+ * XboxController driver = new XboxController(0);
+ *
+ * // Angular-velocity stream: left stick translates, right stick X rotates
+ * SwerveInputStream angularVelocityStream =
+ *     SwerveInputStream.of(swerveDrive,
+ *                          () -> -driver.getLeftY(),   // forward/back
+ *                          () -> -driver.getLeftX())   // strafe
+ *                      .withControllerRotationAxis(driver::getRightX)
+ *                      .withDeadband(0.05)
+ *                      .withScaleTranslation(0.8)
+ *                      .withScaleRotation(0.6)
+ *                      .withAllianceRelativeControl()  // auto-flip for Red alliance
+ *                      .withCubeTranslationControllerAxis(); // non-linear response
+ *
+ * // Heading-snap variant: right stick X/Y picks a desired heading angle
+ * SwerveInputStream headingStream = angularVelocityStream.clone()
+ *     .withControllerHeadingAxis(driver::getRightX, driver::getRightY)
+ *     .withHeadingControl(() -> driver.getRightStickButton());
+ *
+ * // In your periodic or a command, call .get() to obtain ChassisSpeeds:
+ * swerveDrive.drive(angularVelocityStream.get());
+ * }</pre>
  */
 public class SwerveInputStream implements Supplier<ChassisSpeeds>
 {

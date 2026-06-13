@@ -17,6 +17,30 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
 
 /**
  * Double Telemetry for SmartMotorControllers.
+ *
+ * <p>A lightweight wrapper that publishes a single {@code double} value to NetworkTables and/or
+ * a WPILib DataLog, with optional unit metadata consumed by Advantage Scope and Elastic. It is
+ * used internally by {@link SmartMotorControllerTelemetry} to track numeric fields such as
+ * position, velocity, current, and PID gains — but it can also be constructed directly when
+ * you need a standalone numeric entry.
+ *
+ * <h3>Example</h3>
+ * <pre>{@code
+ * // Create and publish a double entry for shooter velocity under the Shooter table.
+ * DoubleTelemetry velocity = new DoubleTelemetry(
+ *     "velocity",                                       // NetworkTables key
+ *     0.0,                                              // default value
+ *     SmartMotorControllerTelemetry.DoubleTelemetryField.MechanismVelocity,
+ *     false,                                            // not tunable
+ *     "rotations_per_second");                          // unit label
+ *
+ * NetworkTable shooterTable = NetworkTableInstance.getDefault().getTable("Shooter");
+ * velocity.enable();
+ * velocity.setupNetworkTable(shooterTable);
+ *
+ * // In periodic:
+ * velocity.set(shooter.getVelocityRPS());
+ * }</pre>
  */
 public class DoubleTelemetry
 {

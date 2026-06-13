@@ -17,6 +17,48 @@ import yams.gearing.MechanismGearing;
 
 /**
  * Configuration for the EasyCRT solver. Made by team 6911.
+ *
+ * <p>{@code EasyCRTConfig} holds all inputs that the {@link EasyCRT} solver needs to estimate an
+ * absolute mechanism angle from two absolute encoders whose gear ratios are deliberately
+ * <em>non-integer</em> multiples of each other (CRT-inspired unwrapping). The fields it
+ * configures include:
+ *
+ * <ul>
+ *   <li><b>Encoder angle suppliers</b> — lambdas that return the live reading for each encoder.</li>
+ *   <li><b>Encoder-to-mechanism ratios</b> — either supplied directly via
+ *       {@link #withEncoderRatios(double, double)}, derived from a shared drive gear via
+ *       {@link #withCommonDriveGear(double, int, int, int)}, or computed from explicit gear chains
+ *       via {@link #withAbsoluteEncoder1Gearing(int...)} /
+ *       {@link #withAbsoluteEncoder2Gearing(int...)}.</li>
+ *   <li><b>Per-encoder offsets</b> — zero-point corrections added before wrapping the raw
+ *       reading into [0, 1) rotations.</li>
+ *   <li><b>Mechanism travel limits</b> — the minimum and maximum mechanism angles the solver
+ *       is allowed to consider as solutions.</li>
+ *   <li><b>Match tolerance</b> — the maximum modular error (in rotations) between the predicted
+ *       and measured encoder 2 reading before a candidate is rejected.</li>
+ *   <li><b>Inversion flags</b> — flip an encoder ratio's sign when the sensor is physically
+ *       mounted in reverse and on-device inversion is not available.</li>
+ *   <li><b>Gear recommendation inputs</b> (simulation only) — tooth counts and search bounds
+ *       used to suggest coprime gear pairs with adequate unique coverage.</li>
+ * </ul>
+ *
+ * <h3>Example</h3>
+ * <pre>{@code
+ * import static edu.wpi.first.units.Units.Rotations;
+ * import yams.units.EasyCRTConfig;
+ *
+ * EasyCRTConfig config = new EasyCRTConfig(
+ *         encoder1::getAbsolutePosition,   // Supplier<Angle> for encoder 1
+ *         encoder2::getAbsolutePosition)   // Supplier<Angle> for encoder 2
+ *     .withCommonDriveGear(
+ *         11.0,   // commonRatio: gearbox reduction between mechanism and drive gear
+ *         50,     // driveGearTeeth: tooth count on the gear that drives both encoder pinions
+ *         30,     // encoder1PinionTeeth
+ *         31)     // encoder2PinionTeeth
+ *     .withMechanismRange(Rotations.of(0.0), Rotations.of(5.0))
+ *     .withMatchTolerance(Rotations.of(0.006))
+ *     .withAbsoluteEncoderOffsets(Rotations.of(0.0), Rotations.of(0.0));
+ * }</pre>
  */
 public class EasyCRTConfig {
   /**

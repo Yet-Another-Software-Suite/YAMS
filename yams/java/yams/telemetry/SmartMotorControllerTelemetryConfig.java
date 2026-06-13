@@ -23,6 +23,41 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
 
 /**
  * Smart motor controller telemetry configuration.
+ *
+ * <p>Use this builder to select exactly which fields are published to NetworkTables and/or
+ * DataLog. Every field is disabled by default; call the individual {@code with*()} methods to
+ * opt in, or use {@link #withTelemetryVerbosity} to enable a predefined set.
+ *
+ * <h3>Example</h3>
+ * <pre>{@code
+ * SmartMotorControllerTelemetryConfig telemetryCfg =
+ *     new SmartMotorControllerTelemetryConfig()
+ *         // choose a verbosity preset (LOW / MID / HIGH), or enable fields individually below
+ *         .withTelemetryVerbosity(TelemetryVerbosity.HIGH)
+ *         // optionally enable individual fields on top of the preset
+ *         .withStatorCurrent()
+ *         .withTemperature()
+ *         .withOutputVoltage()
+ *         .withSetpointPosition()
+ *         .withSetpointVelocity()
+ *         .withMechanismPosition()
+ *         .withMechanismVelocity()
+ *         .withRotorPosition()
+ *         .withRotorVelocity()
+ *         .withMeasurementPosition()
+ *         .withMeasurementVelocity()
+ *         .withMechanismUpperLimit()
+ *         .withMechanismLowerLimit()
+ *         .withTemperatureLimit()
+ *         .withVelocityControl()
+ *         .withMotionProfile()
+ *         .withArmFeedforward()
+ *         .withElevatorFeedforward()
+ *         .withSimpleFeedforward()
+ *         // disable NT4 output (e.g. during competition) and log to DataLog instead
+ *         .withoutNetworkTables()
+ *         .withDataLogName("motors/shooter");
+ * }</pre>
  */
 public class SmartMotorControllerTelemetryConfig
 {

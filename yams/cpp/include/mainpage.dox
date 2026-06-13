@@ -1,0 +1,94 @@
+/**
+ * @mainpage YAMS — Yet Another Mechanism System
+ *
+ * @section intro_sec Introduction
+ *
+ * **YAMS** is a C++ FRC robotics library that provides a unified, hardware-agnostic
+ * abstraction layer for common robot mechanisms. It wraps REV SPARK and CTRE TalonFX
+ * motor controllers behind a single interface and ships ready-to-use implementations
+ * for arms, elevators, pivots, flywheels, and swerve drives — all with built-in
+ * simulation and telemetry support.
+ *
+ * Compatible with **WPILib 2026**, **REVLib**, and **CTRE Phoenix 6**.
+ *
+ * ---
+ *
+ * @section features_sec Key Features
+ *
+ * - **Unified motor controller abstraction** via yams::motorcontrollers::SmartMotorController,
+ *   supporting REV SPARK (yams::motorcontrollers::local::SparkWrapper) and CTRE TalonFX /
+ *   TalonFXS (yams::motorcontrollers::remote::TalonFXWrapper,
+ *   yams::motorcontrollers::remote::TalonFXSWrapper).
+ * - **Ready-to-use mechanism classes**: Arm, Elevator, Pivot (positional) and FlyWheel
+ *   (velocity), all extending yams::mechanisms::SmartMechanism.
+ * - **Full swerve drive support** via yams::mechanisms::swerve::SwerveDrive with integrated
+ *   kinematics, odometry, and pose estimation.
+ * - **Physics-based simulation** through yams::motorcontrollers::simulation suppliers
+ *   (ArmSimSupplier, ElevatorSimSupplier, DCMotorSimSupplier).
+ * - **NetworkTables telemetry** via yams::telemetry::MechanismTelemetry and
+ *   yams::telemetry::SmartMotorControllerTelemetry.
+ * - **Builder-style configuration** objects for every mechanism and controller.
+ * - **LQR and derivative-filtered PID** control through yams::math::LQRController and
+ *   yams::math::DerivativeTimeFilter.
+ *
+ * ---
+ *
+ * @section namespaces_sec Namespace Overview
+ *
+ * | Namespace | Description |
+ * |-----------|-------------|
+ * | yams | Root namespace; include `YAMS.hpp` to pull in everything |
+ * | yams::exceptions | Exception types thrown by YAMS (e.g. ArmConfigurationException) |
+ * | yams::gearing | GearBox and sprocket/chain gearing calculations |
+ * | yams::math | Control math: LQRController, DerivativeTimeFilter, SmartMath |
+ * | yams::mechanisms | Abstract base SmartMechanism and all concrete implementations |
+ * | yams::mechanisms::config | Config structs for every mechanism type |
+ * | yams::mechanisms::positional | Arm, Elevator, Pivot, SmartPositionalMechanism |
+ * | yams::mechanisms::velocity | FlyWheel, SmartVelocityMechanism |
+ * | yams::mechanisms::swerve | SwerveDrive, SwerveModule, SwerveDriveConfig |
+ * | yams::mechanisms::swerve::utility | SwerveInputStream |
+ * | yams::motorcontrollers | SmartMotorController abstract base and factory |
+ * | yams::motorcontrollers::local | SparkWrapper (REV SPARK MAX / FLEX) |
+ * | yams::motorcontrollers::remote | TalonFXWrapper, TalonFXSWrapper (CTRE Phoenix 6) |
+ * | yams::motorcontrollers::simulation | Simulation suppliers and sensor data |
+ * | yams::telemetry | Mechanism and motor controller telemetry publishers |
+ * | yams::units | Extended FRC unit types (YUnits) |
+ *
+ * ---
+ *
+ * @section quickstart_sec Quick Start
+ *
+ * Add the YAMS vendordep JSON to your robot project, then include the convenience header:
+ *
+ * @code{.cpp}
+ * #include <yams/YAMS.hpp>
+ * @endcode
+ *
+ * Configure and construct a mechanism:
+ *
+ * @code{.cpp}
+ * using namespace yams;
+ *
+ * // Build a motor controller
+ * auto motorConfig = motorcontrollers::SmartMotorControllerConfig{}
+ *     .withInverted(false)
+ *     .withCurrentLimit(40);
+ *
+ * auto motor = motorcontrollers::SmartMotorFactory::createSparkMax(1, motorConfig);
+ *
+ * // Build an elevator
+ * auto elevatorConfig = mechanisms::config::ElevatorConfig{}
+ *     .withMaxHeightMeters(1.5)
+ *     .withMinHeightMeters(0.0);
+ *
+ * mechanisms::positional::Elevator elevator{std::move(motor), elevatorConfig};
+ * @endcode
+ *
+ * ---
+ *
+ * @section links_sec Further Resources
+ *
+ * - **Source repository**: https://github.com/YAGSL/YAMS
+ * - **Documentation & guides**: https://yagsl.gitbook.io/yams/documentation
+ * - **Issue tracker**: https://github.com/YAGSL/YAMS/issues
+ */

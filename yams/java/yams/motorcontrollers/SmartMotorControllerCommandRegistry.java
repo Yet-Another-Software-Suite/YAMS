@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Registry for SmartMotorController commands.
+ * Registry for WPILib {@link edu.wpi.first.wpilibj2.command.Command} instances associated with a
+ * {@link yams.motorcontrollers.SmartMotorController}. Mechanisms register setpoint commands here
+ * so the scheduler can manage them.
  */
 public class SmartMotorControllerCommandRegistry
 {

@@ -20,6 +20,49 @@ import yams.telemetry.MechanismTelemetry;
 
 /**
  * Generic implementation of a mechanism with advanced telemetry.
+ *
+ * <p>
+ * {@code SmartMechanism} is the abstract root of all YAMS mechanism implementations. It combines a
+ * {@link yams.motorcontrollers.SmartMotorController} with integrated telemetry, simulation support,
+ * and WPILib {@link edu.wpi.first.wpilibj2.command.Command} / {@link edu.wpi.first.wpilibj2.command.button.Trigger}
+ * integration so that every concrete mechanism (Arm, Elevator, Flywheel, etc.) shares a consistent
+ * API for control, feedback, and visualization.
+ * </p>
+ *
+ * <h3>Mechanism Lifecycle</h3>
+ * <ol>
+ *   <li>Configure a motor controller: {@link yams.motorcontrollers.SmartMotorControllerConfig}</li>
+ *   <li>Create a motor via {@link yams.motorcontrollers.SmartMotorFactory}</li>
+ *   <li>Build a mechanism config (e.g., {@link yams.mechanisms.config.ArmConfig})</li>
+ *   <li>Construct the concrete mechanism (e.g., {@link yams.mechanisms.positional.Arm})</li>
+ *   <li>Schedule setpoint commands and bind triggers</li>
+ * </ol>
+ *
+ * <p>
+ * <b>Periodic calls required:</b> {@link #simIterate()}, {@link #updateTelemetry()}, and
+ * {@link #visualizationUpdate()} must be called periodically — typically from
+ * {@code robotPeriodic()} — so that simulation state, telemetry, and the {@link edu.wpi.first.wpilibj.smartdashboard.Mechanism2d}
+ * visualization remain up to date.
+ * </p>
+ *
+ * <h3>Example</h3>
+ * <pre>{@code
+ * // 1. Motor config
+ * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
+ *     .withKp(0.2).withKs(0.05).withStatorCurrentLimit(Amps.of(40));
+ * // 2. Motor
+ * SmartMotorController motor = SmartMotorFactory.create(
+ *     new CANSparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), motorConfig);
+ * // 3. Mechanism config + 4. Mechanism
+ * Arm arm = new Arm(new ArmConfig(motor).withLength(Meters.of(0.5)));
+ * // 5. Schedule a command (in a subsystem or robot container)
+ * arm.setAngle(Degrees.of(45)).schedule();
+ * // 5. Bind a trigger
+ * arm.isNear(Degrees.of(45), Degrees.of(2)).onTrue(Commands.print("At target!"));
+ * // Call in robotPeriodic():
+ * arm.simIterate();
+ * arm.updateTelemetry();
+ * }</pre>
  */
 public abstract class SmartMechanism
 {

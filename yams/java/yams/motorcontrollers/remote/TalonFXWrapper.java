@@ -103,6 +103,21 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * Configuring a discontinuity point is optional for CANcoder; when omitted the CANcoder default
  * is used. Set via
  * {@link yams.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint}.
+ *
+ * <h3>Example</h3>
+ * <pre>{@code
+ * // Configure and create a Kraken X60 TalonFX on CAN ID 5
+ * SmartMotorControllerConfig config = new SmartMotorControllerConfig()
+ *     .withInverted(false)
+ *     .withStatorCurrentLimit(Amps.of(60))
+ *     .withSupplyCurrentLimit(Amps.of(80))
+ *     .withKp(0.3)
+ *     .withKs(0.1)
+ *     .withKv(0.12);
+ * SmartMotorController motor = SmartMotorFactory.create(
+ *     new TalonFX(5), DCMotor.getKrakenX60(1), config);
+ * Elevator elevator = new Elevator(new ElevatorConfig(motor).withDrumRadius(Inches.of(1)));
+ * }</pre>
  */
 public class TalonFXWrapper extends SmartMotorController
 {

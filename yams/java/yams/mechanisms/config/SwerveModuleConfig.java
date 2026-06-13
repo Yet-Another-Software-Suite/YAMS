@@ -25,6 +25,58 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
 /**
  * Swerve Module
+ *
+ * <h3>Configuration Example</h3>
+ * <p>
+ * The following example shows how to build a complete {@link SwerveModuleConfig} for a single
+ * swerve module using TalonFX motors and a CANcoder absolute encoder.
+ * </p>
+ * <pre>{@code
+ * import static edu.wpi.first.units.Units.*;
+ * import com.ctre.phoenix6.hardware.TalonFX;
+ * import com.ctre.phoenix6.hardware.CANcoder;
+ * import edu.wpi.first.math.system.plant.DCMotor;
+ * import yams.motorcontrollers.SmartMotorControllerConfig;
+ * import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
+ * import yams.motorcontrollers.SmartMotorFactory;
+ * import yams.motorcontrollers.SmartMotorController;
+ * import yams.mechanisms.config.SwerveModuleConfig;
+ * import yams.gearing.GearBox;
+ *
+ * // Drive motor: velocity closed-loop control (e.g. L2 Falcon gearing 6.75:1)
+ * SmartMotorControllerConfig driveConfig = new SmartMotorControllerConfig()
+ *     .withMotorInverted(false)
+ *     .withStatorCurrentLimit(Amps.of(50))
+ *     .withGearing(new GearBox(new double[]{6.75}))
+ *     .withClosedLoopController(0.05, 0.0, 0.001)
+ *     .withControlMode(ControlMode.CLOSED_LOOP);
+ *
+ * // Steer (azimuth) motor: position closed-loop control (e.g. 12.8:1 reduction)
+ * SmartMotorControllerConfig steerConfig = new SmartMotorControllerConfig()
+ *     .withMotorInverted(true)
+ *     .withStatorCurrentLimit(Amps.of(30))
+ *     .withGearing(new GearBox(new double[]{12.8}))
+ *     .withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5))
+ *     .withClosedLoopController(5.0, 0.0, 0.1)
+ *     .withControlMode(ControlMode.CLOSED_LOOP);
+ *
+ * // Create SmartMotorController instances via SmartMotorFactory
+ * SmartMotorController driveMotor = SmartMotorFactory.create(new TalonFX(1), DCMotor.getKrakenX60(1), driveConfig)
+ *                                                    .orElseThrow();
+ * SmartMotorController steerMotor = SmartMotorFactory.create(new TalonFX(2), DCMotor.getFalcon500(1), steerConfig)
+ *                                                    .orElseThrow();
+ *
+ * // Assemble the module config (front-left corner, 0.2 m from centre each axis)
+ * CANcoder cancoder = new CANcoder(10);
+ * SwerveModuleConfig frontLeftConfig = new SwerveModuleConfig(driveMotor, steerMotor)
+ *     .withWheelRadius(Inches.of(2))
+ *     .withLocation(Meters.of(0.2), Meters.of(0.2))     // front, left
+ *     .withAbsoluteEncoder(cancoder)
+ *     .withAbsoluteEncoderOffset(Rotations.of(0.25))    // bevel-left zero offset
+ *     .withCosineCompensation(true)
+ *     .withOptimization(true)
+ *     .withTelemetry("FrontLeft", TelemetryVerbosity.HIGH);
+ * }</pre>
  **/
 public class SwerveModuleConfig
 {

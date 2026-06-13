@@ -26,6 +26,46 @@ import yams.math.LQRConfig.LQRType;
 
 /**
  * Linear Quadratic Regulator (Regulator is a type of controller)
+ *
+ * <p>An LQR computes optimal control inputs (voltages) that minimize a quadratic cost function
+ * combining state error and control effort. It requires a linearized plant model, which is built
+ * automatically from the physical parameters supplied via {@link LQRConfig}. Three mechanism types
+ * are supported: {@code ARM}, {@code ELEVATOR}, and {@code FLYWHEEL}.
+ *
+ * <p>On each robot loop iteration, call the appropriate {@code calculate()} overload with the
+ * current sensor measurement and the desired setpoint. The controller internally runs a
+ * {@link edu.wpi.first.math.system.LinearSystemLoop} that fuses a
+ * {@link edu.wpi.first.math.controller.LinearQuadraticRegulator} with a
+ * {@link edu.wpi.first.math.estimator.KalmanFilter} observer.
+ *
+ * <h3>Example — construct from LQRConfig and calculate arm voltage</h3>
+ * <pre>{@code
+ * import static edu.wpi.first.units.Units.*;
+ *
+ * // Build configuration (see LQRConfig for full parameter details)
+ * LQRConfig config = new LQRConfig(
+ *         DCMotor.getNEO(1),
+ *         MechanismGearing.ofReduction(60.0),
+ *         KilogramSquareMeters.of(0.25))
+ *     .withArm(
+ *         Radians.of(0.01),
+ *         RadiansPerSecond.of(0.5),
+ *         Radians.of(0.05),
+ *         RadiansPerSecond.of(0.5),
+ *         Radians.of(0.01));
+ *
+ * LQRController controller = new LQRController(config);
+ *
+ * // In robotInit / subsystem initialization, reset to the current sensor state:
+ * controller.reset(encoder.getAngle(), encoder.getAngularVelocity());
+ *
+ * // In periodic, calculate and apply voltage:
+ * Voltage output = controller.calculate(
+ *         encoder.getAngle(),           // measured position
+ *         Radians.of(Math.PI / 4),      // position setpoint
+ *         RadiansPerSecond.of(0));       // velocity setpoint
+ * motor.setVoltage(output.in(Volts));
+ * }</pre>
  */
 public class LQRController
 {

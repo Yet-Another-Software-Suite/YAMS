@@ -38,6 +38,37 @@ import yams.gearing.MechanismGearing;
 
 /**
  * LQR Configuration for {@link LQRController}
+ *
+ * <p>The LQR cost matrices determine how the regulator balances state error against control effort:
+ * <ul>
+ *   <li><b>Q (state cost, via qelms)</b> — penalizes deviation from the desired state (position,
+ *       velocity). Smaller values tolerate larger state errors; larger values drive the controller
+ *       to correct errors more aggressively.</li>
+ *   <li><b>R (control effort cost, via relms)</b> — penalizes the voltage applied to the motor.
+ *       Smaller values allow higher voltages (more aggressive); larger values keep the output
+ *       gentler. The default of 12 V matches the approximate maximum battery voltage.</li>
+ * </ul>
+ *
+ * <h3>Example — Arm LQR configuration</h3>
+ * <pre>{@code
+ * import static edu.wpi.first.units.Units.*;
+ *
+ * LQRConfig config = new LQRConfig(
+ *         DCMotor.getNEO(1),
+ *         MechanismGearing.ofReduction(60.0),
+ *         KilogramSquareMeters.of(0.25))
+ *     .withArm(
+ *         Radians.of(0.01),          // qelms position: 0.01 rad error tolerance
+ *         RadiansPerSecond.of(0.5),  // qelms velocity: 0.5 rad/s error tolerance
+ *         Radians.of(0.05),          // model position std dev
+ *         RadiansPerSecond.of(0.5),  // model velocity std dev
+ *         Radians.of(0.01))          // encoder position std dev
+ *     .withControlEffort(Volts.of(12))
+ *     .withMaxVoltage(Volts.of(12))
+ *     .withAggressiveness(10);
+ *
+ * LQRController armController = new LQRController(config);
+ * }</pre>
  */
 public class LQRConfig
 {

@@ -22,6 +22,29 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
 /**
  * Arm configuration class.
+ *
+ * <h3>Configuration Example</h3>
+ * <pre>{@code
+ * // Create a motor first
+ * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
+ *     .withKp(0.25)
+ *     .withKd(0.005)
+ *     .withKs(0.05)
+ *     .withKg(0.3)
+ *     .withStatorCurrentLimit(Amps.of(40))
+ *     .withMechanismUpperLimit(Degrees.of(90))
+ *     .withMechanismLowerLimit(Degrees.of(-10));
+ * SmartMotorController motor = SmartMotorFactory.create(
+ *     new CANSparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), motorConfig);
+ *
+ * // Build the arm config
+ * ArmConfig config = new ArmConfig(motor)
+ *     .withLength(Meters.of(0.5))
+ *     .withMass(Kilograms.of(2.0))
+ *     .withHardLimits(Degrees.of(-10), Degrees.of(90))
+ *     .withTelemetry("Arm", TelemetryVerbosity.HIGH)
+ *     .withSimStartingPosition(Degrees.of(0));
+ * }</pre>
  */
 public class ArmConfig
 {

@@ -29,6 +29,35 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
 /**
  * Smart motor controller telemetry.
+ *
+ * <p>Publishes motor controller state — including duty-cycle output voltage, stator/supply current,
+ * rotor/mechanism position and velocity, and motor temperature — to NetworkTables so that tools
+ * such as SmartDashboard, Elastic, and Advantage Scope can consume the data in real time.
+ * Tunable fields (PID gains, setpoints, motion-profile limits) are additionally exposed on a
+ * separate {@code Tuning} table so they can be adjusted without redeploying code.
+ *
+ * <p>This class is managed internally by {@link SmartMotorController}. You do not normally
+ * instantiate it directly; instead call the methods on the motor controller itself:
+ *
+ * <h3>Basic usage (default NetworkTable path)</h3>
+ * <pre>{@code
+ * // In robotInit() or subsystem constructor:
+ * motor.setupTelemetry();   // publishes under Mechanisms/<motorName>
+ *
+ * // In robotPeriodic() or subsystemPeriodic():
+ * motor.updateTelemetry();
+ * }</pre>
+ *
+ * <h3>Custom NetworkTable path and telemetry config</h3>
+ * <pre>{@code
+ * NetworkTable dataTable   = NetworkTableInstance.getDefault().getTable("Mechanisms").getSubTable("Shooter");
+ * NetworkTable tuningTable = NetworkTableInstance.getDefault().getTable("Tuning").getSubTable("Shooter");
+ *
+ * motor.setupTelemetry(dataTable, tuningTable);
+ *
+ * // In periodic:
+ * motor.updateTelemetry();
+ * }</pre>
  */
 public class SmartMotorControllerTelemetry
 {

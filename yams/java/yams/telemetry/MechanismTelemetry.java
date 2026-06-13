@@ -12,6 +12,40 @@ import yams.motorcontrollers.SmartMotorController;
 
 /**
  * Mechanism telemetry.
+ *
+ * <p>Publishes mechanism state — setpoint position/velocity, current mechanism position, loop
+ * time, and motor controller data — to NetworkTables under the {@code Mechanisms/<name>} and
+ * {@code Tuning/<name>} tables. Data is visible in SmartDashboard, Elastic, and Advantage Scope.
+ *
+ * <p>This class is managed internally by mechanism classes such as {@link yams.mechanisms.positional.Arm},
+ * {@link yams.mechanisms.positional.Elevator}, and {@link yams.mechanisms.velocity.FlyWheel}.
+ * You do <b>not</b> usually construct it directly; instead enable telemetry through the
+ * mechanism's configuration object before constructing the mechanism:
+ *
+ * <h3>Enabling via ArmConfig</h3>
+ * <pre>{@code
+ * ArmConfig armConfig = new ArmConfig()
+ *     .withMotor(new TalonFXConfig(1))
+ *     .withLength(Meters.of(0.5))
+ *     .withMass(Kilograms.of(2.0))
+ *     .withHardLimits(Degrees.of(-10), Degrees.of(90))
+ *     .withTelemetry("Arm", TelemetryVerbosity.HIGH)   // enables MechanismTelemetry
+ *     .withSimStartingPosition(Degrees.of(0));
+ *
+ * Arm arm = new Arm(armConfig);
+ * }</pre>
+ *
+ * <h3>Enabling via ElevatorConfig</h3>
+ * <pre>{@code
+ * ElevatorConfig elevatorConfig = new ElevatorConfig()
+ *     .withMotor(new TalonFXConfig(2))
+ *     .withDrumRadius(Inches.of(1.0))
+ *     .withMass(Kilograms.of(4.0))
+ *     .withTelemetry("Elevator", TelemetryVerbosity.HIGH)   // enables MechanismTelemetry
+ *     .withSimStartingHeight(Meters.of(0));
+ *
+ * Elevator elevator = new Elevator(elevatorConfig);
+ * }</pre>
  */
 public class MechanismTelemetry
 {

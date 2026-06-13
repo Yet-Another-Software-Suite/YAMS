@@ -4,7 +4,29 @@
 package yams.exceptions;
 
 /**
- * Exception for math errors when trying to find the sensor to mechanism ratio.
+ * Thrown by {@link yams.gearing.GearBox} and {@link yams.gearing.Sprocket} when a gear stage
+ * string is not in the required {@code "IN:OUT"} format.
+ *
+ * <p>Each stage passed to a {@code GearBox} or {@code Sprocket} constructor must be a
+ * {@code String} containing exactly one colon ({@code :}) separating the driver tooth count
+ * from the driven tooth count (e.g., {@code "12:60"}).  A stage that is missing the colon
+ * separator, is empty, or cannot be parsed triggers this exception.
+ *
+ * <p><b>Resolution:</b> Correct the malformed stage string so it follows the
+ * {@code "driverTeeth:drivenTeeth"} pattern.
+ *
+ * <p>Example correct usage:
+ * <pre>{@code
+ * // WRONG — missing colon separator
+ * GearBox bad = new GearBox("1260");  // throws InvalidStageGivenException
+ *
+ * // CORRECT
+ * GearBox good = new GearBox("12:60");
+ * }</pre>
+ *
+ * @see yams.gearing.GearBox
+ * @see yams.gearing.Sprocket
+ * @see NoStagesGivenException
  */
 public class InvalidStageGivenException extends RuntimeException
 {

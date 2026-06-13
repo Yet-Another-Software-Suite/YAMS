@@ -20,6 +20,53 @@ import java.util.function.Supplier;
 
 /**
  * Sensor data class to encapsulate sensor data.
+ *
+ * <p>
+ * {@code SensorData} represents a single named field within a {@link Sensor}. It wraps a
+ * real-hardware supplier (e.g. a lambda reading an encoder), a default value, and an optional
+ * {@link edu.wpi.first.hal.SimValue} registered with WPILib's simulation layer so the Glass GUI
+ * can override the value during simulation without touching production code.
+ * </p>
+ *
+ * <p>
+ * At runtime the {@link #getValue()} method applies the following priority order:
+ * </p>
+ * <ol>
+ *   <li><b>Real robot</b> — always returns the live hardware supplier value immediately.</li>
+ *   <li><b>Trigger override</b> — if any registered {@link #addSimTrigger trigger} condition is
+ *       currently {@code true}, the associated override value is returned and written to Glass.</li>
+ *   <li><b>Glass value</b> — if a {@link edu.wpi.first.hal.SimValue} exists and no trigger
+ *       fired, returns whatever Glass has set (including the default).</li>
+ *   <li><b>Supplier fallback</b> — returns the supplier value if no Glass value is available.</li>
+ * </ol>
+ *
+ * <h3>Key fields</h3>
+ * <ul>
+ *   <li>{@code m_name} — the human-readable field name used as the Glass widget label.</li>
+ *   <li>{@code m_supplier} — provides the real sensor reading on a physical robot.</li>
+ *   <li>{@code m_type} ({@link HALValueType}) — guards typed accessors
+ *       ({@link #getAsDouble()}, {@link #getAsInt()}, etc.) against incorrect casts.</li>
+ *   <li>{@code m_defaultValue} — the initial value published to Glass at startup.</li>
+ *   <li>{@code m_triggerValues} — ordered list of {@code (condition, value)} pairs checked
+ *       before the Glass value each loop.</li>
+ *   <li>{@code m_glassValue} — the live {@link edu.wpi.first.hal.SimValue} registered with the
+ *       parent {@link edu.wpi.first.hal.SimDevice}; empty on a real robot.</li>
+ * </ul>
+ *
+ * <h3>Example</h3>
+ * <pre>{@code
+ * // Double field backed by a real encoder
+ * SensorData posField = new SensorData("position", encoder::getPosition, 0.0);
+ *
+ * // Boolean field backed by a limit switch
+ * SensorData limitField = new SensorData("atLimit", limitSwitch::get, false);
+ *
+ * // Force a specific value in simulation when autonomous starts
+ * posField.addSimTrigger(SensorData.convert(180.0), DriverStation::isAutonomous);
+ *
+ * // Read the value (type-safe)
+ * double pos = posField.getAsDouble();
+ * }</pre>
  */
 public class SensorData
 {

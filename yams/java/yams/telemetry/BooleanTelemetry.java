@@ -16,6 +16,28 @@ import yams.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
 
 /**
  * Boolean Telemetry for SmartMotorControllers.
+ *
+ * <p>A lightweight wrapper that publishes a single {@code boolean} value to NetworkTables and/or
+ * a WPILib DataLog. It is used internally by {@link SmartMotorControllerTelemetry} to track
+ * flags such as limit-switch states, active feedforward type, and motor inversion — but it can
+ * also be constructed directly when you need a standalone boolean entry.
+ *
+ * <h3>Example</h3>
+ * <pre>{@code
+ * // Create and publish a boolean entry for "at speed" under the Shooter table.
+ * BooleanTelemetry atSpeed = new BooleanTelemetry(
+ *     "atSpeed",                                        // NetworkTables key
+ *     false,                                            // default value
+ *     SmartMotorControllerTelemetry.BooleanTelemetryField.VelocityControl,
+ *     false);                                           // not tunable
+ *
+ * NetworkTable shooterTable = NetworkTableInstance.getDefault().getTable("Shooter");
+ * atSpeed.enable();
+ * atSpeed.setupNetworkTable(shooterTable);
+ *
+ * // In periodic:
+ * atSpeed.set(shooter.isAtSpeed());
+ * }</pre>
  */
 public class BooleanTelemetry
 {

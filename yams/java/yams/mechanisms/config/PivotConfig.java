@@ -19,7 +19,33 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
 /**
- * Pivot config.
+ * Pivot configuration class.
+ *
+ * <h3>Configuration Example</h3>
+ * <pre>{@code
+ * // Create the motor controller configuration with PID and feedforward gains
+ * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
+ *     .withKp(0.15)
+ *     .withKd(0.004)
+ *     .withKs(0.05)
+ *     .withKg(0.2)
+ *     .withStatorCurrentLimit(Amps.of(40))
+ *     .withMechanismUpperLimit(Degrees.of(60))
+ *     .withMechanismLowerLimit(Degrees.of(0))
+ *     .withStartingPosition(Degrees.of(0));
+ *
+ * // Create the motor via SmartMotorFactory (e.g., a Kraken X60 on TalonFX CAN ID 3)
+ * SmartMotorController motor = SmartMotorFactory.create(
+ *     new TalonFX(3),
+ *     DCMotor.getKrakenX60(1),
+ *     motorConfig);
+ *
+ * // Build the pivot config
+ * PivotConfig config = new PivotConfig(motor)
+ *     .withHardLimits(Degrees.of(0), Degrees.of(60))
+ *     .withTelemetry("ShooterHood", TelemetryVerbosity.HIGH)
+ *     .withSimStartingPosition(Degrees.of(0));
+ * }</pre>
  */
 public class PivotConfig
 {

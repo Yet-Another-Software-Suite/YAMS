@@ -8,6 +8,31 @@ import yams.exceptions.NoStagesGivenException;
 
 /**
  * Sprocket class to handle calculating the conversion factor of a sprocket in your mechanism.
+ *
+ * <p>A {@link Sprocket} models a chain or belt drive made up of two or more sprockets/pulleys.
+ * The ratio for each stage is expressed as {@code driver / driven} (IN/OUT). A ratio less than
+ * 1.0 indicates a reduction (the driven sprocket has more teeth than the driver).</p>
+ *
+ * <p>You can construct a {@link Sprocket} in several ways:</p>
+ * <ul>
+ *   <li><b>{@code new Sprocket(double...)}</b> — provide per-stage IN/OUT ratios directly</li>
+ *   <li><b>{@code fromStages(String...)}</b> — provide stages as {@code "IN:OUT"} strings</li>
+ * </ul>
+ *
+ * <h3>Example</h3>
+ * <pre>{@code
+ * // 2:1 reduction — 18-tooth driver sprocket driving a 36-tooth driven sprocket
+ * // The ratio passed is driver/driven = 18/36 = 0.5
+ * Sprocket twoToOne = new Sprocket(18.0 / 36.0);
+ *
+ * // Equivalent using an "IN:OUT" stage string
+ * Sprocket fromString = Sprocket.fromStages("18:36");
+ *
+ * // Get the input-to-output conversion factor (< 1.0 means the output spins slower)
+ * double factor = twoToOne.getInputToOutputConversionFactor(); // 0.5
+ * // Get the output-to-input conversion factor (the reduction ratio)
+ * double reduction = twoToOne.getOutputToInputConversionFactor(); // 2.0
+ * }</pre>
  */
 public class Sprocket
 {

@@ -17,6 +17,52 @@ import yams.mechanisms.config.SensorConfig;
 /**
  * Sensor class using {@link edu.wpi.first.hal.SimDevice}; All fields will use the given supplier on real robots. Fake
  * data is only given when connected to simulation.
+ *
+ * <p>
+ * {@code Sensor} models a named hardware sensor (such as an encoder, limit switch, or analog
+ * input) whose state is consumed by simulation suppliers and mechanism code. Each sensor owns one
+ * or more named {@link SensorData} fields that carry typed values (double, int, boolean, or long).
+ * </p>
+ *
+ * <p>
+ * On a <b>real robot</b> every field delegates to the real-hardware supplier provided at
+ * construction time. In <b>simulation</b>, a {@link edu.wpi.first.hal.SimDevice} is registered
+ * with WPILib so the WPILib Glass simulation GUI can read and override individual field values,
+ * enabling hardware-in-the-loop-style testing without real hardware.
+ * </p>
+ *
+ * <p>
+ * Trigger overrides ({@link #addSimTrigger}) allow simulation suppliers to inject specific sensor
+ * readings (e.g. a limit-switch trip) at a given moment during a simulated match, which is useful
+ * for automating regression tests.
+ * </p>
+ *
+ * <h3>Key fields and methods</h3>
+ * <ul>
+ *   <li>{@link #getField(String)} — retrieve a {@link SensorData} field by name.</li>
+ *   <li>{@link #getAsDouble(String)}, {@link #getAsInt(String)}, {@link #getAsBoolean(String)},
+ *       {@link #getAsLong(String)} — typed convenience accessors that call through to
+ *       the underlying field.</li>
+ *   <li>{@link #addSimTrigger(String, edu.wpi.first.hal.HALValue, java.util.function.BooleanSupplier)}
+ *       — inject a simulated override value whenever a condition is true.</li>
+ *   <li>{@link #getDevice()} — returns the underlying {@link edu.wpi.first.hal.SimDevice}
+ *       (empty when running on a real robot).</li>
+ * </ul>
+ *
+ * <h3>Example</h3>
+ * <pre>{@code
+ * // Wrap a real encoder position in a simulated sensor field
+ * SensorData posField = new SensorData("position", encoder::getPosition, 0.0);
+ * Sensor encoderSensor = new Sensor("ArmEncoder", List.of(posField));
+ *
+ * // Read the value (returns hardware value on robot, Glass value in sim)
+ * double pos = encoderSensor.getAsDouble("position");
+ *
+ * // Inject a forced value during simulation when a condition is met
+ * encoderSensor.addSimTrigger("position",
+ *     SensorData.convert(90.0),
+ *     () -> DriverStation.isAutonomous());
+ * }</pre>
  */
 public class Sensor
 {

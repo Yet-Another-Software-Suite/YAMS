@@ -10,6 +10,21 @@ import java.util.Optional;
 
 /**
  * Factory for creating SmartMotorController instances.
+ *
+ * <h3>Example</h3>
+ * <pre>{@code
+ * // Create a SPARK MAX on CAN ID 1 using a Neo motor
+ * SmartMotorController sparkMotor = SmartMotorFactory.create(
+ *     new CANSparkMax(1, MotorType.kBrushless),
+ *     DCMotor.getNEO(1),
+ *     config);
+ *
+ * // Create a TalonFX on CAN ID 2 using a Kraken X60
+ * SmartMotorController talonMotor = SmartMotorFactory.create(
+ *     new TalonFX(2),
+ *     DCMotor.getKrakenX60(1),
+ *     config);
+ * }</pre>
  */
 public class SmartMotorFactory
 {

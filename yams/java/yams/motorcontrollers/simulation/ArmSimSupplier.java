@@ -28,7 +28,40 @@ import yams.motorcontrollers.SimSupplier;
 import yams.motorcontrollers.SmartMotorController;
 
 /**
- * ArmSim Supplier
+ * ArmSim Supplier — simulates a single-jointed arm mechanism using WPILib's
+ * {@link edu.wpi.first.wpilibj.simulation.SingleJointedArmSim}.
+ *
+ * <p>
+ * This supplier steps WPILib's {@code SingleJointedArmSim} physics model each control loop and
+ * exposes the resulting angle, angular velocity, current draw, and voltage through the
+ * {@link yams.motorcontrollers.SimSupplier} interface. The arm's gear ratio and control period are
+ * read directly from the associated {@link yams.motorcontrollers.SmartMotorController}'s config,
+ * so no duplication of parameters is required.
+ * </p>
+ *
+ * <h3>Example</h3>
+ * <pre>{@code
+ * // 1. Build the WPILib arm physics model
+ * SingleJointedArmSim armPhysics = new SingleJointedArmSim(
+ *     DCMotor.getNEO(1),
+ *     SingleJointedArmSim.estimateMOI(0.5, 2.0), // moment of inertia (kg·m²)
+ *     5.0,                                         // gear ratio (rotor/mechanism)
+ *     0.5,                                         // arm length (meters)
+ *     Units.degreesToRadians(-10),                 // min angle (radians)
+ *     Units.degreesToRadians(90),                  // max angle (radians)
+ *     true,                                        // simulate gravity
+ *     0);                                          // starting angle (radians)
+ *
+ * // 2. Configure and build the YAMS smart motor controller
+ * SmartMotorController motor = new SparkMaxController(
+ *     new SmartMotorControllerConfig()
+ *         .withGearing(new MechanismGearing(5.0))
+ *         .withClosedLoopControlPeriod(Milliseconds.of(20)));
+ *
+ * // 3. Wrap physics model in the supplier and register it
+ * ArmSimSupplier sim = new ArmSimSupplier(armPhysics, motor);
+ * motor.getConfig().withSimSupplier(sim);
+ * }</pre>
  */
 public class ArmSimSupplier implements SimSupplier
 {

@@ -38,6 +38,27 @@ import yams.motorcontrollers.simulation.ArmSimSupplier;
 
 /**
  * Arm mechanism.
+ *
+ * <h3>Usage Example</h3>
+ * <pre>{@code
+ * // Build and construct
+ * SmartMotorController motor = SmartMotorFactory.create(
+ *     new CANSparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1),
+ *     new SmartMotorControllerConfig().withKp(0.25).withStatorCurrentLimit(Amps.of(40)));
+ * Arm arm = new Arm(new ArmConfig(motor).withLength(Meters.of(0.5)));
+ *
+ * // Schedule a setpoint command
+ * Command moveToScore = arm.setAngle(Degrees.of(80));
+ * Command holdAtZero = arm.runTo(Degrees.of(0), Degrees.of(2));
+ *
+ * // Bind triggers
+ * arm.isNear(Degrees.of(80), Degrees.of(2)).onTrue(indexer.run());
+ * arm.max().onTrue(Commands.print("Arm at max!"));
+ *
+ * // Call in robotPeriodic() or a subsystem's periodic():
+ * arm.simIterate();
+ * arm.updateTelemetry();
+ * }</pre>
  */
 public class Arm extends SmartPositionalMechanism
 {

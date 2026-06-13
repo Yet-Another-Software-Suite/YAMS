@@ -64,6 +64,21 @@ import yams.telemetry.SmartMotorControllerTelemetryConfig;
 
 /**
  * Smart motor controller config.
+ *
+ * <h3>Example</h3>
+ * <pre>{@code
+ * SmartMotorControllerConfig config = new SmartMotorControllerConfig()
+ *     .withInverted(false)
+ *     .withStatorCurrentLimit(Amps.of(40))
+ *     .withSupplyCurrentLimit(Amps.of(60))
+ *     .withKp(0.1)
+ *     .withKd(0.005)
+ *     .withKs(0.1)
+ *     .withKv(0.12)
+ *     .withMechanismUpperLimit(Degrees.of(90))
+ *     .withMechanismLowerLimit(Degrees.of(-90))
+ *     .withGearing(new GearBox(12.0, 60.0));
+ * }</pre>
  */
 public class SmartMotorControllerConfig
 {

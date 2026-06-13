@@ -36,6 +36,37 @@ import yams.motorcontrollers.simulation.DCMotorSimSupplier;
 
 /**
  * FlyWheel mechanism.
+ *
+ * <h3>Usage Example</h3>
+ * <pre>{@code
+ * // Construct using a fully configured FlyWheelConfig
+ * FlyWheel shooter = new FlyWheel(config);
+ *
+ * // Spin at a fixed target RPM (runs continuously as a RunCommand)
+ * Command spinUp = shooter.run(RPM.of(3000));
+ *
+ * // Block until the wheel reaches 3000 RPM within ±50 RPM, then finish
+ * Command spinToSpeed = shooter.runTo(RPM.of(3000), RPM.of(50));
+ *
+ * // Trigger that is true whenever the wheel is within ±50 RPM of target
+ * Trigger atSpeed = shooter.isNear(RPM.of(3000), RPM.of(50));
+ * atSpeed.onTrue(Commands.print("Shooter at speed!"));
+ * }</pre>
+ *
+ * <p><b>Unsupported operations:</b> {@link #max()} and {@link #min()} are not supported for
+ * velocity mechanisms and will throw {@link java.lang.UnsupportedOperationException} if called.
+ * Use {@link #isNear(edu.wpi.first.units.measure.AngularVelocity,
+ * edu.wpi.first.units.measure.AngularVelocity)} or {@link #gte}/{@link #lte} triggers instead.</p>
+ *
+ * <p>Call {@link #simIterate()} and {@link #updateTelemetry()} inside your subsystem's
+ * {@code periodic()} method to keep simulation state and NetworkTables up to date:</p>
+ * <pre>{@code
+ * @Override
+ * public void periodic() {
+ *     shooter.simIterate();       // advances the DCMotorSim each loop
+ *     shooter.updateTelemetry();  // pushes data to SmartDashboard / AdvantageScope
+ * }
+ * }</pre>
  */
 public class FlyWheel extends SmartVelocityMechanism
 {

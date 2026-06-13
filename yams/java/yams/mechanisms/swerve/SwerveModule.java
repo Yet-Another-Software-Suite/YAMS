@@ -16,6 +16,48 @@ import yams.telemetry.MechanismTelemetry;
 
 /**
  * Swerve Module
+ *
+ * <p>
+ * {@link SwerveModule} coordinates the drive motor (velocity control) and the azimuth (steer)
+ * motor (position control) that make up one corner of a swerve drivetrain.  On construction it
+ * reads the absolute encoder and seeds the azimuth relative encoder so the wheel starts at the
+ * correct angle.  Each periodic cycle you call {@link #setSwerveModuleState(SwerveModuleState)} to
+ * command both motors, and {@link #getState()} / {@link #getPosition()} to read back the current
+ * wheel velocity and heading.
+ * </p>
+ *
+ * <h3>Typical usage</h3>
+ * <p>
+ * In almost every case you should <b>not</b> instantiate {@link SwerveModule} directly.  Instead,
+ * pass one {@link yams.mechanisms.config.SwerveModuleConfig} per corner to
+ * {@link yams.mechanisms.config.SwerveDriveConfig} and let
+ * {@link yams.mechanisms.swerve.SwerveDrive} create and manage the modules internally:
+ * </p>
+ * <pre>{@code
+ * SwerveDriveConfig driveConfig = new SwerveDriveConfig()
+ *     .withSwerveModuleConfig(frontLeft, frontRight, backLeft, backRight);
+ *
+ * SwerveDrive swerveDrive = new SwerveDrive(driveConfig);
+ * }</pre>
+ *
+ * <h3>Direct instantiation (advanced)</h3>
+ * <p>
+ * If you need direct access to a module — for example when writing unit tests or custom
+ * characterisation routines — you can construct one from a fully-configured
+ * {@link yams.mechanisms.config.SwerveModuleConfig}:
+ * </p>
+ * <pre>{@code
+ * // Assumes 'frontLeftConfig' has already been built with drive/steer motors,
+ * // wheel radius, module location, absolute encoder offset, and telemetry name.
+ * SwerveModule frontLeft = new SwerveModule(frontLeftConfig);
+ *
+ * // Command a specific state (angle + speed)
+ * SwerveModuleState desiredState = new SwerveModuleState(1.5, Rotation2d.fromDegrees(45));
+ * frontLeft.setSwerveModuleState(desiredState);
+ *
+ * // Read back current state
+ * SwerveModuleState current = frontLeft.getState();
+ * }</pre>
  */
 public class SwerveModule
 {

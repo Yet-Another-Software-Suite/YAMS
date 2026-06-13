@@ -39,6 +39,56 @@ import yams.motorcontrollers.simulation.DCMotorSimSupplier;
 
 /**
  * Pivot mechanism.
+ *
+ * <p>A Pivot is a single-jointed rotation mechanism that rotates around the vertical axis,
+ * such as a shooter hood or turret. It is controlled by a {@link SmartMotorController} and
+ * supports position control, trigger bindings, and simulation.</p>
+ *
+ * <h3>Usage Example</h3>
+ * <pre>{@code
+ * // --- Configuration ---
+ * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
+ *     .withKp(0.15)
+ *     .withKd(0.004)
+ *     .withKs(0.05)
+ *     .withKg(0.2)
+ *     .withStatorCurrentLimit(Amps.of(40))
+ *     .withMechanismUpperLimit(Degrees.of(60))
+ *     .withMechanismLowerLimit(Degrees.of(0))
+ *     .withStartingPosition(Degrees.of(0));
+ *
+ * SmartMotorController motor = SmartMotorFactory.create(
+ *     new TalonFX(3),
+ *     DCMotor.getKrakenX60(1),
+ *     motorConfig);
+ *
+ * PivotConfig pivotConfig = new PivotConfig(motor)
+ *     .withHardLimits(Degrees.of(0), Degrees.of(60))
+ *     .withTelemetry("ShooterHood", TelemetryVerbosity.HIGH)
+ *     .withSimStartingPosition(Degrees.of(0));
+ *
+ * // --- Instantiation ---
+ * Pivot pivot = new Pivot(pivotConfig);
+ *
+ * // --- Commands ---
+ * // setAngle() returns a Command that continuously drives the pivot to the target angle
+ * Command aimHigh = pivot.setAngle(Degrees.of(45));
+ *
+ * // runTo() drives to the angle and ends once the pivot is within tolerance
+ * Command stowPivot = pivot.runTo(Degrees.of(0), Degrees.of(1));
+ *
+ * // --- Trigger bindings ---
+ * // Fire when the pivot is within 2 degrees of the shooting angle
+ * pivot.isNear(Degrees.of(45), Degrees.of(2)).onTrue(shooter.runShooter());
+ *
+ * // Bind on boundary conditions
+ * pivot.gte(Degrees.of(55)).onTrue(Commands.print("Approaching upper limit!"));
+ * pivot.lte(Degrees.of(5)).onTrue(Commands.print("Pivot near stow position."));
+ *
+ * // --- Periodic callbacks (robotPeriodic or subsystem periodic) ---
+ * pivot.simIterate();      // advances simulation state each loop
+ * pivot.updateTelemetry(); // publishes data to NetworkTables/SmartDashboard
+ * }</pre>
  */
 public class Pivot extends SmartPositionalMechanism
 {

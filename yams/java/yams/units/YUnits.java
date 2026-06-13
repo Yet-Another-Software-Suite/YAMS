@@ -27,6 +27,43 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 
 /**
  * YUnits that are fun and useful!
+ *
+ * <p>This class extends the standard WPILib unit set with additional units that are either useful
+ * for FRC robotics or simply entertaining. Beyond what WPILib provides out of the box, {@code YUnits}
+ * adds:
+ *
+ * <ul>
+ *   <li><b>Imperial distance units</b> — {@link #Hands}, {@link #Yards}, {@link #Cubits},
+ *       {@link #Fathoms}, {@link #Chains}, {@link #Furlongs}, {@link #Miles}, {@link #Leagues},
+ *       and even a {@link #FootlongSandwich}.</li>
+ *   <li><b>Extended time units</b> — {@link #Hours}, {@link #Days}, {@link #Weeks},
+ *       {@link #Fortnight}, and {@link #Years}.</li>
+ *   <li><b>Derived velocity units</b> — {@link #MilesPerHour} (MPH), {@link #FurlongsPerFortnight}
+ *       (FPF), and {@link #SandwichPerSecond} for all your footlong-based kinematics.</li>
+ *   <li><b>Angular velocity and acceleration</b> — {@link #RotationsPerYear} (RPY) and
+ *       {@link #RPMPerSecond} for angular acceleration in RPM/s.</li>
+ *   <li><b>Linear and angular momentum units</b> — {@link #PoundFeetPerSecond},
+ *       {@link #PoundInchesPerSecond}, {@link #PoundFeetSquaredPerSecond}, and
+ *       {@link #PoundInchesSquaredPerSecond}.</li>
+ *   <li><b>Moment of inertia units</b> — {@link #PoundSquareFeet} and {@link #PoundSquareInches}
+ *       for imperial rotational inertia calculations.</li>
+ * </ul>
+ *
+ * <h3>Example</h3>
+ * <pre>{@code
+ * import yams.units.YUnits;
+ * import static edu.wpi.first.units.Units.Meters;
+ * import static edu.wpi.first.units.Units.MetersPerSecond;
+ *
+ * // Convert a robot speed from MPH to meters per second
+ * double speedMps = YUnits.MPH.of(10).in(MetersPerSecond);  // ~4.47 m/s
+ *
+ * // Express angular acceleration in RPM per second
+ * var accel = YUnits.RPMPerSecond.of(50);  // 50 RPM/s
+ *
+ * // Use PoundSquareInches for a flywheel moment of inertia
+ * var moi = YUnits.PoundSquareInches.of(0.004);
+ * }</pre>
  */
 public class YUnits
 {

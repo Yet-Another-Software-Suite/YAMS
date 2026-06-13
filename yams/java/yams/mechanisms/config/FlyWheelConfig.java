@@ -30,6 +30,26 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
 /**
  * FlyWheel configuration class.
+ *
+ * <h3>Configuration Example</h3>
+ * <pre>{@code
+ * // 1. Build the motor config with kV and kS feedforward (critical for velocity mechanisms)
+ * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(/* subsystem */)
+ *     .withFeedforward(/* kS */ 0.15, /* kV */ 0.12)   // kV dominates at steady-state RPM
+ *     .withVelocityPID(/* kP */ 0.0005, 0.0, 0.0)
+ *     .withTelemetry("Shooter", TelemetryVerbosity.HIGH);
+ *
+ * // 2. Create the motor via SmartMotorFactory
+ * SmartMotorController motor = SmartMotorFactory.createTalonFX(1, motorConfig);
+ *
+ * // 3. Assemble the FlyWheelConfig
+ * FlyWheelConfig config = new FlyWheelConfig()
+ *     .withSmartMotorController(motor)
+ *     .withDiameter(Inches.of(4))
+ *     .withMass(Pounds.of(0.5))
+ *     .withSpeedometerSimulation(RPM.of(6000))  // optional: sim speedometer up to 6000 RPM
+ *     .withTelemetry("Shooter", TelemetryVerbosity.HIGH);
+ * }</pre>
  */
 public class FlyWheelConfig
 {

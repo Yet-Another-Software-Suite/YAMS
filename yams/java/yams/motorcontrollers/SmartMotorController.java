@@ -65,6 +65,22 @@ import yams.telemetry.SmartMotorControllerTelemetryConfig;
 
 /**
  * Smart motor controller wrapper for motor controllers.
+ *
+ * <p>This abstract class is not instantiated directly. Use {@link yams.motorcontrollers.SmartMotorFactory}
+ * to obtain a concrete instance, then configure it with {@link yams.motorcontrollers.SmartMotorControllerConfig}.
+ *
+ * <h3>Example</h3>
+ * <pre>{@code
+ * SmartMotorControllerConfig config = new SmartMotorControllerConfig()
+ *     .withKp(0.1).withKs(0.05).withStatorCurrentLimit(Amps.of(40));
+ * SmartMotorController motor = SmartMotorFactory.create(
+ *     new CANSparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), config);
+ *
+ * // Use directly for duty-cycle or voltage control:
+ * motor.setDutyCycle(0.5);
+ * // Or attach to a mechanism:
+ * Arm arm = new Arm(new ArmConfig(motor).withLength(Meters.of(0.5)));
+ * }</pre>
  */
 public abstract class SmartMotorController
 {

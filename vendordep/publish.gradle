@@ -114,7 +114,7 @@ GENERATE_LATEX         = NO
 GENERATE_XML           = NO
 HTML_OUTPUT            = html
 EXTRACT_ALL            = YES
-FILE_PATTERNS          = *.h *.hpp
+FILE_PATTERNS          = *.h *.hpp *.dox
 QUIET                  = YES
 """
     }

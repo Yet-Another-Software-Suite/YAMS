@@ -144,6 +144,7 @@ javadoc {
             'apiNote:a:API Note:',
             'implSpec:a:Implementation Requirements:',
             'implNote:a:Implementation Note:'
+        overview "$rootDir/../yams/java/overview.html"
     }
 }
 ext.getCurrentArch = {

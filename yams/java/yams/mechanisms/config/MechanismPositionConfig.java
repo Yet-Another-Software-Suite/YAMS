@@ -13,6 +13,36 @@ import yams.mechanisms.positional.SmartPositionalMechanism;
  * A configuration class for specifying the position and visualization properties of a mechanism relative to a robot in
  * a 3D coordinate system. This class allows setting and retrieving details such as the mechanism's position relative to
  * the robot, the robot's maximum dimensions, and the plane in which the mechanism operates.
+ *
+ * <p>{@code MechanismPositionConfig} is used by {@link SmartPositionalMechanism} to drive the
+ * built-in {@code Mechanism2d} widget in Glass/Shuffleboard. It captures three pieces of
+ * information:
+ *
+ * <ul>
+ *   <li><b>Robot-relative position</b> — a {@link edu.wpi.first.math.geometry.Translation3d}
+ *       that places the mechanism's pivot/root inside the robot frame. When set, the Mechanism2d
+ *       window is automatically offset so the mechanism appears in the correct position relative
+ *       to the robot outline.</li>
+ *   <li><b>Robot bounding box</b> — optional maximum length and height used to size the
+ *       Mechanism2d canvas. When omitted, the canvas defaults to twice the mechanism's
+ *       reported length.</li>
+ *   <li><b>Movement plane</b> — whether the mechanism moves in the XZ (default), YZ, or XY
+ *       plane of the robot coordinate system. This determines which Translation3d axes are
+ *       mapped to the 2D canvas X and Y axes.</li>
+ * </ul>
+ *
+ * <h3>Example</h3>
+ * <pre>{@code
+ * import static edu.wpi.first.units.Units.Meters;
+ * import edu.wpi.first.math.geometry.Translation3d;
+ * import yams.mechanisms.config.MechanismPositionConfig;
+ *
+ * MechanismPositionConfig posConfig = new MechanismPositionConfig()
+ *     .withRelativePosition(new Translation3d(0.2, 0.0, 0.3)) // 20 cm forward, 30 cm up
+ *     .withMaxRobotLength(Meters.of(0.85))
+ *     .withMaxRobotHeight(Meters.of(1.20))
+ *     .withMovementPlane(MechanismPositionConfig.Plane.XZ);
+ * }</pre>
  */
 public class MechanismPositionConfig
 {

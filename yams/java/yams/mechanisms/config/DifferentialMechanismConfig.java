@@ -28,7 +28,27 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
 /**
- * Differential Mechanism config.
+ * Configuration for a {@link DifferentialMechanism} driven by two coordinated motors working
+ * differentially. In a differential mechanism the sum and difference of the two motor outputs
+ * independently control two separate degrees of freedom — commonly referred to as <b>tilt</b>
+ * (the average of both motors) and <b>twist</b> (half the difference between the two motors).
+ *
+ * <p>This class is a builder that collects every setting needed before the mechanism is
+ * constructed. All {@code with*()} methods return {@code this} so calls can be chained.</p>
+ *
+ * <h3>Builder Example</h3>
+ * <pre>{@code
+ * // leftSMC / rightSMC are SmartMotorController instances already configured
+ * // with gearing from the motor to the differential bevel gears.
+ * DifferentialMechanismConfig config = new DifferentialMechanismConfig(leftSMC, rightSMC)
+ *     .withStartingPosition(Degrees.of(45), Degrees.of(0))  // tilt=45°, twist=0°
+ *     .withLength(Inches.of(18))
+ *     .withMOI(Inches.of(18), Pounds.of(3))
+ *     .withTelemetry("DifferentialWrist", TelemetryVerbosity.HIGH)
+ *     .withSimColor(new Color8Bit(Color.kOrange));
+ *
+ * DifferentialMechanism wrist = new DifferentialMechanism(config);
+ * }</pre>
  */
 public class DifferentialMechanismConfig
 {
