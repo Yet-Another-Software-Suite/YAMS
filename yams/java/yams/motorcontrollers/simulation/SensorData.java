@@ -40,7 +40,7 @@ import java.util.function.Supplier;
  *   <li><b>Supplier fallback</b> — returns the supplier value if no Glass value is available.</li>
  * </ol>
  *
- * <h3>Key fields</h3>
+ * <h2>Key fields</h2>
  * <ul>
  *   <li>{@code m_name} — the human-readable field name used as the Glass widget label.</li>
  *   <li>{@code m_supplier} — provides the real sensor reading on a physical robot.</li>
@@ -53,7 +53,7 @@ import java.util.function.Supplier;
  *       parent {@link edu.wpi.first.hal.SimDevice}; empty on a real robot.</li>
  * </ul>
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * // Double field backed by a real encoder
  * SensorData posField = new SensorData("position", encoder::getPosition, 0.0);

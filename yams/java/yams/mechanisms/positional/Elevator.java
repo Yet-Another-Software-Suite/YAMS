@@ -54,7 +54,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
 /**
  * Elevator mechanism.
  *
- * <h3>Usage Example</h3>
+ * <h2>Usage Example</h2>
  * <pre>{@code
  * SmartMotorController motor = new TalonFXWrapper(
  *     new TalonFX(4), DCMotor.getKrakenX60(1),

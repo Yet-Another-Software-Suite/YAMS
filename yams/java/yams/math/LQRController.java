@@ -38,7 +38,7 @@ import yams.math.LQRConfig.LQRType;
  * {@link edu.wpi.first.math.controller.LinearQuadraticRegulator} with a
  * {@link edu.wpi.first.math.estimator.KalmanFilter} observer.
  *
- * <h3>Example — construct from LQRConfig and calculate arm voltage</h3>
+ * <h2>Example — construct from LQRConfig and calculate arm voltage</h2>
  * <pre>{@code
  * import static edu.wpi.first.units.Units.*;
  *

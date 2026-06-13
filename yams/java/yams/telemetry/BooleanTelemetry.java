@@ -22,7 +22,7 @@ import yams.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
  * flags such as limit-switch states, active feedforward type, and motor inversion — but it can
  * also be constructed directly when you need a standalone boolean entry.
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * // Create and publish a boolean entry for "at speed" under the Shooter table.
  * BooleanTelemetry atSpeed = new BooleanTelemetry(

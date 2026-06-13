@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj.Timer;
  *       delta-time (useful when the loop period is already known).</li>
  * </ul>
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * import static edu.wpi.first.units.Units.Milliseconds;
  *

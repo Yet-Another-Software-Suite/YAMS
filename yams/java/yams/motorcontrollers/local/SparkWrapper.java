@@ -90,7 +90,7 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * {@link yams.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint}
  * whenever a {@link com.revrobotics.spark.SparkAbsoluteEncoder} is used as the external encoder.
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * // Configure and create a SPARK MAX (NEO motor) on CAN ID 3
  * SmartMotorControllerConfig config = new SmartMotorControllerConfig()

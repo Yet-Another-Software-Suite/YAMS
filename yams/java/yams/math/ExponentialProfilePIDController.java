@@ -51,7 +51,7 @@ import yams.gearing.MechanismGearing;
  * {@link #createFlywheelConstraints}) to derive physically accurate
  * {@link ExponentialProfile.Constraints} directly from motor and mechanism parameters.
  *
- * <h3>Example — arm position control</h3>
+ * <h2>Example — arm position control</h2>
  * <pre>{@code
  * import static edu.wpi.first.units.Units.*;
  *

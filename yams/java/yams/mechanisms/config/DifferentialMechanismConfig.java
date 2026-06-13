@@ -36,7 +36,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  * <p>This class is a builder that collects every setting needed before the mechanism is
  * constructed. All {@code with*()} methods return {@code this} so calls can be chained.</p>
  *
- * <h3>Builder Example</h3>
+ * <h2>Builder Example</h2>
  * <pre>{@code
  * // leftSMC / rightSMC are SmartMotorController instances already configured
  * // with gearing from the motor to the differential bevel gears.

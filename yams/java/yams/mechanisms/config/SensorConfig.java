@@ -34,7 +34,7 @@ import yams.motorcontrollers.simulation.SensorData;
  * <p>The finished configuration is converted to a {@link yams.motorcontrollers.simulation.Sensor}
  * via {@link #getSensor()}, which handles the real/simulated value arbitration at runtime.
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * import static edu.wpi.first.units.Units.Seconds;
  * import yams.mechanisms.config.SensorConfig;

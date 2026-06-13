@@ -71,7 +71,7 @@ import yams.telemetry.SmartMotorControllerTelemetryConfig;
  * {@link yams.motorcontrollers.remote.TalonFXWrapper}/{@link yams.motorcontrollers.remote.TalonFXSWrapper}
  * for CTRE hardware. Configure all three via {@link yams.motorcontrollers.SmartMotorControllerConfig}.
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * SmartMotorControllerConfig config = new SmartMotorControllerConfig()
  *     .withKp(0.1).withKs(0.05).withStatorCurrentLimit(Amps.of(40));

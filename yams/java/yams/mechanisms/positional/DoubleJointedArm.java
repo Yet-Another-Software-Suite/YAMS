@@ -44,7 +44,7 @@ import yams.motorcontrollers.simulation.ArmSimSupplier;
  * allows the end-effector to be folded back under frame perimeter when traveling or extended
  * far over field elements when scoring.</p>
  *
- * <h3>Construction Example</h3>
+ * <h2>Construction Example</h2>
  * <pre>{@code
  * // Each ArmConfig must specify the motor, gearing, arm length, hard limits,
  * // and starting angle before the DoubleJointedArm can be constructed.
@@ -63,7 +63,7 @@ import yams.motorcontrollers.simulation.ArmSimSupplier;
  * DoubleJointedArm arm = new DoubleJointedArm(lowerConfig, upperConfig);
  * }</pre>
  *
- * <h3>Control Examples</h3>
+ * <h2>Control Examples</h2>
  * <pre>{@code
  * // Set explicit joint angles: shoulder at 45°, elbow at 90°.
  * Command positionCommand = arm.setAngle(Degrees.of(45), Degrees.of(90));

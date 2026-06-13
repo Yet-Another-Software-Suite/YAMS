@@ -30,7 +30,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 /**
  * Swerve Drive Configuration
  *
- * <h3>Configuration Example</h3>
+ * <h2>Configuration Example</h2>
  * <p>
  * The following example builds a four-module swerve drive using NEO motors controlled by
  * {@code SparkMax} controllers and CANcoder absolute encoders.  Modules are ordered

@@ -55,7 +55,7 @@ import yams.motorcontrollers.simulation.DCMotorSimSupplier;
  * pitch while the other controls roll, allowing the intake or end-effector to be positioned in
  * two degrees of freedom with fewer motors than a traditional two-joint wrist.</p>
  *
- * <h3>Usage Example</h3>
+ * <h2>Usage Example</h2>
  * <pre>{@code
  * // Build the config (leftSMC / rightSMC already configured with tilt gearing).
  * DifferentialMechanismConfig config = new DifferentialMechanismConfig(leftSMC, rightSMC)

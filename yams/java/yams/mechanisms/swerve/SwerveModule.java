@@ -26,7 +26,7 @@ import yams.telemetry.MechanismTelemetry;
  * wheel velocity and heading.
  * </p>
  *
- * <h3>Typical usage</h3>
+ * <h2>Typical usage</h2>
  * <p>
  * In almost every case you should <b>not</b> instantiate {@link SwerveModule} directly.  Instead,
  * pass one {@link yams.mechanisms.config.SwerveModuleConfig} per corner to
@@ -40,7 +40,7 @@ import yams.telemetry.MechanismTelemetry;
  * SwerveDrive swerveDrive = new SwerveDrive(driveConfig);
  * }</pre>
  *
- * <h3>Direct instantiation (advanced)</h3>
+ * <h2>Direct instantiation (advanced)</h2>
  * <p>
  * If you need direct access to a module — for example when writing unit tests or custom
  * characterisation routines — you can construct one from a fully-configured

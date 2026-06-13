@@ -39,7 +39,7 @@ import yams.motorcontrollers.simulation.ArmSimSupplier;
 /**
  * Arm mechanism.
  *
- * <h3>Usage Example</h3>
+ * <h2>Usage Example</h2>
  * <pre>{@code
  * // Build and construct
  * SmartMotorController motor = new SparkWrapper(

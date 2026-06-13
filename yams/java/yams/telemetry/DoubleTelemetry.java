@@ -24,7 +24,7 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * position, velocity, current, and PID gains — but it can also be constructed directly when
  * you need a standalone numeric entry.
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * // Create and publish a double entry for shooter velocity under the Shooter table.
  * DoubleTelemetry velocity = new DoubleTelemetry(

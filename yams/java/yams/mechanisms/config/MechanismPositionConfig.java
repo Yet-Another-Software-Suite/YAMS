@@ -31,7 +31,7 @@ import yams.mechanisms.positional.SmartPositionalMechanism;
  *       mapped to the 2D canvas X and Y axes.</li>
  * </ul>
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * import static edu.wpi.first.units.Units.Meters;
  * import edu.wpi.first.math.geometry.Translation3d;

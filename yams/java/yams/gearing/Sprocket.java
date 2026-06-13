@@ -19,7 +19,7 @@ import yams.exceptions.NoStagesGivenException;
  *   <li><b>{@code fromStages(String...)}</b> — provide stages as {@code "IN:OUT"} strings</li>
  * </ul>
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * // 2:1 reduction — 18-tooth driver sprocket driving a 36-tooth driven sprocket
  * // The ratio passed is driver/driven = 18/36 = 0.5

@@ -20,7 +20,7 @@ import yams.exceptions.NoStagesGivenException;
  *   <li><b>{@code fromReductionStages(double...)}</b> — provide per-stage ratios directly</li>
  * </ul>
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * // 5:1 single-stage gearbox (12-tooth driver meshing with a 60-tooth driven gear)
  * GearBox fiveToOne = GearBox.fromTeeth(12, 60);

@@ -31,7 +31,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 /**
  * FlyWheel configuration class.
  *
- * <h3>Configuration Example</h3>
+ * <h2>Configuration Example</h2>
  * <pre>{@code
  * // 1. Build the motor config with kV and kS feedforward (critical for velocity mechanisms)
  * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()

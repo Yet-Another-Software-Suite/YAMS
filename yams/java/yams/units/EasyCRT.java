@@ -24,7 +24,7 @@ import java.util.Optional;
  *
  * <p>Created by team 6911.
  *
- * <h3>Usage</h3>
+ * <h2>Usage</h2>
  * <p>Construct an {@code EasyCRT} from a fully-configured {@link EasyCRTConfig}, then call
  * {@link #getAngleOptional()} periodically. The return value is an {@link java.util.Optional}
  * containing the resolved mechanism {@link edu.wpi.first.units.measure.Angle} when a unique

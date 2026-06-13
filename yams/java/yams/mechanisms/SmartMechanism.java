@@ -29,7 +29,7 @@ import yams.telemetry.MechanismTelemetry;
  * API for control, feedback, and visualization.
  * </p>
  *
- * <h3>Mechanism Lifecycle</h3>
+ * <h2>Mechanism Lifecycle</h2>
  * <ol>
  *   <li>Configure a motor controller: {@link yams.motorcontrollers.SmartMotorControllerConfig}</li>
  *   <li>Instantiate the appropriate wrapper: {@link yams.motorcontrollers.local.SparkWrapper} (REV), {@link yams.motorcontrollers.remote.TalonFXWrapper} or {@link yams.motorcontrollers.remote.TalonFXSWrapper} (CTRE)</li>
@@ -45,7 +45,7 @@ import yams.telemetry.MechanismTelemetry;
  * visualization remain up to date.
  * </p>
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * // 1. Motor config
  * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()

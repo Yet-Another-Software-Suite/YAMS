@@ -39,7 +39,7 @@ import yams.motorcontrollers.SmartMotorController;
  * so no duplication of parameters is required.
  * </p>
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * // 1. Build the WPILib arm physics model
  * SingleJointedArmSim armPhysics = new SingleJointedArmSim(

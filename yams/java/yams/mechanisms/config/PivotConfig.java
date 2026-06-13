@@ -21,7 +21,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 /**
  * Pivot configuration class.
  *
- * <h3>Configuration Example</h3>
+ * <h2>Configuration Example</h2>
  * <pre>{@code
  * // Create the motor controller configuration with PID and feedforward gains
  * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()

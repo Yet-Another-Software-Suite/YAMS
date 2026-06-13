@@ -107,7 +107,7 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * is used. Set via
  * {@link yams.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint}.
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * // Configure and create a TalonFXS (Minion) on CAN ID 7
  * SmartMotorControllerConfig config = new SmartMotorControllerConfig()

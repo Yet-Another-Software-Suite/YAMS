@@ -58,7 +58,7 @@ import yams.mechanisms.swerve.SwerveDrive;
  * }
  * </pre>
  *
- * <h3>Joystick-to-{@link yams.mechanisms.swerve.SwerveDrive} adapter</h3>
+ * <h2>Joystick-to-{@link yams.mechanisms.swerve.SwerveDrive} adapter</h2>
  * <p>
  * {@link SwerveInputStream} acts as a bridge between raw controller axis values (in the range
  * {@code [-1, 1]}) and the {@link ChassisSpeeds} that {@link yams.mechanisms.swerve.SwerveDrive}
@@ -69,7 +69,7 @@ import yams.mechanisms.swerve.SwerveDrive;
  * directly to a command that calls {@code swerveDrive.drive(inputStream.get())}.
  * </p>
  *
- * <h3>Typical usage with an {@link XboxController}</h3>
+ * <h2>Typical usage with an {@link XboxController}</h2>
  * <pre>{@code
  * XboxController driver = new XboxController(0);
  *

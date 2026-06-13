@@ -23,7 +23,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 /**
  * Arm configuration class.
  *
- * <h3>Configuration Example</h3>
+ * <h2>Configuration Example</h2>
  * <pre>{@code
  * // Create a motor first
  * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()

@@ -39,7 +39,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  * <p>This class is managed internally by {@link SmartMotorController}. You do not normally
  * instantiate it directly; instead call the methods on the motor controller itself:
  *
- * <h3>Basic usage (default NetworkTable path)</h3>
+ * <h2>Basic usage (default NetworkTable path)</h2>
  * <pre>{@code
  * // In robotInit() or subsystem constructor:
  * motor.setupTelemetry();   // publishes under Mechanisms/<motorName>
@@ -48,7 +48,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  * motor.updateTelemetry();
  * }</pre>
  *
- * <h3>Custom NetworkTable path and telemetry config</h3>
+ * <h2>Custom NetworkTable path and telemetry config</h2>
  * <pre>{@code
  * NetworkTable dataTable   = NetworkTableInstance.getDefault().getTable("Mechanisms").getSubTable("Shooter");
  * NetworkTable tuningTable = NetworkTableInstance.getDefault().getTable("Tuning").getSubTable("Shooter");

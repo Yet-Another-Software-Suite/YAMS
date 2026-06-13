@@ -25,7 +25,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 /**
  * Elevator configuration class.
  *
- * <h3>Configuration Example</h3>
+ * <h2>Configuration Example</h2>
  * <pre>{@code
  * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
  *     .withKp(0.5)

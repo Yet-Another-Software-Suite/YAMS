@@ -22,7 +22,7 @@ import yams.motorcontrollers.SmartMotorController;
  * You do <b>not</b> usually construct it directly; instead enable telemetry through the
  * mechanism's configuration object before constructing the mechanism:
  *
- * <h3>Enabling via ArmConfig</h3>
+ * <h2>Enabling via ArmConfig</h2>
  * <pre>{@code
  * ArmConfig armConfig = new ArmConfig()
  *     .withMotor(new TalonFXConfig(1))
@@ -35,7 +35,7 @@ import yams.motorcontrollers.SmartMotorController;
  * Arm arm = new Arm(armConfig);
  * }</pre>
  *
- * <h3>Enabling via ElevatorConfig</h3>
+ * <h2>Enabling via ElevatorConfig</h2>
  * <pre>{@code
  * ElevatorConfig elevatorConfig = new ElevatorConfig()
  *     .withMotor(new TalonFXConfig(2))

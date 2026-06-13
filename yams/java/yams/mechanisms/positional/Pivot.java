@@ -44,7 +44,7 @@ import yams.motorcontrollers.simulation.DCMotorSimSupplier;
  * such as a shooter hood or turret. It is controlled by a {@link SmartMotorController} and
  * supports position control, trigger bindings, and simulation.</p>
  *
- * <h3>Usage Example</h3>
+ * <h2>Usage Example</h2>
  * <pre>{@code
  * // --- Configuration ---
  * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()

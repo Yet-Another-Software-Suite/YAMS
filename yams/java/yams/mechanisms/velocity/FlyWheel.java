@@ -37,7 +37,7 @@ import yams.motorcontrollers.simulation.DCMotorSimSupplier;
 /**
  * FlyWheel mechanism.
  *
- * <h3>Usage Example</h3>
+ * <h2>Usage Example</h2>
  * <pre>{@code
  * // Construct using a fully configured FlyWheelConfig
  * FlyWheel shooter = new FlyWheel(config);

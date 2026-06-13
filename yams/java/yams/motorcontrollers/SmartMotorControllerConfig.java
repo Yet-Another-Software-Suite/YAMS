@@ -65,7 +65,7 @@ import yams.telemetry.SmartMotorControllerTelemetryConfig;
 /**
  * Smart motor controller config.
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * SmartMotorControllerConfig config = new SmartMotorControllerConfig()
  *     .withInverted(false)

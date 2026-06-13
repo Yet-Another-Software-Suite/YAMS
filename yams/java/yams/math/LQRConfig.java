@@ -49,7 +49,7 @@ import yams.gearing.MechanismGearing;
  *       gentler. The default of 12 V matches the approximate maximum battery voltage.</li>
  * </ul>
  *
- * <h3>Example — Arm LQR configuration</h3>
+ * <h2>Example — Arm LQR configuration</h2>
  * <pre>{@code
  * import static edu.wpi.first.units.Units.*;
  *

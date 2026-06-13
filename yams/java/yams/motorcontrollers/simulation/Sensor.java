@@ -37,7 +37,7 @@ import yams.mechanisms.config.SensorConfig;
  * for automating regression tests.
  * </p>
  *
- * <h3>Key fields and methods</h3>
+ * <h2>Key fields and methods</h2>
  * <ul>
  *   <li>{@link #getField(String)} — retrieve a {@link SensorData} field by name.</li>
  *   <li>{@link #getAsDouble(String)}, {@link #getAsInt(String)}, {@link #getAsBoolean(String)},
@@ -49,7 +49,7 @@ import yams.mechanisms.config.SensorConfig;
  *       (empty when running on a real robot).</li>
  * </ul>
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * // Wrap a real encoder position in a simulated sensor field
  * SensorData posField = new SensorData("position", encoder::getPosition, 0.0);

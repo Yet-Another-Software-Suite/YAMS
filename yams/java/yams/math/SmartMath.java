@@ -16,7 +16,7 @@ import yams.exceptions.NoStagesGivenException;
  *       gear ratio (MECHANISM_ROTATIONS / ROTOR_ROTATIONS).</li>
  * </ul>
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * // Single-stage 10:1 reduction — sensor on motor shaft
  * double sensorRatio = SmartMath.sensorToMechanismRatio(10.0);

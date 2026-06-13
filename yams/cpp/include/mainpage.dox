@@ -47,7 +47,7 @@
  * | yams::mechanisms::velocity | FlyWheel, SmartVelocityMechanism |
  * | yams::mechanisms::swerve | SwerveDrive, SwerveModule, SwerveDriveConfig |
  * | yams::mechanisms::swerve::utility | SwerveInputStream |
- * | yams::motorcontrollers | SmartMotorController abstract base and factory |
+ * | yams::motorcontrollers | SmartMotorController abstract base and wrapper types |
  * | yams::motorcontrollers::local | SparkWrapper (REV SPARK MAX / FLEX) |
  * | yams::motorcontrollers::remote | TalonFXWrapper, TalonFXSWrapper (CTRE Phoenix 6) |
  * | yams::motorcontrollers::simulation | Simulation suppliers and sensor data |
@@ -70,11 +70,13 @@
  * using namespace yams;
  *
  * // Build a motor controller
+ * rev::spark::SparkMax spark{1, rev::spark::SparkLowLevel::MotorType::kBrushless};
  * auto motorConfig = motorcontrollers::SmartMotorControllerConfig{}
  *     .withInverted(false)
  *     .withCurrentLimit(40);
  *
- * auto motor = motorcontrollers::SmartMotorFactory::createSparkMax(1, motorConfig);
+ * auto motor = std::make_unique<motorcontrollers::local::SparkWrapper>(
+ *     spark, frc::DCMotor::NEO(1), motorConfig);
  *
  * // Build an elevator
  * auto elevatorConfig = mechanisms::config::ElevatorConfig{}

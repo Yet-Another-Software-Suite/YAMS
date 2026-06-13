@@ -26,7 +26,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 /**
  * Swerve Module
  *
- * <h3>Configuration Example</h3>
+ * <h2>Configuration Example</h2>
  * <p>
  * The following example shows how to build a complete {@link SwerveModuleConfig} for a single
  * swerve module using TalonFX motors and a CANcoder absolute encoder.

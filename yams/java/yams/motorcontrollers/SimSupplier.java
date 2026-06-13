@@ -27,7 +27,7 @@ import edu.wpi.first.units.measure.Voltage;
  * that mechanism and control code requires no changes between real and simulated runs.
  * </p>
  *
- * <h3>How to use</h3>
+ * <h2>How to use</h2>
  * <p>
  * Create a concrete {@code SimSupplier} (e.g. {@link yams.motorcontrollers.simulation.ArmSimSupplier}
  * or {@link yams.motorcontrollers.simulation.DCMotorSimSupplier}) and pass it to

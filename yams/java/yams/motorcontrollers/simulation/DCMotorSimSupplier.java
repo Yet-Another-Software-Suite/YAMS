@@ -43,7 +43,7 @@ import yams.motorcontrollers.SmartMotorController;
  * here.
  * </p>
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * // 1. Build the WPILib DC motor physics model (e.g. a flywheel with MOI 0.001 kg·m²)
  * DCMotorSim flywheelPhysics = new DCMotorSim(

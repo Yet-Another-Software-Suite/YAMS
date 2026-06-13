@@ -51,7 +51,7 @@ import yams.telemetry.MechanismTelemetry;
 /**
  * Swerve Drive mechanism
  *
- * <h3>Usage Example</h3>
+ * <h2>Usage Example</h2>
  * <p>
  * The typical pattern is to wrap {@code SwerveDrive} inside a WPILib {@code SubsystemBase}.
  * Build a {@link yams.mechanisms.config.SwerveDriveConfig} (see its class-level doc for the full

@@ -22,7 +22,7 @@ import java.util.Optional;
  *   <li><b>{@code new MechanismGearing(GearBox, Sprocket)}</b> — gearbox followed by a chain/belt stage</li>
  * </ul>
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * // Simple 10:1 gearbox attached directly to the mechanism
  * MechanismGearing simple = new MechanismGearing(10.0);

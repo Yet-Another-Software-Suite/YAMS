@@ -34,7 +34,6 @@
 #include "yams/motorcontrollers/SimSupplier.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
-#include "yams/motorcontrollers/SmartMotorFactory.hpp"
 
 // ---- Simulation Suppliers --------------------------------------------------
 #include "yams/motorcontrollers/simulation/ArmSimSupplier.hpp"

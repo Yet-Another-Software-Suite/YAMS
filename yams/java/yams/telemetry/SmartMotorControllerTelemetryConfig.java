@@ -28,7 +28,7 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * DataLog. Every field is disabled by default; call the individual {@code with*()} methods to
  * opt in, or use {@link #withTelemetryVerbosity} to enable a predefined set.
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * SmartMotorControllerTelemetryConfig telemetryCfg =
  *     new SmartMotorControllerTelemetryConfig()

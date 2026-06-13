@@ -57,7 +57,7 @@ import yams.motorcontrollers.SmartMotorController;
  * }
  * }</pre>
  *
- * <h3>For Subclass Authors</h3>
+ * <h2>For Subclass Authors</h2>
  * <p>
  * Every concrete subclass of {@code SmartPositionalMechanism} must implement the following
  * abstract methods inherited from {@link yams.mechanisms.SmartMechanism}:

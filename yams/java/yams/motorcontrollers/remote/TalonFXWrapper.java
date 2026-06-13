@@ -104,7 +104,7 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * is used. Set via
  * {@link yams.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint}.
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * // Configure and create a Kraken X60 TalonFX on CAN ID 5
  * SmartMotorControllerConfig config = new SmartMotorControllerConfig()

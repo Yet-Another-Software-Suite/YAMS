@@ -42,7 +42,7 @@ import yams.gearing.MechanismGearing;
  *       used to suggest coprime gear pairs with adequate unique coverage.</li>
  * </ul>
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * import static edu.wpi.first.units.Units.Rotations;
  * import yams.units.EasyCRTConfig;

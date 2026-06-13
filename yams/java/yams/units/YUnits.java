@@ -49,7 +49,7 @@ import edu.wpi.first.units.measure.MomentOfInertia;
  *       for imperial rotational inertia calculations.</li>
  * </ul>
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * import yams.units.YUnits;
  * import static edu.wpi.first.units.Units.Meters;
