@@ -1117,6 +1117,7 @@ public class TalonFXSWrapper extends SmartMotorController
         {
           if (follower.getFirst() instanceof TalonFXS)
           {
+            config.getIdleMode().ifPresent(mode -> ((TalonFXS) follower.getFirst()).setNeutralMode(mode == MotorMode.BRAKE ? NeutralModeValue.Brake : NeutralModeValue.Coast));
             applied = ((TalonFXS) follower.getFirst()).setControl(new Follower(m_talonfxs.getDeviceID(),
                                                                                follower.getSecond()
                                                                                ? MotorAlignmentValue.Opposed
@@ -1124,6 +1125,7 @@ public class TalonFXSWrapper extends SmartMotorController
 
           } else if (follower.getFirst() instanceof TalonFX)
           {
+            config.getIdleMode().ifPresent(mode -> ((TalonFX) follower.getFirst()).setNeutralMode(mode == MotorMode.BRAKE ? NeutralModeValue.Brake : NeutralModeValue.Coast));
             applied = ((TalonFX) follower.getFirst()).setControl(new Follower(m_talonfxs.getDeviceID(),
                                                                               follower.getSecond()
                                                                               ? MotorAlignmentValue.Opposed

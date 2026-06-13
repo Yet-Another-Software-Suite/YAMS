@@ -701,14 +701,18 @@ public class SparkWrapper extends SmartMotorController
       {
         if (follower.getFirst() instanceof SparkMax)
         {
-          ((SparkMax) follower.getFirst()).configure(new SparkMaxConfig().follow(m_spark, follower.getSecond()),
+          var f_cfg = new SparkMaxConfig().follow(m_spark, follower.getSecond());
+          m_config.getIdleMode().ifPresent(mode -> f_cfg.idleMode(mode == MotorMode.BRAKE ? IdleMode.kBrake : IdleMode.kCoast));
+          ((SparkMax) follower.getFirst()).configure(f_cfg,
                                                      ResetMode.kNoResetSafeParameters,
                                                      DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                                                : PersistMode.kPersistParameters);
 
         } else if (follower.getFirst() instanceof SparkFlex)
         {
-          ((SparkFlex) follower.getFirst()).configure(new SparkFlexConfig().follow(m_spark, follower.getSecond()),
+          var f_cfg = new SparkFlexConfig().follow(m_spark, follower.getSecond());
+          m_config.getIdleMode().ifPresent(mode -> f_cfg.idleMode(mode == MotorMode.BRAKE ? IdleMode.kBrake : IdleMode.kCoast));
+          ((SparkFlex) follower.getFirst()).configure(f_cfg,
                                                       ResetMode.kNoResetSafeParameters,
                                                       DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
                                                                                 : PersistMode.kPersistParameters);
