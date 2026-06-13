@@ -1793,7 +1793,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Assert that every tracked basic config option was accessed during ApplyConfig.</p>
-<p>Throws <a class="el" href="classyams_1_1SmartMotorControllerConfigurationException.html">SmartMotorControllerConfigurationException</a> if any option was never fetched, indicating that the wrapper's ApplyConfig implementation is incomplete. </p>
+<p>Throws SmartMotorControllerConfigurationException if any option was never fetched, indicating that the wrapper's ApplyConfig implementation is incomplete. </p>
 
 </div>
 </div>
@@ -1812,7 +1812,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Assert that every tracked external-encoder config option was accessed during ApplyConfig.</p>
-<p>Throws <a class="el" href="classyams_1_1SmartMotorControllerConfigurationException.html">SmartMotorControllerConfigurationException</a> if any option was never fetched. </p>
+<p>Throws SmartMotorControllerConfigurationException if any option was never fetched. </p>
 
 </div>
 </div>
@@ -1997,7 +1997,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Enable continuous position wrapping for the closed-loop controller.</p>
-<p>Throws <a class="el" href="classyams_1_1SmartMotorControllerConfigurationException.html">SmartMotorControllerConfigurationException</a> if soft limits or a linear mechanism circumference are already configured.</p>
+<p>Throws SmartMotorControllerConfigurationException if soft limits or a linear mechanism circumference are already configured.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">min</td><td>Bottom of the wrapping range (turns). </td></tr>
@@ -2368,7 +2368,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Set the discontinuity point for absolute encoder wrapping.</p>
-<p>Must be exactly 0.5_tr (encoder reads [−0.5, 0.5]) or 1_tr (reads [0, 1]). Throws <a class="el" href="classyams_1_1SmartMotorControllerConfigurationException.html">SmartMotorControllerConfigurationException</a> otherwise.</p>
+<p>Must be exactly 0.5_tr (encoder reads [−0.5, 0.5]) or 1_tr (reads [0, 1]). Throws SmartMotorControllerConfigurationException otherwise.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">discontinuityPoint</td><td>Wrap-around point (0.5 or 1 turns). </td></tr>

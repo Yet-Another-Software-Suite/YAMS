@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['invalidstagegivenexception_0',['InvalidStageGivenException',['../classyams_1_1InvalidStageGivenException.html',1,'yams']]]
+  ['invalidstagegivenexception_0',['InvalidStageGivenException',['../classyams_1_1exceptions_1_1InvalidStageGivenException.html',1,'yams::exceptions']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['yamsexception_0',['YamsException',['../classyams_1_1YamsException.html#abd99b0cf7e9a97b512fbdc7fea5eb87e',1,'yams::YamsException']]]
+  ['yamsexception_0',['YamsException',['../classyams_1_1exceptions_1_1YamsException.html#af4df63206e7ec852def2800a3a2f4165',1,'yams::exceptions::YamsException']]]
 ];

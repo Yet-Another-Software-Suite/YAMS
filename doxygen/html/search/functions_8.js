@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['invalidstagegivenexception_0',['InvalidStageGivenException',['../classyams_1_1InvalidStageGivenException.html#a4d2b00b980a72e41e4580856057a1665',1,'yams::InvalidStageGivenException']]],
+  ['invalidstagegivenexception_0',['InvalidStageGivenException',['../classyams_1_1exceptions_1_1InvalidStageGivenException.html#ac064fc2ff604b578107d5ad590d55e82',1,'yams::exceptions::InvalidStageGivenException']]],
   ['isangular_1',['IsAngular',['../classyams_1_1mechanisms_1_1config_1_1MechanismPositionConfig.html#a2c3540e57fba51099c1ad75ef85207ed',1,'yams::mechanisms::config::MechanismPositionConfig']]],
   ['isenabled_2',['isenabled',['../classyams_1_1telemetry_1_1DoubleTelemetry.html#a143323b03cc97ea9aca962d453d53888',1,'yams::telemetry::DoubleTelemetry::IsEnabled()'],['../classyams_1_1telemetry_1_1BooleanTelemetry.html#ab6388e058a9e62c4e5f7eb1585708a34',1,'yams::telemetry::BooleanTelemetry::IsEnabled()']]],
   ['ishorizontal_3',['IsHorizontal',['../classyams_1_1mechanisms_1_1config_1_1ElevatorConfig.html#a98dff77e8063ed3299a01b44922e548b',1,'yams::mechanisms::config::ElevatorConfig']]],

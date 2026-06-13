@@ -10,7 +10,7 @@ var searchData=
   ['smartmotorcontroller_7',['SmartMotorController',['../classyams_1_1motorcontrollers_1_1SmartMotorController.html',1,'yams::motorcontrollers']]],
   ['smartmotorcontrollercommandregistry_8',['SmartMotorControllerCommandRegistry',['../classyams_1_1motorcontrollers_1_1SmartMotorControllerCommandRegistry.html',1,'yams::motorcontrollers']]],
   ['smartmotorcontrollerconfig_9',['SmartMotorControllerConfig',['../classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html',1,'yams::motorcontrollers']]],
-  ['smartmotorcontrollerconfigurationexception_10',['SmartMotorControllerConfigurationException',['../classyams_1_1SmartMotorControllerConfigurationException.html',1,'yams']]],
+  ['smartmotorcontrollerconfigurationexception_10',['SmartMotorControllerConfigurationException',['../classyams_1_1exceptions_1_1SmartMotorControllerConfigurationException.html',1,'yams::exceptions']]],
   ['smartmotorcontrollertelemetry_11',['SmartMotorControllerTelemetry',['../classyams_1_1telemetry_1_1SmartMotorControllerTelemetry.html',1,'yams::telemetry']]],
   ['smartmotorcontrollertelemetryconfig_12',['SmartMotorControllerTelemetryConfig',['../classyams_1_1telemetry_1_1SmartMotorControllerTelemetryConfig.html',1,'yams::telemetry']]],
   ['smartmotorfactory_13',['SmartMotorFactory',['../classyams_1_1motorcontrollers_1_1SmartMotorFactory.html',1,'yams::motorcontrollers']]],
@@ -21,7 +21,7 @@ var searchData=
   ['swervedrive_18',['SwerveDrive',['../classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html',1,'yams::mechanisms::swerve']]],
   ['swervedrive_3c_204_20_3e_19',['SwerveDrive&lt; 4 &gt;',['../classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html',1,'yams::mechanisms::swerve']]],
   ['swervedriveconfig_20',['SwerveDriveConfig',['../classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html',1,'yams::mechanisms::swerve']]],
-  ['swervedriveconfigurationexception_21',['SwerveDriveConfigurationException',['../classyams_1_1SwerveDriveConfigurationException.html',1,'yams']]],
+  ['swervedriveconfigurationexception_21',['SwerveDriveConfigurationException',['../classyams_1_1exceptions_1_1SwerveDriveConfigurationException.html',1,'yams::exceptions']]],
   ['swerveinputstream_22',['SwerveInputStream',['../classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStream.html',1,'yams::mechanisms::swerve::utility']]],
   ['swervemodule_23',['SwerveModule',['../classyams_1_1mechanisms_1_1swerve_1_1SwerveModule.html',1,'yams::mechanisms::swerve']]],
   ['swervemoduleconfig_24',['SwerveModuleConfig',['../classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html',1,'yams::mechanisms::config']]]

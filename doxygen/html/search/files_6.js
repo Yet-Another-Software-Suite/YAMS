@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['lqrconfig_2ehpp_0',['LQRConfig.hpp',['../LQRConfig_8hpp.html',1,'']]],
-  ['lqrcontroller_2ehpp_1',['LQRController.hpp',['../LQRController_8hpp.html',1,'']]]
+  ['mechanismgearing_2ehpp_0',['MechanismGearing.hpp',['../MechanismGearing_8hpp.html',1,'']]],
+  ['mechanismpositionconfig_2ehpp_1',['MechanismPositionConfig.hpp',['../MechanismPositionConfig_8hpp.html',1,'']]],
+  ['mechanismtelemetry_2ehpp_2',['MechanismTelemetry.hpp',['../MechanismTelemetry_8hpp.html',1,'']]]
 ];

@@ -7,6 +7,6 @@ var searchData=
   ['applytuningvalues_4',['ApplyTuningValues',['../classyams_1_1telemetry_1_1SmartMotorControllerTelemetry.html#a72068b66003a10b8f8a385a943b97754',1,'yams::telemetry::SmartMotorControllerTelemetry']]],
   ['arm_5',['Arm',['../classyams_1_1mechanisms_1_1positional_1_1Arm.html#a1fdffa3f5afa0c95101585d3f8ae76e5',1,'yams::mechanisms::positional::Arm']]],
   ['armconfig_6',['ArmConfig',['../classyams_1_1mechanisms_1_1config_1_1ArmConfig.html#a65b99892cd24a85079af0d2fbbfd2100',1,'yams::mechanisms::config::ArmConfig']]],
-  ['armconfigurationexception_7',['ArmConfigurationException',['../classyams_1_1ArmConfigurationException.html#ab0a953a144edd7d09a76460112a3c027',1,'yams::ArmConfigurationException']]],
+  ['armconfigurationexception_7',['ArmConfigurationException',['../classyams_1_1exceptions_1_1ArmConfigurationException.html#a2e072505ebb646eee658d230b5d9ca37',1,'yams::exceptions::ArmConfigurationException']]],
   ['armsimsupplier_8',['ArmSimSupplier',['../classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#a7a45ddda2b689d851ca8ba52a0752fba',1,'yams::motorcontrollers::simulation::ArmSimSupplier']]]
 ];
