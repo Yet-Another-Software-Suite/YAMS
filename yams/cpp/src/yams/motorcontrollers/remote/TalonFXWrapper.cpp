@@ -20,7 +20,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "yams/exceptions/SmartMotorControllerConfigurationException.hpp"
+#include "yams/exceptions.hpp"
 #include "yams/math/LQRController.hpp"
 #include "yams/motorcontrollers/simulation/DCMotorSimSupplier.hpp"
 
@@ -163,11 +163,11 @@ bool TalonFXWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     }
   } else {
     if (m_config.GetExternalEncoderInverted().has_value())
-      throw SmartMotorControllerConfigurationException(
+      throw exceptions::SmartMotorControllerConfigurationException(
           "External Encoder cannot be inverted if not present!",
           "External encoder is not inverted!", "WithExternalEncoderInverted(false)");
     if (m_config.GetExternalEncoderGearing().has_value())
-      throw SmartMotorControllerConfigurationException(
+      throw exceptions::SmartMotorControllerConfigurationException(
           "External Encoder cannot be set if not present!", "External encoder gearing is not 1.0!",
           "WithExternalEncoderGearing(1.0)");
     // Consume remaining external encoder options for validation tracking

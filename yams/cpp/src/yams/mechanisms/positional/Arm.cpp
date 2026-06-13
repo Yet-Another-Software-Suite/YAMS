@@ -23,7 +23,7 @@
 #include <memory>
 #include <string>
 
-#include "yams/exceptions/ArmConfigurationException.hpp"
+#include "yams/exceptions.hpp"
 #include "yams/gearing/MechanismGearing.hpp"
 #include "yams/motorcontrollers/simulation/ArmSimSupplier.hpp"
 
@@ -54,25 +54,28 @@ Arm::Arm(const config::ArmConfig& config) : SmartPositionalMechanism(), m_armCon
   if (frc::RobotBase::IsSimulation()) {
     // Configuration checks — throw descriptive exceptions like Java does.
     if (!config.GetArmLength().has_value()) {
-      throw ArmConfigurationException("Arm Length is empty", "Cannot create simulation.",
-                                      "WithArmLength(units::meter_t)");
+      throw exceptions::ArmConfigurationException(
+          "Arm Length is empty", "Cannot create simulation.", "WithArmLength(units::meter_t)");
     }
     if (!config.GetMinAngle().has_value()) {
-      throw ArmConfigurationException("Arm lower hard limit is empty", "Cannot create simulation.",
-                                      "WithMinAngle(units::degree_t)");
+      throw exceptions::ArmConfigurationException("Arm lower hard limit is empty",
+                                                  "Cannot create simulation.",
+                                                  "WithMinAngle(units::degree_t)");
     }
     if (!config.GetMaxAngle().has_value()) {
-      throw ArmConfigurationException("Arm upper hard limit is empty", "Cannot create simulation.",
-                                      "WithMaxAngle(units::degree_t)");
+      throw exceptions::ArmConfigurationException("Arm upper hard limit is empty",
+                                                  "Cannot create simulation.",
+                                                  "WithMaxAngle(units::degree_t)");
     }
     if (!m_smc->GetConfig().GetStartingPosition().has_value() &&
         !m_smc->GetConfig().GetExternalEncoderZeroOffset().has_value()) {
-      throw ArmConfigurationException("Arm starting angle is empty", "Cannot create simulation.",
-                                      "smc.WithStartingPosition(units::degree_t)");
+      throw exceptions::ArmConfigurationException("Arm starting angle is empty",
+                                                  "Cannot create simulation.",
+                                                  "smc.WithStartingPosition(units::degree_t)");
     }
     if (!m_smc->GetConfig().GetMOI()) {
-      throw ArmConfigurationException("Arm MOI is empty", "Cannot create simulation.",
-                                      "smc->GetConfig().WithMOI(length, mass)");
+      throw exceptions::ArmConfigurationException("Arm MOI is empty", "Cannot create simulation.",
+                                                  "smc->GetConfig().WithMOI(length, mass)");
     }
 
     auto& gearingOpt = m_smc->GetConfig().GetMotorGearing();

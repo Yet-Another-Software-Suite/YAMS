@@ -24,7 +24,7 @@
 #include <numbers>
 #include <string>
 
-#include "yams/exceptions/ElevatorConfigurationException.hpp"
+#include "yams/exceptions.hpp"
 #include "yams/gearing/MechanismGearing.hpp"
 #include "yams/motorcontrollers/simulation/ElevatorSimSupplier.hpp"
 
@@ -57,28 +57,29 @@ Elevator::Elevator(const config::ElevatorConfig& config)
   if (frc::RobotBase::IsSimulation()) {
     // Configuration checks.
     if (!config.GetCarriageMass().has_value()) {
-      throw ElevatorConfigurationException("Mass is not configured!", "Cannot create simulator",
-                                           "WithCarriageMass(units::kilogram_t)");
+      throw exceptions::ElevatorConfigurationException("Mass is not configured!",
+                                                       "Cannot create simulator",
+                                                       "WithCarriageMass(units::kilogram_t)");
     }
     if (!config.GetMinHeight().has_value()) {
-      throw ElevatorConfigurationException("Minimum height is not configured!",
-                                           "Cannot create simulator",
-                                           "WithMinimumHeight(units::meter_t)");
+      throw exceptions::ElevatorConfigurationException("Minimum height is not configured!",
+                                                       "Cannot create simulator",
+                                                       "WithMinimumHeight(units::meter_t)");
     }
     if (!config.GetMaxHeight().has_value()) {
-      throw ElevatorConfigurationException("Maximum height is not configured!",
-                                           "Cannot create simulator",
-                                           "WithMaximumHeight(units::meter_t)");
+      throw exceptions::ElevatorConfigurationException("Maximum height is not configured!",
+                                                       "Cannot create simulator",
+                                                       "WithMaximumHeight(units::meter_t)");
     }
     if (!m_smc->GetConfig().GetStartingPosition().has_value()) {
-      throw ElevatorConfigurationException("Starting position is not configured!",
-                                           "Cannot create simulator",
-                                           "smc.WithStartingPosition(units::meter_t)");
+      throw exceptions::ElevatorConfigurationException("Starting position is not configured!",
+                                                       "Cannot create simulator",
+                                                       "smc.WithStartingPosition(units::meter_t)");
     }
     if (!m_smc->GetConfig().GetMechanismCircumference().has_value()) {
-      throw ElevatorConfigurationException("Mechanism circumference is not configured!",
-                                           "Cannot create simulator",
-                                           "SMC.WithMechanismCircumference(units::meter_t)");
+      throw exceptions::ElevatorConfigurationException(
+          "Mechanism circumference is not configured!", "Cannot create simulator",
+          "SMC.WithMechanismCircumference(units::meter_t)");
     }
 
     frc::DCMotor dcMotor = m_smc->GetDCMotor();

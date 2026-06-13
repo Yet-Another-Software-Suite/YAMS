@@ -20,7 +20,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "yams/exceptions/SmartMotorControllerConfigurationException.hpp"
+#include "yams/exceptions.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 
@@ -388,7 +388,7 @@ void SmartMotorControllerTelemetry::ApplyTuningValues(SmartMotorController& smc)
 
   SmartMotorControllerConfig& cfg = smc.GetConfig();
   if (cfg.GetMotorControllerMode() != SmartMotorControllerConfig::ControlMode::CLOSED_LOOP) {
-    throw yams::SmartMotorControllerConfigurationException(
+    throw yams::exceptions::SmartMotorControllerConfigurationException(
         "Live tuning does not work in OPEN_LOOP", "Cannot apply setpoints for Live Tuning.",
         ".withControlMode(ControlMode.CLOSED_LOOP)");
   }
