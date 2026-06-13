@@ -108,12 +108,10 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * <pre>{@code
  * // Configure and create a Kraken X60 TalonFX on CAN ID 5
  * SmartMotorControllerConfig config = new SmartMotorControllerConfig()
- *     .withInverted(false)
+ *     .withMotorInverted(false)
  *     .withStatorCurrentLimit(Amps.of(60))
  *     .withSupplyCurrentLimit(Amps.of(80))
- *     .withKp(0.3)
- *     .withKs(0.1)
- *     .withKv(0.12);
+ *     .withClosedLoopController(0.3, 0.1, 0.12);
  * SmartMotorController motor = new TalonFXWrapper(
  *     new TalonFX(5), DCMotor.getKrakenX60(1), config);
  * Elevator elevator = new Elevator(new ElevatorConfig(motor).withDrumRadius(Inches.of(1)));

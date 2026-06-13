@@ -38,7 +38,7 @@
  * <pre>{@code
  * // TalonFX (Kraken X60) on CAN ID 2
  * SmartMotorControllerConfig config = new SmartMotorControllerConfig()
- *     .withKp(10.0).withKd(0.1).withStatorCurrentLimit(Amps.of(80));
+ *     .withClosedLoopController(10.0,0,0.1).withStatorCurrentLimit(Amps.of(80));
  * SmartMotorController motor = new TalonFXWrapper(
  *     new TalonFX(2), DCMotor.getKrakenX60(1), config);
  *

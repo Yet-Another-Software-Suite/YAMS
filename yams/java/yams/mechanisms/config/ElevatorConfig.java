@@ -28,10 +28,8 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  * <h2>Configuration Example</h2>
  * <pre>{@code
  * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
- *     .withKp(0.5)
- *     .withKs(0.1)
- *     .withKg(0.4)
- *     .withKv(0.12)
+ *     .withClosedLoopController(0.5,0,0)
+ *     .withFeedforward(new ElevatorFeedforward(0.1,0.4,0.12)
  *     .withStatorCurrentLimit(Amps.of(40));
  * SmartMotorController motor = new TalonFXWrapper(
  *     new TalonFX(4), DCMotor.getKrakenX60(1), motorConfig);

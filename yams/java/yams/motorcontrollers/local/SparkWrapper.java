@@ -94,9 +94,9 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * <pre>{@code
  * // Configure and create a SPARK MAX (NEO motor) on CAN ID 3
  * SmartMotorControllerConfig config = new SmartMotorControllerConfig()
- *     .withInverted(false)
+ *     .withMotorInverted(false)
  *     .withStatorCurrentLimit(Amps.of(40))
- *     .withKp(0.2)
+ *     .withClosedLoopController(0.2,0,0)
  *     .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5)); // required for SparkAbsoluteEncoder
  * SmartMotorController motor = new SparkWrapper(
  *     new SparkMax(3, MotorType.kBrushless), DCMotor.getNEO(1), config);

@@ -111,9 +111,9 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * <pre>{@code
  * // Configure and create a TalonFXS (Minion) on CAN ID 7
  * SmartMotorControllerConfig config = new SmartMotorControllerConfig()
- *     .withInverted(false)
+ *     .withMotorInverted(false)
  *     .withStatorCurrentLimit(Amps.of(30))
- *     .withKp(0.1);
+ *     .withClosedLoopController(0.1,0,0);
  * SmartMotorController motor = new TalonFXSWrapper(
  *     new TalonFXS(7), DCMotor.getMinion(1), config);
  * FlyWheel flywheel = new FlyWheel(new FlyWheelConfig(motor));

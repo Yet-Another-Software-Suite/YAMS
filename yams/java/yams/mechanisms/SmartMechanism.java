@@ -49,7 +49,7 @@ import yams.telemetry.MechanismTelemetry;
  * <pre>{@code
  * // 1. Motor config
  * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
- *     .withKp(0.2).withKs(0.05).withStatorCurrentLimit(Amps.of(40));
+ *     .withClosedLoopController(0.2,0,0).withFeedforward(new ArmFeedforawrd(0.05,0,0)).withStatorCurrentLimit(Amps.of(40));
  * // 2. Motor
  * SmartMotorController motor = new SparkWrapper(
  *     new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), motorConfig);

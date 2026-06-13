@@ -44,7 +44,7 @@ import yams.motorcontrollers.simulation.ArmSimSupplier;
  * // Build and construct
  * SmartMotorController motor = new SparkWrapper(
  *     new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1),
- *     new SmartMotorControllerConfig().withKp(0.25).withStatorCurrentLimit(Amps.of(40)));
+ *     new SmartMotorControllerConfig().withClosedLoopController(0.2,0,0).withStatorCurrentLimit(Amps.of(40)));
  * Arm arm = new Arm(new ArmConfig(motor).withLength(Meters.of(0.5)));
  *
  * // Schedule a setpoint command

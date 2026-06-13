@@ -48,10 +48,8 @@ import yams.motorcontrollers.simulation.DCMotorSimSupplier;
  * <pre>{@code
  * // --- Configuration ---
  * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
- *     .withKp(0.15)
- *     .withKd(0.004)
- *     .withKs(0.05)
- *     .withKg(0.2)
+ *     .withClosedLoopController(0.15,0,0.004)
+ *     .withFeedforward(new SimpleMotorFeedforward(0.05,0,0)
  *     .withStatorCurrentLimit(Amps.of(40))
  *     .withMechanismUpperLimit(Degrees.of(60))
  *     .withMechanismLowerLimit(Degrees.of(0))

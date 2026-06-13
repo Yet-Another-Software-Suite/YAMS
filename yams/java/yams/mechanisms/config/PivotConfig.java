@@ -25,10 +25,8 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  * <pre>{@code
  * // Create the motor controller configuration with PID and feedforward gains
  * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
- *     .withKp(0.15)
- *     .withKd(0.004)
- *     .withKs(0.05)
- *     .withKg(0.2)
+ *     .withClosedLoopController(0.15,0,0)
+ *     .withFeedforward(new SimpleMotorFeedforward(0.004, 0.05, 0.2)
  *     .withStatorCurrentLimit(Amps.of(40))
  *     .withMechanismUpperLimit(Degrees.of(60))
  *     .withMechanismLowerLimit(Degrees.of(0))

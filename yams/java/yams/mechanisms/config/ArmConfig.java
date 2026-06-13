@@ -27,10 +27,8 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  * <pre>{@code
  * // Create a motor first
  * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
- *     .withKp(0.25)
- *     .withKd(0.005)
- *     .withKs(0.05)
- *     .withKg(0.3)
+ *     .withClosedLoopController(0.12,0,0)
+ *     .withFeedforward(new ArmFeedforward(0.005,0.05,0.3))
  *     .withStatorCurrentLimit(Amps.of(40))
  *     .withMechanismUpperLimit(Degrees.of(90))
  *     .withMechanismLowerLimit(Degrees.of(-10));

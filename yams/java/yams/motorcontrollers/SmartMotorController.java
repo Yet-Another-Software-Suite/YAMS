@@ -74,7 +74,7 @@ import yams.telemetry.SmartMotorControllerTelemetryConfig;
  * <h2>Example</h2>
  * <pre>{@code
  * SmartMotorControllerConfig config = new SmartMotorControllerConfig()
- *     .withKp(0.1).withKs(0.05).withStatorCurrentLimit(Amps.of(40));
+ *     .withClosedLoopController(0.1,0,0).withFeedforward(new SimpleMotorFeedforward(0.05,0,0)).withStatorCurrentLimit(Amps.of(40));
  * SmartMotorController motor = new SparkWrapper(
  *     new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), config);
  *
