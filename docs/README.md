@@ -16,6 +16,10 @@ layout:
     visible: false
   metadata:
     visible: true
+  tags:
+    visible: true
+  actions:
+    visible: true
 ---
 
 # Yet Another Mechanism System
@@ -34,7 +38,7 @@ Less guesswork, no complexity—just your first successful mechanism, fast.
 
 Setting up your first mechanism should be easy and painless, and that's exactly what YAMS aims to provide.
 
-YAMS provides an effortless programming experience by neatly dividing the process into distinct steps: SmartMotorController Configuration, SmartMotorController creation, Mechanism configuration, and Mechanism creation. This structured approach simplifies the integration of mechanisms like Arms, Elevators, Turrets, and more, allowing developers to effortlessly manage and control them using commands from Mechanism classes. Built exclusively for WPILib command-based programming, YAMS also offers sophisticated features such as advanced telemetry and live tuning, ensuring a streamlined and efficient development process for all supported mechanisms.
+YAMS provides an effortless programming experience by neatly dividing the process into distinct steps: SmartMotorController Configuration, SmartMotorController creation, Mechanism configuration, and Mechanism creation. This structured approach simplifies the integration of mechanisms like Arms, Elevators, Pivots (like turrets and hoods), SwerveDrives, FlyWheels. allowing developers to effortlessly manage and control them using commands from Mechanism classes. Built exclusively for WPILib command-based programming, YAMS also offers sophisticated features such as advanced telemetry and live tuning, ensuring a streamlined and efficient development process for all supported mechanisms.
 
 <a href="https://app.gitbook.com/o/MwECAyhaWCMK5V9K79gd/s/ZM0CFmYiQzcrY4zDcTtZ/" class="button primary" data-icon="rocket-launch">Get started</a> <a href="https://app.gitbook.com/o/MwECAyhaWCMK5V9K79gd/s/ezOwaXLQ3h1N7tr3zYnj/" class="button secondary" data-icon="terminal">API reference</a>
 {% endcolumn %}
@@ -44,7 +48,8 @@ YAMS provides an effortless programming experience by neatly dividing the proces
 ```java
 // Create your motor controller config
 SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
-      .withClosedLoopController(4, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
+      .withClosedLoopController(4, 0, 0)
+      .withTrapezoidalProfile(DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
       .withSoftLimits(Degrees.of(-30), Degrees.of(100))
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
       .withIdleMode(MotorMode.BRAKE)
@@ -54,7 +59,8 @@ SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withClosedLoopRampRate(Seconds.of(0.25))
       .withOpenLoopRampRate(Seconds.of(0.25))
       .withFeedforward(new ArmFeedforward(0, 0, 0, 0))
-      .withControlMode(ControlMode.CLOSED_LOOP);
+      .withControlMode(ControlMode.CLOSED_LOOP)
+      .withStartingPosition(Degrees.of(0));
 
 // Create your motor
 TalonFXS                   armMotor    = new TalonFXS(1);
@@ -65,9 +71,7 @@ ArmConfig                  config    = new ArmConfig(motor)
       .withLength(Meters.of(0.135))
       .withHardLimits(Degrees.of(-100), Degrees.of(200))
       .withTelemetry("ArmExample", TelemetryVerbosity.HIGH)
-      .withMass(Pounds.of(1))
-      .withStartingPosition(Degrees.of(0))
-      .withHorizontalZero(Degrees.of(0));
+      .withMass(Pounds.of(1));
 
 // Create the Arm!
 Arm                        arm = new Arm(config);
