@@ -23,7 +23,7 @@
 #include <memory>
 #include <string>
 
-#include "yams/exceptions/PivotConfigurationException.hpp"
+#include "yams/exceptions.hpp"
 #include "yams/gearing/MechanismGearing.hpp"
 #include "yams/motorcontrollers/simulation/DCMotorSimSupplier.hpp"
 
@@ -56,23 +56,24 @@ Pivot::Pivot(const config::PivotConfig& config)
   if (frc::RobotBase::IsSimulation()) {
     // Configuration checks.
     if (!config.GetMinAngle().has_value()) {
-      throw PivotConfigurationException("Pivot lower hard limit is empty",
-                                        "Cannot create simulation.",
-                                        "WithMinAngle(units::degree_t)");
+      throw exceptions::PivotConfigurationException("Pivot lower hard limit is empty",
+                                                    "Cannot create simulation.",
+                                                    "WithMinAngle(units::degree_t)");
     }
     if (!config.GetMaxAngle().has_value()) {
-      throw PivotConfigurationException("Pivot upper hard limit is empty",
-                                        "Cannot create simulation.",
-                                        "WithMaxAngle(units::degree_t)");
+      throw exceptions::PivotConfigurationException("Pivot upper hard limit is empty",
+                                                    "Cannot create simulation.",
+                                                    "WithMaxAngle(units::degree_t)");
     }
     if (!m_smc->GetConfig().GetStartingPosition().has_value()) {
-      throw PivotConfigurationException("Pivot starting angle is empty",
-                                        "Cannot create simulation.",
-                                        "smc.WithStartingPosition(units::degree_t)");
+      throw exceptions::PivotConfigurationException("Pivot starting angle is empty",
+                                                    "Cannot create simulation.",
+                                                    "smc.WithStartingPosition(units::degree_t)");
     }
     if (!m_smc->GetConfig().GetMOI()) {
-      throw PivotConfigurationException("Pivot MOI is empty", "Cannot create simulation.",
-                                        "smc->GetConfig().WithMOI(length, mass)");
+      throw exceptions::PivotConfigurationException("Pivot MOI is empty",
+                                                    "Cannot create simulation.",
+                                                    "smc->GetConfig().WithMOI(length, mass)");
     }
 
     // Create DCMotorSim and wire up DCMotorSimSupplier.

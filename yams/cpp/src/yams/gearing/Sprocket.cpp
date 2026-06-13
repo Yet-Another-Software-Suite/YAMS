@@ -6,11 +6,9 @@
 #include <string>
 #include <vector>
 
-#include "yams/exceptions/InvalidStageGivenException.hpp"
-#include "yams/exceptions/NoStagesGivenException.hpp"
+#include "yams/exceptions.hpp"
 
 namespace yams::gearing {
-
 Sprocket::Sprocket(double reductionStage) { SetupStages({reductionStage}); }
 
 Sprocket::Sprocket(std::initializer_list<double> reductionStages) {
@@ -25,7 +23,7 @@ Sprocket::Sprocket(const std::vector<std::string>& stages) {
   for (const auto& stage : stages) {
     auto colon = stage.find(':');
     if (colon == std::string::npos) {
-      throw InvalidStageGivenException(stage);
+      throw exceptions::InvalidStageGivenException(stage);
     }
     double in = std::stod(stage.substr(0, colon));
     double out = std::stod(stage.substr(colon + 1));
@@ -59,7 +57,7 @@ double Sprocket::GetOutputToInputConversionFactor() const { return m_sprocketRed
 
 void Sprocket::SetupStages(const std::vector<double>& stages) {
   if (stages.empty()) {
-    throw NoStagesGivenException{};
+    throw exceptions::NoStagesGivenException{};
   }
   m_reductionStages = stages;
   double ratio = 1.0 / stages[0];

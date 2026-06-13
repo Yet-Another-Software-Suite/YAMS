@@ -7,7 +7,7 @@ namespace yams::math {
 
 double SmartMath::SensorToMechanismRatio(std::initializer_list<double> stages) {
   if (stages.size() == 0) {
-    throw NoStagesGivenException{};
+    throw exceptions::NoStagesGivenException{};
   }
   double ratio = 1.0;
   for (double s : stages) {
@@ -18,7 +18,7 @@ double SmartMath::SensorToMechanismRatio(std::initializer_list<double> stages) {
 
 double SmartMath::GearBox(std::initializer_list<double> stages) {
   if (stages.size() == 0) {
-    throw NoStagesGivenException{};
+    throw exceptions::NoStagesGivenException{};
   }
   double result = 1.0;
   for (double s : stages) {

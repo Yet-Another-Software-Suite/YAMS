@@ -75,8 +75,4 @@
 #include "yams/telemetry/SmartMotorControllerTelemetryConfig.hpp"
 
 // ---- Exceptions ------------------------------------------------------------
-#include "yams/exceptions/InvalidStageGivenException.hpp"
-#include "yams/exceptions/NoStagesGivenException.hpp"
-#include "yams/exceptions/SmartMotorControllerConfigurationException.hpp"
-#include "yams/exceptions/SwerveDriveConfigurationException.hpp"
-#include "yams/exceptions/YamsException.hpp"
+#include "yams/exceptions.hpp"

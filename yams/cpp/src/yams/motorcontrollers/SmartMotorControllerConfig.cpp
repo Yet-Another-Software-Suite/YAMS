@@ -16,7 +16,7 @@
 #include <utility>
 #include <vector>
 
-#include "yams/exceptions/SmartMotorControllerConfigurationException.hpp"
+#include "yams/exceptions.hpp"
 
 namespace yams::motorcontrollers {
 
@@ -127,7 +127,7 @@ void SmartMotorControllerConfig::ValidateBasicOptions() const {
   std::cerr << "========= Basic Option Validation FAILED ==========\n";
   for (auto opt : m_basicOptions)
     std::cerr << "  Missing required option: " << ToString(opt) << "\n";
-  throw SmartMotorControllerConfigurationException(
+  throw exceptions::SmartMotorControllerConfigurationException(
       "Basic options are not fully applied", "ApplyConfig did not access all tracked options",
       "Call the corresponding getter for each missing option in ApplyConfig");
 }
@@ -137,7 +137,7 @@ void SmartMotorControllerConfig::ValidateExternalEncoderOptions() const {
   std::cerr << "========= External Encoder Option Validation FAILED ==========\n";
   for (auto opt : m_externalEncoderOptions)
     std::cerr << "  Missing required option: " << ToString(opt) << "\n";
-  throw SmartMotorControllerConfigurationException(
+  throw exceptions::SmartMotorControllerConfigurationException(
       "External encoder options are not fully applied",
       "ApplyConfig did not access all tracked external encoder options",
       "Call the corresponding getter for each missing option in ApplyConfig");
@@ -383,7 +383,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithMechanismRadius(unit
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithMechanismLimits(units::turn_t lower,
                                                                             units::turn_t upper) {
   if (m_continuousWrappingMax)
-    throw SmartMotorControllerConfigurationException(
+    throw exceptions::SmartMotorControllerConfigurationException(
         "Soft limits set while configuring continuous wrapping", "Cannot set soft limits",
         "WithContinuousWrapping() should be removed");
   m_mechLowerLimit = lower;
@@ -422,15 +422,15 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithClosedLoopMaxVoltage
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithContinuousWrapping(units::turn_t min,
                                                                                units::turn_t max) {
   if (m_mechLowerLimit || m_mechUpperLimit)
-    throw SmartMotorControllerConfigurationException(
+    throw exceptions::SmartMotorControllerConfigurationException(
         "Soft limits set while configuring continuous wrapping", "Cannot set continuous wrapping",
         "WithMechanismLimits() should be removed");
   if (m_measLowerLimit || m_measUpperLimit)
-    throw SmartMotorControllerConfigurationException(
+    throw exceptions::SmartMotorControllerConfigurationException(
         "Measurement soft limits set while configuring continuous wrapping",
         "Cannot set continuous wrapping", "WithMeasurementLimits() should be removed");
   if (m_mechanismCircumference)
-    throw SmartMotorControllerConfigurationException(
+    throw exceptions::SmartMotorControllerConfigurationException(
         "Distance based mechanism used with continuous wrapping", "Cannot set continuous wrapping",
         "WithMechanismCircumference() should be removed");
   m_continuousWrappingMin = min;
@@ -515,7 +515,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExternalEncoderGeari
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithExternalEncoderDiscontinuityPoint(
     units::turn_t discontinuityPoint) {
   if (discontinuityPoint != units::turn_t{0.5} && discontinuityPoint != units::turn_t{1.0}) {
-    throw SmartMotorControllerConfigurationException(
+    throw exceptions::SmartMotorControllerConfigurationException(
         "Cannot set external encoder discontinuity point",
         "Discontinuity point must be 0.5 or 1 rotations",
         "WithExternalEncoderDiscontinuityPoint(units::turn_t{0.5})");
@@ -744,7 +744,7 @@ std::optional<units::meter_t> SmartMotorControllerConfig::GetMeasurementUpperLim
 std::optional<units::turn_t> SmartMotorControllerConfig::GetContinuousWrapping() const {
   if (m_continuousWrappingMax && m_continuousWrappingMin &&
       std::abs((m_continuousWrappingMax->value() - 1.0) - m_continuousWrappingMin->value()) > 1e-9)
-    throw SmartMotorControllerConfigurationException(
+    throw exceptions::SmartMotorControllerConfigurationException(
         "Bounds are not correct!", "Cannot get the continuous wrapping point.",
         "WithContinuousWrapping(min, max) where max - min == 1 rotation");
   m_basicOptions.erase(BasicOptions::ContinuousWrapping);
@@ -754,7 +754,7 @@ std::optional<units::turn_t> SmartMotorControllerConfig::GetContinuousWrapping()
 std::optional<units::turn_t> SmartMotorControllerConfig::GetContinuousWrappingMin() const {
   if (m_continuousWrappingMax && m_continuousWrappingMin &&
       std::abs((m_continuousWrappingMax->value() - 1.0) - m_continuousWrappingMin->value()) > 1e-9)
-    throw SmartMotorControllerConfigurationException(
+    throw exceptions::SmartMotorControllerConfigurationException(
         "Bounds are not correct!", "Cannot get the continuous wrapping point.",
         "WithContinuousWrapping(min, max) where max - min == 1 rotation");
   return m_continuousWrappingMin;

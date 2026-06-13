@@ -7,8 +7,7 @@
 #include <string>
 #include <vector>
 
-#include "yams/exceptions/InvalidStageGivenException.hpp"
-#include "yams/exceptions/NoStagesGivenException.hpp"
+#include "yams/exceptions.hpp"
 
 namespace yams::gearing {
 
@@ -26,7 +25,7 @@ GearBox::GearBox(const std::vector<std::string>& stages) {
   for (const auto& stage : stages) {
     auto colon = stage.find(':');
     if (colon == std::string::npos) {
-      throw InvalidStageGivenException(stage);
+      throw exceptions::InvalidStageGivenException(stage);
     }
     double in = std::stod(stage.substr(0, colon));
     double out = std::stod(stage.substr(colon + 1));
@@ -82,7 +81,7 @@ double GearBox::GetOutputToInputConversionFactor() const { return 1.0 / m_gearRe
 
 void GearBox::SetupGearBox(const std::vector<double>& stages) {
   if (stages.empty()) {
-    throw NoStagesGivenException{};
+    throw exceptions::NoStagesGivenException{};
   }
   m_reductionStages = stages;
   double gearBox = 1.0 / stages[0];

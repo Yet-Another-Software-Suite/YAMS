@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 
-#include "yams/exceptions/SmartMotorControllerConfigurationException.hpp"
+#include "yams/exceptions.hpp"
 #include "yams/math/LQRController.hpp"
 #include "yams/motorcontrollers/simulation/DCMotorSimSupplier.hpp"
 
@@ -190,20 +190,20 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& cfg) {
     } else {
       // Validate: encoder-specific options require an encoder to be attached.
       if (m_config.GetExternalEncoderZeroOffset().has_value())
-        throw SmartMotorControllerConfigurationException(
+        throw exceptions::SmartMotorControllerConfigurationException(
             "Zero offset is only available for external encoders",
             "Zero offset could not be applied", "WithExternalEncoder(encoder)");
       if (m_config.GetExternalEncoderDiscontinuityPoint().has_value())
-        throw SmartMotorControllerConfigurationException(
+        throw exceptions::SmartMotorControllerConfigurationException(
             "External encoder discontinuity point is only available for external encoders",
             "Discontinuity point could not be applied", "WithExternalEncoder(encoder)");
       if (m_config.GetExternalEncoderInverted().has_value())
-        throw SmartMotorControllerConfigurationException(
+        throw exceptions::SmartMotorControllerConfigurationException(
             "External encoder cannot be inverted when no external encoder is attached",
             "External encoder inversion could not be applied",
             "WithExternalEncoder(encoder) + WithExternalEncoderInverted(bool)");
       if (m_config.GetExternalEncoderGearing().has_value())
-        throw SmartMotorControllerConfigurationException(
+        throw exceptions::SmartMotorControllerConfigurationException(
             "External encoder gearing requires an external encoder to be attached",
             "External encoder gearing could not be applied",
             "WithExternalEncoder(encoder) + WithExternalEncoderGearing(...)");

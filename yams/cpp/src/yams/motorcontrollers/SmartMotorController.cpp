@@ -22,7 +22,7 @@
 #include <utility>
 #include <vector>
 
-#include "yams/exceptions/SmartMotorControllerConfigurationException.hpp"
+#include "yams/exceptions.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerCommandRegistry.hpp"
 
 namespace yams::motorcontrollers {
@@ -425,12 +425,12 @@ void SmartMotorController::CheckConfigSafety() {
   if (IsMotor(GetDCMotor(), neo550)) {
     auto limit = m_config.GetStatorStallCurrentLimit();
     if (!limit) {
-      throw SmartMotorControllerConfigurationException(
+      throw exceptions::SmartMotorControllerConfigurationException(
           "Stator current limit is not defined for NEO550!", "Safety check failed.",
           "WithStatorCurrentLimit(Current)");
     }
     if (*limit > 40) {
-      throw SmartMotorControllerConfigurationException(
+      throw exceptions::SmartMotorControllerConfigurationException(
           "Stator current limit is too high for NEO550!", "Safety check failed.",
           "WithStatorCurrentLimit(Current) where the Current is under 40A");
     }

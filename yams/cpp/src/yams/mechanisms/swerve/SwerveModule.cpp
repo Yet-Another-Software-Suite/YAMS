@@ -11,7 +11,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "yams/exceptions/SmartMotorControllerConfigurationException.hpp"
+#include "yams/exceptions.hpp"
 
 namespace yams::mechanisms::swerve {
 
@@ -29,7 +29,7 @@ SwerveModule::SwerveModule(const config::SwerveModuleConfig& config)
   // external feedback is not enabled, that encoder can never be used.
   if (m_azimuthMotorController->GetConfig().GetExternalEncoder().has_value() &&
       !m_azimuthMotorController->GetConfig().GetUseExternalFeedback()) {
-    throw SmartMotorControllerConfigurationException(
+    throw exceptions::SmartMotorControllerConfigurationException(
         "External encoder cannot be used without external feedback",
         "External encoder could not be used", "WithUseExternalFeedbackEncoder(true)");
   }
