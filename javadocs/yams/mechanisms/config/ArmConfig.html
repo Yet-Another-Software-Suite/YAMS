@@ -78,7 +78,28 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">ArmConfig</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Arm configuration class.</div>
+<div class="block">Arm configuration class.
+
+ <h2>Configuration Example</h2>
+ <pre><code>
+ // Create a motor first
+ SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
+     .withClosedLoopController(0.12,0,0)
+     .withFeedforward(new ArmFeedforward(0.005,0.05,0.3))
+     .withStatorCurrentLimit(Amps.of(40))
+     .withMechanismUpperLimit(Degrees.of(90))
+     .withMechanismLowerLimit(Degrees.of(-10));
+ SmartMotorController motor = new SparkWrapper(
+     new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), motorConfig);
+
+ // Build the arm config
+ ArmConfig config = new ArmConfig(motor)
+     .withLength(Meters.of(0.5))
+     .withMass(Kilograms.of(2.0))
+     .withHardLimits(Degrees.of(-10), Degrees.of(90))
+     .withTelemetry("Arm", TelemetryVerbosity.HIGH)
+     .withSimStartingPosition(Degrees.of(0));
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

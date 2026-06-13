@@ -78,7 +78,27 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">DifferentialMechanismConfig</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Differential Mechanism config.</div>
+<div class="block">Configuration for a <a href="../positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a> driven by two coordinated motors working
+ differentially. In a differential mechanism the sum and difference of the two motor outputs
+ independently control two separate degrees of freedom — commonly referred to as <b>tilt</b>
+ (the average of both motors) and <b>twist</b> (half the difference between the two motors).
+
+ <p>This class is a builder that collects every setting needed before the mechanism is
+ constructed. All <code>with*()</code> methods return <code>this</code> so calls can be chained.</p>
+
+ <h2>Builder Example</h2>
+ <pre><code>
+ // leftSMC / rightSMC are SmartMotorController instances already configured
+ // with gearing from the motor to the differential bevel gears.
+ DifferentialMechanismConfig config = new DifferentialMechanismConfig(leftSMC, rightSMC)
+     .withStartingPosition(Degrees.of(45), Degrees.of(0))  // tilt=45°, twist=0°
+     .withLength(Inches.of(18))
+     .withMOI(Inches.of(18), Pounds.of(3))
+     .withTelemetry("DifferentialWrist", TelemetryVerbosity.HIGH)
+     .withSimColor(new Color8Bit(Color.kOrange));
+
+ DifferentialMechanism wrist = new DifferentialMechanism(config);
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

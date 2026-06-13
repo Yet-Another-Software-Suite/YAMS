@@ -84,11 +84,38 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">DoubleJointedArmConfigurationException</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/RuntimeException.html" title="class or interface in java.lang" class="external-link">RuntimeException</a></span></div>
-<div class="block">Exception for when the Arm is configured incorrectly.</div>
+<div class="block">Thrown by <a href="../mechanisms/positional/DoubleJointedArm.html" title="class in yams.mechanisms.positional"><code>DoubleJointedArm</code></a> when a required field in the
+ lower-joint or upper-joint <a href="../mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a> is missing or invalid.
+
+ <p>Common triggers include:
+ <ul>
+   <li>The lower and upper joint motor controllers do not share the same WPILib
+       <code>Subsystem</code> instance — both must reference the same subsystem so that a
+       single command can require it</li>
+   <li>Starting angle missing on either joint config — both the lower and upper
+       <code>ArmConfig</code> must have a starting position set via
+       <code>SmartMotorControllerConfig.withStartingPosition(Angle)</code></li>
+ </ul>
+
+ <p><b>Resolution:</b> Ensure both joint configs supply motors via
+ <code>ArmConfig.withSmartMotorController(SmartMotorController)</code>, that both motors
+ are bound to the same subsystem via <code>SmartMotorControllerConfig.withSubsystem(Subsystem)</code>,
+ and that both configs include <code>SmartMotorControllerConfig.withStartingPosition(Angle)</code>.
+
+ <p>Example minimal configuration:
+ <pre><code>
+ ArmConfig lowerConfig = new ArmConfig()
+     .withSmartMotorController(SmartMotorController.create(SPARK_MAX, DCMotor.getNEO(1), lowerMotorCfg));
+ ArmConfig upperConfig = new ArmConfig()
+     .withSmartMotorController(SmartMotorController.create(SPARK_MAX, DCMotor.getNEO(1), upperMotorCfg));
+ DoubleJointedArm arm = new DoubleJointedArm(lowerConfig, upperConfig);
+ </code></pre></div>
 <dl class="notes">
 <dt>See Also:</dt>
 <dd>
 <ul class="see-list">
+<li><a href="../mechanisms/positional/DoubleJointedArm.html" title="class in yams.mechanisms.positional"><code>DoubleJointedArm</code></a></li>
+<li><a href="../mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a></li>
 <li><a href="../../serialized-form.html#yams.exceptions.DoubleJointedArmConfigurationException">Serialized Form</a></li>
 </ul>
 </dd>

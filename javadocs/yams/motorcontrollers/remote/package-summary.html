@@ -61,8 +61,58 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="package-signature">package <span class="element-name">yams.motorcontrollers.remote</span></div>
 <section class="package-description" id="package-description">
-<div class="block">Motor controller wrappers for sufficiently advanced motor controllers which can use the motor controller
- functionality.</div>
+<div class="block">CTRE motor controller wrappers whose closed-loop control runs on the motor controller itself.
+
+ <p>This package contains adapters for CTRE TalonFX-family motor controllers. Because the
+ Phoenix 6 firmware executes PID loops directly on the motor controller hardware, these
+ wrappers are classified as <em>remote</em>: setpoints are sent over CAN and the device
+ closes the loop autonomously at a high update rate without consuming roboRIO CPU cycles.
+
+ <h2>Core types</h2>
+ <ul>
+   <li><a href="TalonFXWrapper.html" title="class in yams.motorcontrollers.remote"><code>TalonFXWrapper</code></a> — adapter for the CTRE TalonFX
+       motor controller, used in the Kraken X60 and Falcon 500 brushless motors. Supports
+       all Phoenix 6 control modes (position, velocity, motion magic, torque current)
+       through the <a href="../SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> interface.</li>
+   <li><a href="TalonFXSWrapper.html" title="class in yams.motorcontrollers.remote"><code>TalonFXSWrapper</code></a> — adapter for the CTRE TalonFXS
+       motor controller, used with the Minion brushless motor. Functionally equivalent to
+       <code>TalonFXWrapper</code> but targets the TalonFXS CAN device type.</li>
+ </ul>
+
+ <h2>Phoenix 6 API</h2>
+ <p>Both wrappers are built on the <a href="https://v6.docs.ctr-electronics.com/">Phoenix 6
+ API</a>. Configuration is applied via YAMS' own
+ <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> fluent builder, which translates
+ YAMS settings into the appropriate <code>TalonFXConfiguration</code> or
+ <code>TalonFXSConfiguration</code> objects before pushing them to the device.
+
+ <h2>CANcoder discontinuity</h2>
+ <p>When a CANcoder is fused as the remote sensor, specifying a discontinuity point via
+ <a href="../SmartMotorControllerConfig.html#withExternalEncoderDiscontinuityPoint(edu.wpi.first.units.measure.Angle)"><code>SmartMotorControllerConfig.withExternalEncoderDiscontinuityPoint(edu.wpi.first.units.measure.Angle)</code></a>
+ is <strong>optional</strong>. If omitted, the CTRE default sensor range (<code>[0, 1)</code>)
+ is used. Unlike the REV absolute encoder, the Phoenix 6 firmware handles the wrap
+ transparently in most configurations.
+
+ <h2>Construction</h2>
+ <pre><code>
+ // TalonFX (Kraken X60) on CAN ID 2
+ SmartMotorControllerConfig config = new SmartMotorControllerConfig()
+     .withClosedLoopController(10.0,0,0.1).withStatorCurrentLimit(Amps.of(80));
+ SmartMotorController motor = new TalonFXWrapper(
+     new TalonFX(2), DCMotor.getKrakenX60(1), config);
+
+ // TalonFXS (Minion) on CAN ID 7
+ SmartMotorController miniMotor = new TalonFXSWrapper(
+     new TalonFXS(7), DCMotor.getMinion(1), config);
+ </code></pre></div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="see-list">
+<li><a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></li>
+</ul>
+</dd>
+</dl>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -74,15 +124,16 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><a href="../package-summary.html">yams.motorcontrollers</a></div>
 <div class="col-last even-row-color">
-<div class="block">Motor controller wrappers</div>
+<div class="block">Hardware-agnostic motor controller abstractions for FRC mechanisms.</div>
 </div>
 <div class="col-first odd-row-color"><a href="../local/package-summary.html">yams.motorcontrollers.local</a></div>
 <div class="col-last odd-row-color">
-<div class="block">Motor controller wrappers for motor controllers that require robot controller interfacing for advanced
- functionality.</div>
+<div class="block">REV Robotics motor controller wrappers whose closed-loop control runs on the roboRIO.</div>
 </div>
 <div class="col-first even-row-color"><a href="../simulation/package-summary.html">yams.motorcontrollers.simulation</a></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Physics-based simulation suppliers for YAMS motor controllers.</div>
+</div>
 </div>
 </div>
 </li>

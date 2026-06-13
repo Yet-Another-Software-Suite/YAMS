@@ -70,11 +70,13 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab5"><a href="yams/exceptions/ArmConfigurationException.html" title="class in yams.exceptions">ArmConfigurationException</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab5">
-<div class="block">Exception for when the Arm is configured incorrectly.</div>
+<div class="block">Thrown by <a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a> when a required
+ <a href="yams/mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a> field is missing or invalid.</div>
 </div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="yams/motorcontrollers/simulation/ArmSimSupplier.html" title="class in yams.motorcontrollers.simulation">ArmSimSupplier</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
-<div class="block">ArmSim Supplier</div>
+<div class="block">ArmSim Supplier — simulates a single-jointed arm mechanism using WPILib's
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/SingleJointedArmSim.html" title="class or interface in edu.wpi.first.wpilibj.simulation" class="external-link"><code>SingleJointedArmSim</code></a>.</div>
 </div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/telemetry/BooleanTelemetry.html" title="class in yams.telemetry">BooleanTelemetry</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
@@ -82,7 +84,8 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
-<div class="block">DCMotorSim Supplier</div>
+<div class="block">DCMotorSim Supplier — simulates a generic DC motor load (flywheel, roller, or elevator)
+ using WPILib's <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/DCMotorSim.html" title="class or interface in edu.wpi.first.wpilibj.simulation" class="external-link"><code>DCMotorSim</code></a>.</div>
 </div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/math/DerivativeTimeFilter.html" title="class in yams.math">DerivativeTimeFilter</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
@@ -90,23 +93,28 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="yams/mechanisms/positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional">DifferentialMechanism</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
-<div class="block">Arm mechanism.</div>
+<div class="block">A differential mechanism for FRC robots driven by two coordinated motors whose combined motion
+ produces two distinct and independent outputs.</div>
 </div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/mechanisms/config/DifferentialMechanismConfig.html" title="class in yams.mechanisms.config">DifferentialMechanismConfig</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
-<div class="block">Differential Mechanism config.</div>
+<div class="block">Configuration for a <a href="yams/mechanisms/positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a> driven by two coordinated motors working
+ differentially.</div>
 </div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab5"><a href="yams/exceptions/DifferentialMechanismConfigurationException.html" title="class in yams.exceptions">DifferentialMechanismConfigurationException</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab5">
-<div class="block">Exception for when the Differential Mechanism is configured incorrectly.</div>
+<div class="block">Thrown by <a href="yams/mechanisms/positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a> or
+ <a href="yams/mechanisms/config/DifferentialMechanismConfig.html" title="class in yams.mechanisms.config"><code>DifferentialMechanismConfig</code></a> when a required field is missing
+ or an attempt is made to violate a config invariant.</div>
 </div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/mechanisms/positional/DoubleJointedArm.html" title="class in yams.mechanisms.positional">DoubleJointedArm</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
-<div class="block">Arm mechanism.</div>
+<div class="block">A two-segment arm where each joint has its own independent motor controller.</div>
 </div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab5"><a href="yams/exceptions/DoubleJointedArmConfigurationException.html" title="class in yams.exceptions">DoubleJointedArmConfigurationException</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab5">
-<div class="block">Exception for when the Arm is configured incorrectly.</div>
+<div class="block">Thrown by <a href="yams/mechanisms/positional/DoubleJointedArm.html" title="class in yams.mechanisms.positional"><code>DoubleJointedArm</code></a> when a required field in the
+ lower-joint or upper-joint <a href="yams/mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a> is missing or invalid.</div>
 </div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/telemetry/DoubleTelemetry.html" title="class in yams.telemetry">DoubleTelemetry</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
@@ -138,7 +146,8 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab5"><a href="yams/exceptions/ElevatorConfigurationException.html" title="class in yams.exceptions">ElevatorConfigurationException</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab5">
-<div class="block">Exception for when the Elevator is configured incorrectly.</div>
+<div class="block">Thrown by <a href="yams/mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> when a required
+ <a href="yams/mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config"><code>ElevatorConfig</code></a> field is missing or invalid.</div>
 </div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/math/ExponentialProfilePIDController.html" title="class in yams.math">ExponentialProfilePIDController</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
@@ -154,7 +163,8 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab5"><a href="yams/exceptions/FlyWheelConfigurationException.html" title="class in yams.exceptions">FlyWheelConfigurationException</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab5">
-<div class="block">Exception for when the FlyWheel is configured incorrectly.</div>
+<div class="block">Thrown by <a href="yams/mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a> or <a href="yams/mechanisms/config/FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a>
+ when a required field in <a href="yams/mechanisms/config/FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a> is missing or invalid.</div>
 </div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/gearing/GearBox.html" title="class in yams.gearing">GearBox</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
@@ -162,7 +172,8 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab5"><a href="yams/exceptions/InvalidStageGivenException.html" title="class in yams.exceptions">InvalidStageGivenException</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab5">
-<div class="block">Exception for math errors when trying to find the sensor to mechanism ratio.</div>
+<div class="block">Thrown by <a href="yams/gearing/GearBox.html" title="class in yams.gearing"><code>GearBox</code></a> and <a href="yams/gearing/Sprocket.html" title="class in yams.gearing"><code>Sprocket</code></a> when a gear stage
+ string is not in the required <code>"IN:OUT"</code> format.</div>
 </div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/math/LQRConfig.html" title="class in yams.math">LQRConfig</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
@@ -195,11 +206,15 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab5"><a href="yams/exceptions/MotorNotPresentException.html" title="class in yams.exceptions">MotorNotPresentException</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab5">
-<div class="block">Custom exception for when there is no motor in the mechanism.</div>
+<div class="block">Thrown by a <a href="yams/mechanisms/SmartMechanism.html" title="class in yams.mechanisms"><code>SmartMechanism</code></a> subclass when the primary
+ <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> has not been set before the mechanism
+ attempts to use it.</div>
 </div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab5"><a href="yams/exceptions/NoStagesGivenException.html" title="class in yams.exceptions">NoStagesGivenException</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab5">
-<div class="block">Exception for math errors when trying to find the sensor to mechanism ratio.</div>
+<div class="block">Thrown by <a href="yams/gearing/GearBox.html" title="class in yams.gearing"><code>GearBox</code></a>, <a href="yams/gearing/Sprocket.html" title="class in yams.gearing"><code>Sprocket</code></a>, and
+ <a href="yams/math/SmartMath.html" title="class in yams.math"><code>SmartMath</code></a> when a gear reduction calculation is requested but
+ no gear stages were supplied.</div>
 </div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="yams/mechanisms/positional/Pivot.html" title="class in yams.mechanisms.positional">Pivot</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
@@ -207,11 +222,12 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config">PivotConfig</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
-<div class="block">Pivot config.</div>
+<div class="block">Pivot configuration class.</div>
 </div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab5"><a href="yams/exceptions/PivotConfigurationException.html" title="class in yams.exceptions">PivotConfigurationException</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab5">
-<div class="block">Exception for when the Pivot is configured incorrectly.</div>
+<div class="block">Thrown by <a href="yams/mechanisms/positional/Pivot.html" title="class in yams.mechanisms.positional"><code>Pivot</code></a> or <a href="yams/mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config"><code>PivotConfig</code></a>
+ when a required field in <a href="yams/mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config"><code>PivotConfig</code></a> is missing or invalid.</div>
 </div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/motorcontrollers/simulation/Sensor.html" title="class in yams.motorcontrollers.simulation">Sensor</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
@@ -231,7 +247,7 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="yams/motorcontrollers/SimSupplier.html" title="interface in yams.motorcontrollers">SimSupplier</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab1">
-<div class="block">Provides sim functions for</div>
+<div class="block">Provides sim functions for a YAMS simulated mechanism.</div>
 </div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="yams/math/SmartMath.html" title="class in yams.math">SmartMath</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
@@ -251,7 +267,8 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="yams/motorcontrollers/SmartMotorControllerCommandRegistry.html" title="class in yams.motorcontrollers">SmartMotorControllerCommandRegistry</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
-<div class="block">Registry for SmartMotorController commands.</div>
+<div class="block">Registry for WPILib <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> instances associated with a
+ <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
@@ -275,7 +292,9 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab5"><a href="yams/exceptions/SmartMotorControllerConfigurationException.html" title="class in yams.exceptions">SmartMotorControllerConfigurationException</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab5">
-<div class="block">Exception for when the SmartMotorController is configured incorrectly.</div>
+<div class="block">Thrown by <a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> or a
+ <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> wrapper when the applied configuration
+ contains conflicting, incomplete, or incompatible settings.</div>
 </div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/telemetry/SmartMotorControllerTelemetry.html" title="class in yams.telemetry">SmartMotorControllerTelemetry</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
@@ -293,19 +312,13 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Smart motor controller telemetry configuration.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/motorcontrollers/SmartMotorFactory.html" title="class in yams.motorcontrollers">SmartMotorFactory</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
-<div class="block">Factory for creating SmartMotorController instances.</div>
-</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="yams/motorcontrollers/SmartMotorFactory.MotorControllerConstructor.html" title="interface in yams.motorcontrollers">SmartMotorFactory.MotorControllerConstructor</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/mechanisms/positional/SmartPositionalMechanism.html" title="class in yams.mechanisms.positional">SmartPositionalMechanism</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
-<div class="block">Generic for positional mechanisms.</div>
+<div class="block">Abstract intermediate base class for all closed-loop positional mechanisms in YAMS.</div>
 </div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="yams/mechanisms/velocity/SmartVelocityMechanism.html" title="class in yams.mechanisms.velocity">SmartVelocityMechanism</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
-<div class="block">Generic for positional mechanisms.</div>
+<div class="block">Abstract intermediate base class for all closed-loop velocity mechanisms in YAMS.</div>
 </div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/motorcontrollers/local/SparkWrapper.html" title="class in yams.motorcontrollers.local">SparkWrapper</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
@@ -325,7 +338,8 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab5"><a href="yams/exceptions/SwerveDriveConfigurationException.html" title="class in yams.exceptions">SwerveDriveConfigurationException</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab5">
-<div class="block">SwerveDrive Config Exception</div>
+<div class="block">Thrown by <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> or <a href="yams/mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config"><code>SwerveDriveConfig</code></a>
+ when a required field is missing or a config invariant is violated.</div>
 </div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">

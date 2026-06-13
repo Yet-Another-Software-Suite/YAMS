@@ -82,7 +82,55 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">Pivot</span>
 <span class="extends-implements">extends <a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional">SmartPositionalMechanism</a></span></div>
-<div class="block">Pivot mechanism.</div>
+<div class="block">Pivot mechanism.
+
+ <p>A Pivot is a single-jointed rotation mechanism that rotates around the vertical axis,
+ such as a shooter hood or turret. It is controlled by a <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> and
+ supports position control, trigger bindings, and simulation.</p>
+
+ <h2>Usage Example</h2>
+ <pre><code>
+ // --- Configuration ---
+ SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
+     .withClosedLoopController(0.15,0,0.004)
+     .withFeedforward(new SimpleMotorFeedforward(0.05,0,0)
+     .withStatorCurrentLimit(Amps.of(40))
+     .withMechanismUpperLimit(Degrees.of(60))
+     .withMechanismLowerLimit(Degrees.of(0))
+     .withStartingPosition(Degrees.of(0));
+
+ SmartMotorController motor = new TalonFXWrapper(
+     new TalonFX(3),
+     DCMotor.getKrakenX60(1),
+     motorConfig);
+
+ PivotConfig pivotConfig = new PivotConfig(motor)
+     .withHardLimits(Degrees.of(0), Degrees.of(60))
+     .withTelemetry("ShooterHood", TelemetryVerbosity.HIGH)
+     .withSimStartingPosition(Degrees.of(0));
+
+ // --- Instantiation ---
+ Pivot pivot = new Pivot(pivotConfig);
+
+ // --- Commands ---
+ // setAngle() returns a Command that continuously drives the pivot to the target angle
+ Command aimHigh = pivot.setAngle(Degrees.of(45));
+
+ // runTo() drives to the angle and ends once the pivot is within tolerance
+ Command stowPivot = pivot.runTo(Degrees.of(0), Degrees.of(1));
+
+ // --- Trigger bindings ---
+ // Fire when the pivot is within 2 degrees of the shooting angle
+ pivot.isNear(Degrees.of(45), Degrees.of(2)).onTrue(shooter.runShooter());
+
+ // Bind on boundary conditions
+ pivot.gte(Degrees.of(55)).onTrue(Commands.print("Approaching upper limit!"));
+ pivot.lte(Degrees.of(5)).onTrue(Commands.print("Pivot near stow position."));
+
+ // --- Periodic callbacks (robotPeriodic or subsystem periodic) ---
+ pivot.simIterate();      // advances simulation state each loop
+ pivot.updateTelemetry(); // publishes data to NetworkTables/SmartDashboard
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

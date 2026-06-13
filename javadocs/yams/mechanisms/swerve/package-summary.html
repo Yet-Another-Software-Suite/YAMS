@@ -40,7 +40,7 @@ loadScripts(document, 'script');</script>
 <div>
 <ul class="sub-nav-list">
 <li>Package:&nbsp;</li>
-<li>Description&nbsp;|&nbsp;</li>
+<li><a href="#package-description">Description</a>&nbsp;|&nbsp;</li>
 <li><a href="#related-package-summary">Related Packages</a>&nbsp;|&nbsp;</li>
 <li><a href="#class-summary">Classes and Interfaces</a></li>
 </ul>
@@ -60,6 +60,25 @@ loadScripts(document, 'script');</script>
 </div>
 <hr>
 <div class="package-signature">package <span class="element-name">yams.mechanisms.swerve</span></div>
+<section class="package-description" id="package-description">
+<div class="block">Swerve drive mechanism classes.
+
+ <p><a href="SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> is a full swerve-drive implementation with
+ integrated kinematics, odometry, and pose estimation. Each wheel is represented by a
+ <a href="SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a> backed by two <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>
+ instances (drive and steer).
+
+ <p>Configure the full drivetrain via <a href="../config/SwerveDriveConfig.html" title="class in yams.mechanisms.config"><code>SwerveDriveConfig</code></a> and each module
+ via <a href="../config/SwerveModuleConfig.html" title="class in yams.mechanisms.config"><code>SwerveModuleConfig</code></a>.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="see-list">
+<li><a href="utility/package-summary.html"><code>yams.mechanisms.swerve.utility</code></a></li>
+</ul>
+</dd>
+</dl>
+</section>
 <section class="summary">
 <ul class="summary-list">
 <li>
@@ -70,21 +89,23 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><a href="../package-summary.html">yams.mechanisms</a></div>
 <div class="col-last even-row-color">
-<div class="block">Mechanism classes.</div>
+<div class="block">Top-level mechanism abstractions for the YAMS (Yet Another Mechanism System) library.</div>
 </div>
 <div class="col-first odd-row-color"><a href="utility/package-summary.html">yams.mechanisms.swerve.utility</a></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Swerve drive utility classes.</div>
+</div>
 <div class="col-first even-row-color"><a href="../config/package-summary.html">yams.mechanisms.config</a></div>
 <div class="col-last even-row-color">
-<div class="block">Mechanism configuration classes.</div>
+<div class="block">Builder-style configuration classes for every mechanism in the YAMS library.</div>
 </div>
 <div class="col-first odd-row-color"><a href="../positional/package-summary.html">yams.mechanisms.positional</a></div>
 <div class="col-last odd-row-color">
-<div class="block">Positional mechanism classes.</div>
+<div class="block">Position-controlled mechanism implementations for the YAMS library.</div>
 </div>
 <div class="col-first even-row-color"><a href="../velocity/package-summary.html">yams.mechanisms.velocity</a></div>
 <div class="col-last even-row-color">
-<div class="block">Velocity mechanism classes.</div>
+<div class="block">Velocity-controlled mechanism implementations for the YAMS library.</div>
 </div>
 </div>
 </div>

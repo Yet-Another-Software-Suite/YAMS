@@ -79,7 +79,44 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">ExponentialProfilePIDController</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
 <div class="block">Exponential profile PID controller. Similar to <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/PIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>PIDController</code></a> or
- <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/ProfiledPIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>ProfiledPIDController</code></a>, but uses an <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/trajectory/ExponentialProfile.html" title="class or interface in edu.wpi.first.math.trajectory" class="external-link"><code>ExponentialProfile</code></a></div>
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/ProfiledPIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>ProfiledPIDController</code></a>, but uses an <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/trajectory/ExponentialProfile.html" title="class or interface in edu.wpi.first.math.trajectory" class="external-link"><code>ExponentialProfile</code></a>
+
+ <p>This controller combines an <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/trajectory/ExponentialProfile.html" title="class or interface in edu.wpi.first.math.trajectory" class="external-link"><code>ExponentialProfile</code></a> motion profile with a
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/PIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>PIDController</code></a> to achieve smooth, continuous position control. On each iteration the
+ profile generates a feasible intermediate setpoint (position + velocity) that the PID then
+ tracks, preventing large step demands from commanding unreachable states. The exponential profile
+ shape respects the plant's natural first-order dynamics, making it well-suited for flywheels,
+ arms, and elevators.
+
+ <p>Use the static factory helpers (<a href="#createArmConstraints(edu.wpi.first.units.measure.Voltage,edu.wpi.first.math.system.plant.DCMotor,edu.wpi.first.units.measure.MomentOfInertia,yams.gearing.MechanismGearing)"><code>createArmConstraints(edu.wpi.first.units.measure.Voltage, edu.wpi.first.math.system.plant.DCMotor, edu.wpi.first.units.measure.MomentOfInertia, yams.gearing.MechanismGearing)</code></a>, <a href="#createElevatorConstraints(edu.wpi.first.units.measure.Voltage,edu.wpi.first.math.system.plant.DCMotor,edu.wpi.first.units.measure.Mass,edu.wpi.first.units.measure.Distance,yams.gearing.MechanismGearing)"><code>createElevatorConstraints(edu.wpi.first.units.measure.Voltage, edu.wpi.first.math.system.plant.DCMotor, edu.wpi.first.units.measure.Mass, edu.wpi.first.units.measure.Distance, yams.gearing.MechanismGearing)</code></a>,
+ <a href="#createFlywheelConstraints(edu.wpi.first.units.measure.Voltage,edu.wpi.first.math.system.plant.DCMotor,edu.wpi.first.units.measure.MomentOfInertia,yams.gearing.MechanismGearing)"><code>createFlywheelConstraints(edu.wpi.first.units.measure.Voltage, edu.wpi.first.math.system.plant.DCMotor, edu.wpi.first.units.measure.MomentOfInertia, yams.gearing.MechanismGearing)</code></a>) to derive physically accurate
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/trajectory/ExponentialProfile.Constraints.html" title="class or interface in edu.wpi.first.math.trajectory" class="external-link"><code>ExponentialProfile.Constraints</code></a> directly from motor and mechanism parameters.
+
+ <h2>Example — arm position control</h2>
+ <pre><code>
+ import static edu.wpi.first.units.Units.*;
+
+ // Derive constraints from the physical arm model
+ ExponentialProfile.Constraints armConstraints =
+     ExponentialProfilePIDController.createArmConstraints(
+         Volts.of(12),
+         DCMotor.getNEO(1),
+         KilogramSquareMeters.of(0.25),
+         MechanismGearing.ofReduction(60.0));
+
+ // kP=1.0, kI=0.0, kD=0.0 — tune these for your mechanism
+ ExponentialProfilePIDController armPID =
+     new ExponentialProfilePIDController(1.0, 0.0, 0.0, armConstraints);
+
+ // In robotInit, seed the profile at the current sensor state:
+ armPID.reset(encoder.getPosition(), 0.0);
+
+ // In periodic, calculate output (positions in rotations):
+ double output = armPID.calculate(
+         encoder.getPosition(),   // measured position (rotations)
+         targetPosition);          // desired position (rotations)
+ motor.set(output);
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

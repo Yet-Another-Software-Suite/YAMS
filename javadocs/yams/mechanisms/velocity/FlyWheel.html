@@ -82,7 +82,37 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">FlyWheel</span>
 <span class="extends-implements">extends <a href="SmartVelocityMechanism.html" title="class in yams.mechanisms.velocity">SmartVelocityMechanism</a></span></div>
-<div class="block">FlyWheel mechanism.</div>
+<div class="block">FlyWheel mechanism.
+
+ <h2>Usage Example</h2>
+ <pre><code>
+ // Construct using a fully configured FlyWheelConfig
+ FlyWheel shooter = new FlyWheel(config);
+
+ // Spin at a fixed target RPM (runs continuously as a RunCommand)
+ Command spinUp = shooter.run(RPM.of(3000));
+
+ // Block until the wheel reaches 3000 RPM within ±50 RPM, then finish
+ Command spinToSpeed = shooter.runTo(RPM.of(3000), RPM.of(50));
+
+ // Trigger that is true whenever the wheel is within ±50 RPM of target
+ Trigger atSpeed = shooter.isNear(RPM.of(3000), RPM.of(50));
+ atSpeed.onTrue(Commands.print("Shooter at speed!"));
+ </code></pre>
+
+ <p><b>Unsupported operations:</b> <a href="#max()"><code>max()</code></a> and <a href="#min()"><code>min()</code></a> are not supported for
+ velocity mechanisms and will throw <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/UnsupportedOperationException.html" title="class or interface in java.lang" class="external-link"><code>UnsupportedOperationException</code></a> if called.
+ Use <a href="#isNear(edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.AngularVelocity)"><code>isNear(edu.wpi.first.units.measure.AngularVelocity, edu.wpi.first.units.measure.AngularVelocity)</code></a> or <a href="#gte(edu.wpi.first.units.measure.AngularVelocity)"><code>gte(edu.wpi.first.units.measure.AngularVelocity)</code></a>/<a href="#lte(edu.wpi.first.units.measure.AngularVelocity)"><code>lte(edu.wpi.first.units.measure.AngularVelocity)</code></a> triggers instead.</p>
+
+ <p>Call <a href="#simIterate()"><code>simIterate()</code></a> and <a href="#updateTelemetry()"><code>updateTelemetry()</code></a> inside your subsystem's
+ <code>periodic()</code> method to keep simulation state and NetworkTables up to date:</p>
+ <pre><code>
+ @Override
+ public void periodic() {
+     shooter.simIterate();       // advances the DCMotorSim each loop
+     shooter.updateTelemetry();  // pushes data to SmartDashboard / AdvantageScope
+ }
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

@@ -78,7 +78,19 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">SmartMotorControllerConfig</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Smart motor controller config.</div>
+<div class="block">Smart motor controller config.
+
+ <h2>Example</h2>
+ <pre><code>
+ SmartMotorControllerConfig config = new SmartMotorControllerConfig()
+     .withMotorInverted(false)
+     .withStatorCurrentLimit(Amps.of(40))
+     .withSupplyCurrentLimit(Amps.of(60))
+     .withFeedforward(new SimpleMotorFeedforward(0.001, 0.002))
+     .withMechanismUpperLimit(Degrees.of(90))
+     .withMechanismLowerLimit(Degrees.of(-90))
+     .withGearing(new GearBox(12.0, 60.0));
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -171,7 +183,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/LinearAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">LinearAccelerationUnit</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#convertFromMechanism(edu.wpi.first.units.measure.Velocity)" class="member-name-link">convertFromMechanism</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/AngularAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">AngularAccelerationUnit</a>&gt;&nbsp;jerk)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Convert <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/AngularAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">AngularAccelerationUnit</a>&gt;</code> to  <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/LinearAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">LinearAccelerationUnit</a>&gt;</code> using the
+<div class="block">Convert <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/AngularAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">AngularAccelerationUnit</a>&gt;</code> to  <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/LinearAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">LinearAccelerationUnit</a>&gt;</code>
+ using the
  <code>mechanismCircumference</code></div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a></code></div>
@@ -194,7 +207,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/AngularAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">AngularAccelerationUnit</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#convertToMechanism(edu.wpi.first.units.measure.Velocity)" class="member-name-link">convertToMechanism</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/LinearAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">LinearAccelerationUnit</a>&gt;&nbsp;jerk)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Convert <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/LinearAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">LinearAccelerationUnit</a>&gt;</code> to  <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/AngularAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">AngularAccelerationUnit</a>&gt;</code> using the
+<div class="block">Convert <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/LinearAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">LinearAccelerationUnit</a>&gt;</code> to  <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/AngularAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">AngularAccelerationUnit</a>&gt;</code>
+ using the
  <code>mechanismCircumference</code></div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/ArmFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link">ArmFeedforward</a>&gt;</code></div>
@@ -300,8 +314,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../math/LQRController.html" title="class in yams.math">LQRController</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLQRClosedLoopController()" class="member-name-link">getLQRClosedLoopController</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or Meters if
- Mechanism Circumference is configured), the outputs are in Volts.</div>
+<div class="block">Get the controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations
+ (or Meters if Mechanism Circumference is configured), the outputs are in Volts.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMechanismCircumference()" class="member-name-link">getMechanismCircumference</a>()</code></div>
@@ -407,7 +421,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getVendorConfig()" class="member-name-link">getVendorConfig</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the vendor specific configuration object to mutate with <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> options.</div>
+<div class="block">Get the vendor specific configuration object to mutate with <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>
+ options.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getVendorControlRequest()" class="member-name-link">getVendorControlRequest</a>()</code></div>
@@ -450,8 +465,8 @@ loadScripts(document, 'script');</script>
  double&nbsp;kI,
  double&nbsp;kD)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
+<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withClosedLoopController(double,double,double,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withClosedLoopController</a><wbr>(double&nbsp;kP,
@@ -459,27 +474,28 @@ loadScripts(document, 'script');</script>
  double&nbsp;kD,
  <a href="SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a>&nbsp;slot)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
+<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withClosedLoopController(edu.wpi.first.math.controller.PIDController)" class="member-name-link">withClosedLoopController</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/PIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link">PIDController</a>&nbsp;controller)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
+<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withClosedLoopController(edu.wpi.first.math.controller.PIDController,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withClosedLoopController</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/PIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link">PIDController</a>&nbsp;controller,
  <a href="SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a>&nbsp;slot)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
+<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withClosedLoopController(yams.math.LQRController)" class="member-name-link">withClosedLoopController</a><wbr>(<a href="../math/LQRController.html" title="class in yams.math">LQRController</a>&nbsp;controller)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> with an exponential profile, the units passed
- in are in Rotations (or Meters if linear closed loop controller configured), outputs are in Volts.</div>
+<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> with an exponential
+ profile, the units passed in are in Rotations (or Meters if linear closed loop controller
+ configured), outputs are in Volts.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withClosedLoopControllerMaximumVoltage(edu.wpi.first.units.measure.Voltage)" class="member-name-link">withClosedLoopControllerMaximumVoltage</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Voltage.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Voltage</a>&nbsp;volts)</code></div>
@@ -592,8 +608,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withFeedbackSynchronizationThreshold(edu.wpi.first.units.measure.Angle)" class="member-name-link">withFeedbackSynchronizationThreshold</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;angle)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the feedback synchronization threshold so the relative encoder synchronizes with the absolute encoder at this
- point.</div>
+<div class="block">Set the feedback synchronization threshold so the relative encoder synchronizes with the
+ absolute encoder at this point.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withFeedforward(edu.wpi.first.math.controller.ArmFeedforward)" class="member-name-link">withFeedforward</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/ArmFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link">ArmFeedforward</a>&nbsp;armFeedforward)</code></div>
@@ -649,42 +665,52 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> to brake or coast mode.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withLinearClosedLoopController(boolean)" class="member-name-link">withLinearClosedLoopController</a><wbr>(boolean&nbsp;linearClosedLoopController)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withInputCurrentLimit(edu.wpi.first.units.measure.Current)" class="member-name-link">withInputCurrentLimit</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Current.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Current</a>&nbsp;supplyCurrent)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Set the stall supply current limit for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withLinearClosedLoopController(boolean)" class="member-name-link">withLinearClosedLoopController</a><wbr>(boolean&nbsp;linearClosedLoopController)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the closed loop controller to be Linear or <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Distance</code></a> based.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withLooselyCoupledFollowers(yams.motorcontrollers.SmartMotorController...)" class="member-name-link">withLooselyCoupledFollowers</a><wbr>(<a href="SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>...&nbsp;followers)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withLooselyCoupledFollowers(yams.motorcontrollers.SmartMotorController...)" class="member-name-link">withLooselyCoupledFollowers</a><wbr>(<a href="SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>...&nbsp;followers)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Applies loosely coupled follower motors to the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMechanismCircumference(edu.wpi.first.units.measure.Distance)" class="member-name-link">withMechanismCircumference</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;circumference)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMechanismCircumference(edu.wpi.first.units.measure.Distance)" class="member-name-link">withMechanismCircumference</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;circumference)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the mechanism circumference to allow distance calculations on the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMomentOfInertia(edu.wpi.first.units.measure.Distance,edu.wpi.first.units.measure.Mass)" class="member-name-link">withMomentOfInertia</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;length,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMomentOfInertia(edu.wpi.first.units.measure.Distance,edu.wpi.first.units.measure.Mass)" class="member-name-link">withMomentOfInertia</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;length,
  <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Mass</a>&nbsp;weight)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Add the mechanism moment of inertia to the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>s simulation when not
+ run under a formal mechanism.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMomentOfInertia(edu.wpi.first.units.measure.MomentOfInertia)" class="member-name-link">withMomentOfInertia</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/MomentOfInertia.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">MomentOfInertia</a>&nbsp;MOI)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Add the mechanism moment of inertia to the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>s simulation when not run under a formal
- mechanism.</div>
+<div class="block">Add the mechanism moment of inertia to the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>s simulation when not
+ run under a formal mechanism.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMomentOfInertia(edu.wpi.first.units.measure.MomentOfInertia)" class="member-name-link">withMomentOfInertia</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/MomentOfInertia.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">MomentOfInertia</a>&nbsp;MOI)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMotorInverted(boolean)" class="member-name-link">withMotorInverted</a><wbr>(boolean&nbsp;motorInverted)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Add the mechanism moment of inertia to the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>s simulation when not run under a formal
- mechanism.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMotorInverted(boolean)" class="member-name-link">withMotorInverted</a><wbr>(boolean&nbsp;motorInverted)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the motor inversion state.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withOpenLoopRampRate(edu.wpi.first.units.measure.Time)" class="member-name-link">withOpenLoopRampRate</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Time.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Time</a>&nbsp;rate)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withOpenLoopRampRate(edu.wpi.first.units.measure.Time)" class="member-name-link">withOpenLoopRampRate</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Time.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Time</a>&nbsp;rate)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the open loop ramp rate.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withOutputCurrentLimit(edu.wpi.first.units.measure.Current)" class="member-name-link">withOutputCurrentLimit</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Current.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Current</a>&nbsp;stallCurrent)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Set the stall stator current limit for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withProfile(edu.wpi.first.math.trajectory.ExponentialProfile.Constraints)" class="member-name-link">withProfile</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/trajectory/ExponentialProfile.Constraints.html" title="class or interface in edu.wpi.first.math.trajectory" class="external-link">ExponentialProfile.Constraints</a>&nbsp;profile)</code></div>
@@ -699,7 +725,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withResetPreviousConfig(boolean)" class="member-name-link">withResetPreviousConfig</a><wbr>(boolean&nbsp;resetPreviousConfig)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> to reset the old configurations and only apply what is given to
+<div class="block">Set the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> to reset the old configurations and only apply what is
+ given to
  <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
@@ -707,8 +734,8 @@ loadScripts(document, 'script');</script>
  double&nbsp;kI,
  double&nbsp;kD)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if Mechanism Circumference is configured).</div>
+<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if Mechanism Circumference is configured).</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimClosedLoopController(double,double,double,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withSimClosedLoopController</a><wbr>(double&nbsp;kP,
@@ -716,21 +743,21 @@ loadScripts(document, 'script');</script>
  double&nbsp;kD,
  <a href="SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a>&nbsp;slot)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if Mechanism Circumference is configured).</div>
+<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if Mechanism Circumference is configured).</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimClosedLoopController(edu.wpi.first.math.controller.PIDController)" class="member-name-link">withSimClosedLoopController</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/PIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link">PIDController</a>&nbsp;controller)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if Mechanism Circumference is configured).</div>
+<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if Mechanism Circumference is configured).</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimClosedLoopController(edu.wpi.first.math.controller.PIDController,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withSimClosedLoopController</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/PIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link">PIDController</a>&nbsp;controller,
  <a href="SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a>&nbsp;slot)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if Mechanism Circumference is configured).</div>
+<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if Mechanism Circumference is configured).</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimClosedLoopController(yams.math.LQRController)" class="member-name-link">withSimClosedLoopController</a><wbr>(<a href="../math/LQRController.html" title="class in yams.math">LQRController</a>&nbsp;controller)</code></div>
@@ -762,13 +789,15 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimFeedforward(edu.wpi.first.math.controller.SimpleMotorFeedforward)" class="member-name-link">withSimFeedforward</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link">SimpleMotorFeedforward</a>&nbsp;simpleFeedforward)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>SimpleMotorFeedforward</code></a> for <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, units are in Rotations.</div>
+<div class="block">Set the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>SimpleMotorFeedforward</code></a> for <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, units are in
+ Rotations.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimFeedforward(edu.wpi.first.math.controller.SimpleMotorFeedforward,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withSimFeedforward</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link">SimpleMotorFeedforward</a>&nbsp;simpleFeedforward,
  <a href="SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a>&nbsp;slot)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>SimpleMotorFeedforward</code></a> for <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, units are in Rotations.</div>
+<div class="block">Set the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>SimpleMotorFeedforward</code></a> for <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, units are in
+ Rotations.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimStartingPosition(edu.wpi.first.units.measure.Angle)" class="member-name-link">withSimStartingPosition</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;simStartingAngle)</code></div>
@@ -810,8 +839,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSubsystem(edu.wpi.first.wpilibj2.command.Subsystem)" class="member-name-link">withSubsystem</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Subsystem.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link">Subsystem</a>&nbsp;subsystem)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Sets the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Subsystem.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Subsystem</code></a> for the <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> to pass along to <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>
- and <a href="../mechanisms/SmartMechanism.html" title="class in yams.mechanisms"><code>SmartMechanism</code></a>s.</div>
+<div class="block">Sets the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Subsystem.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Subsystem</code></a> for the <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> to pass along to <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> and <a href="../mechanisms/SmartMechanism.html" title="class in yams.mechanisms"><code>SmartMechanism</code></a>s.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSupplyCurrentLimit(edu.wpi.first.units.measure.Current)" class="member-name-link">withSupplyCurrentLimit</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Current.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Current</a>&nbsp;supplyCurrent)</code></div>
@@ -877,13 +905,14 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withVendorConfig(java.lang.Object)" class="member-name-link">withVendorConfig</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;vendorConfig)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the vendor specific config for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> which will be used as a base.</div>
+<div class="block">Set the vendor specific config for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> which will be used as a
+ base.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withVendorControlRequest(java.lang.Object)" class="member-name-link">withVendorControlRequest</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;vendorControlRequest)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the vendor specific control request for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> which will be used in place of default
- or calculated ones.</div>
+<div class="block">Set the vendor specific control request for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> which will be used
+ in place of default or calculated ones.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withVoltageCompensation(edu.wpi.first.units.measure.Voltage)" class="member-name-link">withVoltageCompensation</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Voltage.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Voltage</a>&nbsp;voltageCompensation)</code></div>
@@ -961,17 +990,19 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="withVendorConfig(java.lang.Object)">
 <h3>withVendorConfig</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withVendorConfig</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;vendorConfig)</span></div>
-<div class="block">Set the vendor specific config for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> which will be used as a base. Vendor configs
- will be overridden by the <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> options.</div>
+<div class="block">Set the vendor specific config for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> which will be used as a
+ base. Vendor configs will be overridden by the <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> options.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>vendorConfig</code> - Vendor specific config object. Must be of the correct type for the
-                     <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>. Only the root configuration class is accepted.</dd>
+                     <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>. Only the root configuration class is
+ accepted.</dd>
 <dt>Returns:</dt>
 <dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining.</dd>
 <dt>Implementation Requirements:</dt>
-<dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> options will always take precedence and overwrite the vendor config.
- Apply any changes after the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> is created to ensure accuracy.</dd>
+<dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> options will always take precedence and overwrite
+ the vendor config. Apply any changes after the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> is created to
+ ensure accuracy.</dd>
 </dl>
 </section>
 </li>
@@ -979,8 +1010,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="withVendorControlRequest(java.lang.Object)">
 <h3>withVendorControlRequest</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withVendorControlRequest</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;vendorControlRequest)</span></div>
-<div class="block">Set the vendor specific control request for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> which will be used in place of default
- or calculated ones.</div>
+<div class="block">Set the vendor specific control request for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> which will be used
+ in place of default or calculated ones.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>vendorControlRequest</code> - Vendor specific control request for velocity or position.</dd>
@@ -993,8 +1024,7 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="withSubsystem(edu.wpi.first.wpilibj2.command.Subsystem)">
 <h3>withSubsystem</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withSubsystem</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Subsystem.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link">Subsystem</a>&nbsp;subsystem)</span></div>
-<div class="block">Sets the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Subsystem.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Subsystem</code></a> for the <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> to pass along to <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>
- and <a href="../mechanisms/SmartMechanism.html" title="class in yams.mechanisms"><code>SmartMechanism</code></a>s. Must be set if a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Subsystem.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Subsystem</code></a> was not defined previously.</div>
+<div class="block">Sets the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Subsystem.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Subsystem</code></a> for the <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> to pass along to <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> and <a href="../mechanisms/SmartMechanism.html" title="class in yams.mechanisms"><code>SmartMechanism</code></a>s. Must be set if a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Subsystem.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Subsystem</code></a> was not defined previously.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>subsystem</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Subsystem.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Subsystem</code></a> to use.</dd>
@@ -1037,8 +1067,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="withFeedbackSynchronizationThreshold(edu.wpi.first.units.measure.Angle)">
 <h3>withFeedbackSynchronizationThreshold</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withFeedbackSynchronizationThreshold</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;angle)</span></div>
-<div class="block">Set the feedback synchronization threshold so the relative encoder synchronizes with the absolute encoder at this
- point.</div>
+<div class="block">Set the feedback synchronization threshold so the relative encoder synchronizes with the
+ absolute encoder at this point.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>angle</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Angle</code></a> to exceed.</dd>
@@ -1155,7 +1185,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="withResetPreviousConfig(boolean)">
 <h3>withResetPreviousConfig</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withResetPreviousConfig</span><wbr><span class="parameters">(boolean&nbsp;resetPreviousConfig)</span></div>
-<div class="block">Set the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> to reset the old configurations and only apply what is given to
+<div class="block">Set the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> to reset the old configurations and only apply what is
+ given to
  <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -1198,9 +1229,10 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the external encoder absolute position to wrap around a defined discontinuity point.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>discontinuityPoint</code> - Discontinuity point of the external encoder, when provided 0.5rot the external encoder
-                           will read between [-0.5, 0.5]; when provided 1rot the external encoder will read between
-                           [0, 1].</dd>
+<dd><code>discontinuityPoint</code> - Discontinuity point of the external encoder, when provided 0.5rot the
+     external encoder
+                           will read between [-0.5, 0.5]; when provided 1rot the external
+ encoder will read between [0, 1].</dd>
 <dt>Returns:</dt>
 <dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining.</dd>
 <dt>Implementation Note:</dt>
@@ -1358,8 +1390,8 @@ loadScripts(document, 'script');</script>
 <h3>withMomentOfInertia</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withMomentOfInertia</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;length,
  <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Mass</a>&nbsp;weight)</span></div>
-<div class="block">Add the mechanism moment of inertia to the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>s simulation when not run under a formal
- mechanism.</div>
+<div class="block">Add the mechanism moment of inertia to the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>s simulation when not
+ run under a formal mechanism.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>length</code> - Length of the mechanism for MOI.</dd>
@@ -1373,8 +1405,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="withMomentOfInertia(edu.wpi.first.units.measure.MomentOfInertia)">
 <h3>withMomentOfInertia</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withMomentOfInertia</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/MomentOfInertia.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">MomentOfInertia</a>&nbsp;MOI)</span></div>
-<div class="block">Add the mechanism moment of inertia to the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>s simulation when not run under a formal
- mechanism.</div>
+<div class="block">Add the mechanism moment of inertia to the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>s simulation when not
+ run under a formal mechanism.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>MOI</code> - Known moment of inertia.</dd>
@@ -1499,7 +1531,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the follower motors of the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>followers</code> - Base motor types (NOT <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>!) to configure as followers, must be same brand
+<dd><code>followers</code> - Base motor types (NOT <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>!) to configure as
+     followers, must be same brand
                   as the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> with inversion from the base motor.</dd>
 <dt>Returns:</dt>
 <dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining</dd>
@@ -1544,6 +1577,19 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="withOutputCurrentLimit(edu.wpi.first.units.measure.Current)">
+<h3>withOutputCurrentLimit</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withOutputCurrentLimit</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Current.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Current</a>&nbsp;stallCurrent)</span></div>
+<div class="block">Set the stall stator current limit for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>stallCurrent</code> - Stall stator current limit for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</dd>
+<dt>Returns:</dt>
+<dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining.</dd>
+</dl>
+</section>
+</li>
+<li>
 <section class="detail" id="withSupplyCurrentLimit(edu.wpi.first.units.measure.Current)">
 <h3>withSupplyCurrentLimit</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withSupplyCurrentLimit</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Current.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Current</a>&nbsp;supplyCurrent)</span></div>
@@ -1557,11 +1603,24 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="withInputCurrentLimit(edu.wpi.first.units.measure.Current)">
+<h3>withInputCurrentLimit</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withInputCurrentLimit</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Current.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Current</a>&nbsp;supplyCurrent)</span></div>
+<div class="block">Set the stall supply current limit for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>supplyCurrent</code> - Supply current limit.</dd>
+<dt>Returns:</dt>
+<dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining.</dd>
+</dl>
+</section>
+</li>
+<li>
 <section class="detail" id="withClosedLoopRampRate(edu.wpi.first.units.measure.Time)">
 <h3>withClosedLoopRampRate</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withClosedLoopRampRate</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Time.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Time</a>&nbsp;rate)</span></div>
-<div class="block">Set the closed loop ramp rate. The ramp rate is the minimum time it should take to go from 0 power to full power in
- the motor controller while using PID.</div>
+<div class="block">Set the closed loop ramp rate. The ramp rate is the minimum time it should take to go from 0
+ power to full power in the motor controller while using PID.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>rate</code> - time to go from 0 to full throttle.</dd>
@@ -1574,8 +1633,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="withOpenLoopRampRate(edu.wpi.first.units.measure.Time)">
 <h3>withOpenLoopRampRate</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withOpenLoopRampRate</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Time.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Time</a>&nbsp;rate)</span></div>
-<div class="block">Set the open loop ramp rate. The ramp rate is the minimum time it should take to go from 0 power to full power in
- the motor controller while not using PID.</div>
+<div class="block">Set the open loop ramp rate. The ramp rate is the minimum time it should take to go from 0
+ power to full power in the motor controller while not using PID.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>rate</code> - time to go from 0 to full throttle.</dd>
@@ -1628,7 +1687,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the <a href="../gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>reductionRatio</code> - Reduction ratio, for example, a ratio of "3:1" is 3; a ratio of "1:2" is 0.5.</dd>
+<dd><code>reductionRatio</code> - Reduction ratio, for example, a ratio of "3:1" is 3; a ratio of "1:2" is
+     0.5.</dd>
 <dt>Returns:</dt>
 <dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining.</dd>
 </dl>
@@ -1641,7 +1701,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the mechanism circumference to allow distance calculations on the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>circumference</code> - Circumference of the actuating spool or sprocket+chain attached the mechanism actuator.</dd>
+<dd><code>circumference</code> - Circumference of the actuating spool or sprocket+chain attached the
+     mechanism actuator.</dd>
 <dt>Returns:</dt>
 <dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining.</dd>
 </dl>
@@ -1876,11 +1937,12 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="withSimClosedLoopController(yams.math.LQRController)">
 <h3>withSimClosedLoopController</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withSimClosedLoopController</span><wbr><span class="parameters">(<a href="../math/LQRController.html" title="class in yams.math">LQRController</a>&nbsp;controller)</span></div>
-<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>. The units passed in are in Rotations (or
- Meters if Mechanism Circumference is configured), and outputs are in Volts.</div>
+<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>. The units passed in are in
+ Rotations (or Meters if Mechanism Circumference is configured), and outputs are in Volts.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>controller</code> - <a href="../math/LQRController.html" title="class in yams.math"><code>LQRController</code></a> to use, the units passed in are in Rotations (or Meters if Mechanism
+<dd><code>controller</code> - <a href="../math/LQRController.html" title="class in yams.math"><code>LQRController</code></a> to use, the units passed in are in Rotations (or Meters
+     if Mechanism
                    Circumference is configured), and output is Voltage.</dd>
 <dt>Returns:</dt>
 <dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining.</dd>
@@ -1894,8 +1956,8 @@ loadScripts(document, 'script');</script>
  double&nbsp;kI,
  double&nbsp;kD,
  <a href="SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a>&nbsp;slot)</span></div>
-<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if Mechanism Circumference is configured).</div>
+<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if Mechanism Circumference is configured).</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>slot</code> - Closed loop controller slot.</dd>
@@ -1913,8 +1975,8 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withSimClosedLoopController</span><wbr><span class="parameters">(double&nbsp;kP,
  double&nbsp;kI,
  double&nbsp;kD)</span></div>
-<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if Mechanism Circumference is configured).</div>
+<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if Mechanism Circumference is configured).</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>kP</code> - KP scalar for the PID Controller.</dd>
@@ -1930,8 +1992,8 @@ loadScripts(document, 'script');</script>
 <h3>withSimClosedLoopController</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withSimClosedLoopController</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/PIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link">PIDController</a>&nbsp;controller,
  <a href="SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a>&nbsp;slot)</span></div>
-<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if Mechanism Circumference is configured).</div>
+<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if Mechanism Circumference is configured).</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>slot</code> - Closed loop controller slot.</dd>
@@ -1945,8 +2007,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="withSimClosedLoopController(edu.wpi.first.math.controller.PIDController)">
 <h3>withSimClosedLoopController</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withSimClosedLoopController</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/PIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link">PIDController</a>&nbsp;controller)</span></div>
-<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if Mechanism Circumference is configured).</div>
+<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if Mechanism Circumference is configured).</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>controller</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/PIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>PIDController</code></a> to use.</dd>
@@ -1962,7 +2024,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the trapezoidal motion profile for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>profile</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/trajectory/TrapezoidProfile.html" title="class or interface in edu.wpi.first.math.trajectory" class="external-link"><code>TrapezoidProfile</code></a>; if linear use meters/s, meters/s^2; if rotational use rotations/s,
+<dd><code>profile</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/trajectory/TrapezoidProfile.html" title="class or interface in edu.wpi.first.math.trajectory" class="external-link"><code>TrapezoidProfile</code></a>; if linear use meters/s, meters/s^2; if rotational use
+     rotations/s,
                 rotations/s^2.</dd>
 <dt>Returns:</dt>
 <dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining.</dd>
@@ -2036,7 +2099,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the exponential profile</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>profile</code> - Exponential profile; meters/s, meters/s^2 for linear controllers; rotations/s, and rotations/s^2 for
+<dd><code>profile</code> - Exponential profile; meters/s, meters/s^2 for linear controllers; rotations/s,
+     and rotations/s^2 for
                 rotational controllers..</dd>
 <dt>Returns:</dt>
 <dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining.</dd>
@@ -2113,11 +2177,13 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="withClosedLoopController(yams.math.LQRController)">
 <h3>withClosedLoopController</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withClosedLoopController</span><wbr><span class="parameters">(<a href="../math/LQRController.html" title="class in yams.math">LQRController</a>&nbsp;controller)</span></div>
-<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> with an exponential profile, the units passed
- in are in Rotations (or Meters if linear closed loop controller configured), outputs are in Volts.</div>
+<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> with an exponential
+ profile, the units passed in are in Rotations (or Meters if linear closed loop controller
+ configured), outputs are in Volts.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>controller</code> - <a href="../math/LQRController.html" title="class in yams.math"><code>LQRController</code></a> to use, the units passed in are in Rotations and output is Voltage.</dd>
+<dd><code>controller</code> - <a href="../math/LQRController.html" title="class in yams.math"><code>LQRController</code></a> to use, the units passed in are in Rotations and output
+     is Voltage.</dd>
 <dt>Returns:</dt>
 <dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining.</dd>
 <dt>Implementation Note:</dt>
@@ -2132,16 +2198,19 @@ loadScripts(document, 'script');</script>
  double&nbsp;kI,
  double&nbsp;kD,
  <a href="SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a>&nbsp;slot)</span></div>
-<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
+<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>slot</code> - Closed loop controller slot.</dd>
-<dd><code>kP</code> - KP scalar for the PID Controller, the units passed in are in Rotations (or Meters if Mechanism
+<dd><code>kP</code> - KP scalar for the PID Controller, the units passed in are in Rotations (or Meters
+     if Mechanism
              Circumference is configured), the outputs are in Volts.</dd>
-<dd><code>kI</code> - KI scalar for the PID Controller, the units passed in are in Rotations (or Meters if Mechanism
+<dd><code>kI</code> - KI scalar for the PID Controller, the units passed in are in Rotations (or Meters
+     if Mechanism
              Circumference is configured), the outputs are in Volts.</dd>
-<dd><code>kD</code> - KD scalar for the PID Controller, the units passed in are in Rotations (or Meters if Mechanism
+<dd><code>kD</code> - KD scalar for the PID Controller, the units passed in are in Rotations (or Meters
+     if Mechanism
              Circumference is configured), the outputs are in Volts.</dd>
 <dt>Returns:</dt>
 <dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining.</dd>
@@ -2154,15 +2223,18 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withClosedLoopController</span><wbr><span class="parameters">(double&nbsp;kP,
  double&nbsp;kI,
  double&nbsp;kD)</span></div>
-<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
+<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>kP</code> - KP scalar for the PID Controller, the units passed in are in Rotations (or Meters if Mechanism
+<dd><code>kP</code> - KP scalar for the PID Controller, the units passed in are in Rotations (or Meters if
+     Mechanism
            Circumference is configured), the outputs are in Volts.</dd>
-<dd><code>kI</code> - KI scalar for the PID Controller, the units passed in are in Rotations (or Meters if Mechanism
+<dd><code>kI</code> - KI scalar for the PID Controller, the units passed in are in Rotations (or Meters if
+     Mechanism
            Circumference is configured), the outputs are in Volts.</dd>
-<dd><code>kD</code> - KD scalar for the PID Controller, the units passed in are in Rotations (or Meters if Mechanism
+<dd><code>kD</code> - KD scalar for the PID Controller, the units passed in are in Rotations (or Meters if
+     Mechanism
            Circumference is configured), the outputs are in Volts.</dd>
 <dt>Returns:</dt>
 <dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining.</dd>
@@ -2174,12 +2246,13 @@ loadScripts(document, 'script');</script>
 <h3>withClosedLoopController</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withClosedLoopController</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/PIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link">PIDController</a>&nbsp;controller,
  <a href="SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a>&nbsp;slot)</span></div>
-<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
+<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>slot</code> - Closed loop controller slot.</dd>
-<dd><code>controller</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/PIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>PIDController</code></a> to use, the units passed in are in Rotations (or Meters if Mechanism
+<dd><code>controller</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/PIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>PIDController</code></a> to use, the units passed in are in Rotations (or Meters
+     if Mechanism
                    Circumference is configured), the outputs are in Volts.</dd>
 <dt>Returns:</dt>
 <dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining.</dd>
@@ -2190,11 +2263,12 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="withClosedLoopController(edu.wpi.first.math.controller.PIDController)">
 <h3>withClosedLoopController</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withClosedLoopController</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/PIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link">PIDController</a>&nbsp;controller)</span></div>
-<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
+<div class="block">Set the closed loop controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>controller</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/PIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>PIDController</code></a> to use, the units passed in are in Rotations (or Meters if Mechanism
+<dd><code>controller</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/PIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>PIDController</code></a> to use, the units passed in are in Rotations (or Meters
+     if Mechanism
                    Circumference is configured), the outputs are in Volts.</dd>
 <dt>Returns:</dt>
 <dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining.</dd>
@@ -2205,8 +2279,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getLQRClosedLoopController()">
 <h3>getLQRClosedLoopController</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../math/LQRController.html" title="class in yams.math">LQRController</a>&gt;</span>&nbsp;<span class="element-name">getLQRClosedLoopController</span>()</div>
-<div class="block">Get the controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or Meters if
- Mechanism Circumference is configured), the outputs are in Volts.</div>
+<div class="block">Get the controller for the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations
+ (or Meters if Mechanism Circumference is configured), the outputs are in Volts.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd><a href="../math/LQRController.html" title="class in yams.math"><code>LQRController</code></a></dd>
@@ -2253,7 +2327,8 @@ loadScripts(document, 'script');</script>
 <h3>withSimFeedforward</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withSimFeedforward</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link">SimpleMotorFeedforward</a>&nbsp;simpleFeedforward,
  <a href="SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a>&nbsp;slot)</span></div>
-<div class="block">Set the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>SimpleMotorFeedforward</code></a> for <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, units are in Rotations.</div>
+<div class="block">Set the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>SimpleMotorFeedforward</code></a> for <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, units are in
+ Rotations.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>slot</code> - Closed loop controller slot.</dd>
@@ -2267,7 +2342,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="withSimFeedforward(edu.wpi.first.math.controller.SimpleMotorFeedforward)">
 <h3>withSimFeedforward</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></span>&nbsp;<span class="element-name">withSimFeedforward</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link">SimpleMotorFeedforward</a>&nbsp;simpleFeedforward)</span></div>
-<div class="block">Set the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>SimpleMotorFeedforward</code></a> for <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, units are in Rotations.</div>
+<div class="block">Set the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>SimpleMotorFeedforward</code></a> for <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, units are in
+ Rotations.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>simpleFeedforward</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>SimpleMotorFeedforward</code></a></dd>
@@ -2283,7 +2359,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the closed loop controller to be Linear or <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Distance</code></a> based.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>linearClosedLoopController</code> - Closed loop controller is distance based when true, angle based when false.</dd>
+<dd><code>linearClosedLoopController</code> - Closed loop controller is distance based when true, angle
+     based when false.</dd>
 <dt>Returns:</dt>
 <dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining.</dd>
 </dl>
@@ -2296,7 +2373,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the trapezoidal profile to be read explicitly as a velocity profile.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>velocityTrapezoidalProfile</code> - The trapezoidal profile is read explicitly as a velocity profile.</dd>
+<dd><code>velocityTrapezoidalProfile</code> - The trapezoidal profile is read explicitly as a velocity
+     profile.</dd>
 <dt>Returns:</dt>
 <dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining.</dd>
 </dl>
@@ -2423,7 +2501,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="convertToMechanism(edu.wpi.first.units.measure.Velocity)">
 <h3>convertToMechanism</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/AngularAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">AngularAccelerationUnit</a>&gt;</span>&nbsp;<span class="element-name">convertToMechanism</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/LinearAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">LinearAccelerationUnit</a>&gt;&nbsp;jerk)</span></div>
-<div class="block">Convert <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/LinearAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">LinearAccelerationUnit</a>&gt;</code> to  <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/AngularAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">AngularAccelerationUnit</a>&gt;</code> using the
+<div class="block">Convert <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/LinearAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">LinearAccelerationUnit</a>&gt;</code> to  <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/AngularAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">AngularAccelerationUnit</a>&gt;</code>
+ using the
  <code>mechanismCircumference</code></div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -2437,7 +2516,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="convertFromMechanism(edu.wpi.first.units.measure.Velocity)">
 <h3>convertFromMechanism</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/LinearAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">LinearAccelerationUnit</a>&gt;</span>&nbsp;<span class="element-name">convertFromMechanism</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/AngularAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">AngularAccelerationUnit</a>&gt;&nbsp;jerk)</span></div>
-<div class="block">Convert <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/AngularAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">AngularAccelerationUnit</a>&gt;</code> to  <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/LinearAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">LinearAccelerationUnit</a>&gt;</code> using the
+<div class="block">Convert <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/AngularAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">AngularAccelerationUnit</a>&gt;</code> to  <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/LinearAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">LinearAccelerationUnit</a>&gt;</code>
+ using the
  <code>mechanismCircumference</code></div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -2658,7 +2738,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the external encoder gearing.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>reductionRatio</code> - External encoder gearing. For example, a ratio of "3:1" is 3; "1:2" is 0.5</dd>
+<dd><code>reductionRatio</code> - External encoder gearing. For example, a ratio of "3:1" is 3; "1:2" is
+     0.5</dd>
 <dt>Returns:</dt>
 <dd><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining.</dd>
 </dl>
@@ -2712,7 +2793,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getVendorConfig()">
 <h3>getVendorConfig</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&gt;</span>&nbsp;<span class="element-name">getVendorConfig</span>()</div>
-<div class="block">Get the vendor specific configuration object to mutate with <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> options.</div>
+<div class="block">Get the vendor specific configuration object to mutate with <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>
+ options.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd><a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> vendor-specific configuration object.</dd>

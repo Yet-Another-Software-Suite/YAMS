@@ -78,7 +78,30 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">DerivativeTimeFilter</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Find the derivative of a value over time in microseconds.</div>
+<div class="block">Find the derivative of a value over time in microseconds.
+
+ <p>This filter computes a rate-of-change (derivative) estimate from successive measurements
+ timestamped with the FPGA clock. A built-in debounce timer prevents the derivative from being
+ recalculated faster than the configured period, which avoids amplifying high-frequency sensor
+ noise that would otherwise cause derivative kick.
+
+ <p>Two <code>derivative()</code> overloads are available:
+ <ul>
+   <li><a href="#derivative(double)"><code>derivative(double)</code></a> — uses the FPGA clock to measure elapsed time automatically.</li>
+   <li><a href="#derivative(double,edu.wpi.first.units.measure.Time)"><code>derivative(double, edu.wpi.first.units.measure.Time)</code></a> — uses a caller-supplied
+       delta-time (useful when the loop period is already known).</li>
+ </ul>
+
+ <h2>Example</h2>
+ <pre><code>
+ import static edu.wpi.first.units.Units.Milliseconds;
+
+ // Debounce period matches the 20 ms robot loop
+ DerivativeTimeFilter filter = new DerivativeTimeFilter(0.0, Milliseconds.of(20));
+
+ // In periodic:
+ double velocity = filter.derivative(encoder.getPosition());
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

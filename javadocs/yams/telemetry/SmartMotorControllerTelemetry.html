@@ -78,7 +78,36 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">SmartMotorControllerTelemetry</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Smart motor controller telemetry.</div>
+<div class="block">Smart motor controller telemetry.
+
+ <p>Publishes motor controller state — including duty-cycle output voltage, stator/supply current,
+ rotor/mechanism position and velocity, and motor temperature — to NetworkTables so that tools
+ such as SmartDashboard, Elastic, and Advantage Scope can consume the data in real time.
+ Tunable fields (PID gains, setpoints, motion-profile limits) are additionally exposed on a
+ separate <code>Tuning</code> table so they can be adjusted without redeploying code.
+
+ <p>This class is managed internally by <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>. You do not normally
+ instantiate it directly; instead call the methods on the motor controller itself:
+
+ <h2>Basic usage (default NetworkTable path)</h2>
+ <pre><code>
+ // In robotInit() or subsystem constructor:
+ motor.setupTelemetry();   // publishes under Mechanisms/&lt;motorName&gt;
+
+ // In robotPeriodic() or subsystemPeriodic():
+ motor.updateTelemetry();
+ </code></pre>
+
+ <h2>Custom NetworkTable path and telemetry config</h2>
+ <pre><code>
+ NetworkTable dataTable   = NetworkTableInstance.getDefault().getTable("Mechanisms").getSubTable("Shooter");
+ NetworkTable tuningTable = NetworkTableInstance.getDefault().getTable("Tuning").getSubTable("Shooter");
+
+ motor.setupTelemetry(dataTable, tuningTable);
+
+ // In periodic:
+ motor.updateTelemetry();
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

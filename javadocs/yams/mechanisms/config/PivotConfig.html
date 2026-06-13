@@ -78,7 +78,30 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">PivotConfig</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Pivot config.</div>
+<div class="block">Pivot configuration class.
+
+ <h2>Configuration Example</h2>
+ <pre><code>
+ // Create the motor controller configuration with PID and feedforward gains
+ SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
+     .withClosedLoopController(0.15,0,0)
+     .withFeedforward(new SimpleMotorFeedforward(0.004, 0.05, 0.2)
+     .withStatorCurrentLimit(Amps.of(40))
+     .withMechanismUpperLimit(Degrees.of(60))
+     .withMechanismLowerLimit(Degrees.of(0))
+     .withStartingPosition(Degrees.of(0));
+
+ SmartMotorController motor = new TalonFXWrapper(
+     new TalonFX(3),
+     DCMotor.getKrakenX60(1),
+     motorConfig);
+
+ // Build the pivot config
+ PivotConfig config = new PivotConfig(motor)
+     .withHardLimits(Degrees.of(0), Degrees.of(60))
+     .withTelemetry("ShooterHood", TelemetryVerbosity.HIGH)
+     .withSimStartingPosition(Degrees.of(0));
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

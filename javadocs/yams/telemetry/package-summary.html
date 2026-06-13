@@ -65,7 +65,62 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="package-signature">package <span class="element-name">yams.telemetry</span></div>
 <section class="package-description" id="package-description">
-<div class="block">Telemetry configuration and publishing.</div>
+<div class="block">NetworkTables publishers for mechanism and motor controller state.
+
+ <p>This package provides classes that stream live data from YAMS mechanisms and motor
+ controllers to a NetworkTables server, making that data available to dashboard tools
+ (Shuffleboard, AdvantageScope, Glass) and to tuning workflows that adjust PID gains
+ without redeploying code.
+
+ <h2>Mechanism telemetry</h2>
+ <ul>
+   <li><a href="MechanismTelemetry.html" title="class in yams.telemetry"><code>MechanismTelemetry</code></a> — publishes the high-level state of a
+       mechanism: current position, active setpoint, goal, and status flags. Updated each
+       robot periodic cycle.</li>
+ </ul>
+
+ <h2>Motor controller telemetry</h2>
+ <ul>
+   <li><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry"><code>SmartMotorControllerTelemetryConfig</code></a> — fluent builder that
+       selects which signals to publish and under what NetworkTables keys. Signals include
+       duty cycle, applied voltage, velocity, position, supply current, stator current, and
+       device temperature.</li>
+   <li><a href="SmartMotorControllerTelemetry.html" title="class in yams.telemetry"><code>SmartMotorControllerTelemetry</code></a> — publisher that consumes a
+       <code>SmartMotorControllerTelemetryConfig</code> and writes the selected signals to
+       NetworkTables on every <code>periodic()</code> call.</li>
+ </ul>
+
+ <h2>Lightweight scalar publishers</h2>
+ <ul>
+   <li><a href="BooleanTelemetry.html" title="class in yams.telemetry"><code>BooleanTelemetry</code></a> — lightweight publisher for a single
+       <code>boolean</code> value (e.g. limit switch state, at-setpoint flag).</li>
+   <li><a href="DoubleTelemetry.html" title="class in yams.telemetry"><code>DoubleTelemetry</code></a> — lightweight publisher for a single
+       <code>double</code> value (e.g. a raw sensor reading or computed error).</li>
+ </ul>
+
+ <h2>Enabling telemetry</h2>
+ <p>Telemetry is opt-in. Call <code>setupTelemetry()</code> on a
+ <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> or mechanism instance, passing the
+ desired configuration object, to begin publishing. The call must happen before the first
+ <code>periodic()</code> call (typically in <code>robotInit</code> or the subsystem constructor):
+ <pre><code>
+ SmartMotorControllerTelemetryConfig telemetryCfg =
+     new SmartMotorControllerTelemetryConfig("arm/motor")
+         .withVelocity()
+         .withPosition()
+         .withSupplyCurrent()
+         .withTemperature();
+
+ motor.setupTelemetry(telemetryCfg);
+ </code></pre></div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="see-list">
+<li><a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></li>
+</ul>
+</dd>
+</dl>
 </section>
 <section class="summary">
 <ul class="summary-list">

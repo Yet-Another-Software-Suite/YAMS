@@ -50,6 +50,130 @@ loadScripts(document, 'script');</script>
 <div class="header">
 <h1 class="title">Yet Another Mechanism System API</h1>
 </div>
+<div class="block"><h1>Yet Another Mechanism System (YAMS)</h1>
+
+<p>
+  YAMS is a unified FRC mechanism library that provides a hardware-agnostic API for controlling
+  robot mechanisms powered by REV SPARK MAX/FLEX or CTRE TalonFX/TalonFXS motor controllers.
+  It is compatible with WPILib 2026 and targets FRC teams that want consistent, simulation-ready
+  mechanism abstractions without vendor lock-in.
+</p>
+
+<h2>Key Features</h2>
+<ul>
+  <li><strong>Unified SmartMotorController abstraction</strong> — one API for REV SPARK and CTRE TalonFX hardware.</li>
+  <li><strong>Ready-to-use mechanisms</strong> — Arm, Elevator, Pivot, FlyWheel, SwerveDrive, and more, each with builder-style configuration.</li>
+  <li><strong>Physics-based simulation</strong> — drop-in sim suppliers (ArmSimSupplier, DCMotorSimSupplier) for hardware-free testing.</li>
+  <li><strong>NetworkTables telemetry</strong> — MechanismTelemetry and SmartMotorControllerTelemetry publish live data to Shuffleboard/AdvantageScope.</li>
+  <li><strong>Builder-style config</strong> — every mechanism and motor controller is configured through fluent builder objects, keeping construction readable and safe.</li>
+</ul>
+
+<h2>Quick Start</h2>
+
+<pre><code>
+// 1. Configure the motor controller
+SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
+      .withClosedLoopController(4, 0, 0)
+      .withSoftLimits(Degrees.of(-30), Degrees.of(100))
+      .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
+      .withIdleMode(MotorMode.BRAKE)
+      .withTelemetry("ArmMotor", TelemetryVerbosity.HIGH)
+      .withStatorCurrentLimit(Amps.of(40))
+      .withMotorInverted(false)
+      .withFeedforward(new ArmFeedforward(0, 0, 0, 0))
+      .withControlMode(ControlMode.CLOSED_LOOP)
+      .withStartingPosition(Degrees.of(0));
+
+// 2. Instantiate the appropriate vendor wrapper
+SmartMotorController motor = new SparkWrapper(new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), motorConfig);
+
+// 3. Build an ArmConfig describing the physical arm
+ArmConfig armConfig = new ArmConfig()
+    .withMotor(motor)
+    .withArmLength(Meters.of(0.5))
+    .withMinAngle(Degrees.of(-90))
+    .withMaxAngle(Degrees.of(90));
+
+// 4. Construct the Arm mechanism
+Arm arm = new Arm(armConfig);
+
+// 5. Schedule a setpoint command
+arm.setAngle(Degrees.of(45)).schedule();
+</code></pre>
+
+<h2>Package Summary</h2>
+
+<table border="1">
+  <caption>Package Summary</caption>
+  <tr>
+    <th>Package</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><a href="yams/package-summary.html">yams</a></td>
+    <td>Root package; entry point and top-level library classes.</td>
+  </tr>
+  <tr>
+    <td><a href="yams/exceptions/package-summary.html">yams.exceptions</a></td>
+    <td>Configuration and runtime exception types thrown by YAMS.</td>
+  </tr>
+  <tr>
+    <td><a href="yams/gearing/package-summary.html">yams.gearing</a></td>
+    <td>GearBox, Sprocket, and MechanismGearing for gear-ratio math.</td>
+  </tr>
+  <tr>
+    <td><a href="yams/math/package-summary.html">yams.math</a></td>
+    <td>LQR solver, derivative filter, and general math utilities.</td>
+  </tr>
+  <tr>
+    <td><a href="yams/mechanisms/package-summary.html">yams.mechanisms</a></td>
+    <td>SmartMechanism abstract base class shared by all mechanism types.</td>
+  </tr>
+  <tr>
+    <td><a href="yams/mechanisms/config/package-summary.html">yams.mechanisms.config</a></td>
+    <td>Builder and config classes for configuring every supported mechanism.</td>
+  </tr>
+  <tr>
+    <td><a href="yams/mechanisms/positional/package-summary.html">yams.mechanisms.positional</a></td>
+    <td>Arm, Elevator, Pivot, DifferentialMechanism, and DoubleJointedArm implementations.</td>
+  </tr>
+  <tr>
+    <td><a href="yams/mechanisms/velocity/package-summary.html">yams.mechanisms.velocity</a></td>
+    <td>FlyWheel and SmartVelocityMechanism for velocity-controlled subsystems.</td>
+  </tr>
+  <tr>
+    <td><a href="yams/mechanisms/swerve/package-summary.html">yams.mechanisms.swerve</a></td>
+    <td>SwerveDrive and SwerveModule for full swerve drivetrain control.</td>
+  </tr>
+  <tr>
+    <td><a href="yams/mechanisms/swerve/utility/package-summary.html">yams.mechanisms.swerve.utility</a></td>
+    <td>SwerveInputStream and other swerve-specific utility helpers.</td>
+  </tr>
+  <tr>
+    <td><a href="yams/motorcontrollers/package-summary.html">yams.motorcontrollers</a></td>
+    <td>SmartMotorController abstract base, SmartMotorControllerConfig, and vendor wrappers (SparkWrapper, TalonFXWrapper, TalonFXSWrapper).</td>
+  </tr>
+  <tr>
+    <td><a href="yams/motorcontrollers/local/package-summary.html">yams.motorcontrollers.local</a></td>
+    <td>SparkWrapper — REV SPARK MAX and SPARK FLEX integration.</td>
+  </tr>
+  <tr>
+    <td><a href="yams/motorcontrollers/remote/package-summary.html">yams.motorcontrollers.remote</a></td>
+    <td>TalonFXWrapper and TalonFXSWrapper — CTRE Phoenix 6 integration.</td>
+  </tr>
+  <tr>
+    <td><a href="yams/motorcontrollers/simulation/package-summary.html">yams.motorcontrollers.simulation</a></td>
+    <td>ArmSimSupplier, DCMotorSimSupplier, and Sensor for physics-based simulation.</td>
+  </tr>
+  <tr>
+    <td><a href="yams/telemetry/package-summary.html">yams.telemetry</a></td>
+    <td>MechanismTelemetry and SmartMotorControllerTelemetry for NetworkTables publishing.</td>
+  </tr>
+  <tr>
+    <td><a href="yams/units/package-summary.html">yams.units</a></td>
+    <td>YUnits and EasyCRT unit helpers for WPILib unit conversions.</td>
+  </tr>
+</table></div>
 <div id="all-packages-table">
 <div class="caption"><span>Packages</span></div>
 <div class="summary-table two-column-summary">
@@ -69,46 +193,52 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first odd-row-color all-packages-table all-packages-table-tab1"><a href="yams/mechanisms/package-summary.html">yams.mechanisms</a></div>
 <div class="col-last odd-row-color all-packages-table all-packages-table-tab1">
-<div class="block">Mechanism classes.</div>
+<div class="block">Top-level mechanism abstractions for the YAMS (Yet Another Mechanism System) library.</div>
 </div>
 <div class="col-first even-row-color all-packages-table all-packages-table-tab1"><a href="yams/mechanisms/config/package-summary.html">yams.mechanisms.config</a></div>
 <div class="col-last even-row-color all-packages-table all-packages-table-tab1">
-<div class="block">Mechanism configuration classes.</div>
+<div class="block">Builder-style configuration classes for every mechanism in the YAMS library.</div>
 </div>
 <div class="col-first odd-row-color all-packages-table all-packages-table-tab1"><a href="yams/mechanisms/positional/package-summary.html">yams.mechanisms.positional</a></div>
 <div class="col-last odd-row-color all-packages-table all-packages-table-tab1">
-<div class="block">Positional mechanism classes.</div>
+<div class="block">Position-controlled mechanism implementations for the YAMS library.</div>
 </div>
 <div class="col-first even-row-color all-packages-table all-packages-table-tab1"><a href="yams/mechanisms/swerve/package-summary.html">yams.mechanisms.swerve</a></div>
-<div class="col-last even-row-color all-packages-table all-packages-table-tab1">&nbsp;</div>
+<div class="col-last even-row-color all-packages-table all-packages-table-tab1">
+<div class="block">Swerve drive mechanism classes.</div>
+</div>
 <div class="col-first odd-row-color all-packages-table all-packages-table-tab1"><a href="yams/mechanisms/swerve/utility/package-summary.html">yams.mechanisms.swerve.utility</a></div>
-<div class="col-last odd-row-color all-packages-table all-packages-table-tab1">&nbsp;</div>
+<div class="col-last odd-row-color all-packages-table all-packages-table-tab1">
+<div class="block">Swerve drive utility classes.</div>
+</div>
 <div class="col-first even-row-color all-packages-table all-packages-table-tab1"><a href="yams/mechanisms/velocity/package-summary.html">yams.mechanisms.velocity</a></div>
 <div class="col-last even-row-color all-packages-table all-packages-table-tab1">
-<div class="block">Velocity mechanism classes.</div>
+<div class="block">Velocity-controlled mechanism implementations for the YAMS library.</div>
 </div>
 <div class="col-first odd-row-color all-packages-table all-packages-table-tab1"><a href="yams/motorcontrollers/package-summary.html">yams.motorcontrollers</a></div>
 <div class="col-last odd-row-color all-packages-table all-packages-table-tab1">
-<div class="block">Motor controller wrappers</div>
+<div class="block">Hardware-agnostic motor controller abstractions for FRC mechanisms.</div>
 </div>
 <div class="col-first even-row-color all-packages-table all-packages-table-tab1"><a href="yams/motorcontrollers/local/package-summary.html">yams.motorcontrollers.local</a></div>
 <div class="col-last even-row-color all-packages-table all-packages-table-tab1">
-<div class="block">Motor controller wrappers for motor controllers that require robot controller interfacing for advanced
- functionality.</div>
+<div class="block">REV Robotics motor controller wrappers whose closed-loop control runs on the roboRIO.</div>
 </div>
 <div class="col-first odd-row-color all-packages-table all-packages-table-tab1"><a href="yams/motorcontrollers/remote/package-summary.html">yams.motorcontrollers.remote</a></div>
 <div class="col-last odd-row-color all-packages-table all-packages-table-tab1">
-<div class="block">Motor controller wrappers for sufficiently advanced motor controllers which can use the motor controller
- functionality.</div>
+<div class="block">CTRE motor controller wrappers whose closed-loop control runs on the motor controller itself.</div>
 </div>
 <div class="col-first even-row-color all-packages-table all-packages-table-tab1"><a href="yams/motorcontrollers/simulation/package-summary.html">yams.motorcontrollers.simulation</a></div>
-<div class="col-last even-row-color all-packages-table all-packages-table-tab1">&nbsp;</div>
+<div class="col-last even-row-color all-packages-table all-packages-table-tab1">
+<div class="block">Physics-based simulation suppliers for YAMS motor controllers.</div>
+</div>
 <div class="col-first odd-row-color all-packages-table all-packages-table-tab1"><a href="yams/telemetry/package-summary.html">yams.telemetry</a></div>
 <div class="col-last odd-row-color all-packages-table all-packages-table-tab1">
-<div class="block">Telemetry configuration and publishing.</div>
+<div class="block">NetworkTables publishers for mechanism and motor controller state.</div>
 </div>
 <div class="col-first even-row-color all-packages-table all-packages-table-tab1"><a href="yams/units/package-summary.html">yams.units</a></div>
-<div class="col-last even-row-color all-packages-table all-packages-table-tab1">&nbsp;</div>
+<div class="col-last even-row-color all-packages-table all-packages-table-tab1">
+<div class="block">Extended unit-of-measure types and conversion helpers.</div>
+</div>
 </div>
 </div>
 </main>

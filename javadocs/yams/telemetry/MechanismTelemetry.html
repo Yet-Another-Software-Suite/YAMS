@@ -78,7 +78,41 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">MechanismTelemetry</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Mechanism telemetry.</div>
+<div class="block">Mechanism telemetry.
+
+ <p>Publishes mechanism state — setpoint position/velocity, current mechanism position, loop
+ time, and motor controller data — to NetworkTables under the <code>Mechanisms/&lt;name&gt;</code> and
+ <code>Tuning/&lt;name&gt;</code> tables. Data is visible in SmartDashboard, Elastic, and Advantage Scope.
+
+ <p>This class is managed internally by mechanism classes such as <a href="../mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a>,
+ <a href="../mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a>, and <a href="../mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a>.
+ You do <b>not</b> usually construct it directly; instead enable telemetry through the
+ mechanism's configuration object before constructing the mechanism:
+
+ <h2>Enabling via ArmConfig</h2>
+ <pre><code>
+ ArmConfig armConfig = new ArmConfig()
+     .withMotor(new TalonFXConfig(1))
+     .withLength(Meters.of(0.5))
+     .withMass(Kilograms.of(2.0))
+     .withHardLimits(Degrees.of(-10), Degrees.of(90))
+     .withTelemetry("Arm", TelemetryVerbosity.HIGH)   // enables MechanismTelemetry
+     .withSimStartingPosition(Degrees.of(0));
+
+ Arm arm = new Arm(armConfig);
+ </code></pre>
+
+ <h2>Enabling via ElevatorConfig</h2>
+ <pre><code>
+ ElevatorConfig elevatorConfig = new ElevatorConfig()
+     .withMotor(new TalonFXConfig(2))
+     .withDrumRadius(Inches.of(1.0))
+     .withMass(Kilograms.of(4.0))
+     .withTelemetry("Elevator", TelemetryVerbosity.HIGH)   // enables MechanismTelemetry
+     .withSimStartingHeight(Meters.of(0));
+
+ Elevator elevator = new Elevator(elevatorConfig);
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

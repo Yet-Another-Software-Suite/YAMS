@@ -84,7 +84,76 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public abstract class </span><span class="element-name type-name-label">SmartPositionalMechanism</span>
 <span class="extends-implements">extends <a href="../SmartMechanism.html" title="class in yams.mechanisms">SmartMechanism</a></span></div>
-<div class="block">Generic for positional mechanisms.</div>
+<div class="block">Abstract intermediate base class for all closed-loop positional mechanisms in YAMS.
+
+ <p>
+ <code>SmartPositionalMechanism</code> sits between <a href="../SmartMechanism.html" title="class in yams.mechanisms"><code>SmartMechanism</code></a> and the
+ concrete positional mechanism implementations such as <a href="Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a>,
+ <a href="Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a>, <a href="Pivot.html" title="class in yams.mechanisms.positional"><code>Pivot</code></a>, and
+ <a href="DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a>. It provides the shared infrastructure
+ required for closed-loop position control:
+ </p>
+ <ul>
+   <li>Setpoint management via <a href="../SmartMechanism.html#setMechanismPositionSetpoint(edu.wpi.first.units.measure.Angle)"><code>SmartMechanism.setMechanismPositionSetpoint(edu.wpi.first.units.measure.Angle)</code></a>
+       and <a href="../SmartMechanism.html#setMeasurementPositionSetpoint(edu.wpi.first.units.measure.Distance)"><code>SmartMechanism.setMeasurementPositionSetpoint(edu.wpi.first.units.measure.Distance)</code></a></li>
+   <li>Position-based <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/button/Trigger.html" title="class or interface in edu.wpi.first.wpilibj2.command.button" class="external-link"><code>Trigger</code></a> factories
+       (<code>isNear()</code>, <code>gte()</code>, <code>lte()</code>, <code>between()</code>, <code>max()</code>,
+       <code>min()</code>) — defined by each concrete subclass</li>
+   <li>Command factories such as <code>setAngle()</code> and <code>setHeight()</code> defined by each
+       concrete subclass, which internally call
+       <a href="../SmartMechanism.html#setMechanismPositionSetpoint(edu.wpi.first.units.measure.Angle)"><code>SmartMechanism.setMechanismPositionSetpoint(edu.wpi.first.units.measure.Angle)</code></a> or
+       <a href="../SmartMechanism.html#setMeasurementPositionSetpoint(edu.wpi.first.units.measure.Distance)"><code>SmartMechanism.setMeasurementPositionSetpoint(edu.wpi.first.units.measure.Distance)</code></a></li>
+   <li>A 2D visualization model via <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/MechanismRoot2d.html" title="class or interface in edu.wpi.first.wpilibj.smartdashboard" class="external-link"><code>MechanismRoot2d</code></a>
+       and <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/MechanismLigament2d.html" title="class or interface in edu.wpi.first.wpilibj.smartdashboard" class="external-link"><code>MechanismLigament2d</code></a> fields that subclasses
+       populate and update</li>
+ </ul>
+
+ <p>
+ Concrete mechanisms extend this class and supply the physics-specific details: how to read the
+ current position, how to drive the simulation model, and how to update visualization and
+ telemetry. The setpoint infrastructure and WPILib subsystem integration live here so that all
+ positional mechanisms share a consistent, command-based API without code duplication.
+ </p>
+
+ <p>
+ <b>Conceptual subclass pattern:</b> A concrete positional mechanism extends
+ <code>SmartPositionalMechanism</code>, provides a typed command factory, and calls into the
+ base-class setpoint methods:
+ </p>
+ <pre><code>
+ // A concrete mechanism delegates setpoint management to this base class:
+ public Command setAngle(Angle target) {
+     return Commands.startRun(
+         () -&gt; setMechanismPositionSetpoint(target),
+         () -&gt; {},
+         m_subsystem
+     ).withName(getName() + " SetAngle");
+ }
+ </code></pre>
+
+ <h2>For Subclass Authors</h2>
+ <p>
+ Every concrete subclass of <code>SmartPositionalMechanism</code> must implement the following
+ abstract methods inherited from <a href="../SmartMechanism.html" title="class in yams.mechanisms"><code>SmartMechanism</code></a>:
+ </p>
+ <ul>
+   <li><a href="../SmartMechanism.html#getRelativeMechanismPosition()"><code>SmartMechanism.getRelativeMechanismPosition()</code></a> — returns the
+       current 3-D position of the mechanism end-point in <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/Mechanism2d.html" title="class or interface in edu.wpi.first.wpilibj.smartdashboard" class="external-link"><code>Mechanism2d</code></a>
+       coordinates</li>
+   <li><a href="../SmartMechanism.html#visualizationUpdate()"><code>SmartMechanism.visualizationUpdate()</code></a> — updates
+       <code>m_mechanismLigament</code> (and any setpoint ligament) to reflect the current state</li>
+   <li><a href="../SmartMechanism.html#getName()"><code>SmartMechanism.getName()</code></a> — returns a human-readable mechanism
+       name used for telemetry and command names</li>
+   <li><a href="../SmartMechanism.html#simIterate()"><code>SmartMechanism.simIterate()</code></a> — advances the physics simulation
+       model and writes back simulated encoder values each robot loop</li>
+   <li><a href="../SmartMechanism.html#updateTelemetry()"><code>SmartMechanism.updateTelemetry()</code></a> — publishes mechanism state
+       to <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/SmartDashboard.html" title="class or interface in edu.wpi.first.wpilibj.smartdashboard" class="external-link"><code>SmartDashboard</code></a> or an equivalent
+       telemetry sink</li>
+   <li><a href="#max()"><code>max()</code></a> — returns a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/button/Trigger.html" title="class or interface in edu.wpi.first.wpilibj2.command.button" class="external-link"><code>Trigger</code></a> that
+       activates when the mechanism reaches its configured maximum limit</li>
+   <li><a href="#min()"><code>min()</code></a> — returns a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/button/Trigger.html" title="class or interface in edu.wpi.first.wpilibj2.command.button" class="external-link"><code>Trigger</code></a> that
+       activates when the mechanism reaches its configured minimum limit</li>
+ </ul></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

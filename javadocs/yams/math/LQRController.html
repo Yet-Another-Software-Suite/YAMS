@@ -78,7 +78,47 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">LQRController</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Linear Quadratic Regulator (Regulator is a type of controller)</div>
+<div class="block">Linear Quadratic Regulator (Regulator is a type of controller)
+
+ <p>An LQR computes optimal control inputs (voltages) that minimize a quadratic cost function
+ combining state error and control effort. It requires a linearized plant model, which is built
+ automatically from the physical parameters supplied via <a href="LQRConfig.html" title="class in yams.math"><code>LQRConfig</code></a>. Three mechanism types
+ are supported: <code>ARM</code>, <code>ELEVATOR</code>, and <code>FLYWHEEL</code>.
+
+ <p>On each robot loop iteration, call the appropriate <code>calculate()</code> overload with the
+ current sensor measurement and the desired setpoint. The controller internally runs a
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/system/LinearSystemLoop.html" title="class or interface in edu.wpi.first.math.system" class="external-link"><code>LinearSystemLoop</code></a> that fuses a
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/LinearQuadraticRegulator.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>LinearQuadraticRegulator</code></a> with a
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/KalmanFilter.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>KalmanFilter</code></a> observer.
+
+ <h2>Example — construct from LQRConfig and calculate arm voltage</h2>
+ <pre><code>
+ import static edu.wpi.first.units.Units.*;
+
+ // Build configuration (see LQRConfig for full parameter details)
+ LQRConfig config = new LQRConfig(
+         DCMotor.getNEO(1),
+         MechanismGearing.ofReduction(60.0),
+         KilogramSquareMeters.of(0.25))
+     .withArm(
+         Radians.of(0.01),
+         RadiansPerSecond.of(0.5),
+         Radians.of(0.05),
+         RadiansPerSecond.of(0.5),
+         Radians.of(0.01));
+
+ LQRController controller = new LQRController(config);
+
+ // In robotInit / subsystem initialization, reset to the current sensor state:
+ controller.reset(encoder.getAngle(), encoder.getAngularVelocity());
+
+ // In periodic, calculate and apply voltage:
+ Voltage output = controller.calculate(
+         encoder.getAngle(),           // measured position
+         Radians.of(Math.PI / 4),      // position setpoint
+         RadiansPerSecond.of(0));       // velocity setpoint
+ motor.setVoltage(output.in(Volts));
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

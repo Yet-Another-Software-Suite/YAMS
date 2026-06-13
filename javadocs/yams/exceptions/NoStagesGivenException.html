@@ -84,11 +84,33 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">NoStagesGivenException</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/RuntimeException.html" title="class or interface in java.lang" class="external-link">RuntimeException</a></span></div>
-<div class="block">Exception for math errors when trying to find the sensor to mechanism ratio.</div>
+<div class="block">Thrown by <a href="../gearing/GearBox.html" title="class in yams.gearing"><code>GearBox</code></a>, <a href="../gearing/Sprocket.html" title="class in yams.gearing"><code>Sprocket</code></a>, and
+ <a href="../math/SmartMath.html" title="class in yams.math"><code>SmartMath</code></a> when a gear reduction calculation is requested but
+ no gear stages were supplied.
+
+ <p>At least one reduction stage (in the <code>"IN:OUT"</code> string format) is required
+ for the ratio calculation to be mathematically valid.  Passing an empty stage array
+ or constructing a <code>GearBox</code>/<code>Sprocket</code> with zero stages triggers this exception.
+
+ <p><b>Resolution:</b> Provide one or more reduction stages. Each stage must be a
+ <code>String</code> in the form <code>"driverTeeth:drivenTeeth"</code> (e.g., <code>"12:60"</code>).
+
+ <p>Example correct usage:
+ <pre><code>
+ // Single-stage 5:1 reduction
+ GearBox gearBox = new GearBox("12:60");
+
+ // Two-stage reduction
+ GearBox gearBox = new GearBox("12:60", "18:36");
+ </code></pre></div>
 <dl class="notes">
 <dt>See Also:</dt>
 <dd>
 <ul class="see-list">
+<li><a href="../gearing/GearBox.html" title="class in yams.gearing"><code>GearBox</code></a></li>
+<li><a href="../gearing/Sprocket.html" title="class in yams.gearing"><code>Sprocket</code></a></li>
+<li><a href="../math/SmartMath.html" title="class in yams.math"><code>SmartMath</code></a></li>
+<li><a href="InvalidStageGivenException.html" title="class in yams.exceptions"><code>InvalidStageGivenException</code></a></li>
 <li><a href="../../serialized-form.html#yams.exceptions.NoStagesGivenException">Serialized Form</a></li>
 </ul>
 </dd>

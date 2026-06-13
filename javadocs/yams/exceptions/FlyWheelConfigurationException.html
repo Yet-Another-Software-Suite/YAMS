@@ -84,11 +84,39 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">FlyWheelConfigurationException</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/RuntimeException.html" title="class or interface in java.lang" class="external-link">RuntimeException</a></span></div>
-<div class="block">Exception for when the FlyWheel is configured incorrectly.</div>
+<div class="block">Thrown by <a href="../mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a> or <a href="../mechanisms/config/FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a>
+ when a required field in <a href="../mechanisms/config/FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a> is missing or invalid.
+
+ <p>Common triggers include:
+ <ul>
+   <li><code>withSmartMotorController(SmartMotorController)</code> called more than once on the same config</li>
+   <li>Speedometer max velocity not set when speedometer simulation is requested
+       (<code>withSpeedometerSimulation(AngularVelocity)</code>)</li>
+   <li>Flywheel diameter not set when surface speed calculations are needed
+       (<code>withDiameter(Distance)</code>)</li>
+   <li>MOI (moment of inertia) not derivable — neither diameter+mass nor an explicit MOI was provided</li>
+ </ul>
+
+ <p><b>Resolution:</b> Ensure <code>FlyWheelConfig.withSmartMotorController(SmartMotorController)</code>
+ is called exactly once, <code>FlyWheelConfig.withDiameter(Distance)</code> and
+ <code>FlyWheelConfig.withMass(Mass)</code> are set (or provide an explicit MOI via
+ <code>FlyWheelConfig.withMOI()</code>), and — when using speedometer simulation —
+ <code>FlyWheelConfig.withSpeedometerSimulation(AngularVelocity)</code> is called with a nonzero max velocity.
+
+ <p>Example minimal configuration:
+ <pre><code>
+ FlyWheelConfig config = new FlyWheelConfig()
+     .withSmartMotorController(SmartMotorController.create(SPARK_MAX, DCMotor.getNEO(1)))
+     .withDiameter(Inches.of(4))
+     .withMass(Pounds.of(0.5));
+ FlyWheel flyWheel = new FlyWheel(config);
+ </code></pre></div>
 <dl class="notes">
 <dt>See Also:</dt>
 <dd>
 <ul class="see-list">
+<li><a href="../mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a></li>
+<li><a href="../mechanisms/config/FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a></li>
 <li><a href="../../serialized-form.html#yams.exceptions.FlyWheelConfigurationException">Serialized Form</a></li>
 </ul>
 </dd>

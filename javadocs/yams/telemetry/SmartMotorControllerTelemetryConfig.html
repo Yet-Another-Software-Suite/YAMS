@@ -78,7 +78,42 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">SmartMotorControllerTelemetryConfig</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Smart motor controller telemetry configuration.</div>
+<div class="block">Smart motor controller telemetry configuration.
+
+ <p>Use this builder to select exactly which fields are published to NetworkTables and/or
+ DataLog. Every field is disabled by default; call the individual <code>with*()</code> methods to
+ opt in, or use <a href="#withTelemetryVerbosity(yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)"><code>withTelemetryVerbosity(yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)</code></a> to enable a predefined set.
+
+ <h2>Example</h2>
+ <pre><code>
+ SmartMotorControllerTelemetryConfig telemetryCfg =
+     new SmartMotorControllerTelemetryConfig()
+         // choose a verbosity preset (LOW / MID / HIGH), or enable fields individually below
+         .withTelemetryVerbosity(TelemetryVerbosity.HIGH)
+         // optionally enable individual fields on top of the preset
+         .withStatorCurrent()
+         .withTemperature()
+         .withOutputVoltage()
+         .withSetpointPosition()
+         .withSetpointVelocity()
+         .withMechanismPosition()
+         .withMechanismVelocity()
+         .withRotorPosition()
+         .withRotorVelocity()
+         .withMeasurementPosition()
+         .withMeasurementVelocity()
+         .withMechanismUpperLimit()
+         .withMechanismLowerLimit()
+         .withTemperatureLimit()
+         .withVelocityControl()
+         .withMotionProfile()
+         .withArmFeedforward()
+         .withElevatorFeedforward()
+         .withSimpleFeedforward()
+         // disable NT4 output (e.g. during competition) and log to DataLog instead
+         .withoutNetworkTables()
+         .withDataLogName("motors/shooter");
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

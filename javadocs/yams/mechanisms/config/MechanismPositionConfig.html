@@ -80,7 +80,37 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
 <div class="block">A configuration class for specifying the position and visualization properties of a mechanism relative to a robot in
  a 3D coordinate system. This class allows setting and retrieving details such as the mechanism's position relative to
- the robot, the robot's maximum dimensions, and the plane in which the mechanism operates.</div>
+ the robot, the robot's maximum dimensions, and the plane in which the mechanism operates.
+
+ <p><code>MechanismPositionConfig</code> is used by <a href="../positional/SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a> to drive the
+ built-in <code>Mechanism2d</code> widget in Glass/Shuffleboard. It captures three pieces of
+ information:
+
+ <ul>
+   <li><b>Robot-relative position</b> — a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Translation3d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link"><code>Translation3d</code></a>
+       that places the mechanism's pivot/root inside the robot frame. When set, the Mechanism2d
+       window is automatically offset so the mechanism appears in the correct position relative
+       to the robot outline.</li>
+   <li><b>Robot bounding box</b> — optional maximum length and height used to size the
+       Mechanism2d canvas. When omitted, the canvas defaults to twice the mechanism's
+       reported length.</li>
+   <li><b>Movement plane</b> — whether the mechanism moves in the XZ (default), YZ, or XY
+       plane of the robot coordinate system. This determines which Translation3d axes are
+       mapped to the 2D canvas X and Y axes.</li>
+ </ul>
+
+ <h2>Example</h2>
+ <pre><code>
+ import static edu.wpi.first.units.Units.Meters;
+ import edu.wpi.first.math.geometry.Translation3d;
+ import yams.mechanisms.config.MechanismPositionConfig;
+
+ MechanismPositionConfig posConfig = new MechanismPositionConfig()
+     .withRelativePosition(new Translation3d(0.2, 0.0, 0.3)) // 20 cm forward, 30 cm up
+     .withMaxRobotLength(Meters.of(0.85))
+     .withMaxRobotHeight(Meters.of(1.20))
+     .withMovementPlane(MechanismPositionConfig.Plane.XZ);
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

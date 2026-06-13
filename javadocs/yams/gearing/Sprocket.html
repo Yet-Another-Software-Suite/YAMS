@@ -78,7 +78,32 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">Sprocket</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Sprocket class to handle calculating the conversion factor of a sprocket in your mechanism.</div>
+<div class="block">Sprocket class to handle calculating the conversion factor of a sprocket in your mechanism.
+
+ <p>A <a href="Sprocket.html" title="class in yams.gearing"><code>Sprocket</code></a> models a chain or belt drive made up of two or more sprockets/pulleys.
+ The ratio for each stage is expressed as <code>driver / driven</code> (IN/OUT). A ratio less than
+ 1.0 indicates a reduction (the driven sprocket has more teeth than the driver).</p>
+
+ <p>You can construct a <a href="Sprocket.html" title="class in yams.gearing"><code>Sprocket</code></a> in several ways:</p>
+ <ul>
+   <li><b><code>new Sprocket(double...)</code></b> — provide per-stage IN/OUT ratios directly</li>
+   <li><b><code>fromStages(String...)</code></b> — provide stages as <code>"IN:OUT"</code> strings</li>
+ </ul>
+
+ <h2>Example</h2>
+ <pre><code>
+ // 2:1 reduction — 18-tooth driver sprocket driving a 36-tooth driven sprocket
+ // The ratio passed is driver/driven = 18/36 = 0.5
+ Sprocket twoToOne = new Sprocket(18.0 / 36.0);
+
+ // Equivalent using an "IN:OUT" stage string
+ Sprocket fromString = Sprocket.fromStages("18:36");
+
+ // Get the input-to-output conversion factor (&lt; 1.0 means the output spins slower)
+ double factor = twoToOne.getInputToOutputConversionFactor(); // 0.5
+ // Get the output-to-input conversion factor (the reduction ratio)
+ double reduction = twoToOne.getOutputToInputConversionFactor(); // 2.0
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

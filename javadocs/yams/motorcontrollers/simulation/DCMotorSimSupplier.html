@@ -83,7 +83,41 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">DCMotorSimSupplier</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
 implements <a href="../SimSupplier.html" title="interface in yams.motorcontrollers">SimSupplier</a></span></div>
-<div class="block">DCMotorSim Supplier</div>
+<div class="block">DCMotorSim Supplier — simulates a generic DC motor load (flywheel, roller, or elevator)
+ using WPILib's <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/DCMotorSim.html" title="class or interface in edu.wpi.first.wpilibj.simulation" class="external-link"><code>DCMotorSim</code></a>.
+
+ <p>
+ This supplier steps WPILib's <code>DCMotorSim</code> physics model each control loop and exposes the
+ resulting angular position, angular velocity, current draw, and acceleration through the
+ <a href="../SimSupplier.html" title="interface in yams.motorcontrollers"><code>SimSupplier</code></a> interface. Unlike
+ <a href="ArmSimSupplier.html" title="class in yams.motorcontrollers.simulation"><code>ArmSimSupplier</code></a>, this model does not simulate gravity or
+ joint limits — it is suited for continuous-rotation mechanisms such as flywheels or rollers, as
+ well as linear mechanisms (elevators) when paired with appropriate gearing.
+ </p>
+
+ <p>
+ The gear ratio and control period are read from the associated
+ <a href="../SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>'s config, so they do not need to be repeated
+ here.
+ </p>
+
+ <h2>Example</h2>
+ <pre><code>
+ // 1. Build the WPILib DC motor physics model (e.g. a flywheel with MOI 0.001 kg·m²)
+ DCMotorSim flywheelPhysics = new DCMotorSim(
+     LinearSystemId.createDCMotorSystem(DCMotor.getNEO(1), 0.001, 1.0),
+     DCMotor.getNEO(1));
+
+ // 2. Configure and build the YAMS smart motor controller
+ SmartMotorController motor = new SparkMaxController(
+     new SmartMotorControllerConfig()
+         .withGearing(new MechanismGearing(1.0))
+         .withClosedLoopControlPeriod(Milliseconds.of(20)));
+
+ // 3. Wrap physics model in the supplier and register it
+ DCMotorSimSupplier sim = new DCMotorSimSupplier(flywheelPhysics, motor);
+ motor.getConfig().withSimSupplier(sim);
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

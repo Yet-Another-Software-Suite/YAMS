@@ -65,7 +65,72 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="package-signature">package <span class="element-name">yams.mechanisms.config</span></div>
 <section class="package-description" id="package-description">
-<div class="block">Mechanism configuration classes.</div>
+<div class="block">Builder-style configuration classes for every mechanism in the YAMS library.
+
+ <p>Every YAMS mechanism requires a corresponding config object to be constructed before the
+ mechanism itself is instantiated. Config classes follow a <b>fluent builder pattern</b>: each
+ <code>with*()</code> setter mutates the config and returns <code>this</code>, allowing calls to be
+ chained in a single expression.
+
+ <h2>Available Configuration Classes</h2>
+ <ul>
+   <li><a href="ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a> — single-jointed arm with angle limits and
+       feedforward tuning</li>
+   <li><a href="ElevatorConfig.html" title="class in yams.mechanisms.config"><code>ElevatorConfig</code></a> — linear elevator with height limits and
+       gravity compensation</li>
+   <li><a href="PivotConfig.html" title="class in yams.mechanisms.config"><code>PivotConfig</code></a> — pivot mechanism with continuous or bounded
+       rotation</li>
+   <li><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a> — flywheel velocity mechanism with optional
+       second follower motor</li>
+   <li><a href="SwerveDriveConfig.html" title="class in yams.mechanisms.config"><code>SwerveDriveConfig</code></a> — full swerve-drive chassis geometry and
+       module layout</li>
+   <li><a href="SwerveModuleConfig.html" title="class in yams.mechanisms.config"><code>SwerveModuleConfig</code></a> — per-module drive and steer motor
+       configuration</li>
+   <li><a href="DifferentialMechanismConfig.html" title="class in yams.mechanisms.config"><code>DifferentialMechanismConfig</code></a> — differential (tank-drive)
+       mechanism pairing two motors</li>
+   <li><a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a> — position targets and tolerance
+       settings shared across positional mechanisms</li>
+   <li><a href="SensorConfig.html" title="class in yams.mechanisms.config"><code>SensorConfig</code></a> — external encoder or absolute sensor
+       attachment configuration</li>
+ </ul>
+
+ <h2>Motor Controller Requirement</h2>
+ <p>A <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> must be provided before most mechanisms
+ can be constructed. It may be supplied either through the config constructor or via the
+ <code>withSmartMotorController()</code> setter:
+
+ <pre><code>
+ SmartMotorController motor = new TalonFXController(new TalonFX(1));
+
+ // Option A: pass in the constructor
+ ElevatorConfig config = new ElevatorConfig(motor)
+     .withMaxHeight(Meters.of(1.5))
+     .withGearing(9.0);
+
+ // Option B: set via fluent API
+ ElevatorConfig config = new ElevatorConfig()
+     .withSmartMotorController(motor)
+     .withMaxHeight(Meters.of(1.5))
+     .withGearing(9.0);
+ </code></pre>
+
+ <h2>Fluent Chaining Example</h2>
+ <pre><code>
+ ArmConfig armConfig = new ArmConfig(motor)
+     .withGearing(100.0)
+     .withSoftLimits(Rotation2d.fromDegrees(-90), Rotation2d.fromDegrees(90))
+     .withFeedforward(new ArmFeedforward(0.1, 0.5, 1.2))
+     .withSensor(new SensorConfig(encoder).withOffset(Rotation2d.fromDegrees(15)));
+ </code></pre></div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="see-list">
+<li><a href="../SmartMechanism.html" title="class in yams.mechanisms"><code>SmartMechanism</code></a></li>
+<li><a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></li>
+</ul>
+</dd>
+</dl>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -77,17 +142,19 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><a href="../package-summary.html">yams.mechanisms</a></div>
 <div class="col-last even-row-color">
-<div class="block">Mechanism classes.</div>
+<div class="block">Top-level mechanism abstractions for the YAMS (Yet Another Mechanism System) library.</div>
 </div>
 <div class="col-first odd-row-color"><a href="../positional/package-summary.html">yams.mechanisms.positional</a></div>
 <div class="col-last odd-row-color">
-<div class="block">Positional mechanism classes.</div>
+<div class="block">Position-controlled mechanism implementations for the YAMS library.</div>
 </div>
 <div class="col-first even-row-color"><a href="../swerve/package-summary.html">yams.mechanisms.swerve</a></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Swerve drive mechanism classes.</div>
+</div>
 <div class="col-first odd-row-color"><a href="../velocity/package-summary.html">yams.mechanisms.velocity</a></div>
 <div class="col-last odd-row-color">
-<div class="block">Velocity mechanism classes.</div>
+<div class="block">Velocity-controlled mechanism implementations for the YAMS library.</div>
 </div>
 </div>
 </div>
@@ -105,7 +172,8 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab2"><a href="DifferentialMechanismConfig.html" title="class in yams.mechanisms.config">DifferentialMechanismConfig</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab2">
-<div class="block">Differential Mechanism config.</div>
+<div class="block">Configuration for a <a href="../positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a> driven by two coordinated motors working
+ differentially.</div>
 </div>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
@@ -126,7 +194,7 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="PivotConfig.html" title="class in yams.mechanisms.config">PivotConfig</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
-<div class="block">Pivot config.</div>
+<div class="block">Pivot configuration class.</div>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab2"><a href="SensorConfig.html" title="class in yams.mechanisms.config">SensorConfig</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab2">

@@ -82,7 +82,52 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">DoubleJointedArm</span>
 <span class="extends-implements">extends <a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional">SmartPositionalMechanism</a></span></div>
-<div class="block">Arm mechanism.</div>
+<div class="block">A two-segment arm where each joint has its own independent motor controller.
+
+ <p>Unlike a differential mechanism, the joints in a <code>DoubleJointedArm</code> are driven
+ individually: the lower (shoulder) motor directly controls the first segment and the upper
+ (elbow) motor directly controls the second segment. Kinematics are applied in software to
+ convert between Cartesian end-effector positions and the required joint angles.</p>
+
+ <p>This mechanism is well-suited to FRC scoring subsystems that require both high reach and
+ precise end-effector placement. A long lower segment provides reach, while the upper segment
+ allows the end-effector to be folded back under frame perimeter when traveling or extended
+ far over field elements when scoring.</p>
+
+ <h2>Construction Example</h2>
+ <pre><code>
+ // Each ArmConfig must specify the motor, gearing, arm length, hard limits,
+ // and starting angle before the DoubleJointedArm can be constructed.
+ ArmConfig lowerConfig = new ArmConfig(lowerSMC)
+     .withLength(Inches.of(24))
+     .withHardLimits(Degrees.of(0), Degrees.of(120))
+     .withStartingPosition(Degrees.of(0))
+     .withTelemetry("Shoulder", TelemetryVerbosity.HIGH);
+
+ ArmConfig upperConfig = new ArmConfig(upperSMC)
+     .withLength(Inches.of(20))
+     .withHardLimits(Degrees.of(0), Degrees.of(120))
+     .withStartingPosition(Degrees.of(90))
+     .withTelemetry("Elbow", TelemetryVerbosity.HIGH);
+
+ DoubleJointedArm arm = new DoubleJointedArm(lowerConfig, upperConfig);
+ </code></pre>
+
+ <h2>Control Examples</h2>
+ <pre><code>
+ // Set explicit joint angles: shoulder at 45°, elbow at 90°.
+ Command positionCommand = arm.setAngle(Degrees.of(45), Degrees.of(90));
+
+ // Move to a Cartesian target (0.4 m forward, 0.6 m up) using inverse kinematics.
+ Command ikCommand = arm.setPosition(new Translation2d(0.4, 0.6), false);
+
+ // Continuously track a target while within 5 cm tolerance, then finish.
+ Command trackCommand = arm.runTo(new Translation2d(0.5, 0.7), false, Centimeters.of(5));
+
+ // Read current joint angles.
+ Angle shoulder = arm.getLowerAngle();
+ Angle elbow    = arm.getUpperAngle();
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

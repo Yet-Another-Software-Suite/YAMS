@@ -74,7 +74,44 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">YUnits</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">YUnits that are fun and useful!</div>
+<div class="block">YUnits that are fun and useful!
+
+ <p>This class extends the standard WPILib unit set with additional units that are either useful
+ for FRC robotics or simply entertaining. Beyond what WPILib provides out of the box, <code>YUnits</code>
+ adds:
+
+ <ul>
+   <li><b>Imperial distance units</b> — <a href="#Hands"><code>Hands</code></a>, <a href="#Yards"><code>Yards</code></a>, <a href="#Cubits"><code>Cubits</code></a>,
+       <a href="#Fathoms"><code>Fathoms</code></a>, <a href="#Chains"><code>Chains</code></a>, <a href="#Furlongs"><code>Furlongs</code></a>, <a href="#Miles"><code>Miles</code></a>, <a href="#Leagues"><code>Leagues</code></a>,
+       and even a <a href="#FootlongSandwich"><code>FootlongSandwich</code></a>.</li>
+   <li><b>Extended time units</b> — <a href="#Hours"><code>Hours</code></a>, <a href="#Days"><code>Days</code></a>, <a href="#Weeks"><code>Weeks</code></a>,
+       <a href="#Fortnight"><code>Fortnight</code></a>, and <a href="#Years"><code>Years</code></a>.</li>
+   <li><b>Derived velocity units</b> — <a href="#MilesPerHour"><code>MilesPerHour</code></a> (MPH), <a href="#FurlongsPerFortnight"><code>FurlongsPerFortnight</code></a>
+       (FPF), and <a href="#SandwichPerSecond"><code>SandwichPerSecond</code></a> for all your footlong-based kinematics.</li>
+   <li><b>Angular velocity and acceleration</b> — <a href="#RotationsPerYear"><code>RotationsPerYear</code></a> (RPY) and
+       <a href="#RPMPerSecond"><code>RPMPerSecond</code></a> for angular acceleration in RPM/s.</li>
+   <li><b>Linear and angular momentum units</b> — <a href="#PoundFeetPerSecond"><code>PoundFeetPerSecond</code></a>,
+       <a href="#PoundInchesPerSecond"><code>PoundInchesPerSecond</code></a>, <a href="#PoundFeetSquaredPerSecond"><code>PoundFeetSquaredPerSecond</code></a>, and
+       <a href="#PoundInchesSquaredPerSecond"><code>PoundInchesSquaredPerSecond</code></a>.</li>
+   <li><b>Moment of inertia units</b> — <a href="#PoundSquareFeet"><code>PoundSquareFeet</code></a> and <a href="#PoundSquareInches"><code>PoundSquareInches</code></a>
+       for imperial rotational inertia calculations.</li>
+ </ul>
+
+ <h2>Example</h2>
+ <pre><code>
+ import yams.units.YUnits;
+ import static edu.wpi.first.units.Units.Meters;
+ import static edu.wpi.first.units.Units.MetersPerSecond;
+
+ // Convert a robot speed from MPH to meters per second
+ double speedMps = YUnits.MPH.of(10).in(MetersPerSecond);  // ~4.47 m/s
+
+ // Express angular acceleration in RPM per second
+ var accel = YUnits.RPMPerSecond.of(50);  // 50 RPM/s
+
+ // Use PoundSquareInches for a flywheel moment of inertia
+ var moi = YUnits.PoundSquareInches.of(0.004);
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

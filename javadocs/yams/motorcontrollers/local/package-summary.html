@@ -61,8 +61,48 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="package-signature">package <span class="element-name">yams.motorcontrollers.local</span></div>
 <section class="package-description" id="package-description">
-<div class="block">Motor controller wrappers for motor controllers that require robot controller interfacing for advanced
- functionality.</div>
+<div class="block">REV Robotics motor controller wrappers whose closed-loop control runs on the roboRIO.
+
+ <p>This package contains adapters for REV SPARK MAX and SPARK FLEX motor controllers.
+ Because the REV hardware offloads PID execution to the roboRIO (rather than to the motor
+ controller itself), these wrappers are classified as <em>local</em>: the control loop runs
+ on the robot controller and sends periodic duty-cycle or voltage commands to the hardware.
+
+ <h2>Core type</h2>
+ <ul>
+   <li><a href="SparkWrapper.html" title="class in yams.motorcontrollers.local"><code>SparkWrapper</code></a> — unified adapter for both the
+       SPARK MAX (NEO, NEO 550) and SPARK FLEX (NEO Vortex).</li>
+ </ul>
+
+ <h2>Absolute encoder discontinuity</h2>
+ <p>When a <code>SparkAbsoluteEncoder</code> (REV Through Bore Encoder) is used as the feedback
+ device, a <em>discontinuity point</em> <strong>must</strong> be configured so the SPARK
+ firmware knows where the sensor wraps around. Set this via
+ <a href="../SmartMotorControllerConfig.html#withExternalEncoderDiscontinuityPoint(edu.wpi.first.units.measure.Angle)"><code>SmartMotorControllerConfig.withExternalEncoderDiscontinuityPoint(edu.wpi.first.units.measure.Angle)</code></a>:
+ <ul>
+   <li><code>0.5</code> — sensor range <code>[-0.5, 0.5)</code>: useful when the mechanism travels
+       through zero and must not have a wrap at the midpoint of travel.</li>
+   <li><code>1.0</code> — sensor range <code>[0, 1)</code>: useful when the mechanism only moves in
+       the positive direction and zero is never crossed.</li>
+ </ul>
+ Omitting this setting when an absolute encoder is attached will produce a configuration
+ warning and may cause erratic position readings near the wrap boundary.
+
+ <h2>Construction</h2>
+ <pre><code>
+ SmartMotorControllerConfig config = new SmartMotorControllerConfig()
+     .withExternalEncoderDiscontinuityPoint(0.5);
+ SmartMotorController motor = new SparkWrapper(
+     new SparkMax(5, MotorType.kBrushless), DCMotor.getNEO(1), config);
+ </code></pre></div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="see-list">
+<li><a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></li>
+</ul>
+</dd>
+</dl>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -74,15 +114,16 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><a href="../package-summary.html">yams.motorcontrollers</a></div>
 <div class="col-last even-row-color">
-<div class="block">Motor controller wrappers</div>
+<div class="block">Hardware-agnostic motor controller abstractions for FRC mechanisms.</div>
 </div>
 <div class="col-first odd-row-color"><a href="../remote/package-summary.html">yams.motorcontrollers.remote</a></div>
 <div class="col-last odd-row-color">
-<div class="block">Motor controller wrappers for sufficiently advanced motor controllers which can use the motor controller
- functionality.</div>
+<div class="block">CTRE motor controller wrappers whose closed-loop control runs on the motor controller itself.</div>
 </div>
 <div class="col-first even-row-color"><a href="../simulation/package-summary.html">yams.motorcontrollers.simulation</a></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Physics-based simulation suppliers for YAMS motor controllers.</div>
+</div>
 </div>
 </div>
 </li>

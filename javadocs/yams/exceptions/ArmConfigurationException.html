@@ -84,11 +84,39 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">ArmConfigurationException</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/RuntimeException.html" title="class or interface in java.lang" class="external-link">RuntimeException</a></span></div>
-<div class="block">Exception for when the Arm is configured incorrectly.</div>
+<div class="block">Thrown by <a href="../mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a> when a required
+ <a href="../mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a> field is missing or invalid.
+
+ <p>Common triggers include:
+ <ul>
+   <li>No motor controller provided (motor is absent from the config)</li>
+   <li>Arm length not set (needed for simulation)</li>
+   <li>Hard limits (<code>withHardLimits(Angle, Angle)</code>) missing or inconsistent</li>
+   <li>Starting angle not configured when no zero-offset is present on the motor</li>
+   <li>MOI (moment of inertia) not derivable from length/mass and not explicitly set</li>
+   <li><code>withSmartMotorController()</code> called twice on the same config object</li>
+ </ul>
+
+ <p><b>Resolution:</b> Ensure <code>ArmConfig.withSmartMotorController(SmartMotorController)</code>
+ is called exactly once, that <code>ArmConfig.withHardLimits(Angle, Angle)</code> provides valid
+ lower and upper bounds, that <code>ArmConfig.withLength(Distance)</code> is set for simulation,
+ and that a starting angle is supplied via
+ <code>SmartMotorControllerConfig.withStartingPosition(Angle)</code> or an encoder zero-offset.
+
+ <p>Example minimal configuration:
+ <pre><code>
+ ArmConfig config = new ArmConfig()
+     .withSmartMotorController(SmartMotorController.create(SPARK_MAX, DCMotor.getNEO(1)))
+     .withHardLimits(Degrees.of(-90), Degrees.of(90))
+     .withLength(Inches.of(18));
+ Arm arm = new Arm(config);
+ </code></pre></div>
 <dl class="notes">
 <dt>See Also:</dt>
 <dd>
 <ul class="see-list">
+<li><a href="../mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a></li>
+<li><a href="../mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a></li>
 <li><a href="../../serialized-form.html#yams.exceptions.ArmConfigurationException">Serialized Form</a></li>
 </ul>
 </dd>

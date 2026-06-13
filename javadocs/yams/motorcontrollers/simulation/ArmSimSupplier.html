@@ -83,7 +83,40 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">ArmSimSupplier</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
 implements <a href="../SimSupplier.html" title="interface in yams.motorcontrollers">SimSupplier</a></span></div>
-<div class="block">ArmSim Supplier</div>
+<div class="block">ArmSim Supplier — simulates a single-jointed arm mechanism using WPILib's
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/SingleJointedArmSim.html" title="class or interface in edu.wpi.first.wpilibj.simulation" class="external-link"><code>SingleJointedArmSim</code></a>.
+
+ <p>
+ This supplier steps WPILib's <code>SingleJointedArmSim</code> physics model each control loop and
+ exposes the resulting angle, angular velocity, current draw, and voltage through the
+ <a href="../SimSupplier.html" title="interface in yams.motorcontrollers"><code>SimSupplier</code></a> interface. The arm's gear ratio and control period are
+ read directly from the associated <a href="../SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>'s config,
+ so no duplication of parameters is required.
+ </p>
+
+ <h2>Example</h2>
+ <pre><code>
+ // 1. Build the WPILib arm physics model
+ SingleJointedArmSim armPhysics = new SingleJointedArmSim(
+     DCMotor.getNEO(1),
+     SingleJointedArmSim.estimateMOI(0.5, 2.0), // moment of inertia (kg·m²)
+     5.0,                                         // gear ratio (rotor/mechanism)
+     0.5,                                         // arm length (meters)
+     Units.degreesToRadians(-10),                 // min angle (radians)
+     Units.degreesToRadians(90),                  // max angle (radians)
+     true,                                        // simulate gravity
+     0);                                          // starting angle (radians)
+
+ // 2. Configure and build the YAMS smart motor controller
+ SmartMotorController motor = new SparkMaxController(
+     new SmartMotorControllerConfig()
+         .withGearing(new MechanismGearing(5.0))
+         .withClosedLoopControlPeriod(Milliseconds.of(20)));
+
+ // 3. Wrap physics model in the supplier and register it
+ ArmSimSupplier sim = new ArmSimSupplier(armPhysics, motor);
+ motor.getConfig().withSimSupplier(sim);
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

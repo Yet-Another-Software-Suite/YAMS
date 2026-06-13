@@ -82,7 +82,28 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">Arm</span>
 <span class="extends-implements">extends <a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional">SmartPositionalMechanism</a></span></div>
-<div class="block">Arm mechanism.</div>
+<div class="block">Arm mechanism.
+
+ <h2>Usage Example</h2>
+ <pre><code>
+ // Build and construct
+ SmartMotorController motor = new SparkWrapper(
+     new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1),
+     new SmartMotorControllerConfig().withClosedLoopController(0.2,0,0).withStatorCurrentLimit(Amps.of(40)));
+ Arm arm = new Arm(new ArmConfig(motor).withLength(Meters.of(0.5)));
+
+ // Schedule a setpoint command
+ Command moveToScore = arm.setAngle(Degrees.of(80));
+ Command holdAtZero = arm.runTo(Degrees.of(0), Degrees.of(2));
+
+ // Bind triggers
+ arm.isNear(Degrees.of(80), Degrees.of(2)).onTrue(indexer.run());
+ arm.max().onTrue(Commands.print("Arm at max!"));
+
+ // Call in robotPeriodic() or a subsystem's periodic():
+ arm.simIterate();
+ arm.updateTelemetry();
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

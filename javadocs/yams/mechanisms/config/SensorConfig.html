@@ -78,7 +78,42 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">SensorConfig</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Sensor configuration for simulated and real sensors.</div>
+<div class="block">Sensor configuration for simulated and real sensors.
+
+ <p><code>SensorConfig</code> describes a named sensor that can expose one or more typed fields
+ (double, int, boolean, long) to both the real robot and the simulation environment. It is
+ used to wire hardware sensors — such as limit switches, encoders, or custom I/O devices —
+ into YAMS's simulation framework so that the same code path runs identically in simulation
+ and on a real robot.
+
+ <p>Each field is registered with a live supplier (the real hardware value) and a default
+ value used when simulation overrides are not active. Simulated values can be injected by
+ match-time window or by an arbitrary <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link"><code>BooleanSupplier</code></a> trigger,
+ allowing a team to script realistic sensor behaviour during automated testing.
+
+ <p>The finished configuration is converted to a <a href="../../motorcontrollers/simulation/Sensor.html" title="class in yams.motorcontrollers.simulation"><code>Sensor</code></a>
+ via <a href="#getSensor()"><code>getSensor()</code></a>, which handles the real/simulated value arbitration at runtime.
+
+ <h2>Example</h2>
+ <pre><code>
+ import static edu.wpi.first.units.Units.Seconds;
+ import yams.mechanisms.config.SensorConfig;
+
+ // Hardware limit switch wired to a DIO channel
+ DigitalInput limitSwitch = new DigitalInput(0);
+
+ SensorConfig forwardLimit = new SensorConfig("ForwardLimitSwitch")
+     .withField("triggered", limitSwitch::get, false)
+     // Simulate the switch being pressed between 10 s and 12 s of match time
+     .withSimulatedValue("triggered", Seconds.of(10), Seconds.of(12), true);
+
+ // Custom encoder exposing position and velocity
+ SensorConfig encoderConfig = new SensorConfig("ArmEncoder")
+     .withField("positionRotations", myEncoder::getPosition, 0.0)
+     .withField("velocityRPM",       myEncoder::getVelocity, 0.0)
+     // Override position to 2.5 rotations whenever a BooleanSupplier fires
+     .withSimulatedValue("positionRotations", () -&gt; Robot.isInTest(), 2.5);
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

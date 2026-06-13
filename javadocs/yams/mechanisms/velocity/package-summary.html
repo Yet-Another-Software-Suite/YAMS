@@ -61,7 +61,64 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="package-signature">package <span class="element-name">yams.mechanisms.velocity</span></div>
 <section class="package-description" id="package-description">
-<div class="block">Velocity mechanism classes.</div>
+<div class="block">Velocity-controlled mechanism implementations for the YAMS library.
+
+ <p>This package contains concrete mechanism classes that regulate a <b>velocity setpoint</b>
+ rather than a position. All classes extend
+ <a href="SmartVelocityMechanism.html" title="class in yams.mechanisms.velocity"><code>SmartVelocityMechanism</code></a>, which provides closed-loop velocity
+ control, feedforward integration, simulation wiring, and WPILib command/trigger support.
+
+ <h2>Available Mechanisms</h2>
+ <ul>
+   <li><a href="FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a> — single or dual-motor flywheel configured with
+       <a href="../config/FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a>. Accepts both
+       <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> (e.g. RPM) and
+       <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>LinearVelocity</code></a> (e.g. surface speed in m/s) setpoints
+       when a wheel radius is provided in the config.</li>
+ </ul>
+
+ <h2>Running the Mechanism</h2>
+ <ul>
+   <li><code>run(velocity)</code> — commands the mechanism to spin at the given velocity. Accepts
+       either <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> or
+       <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>LinearVelocity</code></a> and returns a <code>Command</code> that
+       holds the setpoint until interrupted.</li>
+   <li><code>runTo(velocity)</code> — like <code>run()</code>, but the returned <code>Command</code> does not
+       finish until the mechanism is within the configured velocity tolerance of the setpoint.
+       Useful when downstream actions must wait for the flywheel to spin up.</li>
+ </ul>
+
+ <pre><code>
+ FlyWheelConfig config = new FlyWheelConfig(motor)
+     .withWheelRadius(Inches.of(2))
+     .withVelocityTolerance(RotationsPerSecond.of(1));
+
+ FlyWheel flyWheel = new FlyWheel(config);
+
+ // Spin at a linear surface speed and wait until up to speed before shooting
+ flyWheel.runTo(MetersPerSecond.of(10))
+         .andThen(shooter.fireCommand())
+         .schedule();
+
+ // Spin at an angular velocity (does not wait for spin-up)
+ flyWheel.run(RotationsPerSecond.of(50)).schedule();
+ </code></pre>
+
+ <h2>Unsupported Operations</h2>
+ <p>Because velocity mechanisms do not track an absolute position, the positional limit triggers
+ <code>max()</code> and <code>min()</code> are <b>not supported</b> and will throw
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/UnsupportedOperationException.html" title="class or interface in java.lang" class="external-link"><code>UnsupportedOperationException</code></a> if called. Use the velocity-based triggers
+ (<code>isNear()</code>, <code>gte()</code>, <code>lte()</code>) for condition-based scheduling instead.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="see-list">
+<li><a href="SmartVelocityMechanism.html" title="class in yams.mechanisms.velocity"><code>SmartVelocityMechanism</code></a></li>
+<li><a href="../SmartMechanism.html" title="class in yams.mechanisms"><code>SmartMechanism</code></a></li>
+<li><a href="../config/FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a></li>
+</ul>
+</dd>
+</dl>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -73,18 +130,20 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><a href="../package-summary.html">yams.mechanisms</a></div>
 <div class="col-last even-row-color">
-<div class="block">Mechanism classes.</div>
+<div class="block">Top-level mechanism abstractions for the YAMS (Yet Another Mechanism System) library.</div>
 </div>
 <div class="col-first odd-row-color"><a href="../config/package-summary.html">yams.mechanisms.config</a></div>
 <div class="col-last odd-row-color">
-<div class="block">Mechanism configuration classes.</div>
+<div class="block">Builder-style configuration classes for every mechanism in the YAMS library.</div>
 </div>
 <div class="col-first even-row-color"><a href="../positional/package-summary.html">yams.mechanisms.positional</a></div>
 <div class="col-last even-row-color">
-<div class="block">Positional mechanism classes.</div>
+<div class="block">Position-controlled mechanism implementations for the YAMS library.</div>
 </div>
 <div class="col-first odd-row-color"><a href="../swerve/package-summary.html">yams.mechanisms.swerve</a></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Swerve drive mechanism classes.</div>
+</div>
 </div>
 </div>
 </li>
@@ -100,7 +159,7 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab2"><a href="SmartVelocityMechanism.html" title="class in yams.mechanisms.velocity">SmartVelocityMechanism</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab2">
-<div class="block">Generic for positional mechanisms.</div>
+<div class="block">Abstract intermediate base class for all closed-loop velocity mechanisms in YAMS.</div>
 </div>
 </div>
 </div>

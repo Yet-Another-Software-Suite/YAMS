@@ -82,7 +82,25 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public abstract class </span><span class="element-name type-name-label">SmartMotorController</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Smart motor controller wrapper for motor controllers.</div>
+<div class="block">Smart motor controller wrapper for motor controllers.
+
+ <p>This abstract class is not instantiated directly. Instantiate the appropriate vendor wrapper:
+ <a href="local/SparkWrapper.html" title="class in yams.motorcontrollers.local"><code>SparkWrapper</code></a> for REV SPARK hardware, or
+ <a href="remote/TalonFXWrapper.html" title="class in yams.motorcontrollers.remote"><code>TalonFXWrapper</code></a>/<a href="remote/TalonFXSWrapper.html" title="class in yams.motorcontrollers.remote"><code>TalonFXSWrapper</code></a>
+ for CTRE hardware. Configure all three via <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.
+
+ <h2>Example</h2>
+ <pre><code>
+ SmartMotorControllerConfig config = new SmartMotorControllerConfig()
+     .withClosedLoopController(0.1,0,0).withFeedforward(new SimpleMotorFeedforward(0.05,0,0)).withStatorCurrentLimit(Amps.of(40));
+ SmartMotorController motor = new SparkWrapper(
+     new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), config);
+
+ // Use directly for duty-cycle or voltage control:
+ motor.setDutyCycle(0.5);
+ // Or attach to a mechanism:
+ Arm arm = new Arm(new ArmConfig(motor).withLength(Meters.of(0.5)));
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

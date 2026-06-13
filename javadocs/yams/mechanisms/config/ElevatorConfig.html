@@ -78,7 +78,23 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">ElevatorConfig</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Elevator configuration class.</div>
+<div class="block">Elevator configuration class.
+
+ <h2>Configuration Example</h2>
+ <pre><code>
+ SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
+     .withClosedLoopController(0.5,0,0)
+     .withFeedforward(new ElevatorFeedforward(0.1,0.4,0.12)
+     .withStatorCurrentLimit(Amps.of(40));
+ SmartMotorController motor = new TalonFXWrapper(
+     new TalonFX(4), DCMotor.getKrakenX60(1), motorConfig);
+
+ ElevatorConfig config = new ElevatorConfig(motor)
+     .withDrumRadius(Inches.of(1.0))          // spool radius
+     .withMass(Kilograms.of(4.0))             // carriage mass
+     .withTelemetry("Elevator", TelemetryVerbosity.HIGH)
+     .withSimStartingHeight(Meters.of(0));
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

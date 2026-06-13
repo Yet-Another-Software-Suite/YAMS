@@ -84,7 +84,81 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public abstract class </span><span class="element-name type-name-label">SmartVelocityMechanism</span>
 <span class="extends-implements">extends <a href="../SmartMechanism.html" title="class in yams.mechanisms">SmartMechanism</a></span></div>
-<div class="block">Generic for positional mechanisms.</div>
+<div class="block">Abstract intermediate base class for all closed-loop velocity mechanisms in YAMS.
+
+ <p>
+ <code>SmartVelocityMechanism</code> sits between <a href="../SmartMechanism.html" title="class in yams.mechanisms"><code>SmartMechanism</code></a> and concrete
+ velocity-controlled mechanism implementations such as
+ <a href="FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a>. It provides the shared infrastructure required for
+ closed-loop velocity control:
+ </p>
+ <ul>
+   <li>Velocity setpoint management via
+       <a href="../SmartMechanism.html#setMechanismVelocitySetpoint(edu.wpi.first.units.measure.AngularVelocity)"><code>SmartMechanism.setMechanismVelocitySetpoint(edu.wpi.first.units.measure.AngularVelocity)</code></a> and
+       <a href="../SmartMechanism.html#setMeasurementVelocitySetpoint(edu.wpi.first.units.measure.LinearVelocity)"><code>SmartMechanism.setMeasurementVelocitySetpoint(edu.wpi.first.units.measure.LinearVelocity)</code></a></li>
+   <li>Velocity-based <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/button/Trigger.html" title="class or interface in edu.wpi.first.wpilibj2.command.button" class="external-link"><code>Trigger</code></a> factories
+       (<code>isNear()</code>, <code>gte()</code>, <code>lte()</code>, <code>between()</code>) — defined by each
+       concrete subclass</li>
+   <li>Command factories such as <code>setSpeed()</code> defined by each concrete subclass, which
+       internally call the base-class velocity setpoint methods</li>
+   <li>A 2D visualization model via <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/MechanismRoot2d.html" title="class or interface in edu.wpi.first.wpilibj.smartdashboard" class="external-link"><code>MechanismRoot2d</code></a>
+       and <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/MechanismLigament2d.html" title="class or interface in edu.wpi.first.wpilibj.smartdashboard" class="external-link"><code>MechanismLigament2d</code></a> fields that subclasses
+       populate and update</li>
+ </ul>
+
+ <p>
+ <b>Important — <code>max()</code> and <code>min()</code> are not applicable to velocity mechanisms.</b>
+ Velocity-controlled mechanisms have no meaningful upper or lower soft limit in the same sense as
+ positional mechanisms. Consequently, calling <a href="#max()"><code>max()</code></a> or <a href="#min()"><code>min()</code></a> on any concrete
+ subclass of <code>SmartVelocityMechanism</code> will throw
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/UnsupportedOperationException.html" title="class or interface in java.lang" class="external-link"><code>UnsupportedOperationException</code></a>. Use the following trigger factories instead:
+ </p>
+ <ul>
+   <li><code>isNear(speed, tolerance)</code> — true when actual velocity is within tolerance of target</li>
+   <li><code>gte(speed)</code> — true when actual velocity is greater than or equal to the given speed</li>
+   <li><code>lte(speed)</code> — true when actual velocity is less than or equal to the given speed</li>
+   <li><code>between(start, end)</code> — true when actual velocity falls within the given range</li>
+ </ul>
+
+ <p>
+ <b>Conceptual subclass pattern:</b> A concrete velocity mechanism extends
+ <code>SmartVelocityMechanism</code>, provides a typed command factory, and calls into the base-class
+ setpoint methods:
+ </p>
+ <pre><code>
+ // A concrete mechanism delegates setpoint management to this base class:
+ public Command setSpeed(AngularVelocity target) {
+     return Commands.startRun(
+         () -&gt; setMechanismVelocitySetpoint(target),
+         () -&gt; {},
+         m_subsystem
+     ).withName(getName() + " SetSpeed");
+ }
+ </code></pre>
+
+ <h2>For Subclass Authors</h2>
+ <p>
+ Every concrete subclass of <code>SmartVelocityMechanism</code> must implement the following abstract
+ methods inherited from <a href="../SmartMechanism.html" title="class in yams.mechanisms"><code>SmartMechanism</code></a>:
+ </p>
+ <ul>
+   <li><a href="../SmartMechanism.html#getRelativeMechanismPosition()"><code>SmartMechanism.getRelativeMechanismPosition()</code></a> — returns the
+       current 3-D position of the mechanism end-point in
+       <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/Mechanism2d.html" title="class or interface in edu.wpi.first.wpilibj.smartdashboard" class="external-link"><code>Mechanism2d</code></a> coordinates</li>
+   <li><a href="../SmartMechanism.html#visualizationUpdate()"><code>SmartMechanism.visualizationUpdate()</code></a> — updates
+       <code>mechanismLigament</code> to reflect the current rotational state</li>
+   <li><a href="../SmartMechanism.html#getName()"><code>SmartMechanism.getName()</code></a> — returns a human-readable mechanism
+       name used for telemetry and command names</li>
+   <li><a href="../SmartMechanism.html#simIterate()"><code>SmartMechanism.simIterate()</code></a> — advances the physics simulation
+       model and writes back simulated encoder values each robot loop</li>
+   <li><a href="../SmartMechanism.html#updateTelemetry()"><code>SmartMechanism.updateTelemetry()</code></a> — publishes mechanism state
+       to <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/SmartDashboard.html" title="class or interface in edu.wpi.first.wpilibj.smartdashboard" class="external-link"><code>SmartDashboard</code></a> or an equivalent
+       telemetry sink</li>
+   <li><a href="#max()"><code>max()</code></a> — must throw <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/UnsupportedOperationException.html" title="class or interface in java.lang" class="external-link"><code>UnsupportedOperationException</code></a>; velocity
+       mechanisms do not support positional limits</li>
+   <li><a href="#min()"><code>min()</code></a> — must throw <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/UnsupportedOperationException.html" title="class or interface in java.lang" class="external-link"><code>UnsupportedOperationException</code></a>; velocity
+       mechanisms do not support positional limits</li>
+ </ul></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

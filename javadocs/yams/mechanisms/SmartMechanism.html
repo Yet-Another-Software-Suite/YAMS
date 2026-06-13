@@ -82,7 +82,50 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public abstract class </span><span class="element-name type-name-label">SmartMechanism</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Generic implementation of a mechanism with advanced telemetry.</div>
+<div class="block">Generic implementation of a mechanism with advanced telemetry.
+
+ <p>
+ <code>SmartMechanism</code> is the abstract root of all YAMS mechanism implementations. It combines a
+ <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> with integrated telemetry, simulation support,
+ and WPILib <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> / <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/button/Trigger.html" title="class or interface in edu.wpi.first.wpilibj2.command.button" class="external-link"><code>Trigger</code></a>
+ integration so that every concrete mechanism (Arm, Elevator, Flywheel, etc.) shares a consistent
+ API for control, feedback, and visualization.
+ </p>
+
+ <h2>Mechanism Lifecycle</h2>
+ <ol>
+   <li>Configure a motor controller: <a href="../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></li>
+   <li>Instantiate the appropriate wrapper: <a href="../motorcontrollers/local/SparkWrapper.html" title="class in yams.motorcontrollers.local"><code>SparkWrapper</code></a> (REV), <a href="../motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.motorcontrollers.remote"><code>TalonFXWrapper</code></a> or <a href="../motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.motorcontrollers.remote"><code>TalonFXSWrapper</code></a> (CTRE)</li>
+   <li>Build a mechanism config (e.g., <a href="config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a>)</li>
+   <li>Construct the concrete mechanism (e.g., <a href="positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a>)</li>
+   <li>Schedule setpoint commands and bind triggers</li>
+ </ol>
+
+ <p>
+ <b>Periodic calls required:</b> <a href="#simIterate()"><code>simIterate()</code></a>, <a href="#updateTelemetry()"><code>updateTelemetry()</code></a>, and
+ <a href="#visualizationUpdate()"><code>visualizationUpdate()</code></a> must be called periodically — typically from
+ <code>robotPeriodic()</code> — so that simulation state, telemetry, and the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/Mechanism2d.html" title="class or interface in edu.wpi.first.wpilibj.smartdashboard" class="external-link"><code>Mechanism2d</code></a>
+ visualization remain up to date.
+ </p>
+
+ <h2>Example</h2>
+ <pre><code>
+ // 1. Motor config
+ SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
+     .withClosedLoopController(0.2,0,0).withFeedforward(new ArmFeedforawrd(0.05,0,0)).withStatorCurrentLimit(Amps.of(40));
+ // 2. Motor
+ SmartMotorController motor = new SparkWrapper(
+     new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), motorConfig);
+ // 3. Mechanism config + 4. Mechanism
+ Arm arm = new Arm(new ArmConfig(motor).withLength(Meters.of(0.5)));
+ // 5. Schedule a command (in a subsystem or robot container)
+ arm.setAngle(Degrees.of(45)).schedule();
+ // 5. Bind a trigger
+ arm.isNear(Degrees.of(45), Degrees.of(2)).onTrue(Commands.print("At target!"));
+ // Call in robotPeriodic():
+ arm.simIterate();
+ arm.updateTelemetry();
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

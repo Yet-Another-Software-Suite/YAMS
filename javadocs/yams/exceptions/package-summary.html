@@ -61,7 +61,47 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="package-signature">package <span class="element-name">yams.exceptions</span></div>
 <section class="package-description" id="package-description">
-<div class="block">Exceptions for YAMS. Will tell you what went wrong and how to fix it.</div>
+<div class="block">Exceptions for YAMS. Will tell you what went wrong and how to fix it.
+
+ <p>This package contains the checked and unchecked exceptions thrown by YAMS when mechanisms or
+ motor controllers are misconfigured. All exceptions include a human-readable message that
+ identifies the missing or invalid field and, where possible, suggests the corrective action.
+ They are typically thrown during mechanism construction — before any control loop begins — so
+ configuration errors surface immediately at robot startup rather than silently producing
+ unexpected behavior at match time.
+
+ <h2>Per-Mechanism Configuration Exceptions</h2>
+ <p>Each mechanism type has a dedicated exception thrown when its required configuration fields
+ are absent or logically inconsistent:
+ <ul>
+   <li><a href="ArmConfigurationException.html" title="class in yams.exceptions"><code>ArmConfigurationException</code></a> — single-jointed arm config errors</li>
+   <li><a href="ElevatorConfigurationException.html" title="class in yams.exceptions"><code>ElevatorConfigurationException</code></a> — elevator config errors</li>
+   <li><a href="FlyWheelConfigurationException.html" title="class in yams.exceptions"><code>FlyWheelConfigurationException</code></a> — flywheel config errors</li>
+   <li><a href="PivotConfigurationException.html" title="class in yams.exceptions"><code>PivotConfigurationException</code></a> — pivot config errors</li>
+   <li><a href="SwerveDriveConfigurationException.html" title="class in yams.exceptions"><code>SwerveDriveConfigurationException</code></a> — swerve drive config errors</li>
+   <li><a href="DifferentialMechanismConfigurationException.html" title="class in yams.exceptions"><code>DifferentialMechanismConfigurationException</code></a> — differential
+       drive config errors</li>
+   <li><a href="DoubleJointedArmConfigurationException.html" title="class in yams.exceptions"><code>DoubleJointedArmConfigurationException</code></a> — double-jointed arm
+       config errors</li>
+ </ul>
+
+ <h2>Motor Controller Exceptions</h2>
+ <p>Thrown when a motor controller is missing or its configuration is invalid:
+ <ul>
+   <li><a href="SmartMotorControllerConfigurationException.html" title="class in yams.exceptions"><code>SmartMotorControllerConfigurationException</code></a> — the motor
+       controller wrapper itself has an invalid or incomplete configuration</li>
+   <li><a href="MotorNotPresentException.html" title="class in yams.exceptions"><code>MotorNotPresentException</code></a> — a required motor controller could
+       not be found on the CAN bus or is otherwise unavailable</li>
+ </ul>
+
+ <h2>Gear Stage Exceptions</h2>
+ <p>Thrown by <a href="../gearing/GearBox.html" title="class in yams.gearing"><code>GearBox</code></a> when its list of stages is malformed:
+ <ul>
+   <li><a href="NoStagesGivenException.html" title="class in yams.exceptions"><code>NoStagesGivenException</code></a> — a <code>GearBox</code> was constructed
+       with an empty stage list</li>
+   <li><a href="InvalidStageGivenException.html" title="class in yams.exceptions"><code>InvalidStageGivenException</code></a> — one or more stages in a
+       <code>GearBox</code> have an illegal value (e.g., zero or negative tooth counts)</li>
+ </ul></div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -73,47 +113,62 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color class-summary class-summary-tab5"><a href="ArmConfigurationException.html" title="class in yams.exceptions">ArmConfigurationException</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab5">
-<div class="block">Exception for when the Arm is configured incorrectly.</div>
+<div class="block">Thrown by <a href="../mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a> when a required
+ <a href="../mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a> field is missing or invalid.</div>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab5"><a href="DifferentialMechanismConfigurationException.html" title="class in yams.exceptions">DifferentialMechanismConfigurationException</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab5">
-<div class="block">Exception for when the Differential Mechanism is configured incorrectly.</div>
+<div class="block">Thrown by <a href="../mechanisms/positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a> or
+ <a href="../mechanisms/config/DifferentialMechanismConfig.html" title="class in yams.mechanisms.config"><code>DifferentialMechanismConfig</code></a> when a required field is missing
+ or an attempt is made to violate a config invariant.</div>
 </div>
 <div class="col-first even-row-color class-summary class-summary-tab5"><a href="DoubleJointedArmConfigurationException.html" title="class in yams.exceptions">DoubleJointedArmConfigurationException</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab5">
-<div class="block">Exception for when the Arm is configured incorrectly.</div>
+<div class="block">Thrown by <a href="../mechanisms/positional/DoubleJointedArm.html" title="class in yams.mechanisms.positional"><code>DoubleJointedArm</code></a> when a required field in the
+ lower-joint or upper-joint <a href="../mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a> is missing or invalid.</div>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab5"><a href="ElevatorConfigurationException.html" title="class in yams.exceptions">ElevatorConfigurationException</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab5">
-<div class="block">Exception for when the Elevator is configured incorrectly.</div>
+<div class="block">Thrown by <a href="../mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> when a required
+ <a href="../mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config"><code>ElevatorConfig</code></a> field is missing or invalid.</div>
 </div>
 <div class="col-first even-row-color class-summary class-summary-tab5"><a href="FlyWheelConfigurationException.html" title="class in yams.exceptions">FlyWheelConfigurationException</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab5">
-<div class="block">Exception for when the FlyWheel is configured incorrectly.</div>
+<div class="block">Thrown by <a href="../mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a> or <a href="../mechanisms/config/FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a>
+ when a required field in <a href="../mechanisms/config/FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a> is missing or invalid.</div>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab5"><a href="InvalidStageGivenException.html" title="class in yams.exceptions">InvalidStageGivenException</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab5">
-<div class="block">Exception for math errors when trying to find the sensor to mechanism ratio.</div>
+<div class="block">Thrown by <a href="../gearing/GearBox.html" title="class in yams.gearing"><code>GearBox</code></a> and <a href="../gearing/Sprocket.html" title="class in yams.gearing"><code>Sprocket</code></a> when a gear stage
+ string is not in the required <code>"IN:OUT"</code> format.</div>
 </div>
 <div class="col-first even-row-color class-summary class-summary-tab5"><a href="MotorNotPresentException.html" title="class in yams.exceptions">MotorNotPresentException</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab5">
-<div class="block">Custom exception for when there is no motor in the mechanism.</div>
+<div class="block">Thrown by a <a href="../mechanisms/SmartMechanism.html" title="class in yams.mechanisms"><code>SmartMechanism</code></a> subclass when the primary
+ <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> has not been set before the mechanism
+ attempts to use it.</div>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab5"><a href="NoStagesGivenException.html" title="class in yams.exceptions">NoStagesGivenException</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab5">
-<div class="block">Exception for math errors when trying to find the sensor to mechanism ratio.</div>
+<div class="block">Thrown by <a href="../gearing/GearBox.html" title="class in yams.gearing"><code>GearBox</code></a>, <a href="../gearing/Sprocket.html" title="class in yams.gearing"><code>Sprocket</code></a>, and
+ <a href="../math/SmartMath.html" title="class in yams.math"><code>SmartMath</code></a> when a gear reduction calculation is requested but
+ no gear stages were supplied.</div>
 </div>
 <div class="col-first even-row-color class-summary class-summary-tab5"><a href="PivotConfigurationException.html" title="class in yams.exceptions">PivotConfigurationException</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab5">
-<div class="block">Exception for when the Pivot is configured incorrectly.</div>
+<div class="block">Thrown by <a href="../mechanisms/positional/Pivot.html" title="class in yams.mechanisms.positional"><code>Pivot</code></a> or <a href="../mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config"><code>PivotConfig</code></a>
+ when a required field in <a href="../mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config"><code>PivotConfig</code></a> is missing or invalid.</div>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab5"><a href="SmartMotorControllerConfigurationException.html" title="class in yams.exceptions">SmartMotorControllerConfigurationException</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab5">
-<div class="block">Exception for when the SmartMotorController is configured incorrectly.</div>
+<div class="block">Thrown by <a href="../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> or a
+ <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> wrapper when the applied configuration
+ contains conflicting, incomplete, or incompatible settings.</div>
 </div>
 <div class="col-first even-row-color class-summary class-summary-tab5"><a href="SwerveDriveConfigurationException.html" title="class in yams.exceptions">SwerveDriveConfigurationException</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab5">
-<div class="block">SwerveDrive Config Exception</div>
+<div class="block">Thrown by <a href="../mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> or <a href="../mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config"><code>SwerveDriveConfig</code></a>
+ when a required field is missing or a config invariant is violated.</div>
 </div>
 </div>
 </div>

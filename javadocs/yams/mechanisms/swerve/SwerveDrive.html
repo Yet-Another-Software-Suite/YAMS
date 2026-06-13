@@ -78,7 +78,80 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">SwerveDrive</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Swerve Drive mechanism</div>
+<div class="block">Swerve Drive mechanism
+
+ <h2>Usage Example</h2>
+ <p>
+ The typical pattern is to wrap <code>SwerveDrive</code> inside a WPILib <code>SubsystemBase</code>.
+ Build a <a href="../config/SwerveDriveConfig.html" title="class in yams.mechanisms.config"><code>SwerveDriveConfig</code></a> (see its class-level doc for the full
+ module-construction example), then instantiate <code>SwerveDrive</code> once in the subsystem
+ constructor.
+ </p>
+ <p>
+ <a href="utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> is the <b>recommended</b> way to
+ convert raw joystick axes into field-relative <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a>
+ before passing them to <a href="#drive(java.util.function.Supplier)"><code>drive(java.util.function.Supplier)</code></a>.
+ </p>
+ <pre><code>
+ public class SwerveSubsystem extends SubsystemBase {
+
+     private final SwerveDrive drive;
+
+     public SwerveSubsystem() {
+         // Build SwerveDriveConfig — see SwerveDriveConfig class doc for the full example.
+         Pigeon2 gyro = new Pigeon2(14);
+         SwerveDriveConfig config = new SwerveDriveConfig(this, fl, fr, bl, br)
+             .withGyro(gyro.getYaw().asSupplier())
+             .withMaximumChassisSpeed(MetersPerSecond.of(4.5), DegreesPerSecond.of(360))
+             .withTranslationController(new PIDController(1.0, 0, 0))
+             .withRotationController(new PIDController(1.0, 0, 0))
+             .withStartingPose(new Pose2d());
+
+         drive = new SwerveDrive(config);
+     }
+
+     // Convert joystick input to a field-relative drive command using SwerveInputStream.
+     public Command driveWithJoystick(CommandXboxController controller) {
+         SwerveInputStream inputStream = new SwerveInputStream(
+                 drive,
+                 controller::getLeftX,
+                 controller::getLeftY,
+                 controller::getRightX)
+             .withMaximumLinearVelocity(MetersPerSecond.of(4.5))
+             .withMaximumAngularVelocity(DegreesPerSecond.of(360))
+             .withDeadband(0.05)
+             .withCubeTranslationControllerAxis()
+             .withAllianceRelativeControl();
+
+         // drive() accepts a robot-relative ChassisSpeeds supplier; SwerveInputStream handles
+         // the field-to-robot conversion internally when alliance-relative control is enabled.
+         return drive.drive(inputStream);
+     }
+
+     // Alternatively, pass field-relative speeds directly.
+     public Command driveFieldRelative(Supplier&lt;ChassisSpeeds&gt; speedsSupplier) {
+         return run(() -&gt; drive.setFieldRelativeChassisSpeeds(speedsSupplier.get()))
+             .withName("Field Oriented Drive");
+     }
+
+     // Read the fused odometry pose at any time.
+     public Pose2d getRobotPose() {
+         return drive.getPose();
+     }
+
+     // Update odometry and publish telemetry every robot loop (20 ms).
+     {@literal @}Override
+     public void periodic() {
+         drive.updateTelemetry();
+     }
+
+     // Advance the simulated gyro and modules every simulation loop.
+     {@literal @}Override
+     public void simulationPeriodic() {
+         drive.simIterate();
+     }
+ }
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

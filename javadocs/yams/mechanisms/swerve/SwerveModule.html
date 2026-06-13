@@ -78,7 +78,49 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">SwerveModule</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Swerve Module</div>
+<div class="block">Swerve Module
+
+ <p>
+ <a href="SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a> coordinates the drive motor (velocity control) and the azimuth (steer)
+ motor (position control) that make up one corner of a swerve drivetrain.  On construction it
+ reads the absolute encoder and seeds the azimuth relative encoder so the wheel starts at the
+ correct angle.  Each periodic cycle you call <a href="#setSwerveModuleState(edu.wpi.first.math.kinematics.SwerveModuleState)"><code>setSwerveModuleState(SwerveModuleState)</code></a> to
+ command both motors, and <a href="#getState()"><code>getState()</code></a> / <a href="#getPosition()"><code>getPosition()</code></a> to read back the current
+ wheel velocity and heading.
+ </p>
+
+ <h2>Typical usage</h2>
+ <p>
+ In almost every case you should <b>not</b> instantiate <a href="SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a> directly.  Instead,
+ pass one <a href="../config/SwerveModuleConfig.html" title="class in yams.mechanisms.config"><code>SwerveModuleConfig</code></a> per corner to
+ <a href="../config/SwerveDriveConfig.html" title="class in yams.mechanisms.config"><code>SwerveDriveConfig</code></a> and let
+ <a href="SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> create and manage the modules internally:
+ </p>
+ <pre><code>
+ SwerveDriveConfig driveConfig = new SwerveDriveConfig()
+     .withSwerveModuleConfig(frontLeft, frontRight, backLeft, backRight);
+
+ SwerveDrive swerveDrive = new SwerveDrive(driveConfig);
+ </code></pre>
+
+ <h2>Direct instantiation (advanced)</h2>
+ <p>
+ If you need direct access to a module — for example when writing unit tests or custom
+ characterisation routines — you can construct one from a fully-configured
+ <a href="../config/SwerveModuleConfig.html" title="class in yams.mechanisms.config"><code>SwerveModuleConfig</code></a>:
+ </p>
+ <pre><code>
+ // Assumes 'frontLeftConfig' has already been built with drive/steer motors,
+ // wheel radius, module location, absolute encoder offset, and telemetry name.
+ SwerveModule frontLeft = new SwerveModule(frontLeftConfig);
+
+ // Command a specific state (angle + speed)
+ SwerveModuleState desiredState = new SwerveModuleState(1.5, Rotation2d.fromDegrees(45));
+ frontLeft.setSwerveModuleState(desiredState);
+
+ // Read back current state
+ SwerveModuleState current = frontLeft.getState();
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

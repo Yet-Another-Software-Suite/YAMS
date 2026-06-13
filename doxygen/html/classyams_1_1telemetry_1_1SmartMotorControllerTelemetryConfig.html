@@ -151,14 +151,14 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Configures which telemetry fields are published for a SmartMotorController.</p>
 <p>Use <a class="el" href="classyams_1_1telemetry_1_1SmartMotorControllerTelemetryConfig.html#ad2ea325226d4757bfe60779d0ba3b3fe">WithTelemetryVerbosity()</a> for a preset bundle of fields, or enable individual fields with the With*() methods. Pass to SmartMotorController::WithTelemetry().</p>
-<h3><a class="anchor" id="autotoc_md14"></a>
+<h3><a class="anchor" id="autotoc_md18"></a>
 Quick preset via SmartMotorControllerConfig</h3>
 <div class="fragment"><div class="line"><span class="comment">// The simplest approach: name the motor in SmartMotorControllerConfig.</span></div>
 <div class="line"><span class="comment">// This enables HIGH-verbosity telemetry automatically.</span></div>
 <div class="line">SmartMotorControllerConfig cfg;</div>
 <div class="line">cfg.WithTelemetry(<span class="stringliteral">&quot;ArmMotor&quot;</span>);                       <span class="comment">// HIGH verbosity (default)</span></div>
 <div class="line">cfg.WithTelemetry(<span class="stringliteral">&quot;ArmMotor&quot;</span>, Cfg::TelemetryVerbosity::MID);  <span class="comment">// or choose a level</span></div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md15"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md19"></a>
 Fine-grained override via SmartMotorController::WithTelemetry()</h3>
 <div class="fragment"><div class="line"><span class="comment">// After constructing the SmartMotorController, supply an explicit config</span></div>
 <div class="line"><span class="comment">// to override the preset chosen by SmartMotorControllerConfig::WithTelemetry().</span></div>
@@ -185,7 +185,7 @@ Fine-grained override via SmartMotorController::WithTelemetry()</h3>
 <div class="ttc" id="aclassyams_1_1telemetry_1_1SmartMotorControllerTelemetryConfig_html_ac4f911e8b423f10f9135149e4dfaea16"><div class="ttname"><a href="classyams_1_1telemetry_1_1SmartMotorControllerTelemetryConfig.html#ac4f911e8b423f10f9135149e4dfaea16">yams::telemetry::SmartMotorControllerTelemetryConfig::WithMechanismPosition</a></div><div class="ttdeci">SmartMotorControllerTelemetryConfig &amp; WithMechanismPosition()</div></div>
 <div class="ttc" id="aclassyams_1_1telemetry_1_1SmartMotorControllerTelemetryConfig_html_adaca9ff77e4dc9e61a5734143d12d3ca"><div class="ttname"><a href="classyams_1_1telemetry_1_1SmartMotorControllerTelemetryConfig.html#adaca9ff77e4dc9e61a5734143d12d3ca">yams::telemetry::SmartMotorControllerTelemetryConfig::WithoutNetworkTables</a></div><div class="ttdeci">SmartMotorControllerTelemetryConfig &amp; WithoutNetworkTables()</div></div>
 <div class="ttc" id="aclassyams_1_1telemetry_1_1SmartMotorControllerTelemetryConfig_html_ae9b9b41288bc5bcf3c1c79b06296c554"><div class="ttname"><a href="classyams_1_1telemetry_1_1SmartMotorControllerTelemetryConfig.html#ae9b9b41288bc5bcf3c1c79b06296c554">yams::telemetry::SmartMotorControllerTelemetryConfig::WithDataLogName</a></div><div class="ttdeci">SmartMotorControllerTelemetryConfig &amp; WithDataLogName(const std::string &amp;dataLogName)</div></div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md16"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md20"></a>
 Logging-only (no NT4) with a custom field selection</h3>
 <div class="fragment"><div class="line">smc.WithTelemetry(</div>
 <div class="line">    TelCfg{}</div>

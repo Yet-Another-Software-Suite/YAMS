@@ -61,7 +61,69 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="package-signature">package <span class="element-name">yams.mechanisms</span></div>
 <section class="package-description" id="package-description">
-<div class="block">Mechanism classes.</div>
+<div class="block">Top-level mechanism abstractions for the YAMS (Yet Another Mechanism System) library.
+
+ <p>This package contains <a href="SmartMechanism.html" title="class in yams.mechanisms"><code>SmartMechanism</code></a>, the abstract base class from
+ which every YAMS mechanism inherits. It defines the shared lifecycle, sensor handling, simulation
+ support, and WPILib command/trigger integration that all concrete mechanism types rely on.
+
+ <h2>Mechanism Lifecycle</h2>
+ <ol>
+   <li><b>Create a configuration object</b> — choose the appropriate config class from
+       <a href="config/package-summary.html"><code>yams.mechanisms.config</code></a> (e.g. <a href="config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a>,
+       <a href="config/ElevatorConfig.html" title="class in yams.mechanisms.config"><code>ElevatorConfig</code></a>) and populate it via the fluent
+       <code>with*()</code> API.</li>
+   <li><b>Construct the mechanism</b> — pass the finished config to the mechanism constructor
+       (e.g. <a href="positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a>, <a href="positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a>).
+       The constructor validates the config and initialises all internal controllers.</li>
+   <li><b>Command the mechanism</b> — call setpoint methods such as <code>setAngle()</code> or
+       <code>setHeight()</code>. Each method returns a WPILib <code>Command</code> that can be bound,
+       composed, or scheduled directly via the command scheduler.</li>
+   <li><b>React to conditions</b> — use trigger factory methods (<code>isNear()</code>, <code>max()</code>,
+       <code>min()</code>, <code>between()</code>, <code>lte()</code>, <code>gte()</code>) to obtain
+       <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/button/Trigger.html" title="class or interface in edu.wpi.first.wpilibj2.command.button" class="external-link"><code>Trigger</code></a> objects that fire when the mechanism
+       satisfies a particular condition, enabling condition-based command scheduling without
+       polling in <code>periodic()</code>.</li>
+ </ol>
+
+ <h2>Typical Usage</h2>
+ <pre><code>
+ // 1. Configure
+ ArmConfig config = new ArmConfig(motor)
+     .withGearing(100.0)
+     .withSoftLimits(Rotation2d.fromDegrees(-90), Rotation2d.fromDegrees(90));
+
+ // 2. Construct
+ Arm arm = new Arm(config);
+
+ // 3. Schedule a setpoint command
+ arm.setAngle(Rotation2d.fromDegrees(45)).schedule();
+
+ // 4. Bind a trigger
+ arm.isNear(Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(2))
+    .onTrue(Commands.print("Arm at target"));
+ </code></pre>
+
+ <h2>Sub-packages</h2>
+ <ul>
+   <li><a href="positional/package-summary.html"><code>yams.mechanisms.positional</code></a> — position-controlled mechanisms (Arm, Elevator,
+       Pivot, DifferentialMechanism, DoubleJointedArm)</li>
+   <li><a href="velocity/package-summary.html"><code>yams.mechanisms.velocity</code></a> — velocity-controlled mechanisms (FlyWheel)</li>
+   <li><a href="swerve/package-summary.html"><code>yams.mechanisms.swerve</code></a> — swerve-drive mechanism and module implementations</li>
+   <li><a href="config/package-summary.html"><code>yams.mechanisms.config</code></a> — builder-style configuration classes for all mechanisms</li>
+ </ul></div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="see-list">
+<li><a href="SmartMechanism.html" title="class in yams.mechanisms"><code>SmartMechanism</code></a></li>
+<li><a href="positional/package-summary.html"><code>yams.mechanisms.positional</code></a></li>
+<li><a href="velocity/package-summary.html"><code>yams.mechanisms.velocity</code></a></li>
+<li><a href="swerve/package-summary.html"><code>yams.mechanisms.swerve</code></a></li>
+<li><a href="config/package-summary.html"><code>yams.mechanisms.config</code></a></li>
+</ul>
+</dd>
+</dl>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -73,17 +135,19 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><a href="config/package-summary.html">yams.mechanisms.config</a></div>
 <div class="col-last even-row-color">
-<div class="block">Mechanism configuration classes.</div>
+<div class="block">Builder-style configuration classes for every mechanism in the YAMS library.</div>
 </div>
 <div class="col-first odd-row-color"><a href="positional/package-summary.html">yams.mechanisms.positional</a></div>
 <div class="col-last odd-row-color">
-<div class="block">Positional mechanism classes.</div>
+<div class="block">Position-controlled mechanism implementations for the YAMS library.</div>
 </div>
 <div class="col-first even-row-color"><a href="swerve/package-summary.html">yams.mechanisms.swerve</a></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Swerve drive mechanism classes.</div>
+</div>
 <div class="col-first odd-row-color"><a href="velocity/package-summary.html">yams.mechanisms.velocity</a></div>
 <div class="col-last odd-row-color">
-<div class="block">Velocity mechanism classes.</div>
+<div class="block">Velocity-controlled mechanism implementations for the YAMS library.</div>
 </div>
 </div>
 </div>

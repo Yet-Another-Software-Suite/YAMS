@@ -79,7 +79,53 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">Sensor</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
 <div class="block">Sensor class using <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/hal/SimDevice.html" title="class or interface in edu.wpi.first.hal" class="external-link"><code>SimDevice</code></a>; All fields will use the given supplier on real robots. Fake
- data is only given when connected to simulation.</div>
+ data is only given when connected to simulation.
+
+ <p>
+ <code>Sensor</code> models a named hardware sensor (such as an encoder, limit switch, or analog
+ input) whose state is consumed by simulation suppliers and mechanism code. Each sensor owns one
+ or more named <a href="SensorData.html" title="class in yams.motorcontrollers.simulation"><code>SensorData</code></a> fields that carry typed values (double, int, boolean, or long).
+ </p>
+
+ <p>
+ On a <b>real robot</b> every field delegates to the real-hardware supplier provided at
+ construction time. In <b>simulation</b>, a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/hal/SimDevice.html" title="class or interface in edu.wpi.first.hal" class="external-link"><code>SimDevice</code></a> is registered
+ with WPILib so the WPILib Glass simulation GUI can read and override individual field values,
+ enabling hardware-in-the-loop-style testing without real hardware.
+ </p>
+
+ <p>
+ Trigger overrides (<a href="#addSimTrigger(java.lang.String,edu.wpi.first.hal.HALValue,java.util.function.BooleanSupplier)"><code>addSimTrigger(java.lang.String, edu.wpi.first.hal.HALValue, java.util.function.BooleanSupplier)</code></a>) allow simulation suppliers to inject specific sensor
+ readings (e.g. a limit-switch trip) at a given moment during a simulated match, which is useful
+ for automating regression tests.
+ </p>
+
+ <h2>Key fields and methods</h2>
+ <ul>
+   <li><a href="#getField(java.lang.String)"><code>getField(String)</code></a> — retrieve a <a href="SensorData.html" title="class in yams.motorcontrollers.simulation"><code>SensorData</code></a> field by name.</li>
+   <li><a href="#getAsDouble(java.lang.String)"><code>getAsDouble(String)</code></a>, <a href="#getAsInt(java.lang.String)"><code>getAsInt(String)</code></a>, <a href="#getAsBoolean(java.lang.String)"><code>getAsBoolean(String)</code></a>,
+       <a href="#getAsLong(java.lang.String)"><code>getAsLong(String)</code></a> — typed convenience accessors that call through to
+       the underlying field.</li>
+   <li><a href="#addSimTrigger(java.lang.String,edu.wpi.first.hal.HALValue,java.util.function.BooleanSupplier)"><code>addSimTrigger(String, edu.wpi.first.hal.HALValue, java.util.function.BooleanSupplier)</code></a>
+       — inject a simulated override value whenever a condition is true.</li>
+   <li><a href="#getDevice()"><code>getDevice()</code></a> — returns the underlying <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/hal/SimDevice.html" title="class or interface in edu.wpi.first.hal" class="external-link"><code>SimDevice</code></a>
+       (empty when running on a real robot).</li>
+ </ul>
+
+ <h2>Example</h2>
+ <pre><code>
+ // Wrap a real encoder position in a simulated sensor field
+ SensorData posField = new SensorData("position", encoder::getPosition, 0.0);
+ Sensor encoderSensor = new Sensor("ArmEncoder", List.of(posField));
+
+ // Read the value (returns hardware value on robot, Glass value in sim)
+ double pos = encoderSensor.getAsDouble("position");
+
+ // Inject a forced value during simulation when a condition is met
+ encoderSensor.addSimTrigger("position",
+     SensorData.convert(90.0),
+     () -&gt; DriverStation.isAutonomous());
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

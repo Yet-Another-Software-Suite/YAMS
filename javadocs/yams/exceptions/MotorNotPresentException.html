@@ -84,11 +84,34 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">MotorNotPresentException</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/RuntimeException.html" title="class or interface in java.lang" class="external-link">RuntimeException</a></span></div>
-<div class="block">Custom exception for when there is no motor in the mechanism.</div>
+<div class="block">Thrown by a <a href="../mechanisms/SmartMechanism.html" title="class in yams.mechanisms"><code>SmartMechanism</code></a> subclass when the primary
+ <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> has not been set before the mechanism
+ attempts to use it.
+
+ <p>This exception signals that the mechanism's motor slot is <code>null</code> — either because
+ no motor was ever assigned, or because the mechanism was constructed before the motor
+ was initialized.
+
+ <p>Common triggers include:
+ <ul>
+   <li>Constructing or activating a mechanism without calling the appropriate
+       <code>withSmartMotorController()</code> builder method on its config</li>
+   <li>Passing <code>null</code> as the motor argument to <code>setMotor()</code> or the config builder</li>
+ </ul>
+
+ <p><b>Resolution:</b> Provide a valid motor controller before constructing the mechanism:
+ <pre><code>
+ SmartMotorController motor = SmartMotorController.create(
+     SPARK_MAX, DCMotor.getNEO(1));
+ // Then pass the motor to the relevant mechanism config, e.g.:
+ ArmConfig config = new ArmConfig().withSmartMotorController(motor);
+ </code></pre></div>
 <dl class="notes">
 <dt>See Also:</dt>
 <dd>
 <ul class="see-list">
+<li><a href="../mechanisms/SmartMechanism.html" title="class in yams.mechanisms"><code>SmartMechanism</code></a></li>
+<li><a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></li>
 <li><a href="../../serialized-form.html#yams.exceptions.MotorNotPresentException">Serialized Form</a></li>
 </ul>
 </dd>

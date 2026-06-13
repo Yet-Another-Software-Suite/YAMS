@@ -44,7 +44,7 @@ loadScripts(document, 'script');</script>
 <div>
 <ul class="sub-nav-list">
 <li>Package:&nbsp;</li>
-<li>Description&nbsp;|&nbsp;</li>
+<li><a href="#package-description">Description</a>&nbsp;|&nbsp;</li>
 <li><a href="#related-package-summary">Related Packages</a>&nbsp;|&nbsp;</li>
 <li><a href="#class-summary">Classes and Interfaces</a></li>
 </ul>
@@ -64,6 +64,19 @@ loadScripts(document, 'script');</script>
 </div>
 <hr>
 <div class="package-signature">package <span class="element-name">yams.motorcontrollers.simulation</span></div>
+<section class="package-description" id="package-description">
+<div class="block">Physics-based simulation suppliers for YAMS motor controllers.
+
+ <p>Simulation suppliers bridge WPILib's simulation framework and YAMS motor controller wrappers.
+ Pass an instance to <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> via
+ <code>withSimSupplier()</code> to enable physics-accurate simulation without changing mechanism code.
+
+ <ul>
+   <li><a href="ArmSimSupplier.html" title="class in yams.motorcontrollers.simulation"><code>ArmSimSupplier</code></a> — single-jointed arm physics</li>
+   <li><a href="DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation"><code>DCMotorSimSupplier</code></a> — generic DC motor physics</li>
+   <li><a href="Sensor.html" title="class in yams.motorcontrollers.simulation"><code>Sensor</code></a> and <a href="SensorData.html" title="class in yams.motorcontrollers.simulation"><code>SensorData</code></a> — simulated encoder/sensor state</li>
+ </ul></div>
+</section>
 <section class="summary">
 <ul class="summary-list">
 <li>
@@ -74,17 +87,15 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><a href="../package-summary.html">yams.motorcontrollers</a></div>
 <div class="col-last even-row-color">
-<div class="block">Motor controller wrappers</div>
+<div class="block">Hardware-agnostic motor controller abstractions for FRC mechanisms.</div>
 </div>
 <div class="col-first odd-row-color"><a href="../local/package-summary.html">yams.motorcontrollers.local</a></div>
 <div class="col-last odd-row-color">
-<div class="block">Motor controller wrappers for motor controllers that require robot controller interfacing for advanced
- functionality.</div>
+<div class="block">REV Robotics motor controller wrappers whose closed-loop control runs on the roboRIO.</div>
 </div>
 <div class="col-first even-row-color"><a href="../remote/package-summary.html">yams.motorcontrollers.remote</a></div>
 <div class="col-last even-row-color">
-<div class="block">Motor controller wrappers for sufficiently advanced motor controllers which can use the motor controller
- functionality.</div>
+<div class="block">CTRE motor controller wrappers whose closed-loop control runs on the motor controller itself.</div>
 </div>
 </div>
 </div>
@@ -98,11 +109,13 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="ArmSimSupplier.html" title="class in yams.motorcontrollers.simulation">ArmSimSupplier</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
-<div class="block">ArmSim Supplier</div>
+<div class="block">ArmSim Supplier — simulates a single-jointed arm mechanism using WPILib's
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/SingleJointedArmSim.html" title="class or interface in edu.wpi.first.wpilibj.simulation" class="external-link"><code>SingleJointedArmSim</code></a>.</div>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab2"><a href="DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab2">
-<div class="block">DCMotorSim Supplier</div>
+<div class="block">DCMotorSim Supplier — simulates a generic DC motor load (flywheel, roller, or elevator)
+ using WPILib's <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/DCMotorSim.html" title="class or interface in edu.wpi.first.wpilibj.simulation" class="external-link"><code>DCMotorSim</code></a>.</div>
 </div>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="Sensor.html" title="class in yams.motorcontrollers.simulation">Sensor</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">

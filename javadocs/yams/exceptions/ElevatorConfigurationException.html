@@ -84,11 +84,37 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">ElevatorConfigurationException</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/RuntimeException.html" title="class or interface in java.lang" class="external-link">RuntimeException</a></span></div>
-<div class="block">Exception for when the Elevator is configured incorrectly.</div>
+<div class="block">Thrown by <a href="../mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> when a required
+ <a href="../mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config"><code>ElevatorConfig</code></a> field is missing or invalid.
+
+ <p>Common triggers include:
+ <ul>
+   <li>Carriage mass not set (<code>withMass(Mass)</code>) — required for simulation</li>
+   <li>Hard limits (<code>withHardLimits(Distance, Distance)</code>) missing minimum or maximum height</li>
+   <li>Starting height not configured (<code>withStartingHeight(Distance)</code>)</li>
+   <li>No motor controller provided</li>
+ </ul>
+
+ <p><b>Resolution:</b> Ensure <code>ElevatorConfig.withSmartMotorController(SmartMotorController)</code>
+ is called, <code>ElevatorConfig.withHardLimits(Distance, Distance)</code> defines both the minimum
+ and maximum travel distances, <code>ElevatorConfig.withMass(Mass)</code> provides the carriage mass,
+ and <code>ElevatorConfig.withStartingHeight(Distance)</code> sets the initial position.
+
+ <p>Example minimal configuration:
+ <pre><code>
+ ElevatorConfig config = new ElevatorConfig()
+     .withSmartMotorController(SmartMotorController.create(SPARK_MAX, DCMotor.getNEO(1)))
+     .withHardLimits(Inches.of(0), Inches.of(48))
+     .withMass(Pounds.of(10))
+     .withStartingHeight(Inches.of(0));
+ Elevator elevator = new Elevator(config);
+ </code></pre></div>
 <dl class="notes">
 <dt>See Also:</dt>
 <dd>
 <ul class="see-list">
+<li><a href="../mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a></li>
+<li><a href="../mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config"><code>ElevatorConfig</code></a></li>
 <li><a href="../../serialized-form.html#yams.exceptions.ElevatorConfigurationException">Serialized Form</a></li>
 </ul>
 </dd>

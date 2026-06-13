@@ -143,7 +143,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/exceptions/ArmConfigurationException.html" class="type-name-link" title="class in yams.exceptions">ArmConfigurationException</a> - Exception in <a href="yams/exceptions/package-summary.html">yams.exceptions</a></dt>
 <dd>
-<div class="block">Exception for when the Arm is configured incorrectly.</div>
+<div class="block">Thrown by <a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a> when a required
+ <a href="yams/mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a> field is missing or invalid.</div>
 </dd>
 <dt><a href="yams/exceptions/ArmConfigurationException.html#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String)" class="member-name-link">ArmConfigurationException(String, String, String)</a> - Constructor for exception yams.exceptions.<a href="yams/exceptions/ArmConfigurationException.html" title="class in yams.exceptions">ArmConfigurationException</a></dt>
 <dd>
@@ -155,7 +156,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/motorcontrollers/simulation/ArmSimSupplier.html" class="type-name-link" title="class in yams.motorcontrollers.simulation">ArmSimSupplier</a> - Class in <a href="yams/motorcontrollers/simulation/package-summary.html">yams.motorcontrollers.simulation</a></dt>
 <dd>
-<div class="block">ArmSim Supplier</div>
+<div class="block">ArmSim Supplier — simulates a single-jointed arm mechanism using WPILib's
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/SingleJointedArmSim.html" title="class or interface in edu.wpi.first.wpilibj.simulation" class="external-link"><code>SingleJointedArmSim</code></a>.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/simulation/ArmSimSupplier.html#%3Cinit%3E(edu.wpi.first.wpilibj.simulation.SingleJointedArmSim,yams.motorcontrollers.SmartMotorController)" class="member-name-link">ArmSimSupplier(SingleJointedArmSim, SmartMotorController)</a> - Constructor for class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ArmSimSupplier.html" title="class in yams.motorcontrollers.simulation">ArmSimSupplier</a></dt>
 <dd>
@@ -169,10 +171,6 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">When the <a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> is in <code>SwerveInputStream.SwerveInputMode.DRIVE_TO_POSE</code> this function will return if the
  robot is at the desired pose within the defined tolerance.</div>
-</dd>
-<dt><a href="yams/motorcontrollers/SmartMotorFactory.html#availableControllers" class="member-name-link">availableControllers</a> - Static variable in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorFactory.html" title="class in yams.motorcontrollers">SmartMotorFactory</a></dt>
-<dd>
-<div class="block">Available motor controller constructors.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:B">B</h2>
@@ -347,7 +345,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#convertFromMechanism(edu.wpi.first.units.measure.Velocity)" class="member-name-link">convertFromMechanism(Velocity&lt;AngularAccelerationUnit&gt;)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Convert <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/AngularAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">AngularAccelerationUnit</a>&gt;</code> to  <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/LinearAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">LinearAccelerationUnit</a>&gt;</code> using the
+<div class="block">Convert <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/AngularAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">AngularAccelerationUnit</a>&gt;</code> to  <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/LinearAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">LinearAccelerationUnit</a>&gt;</code>
+ using the
  <code>SmartMotorControllerConfig.mechanismCircumference</code></div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#convertToMechanism(edu.wpi.first.units.measure.Distance)" class="member-name-link">convertToMechanism(Distance)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
@@ -366,7 +365,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#convertToMechanism(edu.wpi.first.units.measure.Velocity)" class="member-name-link">convertToMechanism(Velocity&lt;LinearAccelerationUnit&gt;)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Convert <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/LinearAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">LinearAccelerationUnit</a>&gt;</code> to  <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/AngularAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">AngularAccelerationUnit</a>&gt;</code> using the
+<div class="block">Convert <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/LinearAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">LinearAccelerationUnit</a>&gt;</code> to  <code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/AngularAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">AngularAccelerationUnit</a>&gt;</code>
+ using the
  <code>SmartMotorControllerConfig.mechanismCircumference</code></div>
 </dd>
 <dt><a href="yams/units/EasyCRTConfig.CrtGearPair.html#coverage()" class="member-name-link">coverage()</a> - Method in record class yams.units.<a href="yams/units/EasyCRTConfig.CrtGearPair.html" title="class in yams.units">EasyCRTConfig.CrtGearPair</a></dt>
@@ -385,17 +385,9 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Create double telemetry field.</div>
 </dd>
-<dt><a href="yams/motorcontrollers/SmartMotorFactory.MotorControllerConstructor.html#create(java.lang.Object...)" class="member-name-link">create(Object...)</a> - Method in interface yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorFactory.MotorControllerConstructor.html" title="interface in yams.motorcontrollers">SmartMotorFactory.MotorControllerConstructor</a></dt>
-<dd>
-<div class="block">Create a motor controller instance.</div>
-</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorController.html#create(java.lang.Object,edu.wpi.first.math.system.plant.DCMotor,yams.motorcontrollers.SmartMotorControllerConfig)" class="member-name-link">create(Object, DCMotor, SmartMotorControllerConfig)</a> - Static method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Create a <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> wrapper from the provided motor controller object.</div>
-</dd>
-<dt><a href="yams/motorcontrollers/SmartMotorFactory.html#create(java.lang.Object,java.lang.Object...)" class="member-name-link">create(Object, Object...)</a> - Static method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorFactory.html" title="class in yams.motorcontrollers">SmartMotorFactory</a></dt>
-<dd>
-<div class="block">Create a motor controller instance.</div>
 </dd>
 <dt><a href="yams/math/ExponentialProfilePIDController.html#createArmConstraints(edu.wpi.first.units.measure.Voltage,edu.wpi.first.math.system.plant.DCMotor,edu.wpi.first.units.measure.Mass,edu.wpi.first.units.measure.Distance,yams.gearing.MechanismGearing)" class="member-name-link">createArmConstraints(Voltage, DCMotor, Mass, Distance, MechanismGearing)</a> - Static method in class yams.math.<a href="yams/math/ExponentialProfilePIDController.html" title="class in yams.math">ExponentialProfilePIDController</a></dt>
 <dd>
@@ -450,7 +442,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" class="type-name-link" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a> - Class in <a href="yams/motorcontrollers/simulation/package-summary.html">yams.motorcontrollers.simulation</a></dt>
 <dd>
-<div class="block">DCMotorSim Supplier</div>
+<div class="block">DCMotorSim Supplier — simulates a generic DC motor load (flywheel, roller, or elevator)
+ using WPILib's <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/DCMotorSim.html" title="class or interface in edu.wpi.first.wpilibj.simulation" class="external-link"><code>DCMotorSim</code></a>.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html#%3Cinit%3E(edu.wpi.first.wpilibj.simulation.DCMotorSim,yams.motorcontrollers.SmartMotorController)" class="member-name-link">DCMotorSimSupplier(DCMotorSim, SmartMotorController)</a> - Constructor for class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
 <dd>
@@ -482,7 +475,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/mechanisms/positional/DifferentialMechanism.html" class="type-name-link" title="class in yams.mechanisms.positional">DifferentialMechanism</a> - Class in <a href="yams/mechanisms/positional/package-summary.html">yams.mechanisms.positional</a></dt>
 <dd>
-<div class="block">Arm mechanism.</div>
+<div class="block">A differential mechanism for FRC robots driven by two coordinated motors whose combined motion
+ produces two distinct and independent outputs.</div>
 </dd>
 <dt><a href="yams/mechanisms/positional/DifferentialMechanism.html#%3Cinit%3E(yams.mechanisms.config.DifferentialMechanismConfig)" class="member-name-link">DifferentialMechanism(DifferentialMechanismConfig)</a> - Constructor for class yams.mechanisms.positional.<a href="yams/mechanisms/positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional">DifferentialMechanism</a></dt>
 <dd>
@@ -490,7 +484,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/mechanisms/config/DifferentialMechanismConfig.html" class="type-name-link" title="class in yams.mechanisms.config">DifferentialMechanismConfig</a> - Class in <a href="yams/mechanisms/config/package-summary.html">yams.mechanisms.config</a></dt>
 <dd>
-<div class="block">Differential Mechanism config.</div>
+<div class="block">Configuration for a <a href="yams/mechanisms/positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a> driven by two coordinated motors working
+ differentially.</div>
 </dd>
 <dt><a href="yams/mechanisms/config/DifferentialMechanismConfig.html#%3Cinit%3E()" class="member-name-link">DifferentialMechanismConfig()</a> - Constructor for class yams.mechanisms.config.<a href="yams/mechanisms/config/DifferentialMechanismConfig.html" title="class in yams.mechanisms.config">DifferentialMechanismConfig</a></dt>
 <dd>
@@ -502,7 +497,9 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/exceptions/DifferentialMechanismConfigurationException.html" class="type-name-link" title="class in yams.exceptions">DifferentialMechanismConfigurationException</a> - Exception in <a href="yams/exceptions/package-summary.html">yams.exceptions</a></dt>
 <dd>
-<div class="block">Exception for when the Differential Mechanism is configured incorrectly.</div>
+<div class="block">Thrown by <a href="yams/mechanisms/positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a> or
+ <a href="yams/mechanisms/config/DifferentialMechanismConfig.html" title="class in yams.mechanisms.config"><code>DifferentialMechanismConfig</code></a> when a required field is missing
+ or an attempt is made to violate a config invariant.</div>
 </dd>
 <dt><a href="yams/exceptions/DifferentialMechanismConfigurationException.html#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String)" class="member-name-link">DifferentialMechanismConfigurationException(String, String, String)</a> - Constructor for exception yams.exceptions.<a href="yams/exceptions/DifferentialMechanismConfigurationException.html" title="class in yams.exceptions">DifferentialMechanismConfigurationException</a></dt>
 <dd>
@@ -550,7 +547,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/mechanisms/positional/DoubleJointedArm.html" class="type-name-link" title="class in yams.mechanisms.positional">DoubleJointedArm</a> - Class in <a href="yams/mechanisms/positional/package-summary.html">yams.mechanisms.positional</a></dt>
 <dd>
-<div class="block">Arm mechanism.</div>
+<div class="block">A two-segment arm where each joint has its own independent motor controller.</div>
 </dd>
 <dt><a href="yams/mechanisms/positional/DoubleJointedArm.html#%3Cinit%3E(yams.mechanisms.config.ArmConfig,yams.mechanisms.config.ArmConfig)" class="member-name-link">DoubleJointedArm(ArmConfig, ArmConfig)</a> - Constructor for class yams.mechanisms.positional.<a href="yams/mechanisms/positional/DoubleJointedArm.html" title="class in yams.mechanisms.positional">DoubleJointedArm</a></dt>
 <dd>
@@ -558,7 +555,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/exceptions/DoubleJointedArmConfigurationException.html" class="type-name-link" title="class in yams.exceptions">DoubleJointedArmConfigurationException</a> - Exception in <a href="yams/exceptions/package-summary.html">yams.exceptions</a></dt>
 <dd>
-<div class="block">Exception for when the Arm is configured incorrectly.</div>
+<div class="block">Thrown by <a href="yams/mechanisms/positional/DoubleJointedArm.html" title="class in yams.mechanisms.positional"><code>DoubleJointedArm</code></a> when a required field in the
+ lower-joint or upper-joint <a href="yams/mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a> is missing or invalid.</div>
 </dd>
 <dt><a href="yams/exceptions/DoubleJointedArmConfigurationException.html#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String)" class="member-name-link">DoubleJointedArmConfigurationException(String, String, String)</a> - Constructor for exception yams.exceptions.<a href="yams/exceptions/DoubleJointedArmConfigurationException.html" title="class in yams.exceptions">DoubleJointedArmConfigurationException</a></dt>
 <dd>
@@ -633,7 +631,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/exceptions/ElevatorConfigurationException.html" class="type-name-link" title="class in yams.exceptions">ElevatorConfigurationException</a> - Exception in <a href="yams/exceptions/package-summary.html">yams.exceptions</a></dt>
 <dd>
-<div class="block">Exception for when the Elevator is configured incorrectly.</div>
+<div class="block">Thrown by <a href="yams/mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> when a required
+ <a href="yams/mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config"><code>ElevatorConfig</code></a> field is missing or invalid.</div>
 </dd>
 <dt><a href="yams/exceptions/ElevatorConfigurationException.html#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String)" class="member-name-link">ElevatorConfigurationException(String, String, String)</a> - Constructor for exception yams.exceptions.<a href="yams/exceptions/ElevatorConfigurationException.html" title="class in yams.exceptions">ElevatorConfigurationException</a></dt>
 <dd>
@@ -768,7 +767,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/exceptions/FlyWheelConfigurationException.html" class="type-name-link" title="class in yams.exceptions">FlyWheelConfigurationException</a> - Exception in <a href="yams/exceptions/package-summary.html">yams.exceptions</a></dt>
 <dd>
-<div class="block">Exception for when the FlyWheel is configured incorrectly.</div>
+<div class="block">Thrown by <a href="yams/mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a> or <a href="yams/mechanisms/config/FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a>
+ when a required field in <a href="yams/mechanisms/config/FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a> is missing or invalid.</div>
 </dd>
 <dt><a href="yams/exceptions/FlyWheelConfigurationException.html#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String)" class="member-name-link">FlyWheelConfigurationException(String, String, String)</a> - Constructor for exception yams.exceptions.<a href="yams/exceptions/FlyWheelConfigurationException.html" title="class in yams.exceptions">FlyWheelConfigurationException</a></dt>
 <dd>
@@ -1345,8 +1345,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getLQRClosedLoopController()" class="member-name-link">getLQRClosedLoopController()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Get the controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or Meters if
- Mechanism Circumference is configured), the outputs are in Volts.</div>
+<div class="block">Get the controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations
+ (or Meters if Mechanism Circumference is configured), the outputs are in Volts.</div>
 </dd>
 <dt><a href="yams/units/EasyCRTConfig.html#getMatchTolerance()" class="member-name-link">getMatchTolerance()</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
@@ -2195,7 +2195,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getVendorConfig()" class="member-name-link">getVendorConfig()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Get the vendor specific configuration object to mutate with <a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> options.</div>
+<div class="block">Get the vendor specific configuration object to mutate with <a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>
+ options.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getVendorControlRequest()" class="member-name-link">getVendorControlRequest()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -2285,7 +2286,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/exceptions/InvalidStageGivenException.html" class="type-name-link" title="class in yams.exceptions">InvalidStageGivenException</a> - Exception in <a href="yams/exceptions/package-summary.html">yams.exceptions</a></dt>
 <dd>
-<div class="block">Exception for math errors when trying to find the sensor to mechanism ratio.</div>
+<div class="block">Thrown by <a href="yams/gearing/GearBox.html" title="class in yams.gearing"><code>GearBox</code></a> and <a href="yams/gearing/Sprocket.html" title="class in yams.gearing"><code>Sprocket</code></a> when a gear stage
+ string is not in the required <code>"IN:OUT"</code> format.</div>
 </dd>
 <dt><a href="yams/exceptions/InvalidStageGivenException.html#%3Cinit%3E(java.lang.String)" class="member-name-link">InvalidStageGivenException(String)</a> - Constructor for exception yams.exceptions.<a href="yams/exceptions/InvalidStageGivenException.html" title="class in yams.exceptions">InvalidStageGivenException</a></dt>
 <dd>
@@ -2707,7 +2709,9 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/exceptions/MotorNotPresentException.html" class="type-name-link" title="class in yams.exceptions">MotorNotPresentException</a> - Exception in <a href="yams/exceptions/package-summary.html">yams.exceptions</a></dt>
 <dd>
-<div class="block">Custom exception for when there is no motor in the mechanism.</div>
+<div class="block">Thrown by a <a href="yams/mechanisms/SmartMechanism.html" title="class in yams.mechanisms"><code>SmartMechanism</code></a> subclass when the primary
+ <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> has not been set before the mechanism
+ attempts to use it.</div>
 </dd>
 <dt><a href="yams/exceptions/MotorNotPresentException.html#%3Cinit%3E(java.lang.String)" class="member-name-link">MotorNotPresentException(String)</a> - Constructor for exception yams.exceptions.<a href="yams/exceptions/MotorNotPresentException.html" title="class in yams.exceptions">MotorNotPresentException</a></dt>
 <dd>
@@ -2730,7 +2734,9 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/exceptions/NoStagesGivenException.html" class="type-name-link" title="class in yams.exceptions">NoStagesGivenException</a> - Exception in <a href="yams/exceptions/package-summary.html">yams.exceptions</a></dt>
 <dd>
-<div class="block">Exception for math errors when trying to find the sensor to mechanism ratio.</div>
+<div class="block">Thrown by <a href="yams/gearing/GearBox.html" title="class in yams.gearing"><code>GearBox</code></a>, <a href="yams/gearing/Sprocket.html" title="class in yams.gearing"><code>Sprocket</code></a>, and
+ <a href="yams/math/SmartMath.html" title="class in yams.math"><code>SmartMath</code></a> when a gear reduction calculation is requested but
+ no gear stages were supplied.</div>
 </dd>
 <dt><a href="yams/exceptions/NoStagesGivenException.html#%3Cinit%3E()" class="member-name-link">NoStagesGivenException()</a> - Constructor for exception yams.exceptions.<a href="yams/exceptions/NoStagesGivenException.html" title="class in yams.exceptions">NoStagesGivenException</a></dt>
 <dd>
@@ -2784,7 +2790,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/mechanisms/config/PivotConfig.html" class="type-name-link" title="class in yams.mechanisms.config">PivotConfig</a> - Class in <a href="yams/mechanisms/config/package-summary.html">yams.mechanisms.config</a></dt>
 <dd>
-<div class="block">Pivot config.</div>
+<div class="block">Pivot configuration class.</div>
 </dd>
 <dt><a href="yams/mechanisms/config/PivotConfig.html#%3Cinit%3E()" class="member-name-link">PivotConfig()</a> - Constructor for class yams.mechanisms.config.<a href="yams/mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config">PivotConfig</a></dt>
 <dd>
@@ -2800,7 +2806,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/exceptions/PivotConfigurationException.html" class="type-name-link" title="class in yams.exceptions">PivotConfigurationException</a> - Exception in <a href="yams/exceptions/package-summary.html">yams.exceptions</a></dt>
 <dd>
-<div class="block">Exception for when the Pivot is configured incorrectly.</div>
+<div class="block">Thrown by <a href="yams/mechanisms/positional/Pivot.html" title="class in yams.mechanisms.positional"><code>Pivot</code></a> or <a href="yams/mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config"><code>PivotConfig</code></a>
+ when a required field in <a href="yams/mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config"><code>PivotConfig</code></a> is missing or invalid.</div>
 </dd>
 <dt><a href="yams/exceptions/PivotConfigurationException.html#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String)" class="member-name-link">PivotConfigurationException(String, String, String)</a> - Constructor for exception yams.exceptions.<a href="yams/exceptions/PivotConfigurationException.html" title="class in yams.exceptions">PivotConfigurationException</a></dt>
 <dd>
@@ -3810,7 +3817,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/motorcontrollers/SimSupplier.html" class="type-name-link" title="interface in yams.motorcontrollers">SimSupplier</a> - Interface in <a href="yams/motorcontrollers/package-summary.html">yams.motorcontrollers</a></dt>
 <dd>
-<div class="block">Provides sim functions for</div>
+<div class="block">Provides sim functions for a YAMS simulated mechanism.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorController.ClosedLoopControllerSlot.html#SLOT_0" class="member-name-link">SLOT_0</a> - Enum constant in enum class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a></dt>
 <dd>
@@ -3852,7 +3859,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerCommandRegistry.html" class="type-name-link" title="class in yams.motorcontrollers">SmartMotorControllerCommandRegistry</a> - Class in <a href="yams/motorcontrollers/package-summary.html">yams.motorcontrollers</a></dt>
 <dd>
-<div class="block">Registry for SmartMotorController commands.</div>
+<div class="block">Registry for WPILib <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> instances associated with a
+ <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerCommandRegistry.html#%3Cinit%3E()" class="member-name-link">SmartMotorControllerCommandRegistry()</a> - Constructor for class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerCommandRegistry.html" title="class in yams.motorcontrollers">SmartMotorControllerCommandRegistry</a></dt>
 <dd>&nbsp;</dd>
@@ -3886,7 +3894,9 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/exceptions/SmartMotorControllerConfigurationException.html" class="type-name-link" title="class in yams.exceptions">SmartMotorControllerConfigurationException</a> - Exception in <a href="yams/exceptions/package-summary.html">yams.exceptions</a></dt>
 <dd>
-<div class="block">Exception for when the SmartMotorController is configured incorrectly.</div>
+<div class="block">Thrown by <a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> or a
+ <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> wrapper when the applied configuration
+ contains conflicting, incomplete, or incompatible settings.</div>
 </dd>
 <dt><a href="yams/exceptions/SmartMotorControllerConfigurationException.html#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String)" class="member-name-link">SmartMotorControllerConfigurationException(String, String, String)</a> - Constructor for exception yams.exceptions.<a href="yams/exceptions/SmartMotorControllerConfigurationException.html" title="class in yams.exceptions">SmartMotorControllerConfigurationException</a></dt>
 <dd>
@@ -3912,23 +3922,15 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#%3Cinit%3E()" class="member-name-link">SmartMotorControllerTelemetryConfig()</a> - Constructor for class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="yams/motorcontrollers/SmartMotorFactory.html" class="type-name-link" title="class in yams.motorcontrollers">SmartMotorFactory</a> - Class in <a href="yams/motorcontrollers/package-summary.html">yams.motorcontrollers</a></dt>
-<dd>
-<div class="block">Factory for creating SmartMotorController instances.</div>
-</dd>
-<dt><a href="yams/motorcontrollers/SmartMotorFactory.html#%3Cinit%3E()" class="member-name-link">SmartMotorFactory()</a> - Constructor for class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorFactory.html" title="class in yams.motorcontrollers">SmartMotorFactory</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="yams/motorcontrollers/SmartMotorFactory.MotorControllerConstructor.html" class="type-name-link" title="interface in yams.motorcontrollers">SmartMotorFactory.MotorControllerConstructor</a> - Interface in <a href="yams/motorcontrollers/package-summary.html">yams.motorcontrollers</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="yams/mechanisms/positional/SmartPositionalMechanism.html" class="type-name-link" title="class in yams.mechanisms.positional">SmartPositionalMechanism</a> - Class in <a href="yams/mechanisms/positional/package-summary.html">yams.mechanisms.positional</a></dt>
 <dd>
-<div class="block">Generic for positional mechanisms.</div>
+<div class="block">Abstract intermediate base class for all closed-loop positional mechanisms in YAMS.</div>
 </dd>
 <dt><a href="yams/mechanisms/positional/SmartPositionalMechanism.html#%3Cinit%3E()" class="member-name-link">SmartPositionalMechanism()</a> - Constructor for class yams.mechanisms.positional.<a href="yams/mechanisms/positional/SmartPositionalMechanism.html" title="class in yams.mechanisms.positional">SmartPositionalMechanism</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/mechanisms/velocity/SmartVelocityMechanism.html" class="type-name-link" title="class in yams.mechanisms.velocity">SmartVelocityMechanism</a> - Class in <a href="yams/mechanisms/velocity/package-summary.html">yams.mechanisms.velocity</a></dt>
 <dd>
-<div class="block">Generic for positional mechanisms.</div>
+<div class="block">Abstract intermediate base class for all closed-loop velocity mechanisms in YAMS.</div>
 </dd>
 <dt><a href="yams/mechanisms/velocity/SmartVelocityMechanism.html#%3Cinit%3E()" class="member-name-link">SmartVelocityMechanism()</a> - Constructor for class yams.mechanisms.velocity.<a href="yams/mechanisms/velocity/SmartVelocityMechanism.html" title="class in yams.mechanisms.velocity">SmartVelocityMechanism</a></dt>
 <dd>&nbsp;</dd>
@@ -4022,7 +4024,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/exceptions/SwerveDriveConfigurationException.html" class="type-name-link" title="class in yams.exceptions">SwerveDriveConfigurationException</a> - Exception in <a href="yams/exceptions/package-summary.html">yams.exceptions</a></dt>
 <dd>
-<div class="block">SwerveDrive Config Exception</div>
+<div class="block">Thrown by <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> or <a href="yams/mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config"><code>SwerveDriveConfig</code></a>
+ when a required field is missing or a config invariant is violated.</div>
 </dd>
 <dt><a href="yams/exceptions/SwerveDriveConfigurationException.html#%3Cinit%3E(java.lang.String,java.lang.String,java.lang.String)" class="member-name-link">SwerveDriveConfigurationException(String, String, String)</a> - Constructor for exception yams.exceptions.<a href="yams/exceptions/SwerveDriveConfigurationException.html" title="class in yams.exceptions">SwerveDriveConfigurationException</a></dt>
 <dd>
@@ -4491,28 +4494,29 @@ the order they are declared.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(double,double,double)" class="member-name-link">withClosedLoopController(double, double, double)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
+<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(double,double,double,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withClosedLoopController(double, double, double, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
+<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(edu.wpi.first.math.controller.PIDController)" class="member-name-link">withClosedLoopController(PIDController)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
+<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(edu.wpi.first.math.controller.PIDController,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withClosedLoopController(PIDController, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
+<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if linear closed loop controller is configured), the outputs are in Volts.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopController(yams.math.LQRController)" class="member-name-link">withClosedLoopController(LQRController)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> with an exponential profile, the units passed
- in are in Rotations (or Meters if linear closed loop controller configured), outputs are in Volts.</div>
+<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> with an exponential
+ profile, the units passed in are in Rotations (or Meters if linear closed loop controller
+ configured), outputs are in Volts.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopControllerMaximumVoltage(edu.wpi.first.units.measure.Voltage)" class="member-name-link">withClosedLoopControllerMaximumVoltage(Voltage)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -4682,8 +4686,8 @@ the order they are declared.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withFeedbackSynchronizationThreshold(edu.wpi.first.units.measure.Angle)" class="member-name-link">withFeedbackSynchronizationThreshold(Angle)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the feedback synchronization threshold so the relative encoder synchronizes with the absolute encoder at this
- point.</div>
+<div class="block">Set the feedback synchronization threshold so the relative encoder synchronizes with the
+ absolute encoder at this point.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withFeedforward(edu.wpi.first.math.controller.ArmFeedforward)" class="member-name-link">withFeedforward(ArmFeedforward)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -4788,6 +4792,10 @@ the order they are declared.</div>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withIdleMode(yams.motorcontrollers.SmartMotorControllerConfig.MotorMode)" class="member-name-link">withIdleMode(SmartMotorControllerConfig.MotorMode)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> to brake or coast mode.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withInputCurrentLimit(edu.wpi.first.units.measure.Current)" class="member-name-link">withInputCurrentLimit(Current)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Set the stall supply current limit for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
 </dd>
 <dt><a href="yams/mechanisms/config/ArmConfig.html#withLength(edu.wpi.first.units.measure.Distance)" class="member-name-link">withLength(Distance)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></dt>
 <dd>
@@ -4947,13 +4955,13 @@ the order they are declared.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withMomentOfInertia(edu.wpi.first.units.measure.Distance,edu.wpi.first.units.measure.Mass)" class="member-name-link">withMomentOfInertia(Distance, Mass)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Add the mechanism moment of inertia to the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>s simulation when not run under a formal
- mechanism.</div>
+<div class="block">Add the mechanism moment of inertia to the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>s simulation when not
+ run under a formal mechanism.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withMomentOfInertia(edu.wpi.first.units.measure.MomentOfInertia)" class="member-name-link">withMomentOfInertia(MomentOfInertia)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Add the mechanism moment of inertia to the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>s simulation when not run under a formal
- mechanism.</div>
+<div class="block">Add the mechanism moment of inertia to the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>s simulation when not
+ run under a formal mechanism.</div>
 </dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#withMotionProfile()" class="member-name-link">withMotionProfile()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
 <dd>
@@ -4983,6 +4991,10 @@ the order they are declared.</div>
 <dd>
 <div class="block">Disable NetworkTable output.</div>
 </dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withOutputCurrentLimit(edu.wpi.first.units.measure.Current)" class="member-name-link">withOutputCurrentLimit(Current)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Set the stall stator current limit for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
+</dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#withOutputVoltage()" class="member-name-link">withOutputVoltage()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
 <dd>
 <div class="block">Enables the output voltage logging if available.</div>
@@ -5005,7 +5017,8 @@ the order they are declared.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withResetPreviousConfig(boolean)" class="member-name-link">withResetPreviousConfig(boolean)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> to reset the old configurations and only apply what is given to
+<div class="block">Set the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> to reset the old configurations and only apply what is
+ given to
  <a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
 </dd>
 <dt><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html#withRobotRelative()" class="member-name-link">withRobotRelative()</a> - Method in class yams.mechanisms.swerve.utility.<a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></dt>
@@ -5046,23 +5059,23 @@ the order they are declared.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimClosedLoopController(double,double,double)" class="member-name-link">withSimClosedLoopController(double, double, double)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if Mechanism Circumference is configured).</div>
+<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if Mechanism Circumference is configured).</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimClosedLoopController(double,double,double,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withSimClosedLoopController(double, double, double, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if Mechanism Circumference is configured).</div>
+<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if Mechanism Circumference is configured).</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimClosedLoopController(edu.wpi.first.math.controller.PIDController)" class="member-name-link">withSimClosedLoopController(PIDController)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if Mechanism Circumference is configured).</div>
+<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if Mechanism Circumference is configured).</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimClosedLoopController(edu.wpi.first.math.controller.PIDController,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withSimClosedLoopController(PIDController, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in Rotations (or
- Meters if Mechanism Circumference is configured).</div>
+<div class="block">Set the closed loop controller for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, the units passed in are in
+ Rotations (or Meters if Mechanism Circumference is configured).</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimClosedLoopController(yams.math.LQRController)" class="member-name-link">withSimClosedLoopController(LQRController)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -5110,11 +5123,13 @@ the order they are declared.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimFeedforward(edu.wpi.first.math.controller.SimpleMotorFeedforward)" class="member-name-link">withSimFeedforward(SimpleMotorFeedforward)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>SimpleMotorFeedforward</code></a> for <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, units are in Rotations.</div>
+<div class="block">Set the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>SimpleMotorFeedforward</code></a> for <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, units are in
+ Rotations.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimFeedforward(edu.wpi.first.math.controller.SimpleMotorFeedforward,yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">withSimFeedforward(SimpleMotorFeedforward, SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>SimpleMotorFeedforward</code></a> for <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, units are in Rotations.</div>
+<div class="block">Set the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>SimpleMotorFeedforward</code></a> for <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, units are in
+ Rotations.</div>
 </dd>
 <dt><a href="yams/mechanisms/config/SwerveDriveConfig.html#withSimGyroAngularVelocityScaleFactor(double)" class="member-name-link">withSimGyroAngularVelocityScaleFactor(double)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
@@ -5262,8 +5277,7 @@ the order they are declared.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSubsystem(edu.wpi.first.wpilibj2.command.Subsystem)" class="member-name-link">withSubsystem(Subsystem)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Sets the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Subsystem.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Subsystem</code></a> for the <a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> to pass along to <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>
- and <a href="yams/mechanisms/SmartMechanism.html" title="class in yams.mechanisms"><code>SmartMechanism</code></a>s.</div>
+<div class="block">Sets the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Subsystem.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Subsystem</code></a> for the <a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> to pass along to <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> and <a href="yams/mechanisms/SmartMechanism.html" title="class in yams.mechanisms"><code>SmartMechanism</code></a>s.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSupplyCurrentLimit(edu.wpi.first.units.measure.Current)" class="member-name-link">withSupplyCurrentLimit(Current)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -5379,12 +5393,13 @@ the order they are declared.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withVendorConfig(java.lang.Object)" class="member-name-link">withVendorConfig(Object)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the vendor specific config for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> which will be used as a base.</div>
+<div class="block">Set the vendor specific config for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> which will be used as a
+ base.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withVendorControlRequest(java.lang.Object)" class="member-name-link">withVendorControlRequest(Object)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the vendor specific control request for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> which will be used in place of default
- or calculated ones.</div>
+<div class="block">Set the vendor specific control request for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> which will be used
+ in place of default or calculated ones.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withVoltageCompensation(edu.wpi.first.units.measure.Voltage)" class="member-name-link">withVoltageCompensation(Voltage)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -5436,46 +5451,52 @@ the order they are declared.</div>
 </dd>
 <dt><a href="yams/mechanisms/package-summary.html">yams.mechanisms</a> - package yams.mechanisms</dt>
 <dd>
-<div class="block">Mechanism classes.</div>
+<div class="block">Top-level mechanism abstractions for the YAMS (Yet Another Mechanism System) library.</div>
 </dd>
 <dt><a href="yams/mechanisms/config/package-summary.html">yams.mechanisms.config</a> - package yams.mechanisms.config</dt>
 <dd>
-<div class="block">Mechanism configuration classes.</div>
+<div class="block">Builder-style configuration classes for every mechanism in the YAMS library.</div>
 </dd>
 <dt><a href="yams/mechanisms/positional/package-summary.html">yams.mechanisms.positional</a> - package yams.mechanisms.positional</dt>
 <dd>
-<div class="block">Positional mechanism classes.</div>
+<div class="block">Position-controlled mechanism implementations for the YAMS library.</div>
 </dd>
 <dt><a href="yams/mechanisms/swerve/package-summary.html">yams.mechanisms.swerve</a> - package yams.mechanisms.swerve</dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Swerve drive mechanism classes.</div>
+</dd>
 <dt><a href="yams/mechanisms/swerve/utility/package-summary.html">yams.mechanisms.swerve.utility</a> - package yams.mechanisms.swerve.utility</dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Swerve drive utility classes.</div>
+</dd>
 <dt><a href="yams/mechanisms/velocity/package-summary.html">yams.mechanisms.velocity</a> - package yams.mechanisms.velocity</dt>
 <dd>
-<div class="block">Velocity mechanism classes.</div>
+<div class="block">Velocity-controlled mechanism implementations for the YAMS library.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/package-summary.html">yams.motorcontrollers</a> - package yams.motorcontrollers</dt>
 <dd>
-<div class="block">Motor controller wrappers</div>
+<div class="block">Hardware-agnostic motor controller abstractions for FRC mechanisms.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/local/package-summary.html">yams.motorcontrollers.local</a> - package yams.motorcontrollers.local</dt>
 <dd>
-<div class="block">Motor controller wrappers for motor controllers that require robot controller interfacing for advanced
- functionality.</div>
+<div class="block">REV Robotics motor controller wrappers whose closed-loop control runs on the roboRIO.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/remote/package-summary.html">yams.motorcontrollers.remote</a> - package yams.motorcontrollers.remote</dt>
 <dd>
-<div class="block">Motor controller wrappers for sufficiently advanced motor controllers which can use the motor controller
- functionality.</div>
+<div class="block">CTRE motor controller wrappers whose closed-loop control runs on the motor controller itself.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/simulation/package-summary.html">yams.motorcontrollers.simulation</a> - package yams.motorcontrollers.simulation</dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Physics-based simulation suppliers for YAMS motor controllers.</div>
+</dd>
 <dt><a href="yams/telemetry/package-summary.html">yams.telemetry</a> - package yams.telemetry</dt>
 <dd>
-<div class="block">Telemetry configuration and publishing.</div>
+<div class="block">NetworkTables publishers for mechanism and motor controller state.</div>
 </dd>
 <dt><a href="yams/units/package-summary.html">yams.units</a> - package yams.units</dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Extended unit-of-measure types and conversion helpers.</div>
+</dd>
 <dt><a href="yams/units/YUnits.html#Yard" class="member-name-link">Yard</a> - Static variable in class yams.units.<a href="yams/units/YUnits.html" title="class in yams.units">YUnits</a></dt>
 <dd>
 <div class="block">914.4/1000 of a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/Units.html#Meters" title="class or interface in edu.wpi.first.units" class="external-link"><code>Units.Meters</code></a>, or 3 <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/Units.html#Feet" title="class or interface in edu.wpi.first.units" class="external-link"><code>Units.Feet</code></a>.</div>

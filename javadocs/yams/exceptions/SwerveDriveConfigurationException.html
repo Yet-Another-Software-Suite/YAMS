@@ -84,11 +84,37 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">SwerveDriveConfigurationException</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/RuntimeException.html" title="class or interface in java.lang" class="external-link">RuntimeException</a></span></div>
-<div class="block">SwerveDrive Config Exception</div>
+<div class="block">Thrown by <a href="../mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> or <a href="../mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config"><code>SwerveDriveConfig</code></a>
+ when a required field is missing or a config invariant is violated.
+
+ <p>Common triggers include:
+ <ul>
+   <li>Module configurations (drive and steer motors) not provided for one or more swerve modules</li>
+   <li>Gyro sensor not configured — required for field-relative driving and odometry</li>
+   <li>Kinematic parameters missing (e.g., track width or wheelbase not set)</li>
+   <li>A <code>SwerveDriveConfig</code> method called in an incompatible sequence or called twice</li>
+ </ul>
+
+ <p><b>Resolution:</b> Ensure <code>SwerveDriveConfig</code> is fully populated with all swerve module
+ configs, a gyro source, and the required kinematic geometry before constructing
+ <a href="../mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a>. Consult the <code>SwerveDriveConfig</code> builder
+ methods for the specific setter that the error message recommends.
+
+ <p>Example minimal configuration:
+ <pre><code>
+ SwerveDriveConfig config = new SwerveDriveConfig()
+     .withModules(frontLeft, frontRight, backLeft, backRight)
+     .withGyro(gyro)
+     .withTrackWidth(Inches.of(22))
+     .withWheelBase(Inches.of(22));
+ SwerveDrive drive = new SwerveDrive(config);
+ </code></pre></div>
 <dl class="notes">
 <dt>See Also:</dt>
 <dd>
 <ul class="see-list">
+<li><a href="../mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a></li>
+<li><a href="../mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config"><code>SwerveDriveConfig</code></a></li>
 <li><a href="../../serialized-form.html#yams.exceptions.SwerveDriveConfigurationException">Serialized Form</a></li>
 </ul>
 </dd>

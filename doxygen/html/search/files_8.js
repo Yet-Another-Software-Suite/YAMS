@@ -12,14 +12,13 @@ var searchData=
   ['smartmotorcontrollerconfig_2ehpp_9',['SmartMotorControllerConfig.hpp',['../SmartMotorControllerConfig_8hpp.html',1,'']]],
   ['smartmotorcontrollertelemetry_2ehpp_10',['SmartMotorControllerTelemetry.hpp',['../SmartMotorControllerTelemetry_8hpp.html',1,'']]],
   ['smartmotorcontrollertelemetryconfig_2ehpp_11',['SmartMotorControllerTelemetryConfig.hpp',['../SmartMotorControllerTelemetryConfig_8hpp.html',1,'']]],
-  ['smartmotorfactory_2ehpp_12',['SmartMotorFactory.hpp',['../SmartMotorFactory_8hpp.html',1,'']]],
-  ['smartpositionalmechanism_2ehpp_13',['SmartPositionalMechanism.hpp',['../SmartPositionalMechanism_8hpp.html',1,'']]],
-  ['smartvelocitymechanism_2ehpp_14',['SmartVelocityMechanism.hpp',['../SmartVelocityMechanism_8hpp.html',1,'']]],
-  ['sparkwrapper_2ehpp_15',['SparkWrapper.hpp',['../SparkWrapper_8hpp.html',1,'']]],
-  ['sprocket_2ehpp_16',['Sprocket.hpp',['../Sprocket_8hpp.html',1,'']]],
-  ['swervedrive_2ehpp_17',['SwerveDrive.hpp',['../SwerveDrive_8hpp.html',1,'']]],
-  ['swervedriveconfig_2ehpp_18',['SwerveDriveConfig.hpp',['../SwerveDriveConfig_8hpp.html',1,'']]],
-  ['swerveinputstream_2ehpp_19',['SwerveInputStream.hpp',['../SwerveInputStream_8hpp.html',1,'']]],
-  ['swervemodule_2ehpp_20',['SwerveModule.hpp',['../SwerveModule_8hpp.html',1,'']]],
-  ['swervemoduleconfig_2ehpp_21',['SwerveModuleConfig.hpp',['../SwerveModuleConfig_8hpp.html',1,'']]]
+  ['smartpositionalmechanism_2ehpp_12',['SmartPositionalMechanism.hpp',['../SmartPositionalMechanism_8hpp.html',1,'']]],
+  ['smartvelocitymechanism_2ehpp_13',['SmartVelocityMechanism.hpp',['../SmartVelocityMechanism_8hpp.html',1,'']]],
+  ['sparkwrapper_2ehpp_14',['SparkWrapper.hpp',['../SparkWrapper_8hpp.html',1,'']]],
+  ['sprocket_2ehpp_15',['Sprocket.hpp',['../Sprocket_8hpp.html',1,'']]],
+  ['swervedrive_2ehpp_16',['SwerveDrive.hpp',['../SwerveDrive_8hpp.html',1,'']]],
+  ['swervedriveconfig_2ehpp_17',['SwerveDriveConfig.hpp',['../SwerveDriveConfig_8hpp.html',1,'']]],
+  ['swerveinputstream_2ehpp_18',['SwerveInputStream.hpp',['../SwerveInputStream_8hpp.html',1,'']]],
+  ['swervemodule_2ehpp_19',['SwerveModule.hpp',['../SwerveModule_8hpp.html',1,'']]],
+  ['swervemoduleconfig_2ehpp_20',['SwerveModuleConfig.hpp',['../SwerveModuleConfig_8hpp.html',1,'']]]
 ];

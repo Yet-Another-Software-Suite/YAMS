@@ -61,7 +61,54 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="package-signature">package <span class="element-name">yams.gearing</span></div>
 <section class="package-description" id="package-description">
-<div class="block">Yet Another Mechanism System gearing classes for easier calculations.</div>
+<div class="block">Yet Another Mechanism System gearing classes for easier calculations.
+
+ <p>This package provides gear-ratio math helpers that let teams express mechanism gearing in
+ terms of physical hardware (tooth counts, sprocket sizes, output dimensions) instead of
+ manually computing reduction fractions. All classes are immutable value types designed to be
+ constructed once at robot initialization and reused throughout the match.
+
+ <h2>Core Classes</h2>
+ <ul>
+   <li><b><a href="GearBox.html" title="class in yams.gearing"><code>GearBox</code></a></b> — chains one or more gear stages together and
+       computes the overall reduction ratio. Each stage is expressed as a pair of tooth counts
+       (driver : driven). Multiple stages are multiplied automatically.</li>
+   <li><b><a href="Sprocket.html" title="class in yams.gearing"><code>Sprocket</code></a></b> — models a chain or belt drive between two
+       sprockets, computing the linear or rotational ratio from sprocket tooth counts and, for
+       linear drives, the pitch diameter.</li>
+   <li><b><a href="MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a></b> — ties a <a href="GearBox.html" title="class in yams.gearing"><code>GearBox</code></a> to
+       the physical output dimensions of a mechanism (e.g., spool radius for an elevator,
+       arm length for a rotary mechanism) so that motor-side units can be converted directly to
+       real-world position and velocity.</li>
+ </ul>
+
+ <h2>Example — Single-Stage 5:1 Reduction</h2>
+ <p>Pass the driver tooth count first, then the driven tooth count. The ratio is
+ <code>driven / driver</code>, so <code>12</code> driver teeth and <code>60</code> driven teeth produces a
+ 5:1 reduction:
+ <pre><code>
+ // Represents a single 12T-to-60T gear stage (5:1 overall reduction).
+ GearBox gearbox = new GearBox(12.0, 60.0);
+ double ratio = gearbox.getRatio(); // 5.0
+ </code></pre>
+
+ <h2>Example — Multi-Stage Gearbox</h2>
+ <pre><code>
+ // Two stages: 12:60 then 14:50 → overall ratio = 5.0 × 3.571... ≈ 17.857:1
+ GearBox gearbox = new GearBox(12.0, 60.0, 14.0, 50.0);
+ </code></pre></div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="see-list">
+<li><a href="GearBox.html" title="class in yams.gearing"><code>GearBox</code></a></li>
+<li><a href="Sprocket.html" title="class in yams.gearing"><code>Sprocket</code></a></li>
+<li><a href="MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a></li>
+<li><a href="../exceptions/NoStagesGivenException.html" title="class in yams.exceptions"><code>NoStagesGivenException</code></a></li>
+<li><a href="../exceptions/InvalidStageGivenException.html" title="class in yams.exceptions"><code>InvalidStageGivenException</code></a></li>
+</ul>
+</dd>
+</dl>
 </section>
 <section class="summary">
 <ul class="summary-list">

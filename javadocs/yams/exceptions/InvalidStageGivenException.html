@@ -84,11 +84,32 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">InvalidStageGivenException</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/RuntimeException.html" title="class or interface in java.lang" class="external-link">RuntimeException</a></span></div>
-<div class="block">Exception for math errors when trying to find the sensor to mechanism ratio.</div>
+<div class="block">Thrown by <a href="../gearing/GearBox.html" title="class in yams.gearing"><code>GearBox</code></a> and <a href="../gearing/Sprocket.html" title="class in yams.gearing"><code>Sprocket</code></a> when a gear stage
+ string is not in the required <code>"IN:OUT"</code> format.
+
+ <p>Each stage passed to a <code>GearBox</code> or <code>Sprocket</code> constructor must be a
+ <code>String</code> containing exactly one colon (<code>:</code>) separating the driver tooth count
+ from the driven tooth count (e.g., <code>"12:60"</code>).  A stage that is missing the colon
+ separator, is empty, or cannot be parsed triggers this exception.
+
+ <p><b>Resolution:</b> Correct the malformed stage string so it follows the
+ <code>"driverTeeth:drivenTeeth"</code> pattern.
+
+ <p>Example correct usage:
+ <pre><code>
+ // WRONG — missing colon separator
+ GearBox bad = new GearBox("1260");  // throws InvalidStageGivenException
+
+ // CORRECT
+ GearBox good = new GearBox("12:60");
+ </code></pre></div>
 <dl class="notes">
 <dt>See Also:</dt>
 <dd>
 <ul class="see-list">
+<li><a href="../gearing/GearBox.html" title="class in yams.gearing"><code>GearBox</code></a></li>
+<li><a href="../gearing/Sprocket.html" title="class in yams.gearing"><code>Sprocket</code></a></li>
+<li><a href="NoStagesGivenException.html" title="class in yams.exceptions"><code>NoStagesGivenException</code></a></li>
 <li><a href="../../serialized-form.html#yams.exceptions.InvalidStageGivenException">Serialized Form</a></li>
 </ul>
 </dd>

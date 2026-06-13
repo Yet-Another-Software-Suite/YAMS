@@ -89,7 +89,20 @@ loadScripts(document, 'script');</script>
  </ul>
  A discontinuity point <b>must</b> be configured via
  <a href="../SmartMotorControllerConfig.html#withExternalEncoderDiscontinuityPoint(edu.wpi.first.units.measure.Angle)"><code>SmartMotorControllerConfig.withExternalEncoderDiscontinuityPoint(edu.wpi.first.units.measure.Angle)</code></a>
- whenever a <a href="https://codedocs.revrobotics.com/java/com/revrobotics/spark/SparkAbsoluteEncoder.html" title="class or interface in com.revrobotics.spark" class="external-link"><code>SparkAbsoluteEncoder</code></a> is used as the external encoder.</div>
+ whenever a <a href="https://codedocs.revrobotics.com/java/com/revrobotics/spark/SparkAbsoluteEncoder.html" title="class or interface in com.revrobotics.spark" class="external-link"><code>SparkAbsoluteEncoder</code></a> is used as the external encoder.
+
+ <h2>Example</h2>
+ <pre><code>
+ // Configure and create a SPARK MAX (NEO motor) on CAN ID 3
+ SmartMotorControllerConfig config = new SmartMotorControllerConfig()
+     .withMotorInverted(false)
+     .withStatorCurrentLimit(Amps.of(40))
+     .withClosedLoopController(0.2,0,0)
+     .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5)); // required for SparkAbsoluteEncoder
+ SmartMotorController motor = new SparkWrapper(
+     new SparkMax(3, MotorType.kBrushless), DCMotor.getNEO(1), config);
+ Arm arm = new Arm(new ArmConfig(motor).withLength(Meters.of(0.6)));
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

@@ -61,7 +61,83 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="package-signature">package <span class="element-name">yams.mechanisms.positional</span></div>
 <section class="package-description" id="package-description">
-<div class="block">Positional mechanism classes.</div>
+<div class="block">Position-controlled mechanism implementations for the YAMS library.
+
+ <p>This package contains concrete mechanism classes that track and control a <b>position
+ setpoint</b> (angle, height, or displacement) using closed-loop feedback. All classes extend
+ <a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a>, which provides the shared
+ closed-loop position logic, soft-limit enforcement, simulation wiring, and WPILib
+ command/trigger integration.
+
+ <h2>Available Mechanisms</h2>
+ <ul>
+   <li><a href="Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a> — single-jointed arm rotating about a fixed pivot,
+       configured with <a href="../config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a></li>
+   <li><a href="Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> — linear-travel elevator stage, configured
+       with <a href="../config/ElevatorConfig.html" title="class in yams.mechanisms.config"><code>ElevatorConfig</code></a></li>
+   <li><a href="Pivot.html" title="class in yams.mechanisms.positional"><code>Pivot</code></a> — generic pivot that may rotate continuously or
+       within bounded limits, configured with <a href="../config/PivotConfig.html" title="class in yams.mechanisms.config"><code>PivotConfig</code></a></li>
+   <li><a href="DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a> — mechanism driven by two motors
+       in a differential arrangement (e.g. differential wrist), configured with
+       <a href="../config/DifferentialMechanismConfig.html" title="class in yams.mechanisms.config"><code>DifferentialMechanismConfig</code></a></li>
+   <li><a href="DoubleJointedArm.html" title="class in yams.mechanisms.positional"><code>DoubleJointedArm</code></a> — two-segment arm whose second joint
+       is kinematically dependent on the first, using two underlying
+       <a href="Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a> instances</li>
+ </ul>
+
+ <h2>Setpoint Commands</h2>
+ <p>Setpoint methods return WPILib <code>Command</code> objects rather than setting the target
+ synchronously. This means they compose naturally with other commands and can be cancelled,
+ interrupted, or sequenced using the standard WPILib command scheduler:
+
+ <pre><code>
+ // Move the arm to 45 degrees and then print a message
+ arm.setAngle(Rotation2d.fromDegrees(45))
+    .andThen(Commands.print("Arm at target"))
+    .schedule();
+
+ // Move the elevator to 0.8 m, waiting until it arrives
+ elevator.setHeight(Meters.of(0.8)).schedule();
+ </code></pre>
+
+ <h2>Trigger Factory Methods</h2>
+ <p>Each positional mechanism exposes factory methods that return
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/button/Trigger.html" title="class or interface in edu.wpi.first.wpilibj2.command.button" class="external-link"><code>Trigger</code></a> objects. These allow condition-based
+ command scheduling without manual polling in <code>periodic()</code>:
+ <ul>
+   <li><code>isNear(setpoint, tolerance)</code> — fires while the mechanism is within
+       <code>tolerance</code> of <code>setpoint</code></li>
+   <li><code>max()</code> — fires while the mechanism is at or beyond its configured maximum
+       limit</li>
+   <li><code>min()</code> — fires while the mechanism is at or below its configured minimum
+       limit</li>
+   <li><code>between(lower, upper)</code> — fires while the mechanism position is within the
+       specified range</li>
+   <li><code>lte(position)</code> — fires while the mechanism position is less than or equal to
+       <code>position</code></li>
+   <li><code>gte(position)</code> — fires while the mechanism position is greater than or equal
+       to <code>position</code></li>
+ </ul>
+
+ <pre><code>
+ // Extend intake when arm clears 30 degrees
+ arm.gte(Rotation2d.fromDegrees(30))
+    .onTrue(intakeSubsystem.extend());
+
+ // Retract intake if arm drops below 30 degrees
+ arm.lte(Rotation2d.fromDegrees(30))
+    .onTrue(intakeSubsystem.retract());
+ </code></pre></div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="see-list">
+<li><a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a></li>
+<li><a href="../SmartMechanism.html" title="class in yams.mechanisms"><code>SmartMechanism</code></a></li>
+<li><a href="../config/package-summary.html"><code>yams.mechanisms.config</code></a></li>
+</ul>
+</dd>
+</dl>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -73,17 +149,19 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color"><a href="../package-summary.html">yams.mechanisms</a></div>
 <div class="col-last even-row-color">
-<div class="block">Mechanism classes.</div>
+<div class="block">Top-level mechanism abstractions for the YAMS (Yet Another Mechanism System) library.</div>
 </div>
 <div class="col-first odd-row-color"><a href="../config/package-summary.html">yams.mechanisms.config</a></div>
 <div class="col-last odd-row-color">
-<div class="block">Mechanism configuration classes.</div>
+<div class="block">Builder-style configuration classes for every mechanism in the YAMS library.</div>
 </div>
 <div class="col-first even-row-color"><a href="../swerve/package-summary.html">yams.mechanisms.swerve</a></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Swerve drive mechanism classes.</div>
+</div>
 <div class="col-first odd-row-color"><a href="../velocity/package-summary.html">yams.mechanisms.velocity</a></div>
 <div class="col-last odd-row-color">
-<div class="block">Velocity mechanism classes.</div>
+<div class="block">Velocity-controlled mechanism implementations for the YAMS library.</div>
 </div>
 </div>
 </div>
@@ -100,11 +178,12 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab2"><a href="DifferentialMechanism.html" title="class in yams.mechanisms.positional">DifferentialMechanism</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab2">
-<div class="block">Arm mechanism.</div>
+<div class="block">A differential mechanism for FRC robots driven by two coordinated motors whose combined motion
+ produces two distinct and independent outputs.</div>
 </div>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="DoubleJointedArm.html" title="class in yams.mechanisms.positional">DoubleJointedArm</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
-<div class="block">Arm mechanism.</div>
+<div class="block">A two-segment arm where each joint has its own independent motor controller.</div>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab2"><a href="Elevator.html" title="class in yams.mechanisms.positional">Elevator</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab2">
@@ -116,7 +195,7 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab2"><a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional">SmartPositionalMechanism</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab2">
-<div class="block">Generic for positional mechanisms.</div>
+<div class="block">Abstract intermediate base class for all closed-loop positional mechanisms in YAMS.</div>
 </div>
 </div>
 </div>

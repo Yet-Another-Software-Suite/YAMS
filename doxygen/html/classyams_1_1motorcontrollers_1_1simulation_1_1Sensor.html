@@ -109,7 +109,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Simulated sensor backed by a HAL SimDevice.</p>
 <p>All fields report the real supplier value on a physical robot. In simulation they surface in the Glass UI and can be overridden with trigger-based values for automated testing scenarios.</p>
-<h3><a class="anchor" id="autotoc_md11"></a>
+<h3><a class="anchor" id="autotoc_md15"></a>
 Basic usage (construct directly)</h3>
 <div class="fragment"><div class="line"><span class="comment">// Beam-break sensor: one boolean field backed by a real DIO channel.</span></div>
 <div class="line">frc::DigitalInput beamBreak{0};</div>
@@ -123,7 +123,7 @@ Basic usage (construct directly)</h3>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1simulation_1_1SensorData_html"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1simulation_1_1SensorData.html">yams::motorcontrollers::simulation::SensorData</a></div><div class="ttdef"><b>Definition</b> SensorData.hpp:24</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1simulation_1_1SensorData_html_a2c9c00c377175c296eb93ce431e3a82a"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1simulation_1_1SensorData.html#a2c9c00c377175c296eb93ce431e3a82a">yams::motorcontrollers::simulation::SensorData::GetAsBoolean</a></div><div class="ttdeci">bool GetAsBoolean() const</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1simulation_1_1Sensor_html"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1simulation_1_1Sensor.html">yams::motorcontrollers::simulation::Sensor</a></div><div class="ttdef"><b>Definition</b> Sensor.hpp:68</div></div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md12"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md16"></a>
 Builder usage (SimSensorConfig)</h3>
 <div class="fragment"><div class="line">frc::DigitalInput beamBreak{0};</div>
 <div class="line">frc::Encoder encoder{1, 2};</div>
@@ -139,7 +139,7 @@ Builder usage (SimSensorConfig)</h3>
 <div class="line"><span class="keywordtype">bool</span> triggered  = sensor.GetAsBoolean(<span class="stringliteral">&quot;BeamBreak&quot;</span>);</div>
 <div class="line"><span class="keywordtype">int</span>  ticks      = sensor.GetAsInt(<span class="stringliteral">&quot;EncoderCount&quot;</span>);</div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1simulation_1_1Sensor_html_a9334b42acb2d9cd93e201e31c2061b29"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1simulation_1_1Sensor.html#a9334b42acb2d9cd93e201e31c2061b29">yams::motorcontrollers::simulation::Sensor::Sensor</a></div><div class="ttdeci">Sensor(std::string sensorName, std::vector&lt; SensorData &gt; fields)</div></div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md13"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md17"></a>
 Trigger-based override</h3>
 <div class="fragment"><div class="line"><span class="comment">// Force the beam-break to appear triggered whenever the arm is retracted.</span></div>
 <div class="line">sensor.AddSimTrigger(<span class="stringliteral">&quot;BeamBreak&quot;</span>,</div>

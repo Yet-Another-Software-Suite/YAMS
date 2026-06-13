@@ -84,11 +84,35 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">PivotConfigurationException</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/RuntimeException.html" title="class or interface in java.lang" class="external-link">RuntimeException</a></span></div>
-<div class="block">Exception for when the Pivot is configured incorrectly.</div>
+<div class="block">Thrown by <a href="../mechanisms/positional/Pivot.html" title="class in yams.mechanisms.positional"><code>Pivot</code></a> or <a href="../mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config"><code>PivotConfig</code></a>
+ when a required field in <a href="../mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config"><code>PivotConfig</code></a> is missing or invalid.
+
+ <p>Common triggers include:
+ <ul>
+   <li><code>withSmartMotorController(SmartMotorController)</code> called more than once on the same config</li>
+   <li>MOI (moment of inertia) not derivable — neither length+mass nor an explicit MOI was configured
+       on the underlying <a href="../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></li>
+ </ul>
+
+ <p><b>Resolution:</b> Ensure <code>PivotConfig.withSmartMotorController(SmartMotorController)</code>
+ is called exactly once, and that the motor's <code>SmartMotorControllerConfig</code> includes
+ <code>withMomentOfInertia(Distance, Mass)</code> or <code>withMomentOfInertia(MomentOfInertia)</code>
+ when simulation is used.
+
+ <p>Example minimal configuration:
+ <pre><code>
+ SmartMotorControllerConfig motorCfg = new SmartMotorControllerConfig()
+     .withMomentOfInertia(Inches.of(10), Pounds.of(2));
+ PivotConfig config = new PivotConfig()
+     .withSmartMotorController(SmartMotorController.create(SPARK_MAX, DCMotor.getNEO(1), motorCfg));
+ Pivot pivot = new Pivot(config);
+ </code></pre></div>
 <dl class="notes">
 <dt>See Also:</dt>
 <dd>
 <ul class="see-list">
+<li><a href="../mechanisms/positional/Pivot.html" title="class in yams.mechanisms.positional"><code>Pivot</code></a></li>
+<li><a href="../mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config"><code>PivotConfig</code></a></li>
 <li><a href="../../serialized-form.html#yams.exceptions.PivotConfigurationException">Serialized Form</a></li>
 </ul>
 </dd>

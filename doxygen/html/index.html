@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>YAMS: Main Page</title>
+<title>YAMS: YAMS — Yet Another Mechanism System</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -69,10 +69,102 @@ $(function() {
 </div>
 </div>
 
-<div class="header">
-  <div class="headertitle"><div class="title">YAMS Documentation</div></div>
+<div><div class="header">
+  <div class="headertitle"><div class="title">YAMS — Yet Another Mechanism System </div></div>
 </div><!--header-->
 <div class="contents">
+<div class="textblock"><h1><a class="anchor" id="intro_sec"></a>
+Introduction</h1>
+<p><b>YAMS</b> is a C++ FRC robotics library that provides a unified, hardware-agnostic abstraction layer for common robot mechanisms. It wraps REV SPARK and CTRE TalonFX motor controllers behind a single interface and ships ready-to-use implementations for arms, elevators, pivots, flywheels, and swerve drives — all with built-in simulation and telemetry support.</p>
+<p>Compatible with <b>WPILib 2026</b>, <b>REVLib</b>, and <b>CTRE Phoenix 6</b>.</p>
+<hr  />
+<h1><a class="anchor" id="features_sec"></a>
+Key Features</h1>
+<ul>
+<li><b>Unified motor controller abstraction</b> via <a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html">yams::motorcontrollers::SmartMotorController</a>, supporting REV SPARK (<a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1SparkWrapper.html">yams::motorcontrollers::local::SparkWrapper</a>) and CTRE TalonFX / TalonFXS (<a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html">yams::motorcontrollers::remote::TalonFXWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html">yams::motorcontrollers::remote::TalonFXSWrapper</a>).</li>
+<li><b>Ready-to-use mechanism classes</b>: Arm, Elevator, Pivot (positional) and FlyWheel (velocity), all extending <a class="el" href="classyams_1_1mechanisms_1_1SmartMechanism.html">yams::mechanisms::SmartMechanism</a>.</li>
+<li><b>Full swerve drive support</b> via <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html">yams::mechanisms::swerve::SwerveDrive</a> with integrated kinematics, odometry, and pose estimation.</li>
+<li><b>Physics-based simulation</b> through <a class="el" href="namespaceyams_1_1motorcontrollers_1_1simulation.html">yams::motorcontrollers::simulation</a> suppliers (ArmSimSupplier, ElevatorSimSupplier, DCMotorSimSupplier).</li>
+<li><b>NetworkTables telemetry</b> via <a class="el" href="classyams_1_1telemetry_1_1MechanismTelemetry.html">yams::telemetry::MechanismTelemetry</a> and <a class="el" href="classyams_1_1telemetry_1_1SmartMotorControllerTelemetry.html">yams::telemetry::SmartMotorControllerTelemetry</a>.</li>
+<li><b>Builder-style configuration</b> objects for every mechanism and controller.</li>
+<li><b>LQR and derivative-filtered PID</b> control through <a class="el" href="classyams_1_1math_1_1LQRController.html">yams::math::LQRController</a> and <a class="el" href="classyams_1_1math_1_1DerivativeTimeFilter.html">yams::math::DerivativeTimeFilter</a>.</li>
+</ul>
+<hr  />
+<h1><a class="anchor" id="namespaces_sec"></a>
+Namespace Overview</h1>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Namespace   </th><th class="markdownTableHeadNone">Description    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">yams   </td><td class="markdownTableBodyNone">Root namespace; include <code><a class="el" href="YAMS_8hpp.html">YAMS.hpp</a></code> to pull in everything    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><a class="el" href="namespaceyams_1_1exceptions.html">yams::exceptions</a>   </td><td class="markdownTableBodyNone">Exception types thrown by YAMS (e.g. ArmConfigurationException)    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><a class="el" href="namespaceyams_1_1gearing.html">yams::gearing</a>   </td><td class="markdownTableBodyNone">GearBox and sprocket/chain gearing calculations    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><a class="el" href="namespaceyams_1_1math.html">yams::math</a>   </td><td class="markdownTableBodyNone">Control math: LQRController, DerivativeTimeFilter, SmartMath    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><a class="el" href="namespaceyams_1_1mechanisms.html">yams::mechanisms</a>   </td><td class="markdownTableBodyNone">Abstract base SmartMechanism and all concrete implementations    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><a class="el" href="namespaceyams_1_1mechanisms_1_1config.html">yams::mechanisms::config</a>   </td><td class="markdownTableBodyNone">Config structs for every mechanism type    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><a class="el" href="namespaceyams_1_1mechanisms_1_1positional.html">yams::mechanisms::positional</a>   </td><td class="markdownTableBodyNone">Arm, Elevator, Pivot, SmartPositionalMechanism    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><a class="el" href="namespaceyams_1_1mechanisms_1_1velocity.html">yams::mechanisms::velocity</a>   </td><td class="markdownTableBodyNone">FlyWheel, SmartVelocityMechanism    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><a class="el" href="namespaceyams_1_1mechanisms_1_1swerve.html">yams::mechanisms::swerve</a>   </td><td class="markdownTableBodyNone">SwerveDrive, SwerveModule, SwerveDriveConfig    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><a class="el" href="namespaceyams_1_1mechanisms_1_1swerve_1_1utility.html">yams::mechanisms::swerve::utility</a>   </td><td class="markdownTableBodyNone">SwerveInputStream    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><a class="el" href="namespaceyams_1_1motorcontrollers.html">yams::motorcontrollers</a>   </td><td class="markdownTableBodyNone">SmartMotorController abstract base and wrapper types    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><a class="el" href="namespaceyams_1_1motorcontrollers_1_1local.html">yams::motorcontrollers::local</a>   </td><td class="markdownTableBodyNone">SparkWrapper (REV SPARK MAX / FLEX)    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><a class="el" href="namespaceyams_1_1motorcontrollers_1_1remote.html">yams::motorcontrollers::remote</a>   </td><td class="markdownTableBodyNone">TalonFXWrapper, TalonFXSWrapper (CTRE Phoenix 6)    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><a class="el" href="namespaceyams_1_1motorcontrollers_1_1simulation.html">yams::motorcontrollers::simulation</a>   </td><td class="markdownTableBodyNone">Simulation suppliers and sensor data    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><a class="el" href="namespaceyams_1_1telemetry.html">yams::telemetry</a>   </td><td class="markdownTableBodyNone">Mechanism and motor controller telemetry publishers    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><a class="el" href="namespaceyams_1_1units.html">yams::units</a>   </td><td class="markdownTableBodyNone">Extended FRC unit types (YUnits)   </td></tr>
+</table>
+<hr  />
+<h1><a class="anchor" id="quickstart_sec"></a>
+Quick Start</h1>
+<p>Add the YAMS vendordep JSON to your robot project, then include the convenience header:</p>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="YAMS_8hpp.html">yams/YAMS.hpp</a>&gt;</span></div>
+<div class="ttc" id="aYAMS_8hpp_html"><div class="ttname"><a href="YAMS_8hpp.html">YAMS.hpp</a></div></div>
+</div><!-- fragment --><p>Configure and construct a mechanism:</p>
+<div class="fragment"><div class="line"><span class="keyword">using namespace </span><a class="code hl_namespace" href="namespaceyams.html">yams</a>;</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Build a motor controller</span></div>
+<div class="line">rev::spark::SparkMax spark{1, rev::spark::SparkLowLevel::MotorType::kBrushless};</div>
+<div class="line"><span class="keyword">auto</span> motorConfig = <a class="code hl_class" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html">motorcontrollers::SmartMotorControllerConfig</a>{}</div>
+<div class="line">    .withInverted(<span class="keyword">false</span>)</div>
+<div class="line">    .withCurrentLimit(40);</div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">auto</span> motor = std::make_unique&lt;motorcontrollers::local::SparkWrapper&gt;(</div>
+<div class="line">    spark, frc::DCMotor::NEO(1), motorConfig);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Build an elevator</span></div>
+<div class="line"><span class="keyword">auto</span> elevatorConfig = <a class="code hl_class" href="classyams_1_1mechanisms_1_1config_1_1ElevatorConfig.html">mechanisms::config::ElevatorConfig</a>{}</div>
+<div class="line">    .withMaxHeightMeters(1.5)</div>
+<div class="line">    .withMinHeightMeters(0.0);</div>
+<div class="line"> </div>
+<div class="line"><a class="code hl_class" href="classyams_1_1mechanisms_1_1positional_1_1Elevator.html">mechanisms::positional::Elevator</a> elevator{std::move(motor), elevatorConfig};</div>
+<div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1ElevatorConfig_html"><div class="ttname"><a href="classyams_1_1mechanisms_1_1config_1_1ElevatorConfig.html">yams::mechanisms::config::ElevatorConfig</a></div><div class="ttdef"><b>Definition</b> ElevatorConfig.hpp:25</div></div>
+<div class="ttc" id="aclassyams_1_1mechanisms_1_1positional_1_1Elevator_html"><div class="ttname"><a href="classyams_1_1mechanisms_1_1positional_1_1Elevator.html">yams::mechanisms::positional::Elevator</a></div><div class="ttdef"><b>Definition</b> Elevator.hpp:71</div></div>
+<div class="ttc" id="aclassyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_html"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html">yams::motorcontrollers::SmartMotorControllerConfig</a></div><div class="ttdef"><b>Definition</b> SmartMotorControllerConfig.hpp:50</div></div>
+<div class="ttc" id="anamespaceyams_html"><div class="ttname"><a href="namespaceyams.html">yams</a></div><div class="ttdef"><b>Definition</b> exceptions.hpp:9</div></div>
+</div><!-- fragment --><hr  />
+<h1><a class="anchor" id="links_sec"></a>
+Further Resources</h1>
+<ul>
+<li><b>Source repository</b>: <a href="https://github.com/YAGSL/YAMS">https://github.com/YAGSL/YAMS</a></li>
+<li><b>Documentation &amp; guides</b>: <a href="https://yagsl.gitbook.io/yams/documentation">https://yagsl.gitbook.io/yams/documentation</a></li>
+<li><b>Issue tracker</b>: <a href="https://github.com/YAGSL/YAMS/issues">https://github.com/YAGSL/YAMS/issues</a> </li>
+</ul>
+</div></div><!-- PageDoc -->
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

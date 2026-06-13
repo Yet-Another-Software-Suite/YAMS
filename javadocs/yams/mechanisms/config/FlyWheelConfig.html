@@ -78,7 +78,27 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">FlyWheelConfig</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">FlyWheel configuration class.</div>
+<div class="block">FlyWheel configuration class.
+
+ <h2>Configuration Example</h2>
+ <pre><code>
+ // 1. Build the motor config with kV and kS feedforward (critical for velocity mechanisms)
+ SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
+     .withFeedforward(0.15, 0.12)   // kS=0.15, kV=0.12 — kV dominates at steady-state RPM
+     .withVelocityPID(0.0005, 0.0, 0.0) // kP
+     .withTelemetry("Shooter", TelemetryVerbosity.HIGH);
+
+ // 2. Create a TalonFXWrapper for a Kraken X60 on CAN ID 1
+ SmartMotorController motor = new TalonFXWrapper(new TalonFX(1), DCMotor.getKrakenX60(1), motorConfig);
+
+ // 3. Assemble the FlyWheelConfig
+ FlyWheelConfig config = new FlyWheelConfig()
+     .withSmartMotorController(motor)
+     .withDiameter(Inches.of(4))
+     .withMass(Pounds.of(0.5))
+     .withSpeedometerSimulation(RPM.of(6000))  // optional: sim speedometer up to 6000 RPM
+     .withTelemetry("Shooter", TelemetryVerbosity.HIGH);
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

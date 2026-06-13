@@ -78,7 +78,52 @@ loadScripts(document, 'script');</script>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">SimSupplier</span></div>
-<div class="block">Provides sim functions for</div>
+<div class="block">Provides sim functions for a YAMS simulated mechanism.
+
+ <p>
+ <code>SimSupplier</code> is the abstract bridge between WPILib's physics simulation models (such as
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/SingleJointedArmSim.html" title="class or interface in edu.wpi.first.wpilibj.simulation" class="external-link"><code>SingleJointedArmSim</code></a> and
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/DCMotorSim.html" title="class or interface in edu.wpi.first.wpilibj.simulation" class="external-link"><code>DCMotorSim</code></a>) and YAMS
+ <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> wrappers. Concrete implementations
+ translate the simulation state — position, velocity, current draw, voltage — into the
+ typed unit-safe values that YAMS motor controller wrappers consume each control loop.
+ </p>
+
+ <p>
+ On a real robot the motor controller hardware provides these values; in simulation a
+ <code>SimSupplier</code> steps the physics model forward and exposes the same interface so
+ that mechanism and control code requires no changes between real and simulated runs.
+ </p>
+
+ <h2>How to use</h2>
+ <p>
+ Create a concrete <code>SimSupplier</code> (e.g. <a href="simulation/ArmSimSupplier.html" title="class in yams.motorcontrollers.simulation"><code>ArmSimSupplier</code></a>
+ or <a href="simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation"><code>DCMotorSimSupplier</code></a>) and pass it to
+ <code>SmartMotorControllerConfig</code> via <code>withSimSupplier()</code>:
+ </p>
+ <pre><code>
+ // Create the WPILib physics model
+ SingleJointedArmSim armPhysics = new SingleJointedArmSim(
+     DCMotor.getNEO(1),
+     SingleJointedArmSim.estimateMOI(0.5, 2.0),
+     5.0,
+     0.5,
+     Units.degreesToRadians(-10),
+     Units.degreesToRadians(90),
+     true,
+     0);
+
+ // Wrap it in a YAMS supplier
+ SmartMotorControllerConfig config = new SmartMotorControllerConfig()
+     // ... other config ...
+     .withSimSupplier(new ArmSimSupplier(armPhysics, motorController));
+ </code></pre>
+
+ <p>
+ Implementations must advance the physics model on each control loop tick via
+ <a href="#updateSimState()"><code>updateSimState()</code></a>, and signal readiness through the watchdog helpers
+ (<a href="#feedUpdateSim()"><code>feedUpdateSim()</code></a>/<a href="#starveUpdateSim()"><code>starveUpdateSim()</code></a>).
+ </p></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

@@ -82,7 +82,47 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">DifferentialMechanism</span>
 <span class="extends-implements">extends <a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional">SmartPositionalMechanism</a></span></div>
-<div class="block">Arm mechanism.</div>
+<div class="block">A differential mechanism for FRC robots driven by two coordinated motors whose combined motion
+ produces two distinct and independent outputs.
+
+ <p>In a differential drive mechanism the two motors do <b>not</b> independently move two
+ separate joints. Instead, their outputs are mixed mathematically:</p>
+ <ul>
+   <li><b>Tilt</b> — controlled by the <em>sum</em> of the left and right motor positions
+       (<code>(left + right) / 2</code>). When both motors turn in the same direction the mechanism
+       tilts up or down.</li>
+   <li><b>Twist</b> — controlled by the <em>difference</em> of the left and right motor
+       positions (<code>(left - right) / 2</code>). When the motors turn in opposite directions the
+       mechanism rotates about its longitudinal axis.</li>
+ </ul>
+
+ <p>A common FRC use-case is a differential wrist at the end of an arm where one motor controls
+ pitch while the other controls roll, allowing the intake or end-effector to be positioned in
+ two degrees of freedom with fewer motors than a traditional two-joint wrist.</p>
+
+ <h2>Usage Example</h2>
+ <pre><code>
+ // Build the config (leftSMC / rightSMC already configured with tilt gearing).
+ DifferentialMechanismConfig config = new DifferentialMechanismConfig(leftSMC, rightSMC)
+     .withStartingPosition(Degrees.of(30), Degrees.of(0))  // tilt=30°, twist=0°
+     .withLength(Inches.of(14))
+     .withMOI(Inches.of(14), Pounds.of(2))
+     .withTelemetry("DifferentialWrist", TelemetryVerbosity.HIGH);
+
+ DifferentialMechanism wrist = new DifferentialMechanism(config);
+
+ // Command: tilt to 60° and twist to 45°.
+ Command scoreCommand = wrist.setPosition(Degrees.of(60), Degrees.of(45));
+
+ // Command: continuously follow a joystick (suppliers).
+ Command manualCommand = wrist.run(
+     () -&gt; Degrees.of(driverController.getLeftY() * 90),
+     () -&gt; Degrees.of(driverController.getRightX() * 90));
+
+ // Read current positions.
+ Angle tilt  = wrist.getTiltPosition();
+ Angle twist = wrist.getTwistPosition();
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">

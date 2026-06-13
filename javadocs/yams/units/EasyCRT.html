@@ -90,7 +90,40 @@ loadScripts(document, 'script');</script>
  "CRT-inspired" unwrapping method that is easier to keep stable with backlash and sensor
  noise.
 
- <p>Created by team 6911.</div>
+ <p>Created by team 6911.
+
+ <h2>Usage</h2>
+ <p>Construct an <code>EasyCRT</code> from a fully-configured <a href="EasyCRTConfig.html" title="class in yams.units"><code>EasyCRTConfig</code></a>, then call
+ <a href="#getAngleOptional()"><code>getAngleOptional()</code></a> periodically. The return value is an <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link"><code>Optional</code></a>
+ containing the resolved mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Angle</code></a> when a unique
+ solution is found, or <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html#empty()" title="class or interface in java.util" class="external-link"><code>Optional.empty()</code></a> when the solve fails or is ambiguous.
+ Inspect <a href="#getLastStatus()"><code>getLastStatus()</code></a> and <a href="#getLastErrorRotations()"><code>getLastErrorRotations()</code></a> for diagnostics.
+
+ <pre><code>
+ import static edu.wpi.first.units.Units.Rotations;
+ import yams.units.EasyCRT;
+ import yams.units.EasyCRTConfig;
+
+ // Build the configuration once (e.g., in robotInit)
+ EasyCRTConfig config = new EasyCRTConfig(
+         encoder1::getAbsolutePosition,
+         encoder2::getAbsolutePosition)
+     .withCommonDriveGear(11.0, 50, 30, 31)
+     .withMechanismRange(Rotations.of(0.0), Rotations.of(5.0))
+     .withMatchTolerance(Rotations.of(0.006));
+
+ EasyCRT crt = new EasyCRT(config);
+
+ // Call periodically (e.g., in periodic())
+ crt.getAngleOptional().ifPresent(angle -&gt; {
+     double mechanismRotations = angle.in(Rotations);
+     // seed the motor controller with the resolved absolute position
+ });
+
+ // Diagnostics
+ EasyCRT.CRTStatus status = crt.getLastStatus();   // OK, NO_SOLUTION, AMBIGUOUS, ...
+ double errorRot = crt.getLastErrorRotations();    // modular error from the best candidate
+ </code></pre></div>
 </section>
 <section class="summary">
 <ul class="summary-list">
