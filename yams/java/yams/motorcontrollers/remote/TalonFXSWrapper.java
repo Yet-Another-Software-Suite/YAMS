@@ -114,7 +114,7 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  *     .withInverted(false)
  *     .withStatorCurrentLimit(Amps.of(30))
  *     .withKp(0.1);
- * SmartMotorController motor = SmartMotorFactory.create(
+ * SmartMotorController motor = new TalonFXSWrapper(
  *     new TalonFXS(7), DCMotor.getMinion(1), config);
  * FlyWheel flywheel = new FlyWheel(new FlyWheelConfig(motor));
  * }</pre>

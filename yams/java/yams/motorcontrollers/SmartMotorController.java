@@ -66,15 +66,17 @@ import yams.telemetry.SmartMotorControllerTelemetryConfig;
 /**
  * Smart motor controller wrapper for motor controllers.
  *
- * <p>This abstract class is not instantiated directly. Use {@link yams.motorcontrollers.SmartMotorFactory}
- * to obtain a concrete instance, then configure it with {@link yams.motorcontrollers.SmartMotorControllerConfig}.
+ * <p>This abstract class is not instantiated directly. Instantiate the appropriate vendor wrapper:
+ * {@link yams.motorcontrollers.local.SparkWrapper} for REV SPARK hardware, or
+ * {@link yams.motorcontrollers.remote.TalonFXWrapper}/{@link yams.motorcontrollers.remote.TalonFXSWrapper}
+ * for CTRE hardware. Configure all three via {@link yams.motorcontrollers.SmartMotorControllerConfig}.
  *
  * <h3>Example</h3>
  * <pre>{@code
  * SmartMotorControllerConfig config = new SmartMotorControllerConfig()
  *     .withKp(0.1).withKs(0.05).withStatorCurrentLimit(Amps.of(40));
- * SmartMotorController motor = SmartMotorFactory.create(
- *     new CANSparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), config);
+ * SmartMotorController motor = new SparkWrapper(
+ *     new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), config);
  *
  * // Use directly for duty-cycle or voltage control:
  * motor.setDutyCycle(0.5);

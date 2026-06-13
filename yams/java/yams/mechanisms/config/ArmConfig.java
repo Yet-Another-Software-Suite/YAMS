@@ -34,8 +34,8 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  *     .withStatorCurrentLimit(Amps.of(40))
  *     .withMechanismUpperLimit(Degrees.of(90))
  *     .withMechanismLowerLimit(Degrees.of(-10));
- * SmartMotorController motor = SmartMotorFactory.create(
- *     new CANSparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), motorConfig);
+ * SmartMotorController motor = new SparkWrapper(
+ *     new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), motorConfig);
  *
  * // Build the arm config
  * ArmConfig config = new ArmConfig(motor)

@@ -20,9 +20,6 @@
  *       feedforward constants, position and velocity software limits, ramp rates, current limits,
  *       encoder resolution and offsets, and gear ratios. Call
  *       {@code SmartMotorController.configure(config)} to push all settings to hardware.</li>
- *   <li>{@link yams.motorcontrollers.SmartMotorFactory} — factory that creates concrete wrapper
- *       instances. Accepts a {@code DCMotor} type enum and a CAN bus ID and returns the
- *       appropriate {@code SmartMotorController} subclass automatically.</li>
  *   <li>{@link yams.motorcontrollers.SmartMotorControllerCommandRegistry} — registers
  *       WPILib {@code Command} objects that operate a specific motor so they can be
  *       discovered and scheduled by a mechanism.</li>
@@ -35,8 +32,8 @@
  *     .withCurrentLimit(40)
  *     .withPositionConversionFactor(2 * Math.PI / 42.0);
  *
- * SmartMotorController motor = SmartMotorFactory.create(DCMotor.getNEO(1), 1);
- * motor.configure(config);
+ * SmartMotorController motor = new SparkWrapper(
+ *     new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), config);
  * motor.setPositionSetpoint(Math.PI / 2);
  * }</pre>
  *

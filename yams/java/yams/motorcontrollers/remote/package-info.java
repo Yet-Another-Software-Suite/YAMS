@@ -35,20 +35,18 @@
  * transparently in most configurations.
  *
  * <h2>Construction</h2>
- * <p>Do not instantiate these wrappers directly. Use
- * {@link yams.motorcontrollers.SmartMotorFactory} so the correct hardware type is selected
- * from the {@code DCMotor} enum automatically:
  * <pre>{@code
- * // Creates a TalonFXWrapper for a Kraken X60 on CAN ID 2
- * SmartMotorController motor = SmartMotorFactory.create(DCMotor.getKrakenX60(1), 2);
- *
+ * // TalonFX (Kraken X60) on CAN ID 2
  * SmartMotorControllerConfig config = new SmartMotorControllerConfig()
- *     .withPID(10.0, 0.0, 0.1)
- *     .withCurrentLimit(80);
- * motor.configure(config);
+ *     .withKp(10.0).withKd(0.1).withStatorCurrentLimit(Amps.of(80));
+ * SmartMotorController motor = new TalonFXWrapper(
+ *     new TalonFX(2), DCMotor.getKrakenX60(1), config);
+ *
+ * // TalonFXS (Minion) on CAN ID 7
+ * SmartMotorController miniMotor = new TalonFXSWrapper(
+ *     new TalonFXS(7), DCMotor.getMinion(1), config);
  * }</pre>
  *
- * @see yams.motorcontrollers.SmartMotorFactory
  * @see yams.motorcontrollers.SmartMotorControllerConfig
  */
 package yams.motorcontrollers.remote;

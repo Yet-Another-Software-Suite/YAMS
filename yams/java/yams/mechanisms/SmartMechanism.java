@@ -32,7 +32,7 @@ import yams.telemetry.MechanismTelemetry;
  * <h3>Mechanism Lifecycle</h3>
  * <ol>
  *   <li>Configure a motor controller: {@link yams.motorcontrollers.SmartMotorControllerConfig}</li>
- *   <li>Create a motor via {@link yams.motorcontrollers.SmartMotorFactory}</li>
+ *   <li>Instantiate the appropriate wrapper: {@link yams.motorcontrollers.local.SparkWrapper} (REV), {@link yams.motorcontrollers.remote.TalonFXWrapper} or {@link yams.motorcontrollers.remote.TalonFXSWrapper} (CTRE)</li>
  *   <li>Build a mechanism config (e.g., {@link yams.mechanisms.config.ArmConfig})</li>
  *   <li>Construct the concrete mechanism (e.g., {@link yams.mechanisms.positional.Arm})</li>
  *   <li>Schedule setpoint commands and bind triggers</li>
@@ -51,8 +51,8 @@ import yams.telemetry.MechanismTelemetry;
  * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
  *     .withKp(0.2).withKs(0.05).withStatorCurrentLimit(Amps.of(40));
  * // 2. Motor
- * SmartMotorController motor = SmartMotorFactory.create(
- *     new CANSparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), motorConfig);
+ * SmartMotorController motor = new SparkWrapper(
+ *     new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), motorConfig);
  * // 3. Mechanism config + 4. Mechanism
  * Arm arm = new Arm(new ArmConfig(motor).withLength(Meters.of(0.5)));
  * // 5. Schedule a command (in a subsystem or robot container)

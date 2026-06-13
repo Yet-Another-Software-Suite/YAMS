@@ -23,12 +23,10 @@
 <pre><code>
 // 1. Configure the motor controller
 SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
-    .withCanId(1)
-    .withMotorType(DCMotor.getNEO(1))
     .withCurrentLimit(40);
 
-// 2. Create a motor via the factory (works for SPARK or TalonFX)
-SmartMotorController motor = SmartMotorFactory.createSparkMax(motorConfig);
+// 2. Instantiate the appropriate vendor wrapper
+SmartMotorController motor = new SparkWrapper(new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), motorConfig);
 
 // 3. Build an ArmConfig describing the physical arm
 ArmConfig armConfig = new ArmConfig()
@@ -93,7 +91,7 @@ arm.setAngle(Degrees.of(45)).schedule();
   </tr>
   <tr>
     <td><a href="yams/motorcontrollers/package-summary.html">yams.motorcontrollers</a></td>
-    <td>SmartMotorController abstract base, SmartMotorFactory, and SmartMotorControllerConfig.</td>
+    <td>SmartMotorController abstract base, SmartMotorControllerConfig, and vendor wrappers (SparkWrapper, TalonFXWrapper, TalonFXSWrapper).</td>
   </tr>
   <tr>
     <td><a href="yams/motorcontrollers/local/package-summary.html">yams.motorcontrollers.local</a></td>

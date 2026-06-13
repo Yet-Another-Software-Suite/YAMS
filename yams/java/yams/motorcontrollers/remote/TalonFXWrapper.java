@@ -114,7 +114,7 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  *     .withKp(0.3)
  *     .withKs(0.1)
  *     .withKv(0.12);
- * SmartMotorController motor = SmartMotorFactory.create(
+ * SmartMotorController motor = new TalonFXWrapper(
  *     new TalonFX(5), DCMotor.getKrakenX60(1), config);
  * Elevator elevator = new Elevator(new ElevatorConfig(motor).withDrumRadius(Inches.of(1)));
  * }</pre>

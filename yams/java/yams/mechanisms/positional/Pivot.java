@@ -57,7 +57,7 @@ import yams.motorcontrollers.simulation.DCMotorSimSupplier;
  *     .withMechanismLowerLimit(Degrees.of(0))
  *     .withStartingPosition(Degrees.of(0));
  *
- * SmartMotorController motor = SmartMotorFactory.create(
+ * SmartMotorController motor = new TalonFXWrapper(
  *     new TalonFX(3),
  *     DCMotor.getKrakenX60(1),
  *     motorConfig);

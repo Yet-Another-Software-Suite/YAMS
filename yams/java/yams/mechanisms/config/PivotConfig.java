@@ -34,8 +34,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  *     .withMechanismLowerLimit(Degrees.of(0))
  *     .withStartingPosition(Degrees.of(0));
  *
- * // Create the motor via SmartMotorFactory (e.g., a Kraken X60 on TalonFX CAN ID 3)
- * SmartMotorController motor = SmartMotorFactory.create(
+ * SmartMotorController motor = new TalonFXWrapper(
  *     new TalonFX(3),
  *     DCMotor.getKrakenX60(1),
  *     motorConfig);

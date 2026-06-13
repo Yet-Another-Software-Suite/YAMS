@@ -56,7 +56,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
  *
  * <h3>Usage Example</h3>
  * <pre>{@code
- * SmartMotorController motor = SmartMotorFactory.create(
+ * SmartMotorController motor = new TalonFXWrapper(
  *     new TalonFX(4), DCMotor.getKrakenX60(1),
  *     new SmartMotorControllerConfig().withKp(0.5).withKg(0.4));
  * Elevator elevator = new Elevator(

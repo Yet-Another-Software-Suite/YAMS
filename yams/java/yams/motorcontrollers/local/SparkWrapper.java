@@ -98,8 +98,8 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  *     .withStatorCurrentLimit(Amps.of(40))
  *     .withKp(0.2)
  *     .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5)); // required for SparkAbsoluteEncoder
- * SmartMotorController motor = SmartMotorFactory.create(
- *     new CANSparkMax(3, MotorType.kBrushless), DCMotor.getNEO(1), config);
+ * SmartMotorController motor = new SparkWrapper(
+ *     new SparkMax(3, MotorType.kBrushless), DCMotor.getNEO(1), config);
  * Arm arm = new Arm(new ArmConfig(motor).withLength(Meters.of(0.6)));
  * }</pre>
  */

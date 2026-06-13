@@ -33,7 +33,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  *     .withKg(0.4)
  *     .withKv(0.12)
  *     .withStatorCurrentLimit(Amps.of(40));
- * SmartMotorController motor = SmartMotorFactory.create(
+ * SmartMotorController motor = new TalonFXWrapper(
  *     new TalonFX(4), DCMotor.getKrakenX60(1), motorConfig);
  *
  * ElevatorConfig config = new ElevatorConfig(motor)

@@ -38,8 +38,8 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  * import edu.wpi.first.math.system.plant.DCMotor;
  * import yams.motorcontrollers.SmartMotorControllerConfig;
  * import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
- * import yams.motorcontrollers.SmartMotorFactory;
  * import yams.motorcontrollers.SmartMotorController;
+ * import yams.motorcontrollers.remote.TalonFXWrapper;
  * import yams.mechanisms.config.SwerveModuleConfig;
  * import yams.gearing.GearBox;
  *
@@ -60,11 +60,9 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  *     .withClosedLoopController(5.0, 0.0, 0.1)
  *     .withControlMode(ControlMode.CLOSED_LOOP);
  *
- * // Create SmartMotorController instances via SmartMotorFactory
- * SmartMotorController driveMotor = SmartMotorFactory.create(new TalonFX(1), DCMotor.getKrakenX60(1), driveConfig)
- *                                                    .orElseThrow();
- * SmartMotorController steerMotor = SmartMotorFactory.create(new TalonFX(2), DCMotor.getFalcon500(1), steerConfig)
- *                                                    .orElseThrow();
+ * // Create motor controller instances directly
+ * SmartMotorController driveMotor = new TalonFXWrapper(new TalonFX(1), DCMotor.getKrakenX60(1), driveConfig);
+ * SmartMotorController steerMotor = new TalonFXWrapper(new TalonFX(2), DCMotor.getFalcon500(1), steerConfig);
  *
  * // Assemble the module config (front-left corner, 0.2 m from centre each axis)
  * CANcoder cancoder = new CANcoder(10);

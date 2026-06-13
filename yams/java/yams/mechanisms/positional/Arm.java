@@ -42,8 +42,8 @@ import yams.motorcontrollers.simulation.ArmSimSupplier;
  * <h3>Usage Example</h3>
  * <pre>{@code
  * // Build and construct
- * SmartMotorController motor = SmartMotorFactory.create(
- *     new CANSparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1),
+ * SmartMotorController motor = new SparkWrapper(
+ *     new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1),
  *     new SmartMotorControllerConfig().withKp(0.25).withStatorCurrentLimit(Amps.of(40)));
  * Arm arm = new Arm(new ArmConfig(motor).withLength(Meters.of(0.5)));
  *

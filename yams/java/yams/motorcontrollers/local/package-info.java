@@ -12,9 +12,7 @@
  * <h2>Core type</h2>
  * <ul>
  *   <li>{@link yams.motorcontrollers.local.SparkWrapper} — unified adapter for both the
- *       SPARK MAX (NEO, NEO 550) and SPARK FLEX (NEO Vortex). Automatically detects the
- *       hardware variant from the {@code DCMotor} type passed to
- *       {@link yams.motorcontrollers.SmartMotorFactory}.</li>
+ *       SPARK MAX (NEO, NEO 550) and SPARK FLEX (NEO Vortex).</li>
  * </ul>
  *
  * <h2>Absolute encoder discontinuity</h2>
@@ -32,19 +30,13 @@
  * warning and may cause erratic position readings near the wrap boundary.
  *
  * <h2>Construction</h2>
- * <p>Do not instantiate {@link yams.motorcontrollers.local.SparkWrapper} directly. Use
- * {@link yams.motorcontrollers.SmartMotorFactory} instead so the correct hardware type is
- * selected automatically:
  * <pre>{@code
- * // Creates a SparkWrapper backed by a SPARK MAX on CAN ID 5
- * SmartMotorController motor = SmartMotorFactory.create(DCMotor.getNEO(1), 5);
- *
  * SmartMotorControllerConfig config = new SmartMotorControllerConfig()
  *     .withExternalEncoderDiscontinuityPoint(0.5);
- * motor.configure(config);
+ * SmartMotorController motor = new SparkWrapper(
+ *     new SparkMax(5, MotorType.kBrushless), DCMotor.getNEO(1), config);
  * }</pre>
  *
- * @see yams.motorcontrollers.SmartMotorFactory
  * @see yams.motorcontrollers.SmartMotorControllerConfig
  */
 package yams.motorcontrollers.local;

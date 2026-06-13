@@ -39,8 +39,8 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  *     .withVelocityPID(/* kP */ 0.0005, 0.0, 0.0)
  *     .withTelemetry("Shooter", TelemetryVerbosity.HIGH);
  *
- * // 2. Create the motor via SmartMotorFactory
- * SmartMotorController motor = SmartMotorFactory.createTalonFX(1, motorConfig);
+ * // 2. Create a TalonFXWrapper for a Kraken X60 on CAN ID 1
+ * SmartMotorController motor = new TalonFXWrapper(new TalonFX(1), DCMotor.getKrakenX60(1), motorConfig);
  *
  * // 3. Assemble the FlyWheelConfig
  * FlyWheelConfig config = new FlyWheelConfig()
