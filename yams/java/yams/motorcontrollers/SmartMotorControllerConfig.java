@@ -1010,7 +1010,7 @@ public class SmartMotorControllerConfig {
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withOutputCurrentLimit(Current stallCurrent) {
-    return withStatorCurrentLimit(stallCurrent)
+    return withStatorCurrentLimit(stallCurrent);
   }
 
   /**
