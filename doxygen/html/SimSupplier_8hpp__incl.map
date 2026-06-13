@@ -1,0 +1,17 @@
+<map id="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/motorcontrollers/SimSupplier.hpp" name="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/motorcontrollers/SimSupplier.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="534,5,719,75"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,123,112,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="534,59,126,125,125,120,534,53"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="137,123,343,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="534,66,301,122,300,117,533,61"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="368,123,544,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="566,77,490,118,488,114,564,72"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="569,123,685,148"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="629,75,629,109,624,109,624,75"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="709,123,819,148"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="678,73,737,112,734,117,675,77"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="844,123,964,148"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="720,70,858,116,856,121,719,75"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="989,123,1107,148"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="720,59,984,117,983,122,719,64"/>
+</map>

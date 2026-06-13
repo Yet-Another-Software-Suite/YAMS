@@ -1,0 +1,11 @@
+<map id="yams::mechanisms::positional::SmartPositionalMechanism" name="yams::mechanisms::positional::SmartPositionalMechanism">
+<area shape="rect" id="Node000001" title=" " alt="" coords="324,55,545,95"/>
+<area shape="rect" id="Node000003" href="$classyams_1_1mechanisms_1_1positional_1_1Arm.html" title=" " alt="" coords="593,5,849,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="547,50,593,41,656,28,657,33,594,46,548,55"/>
+<area shape="rect" id="Node000004" href="$classyams_1_1mechanisms_1_1positional_1_1Elevator.html" title=" " alt="" coords="611,55,832,95"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="559,73,611,73,611,78,559,78"/>
+<area shape="rect" id="Node000005" href="$classyams_1_1mechanisms_1_1positional_1_1Pivot.html" title=" " alt="" coords="611,119,832,159"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="539,96,632,117,631,122,538,101"/>
+<area shape="rect" id="Node000002" href="$classyams_1_1mechanisms_1_1SmartMechanism.html" title=" " alt="" coords="5,63,276,88"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="290,73,324,73,324,78,290,78"/>
+</map>

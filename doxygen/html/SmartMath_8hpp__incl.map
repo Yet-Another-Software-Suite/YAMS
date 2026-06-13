@@ -1,0 +1,14 @@
+<map id="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/math/SmartMath.hpp" name="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/math/SmartMath.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="52,5,256,60"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,115,116,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="129,62,84,107,80,103,126,58"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="124,269,211,295"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="158,60,169,255,163,256,153,61"/>
+<area shape="rect" id="Node000004" href="$NoStagesGivenException_8hpp.html" title=" " alt="" coords="191,108,389,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="194,58,252,98,249,102,191,62"/>
+<area shape="rect" id="Node000005" href="$YamsException_8hpp.html" title=" " alt="" coords="204,196,352,221"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="290,149,284,183,279,182,284,148"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="262,224,199,264,196,259,259,219"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="249,269,307,295"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="281,222,281,256,275,256,275,222"/>
+</map>

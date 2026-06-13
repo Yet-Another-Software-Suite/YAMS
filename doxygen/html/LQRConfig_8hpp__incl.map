@@ -1,0 +1,25 @@
+<map id="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/math/LQRConfig.hpp" name="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/math/LQRConfig.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1188,5,1387,60"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,108,217,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1188,41,775,63,506,84,231,110,230,105,506,78,774,58,1188,35"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="241,115,445,141"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1188,43,863,68,660,88,457,111,421,116,420,110,456,105,660,82,862,63,1188,38"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="469,115,665,141"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1188,47,955,74,678,111,645,116,645,110,678,105,955,69,1188,42"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="690,115,917,141"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="1188,56,876,115,875,110,1187,50"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="941,115,1141,141"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="1219,63,1085,113,1083,108,1217,58"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="1165,115,1410,141"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="1290,60,1290,101,1285,101,1285,60"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="1435,115,1535,141"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="1344,58,1449,107,1447,112,1342,62"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="1559,115,1677,141"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="1381,57,1565,109,1564,114,1380,63"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="1701,115,1775,141"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="1387,44,1532,69,1691,105,1700,108,1698,113,1689,111,1531,74,1387,50"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="1800,115,1868,141"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="1387,39,1575,62,1682,81,1788,105,1797,108,1795,113,1787,111,1681,86,1574,67,1387,44"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="1892,115,1955,141"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="1387,35,1491,42,1615,55,1749,76,1881,105,1888,108,1887,113,1880,111,1748,81,1614,60,1490,47,1386,40"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/mechanisms/config/SensorConfig.hpp" name="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/mechanisms/config/SensorConfig.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="84,5,276,75"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,123,112,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,77,87,116,83,112,135,73"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="137,123,223,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="183,75,183,109,177,109,177,75"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="248,123,323,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="220,73,263,111,260,115,216,77"/>
+</map>

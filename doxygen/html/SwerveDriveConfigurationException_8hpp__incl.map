@@ -1,0 +1,10 @@
+<map id="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/exceptions/SwerveDriveConfigurationException.hpp" name="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/exceptions/SwerveDriveConfigurationException.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,316,75"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="83,196,142,221"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="150,76,134,123,120,183,115,182,129,122,145,74"/>
+<area shape="rect" id="Node000003" href="$YamsException_8hpp.html" title=" " alt="" coords="143,123,291,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="183,73,205,109,200,112,179,76"/>
+<area shape="poly" id="edge4_Node000003_Node000002" title=" " alt="" coords="201,150,143,190,140,186,198,146"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="173,196,260,221"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="219,148,219,182,214,182,214,148"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="yams::motorcontrollers::SmartMotorController" name="yams::motorcontrollers::SmartMotorController">
+<area shape="rect" id="Node000001" title=" " alt="" coords="397,69,572,109"/>
+<area shape="rect" id="Node000002" href="$classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html" title=" " alt="" coords="7,5,219,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="233,42,374,67,397,71,396,76,373,72,232,48"/>
+<area shape="rect" id="Node000003" href="$classyams_1_1telemetry_1_1SmartMotorControllerTelemetry.html" title=" " alt="" coords="5,69,220,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="234,87,397,87,397,92,234,92"/>
+<area shape="rect" id="Node000004" href="$classyams_1_1telemetry_1_1SmartMotorControllerTelemetryConfig.html" title=" " alt="" coords="5,133,220,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="233,131,373,107,396,103,397,108,374,112,234,136"/>
+</map>

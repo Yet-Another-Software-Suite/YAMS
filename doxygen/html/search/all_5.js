@@ -1,0 +1,23 @@
+var searchData=
+[
+  ['fathom_5ft_0',['fathom_t',['../namespaceyams_1_1units.html#ae9d13c093a9b9e44c8d1ac9b7f171703',1,'yams::units']]],
+  ['fathomunit_1',['FathomUnit',['../namespaceyams_1_1units.html#a1c2443f162120632833b208ef9e837a3',1,'yams::units']]],
+  ['feedwatchdog_2',['feedwatchdog',['../classyams_1_1motorcontrollers_1_1SimSupplier.html#abccc8f3defe375bdfe2783ade32326e1',1,'yams::motorcontrollers::SimSupplier::FeedWatchdog()'],['../classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#abd87bb3e9ba629be6222fc9b86d027d5',1,'yams::motorcontrollers::simulation::ArmSimSupplier::FeedWatchdog()'],['../classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#ad3c3903abe52be98f6ad6d6bae4f9119',1,'yams::motorcontrollers::simulation::DCMotorSimSupplier::FeedWatchdog()'],['../classyams_1_1motorcontrollers_1_1simulation_1_1ElevatorSimSupplier.html#a214a2287dfa88f6afc078e4990c3d7b4',1,'yams::motorcontrollers::simulation::ElevatorSimSupplier::FeedWatchdog()']]],
+  ['field_20selection_3',['Logging-only (no NT4) with a custom field selection',['../classyams_1_1telemetry_1_1SmartMotorControllerTelemetryConfig.html#autotoc_md16',1,'']]],
+  ['fine_20grained_20override_20via_20smartmotorcontroller_3a_3awithtelemetry_4',['Fine-grained override via SmartMotorController::WithTelemetry()',['../classyams_1_1telemetry_1_1SmartMotorControllerTelemetryConfig.html#autotoc_md15',1,'']]],
+  ['flex_5',['Example usage — SPARK Flex',['../classyams_1_1motorcontrollers_1_1local_1_1SparkWrapper.html#autotoc_md8',1,'']]],
+  ['flywheel_6',['flywheel',['../classyams_1_1mechanisms_1_1velocity_1_1FlyWheel.html',1,'yams::mechanisms::velocity::FlyWheel'],['../classyams_1_1math_1_1LQRConfig.html#a4d0a59fc149cead7a47bce892a7d2f2ba302102ee6e4e1b49bd6c5dcb56cce0ec',1,'yams::math::LQRConfig::FLYWHEEL'],['../classyams_1_1mechanisms_1_1velocity_1_1FlyWheel.html#a1946ec9e2c3755997e83db8f0b3d29f8',1,'yams::mechanisms::velocity::FlyWheel::FlyWheel()']]],
+  ['flywheel_2ehpp_7',['FlyWheel.hpp',['../FlyWheel_8hpp.html',1,'']]],
+  ['flywheelconfig_8',['flywheelconfig',['../classyams_1_1mechanisms_1_1config_1_1FlyWheelConfig.html',1,'yams::mechanisms::config::FlyWheelConfig'],['../classyams_1_1mechanisms_1_1config_1_1FlyWheelConfig.html#a3c14b862d59a2610a1f9ddd6c7bb07f0',1,'yams::mechanisms::config::FlyWheelConfig::FlyWheelConfig()']]],
+  ['flywheelconfig_2ehpp_9',['FlyWheelConfig.hpp',['../FlyWheelConfig_8hpp.html',1,'']]],
+  ['fortnight_5ft_10',['fortnight_t',['../namespaceyams_1_1units.html#a1d41e030cc9ca6d7b1a6a97d4d95eebf',1,'yams::units']]],
+  ['fortnightunit_11',['FortnightUnit',['../namespaceyams_1_1units.html#a8e27534cc1f7eb4ee7a815218dd453b2',1,'yams::units']]],
+  ['forwardpositiontofollowers_12',['forwardpositiontofollowers',['../classyams_1_1motorcontrollers_1_1SmartMotorController.html#a9f774dc0f7f4435ce677ab83a5bb56c1',1,'yams::motorcontrollers::SmartMotorController::ForwardPositionToFollowers(units::meter_t dist)'],['../classyams_1_1motorcontrollers_1_1SmartMotorController.html#a25390cd61a31ebd56162995af6894b42',1,'yams::motorcontrollers::SmartMotorController::ForwardPositionToFollowers(units::turn_t pos)']]],
+  ['forwardvelocitytofollowers_13',['forwardvelocitytofollowers',['../classyams_1_1motorcontrollers_1_1SmartMotorController.html#ace1e77df5a4aea7ad6c5199ae0d43bb9',1,'yams::motorcontrollers::SmartMotorController::ForwardVelocityToFollowers(units::meters_per_second_t vel)'],['../classyams_1_1motorcontrollers_1_1SmartMotorController.html#afe4c0d05255cf5cfe4b3641ff048d293',1,'yams::motorcontrollers::SmartMotorController::ForwardVelocityToFollowers(units::turns_per_second_t vel)']]],
+  ['four_20module_20subsystem_14',['Example usage (inside a four-module subsystem)',['../classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#autotoc_md3',1,'']]],
+  ['fromreductionstages_15',['FromReductionStages',['../classyams_1_1gearing_1_1GearBox.html#a8b0a6877eb48b325fcd6a655659d27df',1,'yams::gearing::GearBox']]],
+  ['fromstages_16',['fromstages',['../classyams_1_1gearing_1_1GearBox.html#a678fe8d28f0af1a0ce89adb86c04e0dd',1,'yams::gearing::GearBox::FromStages()'],['../classyams_1_1gearing_1_1Sprocket.html#a1827175ae27fa6c1446970fd819e6aef',1,'yams::gearing::Sprocket::FromStages()']]],
+  ['fromteeth_17',['FromTeeth',['../classyams_1_1gearing_1_1GearBox.html#a4cc0c53a0f54baa67608716d7c28073f',1,'yams::gearing::GearBox']]],
+  ['furlong_5ft_18',['furlong_t',['../namespaceyams_1_1units.html#a9d4acd049b639d1953b7bcb505e2e6a0',1,'yams::units']]],
+  ['furlongunit_19',['FurlongUnit',['../namespaceyams_1_1units.html#a460f94a92c33089e1abf485959c62e41',1,'yams::units']]]
+];

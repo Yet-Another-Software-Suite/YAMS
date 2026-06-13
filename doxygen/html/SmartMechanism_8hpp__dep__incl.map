@@ -1,0 +1,23 @@
+<map id="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/mechanisms/SmartMechanism.hpp" name="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/mechanisms/SmartMechanism.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="137,5,432,60"/>
+<area shape="rect" id="Node000002" href="$YAMS_8hpp.html" title=" " alt="" coords="313,343,498,397"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="211,68,129,111,89,138,54,167,26,197,11,229,8,245,10,261,16,277,26,293,44,308,71,320,145,340,230,353,313,361,313,366,230,359,144,345,69,325,41,312,22,296,11,279,4,262,3,245,6,227,22,194,50,163,86,134,126,107,208,64"/>
+<area shape="rect" id="Node000003" href="$SmartPositionalMechanism_8hpp.html" title=" " alt="" coords="168,108,400,177"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="287,74,287,108,282,108,282,74"/>
+<area shape="rect" id="Node000007" href="$SmartVelocityMechanism_8hpp.html" title=" " alt="" coords="684,108,904,177"/>
+<area shape="poly" id="edge10_Node000001_Node000007" title=" " alt="" coords="422,60,684,116,683,121,421,66"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="155,160,124,170,94,184,67,203,45,227,35,244,31,260,35,276,45,293,62,307,87,319,155,338,235,352,313,360,312,365,234,357,154,344,85,324,59,311,41,296,30,278,26,260,30,242,41,224,64,199,91,180,122,165,154,155"/>
+<area shape="rect" id="Node000004" href="$Arm_8hpp.html" title=" " alt="" coords="56,225,273,295"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="241,189,201,227,197,223,237,185"/>
+<area shape="rect" id="Node000005" href="$Elevator_8hpp.html" title=" " alt="" coords="297,225,514,295"/>
+<area shape="poly" id="edge6_Node000003_Node000005" title=" " alt="" coords="332,185,372,223,368,227,328,189"/>
+<area shape="rect" id="Node000006" href="$Pivot_8hpp.html" title=" " alt="" coords="538,225,756,295"/>
+<area shape="poly" id="edge8_Node000003_Node000006" title=" " alt="" coords="404,179,542,223,540,228,402,184"/>
+<area shape="poly" id="edge5_Node000004_Node000002" title=" " alt="" coords="253,298,348,340,346,345,251,303"/>
+<area shape="poly" id="edge7_Node000005_Node000002" title=" " alt="" coords="408,308,408,342,403,342,403,308"/>
+<area shape="poly" id="edge9_Node000006_Node000002" title=" " alt="" coords="560,303,465,345,463,340,558,298"/>
+<area shape="poly" id="edge11_Node000007_Node000002" title=" " alt="" coords="801,191,795,246,785,273,769,297,750,310,724,322,655,341,575,355,499,364,498,359,575,350,654,336,722,317,747,306,765,293,781,271,790,245,795,191"/>
+<area shape="rect" id="Node000008" href="$FlyWheel_8hpp.html" title=" " alt="" coords="831,225,1036,295"/>
+<area shape="poly" id="edge12_Node000007_Node000008" title=" " alt="" coords="847,184,894,223,891,227,843,188"/>
+<area shape="poly" id="edge13_Node000008_Node000002" title=" " alt="" coords="818,296,813,297,647,331,499,357,498,352,646,326,812,292,817,291"/>
+</map>

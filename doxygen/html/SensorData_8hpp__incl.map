@@ -1,0 +1,17 @@
+<map id="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/motorcontrollers/simulation/SensorData.hpp" name="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/motorcontrollers/simulation/SensorData.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="324,5,527,75"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,123,133,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="324,70,127,122,126,117,323,65"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="158,123,253,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="347,77,246,120,244,115,345,72"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="277,123,363,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="389,77,345,115,342,111,386,73"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="388,123,463,148"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="428,75,428,109,423,109,423,75"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="487,123,545,148"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="460,73,497,111,493,114,456,77"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="570,123,630,148"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="490,72,567,114,565,118,487,77"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="654,123,717,148"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="520,72,642,116,640,121,518,77"/>
+</map>

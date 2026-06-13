@@ -1,0 +1,16 @@
+<map id="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/mechanisms/swerve/SwerveModule.hpp" name="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/mechanisms/swerve/SwerveModule.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="27,5,227,75"/>
+<area shape="rect" id="Node000002" href="$YAMS_8hpp.html" title=" " alt="" coords="22,475,207,529"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="95,88,51,157,32,198,17,241,9,293,13,336,29,377,56,425,91,473,87,476,51,428,25,379,8,337,3,293,12,239,27,196,47,155,90,85"/>
+<area shape="rect" id="Node000003" href="$SwerveDrive_8hpp.html" title=" " alt="" coords="27,240,227,309"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="129,89,129,240,124,240,124,89"/>
+<area shape="rect" id="Node000005" href="$SwerveDriveConfig_8hpp.html" title=" " alt="" coords="164,123,364,192"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="179,81,225,120,222,124,175,86"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="88,322,68,358,61,392,68,426,79,451,94,473,90,476,74,453,63,427,56,392,63,356,83,319"/>
+<area shape="rect" id="Node000004" href="$SwerveInputStream_8hpp.html" title=" " alt="" coords="77,357,301,427"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="154,320,173,356,169,358,149,323"/>
+<area shape="poly" id="edge5_Node000004_Node000002" title=" " alt="" coords="161,439,135,476,131,473,156,436"/>
+<area shape="poly" id="edge7_Node000005_Node000002" title=" " alt="" coords="293,203,316,252,334,311,337,342,336,372,330,401,316,428,294,452,268,470,238,483,208,492,207,487,236,478,265,465,291,448,311,425,325,399,331,371,332,342,328,312,311,254,289,205"/>
+<area shape="poly" id="edge8_Node000005_Node000003" title=" " alt="" coords="215,203,169,242,165,238,212,199"/>
+<area shape="poly" id="edge9_Node000005_Node000004" title=" " alt="" coords="263,207,256,257,241,310,216,359,211,356,236,308,251,256,258,206"/>
+</map>

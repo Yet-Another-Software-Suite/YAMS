@@ -1,0 +1,28 @@
+<map id="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/mechanisms/config/SimSensorConfig.hpp" name="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/mechanisms/config/SimSensorConfig.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="264,5,456,75"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,130,147,155"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="266,77,122,128,120,123,264,72"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="171,130,271,155"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="315,77,250,124,247,120,312,73"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="219,211,306,236"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="344,76,278,200,273,198,340,74"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="675,130,752,155"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="457,62,663,120,671,123,670,128,662,125,455,67"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="331,211,389,236"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="363,75,363,197,357,197,357,75"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="414,211,477,236"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="378,74,437,197,432,200,373,76"/>
+<area shape="rect" id="Node000008" href="$SensorData_8hpp.html" title=" " alt="" coords="448,123,651,163"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="425,73,503,114,501,119,422,77"/>
+<area shape="poly" id="edge10_Node000008_Node000004" title=" " alt="" coords="481,165,318,210,317,204,480,160"/>
+<area shape="poly" id="edge12_Node000008_Node000006" title=" " alt="" coords="505,165,402,208,400,203,503,160"/>
+<area shape="poly" id="edge14_Node000008_Node000007" title=" " alt="" coords="526,165,473,204,470,200,523,161"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="804,211,932,236"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="626,160,809,205,808,210,625,165"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="501,211,595,236"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="552,163,551,197,546,197,546,163"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="620,211,695,236"/>
+<area shape="poly" id="edge11_Node000008_Node000011" title=" " alt="" coords="577,161,631,200,628,204,574,165"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="719,211,779,236"/>
+<area shape="poly" id="edge13_Node000008_Node000012" title=" " alt="" coords="598,160,708,203,706,208,596,165"/>
+</map>

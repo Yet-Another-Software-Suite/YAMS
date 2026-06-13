@@ -1,0 +1,15 @@
+<map id="yams::mechanisms::positional::Elevator" name="yams::mechanisms::positional::Elevator">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1263,69,1484,109"/>
+<area shape="rect" id="Node000002" href="$classyams_1_1mechanisms_1_1positional_1_1SmartPositionalMechanism.html" title=" " alt="" coords="992,69,1213,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1227,87,1263,87,1263,92,1227,92"/>
+<area shape="rect" id="Node000003" href="$classyams_1_1mechanisms_1_1SmartMechanism.html" title=" " alt="" coords="672,77,943,102"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="956,87,992,87,992,92,956,92"/>
+<area shape="rect" id="Node000004" href="$classyams_1_1motorcontrollers_1_1SmartMotorController.html" title=" " alt="" coords="397,69,572,109"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="586,87,671,87,671,92,586,92"/>
+<area shape="rect" id="Node000005" href="$classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html" title=" " alt="" coords="7,5,219,45"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="233,42,374,67,397,71,396,76,373,72,232,48"/>
+<area shape="rect" id="Node000006" href="$classyams_1_1telemetry_1_1SmartMotorControllerTelemetry.html" title=" " alt="" coords="5,69,220,109"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="234,87,397,87,397,92,234,92"/>
+<area shape="rect" id="Node000007" href="$classyams_1_1telemetry_1_1SmartMotorControllerTelemetryConfig.html" title=" " alt="" coords="5,133,220,173"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="233,131,373,107,396,103,397,108,374,112,234,136"/>
+</map>

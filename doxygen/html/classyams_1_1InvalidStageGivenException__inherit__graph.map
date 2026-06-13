@@ -1,0 +1,7 @@
+<map id="yams::InvalidStageGivenException" name="yams::InvalidStageGivenException">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,152,255,177"/>
+<area shape="rect" id="Node000002" href="$classyams_1_1YamsException.html" title=" " alt="" coords="48,79,212,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="133,118,133,152,127,152,127,118"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="61,5,199,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="133,44,133,79,127,79,127,44"/>
+</map>
