@@ -34,11 +34,10 @@
  * <pre>{@code
  * // Move the arm to 45 degrees and then print a message
  * arm.setAngle(Rotation2d.fromDegrees(45))
- *    .andThen(Commands.print("Arm at target"))
- *    .schedule();
+ *    .andThen(Commands.print("Arm at target"));
  *
  * // Move the elevator to 0.8 m, waiting until it arrives
- * elevator.setHeight(Meters.of(0.8)).schedule();
+ * elevator.setHeight(Meters.of(0.8));
  * }</pre>
  *
  * <h2>Trigger Factory Methods</h2>

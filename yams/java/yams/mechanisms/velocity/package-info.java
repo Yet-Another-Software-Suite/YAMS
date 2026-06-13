@@ -39,10 +39,10 @@
  * // Spin at a linear surface speed and wait until up to speed before shooting
  * flyWheel.runTo(MetersPerSecond.of(10))
  *         .andThen(shooter.fireCommand())
- *         .schedule();
+ *         ;
  *
  * // Spin at an angular velocity (does not wait for spin-up)
- * flyWheel.run(RotationsPerSecond.of(50)).schedule();
+ * flyWheel.run(RotationsPerSecond.of(50));
  * }</pre>
  *
  * <h2>Unsupported Operations</h2>

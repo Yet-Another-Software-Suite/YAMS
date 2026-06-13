@@ -72,8 +72,8 @@
  * // Build a motor controller
  * rev::spark::SparkMax spark{1, rev::spark::SparkLowLevel::MotorType::kBrushless};
  * auto motorConfig = motorcontrollers::SmartMotorControllerConfig{}
- *     .withInverted(false)
- *     .withCurrentLimit(40);
+ *     .WithMotorInverted(false)
+ *     .WithStatorCurrentLimit(40_amps);
  *
  * auto motor = std::make_unique<motorcontrollers::local::SparkWrapper>(
  *     spark, frc::DCMotor::NEO(1), motorConfig);
@@ -90,7 +90,7 @@
  *
  * @section links_sec Further Resources
  *
- * - **Source repository**: https://github.com/YAGSL/YAMS
+ * - **Source repository**: https://github.com/Yet-Another-Software-Suite/YAMS
  * - **Documentation & guides**: https://yagsl.gitbook.io/yams/documentation
- * - **Issue tracker**: https://github.com/YAGSL/YAMS/issues
+ * - **Issue tracker**: https://github.com/Yet-Another-Software-Suite/YAMS/issues
  */

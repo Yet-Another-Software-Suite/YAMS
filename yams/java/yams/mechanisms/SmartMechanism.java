@@ -56,7 +56,7 @@ import yams.telemetry.MechanismTelemetry;
  * // 3. Mechanism config + 4. Mechanism
  * Arm arm = new Arm(new ArmConfig(motor).withLength(Meters.of(0.5)));
  * // 5. Schedule a command (in a subsystem or robot container)
- * arm.setAngle(Degrees.of(45)).schedule();
+ * arm.setAngle(Degrees.of(45));
  * // 5. Bind a trigger
  * arm.isNear(Degrees.of(45), Degrees.of(2)).onTrue(Commands.print("At target!"));
  * // Call in robotPeriodic():
