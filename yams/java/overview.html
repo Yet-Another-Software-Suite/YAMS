@@ -23,7 +23,16 @@
 <pre><code>
 // 1. Configure the motor controller
 SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
-    .withCurrentLimit(40);
+      .withClosedLoopController(4, 0, 0)
+      .withSoftLimits(Degrees.of(-30), Degrees.of(100))
+      .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
+      .withIdleMode(MotorMode.BRAKE)
+      .withTelemetry("ArmMotor", TelemetryVerbosity.HIGH)
+      .withStatorCurrentLimit(Amps.of(40))
+      .withMotorInverted(false)
+      .withFeedforward(new ArmFeedforward(0, 0, 0, 0))
+      .withControlMode(ControlMode.CLOSED_LOOP)
+      .withStartingPosition(Degrees.of(0));
 
 // 2. Instantiate the appropriate vendor wrapper
 SmartMotorController motor = new SparkWrapper(new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), motorConfig);
