@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "yams/exceptions.hpp"
+#include "yams/motorcontrollers/SmartMotorControllerCommandRegistry.hpp"
 
 namespace yams::motorcontrollers {
 
