@@ -22,7 +22,7 @@
       "version": "${version}",
       "libName": "YAMS",
       "headerClassifier": "headers",
-      "sharedLibrary": false,
+      "sharedLibrary": true,
       "skipInvalidPlatforms": true,
       "binaryPlatforms": [
         "windowsx86-64",
