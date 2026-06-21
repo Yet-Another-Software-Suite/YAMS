@@ -412,7 +412,7 @@ public class TalonFXSWrapper extends SmartMotorController
   @Override
   public void seedRelativeEncoder()
   {
-      throw new RuntimeException("Unsupported operation");
+      //throw new RuntimeException("Unsupported operation");
   }
 
     @Override
