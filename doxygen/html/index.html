@@ -140,8 +140,8 @@ Quick Start</h1>
 <div class="line"><span class="comment">// Build a motor controller</span></div>
 <div class="line">rev::spark::SparkMax spark{1, rev::spark::SparkLowLevel::MotorType::kBrushless};</div>
 <div class="line"><span class="keyword">auto</span> motorConfig = <a class="code hl_class" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html">motorcontrollers::SmartMotorControllerConfig</a>{}</div>
-<div class="line">    .withInverted(<span class="keyword">false</span>)</div>
-<div class="line">    .withCurrentLimit(40);</div>
+<div class="line">    .<a class="code hl_function" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#a0df6ee01600a6fc3b4801a160f8f78db">WithMotorInverted</a>(<span class="keyword">false</span>)</div>
+<div class="line">    .<a class="code hl_function" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#a3eab7ca0607cc22e2f248c10b47c7d52">WithStatorCurrentLimit</a>(40_amps);</div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">auto</span> motor = std::make_unique&lt;motorcontrollers::local::SparkWrapper&gt;(</div>
 <div class="line">    spark, frc::DCMotor::NEO(1), motorConfig);</div>
@@ -155,14 +155,16 @@ Quick Start</h1>
 <div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1ElevatorConfig_html"><div class="ttname"><a href="classyams_1_1mechanisms_1_1config_1_1ElevatorConfig.html">yams::mechanisms::config::ElevatorConfig</a></div><div class="ttdef"><b>Definition</b> ElevatorConfig.hpp:25</div></div>
 <div class="ttc" id="aclassyams_1_1mechanisms_1_1positional_1_1Elevator_html"><div class="ttname"><a href="classyams_1_1mechanisms_1_1positional_1_1Elevator.html">yams::mechanisms::positional::Elevator</a></div><div class="ttdef"><b>Definition</b> Elevator.hpp:71</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_html"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html">yams::motorcontrollers::SmartMotorControllerConfig</a></div><div class="ttdef"><b>Definition</b> SmartMotorControllerConfig.hpp:50</div></div>
+<div class="ttc" id="aclassyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_html_a0df6ee01600a6fc3b4801a160f8f78db"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#a0df6ee01600a6fc3b4801a160f8f78db">yams::motorcontrollers::SmartMotorControllerConfig::WithMotorInverted</a></div><div class="ttdeci">SmartMotorControllerConfig &amp; WithMotorInverted(bool inverted)</div></div>
+<div class="ttc" id="aclassyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_html_a3eab7ca0607cc22e2f248c10b47c7d52"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#a3eab7ca0607cc22e2f248c10b47c7d52">yams::motorcontrollers::SmartMotorControllerConfig::WithStatorCurrentLimit</a></div><div class="ttdeci">SmartMotorControllerConfig &amp; WithStatorCurrentLimit(units::ampere_t limit)</div></div>
 <div class="ttc" id="anamespaceyams_html"><div class="ttname"><a href="namespaceyams.html">yams</a></div><div class="ttdef"><b>Definition</b> exceptions.hpp:9</div></div>
 </div><!-- fragment --><hr  />
 <h1><a class="anchor" id="links_sec"></a>
 Further Resources</h1>
 <ul>
-<li><b>Source repository</b>: <a href="https://github.com/YAGSL/YAMS">https://github.com/YAGSL/YAMS</a></li>
+<li><b>Source repository</b>: <a href="https://github.com/Yet-Another-Software-Suite/YAMS">https://github.com/Yet-Another-Software-Suite/YAMS</a></li>
 <li><b>Documentation &amp; guides</b>: <a href="https://yagsl.gitbook.io/yams/documentation">https://yagsl.gitbook.io/yams/documentation</a></li>
-<li><b>Issue tracker</b>: <a href="https://github.com/YAGSL/YAMS/issues">https://github.com/YAGSL/YAMS/issues</a> </li>
+<li><b>Issue tracker</b>: <a href="https://github.com/Yet-Another-Software-Suite/YAMS/issues">https://github.com/Yet-Another-Software-Suite/YAMS/issues</a> </li>
 </ul>
 </div></div><!-- PageDoc -->
 </div><!-- contents -->

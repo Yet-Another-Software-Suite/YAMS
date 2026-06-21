@@ -97,7 +97,7 @@ loadScripts(document, 'script');</script>
  Arm arm = new Arm(config);
 
  // 3. Schedule a setpoint command
- arm.setAngle(Rotation2d.fromDegrees(45)).schedule();
+ arm.setAngle(Rotation2d.fromDegrees(45));
 
  // 4. Bind a trigger
  arm.isNear(Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(2))
