@@ -75,7 +75,6 @@ public class ElevatorTest
   private static Elevator createElevator(SmartMotorController smc)
   {
     ElevatorConfig config = new ElevatorConfig(smc)
-        .withStartingHeight(Meters.of(0))
         .withHardLimits(Meters.of(0), Meters.of(3))
 //      .withTelemetry("Elevator", TelemetryVerbosity.HIGH)
         .withMass(Pounds.of(16));

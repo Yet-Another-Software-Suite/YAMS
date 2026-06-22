@@ -62,8 +62,7 @@ import yams.motorcontrollers.simulation.DCMotorSimSupplier;
  *
  * PivotConfig pivotConfig = new PivotConfig(motor)
  *     .withHardLimits(Degrees.of(0), Degrees.of(60))
- *     .withTelemetry("ShooterHood", TelemetryVerbosity.HIGH)
- *     .withSimStartingPosition(Degrees.of(0));
+ *     .withTelemetry("ShooterHood", TelemetryVerbosity.HIGH);
  *
  * // --- Instantiation ---
  * Pivot pivot = new Pivot(pivotConfig);
@@ -145,6 +144,13 @@ public class Pivot extends SmartPositionalMechanism
       if (config.getStartingAngle().isEmpty())
       {
         throw new PivotConfigurationException("Pivot starting angle is empty",
+                                              "Cannot create simulation.",
+                                              "SmartMotorControllerConfig.withStartingPosition(Angle)");
+      }
+      if (config.getStartingAngle().get().lt(config.getLowerHardLimit().get()) ||
+          config.getStartingAngle().get().gt(config.getUpperHardLimit().get()))
+      {
+        throw new PivotConfigurationException("Pivot starting angle is outside hard limits",
                                               "Cannot create simulation.",
                                               "SmartMotorControllerConfig.withStartingPosition(Angle)");
       }

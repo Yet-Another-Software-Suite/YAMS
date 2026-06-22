@@ -42,6 +42,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.Optional;
 import java.util.function.Supplier;
 import yams.exceptions.ElevatorConfigurationException;
+import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.gearing.MechanismGearing;
 import yams.math.DerivativeTimeFilter;
 import yams.mechanisms.config.ElevatorConfig;
@@ -133,9 +134,16 @@ public class Elevator extends SmartPositionalMechanism
                                                  "Cannot create simulator",
                                                  "withHardLimits(Distance,Distance)");
       }
-      if (config.getStartingHeight().isEmpty())
+      if (smcConfig.getStartingPosition().isEmpty())
       {
-        throw new ElevatorConfigurationException("Starting height is not configured!",
+        throw new SmartMotorControllerConfigurationException("Starting height is not configured!",
+                                                 "Cannot create simulator",
+                                                 "withStartingPosition(Distance)");
+      }
+      if (smcConfig.convertFromMechanism(smcConfig.getStartingPosition().orElseThrow()).lt(config.getMinimumHeight().get()) ||
+              smcConfig.convertFromMechanism(smcConfig.getStartingPosition().orElseThrow()).gt(config.getMaximumHeight().get()))
+      {
+        throw new ElevatorConfigurationException("Elevator starting height is outside hard limits",
                                                  "Cannot create simulator",
                                                  "withStartingHeight(Distance)");
       }
@@ -149,7 +157,7 @@ public class Elevator extends SmartPositionalMechanism
                                           config.getMinimumHeight().get().in(Meters),
                                           config.getMaximumHeight().get().in(Meters),
                                           simulateGravity,
-                                          config.getStartingHeight().get().in(Meters),
+              smcConfig.convertFromMechanism(smcConfig.getStartingPosition().orElseThrow()).in(Meters),
                                           0.01 / 4096, 0.01 / 4096));
       m_smc.setSimSupplier(new SimSupplier()
       {
@@ -359,12 +367,12 @@ public class Elevator extends SmartPositionalMechanism
                        ));
 
       m_mechanismLigament = m_mechanismRoot.append(new MechanismLigament2d(getName(),
-                                                                           config.getStartingHeight().get().in(Meters),
+              smcConfig.convertFromMechanism(smcConfig.getStartingPosition().orElseThrow()).in(Meters),
                                                                            config.getAngle().in(Degrees),
                                                                            6,
                                                                            config.getSimColor()));
       m_setpointLigament = m_mechanismRoot.append(new MechanismLigament2d("Setpoint",
-                                                                          config.getStartingHeight().get().in(Meters),
+              smcConfig.convertFromMechanism(smcConfig.getStartingPosition().orElseThrow()).in(Meters),
                                                                           config.getAngle().in(Degrees),
                                                                           3,
                                                                           new Color8Bit(Color.kWhite)));

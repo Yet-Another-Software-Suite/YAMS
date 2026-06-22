@@ -6,7 +6,6 @@ package yams.mechanisms.config;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import java.util.Optional;
@@ -41,7 +40,8 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  * PivotConfig config = new PivotConfig(motor)
  *     .withHardLimits(Degrees.of(0), Degrees.of(60))
  *     .withTelemetry("ShooterHood", TelemetryVerbosity.HIGH)
- *     .withSimStartingPosition(Degrees.of(0));
+ *     .withHardLimits(Degrees.of(0), Degrees.of(60))
+ *     .withTelemetry("ShooterHood", TelemetryVerbosity.HIGH);
  * }</pre>
  */
 public class PivotConfig
@@ -75,11 +75,6 @@ public class PivotConfig
    */
   private   MechanismPositionConfig        mechanismPositionConfig = new MechanismPositionConfig();
   /**
-   * Simulated starting position.
-   */
-  private Optional<Angle> simStartingPosition = Optional.empty();
-
-  /**
    * Pivot Configuration class
    *
    * @param motorController Primary {@link SmartMotorController} for the {@link Pivot}
@@ -107,7 +102,6 @@ public class PivotConfig
    */
   public PivotConfig(PivotConfig cfg)
   {
-    this.simStartingPosition = cfg.simStartingPosition;
     this.motor = cfg.motor;
     this.telemetryName = cfg.telemetryName;
     this.telemetryVerbosity = cfg.telemetryVerbosity;
@@ -121,18 +115,6 @@ public class PivotConfig
   public PivotConfig clone()
   {
     return new PivotConfig(this);
-  }
-
-  /**
-   * Set the simulation starting position of the pivot. Only ever used in simulation.
-   *
-   * @param position {@link Angle} of the starting position of the pivot.
-   * @return {@link PivotConfig} for chaining.
-   */
-  public PivotConfig withSimStartingPosition(Angle position)
-  {
-    this.simStartingPosition = Optional.ofNullable(position);
-    return this;
   }
 
   /**
@@ -282,10 +264,6 @@ public class PivotConfig
    */
   public Optional<Angle> getStartingAngle()
   {
-    if (RobotBase.isSimulation() && simStartingPosition.isPresent())
-    {
-      return simStartingPosition;
-    }
     return motor.orElseThrow().getConfig().getStartingPosition();
   }
 

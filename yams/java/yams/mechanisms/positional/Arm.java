@@ -124,6 +124,14 @@ public class Arm extends SmartPositionalMechanism
                                             "Cannot create simulation.",
                                             "SmartMotorControllerConfig.withStartingPosition(Angle)");
       }
+      if (config.getStartingAngle().isPresent() &&
+          (config.getStartingAngle().get().lt(config.getLowerHardLimit().get()) ||
+           config.getStartingAngle().get().gt(config.getUpperHardLimit().get())))
+      {
+        throw new ArmConfigurationException("Arm starting angle is outside hard limits",
+                                            "Cannot create simulation.",
+                                            "SmartMotorControllerConfig.withStartingPosition(Angle)");
+      }
       m_sim = Optional.of(new SingleJointedArmSim(motor.getDCMotor(),
                                                   motor.getConfig().getGearing().getMechanismToRotorRatio(),
                                                   config.getMOI(),

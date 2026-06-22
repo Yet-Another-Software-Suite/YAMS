@@ -9,7 +9,6 @@ import edu.wpi.first.math.Pair;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import java.util.Optional;
@@ -38,7 +37,8 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  *     .withDrumRadius(Inches.of(1.0))          // spool radius
  *     .withMass(Kilograms.of(4.0))             // carriage mass
  *     .withTelemetry("Elevator", TelemetryVerbosity.HIGH)
- *     .withSimStartingHeight(Meters.of(0));
+ *     .withHardLimits(Meters.of(0), Meters.of(2))
+ *     .withTelemetry("Elevator", TelemetryVerbosity.HIGH);
  * }</pre>
  */
 public class ElevatorConfig
@@ -88,14 +88,6 @@ public class ElevatorConfig
    */
   private   OptionalInt                        stages                  = OptionalInt.empty();
   /**
-   * Starting height to set the motor's encoder to.
-   */
-  private   Optional<Distance>                 startingHeight          = Optional.empty();
-  /**
-   * Simulated starting height.
-   */
-  private   Optional<Distance>                 simStartingHeight       = Optional.empty();
-  /**
    * Soft limits of the {@link SmartMotorController} closed loop controller. Can be exceeded. (LowerLimit, UpperLimit)
    */
   private   Optional<Pair<Distance, Distance>> softLimits              = Optional.empty();
@@ -130,11 +122,9 @@ public class ElevatorConfig
   private ElevatorConfig(ElevatorConfig cfg)
   {
     this.isElevatorHorizontal = cfg.isElevatorHorizontal;
-    this.simStartingHeight = cfg.simStartingHeight;
     this.motor = cfg.motor;
     this.drumCircumference = cfg.drumCircumference;
     this.stages = cfg.stages;
-    this.startingHeight = cfg.startingHeight;
     this.softLimits = cfg.softLimits;
     this.simColor = cfg.simColor;
     this.angle = cfg.angle;
@@ -153,18 +143,6 @@ public class ElevatorConfig
   }
 
   /**
-   * Set the simulated starting height of the elevator. Only used during simulation.
-   *
-   * @param height {@link Distance} of the elevator on start.
-   * @return {@link ElevatorConfig} for chaining.
-   */
-  public ElevatorConfig withSimStartingHeight(Distance height)
-  {
-    simStartingHeight = Optional.ofNullable(height);
-    return this;
-  }
-
-  /**
    * Set the {@link SmartMotorController} for the {@link Elevator}
    *
    * @param motorController Primary {@link SmartMotorController} for the {@link Elevator}
@@ -175,8 +153,6 @@ public class ElevatorConfig
     motor = Optional.of(motorController);
     drumCircumference.ifPresent(drumRadius -> motor.get().getConfig().withMechanismCircumference(drumRadius));
     stages.ifPresent(this::withCascadingElevatorStages);
-    startingHeight.ifPresent(this::withStartingHeight);
-    softLimits.ifPresent(softLimits -> withSoftLimits(softLimits.getFirst(), softLimits.getSecond()));
     return this;
   }
 
@@ -285,34 +261,6 @@ public class ElevatorConfig
   }
 
   /**
-   * Set the elevator starting position.
-   *
-   * @param startingPosition Starting position of the elevator.
-   * @return {@link ElevatorConfig} for chaining
-   */
-  public ElevatorConfig withStartingHeight(Distance startingPosition)
-  {
-    startingHeight = Optional.ofNullable(startingPosition);
-    motor.ifPresent(motor -> motor.getConfig().withStartingPosition(startingPosition));
-    return this;
-  }
-
-
-  /**
-   * Set the elevator soft limits. When exceeded the power will be set to 0.
-   *
-   * @param lowerLimit Minimum distance of the elevator.
-   * @param upperLimit Maximum distance of the elevator.
-   * @return {@link ElevatorConfig} for chaining.
-   */
-  public ElevatorConfig withSoftLimits(Distance lowerLimit, Distance upperLimit)
-  {
-    softLimits = Optional.of(Pair.of(lowerLimit, upperLimit));
-    motor.ifPresent(motor -> motor.getConfig().withSoftLimits(lowerLimit, upperLimit));
-    return this;
-  }
-
-  /**
    * Set the Hard Limits for simulation
    *
    * @param min Height where the physical stop appears.
@@ -395,27 +343,6 @@ public class ElevatorConfig
   public Optional<String> getTelemetryName()
   {
     return telemetryName;
-  }
-
-  /**
-   * Get the starting height of the {@link Elevator}
-   *
-   * @return {@link Distance} of the {@link Elevator}
-   */
-  public Optional<Distance> getStartingHeight()
-  {
-    if (RobotBase.isSimulation() && simStartingHeight.isPresent())
-    {
-      return simStartingHeight;
-    }
-    return motor.orElseThrow().getConfig().getStartingPosition().isPresent() ? Optional.of(motor.orElseThrow()
-                                                                                                .getConfig()
-                                                                                                .convertFromMechanism(
-                                                                                                    motor.orElseThrow()
-                                                                                                         .getConfig()
-                                                                                                         .getStartingPosition()
-                                                                                                         .get()))
-                                                                             : Optional.empty();
   }
 
   /**

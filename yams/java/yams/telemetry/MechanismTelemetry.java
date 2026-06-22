@@ -29,8 +29,7 @@ import yams.motorcontrollers.SmartMotorController;
  *     .withLength(Meters.of(0.5))
  *     .withMass(Kilograms.of(2.0))
  *     .withHardLimits(Degrees.of(-10), Degrees.of(90))
- *     .withTelemetry("Arm", TelemetryVerbosity.HIGH)   // enables MechanismTelemetry
- *     .withSimStartingPosition(Degrees.of(0));
+ *     .withTelemetry("Arm", TelemetryVerbosity.HIGH);  // enables MechanismTelemetry
  *
  * Arm arm = new Arm(armConfig);
  * }</pre>
@@ -41,8 +40,7 @@ import yams.motorcontrollers.SmartMotorController;
  *     .withMotor(new TalonFXConfig(2))
  *     .withDrumRadius(Inches.of(1.0))
  *     .withMass(Kilograms.of(4.0))
- *     .withTelemetry("Elevator", TelemetryVerbosity.HIGH)   // enables MechanismTelemetry
- *     .withSimStartingHeight(Meters.of(0));
+ *     .withTelemetry("Elevator", TelemetryVerbosity.HIGH);  // enables MechanismTelemetry
  *
  * Elevator elevator = new Elevator(elevatorConfig);
  * }</pre>
