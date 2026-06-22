@@ -819,12 +819,9 @@ public class SmartMotorControllerConfig {
       throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
           "Cannot set soft limits.", "withMechanismCircumference(Distance)");
     }
-    mechanismLowerLimit =
-        Optional.ofNullable(Rotations.of(low.in(Meters) / mechanismCircumference.get().in(Meters)));
-    mechanismUpperLimit = Optional.ofNullable(
-        Rotations.of(high.in(Meters) / mechanismCircumference.get().in(Meters)));
 
-    return this;
+    return withSoftLimits(Rotations.of(low.in(Meters) / mechanismCircumference.get().in(Meters)),
+            Rotations.of(high.in(Meters) / mechanismCircumference.get().in(Meters)));
   }
 
   /**
@@ -867,14 +864,13 @@ public class SmartMotorControllerConfig {
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withSoftLimits(Angle low, Angle high) {
+    if(low != null && high != null && low.gte(high))
+    {
+      throw new SmartMotorControllerConfigurationException("Lower limit is higher than upper limit", "Cannot configure SmartMotorController", "withSoftLimit(LOW, HIGH)");
+    }
     mechanismLowerLimit = Optional.ofNullable(low);
     mechanismUpperLimit = Optional.ofNullable(high);
-    if(mechanismLowerLimit.isPresent() && mechanismUpperLimit.isPresent()) {
-        if(low.gte(high))
-        {
-            throw new SmartMotorControllerConfigurationException("Lower limit is higher than upper limit", "Cannot configure SmartMotorController", "withSoftLimit(LOW, HIGH)");
-        }
-    }
+
     return this;
   }
 
