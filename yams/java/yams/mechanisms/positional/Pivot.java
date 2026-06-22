@@ -338,7 +338,7 @@ public class Pivot extends SmartPositionalMechanism
     {
       return new Trigger(gte(m_smc.getConfig().getMechanismUpperLimit().get()));
     }
-    if (m_config.getUpperHardLimit().isEmpty())
+    if (m_config.getUpperHardLimit().isPresent())
     {
       return gte(m_config.getUpperHardLimit().get());
     }
@@ -352,11 +352,11 @@ public class Pivot extends SmartPositionalMechanism
   {
     if (m_smc.getConfig().getMechanismLowerLimit().isPresent())
     {
-      return new Trigger(gte(m_smc.getConfig().getMechanismLowerLimit().get()));
+      return new Trigger(lte(m_smc.getConfig().getMechanismLowerLimit().get()));
     }
-    if (m_config.getLowerHardLimit().isEmpty())
+    if (m_config.getLowerHardLimit().isPresent())
     {
-      return gte(m_config.getLowerHardLimit().get());
+      return lte(m_config.getLowerHardLimit().get());
     }
     throw new PivotConfigurationException("Pivot lower hard and motor controller soft limit is empty",
                                         "Cannot create min trigger.",

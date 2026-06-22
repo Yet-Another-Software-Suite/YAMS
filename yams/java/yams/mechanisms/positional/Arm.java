@@ -388,11 +388,11 @@ public class Arm extends SmartPositionalMechanism
   {
     if (m_smc.getConfig().getMechanismLowerLimit().isPresent())
     {
-      return new Trigger(gte(m_smc.getConfig().getMechanismLowerLimit().get()));
+      return new Trigger(lte(m_smc.getConfig().getMechanismLowerLimit().get()));
     }
     if (m_config.getLowerHardLimit().isPresent())
     {
-      return gte(m_config.getLowerHardLimit().get());
+      return lte(m_config.getLowerHardLimit().get());
     }
     throw new ArmConfigurationException("Arm lower hard and motor controller soft limit is empty",
                                         "Cannot create min trigger.",

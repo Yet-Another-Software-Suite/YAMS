@@ -584,12 +584,12 @@ public class Elevator extends SmartPositionalMechanism
   {
     if (m_smc.getConfig().getMechanismLowerLimit().isPresent())
     {
-      return new Trigger(gte(m_smc.getConfig()
+      return new Trigger(lte(m_smc.getConfig()
                                   .convertFromMechanism(m_smc.getConfig().getMechanismLowerLimit().get())));
     }
     if (m_config.getMinimumHeight().isPresent())
     {
-      return gte(m_config.getMinimumHeight().get());
+      return lte(m_config.getMinimumHeight().get());
     }
     throw new ElevatorConfigurationException("Minimum height is not configured!",
                                              "Cannot create min trigger.",
