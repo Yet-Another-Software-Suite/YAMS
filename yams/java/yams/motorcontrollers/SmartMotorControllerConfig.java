@@ -869,6 +869,12 @@ public class SmartMotorControllerConfig {
   public SmartMotorControllerConfig withSoftLimits(Angle low, Angle high) {
     mechanismLowerLimit = Optional.ofNullable(low);
     mechanismUpperLimit = Optional.ofNullable(high);
+    if(mechanismLowerLimit.isPresent() && mechanismUpperLimit.isPresent()) {
+        if(low.gte(high))
+        {
+            throw new SmartMotorControllerConfigurationException("Lower limit is higher than upper limit", "Cannot configure SmartMotorController", "withSoftLimit(LOW, HIGH)");
+        }
+    }
     return this;
   }
 
