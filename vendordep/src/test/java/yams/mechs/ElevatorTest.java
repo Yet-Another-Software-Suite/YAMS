@@ -62,6 +62,7 @@ public class ElevatorTest
         .withSoftLimits(Meters.of(0), Meters.of(5))
         .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
         .withIdleMode(MotorMode.BRAKE)
+        .withStartingPosition(Meters.of(0))
 //        .withTelemetry("ElevatorMotor", TelemetryVerbosity.HIGH)
         .withStatorCurrentLimit(Amps.of(40))
 //      .withVoltageCompensation(Volts.of(12))
@@ -118,8 +119,8 @@ public class ElevatorTest
         case 2: smcConfig = addExponentialProfile(smcConfig);
           break;
       }
-      SparkMax  smax  = new SparkMax(10 + offset + i, MotorType.kBrushless);
-      SparkFlex sflex = new SparkFlex(20 + offset + i, MotorType.kBrushless);
+      SparkMax  smax  = new SparkMax(40 + offset + i, MotorType.kBrushless);
+      SparkFlex sflex = new SparkFlex(50 + offset + i, MotorType.kBrushless);
 //    ThriftyNova tnova = new ThriftyNova(30 + offset+i);
       TalonFXS tfxs = new TalonFXS(40 + offset + i);
       TalonFX  tfx  = new TalonFX(50 + offset + i);

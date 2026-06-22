@@ -54,6 +54,8 @@ import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class PivotTest
 {
+    private static int CTRE_ID = 0;
+    private static int REV_ID = 0;
   private static SmartMotorControllerConfig createSMCConfig()
   {
     return new SmartMotorControllerConfig()
@@ -109,11 +111,11 @@ public class PivotTest
         case 2: smcConfig = addExponentialProfile(smcConfig);
           break;
       }
-      SparkMax  smax  = new SparkMax(10 + offset + i, MotorType.kBrushless);
-      SparkFlex sflex = new SparkFlex(20 + offset + i, MotorType.kBrushless);
+      SparkMax  smax  = new SparkMax((REV_ID++) + offset + i, MotorType.kBrushless);
+      SparkFlex sflex = new SparkFlex((REV_ID++) + offset + i, MotorType.kBrushless);
 //    ThriftyNova tnova = new ThriftyNova(30 + offset+i);
-      TalonFXS tfxs = new TalonFXS(40 + offset + i);
-      TalonFX  tfx  = new TalonFX(50 + offset + i);
+      TalonFXS tfxs = new TalonFXS((CTRE_ID++) + offset + i);
+      TalonFX  tfx  = new TalonFX((CTRE_ID++) + offset + i);
       smcList.add(Arguments.of(setupTestSubsystem(new SparkWrapper(smax,
                                                                    DCMotor.getNEO(1),
                                                                    smcConfig.clone()
