@@ -20,6 +20,9 @@ jobs:
       - name: Install roboRIOToolchain
         working-directory: vendordep
         run: chmod a+x gradlew && ./gradlew installRoboRioToolchain
-      - name: Build examples
+      - name: Build java examples
         run: mkdir generated && make && make build
         working-directory: examples
+      - name: Build C++ example
+        run: ./gradlew build
+        working-directory: examples/cpptest
