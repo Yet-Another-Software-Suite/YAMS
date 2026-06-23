@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
@@ -53,6 +52,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.helpers.DeviceCreator;
 import yams.motorcontrollers.local.SparkWrapper;
 import yams.motorcontrollers.remote.TalonFXSWrapper;
 import yams.motorcontrollers.remote.TalonFXWrapper;
@@ -71,34 +71,8 @@ import yams.motorcontrollers.remote.TalonFXWrapper;
  */
 public class MechanismLimitTest
 {
-  /**
-   * Monotonically-increasing counter for unique CAN device IDs across all @MethodSource factory
-   * calls. SparkMax and SparkFlex share the REV device registry, so their ID ranges must not
-   * overlap with each other or with IDs used by other test classes. Other test classes (ArmTest,
-   * ElevatorTest, PivotTest, ShooterTest) use SparkMax 11–16, SparkFlex 21–26, TalonFXS 41–46,
-   * TalonFX 51–56 — MechanismLimitTest must stay outside those ranges. With at most 7 factory
-   * calls the ranges are:
-   *
-   * <pre>
-   *   REV:  SparkMax  27+offset → 28–34  SparkFlex 47+offset → 48–54
-   *   CTRE: TalonFXS   1+offset →  2–8   TalonFX   15+offset → 16–22
-   * </pre>
-   *
-   * Each factory also creates a second "at-limit" batch:
-   *
-   * <pre>
-   *   REV:  SparkMax  34+offset → 35–41  SparkFlex 54+offset → 55–61
-   *   CTRE: TalonFXS   9+offset → 10–16  TalonFX   23+offset → 24–30
-   * </pre>
-   *
-   * Exception tests use SparkMax 42–47 (EXCEPT_BASE = 42). All IDs are ≤ 61 and no REV range
-   * overlaps another REV range.
-   */
+  // Counter incremented per factory call, used only for telemetry label uniqueness.
   private static int offset = 0;
-
-  // Fixed IDs for the single-motor exception tests — in the gap between SparkMax true (35–41)
-  // and SparkFlex false (48–54), so they never conflict with any parameterized REV device.
-  private static final int EXCEPT_BASE = 42;
 
   // ──────────────────────────────────────────────
   // SMC config base factories
@@ -202,97 +176,97 @@ public class MechanismLimitTest
   // SMC builder helpers
   // ──────────────────────────────────────────────
 
-  private static SmartMotorController makePivotSparkMax(int id, Angle startPos, String label)
+  private static SmartMotorController makePivotSparkMax(Angle startPos, String label)
   {
-    return setupTestSubsystem(new SparkWrapper(new SparkMax(id, MotorType.kBrushless), DCMotor.getNEO(1),
+    return setupTestSubsystem(new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
         pivotBase().withStartingPosition(startPos)
                    .withSubsystem(new SmartMotorControllerTestSubsystem())
                    .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
-  private static SmartMotorController makePivotSparkFlex(int id, Angle startPos, String label)
+  private static SmartMotorController makePivotSparkFlex(Angle startPos, String label)
   {
-    return setupTestSubsystem(new SparkWrapper(new SparkFlex(id, MotorType.kBrushless), DCMotor.getNeoVortex(1),
+    return setupTestSubsystem(new SparkWrapper(DeviceCreator.createSparkFlex(), DCMotor.getNeoVortex(1),
         pivotBase().withStartingPosition(startPos)
                    .withSubsystem(new SmartMotorControllerTestSubsystem())
                    .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
-  private static SmartMotorController makePivotTalonFXS(int id, Angle startPos, String label)
+  private static SmartMotorController makePivotTalonFXS(Angle startPos, String label)
   {
-    return setupTestSubsystem(new TalonFXSWrapper(new TalonFXS(id), DCMotor.getNEO(1),
+    return setupTestSubsystem(new TalonFXSWrapper(DeviceCreator.createTalonFXS(), DCMotor.getNEO(1),
         pivotBase().withStartingPosition(startPos)
                    .withSubsystem(new SmartMotorControllerTestSubsystem())
                    .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
-  private static SmartMotorController makePivotTalonFX(int id, Angle startPos, String label)
+  private static SmartMotorController makePivotTalonFX(Angle startPos, String label)
   {
-    return setupTestSubsystem(new TalonFXWrapper(new TalonFX(id), DCMotor.getKrakenX60(1),
+    return setupTestSubsystem(new TalonFXWrapper(DeviceCreator.createTalonFX(), DCMotor.getKrakenX60(1),
         pivotBase().withStartingPosition(startPos)
                    .withSubsystem(new SmartMotorControllerTestSubsystem())
                    .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
-  private static SmartMotorController makeArmSparkMax(int id, Angle startPos, String label)
+  private static SmartMotorController makeArmSparkMax(Angle startPos, String label)
   {
-    return setupTestSubsystem(new SparkWrapper(new SparkMax(id, MotorType.kBrushless), DCMotor.getNEO(1),
+    return setupTestSubsystem(new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
         armBase().withStartingPosition(startPos)
                  .withSubsystem(new SmartMotorControllerTestSubsystem())
                  .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
-  private static SmartMotorController makeArmSparkFlex(int id, Angle startPos, String label)
+  private static SmartMotorController makeArmSparkFlex(Angle startPos, String label)
   {
-    return setupTestSubsystem(new SparkWrapper(new SparkFlex(id, MotorType.kBrushless), DCMotor.getNeoVortex(1),
+    return setupTestSubsystem(new SparkWrapper(DeviceCreator.createSparkFlex(), DCMotor.getNeoVortex(1),
         armBase().withStartingPosition(startPos)
                  .withSubsystem(new SmartMotorControllerTestSubsystem())
                  .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
-  private static SmartMotorController makeArmTalonFXS(int id, Angle startPos, String label)
+  private static SmartMotorController makeArmTalonFXS(Angle startPos, String label)
   {
-    return setupTestSubsystem(new TalonFXSWrapper(new TalonFXS(id), DCMotor.getNEO(1),
+    return setupTestSubsystem(new TalonFXSWrapper(DeviceCreator.createTalonFXS(), DCMotor.getNEO(1),
         armBase().withStartingPosition(startPos)
                  .withSubsystem(new SmartMotorControllerTestSubsystem())
                  .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
-  private static SmartMotorController makeArmTalonFX(int id, Angle startPos, String label)
+  private static SmartMotorController makeArmTalonFX(Angle startPos, String label)
   {
-    return setupTestSubsystem(new TalonFXWrapper(new TalonFX(id), DCMotor.getKrakenX60(1),
+    return setupTestSubsystem(new TalonFXWrapper(DeviceCreator.createTalonFX(), DCMotor.getKrakenX60(1),
         armBase().withStartingPosition(startPos)
                  .withSubsystem(new SmartMotorControllerTestSubsystem())
                  .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
-  private static SmartMotorController makeElevSparkMax(int id, Distance startHeight, String label)
+  private static SmartMotorController makeElevSparkMax(Distance startHeight, String label)
   {
-    return setupTestSubsystem(new SparkWrapper(new SparkMax(id, MotorType.kBrushless), DCMotor.getNEO(1),
+    return setupTestSubsystem(new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
         elevatorBase().withStartingPosition(startHeight)
                       .withSubsystem(new SmartMotorControllerTestSubsystem())
                       .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
-  private static SmartMotorController makeElevSparkFlex(int id, Distance startHeight, String label)
+  private static SmartMotorController makeElevSparkFlex(Distance startHeight, String label)
   {
-    return setupTestSubsystem(new SparkWrapper(new SparkFlex(id, MotorType.kBrushless), DCMotor.getNeoVortex(1),
+    return setupTestSubsystem(new SparkWrapper(DeviceCreator.createSparkFlex(), DCMotor.getNeoVortex(1),
         elevatorBase().withStartingPosition(startHeight)
                       .withSubsystem(new SmartMotorControllerTestSubsystem())
                       .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
-  private static SmartMotorController makeElevTalonFXS(int id, Distance startHeight, String label)
+  private static SmartMotorController makeElevTalonFXS(Distance startHeight, String label)
   {
-    return setupTestSubsystem(new TalonFXSWrapper(new TalonFXS(id), DCMotor.getNEO(1),
+    return setupTestSubsystem(new TalonFXSWrapper(DeviceCreator.createTalonFXS(), DCMotor.getNEO(1),
         elevatorBase().withStartingPosition(startHeight)
                       .withSubsystem(new SmartMotorControllerTestSubsystem())
                       .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
-  private static SmartMotorController makeElevTalonFX(int id, Distance startHeight, String label)
+  private static SmartMotorController makeElevTalonFX(Distance startHeight, String label)
   {
-    return setupTestSubsystem(new TalonFXWrapper(new TalonFX(id), DCMotor.getKrakenX60(1),
+    return setupTestSubsystem(new TalonFXWrapper(DeviceCreator.createTalonFX(), DCMotor.getKrakenX60(1),
         elevatorBase().withStartingPosition(startHeight)
                       .withSubsystem(new SmartMotorControllerTestSubsystem())
                       .withTelemetry(label, TelemetryVerbosity.HIGH)));
@@ -305,13 +279,6 @@ public class MechanismLimitTest
   // position, then 4 at a "true" (at-limit) starting position. The boolean
   // second parameter tells the test what the trigger should return.
   //
-  // Device ID ranges (7 factory calls max, offset 1–7):
-  //   REV  SparkMax  : false → 27+o (28-34)  true → 34+o (35-41)
-  //   REV  SparkFlex : false → 47+o (48-54)  true → 54+o (55-61)
-  //   CTRE TalonFXS  : false →  1+o  (2-8)   true →  9+o (10-16)
-  //   CTRE TalonFX   : false → 15+o (16-22)  true → 23+o (24-30)
-  //   REV  EXCEPT     SparkMax 42–47 (EXCEPT_BASE)
-  // All ≤ 61; no REV range overlaps another REV range; none overlap other test classes.
   // ──────────────────────────────────────────────
 
   private static Stream<Arguments> pivotMinArgs()
@@ -326,12 +293,10 @@ public class MechanismLimitTest
       Angle   pos      = (Angle) row[0];
       boolean expected = (boolean) row[1];
       String  sfx      = (String) row[2];
-      int     base     = expected ? 34 : 27;
-      int     fbase    = expected ? 54 : 47;
-      args.add(Arguments.of(makePivotSparkMax(base + offset, pos, "SparkMax(pMin" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(makePivotSparkFlex(fbase + offset, pos, "SparkFlex(pMin" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(makePivotTalonFXS(base + offset, pos, "TalonFXS(pMin" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(makePivotTalonFX(fbase + offset, pos, "TalonFX(pMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makePivotSparkMax(pos, "SparkMax(pMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makePivotSparkFlex(pos, "SparkFlex(pMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makePivotTalonFXS(pos, "TalonFXS(pMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makePivotTalonFX(pos, "TalonFX(pMin" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -350,12 +315,10 @@ public class MechanismLimitTest
       Angle   pos      = (Angle) row[0];
       boolean expected = (boolean) row[1];
       String  sfx      = (String) row[2];
-      int     base     = expected ? 34 : 27;
-      int     fbase    = expected ? 54 : 47;
-      args.add(Arguments.of(makePivotSparkMax(base + offset, pos, "SparkMax(pMax" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(makePivotSparkFlex(fbase + offset, pos, "SparkFlex(pMax" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(makePivotTalonFXS(base + offset, pos, "TalonFXS(pMax" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(makePivotTalonFX(fbase + offset, pos, "TalonFX(pMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makePivotSparkMax(pos, "SparkMax(pMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makePivotSparkFlex(pos, "SparkFlex(pMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makePivotTalonFXS(pos, "TalonFXS(pMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makePivotTalonFX(pos, "TalonFX(pMax" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -374,12 +337,10 @@ public class MechanismLimitTest
       Angle   pos      = (Angle) row[0];
       boolean expected = (boolean) row[1];
       String  sfx      = (String) row[2];
-      int     base     = expected ? 34 : 27;
-      int     fbase    = expected ? 54 : 47;
-      args.add(Arguments.of(makeArmSparkMax(base + offset, pos, "SparkMax(aMin" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(makeArmSparkFlex(fbase + offset, pos, "SparkFlex(aMin" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(makeArmTalonFXS(base + offset, pos, "TalonFXS(aMin" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(makeArmTalonFX(fbase + offset, pos, "TalonFX(aMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeArmSparkMax(pos, "SparkMax(aMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeArmSparkFlex(pos, "SparkFlex(aMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeArmTalonFXS(pos, "TalonFXS(aMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeArmTalonFX(pos, "TalonFX(aMin" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -399,12 +360,10 @@ public class MechanismLimitTest
       Angle   pos      = (Angle) row[0];
       boolean expected = (boolean) row[1];
       String  sfx      = (String) row[2];
-      int     base     = expected ? 34 : 27;
-      int     fbase    = expected ? 54 : 47;
-      args.add(Arguments.of(makeArmSparkMax(base + offset, pos, "SparkMax(aMax" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(makeArmSparkFlex(fbase + offset, pos, "SparkFlex(aMax" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(makeArmTalonFXS(base + offset, pos, "TalonFXS(aMax" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(makeArmTalonFX(fbase + offset, pos, "TalonFX(aMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeArmSparkMax(pos, "SparkMax(aMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeArmSparkFlex(pos, "SparkFlex(aMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeArmTalonFXS(pos, "TalonFXS(aMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeArmTalonFX(pos, "TalonFX(aMax" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -423,12 +382,10 @@ public class MechanismLimitTest
       Distance pos      = (Distance) row[0];
       boolean  expected = (boolean) row[1];
       String   sfx      = (String) row[2];
-      int      base     = expected ? 34 : 27;
-      int      fbase    = expected ? 54 : 47;
-      args.add(Arguments.of(makeElevSparkMax(base + offset, pos, "SparkMax(eMin" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(makeElevSparkFlex(fbase + offset, pos, "SparkFlex(eMin" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(makeElevTalonFXS(base + offset, pos, "TalonFXS(eMin" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(makeElevTalonFX(fbase + offset, pos, "TalonFX(eMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeElevSparkMax(pos, "SparkMax(eMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeElevSparkFlex(pos, "SparkFlex(eMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeElevTalonFXS(pos, "TalonFXS(eMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeElevTalonFX(pos, "TalonFX(eMin" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -447,12 +404,10 @@ public class MechanismLimitTest
       Distance pos      = (Distance) row[0];
       boolean  expected = (boolean) row[1];
       String   sfx      = (String) row[2];
-      int      base     = expected ? 34 : 27;
-      int      fbase    = expected ? 54 : 47;
-      args.add(Arguments.of(makeElevSparkMax(base + offset, pos, "SparkMax(eMax" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(makeElevSparkFlex(fbase + offset, pos, "SparkFlex(eMax" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(makeElevTalonFXS(base + offset, pos, "TalonFXS(eMax" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(makeElevTalonFX(fbase + offset, pos, "TalonFX(eMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeElevSparkMax(pos, "SparkMax(eMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeElevSparkFlex(pos, "SparkFlex(eMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeElevTalonFXS(pos, "TalonFXS(eMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeElevTalonFX(pos, "TalonFX(eMax" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -461,10 +416,10 @@ public class MechanismLimitTest
   {
     offset++;
     var args = new ArrayList<Arguments>();
-    args.add(Arguments.of(makePivotSparkMax(27 + offset, Degrees.of(45), "SparkMax(spos)[" + offset + "]")));
-    args.add(Arguments.of(makePivotSparkFlex(47 + offset, Degrees.of(45), "SparkFlex(spos)[" + offset + "]")));
-    args.add(Arguments.of(makePivotTalonFXS(1 + offset, Degrees.of(45), "TalonFXS(spos)[" + offset + "]")));
-    args.add(Arguments.of(makePivotTalonFX(15 + offset, Degrees.of(45), "TalonFX(spos)[" + offset + "]")));
+    args.add(Arguments.of(makePivotSparkMax(Degrees.of(45), "SparkMax(spos)[" + offset + "]")));
+    args.add(Arguments.of(makePivotSparkFlex(Degrees.of(45), "SparkFlex(spos)[" + offset + "]")));
+    args.add(Arguments.of(makePivotTalonFXS(Degrees.of(45), "TalonFXS(spos)[" + offset + "]")));
+    args.add(Arguments.of(makePivotTalonFX(Degrees.of(45), "TalonFX(spos)[" + offset + "]")));
     return args.stream();
   }
 
@@ -610,15 +565,13 @@ public class MechanismLimitTest
 
   // ──────────────────────────────────────────────
   // Starting position out-of-bounds exception tests
-  //
-  // Fixed device IDs 50-55 (REV namespace) for the 6 single-SparkMax tests.
   // ──────────────────────────────────────────────
 
   @Test
   void testPivotThrowsWhenStartingPositionBelowLowerLimit()
   {
     SmartMotorController motor = setupTestSubsystem(new SparkWrapper(
-        new SparkMax(EXCEPT_BASE, MotorType.kBrushless), DCMotor.getNEO(1),
+        DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
         pivotBase().withStartingPosition(Degrees.of(-200)).withSubsystem(new SmartMotorControllerTestSubsystem())));
     try
     {
@@ -634,7 +587,7 @@ public class MechanismLimitTest
   void testPivotThrowsWhenStartingPositionAboveUpperLimit()
   {
     SmartMotorController motor = setupTestSubsystem(new SparkWrapper(
-        new SparkMax(EXCEPT_BASE + 1, MotorType.kBrushless), DCMotor.getNEO(1),
+        DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
         pivotBase().withStartingPosition(Degrees.of(200)).withSubsystem(new SmartMotorControllerTestSubsystem())));
     try
     {
@@ -650,7 +603,7 @@ public class MechanismLimitTest
   void testArmThrowsWhenStartingPositionBelowLowerLimit()
   {
     SmartMotorController motor = setupTestSubsystem(new SparkWrapper(
-        new SparkMax(EXCEPT_BASE + 2, MotorType.kBrushless), DCMotor.getNEO(1),
+        DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
         armBase().withStartingPosition(Degrees.of(-200)).withSubsystem(new SmartMotorControllerTestSubsystem())));
     try
     {
@@ -668,7 +621,7 @@ public class MechanismLimitTest
   void testArmThrowsWhenStartingPositionAboveUpperLimit()
   {
     SmartMotorController motor = setupTestSubsystem(new SparkWrapper(
-        new SparkMax(EXCEPT_BASE + 3, MotorType.kBrushless), DCMotor.getNEO(1),
+        DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
         armBase().withStartingPosition(Degrees.of(300)).withSubsystem(new SmartMotorControllerTestSubsystem())));
     try
     {
@@ -686,7 +639,7 @@ public class MechanismLimitTest
   void testElevatorThrowsWhenStartingHeightBelowMinimum()
   {
     SmartMotorController motor = setupTestSubsystem(new SparkWrapper(
-        new SparkMax(EXCEPT_BASE + 4, MotorType.kBrushless), DCMotor.getNEO(1),
+        DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
         elevatorBase().withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withStartingPosition(Meters.of(-1))));
     try
@@ -705,7 +658,7 @@ public class MechanismLimitTest
   void testElevatorThrowsWhenStartingHeightAboveMaximum()
   {
     SmartMotorController motor = setupTestSubsystem(new SparkWrapper(
-        new SparkMax(EXCEPT_BASE + 5, MotorType.kBrushless), DCMotor.getNEO(1),
+        DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
         elevatorBase().withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withStartingPosition(Meters.of(7))));
     try

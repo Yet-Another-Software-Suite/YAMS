@@ -17,12 +17,12 @@
 
 ## Key Features
 
-- Unified interfaces for `Arm`, `Elevator`, and `Pivot` mechanisms  
--  CTRE-style configuration: familiar and readable  
-- SmartMotorController abstraction: consistent API for different motor vendors (REV, CTRE, etc.)  
-- Physics-based simulation support (`simIterate()`)  
-- Built-in telemetry (works with AdvantageKit, NT, and custom logging)  
-- Composable and declarative configuration style  
+- Unified interfaces for `Arm`, `Elevator`, and `Pivot` mechanisms
+-  CTRE-style configuration: familiar and readable
+- SmartMotorController abstraction: consistent API for different motor vendors (REV, CTRE, etc.)
+- Physics-based simulation support (`simIterate()`)
+- Built-in telemetry (works with AdvantageKit, NT, and custom logging)
+- Composable and declarative configuration style
 
 ---
 
@@ -33,7 +33,7 @@
    - Select: `WPILib: Manage Vendor Libraries`
    - Choose `Install new library (online or offline)`
    - Select **Online**
-   - Paste the URL to the YAMS vendordep JSON file, e.g.:  
+   - Paste the URL to the YAMS vendordep JSON file, e.g.:
      `https://yet-another-software-suite.github.io/YAMS/yams.json`
    - Press Enter to install
 
@@ -139,7 +139,6 @@ See [`LICENSE`](./LICENSE.txt) for full details.
 We welcome feedback and contributions!
 Open an issue for bug reports or feature requests, or fork and open a pull request to contribute.
 
-Inspired by [Manip-Lib](https://github.com/frc5517/Manip-Lib). 
+Inspired by [Manip-Lib](https://github.com/frc5517/Manip-Lib).
 
 ---
-
