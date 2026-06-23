@@ -164,7 +164,7 @@ public class MechanismLimitTest
   {
     ElevatorConfig config = new ElevatorConfig(smc)
         .withHardLimits(Meters.of(-0.1), Meters.of(6))
-        .withMass(Pounds.of(16));
+        .withCarriageWeight(Pounds.of(16));
     Elevator elevator = new Elevator(config);
     SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.mechSimPeriodic = elevator::simIterate;
@@ -647,7 +647,7 @@ public class MechanismLimitTest
       assertThrows(ElevatorConfigurationException.class, () ->
           new Elevator(new ElevatorConfig(motor)
                            .withHardLimits(Meters.of(0), Meters.of(6))
-                           .withMass(Pounds.of(16))));
+                           .withCarriageWeight(Pounds.of(16))));
     } finally
     {
       closeSMC(motor);
@@ -666,7 +666,7 @@ public class MechanismLimitTest
       assertThrows(ElevatorConfigurationException.class, () ->
           new Elevator(new ElevatorConfig(motor)
                            .withHardLimits(Meters.of(0), Meters.of(6))
-                           .withMass(Pounds.of(16))));
+                           .withCarriageWeight(Pounds.of(16))));
     } finally
     {
       closeSMC(motor);

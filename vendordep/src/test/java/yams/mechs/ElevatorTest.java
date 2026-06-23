@@ -78,7 +78,7 @@ public class ElevatorTest
     ElevatorConfig config = new ElevatorConfig(smc)
         .withHardLimits(Meters.of(0), Meters.of(3))
 //      .withTelemetry("Elevator", TelemetryVerbosity.HIGH)
-        .withMass(Pounds.of(16));
+        .withCarriageWeight(Pounds.of(16));
     Elevator                          elevator = new Elevator(config);
     SmartMotorControllerTestSubsystem subsys   = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.smc = smc;

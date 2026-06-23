@@ -5,7 +5,6 @@ package yams.mechanisms.config;
 
 import static edu.wpi.first.units.Units.Degrees;
 
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
@@ -14,7 +13,6 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import java.util.Optional;
 import java.util.OptionalInt;
 import yams.exceptions.SmartMotorControllerConfigurationException;
-import yams.mechanisms.positional.Arm;
 import yams.mechanisms.positional.Elevator;
 import yams.mechanisms.positional.Pivot;
 import yams.motorcontrollers.SmartMotorController;
@@ -43,10 +41,6 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  */
 public class ElevatorConfig
 {
-  /**
-   * {@link SmartMotorController} for the {@link Elevator}
-   */
-  private   Optional<SmartMotorController>     motor                   = Optional.empty();
   /**
    * Telemetry name.
    */
@@ -88,10 +82,6 @@ public class ElevatorConfig
    */
   private   OptionalInt                        stages                  = OptionalInt.empty();
   /**
-   * Soft limits of the {@link SmartMotorController} closed loop controller. Can be exceeded. (LowerLimit, UpperLimit)
-   */
-  private   Optional<Pair<Distance, Distance>> softLimits              = Optional.empty();
-  /**
    * Disable gravity on the elevator simulation.
    */
   private   boolean                            isElevatorHorizontal    = false;
@@ -99,18 +89,6 @@ public class ElevatorConfig
   /**
    * Elevator Configuration class
    *
-   * @param motorController Primary {@link SmartMotorController} for the {@link Elevator}
-   */
-  public ElevatorConfig(SmartMotorController motorController)
-  {
-    motor = Optional.ofNullable(motorController);
-  }
-
-  /**
-   * Elevator Configuration class
-   *
-   * @implNote You are REQUIRED to call {@link #withSmartMotorController(SmartMotorController)} before this is used with
-   * an {@link Elevator}
    */
   public ElevatorConfig() {}
 
@@ -122,10 +100,8 @@ public class ElevatorConfig
   private ElevatorConfig(ElevatorConfig cfg)
   {
     this.isElevatorHorizontal = cfg.isElevatorHorizontal;
-    this.motor = cfg.motor;
     this.drumCircumference = cfg.drumCircumference;
     this.stages = cfg.stages;
-    this.softLimits = cfg.softLimits;
     this.simColor = cfg.simColor;
     this.angle = cfg.angle;
     this.carriageWeight = cfg.carriageWeight;
@@ -140,48 +116,6 @@ public class ElevatorConfig
   public ElevatorConfig clone()
   {
     return new ElevatorConfig(this);
-  }
-
-  /**
-   * Set the {@link SmartMotorController} for the {@link Elevator}
-   *
-   * @param motorController Primary {@link SmartMotorController} for the {@link Elevator}
-   * @return {@link ElevatorConfig} for chaining.
-   */
-  public ElevatorConfig withSmartMotorController(SmartMotorController motorController)
-  {
-    motor = Optional.of(motorController);
-    drumCircumference.ifPresent(drumRadius -> motor.get().getConfig().withMechanismCircumference(drumRadius));
-    stages.ifPresent(this::withCascadingElevatorStages);
-    return this;
-  }
-
-  /**
-   * Set the {@link Elevator} drum radius.
-   *
-   * @param drumRadius Elevator drum radius
-   * @return {@link ElevatorConfig} for chaining.
-   */
-  public ElevatorConfig withDrumRadius(Distance drumRadius)
-  {
-    this.drumCircumference = Optional.ofNullable(drumRadius.times(2 * Math.PI));
-    motor.ifPresent(motor -> motor.getConfig().withMechanismCircumference(drumRadius.times(2 * Math.PI)));
-    return this;
-  }
-
-  /**
-   * Set the {@link Elevator} drum radius via the chain pitch (.25in or .35in) and teeth
-   * count.
-   *
-   * @param chainPitch Chain pitch.
-   * @param teeth      Sprocket teeth count.
-   * @return {@link ElevatorConfig} for chaining.
-   */
-  public ElevatorConfig withDrumRadius(Distance chainPitch, int teeth)
-  {
-    this.drumCircumference = Optional.ofNullable(chainPitch.times(teeth));
-    motor.ifPresent(motor -> motor.getConfig().withMechanismCircumference(chainPitch.times(teeth)));
-    return this;
   }
 
   /**
@@ -214,7 +148,7 @@ public class ElevatorConfig
    * @param mass {@link Mass} of the {@link Elevator}
    * @return {@link ElevatorConfig} for chaining.
    */
-  public ElevatorConfig withMass(Mass mass)
+  public ElevatorConfig withCarriageWeight(Mass mass)
   {
     this.carriageWeight = Optional.ofNullable(mass);
     return this;
@@ -231,20 +165,6 @@ public class ElevatorConfig
   {
     this.telemetryName = Optional.ofNullable(telemetryName);
     this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
-    return this;
-  }
-
-  /**
-   * Change the {@link SmartMotorControllerConfig} gear ratio to be divided by the number of stages given, will reapply
-   * it if already done manually.
-   *
-   * @param stages Stages given
-   * @return {@link ElevatorConfig} for chaining.
-   */
-  public ElevatorConfig withCascadingElevatorStages(int stages)
-  {
-    this.stages = OptionalInt.of(stages);
-    motor.ifPresent(motor -> motor.getConfig().withGearing(motor.getConfig().getGearing().div(stages)));
     return this;
   }
 
@@ -283,16 +203,6 @@ public class ElevatorConfig
   {
     isElevatorHorizontal = true;
     return this;
-  }
-
-  /**
-   * Apply config changes from this class to the {@link SmartMotorController}
-   *
-   * @return {@link SmartMotorController#applyConfig(SmartMotorControllerConfig)} result.
-   */
-  public boolean applyConfig()
-  {
-    return motor.orElseThrow().applyConfig(motor.orElseThrow().getConfig());
   }
 
   /**
@@ -346,16 +256,6 @@ public class ElevatorConfig
   }
 
   /**
-   * Get the {@link SmartMotorController} of the {@link Elevator}
-   *
-   * @return {@link SmartMotorController} for the {@link Elevator}
-   */
-  public SmartMotorController getMotor()
-  {
-    return motor.orElseThrow();
-  }
-
-  /**
    * Get sim color
    *
    * @return sim color
@@ -363,22 +263,6 @@ public class ElevatorConfig
   public Color8Bit getSimColor()
   {
     return simColor;
-  }
-
-  /**
-   * Get the {@link Elevator} drum radius.
-   *
-   * @return Drum radius of the elevator.
-   */
-  public Distance getDrumRadius()
-  {
-    if (motor.orElseThrow().getConfig().getMechanismCircumference().isEmpty())
-    {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
-                                                           "Drum radius cannot be fetched.",
-                                                           "withMechanismCircumference(Distance)");
-    }
-    return motor.orElseThrow().getConfig().getMechanismCircumference().get().div(2 * Math.PI);
   }
 
   /**
@@ -390,7 +274,6 @@ public class ElevatorConfig
   {
     return carriageWeight;
   }
-
 
   /**
    * Get if the elevator is horizontal

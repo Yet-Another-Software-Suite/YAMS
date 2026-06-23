@@ -54,10 +54,6 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 public class FlyWheelConfig
 {
   /**
-   * {@link SmartMotorController} for the {@link FlyWheel}
-   */
-  private Optional<SmartMotorController> motor = Optional.empty();
-  /**
    * Telemetry name.
    */
   private   Optional<String>               telemetryName           = Optional.empty();
@@ -69,14 +65,6 @@ public class FlyWheelConfig
    * {@link FlyWheel} length for simulation.
    */
   private Optional<Distance>           diameter           = Optional.empty();
-  /**
-   * {@link FlyWheel} mass for simulation.
-   */
-  private Optional<Mass>               weight             = Optional.empty();
-  /**
-   * {@link FlyWheel} MOI from CAD software. If not given estimated with length and weight.
-   */
-  private   OptionalDouble                 moi                     = OptionalDouble.empty();
   /**
    * Sim color value
    */
@@ -95,31 +83,17 @@ public class FlyWheelConfig
   private   Optional<AngularVelocity>      speedometerMaxVelocity  = Optional.empty();
 
   /**
-   * Arm Configuration class
+   * FlyWheel Configuration class
    *
-   * @param motorController Primary {@link SmartMotorController} for the {@link FlyWheel}
    */
-  public FlyWheelConfig(SmartMotorController motorController)
-  {
-    motor = Optional.ofNullable(motorController);
-  }
-
-  /**
-   * FlyWheel configuration class.
-   *
-   * @implNote Required to call {@link #withSmartMotorController(SmartMotorController)} before this is used with an
-   * {@link FlyWheel}
-   */
-  public FlyWheelConfig() {}
+  public FlyWheelConfig()
+  {}
 
   private FlyWheelConfig(FlyWheelConfig cfg)
   {
-    this.motor = cfg.motor;
     this.telemetryName = cfg.telemetryName;
     this.telemetryVerbosity = cfg.telemetryVerbosity;
     this.diameter = cfg.diameter;
-    this.weight = cfg.weight;
-    this.moi = cfg.moi;
     this.simColor = cfg.simColor;
     this.mechanismPositionConfig = cfg.mechanismPositionConfig;
     this.useSpeedometer = cfg.useSpeedometer;
@@ -130,24 +104,6 @@ public class FlyWheelConfig
   public FlyWheelConfig clone()
   {
     return new FlyWheelConfig(this);
-  }
-
-  /**
-   * Set the {@link SmartMotorController} for the {@link FlyWheel}
-   *
-   * @param motorController Primary {@link SmartMotorController} for the {@link FlyWheel}
-   * @return {@link FlyWheelConfig} for chaining.
-   */
-  public FlyWheelConfig withSmartMotorController(SmartMotorController motorController)
-  {
-    if (motor.isPresent())
-    {
-      throw new FlyWheelConfigurationException("FlyWheel SmartMotorController already set!",
-                                               "Flywheel cannot be set",
-                                               "withSmartMotorController(SmartMotorController)");
-    }
-    motor = Optional.of(motorController);
-    return this;
   }
 
   /**
@@ -240,35 +196,6 @@ public class FlyWheelConfig
   }
 
   /**
-   * Configure the MOI directly instead of estimating it with the length and mass of the {@link FlyWheel} for
-   * simulation.
-   *
-   * @param MOI Moment of Inertia of the {@link FlyWheel}
-   * @return {@link FlyWheelConfig} for chaining.
-   */
-  public FlyWheelConfig withMOI(MomentOfInertia MOI)
-  {
-    motor.ifPresent(motor -> motor.getConfig().withMomentOfInertia(MOI));
-    this.moi = OptionalDouble.of(MOI.in(KilogramSquareMeters));
-    return this;
-  }
-
-  /**
-   * Configure the MOI directly instead of estimating it with the length and mass of the {@link FlyWheel} for
-   * simulation.
-   *
-   * @param length Length of the {@link FlyWheel}.
-   * @param weight Weight of the {@link FlyWheel}
-   * @return {@link FlyWheelConfig} for chaining.
-   */
-  public FlyWheelConfig withMOI(Distance length, Mass weight)
-  {
-    motor.ifPresent(motor -> motor.getConfig().withMomentOfInertia(length, weight));
-    this.moi = OptionalDouble.of(SingleJointedArmSim.estimateMOI(length.in(Meters), weight.in(Kilograms)));
-    return this;
-  }
-
-  /**
    * Configure the {@link FlyWheel}s diameter for simulation.
    *
    * @param distance Length of the {@link FlyWheel}.
@@ -277,18 +204,6 @@ public class FlyWheelConfig
   public FlyWheelConfig withDiameter(Distance distance)
   {
     this.diameter = Optional.ofNullable(distance);
-    return this;
-  }
-
-  /**
-   * Configure the {@link FlyWheel}s {@link Mass} for simulation.
-   *
-   * @param mass {@link Mass} of the {@link FlyWheel}
-   * @return {@link FlyWheelConfig} for chaining.
-   */
-  public FlyWheelConfig withMass(Mass mass)
-  {
-    this.weight = Optional.ofNullable(mass);
     return this;
   }
 
@@ -317,45 +232,14 @@ public class FlyWheelConfig
     this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
     return this;
   }
-
-  /**
-   * Apply config changes from this class to the {@link SmartMotorController}
-   *
-   * @return {@link SmartMotorController#applyConfig(SmartMotorControllerConfig)} result.
-   */
-  public boolean applyConfig()
-  {
-    return motor.orElseThrow().applyConfig(motor.orElseThrow().getConfig());
-  }
-
   /**
    * Get the Length of the {@link FlyWheel}
    *
-   * @return {@link Distance} of the {@link FlyWheel} or an empty {@link Optional} if not set..
+   * @return {@link Distance} of the {@link FlyWheel} or an empty {@link Optional} if not set.
    */
   public Optional<Distance> getDiameter()
   {
     return diameter;
-  }
-
-  /**
-   * Get the moment of inertia for the {@link FlyWheel} simulation.
-   *
-   * @return Moment of Inertia.
-   */
-  public double getMOI()
-  {
-    if (moi.isPresent())
-    {
-      return moi.getAsDouble();
-    }
-    if (diameter.isPresent() && weight.isPresent())
-    {
-      return SingleJointedArmSim.estimateMOI(diameter.get().in(Units.Meters), weight.get().in(Units.Kilograms));
-    }
-    throw new FlyWheelConfigurationException("FlyWheel diameter and weight or MOI must be set!",
-                                             "Cannot get the MOI!",
-                                             "withDiameter(Distance).withMass(Mass) OR FlyWheelConfig.withMOI()");
   }
 
   /**
@@ -376,17 +260,6 @@ public class FlyWheelConfig
   public Optional<String> getTelemetryName()
   {
     return telemetryName;
-  }
-
-
-  /**
-   * Get the {@link SmartMotorController} of the {@link FlyWheel}
-   *
-   * @return {@link SmartMotorController} for the {@link FlyWheel}
-   */
-  public SmartMotorController getMotor()
-  {
-    return motor.orElseThrow();
   }
 
   /**

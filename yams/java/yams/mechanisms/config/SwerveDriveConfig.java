@@ -188,10 +188,6 @@ public class SwerveDriveConfig
    */
   private OptionalDouble                      simAngularVelocityScaleFactor = OptionalDouble.empty();
   /**
-   *  MapleSim Drive Simulation.
-   */
-//  private       Optional<SelfControlledSwerveDriveSimulation>   mapleDriveSim                   = Optional.empty();
-  /**
    * Swerve drive subsystem.
    */
   private Subsystem                           subsystem;

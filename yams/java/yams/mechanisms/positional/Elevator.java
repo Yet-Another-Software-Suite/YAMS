@@ -95,32 +95,32 @@ public class Elevator extends SmartPositionalMechanism
    * Construct the {@link Elevator} class for easy manipulation of an elevator.
    *
    * @param config {@link ElevatorConfig} to set.
+   * @param smc {@link SmartMotorController} to use for the Elevator
    */
-  public Elevator(ElevatorConfig config)
+  public Elevator(ElevatorConfig config, SmartMotorController smc)
   {
     m_config = config;
-    m_smc = config.getMotor();
+    m_smc = smc;
+    SmartMotorControllerConfig smcCfg = smc.getConfig();
     DCMotor                    dcMotor   = m_smc.getDCMotor();
     MechanismGearing           gearing   = m_smc.getConfig().getGearing();
     SmartMotorControllerConfig smcConfig = m_smc.getConfig();
-    m_subsystem = config.getMotor().getConfig().getSubsystem();
+    m_subsystem = smcCfg.getSubsystem();
     if (config.getTelemetryName().isPresent())
     {
       // TODO: Add telemetry units to config.
       m_telemetry.setupTelemetry(getName(),
                                  m_smc);
     }
-    config.applyConfig();
 
     if (RobotBase.isSimulation())
     {
-      SmartMotorController motor = config.getMotor();
-      motor.setupSimulation();
+      smc.setupSimulation();
       if (config.getCarriageMass().isEmpty())
       {
         throw new ElevatorConfigurationException("Mass is not configured!",
                                                  "Cannot create simulator",
-                                                 "withMass(Mass)");
+                                                 "withCarriageWeight(Mass)");
       }
       if (config.getMinimumHeight().isEmpty())
       {
@@ -143,17 +143,17 @@ public class Elevator extends SmartPositionalMechanism
       if (smcConfig.convertFromMechanism(smcConfig.getStartingPosition().orElseThrow()).lt(config.getMinimumHeight().get()) ||
               smcConfig.convertFromMechanism(smcConfig.getStartingPosition().orElseThrow()).gt(config.getMaximumHeight().get()))
       {
-        throw new ElevatorConfigurationException("Elevator starting height is outside hard limits",
+        throw new SmartMotorControllerConfigurationException("Elevator starting height is outside hard limits",
                                                  "Cannot create simulator",
-                                                 "withStartingHeight(Distance)");
+                                                 "withStartingPosition(Distance)");
       }
 
       boolean simulateGravity = !config.getIsElevatorHorizontal();
 
-      m_sim = Optional.of(new ElevatorSim(motor.getDCMotor(),
-                                          motor.getConfig().getGearing().getMechanismToRotorRatio(),
+      m_sim = Optional.of(new ElevatorSim(smc.getDCMotor(),
+                                          smcConfig.getGearing().getMechanismToRotorRatio(),
                                           config.getCarriageMass().get().in(Kilograms),
-                                          config.getDrumRadius().in(Meters),
+                                          smcCfg.getMechanismCircumference().orElseThrow().div(2).div(Math.PI).in(Meters),
                                           config.getMinimumHeight().get().in(Meters),
                                           config.getMaximumHeight().get().in(Meters),
                                           simulateGravity,
@@ -417,11 +417,10 @@ public class Elevator extends SmartPositionalMechanism
   @Override
   public void visualizationUpdate()
   {
-// TODO: Add setpoint ligament
     m_mechanismLigament.setLength(getHeight().in(Meters));
     if (getMotor().getMechanismPositionSetpoint().isPresent())
     {
-      m_setpointLigament.setLength(m_config.getMotor().getConfig()
+      m_setpointLigament.setLength(m_smc.getConfig()
                                            .convertFromMechanism(getMotor().getMechanismPositionSetpoint().get())
                                            .in(Meters));
     }

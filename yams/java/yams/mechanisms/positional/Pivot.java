@@ -124,7 +124,6 @@ public class Pivot extends SmartPositionalMechanism
     {
       m_telemetry.setupTelemetry(getName(), m_smc);
     }
-    config.applyConfig();
 
     if (RobotBase.isSimulation())
     {

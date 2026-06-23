@@ -47,10 +47,6 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 public class PivotConfig
 {
   /**
-   * {@link SmartMotorController} for the {@link Pivot}
-   */
-  private   Optional<SmartMotorController> motor;
-  /**
    * Telemetry name.
    */
   private   Optional<String>               telemetryName           = Optional.empty();
@@ -74,21 +70,10 @@ public class PivotConfig
    * Mechanism position configuration for the {@link Pivot}
    */
   private   MechanismPositionConfig        mechanismPositionConfig = new MechanismPositionConfig();
-  /**
-   * Pivot Configuration class
-   *
-   * @param motorController Primary {@link SmartMotorController} for the {@link Pivot}
-   */
-  public PivotConfig(SmartMotorController motorController)
-  {
-    motor = Optional.ofNullable(motorController);
-    mechanismPositionConfig.withMovementPlane(Plane.XY);
-  }
 
   /**
    * Pivot Configuration class
-   *
-   * @implNote Required call to {@link #withSmartMotorController(SmartMotorController)} before usage.
+   * @implNote Defaults to XY plane.
    */
   public PivotConfig()
   {
@@ -102,7 +87,6 @@ public class PivotConfig
    */
   public PivotConfig(PivotConfig cfg)
   {
-    this.motor = cfg.motor;
     this.telemetryName = cfg.telemetryName;
     this.telemetryVerbosity = cfg.telemetryVerbosity;
     this.lowerHardLimit = cfg.lowerHardLimit;
@@ -115,24 +99,6 @@ public class PivotConfig
   public PivotConfig clone()
   {
     return new PivotConfig(this);
-  }
-
-  /**
-   * Configure the {@link SmartMotorController} for the {@link Pivot}
-   *
-   * @param motorController {@link SmartMotorController} for the {@link Pivot}.
-   * @return {@link PivotConfig} for chaining.
-   */
-  public PivotConfig withSmartMotorController(SmartMotorController motorController)
-  {
-    if (motor.isPresent())
-    {
-      throw new PivotConfigurationException("Pivot SmartMotorController already set!",
-                                            "Pivot motor cannot be set",
-                                            "withSmartMotorController(SmartMotorController)");
-    }
-    motor = Optional.of(motorController);
-    return this;
   }
 
   /**
@@ -188,35 +154,6 @@ public class PivotConfig
   }
 
   /**
-   * Apply config changes from this class to the {@link SmartMotorController}
-   *
-   * @return {@link SmartMotorController#applyConfig(SmartMotorControllerConfig)} result.
-   */
-  public boolean applyConfig()
-  {
-    return motor.orElseThrow().applyConfig(motor.orElseThrow().getConfig());
-  }
-
-
-  /**
-   * Get the moment of inertia for the {@link Pivot} simulation.
-   * Must be configured via {@link SmartMotorControllerConfig#withMomentOfInertia(edu.wpi.first.units.measure.MomentOfInertia)}
-   * or {@link SmartMotorControllerConfig#withMomentOfInertia(Distance, Mass)}.
-   *
-   * @return Moment of Inertia in KgMetersSquared.
-   */
-  public double getMOI()
-  {
-    if (motor.isPresent())
-    {
-      return motor.get().getConfig().getMOI();
-    }
-    throw new PivotConfigurationException("Pivot MOI must be configured!",
-                                          "Cannot get the MOI!",
-                                          "SmartMotorControllerConfig.withMomentOfInertia(MomentOfInertia) or withMomentOfInertia(Distance, Mass)");
-  }
-
-  /**
    * Get the Upper hard limit of the {@link Pivot}.
    *
    * @return {@link Angle} hard limit.
@@ -254,27 +191,6 @@ public class PivotConfig
   public Optional<String> getTelemetryName()
   {
     return telemetryName;
-  }
-
-  /**
-   * Get the starting angle of the {@link Pivot}. Reads from {@link SmartMotorControllerConfig#getStartingPosition()}.
-   * Configure via {@link SmartMotorControllerConfig#withStartingPosition(Angle)}.
-   *
-   * @return {@link Angle} of the {@link Pivot}
-   */
-  public Optional<Angle> getStartingAngle()
-  {
-    return motor.orElseThrow().getConfig().getStartingPosition();
-  }
-
-  /**
-   * Get the {@link SmartMotorController} of the {@link Pivot}
-   *
-   * @return {@link SmartMotorController} for the {@link Pivot}
-   */
-  public SmartMotorController getMotor()
-  {
-    return motor.orElseThrow();
   }
 
   /**

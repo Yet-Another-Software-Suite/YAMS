@@ -59,6 +59,8 @@ import java.util.Set;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.gearing.MechanismGearing;
 import yams.math.LQRController;
+import yams.mechanisms.config.ElevatorConfig;
+import yams.mechanisms.positional.Elevator;
 import yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
 import yams.telemetry.SmartMotorControllerTelemetryConfig;
 
@@ -1129,6 +1131,42 @@ public class SmartMotorControllerConfig {
     mechanismCircumference = Optional.ofNullable(radius.times(2).times(Math.PI));
     return this;
   }
+
+    /**
+     * Set the {@link Elevator} drum radius
+     * @implNote Overload for {@link #withWheelRadius(Distance)}
+     * @param radius Drum radius of elevator spool.
+     * @return  {@link SmartMotorControllerConfig} for chaining
+     */
+  public SmartMotorControllerConfig withDrumRadius(Distance radius) {
+      return withWheelRadius(radius);
+  }
+    /**
+     * Set the {@link Elevator} drum radius via the chain pitch (.25in or .35in) and teeth
+     * count.
+     *
+     * @param chainPitch Chain pitch.
+     * @param teeth      Sprocket teeth count.
+     * @return {@link SmartMotorControllerConfig} for chaining.
+     * @implNote Overload for {@link #withWheelRadius(Distance)}
+     */
+    public SmartMotorControllerConfig withDrumRadius(Distance chainPitch, int teeth)
+    {
+        return withWheelRadius(chainPitch.times(teeth));
+    }
+
+    /**
+     * Change the {@link SmartMotorControllerConfig} gear ratio to be divided by the number of stages given, will reapply
+     * it if already done manually.
+     *
+     * @param stages Stages given
+     * @implNote Alias for {@link #withGearing(MechanismGearing)} where {@link MechanismGearing#div} is applied via the stages.
+     * @return {@link SmartMotorControllerConfig} for chaining.
+     */
+    public SmartMotorControllerConfig withCascadingElevatorStages(int stages)
+    {
+        return withGearing(gearing.div(stages));
+    }
 
   /**
    * Set the wheel diameter for the mechanism.
