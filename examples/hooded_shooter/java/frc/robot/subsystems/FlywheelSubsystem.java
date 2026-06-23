@@ -40,7 +40,8 @@ public class FlywheelSubsystem extends SubsystemBase
   private final SparkMax flywheelMotor    = new SparkMax(1, MotorType.kBrushless);
 
   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
-      .withClosedLoopController(0.00016541, 0, 0, RPM.of(5000), RotationsPerSecondPerSecond.of(2500))
+      .withClosedLoopController(0.00016541, 0, 0)
+      .withTrapezoidalProfile(RPM.of(5000), RotationsPerSecondPerSecond.of(2500))
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
       .withIdleMode(MotorMode.COAST)
       .withTelemetry("FlywheelMotor", TelemetryVerbosity.HIGH)
@@ -73,7 +74,7 @@ public class FlywheelSubsystem extends SubsystemBase
 
   public Command setVelocity(AngularVelocity speed)
   {
-    return flywheel.setSpeed(speed);
+    return flywheel.run(speed);
   }
 
   public Command setDutyCycle(double dutyCycle)
@@ -83,7 +84,7 @@ public class FlywheelSubsystem extends SubsystemBase
 
   public Command setVelocity(Supplier<AngularVelocity> speed)
   {
-    return flywheel.setSpeed(speed);
+    return flywheel.run(speed);
   }
 
   public Command setDutyCycle(Supplier<Double> dutyCycle)
@@ -105,7 +106,7 @@ public class FlywheelSubsystem extends SubsystemBase
 
   public Command setRPM(LinearVelocity speed)
   {
-    return flywheel.setSpeed(RotationsPerSecond.of(speed.in(MetersPerSecond) / flywheelDiameter.times(Math.PI).in(Meters)));
+    return flywheel.run(RotationsPerSecond.of(speed.in(MetersPerSecond) / flywheelDiameter.times(Math.PI).in(Meters)));
   }
 
   public void setRPMDirect(LinearVelocity speed)

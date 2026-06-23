@@ -19,6 +19,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLog;
@@ -56,7 +57,8 @@ public class ShooterSubsystem extends SubsystemBase {
   private final SparkMax armMotor = new SparkMax(20, MotorType.kBrushless);
 
   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
-      .withClosedLoopController(1, 0, 0, RPM.of(10000), RPM.per(Second).of(60))
+      .withClosedLoopController(1, 0, 0)
+      .withTrapezoidalProfile(RPM.of(10000), RPM.per(Second).of(60))
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
       .withIdleMode(MotorMode.COAST)
       .withTelemetry("ShooterMotor", TelemetryVerbosity.HIGH)
@@ -103,7 +105,7 @@ public class ShooterSubsystem extends SubsystemBase {
    */
   public Command setVelocity(AngularVelocity speed) {
     Logger.recordOutput("Shooter/Setpoint", speed);
-    return shooter.setSpeed(speed);
+    return shooter.run(speed);
   }
 
   /**
@@ -118,11 +120,11 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public Command setVelocity(Supplier<AngularVelocity> speed) {
-    return shooter.setSpeed(() -> {
-      Logger.recordOutput("Shooter/Setpoint",
-          speed.get());
-      return speed.get();
-    });
+    return Commands.run(() -> {
+      AngularVelocity v = speed.get();
+      Logger.recordOutput("Shooter/Setpoint", v);
+      motor.setVelocity(v);
+    }, this);
   }
 
   public Command setDutyCycle(Supplier<Double> dutyCycle) {

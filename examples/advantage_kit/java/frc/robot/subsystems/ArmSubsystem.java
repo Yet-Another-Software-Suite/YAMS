@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Feet;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -80,14 +81,12 @@ public class ArmSubsystem extends SubsystemBase {
       .withControlMode(ControlMode.CLOSED_LOOP)
       .withClosedLoopController(ArmConstants.KP,
           ArmConstants.KI,
-          ArmConstants.KD,
-          DegreesPerSecond.of(ArmConstants.VELOCITY),
+          ArmConstants.KD)
+      .withTrapezoidalProfile(DegreesPerSecond.of(ArmConstants.VELOCITY),
           DegreesPerSecondPerSecond.of(ArmConstants.ACCELERATION))
       .withSimClosedLoopController(ArmConstants.KP,
           ArmConstants.KI,
-          ArmConstants.KD,
-          DegreesPerSecond.of(ArmConstants.VELOCITY),
-          DegreesPerSecondPerSecond.of(ArmConstants.ACCELERATION))
+          ArmConstants.KD)
       .withFeedforward(new ArmFeedforward(ArmConstants.KS,
           ArmConstants.KG,
           ArmConstants.KV,
@@ -103,7 +102,7 @@ public class ArmSubsystem extends SubsystemBase {
 
       .withStatorCurrentLimit(Amps.of(ArmConstants.STATOR_CURRENT_LIMIT))
       .withStartingPosition(Degrees.of(141))
-      .withMomentOfInertia(ArmConstants.MOI);
+      .withMomentOfInertia(KilogramSquareMeters.of(ArmConstants.MOI));
 
   private SmartMotorController armSMC = new TalonFXWrapper(armMotor, DCMotor.getFalcon500(1), smcConfig);
 

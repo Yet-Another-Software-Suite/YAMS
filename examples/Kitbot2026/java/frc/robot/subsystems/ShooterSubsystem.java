@@ -7,7 +7,6 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -34,7 +33,7 @@ public class ShooterSubsystem extends SubsystemBase
   private final SparkMax                   ShooterMotor    = new SparkMax(10, MotorType.kBrushless);
 
   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
-      .withClosedLoopController(1, 0, 0, RPM.of(10000), RPM.per(Second).of(60))
+      .withClosedLoopController(1, 0, 0)
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
       .withIdleMode(MotorMode.COAST)
       .withTelemetry("ShooterMotor", TelemetryVerbosity.HIGH)
@@ -68,7 +67,7 @@ public class ShooterSubsystem extends SubsystemBase
    * @param speed Speed to set.
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
    */
-  public Command setVelocity(AngularVelocity speed) {return shooter.setSpeed(speed);}
+  public Command setVelocity(AngularVelocity speed) {return shooter.run(speed);}
 
   /**
    * Set the dutycycle of the shooter.
@@ -78,7 +77,7 @@ public class ShooterSubsystem extends SubsystemBase
    */
   public Command set(double dutyCycle) {return shooter.set(dutyCycle);}
 
-  public Command setVelocity(Supplier<AngularVelocity> speed) {return shooter.setSpeed(speed);}
+  public Command setVelocity(Supplier<AngularVelocity> speed) {return shooter.run(speed);}
 
   public Command setDutyCycle(Supplier<Double> dutyCycle) {return shooter.set(dutyCycle);}
 

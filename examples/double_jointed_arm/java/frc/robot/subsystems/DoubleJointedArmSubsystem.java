@@ -23,8 +23,6 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.local.SparkWrapper;
 
 import static edu.wpi.first.units.Units.*;
-import static yams.mechanisms.SmartMechanism.gearbox;
-import static yams.mechanisms.SmartMechanism.gearing;
 
 public class DoubleJointedArmSubsystem extends SubsystemBase
 {
@@ -32,7 +30,8 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
 
   private final SparkMax                   lowerMotor  = new SparkMax(1, SparkLowLevel.MotorType.kBrushless);
   private final SmartMotorControllerConfig lowerConfig = new SmartMotorControllerConfig(this)
-          .withClosedLoopController(16, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
+          .withClosedLoopController(16, 0, 0)
+          .withTrapezoidalProfile(DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
           //.withSoftLimits(Degrees.of(-30), Degrees.of(100))
           .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4, 5)))
 //      .withExternalEncoder(armMotor.getAbsoluteEncoder())
@@ -55,7 +54,8 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
           .withMass(Pounds.of(5));
   private final SparkMax                   upperMotor  = new SparkMax(2, SparkLowLevel.MotorType.kBrushless);
   private final SmartMotorControllerConfig upperConfig = new SmartMotorControllerConfig(this)
-          .withClosedLoopController(16, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
+          .withClosedLoopController(16, 0, 0)
+          .withTrapezoidalProfile(DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
           //.withSoftLimits(Degrees.of(-30), Degrees.of(100))
           .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4, 5)))
 //      .withExternalEncoder(armMotor.getAbsoluteEncoder())

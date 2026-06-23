@@ -75,12 +75,13 @@ public class ElevatorSubsystem extends SubsystemBase
   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       .withMechanismCircumference(circumference)
-      .withClosedLoopController(new ExponentialProfilePIDController(30, 0, 0, ExponentialProfilePIDController
+      .withClosedLoopController(30, 0, 0)
+      .withProfile(ExponentialProfilePIDController
           .createElevatorConstraints(Volts.of(12),
                                      motors,
                                      weight,
                                      radius,
-                                     gearing)))
+                                     gearing))
       .withFeedforward(new ElevatorFeedforward(0, 0.1, 0, 0))
       .withStatorCurrentLimit(Amps.of(40))
       .withMotorInverted(false)

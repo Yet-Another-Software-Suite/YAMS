@@ -15,6 +15,7 @@ import static edu.wpi.first.units.Units.Volts;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.trajectory.ExponentialProfile;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
@@ -104,9 +105,11 @@ public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
       /*
        * Closed loop configuration options for the motor.
        */
-      .withClosedLoopController(pidController)
+      .withClosedLoopController(pidController.getP(), pidController.getI(), pidController.getD())
+      .withExponentialProfile(pidController.getConstraints().get())
       .withFeedforward(armFeedforward)
-      .withSoftLimits(softLowerLimit, softUpperLimit);
+      .withSoftLimits(softLowerLimit, softUpperLimit)
+      .withStartingPosition(startingAngle);
 
   /// Generic Smart Motor Controller with out options and vendor motor.
   private final SmartMotorController motor    = new SparkWrapper(armMotor, dcMotor, motorConfig);
@@ -117,7 +120,7 @@ public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
        */
       .withLength(length)
       .withMass(weight)
-      .withStartingPosition(startingAngle) // The starting position should ONLY be defined if you are NOT using an absolute encoder.
+      //.withStartingPosition(startingAngle) // The starting position should ONLY be defined if you are NOT using an absolute encoder. (moved to motorConfig)
       //.withHorizontalZero(Degrees.of(0)) // The horizontal zero should ONLY be defined if you ARE using an absolute encoder.
       .withTelemetry(mechTelemetryName, TelemetryVerbosity.HIGH)
       /*

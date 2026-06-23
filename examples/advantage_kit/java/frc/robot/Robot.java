@@ -15,8 +15,6 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
-import org.littletonrobotics.urcl.URCL;
-
 public class Robot extends LoggedRobot {
   public static enum Mode {
     /** Running on a real robot. */
@@ -57,9 +55,6 @@ public class Robot extends LoggedRobot {
         Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
         break;
     }
-
-    // Initialize URCL
-    Logger.registerURCL(URCL.startExternal());
 
     // Start AdvantageKit logger
     Logger.start();
