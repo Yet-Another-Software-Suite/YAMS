@@ -3,6 +3,7 @@
 
 package yams.helpers;
 
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
@@ -68,5 +69,11 @@ public class DeviceCreator
         System.err.println("Warning: used maximum device IDs, resetting to 0");
     }
     return new TalonFXS(id);
+  }
+
+  /** Creates a CANcoder sharing the same CAN ID as the given TalonFX. */
+  public static CANcoder createCANcoderFor(TalonFX talon)
+  {
+    return new CANcoder(talon.getDeviceID());
   }
 }
