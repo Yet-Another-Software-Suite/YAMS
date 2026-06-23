@@ -42,13 +42,13 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  * // 2. Create a TalonFXWrapper for a Kraken X60 on CAN ID 1
  * SmartMotorController motor = new TalonFXWrapper(new TalonFX(1), DCMotor.getKrakenX60(1), motorConfig);
  *
- * // 3. Assemble the FlyWheelConfig
+ * // 3. Assemble the FlyWheelConfig and mechanism
  * FlyWheelConfig config = new FlyWheelConfig()
- *     .withSmartMotorController(motor)
  *     .withDiameter(Inches.of(4))
- *     .withMass(Pounds.of(0.5))
  *     .withSpeedometerSimulation(RPM.of(6000))  // optional: sim speedometer up to 6000 RPM
  *     .withTelemetry("Shooter", TelemetryVerbosity.HIGH);
+ *
+ * FlyWheel flywheel = new FlyWheel(config, motor);
  * }</pre>
  */
 public class FlyWheelConfig

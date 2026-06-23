@@ -71,9 +71,9 @@ public class PivotTest
 
   private static Pivot createPivot(SmartMotorController smc)
   {
-    PivotConfig config = new PivotConfig(smc)
+    PivotConfig config = new PivotConfig()
         .withHardLimits(Degrees.of(-100), Degrees.of(150));
-    Pivot                             pivot  = new Pivot(config);
+    Pivot                             pivot  = new Pivot(config, smc);
     SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.smc = smc;
     subsys.mechSimPeriodic = pivot::simIterate;

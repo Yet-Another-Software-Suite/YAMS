@@ -10,7 +10,6 @@ import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Millisecond;
 import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
@@ -72,11 +71,10 @@ public class ArmTest
 
   private static Arm createArm(SmartMotorController smc)
   {
-    ArmConfig config = new ArmConfig(smc)
+    ArmConfig config = new ArmConfig()
         .withLength(Inches.of(4))
-        .withHardLimits(Degrees.of(-100), Degrees.of(200))
-        .withMass(Pounds.of(1));
-    Arm                               arm    = new Arm(config);
+        .withHardLimits(Degrees.of(-100), Degrees.of(200));
+    Arm                               arm    = new Arm(config, smc);
     SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.smc = smc;
     subsys.mechSimPeriodic = arm::simIterate;

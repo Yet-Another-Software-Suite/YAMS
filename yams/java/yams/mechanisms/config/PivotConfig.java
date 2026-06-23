@@ -36,12 +36,12 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  *     DCMotor.getKrakenX60(1),
  *     motorConfig);
  *
- * // Build the pivot config
- * PivotConfig config = new PivotConfig(motor)
- *     .withHardLimits(Degrees.of(0), Degrees.of(60))
- *     .withTelemetry("ShooterHood", TelemetryVerbosity.HIGH)
+ * // Build the pivot config and mechanism
+ * PivotConfig config = new PivotConfig()
  *     .withHardLimits(Degrees.of(0), Degrees.of(60))
  *     .withTelemetry("ShooterHood", TelemetryVerbosity.HIGH);
+ *
+ * Pivot pivot = new Pivot(config, motor);
  * }</pre>
  */
 public class PivotConfig

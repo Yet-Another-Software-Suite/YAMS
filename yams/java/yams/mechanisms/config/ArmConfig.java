@@ -34,13 +34,13 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  * SmartMotorController motor = new SparkWrapper(
  *     new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), motorConfig);
  *
- * // Build the arm config
- * ArmConfig config = new ArmConfig(motor)
+ * // Build the arm config and mechanism
+ * ArmConfig config = new ArmConfig()
  *     .withLength(Meters.of(0.5))
- *     .withMass(Kilograms.of(2.0))
  *     .withTelemetry("Arm", TelemetryVerbosity.HIGH)
- *     .withHardLimits(Degrees.of(-10), Degrees.of(90))
- *     .withTelemetry("Arm", TelemetryVerbosity.HIGH);
+ *     .withHardLimits(Degrees.of(-10), Degrees.of(90));
+ *
+ * Arm arm = new Arm(config, motor);
  * }</pre>
  */
 public class ArmConfig

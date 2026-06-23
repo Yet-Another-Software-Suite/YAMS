@@ -31,12 +31,12 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  * SmartMotorController motor = new TalonFXWrapper(
  *     new TalonFX(4), DCMotor.getKrakenX60(1), motorConfig);
  *
- * ElevatorConfig config = new ElevatorConfig(motor)
- *     .withDrumRadius(Inches.of(1.0))          // spool radius
- *     .withMass(Kilograms.of(4.0))             // carriage mass
+ * ElevatorConfig config = new ElevatorConfig()
+ *     .withCarriageWeight(Kilograms.of(4.0))
  *     .withTelemetry("Elevator", TelemetryVerbosity.HIGH)
- *     .withHardLimits(Meters.of(0), Meters.of(2))
- *     .withTelemetry("Elevator", TelemetryVerbosity.HIGH);
+ *     .withHardLimits(Meters.of(0), Meters.of(2));
+ *
+ * Elevator elevator = new Elevator(config, motor);
  * }</pre>
  */
 public class ElevatorConfig

@@ -8,7 +8,6 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Millisecond;
 import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
@@ -70,10 +69,9 @@ public class ShooterTest
 
   private static FlyWheel createShooter(SmartMotorController smc)
   {
-    FlyWheelConfig cfg = new FlyWheelConfig(smc)
-        .withDiameter(Inches.of(4))
-        .withMass(Pounds.of(1));
-    FlyWheel                          shooter = new FlyWheel(cfg);
+    FlyWheelConfig cfg = new FlyWheelConfig()
+        .withDiameter(Inches.of(4));
+    FlyWheel                          shooter = new FlyWheel(cfg, smc);
     SmartMotorControllerTestSubsystem subsys  = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.smc = smc;
     subsys.mechSimPeriodic = shooter::simIterate;

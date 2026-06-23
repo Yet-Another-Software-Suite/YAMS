@@ -46,7 +46,8 @@ import yams.motorcontrollers.simulation.ArmSimSupplier;
  * SmartMotorController motor = new SparkWrapper(
  *     new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1),
  *     new SmartMotorControllerConfig().withClosedLoopController(0.2,0,0).withStatorCurrentLimit(Amps.of(40)));
- * Arm arm = new Arm(new ArmConfig(motor).withLength(Meters.of(0.5)));
+ * ArmConfig armConfig = new ArmConfig().withLength(Meters.of(0.5));
+ * Arm arm = new Arm(armConfig, motor);
  *
  * // Schedule a setpoint command
  * Command moveToScore = arm.setAngle(Degrees.of(80));

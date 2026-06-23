@@ -65,12 +65,12 @@ public class TurretSubsystem extends SubsystemBase
                                                   DCMotor.getKrakenX60(1),
                                                   motorConfig);
 
-  PivotConfig m_config = new PivotConfig(motor)
+  PivotConfig m_config = new PivotConfig()
       .withHardLimits(Degrees.of(-360), Degrees.of(360)) // Hard limit bc wiring prevents infinite spinning
       // .withSoftLimits(Degrees.of(-360), Degrees.of(360))
       .withTelemetry("Turret", TelemetryVerbosity.HIGH); // Telemetry
 
-  private Pivot turret = new Pivot(m_config);
+  private Pivot turret = new Pivot(m_config, motor);
 
 
   // Robot to turret transform, from center of robot to turret.

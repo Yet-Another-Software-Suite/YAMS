@@ -75,11 +75,11 @@ public class ElevatorTest
 
   private static Elevator createElevator(SmartMotorController smc)
   {
-    ElevatorConfig config = new ElevatorConfig(smc)
+    ElevatorConfig config = new ElevatorConfig()
         .withHardLimits(Meters.of(0), Meters.of(3))
 //      .withTelemetry("Elevator", TelemetryVerbosity.HIGH)
         .withCarriageWeight(Pounds.of(16));
-    Elevator                          elevator = new Elevator(config);
+    Elevator                          elevator = new Elevator(config, smc);
     SmartMotorControllerTestSubsystem subsys   = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.smc = smc;
     subsys.mechSimPeriodic = elevator::simIterate;

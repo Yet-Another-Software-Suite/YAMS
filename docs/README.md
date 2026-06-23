@@ -67,14 +67,13 @@ TalonFXS                   armMotor    = new TalonFXS(1);
 SmartMotorController       motor       = new TalonFXSWrapper(armMotor, DCMotor.getNEO(1), motorConfig);
 
 // Create your mechanism config
-ArmConfig                  config    = new ArmConfig(motor)
+ArmConfig                  config    = new ArmConfig()
       .withLength(Meters.of(0.135))
       .withHardLimits(Degrees.of(-100), Degrees.of(200))
-      .withTelemetry("ArmExample", TelemetryVerbosity.HIGH)
-      .withMass(Pounds.of(1));
+      .withTelemetry("ArmExample", TelemetryVerbosity.HIGH);
 
 // Create the Arm!
-Arm                        arm = new Arm(config);
+Arm                        arm = new Arm(config, motor);
 ```
 {% endcode %}
 {% endcolumn %}

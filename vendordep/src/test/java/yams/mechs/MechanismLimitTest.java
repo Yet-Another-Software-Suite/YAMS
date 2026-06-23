@@ -34,8 +34,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import yams.exceptions.ArmConfigurationException;
-import yams.exceptions.ElevatorConfigurationException;
 import yams.exceptions.PivotConfigurationException;
+import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.helpers.MockHardwareExtension;
@@ -128,8 +128,8 @@ public class MechanismLimitTest
 
   private static Pivot createPivot(SmartMotorController smc)
   {
-    PivotConfig config = new PivotConfig(smc).withHardLimits(Degrees.of(-100), Degrees.of(150));
-    Pivot     pivot  = new Pivot(config);
+    PivotConfig config = new PivotConfig().withHardLimits(Degrees.of(-100), Degrees.of(150));
+    Pivot     pivot  = new Pivot(config, smc);
     smc.setupSimulation();
     SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.mechSimPeriodic = pivot::simIterate;
@@ -142,11 +142,10 @@ public class MechanismLimitTest
     // Hard limits are 5° wider at the bottom than the soft limits so that a
     // "true at min" starting position (-105°) can clear the constructor's
     // bounds check while still being below the -100° soft limit.
-    ArmConfig config = new ArmConfig(smc)
+    ArmConfig config = new ArmConfig()
         .withLength(Inches.of(4))
-        .withHardLimits(Degrees.of(-110), Degrees.of(200))
-        .withMass(Pounds.of(1));
-    Arm arm = new Arm(config);
+        .withHardLimits(Degrees.of(-110), Degrees.of(200));
+    Arm arm = new Arm(config, smc);
     SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.mechSimPeriodic = arm::simIterate;
     subsys.mechUpdateTelemetry = arm::updateTelemetry;
@@ -162,10 +161,10 @@ public class MechanismLimitTest
    */
   private static Elevator createElevator(SmartMotorController smc)
   {
-    ElevatorConfig config = new ElevatorConfig(smc)
+    ElevatorConfig config = new ElevatorConfig()
         .withHardLimits(Meters.of(-0.1), Meters.of(6))
         .withCarriageWeight(Pounds.of(16));
-    Elevator elevator = new Elevator(config);
+    Elevator elevator = new Elevator(config, smc);
     SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.mechSimPeriodic = elevator::simIterate;
     subsys.mechUpdateTelemetry = elevator::updateTelemetry;
@@ -576,7 +575,7 @@ public class MechanismLimitTest
     try
     {
       assertThrows(PivotConfigurationException.class, () ->
-          new Pivot(new PivotConfig(motor).withHardLimits(Degrees.of(-100), Degrees.of(150))));
+          new Pivot(new PivotConfig().withHardLimits(Degrees.of(-100), Degrees.of(150)), motor));
     } finally
     {
       closeSMC(motor);
@@ -592,7 +591,7 @@ public class MechanismLimitTest
     try
     {
       assertThrows(PivotConfigurationException.class, () ->
-          new Pivot(new PivotConfig(motor).withHardLimits(Degrees.of(-100), Degrees.of(150))));
+          new Pivot(new PivotConfig().withHardLimits(Degrees.of(-100), Degrees.of(150)), motor));
     } finally
     {
       closeSMC(motor);
@@ -608,9 +607,8 @@ public class MechanismLimitTest
     try
     {
       assertThrows(ArmConfigurationException.class, () ->
-          new Arm(new ArmConfig(motor).withLength(Inches.of(4))
-                                       .withHardLimits(Degrees.of(-100), Degrees.of(200))
-                                       .withMass(Pounds.of(1))));
+          new Arm(new ArmConfig().withLength(Inches.of(4))
+                                  .withHardLimits(Degrees.of(-100), Degrees.of(200)), motor));
     } finally
     {
       closeSMC(motor);
@@ -626,9 +624,8 @@ public class MechanismLimitTest
     try
     {
       assertThrows(ArmConfigurationException.class, () ->
-          new Arm(new ArmConfig(motor).withLength(Inches.of(4))
-                                       .withHardLimits(Degrees.of(-100), Degrees.of(200))
-                                       .withMass(Pounds.of(1))));
+          new Arm(new ArmConfig().withLength(Inches.of(4))
+                                  .withHardLimits(Degrees.of(-100), Degrees.of(200)), motor));
     } finally
     {
       closeSMC(motor);
@@ -644,10 +641,10 @@ public class MechanismLimitTest
                 .withStartingPosition(Meters.of(-1))));
     try
     {
-      assertThrows(ElevatorConfigurationException.class, () ->
-          new Elevator(new ElevatorConfig(motor)
+      assertThrows(SmartMotorControllerConfigurationException.class, () ->
+          new Elevator(new ElevatorConfig()
                            .withHardLimits(Meters.of(0), Meters.of(6))
-                           .withCarriageWeight(Pounds.of(16))));
+                           .withCarriageWeight(Pounds.of(16)), motor));
     } finally
     {
       closeSMC(motor);
@@ -663,10 +660,10 @@ public class MechanismLimitTest
                 .withStartingPosition(Meters.of(7))));
     try
     {
-      assertThrows(ElevatorConfigurationException.class, () ->
-          new Elevator(new ElevatorConfig(motor)
+      assertThrows(SmartMotorControllerConfigurationException.class, () ->
+          new Elevator(new ElevatorConfig()
                            .withHardLimits(Meters.of(0), Meters.of(6))
-                           .withCarriageWeight(Pounds.of(16))));
+                           .withCarriageWeight(Pounds.of(16)), motor));
     } finally
     {
       closeSMC(motor);
