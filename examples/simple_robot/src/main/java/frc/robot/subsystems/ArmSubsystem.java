@@ -73,13 +73,13 @@ public class ArmSubsystem extends SubsystemBase
       .withMaxRobotLength(Meters.of(0.75))
       .withRelativePosition(new Translation3d(Meters.of(0.25), Meters.of(0), Meters.of(0.5)));
 
-  private       ArmConfig m_config = new ArmConfig(motor)
+  private       ArmConfig m_config = new ArmConfig()
       .withLength(Meters.of(0.135))
       .withHardLimits(Degrees.of(-100), Degrees.of(200))
       .withTelemetry("ArmExample", TelemetryVerbosity.HIGH)
       .withMass(Pounds.of(1))
       .withMechanismPositionConfig(robotToMechanism);
-  private final Arm       arm      = new Arm(m_config);
+  private final Arm       arm      = new Arm(m_config, motor);
 
   private       DigitalInput dio         = new DigitalInput(0);
   private final Sensor       coralSensor = new SensorConfig("CoralDetectorBeamBreak")

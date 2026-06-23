@@ -65,12 +65,12 @@ public class ShooterSubsystem extends SubsystemBase
       .withControlMode(ControlMode.CLOSED_LOOP);
   private final SmartMotorController       motor       = new SparkWrapper(armMotor, DCMotor.getNEO(1), motorConfig);
 
-  private final FlyWheelConfig shooterConfig = new FlyWheelConfig(motor)
+  private final FlyWheelConfig shooterConfig = new FlyWheelConfig()
       .withDiameter(Inches.of(4))
       .withMass(Pounds.of(1))
       .withTelemetry("ShooterMech", TelemetryVerbosity.HIGH)
       .withSpeedometerSimulation(RPM.of(750));
-  private final FlyWheel       shooter       = new FlyWheel(shooterConfig);
+  private final FlyWheel       shooter       = new FlyWheel(shooterConfig, motor);
 
   public ShooterSubsystem() {}
 

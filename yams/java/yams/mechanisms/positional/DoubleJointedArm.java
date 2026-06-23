@@ -29,6 +29,7 @@ import yams.exceptions.DoubleJointedArmConfigurationException;
 import yams.mechanisms.config.ArmConfig;
 import yams.mechanisms.config.MechanismPositionConfig;
 import yams.motorcontrollers.SmartMotorController;
+import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.simulation.ArmSimSupplier;
 
 /**
@@ -136,22 +137,25 @@ public class DoubleJointedArm extends SmartPositionalMechanism
    * @param lowerConfig Lower {@link ArmConfig} to use.
    * @param upperConfig Upper {@link ArmConfig} to use.
    */
-  public DoubleJointedArm(ArmConfig lowerConfig, ArmConfig upperConfig)
+  public DoubleJointedArm(ArmConfig lowerConfig, SmartMotorController lowerSMC, ArmConfig upperConfig, SmartMotorController upperSMC)
   {
     m_lowerArmConfig = lowerConfig;
     m_upperArmConfig = upperConfig;
-    m_lowerSMC = lowerConfig.getMotor();
-    m_upperSMC = upperConfig.getMotor();
-    if (lowerConfig.getMotor().getConfig().getSubsystem() != upperConfig.getMotor().getConfig().getSubsystem())
+    m_lowerSMC = lowerSMC;
+    m_upperSMC = upperSMC;
+    SmartMotorControllerConfig lowerSMCConfig = lowerSMC.getConfig();
+    SmartMotorControllerConfig upperSMCConfig = upperSMC.getConfig();
+
+    if (lowerSMCConfig.getSubsystem() != upperSMCConfig.getSubsystem())
     {
       throw new DoubleJointedArmConfigurationException("SmartMotorControllers do not have the same subsystem!",
                                                        "Cannot create commands for single subsystem.",
                                                        "withSubsystem(this)");
     }
-    m_subsystem = lowerConfig.getMotor().getConfig().getSubsystem();
+    m_subsystem = lowerSMCConfig.getSubsystem();
 
     // Check that the starting angle is defined
-    if (lowerConfig.getStartingAngle().isEmpty() || upperConfig.getStartingAngle().isEmpty())
+    if (lowerSMCConfig.getStartingPosition().isEmpty() || upperSMCConfig.getStartingPosition().isEmpty())
     {
       throw new DoubleJointedArmConfigurationException("Arm starting angle is empty",
                                                        "Cannot create simulation.",
@@ -209,30 +213,30 @@ public class DoubleJointedArm extends SmartPositionalMechanism
       m_lowerArmSim = Optional.of(new SingleJointedArmSim(m_lowerSMC.getDCMotor(),
                                                           m_lowerSMC.getConfig().getGearing()
                                                                     .getMechanismToRotorRatio(),
-                                                          lowerConfig.getMOI(),
+                                                          lowerSMCConfig.getMOI(),
                                                           lowerConfig.getLength().get().in(Meters),
                                                           lowerConfig.getLowerHardLimit().get().in(Radians),
                                                           lowerConfig.getUpperHardLimit().get().in(Radians),
                                                           true,
-                                                          lowerConfig.getStartingAngle().get().in(Radians),
+                                                          lowerSMCConfig.getStartingPosition().get().in(Radians),
                                                           0.002 / 4096.0,
                                                           0.0));// Add noise with a std-dev of 1 tick
       m_lowerSMC.setSimSupplier(new ArmSimSupplier(m_lowerArmSim.get(), m_lowerSMC));
       m_upperArmSim = Optional.of(new SingleJointedArmSim(m_upperSMC.getDCMotor(),
                                                           m_upperSMC.getConfig().getGearing()
                                                                     .getMechanismToRotorRatio(),
-                                                          upperConfig.getMOI(),
+                                                          upperSMCConfig.getMOI(),
                                                           m_upperArmLength.in(Meters),
                                                           upperConfig.getLowerHardLimit().get().in(Radians),
                                                           upperConfig.getUpperHardLimit().get().in(Radians),
                                                           true,
-                                                          upperConfig.getStartingAngle().get().in(Radians),
+                                                          upperSMCConfig.getStartingPosition().get().in(Radians),
                                                           0.002 / 4096.0,
                                                           0.0));// Add noise with a std-dev of 1 tick
       m_upperSMC.setSimSupplier(new ArmSimSupplier(m_upperArmSim.get(), m_upperSMC));
 
-      var lowerStartingAngle = lowerConfig.getStartingAngle().get();
-      var upperStartingAngle = upperConfig.getStartingAngle().get();
+      var lowerStartingAngle = lowerSMCConfig.getStartingPosition().get();
+      var upperStartingAngle = upperSMCConfig.getStartingPosition().get();
 
       var upperArmRootPos = getJoint(m_lowerArmLength, lowerStartingAngle, m_lowerArmRootPos);
 
@@ -262,9 +266,6 @@ public class DoubleJointedArm extends SmartPositionalMechanism
       m_upperSMC.setupSimulation();
       m_lowerSMC.setupSimulation();
     }
-    // Apply configs
-    lowerConfig.applyConfig();
-    upperConfig.applyConfig();
   }
 
   /**

@@ -45,7 +45,7 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
   private final SmartMotorController       lowerSMC    = new SparkWrapper(lowerMotor,
           DCMotor.getNEO(1),
           lowerConfig);
-  private final ArmConfig        lowerArmConfig = new ArmConfig(lowerSMC)
+  private final ArmConfig        lowerArmConfig = new ArmConfig()
           .withLength(Feet.of(2))
           .withHardLimits(Degrees.of(-720), Degrees.of(720))
           .withTelemetry("LowerArm", SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
@@ -69,13 +69,13 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
   private final SmartMotorController       upperSMC    = new SparkWrapper(upperMotor,
                                                                           DCMotor.getNEO(1),
                                                                           upperConfig);
-  private final ArmConfig        upperArmConfig = new ArmConfig(upperSMC)
+  private final ArmConfig        upperArmConfig = new ArmConfig()
       .withLength(Feet.of(2.5))
       .withHardLimits(Degrees.of(-720), Degrees.of(720))
       .withTelemetry("UpperArm", SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
       .withMass(Pounds.of(2))
       .withSimColor(new Color8Bit(Color.kDarkRed));
-  private final DoubleJointedArm jointedArm     = new DoubleJointedArm(lowerArmConfig, upperArmConfig);
+  private final DoubleJointedArm jointedArm     = new DoubleJointedArm(lowerArmConfig, lowerSMC, upperArmConfig, upperSMC);
 
   public DoubleJointedArmSubsystem()
   {

@@ -52,13 +52,13 @@ public class HoodSubsystem extends SubsystemBase {
 
     private final SmartMotorController hoodSMC = new SparkWrapper(hoodMotor, DCMotor.getNeo550(1), hoodMotorConfig);
 
-    private final ArmConfig hoodConfig = new ArmConfig(hoodSMC)
+    private final ArmConfig hoodConfig = new ArmConfig()
             .withTelemetry("HoodMech", TelemetryVerbosity.HIGH)
             .withLength(Meters.of(0.3)) // Hood arm length for simulation
             .withHardLimits(Degrees.of(0), Degrees.of(120)); // The Hood can be modeled as an arm since it has a
                                                             // gravitational force acted upon based on the angle its in
 
-    private final Arm hood = new Arm(hoodConfig);
+    private final Arm hood = new Arm(hoodConfig, hoodSMC);
 
     public HoodSubsystem() {
     }

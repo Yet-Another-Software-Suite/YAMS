@@ -1,9 +1,6 @@
 // Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include <cmath>
-#include <variant>
-
 #include <frc/system/plant/DCMotor.h>
 #include <gtest/gtest.h>
 #include <units/angle.h>
@@ -12,6 +9,9 @@
 #include <units/time.h>
 #include <units/velocity.h>
 #include <units/voltage.h>
+
+#include <cmath>
+#include <variant>
 
 #include "yams/math/LQRConfig.hpp"
 #include "yams/math/LQRController.hpp"
@@ -49,65 +49,63 @@ static LQRConfig ElevatorConfig() {
 
 // ── LQRConfig tests ──────────────────────────────────────────────────────────
 
-TEST(LQRConfig, FlywheelSetsType) {
+TEST(LQRConfigTest, FlywheelSetsType) {
   EXPECT_EQ(FlywheelConfig().GetType(), LQRConfig::LQRType::FLYWHEEL);
 }
 
-TEST(LQRConfig, ArmSetsType) {
-  EXPECT_EQ(ArmConfig().GetType(), LQRConfig::LQRType::ARM);
-}
+TEST(LQRConfigTest, ArmSetsType) { EXPECT_EQ(ArmConfig().GetType(), LQRConfig::LQRType::ARM); }
 
-TEST(LQRConfig, ElevatorSetsType) {
+TEST(LQRConfigTest, ElevatorSetsType) {
   EXPECT_EQ(ElevatorConfig().GetType(), LQRConfig::LQRType::ELEVATOR);
 }
 
-TEST(LQRConfig, DefaultPeriodIs20ms) {
+TEST(LQRConfigTest, DefaultPeriodIs20ms) {
   EXPECT_NEAR(FlywheelConfig().GetPeriod().value(), 0.020, 1e-9);
 }
 
-TEST(LQRConfig, WithPeriodChangesPeriod) {
+TEST(LQRConfigTest, WithPeriodChangesPeriod) {
   EXPECT_NEAR(FlywheelConfig().WithPeriod(10_ms).GetPeriod().value(), 0.010, 1e-9);
 }
 
-TEST(LQRConfig, DefaultMaxVoltageIs12V) {
+TEST(LQRConfigTest, DefaultMaxVoltageIs12V) {
   EXPECT_NEAR(FlywheelConfig().GetMaxVoltage().value(), 12.0, 1e-9);
 }
 
-TEST(LQRConfig, WithMaxVoltageChangesVoltage) {
+TEST(LQRConfigTest, WithMaxVoltageChangesVoltage) {
   EXPECT_NEAR(FlywheelConfig().WithMaxVoltage(9_V).GetMaxVoltage().value(), 9.0, 1e-9);
 }
 
-TEST(LQRConfig, FlywheelGetLoopIsLoop1) {
+TEST(LQRConfigTest, FlywheelGetLoopIsLoop1) {
   EXPECT_TRUE(std::holds_alternative<LQRConfig::Loop1>(FlywheelConfig().GetLoop()));
 }
 
-TEST(LQRConfig, ArmGetLoopIsLoop2) {
+TEST(LQRConfigTest, ArmGetLoopIsLoop2) {
   EXPECT_TRUE(std::holds_alternative<LQRConfig::Loop2>(ArmConfig().GetLoop()));
 }
 
-TEST(LQRConfig, ElevatorGetLoopIsLoop2) {
+TEST(LQRConfigTest, ElevatorGetLoopIsLoop2) {
   EXPECT_TRUE(std::holds_alternative<LQRConfig::Loop2>(ElevatorConfig().GetLoop()));
 }
 
 // ── LQRController type and config accessors ──────────────────────────────────
 
-TEST(LQRController, FlywheelGetType) {
+TEST(LQRControllerTest, FlywheelGetType) {
   EXPECT_EQ(LQRController{FlywheelConfig()}.GetType(), LQRConfig::LQRType::FLYWHEEL);
 }
 
-TEST(LQRController, ArmGetType) {
+TEST(LQRControllerTest, ArmGetType) {
   EXPECT_EQ(LQRController{ArmConfig()}.GetType(), LQRConfig::LQRType::ARM);
 }
 
-TEST(LQRController, ElevatorGetType) {
+TEST(LQRControllerTest, ElevatorGetType) {
   EXPECT_EQ(LQRController{ElevatorConfig()}.GetType(), LQRConfig::LQRType::ELEVATOR);
 }
 
-TEST(LQRController, GetConfigPresent) {
+TEST(LQRControllerTest, GetConfigPresent) {
   EXPECT_TRUE(LQRController{FlywheelConfig()}.GetConfig().has_value());
 }
 
-TEST(LQRController, GetConfigPreservesType) {
+TEST(LQRControllerTest, GetConfigPreservesType) {
   LQRController ctrl{ArmConfig()};
   ASSERT_TRUE(ctrl.GetConfig().has_value());
   EXPECT_EQ(ctrl.GetConfig()->GetType(), LQRConfig::LQRType::ARM);
@@ -115,32 +113,32 @@ TEST(LQRController, GetConfigPreservesType) {
 
 // ── Flywheel angular velocity tests ─────────────────────────────────────────
 
-TEST(LQRController, Flywheel_BelowSetpoint_PositiveOutput) {
+TEST(LQRControllerTest, Flywheel_BelowSetpoint_PositiveOutput) {
   LQRController ctrl{FlywheelConfig()};
   auto out = ctrl.Calculate(0_rad_per_s, 200_rad_per_s);
   EXPECT_GT(out.value(), 0.0);
 }
 
-TEST(LQRController, Flywheel_AboveSetpoint_NegativeOutput) {
+TEST(LQRControllerTest, Flywheel_AboveSetpoint_NegativeOutput) {
   LQRController ctrl{FlywheelConfig()};
   ctrl.Calculate(300_rad_per_s, 300_rad_per_s);  // warm up state
   auto out = ctrl.Calculate(300_rad_per_s, 100_rad_per_s);
   EXPECT_LT(out.value(), 0.0);
 }
 
-TEST(LQRController, Flywheel_ClampedToMaxVoltage) {
+TEST(LQRControllerTest, Flywheel_ClampedToMaxVoltage) {
   LQRController ctrl{FlywheelConfig().WithMaxVoltage(12_V)};
   auto out = ctrl.Calculate(0_rad_per_s, 1e6_rad_per_s);
   EXPECT_LE(std::abs(out.value()), 12.0 + 1e-6);
 }
 
-TEST(LQRController, Flywheel_OutputIsFinite) {
+TEST(LQRControllerTest, Flywheel_OutputIsFinite) {
   LQRController ctrl{FlywheelConfig()};
   auto out = ctrl.Calculate(0_rad_per_s, 100_rad_per_s);
   EXPECT_TRUE(std::isfinite(out.value()));
 }
 
-TEST(LQRController, Flywheel_ResetToSetpoint_ReducesOutput) {
+TEST(LQRControllerTest, Flywheel_ResetToSetpoint_ReducesOutput) {
   // Far from setpoint: large output
   LQRController ctrl_far{FlywheelConfig()};
   auto out_far = ctrl_far.Calculate(0_rad_per_s, 100_rad_per_s);
@@ -155,35 +153,35 @@ TEST(LQRController, Flywheel_ResetToSetpoint_ReducesOutput) {
 
 // ── Arm angular position tests ───────────────────────────────────────────────
 
-TEST(LQRController, Arm_BelowSetpoint_PositiveOutput) {
+TEST(LQRControllerTest, Arm_BelowSetpoint_PositiveOutput) {
   LQRController ctrl{ArmConfig()};
   ctrl.Reset(0_rad, 0_rad_per_s);
   auto out = ctrl.Calculate(0_rad, 1_rad, 0_rad_per_s);
   EXPECT_GT(out.value(), 0.0);
 }
 
-TEST(LQRController, Arm_AboveSetpoint_NegativeOutput) {
+TEST(LQRControllerTest, Arm_AboveSetpoint_NegativeOutput) {
   LQRController ctrl{ArmConfig()};
   ctrl.Reset(2_rad, 0_rad_per_s);
   auto out = ctrl.Calculate(2_rad, 1_rad, 0_rad_per_s);
   EXPECT_LT(out.value(), 0.0);
 }
 
-TEST(LQRController, Arm_ClampedToMaxVoltage) {
+TEST(LQRControllerTest, Arm_ClampedToMaxVoltage) {
   LQRController ctrl{ArmConfig().WithMaxVoltage(12_V)};
   ctrl.Reset(0_rad, 0_rad_per_s);
   auto out = ctrl.Calculate(0_rad, 1000_rad, 0_rad_per_s);
   EXPECT_LE(std::abs(out.value()), 12.0 + 1e-6);
 }
 
-TEST(LQRController, Arm_OutputIsFinite) {
+TEST(LQRControllerTest, Arm_OutputIsFinite) {
   LQRController ctrl{ArmConfig()};
   ctrl.Reset(0_rad, 0_rad_per_s);
   auto out = ctrl.Calculate(0_rad, 0.5_rad, 0_rad_per_s);
   EXPECT_TRUE(std::isfinite(out.value()));
 }
 
-TEST(LQRController, Arm_ResetToSetpoint_ReducesOutput) {
+TEST(LQRControllerTest, Arm_ResetToSetpoint_ReducesOutput) {
   // Far from setpoint: large output
   LQRController ctrl_far{ArmConfig()};
   ctrl_far.Reset(0_rad, 0_rad_per_s);
@@ -199,35 +197,35 @@ TEST(LQRController, Arm_ResetToSetpoint_ReducesOutput) {
 
 // ── Elevator linear position tests ───────────────────────────────────────────
 
-TEST(LQRController, Elevator_BelowSetpoint_PositiveOutput) {
+TEST(LQRControllerTest, Elevator_BelowSetpoint_PositiveOutput) {
   LQRController ctrl{ElevatorConfig()};
   ctrl.Reset(0_m, 0_mps);
   auto out = ctrl.Calculate(0_m, 0.5_m, 0_mps);
   EXPECT_GT(out.value(), 0.0);
 }
 
-TEST(LQRController, Elevator_AboveSetpoint_NegativeOutput) {
+TEST(LQRControllerTest, Elevator_AboveSetpoint_NegativeOutput) {
   LQRController ctrl{ElevatorConfig()};
   ctrl.Reset(1_m, 0_mps);
   auto out = ctrl.Calculate(1_m, 0.5_m, 0_mps);
   EXPECT_LT(out.value(), 0.0);
 }
 
-TEST(LQRController, Elevator_ClampedToMaxVoltage) {
+TEST(LQRControllerTest, Elevator_ClampedToMaxVoltage) {
   LQRController ctrl{ElevatorConfig().WithMaxVoltage(12_V)};
   ctrl.Reset(0_m, 0_mps);
   auto out = ctrl.Calculate(0_m, 10000_m, 0_mps);
   EXPECT_LE(std::abs(out.value()), 12.0 + 1e-6);
 }
 
-TEST(LQRController, Elevator_OutputIsFinite) {
+TEST(LQRControllerTest, Elevator_OutputIsFinite) {
   LQRController ctrl{ElevatorConfig()};
   ctrl.Reset(0_m, 0_mps);
   auto out = ctrl.Calculate(0_m, 0.5_m, 0_mps);
   EXPECT_TRUE(std::isfinite(out.value()));
 }
 
-TEST(LQRController, Elevator_ResetAffectsDirection) {
+TEST(LQRControllerTest, Elevator_ResetAffectsDirection) {
   LQRController ctrl{ElevatorConfig()};
 
   ctrl.Reset(0_m, 0_mps);
@@ -242,19 +240,19 @@ TEST(LQRController, Elevator_ResetAffectsDirection) {
 
 // ── Linear flywheel (m/s) tests ──────────────────────────────────────────────
 
-TEST(LQRController, LinearFlywheel_BelowSetpoint_PositiveOutput) {
+TEST(LQRControllerTest, LinearFlywheel_BelowSetpoint_PositiveOutput) {
   LQRController ctrl{FlywheelConfig()};
   auto out = ctrl.Calculate(0_mps, 5_mps);
   EXPECT_GT(out.value(), 0.0);
 }
 
-TEST(LQRController, LinearFlywheel_ClampedToMaxVoltage) {
+TEST(LQRControllerTest, LinearFlywheel_ClampedToMaxVoltage) {
   LQRController ctrl{FlywheelConfig().WithMaxVoltage(12_V)};
   auto out = ctrl.Calculate(0_mps, 1e6_mps);
   EXPECT_LE(std::abs(out.value()), 12.0 + 1e-6);
 }
 
-TEST(LQRController, LinearFlywheel_OutputIsFinite) {
+TEST(LQRControllerTest, LinearFlywheel_OutputIsFinite) {
   LQRController ctrl{FlywheelConfig()};
   auto out = ctrl.Calculate(0_mps, 5_mps);
   EXPECT_TRUE(std::isfinite(out.value()));
@@ -262,14 +260,14 @@ TEST(LQRController, LinearFlywheel_OutputIsFinite) {
 
 // ── UpdateConfig tests ───────────────────────────────────────────────────────
 
-TEST(LQRController, UpdateConfig_ChangesType) {
+TEST(LQRControllerTest, UpdateConfig_ChangesType) {
   LQRController ctrl{FlywheelConfig()};
   EXPECT_EQ(ctrl.GetType(), LQRConfig::LQRType::FLYWHEEL);
   ctrl.UpdateConfig(ArmConfig());
   EXPECT_EQ(ctrl.GetType(), LQRConfig::LQRType::ARM);
 }
 
-TEST(LQRController, UpdateConfig_MaxVoltageRespected) {
+TEST(LQRControllerTest, UpdateConfig_MaxVoltageRespected) {
   LQRController ctrl{FlywheelConfig()};
   ctrl.UpdateConfig(FlywheelConfig().WithMaxVoltage(6_V));
   auto out = ctrl.Calculate(0_rad_per_s, 1e6_rad_per_s);

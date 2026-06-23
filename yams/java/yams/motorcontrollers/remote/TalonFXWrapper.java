@@ -1794,6 +1794,22 @@ public class TalonFXWrapper extends SmartMotorController
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismLimitsEnabled(enabled);}});
   }
 
+  @Override
+  public void setMechanismGearing(MechanismGearing gearing)
+  {
+    m_config.withGearing(gearing);
+    m_talonConfig.Feedback.SensorToMechanismRatio = gearing.getMechanismToRotorRatio();
+    forceConfigApply();
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismGearing(gearing);}});
+  }
+
+  @Override
+  public void setMechanismCircumference(Distance circumference)
+  {
+    m_config.withMechanismCircumference(circumference);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismCircumference(circumference);}});
+  }
+
   /**
    * Set the closed loop controller slot to use.
    *

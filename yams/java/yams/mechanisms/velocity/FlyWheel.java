@@ -83,11 +83,13 @@ public class FlyWheel extends SmartVelocityMechanism
    * Construct the FlyWheel class
    *
    * @param config FlyWheel configuration.
+   * @param smc {@link SmartMotorController} for the Mechanism
    */
-  public FlyWheel(FlyWheelConfig config)
+  public FlyWheel(FlyWheelConfig config, SmartMotorController smc)
   {
     m_config = config;
-    m_smc = config.getMotor();
+    m_smc = smc;
+    SmartMotorControllerConfig smcCfg = smc.getConfig();
     SmartMotorControllerConfig motorConfig = m_smc.getConfig();
     DCMotor                    dcMotor     = m_smc.getDCMotor();
     MechanismGearing           gearing     = m_smc.getConfig().getGearing();
@@ -103,14 +105,12 @@ public class FlyWheel extends SmartVelocityMechanism
       m_telemetry.setupTelemetry(getName(),
                                  m_smc);
     }
-    config.applyConfig();
 
     if (RobotBase.isSimulation())
     {
-      SmartMotorController motor = config.getMotor();
       m_dcmotorSim = Optional.of(new DCMotorSim(LinearSystemId.createDCMotorSystem(dcMotor,
-                                                                                   config.getMOI(),
-                                                                                   motor.getConfig().getGearing()
+                                                                                   smcCfg.getMOI(),
+                                                                                   smcCfg.getGearing()
                                                                                         .getMechanismToRotorRatio()),
                                                 dcMotor));
 

@@ -51,14 +51,14 @@ public class ArmSubsystem extends SubsystemBase
                                                                                DCMotor.getNEO(1),
                                                                                motorConfig);
 
-  private       ArmConfig m_config = new ArmConfig(motor)
+  private       ArmConfig m_config = new ArmConfig()
       .withLength(Meters.of(0.135))
       .withHardLimits(Degrees.of(-100), Degrees.of(200))
       .withTelemetry("ArmExample", TelemetryVerbosity.HIGH)
       .withMass(Pounds.of(1))
       .withSimStartingPosition(Degrees.of(0));
 
-  private final Arm       arm      = new Arm(m_config);
+  private final Arm       arm      = new Arm(m_config, motor);
 
   public ArmSubsystem()
   {
