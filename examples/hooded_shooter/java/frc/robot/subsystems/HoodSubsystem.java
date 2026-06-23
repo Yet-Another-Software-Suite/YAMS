@@ -5,6 +5,7 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
@@ -34,7 +35,8 @@ public class HoodSubsystem extends SubsystemBase {
     private final SparkMax hoodMotor = new SparkMax(2, MotorType.kBrushless);
 
     private final SmartMotorControllerConfig hoodMotorConfig = new SmartMotorControllerConfig(this)
-            .withClosedLoopController(0.00016541, 0, 0, RPM.of(5000), RotationsPerSecondPerSecond.of(2500))
+            .withClosedLoopController(0.00016541, 0, 0)
+            .withTrapezoidalProfile(RPM.of(5000), RotationsPerSecondPerSecond.of(2500))
             .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
             .withIdleMode(MotorMode.COAST)
             .withTelemetry("HoodMotor", TelemetryVerbosity.HIGH)
@@ -44,13 +46,15 @@ public class HoodSubsystem extends SubsystemBase {
             .withOpenLoopRampRate(Seconds.of(0.25))
             .withFeedforward(new SimpleMotorFeedforward(0.27937, 0.089836, 0.014557))
             .withSimFeedforward(new SimpleMotorFeedforward(0.27937, 0.089836, 0.014557))
-            .withControlMode(ControlMode.CLOSED_LOOP);
+            .withControlMode(ControlMode.CLOSED_LOOP)
+            .withSoftLimits(Degrees.of(5), Degrees.of(100))
+            .withStartingPosition(Degrees.of(5));
 
     private final SmartMotorController hoodSMC = new SparkWrapper(hoodMotor, DCMotor.getNeo550(1), hoodMotorConfig);
 
     private final ArmConfig hoodConfig = new ArmConfig()
             .withTelemetry("HoodMech", TelemetryVerbosity.HIGH)
-            .withSoftLimits(Degrees.of(5), Degrees.of(100))
+            .withLength(Meters.of(0.3)) // Hood arm length for simulation
             .withHardLimits(Degrees.of(0), Degrees.of(120)); // The Hood can be modeled as an arm since it has a
                                                             // gravitational force acted upon based on the angle its in
 

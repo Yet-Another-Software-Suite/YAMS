@@ -40,74 +40,111 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.SparkWrapper;
 
 /**
- * AdvantageKit Elevator Subsystem, capable of replaying the elevator.
+ * Chain-driven dual-NEO elevator with AdvantageKit input logging and exponential
+ * motion profiling. The second motor follows the first in inverse so a single
+ * SmartMotorController drives both. Height, velocity, setpoint, volts, and
+ * current are all logged through ElevatorInputs so the elevator can be replayed
+ * from a log without re-energizing the mechanism.
  */
 public class ElevatorSubsystem extends SubsystemBase
 {
-  /**
-   * AdvantageKit identifies inputs via the "Replay Bubble". Everything going to the SMC is an Output. Everything coming
-   * from the SMC is an Input.
+  /*
+   * ElevatorInputs is the replay boundary for this subsystem. @AutoLog generates
+   * ElevatorInputsAutoLogged at compile time; Logger.processInputs() uses that
+   * generated class to stamp all fields with a consistent timestamp.
+   *
+   * Logging the setpoint alongside the position lets you see in replay whether
+   * the elevator reached its goal before the next command fired.
    */
   @AutoLog
   public static class ElevatorInputs
   {
+    // Carriage height derived from the motor encoder via the chain geometry.
     public Distance       position = Meters.of(0);
     public LinearVelocity velocity = MetersPerSecond.of(0);
+    // Active motion-profile setpoint; stored here for replay consistency.
     public Distance       setpoint = Meters.of(0);
+    // Phase voltage from the leader motor.
     public Voltage        volts    = Volts.of(0);
     public Current        current  = Amps.of(0);
-
   }
 
   private final ElevatorInputsAutoLogged elevatorInputs = new ElevatorInputsAutoLogged();
 
-
+  // Chain geometry: 0.25-inch pitch * 22 teeth = 5.5-inch circumference sprocket.
+  // This converts motor rotations to linear carriage travel.
   private final Distance         chainPitch     = Inches.of(0.25);
   private final int              toothCount     = 22;
   private final Distance         circumference  = chainPitch.times(toothCount);
+  // Effective radius used by the exponential profile constraint calculation.
   private final Distance         radius         = circumference.div(2 * Math.PI);
   private final Mass             weight         = Pounds.of(16);
   private final DCMotor          motors         = DCMotor.getNEO(1);
+  // 3:4 box = 12:1 total reduction; chosen to keep carriage speed below 2 m/s
+  // while giving enough torque to lift 16 lb against gravity.
   private final MechanismGearing gearing        = new MechanismGearing(GearBox.fromReductionStages(3, 4));
+  // CAN IDs 30/31 are the leader and follower NEOs.
   private final SparkMax         elevatorMotor  = new SparkMax(30, SparkLowLevel.MotorType.kBrushless);
   private final SparkMax         elevatorMotor2 = new SparkMax(31, SparkLowLevel.MotorType.kBrushless);
 
   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       .withMechanismCircumference(circumference)
-      .withClosedLoopController(new ExponentialProfilePIDController(30, 0, 0, ExponentialProfilePIDController
+      // kP=30 on a chain elevator is reasonable; the exponential profile limits
+      // peak demand so high P doesn't cause integral windup near the setpoint.
+      .withClosedLoopController(30, 0, 0)
+      // Exponential profile constraints computed from real motor/load parameters
+      // so the profile is physically achievable on the first try.
+      .withProfile(ExponentialProfilePIDController
           .createElevatorConstraints(Volts.of(12),
                                      motors,
                                      weight,
                                      radius,
-                                     gearing)))
+                                     gearing))
+      // kG=0.1 V holds the elevator at any height; tune this before match play.
+      // kS/kV/kA are zero until SysId is run.
       .withFeedforward(new ElevatorFeedforward(0, 0.1, 0, 0))
+      // 40 A stator limit protects the NEO during a hard-stop impact.
       .withStatorCurrentLimit(Amps.of(40))
       .withMotorInverted(false)
+      // Soft limits prevent commanding the carriage outside the physical frame.
       .withSoftLimits(Meters.of(0), Meters.of(2))
       .withGearing(gearing)
+      // BRAKE holds position when the command ends; avoids a gravity-driven drop.
       .withIdleMode(MotorMode.BRAKE)
       .withTelemetry("ElevatorMotor", TelemetryVerbosity.HIGH)
-      // Elevator motor2 follows Elevator motor with an inversed output.
-      .withFollowers(Pair.of(elevatorMotor2, true));
+      // elevatorMotor2 is inverted relative to the leader because the two motors
+      // face opposite directions on the carriage.
+      .withFollowers(Pair.of(elevatorMotor2, true))
+      // Starting height of 0.5 m prevents the sim from crashing the carriage into
+      // the floor at t=0 when no homing has been performed.
+      .withStartingPosition(Meters.of(0.5));
 
   private final SmartMotorController motor      = new SparkWrapper(elevatorMotor,
                                                                    motors,
                                                                    motorConfig);
   private       ElevatorConfig       m_config   = new ElevatorConfig()
-      .withStartingHeight(Meters.of(0.5))
+      // Hard limits model the physical travel of the real mechanism in sim.
       .withHardLimits(Meters.of(0), Meters.of(3))
       .withTelemetry("Elevator", TelemetryVerbosity.HIGH)
-      .withMass(weight);
-  private final Elevator             m_elevator = new Elevator(m_config, motor);
+      .withCarriageWeight(weight);
+
+  private final Elevator m_elevator = new Elevator(m_config, motor);
 
   public ElevatorSubsystem()
   {
+    // Safety: if the carriage is at or below 10 cm and the setpoint is floor (0 rot),
+    // force duty-cycle to zero rather than letting the profile command downward
+    // motion into the hard stop.
     new Trigger(() -> getHeight().lte(Meters.of(0.1)))
         .and(() -> elevatorInputs.setpoint.isEquivalent(motorConfig.convertFromMechanism(Rotations.of(0))))
         .whileTrue(m_elevator.set(0));
   }
 
+  /**
+   * Populate ElevatorInputs from the mechanism and SMC. Must be called before
+   * Logger.processInputs() to guarantee all fields share the same log timestamp.
+   */
   private void updateInputs()
   {
     elevatorInputs.setpoint = motorConfig.convertFromMechanism(m_elevator.getMechanismSetpoint()
@@ -121,6 +158,8 @@ public class ElevatorSubsystem extends SubsystemBase
   public void periodic()
   {
     updateInputs();
+    // processInputs stamps ElevatorInputs with the current timestamp and, during
+    // replay, overwrites all fields with the recorded values from the log file.
     Logger.processInputs("Elevator", elevatorInputs);
     m_elevator.updateTelemetry();
   }
@@ -132,18 +171,25 @@ public class ElevatorSubsystem extends SubsystemBase
 
   public Command elevCmd(double dutycycle)
   {
+    // recordOutput writes duty-cycle as a computed output; it is NOT replayed.
+    // This lets you audit what was commanded vs. what the elevator actually did.
     Logger.recordOutput("Elevator/DutyCycle", dutycycle);
     return m_elevator.set(dutycycle);
   }
 
   public Command setHeight(Distance height)
   {
+    // Setpoint is a command output -- recomputed during replay from the same
+    // control logic, so you can verify the auto sequence still issues the same
+    // height goals when replayed against modified subsystem code.
     Logger.recordOutput("Elevator/Setpoint", height);
     return m_elevator.setHeight(height);
   }
 
   public Distance getHeight()
   {
+    // Reads from elevatorInputs so replay returns the logged sensor value, not
+    // a live hardware read.
     return elevatorInputs.position;
   }
 

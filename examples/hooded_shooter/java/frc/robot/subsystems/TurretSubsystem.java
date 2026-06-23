@@ -33,7 +33,8 @@ public class TurretSubsystem extends SubsystemBase {
         private final TalonFXS turretMotor = new TalonFXS(1);
         private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
                         .withControlMode(ControlMode.CLOSED_LOOP)
-                        .withClosedLoopController(4, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
+                        .withClosedLoopController(4, 0, 0)
+                        .withTrapezoidalProfile(DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
                         // Configure Motor and Mechanism properties
                         .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
                         .withIdleMode(MotorMode.BRAKE)
@@ -43,19 +44,18 @@ public class TurretSubsystem extends SubsystemBase {
                         // Power Optimization
                         .withStatorCurrentLimit(Amps.of(40))
                         .withClosedLoopRampRate(Seconds.of(0.25))
-                        .withOpenLoopRampRate(Seconds.of(0.25));
+                        .withOpenLoopRampRate(Seconds.of(0.25))
+                        .withStartingPosition(Degrees.of(0)) // Starting position of the Pivot
+                        .withContinuousWrapping(Degrees.of(0), Degrees.of(360)) // Wrapping enabled bc the pivot can spin infinitely
+                        .withMomentOfInertia(Meters.of(0.25), Pounds.of(4)); // MOI Calculation
         private final SmartMotorController turretSMC = new TalonFXSWrapper(turretMotor,
                         DCMotor.getNEO(1),
                         motorConfig);
 
         private final PivotConfig turretConfig = new PivotConfig()
-                        .withStartingPosition(Degrees.of(0)) // Starting position of the Pivot
-                        .withWrapping(Degrees.of(0), Degrees.of(360)) // Wrapping enabled bc the pivot can spin
-                                                                      // infinitely
                         .withHardLimits(Degrees.of(0), Degrees.of(720)) // Hard limit bc wiring prevents infinite
                                                                        // spinning
-                        .withTelemetry("TurretMech", TelemetryVerbosity.HIGH) // Telemetry
-                        .withMOI(Meters.of(0.25), Pounds.of(4)); // MOI Calculation
+                        .withTelemetry("TurretMech", TelemetryVerbosity.HIGH); // Telemetry
 
         private final Pivot turret = new Pivot(turretConfig, turretSMC);
 

@@ -23,15 +23,29 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class VisionSubsystem extends SubsystemBase {
-    PhotonCamera camera = new PhotonCamera("HubOrientedCameraMountedOnTurret");
-    VisionSystemSim visionSim = new VisionSystemSim("main");
-    AprilTagFieldLayout tagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+    PhotonCamera camera;
+    VisionSystemSim visionSim;
+    AprilTagFieldLayout tagLayout;
 
     SimCameraProperties cameraProp = new SimCameraProperties();
     PhotonCameraSim cameraSim;
 
+    /** True if photonvision JNI loaded successfully; false means vision is unavailable. */
+    private boolean photonAvailable = false;
+
     public VisionSubsystem() {
+        try {
+            camera = new PhotonCamera("HubOrientedCameraMountedOnTurret");
+            tagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+            photonAvailable = true;
+        } catch (UnsatisfiedLinkError | Exception e) {
+            System.err.println("[VisionSubsystem] PhotonVision unavailable (JNI load failed): " + e.getMessage());
+            return;
+        }
+
         if (RobotBase.isSimulation()) {
+            visionSim = new VisionSystemSim("main");
+
             // A 640 x 480 camera with a 100 degree diagonal FOV.
             cameraProp.setCalibration(640, 480, Rotation2d.fromDegrees(100));
             // Approximate detection noise with average and standard deviation error in
@@ -59,7 +73,9 @@ public class VisionSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        if (RobotBase.isSimulation()) {
+        if (!photonAvailable) return;
+
+        if (RobotBase.isSimulation() && visionSim != null) {
             visionSim.update(new Pose2d());
         }
 
@@ -70,6 +86,7 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     public Optional<PhotonTrackedTarget> getClosestTag() {
+        if (!photonAvailable || camera == null) return Optional.empty();
         return camera.getLatestResult().hasTargets()
                 ? camera.getLatestResult().getTargets().stream()
                         .filter(t -> t.getFiducialId() > 0) // AprilTags only

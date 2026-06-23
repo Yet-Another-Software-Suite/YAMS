@@ -10,8 +10,13 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-
-
+/**
+ * Top-level robot class for the differential mechanism example.
+ *
+ * <p>Follows the standard WPILib TimedRobot pattern.  All subsystem and command
+ * setup lives in RobotContainer; this class only owns the lifecycle hooks and
+ * drives the CommandScheduler loop.
+ */
 public class Robot extends TimedRobot
 {
     private Command autonomousCommand;
@@ -28,6 +33,8 @@ public class Robot extends TimedRobot
     @Override
     public void robotPeriodic()
     {
+        // CommandScheduler.run() must be called every loop iteration (20 ms).
+        // It polls buttons, executes scheduled commands, and calls subsystem periodic().
         CommandScheduler.getInstance().run();
     }
 
@@ -67,6 +74,8 @@ public class Robot extends TimedRobot
     @Override
     public void teleopInit()
     {
+        // Cancel any autonomous command that is still running when tele-op starts.
+        // Without this the auto command could keep driving motors while the driver has control.
         if (autonomousCommand != null)
         {
             autonomousCommand.cancel();
@@ -85,6 +94,7 @@ public class Robot extends TimedRobot
     @Override
     public void testInit()
     {
+        // Clear all running commands so test mode starts from a known state.
         CommandScheduler.getInstance().cancelAll();
     }
 
