@@ -107,13 +107,13 @@ public class ArmSubsystem extends SubsystemBase {
 
   private SmartMotorController armSMC = new TalonFXWrapper(armMotor, DCMotor.getFalcon500(1), smcConfig);
 
-  private ArmConfig armCfg = new ArmConfig(armSMC)
+  private ArmConfig armCfg = new ArmConfig()
       .withHardLimits(Degrees.of(-25), Degrees.of(141))
       .withLength(Feet.of((14.0 / 12)))
       .withTelemetry("Arm", TelemetryVerbosity.HIGH);
 
   // Arm Mechanism
-  private Arm arm = new Arm(armCfg);
+  private Arm arm = new Arm(armCfg, armSMC);
 
   /**
    * Updates AdvantageKit inputs from the {@link Arm} to be used in the rest of

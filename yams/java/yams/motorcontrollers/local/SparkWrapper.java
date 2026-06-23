@@ -1386,6 +1386,28 @@ public class SparkWrapper extends SmartMotorController
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismLimitsEnabled(enabled);}});
   }
 
+  @Override
+  public void setMechanismGearing(MechanismGearing gearing)
+  {
+    m_config.withGearing(gearing);
+    double positionConversionFactor = gearing.getRotorToMechanismRatio();
+    double velocityConversionFactor = gearing.getRotorToMechanismRatio() / 60.0;
+    m_sparkBaseConfig.encoder.positionConversionFactor(positionConversionFactor)
+                             .velocityConversionFactor(velocityConversionFactor);
+    m_spark.configureAsync(m_sparkBaseConfig,
+                           ResetMode.kNoResetSafeParameters,
+                           DriverStation.isEnabled() ? PersistMode.kNoPersistParameters
+                                                     : PersistMode.kPersistParameters);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismGearing(gearing);}});
+  }
+
+  @Override
+  public void setMechanismCircumference(Distance circumference)
+  {
+    m_config.withMechanismCircumference(circumference);
+    m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setMechanismCircumference(circumference);}});
+  }
+
   /**
    * Convert generic slot into spark specific slot.
    *

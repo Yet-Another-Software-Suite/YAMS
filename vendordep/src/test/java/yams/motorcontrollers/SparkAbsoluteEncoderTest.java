@@ -7,8 +7,8 @@ import static edu.wpi.first.units.Units.Rotations;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import yams.helpers.DeviceCreator;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Preferences;
 import org.junit.jupiter.api.AfterEach;
@@ -46,7 +46,7 @@ public class SparkAbsoluteEncoderTest
     @Test
     void testZeroCenteredTrueWith0_5DiscontinuityPoint()
     {
-        SparkMax sparkMax = new SparkMax(60, MotorType.kBrushless);
+        SparkMax sparkMax = DeviceCreator.createSparkMax();
         SmartMotorControllerConfig config = baseConfig()
                 .withExternalEncoder(sparkMax.getAbsoluteEncoder())
                 .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5));
@@ -57,7 +57,7 @@ public class SparkAbsoluteEncoderTest
     @Test
     void testZeroCenteredFalseWith1_0DiscontinuityPoint()
     {
-        SparkMax sparkMax = new SparkMax(60, MotorType.kBrushless);
+        SparkMax sparkMax = DeviceCreator.createSparkMax();
         SmartMotorControllerConfig config = baseConfig()
                 .withExternalEncoder(sparkMax.getAbsoluteEncoder())
                 .withExternalEncoderDiscontinuityPoint(Rotations.of(1));
@@ -68,7 +68,7 @@ public class SparkAbsoluteEncoderTest
     @Test
     void testExceptionWhenDiscontinuityPointWithoutEncoder()
     {
-        SparkMax sparkMax = new SparkMax(60, MotorType.kBrushless);
+        SparkMax sparkMax = DeviceCreator.createSparkMax();
         SmartMotorControllerConfig config = baseConfig()
                 .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5));
         assertThrows(SmartMotorControllerConfigurationException.class,

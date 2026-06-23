@@ -44,13 +44,13 @@ public class ShooterSubsystem extends SubsystemBase
   private final SmartMotorController       motor                  = new TalonFXWrapper(flywheelMotor1,
                                                                                        DCMotor.getNEO(2),
                                                                                        motorConfig);
-  private final FlyWheelConfig             shooterConfig          = new FlyWheelConfig(motor)
+  private final FlyWheelConfig             shooterConfig          = new FlyWheelConfig()
       // Diameter of the flywheel.
       .withDiameter(Inches.of(4))
       // Mass of the flywheel.
       .withMass(Pounds.of(4))
       .withTelemetry("ShooterMech", TelemetryVerbosity.HIGH);
-  private final FlyWheel                   shooter                = new FlyWheel(shooterConfig);
+  private final FlyWheel                   shooter                = new FlyWheel(shooterConfig, motor);
 
   public ShooterSubsystem() {}
 

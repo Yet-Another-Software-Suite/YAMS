@@ -8,7 +8,6 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Millisecond;
 import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
@@ -18,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -48,6 +46,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.helpers.DeviceCreator;
 import yams.motorcontrollers.local.SparkWrapper;
 import yams.motorcontrollers.remote.TalonFXSWrapper;
 import yams.motorcontrollers.remote.TalonFXWrapper;
@@ -70,10 +69,9 @@ public class ShooterTest
 
   private static FlyWheel createShooter(SmartMotorController smc)
   {
-    FlyWheelConfig cfg = new FlyWheelConfig(smc)
-        .withDiameter(Inches.of(4))
-        .withMass(Pounds.of(1));
-    FlyWheel                          shooter = new FlyWheel(cfg);
+    FlyWheelConfig cfg = new FlyWheelConfig()
+        .withDiameter(Inches.of(4));
+    FlyWheel                          shooter = new FlyWheel(cfg, smc);
     SmartMotorControllerTestSubsystem subsys  = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.smc = smc;
     subsys.mechSimPeriodic = shooter::simIterate;
@@ -110,11 +108,11 @@ public class ShooterTest
           break;
         case 3: smcConfig.withClosedLoopController(0,0,0);
       }
-      SparkMax  smax  = new SparkMax(10 + offset + i, MotorType.kBrushless);
-      SparkFlex sflex = new SparkFlex(20 + offset + i, MotorType.kBrushless);
+      SparkMax  smax  = DeviceCreator.createSparkMax();
+      SparkFlex sflex = DeviceCreator.createSparkFlex();
 //    ThriftyNova tnova = new ThriftyNova(30 + offset+i);
-      TalonFXS tfxs = new TalonFXS(40 + offset + i);
-      TalonFX  tfx  = new TalonFX(50 + offset + i);
+      TalonFXS tfxs = DeviceCreator.createTalonFXS();
+      TalonFX  tfx  = DeviceCreator.createTalonFX();
       smcList.add(Arguments.of(setupTestSubsystem(new SparkWrapper(smax,
                                                                    DCMotor.getNEO(1),
                                                                    smcConfig.clone()

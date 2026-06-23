@@ -48,7 +48,7 @@ public class TurretSubsystem extends SubsystemBase {
                         DCMotor.getNEO(1),
                         motorConfig);
 
-        private final PivotConfig turretConfig = new PivotConfig(turretSMC)
+        private final PivotConfig turretConfig = new PivotConfig()
                         .withStartingPosition(Degrees.of(0)) // Starting position of the Pivot
                         .withWrapping(Degrees.of(0), Degrees.of(360)) // Wrapping enabled bc the pivot can spin
                                                                       // infinitely
@@ -57,7 +57,7 @@ public class TurretSubsystem extends SubsystemBase {
                         .withTelemetry("TurretMech", TelemetryVerbosity.HIGH) // Telemetry
                         .withMOI(Meters.of(0.25), Pounds.of(4)); // MOI Calculation
 
-        private final Pivot turret = new Pivot(turretConfig);
+        private final Pivot turret = new Pivot(turretConfig, turretSMC);
 
         public TurretSubsystem() {
         }

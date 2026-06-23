@@ -555,7 +555,6 @@ public abstract class SmartMotorController
                                                    nextVelocitySetpoint.in(MetersPerSecond)));
       } else
       {
-        // TODO: Implement velocity profile
         // Not profiled, so using current velocity or setpoint velocity.
         feedforward.set(ff.calculateWithVelocities(getMeasurementVelocity().in(MetersPerSecond), 0));
       }
@@ -1171,6 +1170,9 @@ public abstract class SmartMotorController
    * @param enabled Application of the limits
    */
   public abstract void setMechanismLimitsEnabled(boolean enabled);
+
+  public abstract void setMechanismGearing(MechanismGearing gearing);
+  public abstract void setMechanismCircumference(Distance circumference);
 
   /**
    * Set the closed loop controller slot to use.

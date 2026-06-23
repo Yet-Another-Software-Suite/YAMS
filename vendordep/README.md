@@ -11,7 +11,7 @@ A driver library is built. This should contain all low level code you want to ac
 A native C++ library is built. This has access to all of wpilib, and access to the driver library. This should implement the standard wpilib interfaces.
 
 ## Customizing
-For Java, the library name will be the folder name the build is started from, so rename the folder to the name of your choosing. 
+For Java, the library name will be the folder name the build is started from, so rename the folder to the name of your choosing.
 
 For the native impl, you need to change the library name in the exportsConfigs block of build.gradle, the components block of build.gradle, and the taskList input array name in publish.gradle.
 
