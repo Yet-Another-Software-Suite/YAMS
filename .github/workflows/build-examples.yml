@@ -22,5 +22,5 @@ jobs:
         working-directory: vendordep
         run: chmod a+x gradlew && ./gradlew installRoboRioToolchain
       - name: Build examples
-        run: make build
+        run: mkdir generated && make && make build
         working-directory: examples
