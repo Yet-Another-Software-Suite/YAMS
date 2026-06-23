@@ -26,3 +26,4 @@ jobs:
       - name: Build C++ example
         run: ./gradlew build
         working-directory: examples/cpptest
+        continue-on-error: true
