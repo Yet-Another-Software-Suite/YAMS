@@ -78,12 +78,12 @@ public class ArmSubsystem extends SubsystemBase {
           .withStatorCurrentLimit(Amps.of(40))
           .withFeedforward(new ArmFeedforward(0, 0, 0, 0))
           .withControlMode(ControlMode.CLOSED_LOOP)
+          .withStartingPosition(Degrees.of(0))
   );
 
   private final Arm arm = new Arm(new ArmConfig(motor)
       .withLength(Meters.of(0.135))
       .withHardLimits(Degrees.of(-100), Degrees.of(200))
-      .withStartingPosition(Degrees.of(0))
       .withTelemetry("ArmExample", TelemetryVerbosity.HIGH)
   );
 
