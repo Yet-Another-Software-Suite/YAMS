@@ -34,6 +34,7 @@ import yams.mechanisms.config.ArmConfig;
 import yams.mechanisms.config.MechanismPositionConfig;
 import yams.mechanisms.config.MechanismPositionConfig.Plane;
 import yams.motorcontrollers.SmartMotorController;
+import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.simulation.ArmSimSupplier;
 
 /**
@@ -45,7 +46,8 @@ import yams.motorcontrollers.simulation.ArmSimSupplier;
  * SmartMotorController motor = new SparkWrapper(
  *     new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1),
  *     new SmartMotorControllerConfig().withClosedLoopController(0.2,0,0).withStatorCurrentLimit(Amps.of(40)));
- * Arm arm = new Arm(new ArmConfig(motor).withLength(Meters.of(0.5)));
+ * ArmConfig armConfig = new ArmConfig().withLength(Meters.of(0.5));
+ * Arm arm = new Arm(armConfig, motor);
  *
  * // Schedule a setpoint command
  * Command moveToScore = arm.setAngle(Degrees.of(80));
@@ -79,14 +81,16 @@ public class Arm extends SmartPositionalMechanism
    * Constructor for the Arm mechanism.
    *
    * @param config {@link ArmConfig} to use.
+   * @param smc {@link SmartMotorController} for the Arm.
    */
-  public Arm(ArmConfig config)
+  public Arm(ArmConfig config, SmartMotorController smc)
   {
     this.m_config = config;
-    m_smc = config.getMotor();
+    m_smc = smc;
+    SmartMotorControllerConfig smccfg = smc.getConfig();
     DCMotor          dcmotor = m_smc.getDCMotor();
     MechanismGearing gearing = m_smc.getConfig().getGearing();
-    m_subsystem = config.getMotor().getConfig().getSubsystem();
+    m_subsystem = smc.getConfig().getSubsystem();
     // Seed the relative encoder
     if (m_smc.getConfig().getExternalEncoder().isPresent())
     {
@@ -97,11 +101,9 @@ public class Arm extends SmartPositionalMechanism
       // TODO: Add telemetry units to config.
       m_telemetry.setupTelemetry(getName(), m_smc);
     }
-    config.applyConfig();
 
     if (RobotBase.isSimulation())
     {
-      SmartMotorController motor = config.getMotor();
       if (config.getLength().isEmpty())
       {
         throw new ArmConfigurationException("Arm Length is empty", "Cannot create simulation.", "withLength(Distance)");
@@ -118,20 +120,28 @@ public class Arm extends SmartPositionalMechanism
                                             "Cannot create simulation.",
                                             "withHardLimits(Angle,Angle)");
       }
-      if (config.getStartingAngle().isEmpty() && motor.getConfig().getZeroOffset().isEmpty())
+      if (smccfg.getStartingPosition().isEmpty() && smccfg.getZeroOffset().isEmpty())
       {
         throw new ArmConfigurationException("Arm starting angle is empty",
                                             "Cannot create simulation.",
                                             "SmartMotorControllerConfig.withStartingPosition(Angle)");
       }
-      m_sim = Optional.of(new SingleJointedArmSim(motor.getDCMotor(),
-                                                  motor.getConfig().getGearing().getMechanismToRotorRatio(),
-                                                  config.getMOI(),
+      if (smccfg.getStartingPosition().isPresent() &&
+          (smccfg.getStartingPosition().get().lt(config.getLowerHardLimit().get()) ||
+                  smccfg.getStartingPosition().get().gt(config.getUpperHardLimit().get())))
+      {
+        throw new ArmConfigurationException("Arm starting angle is outside hard limits",
+                                            "Cannot create simulation.",
+                                            "SmartMotorControllerConfig.withStartingPosition(Angle)");
+      }
+      m_sim = Optional.of(new SingleJointedArmSim(smc.getDCMotor(),
+                                                  smccfg.getGearing().getMechanismToRotorRatio(),
+                                                  smccfg.getMOI(),
                                                   config.getLength().get().in(Meters),
                                                   config.getLowerHardLimit().get().in(Radians),
                                                   config.getUpperHardLimit().get().in(Radians),
                                                   true,
-                                                  config.getStartingAngle().orElse(Rotations.zero()).in(Radians),
+                                                  smccfg.getStartingPosition().orElse(Rotations.zero()).in(Radians),
                                                   0.002 / 4096.0,
                                                   0.0));// Add noise with a std-dev of 1 tick
       m_smc.setSimSupplier(new ArmSimSupplier(m_sim.get(), m_smc));
@@ -153,14 +163,14 @@ public class Arm extends SmartPositionalMechanism
 
       m_mechanismLigament = m_mechanismRoot.append(new MechanismLigament2d(getName(),
                                                                            config.getLength().get().in(Meters),
-                                                                           config.getStartingAngle()
+                                                                           smccfg.getStartingPosition()
                                                                                  .orElse(Rotations.zero()).in(Degrees),
                                                                            6,
                                                                            config.getSimColor()));
       m_setpointLigament = m_mechanismRoot.append(new MechanismLigament2d("Setpoint",
                                                                           config.getLength().get()
                                                                                 .in(Meters),
-                                                                          config.getStartingAngle()
+              smccfg.getStartingPosition()
                                                                                 .orElse(Rotations.zero())
                                                                                 .in(Degrees),
                                                                           3,
@@ -175,17 +185,17 @@ public class Arm extends SmartPositionalMechanism
                                                      config.getLowerHardLimit().get()
                                                            .in(Degrees),
                                                      4, new Color8Bit(Color.kRed)));
-      if (motor.getConfig().getMechanismLowerLimit().isPresent() &&
-          motor.getConfig().getMechanismUpperLimit().isPresent())
+      if (smccfg.getMechanismLowerLimit().isPresent() &&
+          smccfg.getMechanismUpperLimit().isPresent())
       {
         m_mechanismRoot.append(new MechanismLigament2d("MaxSoft",
                                                        Inch.of(3).in(Meters),
-                                                       motor.getConfig().getMechanismUpperLimit().get()
+                                                       smccfg.getMechanismUpperLimit().get()
                                                             .in(Degrees),
                                                        4,
                                                        new Color8Bit(Color.kHotPink)));
         m_mechanismRoot.append(new MechanismLigament2d("MinSoft", Inch.of(3).in(Meters),
-                                                       motor.getConfig().getMechanismLowerLimit().get()
+                                                       smccfg.getMechanismLowerLimit().get()
                                                             .in(Degrees),
                                                        4, new Color8Bit(Color.kYellow)));
       }

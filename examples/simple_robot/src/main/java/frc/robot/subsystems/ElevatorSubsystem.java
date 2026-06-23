@@ -82,13 +82,13 @@ public class ElevatorSubsystem extends SubsystemBase
       .withMaxRobotHeight(Meters.of(1.5))
       .withMaxRobotLength(Meters.of(0.75))
       .withRelativePosition(new Translation3d(Meters.of(-0.25), Meters.of(0), Meters.of(0.5)));
-  private       ElevatorConfig             m_config           = new ElevatorConfig(motor)
+  private       ElevatorConfig             m_config           = new ElevatorConfig()
       .withStartingHeight(Meters.of(0.5))
       .withHardLimits(Meters.of(0), Meters.of(3))
       .withTelemetry("Elevator", TelemetryVerbosity.HIGH)
       .withMechanismPositionConfig(m_robotToMechanism)
       .withMass(weight);
-  private final Elevator                   m_elevator         = new Elevator(m_config);
+  private final Elevator                   m_elevator         = new Elevator(m_config, motor);
 
   public ElevatorSubsystem()
   {

@@ -6,7 +6,6 @@ package yams.mechanisms.config;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import java.util.Optional;
@@ -37,19 +36,16 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  *     DCMotor.getKrakenX60(1),
  *     motorConfig);
  *
- * // Build the pivot config
- * PivotConfig config = new PivotConfig(motor)
+ * // Build the pivot config and mechanism
+ * PivotConfig config = new PivotConfig()
  *     .withHardLimits(Degrees.of(0), Degrees.of(60))
- *     .withTelemetry("ShooterHood", TelemetryVerbosity.HIGH)
- *     .withSimStartingPosition(Degrees.of(0));
+ *     .withTelemetry("ShooterHood", TelemetryVerbosity.HIGH);
+ *
+ * Pivot pivot = new Pivot(config, motor);
  * }</pre>
  */
 public class PivotConfig
 {
-  /**
-   * {@link SmartMotorController} for the {@link Pivot}
-   */
-  private   Optional<SmartMotorController> motor;
   /**
    * Telemetry name.
    */
@@ -74,26 +70,10 @@ public class PivotConfig
    * Mechanism position configuration for the {@link Pivot}
    */
   private   MechanismPositionConfig        mechanismPositionConfig = new MechanismPositionConfig();
-  /**
-   * Simulated starting position.
-   */
-  private Optional<Angle> simStartingPosition = Optional.empty();
 
   /**
    * Pivot Configuration class
-   *
-   * @param motorController Primary {@link SmartMotorController} for the {@link Pivot}
-   */
-  public PivotConfig(SmartMotorController motorController)
-  {
-    motor = Optional.ofNullable(motorController);
-    mechanismPositionConfig.withMovementPlane(Plane.XY);
-  }
-
-  /**
-   * Pivot Configuration class
-   *
-   * @implNote Required call to {@link #withSmartMotorController(SmartMotorController)} before usage.
+   * @implNote Defaults to XY plane.
    */
   public PivotConfig()
   {
@@ -107,8 +87,6 @@ public class PivotConfig
    */
   public PivotConfig(PivotConfig cfg)
   {
-    this.simStartingPosition = cfg.simStartingPosition;
-    this.motor = cfg.motor;
     this.telemetryName = cfg.telemetryName;
     this.telemetryVerbosity = cfg.telemetryVerbosity;
     this.lowerHardLimit = cfg.lowerHardLimit;
@@ -121,36 +99,6 @@ public class PivotConfig
   public PivotConfig clone()
   {
     return new PivotConfig(this);
-  }
-
-  /**
-   * Set the simulation starting position of the pivot. Only ever used in simulation.
-   *
-   * @param position {@link Angle} of the starting position of the pivot.
-   * @return {@link PivotConfig} for chaining.
-   */
-  public PivotConfig withSimStartingPosition(Angle position)
-  {
-    this.simStartingPosition = Optional.ofNullable(position);
-    return this;
-  }
-
-  /**
-   * Configure the {@link SmartMotorController} for the {@link Pivot}
-   *
-   * @param motorController {@link SmartMotorController} for the {@link Pivot}.
-   * @return {@link PivotConfig} for chaining.
-   */
-  public PivotConfig withSmartMotorController(SmartMotorController motorController)
-  {
-    if (motor.isPresent())
-    {
-      throw new PivotConfigurationException("Pivot SmartMotorController already set!",
-                                            "Pivot motor cannot be set",
-                                            "withSmartMotorController(SmartMotorController)");
-    }
-    motor = Optional.of(motorController);
-    return this;
   }
 
   /**
@@ -206,35 +154,6 @@ public class PivotConfig
   }
 
   /**
-   * Apply config changes from this class to the {@link SmartMotorController}
-   *
-   * @return {@link SmartMotorController#applyConfig(SmartMotorControllerConfig)} result.
-   */
-  public boolean applyConfig()
-  {
-    return motor.orElseThrow().applyConfig(motor.orElseThrow().getConfig());
-  }
-
-
-  /**
-   * Get the moment of inertia for the {@link Pivot} simulation.
-   * Must be configured via {@link SmartMotorControllerConfig#withMomentOfInertia(edu.wpi.first.units.measure.MomentOfInertia)}
-   * or {@link SmartMotorControllerConfig#withMomentOfInertia(Distance, Mass)}.
-   *
-   * @return Moment of Inertia in KgMetersSquared.
-   */
-  public double getMOI()
-  {
-    if (motor.isPresent())
-    {
-      return motor.get().getConfig().getMOI();
-    }
-    throw new PivotConfigurationException("Pivot MOI must be configured!",
-                                          "Cannot get the MOI!",
-                                          "SmartMotorControllerConfig.withMomentOfInertia(MomentOfInertia) or withMomentOfInertia(Distance, Mass)");
-  }
-
-  /**
    * Get the Upper hard limit of the {@link Pivot}.
    *
    * @return {@link Angle} hard limit.
@@ -272,31 +191,6 @@ public class PivotConfig
   public Optional<String> getTelemetryName()
   {
     return telemetryName;
-  }
-
-  /**
-   * Get the starting angle of the {@link Pivot}. Reads from {@link SmartMotorControllerConfig#getStartingPosition()}.
-   * Configure via {@link SmartMotorControllerConfig#withStartingPosition(Angle)}.
-   *
-   * @return {@link Angle} of the {@link Pivot}
-   */
-  public Optional<Angle> getStartingAngle()
-  {
-    if (RobotBase.isSimulation() && simStartingPosition.isPresent())
-    {
-      return simStartingPosition;
-    }
-    return motor.orElseThrow().getConfig().getStartingPosition();
-  }
-
-  /**
-   * Get the {@link SmartMotorController} of the {@link Pivot}
-   *
-   * @return {@link SmartMotorController} for the {@link Pivot}
-   */
-  public SmartMotorController getMotor()
-  {
-    return motor.orElseThrow();
   }
 
   /**

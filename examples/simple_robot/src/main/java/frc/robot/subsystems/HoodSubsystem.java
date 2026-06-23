@@ -54,11 +54,11 @@ public class HoodSubsystem extends SubsystemBase
       .withMaxRobotHeight(Meters.of(1.5))
       .withMaxRobotLength(Meters.of(0.75))
       .withRelativePosition(new Translation3d(Meters.of(-0.25), Meters.of(0), Meters.of(0.5)));
-  private final PivotConfig                m_config         = new PivotConfig(motor)
+  private final PivotConfig                m_config         = new PivotConfig()
       .withHardLimits(Degrees.of(-100), Degrees.of(200))
       .withTelemetry("HoodExample", TelemetryVerbosity.HIGH)
       .withMechanismPositionConfig(robotToMechanism);
-  private final Pivot                      hood             = new Pivot(m_config);
+  private final Pivot                      hood             = new Pivot(m_config, motor);
 
   public HoodSubsystem()
   {

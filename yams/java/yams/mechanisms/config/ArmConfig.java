@@ -7,7 +7,6 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
@@ -35,21 +34,17 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  * SmartMotorController motor = new SparkWrapper(
  *     new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), motorConfig);
  *
- * // Build the arm config
- * ArmConfig config = new ArmConfig(motor)
+ * // Build the arm config and mechanism
+ * ArmConfig config = new ArmConfig()
  *     .withLength(Meters.of(0.5))
- *     .withMass(Kilograms.of(2.0))
- *     .withHardLimits(Degrees.of(-10), Degrees.of(90))
  *     .withTelemetry("Arm", TelemetryVerbosity.HIGH)
- *     .withSimStartingPosition(Degrees.of(0));
+ *     .withHardLimits(Degrees.of(-10), Degrees.of(90));
+ *
+ * Arm arm = new Arm(config, motor);
  * }</pre>
  */
 public class ArmConfig
 {
-  /**
-   * {@link SmartMotorController} for the {@link Arm}
-   */
-  private Optional<SmartMotorController> motor               = Optional.empty();
   /**
    * Telemetry name.
    */
@@ -71,10 +66,6 @@ public class ArmConfig
    */
   private   Optional<Distance>             length                  = Optional.empty();
   /**
-   * {@link Arm} mass for simulation.
-   */
-  private   Optional<Mass>                 weight                  = Optional.empty();
-  /**
    * Sim color value
    */
   private   Color8Bit                      simColor                = new Color8Bit(Color.kOrange);
@@ -82,20 +73,6 @@ public class ArmConfig
    * Mechanism position configuration for the {@link Pivot} (Optional).
    */
   private   MechanismPositionConfig        mechanismPositionConfig = new MechanismPositionConfig();
-  /**
-   * Simulated starting position.
-   */
-  private Optional<Angle>                simStartingPosition = Optional.empty();
-
-  /**
-   * Arm Configuration class
-   *
-   * @param motorController Primary {@link SmartMotorController} for the {@link Arm}
-   */
-  public ArmConfig(SmartMotorController motorController)
-  {
-    motor = Optional.of(motorController);
-  }
 
   /**
    * Arm configuration class. Required
@@ -110,14 +87,11 @@ public class ArmConfig
    */
   private ArmConfig(ArmConfig cfg)
   {
-    this.simStartingPosition = cfg.simStartingPosition;
-    motor = cfg.motor;
     telemetryName = cfg.telemetryName;
     telemetryVerbosity = cfg.telemetryVerbosity;
     lowerHardLimit = cfg.lowerHardLimit;
     upperHardLimit = cfg.upperHardLimit;
     length = cfg.length;
-    weight = cfg.weight;
     simColor = cfg.simColor;
     mechanismPositionConfig = cfg.mechanismPositionConfig;
   }
@@ -126,40 +100,6 @@ public class ArmConfig
   public ArmConfig clone()
   {
     return new ArmConfig(this);
-  }
-
-  /**
-   * Set the simulation starting position of the arm. Only ever used in simulation.
-   *
-   * @param simStartingPosition {@link Angle} of the starting position of the arm.
-   * @return {@link ArmConfig} for chaining.
-   */
-  public ArmConfig withSimStartingPosition(Angle simStartingPosition)
-  {
-    this.simStartingPosition = Optional.ofNullable(simStartingPosition);
-    return this;
-  }
-
-  /**
-   * Configure the {@link SmartMotorController} for the {@link Arm}
-   *
-   * @param motorController Primary {@link SmartMotorController} for the {@link Arm}
-   * @return {@link ArmConfig} for chaining.
-   */
-  public ArmConfig withSmartMotorController(SmartMotorController motorController)
-  {
-    if (motor.isPresent())
-    {
-      throw new ArmConfigurationException("Arm already has a SmartMotorController!",
-                                          "Cannot set a new one!",
-                                          ".withSmartMotorController(SmartMotorController)");
-    }
-    motor = Optional.of(motorController);
-    if (length.isPresent() && weight.isPresent())
-    {
-      motorController.getConfig().withMomentOfInertia(length.get(), weight.get());
-    }
-    return this;
   }
 
 
@@ -179,31 +119,12 @@ public class ArmConfig
    * Configure the {@link Arm}s length for simulation.
    *
    * @param distance Length of the {@link Arm}.
+   * @implNote This is not used to forward the MOI to {@link SmartMotorControllerConfig}
    * @return {@link ArmConfig} for chaining.
    */
   public ArmConfig withLength(Distance distance)
   {
-    if (weight.isPresent() && distance != null)
-    {
-      motor.ifPresent(motor -> motor.getConfig().withMomentOfInertia(distance, weight.get()));
-    }
     this.length = Optional.ofNullable(distance);
-    return this;
-  }
-
-  /**
-   * Configure the {@link Arm}s {@link Mass} for simulation.
-   *
-   * @param mass {@link Mass} of the {@link Arm}
-   * @return {@link ArmConfig} for chaining.
-   */
-  public ArmConfig withMass(Mass mass)
-  {
-    if (length.isPresent() && mass != null)
-    {
-      motor.ifPresent(motor -> motor.getConfig().withMomentOfInertia(length.get(), mass));
-    }
-    this.weight = Optional.ofNullable(mass);
     return this;
   }
 
@@ -248,16 +169,6 @@ public class ArmConfig
   }
 
   /**
-   * Apply config changes from this class to the {@link SmartMotorController}
-   *
-   * @return {@link SmartMotorController#applyConfig(SmartMotorControllerConfig)} result.
-   */
-  public boolean applyConfig()
-  {
-    return motor.orElseThrow().applyConfig(motor.orElseThrow().getConfig());
-  }
-
-  /**
    * Get the Length of the {@link Arm}
    *
    * @return {@link Distance} of the Arm.
@@ -265,29 +176,6 @@ public class ArmConfig
   public Optional<Distance> getLength()
   {
     return length;
-  }
-
-  /**
-   * Get the moment of inertia for the {@link Arm} simulation.
-   * MOI must be configured via {@link SmartMotorControllerConfig#withMomentOfInertia(Distance, Mass)}
-   * or {@link SmartMotorControllerConfig#withMomentOfInertia(edu.wpi.first.units.measure.MomentOfInertia)}.
-   * Providing {@link #withLength(Distance)} and {@link #withMass(Mass)} will set it automatically.
-   *
-   * @return Moment of Inertia in KgMetersSquared.
-   */
-  public double getMOI()
-  {
-    if (motor.isPresent())
-    {
-      return motor.get().getConfig().getMOI();
-    }
-    if (length.isPresent() && weight.isPresent())
-    {
-      return SingleJointedArmSim.estimateMOI(length.get().in(Units.Meters), weight.get().in(Units.Kilograms));
-    }
-    throw new ArmConfigurationException("Arm MOI must be configured!",
-                                        "Cannot get the MOI!",
-                                        "SmartMotorControllerConfig.withMomentOfInertia(Distance, Mass) or withMomentOfInertia(MomentOfInertia)");
   }
 
   /**
@@ -328,31 +216,6 @@ public class ArmConfig
   public Optional<String> getTelemetryName()
   {
     return telemetryName;
-  }
-
-  /**
-   * Get the starting angle of the {@link Arm}. Reads from {@link SmartMotorControllerConfig#getStartingPosition()}.
-   * Configure via {@link SmartMotorControllerConfig#withStartingPosition(Angle)}.
-   *
-   * @return {@link Angle} of the {@link Arm}
-   */
-  public Optional<Angle> getStartingAngle()
-  {
-    if (RobotBase.isSimulation() && simStartingPosition.isPresent())
-    {
-      return simStartingPosition;
-    }
-    return motor.flatMap(m -> m.getConfig().getStartingPosition());
-  }
-
-  /**
-   * Get the {@link SmartMotorController} of the {@link Arm}
-   *
-   * @return {@link SmartMotorController} for the {@link Arm}
-   */
-  public SmartMotorController getMotor()
-  {
-    return motor.orElseThrow();
   }
 
   /**

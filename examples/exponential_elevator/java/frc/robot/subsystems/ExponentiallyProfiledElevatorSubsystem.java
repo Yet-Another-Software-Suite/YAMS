@@ -91,7 +91,7 @@ public class ExponentiallyProfiledElevatorSubsystem extends SubsystemBase
   /// Generic Smart Motor Controller with our options and vendor motor.
   private final SmartMotorController motor         = new SparkWrapper(elevatorMotor, dcMotor, motorConfig);
   /// Elevator-specific options
-  private       ElevatorConfig       m_config      = new ElevatorConfig(motor)
+  private       ElevatorConfig       m_config      = new ElevatorConfig()
       /*
        * Basic configuration options for the arm.
        */
@@ -103,7 +103,7 @@ public class ExponentiallyProfiledElevatorSubsystem extends SubsystemBase
        */
       .withHardLimits(hardLowerLimit, hardUpperLimit);
   // Arm mechanism
-  private final Elevator             m_elevator    = new Elevator(m_config);
+  private final Elevator             m_elevator    = new Elevator(m_config, motor);
 
   public ExponentiallyProfiledElevatorSubsystem()
   {
