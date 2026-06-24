@@ -33,6 +33,30 @@
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 #include "yams/motorcontrollers/local/SparkWrapper.hpp"
 
+// Four-module swerve drive with REV SPARK Max (NEO) drive + azimuth motors and
+// CTRE CANcoder absolute encoders.  Heading comes from a Pigeon2 (CAN 14).
+//
+// Module layout (robot-centric, x forward, y left):
+//   Front-left  (FL): drive CAN 1, azimuth CAN 2, CANcoder CAN 3  -- +24 in, +24 in
+//   Front-right (FR): drive CAN 4, azimuth CAN 5, CANcoder CAN 6  -- +24 in, -24 in
+//   Back-left   (BL): drive CAN 7, azimuth CAN 8, CANcoder CAN 9  -- -24 in, +24 in
+//   Back-right  (BR): drive CAN 10, azimuth CAN 11, CANcoder CAN 12 -- -24 in, -24 in
+//
+// Drive gearing: 12:1 (12:1 x 2:1) on 4-inch wheels.  Azimuth gearing: 21:1.
+// Drive PID: kP=50, kD=4.  Azimuth PID: kP=50, kD=4.
+// Drive stator limit: 40 A.  Azimuth stator limit: 20 A.
+//
+// SwerveDrive<4> is built via optional + emplace() because it owns non-copyable state
+// (pose estimator, NT4 publishers) and must be constructed after all modules are ready.
+// Modules are also held as optional<SwerveModule> for the same reason.  Hardware objects
+// (SparkMax, CANcoder, Pigeon2) are plain members and are constructed first.
+//
+// Commands exposed:
+//   SetRobotRelativeChassisSpeeds(speeds) -- one-shot robot-relative drive
+//   DriveToPose(pose)                     -- path-following to a field pose
+//   DriveRobotRelative(supplier)          -- continuous robot-relative drive from a supplier
+//   Lock()                                -- X-lock all modules in place
+//   DriveCommand(controller)              -- field-oriented teleop drive from an XboxController
 class SwerveSubsystem : public frc2::SubsystemBase {
  public:
   SwerveSubsystem();
@@ -70,29 +94,30 @@ class SwerveSubsystem : public frc2::SubsystemBase {
   void SimulationPeriodic() override;
 
  private:
-  ctre::phoenix6::hardware::Pigeon2 m_gyro{14};
+  ctre::phoenix6::hardware::Pigeon2 m_gyro{14};  // CAN ID 14; yaw is fed to SwerveDriveConfig
 
-  // Front-left
+  // Front-left module  (drive CAN 1, azimuth CAN 2, CANcoder CAN 3)
   rev::spark::SparkMax m_flDrive{1, rev::spark::SparkMax::MotorType::kBrushless};
   rev::spark::SparkMax m_flAzimuth{2, rev::spark::SparkMax::MotorType::kBrushless};
   ctre::phoenix6::hardware::CANcoder m_flEncoder{3};
 
-  // Front-right
+  // Front-right module  (drive CAN 4, azimuth CAN 5, CANcoder CAN 6)
   rev::spark::SparkMax m_frDrive{4, rev::spark::SparkMax::MotorType::kBrushless};
   rev::spark::SparkMax m_frAzimuth{5, rev::spark::SparkMax::MotorType::kBrushless};
   ctre::phoenix6::hardware::CANcoder m_frEncoder{6};
 
-  // Back-left
+  // Back-left module  (drive CAN 7, azimuth CAN 8, CANcoder CAN 9)
   rev::spark::SparkMax m_blDrive{7, rev::spark::SparkMax::MotorType::kBrushless};
   rev::spark::SparkMax m_blAzimuth{8, rev::spark::SparkMax::MotorType::kBrushless};
   ctre::phoenix6::hardware::CANcoder m_blEncoder{9};
 
-  // Back-right
+  // Back-right module  (drive CAN 10, azimuth CAN 11, CANcoder CAN 12)
   rev::spark::SparkMax m_brDrive{10, rev::spark::SparkMax::MotorType::kBrushless};
   rev::spark::SparkMax m_brAzimuth{11, rev::spark::SparkMax::MotorType::kBrushless};
   ctre::phoenix6::hardware::CANcoder m_brEncoder{12};
 
-  // Motor controllers (optional to allow deferred construction)
+  // SparkWrapper takes its SparkMax by reference, so the SparkMax members above must
+  // outlive these wrappers.  optional allows deferred construction inside CreateModule().
   std::optional<yams::motorcontrollers::local::SparkWrapper> m_flDriveSMC;
   std::optional<yams::motorcontrollers::local::SparkWrapper> m_flAzimuthSMC;
   std::optional<yams::motorcontrollers::local::SparkWrapper> m_frDriveSMC;
@@ -102,16 +127,21 @@ class SwerveSubsystem : public frc2::SubsystemBase {
   std::optional<yams::motorcontrollers::local::SparkWrapper> m_brDriveSMC;
   std::optional<yams::motorcontrollers::local::SparkWrapper> m_brAzimuthSMC;
 
-  // Swerve modules
+  // SwerveModule owns pointers into the SMC optionals above; must be constructed after them.
   std::optional<yams::mechanisms::swerve::SwerveModule> m_fl;
   std::optional<yams::mechanisms::swerve::SwerveModule> m_fr;
   std::optional<yams::mechanisms::swerve::SwerveModule> m_bl;
   std::optional<yams::mechanisms::swerve::SwerveModule> m_br;
 
-  // Drive
+  // SwerveDrive<4> holds NT4 publishers and a pose estimator -- non-copyable, non-movable
+  // after construction.  emplace()'d in the constructor after all four modules are ready.
   std::optional<yams::mechanisms::swerve::SwerveDrive<4>> m_drive;
+  // Stored so its internal controller lambda stays alive for the lifetime of DriveCommand().
   std::optional<yams::mechanisms::swerve::utility::SwerveInputStream<4>> m_driveStream;
 
+  // Builds one swerve module: creates configs, emplace()'s the two SparkWrappers into the
+  // provided optional refs, wires up the CANcoder absolute position lambda, and returns the
+  // finished SwerveModule.  Called once per corner in the constructor.
   yams::mechanisms::swerve::SwerveModule CreateModule(
       rev::spark::SparkMax& drive, rev::spark::SparkMax& azimuth,
       ctre::phoenix6::hardware::CANcoder& absoluteEncoder, const std::string& moduleName,

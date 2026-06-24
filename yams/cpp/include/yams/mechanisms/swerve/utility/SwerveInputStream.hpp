@@ -392,7 +392,7 @@ class SwerveInputStream {
         auto& pid = m_swerveDrive->GetConfig().GetRotationPID();
         auto currentHeading = frc::Rotation2d{units::radian_t{m_swerveDrive->GetGyroAngle()}};
         auto relativeTrl = m_aimTarget.value()().RelativeTo(m_swerveDrive->GetPose()).Translation();
-        auto target = frc::Rotation2d{relativeTrl.X(), relativeTrl.Y()} + currentHeading;
+        auto target = relativeTrl.Angle() + currentHeading;
         omega = pid.Calculate(currentHeading.Radians().value(), target.Radians().value());
         break;
       }
@@ -518,13 +518,13 @@ class SwerveInputStream {
   frc::Translation2d ApplyTranslationScalar(double xAxis, double yAxis) {
     frc::Translation2d t{units::meter_t{xAxis}, units::meter_t{yAxis}};
     return m_translationAxisScale.has_value()
-               ? config::SwerveDriveConfig::ScaleTranslation(t, m_translationAxisScale.value())
+               ? SwerveDriveConfig::ScaleTranslation(t, m_translationAxisScale.value())
                : t;
   }
 
   frc::Translation2d ApplyTranslationCube(frc::Translation2d translation) {
     if (m_translationCube.has_value() && m_translationCube.value()()) {
-      return config::SwerveDriveConfig::CubeTranslation(translation);
+      return SwerveDriveConfig::CubeTranslation(translation);
     }
     return translation;
   }

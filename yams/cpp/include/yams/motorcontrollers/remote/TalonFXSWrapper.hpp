@@ -40,7 +40,6 @@ namespace yams::motorcontrollers::remote {
  * The TalonFXS supports third-party brushed and brushless motors (e.g. REV NEO, Minion).
  * Wraps a TalonFXS hardware object and exposes the full SmartMotorController interface
  * including MotionMagic profiles, CANcoder/CANdi synchronization, and simulation support.
-Q *
  * ### Example usage (inside a subsystem constructor)
  * @code{.cpp}
  * using namespace yams::motorcontrollers;

@@ -24,15 +24,34 @@ using namespace yams::mechanisms::config;
 using namespace yams::mechanisms::swerve::utility;
 using Cfg = SmartMotorControllerConfig;
 
+// CreateModule is called once per corner in the constructor.  It owns the SparkWrapper
+// instances for that corner (passed in by reference from the header) and returns a
+// fully-configured SwerveModule by value.
+//
+// CAN ID layout (from the header):
+//   FL: drive=1, azimuth=2, CANcoder=3
+//   FR: drive=4, azimuth=5, CANcoder=6
+//   BL: drive=7, azimuth=8, CANcoder=9
+//   BR: drive=10, azimuth=11, CANcoder=12
+//   Pigeon2 gyro: 14
 yams::mechanisms::swerve::SwerveModule SwerveSubsystem::CreateModule(
     rev::spark::SparkMax& drive, rev::spark::SparkMax& azimuth,
     ctre::phoenix6::hardware::CANcoder& absoluteEncoder, const std::string& moduleName,
     frc::Translation2d location,
     std::optional<yams::motorcontrollers::local::SparkWrapper>& driveSMC,
     std::optional<yams::motorcontrollers::local::SparkWrapper>& azimuthSMC) {
+  // Drive gearing: GearBox::FromStages parses ratio strings and multiplies them.
+  // "12:1" then "2:1" gives a 24:1 total rotor-to-wheel reduction.
+  // Circumference = pi * 4 in (4-inch wheel) -- tells the SMC how to convert rotor
+  // turns into meters traveled, which the pose estimator needs for odometry.
+  //
+  // Azimuth gearing: 21:1 reduction from motor to steering axle.
+  // Lower current limit (20 A vs 40 A) because the steering motor is smaller-duty.
   MechanismGearing driveGearing{GearBox::FromStages({"12:1", "2:1"})};
   MechanismGearing azimuthGearing{GearBox::FromStages({"21:1"})};
 
+  // kP=50 with kD=4 gives a stiff velocity loop on the drive.  kD suppresses overshoot
+  // when the module snaps to a new wheel speed; tune kP down if wheels chatter at low speed.
   SmartMotorControllerConfig driveCfg;
   driveCfg.WithSubsystem(this)
       .WithMechanismCircumference(units::meter_t{4.0 * 0.0254 * std::numbers::pi})
@@ -41,6 +60,8 @@ yams::mechanisms::swerve::SwerveModule SwerveSubsystem::CreateModule(
       .WithStatorCurrentLimit(units::ampere_t{40})
       .WithTelemetry("driveMotor", Cfg::TelemetryVerbosity::HIGH);
 
+  // Same PID shape for the azimuth.  No feedforward needed because the NEO holds angle
+  // with PD alone at these gains.  Add kS if you observe steady-state azimuth error.
   SmartMotorControllerConfig azimuthCfg;
   azimuthCfg.WithSubsystem(this)
       .WithFeedback(50, 0, 4)
@@ -48,9 +69,18 @@ yams::mechanisms::swerve::SwerveModule SwerveSubsystem::CreateModule(
       .WithStatorCurrentLimit(units::ampere_t{20})
       .WithTelemetry("angleMotor", Cfg::TelemetryVerbosity::HIGH);
 
+  // SparkWrapper takes a reference (not pointer).  emplace() builds in-place to avoid a
+  // move, since SparkMax itself is non-movable after construction.
   driveSMC.emplace(drive, frc::DCMotor::NEO(1), driveCfg);
   azimuthSMC.emplace(azimuth, frc::DCMotor::NEO(1), azimuthCfg);
 
+  // CANcoder: absolute magnetic encoder that gives the true wheel angle in turns on every
+  // power cycle.  The lambda converts CANcoder turns to degrees and is called by
+  // SwerveModule each loop to seed/synchronize the SparkMax relative encoder.
+  // Without this, the azimuth SparkMax would reset to 0 deg after every deploy or brownout.
+  //
+  // WithOptimization(true): allows the module to flip drive direction and rotate at most 90 deg
+  // instead of 270 deg to reach the commanded angle, cutting steering travel in half.
   auto* encoderPtr = &absoluteEncoder;
   SwerveModuleConfig moduleConfig{&driveSMC.value(), &azimuthSMC.value()};
   moduleConfig
@@ -65,6 +95,10 @@ yams::mechanisms::swerve::SwerveModule SwerveSubsystem::CreateModule(
 }
 
 SwerveSubsystem::SwerveSubsystem() {
+  // Module locations are Translation2d{X_forward, Y_left} from the robot centre.
+  // Sign convention: +X is toward the intake/front, +Y is toward the left side.
+  // All four corners are 24 in from centre in each axis, so the wheelbase and track
+  // width are both 48 in.  Adjust these if the frame dimensions change.
   m_fl.emplace(CreateModule(m_flDrive, m_flAzimuth, m_flEncoder, "frontleft",
                             frc::Translation2d{units::inch_t{24}, units::inch_t{24}}, m_flDriveSMC,
                             m_flAzimuthSMC));
@@ -78,6 +112,15 @@ SwerveSubsystem::SwerveSubsystem() {
                             frc::Translation2d{units::inch_t{-24}, units::inch_t{-24}},
                             m_brDriveSMC, m_brAzimuthSMC));
 
+  // SwerveDriveConfig collects all four modules and the gyro supplier into one object
+  // that is moved into SwerveDrive<4>.  The gyro lambda converts Pigeon2 yaw (in turns)
+  // to degrees; SwerveDrive applies offset and inversion internally.
+  //
+  // WithStartingPose at the origin: odometry starts at (0, 0) facing 0 degrees.  Reset
+  // this before auto if the robot starts at a known field position.
+  //
+  // Translation and rotation PID controllers are used by DriveToPose only.  kP=1 is a
+  // placeholder -- tune these in auto by checking overshoot and settling time.
   SwerveDriveConfig config;
   config.WithSubsystem(this)
       .WithModules({&m_fl.value(), &m_fr.value(), &m_bl.value(), &m_br.value()})
@@ -88,22 +131,30 @@ SwerveSubsystem::SwerveSubsystem() {
       .WithTranslationController(frc::PIDController{1, 0, 0})
       .WithRotationController(frc::PIDController{1, 0, 0});
 
+  // config is moved here so SwerveDrive owns it; do not use config after this line.
   m_drive.emplace(std::move(config));
 }
 
+// Constant-speed command: captures the ChassisSpeeds by value so the command keeps
+// driving at the speed it was given even if the caller changes its local variable.
 frc2::CommandPtr SwerveSubsystem::SetRobotRelativeChassisSpeeds(frc::ChassisSpeeds speeds) {
   return Run([this, speeds] { m_drive->SetRobotRelativeChassisSpeeds(speeds); });
 }
 
+// DriveToPose uses the translation and rotation PID controllers set in the constructor.
+// It drives field-relative using pose-estimator feedback; vision measurements improve accuracy.
 frc2::CommandPtr SwerveSubsystem::DriveToPose(frc::Pose2d pose) {
   return m_drive->DriveToPose(pose);
 }
 
+// Accepts a supplier so the caller can update speeds each loop (e.g. from a joystick).
 frc2::CommandPtr SwerveSubsystem::DriveRobotRelative(
     std::function<frc::ChassisSpeeds()> speedsSupplier) {
   return m_drive->Drive(speedsSupplier);
 }
 
+// X-lock: points all modules toward the centre of the robot to resist pushing.
+// Useful as a defensive command bound to a button.
 frc2::CommandPtr SwerveSubsystem::Lock() {
   return Run([this] { m_drive->LockPose(); });
 }
@@ -116,6 +167,15 @@ frc::ChassisSpeeds SwerveSubsystem::GetFieldOrientedChassisSpeed() {
 
 units::degree_t SwerveSubsystem::GetGyroAngle() { return m_drive->GetGyroAngle(); }
 
+// Builds a SwerveInputStream from an Xbox controller with competition-ready defaults:
+//   - Left stick Y -> forward/back (negated: push stick forward = positive X)
+//   - Left stick X -> strafe left/right (negated: push stick left = positive Y)
+//   - Right stick X -> rotation (not negated; CCW-positive by convention)
+//   - 0.1 deadband removes controller drift
+//   - 0.8 translation scale limits max speed to 80% to protect mechanisms
+//   - Cubed rotation: fine control near centre, faster at the extremes
+//   - WithAllianceRelativeControl: rotates the field frame so forward is always away from
+//     your alliance wall regardless of which side of the field you start on
 SwerveInputStream<4> SwerveSubsystem::MakeDriveInputStream(
     frc2::CommandXboxController& controller) {
   return SwerveInputStream<4>::Of(
@@ -128,11 +188,15 @@ SwerveInputStream<4> SwerveSubsystem::MakeDriveInputStream(
       .WithAllianceRelativeControl();
 }
 
+// m_driveStream must outlive the command returned here; it is stored as a subsystem member
+// so the lambdas inside SwerveDrive::Drive remain valid for the command's lifetime.
 frc2::CommandPtr SwerveSubsystem::DriveCommand(frc2::CommandXboxController& controller) {
   m_driveStream.emplace(MakeDriveInputStream(controller));
   return m_drive->Drive([this] { return (*m_driveStream)(); });
 }
 
+// UpdateTelemetry also updates the pose estimator from module positions + gyro.
 void SwerveSubsystem::Periodic() { m_drive->UpdateTelemetry(); }
 
+// SimIterate steps each module's DCMotorSim and integrates the simulated gyro heading.
 void SwerveSubsystem::SimulationPeriodic() { m_drive->SimIterate(); }
