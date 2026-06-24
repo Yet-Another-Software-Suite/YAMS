@@ -64,7 +64,7 @@ namespace yams::motorcontrollers::remote {
  *    .WithClosedLoopMode()
  *    .WithTelemetry("HoodMotor", Cfg::TelemetryVerbosity::HIGH);
  *
- * m_smc.emplace(m_talonFXS, DCMotor::NEO(1), MotorArrangement::NEO, &cfg);
+ * m_smc.emplace(&m_talonFXS, DCMotor::NEO(1), MotorArrangement::NEO, &cfg);
  * @endcode
  */
 class TalonFXSWrapper : public SmartMotorController {
