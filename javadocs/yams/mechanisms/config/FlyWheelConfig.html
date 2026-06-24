@@ -91,13 +91,13 @@ loadScripts(document, 'script');</script>
  // 2. Create a TalonFXWrapper for a Kraken X60 on CAN ID 1
  SmartMotorController motor = new TalonFXWrapper(new TalonFX(1), DCMotor.getKrakenX60(1), motorConfig);
 
- // 3. Assemble the FlyWheelConfig
+ // 3. Assemble the FlyWheelConfig and mechanism
  FlyWheelConfig config = new FlyWheelConfig()
-     .withSmartMotorController(motor)
      .withDiameter(Inches.of(4))
-     .withMass(Pounds.of(0.5))
      .withSpeedometerSimulation(RPM.of(6000))  // optional: sim speedometer up to 6000 RPM
      .withTelemetry("Shooter", TelemetryVerbosity.HIGH);
+
+ FlyWheel flywheel = new FlyWheel(config, motor);
  </code></pre></div>
 </section>
 <section class="summary">
@@ -112,11 +112,7 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E()" class="member-name-link">FlyWheelConfig</a>()</code></div>
 <div class="col-last even-row-color">
-<div class="block">FlyWheel configuration class.</div>
-</div>
-<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(yams.motorcontrollers.SmartMotorController)" class="member-name-link">FlyWheelConfig</a><wbr>(<a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>&nbsp;motorController)</code></div>
-<div class="col-last odd-row-color">
-<div class="block">Arm Configuration class</div>
+<div class="block">FlyWheel Configuration class</div>
 </div>
 </div>
 </section>
@@ -132,88 +128,68 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyConfig()" class="member-name-link">applyConfig</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Apply config changes from this class to the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#clone()" class="member-name-link">clone</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#disableSpeedometerSimulation()" class="member-name-link">disableSpeedometerSimulation</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#clone()" class="member-name-link">clone</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#disableSpeedometerSimulation()" class="member-name-link">disableSpeedometerSimulation</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Disable the use of the speedometer simulation for the shooter.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAngularVelocity(edu.wpi.first.units.measure.LinearVelocity)" class="member-name-link">getAngularVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearVelocity</a>&nbsp;velocity)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAngularVelocity(edu.wpi.first.units.measure.LinearVelocity)" class="member-name-link">getAngularVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearVelocity</a>&nbsp;velocity)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> of the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a> given a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>LinearVelocity</code></a></div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCircumference()" class="member-name-link">getCircumference</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCircumference()" class="member-name-link">getCircumference</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the circumference of the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDiameter()" class="member-name-link">getDiameter</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDiameter()" class="member-name-link">getDiameter</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the Length of the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a></div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearVelocity</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLinearVelocity(edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">getLinearVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&nbsp;velocity)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearVelocity</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLinearVelocity(edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">getLinearVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&nbsp;velocity)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>LinearVelocity</code></a> of the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a> given an <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a></div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config">MechanismPositionConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMechanismPositionConfig()" class="member-name-link">getMechanismPositionConfig</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config">MechanismPositionConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMechanismPositionConfig()" class="member-name-link">getMechanismPositionConfig</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the <a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a> associated with this <a href="FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a>.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMOI()" class="member-name-link">getMOI</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the moment of inertia for the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a> simulation.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMotor()" class="member-name-link">getMotor</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/util/Color8Bit.html" title="class or interface in edu.wpi.first.wpilibj.util" class="external-link">Color8Bit</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSimColor()" class="member-name-link">getSimColor</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> of the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a></div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/util/Color8Bit.html" title="class or interface in edu.wpi.first.wpilibj.util" class="external-link">Color8Bit</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSimColor()" class="member-name-link">getSimColor</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get sim color</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSpeedometerMaxVelocity()" class="member-name-link">getSpeedometerMaxVelocity</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSpeedometerMaxVelocity()" class="member-name-link">getSpeedometerMaxVelocity</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the maximum velocity of the speedometer simulation.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTelemetryName()" class="member-name-link">getTelemetryName</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTelemetryName()" class="member-name-link">getTelemetryName</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Network Tables name for the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a></div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../../motorcontrollers/SmartMotorControllerConfig.TelemetryVerbosity.html" title="enum class in yams.motorcontrollers">SmartMotorControllerConfig.TelemetryVerbosity</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTelemetryVerbosity()" class="member-name-link">getTelemetryVerbosity</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../../motorcontrollers/SmartMotorControllerConfig.TelemetryVerbosity.html" title="enum class in yams.motorcontrollers">SmartMotorControllerConfig.TelemetryVerbosity</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTelemetryVerbosity()" class="member-name-link">getTelemetryVerbosity</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the telemetry verbosity of the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a></div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isUsingSpeedometerSimulation()" class="member-name-link">isUsingSpeedometerSimulation</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isUsingSpeedometerSimulation()" class="member-name-link">isUsingSpeedometerSimulation</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Check if the shooter is using the speedometer simulation.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withDiameter(edu.wpi.first.units.measure.Distance)" class="member-name-link">withDiameter</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;distance)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Configure the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a>s diameter for simulation.</div>
-</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMass(edu.wpi.first.units.measure.Mass)" class="member-name-link">withMass</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Mass</a>&nbsp;mass)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withDiameter(edu.wpi.first.units.measure.Distance)" class="member-name-link">withDiameter</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;distance)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Configure the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a>s <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Mass</code></a> for simulation.</div>
+<div class="block">Configure the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a>s diameter for simulation.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMechanismPositionConfig(yams.mechanisms.config.MechanismPositionConfig)" class="member-name-link">withMechanismPositionConfig</a><wbr>(<a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config">MechanismPositionConfig</a>&nbsp;mechanismPositionConfig)</code></div>
@@ -221,42 +197,24 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the shooter mechanism position configuration.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMOI(edu.wpi.first.units.measure.Distance,edu.wpi.first.units.measure.Mass)" class="member-name-link">withMOI</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;length,
- <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Mass</a>&nbsp;weight)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Configure the MOI directly instead of estimating it with the length and mass of the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a> for
- simulation.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMOI(edu.wpi.first.units.measure.MomentOfInertia)" class="member-name-link">withMOI</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/MomentOfInertia.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">MomentOfInertia</a>&nbsp;MOI)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Configure the MOI directly instead of estimating it with the length and mass of the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a> for
- simulation.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimColor(edu.wpi.first.wpilibj.util.Color8Bit)" class="member-name-link">withSimColor</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/util/Color8Bit.html" title="class or interface in edu.wpi.first.wpilibj.util" class="external-link">Color8Bit</a>&nbsp;simColor)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Publish the color in sim as this.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSmartMotorController(yams.motorcontrollers.SmartMotorController)" class="member-name-link">withSmartMotorController</a><wbr>(<a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>&nbsp;motorController)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSpeedometerSimulation()" class="member-name-link">withSpeedometerSimulation</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a></div>
+<div class="block">Enables the use of the speedometer simulation for the shooter.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSpeedometerSimulation()" class="member-name-link">withSpeedometerSimulation</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSpeedometerSimulation(edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">withSpeedometerSimulation</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&nbsp;maxVelocity)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Enables the use of the speedometer simulation for the shooter.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSpeedometerSimulation(edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">withSpeedometerSimulation</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&nbsp;maxVelocity)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Enables the use of the speedometer simulation for the shooter.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTelemetry(java.lang.String,yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)" class="member-name-link">withTelemetry</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;telemetryName,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTelemetry(java.lang.String,yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)" class="member-name-link">withTelemetry</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;telemetryName,
  <a href="../../motorcontrollers/SmartMotorControllerConfig.TelemetryVerbosity.html" title="enum class in yams.motorcontrollers">SmartMotorControllerConfig.TelemetryVerbosity</a>&nbsp;telemetryVerbosity)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Configure telemetry for the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a> mechanism.</div>
 </div>
 </div>
@@ -277,26 +235,10 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(yams.motorcontrollers.SmartMotorController)">
-<h3>FlyWheelConfig</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">FlyWheelConfig</span><wbr><span class="parameters">(<a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>&nbsp;motorController)</span></div>
-<div class="block">Arm Configuration class</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>motorController</code> - Primary <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a></dd>
-</dl>
-</section>
-</li>
-<li>
 <section class="detail" id="&lt;init&gt;()">
 <h3>FlyWheelConfig</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">FlyWheelConfig</span>()</div>
-<div class="block">FlyWheel configuration class.</div>
-<dl class="notes">
-<dt>Implementation Note:</dt>
-<dd>Required to call <a href="#withSmartMotorController(yams.motorcontrollers.SmartMotorController)"><code>withSmartMotorController(SmartMotorController)</code></a> before this is used with an
- <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a></dd>
-</dl>
+<div class="block">FlyWheel Configuration class</div>
 </section>
 </li>
 </ul>
@@ -314,19 +256,6 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Overrides:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#clone()" title="class or interface in java.lang" class="external-link">clone</a></code>&nbsp;in class&nbsp;<code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></code></dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="withSmartMotorController(yams.motorcontrollers.SmartMotorController)">
-<h3>withSmartMotorController</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></span>&nbsp;<span class="element-name">withSmartMotorController</span><wbr><span class="parameters">(<a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>&nbsp;motorController)</span></div>
-<div class="block">Set the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a></div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>motorController</code> - Primary <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a></dd>
-<dt>Returns:</dt>
-<dd><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a> for chaining.</dd>
 </dl>
 </section>
 </li>
@@ -416,36 +345,6 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="withMOI(edu.wpi.first.units.measure.MomentOfInertia)">
-<h3>withMOI</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></span>&nbsp;<span class="element-name">withMOI</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/MomentOfInertia.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">MomentOfInertia</a>&nbsp;MOI)</span></div>
-<div class="block">Configure the MOI directly instead of estimating it with the length and mass of the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a> for
- simulation.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>MOI</code> - Moment of Inertia of the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a></dd>
-<dt>Returns:</dt>
-<dd><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a> for chaining.</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="withMOI(edu.wpi.first.units.measure.Distance,edu.wpi.first.units.measure.Mass)">
-<h3>withMOI</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></span>&nbsp;<span class="element-name">withMOI</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;length,
- <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Mass</a>&nbsp;weight)</span></div>
-<div class="block">Configure the MOI directly instead of estimating it with the length and mass of the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a> for
- simulation.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>length</code> - Length of the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a>.</dd>
-<dd><code>weight</code> - Weight of the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a></dd>
-<dt>Returns:</dt>
-<dd><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a> for chaining.</dd>
-</dl>
-</section>
-</li>
-<li>
 <section class="detail" id="withDiameter(edu.wpi.first.units.measure.Distance)">
 <h3>withDiameter</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></span>&nbsp;<span class="element-name">withDiameter</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;distance)</span></div>
@@ -453,19 +352,6 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>distance</code> - Length of the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a>.</dd>
-<dt>Returns:</dt>
-<dd><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a> for chaining.</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="withMass(edu.wpi.first.units.measure.Mass)">
-<h3>withMass</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></span>&nbsp;<span class="element-name">withMass</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Mass</a>&nbsp;mass)</span></div>
-<div class="block">Configure the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a>s <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Mass</code></a> for simulation.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>mass</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Mass</code></a> of the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a></dd>
 <dt>Returns:</dt>
 <dd><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a> for chaining.</dd>
 </dl>
@@ -500,35 +386,13 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="applyConfig()">
-<h3>applyConfig</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">applyConfig</span>()</div>
-<div class="block">Apply config changes from this class to the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd><a href="../../motorcontrollers/SmartMotorController.html#applyConfig(yams.motorcontrollers.SmartMotorControllerConfig)"><code>SmartMotorController.applyConfig(SmartMotorControllerConfig)</code></a> result.</dd>
-</dl>
-</section>
-</li>
-<li>
 <section class="detail" id="getDiameter()">
 <h3>getDiameter</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&gt;</span>&nbsp;<span class="element-name">getDiameter</span>()</div>
 <div class="block">Get the Length of the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a></div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Distance</code></a> of the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a> or an empty <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link"><code>Optional</code></a> if not set..</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="getMOI()">
-<h3>getMOI</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getMOI</span>()</div>
-<div class="block">Get the moment of inertia for the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a> simulation.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>Moment of Inertia.</dd>
+<dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Distance</code></a> of the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a> or an empty <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link"><code>Optional</code></a> if not set.</dd>
 </dl>
 </section>
 </li>
@@ -551,17 +415,6 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>Network Tables name.</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="getMotor()">
-<h3>getMotor</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></span>&nbsp;<span class="element-name">getMotor</span>()</div>
-<div class="block">Get the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> of the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a></div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd><a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="../velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a></dd>
 </dl>
 </section>
 </li>

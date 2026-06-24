@@ -104,13 +104,12 @@ loadScripts(document, 'script');</script>
      DCMotor.getKrakenX60(1),
      motorConfig);
 
- PivotConfig pivotConfig = new PivotConfig(motor)
+ PivotConfig pivotConfig = new PivotConfig()
      .withHardLimits(Degrees.of(0), Degrees.of(60))
-     .withTelemetry("ShooterHood", TelemetryVerbosity.HIGH)
-     .withSimStartingPosition(Degrees.of(0));
+     .withTelemetry("ShooterHood", TelemetryVerbosity.HIGH);
 
  // --- Instantiation ---
- Pivot pivot = new Pivot(pivotConfig);
+ Pivot pivot = new Pivot(pivotConfig, motor);
 
  // --- Commands ---
  // setAngle() returns a Command that continuously drives the pivot to the target angle
@@ -154,7 +153,8 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(yams.mechanisms.config.PivotConfig)" class="member-name-link">Pivot</a><wbr>(<a href="../config/PivotConfig.html" title="class in yams.mechanisms.config">PivotConfig</a>&nbsp;config)</code></div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(yams.mechanisms.config.PivotConfig,yams.motorcontrollers.SmartMotorController)" class="member-name-link">Pivot</a><wbr>(<a href="../config/PivotConfig.html" title="class in yams.mechanisms.config">PivotConfig</a>&nbsp;config,
+ <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>&nbsp;smc)</code></div>
 <div class="col-last even-row-color">
 <div class="block">Construct the Pivot class</div>
 </div>
@@ -298,9 +298,10 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(yams.mechanisms.config.PivotConfig)">
+<section class="detail" id="&lt;init&gt;(yams.mechanisms.config.PivotConfig,yams.motorcontrollers.SmartMotorController)">
 <h3>Pivot</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">Pivot</span><wbr><span class="parameters">(<a href="../config/PivotConfig.html" title="class in yams.mechanisms.config">PivotConfig</a>&nbsp;config)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">Pivot</span><wbr><span class="parameters">(<a href="../config/PivotConfig.html" title="class in yams.mechanisms.config">PivotConfig</a>&nbsp;config,
+ <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>&nbsp;smc)</span></div>
 <div class="block">Construct the Pivot class</div>
 <dl class="notes">
 <dt>Parameters:</dt>

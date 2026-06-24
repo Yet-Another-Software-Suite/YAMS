@@ -83,23 +83,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">The previous solve attempt resulted in two nearly-equal matches within tolerance.</div>
 </dd>
-<dt><a href="yams/mechanisms/config/ArmConfig.html#applyConfig()" class="member-name-link">applyConfig()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></dt>
-<dd>
-<div class="block">Apply config changes from this class to the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
-</dd>
 <dt><a href="yams/mechanisms/config/DifferentialMechanismConfig.html#applyConfig()" class="member-name-link">applyConfig()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/DifferentialMechanismConfig.html" title="class in yams.mechanisms.config">DifferentialMechanismConfig</a></dt>
-<dd>
-<div class="block">Apply config changes from this class to the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
-</dd>
-<dt><a href="yams/mechanisms/config/ElevatorConfig.html#applyConfig()" class="member-name-link">applyConfig()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></dt>
-<dd>
-<div class="block">Apply config changes from this class to the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
-</dd>
-<dt><a href="yams/mechanisms/config/FlyWheelConfig.html#applyConfig()" class="member-name-link">applyConfig()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></dt>
-<dd>
-<div class="block">Apply config changes from this class to the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
-</dd>
-<dt><a href="yams/mechanisms/config/PivotConfig.html#applyConfig()" class="member-name-link">applyConfig()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config">PivotConfig</a></dt>
 <dd>
 <div class="block">Apply config changes from this class to the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
 </dd>
@@ -121,7 +105,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Arm mechanism.</div>
 </dd>
-<dt><a href="yams/mechanisms/positional/Arm.html#%3Cinit%3E(yams.mechanisms.config.ArmConfig)" class="member-name-link">Arm(ArmConfig)</a> - Constructor for class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional">Arm</a></dt>
+<dt><a href="yams/mechanisms/positional/Arm.html#%3Cinit%3E(yams.mechanisms.config.ArmConfig,yams.motorcontrollers.SmartMotorController)" class="member-name-link">Arm(ArmConfig, SmartMotorController)</a> - Constructor for class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional">Arm</a></dt>
 <dd>
 <div class="block">Constructor for the Arm mechanism.</div>
 </dd>
@@ -136,10 +120,6 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/config/ArmConfig.html#%3Cinit%3E()" class="member-name-link">ArmConfig()</a> - Constructor for class yams.mechanisms.config.<a href="yams/mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></dt>
 <dd>
 <div class="block">Arm configuration class.</div>
-</dd>
-<dt><a href="yams/mechanisms/config/ArmConfig.html#%3Cinit%3E(yams.motorcontrollers.SmartMotorController)" class="member-name-link">ArmConfig(SmartMotorController)</a> - Constructor for class yams.mechanisms.config.<a href="yams/mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></dt>
-<dd>
-<div class="block">Arm Configuration class</div>
 </dd>
 <dt><a href="yams/exceptions/ArmConfigurationException.html" class="type-name-link" title="class in yams.exceptions">ArmConfigurationException</a> - Exception in <a href="yams/exceptions/package-summary.html">yams.exceptions</a></dt>
 <dd>
@@ -549,7 +529,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">A two-segment arm where each joint has its own independent motor controller.</div>
 </dd>
-<dt><a href="yams/mechanisms/positional/DoubleJointedArm.html#%3Cinit%3E(yams.mechanisms.config.ArmConfig,yams.mechanisms.config.ArmConfig)" class="member-name-link">DoubleJointedArm(ArmConfig, ArmConfig)</a> - Constructor for class yams.mechanisms.positional.<a href="yams/mechanisms/positional/DoubleJointedArm.html" title="class in yams.mechanisms.positional">DoubleJointedArm</a></dt>
+<dt><a href="yams/mechanisms/positional/DoubleJointedArm.html#%3Cinit%3E(yams.mechanisms.config.ArmConfig,yams.motorcontrollers.SmartMotorController,yams.mechanisms.config.ArmConfig,yams.motorcontrollers.SmartMotorController)" class="member-name-link">DoubleJointedArm(ArmConfig, SmartMotorController, ArmConfig, SmartMotorController)</a> - Constructor for class yams.mechanisms.positional.<a href="yams/mechanisms/positional/DoubleJointedArm.html" title="class in yams.mechanisms.positional">DoubleJointedArm</a></dt>
 <dd>
 <div class="block">Constructor for the Arm mechanism.</div>
 </dd>
@@ -609,7 +589,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Elevator mechanism.</div>
 </dd>
-<dt><a href="yams/mechanisms/positional/Elevator.html#%3Cinit%3E(yams.mechanisms.config.ElevatorConfig)" class="member-name-link">Elevator(ElevatorConfig)</a> - Constructor for class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional">Elevator</a></dt>
+<dt><a href="yams/mechanisms/positional/Elevator.html#%3Cinit%3E(yams.mechanisms.config.ElevatorConfig,yams.motorcontrollers.SmartMotorController)" class="member-name-link">Elevator(ElevatorConfig, SmartMotorController)</a> - Constructor for class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional">Elevator</a></dt>
 <dd>
 <div class="block">Construct the <a href="yams/mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> class for easy manipulation of an elevator.</div>
 </dd>
@@ -622,10 +602,6 @@ loadScripts(document, 'script');</script>
 <div class="block">Elevator configuration class.</div>
 </dd>
 <dt><a href="yams/mechanisms/config/ElevatorConfig.html#%3Cinit%3E()" class="member-name-link">ElevatorConfig()</a> - Constructor for class yams.mechanisms.config.<a href="yams/mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></dt>
-<dd>
-<div class="block">Elevator Configuration class</div>
-</dd>
-<dt><a href="yams/mechanisms/config/ElevatorConfig.html#%3Cinit%3E(yams.motorcontrollers.SmartMotorController)" class="member-name-link">ElevatorConfig(SmartMotorController)</a> - Constructor for class yams.mechanisms.config.<a href="yams/mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></dt>
 <dd>
 <div class="block">Elevator Configuration class</div>
 </dd>
@@ -745,7 +721,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">FlyWheel mechanism.</div>
 </dd>
-<dt><a href="yams/mechanisms/velocity/FlyWheel.html#%3Cinit%3E(yams.mechanisms.config.FlyWheelConfig)" class="member-name-link">FlyWheel(FlyWheelConfig)</a> - Constructor for class yams.mechanisms.velocity.<a href="yams/mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity">FlyWheel</a></dt>
+<dt><a href="yams/mechanisms/velocity/FlyWheel.html#%3Cinit%3E(yams.mechanisms.config.FlyWheelConfig,yams.motorcontrollers.SmartMotorController)" class="member-name-link">FlyWheel(FlyWheelConfig, SmartMotorController)</a> - Constructor for class yams.mechanisms.velocity.<a href="yams/mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity">FlyWheel</a></dt>
 <dd>
 <div class="block">Construct the FlyWheel class</div>
 </dd>
@@ -759,11 +735,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/mechanisms/config/FlyWheelConfig.html#%3Cinit%3E()" class="member-name-link">FlyWheelConfig()</a> - Constructor for class yams.mechanisms.config.<a href="yams/mechanisms/config/FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></dt>
 <dd>
-<div class="block">FlyWheel configuration class.</div>
-</dd>
-<dt><a href="yams/mechanisms/config/FlyWheelConfig.html#%3Cinit%3E(yams.motorcontrollers.SmartMotorController)" class="member-name-link">FlyWheelConfig(SmartMotorController)</a> - Constructor for class yams.mechanisms.config.<a href="yams/mechanisms/config/FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></dt>
-<dd>
-<div class="block">Arm Configuration class</div>
+<div class="block">FlyWheel Configuration class</div>
 </dd>
 <dt><a href="yams/exceptions/FlyWheelConfigurationException.html" class="type-name-link" title="class in yams.exceptions">FlyWheelConfigurationException</a> - Exception in <a href="yams/exceptions/package-summary.html">yams.exceptions</a></dt>
 <dd>
@@ -1112,10 +1084,6 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/swerve/SwerveModule.html#getDriveMotorController()" class="member-name-link">getDriveMotorController()</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve">SwerveModule</a></dt>
 <dd>
 <div class="block">Get the drive <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
-</dd>
-<dt><a href="yams/mechanisms/config/ElevatorConfig.html#getDrumRadius()" class="member-name-link">getDrumRadius()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></dt>
-<dd>
-<div class="block">Get the <a href="yams/mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> drum radius.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/local/SparkWrapper.html#getDutyCycle()" class="member-name-link">getDutyCycle()</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/SparkWrapper.html" title="class in yams.motorcontrollers.local">SparkWrapper</a></dt>
 <dd>&nbsp;</dd>
@@ -1578,42 +1546,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState</code></a> of the modules.</div>
 </dd>
-<dt><a href="yams/mechanisms/config/ArmConfig.html#getMOI()" class="member-name-link">getMOI()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></dt>
-<dd>
-<div class="block">Get the moment of inertia for the <a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a> simulation.</div>
-</dd>
 <dt><a href="yams/mechanisms/config/DifferentialMechanismConfig.html#getMOI()" class="member-name-link">getMOI()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/DifferentialMechanismConfig.html" title="class in yams.mechanisms.config">DifferentialMechanismConfig</a></dt>
 <dd>
 <div class="block">Get the moment of inertia for the <a href="yams/mechanisms/positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a> simulation.</div>
-</dd>
-<dt><a href="yams/mechanisms/config/FlyWheelConfig.html#getMOI()" class="member-name-link">getMOI()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></dt>
-<dd>
-<div class="block">Get the moment of inertia for the <a href="yams/mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a> simulation.</div>
-</dd>
-<dt><a href="yams/mechanisms/config/PivotConfig.html#getMOI()" class="member-name-link">getMOI()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config">PivotConfig</a></dt>
-<dd>
-<div class="block">Get the moment of inertia for the <a href="yams/mechanisms/positional/Pivot.html" title="class in yams.mechanisms.positional"><code>Pivot</code></a> simulation.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getMOI()" class="member-name-link">getMOI()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the Moment of Inertia of the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>'s mechanism for the
  <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/DCMotorSim.html" title="class or interface in edu.wpi.first.wpilibj.simulation" class="external-link"><code>DCMotorSim</code></a>.</div>
-</dd>
-<dt><a href="yams/mechanisms/config/ArmConfig.html#getMotor()" class="member-name-link">getMotor()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></dt>
-<dd>
-<div class="block">Get the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> of the <a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a></div>
-</dd>
-<dt><a href="yams/mechanisms/config/ElevatorConfig.html#getMotor()" class="member-name-link">getMotor()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></dt>
-<dd>
-<div class="block">Get the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> of the <a href="yams/mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a></div>
-</dd>
-<dt><a href="yams/mechanisms/config/FlyWheelConfig.html#getMotor()" class="member-name-link">getMotor()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></dt>
-<dd>
-<div class="block">Get the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> of the <a href="yams/mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a></div>
-</dd>
-<dt><a href="yams/mechanisms/config/PivotConfig.html#getMotor()" class="member-name-link">getMotor()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config">PivotConfig</a></dt>
-<dd>
-<div class="block">Get the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> of the <a href="yams/mechanisms/positional/Pivot.html" title="class in yams.mechanisms.positional"><code>Pivot</code></a></div>
 </dd>
 <dt><a href="yams/mechanisms/positional/SmartPositionalMechanism.html#getMotor()" class="member-name-link">getMotor()</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/SmartPositionalMechanism.html" title="class in yams.mechanisms.positional">SmartPositionalMechanism</a></dt>
 <dd>
@@ -1926,18 +1866,6 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/config/FlyWheelConfig.html#getSpeedometerMaxVelocity()" class="member-name-link">getSpeedometerMaxVelocity()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></dt>
 <dd>
 <div class="block">Get the maximum velocity of the speedometer simulation.</div>
-</dd>
-<dt><a href="yams/mechanisms/config/ArmConfig.html#getStartingAngle()" class="member-name-link">getStartingAngle()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></dt>
-<dd>
-<div class="block">Get the starting angle of the <a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a>.</div>
-</dd>
-<dt><a href="yams/mechanisms/config/PivotConfig.html#getStartingAngle()" class="member-name-link">getStartingAngle()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config">PivotConfig</a></dt>
-<dd>
-<div class="block">Get the starting angle of the <a href="yams/mechanisms/positional/Pivot.html" title="class in yams.mechanisms.positional"><code>Pivot</code></a>.</div>
-</dd>
-<dt><a href="yams/mechanisms/config/ElevatorConfig.html#getStartingHeight()" class="member-name-link">getStartingHeight()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></dt>
-<dd>
-<div class="block">Get the starting height of the <a href="yams/mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a></div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getStartingPosition()" class="member-name-link">getStartingPosition()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -2784,7 +2712,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Pivot mechanism.</div>
 </dd>
-<dt><a href="yams/mechanisms/positional/Pivot.html#%3Cinit%3E(yams.mechanisms.config.PivotConfig)" class="member-name-link">Pivot(PivotConfig)</a> - Constructor for class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Pivot.html" title="class in yams.mechanisms.positional">Pivot</a></dt>
+<dt><a href="yams/mechanisms/positional/Pivot.html#%3Cinit%3E(yams.mechanisms.config.PivotConfig,yams.motorcontrollers.SmartMotorController)" class="member-name-link">Pivot(PivotConfig, SmartMotorController)</a> - Constructor for class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Pivot.html" title="class in yams.mechanisms.positional">Pivot</a></dt>
 <dd>
 <div class="block">Construct the Pivot class</div>
 </dd>
@@ -2799,10 +2727,6 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/config/PivotConfig.html#%3Cinit%3E(yams.mechanisms.config.PivotConfig)" class="member-name-link">PivotConfig(PivotConfig)</a> - Constructor for class yams.mechanisms.config.<a href="yams/mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config">PivotConfig</a></dt>
 <dd>
 <div class="block">Copy constructor.</div>
-</dd>
-<dt><a href="yams/mechanisms/config/PivotConfig.html#%3Cinit%3E(yams.motorcontrollers.SmartMotorController)" class="member-name-link">PivotConfig(SmartMotorController)</a> - Constructor for class yams.mechanisms.config.<a href="yams/mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config">PivotConfig</a></dt>
-<dd>
-<div class="block">Pivot Configuration class</div>
 </dd>
 <dt><a href="yams/exceptions/PivotConfigurationException.html" class="type-name-link" title="class in yams.exceptions">PivotConfigurationException</a> - Exception in <a href="yams/exceptions/package-summary.html">yams.exceptions</a></dt>
 <dd>
@@ -3425,6 +3349,22 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Set the FlyWheel to the given speed.</div>
 </dd>
+<dt><a href="yams/motorcontrollers/local/SparkWrapper.html#setMechanismCircumference(edu.wpi.first.units.measure.Distance)" class="member-name-link">setMechanismCircumference(Distance)</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/SparkWrapper.html" title="class in yams.motorcontrollers.local">SparkWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/remote/TalonFXSWrapper.html#setMechanismCircumference(edu.wpi.first.units.measure.Distance)" class="member-name-link">setMechanismCircumference(Distance)</a> - Method in class yams.motorcontrollers.remote.<a href="yams/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXSWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/remote/TalonFXWrapper.html#setMechanismCircumference(edu.wpi.first.units.measure.Distance)" class="member-name-link">setMechanismCircumference(Distance)</a> - Method in class yams.motorcontrollers.remote.<a href="yams/motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.html#setMechanismCircumference(edu.wpi.first.units.measure.Distance)" class="member-name-link">setMechanismCircumference(Distance)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/local/SparkWrapper.html#setMechanismGearing(yams.gearing.MechanismGearing)" class="member-name-link">setMechanismGearing(MechanismGearing)</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/SparkWrapper.html" title="class in yams.motorcontrollers.local">SparkWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/remote/TalonFXSWrapper.html#setMechanismGearing(yams.gearing.MechanismGearing)" class="member-name-link">setMechanismGearing(MechanismGearing)</a> - Method in class yams.motorcontrollers.remote.<a href="yams/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXSWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/remote/TalonFXWrapper.html#setMechanismGearing(yams.gearing.MechanismGearing)" class="member-name-link">setMechanismGearing(MechanismGearing)</a> - Method in class yams.motorcontrollers.remote.<a href="yams/motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.html#setMechanismGearing(yams.gearing.MechanismGearing)" class="member-name-link">setMechanismGearing(MechanismGearing)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/local/SparkWrapper.html#setMechanismLimits(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)" class="member-name-link">setMechanismLimits(Angle, Angle)</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/SparkWrapper.html" title="class in yams.motorcontrollers.local">SparkWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/remote/TalonFXSWrapper.html#setMechanismLimits(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)" class="member-name-link">setMechanismLimits(Angle, Angle)</a> - Method in class yams.motorcontrollers.remote.<a href="yams/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXSWrapper</a></dt>
@@ -4479,7 +4419,11 @@ the order they are declared.</div>
 <dd>
 <div class="block">Enables the arm feedforward logging if available.</div>
 </dd>
-<dt><a href="yams/mechanisms/config/ElevatorConfig.html#withCascadingElevatorStages(int)" class="member-name-link">withCascadingElevatorStages(int)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></dt>
+<dt><a href="yams/mechanisms/config/ElevatorConfig.html#withCarriageWeight(edu.wpi.first.units.measure.Mass)" class="member-name-link">withCarriageWeight(Mass)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></dt>
+<dd>
+<div class="block">Configure the <a href="yams/mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a>s <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Mass</code></a> for simulation.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withCascadingElevatorStages(int)" class="member-name-link">withCascadingElevatorStages(int)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Change the <a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> gear ratio to be divided by the number of stages given, will reapply
  it if already done manually.</div>
@@ -4615,11 +4559,11 @@ the order they are declared.</div>
 <dd>
 <div class="block">Set the distance from the center of rotation for the <a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a>.</div>
 </dd>
-<dt><a href="yams/mechanisms/config/ElevatorConfig.html#withDrumRadius(edu.wpi.first.units.measure.Distance)" class="member-name-link">withDrumRadius(Distance)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></dt>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withDrumRadius(edu.wpi.first.units.measure.Distance)" class="member-name-link">withDrumRadius(Distance)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set the <a href="yams/mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> drum radius.</div>
+<div class="block">Set the <a href="yams/mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> drum radius</div>
 </dd>
-<dt><a href="yams/mechanisms/config/ElevatorConfig.html#withDrumRadius(edu.wpi.first.units.measure.Distance,int)" class="member-name-link">withDrumRadius(Distance, int)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></dt>
+<dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withDrumRadius(edu.wpi.first.units.measure.Distance,int)" class="member-name-link">withDrumRadius(Distance, int)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the <a href="yams/mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> drum radius via the chain pitch (.25in or .35in) and teeth
  count.</div>
@@ -4825,18 +4769,6 @@ the order they are declared.</div>
 <dd>
 <div class="block">Applies loosely coupled follower motors to the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </dd>
-<dt><a href="yams/mechanisms/config/ArmConfig.html#withMass(edu.wpi.first.units.measure.Mass)" class="member-name-link">withMass(Mass)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></dt>
-<dd>
-<div class="block">Configure the <a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a>s <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Mass</code></a> for simulation.</div>
-</dd>
-<dt><a href="yams/mechanisms/config/ElevatorConfig.html#withMass(edu.wpi.first.units.measure.Mass)" class="member-name-link">withMass(Mass)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></dt>
-<dd>
-<div class="block">Configure the <a href="yams/mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a>s <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Mass</code></a> for simulation.</div>
-</dd>
-<dt><a href="yams/mechanisms/config/FlyWheelConfig.html#withMass(edu.wpi.first.units.measure.Mass)" class="member-name-link">withMass(Mass)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></dt>
-<dd>
-<div class="block">Configure the <a href="yams/mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a>s <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Mass</code></a> for simulation.</div>
-</dd>
 <dt><a href="yams/units/EasyCRTConfig.html#withMatchTolerance(edu.wpi.first.units.measure.Angle)" class="member-name-link">withMatchTolerance(Angle)</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Sets the match tolerance for encoder 2 modular error (in rotations).</div>
@@ -4938,20 +4870,10 @@ the order they are declared.</div>
 <div class="block">Configure the MOI directly instead of estimating it with the length and mass of the <a href="yams/mechanisms/positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a>
  for simulation.</div>
 </dd>
-<dt><a href="yams/mechanisms/config/FlyWheelConfig.html#withMOI(edu.wpi.first.units.measure.Distance,edu.wpi.first.units.measure.Mass)" class="member-name-link">withMOI(Distance, Mass)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></dt>
-<dd>
-<div class="block">Configure the MOI directly instead of estimating it with the length and mass of the <a href="yams/mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a> for
- simulation.</div>
-</dd>
 <dt><a href="yams/mechanisms/config/DifferentialMechanismConfig.html#withMOI(edu.wpi.first.units.measure.MomentOfInertia)" class="member-name-link">withMOI(MomentOfInertia)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/DifferentialMechanismConfig.html" title="class in yams.mechanisms.config">DifferentialMechanismConfig</a></dt>
 <dd>
 <div class="block">Configure the MOI directly instead of estimating it with the length and mass of the <a href="yams/mechanisms/positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a>
  for simulation.</div>
-</dd>
-<dt><a href="yams/mechanisms/config/FlyWheelConfig.html#withMOI(edu.wpi.first.units.measure.MomentOfInertia)" class="member-name-link">withMOI(MomentOfInertia)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></dt>
-<dd>
-<div class="block">Configure the MOI directly instead of estimating it with the length and mass of the <a href="yams/mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a> for
- simulation.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withMomentOfInertia(edu.wpi.first.units.measure.Distance,edu.wpi.first.units.measure.Mass)" class="member-name-link">withMomentOfInertia(Distance, Mass)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -5143,18 +5065,6 @@ the order they are declared.</div>
 <dd>
 <div class="block">Set the rotation PID controller.</div>
 </dd>
-<dt><a href="yams/mechanisms/config/ElevatorConfig.html#withSimStartingHeight(edu.wpi.first.units.measure.Distance)" class="member-name-link">withSimStartingHeight(Distance)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></dt>
-<dd>
-<div class="block">Set the simulated starting height of the elevator.</div>
-</dd>
-<dt><a href="yams/mechanisms/config/ArmConfig.html#withSimStartingPosition(edu.wpi.first.units.measure.Angle)" class="member-name-link">withSimStartingPosition(Angle)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></dt>
-<dd>
-<div class="block">Set the simulation starting position of the arm.</div>
-</dd>
-<dt><a href="yams/mechanisms/config/PivotConfig.html#withSimStartingPosition(edu.wpi.first.units.measure.Angle)" class="member-name-link">withSimStartingPosition(Angle)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config">PivotConfig</a></dt>
-<dd>
-<div class="block">Set the simulation starting position of the pivot.</div>
-</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSimStartingPosition(edu.wpi.first.units.measure.Angle)" class="member-name-link">withSimStartingPosition(Angle)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the starting angle of the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> to be used only in simulation</div>
@@ -5199,22 +5109,6 @@ the order they are declared.</div>
 <dd>
 <div class="block">Add a simulated value to the sensor at a given trigger.</div>
 </dd>
-<dt><a href="yams/mechanisms/config/ArmConfig.html#withSmartMotorController(yams.motorcontrollers.SmartMotorController)" class="member-name-link">withSmartMotorController(SmartMotorController)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></dt>
-<dd>
-<div class="block">Configure the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a></div>
-</dd>
-<dt><a href="yams/mechanisms/config/ElevatorConfig.html#withSmartMotorController(yams.motorcontrollers.SmartMotorController)" class="member-name-link">withSmartMotorController(SmartMotorController)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></dt>
-<dd>
-<div class="block">Set the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="yams/mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a></div>
-</dd>
-<dt><a href="yams/mechanisms/config/FlyWheelConfig.html#withSmartMotorController(yams.motorcontrollers.SmartMotorController)" class="member-name-link">withSmartMotorController(SmartMotorController)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></dt>
-<dd>
-<div class="block">Set the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="yams/mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a></div>
-</dd>
-<dt><a href="yams/mechanisms/config/PivotConfig.html#withSmartMotorController(yams.motorcontrollers.SmartMotorController)" class="member-name-link">withSmartMotorController(SmartMotorController)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config">PivotConfig</a></dt>
-<dd>
-<div class="block">Configure the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="yams/mechanisms/positional/Pivot.html" title="class in yams.mechanisms.positional"><code>Pivot</code></a></div>
-</dd>
 <dt><a href="yams/mechanisms/config/SwerveModuleConfig.html#withSmartMotorController(yams.motorcontrollers.SmartMotorController,yams.motorcontrollers.SmartMotorController)" class="member-name-link">withSmartMotorController(SmartMotorController, SmartMotorController)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></dt>
 <dd>
 <div class="block">Set the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a>.</div>
@@ -5227,10 +5121,6 @@ the order they are declared.</div>
 <dd>
 <div class="block">Set the angle soft limits.</div>
 </dd>
-<dt><a href="yams/mechanisms/config/ElevatorConfig.html#withSoftLimits(edu.wpi.first.units.measure.Distance,edu.wpi.first.units.measure.Distance)" class="member-name-link">withSoftLimits(Distance, Distance)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></dt>
-<dd>
-<div class="block">Set the elevator soft limits.</div>
-</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withSoftLimits(edu.wpi.first.units.measure.Distance,edu.wpi.first.units.measure.Distance)" class="member-name-link">withSoftLimits(Distance, Distance)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the distance soft limits.</div>
@@ -5242,10 +5132,6 @@ the order they are declared.</div>
 <dt><a href="yams/mechanisms/config/FlyWheelConfig.html#withSpeedometerSimulation(edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">withSpeedometerSimulation(AngularVelocity)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></dt>
 <dd>
 <div class="block">Enables the use of the speedometer simulation for the shooter.</div>
-</dd>
-<dt><a href="yams/mechanisms/config/ElevatorConfig.html#withStartingHeight(edu.wpi.first.units.measure.Distance)" class="member-name-link">withStartingHeight(Distance)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></dt>
-<dd>
-<div class="block">Set the elevator starting position.</div>
 </dd>
 <dt><a href="yams/mechanisms/config/SwerveDriveConfig.html#withStartingPose(edu.wpi.first.math.geometry.Pose2d)" class="member-name-link">withStartingPose(Pose2d)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>

@@ -89,11 +89,12 @@ loadScripts(document, 'script');</script>
  SmartMotorController motor = new TalonFXWrapper(
      new TalonFX(4), DCMotor.getKrakenX60(1), motorConfig);
 
- ElevatorConfig config = new ElevatorConfig(motor)
-     .withDrumRadius(Inches.of(1.0))          // spool radius
-     .withMass(Kilograms.of(4.0))             // carriage mass
+ ElevatorConfig config = new ElevatorConfig()
+     .withCarriageWeight(Kilograms.of(4.0))
      .withTelemetry("Elevator", TelemetryVerbosity.HIGH)
-     .withSimStartingHeight(Meters.of(0));
+     .withHardLimits(Meters.of(0), Meters.of(2));
+
+ Elevator elevator = new Elevator(config, motor);
  </code></pre></div>
 </section>
 <section class="summary">
@@ -110,10 +111,6 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">Elevator Configuration class</div>
 </div>
-<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(yams.motorcontrollers.SmartMotorController)" class="member-name-link">ElevatorConfig</a><wbr>(<a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>&nbsp;motorController)</code></div>
-<div class="col-last odd-row-color">
-<div class="block">Elevator Configuration class</div>
-</div>
 </div>
 </section>
 </li>
@@ -128,28 +125,18 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyConfig()" class="member-name-link">applyConfig</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Apply config changes from this class to the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#clone()" class="member-name-link">clone</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAngle()" class="member-name-link">getAngle</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#clone()" class="member-name-link">clone</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAngle()" class="member-name-link">getAngle</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the Angle of the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a></div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Mass</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCarriageMass()" class="member-name-link">getCarriageMass</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Mass</code></a> of the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> carriage.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDrumRadius()" class="member-name-link">getDrumRadius</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Mass</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCarriageMass()" class="member-name-link">getCarriageMass</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> drum radius.</div>
+<div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Mass</code></a> of the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> carriage.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getIsElevatorHorizontal()" class="member-name-link">getIsElevatorHorizontal</a>()</code></div>
@@ -171,20 +158,10 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the lower hard limit of the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a></div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMotor()" class="member-name-link">getMotor</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/util/Color8Bit.html" title="class or interface in edu.wpi.first.wpilibj.util" class="external-link">Color8Bit</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSimColor()" class="member-name-link">getSimColor</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> of the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a></div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/util/Color8Bit.html" title="class or interface in edu.wpi.first.wpilibj.util" class="external-link">Color8Bit</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSimColor()" class="member-name-link">getSimColor</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get sim color</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getStartingHeight()" class="member-name-link">getStartingHeight</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the starting height of the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a></div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTelemetryName()" class="member-name-link">getTelemetryName</a>()</code></div>
@@ -202,22 +179,9 @@ loadScripts(document, 'script');</script>
 <div class="block">Configure the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a>s angle for simulation.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withCascadingElevatorStages(int)" class="member-name-link">withCascadingElevatorStages</a><wbr>(int&nbsp;stages)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withCarriageWeight(edu.wpi.first.units.measure.Mass)" class="member-name-link">withCarriageWeight</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Mass</a>&nbsp;mass)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Change the <a href="../../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> gear ratio to be divided by the number of stages given, will reapply
- it if already done manually.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withDrumRadius(edu.wpi.first.units.measure.Distance)" class="member-name-link">withDrumRadius</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;drumRadius)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> drum radius.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withDrumRadius(edu.wpi.first.units.measure.Distance,int)" class="member-name-link">withDrumRadius</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;chainPitch,
- int&nbsp;teeth)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> drum radius via the chain pitch (.25in or .35in) and teeth
- count.</div>
+<div class="block">Configure the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a>s <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Mass</code></a> for simulation.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withHardLimits(edu.wpi.first.units.measure.Distance,edu.wpi.first.units.measure.Distance)" class="member-name-link">withHardLimits</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;min,
@@ -231,45 +195,19 @@ loadScripts(document, 'script');</script>
 <div class="block">Set elevator as horizontal to avoid gravity simulation</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMass(edu.wpi.first.units.measure.Mass)" class="member-name-link">withMass</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Mass</a>&nbsp;mass)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMechanismPositionConfig(yams.mechanisms.config.MechanismPositionConfig)" class="member-name-link">withMechanismPositionConfig</a><wbr>(<a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config">MechanismPositionConfig</a>&nbsp;mechanismPositionConfig)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Configure the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a>s <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Mass</code></a> for simulation.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMechanismPositionConfig(yams.mechanisms.config.MechanismPositionConfig)" class="member-name-link">withMechanismPositionConfig</a><wbr>(<a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config">MechanismPositionConfig</a>&nbsp;mechanismPositionConfig)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the elevator mechanism position configuration.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimColor(edu.wpi.first.wpilibj.util.Color8Bit)" class="member-name-link">withSimColor</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/util/Color8Bit.html" title="class or interface in edu.wpi.first.wpilibj.util" class="external-link">Color8Bit</a>&nbsp;simColor)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimColor(edu.wpi.first.wpilibj.util.Color8Bit)" class="member-name-link">withSimColor</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/util/Color8Bit.html" title="class or interface in edu.wpi.first.wpilibj.util" class="external-link">Color8Bit</a>&nbsp;simColor)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Publish the color in sim as this.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimStartingHeight(edu.wpi.first.units.measure.Distance)" class="member-name-link">withSimStartingHeight</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;height)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the simulated starting height of the elevator.</div>
-</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSmartMotorController(yams.motorcontrollers.SmartMotorController)" class="member-name-link">withSmartMotorController</a><wbr>(<a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>&nbsp;motorController)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a></div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSoftLimits(edu.wpi.first.units.measure.Distance,edu.wpi.first.units.measure.Distance)" class="member-name-link">withSoftLimits</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;lowerLimit,
- <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;upperLimit)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the elevator soft limits.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withStartingHeight(edu.wpi.first.units.measure.Distance)" class="member-name-link">withStartingHeight</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;startingPosition)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the elevator starting position.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTelemetry(java.lang.String,yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)" class="member-name-link">withTelemetry</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;telemetryName,
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTelemetry(java.lang.String,yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)" class="member-name-link">withTelemetry</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;telemetryName,
  <a href="../../motorcontrollers/SmartMotorControllerConfig.TelemetryVerbosity.html" title="enum class in yams.motorcontrollers">SmartMotorControllerConfig.TelemetryVerbosity</a>&nbsp;telemetryVerbosity)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Configure telemetry for the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> mechanism.</div>
 </div>
 </div>
@@ -290,26 +228,10 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(yams.motorcontrollers.SmartMotorController)">
-<h3>ElevatorConfig</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ElevatorConfig</span><wbr><span class="parameters">(<a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>&nbsp;motorController)</span></div>
-<div class="block">Elevator Configuration class</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>motorController</code> - Primary <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a></dd>
-</dl>
-</section>
-</li>
-<li>
 <section class="detail" id="&lt;init&gt;()">
 <h3>ElevatorConfig</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ElevatorConfig</span>()</div>
 <div class="block">Elevator Configuration class</div>
-<dl class="notes">
-<dt>Implementation Note:</dt>
-<dd>You are REQUIRED to call <a href="#withSmartMotorController(yams.motorcontrollers.SmartMotorController)"><code>withSmartMotorController(SmartMotorController)</code></a> before this is used with
- an <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a></dd>
-</dl>
 </section>
 </li>
 </ul>
@@ -327,61 +249,6 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Overrides:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#clone()" title="class or interface in java.lang" class="external-link">clone</a></code>&nbsp;in class&nbsp;<code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></code></dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="withSimStartingHeight(edu.wpi.first.units.measure.Distance)">
-<h3>withSimStartingHeight</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></span>&nbsp;<span class="element-name">withSimStartingHeight</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;height)</span></div>
-<div class="block">Set the simulated starting height of the elevator. Only used during simulation.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>height</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Distance</code></a> of the elevator on start.</dd>
-<dt>Returns:</dt>
-<dd><a href="ElevatorConfig.html" title="class in yams.mechanisms.config"><code>ElevatorConfig</code></a> for chaining.</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="withSmartMotorController(yams.motorcontrollers.SmartMotorController)">
-<h3>withSmartMotorController</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></span>&nbsp;<span class="element-name">withSmartMotorController</span><wbr><span class="parameters">(<a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>&nbsp;motorController)</span></div>
-<div class="block">Set the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a></div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>motorController</code> - Primary <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a></dd>
-<dt>Returns:</dt>
-<dd><a href="ElevatorConfig.html" title="class in yams.mechanisms.config"><code>ElevatorConfig</code></a> for chaining.</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="withDrumRadius(edu.wpi.first.units.measure.Distance)">
-<h3>withDrumRadius</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></span>&nbsp;<span class="element-name">withDrumRadius</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;drumRadius)</span></div>
-<div class="block">Set the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> drum radius.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>drumRadius</code> - Elevator drum radius</dd>
-<dt>Returns:</dt>
-<dd><a href="ElevatorConfig.html" title="class in yams.mechanisms.config"><code>ElevatorConfig</code></a> for chaining.</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="withDrumRadius(edu.wpi.first.units.measure.Distance,int)">
-<h3>withDrumRadius</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></span>&nbsp;<span class="element-name">withDrumRadius</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;chainPitch,
- int&nbsp;teeth)</span></div>
-<div class="block">Set the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> drum radius via the chain pitch (.25in or .35in) and teeth
- count.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>chainPitch</code> - Chain pitch.</dd>
-<dd><code>teeth</code> - Sprocket teeth count.</dd>
-<dt>Returns:</dt>
-<dd><a href="ElevatorConfig.html" title="class in yams.mechanisms.config"><code>ElevatorConfig</code></a> for chaining.</dd>
 </dl>
 </section>
 </li>
@@ -412,9 +279,9 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="withMass(edu.wpi.first.units.measure.Mass)">
-<h3>withMass</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></span>&nbsp;<span class="element-name">withMass</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Mass</a>&nbsp;mass)</span></div>
+<section class="detail" id="withCarriageWeight(edu.wpi.first.units.measure.Mass)">
+<h3>withCarriageWeight</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></span>&nbsp;<span class="element-name">withCarriageWeight</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Mass</a>&nbsp;mass)</span></div>
 <div class="block">Configure the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a>s <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Mass</code></a> for simulation.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -440,20 +307,6 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="withCascadingElevatorStages(int)">
-<h3>withCascadingElevatorStages</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></span>&nbsp;<span class="element-name">withCascadingElevatorStages</span><wbr><span class="parameters">(int&nbsp;stages)</span></div>
-<div class="block">Change the <a href="../../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> gear ratio to be divided by the number of stages given, will reapply
- it if already done manually.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>stages</code> - Stages given</dd>
-<dt>Returns:</dt>
-<dd><a href="ElevatorConfig.html" title="class in yams.mechanisms.config"><code>ElevatorConfig</code></a> for chaining.</dd>
-</dl>
-</section>
-</li>
-<li>
 <section class="detail" id="withMechanismPositionConfig(yams.mechanisms.config.MechanismPositionConfig)">
 <h3>withMechanismPositionConfig</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></span>&nbsp;<span class="element-name">withMechanismPositionConfig</span><wbr><span class="parameters">(<a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config">MechanismPositionConfig</a>&nbsp;mechanismPositionConfig)</span></div>
@@ -463,34 +316,6 @@ loadScripts(document, 'script');</script>
 <dd><code>mechanismPositionConfig</code> - <a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a> for the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a></dd>
 <dt>Returns:</dt>
 <dd><a href="ElevatorConfig.html" title="class in yams.mechanisms.config"><code>ElevatorConfig</code></a> for chaining</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="withStartingHeight(edu.wpi.first.units.measure.Distance)">
-<h3>withStartingHeight</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></span>&nbsp;<span class="element-name">withStartingHeight</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;startingPosition)</span></div>
-<div class="block">Set the elevator starting position.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>startingPosition</code> - Starting position of the elevator.</dd>
-<dt>Returns:</dt>
-<dd><a href="ElevatorConfig.html" title="class in yams.mechanisms.config"><code>ElevatorConfig</code></a> for chaining</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="withSoftLimits(edu.wpi.first.units.measure.Distance,edu.wpi.first.units.measure.Distance)">
-<h3>withSoftLimits</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ElevatorConfig.html" title="class in yams.mechanisms.config">ElevatorConfig</a></span>&nbsp;<span class="element-name">withSoftLimits</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;lowerLimit,
- <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;upperLimit)</span></div>
-<div class="block">Set the elevator soft limits. When exceeded the power will be set to 0.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>lowerLimit</code> - Minimum distance of the elevator.</dd>
-<dd><code>upperLimit</code> - Maximum distance of the elevator.</dd>
-<dt>Returns:</dt>
-<dd><a href="ElevatorConfig.html" title="class in yams.mechanisms.config"><code>ElevatorConfig</code></a> for chaining.</dd>
 </dl>
 </section>
 </li>
@@ -517,17 +342,6 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd><a href="ElevatorConfig.html" title="class in yams.mechanisms.config"><code>ElevatorConfig</code></a> for chaining.</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="applyConfig()">
-<h3>applyConfig</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">applyConfig</span>()</div>
-<div class="block">Apply config changes from this class to the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd><a href="../../motorcontrollers/SmartMotorController.html#applyConfig(yams.motorcontrollers.SmartMotorControllerConfig)"><code>SmartMotorController.applyConfig(SmartMotorControllerConfig)</code></a> result.</dd>
 </dl>
 </section>
 </li>
@@ -587,28 +401,6 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="getStartingHeight()">
-<h3>getStartingHeight</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&gt;</span>&nbsp;<span class="element-name">getStartingHeight</span>()</div>
-<div class="block">Get the starting height of the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a></div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Distance</code></a> of the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a></dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="getMotor()">
-<h3>getMotor</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></span>&nbsp;<span class="element-name">getMotor</span>()</div>
-<div class="block">Get the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> of the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a></div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd><a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a></dd>
-</dl>
-</section>
-</li>
-<li>
 <section class="detail" id="getSimColor()">
 <h3>getSimColor</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/util/Color8Bit.html" title="class or interface in edu.wpi.first.wpilibj.util" class="external-link">Color8Bit</a></span>&nbsp;<span class="element-name">getSimColor</span>()</div>
@@ -616,17 +408,6 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>sim color</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="getDrumRadius()">
-<h3>getDrumRadius</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a></span>&nbsp;<span class="element-name">getDrumRadius</span>()</div>
-<div class="block">Get the <a href="../positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> drum radius.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>Drum radius of the elevator.</dd>
 </dl>
 </section>
 </li>

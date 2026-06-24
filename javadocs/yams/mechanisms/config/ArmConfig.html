@@ -92,13 +92,13 @@ loadScripts(document, 'script');</script>
  SmartMotorController motor = new SparkWrapper(
      new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), motorConfig);
 
- // Build the arm config
- ArmConfig config = new ArmConfig(motor)
+ // Build the arm config and mechanism
+ ArmConfig config = new ArmConfig()
      .withLength(Meters.of(0.5))
-     .withMass(Kilograms.of(2.0))
-     .withHardLimits(Degrees.of(-10), Degrees.of(90))
      .withTelemetry("Arm", TelemetryVerbosity.HIGH)
-     .withSimStartingPosition(Degrees.of(0));
+     .withHardLimits(Degrees.of(-10), Degrees.of(90));
+
+ Arm arm = new Arm(config, motor);
  </code></pre></div>
 </section>
 <section class="summary">
@@ -115,10 +115,6 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">Arm configuration class.</div>
 </div>
-<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(yams.motorcontrollers.SmartMotorController)" class="member-name-link">ArmConfig</a><wbr>(<a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>&nbsp;motorController)</code></div>
-<div class="col-last odd-row-color">
-<div class="block">Arm Configuration class</div>
-</div>
 </div>
 </section>
 </li>
@@ -133,48 +129,28 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyConfig()" class="member-name-link">applyConfig</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Apply config changes from this class to the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#clone()" class="member-name-link">clone</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLength()" class="member-name-link">getLength</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#clone()" class="member-name-link">clone</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLength()" class="member-name-link">getLength</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the Length of the <a href="../positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a></div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLowerHardLimit()" class="member-name-link">getLowerHardLimit</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLowerHardLimit()" class="member-name-link">getLowerHardLimit</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the lower hard limit of the <a href="../positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a></div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config">MechanismPositionConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMechanismPositionConfig()" class="member-name-link">getMechanismPositionConfig</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config">MechanismPositionConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMechanismPositionConfig()" class="member-name-link">getMechanismPositionConfig</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the <a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a> associated with this <a href="ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMOI()" class="member-name-link">getMOI</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the moment of inertia for the <a href="../positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a> simulation.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMotor()" class="member-name-link">getMotor</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/util/Color8Bit.html" title="class or interface in edu.wpi.first.wpilibj.util" class="external-link">Color8Bit</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSimColor()" class="member-name-link">getSimColor</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> of the <a href="../positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a></div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/util/Color8Bit.html" title="class or interface in edu.wpi.first.wpilibj.util" class="external-link">Color8Bit</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSimColor()" class="member-name-link">getSimColor</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get sim color</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getStartingAngle()" class="member-name-link">getStartingAngle</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the starting angle of the <a href="../positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a>.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTelemetryName()" class="member-name-link">getTelemetryName</a>()</code></div>
@@ -203,34 +179,19 @@ loadScripts(document, 'script');</script>
 <div class="block">Configure the <a href="../positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a>s length for simulation.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMass(edu.wpi.first.units.measure.Mass)" class="member-name-link">withMass</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Mass</a>&nbsp;mass)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMechanismPositionConfig(yams.mechanisms.config.MechanismPositionConfig)" class="member-name-link">withMechanismPositionConfig</a><wbr>(<a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config">MechanismPositionConfig</a>&nbsp;mechanismPositionConfig)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Configure the <a href="../positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a>s <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Mass</code></a> for simulation.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMechanismPositionConfig(yams.mechanisms.config.MechanismPositionConfig)" class="member-name-link">withMechanismPositionConfig</a><wbr>(<a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config">MechanismPositionConfig</a>&nbsp;mechanismPositionConfig)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the elevator mechanism position configuration.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimColor(edu.wpi.first.wpilibj.util.Color8Bit)" class="member-name-link">withSimColor</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/util/Color8Bit.html" title="class or interface in edu.wpi.first.wpilibj.util" class="external-link">Color8Bit</a>&nbsp;simColor)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimColor(edu.wpi.first.wpilibj.util.Color8Bit)" class="member-name-link">withSimColor</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/util/Color8Bit.html" title="class or interface in edu.wpi.first.wpilibj.util" class="external-link">Color8Bit</a>&nbsp;simColor)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Publish the color in sim as this.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimStartingPosition(edu.wpi.first.units.measure.Angle)" class="member-name-link">withSimStartingPosition</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;simStartingPosition)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the simulation starting position of the arm.</div>
-</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSmartMotorController(yams.motorcontrollers.SmartMotorController)" class="member-name-link">withSmartMotorController</a><wbr>(<a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>&nbsp;motorController)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Configure the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="../positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a></div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTelemetry(java.lang.String,yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)" class="member-name-link">withTelemetry</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;telemetryName,
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTelemetry(java.lang.String,yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)" class="member-name-link">withTelemetry</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;telemetryName,
  <a href="../../motorcontrollers/SmartMotorControllerConfig.TelemetryVerbosity.html" title="enum class in yams.motorcontrollers">SmartMotorControllerConfig.TelemetryVerbosity</a>&nbsp;telemetryVerbosity)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Configure telemetry for the <a href="../positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a> mechanism.</div>
 </div>
 </div>
@@ -250,17 +211,6 @@ loadScripts(document, 'script');</script>
 <section class="constructor-details" id="constructor-detail">
 <h2>Constructor Details</h2>
 <ul class="member-list">
-<li>
-<section class="detail" id="&lt;init&gt;(yams.motorcontrollers.SmartMotorController)">
-<h3>ArmConfig</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ArmConfig</span><wbr><span class="parameters">(<a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>&nbsp;motorController)</span></div>
-<div class="block">Arm Configuration class</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>motorController</code> - Primary <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="../positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a></dd>
-</dl>
-</section>
-</li>
 <li>
 <section class="detail" id="&lt;init&gt;()">
 <h3>ArmConfig</h3>
@@ -287,32 +237,6 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="withSimStartingPosition(edu.wpi.first.units.measure.Angle)">
-<h3>withSimStartingPosition</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></span>&nbsp;<span class="element-name">withSimStartingPosition</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;simStartingPosition)</span></div>
-<div class="block">Set the simulation starting position of the arm. Only ever used in simulation.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>simStartingPosition</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Angle</code></a> of the starting position of the arm.</dd>
-<dt>Returns:</dt>
-<dd><a href="ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a> for chaining.</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="withSmartMotorController(yams.motorcontrollers.SmartMotorController)">
-<h3>withSmartMotorController</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></span>&nbsp;<span class="element-name">withSmartMotorController</span><wbr><span class="parameters">(<a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>&nbsp;motorController)</span></div>
-<div class="block">Configure the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="../positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a></div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>motorController</code> - Primary <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="../positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a></dd>
-<dt>Returns:</dt>
-<dd><a href="ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a> for chaining.</dd>
-</dl>
-</section>
-</li>
-<li>
 <section class="detail" id="withSimColor(edu.wpi.first.wpilibj.util.Color8Bit)">
 <h3>withSimColor</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></span>&nbsp;<span class="element-name">withSimColor</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/util/Color8Bit.html" title="class or interface in edu.wpi.first.wpilibj.util" class="external-link">Color8Bit</a>&nbsp;simColor)</span></div>
@@ -335,19 +259,8 @@ loadScripts(document, 'script');</script>
 <dd><code>distance</code> - Length of the <a href="../positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a>.</dd>
 <dt>Returns:</dt>
 <dd><a href="ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a> for chaining.</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="withMass(edu.wpi.first.units.measure.Mass)">
-<h3>withMass</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a></span>&nbsp;<span class="element-name">withMass</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Mass</a>&nbsp;mass)</span></div>
-<div class="block">Configure the <a href="../positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a>s <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Mass</code></a> for simulation.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>mass</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Mass</code></a> of the <a href="../positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a></dd>
-<dt>Returns:</dt>
-<dd><a href="ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a> for chaining.</dd>
+<dt>Implementation Note:</dt>
+<dd>This is not used to forward the MOI to <a href="../../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></dd>
 </dl>
 </section>
 </li>
@@ -395,17 +308,6 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="applyConfig()">
-<h3>applyConfig</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">applyConfig</span>()</div>
-<div class="block">Apply config changes from this class to the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd><a href="../../motorcontrollers/SmartMotorController.html#applyConfig(yams.motorcontrollers.SmartMotorControllerConfig)"><code>SmartMotorController.applyConfig(SmartMotorControllerConfig)</code></a> result.</dd>
-</dl>
-</section>
-</li>
-<li>
 <section class="detail" id="getLength()">
 <h3>getLength</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&gt;</span>&nbsp;<span class="element-name">getLength</span>()</div>
@@ -413,20 +315,6 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Distance</code></a> of the Arm.</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="getMOI()">
-<h3>getMOI</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getMOI</span>()</div>
-<div class="block">Get the moment of inertia for the <a href="../positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a> simulation.
- MOI must be configured via <a href="../../motorcontrollers/SmartMotorControllerConfig.html#withMomentOfInertia(edu.wpi.first.units.measure.Distance,edu.wpi.first.units.measure.Mass)"><code>SmartMotorControllerConfig.withMomentOfInertia(Distance, Mass)</code></a>
- or <a href="../../motorcontrollers/SmartMotorControllerConfig.html#withMomentOfInertia(edu.wpi.first.units.measure.MomentOfInertia)"><code>SmartMotorControllerConfig.withMomentOfInertia(edu.wpi.first.units.measure.MomentOfInertia)</code></a>.
- Providing <a href="#withLength(edu.wpi.first.units.measure.Distance)"><code>withLength(Distance)</code></a> and <a href="#withMass(edu.wpi.first.units.measure.Mass)"><code>withMass(Mass)</code></a> will set it automatically.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>Moment of Inertia in KgMetersSquared.</dd>
 </dl>
 </section>
 </li>
@@ -471,29 +359,6 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>Network Tables name.</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="getStartingAngle()">
-<h3>getStartingAngle</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&gt;</span>&nbsp;<span class="element-name">getStartingAngle</span>()</div>
-<div class="block">Get the starting angle of the <a href="../positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a>. Reads from <a href="../../motorcontrollers/SmartMotorControllerConfig.html#getStartingPosition()"><code>SmartMotorControllerConfig.getStartingPosition()</code></a>.
- Configure via <a href="../../motorcontrollers/SmartMotorControllerConfig.html#withStartingPosition(edu.wpi.first.units.measure.Angle)"><code>SmartMotorControllerConfig.withStartingPosition(Angle)</code></a>.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Angle</code></a> of the <a href="../positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a></dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="getMotor()">
-<h3>getMotor</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></span>&nbsp;<span class="element-name">getMotor</span>()</div>
-<div class="block">Get the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> of the <a href="../positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a></div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd><a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="../positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a></dd>
 </dl>
 </section>
 </li>

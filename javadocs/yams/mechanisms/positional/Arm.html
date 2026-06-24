@@ -90,7 +90,8 @@ loadScripts(document, 'script');</script>
  SmartMotorController motor = new SparkWrapper(
      new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1),
      new SmartMotorControllerConfig().withClosedLoopController(0.2,0,0).withStatorCurrentLimit(Amps.of(40)));
- Arm arm = new Arm(new ArmConfig(motor).withLength(Meters.of(0.5)));
+ ArmConfig armConfig = new ArmConfig().withLength(Meters.of(0.5));
+ Arm arm = new Arm(armConfig, motor);
 
  // Schedule a setpoint command
  Command moveToScore = arm.setAngle(Degrees.of(80));
@@ -127,7 +128,8 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(yams.mechanisms.config.ArmConfig)" class="member-name-link">Arm</a><wbr>(<a href="../config/ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a>&nbsp;config)</code></div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(yams.mechanisms.config.ArmConfig,yams.motorcontrollers.SmartMotorController)" class="member-name-link">Arm</a><wbr>(<a href="../config/ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a>&nbsp;config,
+ <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>&nbsp;smc)</code></div>
 <div class="col-last even-row-color">
 <div class="block">Constructor for the Arm mechanism.</div>
 </div>
@@ -271,13 +273,15 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(yams.mechanisms.config.ArmConfig)">
+<section class="detail" id="&lt;init&gt;(yams.mechanisms.config.ArmConfig,yams.motorcontrollers.SmartMotorController)">
 <h3>Arm</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">Arm</span><wbr><span class="parameters">(<a href="../config/ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a>&nbsp;config)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">Arm</span><wbr><span class="parameters">(<a href="../config/ArmConfig.html" title="class in yams.mechanisms.config">ArmConfig</a>&nbsp;config,
+ <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>&nbsp;smc)</span></div>
 <div class="block">Constructor for the Arm mechanism.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>config</code> - <a href="../config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a> to use.</dd>
+<dd><code>smc</code> - <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> for the Arm.</dd>
 </dl>
 </section>
 </li>
