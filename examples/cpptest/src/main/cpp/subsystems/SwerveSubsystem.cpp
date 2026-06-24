@@ -35,7 +35,7 @@ using Cfg = SmartMotorControllerConfig;
 //   BR: drive=10, azimuth=11, CANcoder=12
 //   Pigeon2 gyro: 14
 void SwerveSubsystem::SetupModule(
-    rev::spark::SparkMax& drive, rev::spark::SparkMax& azimuth,
+    rev::spark::SparkMax* drive, rev::spark::SparkMax* azimuth,
     ctre::phoenix6::hardware::CANcoder& absoluteEncoder, const std::string& moduleName,
     frc::Translation2d location,
     std::optional<yams::motorcontrollers::local::SparkWrapper>& driveSMC,
@@ -71,8 +71,8 @@ void SwerveSubsystem::SetupModule(
       .WithStatorCurrentLimit(units::ampere_t{20})
       .WithTelemetry("angleMotor", Cfg::TelemetryVerbosity::HIGH);
 
-  // SparkWrapper now takes a SmartMotorControllerConfig* so pass the address of the member
-  // configs, which have stable lifetime as subsystem members.
+  // SparkWrapper takes pointers; pass the address of the member configs and motors,
+  // which have stable lifetime as subsystem members.
   driveSMC.emplace(drive, frc::DCMotor::NEO(1), &driveCfgMember);
   azimuthSMC.emplace(azimuth, frc::DCMotor::NEO(1), &azimuthCfgMember);
 
@@ -101,19 +101,19 @@ SwerveSubsystem::SwerveSubsystem() {
   // Sign convention: +X is toward the intake/front, +Y is toward the left side.
   // All four corners are 24 in from centre in each axis, so the wheelbase and track
   // width are both 48 in.  Adjust these if the frame dimensions change.
-  SetupModule(m_flDrive, m_flAzimuth, m_flEncoder, "frontleft",
+  SetupModule(&m_flDrive, &m_flAzimuth, m_flEncoder, "frontleft",
               frc::Translation2d{units::inch_t{24}, units::inch_t{24}},
               m_flDriveSMC, m_flAzimuthSMC,
               m_flDriveCfg, m_flAzimuthCfg, m_flModuleCfg, m_fl);
-  SetupModule(m_frDrive, m_frAzimuth, m_frEncoder, "frontright",
+  SetupModule(&m_frDrive, &m_frAzimuth, m_frEncoder, "frontright",
               frc::Translation2d{units::inch_t{24}, units::inch_t{-24}},
               m_frDriveSMC, m_frAzimuthSMC,
               m_frDriveCfg, m_frAzimuthCfg, m_frModuleCfg, m_fr);
-  SetupModule(m_blDrive, m_blAzimuth, m_blEncoder, "backleft",
+  SetupModule(&m_blDrive, &m_blAzimuth, m_blEncoder, "backleft",
               frc::Translation2d{units::inch_t{-24}, units::inch_t{24}},
               m_blDriveSMC, m_blAzimuthSMC,
               m_blDriveCfg, m_blAzimuthCfg, m_blModuleCfg, m_bl);
-  SetupModule(m_brDrive, m_brAzimuth, m_brEncoder, "backright",
+  SetupModule(&m_brDrive, &m_brAzimuth, m_brEncoder, "backright",
               frc::Translation2d{units::inch_t{-24}, units::inch_t{-24}},
               m_brDriveSMC, m_brAzimuthSMC,
               m_brDriveCfg, m_brAzimuthCfg, m_brModuleCfg, m_br);

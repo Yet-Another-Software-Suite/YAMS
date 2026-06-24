@@ -57,6 +57,8 @@ struct HardwareBundle {
   std::unique_ptr<ctre::phoenix6::hardware::TalonFXS> talonFXS;
   std::unique_ptr<ctre::phoenix6::hardware::TalonFX> talonFX;
 
+  // Config must outlive the wrapper; stored here so its address stays stable.
+  SmartMotorControllerConfig cfg;
   std::unique_ptr<TestSubsystem> subsystem;
   SmartMotorController* smc{nullptr};
 };
@@ -98,8 +100,11 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
   HardwareBundle bundle;
   bundle.subsystem = std::make_unique<TestSubsystem>();
   cfg.WithSubsystem(bundle.subsystem.get());
-
   cfg.WithSimMotor(MotorForHardware(param.hardware));
+
+  // Move the fully-configured cfg into the bundle so its address is stable for
+  // the lifetime of the bundle (the wrapper stores a SmartMotorControllerConfig*).
+  bundle.cfg = std::move(cfg);
 
   int canId = NextCanId();
 
@@ -107,32 +112,28 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
     case HardwareType::SparkMax: {
       bundle.sparkMax = std::make_unique<rev::spark::SparkMax>(
           canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
-      auto* wrapper =
-          new local::SparkWrapper(*bundle.sparkMax, MotorForHardware(param.hardware), cfg);
-      bundle.smc = wrapper;
+      bundle.smc = new local::SparkWrapper(
+          bundle.sparkMax.get(), MotorForHardware(param.hardware), &bundle.cfg);
       break;
     }
     case HardwareType::SparkFlex: {
       bundle.sparkFlex = std::make_unique<rev::spark::SparkFlex>(
           canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
-      auto* wrapper =
-          new local::SparkWrapper(*bundle.sparkFlex, MotorForHardware(param.hardware), cfg);
-      bundle.smc = wrapper;
+      bundle.smc = new local::SparkWrapper(
+          bundle.sparkFlex.get(), MotorForHardware(param.hardware), &bundle.cfg);
       break;
     }
     case HardwareType::TalonFXS: {
       bundle.talonFXS = std::make_unique<ctre::phoenix6::hardware::TalonFXS>(canId);
-      auto* wrapper =
-          new remote::TalonFXSWrapper(bundle.talonFXS.get(), MotorForHardware(param.hardware),
-                                      remote::TalonFXSWrapper::MotorArrangement::NEO, cfg);
-      bundle.smc = wrapper;
+      bundle.smc = new remote::TalonFXSWrapper(
+          bundle.talonFXS.get(), MotorForHardware(param.hardware),
+          remote::TalonFXSWrapper::MotorArrangement::NEO, &bundle.cfg);
       break;
     }
     case HardwareType::TalonFX: {
       bundle.talonFX = std::make_unique<ctre::phoenix6::hardware::TalonFX>(canId);
-      auto* wrapper =
-          new remote::TalonFXWrapper(bundle.talonFX.get(), MotorForHardware(param.hardware), cfg);
-      bundle.smc = wrapper;
+      bundle.smc = new remote::TalonFXWrapper(
+          bundle.talonFX.get(), MotorForHardware(param.hardware), &bundle.cfg);
       break;
     }
   }

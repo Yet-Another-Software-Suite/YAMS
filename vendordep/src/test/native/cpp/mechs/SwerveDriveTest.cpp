@@ -130,6 +130,16 @@ class SwerveDriveTest : public ::testing::Test {
   static remote::TalonFXWrapper* s_blAzimuthSMC;
   static remote::TalonFXWrapper* s_brAzimuthSMC;
 
+  // Configs must outlive the wrappers; stored as static members for suite lifetime.
+  static SmartMotorControllerConfig s_flDriveCfg;
+  static SmartMotorControllerConfig s_frDriveCfg;
+  static SmartMotorControllerConfig s_blDriveCfg;
+  static SmartMotorControllerConfig s_brDriveCfg;
+  static SmartMotorControllerConfig s_flAzimuthCfg;
+  static SmartMotorControllerConfig s_frAzimuthCfg;
+  static SmartMotorControllerConfig s_blAzimuthCfg;
+  static SmartMotorControllerConfig s_brAzimuthCfg;
+
   static void SetUpTestSuite() {
     InitializeHardware();
     SchedulerHelper::Enable();

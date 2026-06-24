@@ -64,9 +64,9 @@ static SmartMotorControllerConfig MakePivotSMCConfig(ProfileType profile, Hardwa
 }
 
 static positional::Pivot* CreatePivot(SmartMotorController* smc, TestSubsystem* subsys) {
-  PivotConfig cfg;
-  cfg.WithMotorController(smc).WithMinAngle(-100.0_deg).WithMaxAngle(150.0_deg);
-  positional::Pivot* pivot = new positional::Pivot(cfg);
+  auto* cfg = new PivotConfig;
+  cfg->WithMinAngle(-100.0_deg).WithMaxAngle(150.0_deg);
+  auto* pivot = new positional::Pivot(cfg, smc);
   subsys->m_mechSimPeriodic = [pivot] { pivot->SimIterate(); };
   subsys->m_mechUpdateTelemetry = [pivot] { pivot->UpdateTelemetry(); };
   return pivot;

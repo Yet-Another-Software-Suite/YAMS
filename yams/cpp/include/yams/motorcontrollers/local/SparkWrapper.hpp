@@ -56,7 +56,7 @@ namespace yams::motorcontrollers::local {
  *    .WithClosedLoopMode()
  *    .WithTelemetry("ElevatorMotor", Cfg::TelemetryVerbosity::HIGH);
  *
- * m_smc.emplace(m_sparkMax, frc::DCMotor::NEO(1), &cfg);
+ * m_smc.emplace(&m_sparkMax, frc::DCMotor::NEO(1), &cfg);
  * @endcode
  *
  * ### Example usage — SPARK Flex
@@ -66,7 +66,7 @@ namespace yams::motorcontrollers::local {
  * rev::spark::SparkLowLevel::MotorType::kBrushless};
  * //   std::optional<SparkWrapper>  m_smc;
  *
- * m_smc.emplace(m_sparkFlex, frc::DCMotor::NeoVortex(1), &cfg);
+ * m_smc.emplace(&m_sparkFlex, frc::DCMotor::NeoVortex(1), &cfg);
  * @endcode
  */
 class SparkWrapper : public SmartMotorController {
@@ -74,21 +74,21 @@ class SparkWrapper : public SmartMotorController {
   /**
    * Construct a SparkWrapper around a SPARK Max.
    *
-   * @param spark  SPARK Max hardware object (must outlive this wrapper).
+   * @param spark  Pointer to the SPARK Max hardware object (must outlive this wrapper).
    * @param motor  DC motor model used for simulation.
    * @param config Pointer to the SmartMotorControllerConfig (must outlive this wrapper).
    */
-  SparkWrapper(rev::spark::SparkMax& spark, frc::DCMotor motor,
+  SparkWrapper(rev::spark::SparkMax* spark, frc::DCMotor motor,
                SmartMotorControllerConfig* config);
 
   /**
    * Construct a SparkWrapper around a SPARK Flex.
    *
-   * @param spark  SPARK Flex hardware object (must outlive this wrapper).
+   * @param spark  Pointer to the SPARK Flex hardware object (must outlive this wrapper).
    * @param motor  DC motor model used for simulation.
    * @param config Pointer to the SmartMotorControllerConfig (must outlive this wrapper).
    */
-  SparkWrapper(rev::spark::SparkFlex& spark, frc::DCMotor motor,
+  SparkWrapper(rev::spark::SparkFlex* spark, frc::DCMotor motor,
                SmartMotorControllerConfig* config);
   ~SparkWrapper();
 

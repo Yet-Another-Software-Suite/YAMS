@@ -139,7 +139,7 @@ class SwerveSubsystem : public frc2::SubsystemBase {
   // SwerveDriveConfig (must outlive SwerveDrive<4>)
   yams::mechanisms::swerve::SwerveDriveConfig m_driveConfig;
 
-  // SparkWrapper takes its SparkMax by reference, so the SparkMax members above must
+  // SparkWrapper takes its SparkMax by pointer, so the SparkMax members above must
   // outlive these wrappers.  optional allows deferred construction inside SetupModule().
   std::optional<yams::motorcontrollers::local::SparkWrapper> m_flDriveSMC;
   std::optional<yams::motorcontrollers::local::SparkWrapper> m_flAzimuthSMC;
@@ -166,7 +166,7 @@ class SwerveSubsystem : public frc2::SubsystemBase {
   // the two SparkWrappers, wires up the CANcoder absolute-position lambda, and emplace()'s
   // the finished SwerveModule into moduleOut.  Called once per corner in the constructor.
   void SetupModule(
-      rev::spark::SparkMax& drive, rev::spark::SparkMax& azimuth,
+      rev::spark::SparkMax* drive, rev::spark::SparkMax* azimuth,
       ctre::phoenix6::hardware::CANcoder& absoluteEncoder, const std::string& moduleName,
       frc::Translation2d location,
       std::optional<yams::motorcontrollers::local::SparkWrapper>& driveSMC,

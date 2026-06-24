@@ -67,9 +67,9 @@ static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, Test
 }
 
 static FlyWheel* CreateShooter(SmartMotorController* smc, TestSubsystem* subsys) {
-  FlyWheelConfig cfg;
-  cfg.WithMotorController(smc).WithRollerDiameter(units::meter_t{4.0 * 0.0254});  // 4 inches
-  FlyWheel* shooter = new FlyWheel(cfg);
+  auto* cfg = new FlyWheelConfig;
+  cfg->WithRollerDiameter(units::meter_t{4.0 * 0.0254});  // 4 inches
+  auto* shooter = new FlyWheel(cfg, smc);
   subsys->m_mechSimPeriodic = [shooter] { shooter->SimIterate(); };
   subsys->m_mechUpdateTelemetry = [shooter] { shooter->UpdateTelemetry(); };
   return shooter;

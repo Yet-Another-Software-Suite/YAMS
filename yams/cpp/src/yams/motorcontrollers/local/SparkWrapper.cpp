@@ -26,7 +26,7 @@ using namespace rev::spark;
 
 namespace yams::motorcontrollers::local {
 
-SparkWrapper::SparkWrapper(SparkMax& spark, frc::DCMotor motor,
+SparkWrapper::SparkWrapper(SparkMax* spark, frc::DCMotor motor,
                            SmartMotorControllerConfig* cfg)
     : SmartMotorController(), m_motor(motor) {
   m_maxConfig.emplace();
@@ -38,10 +38,10 @@ SparkWrapper::SparkWrapper(SparkMax& spark, frc::DCMotor motor,
           "SparkWrapper (SparkMax): WithVendorConfig requires a SparkMaxConfig");
     }
   }
-  Init(&spark, motor, cfg);
+  Init(spark, motor, cfg);
 }
 
-SparkWrapper::SparkWrapper(SparkFlex& spark, frc::DCMotor motor,
+SparkWrapper::SparkWrapper(SparkFlex* spark, frc::DCMotor motor,
                            SmartMotorControllerConfig* cfg)
     : SmartMotorController(), m_motor(motor) {
   m_flexConfig.emplace();
@@ -53,7 +53,7 @@ SparkWrapper::SparkWrapper(SparkFlex& spark, frc::DCMotor motor,
           "SparkWrapper (SparkFlex): WithVendorConfig requires a SparkFlexConfig");
     }
   }
-  Init(&spark, motor, cfg);
+  Init(spark, motor, cfg);
 }
 
 void SparkWrapper::Init(SparkBase* spark, frc::DCMotor motor,

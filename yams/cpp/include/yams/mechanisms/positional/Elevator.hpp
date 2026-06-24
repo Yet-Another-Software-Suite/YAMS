@@ -55,7 +55,7 @@ namespace yams::mechanisms::positional {
  *         .WithClosedLoopMode()
  *         .WithTelemetry("ElevatorMotor", Cfg::TelemetryVerbosity::HIGH);
  *
- * m_smc.emplace(m_sparkMax, frc::DCMotor::NEO(1), motorCfg);
+ * m_smc.emplace(&m_sparkMax, frc::DCMotor::NEO(1), &motorCfg);
  *
  * m_elevatorConfig.WithMinimumHeight(0.0_m)
  *                 .WithMaximumHeight(3.0_m)

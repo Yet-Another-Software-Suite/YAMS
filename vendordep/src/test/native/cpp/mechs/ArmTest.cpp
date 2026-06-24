@@ -63,15 +63,11 @@ static SmartMotorControllerConfig MakeArmSMCConfig(ProfileType profile, Hardware
 }
 
 static positional::Arm* CreateArm(SmartMotorController* smc, TestSubsystem* subsys, bool isCTRE) {
-  ArmConfig cfg;
-  cfg.WithMotorController(smc)
-      .WithArmLength(4_in)  // 4 inches → meters
+  auto* cfg = new ArmConfig;
+  cfg->WithArmLength(4_in)
       .WithMinAngle(-100.0_deg)
       .WithMaxAngle(200.0_deg);
-  // withHorizontalZero only for CTRE controllers in the Java tests
-  // (not a config option in our C++ ArmConfig yet; add if needed)
-
-  positional::Arm* arm = new positional::Arm(cfg);
+  auto* arm = new positional::Arm(cfg, smc);
   subsys->m_mechSimPeriodic = [arm] { arm->SimIterate(); };
   subsys->m_mechUpdateTelemetry = [arm] { arm->UpdateTelemetry(); };
   return arm;
