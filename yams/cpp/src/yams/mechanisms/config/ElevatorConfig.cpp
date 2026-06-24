@@ -12,11 +12,6 @@
 
 namespace yams::mechanisms::config {
 
-ElevatorConfig& ElevatorConfig::WithMotorController(motorcontrollers::SmartMotorController* smc) {
-  m_smc = smc;
-  return *this;
-}
-
 ElevatorConfig& ElevatorConfig::WithTelemetryName(const std::string& name) {
   m_telemetryName = name;
   return *this;
@@ -51,8 +46,6 @@ ElevatorConfig& ElevatorConfig::WithAngle(units::degree_t angle) {
   m_angle = angle;
   return *this;
 }
-
-motorcontrollers::SmartMotorController* ElevatorConfig::GetMotorController() const { return m_smc; }
 
 std::string ElevatorConfig::GetTelemetryName() const { return m_telemetryName; }
 

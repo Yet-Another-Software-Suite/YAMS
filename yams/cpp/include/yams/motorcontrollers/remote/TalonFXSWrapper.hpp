@@ -64,8 +64,7 @@ namespace yams::motorcontrollers::remote {
  *    .WithClosedLoopMode()
  *    .WithTelemetry("HoodMotor", Cfg::TelemetryVerbosity::HIGH);
  *
- * m_smc.emplace(m_talonFXS, frc::DCMotor::NEO(1),
- *               TalonFXSWrapper::MotorArrangement::NEO, cfg);
+ * m_smc.emplace(m_talonFXS, DCMotor::NEO(1), MotorArrangement::NEO, &cfg);
  * @endcode
  */
 class TalonFXSWrapper : public SmartMotorController {
@@ -82,7 +81,7 @@ class TalonFXSWrapper : public SmartMotorController {
    * @param config      Initial SmartMotorControllerConfig to apply.
    */
   TalonFXSWrapper(ctre::phoenix6::hardware::TalonFXS* talon, frc::DCMotor dcMotor,
-                  MotorArrangement arrangement, const SmartMotorControllerConfig& config);
+                  MotorArrangement arrangement, SmartMotorControllerConfig* config);
 
   ~TalonFXSWrapper();
 
@@ -287,6 +286,7 @@ class TalonFXSWrapper : public SmartMotorController {
   void* GetMotorControllerConfig() override;
 
  private:
+  SmartMotorControllerConfig* m_config{nullptr};
   ctre::phoenix6::hardware::TalonFXS* m_talon;
   frc::DCMotor m_dcMotor;
   MotorArrangement m_arrangement;

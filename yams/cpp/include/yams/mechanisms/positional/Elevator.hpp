@@ -16,6 +16,7 @@
 
 #include "SmartPositionalMechanism.hpp"
 #include "yams/mechanisms/config/ElevatorConfig.hpp"
+#include "yams/motorcontrollers/SmartMotorController.hpp"
 
 namespace yams::mechanisms::positional {
 
@@ -56,13 +57,12 @@ namespace yams::mechanisms::positional {
  *
  * m_smc.emplace(m_sparkMax, frc::DCMotor::NEO(1), motorCfg);
  *
- * m_elevatorConfig.WithMotorController(&m_smc.value())
- *                 .WithMinimumHeight(0.0_m)
+ * m_elevatorConfig.WithMinimumHeight(0.0_m)
  *                 .WithMaximumHeight(3.0_m)
  *                 .WithCarriageMass(2.0_lb)
  *                 .WithTelemetryName("Elevator");
  *
- * m_elevator.emplace(m_elevatorConfig);
+ * m_elevator.emplace(&m_elevatorConfig, &m_smc.value());
  *
  * // In commands or bindings:
  * m_elevator->RunTo(1.2_m);
@@ -71,11 +71,12 @@ namespace yams::mechanisms::positional {
 class Elevator : public SmartPositionalMechanism {
  public:
   /**
-   * Construct an Elevator from an ElevatorConfig.
+   * Construct an Elevator from an ElevatorConfig and a SmartMotorController.
    *
-   * @param config Fully-populated elevator configuration.
+   * @param config Pointer to the elevator configuration (must outlive this Elevator).
+   * @param smc    Pointer to the motor controller (must outlive this Elevator).
    */
-  explicit Elevator(const config::ElevatorConfig& config);
+  Elevator(config::ElevatorConfig* config, motorcontrollers::SmartMotorController* smc);
 
   // ---- SmartMechanism overrides ---------------------------------------------
 
@@ -211,7 +212,7 @@ class Elevator : public SmartPositionalMechanism {
   void SetHeight(units::meter_t height);
 
  private:
-  config::ElevatorConfig m_elevatorConfig;
+  config::ElevatorConfig* m_elevatorConfig{nullptr};
   std::string m_name{"Elevator"};
   std::optional<frc::sim::ElevatorSim> m_elevatorSim;
   frc::MechanismLigament2d* m_setpointLigament{nullptr};

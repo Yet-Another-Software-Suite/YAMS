@@ -35,13 +35,14 @@ namespace yams::mechanisms::velocity {
 
 // ---- Constructor ------------------------------------------------------------
 
-FlyWheel::FlyWheel(const config::FlyWheelConfig& config)
-    : SmartVelocityMechanism(), m_flyWheelConfig{config} {
-  m_smc = config.GetMotorController();
+FlyWheel::FlyWheel(config::FlyWheelConfig* config, motorcontrollers::SmartMotorController* smc)
+    : SmartVelocityMechanism() {
+  m_flyWheelConfig = config;
+  m_smc = smc;
   m_subsystem = m_smc->GetConfig().GetSubsystem();
 
-  if (!config.GetTelemetryName().empty()) {
-    m_name = config.GetTelemetryName();
+  if (!m_flyWheelConfig->GetTelemetryName().empty()) {
+    m_name = m_flyWheelConfig->GetTelemetryName();
   }
 
   if (frc::RobotBase::IsSimulation()) {
@@ -59,13 +60,14 @@ FlyWheel::FlyWheel(const config::FlyWheelConfig& config)
         *m_dcMotorSim, [this]() { return m_smc->GetDutyCycle(); }, gearing, period));
 
     // Size the window from the configured roller diameter; default to 36 in (0.9144 m) like Java.
-    units::meter_t shooterLength = config.GetRollerDiameter().value_or(units::meter_t{0.9144});
+    units::meter_t shooterLength =
+        m_flyWheelConfig->GetRollerDiameter().value_or(units::meter_t{0.9144});
 
     double len = shooterLength.value();
     m_mechanismWindow.emplace(len * 2.0, len * 2.0);
     m_mechanismRoot = m_mechanismWindow->GetRoot(m_name + "Root", len, len);
-    m_mechanismLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(m_name, len, 0_deg, 6,
-                                                                            config.GetSimColor());
+    m_mechanismLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
+        m_name, len, 0_deg, 6, m_flyWheelConfig->GetSimColor());
 
     frc::SmartDashboard::PutData(m_name + "/mechanism", &(*m_mechanismWindow));
   }
@@ -123,7 +125,7 @@ frc2::CommandPtr FlyWheel::Run(std::function<units::degrees_per_second_t()> velo
 }
 
 frc2::CommandPtr FlyWheel::Run(units::meters_per_second_t surfaceSpeed) {
-  auto diameter = m_flyWheelConfig.GetRollerDiameter();
+  auto diameter = m_flyWheelConfig->GetRollerDiameter();
   if (!diameter) {
     std::fprintf(stderr, "[YAMS] %s Run: no roller diameter configured, command is a no-op.\n",
                  m_name.c_str());
@@ -140,7 +142,7 @@ frc2::CommandPtr FlyWheel::Run(units::meters_per_second_t surfaceSpeed) {
 }
 
 frc2::CommandPtr FlyWheel::Run(std::function<units::meters_per_second_t()> surfaceSpeed) {
-  auto diameter = m_flyWheelConfig.GetRollerDiameter();
+  auto diameter = m_flyWheelConfig->GetRollerDiameter();
   if (!diameter) {
     std::fprintf(stderr, "[YAMS] %s Run: no roller diameter configured, command is a no-op.\n",
                  m_name.c_str());
@@ -185,7 +187,7 @@ frc2::CommandPtr FlyWheel::RunTo(std::function<units::degrees_per_second_t()> ve
 
 frc2::CommandPtr FlyWheel::RunTo(units::meters_per_second_t velocity,
                                  units::meters_per_second_t tolerance) {
-  auto diameter = m_flyWheelConfig.GetRollerDiameter();
+  auto diameter = m_flyWheelConfig->GetRollerDiameter();
   if (!diameter) {
     std::fprintf(stderr, "[YAMS] %s RunTo: no roller diameter configured, command is a no-op.\n",
                  m_name.c_str());
@@ -199,7 +201,7 @@ frc2::CommandPtr FlyWheel::RunTo(units::meters_per_second_t velocity,
 
 frc2::CommandPtr FlyWheel::RunTo(std::function<units::meters_per_second_t()> velocity,
                                  units::meters_per_second_t tolerance) {
-  auto diameter = m_flyWheelConfig.GetRollerDiameter();
+  auto diameter = m_flyWheelConfig->GetRollerDiameter();
   if (!diameter) {
     std::fprintf(stderr, "[YAMS] %s RunTo: no roller diameter configured, command is a no-op.\n",
                  m_name.c_str());
@@ -243,7 +245,7 @@ void FlyWheel::SetSurfaceSpeed(units::meters_per_second_t speed) {
 }
 
 void FlyWheel::SetMeasurementVelocitySetpoint(units::meters_per_second_t velocity) {
-  auto diameter = m_flyWheelConfig.GetRollerDiameter();
+  auto diameter = m_flyWheelConfig->GetRollerDiameter();
   if (!diameter) {
     return;
   }
@@ -261,7 +263,7 @@ frc::Translation3d FlyWheel::GetRelativeMechanismPosition() const {
   return frc::Translation3d{};
 }
 
-const config::FlyWheelConfig& FlyWheel::GetConfig() const { return m_flyWheelConfig; }
+const config::FlyWheelConfig& FlyWheel::GetConfig() const { return *m_flyWheelConfig; }
 
 units::degrees_per_second_t FlyWheel::GetVelocity() const { return m_smc->GetMechanismVelocity(); }
 

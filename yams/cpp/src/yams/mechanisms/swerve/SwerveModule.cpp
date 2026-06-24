@@ -15,14 +15,14 @@
 
 namespace yams::mechanisms::swerve {
 
-SwerveModule::SwerveModule(const config::SwerveModuleConfig& config)
-    : m_config{config},
-      m_driveMotorController{config.GetDriveMotor()},
-      m_azimuthMotorController{config.GetAzimuthMotor()} {
-  if (!m_config.GetTelemetryName()) {
+SwerveModule::SwerveModule(config::SwerveModuleConfig* config)
+    : m_driveMotorController{config->GetDriveMotor()},
+      m_azimuthMotorController{config->GetAzimuthMotor()} {
+  m_config = config;
+  if (!m_config->GetTelemetryName()) {
     throw std::invalid_argument("SwerveModuleConfig must have a telemetry name!");
   }
-  if (!m_config.GetLocation()) {
+  if (!m_config->GetLocation()) {
     throw std::invalid_argument("SwerveModuleConfig must have a position!");
   }
   // Mirror Java: if the azimuth motor has an external encoder configured but
@@ -55,19 +55,19 @@ void SwerveModule::SeedAzimuthEncoder() {
     // angle; seeding would overwrite that with redundant data.
     const auto& cfg = m_azimuthMotorController->GetConfig();
     if (!cfg.GetExternalEncoder().has_value() || !cfg.GetUseExternalFeedback()) {
-      m_azimuthMotorController->SetEncoderPosition(m_config.GetAbsoluteEncoderAngle());
+      m_azimuthMotorController->SetEncoderPosition(m_config->GetAbsoluteEncoderAngle());
     }
   }
 }
 
 std::string SwerveModule::GetName() const {
-  return m_config.GetTelemetryName().value_or("SwerveModule");
+  return m_config->GetTelemetryName().value_or("SwerveModule");
 }
 
-const config::SwerveModuleConfig& SwerveModule::GetConfig() const { return m_config; }
+const config::SwerveModuleConfig& SwerveModule::GetConfig() const { return *m_config; }
 
 void SwerveModule::SetSwerveModuleState(frc::SwerveModuleState state) {
-  state = m_config.GetOptimizedState(state);
+  state = m_config->GetOptimizedState(state);
   m_driveMotorController->SetVelocity(state.speed);
   m_azimuthMotorController->SetPosition(units::degree_t{state.angle.Degrees()});
 }

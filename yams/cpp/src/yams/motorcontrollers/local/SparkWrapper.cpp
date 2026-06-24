@@ -27,10 +27,10 @@ using namespace rev::spark;
 namespace yams::motorcontrollers::local {
 
 SparkWrapper::SparkWrapper(SparkMax& spark, frc::DCMotor motor,
-                           const SmartMotorControllerConfig& cfg)
+                           SmartMotorControllerConfig* cfg)
     : SmartMotorController(), m_motor(motor) {
   m_maxConfig.emplace();
-  if (auto vc = cfg.GetVendorConfig(); vc.has_value()) {
+  if (auto vc = cfg->GetVendorConfig(); vc.has_value()) {
     if (auto* p = std::any_cast<rev::spark::SparkMaxConfig>(&vc.value())) {
       m_maxConfig->Apply(*p);
     } else {
@@ -42,10 +42,10 @@ SparkWrapper::SparkWrapper(SparkMax& spark, frc::DCMotor motor,
 }
 
 SparkWrapper::SparkWrapper(SparkFlex& spark, frc::DCMotor motor,
-                           const SmartMotorControllerConfig& cfg)
+                           SmartMotorControllerConfig* cfg)
     : SmartMotorController(), m_motor(motor) {
   m_flexConfig.emplace();
-  if (auto vc = cfg.GetVendorConfig(); vc.has_value()) {
+  if (auto vc = cfg->GetVendorConfig(); vc.has_value()) {
     if (auto* p = std::any_cast<rev::spark::SparkFlexConfig>(&vc.value())) {
       m_flexConfig->Apply(*p);
     } else {
@@ -57,59 +57,58 @@ SparkWrapper::SparkWrapper(SparkFlex& spark, frc::DCMotor motor,
 }
 
 void SparkWrapper::Init(SparkBase* spark, frc::DCMotor motor,
-                        const SmartMotorControllerConfig& cfg) {
+                        SmartMotorControllerConfig* cfg) {
   m_spark = spark;
   m_sparkPid = &spark->GetClosedLoopController();
   m_relEncoder = &spark->GetEncoder();
   m_config = cfg;
-  m_config.WithSimMotor(motor);
+  m_config->WithSimMotor(motor);
 
   SetupSimulation();
-  ApplyConfig(cfg);
+  ApplyConfig(*m_config);
   CheckConfigSafety();
 }
 
 // ---- Configuration ----------------------------------------------------------
 
-bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& cfg) {
+bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   // If the device is currently a follower, applying a new config (without a follow directive)
   // automatically clears follower mode, allowing it to be used as an independent master.
-  m_config = cfg;
-  m_config.ResetValidationCheck();
+  m_config->ResetValidationCheck();
 
   auto doConfig = [&](SparkBaseConfig& sparkCfg) {
     sparkCfg.DisableFollowerMode();  // Disable follower from the Spark.
-    if (auto inv = m_config.GetMotorInverted(); inv) sparkCfg.Inverted(*inv);
-    sparkCfg.SetIdleMode(m_config.GetIdleMode() == SmartMotorControllerConfig::MotorMode::BRAKE
+    if (auto inv = config.GetMotorInverted(); inv) sparkCfg.Inverted(*inv);
+    sparkCfg.SetIdleMode(config.GetIdleMode() == SmartMotorControllerConfig::MotorMode::BRAKE
                              ? SparkBaseConfig::IdleMode::kBrake
                              : SparkBaseConfig::IdleMode::kCoast);
 
-    if (auto r = m_config.GetOpenLoopRampRate(); r) sparkCfg.OpenLoopRampRate(r->value());
-    if (auto r = m_config.GetClosedLoopRampRate(); r) sparkCfg.ClosedLoopRampRate(r->value());
+    if (auto r = config.GetOpenLoopRampRate(); r) sparkCfg.OpenLoopRampRate(r->value());
+    if (auto r = config.GetClosedLoopRampRate(); r) sparkCfg.ClosedLoopRampRate(r->value());
 
-    if (auto stator = m_config.GetStatorCurrentLimit(); stator)
+    if (auto stator = config.GetStatorCurrentLimit(); stator)
       sparkCfg.SmartCurrentLimit(static_cast<int>(stator->value()));
-    if (auto supply = m_config.GetSupplyCurrentLimit(); supply)
+    if (auto supply = config.GetSupplyCurrentLimit(); supply)
       sparkCfg.SecondaryCurrentLimit(supply->value());
 
     // No software temperature cutoff on Spark; consume option for validation
-    m_config.GetTemperatureCutoff();
+    config.GetTemperatureCutoff();
 
     // Closed-loop max output percentage
-    if (auto maxV = m_config.GetClosedLoopControllerMaximumVoltage(); maxV) {
+    if (auto maxV = config.GetClosedLoopControllerMaximumVoltage(); maxV) {
       double pct = maxV->value() / 12.0;
       sparkCfg.closedLoop.MaxOutput(pct).MinOutput(-pct);
     }
 
     // Base (relative) encoder: conversion from motor rotations to mechanism turns.
     double convFactor = 1.0;
-    if (auto& g = m_config.GetMotorGearing(); g) convFactor = g->GetRotorToMechanismRatio();
+    if (auto& g = config.GetMotorGearing(); g) convFactor = g->GetRotorToMechanismRatio();
     sparkCfg.encoder.PositionConversionFactor(convFactor);
     sparkCfg.encoder.VelocityConversionFactor(convFactor / 60.0);
 
     using Slot = SmartMotorControllerConfig::ClosedLoopControllerSlot;
     for (auto slot : {Slot::SLOT_0, Slot::SLOT_1, Slot::SLOT_2, Slot::SLOT_3}) {
-      auto gains = m_config.GetSlotGains(slot);
+      auto gains = config.GetSlotGains(slot);
       auto revSlot = static_cast<ClosedLoopSlot>(static_cast<int>(slot));
       sparkCfg.closedLoop.Pid(gains.kP, gains.kI, gains.kD, revSlot);
       if (gains.armFF) {
@@ -129,24 +128,24 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& cfg) {
       }
     }
 
-    if (m_config.HasTrapezoidProfile()) {
+    if (config.HasTrapezoidProfile()) {
       // Angular profile supplies velocity directly in TPS.  Linear profiles store
       // velocity in m/s; convert to TPS using the mechanism circumference.
-      auto cruiseVelTps = m_config.GetTrapMaxVelocityTurns();
-      auto cruiseAccTps = m_config.GetTrapMaxAccelTurns();
+      auto cruiseVelTps = config.GetTrapMaxVelocityTurns();
+      auto cruiseAccTps = config.GetTrapMaxAccelTurns();
       if (!cruiseVelTps) {
-        if (auto linVel = m_config.GetTrapMaxVelocityLinear(); linVel)
-          if (auto circ = m_config.GetMechanismCircumference(); circ && circ->value() != 0.0)
+        if (auto linVel = config.GetTrapMaxVelocityLinear(); linVel)
+          if (auto circ = config.GetMechanismCircumference(); circ && circ->value() != 0.0)
             cruiseVelTps = units::turns_per_second_t{linVel->value() / circ->value()};
       }
       if (!cruiseAccTps) {
-        if (auto linAcc = m_config.GetTrapMaxAccelLinear(); linAcc)
-          if (auto circ = m_config.GetMechanismCircumference(); circ && circ->value() != 0.0)
+        if (auto linAcc = config.GetTrapMaxAccelLinear(); linAcc)
+          if (auto circ = config.GetMechanismCircumference(); circ && circ->value() != 0.0)
             cruiseAccTps = units::turns_per_second_squared_t{linAcc->value() / circ->value()};
       }
       if (cruiseVelTps) sparkCfg.closedLoop.maxMotion.CruiseVelocity(cruiseVelTps->value());
       if (cruiseAccTps) sparkCfg.closedLoop.maxMotion.MaxAcceleration(cruiseAccTps->value());
-      m_positionControlType = m_config.GetVelocityTrapezoidalProfileInUse()
+      m_positionControlType = config.GetVelocityTrapezoidalProfileInUse()
                                   ? SparkLowLevel::ControlType::kVelocity
                                   : SparkLowLevel::ControlType::kMAXMotionPositionControl;
       m_velocityControlType = SparkLowLevel::ControlType::kMAXMotionVelocityControl;
@@ -155,12 +154,12 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& cfg) {
     // Exponential profiles are not natively supported by SPARK hardware; the option is consumed
     // here to satisfy validation tracking — actual profile execution uses the software controller
     // started below.
-    m_config.HasExponentialProfile();
+    config.HasExponentialProfile();
 
-    if (auto inv = m_config.GetEncoderInverted(); inv) sparkCfg.encoder.Inverted(*inv);
+    if (auto inv = config.GetEncoderInverted(); inv) sparkCfg.encoder.Inverted(*inv);
 
     // External (absolute) encoder configuration.
-    if (auto enc = m_config.GetExternalEncoder(); enc.has_value()) {
+    if (auto enc = config.GetExternalEncoder(); enc.has_value()) {
       auto* absPtr = std::any_cast<rev::spark::SparkAbsoluteEncoder*>(&enc.value());
       if (!absPtr || !*absPtr)
         throw std::invalid_argument(
@@ -168,58 +167,58 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& cfg) {
       m_absEncoder = *absPtr;
 
       // Conversion factor: gearing-derived, overridden by direct CF if set.
-      double absCF = m_config.GetExternalEncoderGearing()
+      double absCF = config.GetExternalEncoderGearing()
                          .value_or(gearing::MechanismGearing::kOne)
                          .GetRotorToMechanismRatio();
-      if (auto cf = m_config.GetExternalEncoderConversionFactor(); cf) absCF = *cf;
+      if (auto cf = config.GetExternalEncoderConversionFactor(); cf) absCF = *cf;
       sparkCfg.absoluteEncoder.PositionConversionFactor(absCF).VelocityConversionFactor(absCF /
                                                                                         60.0);
 
-      if (auto inv = m_config.GetExternalEncoderInverted(); inv)
+      if (auto inv = config.GetExternalEncoderInverted(); inv)
         sparkCfg.absoluteEncoder.Inverted(*inv);
 
-      if (m_config.GetUseExternalFeedback())
+      if (config.GetUseExternalFeedback())
         sparkCfg.closedLoop.SetFeedbackSensor(rev::spark::FeedbackSensor::kAbsoluteEncoder);
 
-      if (auto offset = m_config.GetExternalEncoderZeroOffset(); offset)
+      if (auto offset = config.GetExternalEncoderZeroOffset(); offset)
         sparkCfg.absoluteEncoder.ZeroOffset(offset->value());
 
-      if (auto dp = m_config.GetExternalEncoderDiscontinuityPoint(); dp)
+      if (auto dp = config.GetExternalEncoderDiscontinuityPoint(); dp)
         sparkCfg.absoluteEncoder.ZeroCentered(*dp == units::turn_t{0.5});
 
     } else {
       // Validate: encoder-specific options require an encoder to be attached.
-      if (m_config.GetExternalEncoderZeroOffset().has_value())
+      if (config.GetExternalEncoderZeroOffset().has_value())
         throw exceptions::SmartMotorControllerConfigurationException(
             "Zero offset is only available for external encoders",
             "Zero offset could not be applied", "WithExternalEncoder(encoder)");
-      if (m_config.GetExternalEncoderDiscontinuityPoint().has_value())
+      if (config.GetExternalEncoderDiscontinuityPoint().has_value())
         throw exceptions::SmartMotorControllerConfigurationException(
             "External encoder discontinuity point is only available for external encoders",
             "Discontinuity point could not be applied", "WithExternalEncoder(encoder)");
-      if (m_config.GetExternalEncoderInverted().has_value())
+      if (config.GetExternalEncoderInverted().has_value())
         throw exceptions::SmartMotorControllerConfigurationException(
             "External encoder cannot be inverted when no external encoder is attached",
             "External encoder inversion could not be applied",
             "WithExternalEncoder(encoder) + WithExternalEncoderInverted(bool)");
-      if (m_config.GetExternalEncoderGearing().has_value())
+      if (config.GetExternalEncoderGearing().has_value())
         throw exceptions::SmartMotorControllerConfigurationException(
             "External encoder gearing requires an external encoder to be attached",
             "External encoder gearing could not be applied",
             "WithExternalEncoder(encoder) + WithExternalEncoderGearing(...)");
       // Consume remaining external encoder options for validation tracking
-      m_config.GetUseExternalFeedback();
+      config.GetUseExternalFeedback();
     }
 
-    bool isClosedLoop = m_config.GetMotorControllerMode() == ControlMode::CLOSED_LOOP;
-    if (auto lower = m_config.GetMechanismLowerLimit()) {
+    bool isClosedLoop = config.GetMotorControllerMode() == ControlMode::CLOSED_LOOP;
+    if (auto lower = config.GetMechanismLowerLimit()) {
       sparkCfg.softLimit.ReverseSoftLimit(lower->value()).ReverseSoftLimitEnabled(isClosedLoop);
     }
-    if (auto upper = m_config.GetMechanismUpperLimit()) {
+    if (auto upper = config.GetMechanismUpperLimit()) {
       sparkCfg.softLimit.ForwardSoftLimit(upper->value()).ForwardSoftLimitEnabled(isClosedLoop);
     }
-    if (auto wrapMax = m_config.GetContinuousWrapping(); wrapMax) {
-      if (auto wrapMin = m_config.GetContinuousWrappingMin(); wrapMin)
+    if (auto wrapMax = config.GetContinuousWrapping(); wrapMax) {
+      if (auto wrapMin = config.GetContinuousWrappingMin(); wrapMin)
         sparkCfg.closedLoop.PositionWrappingInputRange(wrapMin->value(), wrapMax->value())
             .PositionWrappingEnabled(true);
       else
@@ -228,7 +227,7 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& cfg) {
     }
   };
 
-  if (m_config.GetVendorControlRequest().has_value())
+  if (config.GetVendorControlRequest().has_value())
     throw std::runtime_error(
         "SparkWrapper does not support custom vendor control requests (WithVendorControlRequest).");
 
@@ -239,7 +238,7 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& cfg) {
   CommitConfig();
 
   // Load LQR from the active gain slot so IterateClosedLoopController can use it.
-  auto gains = m_config.GetSlotGains(m_slot);
+  auto gains = config.GetSlotGains(m_slot);
   if (gains.lqr) {
     m_lqr = math::LQRController{*gains.lqr};
   } else {
@@ -257,7 +256,7 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& cfg) {
   // the RoboRIO runs the closed-loop controller via a Notifier and sends voltage commands to the
   // Spark.  SetPosition/SetVelocity are gated by m_closedLoopControllerRunning so they do not
   // forward raw setpoints to the Spark hardware controller while the notifier is active.
-  bool needsRioController = m_config.HasExponentialProfile() || m_lqr.has_value();
+  bool needsRioController = config.HasExponentialProfile() || m_lqr.has_value();
   if (needsRioController) {
     int deviceId = m_spark->GetDeviceId();
     std::string alertText =
@@ -275,10 +274,10 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& cfg) {
     }
     m_closedLoopControllerThread =
         std::make_unique<frc::Notifier>([this] { IterateClosedLoopController(); });
-    if (auto name = m_config.GetTelemetryName(); name) {
+    if (auto name = config.GetTelemetryName(); name) {
       m_closedLoopControllerThread->SetName(*name);
     }
-    if (m_config.GetMotorControllerMode() == ControlMode::CLOSED_LOOP) {
+    if (config.GetMotorControllerMode() == ControlMode::CLOSED_LOOP) {
       StartClosedLoopController();
     }
   } else if (m_closedLoopControllerThread) {
@@ -288,14 +287,14 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& cfg) {
     if (m_rioControllerAlert) m_rioControllerAlert->Set(false);
   }
 
-  if (auto startPos = m_config.GetStartingPosition()) {
+  if (auto startPos = config.GetStartingPosition()) {
     m_relEncoder->SetPosition(startPos->value());
   } else if (m_absEncoder) {
     m_relEncoder->SetPosition(m_absEncoder->GetPosition());
   }
 
   // Tightly coupled followers — accept SparkMax and SparkFlex only
-  for (auto& [hw, inverted] : m_config.GetFollowers()) {
+  for (auto& [hw, inverted] : config.GetFollowers()) {
     if (auto* mx = std::any_cast<rev::spark::SparkMax*>(&hw)) {
       SparkMaxConfig followCfg;
       followCfg.Follow(*m_spark, inverted);
@@ -313,8 +312,8 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& cfg) {
   }
   LoadLooselyCoupledFollowers();
 
-  m_config.ValidateBasicOptions();
-  m_config.ValidateExternalEncoderOptions();
+  config.ValidateBasicOptions();
+  config.ValidateExternalEncoderOptions();
   return true;
 }
 
@@ -333,15 +332,15 @@ void SparkWrapper::SetupSimulation() {
   if (!frc::RobotBase::IsSimulation()) return;
 
   if (!m_sparkSim.has_value()) {
-    auto simMotor = m_config.GetSimMotor();
-    auto& gearing = m_config.GetMotorGearing();
+    auto simMotor = m_config->GetSimMotor();
+    auto& gearing = m_config->GetMotorGearing();
     if (!simMotor || !gearing) return;
 
-    auto plant = frc::LinearSystemId::DCMotorSystem(*simMotor, m_config.GetMOI(),
+    auto plant = frc::LinearSystemId::DCMotorSystem(*simMotor, m_config->GetMOI(),
                                                     gearing->GetMechanismToRotorRatio());
     m_motorSim.emplace(plant, *simMotor);
 
-    auto period = m_config.GetClosedLoopControlPeriod().value_or(20_ms);
+    auto period = m_config->GetClosedLoopControlPeriod().value_or(20_ms);
     SetSimSupplier(std::make_shared<simulation::DCMotorSimSupplier>(
         *m_motorSim, [this]() { return GetDutyCycle(); }, *gearing, period));
 
@@ -352,7 +351,7 @@ void SparkWrapper::SetupSimulation() {
     else if (m_flexConfig)
       m_relEncoderSim.emplace(static_cast<rev::spark::SparkFlex*>(m_spark));
 
-    if (m_config.GetExternalEncoder().has_value()) {
+    if (m_config->GetExternalEncoder().has_value()) {
       if (m_maxConfig)
         m_absEncoderSim.emplace(static_cast<rev::spark::SparkMax*>(m_spark));
       else if (m_flexConfig)
@@ -360,12 +359,12 @@ void SparkWrapper::SetupSimulation() {
     }
   }
 
-  if (auto startPos = m_config.GetStartingPosition()) {
+  if (auto startPos = m_config->GetStartingPosition()) {
     m_sparkSim->SetPosition(startPos->value());
     if (m_relEncoderSim) m_relEncoderSim->SetPosition(startPos->value());
     if (m_absEncoderSim) m_absEncoderSim->SetPosition(startPos->value());
   }
-  if (auto offset = m_config.GetExternalEncoderZeroOffset()) {
+  if (auto offset = m_config->GetExternalEncoderZeroOffset()) {
     if (m_absEncoderSim) m_absEncoderSim->SetZeroOffset(offset->value());
   }
 }
@@ -376,7 +375,7 @@ void SparkWrapper::SimIterate() {
     if (m_simSupplier->IsWatchdogExpired()) {
       m_simSupplier->UpdateSim();
     }
-    units::second_t dt = m_config.GetClosedLoopControlPeriod().value_or(20_ms);
+    units::second_t dt = m_config->GetClosedLoopControlPeriod().value_or(20_ms);
     units::turns_per_second_t mechVelRps = m_simSupplier->GetMechanismVelocity();
     double vbus = m_simSupplier->GetMechanismSupplyVoltage().value();
     m_sparkSim->iterate(mechVelRps.value(), vbus, dt.value());
@@ -412,7 +411,7 @@ units::volt_t SparkWrapper::GetVoltage() {
 
 void SparkWrapper::SetPosition(units::turn_t angle) {
   m_setpointPosition = angle;
-  if (m_config.GetMotorControllerMode() == ControlMode::CLOSED_LOOP &&
+  if (m_config->GetMotorControllerMode() == ControlMode::CLOSED_LOOP &&
       !m_closedLoopControllerRunning)
     m_sparkPid->SetSetpoint(angle.value(), m_positionControlType,
                             static_cast<ClosedLoopSlot>(m_revSlot));
@@ -420,7 +419,7 @@ void SparkWrapper::SetPosition(units::turn_t angle) {
 }
 
 void SparkWrapper::SetPosition(units::meter_t distance) {
-  if (auto circ = m_config.GetMechanismCircumference(); circ) {
+  if (auto circ = m_config->GetMechanismCircumference(); circ) {
     SetPosition(units::turn_t{distance.value() / circ->value()});
   } else {
     ForwardPositionToFollowers(distance);
@@ -429,7 +428,7 @@ void SparkWrapper::SetPosition(units::meter_t distance) {
 
 void SparkWrapper::SetVelocity(units::turns_per_second_t velocity) {
   m_setpointVelocity = velocity;
-  if (m_config.GetMotorControllerMode() == ControlMode::CLOSED_LOOP &&
+  if (m_config->GetMotorControllerMode() == ControlMode::CLOSED_LOOP &&
       !m_closedLoopControllerRunning)
     m_sparkPid->SetSetpoint(velocity.value(), m_velocityControlType,
                             static_cast<ClosedLoopSlot>(m_revSlot));
@@ -437,7 +436,7 @@ void SparkWrapper::SetVelocity(units::turns_per_second_t velocity) {
 }
 
 void SparkWrapper::SetVelocity(units::meters_per_second_t velocity) {
-  if (auto circ = m_config.GetMechanismCircumference(); circ) {
+  if (auto circ = m_config->GetMechanismCircumference(); circ) {
     SetVelocity(units::turns_per_second_t{velocity.value() / circ->value()});
   } else {
     ForwardVelocityToFollowers(velocity);
@@ -453,7 +452,7 @@ void SparkWrapper::SetEncoderPosition(units::turn_t angle) {
   if (m_simSupplier) m_simSupplier->SetMechanismPosition(angle);
 }
 void SparkWrapper::SetEncoderPosition(units::meter_t distance) {
-  if (auto circ = m_config.GetMechanismCircumference(); circ)
+  if (auto circ = m_config->GetMechanismCircumference(); circ)
     SetEncoderPosition(units::turn_t{distance.value() / circ->value()});
 }
 void SparkWrapper::SetEncoderVelocity(units::turns_per_second_t) {}
@@ -472,25 +471,25 @@ units::turns_per_second_squared_t SparkWrapper::GetMechanismAcceleration() {
       m_accelFilter.Derivative(GetMechanismVelocity().value())};
 }
 units::turn_t SparkWrapper::GetRotorPosition() {
-  auto& g = m_config.GetMotorGearing();
+  auto& g = m_config->GetMotorGearing();
   return units::turn_t{m_relEncoder->GetPosition() * (g ? g->GetMechanismToRotorRatio() : 1.0)};
 }
 units::turns_per_second_t SparkWrapper::GetRotorVelocity() {
-  auto& g = m_config.GetMotorGearing();
+  auto& g = m_config->GetMotorGearing();
   return units::turns_per_second_t{m_relEncoder->GetVelocity() *
                                    (g ? g->GetMechanismToRotorRatio() : 1.0)};
 }
 
 units::meter_t SparkWrapper::GetMeasurementPosition() {
-  auto circ = m_config.GetMechanismCircumference().value_or(1.0_m);
+  auto circ = m_config->GetMechanismCircumference().value_or(1.0_m);
   return units::meter_t{GetMechanismPosition().value() * circ.value()};
 }
 units::meters_per_second_t SparkWrapper::GetMeasurementVelocity() {
-  auto circ = m_config.GetMechanismCircumference().value_or(1.0_m);
+  auto circ = m_config->GetMechanismCircumference().value_or(1.0_m);
   return units::meters_per_second_t{GetMechanismVelocity().value() * circ.value()};
 }
 units::meters_per_second_squared_t SparkWrapper::GetMeasurementAcceleration() {
-  auto circ = m_config.GetMechanismCircumference().value_or(1.0_m);
+  auto circ = m_config->GetMechanismCircumference().value_or(1.0_m);
   return units::meters_per_second_squared_t{GetMechanismAcceleration().value() * circ.value()};
 }
 
@@ -626,7 +625,7 @@ void SparkWrapper::SetKa(double kA) {
 }
 void SparkWrapper::SetKg(double kG) {
   auto doConfig = [&](SparkBaseConfig& cfg) {
-    if (m_config.GetArmFeedforward(m_slot))
+    if (m_config->GetArmFeedforward(m_slot))
       cfg.closedLoop.feedForward.kCos(kG, static_cast<ClosedLoopSlot>(m_revSlot));
     else
       cfg.closedLoop.feedForward.kG(kG, static_cast<ClosedLoopSlot>(m_revSlot));
@@ -642,9 +641,9 @@ void SparkWrapper::SetFeedforward(double kS, double kV, double kA, double kG) {
     cfg.closedLoop.feedForward.kS(kS, static_cast<ClosedLoopSlot>(m_revSlot))
         .kV(kV, static_cast<ClosedLoopSlot>(m_revSlot))
         .kA(kA, static_cast<ClosedLoopSlot>(m_revSlot));
-    if (m_config.GetArmFeedforward(m_slot))
+    if (m_config->GetArmFeedforward(m_slot))
       cfg.closedLoop.feedForward.kCos(kG, static_cast<ClosedLoopSlot>(m_revSlot));
-    else if (m_config.GetElevatorFeedforward(m_slot))
+    else if (m_config->GetElevatorFeedforward(m_slot))
       cfg.closedLoop.feedForward.kG(kG, static_cast<ClosedLoopSlot>(m_revSlot));
   };
   if (m_maxConfig)
@@ -693,7 +692,7 @@ void SparkWrapper::SetOpenLoopRampRate(units::second_t r) {
 }
 
 void SparkWrapper::SetMechanismUpperLimit(units::turn_t upper) {
-  if (auto lower = m_config.GetMechanismLowerLimit()) m_config.WithMechanismLimits(*lower, upper);
+  if (auto lower = m_config->GetMechanismLowerLimit()) m_config->WithMechanismLimits(*lower, upper);
   auto doConfig = [&](SparkBaseConfig& cfg) { cfg.softLimit.ForwardSoftLimit(upper.value()); };
   if (m_maxConfig)
     doConfig(*m_maxConfig);
@@ -702,7 +701,7 @@ void SparkWrapper::SetMechanismUpperLimit(units::turn_t upper) {
   CommitConfig();
 }
 void SparkWrapper::SetMechanismLowerLimit(units::turn_t lower) {
-  if (auto upper = m_config.GetMechanismUpperLimit()) m_config.WithMechanismLimits(lower, *upper);
+  if (auto upper = m_config->GetMechanismUpperLimit()) m_config->WithMechanismLimits(lower, *upper);
   auto doConfig = [&](SparkBaseConfig& cfg) { cfg.softLimit.ReverseSoftLimit(lower.value()); };
   if (m_maxConfig)
     doConfig(*m_maxConfig);
@@ -711,7 +710,7 @@ void SparkWrapper::SetMechanismLowerLimit(units::turn_t lower) {
   CommitConfig();
 }
 void SparkWrapper::SetMechanismLimits(units::turn_t lower, units::turn_t upper) {
-  m_config.WithMechanismLimits(lower, upper);
+  m_config->WithMechanismLimits(lower, upper);
   auto doConfig = [&](SparkBaseConfig& cfg) {
     cfg.softLimit.ReverseSoftLimit(lower.value()).ForwardSoftLimit(upper.value());
   };
@@ -732,10 +731,10 @@ void SparkWrapper::SetMechanismLimitsEnabled(bool enabled) {
   CommitConfig();
 }
 void SparkWrapper::SetMeasurementUpperLimit(units::meter_t upper) {
-  auto circ = m_config.GetMechanismCircumference();
-  auto lowerAngle = m_config.GetMechanismLowerLimit();
+  auto circ = m_config->GetMechanismCircumference();
+  auto lowerAngle = m_config->GetMechanismLowerLimit();
   if (!circ || !lowerAngle) return;
-  m_config.WithMeasurementLimits(units::meter_t{lowerAngle->value() * circ->value()}, upper);
+  m_config->WithMeasurementLimits(units::meter_t{lowerAngle->value() * circ->value()}, upper);
   units::turn_t upperTurns{upper.value() / circ->value()};
   auto doConfig = [&](SparkBaseConfig& cfg) { cfg.softLimit.ForwardSoftLimit(upperTurns.value()); };
   if (m_maxConfig)
@@ -745,10 +744,10 @@ void SparkWrapper::SetMeasurementUpperLimit(units::meter_t upper) {
   CommitConfig();
 }
 void SparkWrapper::SetMeasurementLowerLimit(units::meter_t lower) {
-  auto circ = m_config.GetMechanismCircumference();
-  auto upperAngle = m_config.GetMechanismUpperLimit();
+  auto circ = m_config->GetMechanismCircumference();
+  auto upperAngle = m_config->GetMechanismUpperLimit();
   if (!circ || !upperAngle) return;
-  m_config.WithMeasurementLimits(lower, units::meter_t{upperAngle->value() * circ->value()});
+  m_config->WithMeasurementLimits(lower, units::meter_t{upperAngle->value() * circ->value()});
   units::turn_t lowerTurns{lower.value() / circ->value()};
   auto doConfig = [&](SparkBaseConfig& cfg) { cfg.softLimit.ReverseSoftLimit(lowerTurns.value()); };
   if (m_maxConfig)
@@ -770,7 +769,7 @@ void SparkWrapper::SetMotionProfileMaxVelocity(units::turns_per_second_t vel) {
 }
 
 void SparkWrapper::SetMotionProfileMaxVelocity(units::meters_per_second_t vel) {
-  if (auto circ = m_config.GetMechanismCircumference(); circ)
+  if (auto circ = m_config->GetMechanismCircumference(); circ)
     SetMotionProfileMaxVelocity(units::turns_per_second_t{vel.value() / circ->value()});
 }
 
@@ -786,7 +785,7 @@ void SparkWrapper::SetMotionProfileMaxAcceleration(units::turns_per_second_squar
 }
 
 void SparkWrapper::SetMotionProfileMaxAcceleration(units::meters_per_second_squared_t acc) {
-  if (auto circ = m_config.GetMechanismCircumference(); circ)
+  if (auto circ = m_config->GetMechanismCircumference(); circ)
     SetMotionProfileMaxAcceleration(units::turns_per_second_squared_t{acc.value() / circ->value()});
 }
 
@@ -803,14 +802,14 @@ void SparkWrapper::SetMotionProfileMaxJerk(units::angular_jerk::turns_per_second
 
 void SparkWrapper::SetExponentialProfile(std::optional<double> kV, std::optional<double> kA,
                                          std::optional<units::volt_t> maxInput) {
-  if (!m_config.GetExponentialProfile()) return;
+  if (!m_config->GetExponentialProfile()) return;
 
-  double newKV = kV.value_or(m_config.GetExponentialProfileKV().value_or(0.0));
-  double newKA = kA.value_or(m_config.GetExponentialProfileKA().value_or(0.0));
+  double newKV = kV.value_or(m_config->GetExponentialProfileKV().value_or(0.0));
+  double newKA = kA.value_or(m_config->GetExponentialProfileKA().value_or(0.0));
   units::volt_t newMaxInput =
-      maxInput.value_or(m_config.GetExponentialProfileMaxInput().value_or(12_V));
+      maxInput.value_or(m_config->GetExponentialProfileMaxInput().value_or(12_V));
 
-  m_config.WithExponentialProfile(newKV, newKA, newMaxInput);
+  m_config->WithExponentialProfile(newKV, newKA, newMaxInput);
 
   for (auto* f : m_looseFollowers) f->SetExponentialProfile(kV, kA, maxInput);
 }
@@ -820,7 +819,7 @@ void SparkWrapper::SetClosedLoopSlot(ClosedLoopControllerSlot slot) {
   m_revSlot = static_cast<int>(slot);
 }
 
-SmartMotorControllerConfig& SparkWrapper::GetConfig() { return m_config; }
+SmartMotorControllerConfig& SparkWrapper::GetConfig() { return *m_config; }
 void* SparkWrapper::GetMotorController() { return m_spark; }
 void* SparkWrapper::GetMotorControllerConfig() {
   if (m_maxConfig) return &m_maxConfig.value();

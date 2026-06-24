@@ -43,8 +43,8 @@ DiffDriveSubsystem::DiffDriveSubsystem() {
   // SparkWrapper takes a reference (CAN IDs 21 and 24 from the header).
   // Followers (22 and 23) are not wired through YAMS here -- configure them via
   // SmartMotorControllerConfig::WithFollowers if you need YAMS to manage them.
-  m_leftSMC.emplace(m_leftMotor, frc::DCMotor::NEO(2), m_leftConfig);
-  m_rightSMC.emplace(m_rightMotor, frc::DCMotor::NEO(2), m_rightConfig);
+  m_leftSMC.emplace(m_leftMotor, frc::DCMotor::NEO(2), &m_leftConfig);
+  m_rightSMC.emplace(m_rightMotor, frc::DCMotor::NEO(2), &m_rightConfig);
 
   // DifferentialDrive's output callbacks: each lambda captures the SparkWrapper by pointer
   // and forwards the duty-cycle from WPILib's tank/arcade math to the actual motor.

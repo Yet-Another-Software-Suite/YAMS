@@ -12,8 +12,6 @@
 #include <optional>
 #include <string>
 
-#include "yams/motorcontrollers/SmartMotorController.hpp"
-
 namespace yams::mechanisms::config {
 
 /**
@@ -28,14 +26,6 @@ class PivotConfig {
   PivotConfig() = default;
 
   // ---- Builder methods -------------------------------------------------------
-
-  /**
-   * Set the SmartMotorController driving the pivot.
-   *
-   * @param smc Pointer to the motor controller (must outlive this config).
-   * @return *this for chaining.
-   */
-  PivotConfig& WithMotorController(motorcontrollers::SmartMotorController* smc);
 
   /**
    * Set the NetworkTables / SmartDashboard name for telemetry.
@@ -71,9 +61,6 @@ class PivotConfig {
 
   // ---- Getters ---------------------------------------------------------------
 
-  /** Get the motor controller pointer. */
-  motorcontrollers::SmartMotorController* GetMotorController() const;
-
   /** Get the telemetry name. */
   std::string GetTelemetryName() const;
 
@@ -87,7 +74,6 @@ class PivotConfig {
   frc::Color8Bit GetSimColor() const;
 
  private:
-  motorcontrollers::SmartMotorController* m_smc{nullptr};
   std::string m_telemetryName;
   std::optional<units::degree_t> m_minAngle;
   std::optional<units::degree_t> m_maxAngle;

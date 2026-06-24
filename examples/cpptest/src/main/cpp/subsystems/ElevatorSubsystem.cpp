@@ -63,13 +63,13 @@ ElevatorSubsystem::ElevatorSubsystem() {
   // emplace constructs TalonFXWrapper in-place inside the optional; pass a pointer to the
   // hardware object (not a reference) because the wrapper stores a raw pointer internally.
   // KrakenX44(1) is the sim motor model -- 1 motor in the gearbox, not a dual-motor config.
-  m_motor.emplace(&m_elevatorMotor, frc::DCMotor::KrakenX44(1), m_motorConfig);
+  // m_motorConfig is passed by pointer so the wrapper references the member directly.
+  m_motor.emplace(&m_elevatorMotor, frc::DCMotor::KrakenX44(1), &m_motorConfig);
 
   // ElevatorConfig carries mechanism-level bounds and the carriage mass used by the sim.
   // WithMinimumHeight / WithMaximumHeight set the ElevatorSim travel limits (not the
   // motor-controller soft limits -- those are set in m_motorConfig above).
-  m_elevatorConfig.WithMotorController(&m_motor.value())
-      .WithMinimumHeight(units::meter_t{0})
+  m_elevatorConfig.WithMinimumHeight(units::meter_t{0})
       // 3 m is the sim ceiling; it is intentionally larger than the 2 m motor-controller
       // soft limit so the sim does not clip before the soft limit fires in real code.
       .WithMaximumHeight(units::meter_t{3})
@@ -78,7 +78,9 @@ ElevatorSubsystem::ElevatorSubsystem() {
       .WithCarriageMass(2.0_lb)
       .WithTelemetryName("Elevator");
 
-  m_elevator.emplace(m_elevatorConfig);
+  // Elevator constructor takes (ElevatorConfig*, SmartMotorController*); the SMC is wired
+  // in here rather than through ElevatorConfig::WithMotorController.
+  m_elevator.emplace(&m_elevatorConfig, &m_motor.value());
 }
 
 void ElevatorSubsystem::Periodic() { m_elevator->UpdateTelemetry(); }

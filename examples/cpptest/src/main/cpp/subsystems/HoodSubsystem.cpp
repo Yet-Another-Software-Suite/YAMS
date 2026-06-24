@@ -53,17 +53,16 @@ HoodSubsystem::HoodSubsystem() {
   // emplace() deferred until here so m_hoodMotor is fully constructed before we take its address.
   // MotorArrangement::NEO selects the NEO brushless commutation profile inside the TalonFXS.
   m_motor.emplace(&m_hoodMotor, frc::DCMotor::NEO(1), TalonFXSWrapper::MotorArrangement::NEO,
-                  m_motorConfig);
+                  &m_motorConfig);
 
   // PivotConfig wires the motor controller to the Pivot mechanism.  WithMin/MaxAngle here are
   // simulation hard-stop bounds used by DCMotorSim -- wider than the firmware soft limits above
   // so the sim doesn't clamp before firmware would.  WithTelemetryName sets the NT4 table key.
-  m_pivotConfig.WithMotorController(&m_motor.value())
-      .WithMinAngle(units::degree_t{-100})
+  m_pivotConfig.WithMinAngle(units::degree_t{-100})
       .WithMaxAngle(units::degree_t{200})
       .WithTelemetryName("HoodExample");
 
-  m_hood.emplace(m_pivotConfig);
+  m_hood.emplace(&m_pivotConfig, &m_motor.value());
 }
 
 // Non-command path for periodic callers that manage their own setpoint scheduling.

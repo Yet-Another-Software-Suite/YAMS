@@ -38,7 +38,7 @@ namespace yams::mechanisms::velocity {
  *
  * // Declare as subsystem members:
  * //   ctre::phoenix6::hardware::TalonFX m_talon{4};
- * //   std::optional<TalonFXWrapper>     m_smc;
+ * //   std::optional<TalonFXWrapper>     m_motor;
  * //   FlyWheelConfig                     m_flyWheelConfig;
  * //   std::optional<FlyWheel>            m_flyWheel;
  *
@@ -53,13 +53,12 @@ namespace yams::mechanisms::velocity {
  *         .WithClosedLoopMode()
  *         .WithTelemetry("ShooterMotor", Cfg::TelemetryVerbosity::HIGH);
  *
- * m_smc.emplace(m_talon, frc::DCMotor::Falcon500(1), motorCfg);
+ * m_motor.emplace(m_talon, frc::DCMotor::Falcon500(1), motorCfg);
  *
- * m_flyWheelConfig.WithMotorController(&m_smc.value())
- *                 .WithRollerDiameter(4.0 * 0.0254_m)  // 4-inch roller
+ * m_flyWheelConfig.WithRollerDiameter(4.0 * 0.0254_m)  // 4-inch roller
  *                 .WithTelemetryName("Shooter");
  *
- * m_flyWheel.emplace(m_flyWheelConfig);
+ * m_flyWheel.emplace(&m_flyWheelConfig, &m_motor.value());
  *
  * // Run at a fixed angular velocity (~2000 RPM):
  * m_flyWheel->Run(units::degrees_per_second_t{12000.0});
@@ -71,11 +70,12 @@ namespace yams::mechanisms::velocity {
 class FlyWheel : public SmartVelocityMechanism {
  public:
   /**
-   * Construct a FlyWheel from a FlyWheelConfig.
+   * Construct a FlyWheel from a FlyWheelConfig and a SmartMotorController.
    *
-   * @param config Fully-populated flywheel configuration.
+   * @param config Pointer to the flywheel configuration (must outlive this object).
+   * @param smc    Pointer to the motor controller (must outlive this object).
    */
-  explicit FlyWheel(const config::FlyWheelConfig& config);
+  FlyWheel(config::FlyWheelConfig* config, motorcontrollers::SmartMotorController* smc);
 
   // ---- SmartMechanism overrides ---------------------------------------------
 
@@ -292,7 +292,7 @@ class FlyWheel : public SmartVelocityMechanism {
   const config::FlyWheelConfig& GetConfig() const;
 
  private:
-  config::FlyWheelConfig m_flyWheelConfig;
+  config::FlyWheelConfig* m_flyWheelConfig{nullptr};
   std::string m_name{"FlyWheel"};
   std::optional<frc::sim::DCMotorSim> m_dcMotorSim;
 };

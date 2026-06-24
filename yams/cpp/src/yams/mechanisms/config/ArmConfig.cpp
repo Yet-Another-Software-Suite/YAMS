@@ -7,11 +7,6 @@
 
 namespace yams::mechanisms::config {
 
-ArmConfig& ArmConfig::WithMotorController(motorcontrollers::SmartMotorController* smc) {
-  m_smc = smc;
-  return *this;
-}
-
 ArmConfig& ArmConfig::WithTelemetryName(const std::string& name) {
   m_telemetryName = name;
   return *this;
@@ -36,8 +31,6 @@ ArmConfig& ArmConfig::WithSimColor(const frc::Color8Bit& color) {
   m_simColor = color;
   return *this;
 }
-
-motorcontrollers::SmartMotorController* ArmConfig::GetMotorController() const { return m_smc; }
 
 std::string ArmConfig::GetTelemetryName() const { return m_telemetryName; }
 

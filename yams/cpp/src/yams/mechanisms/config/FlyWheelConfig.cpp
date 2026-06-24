@@ -8,11 +8,6 @@
 
 namespace yams::mechanisms::config {
 
-FlyWheelConfig& FlyWheelConfig::WithMotorController(motorcontrollers::SmartMotorController* smc) {
-  m_smc = smc;
-  return *this;
-}
-
 FlyWheelConfig& FlyWheelConfig::WithTelemetryName(const std::string& name) {
   m_telemetryName = name;
   return *this;
@@ -27,8 +22,6 @@ FlyWheelConfig& FlyWheelConfig::WithSimColor(const frc::Color8Bit& color) {
   m_simColor = color;
   return *this;
 }
-
-motorcontrollers::SmartMotorController* FlyWheelConfig::GetMotorController() const { return m_smc; }
 
 std::string FlyWheelConfig::GetTelemetryName() const { return m_telemetryName; }
 

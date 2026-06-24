@@ -10,8 +10,6 @@
 #include <optional>
 #include <string>
 
-#include "yams/motorcontrollers/SmartMotorController.hpp"
-
 namespace yams::mechanisms::config {
 
 /**
@@ -24,14 +22,6 @@ class FlyWheelConfig {
   FlyWheelConfig() = default;
 
   // ---- Builder methods -------------------------------------------------------
-
-  /**
-   * Set the SmartMotorController driving the flywheel.
-   *
-   * @param smc Pointer to the motor controller (must outlive this config).
-   * @return *this for chaining.
-   */
-  FlyWheelConfig& WithMotorController(motorcontrollers::SmartMotorController* smc);
 
   /**
    * Set the NetworkTables / SmartDashboard name for telemetry.
@@ -57,9 +47,6 @@ class FlyWheelConfig {
 
   // ---- Getters ---------------------------------------------------------------
 
-  /** Get the motor controller pointer. */
-  motorcontrollers::SmartMotorController* GetMotorController() const;
-
   /** Get the telemetry name. */
   std::string GetTelemetryName() const;
 
@@ -70,7 +57,6 @@ class FlyWheelConfig {
   frc::Color8Bit GetSimColor() const;
 
  private:
-  motorcontrollers::SmartMotorController* m_smc{nullptr};
   std::string m_telemetryName;
   std::optional<units::meter_t> m_rollerDiameter;
   frc::Color8Bit m_simColor{frc::Color::kOrange};

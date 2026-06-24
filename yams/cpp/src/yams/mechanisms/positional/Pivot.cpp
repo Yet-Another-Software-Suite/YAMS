@@ -31,20 +31,21 @@ namespace yams::mechanisms::positional {
 
 // ---- Constructor ------------------------------------------------------------
 
-Pivot::Pivot(const config::PivotConfig& config)
-    : SmartPositionalMechanism(), m_pivotConfig{config} {
-  m_smc = config.GetMotorController();
+Pivot::Pivot(config::PivotConfig* config, motorcontrollers::SmartMotorController* smc)
+    : SmartPositionalMechanism() {
+  m_pivotConfig = config;
+  m_smc = smc;
   m_subsystem = m_smc->GetConfig().GetSubsystem();
 
-  if (!config.GetTelemetryName().empty()) {
-    m_name = config.GetTelemetryName();
+  if (!m_pivotConfig->GetTelemetryName().empty()) {
+    m_name = m_pivotConfig->GetTelemetryName();
   }
 
   // Apply angular soft limits to the motor controller when configured.
-  if (auto minA = config.GetMinAngle()) {
+  if (auto minA = m_pivotConfig->GetMinAngle()) {
     m_smc->SetMechanismLowerLimit(*minA);
   }
-  if (auto maxA = config.GetMaxAngle()) {
+  if (auto maxA = m_pivotConfig->GetMaxAngle()) {
     m_smc->SetMechanismUpperLimit(*maxA);
   }
 
@@ -55,12 +56,12 @@ Pivot::Pivot(const config::PivotConfig& config)
 
   if (frc::RobotBase::IsSimulation()) {
     // Configuration checks.
-    if (!config.GetMinAngle().has_value()) {
+    if (!m_pivotConfig->GetMinAngle().has_value()) {
       throw exceptions::PivotConfigurationException("Pivot lower hard limit is empty",
                                                     "Cannot create simulation.",
                                                     "WithMinAngle(units::degree_t)");
     }
-    if (!config.GetMaxAngle().has_value()) {
+    if (!m_pivotConfig->GetMaxAngle().has_value()) {
       throw exceptions::PivotConfigurationException("Pivot upper hard limit is empty",
                                                     "Cannot create simulation.",
                                                     "WithMaxAngle(units::degree_t)");
@@ -96,16 +97,16 @@ Pivot::Pivot(const config::PivotConfig& config)
 
     units::degree_t startDeg = *m_smc->GetConfig().GetStartingPosition();
     m_mechanismLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
-        m_name, kPivotLen, startDeg, 6, config.GetSimColor());
+        m_name, kPivotLen, startDeg, 6, m_pivotConfig->GetSimColor());
     m_setpointLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
         "Setpoint", kPivotLen, startDeg, 3, frc::Color8Bit{frc::Color::kWhite});
 
     constexpr double kTickLen = 3.0 * 0.0254;  // 3 inches in metres
     m_mechanismRoot->Append<frc::MechanismLigament2d>("MaxHard", kTickLen,
-                                                      config.GetMaxAngle().value(), 4,
+                                                      m_pivotConfig->GetMaxAngle().value(), 4,
                                                       frc::Color8Bit{frc::Color::kLimeGreen});
     m_mechanismRoot->Append<frc::MechanismLigament2d>(
-        "MinHard", kTickLen, config.GetMinAngle().value(), 4, frc::Color8Bit{frc::Color::kRed});
+        "MinHard", kTickLen, m_pivotConfig->GetMinAngle().value(), 4, frc::Color8Bit{frc::Color::kRed});
 
     auto smcUpperLimit = m_smc->GetConfig().GetMechanismUpperLimit();
     auto smcLowerLimit = m_smc->GetConfig().GetMechanismLowerLimit();
@@ -130,13 +131,13 @@ void Pivot::SimIterate() {
     ss->StarveWatchdog();
 
     double simVelRadPerSec = m_dcMotorSim->GetAngularVelocity().value();
-    if (m_pivotConfig.GetMinAngle() && simVelRadPerSec < 0.0 &&
-        GetAngle() < *m_pivotConfig.GetMinAngle()) {
-      m_smc->SetEncoderPosition(*m_pivotConfig.GetMinAngle());
+    if (m_pivotConfig->GetMinAngle() && simVelRadPerSec < 0.0 &&
+        GetAngle() < *m_pivotConfig->GetMinAngle()) {
+      m_smc->SetEncoderPosition(*m_pivotConfig->GetMinAngle());
     }
-    if (m_pivotConfig.GetMaxAngle() && simVelRadPerSec > 0.0 &&
-        GetAngle() > *m_pivotConfig.GetMaxAngle()) {
-      m_smc->SetEncoderPosition(*m_pivotConfig.GetMaxAngle());
+    if (m_pivotConfig->GetMaxAngle() && simVelRadPerSec > 0.0 &&
+        GetAngle() > *m_pivotConfig->GetMaxAngle()) {
+      m_smc->SetEncoderPosition(*m_pivotConfig->GetMaxAngle());
     }
     frc::sim::RoboRioSim::SetVInVoltage(
         frc::sim::BatterySim::Calculate({ss->GetCurrentDrawAmps()}));
@@ -161,13 +162,13 @@ std::string Pivot::GetName() const { return m_name; }
 
 frc2::Trigger Pivot::Max() {
   return frc2::Trigger{[this] {
-    return GetAngle() >= m_pivotConfig.GetMaxAngle().value_or(units::degree_t{36000});
+    return GetAngle() >= m_pivotConfig->GetMaxAngle().value_or(units::degree_t{36000});
   }};
 }
 
 frc2::Trigger Pivot::Min() {
   return frc2::Trigger{[this] {
-    return GetAngle() <= m_pivotConfig.GetMinAngle().value_or(units::degree_t{-36000});
+    return GetAngle() <= m_pivotConfig->GetMinAngle().value_or(units::degree_t{-36000});
   }};
 }
 
@@ -216,7 +217,7 @@ frc2::Trigger Pivot::IsNear(units::degree_t angle, units::degree_t within) {
   }};
 }
 
-const config::PivotConfig& Pivot::GetConfig() const { return m_pivotConfig; }
+const config::PivotConfig& Pivot::GetConfig() const { return *m_pivotConfig; }
 
 frc::Translation3d Pivot::GetRelativeMechanismPosition() const {
   if (m_mechanismLigament) {

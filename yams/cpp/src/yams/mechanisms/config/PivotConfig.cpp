@@ -7,11 +7,6 @@
 
 namespace yams::mechanisms::config {
 
-PivotConfig& PivotConfig::WithMotorController(motorcontrollers::SmartMotorController* smc) {
-  m_smc = smc;
-  return *this;
-}
-
 PivotConfig& PivotConfig::WithTelemetryName(const std::string& name) {
   m_telemetryName = name;
   return *this;
@@ -31,8 +26,6 @@ PivotConfig& PivotConfig::WithSimColor(const frc::Color8Bit& color) {
   m_simColor = color;
   return *this;
 }
-
-motorcontrollers::SmartMotorController* PivotConfig::GetMotorController() const { return m_smc; }
 
 std::string PivotConfig::GetTelemetryName() const { return m_telemetryName; }
 

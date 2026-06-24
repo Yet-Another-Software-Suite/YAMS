@@ -49,8 +49,8 @@ DoubleFlyWheelSubsystem::DoubleFlyWheelSubsystem() {
 
   // TalonFXWrapper takes TalonFX* (pointer), not a reference -- pass address of
   // the member objects declared in the header.
-  m_lowerFlyWheel.emplace(&m_talonLower, frc::DCMotor::KrakenX60(1), m_lowerConfig);
-  m_upperFlyWheel.emplace(&m_talonUpper, frc::DCMotor::KrakenX60(1), m_upperConfig);
+  m_lowerFlyWheel.emplace(&m_talonLower, frc::DCMotor::KrakenX60(1), &m_lowerConfig);
+  m_upperFlyWheel.emplace(&m_talonUpper, frc::DCMotor::KrakenX60(1), &m_upperConfig);
 }
 
 frc2::CommandPtr DoubleFlyWheelSubsystem::SetDutyCycle(double lower, double upper) {

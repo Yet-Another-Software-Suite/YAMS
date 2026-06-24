@@ -13,8 +13,6 @@
 #include <optional>
 #include <string>
 
-#include "yams/motorcontrollers/SmartMotorController.hpp"
-
 namespace yams::mechanisms::config {
 
 /**
@@ -27,14 +25,6 @@ class ArmConfig {
   ArmConfig() = default;
 
   // ---- Builder methods -------------------------------------------------------
-
-  /**
-   * Set the SmartMotorController driving the arm.
-   *
-   * @param smc Pointer to the motor controller (must outlive this config).
-   * @return *this for chaining.
-   */
-  ArmConfig& WithMotorController(motorcontrollers::SmartMotorController* smc);
 
   /**
    * Set the NetworkTables / SmartDashboard name for telemetry.
@@ -78,9 +68,6 @@ class ArmConfig {
 
   // ---- Getters ---------------------------------------------------------------
 
-  /** Get the motor controller pointer. */
-  motorcontrollers::SmartMotorController* GetMotorController() const;
-
   /** Get the telemetry name. */
   std::string GetTelemetryName() const;
 
@@ -97,7 +84,6 @@ class ArmConfig {
   frc::Color8Bit GetSimColor() const;
 
  private:
-  motorcontrollers::SmartMotorController* m_smc{nullptr};
   std::string m_telemetryName;
   std::optional<units::degree_t> m_minAngle;
   std::optional<units::degree_t> m_maxAngle;

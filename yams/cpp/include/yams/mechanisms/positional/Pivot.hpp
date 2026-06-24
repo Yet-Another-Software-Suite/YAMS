@@ -56,12 +56,11 @@ namespace yams::mechanisms::positional {
  * m_smc.emplace(m_talonFXS, frc::DCMotor::NEO(1),
  *               TalonFXSWrapper::MotorArrangement::NEO, motorCfg);
  *
- * m_pivotConfig.WithMotorController(&m_smc.value())
- *              .WithMinAngle(-100.0_deg)
+ * m_pivotConfig.WithMinAngle(-100.0_deg)
  *              .WithMaxAngle(200.0_deg)
  *              .WithTelemetryName("HoodExample");
  *
- * m_pivot.emplace(m_pivotConfig);
+ * m_pivot.emplace(&m_pivotConfig, &m_smc.value());
  *
  * // In commands or bindings:
  * m_pivot->RunTo(30.0_deg);
@@ -70,11 +69,12 @@ namespace yams::mechanisms::positional {
 class Pivot : public SmartPositionalMechanism {
  public:
   /**
-   * Construct a Pivot from a PivotConfig.
+   * Construct a Pivot from a PivotConfig and a SmartMotorController.
    *
-   * @param config Fully-populated pivot configuration.
+   * @param config Pointer to the pivot configuration (must outlive this Pivot).
+   * @param smc    Pointer to the motor controller (must outlive this Pivot).
    */
-  explicit Pivot(const config::PivotConfig& config);
+  Pivot(config::PivotConfig* config, motorcontrollers::SmartMotorController* smc);
 
   // ---- SmartMechanism overrides ---------------------------------------------
 
@@ -210,7 +210,7 @@ class Pivot : public SmartPositionalMechanism {
   void SetAngle(units::degree_t angle);
 
  private:
-  config::PivotConfig m_pivotConfig;
+  config::PivotConfig* m_pivotConfig{nullptr};
   std::string m_name{"Pivot"};
   std::optional<frc::sim::DCMotorSim> m_dcMotorSim;
   frc::MechanismLigament2d* m_setpointLigament{nullptr};

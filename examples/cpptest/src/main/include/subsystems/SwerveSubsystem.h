@@ -116,8 +116,31 @@ class SwerveSubsystem : public frc2::SubsystemBase {
   rev::spark::SparkMax m_brAzimuth{11, rev::spark::SparkMax::MotorType::kBrushless};
   ctre::phoenix6::hardware::CANcoder m_brEncoder{12};
 
+  // Config objects must be declared before the wrappers and modules that store pointers
+  // into them, so they are fully constructed (and have stable addresses) before those
+  // dependent members are emplace()'d in the constructor.
+
+  // SmartMotorControllerConfigs for each module (must outlive the SparkWrappers)
+  yams::motorcontrollers::SmartMotorControllerConfig m_flDriveCfg;
+  yams::motorcontrollers::SmartMotorControllerConfig m_flAzimuthCfg;
+  yams::motorcontrollers::SmartMotorControllerConfig m_frDriveCfg;
+  yams::motorcontrollers::SmartMotorControllerConfig m_frAzimuthCfg;
+  yams::motorcontrollers::SmartMotorControllerConfig m_blDriveCfg;
+  yams::motorcontrollers::SmartMotorControllerConfig m_blAzimuthCfg;
+  yams::motorcontrollers::SmartMotorControllerConfig m_brDriveCfg;
+  yams::motorcontrollers::SmartMotorControllerConfig m_brAzimuthCfg;
+
+  // SwerveModuleConfigs (must outlive the SwerveModule instances)
+  yams::mechanisms::config::SwerveModuleConfig m_flModuleCfg;
+  yams::mechanisms::config::SwerveModuleConfig m_frModuleCfg;
+  yams::mechanisms::config::SwerveModuleConfig m_blModuleCfg;
+  yams::mechanisms::config::SwerveModuleConfig m_brModuleCfg;
+
+  // SwerveDriveConfig (must outlive SwerveDrive<4>)
+  yams::mechanisms::swerve::SwerveDriveConfig m_driveConfig;
+
   // SparkWrapper takes its SparkMax by reference, so the SparkMax members above must
-  // outlive these wrappers.  optional allows deferred construction inside CreateModule().
+  // outlive these wrappers.  optional allows deferred construction inside SetupModule().
   std::optional<yams::motorcontrollers::local::SparkWrapper> m_flDriveSMC;
   std::optional<yams::motorcontrollers::local::SparkWrapper> m_flAzimuthSMC;
   std::optional<yams::motorcontrollers::local::SparkWrapper> m_frDriveSMC;
@@ -139,13 +162,17 @@ class SwerveSubsystem : public frc2::SubsystemBase {
   // Stored so its internal controller lambda stays alive for the lifetime of DriveCommand().
   std::optional<yams::mechanisms::swerve::utility::SwerveInputStream<4>> m_driveStream;
 
-  // Builds one swerve module: creates configs, emplace()'s the two SparkWrappers into the
-  // provided optional refs, wires up the CANcoder absolute position lambda, and returns the
-  // finished SwerveModule.  Called once per corner in the constructor.
-  yams::mechanisms::swerve::SwerveModule CreateModule(
+  // Populates one swerve module: fills the caller-supplied member config objects, emplace()'s
+  // the two SparkWrappers, wires up the CANcoder absolute-position lambda, and emplace()'s
+  // the finished SwerveModule into moduleOut.  Called once per corner in the constructor.
+  void SetupModule(
       rev::spark::SparkMax& drive, rev::spark::SparkMax& azimuth,
       ctre::phoenix6::hardware::CANcoder& absoluteEncoder, const std::string& moduleName,
       frc::Translation2d location,
       std::optional<yams::motorcontrollers::local::SparkWrapper>& driveSMC,
-      std::optional<yams::motorcontrollers::local::SparkWrapper>& azimuthSMC);
+      std::optional<yams::motorcontrollers::local::SparkWrapper>& azimuthSMC,
+      yams::motorcontrollers::SmartMotorControllerConfig& driveCfgMember,
+      yams::motorcontrollers::SmartMotorControllerConfig& azimuthCfgMember,
+      yams::mechanisms::config::SwerveModuleConfig& moduleCfgMember,
+      std::optional<yams::mechanisms::swerve::SwerveModule>& moduleOut);
 };

@@ -40,15 +40,14 @@ ShooterSubsystem::ShooterSubsystem() {
 
   // NEO(2) tells the simulation plant that two NEO motors are mechanically coupled.
   // At runtime only m_flywheelMotor1 receives commands; motor2 follows via CAN.
-  m_motor.emplace(m_flywheelMotor1, frc::DCMotor::NEO(2), m_motorConfig);
+  m_motor.emplace(m_flywheelMotor1, frc::DCMotor::NEO(2), &m_motorConfig);
 
   // 4-inch diameter wheel; 4.0 * 0.0254 converts inches to meters.
   // WithRollerDiameter enables SetSurfaceSpeedSetpoint (m/s at the wheel rim).
-  m_shooterConfig.WithMotorController(&m_motor.value())
-      .WithRollerDiameter(units::meter_t{4.0 * 0.0254})
+  m_shooterConfig.WithRollerDiameter(units::meter_t{4.0 * 0.0254})
       .WithTelemetryName("ShooterMech");
 
-  m_shooter.emplace(m_shooterConfig);
+  m_shooter.emplace(&m_shooterConfig, &m_motor.value());
 }
 
 units::degrees_per_second_t ShooterSubsystem::GetVelocity() const {

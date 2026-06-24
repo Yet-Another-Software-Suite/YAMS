@@ -57,16 +57,15 @@ TurretSubsystem::TurretSubsystem()
 
   // KrakenX60(1): single-motor sim model for the turret. The (1) is the motor count
   // used to average free-speed and stall torque -- leave it at 1 for a single-motor drive.
-  m_motor.emplace(&m_talonFX, frc::DCMotor::KrakenX60(1), m_motorConfig);
+  m_motor.emplace(&m_talonFX, frc::DCMotor::KrakenX60(1), &m_motorConfig);
 
   // Soft limits span a full revolution in each direction. This allows 360-degree tracking
   // without a hard stop but prevents winding the cable harness past two full turns.
-  m_pivotConfig.WithMotorController(&m_motor.value())
-      .WithMinAngle(units::degree_t{-360})
+  m_pivotConfig.WithMinAngle(units::degree_t{-360})
       .WithMaxAngle(units::degree_t{360})
       .WithTelemetryName("Turret");
 
-  m_turret.emplace(m_pivotConfig);
+  m_turret.emplace(&m_pivotConfig, &m_motor.value());
 }
 
 frc::Pose2d TurretSubsystem::GetPose(frc::Pose2d robotPose) const {

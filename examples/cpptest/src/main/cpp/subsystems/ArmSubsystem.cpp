@@ -58,13 +58,12 @@ ArmSubsystem::ArmSubsystem() {
 
   // KrakenX60(1): single-motor sim model. The arm has one motor driving the 12:1 box,
   // so motor count stays at 1 -- do not increase unless a second motor is added as a follower.
-  m_motor.emplace(&m_armMotor, frc::DCMotor::KrakenX60(1), m_motorConfig);
+  m_motor.emplace(&m_armMotor, frc::DCMotor::KrakenX60(1), &m_motorConfig);
 
   // ArmConfig feeds the SingleJointedArmSim; arm length drives MOI estimation (1/3 * m * L^2).
   // 0.135 m is the distance from the pivot to the center of mass, not the total arm length.
   // Getting this wrong in sim makes the simulated inertia unrealistic but has no hardware effect.
-  m_armConfig.WithMotorController(&m_motor.value())
-      .WithArmLength(units::meter_t{0.135})
+  m_armConfig.WithArmLength(units::meter_t{0.135})
       // Sim limits are wider than the motor-controller soft limits (-30 to +100) so the
       // sim does not clip before the soft-limit logic fires. Do not use these as the
       // canonical travel bounds -- those are in WithMechanismLimits above.
@@ -72,7 +71,7 @@ ArmSubsystem::ArmSubsystem() {
       .WithMaxAngle(units::degree_t{200})
       .WithTelemetryName("ArmExample");
 
-  m_arm.emplace(m_armConfig);
+  m_arm.emplace(&m_armConfig, &m_motor.value());
 }
 
 bool ArmSubsystem::GetBeamBreak() { return m_dio.Get(); }

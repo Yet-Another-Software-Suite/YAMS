@@ -54,13 +54,12 @@ namespace yams::mechanisms::positional {
  *
  * m_smc.emplace(m_talon, frc::DCMotor::KrakenX60(1), motorCfg);
  *
- * m_armConfig.WithMotorController(&m_smc.value())
- *            .WithMinAngle(-100.0_deg)
+ * m_armConfig.WithMinAngle(-100.0_deg)
  *            .WithMaxAngle(200.0_deg)
  *            .WithArmLength(0.135_m)
  *            .WithTelemetryName("ArmExample");
  *
- * m_arm.emplace(m_armConfig);
+ * m_arm.emplace(&m_armConfig, &m_smc.value());
  *
  * // In commands or bindings:
  * m_arm->RunTo(45.0_deg);
@@ -69,11 +68,12 @@ namespace yams::mechanisms::positional {
 class Arm : public SmartPositionalMechanism {
  public:
   /**
-   * Construct an Arm from an ArmConfig.
+   * Construct an Arm from an ArmConfig pointer and a SmartMotorController pointer.
    *
-   * @param config Fully-populated arm configuration.
+   * @param config Pointer to the arm configuration (must outlive this Arm).
+   * @param smc    Pointer to the motor controller (must outlive this Arm).
    */
-  explicit Arm(const config::ArmConfig& config);
+  Arm(config::ArmConfig* config, motorcontrollers::SmartMotorController* smc);
 
   // ---- SmartMechanism overrides ---------------------------------------------
 
@@ -209,7 +209,7 @@ class Arm : public SmartPositionalMechanism {
   void SetAngle(units::degree_t angle);
 
  private:
-  config::ArmConfig m_armConfig;
+  config::ArmConfig* m_armConfig{nullptr};
   std::string m_name{"Arm"};
   std::optional<frc::sim::SingleJointedArmSim> m_armSim;
   frc::MechanismLigament2d* m_setpointLigament{nullptr};

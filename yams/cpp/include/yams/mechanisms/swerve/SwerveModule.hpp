@@ -69,7 +69,7 @@ namespace yams::mechanisms::swerve {
  *     .WithCosineCompensation(true)
  *     .WithTelemetry("FrontLeft", Cfg::TelemetryVerbosity::HIGH);
  *
- * m_module.emplace(moduleConfig);
+ * m_module.emplace(&m_moduleConfig);
  * @endcode
  */
 class SwerveModule {
@@ -80,7 +80,7 @@ class SwerveModule {
    * @param config Module configuration.  Must contain a telemetry name and a location.
    * @throws std::invalid_argument if telemetry name or location is not set.
    */
-  explicit SwerveModule(const config::SwerveModuleConfig& config);
+  explicit SwerveModule(config::SwerveModuleConfig* config);
 
   /**
    * Seed the azimuth encoder from the absolute encoder reading (real robot only).
@@ -122,7 +122,7 @@ class SwerveModule {
   motorcontrollers::SmartMotorController* GetAzimuthMotorController() const;
 
  private:
-  config::SwerveModuleConfig m_config;
+  config::SwerveModuleConfig* m_config{nullptr};
 
  public:
   // Public so SwerveDrive can access them directly (mirrors Java protected fields).

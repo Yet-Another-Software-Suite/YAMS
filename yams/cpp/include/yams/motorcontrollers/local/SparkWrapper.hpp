@@ -56,7 +56,7 @@ namespace yams::motorcontrollers::local {
  *    .WithClosedLoopMode()
  *    .WithTelemetry("ElevatorMotor", Cfg::TelemetryVerbosity::HIGH);
  *
- * m_smc.emplace(m_sparkMax, frc::DCMotor::NEO(1), cfg);
+ * m_smc.emplace(m_sparkMax, frc::DCMotor::NEO(1), &cfg);
  * @endcode
  *
  * ### Example usage — SPARK Flex
@@ -66,7 +66,7 @@ namespace yams::motorcontrollers::local {
  * rev::spark::SparkLowLevel::MotorType::kBrushless};
  * //   std::optional<SparkWrapper>  m_smc;
  *
- * m_smc.emplace(m_sparkFlex, frc::DCMotor::NeoVortex(1), cfg);
+ * m_smc.emplace(m_sparkFlex, frc::DCMotor::NeoVortex(1), &cfg);
  * @endcode
  */
 class SparkWrapper : public SmartMotorController {
@@ -76,20 +76,20 @@ class SparkWrapper : public SmartMotorController {
    *
    * @param spark  SPARK Max hardware object (must outlive this wrapper).
    * @param motor  DC motor model used for simulation.
-   * @param config Initial SmartMotorControllerConfig to apply.
+   * @param config Pointer to the SmartMotorControllerConfig (must outlive this wrapper).
    */
   SparkWrapper(rev::spark::SparkMax& spark, frc::DCMotor motor,
-               const SmartMotorControllerConfig& config);
+               SmartMotorControllerConfig* config);
 
   /**
    * Construct a SparkWrapper around a SPARK Flex.
    *
    * @param spark  SPARK Flex hardware object (must outlive this wrapper).
    * @param motor  DC motor model used for simulation.
-   * @param config Initial SmartMotorControllerConfig to apply.
+   * @param config Pointer to the SmartMotorControllerConfig (must outlive this wrapper).
    */
   SparkWrapper(rev::spark::SparkFlex& spark, frc::DCMotor motor,
-               const SmartMotorControllerConfig& config);
+               SmartMotorControllerConfig* config);
   ~SparkWrapper();
 
   // ---- Telemetry ----------------------------------------------------------
@@ -301,6 +301,7 @@ class SparkWrapper : public SmartMotorController {
   void* GetMotorControllerConfig() override;
 
  private:
+  SmartMotorControllerConfig* m_config{nullptr};
   rev::spark::SparkBase* m_spark{nullptr};
   rev::spark::SparkClosedLoopController* m_sparkPid{nullptr};
   rev::spark::SparkRelativeEncoder* m_relEncoder{nullptr};
@@ -328,7 +329,7 @@ class SparkWrapper : public SmartMotorController {
   std::optional<frc::Alert> m_rioControllerAlert;
 
   void Init(rev::spark::SparkBase* spark, frc::DCMotor motor,
-            const SmartMotorControllerConfig& config);
+            SmartMotorControllerConfig* config);
   void ApplyBaseConfig();
   void CommitConfig();
 };
