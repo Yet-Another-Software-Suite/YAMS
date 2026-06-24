@@ -35,8 +35,8 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  * <pre>{@code
  * // 1. Build the motor config with kV and kS feedforward (critical for velocity mechanisms)
  * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
- *     .withFeedforward(0.15, 0.12)   // kS=0.15, kV=0.12 — kV dominates at steady-state RPM
- *     .withVelocityPID(0.0005, 0.0, 0.0) // kP
+ *     .withFeedforward(new SimpleMotorFeedforward(0.15, 0.12))   // kS=0.15, kV=0.12 — kV dominates at steady-state RPM
+ *     .withClosedLoopController(0.0005, 0.0, 0.0) // kP
  *     .withTelemetry("Shooter", TelemetryVerbosity.HIGH);
  *
  * // 2. Create a TalonFXWrapper for a Kraken X60 on CAN ID 1
