@@ -207,7 +207,7 @@ jobs:
       - name: Zip current version maven for offline installation
         run: |
           cd ${{ env.workingDirectory }}/build
-          zip -r ${{ github.workspace }}/release-artifacts/YAMS-${{ inputs.releaseVersion }}-Offline.zip maven/
+          zip -r ${{ github.workspace }}/release-artifacts/${{ inputs.releaseVersion }}-YAMS-Offline.zip maven/
 
       # Pass 2: rebuild on top of the full gh-pages history so the deployed
       # maven metadata covers all versions, not just the current one.
