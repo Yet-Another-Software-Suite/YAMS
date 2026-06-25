@@ -44,8 +44,7 @@ ShooterSubsystem::ShooterSubsystem() {
 
   // 4-inch diameter wheel; 4.0 * 0.0254 converts inches to meters.
   // WithRollerDiameter enables SetSurfaceSpeedSetpoint (m/s at the wheel rim).
-  m_shooterConfig.WithRollerDiameter(units::meter_t{4.0 * 0.0254})
-      .WithTelemetryName("ShooterMech");
+  m_shooterConfig.WithRollerDiameter(units::meter_t{4.0 * 0.0254}).WithTelemetryName("ShooterMech");
 
   m_shooter.emplace(&m_shooterConfig, &m_motor.value());
 }

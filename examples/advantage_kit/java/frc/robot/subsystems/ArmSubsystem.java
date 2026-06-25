@@ -41,7 +41,6 @@ import yams.motorcontrollers.remote.TalonFXWrapper;
  * making network latency irrelevant to closed-loop response.
  */
 public class ArmSubsystem extends SubsystemBase {
-
   /**
    * Named positions and tuned constants collected in one place so they can be
    * adjusted without hunting through the subsystem body.

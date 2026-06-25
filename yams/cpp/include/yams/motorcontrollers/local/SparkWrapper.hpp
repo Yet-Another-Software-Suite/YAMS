@@ -78,8 +78,7 @@ class SparkWrapper : public SmartMotorController {
    * @param motor  DC motor model used for simulation.
    * @param config Pointer to the SmartMotorControllerConfig (must outlive this wrapper).
    */
-  SparkWrapper(rev::spark::SparkMax* spark, frc::DCMotor motor,
-               SmartMotorControllerConfig* config);
+  SparkWrapper(rev::spark::SparkMax* spark, frc::DCMotor motor, SmartMotorControllerConfig* config);
 
   /**
    * Construct a SparkWrapper around a SPARK Flex.
@@ -328,8 +327,7 @@ class SparkWrapper : public SmartMotorController {
 
   std::optional<frc::Alert> m_rioControllerAlert;
 
-  void Init(rev::spark::SparkBase* spark, frc::DCMotor motor,
-            SmartMotorControllerConfig* config);
+  void Init(rev::spark::SparkBase* spark, frc::DCMotor motor, SmartMotorControllerConfig* config);
   void ApplyBaseConfig();
   void CommitConfig();
 };

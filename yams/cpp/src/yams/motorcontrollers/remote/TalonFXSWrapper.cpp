@@ -69,10 +69,9 @@ bool TalonFXSWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     cfg.MotorOutput.Inverted = *inv ? signals::InvertedValue::Clockwise_Positive
                                     : signals::InvertedValue::CounterClockwise_Positive;
 
-  cfg.MotorOutput.NeutralMode =
-      config.GetIdleMode() == SmartMotorControllerConfig::MotorMode::BRAKE
-          ? signals::NeutralModeValue::Brake
-          : signals::NeutralModeValue::Coast;
+  cfg.MotorOutput.NeutralMode = config.GetIdleMode() == SmartMotorControllerConfig::MotorMode::BRAKE
+                                    ? signals::NeutralModeValue::Brake
+                                    : signals::NeutralModeValue::Coast;
 
   // Consume control-mode option for validation tracking
   config.GetMotorControllerMode();
@@ -97,8 +96,7 @@ bool TalonFXSWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   cfg.ExternalFeedback.ExternalFeedbackSensorSource = ArrangementToFeedbackSource();
 
   // External encoder configuration (driven by SmartMotorControllerConfig)
-  if (auto enc = config.GetExternalEncoder();
-      enc.has_value() && config.GetUseExternalFeedback()) {
+  if (auto enc = config.GetExternalEncoder(); enc.has_value() && config.GetUseExternalFeedback()) {
     gearing::MechanismGearing motorGearing =
         config.GetMotorGearing().value_or(gearing::MechanismGearing::kOne);
     gearing::MechanismGearing extGearing =

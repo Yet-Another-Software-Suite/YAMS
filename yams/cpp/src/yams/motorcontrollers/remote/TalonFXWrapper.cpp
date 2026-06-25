@@ -60,10 +60,9 @@ bool TalonFXWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
                                     : signals::InvertedValue::CounterClockwise_Positive;
 
   // Idle mode
-  cfg.MotorOutput.NeutralMode =
-      config.GetIdleMode() == SmartMotorControllerConfig::MotorMode::BRAKE
-          ? signals::NeutralModeValue::Brake
-          : signals::NeutralModeValue::Coast;
+  cfg.MotorOutput.NeutralMode = config.GetIdleMode() == SmartMotorControllerConfig::MotorMode::BRAKE
+                                    ? signals::NeutralModeValue::Brake
+                                    : signals::NeutralModeValue::Coast;
 
   // Consume control-mode option for validation tracking
   config.GetMotorControllerMode();
@@ -88,8 +87,7 @@ bool TalonFXWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   }
 
   // External encoder configuration (driven by SmartMotorControllerConfig)
-  if (auto enc = config.GetExternalEncoder();
-      enc.has_value() && config.GetUseExternalFeedback()) {
+  if (auto enc = config.GetExternalEncoder(); enc.has_value() && config.GetUseExternalFeedback()) {
     gearing::MechanismGearing motorGearing =
         config.GetMotorGearing().value_or(gearing::MechanismGearing::kOne);
     gearing::MechanismGearing extGearing =
@@ -316,7 +314,8 @@ void TalonFXWrapper::ApplyPIDConfig() {
   m_talonConfig.Slot0.kV = gains.kV;
   m_talonConfig.Slot0.kA = gains.kA;
 
-  auto gains1 = m_config->GetSlotGains(SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_1);
+  auto gains1 =
+      m_config->GetSlotGains(SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_1);
   m_talonConfig.Slot1.kP = gains1.kP;
   m_talonConfig.Slot1.kI = gains1.kI;
   m_talonConfig.Slot1.kD = gains1.kD;
@@ -324,7 +323,8 @@ void TalonFXWrapper::ApplyPIDConfig() {
   m_talonConfig.Slot1.kV = gains1.kV;
   m_talonConfig.Slot1.kA = gains1.kA;
 
-  auto gains2 = m_config->GetSlotGains(SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_2);
+  auto gains2 =
+      m_config->GetSlotGains(SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_2);
   m_talonConfig.Slot2.kP = gains2.kP;
   m_talonConfig.Slot2.kI = gains2.kI;
   m_talonConfig.Slot2.kD = gains2.kD;

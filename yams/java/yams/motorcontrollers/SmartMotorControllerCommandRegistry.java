@@ -27,6 +27,11 @@ public class SmartMotorControllerCommandRegistry
    * HashMap with the Subsystem name as the key and a list of runnables to be added to the shared command.
    */
   private static Map<String, List<Runnable>> commandCallbacks = new HashMap<>();
+  /**
+   * HashMap tracking which subsystem instance owns each command key.
+   * Used to detect when two different subsystem instances share the same name.
+   */
+  private static Map<String, Subsystem>      commandOwners    = new HashMap<>();
 
   /**
    * Create the {@link Command} and publish it to NetworkTables.
@@ -56,10 +61,17 @@ public class SmartMotorControllerCommandRegistry
    */
   public static void addCommand(String cmdName, Subsystem subsystem, Runnable callback)
   {
-    var key               = subsystem.getName() + "/" + cmdName;
-    var existingCallbacks = commandCallbacks.getOrDefault(key, new ArrayList<>());
-    existingCallbacks.add(callback);
-    commandCallbacks.put(key, existingCallbacks);
+    var key   = subsystem.getName() + "/" + cmdName;
+    var owner = commandOwners.get(key);
+    if (owner != null && owner != subsystem)
+    {
+      throw new IllegalStateException(
+          "SmartMotorControllerCommandRegistry: subsystem name conflict — \"" +
+          subsystem.getName() + "\" is already registered by a different subsystem instance. " +
+          "Use unique subsystem names for each subsystem instance (e.g. \"LeftTurret\", \"RightTurret\").");
+    }
+    commandOwners.put(key, subsystem);
+    commandCallbacks.computeIfAbsent(key, k -> new ArrayList<>()).add(callback);
     // Create Command and publish it to NT
     if (!commandExists(cmdName, subsystem))
     {addCommandToNT(cmdName, subsystem);}
@@ -76,6 +88,27 @@ public class SmartMotorControllerCommandRegistry
   {
     var key = subsystem.getName() + "/" + cmdName;
     return commands.containsKey(key);
+  }
+
+  /**
+   * Remove all commands registered for the given subsystem instance.
+   *
+   * <p>Call this when a subsystem is being torn down (e.g. between tests) so that a
+   * new instance with the same name can register without triggering the conflict check.
+   *
+   * @param subsystem Subsystem whose commands should be removed.
+   */
+  public static void removeCommands(Subsystem subsystem)
+  {
+    commandOwners.entrySet().removeIf(e -> {
+      if (e.getValue() == subsystem)
+      {
+        commandCallbacks.remove(e.getKey());
+        commands.remove(e.getKey());
+        return true;
+      }
+      return false;
+    });
   }
 
 }

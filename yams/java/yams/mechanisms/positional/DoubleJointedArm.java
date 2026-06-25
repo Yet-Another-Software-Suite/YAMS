@@ -135,7 +135,9 @@ public class DoubleJointedArm extends SmartPositionalMechanism
    * Constructor for the Arm mechanism.
    *
    * @param lowerConfig Lower {@link ArmConfig} to use.
+   * @param lowerSMC    {@link SmartMotorController} driving the lower joint.
    * @param upperConfig Upper {@link ArmConfig} to use.
+   * @param upperSMC    {@link SmartMotorController} driving the upper joint.
    */
   public DoubleJointedArm(ArmConfig lowerConfig, SmartMotorController lowerSMC, ArmConfig upperConfig, SmartMotorController upperSMC)
   {

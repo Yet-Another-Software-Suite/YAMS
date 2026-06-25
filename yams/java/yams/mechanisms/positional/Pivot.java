@@ -106,6 +106,7 @@ public class Pivot extends SmartPositionalMechanism
    * Construct the Pivot class
    *
    * @param config Pivot configuration.
+   * @param smc    {@link SmartMotorController} driving the pivot.
    */
   public Pivot(PivotConfig config, SmartMotorController smc)
   {

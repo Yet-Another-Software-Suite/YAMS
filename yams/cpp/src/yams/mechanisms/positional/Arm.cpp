@@ -112,9 +112,9 @@ Arm::Arm(config::ArmConfig* config, motorcontrollers::SmartMotorController* smc)
     m_mechanismRoot->Append<frc::MechanismLigament2d>("MaxHard", kTickLength,
                                                       m_armConfig->GetMaxAngle().value(), 4,
                                                       frc::Color8Bit{frc::Color::kLimeGreen});
-    m_mechanismRoot->Append<frc::MechanismLigament2d>(
-        "MinHard", kTickLength, m_armConfig->GetMinAngle().value(), 4,
-        frc::Color8Bit{frc::Color::kRed});
+    m_mechanismRoot->Append<frc::MechanismLigament2d>("MinHard", kTickLength,
+                                                      m_armConfig->GetMinAngle().value(), 4,
+                                                      frc::Color8Bit{frc::Color::kRed});
 
     auto smcUpperLimit = m_smc->GetConfig().GetMechanismUpperLimit();
     auto smcLowerLimit = m_smc->GetConfig().GetMechanismLowerLimit();
@@ -173,8 +173,9 @@ frc2::Trigger Arm::Max() {
 }
 
 frc2::Trigger Arm::Min() {
-  return frc2::Trigger{
-      [this] { return GetAngle() <= m_armConfig->GetMinAngle().value_or(units::degree_t{-36000}); }};
+  return frc2::Trigger{[this] {
+    return GetAngle() <= m_armConfig->GetMinAngle().value_or(units::degree_t{-36000});
+  }};
 }
 
 // ---- Arm-specific interface -------------------------------------------------

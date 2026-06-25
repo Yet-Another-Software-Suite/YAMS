@@ -165,14 +165,13 @@ class SwerveSubsystem : public frc2::SubsystemBase {
   // Populates one swerve module: fills the caller-supplied member config objects, emplace()'s
   // the two SparkWrappers, wires up the CANcoder absolute-position lambda, and emplace()'s
   // the finished SwerveModule into moduleOut.  Called once per corner in the constructor.
-  void SetupModule(
-      rev::spark::SparkMax* drive, rev::spark::SparkMax* azimuth,
-      ctre::phoenix6::hardware::CANcoder& absoluteEncoder, const std::string& moduleName,
-      frc::Translation2d location,
-      std::optional<yams::motorcontrollers::local::SparkWrapper>& driveSMC,
-      std::optional<yams::motorcontrollers::local::SparkWrapper>& azimuthSMC,
-      yams::motorcontrollers::SmartMotorControllerConfig& driveCfgMember,
-      yams::motorcontrollers::SmartMotorControllerConfig& azimuthCfgMember,
-      yams::mechanisms::config::SwerveModuleConfig& moduleCfgMember,
-      std::optional<yams::mechanisms::swerve::SwerveModule>& moduleOut);
+  void SetupModule(rev::spark::SparkMax* drive, rev::spark::SparkMax* azimuth,
+                   ctre::phoenix6::hardware::CANcoder& absoluteEncoder,
+                   const std::string& moduleName, frc::Translation2d location,
+                   std::optional<yams::motorcontrollers::local::SparkWrapper>& driveSMC,
+                   std::optional<yams::motorcontrollers::local::SparkWrapper>& azimuthSMC,
+                   yams::motorcontrollers::SmartMotorControllerConfig& driveCfgMember,
+                   yams::motorcontrollers::SmartMotorControllerConfig& azimuthCfgMember,
+                   yams::mechanisms::config::SwerveModuleConfig& moduleCfgMember,
+                   std::optional<yams::mechanisms::swerve::SwerveModule>& moduleOut);
 };

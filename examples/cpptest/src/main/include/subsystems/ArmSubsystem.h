@@ -53,8 +53,9 @@ class ArmSubsystem : public frc2::SubsystemBase {
   void SimulationPeriodic() override;
 
  private:
-  ctre::phoenix6::hardware::CANcoder m_cancoder{2};  // absolute encoder, CAN 2 (not yet wired into feedback)
-  ctre::phoenix6::hardware::TalonFX m_armMotor{1};   // Kraken X60, CAN 1
+  ctre::phoenix6::hardware::CANcoder m_cancoder{
+      2};  // absolute encoder, CAN 2 (not yet wired into feedback)
+  ctre::phoenix6::hardware::TalonFX m_armMotor{1};  // Kraken X60, CAN 1
 
   yams::motorcontrollers::SmartMotorControllerConfig m_motorConfig;
   std::optional<yams::motorcontrollers::remote::TalonFXWrapper> m_motor;

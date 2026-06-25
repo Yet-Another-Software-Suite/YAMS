@@ -26,8 +26,7 @@ using namespace rev::spark;
 
 namespace yams::motorcontrollers::local {
 
-SparkWrapper::SparkWrapper(SparkMax* spark, frc::DCMotor motor,
-                           SmartMotorControllerConfig* cfg)
+SparkWrapper::SparkWrapper(SparkMax* spark, frc::DCMotor motor, SmartMotorControllerConfig* cfg)
     : SmartMotorController(), m_motor(motor) {
   m_maxConfig.emplace();
   if (auto vc = cfg->GetVendorConfig(); vc.has_value()) {
@@ -41,8 +40,7 @@ SparkWrapper::SparkWrapper(SparkMax* spark, frc::DCMotor motor,
   Init(spark, motor, cfg);
 }
 
-SparkWrapper::SparkWrapper(SparkFlex* spark, frc::DCMotor motor,
-                           SmartMotorControllerConfig* cfg)
+SparkWrapper::SparkWrapper(SparkFlex* spark, frc::DCMotor motor, SmartMotorControllerConfig* cfg)
     : SmartMotorController(), m_motor(motor) {
   m_flexConfig.emplace();
   if (auto vc = cfg->GetVendorConfig(); vc.has_value()) {
@@ -56,8 +54,7 @@ SparkWrapper::SparkWrapper(SparkFlex* spark, frc::DCMotor motor,
   Init(spark, motor, cfg);
 }
 
-void SparkWrapper::Init(SparkBase* spark, frc::DCMotor motor,
-                        SmartMotorControllerConfig* cfg) {
+void SparkWrapper::Init(SparkBase* spark, frc::DCMotor motor, SmartMotorControllerConfig* cfg) {
   m_spark = spark;
   m_sparkPid = &spark->GetClosedLoopController();
   m_relEncoder = &spark->GetEncoder();

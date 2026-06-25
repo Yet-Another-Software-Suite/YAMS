@@ -19,7 +19,8 @@ using namespace yams::mechanisms;
 using Cfg = SmartMotorControllerConfig;
 
 ArmSubsystem::ArmSubsystem() {
-  m_motorConfig.WithSubsystem(this)
+  m_motorConfig
+      .WithSubsystem(this)
       // kP=4: stiff enough to hold position against gravity at 12:1 with a short arm
       // (~135 mm). If the arm vibrates at a setpoint, reduce kP or add kD; if it sags
       // under load, add kG in the feedforward below.
@@ -63,7 +64,8 @@ ArmSubsystem::ArmSubsystem() {
   // ArmConfig feeds the SingleJointedArmSim; arm length drives MOI estimation (1/3 * m * L^2).
   // 0.135 m is the distance from the pivot to the center of mass, not the total arm length.
   // Getting this wrong in sim makes the simulated inertia unrealistic but has no hardware effect.
-  m_armConfig.WithArmLength(units::meter_t{0.135})
+  m_armConfig
+      .WithArmLength(units::meter_t{0.135})
       // Sim limits are wider than the motor-controller soft limits (-30 to +100) so the
       // sim does not clip before the soft-limit logic fires. Do not use these as the
       // canonical travel bounds -- those are in WithMechanismLimits above.

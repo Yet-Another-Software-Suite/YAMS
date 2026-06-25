@@ -33,7 +33,7 @@ class HoodSubsystem : public frc2::SubsystemBase {
   // Direct setpoint write -- use when you need non-command periodic control.
   void SetAngleSetpoint(units::degree_t angle);
 
-  frc2::CommandPtr HoodCmd(double dutycycle);    // open-loop override; runs continuously
+  frc2::CommandPtr HoodCmd(double dutycycle);        // open-loop override; runs continuously
   frc2::CommandPtr SetAngle(units::degree_t angle);  // closed-loop; ends when interrupted
 
   void Periodic() override;

@@ -93,12 +93,11 @@ Elevator::Elevator(config::ElevatorConfig* config, motorcontrollers::SmartMotorC
     units::meter_t startH =
         m_smc->GetConfig().ConvertFromMechanism(*m_smc->GetConfig().GetStartingPosition());
 
-    m_elevatorSim.emplace(dcMotor, gearing.GetMechanismToRotorRatio(),
-                          m_elevatorConfig->GetCarriageMass().value(),
-                          circumference / (2.0 * std::numbers::pi),
-                          m_elevatorConfig->GetMinHeight().value(),
-                          m_elevatorConfig->GetMaxHeight().value(), simulateGravity, startH,
-                          std::array<double, 2>{0.01 / 4096.0, 0.01 / 4096.0});
+    m_elevatorSim.emplace(
+        dcMotor, gearing.GetMechanismToRotorRatio(), m_elevatorConfig->GetCarriageMass().value(),
+        circumference / (2.0 * std::numbers::pi), m_elevatorConfig->GetMinHeight().value(),
+        m_elevatorConfig->GetMaxHeight().value(), simulateGravity, startH,
+        std::array<double, 2>{0.01 / 4096.0, 0.01 / 4096.0});
 
     units::second_t period = m_smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms);
     m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::ElevatorSimSupplier>(
@@ -130,13 +129,13 @@ Elevator::Elevator(config::ElevatorConfig* config, motorcontrollers::SmartMotorC
               angle, 3, frc::Color8Bit{frc::Color::kHotPink});
     }
     m_mechanismWindow->GetRoot("MinHard", maxH - kHardOffset, 0.0)
-        ->Append<frc::MechanismLigament2d>(
-            "Limit", m_elevatorConfig->GetMinHeight().value().value(), angle, 3,
-            frc::Color8Bit{frc::Color::kRed});
+        ->Append<frc::MechanismLigament2d>("Limit",
+                                           m_elevatorConfig->GetMinHeight().value().value(), angle,
+                                           3, frc::Color8Bit{frc::Color::kRed});
     m_mechanismWindow->GetRoot("MaxHard", maxH - kHardOffset, 0.0)
-        ->Append<frc::MechanismLigament2d>(
-            "Limit", m_elevatorConfig->GetMaxHeight().value().value(), angle, 3,
-            frc::Color8Bit{frc::Color::kLimeGreen});
+        ->Append<frc::MechanismLigament2d>("Limit",
+                                           m_elevatorConfig->GetMaxHeight().value().value(), angle,
+                                           3, frc::Color8Bit{frc::Color::kLimeGreen});
 
     m_mechanismLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
         m_name, startHValue, angle, 6, m_elevatorConfig->GetSimColor());
