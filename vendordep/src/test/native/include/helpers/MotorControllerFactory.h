@@ -21,6 +21,7 @@
 #include "TestSubsystem.h"
 #include "yams/gearing/GearBox.hpp"
 #include "yams/gearing/MechanismGearing.hpp"
+#include "yams/motorcontrollers/SmartMotorControllerCommandRegistry.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 #include "yams/motorcontrollers/local/SparkWrapper.hpp"
 #include "yams/motorcontrollers/remote/TalonFXSWrapper.hpp"
@@ -112,28 +113,28 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
     case HardwareType::SparkMax: {
       bundle.sparkMax = std::make_unique<rev::spark::SparkMax>(
           canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
-      bundle.smc = new local::SparkWrapper(
-          bundle.sparkMax.get(), MotorForHardware(param.hardware), &bundle.cfg);
+      bundle.smc = new local::SparkWrapper(bundle.sparkMax.get(), MotorForHardware(param.hardware),
+                                           &bundle.cfg);
       break;
     }
     case HardwareType::SparkFlex: {
       bundle.sparkFlex = std::make_unique<rev::spark::SparkFlex>(
           canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
-      bundle.smc = new local::SparkWrapper(
-          bundle.sparkFlex.get(), MotorForHardware(param.hardware), &bundle.cfg);
+      bundle.smc = new local::SparkWrapper(bundle.sparkFlex.get(), MotorForHardware(param.hardware),
+                                           &bundle.cfg);
       break;
     }
     case HardwareType::TalonFXS: {
       bundle.talonFXS = std::make_unique<ctre::phoenix6::hardware::TalonFXS>(canId);
-      bundle.smc = new remote::TalonFXSWrapper(
-          bundle.talonFXS.get(), MotorForHardware(param.hardware),
-          remote::TalonFXSWrapper::MotorArrangement::NEO, &bundle.cfg);
+      bundle.smc =
+          new remote::TalonFXSWrapper(bundle.talonFXS.get(), MotorForHardware(param.hardware),
+                                      remote::TalonFXSWrapper::MotorArrangement::NEO, &bundle.cfg);
       break;
     }
     case HardwareType::TalonFX: {
       bundle.talonFX = std::make_unique<ctre::phoenix6::hardware::TalonFX>(canId);
-      bundle.smc = new remote::TalonFXWrapper(
-          bundle.talonFX.get(), MotorForHardware(param.hardware), &bundle.cfg);
+      bundle.smc = new remote::TalonFXWrapper(bundle.talonFX.get(),
+                                              MotorForHardware(param.hardware), &bundle.cfg);
       break;
     }
   }
@@ -149,6 +150,7 @@ inline bool IsCTRE(const HardwareBundle& b) {
 
 // Standard teardown: unregister subsystem, close SMC, delete wrapper.
 inline void CloseBundle(HardwareBundle& b) {
+  motorcontrollers::SmartMotorControllerCommandRegistry::RemoveCommands(b.subsystem.get());
   frc2::CommandScheduler::GetInstance().UnregisterSubsystem(b.subsystem.get());
   b.subsystem->Close();
   delete b.smc;

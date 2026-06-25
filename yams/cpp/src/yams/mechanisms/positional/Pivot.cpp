@@ -105,8 +105,9 @@ Pivot::Pivot(config::PivotConfig* config, motorcontrollers::SmartMotorController
     m_mechanismRoot->Append<frc::MechanismLigament2d>("MaxHard", kTickLen,
                                                       m_pivotConfig->GetMaxAngle().value(), 4,
                                                       frc::Color8Bit{frc::Color::kLimeGreen});
-    m_mechanismRoot->Append<frc::MechanismLigament2d>(
-        "MinHard", kTickLen, m_pivotConfig->GetMinAngle().value(), 4, frc::Color8Bit{frc::Color::kRed});
+    m_mechanismRoot->Append<frc::MechanismLigament2d>("MinHard", kTickLen,
+                                                      m_pivotConfig->GetMinAngle().value(), 4,
+                                                      frc::Color8Bit{frc::Color::kRed});
 
     auto smcUpperLimit = m_smc->GetConfig().GetMechanismUpperLimit();
     auto smcLowerLimit = m_smc->GetConfig().GetMechanismLowerLimit();

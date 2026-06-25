@@ -44,6 +44,7 @@ import yams.helpers.TestWithScheduler;
 import yams.mechanisms.config.ArmConfig;
 import yams.mechanisms.positional.Arm;
 import yams.motorcontrollers.SmartMotorController;
+import yams.motorcontrollers.SmartMotorControllerCommandRegistry;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
@@ -156,6 +157,7 @@ public class ArmTest
 
   private static void closeSMC(SmartMotorController smc)
   {
+    SmartMotorControllerCommandRegistry.removeCommands(smc.getConfig().getSubsystem());
     CommandScheduler.getInstance().unregisterSubsystem((SmartMotorControllerTestSubsystem) smc.getConfig()
                                                                                               .getSubsystem());
     ((SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem()).close();

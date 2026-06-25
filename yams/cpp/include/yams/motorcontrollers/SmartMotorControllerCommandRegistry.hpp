@@ -47,6 +47,17 @@ class SmartMotorControllerCommandRegistry {
   static bool CommandExists(const std::string& cmdName, frc2::SubsystemBase* subsystem);
 
   /**
+   * Remove all commands registered for a specific subsystem instance.
+   *
+   * Call this when a subsystem is being torn down (e.g. between tests) so
+   * that a new instance with the same name can register without triggering
+   * the conflict check.
+   *
+   * @param subsystem Subsystem whose commands should be removed.
+   */
+  static void RemoveCommands(frc2::SubsystemBase* subsystem);
+
+  /**
    * Destroy all registered commands and callbacks.
    *
    * Must be called before program exit while WPILib's SendableRegistry is
@@ -58,6 +69,7 @@ class SmartMotorControllerCommandRegistry {
  private:
   static std::unordered_map<std::string, frc2::CommandPtr> s_commands;
   static std::unordered_map<std::string, std::vector<std::function<void()>>> s_callbacks;
+  static std::unordered_map<std::string, frc2::SubsystemBase*> s_owners;
 
   static std::string MakeKey(const std::string& cmdName, frc2::SubsystemBase* subsystem);
   static void PublishToNT(const std::string& cmdName, frc2::SubsystemBase* subsystem);

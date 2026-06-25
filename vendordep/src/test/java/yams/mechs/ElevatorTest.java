@@ -43,6 +43,7 @@ import yams.helpers.TestWithScheduler;
 import yams.mechanisms.config.ElevatorConfig;
 import yams.mechanisms.positional.Elevator;
 import yams.motorcontrollers.SmartMotorController;
+import yams.motorcontrollers.SmartMotorControllerCommandRegistry;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
@@ -165,6 +166,7 @@ public class ElevatorTest
 
   private static void closeSMC(SmartMotorController smc)
   {
+    SmartMotorControllerCommandRegistry.removeCommands(smc.getConfig().getSubsystem());
     CommandScheduler.getInstance().unregisterSubsystem((SmartMotorControllerTestSubsystem) smc.getConfig()
                                                                                               .getSubsystem());
     ((SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem()).close();

@@ -1171,7 +1171,18 @@ public abstract class SmartMotorController
    */
   public abstract void setMechanismLimitsEnabled(boolean enabled);
 
+  /**
+   * Update the mechanism gearing used for position/velocity conversions.
+   *
+   * @param gearing New {@link MechanismGearing} to apply.
+   */
   public abstract void setMechanismGearing(MechanismGearing gearing);
+
+  /**
+   * Update the mechanism circumference used for linear position/velocity conversions.
+   *
+   * @param circumference New mechanism circumference.
+   */
   public abstract void setMechanismCircumference(Distance circumference);
 
   /**

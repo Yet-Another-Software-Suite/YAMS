@@ -43,10 +43,13 @@ class DiffDriveSubsystem : public frc2::SubsystemBase {
   void SimulationPeriodic() override;
 
  private:
-  rev::spark::SparkMax m_leftMotor{21, rev::spark::SparkMax::MotorType::kBrushless};          // left leader
-  rev::spark::SparkMax m_rightMotor{24, rev::spark::SparkMax::MotorType::kBrushless};         // right leader
-  rev::spark::SparkMax m_leftFollowerMotor{22, rev::spark::SparkMax::MotorType::kBrushless};  // mirrors CAN 21
-  rev::spark::SparkMax m_rightFollowerMotor{23, rev::spark::SparkMax::MotorType::kBrushless}; // mirrors CAN 24
+  rev::spark::SparkMax m_leftMotor{21, rev::spark::SparkMax::MotorType::kBrushless};  // left leader
+  rev::spark::SparkMax m_rightMotor{24,
+                                    rev::spark::SparkMax::MotorType::kBrushless};  // right leader
+  rev::spark::SparkMax m_leftFollowerMotor{
+      22, rev::spark::SparkMax::MotorType::kBrushless};  // mirrors CAN 21
+  rev::spark::SparkMax m_rightFollowerMotor{
+      23, rev::spark::SparkMax::MotorType::kBrushless};  // mirrors CAN 24
 
   yams::motorcontrollers::SmartMotorControllerConfig m_leftConfig;   // inverted=true
   yams::motorcontrollers::SmartMotorControllerConfig m_rightConfig;  // inverted=false

@@ -37,7 +37,8 @@ TurretSubsystem::TurretSubsystem()
       .WithFeedback(0.0, 0.0, 0)
       // Three-stage gearbox expressed as individual reduction factors, multiplied together:
       //   stage 1: 144/15 = 9.6:1, stage 2: 5:1, stage 3: 1.08:1 -> 51.84:1 total.
-      // The initializer-list GearBox constructor multiplies all stages, same as FromReductionStages.
+      // The initializer-list GearBox constructor multiplies all stages, same as
+      // FromReductionStages.
       .WithMotorGearing(MechanismGearing{GearBox({144.0 / 15.0, 5.0, 1.08})})
       // BRAKE prevents the turret from drifting off-target when no command is running.
       // On a turret with a heavy mechanism attached, COAST can cause dangerous snap rotation.

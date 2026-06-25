@@ -40,8 +40,7 @@ void SwerveSubsystem::SetupModule(
     frc::Translation2d location,
     std::optional<yams::motorcontrollers::local::SparkWrapper>& driveSMC,
     std::optional<yams::motorcontrollers::local::SparkWrapper>& azimuthSMC,
-    SmartMotorControllerConfig& driveCfgMember,
-    SmartMotorControllerConfig& azimuthCfgMember,
+    SmartMotorControllerConfig& driveCfgMember, SmartMotorControllerConfig& azimuthCfgMember,
     SwerveModuleConfig& moduleCfgMember,
     std::optional<yams::mechanisms::swerve::SwerveModule>& moduleOut) {
   // Drive gearing: GearBox::FromStages parses ratio strings and multiplies them.
@@ -102,21 +101,17 @@ SwerveSubsystem::SwerveSubsystem() {
   // All four corners are 24 in from centre in each axis, so the wheelbase and track
   // width are both 48 in.  Adjust these if the frame dimensions change.
   SetupModule(&m_flDrive, &m_flAzimuth, m_flEncoder, "frontleft",
-              frc::Translation2d{units::inch_t{24}, units::inch_t{24}},
-              m_flDriveSMC, m_flAzimuthSMC,
-              m_flDriveCfg, m_flAzimuthCfg, m_flModuleCfg, m_fl);
+              frc::Translation2d{units::inch_t{24}, units::inch_t{24}}, m_flDriveSMC,
+              m_flAzimuthSMC, m_flDriveCfg, m_flAzimuthCfg, m_flModuleCfg, m_fl);
   SetupModule(&m_frDrive, &m_frAzimuth, m_frEncoder, "frontright",
-              frc::Translation2d{units::inch_t{24}, units::inch_t{-24}},
-              m_frDriveSMC, m_frAzimuthSMC,
-              m_frDriveCfg, m_frAzimuthCfg, m_frModuleCfg, m_fr);
+              frc::Translation2d{units::inch_t{24}, units::inch_t{-24}}, m_frDriveSMC,
+              m_frAzimuthSMC, m_frDriveCfg, m_frAzimuthCfg, m_frModuleCfg, m_fr);
   SetupModule(&m_blDrive, &m_blAzimuth, m_blEncoder, "backleft",
-              frc::Translation2d{units::inch_t{-24}, units::inch_t{24}},
-              m_blDriveSMC, m_blAzimuthSMC,
-              m_blDriveCfg, m_blAzimuthCfg, m_blModuleCfg, m_bl);
+              frc::Translation2d{units::inch_t{-24}, units::inch_t{24}}, m_blDriveSMC,
+              m_blAzimuthSMC, m_blDriveCfg, m_blAzimuthCfg, m_blModuleCfg, m_bl);
   SetupModule(&m_brDrive, &m_brAzimuth, m_brEncoder, "backright",
-              frc::Translation2d{units::inch_t{-24}, units::inch_t{-24}},
-              m_brDriveSMC, m_brAzimuthSMC,
-              m_brDriveCfg, m_brAzimuthCfg, m_brModuleCfg, m_br);
+              frc::Translation2d{units::inch_t{-24}, units::inch_t{-24}}, m_brDriveSMC,
+              m_brAzimuthSMC, m_brDriveCfg, m_brAzimuthCfg, m_brModuleCfg, m_br);
 
   // m_driveConfig is a subsystem member so its address is stable; SwerveDrive<4> takes a
   // pointer to it.  The gyro lambda converts Pigeon2 yaw (in turns) to degrees; SwerveDrive

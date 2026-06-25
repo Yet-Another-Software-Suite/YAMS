@@ -64,9 +64,7 @@ static SmartMotorControllerConfig MakeArmSMCConfig(ProfileType profile, Hardware
 
 static positional::Arm* CreateArm(SmartMotorController* smc, TestSubsystem* subsys, bool isCTRE) {
   auto* cfg = new ArmConfig;
-  cfg->WithArmLength(4_in)
-      .WithMinAngle(-100.0_deg)
-      .WithMaxAngle(200.0_deg);
+  cfg->WithArmLength(4_in).WithMinAngle(-100.0_deg).WithMaxAngle(200.0_deg);
   auto* arm = new positional::Arm(cfg, smc);
   subsys->m_mechSimPeriodic = [arm] { arm->SimIterate(); };
   subsys->m_mechUpdateTelemetry = [arm] { arm->UpdateTelemetry(); };

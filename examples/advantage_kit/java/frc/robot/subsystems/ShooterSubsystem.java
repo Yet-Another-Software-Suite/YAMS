@@ -43,7 +43,6 @@ import yams.motorcontrollers.local.SparkWrapper;
  * without touching real hardware.
  */
 public class ShooterSubsystem extends SubsystemBase {
-
   /*
    * ShooterInputs is the boundary of the "replay bubble". Fields here cross the
    * boundary into deterministic replay territory; anything the robot computes FROM

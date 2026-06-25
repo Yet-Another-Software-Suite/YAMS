@@ -26,7 +26,8 @@ ElevatorSubsystem::ElevatorSubsystem() {
   constexpr double kCircumferenceIn = kChainPitchIn * kToothCount;
   const units::meter_t circumference{kCircumferenceIn * 0.0254};
 
-  m_motorConfig.WithSubsystem(this)
+  m_motorConfig
+      .WithSubsystem(this)
       // #25 chain, 22-tooth output sprocket: circumference = 0.25 in * 22 = 5.5 in (0.1397 m).
       // This is what converts one sprocket rotation into linear carriage travel.
       .WithMechanismCircumference(0.25_in, 22)
@@ -69,7 +70,8 @@ ElevatorSubsystem::ElevatorSubsystem() {
   // ElevatorConfig carries mechanism-level bounds and the carriage mass used by the sim.
   // WithMinimumHeight / WithMaximumHeight set the ElevatorSim travel limits (not the
   // motor-controller soft limits -- those are set in m_motorConfig above).
-  m_elevatorConfig.WithMinimumHeight(units::meter_t{0})
+  m_elevatorConfig
+      .WithMinimumHeight(units::meter_t{0})
       // 3 m is the sim ceiling; it is intentionally larger than the 2 m motor-controller
       // soft limit so the sim does not clip before the soft limit fires in real code.
       .WithMaximumHeight(units::meter_t{3})
