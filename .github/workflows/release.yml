@@ -41,7 +41,7 @@ jobs:
       - name: Publish
         run: ./gradlew publish ${{ matrix.build-options }}
         working-directory: vendordep
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: maven-${{ matrix.artifact-name }}
           path: vendordep/build/maven/
@@ -93,7 +93,7 @@ jobs:
           done
       - name: Publish
         run: ${{ matrix.gradlew }} publish
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: maven-${{ matrix.artifact-name }}
           path: vendordep/build/maven/
@@ -115,7 +115,7 @@ jobs:
           done
       - name: Zip C++ example
         run: zip -r ${{ github.workspace }}/example-artifacts/example-cpptest.zip examples/cpptest/ -x "examples/cpptest/.gradle/*" -x "examples/cpptest/build/*"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: release-examples
           path: example-artifacts/
@@ -179,7 +179,7 @@ jobs:
           git push origin v${{ inputs.releaseVersion }}
 
       - name: Download cross-platform maven artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: maven-*
           path: cross/
@@ -199,7 +199,7 @@ jobs:
         working-directory: ${{ env.workingDirectory }}
 
       - name: Download example artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: release-examples
           path: release-artifacts/

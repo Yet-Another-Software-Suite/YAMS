@@ -48,7 +48,7 @@ jobs:
       - name: Publish
         run: ./gradlew publish ${{ matrix.build-options }}
         working-directory: vendordep
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: maven-${{ matrix.artifact-name }}
           path: vendordep/build/maven/
@@ -94,7 +94,7 @@ jobs:
         run: ./gradlew test
       - name: Publish
         run: ./gradlew publish
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: maven-linux
           path: vendordep/build/maven/
@@ -145,7 +145,7 @@ jobs:
           done
       - name: Publish
         run: ${{ matrix.gradlew }} publish
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: maven-${{ matrix.artifact-name }}
           path: vendordep/build/maven/
@@ -155,12 +155,12 @@ jobs:
     needs: [build-cross, build-linux, build-host]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           pattern: maven-*
           path: combined-maven/
           merge-multiple: true
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: maven-combined
           path: combined-maven/
