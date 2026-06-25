@@ -81,7 +81,7 @@ jobs:
         with:
           path: ${{ matrix.toolchain-path }}
           key: roborio-toolchain-${{ matrix.artifact-name }}
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - name: Install roboRIO toolchain
         if: steps.toolchain-cache.outputs.cache-hit != 'true'
         shell: bash
@@ -160,7 +160,7 @@ jobs:
           path: ~/wpilib/2026/roborio
           key: roborio-toolchain-linux
 
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
 
       - name: Install roboRIO toolchain
         if: steps.toolchain-cache.outputs.cache-hit != 'true'
