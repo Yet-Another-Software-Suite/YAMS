@@ -5,10 +5,12 @@ on:
     paths:
       - "examples/**"
       - "yams/**"
+      - "vendordep/**"
   pull_request:
     paths:
       - "examples/**"
       - "yams/**"
+      - "vendordep/**"
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
