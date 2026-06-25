@@ -130,7 +130,6 @@ jobs:
       pages: write
       deployments: read
       id-token: write
-      workflows: write
     env:
       releaseVersion: ${{ inputs.releaseVersion }}
       workingDirectory: ${{ github.workspace }}/vendordep
