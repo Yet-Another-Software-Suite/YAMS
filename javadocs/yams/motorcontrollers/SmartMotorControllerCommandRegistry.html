@@ -121,6 +121,11 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Check if a command exists.</div>
 </div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#removeCommands(edu.wpi.first.wpilibj2.command.Subsystem)" class="member-name-link">removeCommands</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Subsystem.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link">Subsystem</a>&nbsp;subsystem)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Remove all commands registered for the given subsystem instance.</div>
+</div>
 </div>
 </div>
 </div>
@@ -179,6 +184,20 @@ loadScripts(document, 'script');</script>
 <dd><code>subsystem</code> - Subsystem.</dd>
 <dt>Returns:</dt>
 <dd>True if command exists.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="removeCommands(edu.wpi.first.wpilibj2.command.Subsystem)">
+<h3>removeCommands</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">removeCommands</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Subsystem.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link">Subsystem</a>&nbsp;subsystem)</span></div>
+<div class="block">Remove all commands registered for the given subsystem instance.
+
+ <p>Call this when a subsystem is being torn down (e.g. between tests) so that a
+ new instance with the same name can register without triggering the conflict check.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>subsystem</code> - Subsystem whose commands should be removed.</dd>
 </dl>
 </section>
 </li>

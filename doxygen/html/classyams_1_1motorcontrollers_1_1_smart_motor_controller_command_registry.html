@@ -91,6 +91,8 @@ Static Public Member Functions</h2></td></tr>
 <tr class="separator:a007bc5f4054d3c12612029cba6194cef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af6bb44fc45833efbabb18f8201b83ecf" id="r_af6bb44fc45833efbabb18f8201b83ecf"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af6bb44fc45833efbabb18f8201b83ecf">CommandExists</a> (const std::string &amp;cmdName, frc2::SubsystemBase *subsystem)</td></tr>
 <tr class="separator:af6bb44fc45833efbabb18f8201b83ecf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b4f29b2e9c96ebfee87bea3d7e617f5" id="r_a2b4f29b2e9c96ebfee87bea3d7e617f5"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2b4f29b2e9c96ebfee87bea3d7e617f5">RemoveCommands</a> (frc2::SubsystemBase *subsystem)</td></tr>
+<tr class="separator:a2b4f29b2e9c96ebfee87bea3d7e617f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aad08fde5a1d0d68d593dccca7cc1c693" id="r_aad08fde5a1d0d68d593dccca7cc1c693"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aad08fde5a1d0d68d593dccca7cc1c693">Clear</a> ()</td></tr>
 <tr class="separator:aad08fde5a1d0d68d593dccca7cc1c693"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -205,6 +207,39 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>true if the command is already registered. </dd></dl>
+
+</div>
+</div>
+<a id="a2b4f29b2e9c96ebfee87bea3d7e617f5" name="a2b4f29b2e9c96ebfee87bea3d7e617f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b4f29b2e9c96ebfee87bea3d7e617f5">&#9670;&#160;</a></span>RemoveCommands()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void yams::motorcontrollers::SmartMotorControllerCommandRegistry::RemoveCommands </td>
+          <td>(</td>
+          <td class="paramtype">frc2::SubsystemBase *</td>          <td class="paramname"><span class="paramname"><em>subsystem</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Remove all commands registered for a specific subsystem instance.</p>
+<p>Call this when a subsystem is being torn down (e.g. between tests) so that a new instance with the same name can register without triggering the conflict check.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">subsystem</td><td>Subsystem whose commands should be removed. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
