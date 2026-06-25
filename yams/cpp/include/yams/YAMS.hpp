@@ -46,7 +46,6 @@
 #include "yams/mechanisms/config/FlyWheelConfig.hpp"
 #include "yams/mechanisms/config/MechanismPositionConfig.hpp"
 #include "yams/mechanisms/config/PivotConfig.hpp"
-#include "yams/mechanisms/config/SensorConfig.hpp"
 
 // ---- Mechanisms ------------------------------------------------------------
 #include "yams/mechanisms/SmartMechanism.hpp"
