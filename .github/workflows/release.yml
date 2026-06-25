@@ -35,7 +35,7 @@ jobs:
     env:
       releaseVersion: ${{ inputs.releaseVersion }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Configure git safe directory
         run: git config --global --add safe.directory /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}
       - name: Publish
@@ -67,7 +67,7 @@ jobs:
       run:
         working-directory: vendordep
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -102,7 +102,7 @@ jobs:
     name: Release - Examples
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Generate Java examples
         run: mkdir -p generated && make
         working-directory: examples
@@ -138,7 +138,7 @@ jobs:
     steps:
       - run: git config --global user.name "thenetworkgrinch" && git config --global user.email "thenetworkgrinch@noreply.users.github.com"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -215,7 +215,7 @@ jobs:
         run: rm -rf ${{ env.workingDirectory }}/build/maven/
 
       - name: Checkout gh-pages branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: gh-pages
           path: ${{ env.workingDirectory }}/build/maven/
