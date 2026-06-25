@@ -123,8 +123,8 @@ $(document).ready(function() { init_codefold(0); });
 <div class="foldopen" id="foldopen00072" data-start="{" data-end="};">
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html">   72</a></span><span class="keyword">class </span><a class="code hl_class" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html">TalonFXWrapper</a> : <span class="keyword">public</span> <a class="code hl_class" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html">SmartMotorController</a> {</div>
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#a7f983659a3bd3146b2341319796be675">   81</a></span>  <a class="code hl_function" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#a7f983659a3bd3146b2341319796be675">TalonFXWrapper</a>(ctre::phoenix6::hardware::TalonFX* talon, frc::DCMotor dcMotor,</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>                 <span class="keyword">const</span> <a class="code hl_class" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html">SmartMotorControllerConfig</a>&amp; config);</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#a4dec7d0ec18e0b601326714f4bfd3695">   81</a></span>  <a class="code hl_function" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#a4dec7d0ec18e0b601326714f4bfd3695">TalonFXWrapper</a>(ctre::phoenix6::hardware::TalonFX* talon, frc::DCMotor dcMotor,</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>                 <a class="code hl_class" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html">SmartMotorControllerConfig</a>* config);</div>
 <div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#aeba1c348d42df7464be3167d2fbed9f9">   84</a></span>  <a class="code hl_function" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#aeba1c348d42df7464be3167d2fbed9f9">~TalonFXWrapper</a>();</div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
@@ -215,50 +215,51 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00284" name="l00284"></a><span class="lineno"><a class="line" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#abc47cfa5725166322d5107d3090875ff">  284</a></span>  <span class="keywordtype">void</span>* <a class="code hl_function" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#abc47cfa5725166322d5107d3090875ff">GetMotorControllerConfig</a>() <span class="keyword">override</span>;</div>
 <div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span> </div>
 <div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span> <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>  ctre::phoenix6::hardware::TalonFX* m_talon;</div>
-<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>  frc::DCMotor m_dcMotor;</div>
-<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>  ctre::phoenix6::configs::TalonFXConfiguration m_talonConfig;</div>
-<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span> </div>
-<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>  <span class="comment">// Active closed-loop control requests — variant selects the active request type</span></div>
-<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>  <span class="keyword">using </span>PositionControlRequest = std::variant&lt;</div>
-<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>      ctre::phoenix6::controls::PositionVoltage, ctre::phoenix6::controls::PositionDutyCycle,</div>
-<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>      ctre::phoenix6::controls::PositionTorqueCurrentFOC,</div>
-<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>      ctre::phoenix6::controls::MotionMagicVoltage, ctre::phoenix6::controls::MotionMagicDutyCycle,</div>
-<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>      ctre::phoenix6::controls::MotionMagicExpoVoltage,</div>
-<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>      ctre::phoenix6::controls::MotionMagicExpoDutyCycle,</div>
-<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>      ctre::phoenix6::controls::MotionMagicTorqueCurrentFOC&gt;;</div>
-<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>  <span class="keyword">using </span>VelocityControlRequest =</div>
-<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>      std::variant&lt;ctre::phoenix6::controls::VelocityVoltage,</div>
-<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>                   ctre::phoenix6::controls::VelocityDutyCycle,</div>
-<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>                   ctre::phoenix6::controls::VelocityTorqueCurrentFOC,</div>
-<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>                   ctre::phoenix6::controls::MotionMagicVelocityVoltage,</div>
-<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>                   ctre::phoenix6::controls::MotionMagicVelocityDutyCycle,</div>
-<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>                   ctre::phoenix6::controls::MotionMagicVelocityTorqueCurrentFOC&gt;;</div>
-<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span> </div>
-<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>  PositionControlRequest m_positionReq{ctre::phoenix6::controls::PositionVoltage{0_tr}};</div>
-<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>  VelocityControlRequest m_velocityReq{ctre::phoenix6::controls::VelocityVoltage{0_tps}};</div>
-<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>  ctre::phoenix6::controls::VoltageOut m_voltageReq{0_V};</div>
-<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>  ctre::phoenix6::controls::DutyCycleOut m_dutyCycleReq{0.0};</div>
-<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span> </div>
-<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>  <span class="comment">// External sensors</span></div>
-<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>  std::optional&lt;std::reference_wrapper&lt;ctre::phoenix6::hardware::CANcoder&gt;&gt; m_cancoder;</div>
-<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>  std::optional&lt;std::reference_wrapper&lt;ctre::phoenix6::hardware::CANdi&gt;&gt; m_candi;</div>
-<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span> </div>
-<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>  <span class="comment">// Simulation</span></div>
-<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>  std::optional&lt;frc::sim::DCMotorSim&gt; m_motorSim;</div>
-<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span> </div>
-<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span>  math::DerivativeTimeFilter m_accelFilter{20_ms};</div>
-<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span> </div>
-<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>  std::optional&lt;frc::Alert&gt; m_rioControllerAlert;</div>
-<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span> </div>
-<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span>  <span class="keywordtype">void</span> ApplyPIDConfig();</div>
-<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>  <span class="keywordtype">void</span> ApplyFeedforwardConfig();</div>
-<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>  <span class="keywordtype">void</span> ApplyLimitsConfig();</div>
-<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span>  <span class="keywordtype">void</span> ApplyMotionMagicConfig();</div>
-<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>};</div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>  <a class="code hl_class" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html">SmartMotorControllerConfig</a>* m_config{<span class="keyword">nullptr</span>};</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>  ctre::phoenix6::hardware::TalonFX* m_talon;</div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>  frc::DCMotor m_dcMotor;</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>  ctre::phoenix6::configs::TalonFXConfiguration m_talonConfig;</div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span> </div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>  <span class="comment">// Active closed-loop control requests — variant selects the active request type</span></div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>  <span class="keyword">using </span>PositionControlRequest = std::variant&lt;</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>      ctre::phoenix6::controls::PositionVoltage, ctre::phoenix6::controls::PositionDutyCycle,</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>      ctre::phoenix6::controls::PositionTorqueCurrentFOC,</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>      ctre::phoenix6::controls::MotionMagicVoltage, ctre::phoenix6::controls::MotionMagicDutyCycle,</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>      ctre::phoenix6::controls::MotionMagicExpoVoltage,</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>      ctre::phoenix6::controls::MotionMagicExpoDutyCycle,</div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>      ctre::phoenix6::controls::MotionMagicTorqueCurrentFOC&gt;;</div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>  <span class="keyword">using </span>VelocityControlRequest =</div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>      std::variant&lt;ctre::phoenix6::controls::VelocityVoltage,</div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>                   ctre::phoenix6::controls::VelocityDutyCycle,</div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>                   ctre::phoenix6::controls::VelocityTorqueCurrentFOC,</div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>                   ctre::phoenix6::controls::MotionMagicVelocityVoltage,</div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>                   ctre::phoenix6::controls::MotionMagicVelocityDutyCycle,</div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>                   ctre::phoenix6::controls::MotionMagicVelocityTorqueCurrentFOC&gt;;</div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span> </div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>  PositionControlRequest m_positionReq{ctre::phoenix6::controls::PositionVoltage{0_tr}};</div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>  VelocityControlRequest m_velocityReq{ctre::phoenix6::controls::VelocityVoltage{0_tps}};</div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>  ctre::phoenix6::controls::VoltageOut m_voltageReq{0_V};</div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>  ctre::phoenix6::controls::DutyCycleOut m_dutyCycleReq{0.0};</div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span> </div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>  <span class="comment">// External sensors</span></div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>  std::optional&lt;std::reference_wrapper&lt;ctre::phoenix6::hardware::CANcoder&gt;&gt; m_cancoder;</div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>  std::optional&lt;std::reference_wrapper&lt;ctre::phoenix6::hardware::CANdi&gt;&gt; m_candi;</div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span> </div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>  <span class="comment">// Simulation</span></div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span>  std::optional&lt;frc::sim::DCMotorSim&gt; m_motorSim;</div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span> </div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span>  math::DerivativeTimeFilter m_accelFilter{20_ms};</div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span> </div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>  std::optional&lt;frc::Alert&gt; m_rioControllerAlert;</div>
+<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span> </div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>  <span class="keywordtype">void</span> ApplyPIDConfig();</div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>  <span class="keywordtype">void</span> ApplyFeedforwardConfig();</div>
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span>  <span class="keywordtype">void</span> ApplyLimitsConfig();</div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>  <span class="keywordtype">void</span> ApplyMotionMagicConfig();</div>
+<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span>};</div>
 </div>
-<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span> </div>
-<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span>}  <span class="comment">// namespace yams::motorcontrollers::remote</span></div>
+<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span> </div>
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>}  <span class="comment">// namespace yams::motorcontrollers::remote</span></div>
 <div class="ttc" id="aDerivativeTimeFilter_8hpp_html"><div class="ttname"><a href="DerivativeTimeFilter_8hpp.html">DerivativeTimeFilter.hpp</a></div></div>
 <div class="ttc" id="aSmartMotorController_8hpp_html"><div class="ttname"><a href="SmartMotorController_8hpp.html">SmartMotorController.hpp</a></div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_html"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html">yams::motorcontrollers::SmartMotorControllerConfig</a></div><div class="ttdef"><b>Definition</b> SmartMotorControllerConfig.hpp:50</div></div>
@@ -284,6 +285,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper_html_a42a643b852b914dc92b691ca4fb78d2c"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#a42a643b852b914dc92b691ca4fb78d2c">yams::motorcontrollers::remote::TalonFXWrapper::SetPosition</a></div><div class="ttdeci">void SetPosition(units::turn_t angle) override</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper_html_a445c5cc779f88590b5f14bc204ad8a79"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#a445c5cc779f88590b5f14bc204ad8a79">yams::motorcontrollers::remote::TalonFXWrapper::GetMotorController</a></div><div class="ttdeci">void * GetMotorController() override</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper_html_a45579d6ae13aded6af87f351c8e7e3ba"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#a45579d6ae13aded6af87f351c8e7e3ba">yams::motorcontrollers::remote::TalonFXWrapper::GetExternalEncoderPosition</a></div><div class="ttdeci">std::optional&lt; units::degree_t &gt; GetExternalEncoderPosition() override</div></div>
+<div class="ttc" id="aclassyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper_html_a4dec7d0ec18e0b601326714f4bfd3695"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#a4dec7d0ec18e0b601326714f4bfd3695">yams::motorcontrollers::remote::TalonFXWrapper::TalonFXWrapper</a></div><div class="ttdeci">TalonFXWrapper(ctre::phoenix6::hardware::TalonFX *talon, frc::DCMotor dcMotor, SmartMotorControllerConfig *config)</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper_html_a526b6979434bb14d006fb1555fb9784b"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#a526b6979434bb14d006fb1555fb9784b">yams::motorcontrollers::remote::TalonFXWrapper::SetClosedLoopRampRate</a></div><div class="ttdeci">void SetClosedLoopRampRate(units::second_t rampRate) override</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper_html_a55c11fb234c2542d574b7fce7fae45df"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#a55c11fb234c2542d574b7fce7fae45df">yams::motorcontrollers::remote::TalonFXWrapper::SetKs</a></div><div class="ttdeci">void SetKs(double kS) override</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper_html_a560512cb37df8510b8cc084a689b9b53"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#a560512cb37df8510b8cc084a689b9b53">yams::motorcontrollers::remote::TalonFXWrapper::SetMechanismLimits</a></div><div class="ttdeci">void SetMechanismLimits(units::turn_t lower, units::turn_t upper) override</div></div>
@@ -293,7 +295,6 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper_html_a6fdef95f1324c2749e129d8388ccd1f5"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#a6fdef95f1324c2749e129d8388ccd1f5">yams::motorcontrollers::remote::TalonFXWrapper::SetKa</a></div><div class="ttdeci">void SetKa(double kA) override</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper_html_a76031eada36788f2182ecf2a425e4f43"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#a76031eada36788f2182ecf2a425e4f43">yams::motorcontrollers::remote::TalonFXWrapper::SetOpenLoopRampRate</a></div><div class="ttdeci">void SetOpenLoopRampRate(units::second_t rampRate) override</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper_html_a78079ccadaea1fd920a096266366e891"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#a78079ccadaea1fd920a096266366e891">yams::motorcontrollers::remote::TalonFXWrapper::SeedRelativeEncoder</a></div><div class="ttdeci">void SeedRelativeEncoder() override</div></div>
-<div class="ttc" id="aclassyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper_html_a7f983659a3bd3146b2341319796be675"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#a7f983659a3bd3146b2341319796be675">yams::motorcontrollers::remote::TalonFXWrapper::TalonFXWrapper</a></div><div class="ttdeci">TalonFXWrapper(ctre::phoenix6::hardware::TalonFX *talon, frc::DCMotor dcMotor, const SmartMotorControllerConfig &amp;config)</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper_html_a831ae2209fae7251bb96746aed9906b4"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#a831ae2209fae7251bb96746aed9906b4">yams::motorcontrollers::remote::TalonFXWrapper::GetDCMotor</a></div><div class="ttdeci">frc::DCMotor GetDCMotor() override</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper_html_a83558c36cbc96d39509fd55c7d568984"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#a83558c36cbc96d39509fd55c7d568984">yams::motorcontrollers::remote::TalonFXWrapper::GetMeasurementVelocity</a></div><div class="ttdeci">units::meters_per_second_t GetMeasurementVelocity() override</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper_html_a86f2815772484bbd4a0d529a2ee0bf37"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#a86f2815772484bbd4a0d529a2ee0bf37">yams::motorcontrollers::remote::TalonFXWrapper::GetMeasurementAcceleration</a></div><div class="ttdeci">units::meters_per_second_squared_t GetMeasurementAcceleration() override</div></div>

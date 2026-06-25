@@ -1,9 +1,3 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$classyams_1_1motorcontrollers_1_1SmartMotorController.html" title=" " alt="" coords="5,69,180,109"/>
-<area shape="rect" id="Node000001" href="$classyams_1_1motorcontrollers_1_1local_1_1SparkWrapper.html" title=" " alt="" coords="240,5,415,45"/>
-<area shape="poly" id="edge18_Node000000_Node000001" title=" " alt="" coords="179,63,253,43,254,48,180,68"/>
-<area shape="rect" id="Node000002" href="$classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html" title=" " alt="" coords="228,69,427,109"/>
-<area shape="poly" id="edge19_Node000000_Node000002" title=" " alt="" coords="194,87,228,87,228,92,194,92"/>
-<area shape="rect" id="Node000003" href="$classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html" title=" " alt="" coords="232,133,423,173"/>
-<area shape="poly" id="edge20_Node000000_Node000003" title=" " alt="" coords="180,110,254,131,253,136,179,116"/>
+<area shape="rect" id="Node000000" href="$classyams_1_1motorcontrollers_1_1SmartMotorControllerCommandRegistry.html" title=" " alt="" coords="5,5,244,60"/>
 </map>

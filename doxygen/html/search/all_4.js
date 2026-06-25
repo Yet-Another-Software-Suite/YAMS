@@ -3,7 +3,7 @@ var searchData=
   ['easycrt_0',['easycrt',['../classyams_1_1units_1_1EasyCRT.html#a380759d10d5cd149e6d1fb4798a42d92',1,'yams::units::EasyCRT::EasyCRT()'],['../classyams_1_1units_1_1EasyCRT.html',1,'yams::units::EasyCRT']]],
   ['easycrt_2ehpp_1',['EasyCRT.hpp',['../EasyCRT_8hpp.html',1,'']]],
   ['easycrtconfig_2',['EasyCRTConfig',['../structyams_1_1units_1_1EasyCRTConfig.html',1,'yams::units']]],
-  ['elevator_3',['elevator',['../classyams_1_1mechanisms_1_1positional_1_1Elevator.html#a0d52ea402031d39bec6f5a125b44ca31',1,'yams::mechanisms::positional::Elevator::Elevator()'],['../classyams_1_1math_1_1LQRConfig.html#a4d0a59fc149cead7a47bce892a7d2f2ba0727a5b7a92dc07a4e5ed231272d0bde',1,'yams::math::LQRConfig::ELEVATOR'],['../classyams_1_1mechanisms_1_1positional_1_1Elevator.html',1,'yams::mechanisms::positional::Elevator']]],
+  ['elevator_3',['elevator',['../classyams_1_1math_1_1LQRConfig.html#a4d0a59fc149cead7a47bce892a7d2f2ba0727a5b7a92dc07a4e5ed231272d0bde',1,'yams::math::LQRConfig::ELEVATOR'],['../classyams_1_1mechanisms_1_1positional_1_1Elevator.html#a60065137a96c491fa771ad19a743ec6e',1,'yams::mechanisms::positional::Elevator::Elevator()'],['../classyams_1_1mechanisms_1_1positional_1_1Elevator.html',1,'yams::mechanisms::positional::Elevator']]],
   ['elevator_2ehpp_4',['Elevator.hpp',['../Elevator_8hpp.html',1,'']]],
   ['elevatorconfig_5',['elevatorconfig',['../classyams_1_1mechanisms_1_1config_1_1ElevatorConfig.html#a026c18507884340b95eebbacb431fa10',1,'yams::mechanisms::config::ElevatorConfig::ElevatorConfig()'],['../classyams_1_1mechanisms_1_1config_1_1ElevatorConfig.html',1,'yams::mechanisms::config::ElevatorConfig']]],
   ['elevatorconfig_2ehpp_6',['ElevatorConfig.hpp',['../ElevatorConfig_8hpp.html',1,'']]],

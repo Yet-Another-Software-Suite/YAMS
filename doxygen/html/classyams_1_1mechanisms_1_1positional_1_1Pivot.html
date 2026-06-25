@@ -117,8 +117,8 @@ Collaboration diagram for yams::mechanisms::positional::Pivot:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aabfb78e6720e4ccd8ae38cb9266f0f84" id="r_aabfb78e6720e4ccd8ae38cb9266f0f84"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1positional_1_1Pivot.html#aabfb78e6720e4ccd8ae38cb9266f0f84">Pivot</a> (const <a class="el" href="classyams_1_1mechanisms_1_1config_1_1PivotConfig.html">config::PivotConfig</a> &amp;config)</td></tr>
-<tr class="separator:aabfb78e6720e4ccd8ae38cb9266f0f84"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc39e65b85edbfb4d11d4516ef446f0e" id="r_afc39e65b85edbfb4d11d4516ef446f0e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1positional_1_1Pivot.html#afc39e65b85edbfb4d11d4516ef446f0e">Pivot</a> (<a class="el" href="classyams_1_1mechanisms_1_1config_1_1PivotConfig.html">config::PivotConfig</a> *config, <a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html">motorcontrollers::SmartMotorController</a> *smc)</td></tr>
+<tr class="separator:afc39e65b85edbfb4d11d4516ef446f0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3c5474b6e3bdc6b0d1938443b3b9d4bb" id="r_a3c5474b6e3bdc6b0d1938443b3b9d4bb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1positional_1_1Pivot.html#a3c5474b6e3bdc6b0d1938443b3b9d4bb">SimIterate</a> () override</td></tr>
 <tr class="separator:a3c5474b6e3bdc6b0d1938443b3b9d4bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a018059844d6784af1792aa815cae19fa" id="r_a018059844d6784af1792aa815cae19fa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1positional_1_1Pivot.html#a018059844d6784af1792aa815cae19fa">UpdateTelemetry</a> () override</td></tr>
@@ -246,20 +246,19 @@ Example usage (inside a subsystem constructor)</h3>
 <div class="line"><a class="code hl_variable" href="classyams_1_1mechanisms_1_1SmartMechanism.html#ac0687ea085d15713705322353588b87b">m_smc</a>.emplace(m_talonFXS, frc::DCMotor::NEO(1),</div>
 <div class="line">              TalonFXSWrapper::MotorArrangement::NEO, motorCfg);</div>
 <div class="line"> </div>
-<div class="line">m_pivotConfig.<a class="code hl_function" href="classyams_1_1mechanisms_1_1config_1_1PivotConfig.html#a090f8ddb11efa2d12bfe95fb93d741e3">WithMotorController</a>(&amp;<a class="code hl_variable" href="classyams_1_1mechanisms_1_1SmartMechanism.html#ac0687ea085d15713705322353588b87b">m_smc</a>.value())</div>
-<div class="line">             .WithMinAngle(-100.0_deg)</div>
+<div class="line">m_pivotConfig.<a class="code hl_function" href="classyams_1_1mechanisms_1_1config_1_1PivotConfig.html#a345aa61a2f026a86f5bdfceb82ffc7a9">WithMinAngle</a>(-100.0_deg)</div>
 <div class="line">             .<a class="code hl_function" href="classyams_1_1mechanisms_1_1config_1_1PivotConfig.html#a227f3a91eb004195a6b165f6181dbaf0">WithMaxAngle</a>(200.0_deg)</div>
 <div class="line">             .<a class="code hl_function" href="classyams_1_1mechanisms_1_1config_1_1PivotConfig.html#a143d3a1507473581e40632c5496340a1">WithTelemetryName</a>(<span class="stringliteral">&quot;HoodExample&quot;</span>);</div>
 <div class="line"> </div>
-<div class="line">m_pivot.emplace(m_pivotConfig);</div>
+<div class="line">m_pivot.emplace(&amp;m_pivotConfig, &amp;<a class="code hl_variable" href="classyams_1_1mechanisms_1_1SmartMechanism.html#ac0687ea085d15713705322353588b87b">m_smc</a>.value());</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// In commands or bindings:</span></div>
 <div class="line">m_pivot-&gt;RunTo(30.0_deg);</div>
 <div class="ttc" id="aclassyams_1_1gearing_1_1MechanismGearing_html"><div class="ttname"><a href="classyams_1_1gearing_1_1MechanismGearing.html">yams::gearing::MechanismGearing</a></div><div class="ttdef"><b>Definition</b> MechanismGearing.hpp:19</div></div>
 <div class="ttc" id="aclassyams_1_1mechanisms_1_1SmartMechanism_html_ac0687ea085d15713705322353588b87b"><div class="ttname"><a href="classyams_1_1mechanisms_1_1SmartMechanism.html#ac0687ea085d15713705322353588b87b">yams::mechanisms::SmartMechanism::m_smc</a></div><div class="ttdeci">motorcontrollers::SmartMotorController * m_smc</div><div class="ttdef"><b>Definition</b> SmartMechanism.hpp:136</div></div>
-<div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1PivotConfig_html_a090f8ddb11efa2d12bfe95fb93d741e3"><div class="ttname"><a href="classyams_1_1mechanisms_1_1config_1_1PivotConfig.html#a090f8ddb11efa2d12bfe95fb93d741e3">yams::mechanisms::config::PivotConfig::WithMotorController</a></div><div class="ttdeci">PivotConfig &amp; WithMotorController(motorcontrollers::SmartMotorController *smc)</div></div>
 <div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1PivotConfig_html_a143d3a1507473581e40632c5496340a1"><div class="ttname"><a href="classyams_1_1mechanisms_1_1config_1_1PivotConfig.html#a143d3a1507473581e40632c5496340a1">yams::mechanisms::config::PivotConfig::WithTelemetryName</a></div><div class="ttdeci">PivotConfig &amp; WithTelemetryName(const std::string &amp;name)</div></div>
 <div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1PivotConfig_html_a227f3a91eb004195a6b165f6181dbaf0"><div class="ttname"><a href="classyams_1_1mechanisms_1_1config_1_1PivotConfig.html#a227f3a91eb004195a6b165f6181dbaf0">yams::mechanisms::config::PivotConfig::WithMaxAngle</a></div><div class="ttdeci">PivotConfig &amp; WithMaxAngle(units::degree_t angle)</div></div>
+<div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1PivotConfig_html_a345aa61a2f026a86f5bdfceb82ffc7a9"><div class="ttname"><a href="classyams_1_1mechanisms_1_1config_1_1PivotConfig.html#a345aa61a2f026a86f5bdfceb82ffc7a9">yams::mechanisms::config::PivotConfig::WithMinAngle</a></div><div class="ttdeci">PivotConfig &amp; WithMinAngle(units::degree_t angle)</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_html"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html">yams::motorcontrollers::SmartMotorControllerConfig</a></div><div class="ttdef"><b>Definition</b> SmartMotorControllerConfig.hpp:50</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_html_a06a2b48cc33bc36a2e289b30a12baf30"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#a06a2b48cc33bc36a2e289b30a12baf30">yams::motorcontrollers::SmartMotorControllerConfig::WithTelemetry</a></div><div class="ttdeci">SmartMotorControllerConfig &amp; WithTelemetry(const std::string &amp;name, TelemetryVerbosity verbosity=TelemetryVerbosity::HIGH)</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_html_a0df6ee01600a6fc3b4801a160f8f78db"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#a0df6ee01600a6fc3b4801a160f8f78db">yams::motorcontrollers::SmartMotorControllerConfig::WithMotorInverted</a></div><div class="ttdeci">SmartMotorControllerConfig &amp; WithMotorInverted(bool inverted)</div></div>
@@ -274,33 +273,36 @@ Example usage (inside a subsystem constructor)</h3>
 <div class="ttc" id="anamespaceyams_1_1motorcontrollers_1_1remote_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers_1_1remote.html">yams::motorcontrollers::remote</a></div><div class="ttdef"><b>Definition</b> TalonFXSWrapper.hpp:35</div></div>
 <div class="ttc" id="anamespaceyams_1_1motorcontrollers_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers.html">yams::motorcontrollers</a></div><div class="ttdef"><b>Definition</b> SimSensorConfig.hpp:16</div></div>
 </div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="aabfb78e6720e4ccd8ae38cb9266f0f84" name="aabfb78e6720e4ccd8ae38cb9266f0f84"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aabfb78e6720e4ccd8ae38cb9266f0f84">&#9670;&#160;</a></span>Pivot()</h2>
+<a id="afc39e65b85edbfb4d11d4516ef446f0e" name="afc39e65b85edbfb4d11d4516ef446f0e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc39e65b85edbfb4d11d4516ef446f0e">&#9670;&#160;</a></span>Pivot()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">yams::mechanisms::positional::Pivot::Pivot </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="classyams_1_1mechanisms_1_1config_1_1PivotConfig.html">config::PivotConfig</a> &amp;&#160;</td>
-          <td class="paramname"><em>config</em></td><td>)</td>
+          <td class="paramtype"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1PivotConfig.html">config::PivotConfig</a> *&#160;</td>
+          <td class="paramname"><em>config</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html">motorcontrollers::SmartMotorController</a> *&#160;</td>
+          <td class="paramname"><em>smc</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">explicit</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
-<p>Construct a <a class="el" href="classyams_1_1mechanisms_1_1positional_1_1Pivot.html">Pivot</a> from a PivotConfig.</p>
+<p>Construct a <a class="el" href="classyams_1_1mechanisms_1_1positional_1_1Pivot.html">Pivot</a> from a PivotConfig and a SmartMotorController.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">config</td><td>Fully-populated pivot configuration. </td></tr>
+    <tr><td class="paramname">config</td><td>Pointer to the pivot configuration (must outlive this <a class="el" href="classyams_1_1mechanisms_1_1positional_1_1Pivot.html">Pivot</a>). </td></tr>
+    <tr><td class="paramname">smc</td><td>Pointer to the motor controller (must outlive this <a class="el" href="classyams_1_1mechanisms_1_1positional_1_1Pivot.html">Pivot</a>). </td></tr>
   </table>
   </dd>
 </dl>

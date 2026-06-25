@@ -7,9 +7,8 @@ var searchData=
   ['slot_5f1_4',['SLOT_1',['../classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#acdc3626942088138de81d50081b979c4a90d71ec57b92ac66f93b7b0a658b8606',1,'yams::motorcontrollers::SmartMotorControllerConfig']]],
   ['slot_5f2_5',['SLOT_2',['../classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#acdc3626942088138de81d50081b979c4a7eccd0b49279bdde76135e56b98f6248',1,'yams::motorcontrollers::SmartMotorControllerConfig']]],
   ['slot_5f3_6',['SLOT_3',['../classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#acdc3626942088138de81d50081b979c4a6cbcb9543d25d2275c1a9b74375aa33b',1,'yams::motorcontrollers::SmartMotorControllerConfig']]],
-  ['spark_5fabsolute_7',['SPARK_ABSOLUTE',['../classyams_1_1mechanisms_1_1config_1_1SensorConfig.html#af2563688afa21b2b0a3291309ed55670a62d8aa76de8c822ae12840efec7aa173',1,'yams::mechanisms::config::SensorConfig']]],
-  ['statorcurrent_8',['StatorCurrent',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba3786e14c328f1ff3e0e8d914b00593f2',1,'yams::telemetry']]],
-  ['statorcurrentlimit_9',['StatorCurrentLimit',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbac741e8ea2b5294fffc2e4a6d70d69337',1,'yams::telemetry']]],
-  ['supplycurrent_10',['SupplyCurrent',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba33993099d27fb7c7678a005175fa4076',1,'yams::telemetry']]],
-  ['supplycurrentlimit_11',['SupplyCurrentLimit',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba59e11379b07e676d83d6c6c8d4b995ff',1,'yams::telemetry']]]
+  ['statorcurrent_7',['StatorCurrent',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba3786e14c328f1ff3e0e8d914b00593f2',1,'yams::telemetry']]],
+  ['statorcurrentlimit_8',['StatorCurrentLimit',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbac741e8ea2b5294fffc2e4a6d70d69337',1,'yams::telemetry']]],
+  ['supplycurrent_9',['SupplyCurrent',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba33993099d27fb7c7678a005175fa4076',1,'yams::telemetry']]],
+  ['supplycurrentlimit_10',['SupplyCurrentLimit',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba59e11379b07e676d83d6c6c8d4b995ff',1,'yams::telemetry']]]
 ];

@@ -120,35 +120,34 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#include &quot;<a class="code" href="FlyWheelConfig_8hpp.html">yams/mechanisms/config/FlyWheelConfig.hpp</a>&quot;</span></div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">#include &quot;<a class="code" href="MechanismPositionConfig_8hpp.html">yams/mechanisms/config/MechanismPositionConfig.hpp</a>&quot;</span></div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#include &quot;<a class="code" href="PivotConfig_8hpp.html">yams/mechanisms/config/PivotConfig.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#include &quot;<a class="code" href="SensorConfig_8hpp.html">yams/mechanisms/config/SensorConfig.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="comment">// ---- Mechanisms ------------------------------------------------------------</span></div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="preprocessor">#include &quot;<a class="code" href="SmartMechanism_8hpp.html">yams/mechanisms/SmartMechanism.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">#include &quot;<a class="code" href="Arm_8hpp.html">yams/mechanisms/positional/Arm.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#include &quot;<a class="code" href="Elevator_8hpp.html">yams/mechanisms/positional/Elevator.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#include &quot;<a class="code" href="Pivot_8hpp.html">yams/mechanisms/positional/Pivot.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#include &quot;<a class="code" href="SmartPositionalMechanism_8hpp.html">yams/mechanisms/positional/SmartPositionalMechanism.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#include &quot;<a class="code" href="FlyWheel_8hpp.html">yams/mechanisms/velocity/FlyWheel.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">#include &quot;<a class="code" href="SmartVelocityMechanism_8hpp.html">yams/mechanisms/velocity/SmartVelocityMechanism.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="comment">// ---- Swerve Mechanism Configs ----------------------------------------------</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">#include &quot;<a class="code" href="SwerveModuleConfig_8hpp.html">yams/mechanisms/config/SwerveModuleConfig.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="comment">// ---- Swerve Mechanisms -----------------------------------------------------</span></div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="preprocessor">#include &quot;<a class="code" href="SwerveDrive_8hpp.html">yams/mechanisms/swerve/SwerveDrive.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="preprocessor">#include &quot;<a class="code" href="SwerveDriveConfig_8hpp.html">yams/mechanisms/swerve/SwerveDriveConfig.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="preprocessor">#include &quot;<a class="code" href="SwerveModule_8hpp.html">yams/mechanisms/swerve/SwerveModule.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="comment">// ---- Swerve Utilities ------------------------------------------------------</span></div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">#include &quot;<a class="code" href="SwerveInputStream_8hpp.html">yams/mechanisms/swerve/utility/SwerveInputStream.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="comment">// ---- Telemetry -------------------------------------------------------------</span></div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="preprocessor">#include &quot;<a class="code" href="MechanismTelemetry_8hpp.html">yams/telemetry/MechanismTelemetry.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="preprocessor">#include &quot;<a class="code" href="SmartMotorControllerTelemetry_8hpp.html">yams/telemetry/SmartMotorControllerTelemetry.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="preprocessor">#include &quot;<a class="code" href="SmartMotorControllerTelemetryConfig_8hpp.html">yams/telemetry/SmartMotorControllerTelemetryConfig.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="comment">// ---- Exceptions ------------------------------------------------------------</span></div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="preprocessor">#include &quot;<a class="code" href="exceptions_8hpp.html">yams/exceptions.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="comment">// ---- Mechanisms ------------------------------------------------------------</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">#include &quot;<a class="code" href="SmartMechanism_8hpp.html">yams/mechanisms/SmartMechanism.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="preprocessor">#include &quot;<a class="code" href="Arm_8hpp.html">yams/mechanisms/positional/Arm.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">#include &quot;<a class="code" href="Elevator_8hpp.html">yams/mechanisms/positional/Elevator.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#include &quot;<a class="code" href="Pivot_8hpp.html">yams/mechanisms/positional/Pivot.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#include &quot;<a class="code" href="SmartPositionalMechanism_8hpp.html">yams/mechanisms/positional/SmartPositionalMechanism.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#include &quot;<a class="code" href="FlyWheel_8hpp.html">yams/mechanisms/velocity/FlyWheel.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#include &quot;<a class="code" href="SmartVelocityMechanism_8hpp.html">yams/mechanisms/velocity/SmartVelocityMechanism.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="comment">// ---- Swerve Mechanism Configs ----------------------------------------------</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="preprocessor">#include &quot;<a class="code" href="SwerveModuleConfig_8hpp.html">yams/mechanisms/config/SwerveModuleConfig.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="comment">// ---- Swerve Mechanisms -----------------------------------------------------</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="preprocessor">#include &quot;<a class="code" href="SwerveDrive_8hpp.html">yams/mechanisms/swerve/SwerveDrive.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="preprocessor">#include &quot;<a class="code" href="SwerveDriveConfig_8hpp.html">yams/mechanisms/swerve/SwerveDriveConfig.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="preprocessor">#include &quot;<a class="code" href="SwerveModule_8hpp.html">yams/mechanisms/swerve/SwerveModule.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="comment">// ---- Swerve Utilities ------------------------------------------------------</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="preprocessor">#include &quot;<a class="code" href="SwerveInputStream_8hpp.html">yams/mechanisms/swerve/utility/SwerveInputStream.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="comment">// ---- Telemetry -------------------------------------------------------------</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#include &quot;<a class="code" href="MechanismTelemetry_8hpp.html">yams/telemetry/MechanismTelemetry.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="preprocessor">#include &quot;<a class="code" href="SmartMotorControllerTelemetry_8hpp.html">yams/telemetry/SmartMotorControllerTelemetry.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="preprocessor">#include &quot;<a class="code" href="SmartMotorControllerTelemetryConfig_8hpp.html">yams/telemetry/SmartMotorControllerTelemetryConfig.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="comment">// ---- Exceptions ------------------------------------------------------------</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="preprocessor">#include &quot;<a class="code" href="exceptions_8hpp.html">yams/exceptions.hpp</a>&quot;</span></div>
 <div class="ttc" id="aArmConfig_8hpp_html"><div class="ttname"><a href="ArmConfig_8hpp.html">ArmConfig.hpp</a></div></div>
 <div class="ttc" id="aArmSimSupplier_8hpp_html"><div class="ttname"><a href="ArmSimSupplier_8hpp.html">ArmSimSupplier.hpp</a></div></div>
 <div class="ttc" id="aArm_8hpp_html"><div class="ttname"><a href="Arm_8hpp.html">Arm.hpp</a></div></div>
@@ -167,7 +166,6 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aMechanismTelemetry_8hpp_html"><div class="ttname"><a href="MechanismTelemetry_8hpp.html">MechanismTelemetry.hpp</a></div></div>
 <div class="ttc" id="aPivotConfig_8hpp_html"><div class="ttname"><a href="PivotConfig_8hpp.html">PivotConfig.hpp</a></div></div>
 <div class="ttc" id="aPivot_8hpp_html"><div class="ttname"><a href="Pivot_8hpp.html">Pivot.hpp</a></div></div>
-<div class="ttc" id="aSensorConfig_8hpp_html"><div class="ttname"><a href="SensorConfig_8hpp.html">SensorConfig.hpp</a></div></div>
 <div class="ttc" id="aSimSupplier_8hpp_html"><div class="ttname"><a href="SimSupplier_8hpp.html">SimSupplier.hpp</a></div></div>
 <div class="ttc" id="aSmartMath_8hpp_html"><div class="ttname"><a href="SmartMath_8hpp.html">SmartMath.hpp</a></div></div>
 <div class="ttc" id="aSmartMechanism_8hpp_html"><div class="ttname"><a href="SmartMechanism_8hpp.html">SmartMechanism.hpp</a></div></div>

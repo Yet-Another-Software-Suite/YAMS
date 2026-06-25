@@ -85,8 +85,8 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ac695869c340fcc56fe1e920c7c91fe16" id="r_ac695869c340fcc56fe1e920c7c91fe16"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ac695869c340fcc56fe1e920c7c91fe16">SwerveDrive</a> (<a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html">SwerveDriveConfig</a> config)</td></tr>
-<tr class="separator:ac695869c340fcc56fe1e920c7c91fe16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac269453ccae65753a20e1551ab049c52" id="r_ac269453ccae65753a20e1551ab049c52"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ac269453ccae65753a20e1551ab049c52">SwerveDrive</a> (<a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html">SwerveDriveConfig</a> *config)</td></tr>
+<tr class="separator:ac269453ccae65753a20e1551ab049c52"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa1e0f9585f97f6f327973cfc7a8dd22d" id="r_aa1e0f9585f97f6f327973cfc7a8dd22d"><td class="memItemLeft" align="right" valign="top">frc2::CommandPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#aa1e0f9585f97f6f327973cfc7a8dd22d">Drive</a> (std::function&lt; frc::ChassisSpeeds()&gt; <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html">robotRelativeSpeeds</a>)</td></tr>
 <tr class="separator:aa1e0f9585f97f6f327973cfc7a8dd22d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1bb8f94941e69a7744edddf29c70bc4b" id="r_a1bb8f94941e69a7744edddf29c70bc4b"><td class="memItemLeft" align="right" valign="top">frc2::CommandPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a1bb8f94941e69a7744edddf29c70bc4b">DriveToPose</a> (frc::Pose2d <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html">pose</a>)</td></tr>
@@ -145,7 +145,7 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:af2cf42b1618d4f3ebabe905bee28b3a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ac695869c340fcc56fe1e920c7c91fe16">size_t</a> NumModules = 4&gt;<br />
+<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ac269453ccae65753a20e1551ab049c52">size_t</a> NumModules = 4&gt;<br />
 class yams::mechanisms::swerve::SwerveDrive&lt; NumModules &gt;</div><p>Swerve drive mechanism with pose estimation, telemetry, and simulation support.</p>
 <p>Owns the kinematics, pose estimator, and all NT4 struct publishers. Modules are created separately and handed in by pointer via <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html">SwerveDriveConfig</a>. Call <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a6ae682c0cf8dac806b53199430eca32f">UpdateTelemetry()</a> every loop and <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a51eabea7c8418e7f26ce2f9924e4aa14">SimIterate()</a> in SimulationPeriodic().</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
@@ -215,7 +215,7 @@ Example usage (inside a four-module subsystem)</h3>
 <div class="line">        .WithStartingPose(frc::Pose2d{})</div>
 <div class="line">        .WithTranslationController(frc::PIDController{2.0, 0.0, 0.0})</div>
 <div class="line">        .WithRotationController(frc::PIDController{4.0, 0.0, 0.0});</div>
-<div class="line"><a class="code hl_class" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html">m_drive</a>.emplace(std::move(<a class="code hl_class" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html">driveCfg</a>));</div>
+<div class="line"><a class="code hl_class" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html">m_drive</a>.emplace(&amp;<a class="code hl_class" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html">m_driveConfig</a>);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// --- in Periodic() ---</span></div>
 <div class="line"><span class="comment">//   m_drive-&gt;UpdateTelemetry();</span></div>
@@ -233,13 +233,13 @@ Example usage (inside a four-module subsystem)</h3>
 <div class="ttc" id="aclassyams_1_1mechanisms_1_1swerve_1_1SwerveDrive_html"><div class="ttname"><a href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html">yams::mechanisms::swerve::SwerveDrive</a></div><div class="ttdef"><b>Definition</b> SwerveDrive.hpp:129</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_html"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html">yams::motorcontrollers::SmartMotorControllerConfig</a></div><div class="ttdef"><b>Definition</b> SmartMotorControllerConfig.hpp:50</div></div>
 <div class="ttc" id="anamespaceyams_1_1gearing_html"><div class="ttname"><a href="namespaceyams_1_1gearing.html">yams::gearing</a></div><div class="ttdef"><b>Definition</b> GearBox.hpp:11</div></div>
-<div class="ttc" id="anamespaceyams_1_1mechanisms_1_1config_html"><div class="ttname"><a href="namespaceyams_1_1mechanisms_1_1config.html">yams::mechanisms::config</a></div><div class="ttdef"><b>Definition</b> ArmConfig.hpp:18</div></div>
+<div class="ttc" id="anamespaceyams_1_1mechanisms_1_1config_html"><div class="ttname"><a href="namespaceyams_1_1mechanisms_1_1config.html">yams::mechanisms::config</a></div><div class="ttdef"><b>Definition</b> ArmConfig.hpp:16</div></div>
 <div class="ttc" id="anamespaceyams_1_1mechanisms_1_1swerve_html"><div class="ttname"><a href="namespaceyams_1_1mechanisms_1_1swerve.html">yams::mechanisms::swerve</a></div><div class="ttdef"><b>Definition</b> SwerveDrive.hpp:42</div></div>
 <div class="ttc" id="anamespaceyams_1_1motorcontrollers_1_1remote_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers_1_1remote.html">yams::motorcontrollers::remote</a></div><div class="ttdef"><b>Definition</b> TalonFXSWrapper.hpp:35</div></div>
 <div class="ttc" id="anamespaceyams_1_1motorcontrollers_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers.html">yams::motorcontrollers</a></div><div class="ttdef"><b>Definition</b> SimSensorConfig.hpp:16</div></div>
 </div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="ac695869c340fcc56fe1e920c7c91fe16" name="ac695869c340fcc56fe1e920c7c91fe16"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac695869c340fcc56fe1e920c7c91fe16">&#9670;&#160;</a></span>SwerveDrive()</h2>
+<a id="ac269453ccae65753a20e1551ab049c52" name="ac269453ccae65753a20e1551ab049c52"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac269453ccae65753a20e1551ab049c52">&#9670;&#160;</a></span>SwerveDrive()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -252,7 +252,7 @@ template&lt;<a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive
         <tr>
           <td class="memname"><a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html">yams::mechanisms::swerve::SwerveDrive</a>&lt; <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html">NumModules</a> &gt;::SwerveDrive </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html">SwerveDriveConfig</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html">SwerveDriveConfig</a> *&#160;</td>
           <td class="paramname"><em>config</em></td><td>)</td>
           <td></td>
         </tr>

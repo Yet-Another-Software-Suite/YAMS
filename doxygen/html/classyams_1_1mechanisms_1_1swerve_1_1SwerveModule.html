@@ -102,8 +102,8 @@ Collaboration diagram for yams::mechanisms::swerve::SwerveModule:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a2f411d05e525368e5f859c5b4f87a001" id="r_a2f411d05e525368e5f859c5b4f87a001"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveModule.html#a2f411d05e525368e5f859c5b4f87a001">SwerveModule</a> (<a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html">const</a> <a class="el" href="classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html">config::SwerveModuleConfig</a> &amp;config)</td></tr>
-<tr class="separator:a2f411d05e525368e5f859c5b4f87a001"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a55dc289e24265726aff293be12ad81" id="r_a4a55dc289e24265726aff293be12ad81"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveModule.html#a4a55dc289e24265726aff293be12ad81">SwerveModule</a> (<a class="el" href="classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html">config::SwerveModuleConfig</a> *config)</td></tr>
+<tr class="separator:a4a55dc289e24265726aff293be12ad81"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaf2817e114f192b47085cd9823bcd4a8" id="r_aaf2817e114f192b47085cd9823bcd4a8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveModule.html#aaf2817e114f192b47085cd9823bcd4a8">SeedAzimuthEncoder</a> ()</td></tr>
 <tr class="separator:aaf2817e114f192b47085cd9823bcd4a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae1111dadbb61c798d4f0408792bfc88c" id="r_ae1111dadbb61c798d4f0408792bfc88c"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveModule.html#ae1111dadbb61c798d4f0408792bfc88c">GetName</a> () <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html">const</a></td></tr>
@@ -184,7 +184,7 @@ Example usage (inside a subsystem constructor)</h3>
 <div class="line">    .<a class="code hl_function" href="classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html#ac34686f9c98e7781416b32dcd3911c32">WithCosineCompensation</a>(<span class="keyword">true</span>)</div>
 <div class="line">    .<a class="code hl_function" href="classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html#ae6e6f9e1426f7094fa8b34ea1b1707e9">WithTelemetry</a>(<span class="stringliteral">&quot;FrontLeft&quot;</span>, Cfg::TelemetryVerbosity::HIGH);</div>
 <div class="line"> </div>
-<div class="line">m_module.emplace(moduleConfig);</div>
+<div class="line">m_module.emplace(&amp;m_moduleConfig);</div>
 <div class="ttc" id="aclassyams_1_1gearing_1_1MechanismGearing_html"><div class="ttname"><a href="classyams_1_1gearing_1_1MechanismGearing.html">yams::gearing::MechanismGearing</a></div><div class="ttdef"><b>Definition</b> MechanismGearing.hpp:19</div></div>
 <div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig_html"><div class="ttname"><a href="classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html">yams::mechanisms::config::SwerveModuleConfig</a></div><div class="ttdef"><b>Definition</b> SwerveModuleConfig.hpp:28</div></div>
 <div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig_html_a19d0f5fabfd24cfda54610c2a1b8a0bf"><div class="ttname"><a href="classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html#a19d0f5fabfd24cfda54610c2a1b8a0bf">yams::mechanisms::config::SwerveModuleConfig::WithWheelDiameter</a></div><div class="ttdeci">SwerveModuleConfig &amp; WithWheelDiameter(units::meter_t diameter)</div></div>
@@ -200,12 +200,12 @@ Example usage (inside a subsystem constructor)</h3>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_html_a4f43bbaa1f28d790ed916ff6023878dd"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#a4f43bbaa1f28d790ed916ff6023878dd">yams::motorcontrollers::SmartMotorControllerConfig::WithSubsystem</a></div><div class="ttdeci">SmartMotorControllerConfig &amp; WithSubsystem(frc2::SubsystemBase *subsystem)</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_html_a86825fd1f48eeed62df904ebc583f159"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#a86825fd1f48eeed62df904ebc583f159">yams::motorcontrollers::SmartMotorControllerConfig::WithFeedback</a></div><div class="ttdeci">SmartMotorControllerConfig &amp; WithFeedback(double kP, double kI, double kD, ClosedLoopControllerSlot slot=ClosedLoopControllerSlot::SLOT_0)</div></div>
 <div class="ttc" id="anamespaceyams_1_1gearing_html"><div class="ttname"><a href="namespaceyams_1_1gearing.html">yams::gearing</a></div><div class="ttdef"><b>Definition</b> GearBox.hpp:11</div></div>
-<div class="ttc" id="anamespaceyams_1_1mechanisms_1_1config_html"><div class="ttname"><a href="namespaceyams_1_1mechanisms_1_1config.html">yams::mechanisms::config</a></div><div class="ttdef"><b>Definition</b> ArmConfig.hpp:18</div></div>
+<div class="ttc" id="anamespaceyams_1_1mechanisms_1_1config_html"><div class="ttname"><a href="namespaceyams_1_1mechanisms_1_1config.html">yams::mechanisms::config</a></div><div class="ttdef"><b>Definition</b> ArmConfig.hpp:16</div></div>
 <div class="ttc" id="anamespaceyams_1_1motorcontrollers_1_1remote_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers_1_1remote.html">yams::motorcontrollers::remote</a></div><div class="ttdef"><b>Definition</b> TalonFXSWrapper.hpp:35</div></div>
 <div class="ttc" id="anamespaceyams_1_1motorcontrollers_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers.html">yams::motorcontrollers</a></div><div class="ttdef"><b>Definition</b> SimSensorConfig.hpp:16</div></div>
 </div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a2f411d05e525368e5f859c5b4f87a001" name="a2f411d05e525368e5f859c5b4f87a001"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2f411d05e525368e5f859c5b4f87a001">&#9670;&#160;</a></span>SwerveModule()</h2>
+<a id="a4a55dc289e24265726aff293be12ad81" name="a4a55dc289e24265726aff293be12ad81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4a55dc289e24265726aff293be12ad81">&#9670;&#160;</a></span>SwerveModule()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -216,7 +216,7 @@ Example usage (inside a subsystem constructor)</h3>
         <tr>
           <td class="memname">yams::mechanisms::swerve::SwerveModule::SwerveModule </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html">const</a> <a class="el" href="classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html">config::SwerveModuleConfig</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html">config::SwerveModuleConfig</a> *&#160;</td>
           <td class="paramname"><em>config</em></td><td>)</td>
           <td></td>
         </tr>

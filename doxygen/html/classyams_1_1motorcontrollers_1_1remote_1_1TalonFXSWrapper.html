@@ -133,8 +133,8 @@ Public Types</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a7505ec528e354900c7dae65a39dc830c" id="r_a7505ec528e354900c7dae65a39dc830c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html#a7505ec528e354900c7dae65a39dc830c">TalonFXSWrapper</a> (ctre::phoenix6::hardware::TalonFXS *talon, frc::DCMotor dcMotor, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html#a5824bb1070aa6c7842b38f019ecb014f">MotorArrangement</a> arrangement, const <a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html">SmartMotorControllerConfig</a> &amp;config)</td></tr>
-<tr class="separator:a7505ec528e354900c7dae65a39dc830c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d6c74e72e999c3f32701e22a1101321" id="r_a8d6c74e72e999c3f32701e22a1101321"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html#a8d6c74e72e999c3f32701e22a1101321">TalonFXSWrapper</a> (ctre::phoenix6::hardware::TalonFXS *talon, frc::DCMotor dcMotor, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html#a5824bb1070aa6c7842b38f019ecb014f">MotorArrangement</a> arrangement, <a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html">SmartMotorControllerConfig</a> *config)</td></tr>
+<tr class="separator:a8d6c74e72e999c3f32701e22a1101321"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1e8ea82ecdaa1a5ebb541787027c5716" id="r_a1e8ea82ecdaa1a5ebb541787027c5716"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html#a1e8ea82ecdaa1a5ebb541787027c5716">~TalonFXSWrapper</a> ()</td></tr>
 <tr class="separator:a1e8ea82ecdaa1a5ebb541787027c5716"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa48d1c6d917605c08fff26760257f5c9" id="r_aa48d1c6d917605c08fff26760257f5c9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structyams_1_1telemetry_1_1UnsupportedTelemetryFields.html">telemetry::UnsupportedTelemetryFields</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html#aa48d1c6d917605c08fff26760257f5c9">GetUnsupportedTelemetryFields</a> () override</td></tr>
@@ -360,7 +360,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html">SmartMotorController</a> implementation for the CTRE TalonFXS motor controller (Phoenix 6).</p>
-<p>The TalonFXS supports third-party brushed and brushless motors (e.g. REV NEO, Minion). Wraps a TalonFXS hardware object and exposes the full <a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html">SmartMotorController</a> interface including MotionMagic profiles, CANcoder/CANdi synchronization, and simulation support. Q * </p>
+<p>The TalonFXS supports third-party brushed and brushless motors (e.g. REV NEO, Minion). Wraps a TalonFXS hardware object and exposes the full <a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html">SmartMotorController</a> interface including MotionMagic profiles, CANcoder/CANdi synchronization, and simulation support. </p>
 <h3><a class="anchor" id="autotoc_md13"></a>
 Example usage (inside a subsystem constructor)</h3>
 <div class="fragment"><div class="line"><span class="keyword">using namespace </span><a class="code hl_namespace" href="namespaceyams_1_1motorcontrollers.html">yams::motorcontrollers</a>;</div>
@@ -385,8 +385,7 @@ Example usage (inside a subsystem constructor)</h3>
 <div class="line">   .<a class="code hl_function" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#a34e7365689e4a90d40b36f1b89e73523">WithClosedLoopMode</a>()</div>
 <div class="line">   .<a class="code hl_function" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#a06a2b48cc33bc36a2e289b30a12baf30">WithTelemetry</a>(<span class="stringliteral">&quot;HoodMotor&quot;</span>, Cfg::TelemetryVerbosity::HIGH);</div>
 <div class="line"> </div>
-<div class="line">m_smc.emplace(m_talonFXS, frc::DCMotor::NEO(1),</div>
-<div class="line">              <a class="code hl_enumvalue" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html#a5824bb1070aa6c7842b38f019ecb014fad9cfaccbb46b1e60b471fcbb35752f40">TalonFXSWrapper::MotorArrangement::NEO</a>, cfg);</div>
+<div class="line">m_smc.emplace(&amp;m_talonFXS, DCMotor::NEO(1), <a class="code hl_enumvalue" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html#a5824bb1070aa6c7842b38f019ecb014fad9cfaccbb46b1e60b471fcbb35752f40">MotorArrangement::NEO</a>, &amp;cfg);</div>
 <div class="ttc" id="aclassyams_1_1gearing_1_1MechanismGearing_html"><div class="ttname"><a href="classyams_1_1gearing_1_1MechanismGearing.html">yams::gearing::MechanismGearing</a></div><div class="ttdef"><b>Definition</b> MechanismGearing.hpp:19</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_html"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html">yams::motorcontrollers::SmartMotorControllerConfig</a></div><div class="ttdef"><b>Definition</b> SmartMotorControllerConfig.hpp:50</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_html_a06a2b48cc33bc36a2e289b30a12baf30"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#a06a2b48cc33bc36a2e289b30a12baf30">yams::motorcontrollers::SmartMotorControllerConfig::WithTelemetry</a></div><div class="ttdeci">SmartMotorControllerConfig &amp; WithTelemetry(const std::string &amp;name, TelemetryVerbosity verbosity=TelemetryVerbosity::HIGH)</div></div>
@@ -434,8 +433,8 @@ Example usage (inside a subsystem constructor)</h3>
 </div>
 </div>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a7505ec528e354900c7dae65a39dc830c" name="a7505ec528e354900c7dae65a39dc830c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7505ec528e354900c7dae65a39dc830c">&#9670;&#160;</a></span>TalonFXSWrapper()</h2>
+<a id="a8d6c74e72e999c3f32701e22a1101321" name="a8d6c74e72e999c3f32701e22a1101321"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d6c74e72e999c3f32701e22a1101321">&#9670;&#160;</a></span>TalonFXSWrapper()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -461,7 +460,7 @@ Example usage (inside a subsystem constructor)</h3>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html">SmartMotorControllerConfig</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html">SmartMotorControllerConfig</a> *&#160;</td>
           <td class="paramname"><em>config</em>&#160;</td>
         </tr>
         <tr>

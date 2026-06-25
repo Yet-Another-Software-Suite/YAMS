@@ -343,7 +343,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>        <span class="keyword">auto</span>&amp; pid = m_swerveDrive-&gt;GetConfig().GetRotationPID();</div>
 <div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>        <span class="keyword">auto</span> currentHeading = frc::Rotation2d{units::radian_t{m_swerveDrive-&gt;GetGyroAngle()}};</div>
 <div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>        <span class="keyword">auto</span> relativeTrl = m_aimTarget.value()().RelativeTo(m_swerveDrive-&gt;GetPose()).Translation();</div>
-<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>        <span class="keyword">auto</span> target = frc::Rotation2d{relativeTrl.X(), relativeTrl.Y()} + currentHeading;</div>
+<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>        <span class="keyword">auto</span> target = relativeTrl.Angle() + currentHeading;</div>
 <div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>        omega = pid.Calculate(currentHeading.Radians().value(), target.Radians().value());</div>
 <div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>        <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>      }</div>
@@ -466,13 +466,13 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00518" name="l00518"></a><span class="lineno">  518</span>  frc::Translation2d ApplyTranslationScalar(<span class="keywordtype">double</span> xAxis, <span class="keywordtype">double</span> yAxis) {</div>
 <div class="line"><a id="l00519" name="l00519"></a><span class="lineno">  519</span>    frc::Translation2d t{units::meter_t{xAxis}, units::meter_t{yAxis}};</div>
 <div class="line"><a id="l00520" name="l00520"></a><span class="lineno">  520</span>    <span class="keywordflow">return</span> m_translationAxisScale.has_value()</div>
-<div class="line"><a id="l00521" name="l00521"></a><span class="lineno">  521</span>               ? config::SwerveDriveConfig::ScaleTranslation(t, m_translationAxisScale.value())</div>
+<div class="line"><a id="l00521" name="l00521"></a><span class="lineno">  521</span>               ? <a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#ad34d13c8ced03c366cf43e2a9388e29b">SwerveDriveConfig::ScaleTranslation</a>(t, m_translationAxisScale.value())</div>
 <div class="line"><a id="l00522" name="l00522"></a><span class="lineno">  522</span>               : t;</div>
 <div class="line"><a id="l00523" name="l00523"></a><span class="lineno">  523</span>  }</div>
 <div class="line"><a id="l00524" name="l00524"></a><span class="lineno">  524</span> </div>
 <div class="line"><a id="l00525" name="l00525"></a><span class="lineno">  525</span>  frc::Translation2d ApplyTranslationCube(frc::Translation2d translation) {</div>
 <div class="line"><a id="l00526" name="l00526"></a><span class="lineno">  526</span>    <span class="keywordflow">if</span> (m_translationCube.has_value() &amp;&amp; m_translationCube.value()()) {</div>
-<div class="line"><a id="l00527" name="l00527"></a><span class="lineno">  527</span>      <span class="keywordflow">return</span> config::SwerveDriveConfig::CubeTranslation(translation);</div>
+<div class="line"><a id="l00527" name="l00527"></a><span class="lineno">  527</span>      <span class="keywordflow">return</span> <a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a97a3ec4b656eb7b96697b4e8fa607c6d">SwerveDriveConfig::CubeTranslation</a>(translation);</div>
 <div class="line"><a id="l00528" name="l00528"></a><span class="lineno">  528</span>    }</div>
 <div class="line"><a id="l00529" name="l00529"></a><span class="lineno">  529</span>    <span class="keywordflow">return</span> translation;</div>
 <div class="line"><a id="l00530" name="l00530"></a><span class="lineno">  530</span>  }</div>
@@ -522,6 +522,8 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 <div class="ttc" id="aSwerveDriveConfig_8hpp_html"><div class="ttname"><a href="SwerveDriveConfig_8hpp.html">SwerveDriveConfig.hpp</a></div></div>
 <div class="ttc" id="aSwerveDrive_8hpp_html"><div class="ttname"><a href="SwerveDrive_8hpp.html">SwerveDrive.hpp</a></div></div>
+<div class="ttc" id="aclassyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig_html_a97a3ec4b656eb7b96697b4e8fa607c6d"><div class="ttname"><a href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a97a3ec4b656eb7b96697b4e8fa607c6d">yams::mechanisms::swerve::SwerveDriveConfig::CubeTranslation</a></div><div class="ttdeci">static frc::Translation2d CubeTranslation(frc::Translation2d translation)</div></div>
+<div class="ttc" id="aclassyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig_html_ad34d13c8ced03c366cf43e2a9388e29b"><div class="ttname"><a href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#ad34d13c8ced03c366cf43e2a9388e29b">yams::mechanisms::swerve::SwerveDriveConfig::ScaleTranslation</a></div><div class="ttdeci">static frc::Translation2d ScaleTranslation(frc::Translation2d translation, double scalar)</div></div>
 <div class="ttc" id="aclassyams_1_1mechanisms_1_1swerve_1_1SwerveDrive_html"><div class="ttname"><a href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html">yams::mechanisms::swerve::SwerveDrive</a></div><div class="ttdef"><b>Definition</b> SwerveDrive.hpp:129</div></div>
 <div class="ttc" id="aclassyams_1_1mechanisms_1_1swerve_1_1SwerveDrive_html_a008158e13d384390c15b8b2723464767"><div class="ttname"><a href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a008158e13d384390c15b8b2723464767">yams::mechanisms::swerve::SwerveDrive::GetGyroAngle</a></div><div class="ttdeci">units::degree_t GetGyroAngle()</div><div class="ttdef"><b>Definition</b> SwerveDrive.hpp:388</div></div>
 <div class="ttc" id="aclassyams_1_1mechanisms_1_1swerve_1_1SwerveDrive_html_a397aef2b36439d8b47ec154a0539b220"><div class="ttname"><a href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a397aef2b36439d8b47ec154a0539b220">yams::mechanisms::swerve::SwerveDrive::ResetAzimuthPID</a></div><div class="ttdeci">void ResetAzimuthPID()</div><div class="ttdef"><b>Definition</b> SwerveDrive.hpp:455</div></div>

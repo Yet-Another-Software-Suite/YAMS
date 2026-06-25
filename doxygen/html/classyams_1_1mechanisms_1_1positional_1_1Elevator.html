@@ -117,8 +117,8 @@ Collaboration diagram for yams::mechanisms::positional::Elevator:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a0d52ea402031d39bec6f5a125b44ca31" id="r_a0d52ea402031d39bec6f5a125b44ca31"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1positional_1_1Elevator.html#a0d52ea402031d39bec6f5a125b44ca31">Elevator</a> (const <a class="el" href="classyams_1_1mechanisms_1_1config_1_1ElevatorConfig.html">config::ElevatorConfig</a> &amp;config)</td></tr>
-<tr class="separator:a0d52ea402031d39bec6f5a125b44ca31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60065137a96c491fa771ad19a743ec6e" id="r_a60065137a96c491fa771ad19a743ec6e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1positional_1_1Elevator.html#a60065137a96c491fa771ad19a743ec6e">Elevator</a> (<a class="el" href="classyams_1_1mechanisms_1_1config_1_1ElevatorConfig.html">config::ElevatorConfig</a> *config, <a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html">motorcontrollers::SmartMotorController</a> *smc)</td></tr>
+<tr class="separator:a60065137a96c491fa771ad19a743ec6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a815eb7e2a400e7cb8518036d3777a9c7" id="r_a815eb7e2a400e7cb8518036d3777a9c7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1positional_1_1Elevator.html#a815eb7e2a400e7cb8518036d3777a9c7">SimIterate</a> () override</td></tr>
 <tr class="separator:a815eb7e2a400e7cb8518036d3777a9c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a11f074331b86868c8ef8ccae67689197" id="r_a11f074331b86868c8ef8ccae67689197"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1positional_1_1Elevator.html#a11f074331b86868c8ef8ccae67689197">UpdateTelemetry</a> () override</td></tr>
@@ -245,23 +245,22 @@ Example usage (inside a subsystem constructor)</h3>
 <div class="line">        .<a class="code hl_function" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#a34e7365689e4a90d40b36f1b89e73523">WithClosedLoopMode</a>()</div>
 <div class="line">        .<a class="code hl_function" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#a06a2b48cc33bc36a2e289b30a12baf30">WithTelemetry</a>(<span class="stringliteral">&quot;ElevatorMotor&quot;</span>, Cfg::TelemetryVerbosity::HIGH);</div>
 <div class="line"> </div>
-<div class="line"><a class="code hl_variable" href="classyams_1_1mechanisms_1_1SmartMechanism.html#ac0687ea085d15713705322353588b87b">m_smc</a>.emplace(m_sparkMax, frc::DCMotor::NEO(1), motorCfg);</div>
+<div class="line"><a class="code hl_variable" href="classyams_1_1mechanisms_1_1SmartMechanism.html#ac0687ea085d15713705322353588b87b">m_smc</a>.emplace(&amp;m_sparkMax, frc::DCMotor::NEO(1), &amp;motorCfg);</div>
 <div class="line"> </div>
-<div class="line">m_elevatorConfig.<a class="code hl_function" href="classyams_1_1mechanisms_1_1config_1_1ElevatorConfig.html#ad06663cd24ce1d36198fd3927368dc11">WithMotorController</a>(&amp;<a class="code hl_variable" href="classyams_1_1mechanisms_1_1SmartMechanism.html#ac0687ea085d15713705322353588b87b">m_smc</a>.value())</div>
-<div class="line">                .WithMinimumHeight(0.0_m)</div>
+<div class="line">m_elevatorConfig.<a class="code hl_function" href="classyams_1_1mechanisms_1_1config_1_1ElevatorConfig.html#a9e861de207466f067859674d53ad0857">WithMinimumHeight</a>(0.0_m)</div>
 <div class="line">                .<a class="code hl_function" href="classyams_1_1mechanisms_1_1config_1_1ElevatorConfig.html#a7f583b55e7f2cdc6a444296f0c31e253">WithMaximumHeight</a>(3.0_m)</div>
 <div class="line">                .<a class="code hl_function" href="classyams_1_1mechanisms_1_1config_1_1ElevatorConfig.html#adfb9e50b2fa4e6fea298deec024f1bf9">WithCarriageMass</a>(2.0_lb)</div>
 <div class="line">                .<a class="code hl_function" href="classyams_1_1mechanisms_1_1config_1_1ElevatorConfig.html#ad0073fa517e4e6b09a6b34829d7c87d1">WithTelemetryName</a>(<span class="stringliteral">&quot;Elevator&quot;</span>);</div>
 <div class="line"> </div>
-<div class="line">m_elevator.emplace(m_elevatorConfig);</div>
+<div class="line">m_elevator.emplace(&amp;m_elevatorConfig, &amp;<a class="code hl_variable" href="classyams_1_1mechanisms_1_1SmartMechanism.html#ac0687ea085d15713705322353588b87b">m_smc</a>.value());</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// In commands or bindings:</span></div>
 <div class="line">m_elevator-&gt;RunTo(1.2_m);</div>
 <div class="ttc" id="aclassyams_1_1gearing_1_1MechanismGearing_html"><div class="ttname"><a href="classyams_1_1gearing_1_1MechanismGearing.html">yams::gearing::MechanismGearing</a></div><div class="ttdef"><b>Definition</b> MechanismGearing.hpp:19</div></div>
 <div class="ttc" id="aclassyams_1_1mechanisms_1_1SmartMechanism_html_ac0687ea085d15713705322353588b87b"><div class="ttname"><a href="classyams_1_1mechanisms_1_1SmartMechanism.html#ac0687ea085d15713705322353588b87b">yams::mechanisms::SmartMechanism::m_smc</a></div><div class="ttdeci">motorcontrollers::SmartMotorController * m_smc</div><div class="ttdef"><b>Definition</b> SmartMechanism.hpp:136</div></div>
 <div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1ElevatorConfig_html_a7f583b55e7f2cdc6a444296f0c31e253"><div class="ttname"><a href="classyams_1_1mechanisms_1_1config_1_1ElevatorConfig.html#a7f583b55e7f2cdc6a444296f0c31e253">yams::mechanisms::config::ElevatorConfig::WithMaximumHeight</a></div><div class="ttdeci">ElevatorConfig &amp; WithMaximumHeight(units::meter_t height)</div></div>
+<div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1ElevatorConfig_html_a9e861de207466f067859674d53ad0857"><div class="ttname"><a href="classyams_1_1mechanisms_1_1config_1_1ElevatorConfig.html#a9e861de207466f067859674d53ad0857">yams::mechanisms::config::ElevatorConfig::WithMinimumHeight</a></div><div class="ttdeci">ElevatorConfig &amp; WithMinimumHeight(units::meter_t height)</div></div>
 <div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1ElevatorConfig_html_ad0073fa517e4e6b09a6b34829d7c87d1"><div class="ttname"><a href="classyams_1_1mechanisms_1_1config_1_1ElevatorConfig.html#ad0073fa517e4e6b09a6b34829d7c87d1">yams::mechanisms::config::ElevatorConfig::WithTelemetryName</a></div><div class="ttdeci">ElevatorConfig &amp; WithTelemetryName(const std::string &amp;name)</div></div>
-<div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1ElevatorConfig_html_ad06663cd24ce1d36198fd3927368dc11"><div class="ttname"><a href="classyams_1_1mechanisms_1_1config_1_1ElevatorConfig.html#ad06663cd24ce1d36198fd3927368dc11">yams::mechanisms::config::ElevatorConfig::WithMotorController</a></div><div class="ttdeci">ElevatorConfig &amp; WithMotorController(motorcontrollers::SmartMotorController *smc)</div></div>
 <div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1ElevatorConfig_html_adfb9e50b2fa4e6fea298deec024f1bf9"><div class="ttname"><a href="classyams_1_1mechanisms_1_1config_1_1ElevatorConfig.html#adfb9e50b2fa4e6fea298deec024f1bf9">yams::mechanisms::config::ElevatorConfig::WithCarriageMass</a></div><div class="ttdeci">ElevatorConfig &amp; WithCarriageMass(units::kilogram_t mass)</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_html"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html">yams::motorcontrollers::SmartMotorControllerConfig</a></div><div class="ttdef"><b>Definition</b> SmartMotorControllerConfig.hpp:50</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_html_a06a2b48cc33bc36a2e289b30a12baf30"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#a06a2b48cc33bc36a2e289b30a12baf30">yams::motorcontrollers::SmartMotorControllerConfig::WithTelemetry</a></div><div class="ttdeci">SmartMotorControllerConfig &amp; WithTelemetry(const std::string &amp;name, TelemetryVerbosity verbosity=TelemetryVerbosity::HIGH)</div></div>
@@ -280,33 +279,36 @@ Example usage (inside a subsystem constructor)</h3>
 <div class="ttc" id="anamespaceyams_1_1motorcontrollers_1_1local_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers_1_1local.html">yams::motorcontrollers::local</a></div><div class="ttdef"><b>Definition</b> SparkWrapper.hpp:26</div></div>
 <div class="ttc" id="anamespaceyams_1_1motorcontrollers_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers.html">yams::motorcontrollers</a></div><div class="ttdef"><b>Definition</b> SimSensorConfig.hpp:16</div></div>
 </div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a0d52ea402031d39bec6f5a125b44ca31" name="a0d52ea402031d39bec6f5a125b44ca31"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0d52ea402031d39bec6f5a125b44ca31">&#9670;&#160;</a></span>Elevator()</h2>
+<a id="a60065137a96c491fa771ad19a743ec6e" name="a60065137a96c491fa771ad19a743ec6e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a60065137a96c491fa771ad19a743ec6e">&#9670;&#160;</a></span>Elevator()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">yams::mechanisms::positional::Elevator::Elevator </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="classyams_1_1mechanisms_1_1config_1_1ElevatorConfig.html">config::ElevatorConfig</a> &amp;&#160;</td>
-          <td class="paramname"><em>config</em></td><td>)</td>
+          <td class="paramtype"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1ElevatorConfig.html">config::ElevatorConfig</a> *&#160;</td>
+          <td class="paramname"><em>config</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html">motorcontrollers::SmartMotorController</a> *&#160;</td>
+          <td class="paramname"><em>smc</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">explicit</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
-<p>Construct an <a class="el" href="classyams_1_1mechanisms_1_1positional_1_1Elevator.html">Elevator</a> from an ElevatorConfig.</p>
+<p>Construct an <a class="el" href="classyams_1_1mechanisms_1_1positional_1_1Elevator.html">Elevator</a> from an ElevatorConfig and a SmartMotorController.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">config</td><td>Fully-populated elevator configuration. </td></tr>
+    <tr><td class="paramname">config</td><td>Pointer to the elevator configuration (must outlive this <a class="el" href="classyams_1_1mechanisms_1_1positional_1_1Elevator.html">Elevator</a>). </td></tr>
+    <tr><td class="paramname">smc</td><td>Pointer to the motor controller (must outlive this <a class="el" href="classyams_1_1mechanisms_1_1positional_1_1Elevator.html">Elevator</a>). </td></tr>
   </table>
   </dd>
 </dl>

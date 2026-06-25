@@ -1,7 +1,7 @@
 var searchData=
 [
   ['pidgains_0',['PIDGains',['../structyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_1_1PIDGains.html',1,'yams::motorcontrollers::SmartMotorControllerConfig']]],
-  ['pivot_1',['pivot',['../classyams_1_1mechanisms_1_1positional_1_1Pivot.html',1,'yams::mechanisms::positional::Pivot'],['../classyams_1_1mechanisms_1_1positional_1_1Pivot.html#aabfb78e6720e4ccd8ae38cb9266f0f84',1,'yams::mechanisms::positional::Pivot::Pivot()']]],
+  ['pivot_1',['pivot',['../classyams_1_1mechanisms_1_1positional_1_1Pivot.html',1,'yams::mechanisms::positional::Pivot'],['../classyams_1_1mechanisms_1_1positional_1_1Pivot.html#afc39e65b85edbfb4d11d4516ef446f0e',1,'yams::mechanisms::positional::Pivot::Pivot()']]],
   ['pivot_2ehpp_2',['Pivot.hpp',['../Pivot_8hpp.html',1,'']]],
   ['pivotconfig_3',['pivotconfig',['../classyams_1_1mechanisms_1_1config_1_1PivotConfig.html',1,'yams::mechanisms::config::PivotConfig'],['../classyams_1_1mechanisms_1_1config_1_1PivotConfig.html#a717bc6f795d298d425efcf3af47c47d0',1,'yams::mechanisms::config::PivotConfig::PivotConfig()']]],
   ['pivotconfig_2ehpp_4',['PivotConfig.hpp',['../PivotConfig_8hpp.html',1,'']]],
