@@ -3,7 +3,13 @@ name: Build Examples
 on:
   push:
     branches: [ "master" ]
+    paths:
+      - "examples/**"
+      - "yams/**"
   pull_request:
+    paths:
+      - "examples/**"
+      - "yams/**"
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
