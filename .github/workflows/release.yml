@@ -98,9 +98,31 @@ jobs:
           name: maven-${{ matrix.artifact-name }}
           path: vendordep/build/maven/
 
+  build-examples:
+    name: Release - Examples
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate Java examples
+        run: mkdir -p generated && make
+        working-directory: examples
+      - name: Zip generated Java examples
+        run: |
+          mkdir -p ${{ github.workspace }}/example-artifacts
+          for dir in examples/generated/*/; do
+            name=$(basename "$dir")
+            zip -r "${{ github.workspace }}/example-artifacts/example-${name}.zip" "$dir"
+          done
+      - name: Zip C++ example
+        run: zip -r ${{ github.workspace }}/example-artifacts/example-cpptest.zip examples/cpptest/ -x "examples/cpptest/.gradle/*" -x "examples/cpptest/build/*"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-examples
+          path: example-artifacts/
+
   release:
     name: Release - Linux (publish)
-    needs: [build-cross, build-host]
+    needs: [build-cross, build-host, build-examples]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -117,6 +139,8 @@ jobs:
       - run: git config --global user.name "thenetworkgrinch" && git config --global user.email "thenetworkgrinch@noreply.users.github.com"
 
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-java@v4
         with:
@@ -149,6 +173,11 @@ jobs:
             sleep 5
           done
 
+      - name: Create and push release tag
+        run: |
+          git tag v${{ inputs.releaseVersion }} ${{ github.sha }}
+          git push origin v${{ inputs.releaseVersion }}
+
       - name: Download cross-platform maven artifacts
         uses: actions/download-artifact@v4
         with:
@@ -156,19 +185,48 @@ jobs:
           path: cross/
           merge-multiple: false
 
+      # Pass 1: publish into a clean directory so the offline zip contains only
+      # the current version's artifacts with correctly stitched metadata.
+      - name: Merge cross-platform artifacts (pass 1 — clean dir)
+        run: |
+          mkdir -p vendordep/build/maven
+          for dir in cross/maven-*/; do
+            cp -r "$dir." vendordep/build/maven/
+          done
+
+      - name: Build and publish — stitch current version maven metadata
+        run: ./gradlew publish
+        working-directory: ${{ env.workingDirectory }}
+
+      - name: Download example artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-examples
+          path: release-artifacts/
+
+      - name: Zip current version maven for offline installation
+        run: |
+          cd ${{ env.workingDirectory }}/build
+          zip -r ${{ github.workspace }}/release-artifacts/YAMS-${{ inputs.releaseVersion }}-Offline.zip maven/
+
+      # Pass 2: rebuild on top of the full gh-pages history so the deployed
+      # maven metadata covers all versions, not just the current one.
+      - name: Clean maven directory for gh-pages checkout
+        run: rm -rf ${{ env.workingDirectory }}/build/maven/
+
       - name: Checkout gh-pages branch
         uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: ${{ env.workingDirectory }}/build/maven/
 
-      - name: Merge cross-platform artifacts into maven
+      - name: Merge cross-platform artifacts (pass 2 — full history)
         run: |
           for dir in cross/maven-*/; do
             cp -r "$dir." vendordep/build/maven/
           done
 
-      - name: Build and publish (Linux — fixes maven metadata)
+      - name: Build and publish (Linux — fixes maven metadata for all versions)
         run: ./gradlew publish
         working-directory: ${{ env.workingDirectory }}
 
@@ -195,6 +253,21 @@ jobs:
 
       - name: Output Pages Tree
         run: find ${{ env.workingDirectory }}/build/maven/ -type f
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ inputs.publish }}" = "true" ]; then
+            RELEASE_FLAGS="--latest"
+          else
+            RELEASE_FLAGS="--prerelease"
+          fi
+          gh release create "v${{ inputs.releaseVersion }}" \
+            --title "YAMS v${{ inputs.releaseVersion }}" \
+            --generate-notes \
+            $RELEASE_FLAGS \
+            release-artifacts/*
 
       - name: Create Vendor JSON Repo PR
         if: ${{ inputs.publish == true }}
