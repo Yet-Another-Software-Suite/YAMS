@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -135,6 +136,16 @@ public class SwerveModuleConfig
    * Wheel circumference for the drive {@link SmartMotorController}.
    */
   private Optional<Distance> wheelCircumference = Optional.empty();
+  /**
+   * Last angle this config actually commanded via {@link #getOptimizedState(SwerveModuleState)}.
+   * The flip decision is made against this, not the live absolute encoder reading: kinematics
+   * recomputes the raw desired angle every loop with no memory of a prior flip, so if the
+   * decision were re-derived from the encoder, holding the raw state while a flip is debouncing
+   * would drive the wheel toward the raw angle, pulling the encoder (and thus the error that
+   * triggered the flip) back down before the debounce could ever confirm it.
+   */
+  private Rotation2d lastCommandedAngle;
+
   /**
    * Create the {@link SwerveModuleConfig} for the {@link SwerveModule}
    *
@@ -483,7 +494,6 @@ public class SwerveModuleConfig
     return desiredState.speedMetersPerSecond * cosineScalar;
   }
 
-
   /**
    * Get the optimized {@link SwerveModuleState} applying all optional optimizations.
    *
@@ -503,11 +513,16 @@ public class SwerveModuleConfig
     }
     if (swerveModuleStateOptimization)
     {
-      state.optimize(new Rotation2d(getAbsoluteEncoderAngle()));
+        if (lastCommandedAngle == null)
+        {
+            lastCommandedAngle = new Rotation2d(getAbsoluteEncoderAngle());
+        }
+        state.optimize(lastCommandedAngle);
+        lastCommandedAngle = state.angle;
     }
     if (cosineCompensation)
     {
-      state.speedMetersPerSecond *= getCosineCompensatedVelocity(state);
+      state.speedMetersPerSecond = getCosineCompensatedVelocity(state);
     }
     return state;
   }
