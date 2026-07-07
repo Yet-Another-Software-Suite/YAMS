@@ -144,12 +144,14 @@ public class SwerveModule
    * Set the {@link SwerveModuleState} of the module.
    *
    * @param state State to set.
+   * @return The optimized {@link SwerveModuleState}.
    */
-  public void setSwerveModuleState(SwerveModuleState state)
+  public SwerveModuleState setSwerveModuleState(SwerveModuleState state)
   {
     state = m_config.getOptimizedState(state);
     m_driveMotorController.setVelocity(MetersPerSecond.of(state.speedMetersPerSecond));
     m_azimuthMotorController.setPosition(state.angle.getMeasure());
+    return state;
   }
 
   /**

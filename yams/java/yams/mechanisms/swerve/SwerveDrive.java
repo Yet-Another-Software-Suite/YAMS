@@ -305,9 +305,8 @@ public class SwerveDrive
 //      {
 //        m_config.getMapleDriveSim().get().runSwerveStates(states);
 //      }
-      m_modules[i].setSwerveModuleState(states[i]);
+        m_desiredModuleStates[i] = m_modules[i].setSwerveModuleState(states[i]);
     }
-    m_desiredModuleStates = states;
   }
 
   /**
