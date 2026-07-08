@@ -17,6 +17,8 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+
+import edu.wpi.first.wpilibj.RobotBase;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.swerve.SwerveModule;
@@ -435,6 +437,24 @@ public class SwerveModuleConfig
                                                                      .times(absoluteEncoderGearbox.getInputToOutputConversionFactor())
                                                                      .minus(absoluteEncoderOffset.orElse(Rotations.of(0))))
                                   .orElse(azimuthMotor.orElseThrow().getMechanismPosition());
+  }
+
+  /**
+   * Get the absolute encoder angle as a supplier without offsets applied.
+   *
+   * @return {@link Supplier<Angle>} for the absolute encoder angle without offsets.
+   */
+  public Supplier<Angle> getRawAbsoluteEncoderAngle()
+  {
+    if(absoluteEncoderSupplier.isPresent())
+    {
+      return absoluteEncoderSupplier.get();
+    }
+    else
+    {
+      var offset = RobotBase.isSimulation() ? Rotations.zero() : azimuthMotor.orElseThrow().getConfig().getZeroOffset().orElse(Rotations.zero());
+      return () -> azimuthMotor.orElseThrow().getMechanismPosition().plus(offset);
+    }
   }
 
   /**
