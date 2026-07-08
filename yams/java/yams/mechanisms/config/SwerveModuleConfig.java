@@ -438,6 +438,16 @@ public class SwerveModuleConfig
   }
 
   /**
+   * Get the absolute encoder supplier
+   *
+   * @return Absolute encoder supplier.
+   */
+  public Optional<Supplier<Angle>> getAbsoluteEncoderSupplier()
+  {
+    return absoluteEncoderSupplier;
+  }
+
+  /**
    * Enable or disable state optimization.
    *
    * @return True if optimization is enabled, false otherwise.
