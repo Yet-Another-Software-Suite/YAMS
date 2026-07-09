@@ -3,11 +3,11 @@
   <groupId>yams</groupId>
   <artifactId>YAMS-cpp</artifactId>
   <versioning>
-    <latest>2026.7.06</latest>
-    <release>2026.7.06</release>
+    <latest>2026.7.09</latest>
+    <release>2026.7.09</release>
     <versions>
-      <version>2026.7.06</version>
+      <version>2026.7.09</version>
     </versions>
-    <lastUpdated>20260707002513</lastUpdated>
+    <lastUpdated>20260709195323</lastUpdated>
   </versioning>
 </metadata>
