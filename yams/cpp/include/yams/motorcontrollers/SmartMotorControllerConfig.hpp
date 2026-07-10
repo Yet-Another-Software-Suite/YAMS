@@ -73,117 +73,40 @@ class SmartMotorControllerConfig {
       double kP, double kI, double kD,
       ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
 
-  /**
-   * Set the proportional gain for the specified slot.
-   *
-   * @param kP   Proportional gain.
-   * @param slot Gain slot to write (default SLOT_0).
-   * @return *this for chaining.
-   */
-  SmartMotorControllerConfig& WithKp(
-      double kP, ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
-
-  /**
-   * Set the integral gain for the specified slot.
-   *
-   * @param kI   Integral gain.
-   * @param slot Gain slot to write (default SLOT_0).
-   * @return *this for chaining.
-   */
-  SmartMotorControllerConfig& WithKi(
-      double kI, ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
-
-  /**
-   * Set the derivative gain for the specified slot.
-   *
-   * @param kD   Derivative gain.
-   * @param slot Gain slot to write (default SLOT_0).
-   * @return *this for chaining.
-   */
-  SmartMotorControllerConfig& WithKd(
-      double kD, ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
-
   // ---- Feedforward -------------------------------------------------------
 
   /**
-   * Configure an arm feedforward model (kS, kV, kA, kG) for the specified slot.
+   * Configure an arm feedforward model for the specified slot.
    *
-   * @param kS   Static friction voltage.
-   * @param kV   Velocity feedforward coefficient.
-   * @param kA   Acceleration feedforward coefficient.
-   * @param kG   Gravity feedforward coefficient.
+   * @param ff   ArmFeedforward (kS, kG, kV, kA) to use.
    * @param slot Gain slot to write (default SLOT_0).
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithArmFeedforward(
-      double kS, double kV, double kA, double kG,
+  SmartMotorControllerConfig& WithFeedforward(
+      const frc::ArmFeedforward& ff,
       ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
 
   /**
-   * Configure an elevator feedforward model (kS, kV, kA) for the specified slot.
+   * Configure an elevator feedforward model for the specified slot.
    *
-   * @param kS   Static friction voltage.
-   * @param kV   Velocity feedforward coefficient.
-   * @param kA   Acceleration feedforward coefficient.
+   * @param ff   ElevatorFeedforward (kS, kG, kV, kA) to use.
    * @param slot Gain slot to write (default SLOT_0).
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithElevatorFeedforward(
-      double kS, double kV, double kA,
+  SmartMotorControllerConfig& WithFeedforward(
+      const frc::ElevatorFeedforward& ff,
       ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
 
   /**
-   * Configure a simple motor feedforward model (kS, kV, optional kA) for the specified slot.
+   * Configure a simple motor feedforward model for the specified slot.
    *
-   * @param kS   Static friction voltage.
-   * @param kV   Velocity feedforward coefficient.
-   * @param kA   Acceleration feedforward coefficient (default 0).
+   * @param ff   SimpleMotorFeedforward (kS, kV, kA) to use.
    * @param slot Gain slot to write (default SLOT_0).
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithSimpleFeedforward(
-      double kS, double kV, double kA = 0.0,
+  SmartMotorControllerConfig& WithFeedforward(
+      const frc::SimpleMotorFeedforward<units::turns>& ff,
       ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
-
-  /**
-   * Set the static friction feedforward (kS) for the specified slot.
-   *
-   * @param kS   Static friction voltage.
-   * @param slot Gain slot to write (default SLOT_0).
-   * @return *this for chaining.
-   */
-  SmartMotorControllerConfig& WithKs(
-      double kS, ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
-
-  /**
-   * Set the velocity feedforward coefficient (kV) for the specified slot.
-   *
-   * @param kV   Velocity feedforward coefficient.
-   * @param slot Gain slot to write (default SLOT_0).
-   * @return *this for chaining.
-   */
-  SmartMotorControllerConfig& WithKv(
-      double kV, ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
-
-  /**
-   * Set the acceleration feedforward coefficient (kA) for the specified slot.
-   *
-   * @param kA   Acceleration feedforward coefficient.
-   * @param slot Gain slot to write (default SLOT_0).
-   * @return *this for chaining.
-   */
-  SmartMotorControllerConfig& WithKa(
-      double kA, ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
-
-  /**
-   * Set the gravity feedforward coefficient (kG) for the specified slot.
-   *
-   * @param kG   Gravity feedforward coefficient.
-   * @param slot Gain slot to write (default SLOT_0).
-   * @return *this for chaining.
-   */
-  SmartMotorControllerConfig& WithKg(
-      double kG, ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
 
   // ---- Motion profiles ---------------------------------------------------
 

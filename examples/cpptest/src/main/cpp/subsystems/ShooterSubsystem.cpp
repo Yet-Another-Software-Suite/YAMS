@@ -32,7 +32,9 @@ ShooterSubsystem::ShooterSubsystem() {
       .WithTelemetry("ShooterMotor", Cfg::TelemetryVerbosity::HIGH)
       .WithMotorInverted(false)
       // Feedforward zeroed for now; tune kV once actual free-spin RPM is measured.
-      .WithSimpleFeedforward(0, 0, 0)
+      .WithFeedforward(frc::SimpleMotorFeedforward<units::turns>{
+          units::volt_t{0}, units::unit_t<frc::SimpleMotorFeedforward<units::turns>::kv_unit>{0},
+          units::unit_t<frc::SimpleMotorFeedforward<units::turns>::ka_unit>{0}})
       .WithClosedLoopMode()
       // m_flywheelMotor2 mirrors m_flywheelMotor1 via hardware follower mode.
       // false = not inverted relative to the leader.

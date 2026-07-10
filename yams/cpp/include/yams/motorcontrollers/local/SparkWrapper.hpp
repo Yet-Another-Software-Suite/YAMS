@@ -52,7 +52,9 @@ namespace yams::motorcontrollers::local {
  *    .WithIdleMode(Cfg::MotorMode::BRAKE)
  *    .WithSupplyCurrentLimit(40.0_A)
  *    .WithMotorInverted(false)
- *    .WithElevatorFeedforward(0.0, 0.0, 0.0)
+ *    .WithFeedforward(frc::ElevatorFeedforward{
+ *        0.0_V, 0.0_V, units::unit_t<frc::ElevatorFeedforward::kv_unit>{0.0},
+ *        units::unit_t<frc::ElevatorFeedforward::ka_unit>{0.0}})
  *    .WithClosedLoopMode()
  *    .WithTelemetry("ElevatorMotor", Cfg::TelemetryVerbosity::HIGH);
  *

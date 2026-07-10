@@ -41,7 +41,9 @@ static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, Test
       .WithIdleMode(SmartMotorControllerConfig::MotorMode::COAST)
       .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
-      .WithSimpleFeedforward(0.0, 1.0, 0.0)
+      .WithFeedforward(frc::SimpleMotorFeedforward<units::turns>{
+          0.0_V, units::unit_t<frc::SimpleMotorFeedforward<units::turns>::kv_unit>{1.0},
+          units::unit_t<frc::SimpleMotorFeedforward<units::turns>::ka_unit>{0.0}})
       .WithClosedLoopMode()
       .WithSubsystem(subsys)
       .WithTelemetry(name);

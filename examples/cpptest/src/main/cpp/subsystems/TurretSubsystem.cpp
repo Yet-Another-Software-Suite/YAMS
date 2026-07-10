@@ -44,10 +44,12 @@ TurretSubsystem::TurretSubsystem()
       // On a turret with a heavy mechanism attached, COAST can cause dangerous snap rotation.
       .WithIdleMode(Cfg::MotorMode::BRAKE)
       .WithMotorInverted(false)
-      // WithArmFeedforward on a turret: kS=0.5 V overcomes static friction at the worm/gear
-      // interface; kV=5.0 V/(turn/s) is the velocity gain for tracking; kA=0 (no accel FF yet);
-      // kG=0 because the turret rotates in the horizontal plane -- gravity does no work.
-      .WithArmFeedforward(0.5, 5.0, 0, 0.0)
+      // WithFeedforward(ArmFeedforward) on a turret: kS=0.5 V overcomes static friction at the
+      // worm/gear interface; kV=5.0 V/(turn/s) is the velocity gain for tracking; kA=0 (no accel
+      // FF yet); kG=0 because the turret rotates in the horizontal plane -- gravity does no work.
+      .WithFeedforward(frc::ArmFeedforward{units::volt_t{0.5}, units::volt_t{0.0},
+                                           units::unit_t<frc::ArmFeedforward::kv_unit>{5.0},
+                                           units::unit_t<frc::ArmFeedforward::ka_unit>{0}})
       // Turret faces forward (0 deg = robot heading) at power-on. If the turret has a
       // hard-stop home position, replace 0 with the measured home angle.
       .WithStartingPosition(units::degree_t{0})

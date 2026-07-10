@@ -58,7 +58,9 @@ ElevatorSubsystem::ElevatorSubsystem() {
       .WithMotorInverted(false)
       // kS/kV/kA all at 0: placeholder for sysid tuning. Once characterized, kS
       // removes dead-band stiction and kV will improve velocity tracking during moves.
-      .WithElevatorFeedforward(0, 0, 0)
+      .WithFeedforward(frc::ElevatorFeedforward{units::volt_t{0}, units::volt_t{0},
+                                                units::unit_t<frc::ElevatorFeedforward::kv_unit>{0},
+                                                units::unit_t<frc::ElevatorFeedforward::ka_unit>{0}})
       .WithClosedLoopMode();
 
   // emplace constructs TalonFXWrapper in-place inside the optional; pass a pointer to the

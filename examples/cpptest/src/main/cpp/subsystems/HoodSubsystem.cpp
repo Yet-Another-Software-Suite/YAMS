@@ -30,7 +30,7 @@ HoodSubsystem::HoodSubsystem() {
   // GearBox::FromReductionStages({3.0, 4.0}): two sequential reductions, 3:1 then 4:1, giving
   // a 12:1 total.  One motor turn moves the hood 1/12 of a turn (30 deg).
   //
-  // WithArmFeedforward(0, 0, 0, 0): kS, kV, kA, kG all zeroed out.  kG should be non-zero if
+  // WithFeedforward(ArmFeedforward{0, 0, 0, 0}): kS, kG, kV, kA all zeroed out.  kG should be non-zero if
   // the hood is not balanced (gravity torque changes with angle).  Set it via system ID or
   // manual tuning: kG = voltage needed to hold the hood at 90 deg from horizontal.
   //
@@ -46,7 +46,9 @@ HoodSubsystem::HoodSubsystem() {
       .WithMotorInverted(false)
       .WithClosedLoopRampRate(units::second_t{0.25})
       .WithOpenLoopRampRate(units::second_t{0.25})
-      .WithArmFeedforward(0, 0, 0, 0)
+      .WithFeedforward(frc::ArmFeedforward{units::volt_t{0}, units::volt_t{0},
+                                           units::unit_t<frc::ArmFeedforward::kv_unit>{0},
+                                           units::unit_t<frc::ArmFeedforward::ka_unit>{0}})
       .WithStartingPosition(units::degree_t{0})
       .WithClosedLoopMode();
 
