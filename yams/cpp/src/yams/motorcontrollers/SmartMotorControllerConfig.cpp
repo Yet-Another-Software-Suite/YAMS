@@ -188,6 +188,8 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithFeedforward(
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithFeedforward(
     const frc::SimpleMotorFeedforward<units::turns>& ff, ClosedLoopControllerSlot slot) {
+  using kv_unit = frc::SimpleMotorFeedforward<units::turns>::kv_unit;
+  using ka_unit = frc::SimpleMotorFeedforward<units::turns>::ka_unit;
   auto& s = m_slots[SlotIndex(slot)];
   s.kS = ff.GetKs().value();
   s.kV = units::unit_t<kv_unit>{ff.GetKv()}.value();
