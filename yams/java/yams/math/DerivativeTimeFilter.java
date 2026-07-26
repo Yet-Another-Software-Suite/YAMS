@@ -6,9 +6,9 @@ package yams.math;
 import static org.wpilib.units.Units.Microseconds;
 import static org.wpilib.units.Units.Seconds;
 
+import org.wpilib.system.RobotController;
+import org.wpilib.system.Timer;
 import org.wpilib.units.measure.Time;
-import org.wpilib.wpilibj.RobotController;
-import org.wpilib.wpilibj.Timer;
 
 /**
  * Find the derivative of a value over time in microseconds.
@@ -69,7 +69,7 @@ public class DerivativeTimeFilter
   public DerivativeTimeFilter(double initial, Time debouncerPeriod)
   {
     last = initial;
-    lastFpgaTime_us = RobotController.getFPGATime();
+    lastFpgaTime_us = RobotController.getTime();
     debouncer = new Timer();
     this.debouncePeriod = debouncerPeriod;
     debouncer.start();
@@ -120,7 +120,7 @@ public class DerivativeTimeFilter
   {
     if (debouncer.hasElapsed(debouncePeriod))
     {
-      long   currentFpgaTime_us = RobotController.getFPGATime();
+      long   currentFpgaTime_us = RobotController.getTime();
       double derivative         = derivative(current, Microseconds.of(currentFpgaTime_us - lastFpgaTime_us));
       lastFpgaTime_us = currentFpgaTime_us;
       return derivative;
