@@ -12,7 +12,7 @@ import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
-import org.wpilib.math.system.plant.DCMotor;
+import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularAcceleration;
 import org.wpilib.units.measure.AngularVelocity;
@@ -166,8 +166,8 @@ public class ArmSimSupplier implements SimSupplier
   @Override
   public Voltage getMechanismStatorVoltage()
   {
-    return Volts.of(motor.getVoltage(motor.getTorque(sim.getCurrentDrawAmps()),
-                                     sim.getVelocityRadPerSec()));
+    return Volts.of(motor.getVoltage(motor.getTorque(sim.getCurrentDraw()),
+                                     sim.getVelocity()));
   }
 
   @Override
@@ -180,14 +180,14 @@ public class ArmSimSupplier implements SimSupplier
   @Override
   public Angle getMechanismPosition()
   {
-    return Radians.of(sim.getAngleRads());
+    return Radians.of(sim.getAngle());
   }
 
   @Override
   public void setMechanismPosition(Angle position)
   {
     sim.setState(position.in(Radians),
-                 sim.getVelocityRadPerSec());//.times(config.getGearing().getMechanismToRotorRatio()).in(Radians));
+                 sim.getVelocity());//.times(config.getGearing().getMechanismToRotorRatio()).in(Radians));
   }
 
   @Override
@@ -199,13 +199,13 @@ public class ArmSimSupplier implements SimSupplier
   @Override
   public AngularVelocity getMechanismVelocity()
   {
-    return RadiansPerSecond.of(sim.getVelocityRadPerSec());
+    return RadiansPerSecond.of(sim.getVelocity());
   }
 
   @Override
   public void setMechanismVelocity(AngularVelocity velocity)
   {
-    sim.setState(sim.getAngleRads(), velocity.in(RadiansPerSecond));
+    sim.setState(sim.getAngle(), velocity.in(RadiansPerSecond));
   }
 
   @Override
@@ -217,7 +217,7 @@ public class ArmSimSupplier implements SimSupplier
   @Override
   public Current getCurrentDraw()
   {
-    return Amps.of(sim.getCurrentDrawAmps());
+    return Amps.of(sim.getCurrentDraw());
   }
 
   @Override

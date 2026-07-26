@@ -7,10 +7,11 @@ import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Milliseconds;
 import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.RadiansPerSecondPerSecond;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
-import org.wpilib.math.system.plant.DCMotor;
+import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularAcceleration;
 import org.wpilib.units.measure.AngularVelocity;
@@ -47,7 +48,7 @@ import yams.motorcontrollers.SmartMotorController;
  * <pre>{@code
  * // 1. Build the WPILib DC motor physics model (e.g. a flywheel with MOI 0.001 kg·m²)
  * DCMotorSim flywheelPhysics = new DCMotorSim(
- *     LinearSystemId.createDCMotorSystem(DCMotor.getNEO(1), 0.001, 1.0),
+ *     Models.singleJointedArmFromPhysicalConstants(DCMotor.getNEO(1), 0.001, 1.0),
  *     DCMotor.getNEO(1));
  *
  * // 2. Configure and build the YAMS smart motor controller
@@ -162,8 +163,8 @@ public class DCMotorSimSupplier implements SimSupplier
   @Override
   public Voltage getMechanismStatorVoltage()
   {
-    return Volts.of(motor.getVoltage(sim.getTorqueNewtonMeters(),
-                                     sim.getAngularVelocityRadPerSec()));
+    return Volts.of(motor.getVoltage(sim.getTorque(),
+                                     sim.getAngularVelocity()));
   }
 
   @Override
@@ -176,7 +177,7 @@ public class DCMotorSimSupplier implements SimSupplier
   @Override
   public Angle getMechanismPosition()
   {
-    return sim.getAngularPosition();
+    return Radians.of(sim.getAngularPosition());
   }
 
   @Override
@@ -195,7 +196,7 @@ public class DCMotorSimSupplier implements SimSupplier
   @Override
   public AngularVelocity getMechanismVelocity()
   {
-    return sim.getAngularVelocity();
+    return RadiansPerSecond.of(sim.getAngularVelocity());
   }
 
   @Override
@@ -213,12 +214,12 @@ public class DCMotorSimSupplier implements SimSupplier
   @Override
   public Current getCurrentDraw()
   {
-    return Amps.of(sim.getCurrentDrawAmps());
+    return Amps.of(sim.getCurrentDraw());
   }
 
   @Override
   public AngularAcceleration getRotorAcceleration()
   {
-    return sim.getAngularAcceleration();
+    return RadiansPerSecondPerSecond.of(sim.getAngularAcceleration());
   }
 }
