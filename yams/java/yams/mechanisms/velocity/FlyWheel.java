@@ -10,12 +10,12 @@ import static org.wpilib.units.Units.RPM;
 import org.wpilib.math.filter.Debouncer.DebounceType;
 import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.Translation3d;
-import org.wpilib.math.system.plant.DCMotor;
-import org.wpilib.math.system.plant.LinearSystemId;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.math.system.Models;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.LinearVelocity;
-import org.wpilib.wpilibj.RobotBase;
+import org.wpilib.framework.RobotBase;
 import org.wpilib.simulation.BatterySim;
 import org.wpilib.simulation.DCMotorSim;
 import org.wpilib.simulation.RoboRioSim;
@@ -108,7 +108,7 @@ public class FlyWheel extends SmartVelocityMechanism
 
     if (RobotBase.isSimulation())
     {
-      m_dcmotorSim = Optional.of(new DCMotorSim(LinearSystemId.createDCMotorSystem(dcMotor,
+      m_dcmotorSim = Optional.of(new DCMotorSim(Models.singleJointedArmFromPhysicalConstants(dcMotor,
                                                                                    smcCfg.getMOI(),
                                                                                    smcCfg.getGearing()
                                                                                         .getMechanismToRotorRatio()),
@@ -346,7 +346,7 @@ public class FlyWheel extends SmartVelocityMechanism
       m_smc.getSimSupplier().get().starveUpdateSim();
 
       RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_dcmotorSim.get()
-                                                                                           .getCurrentDrawAmps()));
+                                                                                           .getCurrentDraw()));
       visualizationUpdate();
     }
   }
