@@ -6,7 +6,7 @@ package yams.mechanisms.config;
 import static org.wpilib.units.Units.Seconds;
 
 import org.wpilib.units.measure.Time;
-import org.wpilib.wpilibj.DriverStation;
+import org.wpilib.system.Timer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -151,8 +151,8 @@ public class SensorConfig
     {
       if (field.getName().equals(fieldName))
       {
-        field.addSimTrigger(SensorData.convert(value), () -> DriverStation.getMatchTime() >= start.in(Seconds) &&
-                                                             DriverStation.getMatchTime() <= end.in(Seconds));
+        field.addSimTrigger(SensorData.convert(value), () -> Timer.getMatchTime() >= start.in(Seconds) &&
+                                                             Timer.getMatchTime() <= end.in(Seconds));
       }
     }
     return this;
@@ -173,8 +173,8 @@ public class SensorConfig
     {
       if (field.getName().equals(fieldName))
       {
-        field.addSimTrigger(SensorData.convert(value), () -> DriverStation.getMatchTime() >= start.in(Seconds) &&
-                                                             DriverStation.getMatchTime() <= end.in(Seconds));
+        field.addSimTrigger(SensorData.convert(value), () -> Timer.getMatchTime() >= start.in(Seconds) &&
+                                                             Timer.getMatchTime() <= end.in(Seconds));
       }
     }
     return this;
@@ -195,8 +195,8 @@ public class SensorConfig
     {
       if (field.getName().equals(fieldName))
       {
-        field.addSimTrigger(SensorData.convert(value), () -> DriverStation.getMatchTime() >= start.in(Seconds) &&
-                                                             DriverStation.getMatchTime() <= end.in(Seconds));
+        field.addSimTrigger(SensorData.convert(value), () -> Timer.getMatchTime() >= start.in(Seconds) &&
+                                                             Timer.getMatchTime() <= end.in(Seconds));
       }
     }
     return this;
@@ -217,8 +217,8 @@ public class SensorConfig
     {
       if (field.getName().equals(fieldName))
       {
-        field.addSimTrigger(SensorData.convert(value), () -> DriverStation.getMatchTime() >= start.in(Seconds) &&
-                                                             DriverStation.getMatchTime() <= end.in(Seconds));
+        field.addSimTrigger(SensorData.convert(value), () -> Timer.getMatchTime() >= start.in(Seconds) &&
+                                                             Timer.getMatchTime() <= end.in(Seconds));
       }
     }
     return this;

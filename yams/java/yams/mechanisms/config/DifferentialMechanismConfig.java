@@ -45,7 +45,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  *     .withLength(Inches.of(18))
  *     .withMOI(Inches.of(18), Pounds.of(3))
  *     .withTelemetry("DifferentialWrist", TelemetryVerbosity.HIGH)
- *     .withSimColor(new Color8Bit(Color.kOrange));
+ *     .withSimColor(new Color8Bit(Color.ORANGE));
  *
  * DifferentialMechanism wrist = new DifferentialMechanism(config);
  * }</pre>
@@ -101,7 +101,7 @@ public class DifferentialMechanismConfig
   /**
    * Sim color value
    */
-  private       Color8Bit                    simColor                = new Color8Bit(Color.kOrange);
+  private       Color8Bit                    simColor                = new Color8Bit(Color.ORANGE);
   /**
    * Mechanism position configuration for the {@link DifferentialMechanism}
    */

@@ -68,7 +68,7 @@ public class FlyWheelConfig
   /**
    * Sim color value
    */
-  private   Color8Bit                      simColor                = new Color8Bit(Color.kOrange);
+  private   Color8Bit                      simColor                = new Color8Bit(Color.ORANGE);
   /**
    * Mechanism position configuration for the {@link Pivot} (Optional).
    */

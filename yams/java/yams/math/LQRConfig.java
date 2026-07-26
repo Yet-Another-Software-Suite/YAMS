@@ -13,17 +13,17 @@ import static org.wpilib.units.Units.RadiansPerSecond;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
-import org.wpilib.math.Nat;
-import org.wpilib.math.VecBuilder;
-import org.wpilib.math.Vector;
 import org.wpilib.math.controller.LinearQuadraticRegulator;
 import org.wpilib.math.estimator.KalmanFilter;
+import org.wpilib.math.linalg.VecBuilder;
+import org.wpilib.math.linalg.Vector;
 import org.wpilib.math.numbers.N1;
 import org.wpilib.math.numbers.N2;
 import org.wpilib.math.system.LinearSystem;
 import org.wpilib.math.system.LinearSystemLoop;
-import org.wpilib.math.system.plant.DCMotor;
-import org.wpilib.math.system.plant.LinearSystemId;
+import org.wpilib.math.system.Models;
+import org.wpilib.math.util.Nat;
+import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Distance;
@@ -129,7 +129,7 @@ public class LQRConfig
   private final MomentOfInertia              m_moi;
   /**
    * Loop time for the {@link org.wpilib.math.controller.LinearQuadraticRegulator}. Could be faster if using
-   * {@link org.wpilib.wpilibj.Notifier}s.
+   * {@link org.wpilib.system.Notifier}s.
    */
   private       Time                         m_period             = Milliseconds.of(20);
   /**
@@ -155,11 +155,11 @@ public class LQRConfig
    */
   private       Optional<Vector<?>>          m_encoderStdDevs     = Optional.empty();
   /**
-   * Elevator mass for {@link LinearSystemId#createElevatorSystem(DCMotor, double, double, double)}
+   * Elevator mass for {@link Models#elevatorFromPhysicalConstants(DCMotor, double, double, double)}
    */
   private       Optional<Mass>               m_elevatorMass       = Optional.empty();
   /**
-   * Elevator radius for {@link LinearSystemId#createElevatorSystem(DCMotor, double, double, double)}
+   * Elevator radius for {@link Models#elevatorFromPhysicalConstants(DCMotor, double, double, double)}
    */
   private       Optional<Distance>           m_elevatorDrumRadius = Optional.empty();
   /**
@@ -325,7 +325,7 @@ public class LQRConfig
   }
 
   /**
-   * Get the {@link LinearSystem} for the LQR. with {@link LinearSystemId}
+   * Get the {@link LinearSystem} for the LQR. with {@link Models}
    *
    * @return {@link LinearSystem} for the LQR.
    */
@@ -335,22 +335,22 @@ public class LQRConfig
     {
       case FLYWHEEL ->
       {
-        return LinearSystemId.createFlywheelSystem(m_motor,
-                                                   m_moi.in(KilogramSquareMeters),
-                                                   m_gearing.getMechanismToRotorRatio());
+        return Models.flywheelFromPhysicalConstants(m_motor,
+                                                    m_moi.in(KilogramSquareMeters),
+                                                    m_gearing.getMechanismToRotorRatio());
       }
       case ARM ->
       {
-        return LinearSystemId.createSingleJointedArmSystem(m_motor,
-                                                           m_moi.in(KilogramSquareMeters),
-                                                           m_gearing.getMechanismToRotorRatio());
+        return Models.singleJointedArmFromPhysicalConstants(m_motor,
+                                                            m_moi.in(KilogramSquareMeters),
+                                                            m_gearing.getMechanismToRotorRatio());
       }
       case ELEVATOR ->
       {
-        return LinearSystemId.createElevatorSystem(m_motor,
-                                                   m_elevatorMass.orElseThrow().in(Kilograms),
-                                                   m_elevatorDrumRadius.orElseThrow().in(Meters),
-                                                   m_gearing.getMechanismToRotorRatio());
+        return Models.elevatorFromPhysicalConstants(m_motor,
+                                                    m_elevatorMass.orElseThrow().in(Kilograms),
+                                                    m_elevatorDrumRadius.orElseThrow().in(Meters),
+                                                    m_gearing.getMechanismToRotorRatio());
       }
     }
     throw new IllegalStateException("Invalid LQR Type");

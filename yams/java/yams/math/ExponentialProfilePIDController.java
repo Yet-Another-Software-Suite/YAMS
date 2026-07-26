@@ -18,8 +18,8 @@ import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
 import org.wpilib.math.controller.PIDController;
-import org.wpilib.math.system.plant.DCMotor;
-import org.wpilib.math.system.plant.LinearSystemId;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.math.system.Models;
 import org.wpilib.math.trajectory.ExponentialProfile;
 import org.wpilib.math.trajectory.ExponentialProfile.Constraints;
 import org.wpilib.math.trajectory.ExponentialProfile.State;
@@ -31,8 +31,9 @@ import org.wpilib.units.measure.Mass;
 import org.wpilib.units.measure.MomentOfInertia;
 import org.wpilib.units.measure.Time;
 import org.wpilib.units.measure.Voltage;
-import org.wpilib.wpilibj.Timer;
 import org.wpilib.simulation.SingleJointedArmSim;
+import org.wpilib.system.Timer;
+
 import java.util.Optional;
 import yams.gearing.MechanismGearing;
 
@@ -148,10 +149,10 @@ public class ExponentialProfilePIDController
                                                                          Distance drumRadius,
                                                                          MechanismGearing gearing)
   {
-    var sysid = LinearSystemId.createElevatorSystem(motor,
-                                                    mass.in(Kilograms),
-                                                    drumRadius.in(Meters),
-                                                    gearing.getMechanismToRotorRatio());
+    var sysid = Models.elevatorFromPhysicalConstants(motor,
+                                                     mass.in(Kilograms),
+                                                     drumRadius.in(Meters),
+                                                     gearing.getMechanismToRotorRatio());
     var circumference = (2.0 * Math.PI * drumRadius.in(Meters));
 
     var A  = sysid.getA(0, 0);
@@ -177,9 +178,9 @@ public class ExponentialProfilePIDController
   public static ExponentialProfile.Constraints createArmConstraints(Voltage maxVolts, DCMotor motor, MomentOfInertia moi,
                                                                     MechanismGearing gearing)
   {
-    var sysid = LinearSystemId.createSingleJointedArmSystem(motor,
-                                                            moi.in(KilogramSquareMeters),
-                                                            gearing.getMechanismToRotorRatio());
+    var sysid = Models.singleJointedArmFromPhysicalConstants(motor,
+                                                             moi.in(KilogramSquareMeters),
+                                                             gearing.getMechanismToRotorRatio());
     var A  = sysid.getA(0, 0); // radians
     var B  = sysid.getB(0, 0); // radians
     var kV = RadiansPerSecond.of(-A / B);
