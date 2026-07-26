@@ -26,7 +26,7 @@
 //   stage 1: 144/15 (= 9.6:1), stage 2: 5:1, stage 3: 1.08:1  -> ~51.84:1 total.
 // Angle is in degrees (mechanism space); soft limits are [-360, +360] deg so the
 // turret can spin a full revolution in either direction without a hard stop.
-// WithArmFeedforward is used here for the pivot-style kS/kV gravity model (kG = 0).
+// WithFeedforward(ArmFeedforward) is used here for the pivot-style kS/kV gravity model (kG = 0).
 //
 // The turret pivot is mounted 1.5 ft behind and 0.5 ft above the robot center.
 // GetPose / GetVelocity project that offset into field-relative coordinates so

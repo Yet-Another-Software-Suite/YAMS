@@ -50,7 +50,9 @@ ArmSubsystem::ArmSubsystem() {
       // All feedforward terms at 0: placeholders for sysid. kS removes stiction, kV
       // improves velocity tracking through the profile, kG compensates gravity at the
       // current angle (cos(angle) * kG). Without kG the arm will droop at horizontal.
-      .WithArmFeedforward(0, 0, 0, 0)
+      .WithFeedforward(frc::ArmFeedforward{units::volt_t{0}, units::volt_t{0},
+                                           units::unit_t<frc::ArmFeedforward::kv_unit>{0},
+                                           units::unit_t<frc::ArmFeedforward::ka_unit>{0}})
       // Arm is assumed horizontal (0 deg) at power-on. If the arm powers on in a known
       // tucked position, set this to match that angle so the first move is relative to
       // the correct starting point.

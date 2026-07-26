@@ -14,6 +14,8 @@ import yams.mechanisms.config.SwerveModuleConfig;
 import yams.motorcontrollers.SmartMotorController;
 import yams.telemetry.MechanismTelemetry;
 
+import java.util.function.Supplier;
+
 /**
  * Swerve Module
  *
@@ -59,8 +61,7 @@ import yams.telemetry.MechanismTelemetry;
  * SwerveModuleVelocity current = frontLeft.getState();
  * }</pre>
  */
-public class SwerveModule
-{
+public class SwerveModule {
   /**
    * Drive motor controller.
    */
@@ -72,50 +73,52 @@ public class SwerveModule
   /**
    * Swerve module configuration.
    */
-  private final SwerveModuleConfig   m_config;
+  private final SwerveModuleConfig m_config;
   /**
    * Mechanism Telemetry
    */
-  private final MechanismTelemetry   m_telemetry = new MechanismTelemetry();
+  private final MechanismTelemetry m_telemetry = new MechanismTelemetry();
+  /**
+   * Azimuth absolute encoder field.
+   */
+  private final DoublePublisher m_azimuthAbsoluteEncoderTelemetry;
+  /**
+   * Absolute encoder angle without any offsets applied.
+   */
+  private final Supplier<Angle> m_azimuthEncoderWithoutOffsets;
 
   /**
    * Create a SwerveModule.
    *
    * @param config {@link SwerveModuleConfig} for the module.
    */
-  public SwerveModule(SwerveModuleConfig config)
-  {
+  public SwerveModule(SwerveModuleConfig config) {
     m_config = config;
     m_driveMotorController = config.getDriveMotor();
     m_azimuthMotorController = config.getAzimuthMotor();
-    if (m_config.getTelemetryName().isEmpty())
-    {
+    if (m_config.getTelemetryName().isEmpty()) {
       throw new IllegalArgumentException("SwerveModuleConfig must have a telemetry name!");
     }
-    if (m_config.getLocation().isEmpty())
-    {
+    if (m_config.getLocation().isEmpty()) {
       throw new IllegalArgumentException("SwerveModuleConfig must have a position!");
     }
-    if (m_azimuthMotorController.getConfig().getExternalEncoder().isPresent() &&
-        !m_azimuthMotorController.getConfig().getUseExternalFeedback())
-    {
-      throw new SmartMotorControllerConfigurationException("External encoder cannot be used without external feedback",
-                                                           "External encoder could not be used",
-                                                           "withUseExternalFeedbackEncoder(true)");
+    if (m_azimuthMotorController.getConfig().getExternalEncoder().isPresent() && !m_azimuthMotorController.getConfig().getUseExternalFeedback()) {
+      throw new SmartMotorControllerConfigurationException("External encoder cannot be used without external feedback", "External encoder could not be used", "withUseExternalFeedbackEncoder(true)");
     }
     m_telemetry.setupTelemetry("swerve/" + getName() + "/drive", m_driveMotorController);
     m_telemetry.setupTelemetry("swerve/" + getName() + "/azimuth", m_azimuthMotorController);
+    var encoderTopic = m_telemetry.getDataTable().getDoubleTopic("encoder");
+    encoderTopic.setProperties("{\"units\": \"degrees\"}");
+    m_azimuthAbsoluteEncoderTelemetry = encoderTopic.publish();
     seedAzimuthEncoder();
+    m_azimuthEncoderWithoutOffsets = config.getRawAbsoluteEncoderAngle();
   }
 
   /**
    * Seed the azimuth encoder with the absolute encoder angle.
    */
-  public void seedAzimuthEncoder()
-  {
-    if (RobotBase.isReal() && (m_azimuthMotorController.getConfig().getExternalEncoder().isEmpty() ||
-                               !m_azimuthMotorController.getConfig().getUseExternalFeedback()))
-    {
+  public void seedAzimuthEncoder() {
+    if (RobotBase.isReal() && (m_azimuthMotorController.getConfig().getExternalEncoder().isEmpty() || !m_azimuthMotorController.getConfig().getUseExternalFeedback())) {
       m_azimuthMotorController.setEncoderPosition(m_config.getAbsoluteEncoderAngle());
     }
   }
@@ -125,9 +128,8 @@ public class SwerveModule
    *
    * @return Name of the module.
    */
-  public String getName()
-  {
-    return m_config.getTelemetryName().orElse("SwerveModule");
+  public String getName() {
+    return m_config.getTelemetryName().orElseThrow();
   }
 
   /**
@@ -135,8 +137,7 @@ public class SwerveModule
    *
    * @return {@link SwerveModuleConfig} for the module.
    */
-  public SwerveModuleConfig getConfig()
-  {
+  public SwerveModuleConfig getConfig() {
     return m_config;
   }
 
@@ -170,27 +171,24 @@ public class SwerveModule
    *
    * @return {@link SwerveModulePosition} of the module.
    */
-  public SwerveModulePosition getPosition()
-  {
-    return new SwerveModulePosition(m_driveMotorController.getMeasurementPosition(),
-                                    new Rotation2d(m_azimuthMotorController.getMechanismPosition()));
+  public SwerveModulePosition getPosition() {
+    return new SwerveModulePosition(m_driveMotorController.getMeasurementPosition(), new Rotation2d(m_azimuthMotorController.getMechanismPosition()));
   }
 
   /**
    * Update the telemetry of the module.
    */
-  public void updateTelemetry()
-  {
+  public void updateTelemetry() {
     m_driveMotorController.updateTelemetry();
     m_azimuthMotorController.updateTelemetry();
+    m_azimuthAbsoluteEncoderTelemetry.set(m_azimuthEncoderWithoutOffsets.get().in(Degrees));
     m_telemetry.updateLoopTime();
   }
 
   /**
    * Update the simulation of the module.
    */
-  public void simIterate()
-  {
+  public void simIterate() {
     m_driveMotorController.simIterate();
     m_azimuthMotorController.simIterate();
   }
@@ -200,8 +198,7 @@ public class SwerveModule
    *
    * @return Azimuth {@link SmartMotorController}.
    */
-  public SmartMotorController getAzimuthMotorController()
-  {
+  public SmartMotorController getAzimuthMotorController() {
     return m_azimuthMotorController;
   }
 
@@ -210,8 +207,7 @@ public class SwerveModule
    *
    * @return Drive {@link SmartMotorController}.
    */
-  public SmartMotorController getDriveMotorController()
-  {
+  public SmartMotorController getDriveMotorController() {
     return m_driveMotorController;
   }
 }

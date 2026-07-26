@@ -60,7 +60,9 @@ namespace yams::motorcontrollers::remote {
  *    .WithIdleMode(Cfg::MotorMode::BRAKE)
  *    .WithStatorCurrentLimit(40.0_A)
  *    .WithMotorInverted(false)
- *    .WithArmFeedforward(0.0, 0.0, 0.0, 0.0)
+ *    .WithFeedforward(frc::ArmFeedforward{
+ *        0.0_V, 0.0_V, units::unit_t<frc::ArmFeedforward::kv_unit>{0.0},
+ *        units::unit_t<frc::ArmFeedforward::ka_unit>{0.0}})
  *    .WithClosedLoopMode()
  *    .WithTelemetry("HoodMotor", Cfg::TelemetryVerbosity::HIGH);
  *

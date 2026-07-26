@@ -48,7 +48,9 @@ static SmartMotorControllerConfig MakeElevatorSMCConfig(ProfileType profile, Har
       .WithIdleMode(SmartMotorControllerConfig::MotorMode::BRAKE)
       .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
-      .WithElevatorFeedforward(1.0, 0.0, 0.0)
+      .WithFeedforward(frc::ElevatorFeedforward{
+          1.0_V, 0.0_V, units::unit_t<frc::ElevatorFeedforward::kv_unit>{0.0},
+          units::unit_t<frc::ElevatorFeedforward::ka_unit>{0.0}})
       .WithClosedLoopMode()
       .WithSubsystem(subsys)
       .WithTelemetry(name);

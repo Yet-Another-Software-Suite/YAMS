@@ -33,7 +33,9 @@ DoubleFlyWheelSubsystem::DoubleFlyWheelSubsystem() {
       .WithFeedback(1, 0, 0)
       // Feedforward at zero for now; kV/kS should be measured on the real robot
       // using SysId before closed-loop tuning.
-      .WithSimpleFeedforward(0, 0, 0)
+      .WithFeedforward(frc::SimpleMotorFeedforward<units::turns>{
+          units::volt_t{0}, units::unit_t<frc::SimpleMotorFeedforward<units::turns>::kv_unit>{0},
+          units::unit_t<frc::SimpleMotorFeedforward<units::turns>::ka_unit>{0}})
       .WithMotorInverted(false)
       .WithTelemetry("LowerFlyWheel", Cfg::TelemetryVerbosity::HIGH);
 
@@ -43,7 +45,9 @@ DoubleFlyWheelSubsystem::DoubleFlyWheelSubsystem() {
       .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
       .WithMOI(units::kilogram_square_meter_t{0.00029264})
       .WithFeedback(1, 0, 0)
-      .WithSimpleFeedforward(0, 0, 0)
+      .WithFeedforward(frc::SimpleMotorFeedforward<units::turns>{
+          units::volt_t{0}, units::unit_t<frc::SimpleMotorFeedforward<units::turns>::kv_unit>{0},
+          units::unit_t<frc::SimpleMotorFeedforward<units::turns>::ka_unit>{0}})
       .WithMotorInverted(false)
       .WithTelemetry("UpperFlyWheel", Cfg::TelemetryVerbosity::HIGH);
 

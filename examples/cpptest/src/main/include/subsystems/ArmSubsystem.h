@@ -22,7 +22,7 @@
 
 // Single-jointed arm driven by a Kraken X60 (CAN 1) through a 3:1 x 4:1 (12:1 total)
 // gearbox. Arm length is 0.135 m; the Arm mechanism uses this for gravity compensation
-// via the kG term in WithArmFeedforward (currently zeroed out -- tune before use).
+// via the kG term in WithFeedforward(ArmFeedforward) (currently zeroed out -- tune before use).
 // A trapezoidal motion profile limits speed to 0.5 turns/s and accel to 0.25 turns/s^2.
 //
 // Angle limits: WithMechanismLimits [-30, +100] deg (motor-level soft limits);

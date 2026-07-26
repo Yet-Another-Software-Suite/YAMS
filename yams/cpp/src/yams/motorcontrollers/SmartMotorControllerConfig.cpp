@@ -154,79 +154,49 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithFeedback(
   return *this;
 }
 
-SmartMotorControllerConfig& SmartMotorControllerConfig::WithKp(double kP,
-                                                               ClosedLoopControllerSlot slot) {
-  m_slots[SlotIndex(slot)].kP = kP;
-  return *this;
-}
-SmartMotorControllerConfig& SmartMotorControllerConfig::WithKi(double kI,
-                                                               ClosedLoopControllerSlot slot) {
-  m_slots[SlotIndex(slot)].kI = kI;
-  return *this;
-}
-SmartMotorControllerConfig& SmartMotorControllerConfig::WithKd(double kD,
-                                                               ClosedLoopControllerSlot slot) {
-  m_slots[SlotIndex(slot)].kD = kD;
-  return *this;
-}
-
 // ---- Feedforward ---------------------------------------------------------
 
-SmartMotorControllerConfig& SmartMotorControllerConfig::WithArmFeedforward(
-    double kS, double kV, double kA, double kG, ClosedLoopControllerSlot slot) {
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithFeedforward(
+    const frc::ArmFeedforward& ff, ClosedLoopControllerSlot slot) {
+  // ArmFeedforward's kV/kA are natively per-radian; the hardware closed loop runs in
+  // mechanism turns, so convert via the units library before storing the raw gains.
+  using kv_unit = frc::SimpleMotorFeedforward<units::turns>::kv_unit;
+  using ka_unit = frc::SimpleMotorFeedforward<units::turns>::ka_unit;
   auto& s = m_slots[SlotIndex(slot)];
-  s.kS = kS;
-  s.kV = kV;
-  s.kA = kA;
-  s.kG = kG;
-  s.armFF = frc::ArmFeedforward{units::volt_t{kS}, units::volt_t{kG},
-                                units::unit_t<frc::ArmFeedforward::kv_unit>{kV},
-                                units::unit_t<frc::ArmFeedforward::ka_unit>{kA}};
+  s.kS = ff.GetKs().value();
+  s.kV = units::unit_t<kv_unit>{ff.GetKv()}.value();
+  s.kA = units::unit_t<ka_unit>{ff.GetKa()}.value();
+  s.kG = ff.GetKg().value();
+  s.armFF = ff;
+  s.elevatorFF.reset();
+  s.simpleFF.reset();
   return *this;
 }
 
-SmartMotorControllerConfig& SmartMotorControllerConfig::WithElevatorFeedforward(
-    double kS, double kV, double kA, ClosedLoopControllerSlot slot) {
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithFeedforward(
+    const frc::ElevatorFeedforward& ff, ClosedLoopControllerSlot slot) {
   auto& s = m_slots[SlotIndex(slot)];
-  s.kS = kS;
-  s.kV = kV;
-  s.kA = kA;
-  s.elevatorFF = frc::ElevatorFeedforward{units::volt_t{kS}, units::volt_t{0.0},
-                                          units::unit_t<frc::ElevatorFeedforward::kv_unit>{kV},
-                                          units::unit_t<frc::ElevatorFeedforward::ka_unit>{kA}};
+  s.kS = ff.GetKs().value();
+  s.kV = ff.GetKv().value();
+  s.kA = ff.GetKa().value();
+  s.kG = ff.GetKg().value();
+  s.elevatorFF = ff;
+  s.armFF.reset();
+  s.simpleFF.reset();
   return *this;
 }
 
-SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimpleFeedforward(
-    double kS, double kV, double kA, ClosedLoopControllerSlot slot) {
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithFeedforward(
+    const frc::SimpleMotorFeedforward<units::turns>& ff, ClosedLoopControllerSlot slot) {
+  using kv_unit = frc::SimpleMotorFeedforward<units::turns>::kv_unit;
+  using ka_unit = frc::SimpleMotorFeedforward<units::turns>::ka_unit;
   auto& s = m_slots[SlotIndex(slot)];
-  s.kS = kS;
-  s.kV = kV;
-  s.kA = kA;
-  s.simpleFF = frc::SimpleMotorFeedforward<units::turns>{
-      units::volt_t{kS}, units::unit_t<frc::SimpleMotorFeedforward<units::turns>::kv_unit>{kV},
-      units::unit_t<frc::SimpleMotorFeedforward<units::turns>::ka_unit>{kA}};
-  return *this;
-}
-
-SmartMotorControllerConfig& SmartMotorControllerConfig::WithKs(double kS,
-                                                               ClosedLoopControllerSlot slot) {
-  m_slots[SlotIndex(slot)].kS = kS;
-  return *this;
-}
-SmartMotorControllerConfig& SmartMotorControllerConfig::WithKv(double kV,
-                                                               ClosedLoopControllerSlot slot) {
-  m_slots[SlotIndex(slot)].kV = kV;
-  return *this;
-}
-SmartMotorControllerConfig& SmartMotorControllerConfig::WithKa(double kA,
-                                                               ClosedLoopControllerSlot slot) {
-  m_slots[SlotIndex(slot)].kA = kA;
-  return *this;
-}
-SmartMotorControllerConfig& SmartMotorControllerConfig::WithKg(double kG,
-                                                               ClosedLoopControllerSlot slot) {
-  m_slots[SlotIndex(slot)].kG = kG;
+  s.kS = ff.GetKs().value();
+  s.kV = units::unit_t<kv_unit>{ff.GetKv()}.value();
+  s.kA = units::unit_t<ka_unit>{ff.GetKa()}.value();
+  s.simpleFF = ff;
+  s.armFF.reset();
+  s.elevatorFF.reset();
   return *this;
 }
 
