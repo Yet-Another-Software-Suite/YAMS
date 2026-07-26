@@ -519,7 +519,7 @@ public class SwerveModuleConfig
         {
             lastCommandedAngle = new Rotation2d(getAbsoluteEncoderAngle());
         }
-        state.optimize(lastCommandedAngle);
+        state = state.optimize(lastCommandedAngle);
         lastCommandedAngle = state.angle;
     }
     if (cosineCompensation)
