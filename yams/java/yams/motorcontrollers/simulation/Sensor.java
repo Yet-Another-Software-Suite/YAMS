@@ -6,7 +6,7 @@ package yams.motorcontrollers.simulation;
 import org.wpilib.hardware.hal.HALValue;
 import org.wpilib.hardware.hal.SimDevice;
 import org.wpilib.hardware.hal.SimDevice.Direction;
-import org.wpilib.wpilibj.RobotBase;
+import org.wpilib.framework.RobotBase;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -95,7 +95,7 @@ public class Sensor
       m_simDevice = Optional.of(SimDevice.create("Sensor[" + sensorName + "]"));
       for (var field : sensorFields)
       {
-        field.createValue(m_simDevice.get(), Direction.kBidir);
+        field.createValue(m_simDevice.get(), Direction.BIDIR);
       }
     } else
     {

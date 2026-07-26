@@ -7,8 +7,8 @@ import org.wpilib.hardware.hal.HALValue;
 import org.wpilib.hardware.hal.SimDevice;
 import org.wpilib.hardware.hal.SimDevice.Direction;
 import org.wpilib.hardware.hal.SimValue;
-import org.wpilib.math.Pair;
-import org.wpilib.wpilibj.RobotBase;
+import org.wpilib.math.util.Pair;
+import org.wpilib.framework.RobotBase;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -460,7 +460,7 @@ public class SensorData
   public SimValue createValue(SimDevice device, Direction direction)
   {
     var simVal = device.createValue(m_name, direction, m_defaultValue);
-    if (direction == Direction.kBidir || direction == Direction.kInput)
+    if (direction == Direction.BIDIR || direction == Direction.INPUT)
     {
       m_glassValue = Optional.of(simVal);
     }
