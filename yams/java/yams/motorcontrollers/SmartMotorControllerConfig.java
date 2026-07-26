@@ -18,19 +18,15 @@ import static org.wpilib.units.Units.Second;
 import static org.wpilib.units.Units.Volts;
 
 import org.wpilib.hardware.hal.HAL;
-import org.wpilib.hardware.hal.HALUtil;
-import org.wpilib.hardware.hal.HALValue;
 import org.wpilib.math.util.Pair;
 import org.wpilib.math.controller.ArmFeedforward;
 import org.wpilib.math.controller.ElevatorFeedforward;
 import org.wpilib.math.controller.PIDController;
 import org.wpilib.math.controller.SimpleMotorFeedforward;
 import org.wpilib.math.system.DCMotor;
-import org.wpilib.math.system.LinearSystem;
 import org.wpilib.math.system.Models;
 import org.wpilib.math.trajectory.ExponentialProfile;
 import org.wpilib.math.trajectory.TrapezoidProfile;
-import org.wpilib.math.trajectory.TrapezoidProfile.Constraints;
 import org.wpilib.units.AngularAccelerationUnit;
 import org.wpilib.units.LinearAccelerationUnit;
 import org.wpilib.units.measure.Angle;
@@ -49,11 +45,8 @@ import org.wpilib.units.measure.Velocity;
 import org.wpilib.units.measure.Voltage;
 import org.wpilib.simulation.SingleJointedArmSim;
 import org.wpilib.command2.Subsystem;
-import org.wpilib.driverstation.DriverStation;
 import org.wpilib.driverstation.internal.DriverStationBackend;
 import org.wpilib.framework.RobotBase;
-
-
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -64,13 +57,9 @@ import java.util.Set;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.gearing.MechanismGearing;
 import yams.math.LQRController;
-import yams.mechanisms.config.ElevatorConfig;
 import yams.mechanisms.positional.Elevator;
 import yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
-import yams.motorcontrollers.simulation.SensorData.HALValueType;
 import yams.telemetry.SmartMotorControllerTelemetryConfig;
-import org.wpilib.math.system.LinearSystem;
-import org.wpilib.hardware.hal.HALValue;
 /**
  * Smart motor controller config.
  *
@@ -2297,6 +2286,19 @@ public class SmartMotorControllerConfig {
    */
   public Optional<Object> getVendorConfig() {
     return vendorConfig;
+  }
+
+
+  /**
+   * Set the vendor specific control request for the {@link SmartMotorController} which will be used
+   * in place of default or calculated ones.
+   *
+   * @param vendorControlRequest Vendor specific control request for velocity or position.
+   * @return {@link SmartMotorControllerConfig} for chaining
+   */
+  public SmartMotorControllerConfig withVendorControlRequest(Object vendorControlRequest) {
+    this.vendorControlRequest = Optional.ofNullable(vendorControlRequest);
+    return this;
   }
 
   /**
