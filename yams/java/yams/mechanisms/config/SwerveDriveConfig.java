@@ -11,13 +11,13 @@ import org.wpilib.math.controller.PIDController;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.geometry.Translation2d;
-import org.wpilib.math.kinematics.ChassisSpeeds;
+import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.LinearVelocity;
 import org.wpilib.units.measure.Time;
-import org.wpilib.wpilibj.RobotBase;
+import org.wpilib.framework.RobotBase;
 import org.wpilib.command2.Subsystem;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -576,9 +576,9 @@ public class SwerveDriveConfig
    * Correct for skew that worsens as angular velocity increases
    *
    * @param robotRelativeVelocity The chassis speeds to set the robot to achieve.
-   * @return {@link ChassisSpeeds} of the robot after angular velocity skew correction.
+   * @return {@link ChassisVelocities} of the robot after angular velocity skew correction.
    */
-  private ChassisSpeeds angularVelocitySkewCorrection(ChassisSpeeds robotRelativeVelocity)
+  private ChassisVelocities angularVelocitySkewCorrection(ChassisVelocities robotRelativeVelocity)
   {
     var angularVelocity = new Rotation2d(gyroAngularVelocitySupplier.orElseThrow().get().in(RadiansPerSecond) *
                                          (RobotBase.isSimulation() ?
@@ -588,9 +588,8 @@ public class SwerveDriveConfig
     if (angularVelocity.getRadians() != 0.0)
     {
       var           gyroRotation          = new Rotation2d(gyroSupplier.orElseThrow().get());
-      ChassisSpeeds fieldRelativeVelocity = ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeVelocity, gyroRotation);
-      robotRelativeVelocity = ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeVelocity,
-                                                                    gyroRotation.plus(angularVelocity));
+      ChassisVelocities fieldRelativeVelocity = robotRelativeVelocity.toFieldRelative(gyroRotation);
+      robotRelativeVelocity = fieldRelativeVelocity.toRobotRelative(gyroRotation.plus(angularVelocity));
     }
     return robotRelativeVelocity;
   }
@@ -598,10 +597,10 @@ public class SwerveDriveConfig
   /**
    * Optimize the given chassis speeds.
    *
-   * @param speeds {@link ChassisSpeeds} to optimize.
-   * @return Optimized {@link ChassisSpeeds}.
+   * @param speeds {@link ChassisVelocities} to optimize.
+   * @return Optimized {@link ChassisVelocities}.
    */
-  public ChassisSpeeds optimizeRobotRelativeChassisSpeeds(ChassisSpeeds speeds)
+  public ChassisVelocities optimizeRobotRelativeChassisSpeeds(ChassisVelocities speeds)
   {
     if (angularVelocityScaleFactor.isPresent())
     {
@@ -609,7 +608,7 @@ public class SwerveDriveConfig
     }
     if (discretizationSeconds.isPresent())
     {
-      speeds = ChassisSpeeds.discretize(speeds, (RobotBase.isSimulation() ?
+      speeds = speeds.discretize((RobotBase.isSimulation() ?
                                                  simDiscretizationSeconds.orElse(discretizationSeconds.get()) :
                                                  discretizationSeconds.get()).in(Seconds));
     }

@@ -7,8 +7,8 @@ import static org.wpilib.units.Units.MetersPerSecond;
 
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.kinematics.SwerveModulePosition;
-import org.wpilib.math.kinematics.SwerveModuleState;
-import org.wpilib.wpilibj.RobotBase;
+import org.wpilib.math.kinematics.SwerveModuleVelocity;
+import org.wpilib.framework.RobotBase;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.mechanisms.config.SwerveModuleConfig;
 import yams.motorcontrollers.SmartMotorController;
@@ -21,7 +21,7 @@ import yams.telemetry.MechanismTelemetry;
  * {@link SwerveModule} coordinates the drive motor (velocity control) and the azimuth (steer)
  * motor (position control) that make up one corner of a swerve drivetrain.  On construction it
  * reads the absolute encoder and seeds the azimuth relative encoder so the wheel starts at the
- * correct angle.  Each periodic cycle you call {@link #setSwerveModuleState(SwerveModuleState)} to
+ * correct angle.  Each periodic cycle you call {@link #setSwerveModuleState(SwerveModuleVelocity)} to
  * command both motors, and {@link #getState()} / {@link #getPosition()} to read back the current
  * wheel velocity and heading.
  * </p>
@@ -52,11 +52,11 @@ import yams.telemetry.MechanismTelemetry;
  * SwerveModule frontLeft = new SwerveModule(frontLeftConfig);
  *
  * // Command a specific state (angle + speed)
- * SwerveModuleState desiredState = new SwerveModuleState(1.5, Rotation2d.fromDegrees(45));
+ * SwerveModuleVelocity desiredState = new SwerveModuleVelocity(1.5, Rotation2d.fromDegrees(45));
  * frontLeft.setSwerveModuleState(desiredState);
  *
  * // Read back current state
- * SwerveModuleState current = frontLeft.getState();
+ * SwerveModuleVelocity current = frontLeft.getState();
  * }</pre>
  */
 public class SwerveModule
@@ -141,27 +141,27 @@ public class SwerveModule
   }
 
   /**
-   * Set the {@link SwerveModuleState} of the module.
+   * Set the {@link SwerveModuleVelocity} of the module.
    *
    * @param state State to set.
-   * @return The optimized {@link SwerveModuleState}.
+   * @return The optimized {@link SwerveModuleVelocity}.
    */
-  public SwerveModuleState setSwerveModuleState(SwerveModuleState state)
+  public SwerveModuleVelocity setSwerveModuleState(SwerveModuleVelocity state)
   {
     state = m_config.getOptimizedState(state);
-    m_driveMotorController.setVelocity(MetersPerSecond.of(state.speedMetersPerSecond));
+    m_driveMotorController.setVelocity(MetersPerSecond.of(state.velocity));
     m_azimuthMotorController.setPosition(state.angle.getMeasure());
     return state;
   }
 
   /**
-   * Get the {@link SwerveModuleState} of the module.
+   * Get the {@link SwerveModuleVelocity} of the module.
    *
-   * @return {@link SwerveModuleState} of the module.
+   * @return {@link SwerveModuleVelocity} of the module.
    */
-  public SwerveModuleState getState()
+  public SwerveModuleVelocity getState()
   {
-    return new SwerveModuleState(m_driveMotorController.getMeasurementVelocity(),
+    return new SwerveModuleVelocity(m_driveMotorController.getMeasurementVelocity(),
                                  new Rotation2d(m_azimuthMotorController.getMechanismPosition()));
   }
 

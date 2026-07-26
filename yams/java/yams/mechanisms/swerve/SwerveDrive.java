@@ -3,8 +3,6 @@
 
 package yams.mechanisms.swerve;
 
-import static org.wpilib.hardware.hal.FRCNetComm.tInstances.kRobotDriveSwerve_YAGSL;
-import static org.wpilib.hardware.hal.FRCNetComm.tResourceType.kResourceType_RobotDrive;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Radians;
@@ -14,15 +12,15 @@ import static org.wpilib.units.Units.Second;
 import static org.wpilib.units.Units.Seconds;
 
 import org.wpilib.hardware.hal.HAL;
-import org.wpilib.math.Matrix;
+import org.wpilib.math.linalg.Matrix;
 import org.wpilib.math.estimator.SwerveDrivePoseEstimator;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.geometry.Translation2d;
-import org.wpilib.math.kinematics.ChassisSpeeds;
+import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.math.kinematics.SwerveDriveKinematics;
 import org.wpilib.math.kinematics.SwerveModulePosition;
-import org.wpilib.math.kinematics.SwerveModuleState;
+import org.wpilib.math.kinematics.SwerveModuleVelocity;
 import org.wpilib.math.numbers.N1;
 import org.wpilib.math.numbers.N3;
 import org.wpilib.networktables.DoublePublisher;
@@ -34,8 +32,8 @@ import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.Time;
 import org.wpilib.units.measure.Velocity;
 import org.wpilib.units.measure.Voltage;
-import org.wpilib.wpilibj.RobotBase;
-import org.wpilib.wpilibj.Timer;
+import org.wpilib.framework.RobotBase;
+import org.wpilib.system.Timer;
 import org.wpilib.smartdashboard.Field2d;
 import org.wpilib.smartdashboard.SmartDashboard;
 import org.wpilib.command2.Command;
@@ -60,7 +58,7 @@ import yams.telemetry.MechanismTelemetry;
  * </p>
  * <p>
  * {@link yams.mechanisms.swerve.utility.SwerveInputStream} is the <b>recommended</b> way to
- * convert raw joystick axes into field-relative {@link org.wpilib.math.kinematics.ChassisSpeeds}
+ * convert raw joystick axes into field-relative {@link org.wpilib.math.kinematics.ChassisVelocities}
  * before passing them to {@link #drive(java.util.function.Supplier)}.
  * </p>
  * <pre>{@code
@@ -94,13 +92,13 @@ import yams.telemetry.MechanismTelemetry;
  *             .withCubeTranslationControllerAxis()
  *             .withAllianceRelativeControl();
  *
- *         // drive() accepts a robot-relative ChassisSpeeds supplier; SwerveInputStream handles
+ *         // drive() accepts a robot-relative ChassisVelocities supplier; SwerveInputStream handles
  *         // the field-to-robot conversion internally when alliance-relative control is enabled.
  *         return drive.drive(inputStream);
  *     }
  *
  *     // Alternatively, pass field-relative speeds directly.
- *     public Command driveFieldRelative(Supplier<ChassisSpeeds> speedsSupplier) {
+ *     public Command driveFieldRelative(Supplier<ChassisVelocities> speedsSupplier) {
  *         return run(() -> drive.setFieldRelativeChassisSpeeds(speedsSupplier.get()))
  *             .withName("Field Oriented Drive");
  *     }
@@ -141,23 +139,23 @@ public class SwerveDrive
   /**
    * Desired swerve module states.
    */
-  private final StructArrayPublisher<SwerveModuleState> m_desiredModuleStatesPublisher;
+  private final StructArrayPublisher<SwerveModuleVelocity> m_desiredModuleStatesPublisher;
   /**
    * Current swerve module states.
    */
-  private final StructArrayPublisher<SwerveModuleState> m_currentModuleStatesPublisher;
+  private final StructArrayPublisher<SwerveModuleVelocity> m_currentModuleStatesPublisher;
   /**
    * Desired robot relative chassis speeds.
    */
-  private final StructPublisher<ChassisSpeeds>          m_desiredRobotRelativeChassisSpeedsPublisher;
+  private final StructPublisher<ChassisVelocities>          m_desiredRobotRelativeChassisSpeedsPublisher;
   /**
    * Current robot relative chassis speeds.
    */
-  private final StructPublisher<ChassisSpeeds>          m_currentRobotRelativeChassisSpeedsPublisher;
+  private final StructPublisher<ChassisVelocities>          m_currentRobotRelativeChassisSpeedsPublisher;
   /**
    * Field relative chassis speeds.
    */
-  private final StructPublisher<ChassisSpeeds>          m_fieldRelativeChassisSpeedsPublisher;
+  private final StructPublisher<ChassisVelocities>          m_fieldRelativeChassisSpeedsPublisher;
   /**
    * Pose of the robot.
    */
@@ -189,11 +187,11 @@ public class SwerveDrive
   /**
    * Last-commanded desired module states; cached and published from updateTelemetry.
    */
-  private       SwerveModuleState[]                     m_desiredModuleStates;
+  private       SwerveModuleVelocity[]                     m_desiredModuleStates;
   /**
    * Last-commanded desired robot-relative chassis speeds; cached and published from updateTelemetry.
    */
-  private       ChassisSpeeds                           m_desiredChassisSpeeds = new ChassisSpeeds();
+  private       ChassisVelocities                           m_desiredChassisSpeeds = new ChassisVelocities();
 
   /**
    * Create a SwerveDrive.
@@ -204,8 +202,8 @@ public class SwerveDrive
   {
     m_config = config;
     m_modules = config.getModules();
-    m_desiredModuleStates = new SwerveModuleState[m_modules.length];
-    Arrays.fill(m_desiredModuleStates, new SwerveModuleState());
+    m_desiredModuleStates = new SwerveModuleVelocity[m_modules.length];
+    Arrays.fill(m_desiredModuleStates, new SwerveModuleVelocity());
     m_kinematics = getKinematics();
     m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics,
                                                    new Rotation2d(getGyroAngle()),
@@ -213,18 +211,18 @@ public class SwerveDrive
                                                    m_config.getInitialPose());
     m_telemetry.setupTelemetry(getName());
     var desiredModuleStatesTopic = m_telemetry.getDataTable()
-                                              .getStructArrayTopic("states/desired", SwerveModuleState.struct);
+                                              .getStructArrayTopic("states/desired", SwerveModuleVelocity.struct);
     var currentModuleStatesTopic = m_telemetry.getDataTable()
-                                              .getStructArrayTopic("states/current", SwerveModuleState.struct);
+                                              .getStructArrayTopic("states/current", SwerveModuleVelocity.struct);
     var poseTopic = m_telemetry.getDataTable().getStructTopic("pose", Pose2d.struct);
     var gyroTopic = m_telemetry.getDataTable().getDoubleTopic("gyro");
     gyroTopic.setProperties("{\"units\": \"degrees\"}");
     var desiredRobotRelativeChassisSpeedsTopic = m_telemetry.getDataTable()
-                                                            .getStructTopic("chassis/desired", ChassisSpeeds.struct);
+                                                            .getStructTopic("chassis/desired", ChassisVelocities.struct);
     var fieldRelativeChassisSpeedsTopic = m_telemetry.getDataTable()
-                                                     .getStructTopic("chassis/field", ChassisSpeeds.struct);
+                                                     .getStructTopic("chassis/field", ChassisVelocities.struct);
     var currentRobotRelativeChassisSpeedsTopic = m_telemetry.getDataTable()
-                                                            .getStructTopic("chassis/current", ChassisSpeeds.struct);
+                                                            .getStructTopic("chassis/current", ChassisVelocities.struct);
     m_gyroPublisher = gyroTopic.publish();
     m_currentRobotRelativeChassisSpeedsPublisher = currentRobotRelativeChassisSpeedsTopic.publish();
     m_fieldRelativeChassisSpeedsPublisher = fieldRelativeChassisSpeedsTopic.publish();
@@ -235,18 +233,18 @@ public class SwerveDrive
     m_field2d.setRobotPose(getPose());
     SmartDashboard.putData("Mechanisms/"+getName()+"/field", m_field2d);
     // Report as YAGSL bc this will become apart of YAGSL in 2027...
-    HAL.report(kResourceType_RobotDrive, kRobotDriveSwerve_YAGSL);
+    HAL.reportUsage("RobotDrive", "YAGSL");
   }
 
   /**
    * Create a {@link RunCommand} to drive the swerve drive with robot relative chassis speeds.
    *
-   * @param robotRelativeChassisSpeeds {@link Supplier<ChassisSpeeds>} for the robot relative chassis speeds. Could also
+   * @param robotRelativeChassisSpeeds {@link Supplier<ChassisVelocities>} for the robot relative chassis speeds. Could also
    *                                   use {@link yams.mechanisms.swerve.utility.SwerveInputStream}
    * @return {@link RunCommand} to drive the swerve drive.
    * @implNote Not compatible with AdvantageKit
    */
-  public Command drive(Supplier<ChassisSpeeds> robotRelativeChassisSpeeds)
+  public Command drive(Supplier<ChassisVelocities> robotRelativeChassisSpeeds)
   {
     return Commands.run(() -> setRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds.get()),
                         m_config.getSubsystem()).withName("Drive");
@@ -279,24 +277,24 @@ public class SwerveDrive
   public void lockPose()
   {
     // Sets states
-    SwerveModuleState[] desiredStates = new SwerveModuleState[m_modules.length];
+    SwerveModuleVelocity[] desiredStates = new SwerveModuleVelocity[m_modules.length];
     for (int i = 0; i < m_modules.length; i++)
     {
       desiredStates[i] =
-          new SwerveModuleState(0, m_modules[i].getConfig().getLocation().orElseThrow().getAngle());
+          new SwerveModuleVelocity(0, m_modules[i].getConfig().getLocation().orElseThrow().getAngle());
     }
     setSwerveModuleStates(desiredStates);
-    m_desiredChassisSpeeds = new ChassisSpeeds();
+    m_desiredChassisSpeeds = new ChassisVelocities();
   }
 
   /**
-   * Set the {@link SwerveModuleState}s of the swerve drive directly.
+   * Set the {@link SwerveModuleVelocity}s of the swerve drive directly.
    *
-   * @param states {@link SwerveModuleState}s to use, must be the same count as the swerve drive is configured order is
+   * @param states {@link SwerveModuleVelocity}s to use, must be the same count as the swerve drive is configured order is
    *               Clockwise from FL.
    * @implNote Not compatible with AdvantageKit if MapleSim is defined.
    */
-  public void setSwerveModuleStates(SwerveModuleState[] states)
+  public void setSwerveModuleStates(SwerveModuleVelocity[] states)
   {
     for (int i = 0; i < states.length; i++)
     {
@@ -310,17 +308,17 @@ public class SwerveDrive
   }
 
   /**
-   * Get the {@link SwerveModuleState}s of the swerve drive given a robot relative chassis speed..
+   * Get the {@link SwerveModuleVelocity}s of the swerve drive given a robot relative chassis speed..
    *
-   * @param robotRelativeChassisSpeeds Robot relative {@link ChassisSpeeds}.
-   * @return {@link SwerveModuleState}s of the swerve drive.
+   * @param robotRelativeChassisSpeeds Robot relative {@link ChassisVelocities}.
+   * @return {@link SwerveModuleVelocity}s of the swerve drive.
    */
-  public SwerveModuleState[] getStateFromRobotRelativeChassisSpeeds(ChassisSpeeds robotRelativeChassisSpeeds)
+  public SwerveModuleVelocity[] getStateFromRobotRelativeChassisSpeeds(ChassisVelocities robotRelativeChassisSpeeds)
   {
     robotRelativeChassisSpeeds = m_config.optimizeRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds);
     return m_config.getCenterOfRotation().isPresent() ?
-           m_kinematics.toSwerveModuleStates(robotRelativeChassisSpeeds, m_config.getCenterOfRotation().get()) :
-           m_kinematics.toSwerveModuleStates(robotRelativeChassisSpeeds);
+           m_kinematics.toSwerveModuleVelocities(robotRelativeChassisSpeeds, m_config.getCenterOfRotation().get()) :
+           m_kinematics.toSwerveModuleVelocities(robotRelativeChassisSpeeds);
   }
 
   /**
@@ -328,7 +326,7 @@ public class SwerveDrive
    *
    * @param robotRelativeChassisSpeeds Robot relative chassis speeds.
    */
-  public void setRobotRelativeChassisSpeeds(ChassisSpeeds robotRelativeChassisSpeeds)
+  public void setRobotRelativeChassisSpeeds(ChassisVelocities robotRelativeChassisSpeeds)
   {
     m_desiredChassisSpeeds = robotRelativeChassisSpeeds;
     setSwerveModuleStates(getStateFromRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds));
@@ -339,10 +337,9 @@ public class SwerveDrive
    *
    * @param fieldRelativeChassisSpeeds Field relative chassis speeds.
    */
-  public void setFieldRelativeChassisSpeeds(ChassisSpeeds fieldRelativeChassisSpeeds)
+  public void setFieldRelativeChassisSpeeds(ChassisVelocities fieldRelativeChassisSpeeds)
   {
-    setRobotRelativeChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeChassisSpeeds,
-                                                                        new Rotation2d(getGyroAngle())));
+    setRobotRelativeChassisSpeeds(fieldRelativeChassisSpeeds.toRobotRelative(new Rotation2d(getGyroAngle())));
   }
 
   /**
@@ -427,8 +424,8 @@ public class SwerveDrive
 //      m_config.getMapleDriveSim().get().setSimulationWorldPose(pose);
 //    }
     m_poseEstimator.resetPosition(new Rotation2d(getGyroAngle()), getModulePositions(), pose);
-    m_desiredChassisSpeeds = new ChassisSpeeds();
-    m_desiredModuleStates = m_kinematics.toSwerveModuleStates(new ChassisSpeeds());
+    m_desiredChassisSpeeds = new ChassisVelocities();
+    m_desiredModuleStates = m_kinematics.toSwerveModuleVelocities(new ChassisVelocities());
   }
 
   /**
@@ -489,13 +486,11 @@ public class SwerveDrive
       var translationScalar = translationPID.calculate(distance.in(Meters), 0);
       var currentPose       = getPose();
       var poseDifference    = currentPose.minus(pose);
-      return ChassisSpeeds.fromFieldRelativeSpeeds(poseDifference.getMeasureX().per(Second).times(translationScalar),
-                                                   poseDifference.getMeasureY().per(Second).times(translationScalar),
-                                                   RadiansPerSecond.of(azimuthPID.calculate(currentPose.getRotation()
-                                                                                                       .getRadians(),
-                                                                                            pose.getRotation()
-                                                                                                .getRadians())),
-                                                   new Rotation2d(getGyroAngle()));
+      return new ChassisVelocities(poseDifference.getMeasureX().per(Second).times(translationScalar),
+                                   poseDifference.getMeasureY().per(Second).times(translationScalar),
+                                   RadiansPerSecond.of(azimuthPID.calculate(currentPose.getRotation().getRadians(),
+                                                                            pose.getRotation().getRadians())))
+          .toRobotRelative(new Rotation2d(getGyroAngle()));
     })).withName("Drive to Pose");
   }
 
@@ -505,7 +500,7 @@ public class SwerveDrive
    *
    * @param robotPose                Robot {@link Pose2d} as measured by vision.
    * @param timestamp                Timestamp the measurement was taken as time since startup, should be taken from
-   *                                 {@link Timer#getFPGATimestamp()} or similar sources.
+   *                                 {@link Timer#getTimestamp()} or similar sources.
    * @param visionMeasurementStdDevs Vision measurement standard deviation that will be sent to the
    *                                 {@link SwerveDrivePoseEstimator}.The standard deviation of the vision measurement,
    *                                 for best accuracy calculate the standard deviation at 2 or more points and fit a
@@ -538,7 +533,7 @@ public class SwerveDrive
    *
    * @param robotPose Robot {@link Pose2d} as measured by vision.
    * @param timestamp Timestamp the measurement was taken as time since startup, should be taken from
-   *                  {@link Timer#getFPGATimestamp()} or similar sources.
+   *                  {@link Timer#getTimestamp()} or similar sources.
    */
   public void addVisionMeasurement(Pose2d robotPose, double timestamp)
   {
@@ -560,7 +555,7 @@ public class SwerveDrive
   {
     updatePoseEstimator();
     Pose2d             robotPose     = getPose();
-    SwerveModuleState[] currentStates = getModuleStates();
+    SwerveModuleVelocity[] currentStates = getModuleStates();
 
     m_gyroPublisher.accept(getGyroAngle().in(Degrees));
     m_desiredModuleStatesPublisher.accept(m_desiredModuleStates);
@@ -600,7 +595,7 @@ public class SwerveDrive
     {m_simTimer.start();}
     Arrays.stream(m_modules).forEach(SwerveModule::simIterate);
     m_simGyroAngle = m_simGyroAngle.plus(Radians.of(
-        m_kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond * m_simTimer.get()));
+        m_kinematics.toChassisVelocities(getModuleStates()).omega * m_simTimer.get()));
     m_simTimer.reset();
   }
 
@@ -609,9 +604,9 @@ public class SwerveDrive
    *
    * @return Robot relative speed of the drive.
    */
-  public ChassisSpeeds getRobotRelativeSpeed()
+  public ChassisVelocities getRobotRelativeSpeed()
   {
-    return m_kinematics.toChassisSpeeds(getModuleStates());
+    return m_kinematics.toChassisVelocities(getModuleStates());
   }
 
   /**
@@ -619,9 +614,9 @@ public class SwerveDrive
    *
    * @return Field relative speed of the drive.
    */
-  public ChassisSpeeds getFieldRelativeSpeed()
+  public ChassisVelocities getFieldRelativeSpeed()
   {
-    return ChassisSpeeds.fromRobotRelativeSpeeds(getRobotRelativeSpeed(), new Rotation2d(getGyroAngle()));
+    return getRobotRelativeSpeed().toFieldRelative(new Rotation2d(getGyroAngle()));
   }
 
   /**
@@ -642,11 +637,11 @@ public class SwerveDrive
   }
 
   /**
-   * Get the {@link SwerveModuleState} of the modules.
+   * Get the {@link SwerveModuleVelocity} of the modules.
    *
-   * @return {@link SwerveModuleState} of the modules.
+   * @return {@link SwerveModuleVelocity} of the modules.
    */
-  public SwerveModuleState[] getModuleStates()
+  public SwerveModuleVelocity[] getModuleStates()
   {
     // If MapleSim is configured, return the simulated states.
 //    if (RobotBase.isSimulation() && m_config.getMapleDriveSim().isPresent())
@@ -655,7 +650,7 @@ public class SwerveDrive
 //    }
     return Arrays.stream(m_modules)
                  .map(SwerveModule::getState)
-                 .toArray(SwerveModuleState[]::new);
+                 .toArray(SwerveModuleVelocity[]::new);
   }
 
   /**

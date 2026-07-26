@@ -10,7 +10,9 @@ import static org.wpilib.units.Units.Rotations;
 import org.wpilib.math.filter.Debouncer;
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.geometry.Translation2d;
-import org.wpilib.math.kinematics.SwerveModuleState;
+import org.wpilib.math.kinematics.SwerveModuleAcceleration;
+import org.wpilib.math.kinematics.SwerveModulePosition;
+import org.wpilib.math.kinematics.SwerveModuleVelocity;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.LinearVelocity;
@@ -36,7 +38,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  * import static org.wpilib.units.Units.*;
  * import com.ctre.phoenix6.hardware.TalonFX;
  * import com.ctre.phoenix6.hardware.CANcoder;
- * import org.wpilib.math.system.plant.DCMotor;
+ * import org.wpilib.math.system.DCMotor;
  * import yams.motorcontrollers.SmartMotorControllerConfig;
  * import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
  * import yams.motorcontrollers.SmartMotorController;
@@ -109,7 +111,7 @@ public class SwerveModuleConfig
   private GearBox                        absoluteEncoderGearbox        = new GearBox(new double[]{1});
   /**
    * Swerve module state optimization using
-   * {@link org.wpilib.math.kinematics.SwerveModuleState#optimize(Rotation2d)}.
+   * {@link org.wpilib.math.kinematics.SwerveModuleVelocity#optimize(Rotation2d)}.
    */
   private boolean                        swerveModuleStateOptimization = true;
   /**
@@ -137,7 +139,7 @@ public class SwerveModuleConfig
    */
   private Optional<Distance> wheelCircumference = Optional.empty();
   /**
-   * Last angle this config actually commanded via {@link #getOptimizedState(SwerveModuleState)}.
+   * Last angle this config actually commanded via {@link #getOptimizedState(SwerveModuleVelocity)}.
    * The flip decision is made against this, not the live absolute encoder reading: kinematics
    * recomputes the raw desired angle every loop with no memory of a prior flip, so if the
    * decision were re-derived from the encoder, holding the raw state while a flip is debouncing
@@ -399,7 +401,7 @@ public class SwerveModuleConfig
   }
 
   /**
-   * Use {@link org.wpilib.math.kinematics.SwerveModuleState#optimize(Rotation2d)} to optimize each state.
+   * Use {@link org.wpilib.math.kinematics.SwerveModuleVelocity#optimize(Rotation2d)} to optimize each state.
    *
    * @param swerveModuleStateOptimization True to enable optimization, false otherwise.
    * @return {@link SwerveModuleConfig} for chaining.
@@ -470,10 +472,10 @@ public class SwerveModuleConfig
   /**
    * Get the cosine-compensated velocity to set the swerve module to.
    *
-   * @param desiredState Desired {@link SwerveModuleState} to use.
+   * @param desiredState Desired {@link SwerveModuleVelocity} to use.
    * @return Cosine compensated velocity in meters/second.
    */
-  private double getCosineCompensatedVelocity(SwerveModuleState desiredState)
+  private double getCosineCompensatedVelocity(SwerveModuleVelocity desiredState)
   {
     double cosineScalar = 1.0;
     // Taken from the CTRE SwerveModule class.
@@ -490,24 +492,24 @@ public class SwerveModuleConfig
     {
       cosineScalar = 1;
     }
-
-    return desiredState.speedMetersPerSecond * cosineScalar;
+    
+    return desiredState.velocity * cosineScalar;
   }
 
   /**
-   * Get the optimized {@link SwerveModuleState} applying all optional optimizations.
+   * Get the optimized {@link SwerveModuleVelocity} applying all optional optimizations.
    *
-   * @param state {@link SwerveModuleState} to optimize.
-   * @return {@link SwerveModuleState} optimized.
+   * @param state {@link SwerveModuleVelocity} to optimize.
+   * @return {@link SwerveModuleVelocity} optimized.
    */
-  public SwerveModuleState getOptimizedState(SwerveModuleState state)
+  public SwerveModuleVelocity getOptimizedState(SwerveModuleVelocity state)
   {
     if (minimumVelocity.isPresent())
     {
-      if (MetersPerSecond.of(Math.abs(state.speedMetersPerSecond)).lte(minimumVelocity.get()))
+      if (MetersPerSecond.of(Math.abs(state.velocity)).lte(minimumVelocity.get()))
       {
-//        state = new SwerveModuleState(0, state.angle);
-        state = new SwerveModuleState(0, new Rotation2d(getAbsoluteEncoderAngle()));
+//        state = new SwerveModuleVelocity(0, state.angle);
+        state = new SwerveModuleVelocity(0, new Rotation2d(getAbsoluteEncoderAngle()));
 
       }
     }
@@ -522,7 +524,7 @@ public class SwerveModuleConfig
     }
     if (cosineCompensation)
     {
-      state.speedMetersPerSecond = getCosineCompensatedVelocity(state);
+      state.velocity = getCosineCompensatedVelocity(state);
     }
     return state;
   }
