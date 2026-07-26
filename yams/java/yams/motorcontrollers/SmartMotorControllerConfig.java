@@ -2513,14 +2513,6 @@ public class SmartMotorControllerConfig {
      * Exponentially profiled closed loop controller.
      */
     ExponentialProfile,
-    /**
-     * Vendor position control request.
-     */
-    VendorPositionControlRequest,
-    /**
-     * Vendor velocity control request.
-     */
-    VendorVelocityControlRequest,
   }
 
   /**
