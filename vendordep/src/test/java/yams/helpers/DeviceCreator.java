@@ -3,6 +3,7 @@
 
 package yams.helpers;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
@@ -35,7 +36,7 @@ public class DeviceCreator
         revId.setRelease(1);
         System.err.println("Warning: used maximum device IDs, resetting to 0");
     }
-    return new SparkMax(id, MotorType.kBrushless);
+    return new SparkMax(1, id, MotorType.kBrushless);
   }
 
   public static SparkFlex createSparkFlex()
@@ -46,7 +47,7 @@ public class DeviceCreator
         revId.setRelease(1);
         System.err.println("Warning: used maximum device IDs, resetting to 0");
     }
-    return new SparkFlex(id, MotorType.kBrushless);
+    return new SparkFlex(1, id, MotorType.kBrushless);
   }
 
   public static TalonFX createTalonFX()
@@ -57,7 +58,7 @@ public class DeviceCreator
         ctreId.setRelease(1);
         System.err.println("Warning: used maximum device IDs, resetting to 0");
     }
-    return new TalonFX(id);
+    return new TalonFX(id, CANBus.systemcore(1));
   }
 
   public static TalonFXS createTalonFXS()
@@ -68,12 +69,12 @@ public class DeviceCreator
         ctreId.setRelease(1);
         System.err.println("Warning: used maximum device IDs, resetting to 0");
     }
-    return new TalonFXS(id);
+    return new TalonFXS(id, CANBus.systemcore(1));
   }
 
   /** Creates a CANcoder sharing the same CAN ID as the given TalonFX. */
   public static CANcoder createCANcoderFor(TalonFX talon)
   {
-    return new CANcoder(talon.getDeviceID());
+    return new CANcoder(talon.getDeviceID(), CANBus.systemcore(1));
   }
 }
