@@ -6,7 +6,7 @@ package yams.units;
 import static org.wpilib.units.Units.Rotations;
 
 import org.wpilib.units.measure.Angle;
-import org.wpilib.wpilibj.RobotBase;
+import org.wpilib.framework.RobotBase;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Objects;

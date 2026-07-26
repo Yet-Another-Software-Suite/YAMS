@@ -5,7 +5,7 @@ package yams.units;
 
 import static org.wpilib.units.Units.Rotations;
 
-import org.wpilib.math.MathUtil;
+import org.wpilib.math.util.MathUtil;
 import org.wpilib.units.measure.Angle;
 import java.util.Optional;
 
