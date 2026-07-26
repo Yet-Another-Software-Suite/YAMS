@@ -12,10 +12,9 @@ import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.geometry.Translation3d;
-import org.wpilib.math.system.plant.LinearSystemId;
+import org.wpilib.math.system.Models;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.Distance;
-import org.wpilib.wpilibj.RobotBase;
 import org.wpilib.simulation.BatterySim;
 import org.wpilib.simulation.DCMotorSim;
 import org.wpilib.simulation.RoboRioSim;
@@ -28,6 +27,8 @@ import org.wpilib.util.Color8Bit;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.button.Trigger;
+import org.wpilib.framework.RobotBase;
+
 import java.util.Optional;
 import java.util.function.Supplier;
 import yams.exceptions.DifferentialMechanismConfigurationException;
@@ -182,14 +183,14 @@ public class DifferentialMechanism extends SmartPositionalMechanism
 
       // Setup Sim
       m_leftSim = Optional.of(new DCMotorSim(
-          LinearSystemId.createDCMotorSystem(m_leftSMC.getDCMotor(),
-                                             m_config.getMOI(),
-                                             m_leftSMC.getConfig().getGearing().getMechanismToRotorRatio()),
+          Models.singleJointedArmFromPhysicalConstants(m_leftSMC.getDCMotor(),
+                                                       m_config.getMOI(),
+                                                       m_leftSMC.getConfig().getGearing().getMechanismToRotorRatio()),
           m_leftSMC.getDCMotor()));
       m_rightSim = Optional.of(new DCMotorSim(
-          LinearSystemId.createDCMotorSystem(m_rightSMC.getDCMotor(),
-                                             m_config.getMOI(),
-                                             m_rightSMC.getConfig().getGearing().getMechanismToRotorRatio()),
+          Models.singleJointedArmFromPhysicalConstants(m_rightSMC.getDCMotor(),
+                                                       m_config.getMOI(),
+                                                       m_rightSMC.getConfig().getGearing().getMechanismToRotorRatio()),
           m_rightSMC.getDCMotor()));
       m_leftSMC.setSimSupplier(new DCMotorSimSupplier(m_leftSim.get(), m_leftSMC));
       m_rightSMC.setSimSupplier(new DCMotorSimSupplier(m_rightSim.get(), m_rightSMC));
@@ -207,7 +208,7 @@ public class DifferentialMechanism extends SmartPositionalMechanism
                                                                    Inches.of(4).in(Meters),
                                                                    startingtwist.in(Degrees),
                                                                    6,
-                                                                   new Color8Bit(Color.kRed)));
+                                                                   new Color8Bit(Color.RED)));
 
       SmartDashboard.putData(getName() + "/mechanism", m_mechanismWindow);
 
@@ -359,8 +360,8 @@ public class DifferentialMechanism extends SmartPositionalMechanism
       m_rightSMC.simIterate();
       m_rightSMC.getSimSupplier().get().starveUpdateSim();
       RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(
-          m_leftSim.get().getCurrentDrawAmps(),
-          m_rightSim.get().getCurrentDrawAmps()));
+          m_leftSim.get().getCurrentDraw(),
+          m_rightSim.get().getCurrentDraw()));
       visualizationUpdate();
     }
   }

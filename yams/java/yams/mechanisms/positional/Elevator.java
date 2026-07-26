@@ -19,7 +19,7 @@ import static org.wpilib.units.Units.Volts;
 import org.wpilib.math.filter.Debouncer.DebounceType;
 import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.Translation3d;
-import org.wpilib.math.system.plant.DCMotor;
+import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularAcceleration;
 import org.wpilib.units.measure.AngularVelocity;
@@ -27,7 +27,7 @@ import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.LinearVelocity;
 import org.wpilib.units.measure.Voltage;
-import org.wpilib.wpilibj.RobotBase;
+import org.wpilib.framework.RobotBase;
 import org.wpilib.simulation.BatterySim;
 import org.wpilib.simulation.ElevatorSim;
 import org.wpilib.simulation.RoboRioSim;
@@ -161,8 +161,8 @@ public class Elevator extends SmartPositionalMechanism
                                           0.01 / 4096, 0.01 / 4096));
       m_smc.setSimSupplier(new SimSupplier()
       {
-        final Supplier<Double> pos = m_sim.get()::getPositionMeters;
-        final Supplier<Double> mps = m_sim.get()::getVelocityMetersPerSecond;
+        final Supplier<Double> pos = m_sim.get()::getPosition;
+        final Supplier<Double> mps = m_sim.get()::getVelocity;
         final DerivativeTimeFilter mpsps = new DerivativeTimeFilter(pos.get(),
                                                                     smcConfig.getClosedLoopControlPeriod()
                                                                              .orElse(Milliseconds.of(20)));
@@ -236,7 +236,7 @@ public class Elevator extends SmartPositionalMechanism
         @Override
         public Voltage getMechanismStatorVoltage()
         {
-          return Volts.of(dcMotor.getVoltage(dcMotor.getTorque(m_sim.get().getCurrentDrawAmps()),
+          return Volts.of(dcMotor.getVoltage(dcMotor.getTorque(m_sim.get().getCurrentDraw()),
                                              getMechanismVelocity().in(RadiansPerSecond)));
         }
 
@@ -288,7 +288,7 @@ public class Elevator extends SmartPositionalMechanism
         @Override
         public Current getCurrentDraw()
         {
-          return Amps.of(m_sim.get().getCurrentDrawAmps());
+          return Amps.of(m_sim.get().getCurrentDraw());
         }
 
         @Override
@@ -321,7 +321,7 @@ public class Elevator extends SmartPositionalMechanism
                                   .in(Meters),
                              config.getAngle().in(Degrees),
                              3,
-                             new Color8Bit(Color.kYellow)
+                             new Color8Bit(Color.YELLOW)
                          ));
       }
       if (m_smc.getConfig().getMechanismUpperLimit().isPresent())
@@ -338,7 +338,7 @@ public class Elevator extends SmartPositionalMechanism
                                   .in(Meters),
                              config.getAngle().in(Degrees),
                              3,
-                             new Color8Bit(Color.kHotPink)
+                             new Color8Bit(Color.HOT_PINK)
                          ));
       }
       m_mechanismWindow.getRoot(
@@ -351,7 +351,7 @@ public class Elevator extends SmartPositionalMechanism
                            config.getMinimumHeight().get().in(Meters),
                            config.getAngle().in(Degrees),
                            3,
-                           new Color8Bit(Color.kRed)
+                           new Color8Bit(Color.RED)
                        ));
       m_mechanismWindow.getRoot(
                            "MaxHard",
@@ -363,7 +363,7 @@ public class Elevator extends SmartPositionalMechanism
                            config.getMaximumHeight().get().in(Meters),
                            config.getAngle().in(Degrees),
                            3,
-                           new Color8Bit(Color.kLimeGreen)
+                           new Color8Bit(Color.LIME_GREEN)
                        ));
 
       m_mechanismLigament = m_mechanismRoot.append(new MechanismLigament2d(getName(),
@@ -375,7 +375,7 @@ public class Elevator extends SmartPositionalMechanism
               smcConfig.convertFromMechanism(smcConfig.getStartingPosition().orElseThrow()).in(Meters),
                                                                           config.getAngle().in(Degrees),
                                                                           3,
-                                                                          new Color8Bit(Color.kWhite)));
+                                                                          new Color8Bit(Color.WHITE)));
       SmartDashboard.putData(getName() + "/mechanism", m_mechanismWindow);
     }
   }
@@ -405,7 +405,7 @@ public class Elevator extends SmartPositionalMechanism
 //        m_motor.setEncoderPosition(m_config.getMinimumHeight().get());
       } else
       {
-        RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_sim.get().getCurrentDrawAmps()));
+        RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_sim.get().getCurrentDraw()));
       }
       visualizationUpdate();
     }

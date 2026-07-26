@@ -7,12 +7,12 @@ import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Radians;
 
-import org.wpilib.math.Pair;
+import org.wpilib.math.util.Pair;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.geometry.Translation3d;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.Distance;
-import org.wpilib.wpilibj.RobotBase;
+import org.wpilib.framework.RobotBase;
 import org.wpilib.simulation.BatterySim;
 import org.wpilib.simulation.RoboRioSim;
 import org.wpilib.simulation.SingleJointedArmSim;
@@ -442,9 +442,9 @@ public class DoubleJointedArm extends SmartPositionalMechanism
       m_upperSMC.getSimSupplier().get().updateSimState();
       m_upperSMC.simIterate();
       m_upperSMC.getSimSupplier().get().starveUpdateSim();
-      RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_lowerArmSim.get().getCurrentDrawAmps(),
+      RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_lowerArmSim.get().getCurrentDraw(),
                                                                                m_upperArmSim.get()
-                                                                                            .getCurrentDrawAmps()));
+                                                                                            .getCurrentDraw()));
       visualizationUpdate();
     }
   }
