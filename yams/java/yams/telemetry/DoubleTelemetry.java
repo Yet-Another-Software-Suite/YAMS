@@ -9,8 +9,8 @@ import org.wpilib.networktables.DoubleTopic;
 import org.wpilib.networktables.NetworkTable;
 import org.wpilib.networktables.PubSub;
 import org.wpilib.datalog.DoubleLogEntry;
-import org.wpilib.wpilibj.DataLogManager;
-import org.wpilib.wpilibj.Timer;
+import org.wpilib.system.DataLogManager;
+import org.wpilib.system.Timer;
 import java.util.Optional;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
@@ -175,7 +175,7 @@ public class DoubleTelemetry
       prefix += unit + "/";
       dataLogEntry = Optional.of(new DoubleLogEntry(DataLogManager.getLog(),
                                                     prefix + key,
-                                                    (long) Timer.getFPGATimestamp()));
+                                                    (long) Timer.getTimestamp()));
     }
   }
 
@@ -239,7 +239,7 @@ public class DoubleTelemetry
     {return false;}
     if (dataLogEntry.isPresent())
     {
-      dataLogEntry.get().append(value, (long) Timer.getFPGATimestamp());
+      dataLogEntry.get().append(value, (long) Timer.getTimestamp());
     }
     if (subscriber.isPresent())
     {

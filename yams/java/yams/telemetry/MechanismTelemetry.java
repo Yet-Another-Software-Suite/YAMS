@@ -6,7 +6,7 @@ package yams.telemetry;
 import org.wpilib.networktables.DoublePublisher;
 import org.wpilib.networktables.NetworkTable;
 import org.wpilib.networktables.NetworkTableInstance;
-import org.wpilib.wpilibj.Timer;
+import org.wpilib.system.Timer;
 import java.util.Optional;
 import yams.motorcontrollers.SmartMotorController;
 
@@ -132,9 +132,9 @@ public class MechanismTelemetry
     loopTimePublisher.ifPresent(publisher -> {
       if (prevTimestamp != 0)
       {
-        publisher.set(Timer.getFPGATimestamp() - prevTimestamp);
+        publisher.set(Timer.getTimestamp() - prevTimestamp);
       }
-      prevTimestamp = Timer.getFPGATimestamp();
+      prevTimestamp = Timer.getTimestamp();
     });
   }
 }

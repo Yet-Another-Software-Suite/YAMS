@@ -9,8 +9,8 @@ import org.wpilib.networktables.BooleanTopic;
 import org.wpilib.networktables.NetworkTable;
 import org.wpilib.networktables.PubSub;
 import org.wpilib.datalog.BooleanLogEntry;
-import org.wpilib.wpilibj.DataLogManager;
-import org.wpilib.wpilibj.Timer;
+import org.wpilib.system.DataLogManager;
+import org.wpilib.system.Timer;
 import java.util.Optional;
 import yams.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
 
@@ -148,7 +148,7 @@ public class BooleanTelemetry
       {prefix += "/";}
       dataLogEntry = Optional.of(new BooleanLogEntry(DataLogManager.getLog(),
                                                      prefix + key,
-                                                     (long) Timer.getFPGATimestamp()));
+                                                     (long) Timer.getTimestamp()));
     }
   }
 
