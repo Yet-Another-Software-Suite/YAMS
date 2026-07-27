@@ -30,16 +30,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - container: wpilib/roborio-cross-ubuntu:2025-22.04
-            artifact-name: athena
-            build-options: "-Ponlylinuxathena"
-          - container: wpilib/raspbian-cross-ubuntu:bookworm-22.04
-            artifact-name: arm32
-            build-options: "-Ponlylinuxarm32"
-          - container: wpilib/aarch64-cross-ubuntu:bookworm-22.04
-            artifact-name: arm64
+          - container: wpilib/systemcore-cross-debian:trixie
+            artifact-name: SystemCore
+            build-options: "-Ponlylinuxsystemcore"
+          - container: wpilib/aarch64-cross-debian:trixie
+            artifact-name: Arm64
             build-options: "-Ponlylinuxarm64"
-    runs-on: ubuntu-22.04
+          - container: wpilib/systemcore-cross-debian:trixie
+            artifact-name: Linux
+            build-options: ""
+    runs-on: ubuntu-24.04
     container: ${{ matrix.container }}
     steps:
       - uses: actions/checkout@v7
@@ -47,6 +47,7 @@ jobs:
         run: git config --global --add safe.directory /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}
       - name: Install toolchain
         run: ./gradlew installSystemCoreToolchain
+        working-directory: vendordep
       - name: Publish
         run: ./gradlew publish ${{ matrix.build-options }}
         working-directory: vendordep
@@ -112,7 +113,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 25
       - name: Make gradlew executable
         if: runner.os != 'Windows'
         run: chmod +x gradlew
