@@ -23,9 +23,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
-      - uses: gradle/actions/setup-gradle@v6
-      - name: Install roboRIOToolchain
+          java-version: 25
         working-directory: vendordep
         run: chmod a+x gradlew && ./gradlew installRoboRioToolchain
       - name: Build java examples
