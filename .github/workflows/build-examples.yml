@@ -25,7 +25,7 @@ jobs:
           distribution: temurin
           java-version: 25
         working-directory: vendordep
-        run: chmod a+x gradlew && ./gradlew installRoboRioToolchain
+        run: chmod a+x gradlew && ./gradlew installSystemCoreToolchain
       - name: Build java examples
         run: mkdir generated && make && make build
         working-directory: examples
