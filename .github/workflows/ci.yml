@@ -45,6 +45,8 @@ jobs:
       - uses: actions/checkout@v7
       - name: Configure git safe directory
         run: git config --global --add safe.directory /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}
+      - name: Install toolchain
+        run: ./gradlew installSystemCoreToolchain
       - name: Publish
         run: ./gradlew publish ${{ matrix.build-options }}
         working-directory: vendordep
@@ -72,6 +74,8 @@ jobs:
       - name: Install doxygen and graphviz
         run: sudo apt-get install -y doxygen graphviz
       - uses: gradle/actions/setup-gradle@v6
+      - name: Install toolchain
+        run: ./gradlew installSystemCoreToolchain
       - name: C++ unit tests
         run: ./gradlew googleTest
         continue-on-error: true
@@ -113,6 +117,8 @@ jobs:
         if: runner.os != 'Windows'
         run: chmod +x gradlew
       - uses: gradle/actions/setup-gradle@v6
+      - name: Install toolchian
+        run: ${{matrix.gradlew}} installSystemCoreToolchain
       - name: Publish
         run: ${{ matrix.gradlew }} publish
       - uses: actions/upload-artifact@v7
