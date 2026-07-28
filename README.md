@@ -139,6 +139,9 @@ See [`LICENSE`](./LICENSE.txt) for full details.
 We welcome feedback and contributions!
 Open an issue for bug reports or feature requests, or fork and open a pull request to contribute.
 
+# Special Thanks
+GitBook for supporting our documentation!
+
 Inspired by [Manip-Lib](https://github.com/frc5517/Manip-Lib).
 
 ---
