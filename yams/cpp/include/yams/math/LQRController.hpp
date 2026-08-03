@@ -3,15 +3,15 @@
 
 #pragma once
 
-#include <frc/controller/LinearQuadraticRegulator.h>
-#include <frc/estimator/KalmanFilter.h>
-#include <frc/system/LinearSystem.h>
-#include <units/angle.h>
-#include <units/angular_velocity.h>
-#include <units/length.h>
-#include <units/time.h>
-#include <units/velocity.h>
-#include <units/voltage.h>
+#include <wpi/math/controller/LinearQuadraticRegulator.hpp>
+#include <wpi/math/estimator/KalmanFilter.hpp>
+#include <wpi/math/system/LinearSystem.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/time.hpp>
+#include <wpi/units/velocity.hpp>
+#include <wpi/units/voltage.hpp>
 
 #include <memory>
 #include <optional>
@@ -55,7 +55,7 @@ class LQRController {
    * @param angle    Current mechanism angle.
    * @param velocity Current mechanism velocity.
    */
-  void Reset(units::radian_t angle, units::radians_per_second_t velocity);
+  void Reset(wpi::units::radian_t angle, wpi::units::radians_per_second_t  velocity);
 
   /**
    * Reset the linear position+velocity state of the controller (elevator).
@@ -63,7 +63,7 @@ class LQRController {
    * @param distance Current mechanism distance.
    * @param velocity Current mechanism linear velocity.
    */
-  void Reset(units::meter_t distance, units::meters_per_second_t velocity);
+  void Reset(wpi::units::meter_t distance, wpi::units::meters_per_second_t velocity);
 
   /**
    * Calculate the next voltage output for an angular positional mechanism (arm).
@@ -73,8 +73,8 @@ class LQRController {
    * @param velocity  Target angular velocity setpoint.
    * @return Voltage to apply to the motor.
    */
-  units::volt_t Calculate(units::radian_t measured, units::radian_t position,
-                          units::radians_per_second_t velocity);
+  wpi::units::volt_t Calculate(wpi::units::radian_t measured, wpi::units::radian_t position,
+                          wpi::units::radians_per_second_t velocity);
 
   /**
    * Calculate the next voltage output for a linear positional mechanism (elevator).
@@ -84,8 +84,8 @@ class LQRController {
    * @param velocity  Target linear velocity setpoint.
    * @return Voltage to apply to the motor.
    */
-  units::volt_t Calculate(units::meter_t measured, units::meter_t position,
-                          units::meters_per_second_t velocity);
+  wpi::units::volt_t Calculate(wpi::units::meter_t measured, wpi::units::meter_t position,
+                          wpi::units::meters_per_second_t velocity);
 
   /**
    * Calculate the next voltage output for an angular velocity mechanism (flywheel).
@@ -94,8 +94,8 @@ class LQRController {
    * @param velocity  Target angular velocity setpoint.
    * @return Voltage to apply to the motor.
    */
-  units::volt_t Calculate(units::radians_per_second_t measured,
-                          units::radians_per_second_t velocity);
+  wpi::units::volt_t Calculate(wpi::units::radians_per_second_t measured,
+                          wpi::units::radians_per_second_t velocity);
 
   /**
    * Calculate the next voltage output for a linear velocity mechanism.
@@ -104,7 +104,7 @@ class LQRController {
    * @param velocity  Target linear velocity setpoint.
    * @return Voltage to apply to the motor.
    */
-  units::volt_t Calculate(units::meters_per_second_t measured, units::meters_per_second_t velocity);
+  wpi::units::volt_t Calculate(wpi::units::meters_per_second_t measured, wpi::units::meters_per_second_t velocity);
 
   /**
    * Get the configured LQR plant type.
@@ -121,15 +121,15 @@ class LQRController {
   const std::optional<LQRConfig>& GetConfig() const;
 
  private:
-  // frc::LinearSystemLoop stores raw pointers to the LQR and Kalman filter passed to its
+  // wpi::math::LinearSystemLoop stores raw pointers to the LQR and Kalman filter passed to its
   // constructor. These bundles heap-pin all three together so the pointers are never dangled.
   struct FlywheelBundle {
-    frc::LinearQuadraticRegulator<1, 1> controller;
-    frc::KalmanFilter<1, 1, 1> observer;
+    wpi::math::LinearQuadraticRegulator<1, 1> controller;
+    wpi::math::KalmanFilter<1, 1, 1> observer;
     LQRConfig::Loop1 loop;
 
-    FlywheelBundle(frc::LinearSystem<1, 1, 1> plant, frc::LinearQuadraticRegulator<1, 1> ctrl,
-                   frc::KalmanFilter<1, 1, 1> obs, units::volt_t maxV, units::second_t dt)
+    FlywheelBundle(wpi::math::LinearSystem<1, 1, 1> plant, wpi::math::LinearQuadraticRegulator<1, 1> ctrl,
+                   wpi::math::KalmanFilter<1, 1, 1> obs, wpi::units::volt_t maxV, wpi::units::second_t dt)
         : controller{std::move(ctrl)},
           observer{std::move(obs)},
           loop{plant, controller, observer, maxV, dt} {}
@@ -141,12 +141,12 @@ class LQRController {
   };
 
   struct ArmElevatorBundle {
-    frc::LinearQuadraticRegulator<2, 1> controller;
-    frc::KalmanFilter<2, 1, 1> observer;
+    wpi::math::LinearQuadraticRegulator<2, 1> controller;
+    wpi::math::KalmanFilter<2, 1, 1> observer;
     LQRConfig::Loop2 loop;
 
-    ArmElevatorBundle(frc::LinearSystem<2, 1, 1> plant, frc::LinearQuadraticRegulator<2, 1> ctrl,
-                      frc::KalmanFilter<2, 1, 1> obs, units::volt_t maxV, units::second_t dt)
+    ArmElevatorBundle(wpi::math::LinearSystem<2, 1, 1> plant, wpi::math::LinearQuadraticRegulator<2, 1> ctrl,
+                      wpi::math::KalmanFilter<2, 1, 1> obs, wpi::units::volt_t maxV, wpi::units::second_t dt)
         : controller{std::move(ctrl)},
           observer{std::move(obs)},
           loop{plant, controller, observer, maxV, dt} {}
@@ -163,7 +163,7 @@ class LQRController {
   std::optional<LQRConfig> m_config;
   LQRConfig::LQRType m_type;
   std::variant<std::unique_ptr<FlywheelBundle>, std::unique_ptr<ArmElevatorBundle>> m_bundle;
-  units::second_t m_period;
+  wpi::units::second_t m_period;
 };
 
 }  // namespace yams::math

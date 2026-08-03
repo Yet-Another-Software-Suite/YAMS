@@ -3,11 +3,11 @@
 
 #include "yams/math/LQRConfig.hpp"
 
-#include <frc/EigenCore.h>
-#include <frc/system/plant/LinearSystemId.h>
-#include <units/length.h>
-#include <units/mass.h>
-#include <units/moment_of_inertia.h>
+#include <wpi/math/linalg/EigenCore.hpp>
+#include <wpi/math/system/Models.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/mass.hpp>
+#include <wpi/units/moment_of_inertia.hpp>
 
 #include <stdexcept>
 #include <vector>
@@ -19,35 +19,35 @@ LQRConfig& LQRConfig::WithType(LQRType type) {
   return *this;
 }
 
-LQRConfig& LQRConfig::WithFlywheelSystem(const frc::DCMotor& motor, double momentOfInertia,
+LQRConfig& LQRConfig::WithFlywheelSystem(const wpi::math::DCMotor& motor, double momentOfInertia,
                                          double gearing) {
-  m_flywheelPlant = frc::LinearSystemId::FlywheelSystem(
-      motor, units::kilogram_square_meter_t{momentOfInertia}, gearing);
+  m_flywheelPlant = wpi::math::Models::FlywheelFromPhysicalConstants(
+      motor, wpi::units::kilogram_square_meter_t{momentOfInertia}, gearing);
   m_type = LQRType::FLYWHEEL;
   return *this;
 }
 
-LQRConfig& LQRConfig::WithArmSystem(const frc::DCMotor& motor, double momentOfInertia,
+LQRConfig& LQRConfig::WithArmSystem(const wpi::math::DCMotor& motor, double momentOfInertia,
                                     double gearing) {
   // Build full 2-output plant, then reduce to position-only output to match
   // the Java LinearSystem<N2,N1,N1> behaviour.
-  auto full = frc::LinearSystemId::SingleJointedArmSystem(
-      motor, units::kilogram_square_meter_t{momentOfInertia}, gearing);
-  m_armElevatorPlant =
-      frc::LinearSystem<2, 1, 1>{full.A(), full.B(), (frc::Matrixd<1, 2>() << 1.0, 0.0).finished(),
-                                 frc::Matrixd<1, 1>::Zero()};
+  auto full = wpi::math::Models::SingleJointedArmFromPhysicalConstants(
+      motor, wpi::units::kilogram_square_meter_t{momentOfInertia}, gearing);
+  m_armElevatorPlant = wpi::math::LinearSystem<2, 1, 1>{
+      full.A(), full.B(), (wpi::math::Matrixd<1, 2>() << 1.0, 0.0).finished(),
+      wpi::math::Matrixd<1, 1>::Zero()};
   m_type = LQRType::ARM;
   return *this;
 }
 
-LQRConfig& LQRConfig::WithElevatorSystem(const frc::DCMotor& motor, double mass, double drumRadius,
+LQRConfig& LQRConfig::WithElevatorSystem(const wpi::math::DCMotor& motor, double mass, double drumRadius,
                                          double gearing) {
   // Same reduction to position-only output.
-  auto full = frc::LinearSystemId::ElevatorSystem(motor, units::kilogram_t{mass},
-                                                  units::meter_t{drumRadius}, gearing);
-  m_armElevatorPlant =
-      frc::LinearSystem<2, 1, 1>{full.A(), full.B(), (frc::Matrixd<1, 2>() << 1.0, 0.0).finished(),
-                                 frc::Matrixd<1, 1>::Zero()};
+  auto full = wpi::math::Models::ElevatorFromPhysicalConstants(
+      motor, wpi::units::kilogram_t{mass}, wpi::units::meter_t{drumRadius}, gearing);
+  m_armElevatorPlant = wpi::math::LinearSystem<2, 1, 1>{
+      full.A(), full.B(), (wpi::math::Matrixd<1, 2>() << 1.0, 0.0).finished(),
+      wpi::math::Matrixd<1, 1>::Zero()};
   m_type = LQRType::ELEVATOR;
   return *this;
 }
@@ -68,20 +68,21 @@ LQRConfig& LQRConfig::WithMeasurementStdDevs(std::initializer_list<double> measS
   m_measStdDevs = std::vector<double>(measStdDevs);
   return *this;
 }
-LQRConfig& LQRConfig::WithMaxVoltage(units::volt_t maxVoltage) {
+LQRConfig& LQRConfig::WithMaxVoltage(wpi::units::volt_t maxVoltage) {
   m_maxVoltage = maxVoltage;
   return *this;
 }
-LQRConfig& LQRConfig::WithPeriod(units::second_t period) {
+LQRConfig& LQRConfig::WithPeriod(wpi::units::second_t period) {
   m_period = period;
   return *this;
 }
 
 LQRConfig::LQRType LQRConfig::GetType() const { return m_type.value(); }
-units::second_t LQRConfig::GetPeriod() const { return m_period; }
-units::volt_t LQRConfig::GetMaxVoltage() const { return m_maxVoltage; }
+wpi::units::second_t LQRConfig::GetPeriod() const { return m_period; }
+wpi::units::volt_t LQRConfig::GetMaxVoltage() const { return m_maxVoltage; }
 
-std::variant<frc::LinearSystem<1, 1, 1>, frc::LinearSystem<2, 1, 1>> LQRConfig::GetSystem() const {
+std::variant<wpi::math::LinearSystem<1, 1, 1>, wpi::math::LinearSystem<2, 1, 1>>
+LQRConfig::GetSystem() const {
   if (m_type.value() == LQRType::FLYWHEEL) return m_flywheelPlant.value();
   return m_armElevatorPlant.value();
 }
@@ -90,23 +91,23 @@ std::variant<LQRConfig::Loop1, LQRConfig::Loop2> LQRConfig::GetLoop() const {
   auto type = m_type.value();
   if (type == LQRType::FLYWHEEL) {
     auto plant = m_flywheelPlant.value();
-    frc::LinearQuadraticRegulator<1, 1> controller{plant,
+    wpi::math::LinearQuadraticRegulator<1, 1> controller{plant,
                                                    {m_qElems.empty() ? 3.0 : m_qElems[0]},
                                                    {m_rElems.empty() ? 12.0 : m_rElems[0]},
                                                    m_period};
-    frc::KalmanFilter<1, 1, 1> observer{plant,
+    wpi::math::KalmanFilter<1, 1, 1> observer{plant,
                                         {m_stateStdDevs.empty() ? 3.0 : m_stateStdDevs[0]},
                                         {m_measStdDevs.empty() ? 0.01 : m_measStdDevs[0]},
                                         m_period};
     return Loop1{plant, controller, observer, m_maxVoltage, m_period};
   } else {
     auto plant = m_armElevatorPlant.value();
-    frc::LinearQuadraticRegulator<2, 1> controller{
+    wpi::math::LinearQuadraticRegulator<2, 1> controller{
         plant,
         {m_qElems.size() > 0 ? m_qElems[0] : 0.01, m_qElems.size() > 1 ? m_qElems[1] : 0.01},
         {m_rElems.empty() ? 12.0 : m_rElems[0]},
         m_period};
-    frc::KalmanFilter<2, 1, 1> observer{plant,
+    wpi::math::KalmanFilter<2, 1, 1> observer{plant,
                                         {m_stateStdDevs.size() > 0 ? m_stateStdDevs[0] : 0.01,
                                          m_stateStdDevs.size() > 1 ? m_stateStdDevs[1] : 0.01},
                                         {m_measStdDevs.empty() ? 0.0001 : m_measStdDevs[0]},
