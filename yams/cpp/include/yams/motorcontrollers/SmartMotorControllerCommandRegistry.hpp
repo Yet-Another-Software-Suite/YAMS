@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <frc2/command/CommandPtr.h>
-#include <frc2/command/SubsystemBase.h>
+#include <wpi/commands2/CommandPtr.hpp>
+#include <wpi/commands2/SubsystemBase.hpp>
 
 #include <functional>
 #include <string>
@@ -34,7 +34,7 @@ class SmartMotorControllerCommandRegistry {
    * @param subsystem Subsystem that owns the command (used for requirement and naming).
    * @param callback  Runnable invoked each loop while the command is running.
    */
-  static void AddCommand(const std::string& cmdName, frc2::SubsystemBase* subsystem,
+  static void AddCommand(const std::string& cmdName, wpi::cmd::SubsystemBase* subsystem,
                          std::function<void()> callback);
 
   /**
@@ -44,7 +44,7 @@ class SmartMotorControllerCommandRegistry {
    * @param subsystem Subsystem.
    * @return true if the command is already registered.
    */
-  static bool CommandExists(const std::string& cmdName, frc2::SubsystemBase* subsystem);
+  static bool CommandExists(const std::string& cmdName, wpi::cmd::SubsystemBase* subsystem);
 
   /**
    * Remove all commands registered for a specific subsystem instance.
@@ -55,7 +55,7 @@ class SmartMotorControllerCommandRegistry {
    *
    * @param subsystem Subsystem whose commands should be removed.
    */
-  static void RemoveCommands(frc2::SubsystemBase* subsystem);
+  static void RemoveCommands(wpi::cmd::SubsystemBase* subsystem);
 
   /**
    * Destroy all registered commands and callbacks.
@@ -67,12 +67,12 @@ class SmartMotorControllerCommandRegistry {
   static void Clear();
 
  private:
-  static std::unordered_map<std::string, frc2::CommandPtr> s_commands;
+  static std::unordered_map<std::string, wpi::cmd::CommandPtr> s_commands;
   static std::unordered_map<std::string, std::vector<std::function<void()>>> s_callbacks;
-  static std::unordered_map<std::string, frc2::SubsystemBase*> s_owners;
+  static std::unordered_map<std::string, wpi::cmd::SubsystemBase*> s_owners;
 
-  static std::string MakeKey(const std::string& cmdName, frc2::SubsystemBase* subsystem);
-  static void PublishToNT(const std::string& cmdName, frc2::SubsystemBase* subsystem);
+  static std::string MakeKey(const std::string& cmdName, wpi::cmd::SubsystemBase* subsystem);
+  static void PublishToNT(const std::string& cmdName, wpi::cmd::SubsystemBase* subsystem);
 };
 
 }  // namespace yams::motorcontrollers
