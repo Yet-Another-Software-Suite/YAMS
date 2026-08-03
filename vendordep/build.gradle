@@ -152,6 +152,7 @@ model {
               }
           }
           nativeUtils.useRequiredLibrary(it, 'wpilib_shared')
+          wpi.vendor.nativeVendor.cpp(it)
       }
   }
   testSuites {
@@ -183,6 +184,7 @@ model {
           }*/
 
           nativeUtils.useRequiredLibrary(it, "wpilib_shared", "googletest_static")
+          wpi.vendor.nativeVendor.cpp(it)
       }
 
   }
