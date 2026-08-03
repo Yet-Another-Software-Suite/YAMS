@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include <frc/geometry/Translation3d.h>
-#include <frc/simulation/DCMotorSim.h>
-#include <frc2/command/CommandPtr.h>
-#include <frc2/command/button/Trigger.h>
-#include <units/angle.h>
-#include <units/angular_velocity.h>
-#include <units/length.h>
-#include <units/velocity.h>
+#include <wpi/math/geometry/Translation3d.hpp>
+#include <wpi/simulation/DCMotorSim.hpp>
+#include <wpi/commands2/CommandPtr.hpp>
+#include <wpi/commands2/button/Trigger.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/velocity.hpp>
 
 #include <functional>
 #include <optional>
@@ -49,13 +49,13 @@ namespace yams::mechanisms::velocity {
  *         .WithIdleMode(Cfg::MotorMode::COAST)
  *         .WithStatorCurrentLimit(60.0_A)
  *         .WithMotorInverted(false)
- *         .WithFeedforward(frc::SimpleMotorFeedforward<units::turns>{
- *             0.0_V, units::unit_t<frc::SimpleMotorFeedforward<units::turns>::kv_unit>{1.0},
- *             units::unit_t<frc::SimpleMotorFeedforward<units::turns>::ka_unit>{0.0}})
+ *         .WithFeedforward(wpi::math::SimpleMotorFeedforward<wpi::units::turns>{
+ *             0.0_V, wpi::units::unit_t<wpi::math::SimpleMotorFeedforward<wpi::units::turns>::kv_unit>{1.0},
+ *             wpi::units::unit_t<wpi::math::SimpleMotorFeedforward<wpi::units::turns>::ka_unit>{0.0}})
  *         .WithClosedLoopMode()
  *         .WithTelemetry("ShooterMotor", Cfg::TelemetryVerbosity::HIGH);
  *
- * m_motor.emplace(m_talon, frc::DCMotor::Falcon500(1), motorCfg);
+ * m_motor.emplace(m_talon, wpi::math::DCMotor::Falcon500(1), motorCfg);
  *
  * m_flyWheelConfig.WithRollerDiameter(4.0 * 0.0254_m)  // 4-inch roller
  *                 .WithTelemetryName("Shooter");
@@ -63,7 +63,7 @@ namespace yams::mechanisms::velocity {
  * m_flyWheel.emplace(&m_flyWheelConfig, &m_motor.value());
  *
  * // Run at a fixed angular velocity (~2000 RPM):
- * m_flyWheel->Run(units::degrees_per_second_t{12000.0});
+ * m_flyWheel->Run(wpi::units::degrees_per_second_t{12000.0});
  *
  * // Or run at a surface speed (requires roller diameter):
  * m_flyWheel->Run(10.0_mps);
@@ -101,7 +101,7 @@ class FlyWheel : public SmartVelocityMechanism {
    *
    * @return Trigger for the upper velocity limit.
    */
-  frc2::Trigger Max() override;
+  wpi::cmd::Trigger Max() override;
 
   /**
    * Trigger that becomes true when the flywheel is at or below its minimum
@@ -109,7 +109,7 @@ class FlyWheel : public SmartVelocityMechanism {
    *
    * @return Trigger for the lower velocity limit.
    */
-  frc2::Trigger Min() override;
+  wpi::cmd::Trigger Min() override;
 
   // ---- FlyWheel-specific interface ------------------------------------------
 
@@ -118,7 +118,7 @@ class FlyWheel : public SmartVelocityMechanism {
    *
    * @return Current mechanism velocity in degrees per second.
    */
-  units::degrees_per_second_t GetVelocity() const;
+  wpi::units::degrees_per_second_t GetVelocity() const;
 
   // ---- Run / RunTo interface ------------------------------------------------
 
@@ -128,7 +128,7 @@ class FlyWheel : public SmartVelocityMechanism {
    * @param velocity FlyWheel angular velocity to go to.
    * @return CommandPtr that sets the flywheel to the desired speed.
    */
-  frc2::CommandPtr Run(units::degrees_per_second_t velocity);
+  wpi::cmd::CommandPtr Run(wpi::units::degrees_per_second_t velocity);
 
   /**
    * Set the flywheel to the given angular velocity via a supplier.
@@ -136,7 +136,7 @@ class FlyWheel : public SmartVelocityMechanism {
    * @param velocity Supplier returning the desired angular velocity each loop.
    * @return CommandPtr that sets the flywheel to the desired speed.
    */
-  frc2::CommandPtr Run(std::function<units::degrees_per_second_t()> velocity);
+  wpi::cmd::CommandPtr Run(std::function<wpi::units::degrees_per_second_t()> velocity);
 
   /**
    * Set the flywheel to the given surface speed.
@@ -146,7 +146,7 @@ class FlyWheel : public SmartVelocityMechanism {
    * @param surfaceSpeed Desired surface speed in metres per second.
    * @return CommandPtr that sets the flywheel to the desired surface speed.
    */
-  frc2::CommandPtr Run(units::meters_per_second_t surfaceSpeed);
+  wpi::cmd::CommandPtr Run(wpi::units::meters_per_second_t surfaceSpeed);
 
   /**
    * Set the flywheel to the given surface speed via a supplier.
@@ -156,7 +156,7 @@ class FlyWheel : public SmartVelocityMechanism {
    * @param surfaceSpeed Supplier returning the desired surface speed each loop.
    * @return CommandPtr that sets the flywheel to the desired surface speed.
    */
-  frc2::CommandPtr Run(std::function<units::meters_per_second_t()> surfaceSpeed);
+  wpi::cmd::CommandPtr Run(std::function<wpi::units::meters_per_second_t()> surfaceSpeed);
 
   /**
    * Run the flywheel to an angular velocity within a tolerance, then end the command.
@@ -167,8 +167,8 @@ class FlyWheel : public SmartVelocityMechanism {
    * @note Do not use with a default command on the subsystem, as it will override the setting after
    * this ends.
    */
-  frc2::CommandPtr RunTo(units::degrees_per_second_t velocity,
-                         units::degrees_per_second_t tolerance = units::degrees_per_second_t{5.0});
+  wpi::cmd::CommandPtr RunTo(wpi::units::degrees_per_second_t velocity,
+                         wpi::units::degrees_per_second_t tolerance = wpi::units::degrees_per_second_t{5.0});
 
   /**
    * Run the flywheel to a supplier-provided angular velocity within a tolerance, then end the
@@ -182,8 +182,8 @@ class FlyWheel : public SmartVelocityMechanism {
    * @note Do not use with a default command on the subsystem, as it will override the setting after
    * this ends.
    */
-  frc2::CommandPtr RunTo(std::function<units::degrees_per_second_t()> velocity,
-                         units::degrees_per_second_t tolerance = units::degrees_per_second_t{5.0});
+  wpi::cmd::CommandPtr RunTo(std::function<wpi::units::degrees_per_second_t()> velocity,
+                         wpi::units::degrees_per_second_t tolerance = wpi::units::degrees_per_second_t{5.0});
 
   /**
    * Run the flywheel to a surface speed within a tolerance, then end the command.
@@ -196,7 +196,7 @@ class FlyWheel : public SmartVelocityMechanism {
    * @note Do not use with a default command on the subsystem, as it will override the setting after
    * this ends.
    */
-  frc2::CommandPtr RunTo(units::meters_per_second_t velocity, units::meters_per_second_t tolerance);
+  wpi::cmd::CommandPtr RunTo(wpi::units::meters_per_second_t velocity, wpi::units::meters_per_second_t tolerance);
 
   /**
    * Run the flywheel to a supplier-provided surface speed within a tolerance, then end the command.
@@ -209,8 +209,8 @@ class FlyWheel : public SmartVelocityMechanism {
    * @note Do not use with a default command on the subsystem, as it will override the setting after
    * this ends.
    */
-  frc2::CommandPtr RunTo(std::function<units::meters_per_second_t()> velocity,
-                         units::meters_per_second_t tolerance);
+  wpi::cmd::CommandPtr RunTo(std::function<wpi::units::meters_per_second_t()> velocity,
+                         wpi::units::meters_per_second_t tolerance);
 
   // ---- Comparison triggers ---------------------------------------------------
 
@@ -220,7 +220,7 @@ class FlyWheel : public SmartVelocityMechanism {
    * @param velocity Reference angular velocity.
    * @return Trigger for the >= condition.
    */
-  frc2::Trigger Gte(units::degrees_per_second_t velocity);
+  wpi::cmd::Trigger Gte(wpi::units::degrees_per_second_t velocity);
 
   /**
    * Trigger that fires while the flywheel angular velocity is <= the given velocity.
@@ -228,7 +228,7 @@ class FlyWheel : public SmartVelocityMechanism {
    * @param velocity Reference angular velocity.
    * @return Trigger for the <= condition.
    */
-  frc2::Trigger Lte(units::degrees_per_second_t velocity);
+  wpi::cmd::Trigger Lte(wpi::units::degrees_per_second_t velocity);
 
   /**
    * Trigger that fires while the flywheel angular velocity is between start and end (inclusive).
@@ -237,7 +237,7 @@ class FlyWheel : public SmartVelocityMechanism {
    * @param end   Upper bound.
    * @return Trigger for the range condition.
    */
-  frc2::Trigger Between(units::degrees_per_second_t start, units::degrees_per_second_t end);
+  wpi::cmd::Trigger Between(wpi::units::degrees_per_second_t start, wpi::units::degrees_per_second_t end);
 
   /**
    * Trigger that fires while the flywheel is within tolerance of a velocity.
@@ -246,8 +246,8 @@ class FlyWheel : public SmartVelocityMechanism {
    * @param within   Tolerance.
    * @return Trigger for the near condition.
    */
-  frc2::Trigger IsNear(units::degrees_per_second_t velocity,
-                       units::degrees_per_second_t within = units::degrees_per_second_t{5.0}) const;
+  wpi::cmd::Trigger IsNear(wpi::units::degrees_per_second_t velocity,
+                       wpi::units::degrees_per_second_t within = wpi::units::degrees_per_second_t{5.0}) const;
 
   // ---- Direct setpoint setters -----------------------------------------------
 
@@ -256,7 +256,7 @@ class FlyWheel : public SmartVelocityMechanism {
    *
    * @param velocity Desired angular velocity.
    */
-  void SetVelocity(units::degrees_per_second_t velocity);
+  void SetVelocity(wpi::units::degrees_per_second_t velocity);
 
   /**
    * Directly command the flywheel to a surface speed setpoint (non-command).
@@ -265,7 +265,7 @@ class FlyWheel : public SmartVelocityMechanism {
    *
    * @param speed Desired surface speed.
    */
-  void SetSurfaceSpeed(units::meters_per_second_t speed);
+  void SetSurfaceSpeed(wpi::units::meters_per_second_t speed);
 
   /**
    * Set flywheel velocity from a linear surface speed (base-class override).
@@ -275,7 +275,7 @@ class FlyWheel : public SmartVelocityMechanism {
    *
    * @param velocity Desired surface speed.
    */
-  void SetMeasurementVelocitySetpoint(units::meters_per_second_t velocity);
+  void SetMeasurementVelocitySetpoint(wpi::units::meters_per_second_t velocity);
 
   // ---- Misc ------------------------------------------------------------------
 
@@ -284,7 +284,7 @@ class FlyWheel : public SmartVelocityMechanism {
    *
    * @return Translation3d representing the mechanism endpoint.
    */
-  frc::Translation3d GetRelativeMechanismPosition() const;
+  wpi::math::Translation3d GetRelativeMechanismPosition() const;
 
   /**
    * Get the configuration used to construct this flywheel.
@@ -296,7 +296,7 @@ class FlyWheel : public SmartVelocityMechanism {
  private:
   config::FlyWheelConfig* m_flyWheelConfig{nullptr};
   std::string m_name{"FlyWheel"};
-  std::optional<frc::sim::DCMotorSim> m_dcMotorSim;
+  std::optional<wpi::sim::DCMotorSim> m_dcMotorSim;
 };
 
 }  // namespace yams::mechanisms::velocity

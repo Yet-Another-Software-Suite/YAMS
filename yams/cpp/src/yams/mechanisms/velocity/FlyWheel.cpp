@@ -3,24 +3,24 @@
 
 #include "yams/mechanisms/velocity/FlyWheel.hpp"
 
-#include <frc/DriverStation.h>
-#include <frc/RobotBase.h>
-#include <frc/geometry/Rotation3d.h>
-#include <frc/geometry/Translation3d.h>
-#include <frc/simulation/BatterySim.h>
-#include <frc/simulation/RoboRioSim.h>
-#include <frc/smartdashboard/Mechanism2d.h>
-#include <frc/smartdashboard/MechanismLigament2d.h>
-#include <frc/smartdashboard/MechanismRoot2d.h>
-#include <frc/smartdashboard/SmartDashboard.h>
-#include <frc/system/plant/LinearSystemId.h>
-#include <frc/util/Color8Bit.h>
-#include <frc2/command/Commands.h>
-#include <units/angle.h>
-#include <units/angular_velocity.h>
-#include <units/length.h>
-#include <units/math.h>
-#include <units/time.h>
+#include <wpi/driverstation/DriverStation.hpp>
+#include <wpi/framework/RobotBase.hpp>
+#include <wpi/math/geometry/Rotation3d.hpp>
+#include <wpi/math/geometry/Translation3d.hpp>
+#include <wpi/simulation/BatterySim.hpp>
+#include <wpi/simulation/RoboRioSim.hpp>
+#include <wpi/smartdashboard/Mechanism2d.hpp>
+#include <wpi/smartdashboard/MechanismLigament2d.hpp>
+#include <wpi/smartdashboard/MechanismRoot2d.hpp>
+#include <wpi/smartdashboard/SmartDashboard.hpp>
+#include <wpi/math/system/Models.hpp>
+#include <wpi/util/Color8Bit.hpp>
+#include <wpi/commands2/Commands.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/math.hpp>
+#include <wpi/units/time.hpp>
 
 #include <cmath>
 #include <cstdio>
@@ -45,31 +45,31 @@ FlyWheel::FlyWheel(config::FlyWheelConfig* config, motorcontrollers::SmartMotorC
     m_name = m_flyWheelConfig->GetTelemetryName();
   }
 
-  if (frc::RobotBase::IsSimulation()) {
+  if (wpi::RobotBase::IsSimulation()) {
     // Create the DCMotorSim using LinearSystemId, then wire up the DCMotorSimSupplier.
-    frc::DCMotor dcMotor = m_smc->GetDCMotor();
+    wpi::math::DCMotor dcMotor = m_smc->GetDCMotor();
     auto& gearingOpt = m_smc->GetConfig().GetMotorGearing();
     gearing::MechanismGearing gearing = gearingOpt.value_or(gearing::MechanismGearing::kOne);
 
-    auto plant = frc::LinearSystemId::DCMotorSystem(dcMotor, m_smc->GetConfig().GetMOI(),
+    auto plant = wpi::math::Models::SingleJointedArmFromPhysicalConstants(dcMotor, m_smc->GetConfig().GetMOI(),
                                                     gearing.GetMechanismToRotorRatio());
     m_dcMotorSim.emplace(plant, dcMotor);
 
-    units::second_t period = m_smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms);
+    wpi::units::second_t period = m_smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms);
     m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::DCMotorSimSupplier>(
         *m_dcMotorSim, [this]() { return m_smc->GetDutyCycle(); }, gearing, period));
 
     // Size the window from the configured roller diameter; default to 36 in (0.9144 m) like Java.
-    units::meter_t shooterLength =
-        m_flyWheelConfig->GetRollerDiameter().value_or(units::meter_t{0.9144});
+    wpi::units::meter_t shooterLength =
+        m_flyWheelConfig->GetRollerDiameter().value_or(wpi::units::meter_t{0.9144});
 
     double len = shooterLength.value();
     m_mechanismWindow.emplace(len * 2.0, len * 2.0);
     m_mechanismRoot = m_mechanismWindow->GetRoot(m_name + "Root", len, len);
-    m_mechanismLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
+    m_mechanismLigament = m_mechanismRoot->Append<wpi::MechanismLigament2d>(
         m_name, len, 0_deg, 6, m_flyWheelConfig->GetSimColor());
 
-    frc::SmartDashboard::PutData(m_name + "/mechanism", &(*m_mechanismWindow));
+    wpi::SmartDashboard::PutData(m_name + "/mechanism", &(*m_mechanismWindow));
   }
 }
 
@@ -81,8 +81,8 @@ void FlyWheel::SimIterate() {
     m_smc->SimIterate();
     ss->StarveWatchdog();
 
-    frc::sim::RoboRioSim::SetVInVoltage(
-        frc::sim::BatterySim::Calculate({ss->GetCurrentDrawAmps()}));
+    wpi::sim::RoboRioSim::SetVInVoltage(
+        wpi::sim::BatterySim::Calculate({ss->GetCurrentDrawAmps()}));
     VisualizationUpdate();
   }
 }
@@ -94,177 +94,177 @@ void FlyWheel::VisualizationUpdate() {
     return;
   }
 
-  m_mechanismLigament->SetAngle(units::degree_t{m_smc->GetMechanismPosition()});
+  m_mechanismLigament->SetAngle(wpi::units::degree_t{m_smc->GetMechanismPosition()});
 }
 
 std::string FlyWheel::GetName() const { return m_name; }
 
 // ---- SmartVelocityMechanism overrides ---------------------------------------
 
-frc2::Trigger FlyWheel::Max() {
+wpi::cmd::Trigger FlyWheel::Max() {
   // FlyWheel has no inherent max velocity limit by default; always false.
-  return frc2::Trigger{[] { return false; }};
+  return wpi::cmd::Trigger{[] { return false; }};
 }
 
-frc2::Trigger FlyWheel::Min() {
+wpi::cmd::Trigger FlyWheel::Min() {
   // FlyWheel has no inherent min velocity limit by default; always false.
-  return frc2::Trigger{[] { return false; }};
+  return wpi::cmd::Trigger{[] { return false; }};
 }
 
 // ---- Run / RunTo / comparison / setpoint interface --------------------------
 
-frc2::CommandPtr FlyWheel::Run(units::degrees_per_second_t velocity) {
-  return frc2::cmd::Run([this, velocity] { SetMechanismVelocitySetpoint(velocity); }, {m_subsystem})
+wpi::cmd::CommandPtr FlyWheel::Run(wpi::units::degrees_per_second_t velocity) {
+  return wpi::cmd::Run([this, velocity] { SetMechanismVelocitySetpoint(velocity); }, {m_subsystem})
       .WithName(m_name + " Run");
 }
 
-frc2::CommandPtr FlyWheel::Run(std::function<units::degrees_per_second_t()> velocity) {
-  return frc2::cmd::Run([this, velocity] { SetMechanismVelocitySetpoint(velocity()); },
+wpi::cmd::CommandPtr FlyWheel::Run(std::function<wpi::units::degrees_per_second_t()> velocity) {
+  return wpi::cmd::Run([this, velocity] { SetMechanismVelocitySetpoint(velocity()); },
                         {m_subsystem})
       .WithName(m_name + " Run Supplier");
 }
 
-frc2::CommandPtr FlyWheel::Run(units::meters_per_second_t surfaceSpeed) {
+wpi::cmd::CommandPtr FlyWheel::Run(wpi::units::meters_per_second_t surfaceSpeed) {
   auto diameter = m_flyWheelConfig->GetRollerDiameter();
   if (!diameter) {
     std::fprintf(stderr, "[YAMS] %s Run: no roller diameter configured, command is a no-op.\n",
                  m_name.c_str());
-    return frc2::cmd::None();
+    return wpi::cmd::None();
   }
-  units::meter_t radius = *diameter / 2.0;
-  return frc2::cmd::Run(
+  wpi::units::meter_t radius = *diameter / 2.0;
+  return wpi::cmd::Run(
              [this, surfaceSpeed, radius] {
-               SetMechanismVelocitySetpoint(units::degrees_per_second_t{
+               SetMechanismVelocitySetpoint(wpi::units::degrees_per_second_t{
                    (surfaceSpeed.value() / radius.value()) * (180.0 / std::numbers::pi)});
              },
              {m_subsystem})
       .WithName(m_name + " Run Surface");
 }
 
-frc2::CommandPtr FlyWheel::Run(std::function<units::meters_per_second_t()> surfaceSpeed) {
+wpi::cmd::CommandPtr FlyWheel::Run(std::function<wpi::units::meters_per_second_t()> surfaceSpeed) {
   auto diameter = m_flyWheelConfig->GetRollerDiameter();
   if (!diameter) {
     std::fprintf(stderr, "[YAMS] %s Run: no roller diameter configured, command is a no-op.\n",
                  m_name.c_str());
-    return frc2::cmd::None();
+    return wpi::cmd::None();
   }
-  units::meter_t radius = *diameter / 2.0;
-  return frc2::cmd::Run(
+  wpi::units::meter_t radius = *diameter / 2.0;
+  return wpi::cmd::Run(
              [this, surfaceSpeed, radius] {
-               SetMechanismVelocitySetpoint(units::degrees_per_second_t{
+               SetMechanismVelocitySetpoint(wpi::units::degrees_per_second_t{
                    (surfaceSpeed().value() / radius.value()) * (180.0 / std::numbers::pi)});
              },
              {m_subsystem})
       .WithName(m_name + " Run Surface Supplier");
 }
 
-frc2::CommandPtr FlyWheel::RunTo(units::degrees_per_second_t velocity,
-                                 units::degrees_per_second_t tolerance) {
-  frc2::Trigger near = IsNear(velocity, tolerance).Debounce(units::second_t{0.1});
-  return frc2::cmd::RunOnce(
+wpi::cmd::CommandPtr FlyWheel::RunTo(wpi::units::degrees_per_second_t velocity,
+                                 wpi::units::degrees_per_second_t tolerance) {
+  wpi::cmd::Trigger near = IsNear(velocity, tolerance).Debounce(wpi::units::second_t{0.1});
+  return wpi::cmd::RunOnce(
              [this, velocity] {
                m_smc->StartClosedLoopController();
                m_smc->SetVelocity(velocity);
              },
              {m_subsystem})
-      .AndThen(frc2::cmd::WaitUntil([near] { return near.Get(); }))
+      .AndThen(wpi::cmd::WaitUntil([near] { return near.Get(); }))
       .WithName(m_name + " RunTo");
 }
 
-frc2::CommandPtr FlyWheel::RunTo(std::function<units::degrees_per_second_t()> velocity,
-                                 units::degrees_per_second_t tolerance) {
-  units::degrees_per_second_t target = velocity();
-  frc2::Trigger near = IsNear(target, tolerance).Debounce(units::second_t{0.1});
-  return frc2::cmd::RunOnce(
+wpi::cmd::CommandPtr FlyWheel::RunTo(std::function<wpi::units::degrees_per_second_t()> velocity,
+                                 wpi::units::degrees_per_second_t tolerance) {
+  wpi::units::degrees_per_second_t target = velocity();
+  wpi::cmd::Trigger near = IsNear(target, tolerance).Debounce(wpi::units::second_t{0.1});
+  return wpi::cmd::RunOnce(
              [this, target] {
                m_smc->StartClosedLoopController();
                m_smc->SetVelocity(target);
              },
              {m_subsystem})
-      .AndThen(frc2::cmd::WaitUntil([near] { return near.Get(); }))
+      .AndThen(wpi::cmd::WaitUntil([near] { return near.Get(); }))
       .WithName(m_name + " RunTo Supplier");
 }
 
-frc2::CommandPtr FlyWheel::RunTo(units::meters_per_second_t velocity,
-                                 units::meters_per_second_t tolerance) {
+wpi::cmd::CommandPtr FlyWheel::RunTo(wpi::units::meters_per_second_t velocity,
+                                 wpi::units::meters_per_second_t tolerance) {
   auto diameter = m_flyWheelConfig->GetRollerDiameter();
   if (!diameter) {
     std::fprintf(stderr, "[YAMS] %s RunTo: no roller diameter configured, command is a no-op.\n",
                  m_name.c_str());
-    return frc2::cmd::None();
+    return wpi::cmd::None();
   }
-  units::meter_t radius = *diameter / 2.0;
+  wpi::units::meter_t radius = *diameter / 2.0;
   double convFactor = (180.0 / std::numbers::pi) / radius.value();
-  return RunTo(units::degrees_per_second_t{velocity.value() * convFactor},
-               units::degrees_per_second_t{tolerance.value() * convFactor});
+  return RunTo(wpi::units::degrees_per_second_t{velocity.value() * convFactor},
+               wpi::units::degrees_per_second_t{tolerance.value() * convFactor});
 }
 
-frc2::CommandPtr FlyWheel::RunTo(std::function<units::meters_per_second_t()> velocity,
-                                 units::meters_per_second_t tolerance) {
+wpi::cmd::CommandPtr FlyWheel::RunTo(std::function<wpi::units::meters_per_second_t()> velocity,
+                                 wpi::units::meters_per_second_t tolerance) {
   auto diameter = m_flyWheelConfig->GetRollerDiameter();
   if (!diameter) {
     std::fprintf(stderr, "[YAMS] %s RunTo: no roller diameter configured, command is a no-op.\n",
                  m_name.c_str());
-    return frc2::cmd::None();
+    return wpi::cmd::None();
   }
-  units::meter_t radius = *diameter / 2.0;
+  wpi::units::meter_t radius = *diameter / 2.0;
   double convFactor = (180.0 / std::numbers::pi) / radius.value();
   return RunTo(
       [velocity, convFactor] {
-        return units::degrees_per_second_t{velocity().value() * convFactor};
+        return wpi::units::degrees_per_second_t{velocity().value() * convFactor};
       },
-      units::degrees_per_second_t{tolerance.value() * convFactor});
+      wpi::units::degrees_per_second_t{tolerance.value() * convFactor});
 }
 
-frc2::Trigger FlyWheel::Gte(units::degrees_per_second_t velocity) {
-  return frc2::Trigger{[this, velocity] { return GetVelocity() >= velocity; }};
+wpi::cmd::Trigger FlyWheel::Gte(wpi::units::degrees_per_second_t velocity) {
+  return wpi::cmd::Trigger{[this, velocity] { return GetVelocity() >= velocity; }};
 }
 
-frc2::Trigger FlyWheel::Lte(units::degrees_per_second_t velocity) {
-  return frc2::Trigger{[this, velocity] { return GetVelocity() <= velocity; }};
+wpi::cmd::Trigger FlyWheel::Lte(wpi::units::degrees_per_second_t velocity) {
+  return wpi::cmd::Trigger{[this, velocity] { return GetVelocity() <= velocity; }};
 }
 
-frc2::Trigger FlyWheel::Between(units::degrees_per_second_t start,
-                                units::degrees_per_second_t end) {
+wpi::cmd::Trigger FlyWheel::Between(wpi::units::degrees_per_second_t start,
+                                wpi::units::degrees_per_second_t end) {
   return Gte(start) && (Lte(end));
 }
 
-frc2::Trigger FlyWheel::IsNear(units::degrees_per_second_t velocity,
-                               units::degrees_per_second_t within) const {
-  return frc2::Trigger{[this, velocity, within] {
+wpi::cmd::Trigger FlyWheel::IsNear(wpi::units::degrees_per_second_t velocity,
+                               wpi::units::degrees_per_second_t within) const {
+  return wpi::cmd::Trigger{[this, velocity, within] {
     return std::abs(GetVelocity().value() - velocity.value()) <= within.value();
   }};
 }
 
-void FlyWheel::SetVelocity(units::degrees_per_second_t velocity) {
+void FlyWheel::SetVelocity(wpi::units::degrees_per_second_t velocity) {
   SetMechanismVelocitySetpoint(velocity);
 }
 
-void FlyWheel::SetSurfaceSpeed(units::meters_per_second_t speed) {
+void FlyWheel::SetSurfaceSpeed(wpi::units::meters_per_second_t speed) {
   SetMeasurementVelocitySetpoint(speed);
 }
 
-void FlyWheel::SetMeasurementVelocitySetpoint(units::meters_per_second_t velocity) {
+void FlyWheel::SetMeasurementVelocitySetpoint(wpi::units::meters_per_second_t velocity) {
   auto diameter = m_flyWheelConfig->GetRollerDiameter();
   if (!diameter) {
     return;
   }
-  units::meter_t radius = *diameter / 2.0;
-  SetMechanismVelocitySetpoint(units::degrees_per_second_t{(velocity.value() / radius.value()) *
+  wpi::units::meter_t radius = *diameter / 2.0;
+  SetMechanismVelocitySetpoint(wpi::units::degrees_per_second_t{(velocity.value() / radius.value()) *
                                                            (180.0 / std::numbers::pi)});
 }
 
-frc::Translation3d FlyWheel::GetRelativeMechanismPosition() const {
+wpi::math::Translation3d FlyWheel::GetRelativeMechanismPosition() const {
   if (m_mechanismLigament) {
-    return frc::Translation3d{
-        units::meter_t{m_mechanismLigament->GetLength()},
-        frc::Rotation3d{0_rad, 0_rad, units::radian_t{m_mechanismLigament->GetAngle()}}};
+    return wpi::math::Translation3d{
+        wpi::units::meter_t{m_mechanismLigament->GetLength()},
+        wpi::math::Rotation3d{0_rad, 0_rad, wpi::units::radian_t{m_mechanismLigament->GetAngle()}}};
   }
-  return frc::Translation3d{};
+  return wpi::math::Translation3d{};
 }
 
 const config::FlyWheelConfig& FlyWheel::GetConfig() const { return *m_flyWheelConfig; }
 
-units::degrees_per_second_t FlyWheel::GetVelocity() const { return m_smc->GetMechanismVelocity(); }
+wpi::units::degrees_per_second_t FlyWheel::GetVelocity() const { return m_smc->GetMechanismVelocity(); }
 
 }  // namespace yams::mechanisms::velocity

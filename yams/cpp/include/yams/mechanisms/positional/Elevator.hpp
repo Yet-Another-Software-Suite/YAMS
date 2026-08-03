@@ -3,12 +3,12 @@
 
 #pragma once
 
-#include <frc/geometry/Translation3d.h>
-#include <frc/simulation/ElevatorSim.h>
-#include <frc/smartdashboard/MechanismLigament2d.h>
-#include <frc2/command/CommandPtr.h>
-#include <frc2/command/button/Trigger.h>
-#include <units/length.h>
+#include <wpi/math/geometry/Translation3d.hpp>
+#include <wpi/simulation/ElevatorSim.hpp>
+#include <wpi/smartdashboard/MechanismLigament2d.hpp>
+#include <wpi/commands2/CommandPtr.hpp>
+#include <wpi/commands2/button/Trigger.hpp>
+#include <wpi/units/length.hpp>
 
 #include <functional>
 #include <optional>
@@ -51,13 +51,13 @@ namespace yams::mechanisms::positional {
  *         .WithIdleMode(Cfg::MotorMode::BRAKE)
  *         .WithSupplyCurrentLimit(40.0_A)
  *         .WithMotorInverted(false)
- *         .WithFeedforward(frc::ElevatorFeedforward{
- *             0.0_V, 0.0_V, units::unit_t<frc::ElevatorFeedforward::kv_unit>{0.0},
- *             units::unit_t<frc::ElevatorFeedforward::ka_unit>{0.0}})
+ *         .WithFeedforward(wpi::math::ElevatorFeedforward{
+ *             0.0_V, 0.0_V, wpi::units::unit_t<wpi::math::ElevatorFeedforward::kv_unit>{0.0},
+ *             wpi::units::unit_t<wpi::math::ElevatorFeedforward::ka_unit>{0.0}})
  *         .WithClosedLoopMode()
  *         .WithTelemetry("ElevatorMotor", Cfg::TelemetryVerbosity::HIGH);
  *
- * m_smc.emplace(&m_sparkMax, frc::DCMotor::NEO(1), &motorCfg);
+ * m_smc.emplace(&m_sparkMax, wpi::math::DCMotor::NEO(1), &motorCfg);
  *
  * m_elevatorConfig.WithMinimumHeight(0.0_m)
  *                 .WithMaximumHeight(3.0_m)
@@ -102,7 +102,7 @@ class Elevator : public SmartPositionalMechanism {
    *
    * @return Trigger for the upper hard limit.
    */
-  frc2::Trigger Max() override;
+  wpi::cmd::Trigger Max() override;
 
   /**
    * Trigger that becomes true when the elevator is at or below its minimum
@@ -110,7 +110,7 @@ class Elevator : public SmartPositionalMechanism {
    *
    * @return Trigger for the lower hard limit.
    */
-  frc2::Trigger Min() override;
+  wpi::cmd::Trigger Min() override;
 
   // ---- Elevator-specific interface ------------------------------------------
 
@@ -120,7 +120,7 @@ class Elevator : public SmartPositionalMechanism {
    * @param height Height of the elevator to reach.
    * @return CommandPtr that sets the elevator height, runs continuously.
    */
-  frc2::CommandPtr Run(units::meter_t height);
+  wpi::cmd::CommandPtr Run(wpi::units::meter_t height);
 
   /**
    * Set the height of the elevator via a supplier.
@@ -128,7 +128,7 @@ class Elevator : public SmartPositionalMechanism {
    * @param height Supplier returning the desired height each loop.
    * @return CommandPtr that sets the elevator height, runs continuously.
    */
-  frc2::CommandPtr Run(std::function<units::meter_t()> height);
+  wpi::cmd::CommandPtr Run(std::function<wpi::units::meter_t()> height);
 
   /**
    * Command the elevator to a fixed height, then end when within tolerance.
@@ -137,7 +137,7 @@ class Elevator : public SmartPositionalMechanism {
    * @param tolerance Acceptable error.
    * @return CommandPtr that ends once the elevator is near the target.
    */
-  frc2::CommandPtr RunTo(units::meter_t height, units::meter_t tolerance = units::meter_t{0.01});
+  wpi::cmd::CommandPtr RunTo(wpi::units::meter_t height, wpi::units::meter_t tolerance = wpi::units::meter_t{0.01});
 
   /**
    * Command the elevator to a height from a supplier, then end when within tolerance.
@@ -148,15 +148,15 @@ class Elevator : public SmartPositionalMechanism {
    * @param tolerance Acceptable error.
    * @return CommandPtr that ends once the elevator is near the target.
    */
-  frc2::CommandPtr RunTo(std::function<units::meter_t()> height,
-                         units::meter_t tolerance = units::meter_t{0.01});
+  wpi::cmd::CommandPtr RunTo(std::function<wpi::units::meter_t()> height,
+                         wpi::units::meter_t tolerance = wpi::units::meter_t{0.01});
 
   /**
    * Get the current carriage height from the motor encoder.
    *
    * @return Current height in meters.
    */
-  units::meter_t GetHeight() const;
+  wpi::units::meter_t GetHeight() const;
 
   /**
    * Trigger that fires while the elevator height is >= the given height.
@@ -164,7 +164,7 @@ class Elevator : public SmartPositionalMechanism {
    * @param height Reference height.
    * @return Trigger for the >= condition.
    */
-  frc2::Trigger Gte(units::meter_t height);
+  wpi::cmd::Trigger Gte(wpi::units::meter_t height);
 
   /**
    * Trigger that fires while the elevator height is <= the given height.
@@ -172,7 +172,7 @@ class Elevator : public SmartPositionalMechanism {
    * @param height Reference height.
    * @return Trigger for the <= condition.
    */
-  frc2::Trigger Lte(units::meter_t height);
+  wpi::cmd::Trigger Lte(wpi::units::meter_t height);
 
   /**
    * Trigger that fires while the elevator height is between start and end (inclusive).
@@ -181,7 +181,7 @@ class Elevator : public SmartPositionalMechanism {
    * @param end   Upper bound.
    * @return Trigger for the range condition.
    */
-  frc2::Trigger Between(units::meter_t start, units::meter_t end);
+  wpi::cmd::Trigger Between(wpi::units::meter_t start, wpi::units::meter_t end);
 
   /**
    * Trigger that fires while the elevator is within tolerance of a height.
@@ -190,7 +190,7 @@ class Elevator : public SmartPositionalMechanism {
    * @param within Tolerance.
    * @return Trigger for the near condition.
    */
-  frc2::Trigger IsNear(units::meter_t height, units::meter_t within = units::meter_t{0.01});
+  wpi::cmd::Trigger IsNear(wpi::units::meter_t height, wpi::units::meter_t within = wpi::units::meter_t{0.01});
 
   /**
    * Get the configuration used to construct this elevator.
@@ -204,20 +204,20 @@ class Elevator : public SmartPositionalMechanism {
    *
    * @return Translation3d representing the current carriage position.
    */
-  frc::Translation3d GetRelativeMechanismPosition() const;
+  wpi::math::Translation3d GetRelativeMechanismPosition() const;
 
   /**
    * Directly command the elevator to a height setpoint (non-command, for use in periodic).
    *
    * @param height Desired carriage height.
    */
-  void SetHeight(units::meter_t height);
+  void SetHeight(wpi::units::meter_t height);
 
  private:
   config::ElevatorConfig* m_elevatorConfig{nullptr};
   std::string m_name{"Elevator"};
-  std::optional<frc::sim::ElevatorSim> m_elevatorSim;
-  frc::MechanismLigament2d* m_setpointLigament{nullptr};
+  std::optional<wpi::sim::ElevatorSim> m_elevatorSim;
+  wpi::MechanismLigament2d* m_setpointLigament{nullptr};
 };
 
 }  // namespace yams::mechanisms::positional
