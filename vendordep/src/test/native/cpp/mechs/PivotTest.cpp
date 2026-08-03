@@ -4,13 +4,14 @@
 // Mirrors Java PivotTest — duty-cycle and position-PID tests for a rotary
 // pivot mechanism across all (HardwareType × ProfileType) combinations.
 
-#include <frc/system/plant/DCMotor.h>
-#include <frc2/command/Commands.h>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/commands2/CommandScheduler.hpp>
+#include <wpi/commands2/Commands.hpp>
 #include <gtest/gtest.h>
-#include <units/angle.h>
-#include <units/angular_acceleration.h>
-#include <units/angular_velocity.h>
-#include <units/moment_of_inertia.h>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/angular_acceleration.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/moment_of_inertia.hpp>
 
 #include <chrono>
 #include <cmath>
@@ -43,9 +44,9 @@ static SmartMotorControllerConfig MakePivotSMCConfig(ProfileType profile, Hardwa
       .WithIdleMode(SmartMotorControllerConfig::MotorMode::BRAKE)
       .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
-      .WithFeedforward(frc::SimpleMotorFeedforward<units::turns>{
-          1.0_V, units::unit_t<frc::SimpleMotorFeedforward<units::turns>::kv_unit>{0.0},
-          units::unit_t<frc::SimpleMotorFeedforward<units::turns>::ka_unit>{0.0}})
+      .WithFeedforward(wpi::math::SimpleMotorFeedforward<wpi::units::turns>{
+          1.0_V, wpi::units::unit_t<wpi::math::SimpleMotorFeedforward<wpi::units::turns>::kv_unit>{0.0},
+          wpi::units::unit_t<wpi::math::SimpleMotorFeedforward<wpi::units::turns>::ka_unit>{0.0}})
       .WithClosedLoopMode()
       .WithMOI(12_in, 1_lb)
       .WithStartingPosition(0.0_deg)
@@ -83,8 +84,8 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
 
   auto* subsys = static_cast<TestSubsystem*>(smc->GetConfig().GetSubsystem());
   auto cmd = subsys->SetDutyCycle(0.5);
-  frc2::CommandScheduler::GetInstance().Schedule(cmd);
-  frc2::CommandScheduler::GetInstance().Schedule(cmd);  // schedule twice like Java
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(cmd);
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(cmd);  // schedule twice like Java
 
   SchedulerHelper::RunForDuration(1.0_s, [&] {
     if (smc->GetDutyCycle() != 0.0) passed = true;
@@ -113,8 +114,8 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   bool passed = false;
 
   auto cmd =
-      frc2::cmd::Run([smc] { smc->SetPosition(80.0_deg); }, {smc->GetConfig().GetSubsystem()});
-  frc2::CommandScheduler::GetInstance().Schedule(cmd);
+      wpi::cmd::Run([smc] { smc->SetPosition(80.0_deg); }, {smc->GetConfig().GetSubsystem()});
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(cmd);
 
   SchedulerHelper::RunForDuration(isCTRE ? 1.0_s : 20.0_s, [&] {
     if (isCTRE)
@@ -180,7 +181,7 @@ TEST_P(PivotTest, PivotDutyCycle) {
 
   auto pivot = CreatePivot(bundle.smc, bundle.subsystem.get());
   auto upCmd = pivot->Set(0.5);
-  frc2::CommandScheduler::GetInstance().Schedule(upCmd);
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(upCmd);
 
   DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
   CloseBundle(bundle);
@@ -197,7 +198,7 @@ TEST_P(PivotTest, PivotPositionPID) {
 
   auto pivot = CreatePivot(bundle.smc, bundle.subsystem.get());
   auto highPid = pivot->RunTo(80.0_deg);
-  frc2::CommandScheduler::GetInstance().Schedule(highPid);
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(highPid);
 
   PositionPIDTestBody(bundle.smc, IsCTRE(bundle));
   CloseBundle(bundle);

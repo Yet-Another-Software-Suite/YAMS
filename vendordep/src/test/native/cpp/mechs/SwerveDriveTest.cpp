@@ -11,18 +11,19 @@
 // TalonFX objects are destroyed per-test.
 
 /*
-#include <frc/controller/PIDController.h>
-#include <frc/geometry/Pose2d.h>
-#include <frc/geometry/Rotation2d.h>
-#include <frc/geometry/Translation2d.h>
-#include <frc/kinematics/ChassisSpeeds.h>
-#include <frc/system/plant/DCMotor.h>
-#include <frc2/command/CommandScheduler.h>
-#include <frc2/command/SubsystemBase.h>
+#include <wpi/math/controller/PIDController.hpp>
+#include <wpi/math/geometry/Pose2d.hpp>
+#include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/math/geometry/Translation2d.hpp>
+#include <wpi/math/kinematics/ChassisVelocities.hpp>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/commands2/CommandScheduler.hpp>
+#include <wpi/commands2/CommandScheduler.hpp>
+#include <wpi/commands2/SubsystemBase.hpp>
 #include <gtest/gtest.h>
-#include <units/angle.h>
-#include <units/length.h>
-#include <units/velocity.h>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/velocity.hpp>
 
 #include <cmath>
 #include <ctre/phoenix6/TalonFX.hpp>
@@ -54,12 +55,12 @@ using namespace mechanisms::swerve;
 // ---- Constants ---------------------------------------------------------------
 
 // Module offset from robot centre for a 24 in × 24 in square chassis.
-static constexpr units::meter_t kModuleX{0.3048};
-static constexpr units::meter_t kModuleY{0.3048};
+static constexpr wpi::units::meter_t kModuleX{0.3048};
+static constexpr wpi::units::meter_t kModuleY{0.3048};
 
 // ---- Minimal subsystem -------------------------------------------------------
 
-class SwerveTestSubsystem : public frc2::SubsystemBase {
+class SwerveTestSubsystem : public wpi::cmd::SubsystemBase {
  public:
   void Periodic() override {
     if (m_drive) m_drive->UpdateTelemetry();
@@ -73,14 +74,14 @@ class SwerveTestSubsystem : public frc2::SubsystemBase {
 // ---- SMC config helpers ------------------------------------------------------
 
 static SmartMotorControllerConfig MakeDriveConfig(const std::string& name,
-                                                  frc2::SubsystemBase* subsys) {
+                                                  wpi::cmd::SubsystemBase* subsys) {
   SmartMotorControllerConfig cfg;
   cfg.WithFeedback(0.1, 0.0, 0.0)
-      .WithMechanismCircumference(units::meter_t{4.0_in * std::numbers::pi})
+      .WithMechanismCircumference(wpi::units::meter_t{4.0_in * std::numbers::pi})
       .WithMotorGearing(gearing::MechanismGearing{gearing::GearBox::FromReductionStages({6.75})})
       .WithIdleMode(SmartMotorControllerConfig::MotorMode::BRAKE)
       .WithStatorCurrentLimit(40.0_A)
-      .WithSimMotor(frc::DCMotor::KrakenX60(1))
+      .WithSimMotor(wpi::math::DCMotor::KrakenX60(1))
       .WithClosedLoopMode()
       .WithSubsystem(subsys)
       .WithTelemetry(name, SmartMotorControllerConfig::TelemetryVerbosity::NONE);
@@ -88,14 +89,14 @@ static SmartMotorControllerConfig MakeDriveConfig(const std::string& name,
 }
 
 static SmartMotorControllerConfig MakeAzimuthConfig(const std::string& name,
-                                                    frc2::SubsystemBase* subsys) {
+                                                    wpi::cmd::SubsystemBase* subsys) {
   SmartMotorControllerConfig cfg;
   cfg.WithFeedback(50.0, 0.0, 0.5)
       .WithMotorGearing(
           gearing::MechanismGearing{gearing::GearBox::FromReductionStages({150.0 / 7.0})})
       .WithIdleMode(SmartMotorControllerConfig::MotorMode::BRAKE)
       .WithStatorCurrentLimit(20.0_A)
-      .WithSimMotor(frc::DCMotor::KrakenX60(1))
+      .WithSimMotor(wpi::math::DCMotor::KrakenX60(1))
       .WithMOI(4_in, 0.5_lb)
       .WithClosedLoopMode()
       .WithSubsystem(subsys)
@@ -156,28 +157,28 @@ class SwerveDriveTest : public ::testing::Test {
     s_brAzimuthTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId());
 
     // TalonFXWrapper constructor calls SetupSimulation() automatically.
-    s_flDriveSMC = new remote::TalonFXWrapper(*s_flDriveTalon, frc::DCMotor::KrakenX60(1),
+    s_flDriveSMC = new remote::TalonFXWrapper(*s_flDriveTalon, wpi::math::DCMotor::KrakenX60(1),
                                               MakeDriveConfig("FL_Drive", s_sub));
-    s_frDriveSMC = new remote::TalonFXWrapper(*s_frDriveTalon, frc::DCMotor::KrakenX60(1),
+    s_frDriveSMC = new remote::TalonFXWrapper(*s_frDriveTalon, wpi::math::DCMotor::KrakenX60(1),
                                               MakeDriveConfig("FR_Drive", s_sub));
-    s_blDriveSMC = new remote::TalonFXWrapper(*s_blDriveTalon, frc::DCMotor::KrakenX60(1),
+    s_blDriveSMC = new remote::TalonFXWrapper(*s_blDriveTalon, wpi::math::DCMotor::KrakenX60(1),
                                               MakeDriveConfig("BL_Drive", s_sub));
-    s_brDriveSMC = new remote::TalonFXWrapper(*s_brDriveTalon, frc::DCMotor::KrakenX60(1),
+    s_brDriveSMC = new remote::TalonFXWrapper(*s_brDriveTalon, wpi::math::DCMotor::KrakenX60(1),
                                               MakeDriveConfig("BR_Drive", s_sub));
-    s_flAzimuthSMC = new remote::TalonFXWrapper(*s_flAzimuthTalon, frc::DCMotor::KrakenX60(1),
+    s_flAzimuthSMC = new remote::TalonFXWrapper(*s_flAzimuthTalon, wpi::math::DCMotor::KrakenX60(1),
                                                 MakeAzimuthConfig("FL_Azimuth", s_sub));
-    s_frAzimuthSMC = new remote::TalonFXWrapper(*s_frAzimuthTalon, frc::DCMotor::KrakenX60(1),
+    s_frAzimuthSMC = new remote::TalonFXWrapper(*s_frAzimuthTalon, wpi::math::DCMotor::KrakenX60(1),
                                                 MakeAzimuthConfig("FR_Azimuth", s_sub));
-    s_blAzimuthSMC = new remote::TalonFXWrapper(*s_blAzimuthTalon, frc::DCMotor::KrakenX60(1),
+    s_blAzimuthSMC = new remote::TalonFXWrapper(*s_blAzimuthTalon, wpi::math::DCMotor::KrakenX60(1),
                                                 MakeAzimuthConfig("BL_Azimuth", s_sub));
-    s_brAzimuthSMC = new remote::TalonFXWrapper(*s_brAzimuthTalon, frc::DCMotor::KrakenX60(1),
+    s_brAzimuthSMC = new remote::TalonFXWrapper(*s_brAzimuthTalon, wpi::math::DCMotor::KrakenX60(1),
                                                 MakeAzimuthConfig("BR_Azimuth", s_sub));
   }
 
   static void TearDownTestSuite() {
     s_sub->m_drive = nullptr;
     SchedulerHelper::CancelAll();
-    frc2::CommandScheduler::GetInstance().UnregisterSubsystem(s_sub);
+    wpi::cmd::CommandScheduler::GetInstance().UnregisterSubsystem(s_sub);
 
     for (auto* s : {s_flDriveSMC, s_frDriveSMC, s_blDriveSMC, s_brDriveSMC, s_flAzimuthSMC,
                     s_frAzimuthSMC, s_blAzimuthSMC, s_brAzimuthSMC}) {
@@ -200,7 +201,7 @@ class SwerveDriveTest : public ::testing::Test {
     m_simGyro = 0_deg;
 
     auto makeModuleCfg = [](remote::TalonFXWrapper* drive, remote::TalonFXWrapper* azimuth,
-                            units::meter_t front, units::meter_t left,
+                            wpi::units::meter_t front, wpi::units::meter_t left,
                             const std::string& name) -> SwerveModuleConfig {
       SwerveModuleConfig cfg{drive, azimuth};
       cfg.WithAbsoluteEncoder([] { return 0.0_deg; })
@@ -221,10 +222,10 @@ class SwerveDriveTest : public ::testing::Test {
     driveCfg.WithSubsystem(s_sub)
         .WithModules({&m_fl.value(), &m_fr.value(), &m_bl.value(), &m_br.value()})
         .WithGyro([this] { return m_simGyro; })
-        .WithStartingPose(frc::Pose2d{})
-        .WithMaximumChassisSpeed(4.5_mps, units::degrees_per_second_t{540})
-        .WithTranslationController(frc::PIDController{2.0, 0.0, 0.0})
-        .WithRotationController(frc::PIDController{4.0, 0.0, 0.0});
+        .WithStartingPose(wpi::math::Pose2d{})
+        .WithMaximumChassisSpeed(4.5_mps, wpi::units::degrees_per_second_t{540})
+        .WithTranslationController(wpi::math::PIDController{2.0, 0.0, 0.0})
+        .WithRotationController(wpi::math::PIDController{4.0, 0.0, 0.0});
     m_drive.emplace(std::move(driveCfg));
 
     s_sub->m_drive = &m_drive.value();
@@ -232,7 +233,7 @@ class SwerveDriveTest : public ::testing::Test {
 
   void TearDown() override {
     s_sub->m_drive = nullptr;
-    frc2::CommandScheduler::GetInstance().CancelAll();
+    wpi::cmd::CommandScheduler::GetInstance().CancelAll();
     m_drive.reset();
     m_fl.reset();
     m_fr.reset();
@@ -241,7 +242,7 @@ class SwerveDriveTest : public ::testing::Test {
   }
 
   // Simulated gyro angle — tests can mutate this to fake heading.
-  units::degree_t m_simGyro{0};
+  wpi::units::degree_t m_simGyro{0};
 
   std::optional<SwerveModule> m_fl;
   std::optional<SwerveModule> m_fr;
@@ -292,7 +293,7 @@ TEST_F(SwerveDriveTest, InitialPoseIsOrigin) {
 
 // A non-zero target pose is reflected in GetPose() immediately after ResetOdometry.
 TEST_F(SwerveDriveTest, ResetOdometryMatchesPose) {
-  frc::Pose2d target{3.0_m, 2.0_m, frc::Rotation2d{45.0_deg}};
+  wpi::math::Pose2d target{3.0_m, 2.0_m, wpi::math::Rotation2d{45.0_deg}};
   m_drive->ResetOdometry(target);
   auto pose = m_drive->GetPose();
   EXPECT_NEAR(pose.X().value(), 3.0, 0.01);
@@ -304,7 +305,7 @@ TEST_F(SwerveDriveTest, ResetOdometryMatchesPose) {
 // forward-pointing states for all four modules.
 TEST_F(SwerveDriveTest, GetStateFromSpeedsForwardDrive) {
   auto states = m_drive->GetStateFromRobotRelativeChassisSpeeds(
-      frc::ChassisSpeeds{1.0_mps, 0_mps, 0_rad_per_s});
+      wpi::math::ChassisVelocities{1.0_mps, 0_mps, 0_rad_per_s});
 
   for (size_t i = 0; i < 4; ++i) {
     EXPECT_NEAR(states[i].speed.value(), 1.0, 0.01)
@@ -317,7 +318,7 @@ TEST_F(SwerveDriveTest, GetStateFromSpeedsForwardDrive) {
 // Pure rotation command produces tangential module states (none pointing forward).
 TEST_F(SwerveDriveTest, GetStateFromSpeedsPureRotation) {
   auto states = m_drive->GetStateFromRobotRelativeChassisSpeeds(
-      frc::ChassisSpeeds{0_mps, 0_mps, units::radians_per_second_t{1.0}});
+      wpi::math::ChassisVelocities{0_mps, 0_mps, wpi::units::radians_per_second_t{1.0}});
 
   for (size_t i = 0; i < 4; ++i) {
     EXPECT_GT(std::abs(states[i].speed.value()), 0.0)
@@ -330,9 +331,9 @@ TEST_F(SwerveDriveTest, GetStateFromSpeedsPureRotation) {
 // SetRobotRelativeChassisSpeeds does not crash for both non-zero and zero inputs.
 TEST_F(SwerveDriveTest, SetRobotRelativeSpeedsDoesNotCrash) {
   EXPECT_NO_FATAL_FAILURE(
-      m_drive->SetRobotRelativeChassisSpeeds(frc::ChassisSpeeds{1.0_mps, 0_mps, 0_rad_per_s}));
+      m_drive->SetRobotRelativeChassisSpeeds(wpi::math::ChassisVelocities{1.0_mps, 0_mps, 0_rad_per_s}));
   EXPECT_NO_FATAL_FAILURE(
-      m_drive->SetRobotRelativeChassisSpeeds(frc::ChassisSpeeds{0_mps, 0_mps, 0_rad_per_s}));
+      m_drive->SetRobotRelativeChassisSpeeds(wpi::math::ChassisVelocities{0_mps, 0_mps, 0_rad_per_s}));
 }
 
 
@@ -359,7 +360,7 @@ TEST_F(SwerveDriveTest, LockPoseSetsXPattern) {
 // ZeroGyro does not crash and zeroes the heading.
 TEST_F(SwerveDriveTest, ZeroGyroDoesNotCrash) {
   m_simGyro = 45.0_deg;
-  m_drive->ResetOdometry(frc::Pose2d{0_m, 0_m, frc::Rotation2d{45.0_deg}});
+  m_drive->ResetOdometry(wpi::math::Pose2d{0_m, 0_m, wpi::math::Rotation2d{45.0_deg}});
   EXPECT_NO_FATAL_FAILURE(m_drive->ZeroGyro());
   EXPECT_NEAR(m_drive->GetPose().Rotation().Degrees().value(), 0.0, 1.0);
 }
@@ -367,12 +368,12 @@ TEST_F(SwerveDriveTest, ZeroGyroDoesNotCrash) {
 // AddVisionMeasurement accepts a pose without crashing.
 TEST_F(SwerveDriveTest, AddVisionMeasurementDoesNotCrash) {
   EXPECT_NO_FATAL_FAILURE(
-      m_drive->AddVisionMeasurement(frc::Pose2d{1_m, 1_m, frc::Rotation2d{}}, 0.0_s));
+      m_drive->AddVisionMeasurement(wpi::math::Pose2d{1_m, 1_m, wpi::math::Rotation2d{}}, 0.0_s));
 }
 
 // GetDistanceFromPose returns the Euclidean distance to a target (3-4-5 triangle).
 TEST_F(SwerveDriveTest, GetDistanceFromPose) {
-  auto dist = m_drive->GetDistanceFromPose(frc::Pose2d{3.0_m, 4.0_m, frc::Rotation2d{}});
+  auto dist = m_drive->GetDistanceFromPose(wpi::math::Pose2d{3.0_m, 4.0_m, wpi::math::Rotation2d{}});
   EXPECT_NEAR(dist.value(), 5.0, 0.01);
 }
 
@@ -381,16 +382,16 @@ TEST_F(SwerveDriveTest, DriveCommandCallsSpeedSupplier) {
   int callCount = 0;
   auto cmd = m_drive->Drive([&] {
     ++callCount;
-    return frc::ChassisSpeeds{};
+    return wpi::math::ChassisVelocities{};
   });
-  frc2::CommandScheduler::GetInstance().Schedule(cmd);
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(cmd);
   SchedulerHelper::RunForDuration(0.1_s);
   EXPECT_GE(callCount, 1);
 }
 
 // The Drive command declares the configured subsystem as a requirement.
 TEST_F(SwerveDriveTest, DriveCommandHasSubsystemRequirement) {
-  auto cmd = m_drive->Drive([] { return frc::ChassisSpeeds{}; });
+  auto cmd = m_drive->Drive([] { return wpi::math::ChassisVelocities{}; });
   EXPECT_TRUE(cmd.HasRequirement(s_sub));
 }
 
@@ -400,19 +401,19 @@ TEST_F(SwerveDriveTest, SecondDriveCommandInterruptsFirst) {
   int secondCalls = 0;
   auto cmd1 = m_drive->Drive([&] {
     ++firstCalls;
-    return frc::ChassisSpeeds{};
+    return wpi::math::ChassisVelocities{};
   });
   auto cmd2 = m_drive->Drive([&] {
     ++secondCalls;
-    return frc::ChassisSpeeds{};
+    return wpi::math::ChassisVelocities{};
   });
 
-  frc2::CommandScheduler::GetInstance().Schedule(cmd1);
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(cmd1);
   SchedulerHelper::RunForDuration(0.04_s);
   int firstCallsAtInterrupt = firstCalls;
   EXPECT_GE(firstCallsAtInterrupt, 1) << "cmd1 should run initially";
 
-  frc2::CommandScheduler::GetInstance().Schedule(cmd2);
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(cmd2);
   SchedulerHelper::RunForDuration(0.04_s);
 
   EXPECT_GE(secondCalls, 1) << "cmd2 should run after interrupt";

@@ -4,12 +4,13 @@
 // Mirrors Java ShooterTest — duty-cycle and velocity-PID tests for a FlyWheel
 // (shooter) mechanism across all (HardwareType × ProfileType) combinations.
 
-#include <frc2/command/Commands.h>
+#include <wpi/commands2/CommandScheduler.hpp>
+#include <wpi/commands2/Commands.hpp>
 #include <gtest/gtest.h>
-#include <units/angle.h>
-#include <units/angular_velocity.h>
-#include <units/length.h>
-#include <units/mass.h>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/mass.hpp>
 
 #include <chrono>
 #include <cmath>
@@ -41,9 +42,9 @@ static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, Test
       .WithIdleMode(SmartMotorControllerConfig::MotorMode::COAST)
       .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
-      .WithFeedforward(frc::SimpleMotorFeedforward<units::turns>{
-          0.0_V, units::unit_t<frc::SimpleMotorFeedforward<units::turns>::kv_unit>{1.0},
-          units::unit_t<frc::SimpleMotorFeedforward<units::turns>::ka_unit>{0.0}})
+      .WithFeedforward(wpi::math::SimpleMotorFeedforward<wpi::units::turns>{
+          0.0_V, wpi::units::unit_t<wpi::math::SimpleMotorFeedforward<wpi::units::turns>::kv_unit>{1.0},
+          wpi::units::unit_t<wpi::math::SimpleMotorFeedforward<wpi::units::turns>::ka_unit>{0.0}})
       .WithClosedLoopMode()
       .WithSubsystem(subsys)
       .WithTelemetry(name);
@@ -55,9 +56,9 @@ static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, Test
       // RPM.of(6000) ≈ 6000/60 rps = 100 rps → 36000 deg/s
       // RPM.per(Second).of(9000) ≈ 9000/60 rps² → 54000 deg/s²
       cfg.WithTrapezoidProfile(
-          units::degrees_per_second_t{36000.0},
-          units::unit_t<units::compound_unit<units::angular_velocity::degrees_per_second,
-                                             units::inverse<units::seconds>>>{54000.0});
+          wpi::units::degrees_per_second_t{36000.0},
+          wpi::units::unit_t<wpi::units::compound_unit<wpi::units::angular_velocity::degrees_per_second,
+                                             wpi::units::inverse<wpi::units::seconds>>>{54000.0});
       break;
     case ProfileType::Exponential:
       cfg.WithExponentialProfile(0.5, 0.05, 12.0_V);
@@ -70,7 +71,7 @@ static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, Test
 
 static FlyWheel* CreateShooter(SmartMotorController* smc, TestSubsystem* subsys) {
   auto* cfg = new FlyWheelConfig;
-  cfg->WithRollerDiameter(units::meter_t{4.0 * 0.0254});  // 4 inches
+  cfg->WithRollerDiameter(wpi::units::meter_t{4.0 * 0.0254});  // 4 inches
   auto* shooter = new FlyWheel(cfg, smc);
   subsys->m_mechSimPeriodic = [shooter] { shooter->SimIterate(); };
   subsys->m_mechUpdateTelemetry = [shooter] { shooter->UpdateTelemetry(); };
@@ -86,8 +87,8 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
 
   auto* subsys = static_cast<TestSubsystem*>(smc->GetConfig().GetSubsystem());
   auto cmd = subsys->SetDutyCycle(0.5);
-  frc2::CommandScheduler::GetInstance().Schedule(cmd);
-  frc2::CommandScheduler::GetInstance().Schedule(cmd);
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(cmd);
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(cmd);
 
   SchedulerHelper::RunForDuration(1.0_s, [&] {
     if (smc->GetDutyCycle() != 0.0) passed = true;
@@ -116,9 +117,9 @@ static void VelocityPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   bool passed = false;
 
   // ~2000 RPM = 2000/60 rps * 360 deg/rot = 12000 deg/s
-  auto cmd = frc2::cmd::Run([smc] { smc->SetVelocity(units::degrees_per_second_t{12000.0}); },
+  auto cmd = wpi::cmd::Run([smc] { smc->SetVelocity(wpi::units::degrees_per_second_t{12000.0}); },
                             {smc->GetConfig().GetSubsystem()});
-  frc2::CommandScheduler::GetInstance().Schedule(cmd);
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(cmd);
 
   SchedulerHelper::RunForDuration(isCTRE ? 1.0_s : 2.0_s, [&] {
     if (smc->GetDutyCycle() != 0.0) passed = true;
@@ -182,7 +183,7 @@ TEST_P(ShooterTest, ShooterDutyCycle) {
 
   auto shooter = CreateShooter(bundle.smc, bundle.subsystem.get());
   auto upCmd = shooter->Set(0.5);
-  frc2::CommandScheduler::GetInstance().Schedule(upCmd);
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(upCmd);
 
   DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
   CloseBundle(bundle);
@@ -199,8 +200,8 @@ TEST_P(ShooterTest, ShooterVelocityPID) {
 
   // ~80 RPM = 80/60 * 360 ≈ 480 deg/s
   auto shooter = CreateShooter(bundle.smc, bundle.subsystem.get());
-  auto highPid = shooter->RunTo(units::degrees_per_second_t{480.0});
-  frc2::CommandScheduler::GetInstance().Schedule(highPid);
+  auto highPid = shooter->RunTo(wpi::units::degrees_per_second_t{480.0});
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(highPid);
 
   VelocityPIDTestBody(bundle.smc, IsCTRE(bundle));
   CloseBundle(bundle);

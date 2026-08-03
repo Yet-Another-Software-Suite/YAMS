@@ -3,14 +3,14 @@
 
 // Unit tests for LQRConfig and LQRController — pure math, no hardware required.
 
-#include <frc/system/plant/DCMotor.h>
+#include <wpi/math/system/DCMotor.hpp>
 #include <gtest/gtest.h>
-#include <units/angle.h>
-#include <units/angular_velocity.h>
-#include <units/length.h>
-#include <units/time.h>
-#include <units/velocity.h>
-#include <units/voltage.h>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/time.hpp>
+#include <wpi/units/velocity.hpp>
+#include <wpi/units/voltage.hpp>
 
 #include <cmath>
 #include <variant>
@@ -26,7 +26,7 @@ using namespace math;
 
 static LQRConfig FlywheelConfig() {
   return LQRConfig{}
-      .WithFlywheelSystem(frc::DCMotor::NEO(1), 0.00233, 1.0)
+      .WithFlywheelSystem(wpi::math::DCMotor::NEO(1), 0.00233, 1.0)
       .WithQElems({3.0})
       .WithRElems({12.0})
       .WithStateStdDevs({3.0})
@@ -35,7 +35,7 @@ static LQRConfig FlywheelConfig() {
 
 static LQRConfig ArmConfig() {
   return LQRConfig{}
-      .WithArmSystem(frc::DCMotor::NEO(1), 0.5, 50.0)
+      .WithArmSystem(wpi::math::DCMotor::NEO(1), 0.5, 50.0)
       .WithQElems({0.01745, 0.1745})
       .WithRElems({12.0})
       .WithStateStdDevs({0.01745, 0.1745})
@@ -44,7 +44,7 @@ static LQRConfig ArmConfig() {
 
 static LQRConfig ElevatorConfig() {
   return LQRConfig{}
-      .WithElevatorSystem(frc::DCMotor::NEO(1), 5.0, 0.0254, 10.0)
+      .WithElevatorSystem(wpi::math::DCMotor::NEO(1), 5.0, 0.0254, 10.0)
       .WithQElems({0.01, 0.1})
       .WithRElems({12.0})
       .WithStateStdDevs({0.01, 0.1})

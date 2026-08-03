@@ -6,7 +6,7 @@
 // CRT period = lcm(19, 21) / 200 = 399 / 200 = 1.995 rotations.
 
 #include <gtest/gtest.h>
-#include <units/angle.h>
+#include <wpi/units/angle.hpp>
 
 #include <cmath>
 #include <optional>
@@ -31,8 +31,8 @@ static EasyCRTConfig MakePerfectConfig(double mechRot, int t1 = 19, int t2 = 21,
   const double e1 = mechRot * k / t1;
   const double e2 = mechRot * k / t2;
   EasyCRTConfig cfg;
-  cfg.enc1 = [e1] { return ::units::turn_t{e1}; };
-  cfg.enc2 = [e2] { return ::units::turn_t{e2}; };
+  cfg.enc1 = [e1] { return wpi::units::turn_t{e1}; };
+  cfg.enc2 = [e2] { return wpi::units::turn_t{e2}; };
   const double period = CrtLcm(t1, t2) / k;
   return cfg.WithTeeth(t1, t2, k).WithRange(0.0, period - 1e-6);
 }
@@ -168,8 +168,8 @@ TEST(EasyCRTTest, SolveWithEncoderOffsets) {
   const double raw2 = mechRot * k / t2 - off2;
 
   EasyCRTConfig cfg;
-  cfg.enc1 = [raw1] { return ::units::turn_t{raw1}; };
-  cfg.enc2 = [raw2] { return ::units::turn_t{raw2}; };
+  cfg.enc1 = [raw1] { return wpi::units::turn_t{raw1}; };
+  cfg.enc2 = [raw2] { return wpi::units::turn_t{raw2}; };
   const double period = CrtLcm(t1, t2) / k;
   cfg.WithTeeth(t1, t2, k).WithRange(0.0, period - 1e-6).WithOffsets(off1, off2);
 
@@ -192,8 +192,8 @@ TEST(EasyCRTTest, SolveWithEnc1Inverted) {
   const double e2 = mechRot * k / t2;
 
   EasyCRTConfig cfg;
-  cfg.enc1 = [e1_inverted] { return ::units::turn_t{e1_inverted}; };
-  cfg.enc2 = [e2] { return ::units::turn_t{e2}; };
+  cfg.enc1 = [e1_inverted] { return wpi::units::turn_t{e1_inverted}; };
+  cfg.enc2 = [e2] { return wpi::units::turn_t{e2}; };
   const double period = CrtLcm(t1, t2) / k;
   cfg.WithTeeth(t1, t2, k).WithRange(0.0, period - 1e-6).WithInversions(true, false);
 
@@ -207,8 +207,8 @@ TEST(EasyCRTTest, SolveWithEnc1Inverted) {
 
 TEST(EasyCRTTest, InvalidConfig_NaNEncoder) {
   EasyCRTConfig cfg;
-  cfg.enc1 = [] { return ::units::turn_t{std::numeric_limits<double>::quiet_NaN()}; };
-  cfg.enc2 = [] { return ::units::turn_t{0.5}; };
+  cfg.enc1 = [] { return wpi::units::turn_t{std::numeric_limits<double>::quiet_NaN()}; };
+  cfg.enc2 = [] { return wpi::units::turn_t{0.5}; };
   cfg.WithTeeth(19, 21, 200.0).WithRange(0.0, 1.99);
 
   EasyCRT solver{cfg};
@@ -219,8 +219,8 @@ TEST(EasyCRTTest, InvalidConfig_NaNEncoder) {
 
 TEST(EasyCRTTest, InvalidConfig_ZeroCommonK) {
   EasyCRTConfig cfg;
-  cfg.enc1 = [] { return ::units::turn_t{0.1}; };
-  cfg.enc2 = [] { return ::units::turn_t{0.2}; };
+  cfg.enc1 = [] { return wpi::units::turn_t{0.1}; };
+  cfg.enc2 = [] { return wpi::units::turn_t{0.2}; };
   cfg.WithTeeth(19, 21, 0.0).WithRange(0.0, 1.99);
 
   EasyCRT solver{cfg};
@@ -231,8 +231,8 @@ TEST(EasyCRTTest, InvalidConfig_ZeroCommonK) {
 
 TEST(EasyCRTTest, InvalidConfig_InvertedRange) {
   EasyCRTConfig cfg;
-  cfg.enc1 = [] { return ::units::turn_t{0.1}; };
-  cfg.enc2 = [] { return ::units::turn_t{0.2}; };
+  cfg.enc1 = [] { return wpi::units::turn_t{0.1}; };
+  cfg.enc2 = [] { return wpi::units::turn_t{0.2}; };
   cfg.WithTeeth(19, 21, 200.0).WithRange(2.0, 0.0);  // min > max
 
   EasyCRT solver{cfg};
@@ -252,8 +252,8 @@ TEST(EasyCRTTest, NoSolution_PositionOutsideRange) {
   const double e1 = mechRot * k / t1;
   const double e2 = mechRot * k / t2;
   EasyCRTConfig cfg;
-  cfg.enc1 = [e1] { return ::units::turn_t{e1}; };
-  cfg.enc2 = [e2] { return ::units::turn_t{e2}; };
+  cfg.enc1 = [e1] { return wpi::units::turn_t{e1}; };
+  cfg.enc2 = [e2] { return wpi::units::turn_t{e2}; };
   cfg.WithTeeth(t1, t2, k).WithRange(0.0, 1.0);
 
   EasyCRT solver{cfg};

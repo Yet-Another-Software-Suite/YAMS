@@ -4,13 +4,14 @@
 // Mirrors Java ArmTest — duty-cycle and position-PID tests for a single-jointed
 // arm across all (HardwareType × ProfileType) combinations.
 
-#include <frc/system/plant/DCMotor.h>
-#include <frc2/command/Commands.h>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/commands2/CommandScheduler.hpp>
+#include <wpi/commands2/Commands.hpp>
 #include <gtest/gtest.h>
-#include <units/angle.h>
-#include <units/angular_velocity.h>
-#include <units/length.h>
-#include <units/mass.h>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/mass.hpp>
 
 #include <chrono>
 #include <cmath>
@@ -42,9 +43,9 @@ static SmartMotorControllerConfig MakeArmSMCConfig(ProfileType profile, Hardware
       .WithIdleMode(SmartMotorControllerConfig::MotorMode::BRAKE)
       .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
-      .WithFeedforward(frc::ArmFeedforward{
-          0.0_V, 0.0_V, units::unit_t<frc::ArmFeedforward::kv_unit>{1.0},
-          units::unit_t<frc::ArmFeedforward::ka_unit>{0.0}})
+      .WithFeedforward(wpi::math::ArmFeedforward{
+          0.0_V, 0.0_V, wpi::units::unit_t<wpi::math::ArmFeedforward::kv_unit>{1.0},
+          wpi::units::unit_t<wpi::math::ArmFeedforward::ka_unit>{0.0}})
       .WithClosedLoopMode()
       .WithMOI(4_in, 1_lb)
       .WithStartingPosition(0.0_deg)
@@ -82,8 +83,8 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
 
   auto* subsys = static_cast<TestSubsystem*>(smc->GetConfig().GetSubsystem());
   auto cmd = subsys->SetDutyCycle(0.5);
-  frc2::CommandScheduler::GetInstance().Schedule(cmd);
-  frc2::CommandScheduler::GetInstance().Schedule(cmd);
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(cmd);
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(cmd);
 
   SchedulerHelper::RunForDuration(1.5_s, [&] {
     if (smc->GetDutyCycle() != 0.0) passed = true;
@@ -112,8 +113,8 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   bool passed = false;
 
   auto cmd =
-      frc2::cmd::Run([smc] { smc->SetPosition(80.0_deg); }, {smc->GetConfig().GetSubsystem()});
-  frc2::CommandScheduler::GetInstance().Schedule(cmd);
+      wpi::cmd::Run([smc] { smc->SetPosition(80.0_deg); }, {smc->GetConfig().GetSubsystem()});
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(cmd);
 
   SchedulerHelper::RunForDuration(1.0_s, [&] {
     std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(
@@ -178,7 +179,7 @@ TEST_P(ArmTest, ArmDutyCycle) {
 
   auto arm = CreateArm(bundle.smc, bundle.subsystem.get(), IsCTRE(bundle));
   auto upCmd = arm->Set(0.5);
-  frc2::CommandScheduler::GetInstance().Schedule(upCmd);
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(upCmd);
 
   DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
   CloseBundle(bundle);
@@ -195,7 +196,7 @@ TEST_P(ArmTest, ArmPositionPID) {
 
   auto arm = CreateArm(bundle.smc, bundle.subsystem.get(), IsCTRE(bundle));
   auto highPid = arm->RunTo(80.0_deg);
-  frc2::CommandScheduler::GetInstance().Schedule(highPid);
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(highPid);
 
   PositionPIDTestBody(bundle.smc, IsCTRE(bundle));
   CloseBundle(bundle);
