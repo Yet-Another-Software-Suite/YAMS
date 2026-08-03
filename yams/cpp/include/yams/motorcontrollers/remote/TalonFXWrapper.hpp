@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <frc/Alert.h>
-#include <frc/simulation/DCMotorSim.h>
+#include <wpi/driverstation/Alert.hpp>
+#include <wpi/simulation/DCMotorSim.hpp>
 
 #include <any>
 #include <ctre/phoenix6/CANcoder.hpp>
@@ -56,19 +56,19 @@ namespace yams::motorcontrollers::remote {
  * SmartMotorControllerConfig cfg;
  * cfg.WithSubsystem(this)
  *    .WithFeedback(4.0, 0.0, 0.0)
- *    .WithTrapezoidProfile(units::turns_per_second_t{0.5},
- *                          units::turns_per_second_squared_t{0.25})
+ *    .WithTrapezoidProfile(wpi::units::turns_per_second_t{0.5},
+ *                          wpi::units::turns_per_second_squared_t{0.25})
  *    .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
  *    .WithIdleMode(Cfg::MotorMode::BRAKE)
  *    .WithStatorCurrentLimit(40.0_A)
  *    .WithMotorInverted(false)
- *    .WithFeedforward(frc::ArmFeedforward{
- *        0.0_V, 0.0_V, units::unit_t<frc::ArmFeedforward::kv_unit>{0.0},
- *        units::unit_t<frc::ArmFeedforward::ka_unit>{0.0}})
+ *    .WithFeedforward(wpi::math::ArmFeedforward{
+ *        0.0_V, 0.0_V, wpi::units::unit_t<wpi::math::ArmFeedforward::kv_unit>{0.0},
+ *        wpi::units::unit_t<wpi::math::ArmFeedforward::ka_unit>{0.0}})
  *    .WithClosedLoopMode()
  *    .WithTelemetry("ArmMotor", Cfg::TelemetryVerbosity::HIGH);
  *
- * m_smc.emplace(m_talon, frc::DCMotor::KrakenX60(1), &cfg);
+ * m_smc.emplace(m_talon, wpi::math::DCMotor::KrakenX60(1), &cfg);
  * @endcode
  */
 class TalonFXWrapper : public SmartMotorController {
@@ -80,7 +80,7 @@ class TalonFXWrapper : public SmartMotorController {
    * @param dcMotor DC motor model used for simulation.
    * @param config  Initial SmartMotorControllerConfig to apply.
    */
-  TalonFXWrapper(ctre::phoenix6::hardware::TalonFX* talon, frc::DCMotor dcMotor,
+  TalonFXWrapper(ctre::phoenix6::hardware::TalonFX* talon, wpi::math::DCMotor dcMotor,
                  SmartMotorControllerConfig* config);
 
   ~TalonFXWrapper();
@@ -111,76 +111,76 @@ class TalonFXWrapper : public SmartMotorController {
   /** @copydoc SmartMotorController::GetDutyCycle */
   double GetDutyCycle() override;
   /** @copydoc SmartMotorController::SetVoltage */
-  void SetVoltage(units::volt_t voltage) override;
+  void SetVoltage(wpi::units::volt_t voltage) override;
   /** @copydoc SmartMotorController::GetVoltage */
-  units::volt_t GetVoltage() override;
+  wpi::units::volt_t GetVoltage() override;
 
   // ---- Closed-loop setpoints ----------------------------------------------
-  /** @copydoc SmartMotorController::SetPosition(units::turn_t) */
-  void SetPosition(units::turn_t angle) override;
+  /** @copydoc SmartMotorController::SetPosition(wpi::units::turn_t) */
+  void SetPosition(wpi::units::turn_t angle) override;
   /**
    * Command a linear measurement position setpoint (closed-loop).
    * Converts distance to turns using the configured mechanism circumference.
    *
    * @param distance Target linear distance.
    */
-  void SetPosition(units::meter_t distance) override;
-  /** @copydoc SmartMotorController::SetVelocity(units::turns_per_second_t) */
-  void SetVelocity(units::turns_per_second_t velocity) override;
+  void SetPosition(wpi::units::meter_t distance) override;
+  /** @copydoc SmartMotorController::SetVelocity(wpi::units::turns_per_second_t) */
+  void SetVelocity(wpi::units::turns_per_second_t velocity) override;
   /**
    * Command a linear measurement velocity setpoint (closed-loop).
    * Converts linear velocity to turns per second using the configured mechanism circumference.
    *
    * @param velocity Target linear velocity.
    */
-  void SetVelocity(units::meters_per_second_t velocity) override;
+  void SetVelocity(wpi::units::meters_per_second_t velocity) override;
 
   // ---- Encoder writes -----------------------------------------------------
-  /** @copydoc SmartMotorController::SetEncoderPosition(units::turn_t) */
-  void SetEncoderPosition(units::turn_t angle) override;
+  /** @copydoc SmartMotorController::SetEncoderPosition(wpi::units::turn_t) */
+  void SetEncoderPosition(wpi::units::turn_t angle) override;
   /**
    * Write a linear distance into the encoder (seeds the position).
    * Converts distance to turns using the configured mechanism circumference.
    *
    * @param distance Linear distance to write.
    */
-  void SetEncoderPosition(units::meter_t distance) override;
+  void SetEncoderPosition(wpi::units::meter_t distance) override;
   /** Not applicable to TalonFX; has no effect. */
-  void SetEncoderVelocity(units::turns_per_second_t velocity) override;
+  void SetEncoderVelocity(wpi::units::turns_per_second_t velocity) override;
   /** Not applicable to TalonFX; has no effect. */
-  void SetEncoderVelocity(units::meters_per_second_t velocity) override;
+  void SetEncoderVelocity(wpi::units::meters_per_second_t velocity) override;
 
   // ---- Encoder reads ------------------------------------------------------
   /** @copydoc SmartMotorController::GetMechanismPosition */
-  units::turn_t GetMechanismPosition() override;
+  wpi::units::turn_t GetMechanismPosition() override;
   /** @copydoc SmartMotorController::GetMechanismVelocity */
-  units::turns_per_second_t GetMechanismVelocity() override;
+  wpi::units::turns_per_second_t GetMechanismVelocity() override;
   /** @copydoc SmartMotorController::GetMechanismAcceleration */
-  units::turns_per_second_squared_t GetMechanismAcceleration() override;
+  wpi::units::turns_per_second_squared_t GetMechanismAcceleration() override;
   /** @copydoc SmartMotorController::GetRotorPosition */
-  units::turn_t GetRotorPosition() override;
+  wpi::units::turn_t GetRotorPosition() override;
   /** @copydoc SmartMotorController::GetRotorVelocity */
-  units::turns_per_second_t GetRotorVelocity() override;
+  wpi::units::turns_per_second_t GetRotorVelocity() override;
   /** @copydoc SmartMotorController::GetMeasurementPosition */
-  units::meter_t GetMeasurementPosition() override;
+  wpi::units::meter_t GetMeasurementPosition() override;
   /** @copydoc SmartMotorController::GetMeasurementVelocity */
-  units::meters_per_second_t GetMeasurementVelocity() override;
+  wpi::units::meters_per_second_t GetMeasurementVelocity() override;
   /** @copydoc SmartMotorController::GetMeasurementAcceleration */
-  units::meters_per_second_squared_t GetMeasurementAcceleration() override;
+  wpi::units::meters_per_second_squared_t GetMeasurementAcceleration() override;
   /** @copydoc SmartMotorController::GetExternalEncoderPosition */
-  std::optional<units::degree_t> GetExternalEncoderPosition() override;
+  std::optional<wpi::units::degree_t> GetExternalEncoderPosition() override;
   /** @copydoc SmartMotorController::GetExternalEncoderVelocity */
-  std::optional<units::degrees_per_second_t> GetExternalEncoderVelocity() override;
+  std::optional<wpi::units::degrees_per_second_t> GetExternalEncoderVelocity() override;
 
   // ---- Motor status -------------------------------------------------------
   /** @copydoc SmartMotorController::GetSupplyCurrent */
-  std::optional<units::ampere_t> GetSupplyCurrent() override;
+  std::optional<wpi::units::ampere_t> GetSupplyCurrent() override;
   /** @copydoc SmartMotorController::GetStatorCurrent */
-  units::ampere_t GetStatorCurrent() override;
+  wpi::units::ampere_t GetStatorCurrent() override;
   /** @copydoc SmartMotorController::GetTemperature */
-  units::celsius_t GetTemperature() override;
+  wpi::units::celsius_t GetTemperature() override;
   /** @copydoc SmartMotorController::GetDCMotor */
-  frc::DCMotor GetDCMotor() override;
+  wpi::math::DCMotor GetDCMotor() override;
 
   // ---- Configuration setters (live tuning) --------------------------------
   /** @copydoc SmartMotorController::SetIdleMode */
@@ -208,19 +208,19 @@ class TalonFXWrapper : public SmartMotorController {
   /** @copydoc SmartMotorController::SetFeedforward */
   void SetFeedforward(double kS, double kV, double kA, double kG) override;
   /** @copydoc SmartMotorController::SetStatorCurrentLimit */
-  void SetStatorCurrentLimit(units::ampere_t currentLimit) override;
+  void SetStatorCurrentLimit(wpi::units::ampere_t currentLimit) override;
   /** @copydoc SmartMotorController::SetSupplyCurrentLimit */
-  void SetSupplyCurrentLimit(units::ampere_t currentLimit) override;
+  void SetSupplyCurrentLimit(wpi::units::ampere_t currentLimit) override;
   /** @copydoc SmartMotorController::SetClosedLoopRampRate */
-  void SetClosedLoopRampRate(units::second_t rampRate) override;
+  void SetClosedLoopRampRate(wpi::units::second_t rampRate) override;
   /** @copydoc SmartMotorController::SetOpenLoopRampRate */
-  void SetOpenLoopRampRate(units::second_t rampRate) override;
-  /** @copydoc SmartMotorController::SetMechanismUpperLimit(units::turn_t) */
-  void SetMechanismUpperLimit(units::turn_t upperLimit) override;
-  /** @copydoc SmartMotorController::SetMechanismLowerLimit(units::turn_t) */
-  void SetMechanismLowerLimit(units::turn_t lowerLimit) override;
+  void SetOpenLoopRampRate(wpi::units::second_t rampRate) override;
+  /** @copydoc SmartMotorController::SetMechanismUpperLimit(wpi::units::turn_t) */
+  void SetMechanismUpperLimit(wpi::units::turn_t upperLimit) override;
+  /** @copydoc SmartMotorController::SetMechanismLowerLimit(wpi::units::turn_t) */
+  void SetMechanismLowerLimit(wpi::units::turn_t lowerLimit) override;
   /** @copydoc SmartMotorController::SetMechanismLimits */
-  void SetMechanismLimits(units::turn_t lower, units::turn_t upper) override;
+  void SetMechanismLimits(wpi::units::turn_t lower, wpi::units::turn_t upper) override;
   /** @copydoc SmartMotorController::SetMechanismLimitsEnabled */
   void SetMechanismLimitsEnabled(bool enabled) override;
   /**
@@ -229,26 +229,26 @@ class TalonFXWrapper : public SmartMotorController {
    *
    * @param upperLimit Upper distance limit.
    */
-  void SetMeasurementUpperLimit(units::meter_t upperLimit) override;
+  void SetMeasurementUpperLimit(wpi::units::meter_t upperLimit) override;
   /**
    * Set the lower linear soft limit for the measurement.
    * Converts the lower limit to turns using the configured mechanism circumference.
    *
    * @param lowerLimit Lower distance limit.
    */
-  void SetMeasurementLowerLimit(units::meter_t lowerLimit) override;
-  /** @copydoc SmartMotorController::SetMotionProfileMaxVelocity(units::turns_per_second_t) */
-  void SetMotionProfileMaxVelocity(units::turns_per_second_t maxVelocity) override;
+  void SetMeasurementLowerLimit(wpi::units::meter_t lowerLimit) override;
+  /** @copydoc SmartMotorController::SetMotionProfileMaxVelocity(wpi::units::turns_per_second_t) */
+  void SetMotionProfileMaxVelocity(wpi::units::turns_per_second_t maxVelocity) override;
   /**
    * Set the maximum linear velocity for the motion profile.
    * Converts linear velocity to turns per second using the configured mechanism circumference.
    *
    * @param maxVelocity Maximum linear velocity.
    */
-  void SetMotionProfileMaxVelocity(units::meters_per_second_t maxVelocity) override;
+  void SetMotionProfileMaxVelocity(wpi::units::meters_per_second_t maxVelocity) override;
   /** @copydoc
-   * SmartMotorController::SetMotionProfileMaxAcceleration(units::turns_per_second_squared_t) */
-  void SetMotionProfileMaxAcceleration(units::turns_per_second_squared_t maxAcc) override;
+   * SmartMotorController::SetMotionProfileMaxAcceleration(wpi::units::turns_per_second_squared_t) */
+  void SetMotionProfileMaxAcceleration(wpi::units::turns_per_second_squared_t maxAcc) override;
   /**
    * Set the maximum linear acceleration for the motion profile.
    * Converts linear acceleration to turns per second squared using the configured mechanism
@@ -256,12 +256,12 @@ class TalonFXWrapper : public SmartMotorController {
    *
    * @param maxAcc Maximum linear acceleration.
    */
-  void SetMotionProfileMaxAcceleration(units::meters_per_second_squared_t maxAcc) override;
+  void SetMotionProfileMaxAcceleration(wpi::units::meters_per_second_squared_t maxAcc) override;
   /** @copydoc SmartMotorController::SetMotionProfileMaxJerk */
-  void SetMotionProfileMaxJerk(units::angular_jerk::turns_per_second_cubed_t maxJerk) override;
+  void SetMotionProfileMaxJerk(wpi::units::angular_jerk::turns_per_second_cubed_t maxJerk) override;
   /** @copydoc SmartMotorController::SetExponentialProfile */
   void SetExponentialProfile(std::optional<double> kV, std::optional<double> kA,
-                             std::optional<units::volt_t> maxInput) override;
+                             std::optional<wpi::units::volt_t> maxInput) override;
   /**
    * Select the active closed-loop gain slot.
    * TalonFX supports 3 slots (SLOT_0 through SLOT_2); SLOT_3 is silently ignored.
@@ -288,7 +288,7 @@ class TalonFXWrapper : public SmartMotorController {
  private:
   SmartMotorControllerConfig* m_config{nullptr};
   ctre::phoenix6::hardware::TalonFX* m_talon;
-  frc::DCMotor m_dcMotor;
+  wpi::math::DCMotor m_dcMotor;
   ctre::phoenix6::configs::TalonFXConfiguration m_talonConfig;
 
   // Active closed-loop control requests — variant selects the active request type
@@ -317,11 +317,11 @@ class TalonFXWrapper : public SmartMotorController {
   std::optional<std::reference_wrapper<ctre::phoenix6::hardware::CANdi>> m_candi;
 
   // Simulation
-  std::optional<frc::sim::DCMotorSim> m_motorSim;
+  std::optional<wpi::sim::DCMotorSim> m_motorSim;
 
   math::DerivativeTimeFilter m_accelFilter{20_ms};
 
-  std::optional<frc::Alert> m_rioControllerAlert;
+  std::optional<wpi::Alert> m_rioControllerAlert;
 
   void ApplyPIDConfig();
   void ApplyFeedforwardConfig();
