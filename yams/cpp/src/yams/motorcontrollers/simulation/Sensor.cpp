@@ -3,8 +3,8 @@
 
 #include "yams/motorcontrollers/simulation/Sensor.hpp"
 
-#include <frc/RobotBase.h>
-#include <hal/SimDevice.h>
+#include <wpi/framework/RobotBase.hpp>
+#include <wpi/hal/SimDevice.hpp>
 
 #include <functional>
 #include <stdexcept>
@@ -20,11 +20,11 @@ Sensor::Sensor(std::string sensorName, std::vector<SensorData> fields)
     : m_sensorName{std::move(sensorName)} {
   for (auto& field : fields) m_simData.emplace(field.GetName(), std::move(field));
 
-  if (frc::RobotBase::IsSimulation()) {
+  if (wpi::RobotBase::IsSimulation()) {
     auto handle = HAL_CreateSimDevice(("Sensor[" + m_sensorName + "]").c_str());
     m_simDevice = handle;
     for (auto& [name, field] : m_simData) {
-      field.CreateValue(handle, HAL_SimValueBidir);
+      field.CreateValue(handle, HAL_SIM_VALUE_BIDIR);
     }
   }
 }
@@ -51,7 +51,7 @@ int Sensor::GetAsInt(const std::string& name) const { return GetField(name).GetA
 bool Sensor::GetAsBoolean(const std::string& name) const { return GetField(name).GetAsBoolean(); }
 int64_t Sensor::GetAsLong(const std::string& name) const { return GetField(name).GetAsLong(); }
 
-HAL_SimDeviceHandle Sensor::GetDevice() const { return m_simDevice.value_or(HAL_kInvalidHandle); }
+HAL_SimDeviceHandle Sensor::GetDevice() const { return m_simDevice.value_or(HAL_INVALID_HANDLE); }
 
 void Sensor::AddSimTrigger(const std::string& field, HAL_Value value,
                            std::function<bool()> trigger) {

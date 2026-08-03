@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <hal/SimDevice.h>
-#include <hal/Value.h>
+#include <wpi/hal/SimDevice.hpp>
+#include <wpi/hal/Value.h>
 
 #include <functional>
 #include <optional>
@@ -30,7 +30,7 @@ namespace yams::motorcontrollers::simulation {
  * ### Basic usage (construct directly)
  * @code{.cpp}
  * // Beam-break sensor: one boolean field backed by a real DIO channel.
- * frc::DigitalInput beamBreak{0};
+ * wpi::hardware::DigitalInput beamBreak{0};
  *
  * Sensor sensor{"BeamBreak", {
  *   SensorData{"Triggered", [&beamBreak] { return !beamBreak.Get(); }, false},
@@ -42,8 +42,8 @@ namespace yams::motorcontrollers::simulation {
  *
  * ### Builder usage (SimSensorConfig)
  * @code{.cpp}
- * frc::DigitalInput beamBreak{0};
- * frc::Encoder encoder{1, 2};
+ * wpi::hardware::DigitalInput beamBreak{0};
+ * wpi::hardware::Encoder encoder{1, 2};
  *
  * SimSensorConfig cfg{"IntakeSensors"};
  * cfg.WithField("BeamBreak",   [&beamBreak] { return !beamBreak.Get(); }, false)

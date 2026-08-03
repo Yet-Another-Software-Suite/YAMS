@@ -3,9 +3,9 @@
 
 #include "yams/motorcontrollers/simulation/SensorData.hpp"
 
-#include <frc/RobotBase.h>
-#include <hal/SimDevice.h>
-#include <hal/Value.h>
+#include <wpi/framework/RobotBase.hpp>
+#include <wpi/hal/SimDevice.hpp>
+#include <wpi/hal/Value.h>
 
 #include <functional>
 #include <optional>
@@ -86,7 +86,7 @@ int64_t SensorData::GetAsLong() const {
 }
 
 HAL_Value SensorData::GetValue() const {
-  if (frc::RobotBase::IsReal()) return m_supplier();
+  if (wpi::RobotBase::IsReal()) return m_supplier();
 
   if (m_triggerValues.has_value()) {
     for (auto& [trigger, value] : *m_triggerValues) {
@@ -102,7 +102,7 @@ HAL_Value SensorData::GetValue() const {
     const_cast<SensorData*>(this)->m_prev.reset();
   }
 
-  if (m_glassValue != HAL_kInvalidHandle) return HAL_GetSimValue(m_glassValue);
+  if (m_glassValue != HAL_INVALID_HANDLE) return HAL_GetSimValue(m_glassValue);
   return m_supplier();
 }
 
@@ -113,9 +113,9 @@ SensorData::HALValueType SensorData::GetType() const { return m_type; }
 // ---- Setters ----------------------------------------------------------------
 
 void SensorData::Set(HAL_Value val) {
-  if (!m_prev.has_value() && m_glassValue != HAL_kInvalidHandle)
+  if (!m_prev.has_value() && m_glassValue != HAL_INVALID_HANDLE)
     m_prev = HAL_GetSimValue(m_glassValue);
-  if (m_glassValue != HAL_kInvalidHandle) HAL_SetSimValue(m_glassValue, val);
+  if (m_glassValue != HAL_INVALID_HANDLE) HAL_SetSimValue(m_glassValue, val);
 }
 
 void SensorData::Set(double val) { Set(Convert(val)); }
@@ -132,7 +132,7 @@ void SensorData::AddSimTrigger(HAL_Value value, std::function<bool()> trigger) {
 
 HAL_SimValueHandle SensorData::CreateValue(HAL_SimDeviceHandle device, int32_t direction) {
   auto handle = HAL_CreateSimValue(device, m_name.c_str(), direction, m_defaultValue);
-  if (direction == HAL_SimValueBidir || direction == HAL_SimValueInput) m_glassValue = handle;
+  if (direction == HAL_SIM_VALUE_BIDIR || direction == HAL_SIM_VALUE_INPUT) m_glassValue = handle;
   return handle;
 }
 
