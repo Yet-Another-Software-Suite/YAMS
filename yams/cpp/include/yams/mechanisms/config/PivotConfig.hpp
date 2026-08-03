@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include <frc/util/Color.h>
-#include <frc/util/Color8Bit.h>
-#include <units/angle.h>
-#include <units/angular_velocity.h>
-#include <units/moment_of_inertia.h>
+#include <wpi/util/Color.hpp>
+#include <wpi/util/Color8Bit.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/moment_of_inertia.hpp>
 
 #include <optional>
 #include <string>
@@ -41,7 +41,7 @@ class PivotConfig {
    * @param angle Minimum angle.
    * @return *this for chaining.
    */
-  PivotConfig& WithMinAngle(units::degree_t angle);
+  PivotConfig& WithMinAngle(wpi::units::degree_t angle);
 
   /**
    * Set the maximum (upper hard) angle for simulation and soft-limit purposes.
@@ -49,7 +49,7 @@ class PivotConfig {
    * @param angle Maximum angle.
    * @return *this for chaining.
    */
-  PivotConfig& WithMaxAngle(units::degree_t angle);
+  PivotConfig& WithMaxAngle(wpi::units::degree_t angle);
 
   /**
    * Set the Mechanism2d simulation colour for the pivot ligament (default: green).
@@ -57,7 +57,7 @@ class PivotConfig {
    * @param color Desired colour.
    * @return *this for chaining.
    */
-  PivotConfig& WithSimColor(const frc::Color8Bit& color);
+  PivotConfig& WithSimColor(const wpi::util::Color8Bit& color);
 
   // ---- Getters ---------------------------------------------------------------
 
@@ -65,19 +65,19 @@ class PivotConfig {
   std::string GetTelemetryName() const;
 
   /** Get the optional minimum (lower hard-limit) angle. */
-  std::optional<units::degree_t> GetMinAngle() const;
+  std::optional<wpi::units::degree_t> GetMinAngle() const;
 
   /** Get the optional maximum (upper hard-limit) angle. */
-  std::optional<units::degree_t> GetMaxAngle() const;
+  std::optional<wpi::units::degree_t> GetMaxAngle() const;
 
   /** Get the Mechanism2d simulation colour. */
-  frc::Color8Bit GetSimColor() const;
+  wpi::util::Color8Bit GetSimColor() const;
 
  private:
   std::string m_telemetryName;
-  std::optional<units::degree_t> m_minAngle;
-  std::optional<units::degree_t> m_maxAngle;
-  frc::Color8Bit m_simColor{frc::Color::kGreen};
+  std::optional<wpi::units::degree_t> m_minAngle;
+  std::optional<wpi::units::degree_t> m_maxAngle;
+  wpi::util::Color8Bit m_simColor{wpi::util::Color::GREEN};
 };
 
 }  // namespace yams::mechanisms::config

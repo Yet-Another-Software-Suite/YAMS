@@ -13,20 +13,20 @@ FlyWheelConfig& FlyWheelConfig::WithTelemetryName(const std::string& name) {
   return *this;
 }
 
-FlyWheelConfig& FlyWheelConfig::WithRollerDiameter(units::meter_t diameter) {
+FlyWheelConfig& FlyWheelConfig::WithRollerDiameter(wpi::units::meter_t diameter) {
   m_rollerDiameter = diameter;
   return *this;
 }
 
-FlyWheelConfig& FlyWheelConfig::WithSimColor(const frc::Color8Bit& color) {
+FlyWheelConfig& FlyWheelConfig::WithSimColor(const wpi::util::Color8Bit& color) {
   m_simColor = color;
   return *this;
 }
 
 std::string FlyWheelConfig::GetTelemetryName() const { return m_telemetryName; }
 
-std::optional<units::meter_t> FlyWheelConfig::GetRollerDiameter() const { return m_rollerDiameter; }
+std::optional<wpi::units::meter_t> FlyWheelConfig::GetRollerDiameter() const { return m_rollerDiameter; }
 
-frc::Color8Bit FlyWheelConfig::GetSimColor() const { return m_simColor; }
+wpi::util::Color8Bit FlyWheelConfig::GetSimColor() const { return m_simColor; }
 
 }  // namespace yams::mechanisms::config

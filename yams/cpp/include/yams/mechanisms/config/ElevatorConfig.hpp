@@ -3,12 +3,12 @@
 
 #pragma once
 
-#include <frc/util/Color.h>
-#include <frc/util/Color8Bit.h>
-#include <units/angle.h>
-#include <units/length.h>
-#include <units/mass.h>
-#include <units/velocity.h>
+#include <wpi/util/Color.hpp>
+#include <wpi/util/Color8Bit.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/mass.hpp>
+#include <wpi/units/velocity.hpp>
 
 #include <optional>
 #include <string>
@@ -40,7 +40,7 @@ class ElevatorConfig {
    * @param height Minimum height.
    * @return *this for chaining.
    */
-  ElevatorConfig& WithMinimumHeight(units::meter_t height);
+  ElevatorConfig& WithMinimumHeight(wpi::units::meter_t height);
 
   /**
    * Set the maximum (upper hard) height for simulation and soft-limit purposes.
@@ -48,7 +48,7 @@ class ElevatorConfig {
    * @param height Maximum height.
    * @return *this for chaining.
    */
-  ElevatorConfig& WithMaximumHeight(units::meter_t height);
+  ElevatorConfig& WithMaximumHeight(wpi::units::meter_t height);
 
   /**
    * Set the carriage mass (required for simulation).
@@ -56,7 +56,7 @@ class ElevatorConfig {
    * @param mass Carriage mass in kg.
    * @return *this for chaining.
    */
-  ElevatorConfig& WithCarriageMass(units::kilogram_t mass);
+  ElevatorConfig& WithCarriageMass(wpi::units::kilogram_t mass);
 
   /**
    * Mark the elevator as horizontal (disables gravity simulation).
@@ -72,7 +72,7 @@ class ElevatorConfig {
    * @param color Desired colour.
    * @return *this for chaining.
    */
-  ElevatorConfig& WithSimColor(const frc::Color8Bit& color);
+  ElevatorConfig& WithSimColor(const wpi::util::Color8Bit& color);
 
   /**
    * Set the angle of the elevator ligament in the Mechanism2d window (default: 90°/vertical).
@@ -80,7 +80,7 @@ class ElevatorConfig {
    * @param angle Ligament angle.
    * @return *this for chaining.
    */
-  ElevatorConfig& WithAngle(units::degree_t angle);
+  ElevatorConfig& WithAngle(wpi::units::degree_t angle);
 
   // ---- Getters ---------------------------------------------------------------
 
@@ -88,32 +88,32 @@ class ElevatorConfig {
   std::string GetTelemetryName() const;
 
   /** Get the optional minimum height. */
-  std::optional<units::meter_t> GetMinHeight() const;
+  std::optional<wpi::units::meter_t> GetMinHeight() const;
 
   /** Get the optional maximum height. */
-  std::optional<units::meter_t> GetMaxHeight() const;
+  std::optional<wpi::units::meter_t> GetMaxHeight() const;
 
   /** Get the optional carriage mass. */
-  std::optional<units::kilogram_t> GetCarriageMass() const;
+  std::optional<wpi::units::kilogram_t> GetCarriageMass() const;
 
   /** Returns true when the elevator is configured as horizontal (gravity disabled). */
   bool IsHorizontal() const;
 
   /** Get the Mechanism2d simulation colour. */
-  frc::Color8Bit GetSimColor() const;
+  wpi::util::Color8Bit GetSimColor() const;
 
   /** Get the Mechanism2d ligament angle (default: 90°). */
-  units::degree_t GetAngle() const;
+  wpi::units::degree_t GetAngle() const;
 
  private:
   std::string m_telemetryName;
-  std::optional<units::meter_t> m_minHeight;
-  std::optional<units::meter_t> m_maxHeight;
-  std::optional<units::kilogram_t> m_carriageMass;
-  std::optional<units::meter_t> m_drumRadius;
+  std::optional<wpi::units::meter_t> m_minHeight;
+  std::optional<wpi::units::meter_t> m_maxHeight;
+  std::optional<wpi::units::kilogram_t> m_carriageMass;
+  std::optional<wpi::units::meter_t> m_drumRadius;
   bool m_isHorizontal{false};
-  frc::Color8Bit m_simColor{frc::Color::kOrange};
-  units::degree_t m_angle{90.0};
+  wpi::util::Color8Bit m_simColor{wpi::util::Color::ORANGE};
+  wpi::units::degree_t m_angle{90.0};
 };
 
 }  // namespace yams::mechanisms::config
