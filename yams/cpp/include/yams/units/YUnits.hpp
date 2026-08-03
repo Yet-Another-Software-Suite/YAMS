@@ -60,12 +60,12 @@ using year_t = ::wpi::units::unit_t<YearUnit>;            ///< Quantity in years
 // === Angular Velocity ===
 /** Rotations per year — useful for very slow mechanisms. */
 using rotations_per_year_t =
-    ::wpi::units::unit_t<::wpi::units::compound_unit<::wpi::units::turns, ::units::inverse<YearUnit>>>;
+    ::wpi::units::unit_t<::wpi::units::compound_unit<::wpi::units::turns, wpi::units::inverse<YearUnit>>>;
 
 // === Angular Acceleration ===
 /** RPM per second — angular acceleration expressed as RPM/s. */
 using rpm_per_second_t =
     ::wpi::units::unit_t<::wpi::units::compound_unit<::wpi::units::angular_velocity::revolutions_per_minute,
-                                           ::units::inverse<::wpi::units::seconds>>>;
+                                           wpi::units::inverse<::wpi::units::seconds>>>;
 
 }  // namespace yams::units
