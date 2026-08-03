@@ -3,10 +3,10 @@
 
 #include "yams/mechanisms/swerve/SwerveModule.hpp"
 
-#include <frc/RobotBase.h>
-#include <frc/geometry/Rotation2d.h>
-#include <networktables/NetworkTableInstance.h>
-#include <units/angle.h>
+#include <wpi/framework/RobotBase.hpp>
+#include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/nt/NetworkTableInstance.hpp>
+#include <wpi/units/angle.hpp>
 
 #include <stdexcept>
 #include <string>
@@ -35,7 +35,7 @@ SwerveModule::SwerveModule(config::SwerveModuleConfig* config)
   }
 
   // Set up motor telemetry under the swerve hierarchy.
-  auto instance = nt::NetworkTableInstance::GetDefault();
+  auto instance = wpi::nt::NetworkTableInstance::GetDefault();
   auto driveTable = instance.GetTable("SmartDashboard/swerve/" + GetName() + "/drive");
   auto driveTuning = instance.GetTable("SmartDashboard/swerve/" + GetName() + "/drive/tuning");
   auto azimuthTable = instance.GetTable("SmartDashboard/swerve/" + GetName() + "/azimuth");
@@ -48,7 +48,7 @@ SwerveModule::SwerveModule(config::SwerveModuleConfig* config)
 }
 
 void SwerveModule::SeedAzimuthEncoder() {
-  if (frc::RobotBase::IsReal()) {
+  if (wpi::RobotBase::IsReal()) {
     // Only seed from the absolute encoder when the motor is NOT using an
     // external feedback encoder (e.g., a fused CANcoder on a TalonFX).  When
     // external feedback is active the hardware already tracks the absolute
@@ -66,22 +66,22 @@ std::string SwerveModule::GetName() const {
 
 const config::SwerveModuleConfig& SwerveModule::GetConfig() const { return *m_config; }
 
-void SwerveModule::SetSwerveModuleState(frc::SwerveModuleState state) {
+void SwerveModule::SetSwerveModuleState(wpi::math::SwerveModuleVelocity state) {
   state = m_config->GetOptimizedState(state);
-  m_driveMotorController->SetVelocity(state.speed);
-  m_azimuthMotorController->SetPosition(units::degree_t{state.angle.Degrees()});
+  m_driveMotorController->SetVelocity(state.velocity);
+  m_azimuthMotorController->SetPosition(wpi::units::degree_t{state.angle.Degrees()});
 }
 
-frc::SwerveModuleState SwerveModule::GetState() const {
-  return frc::SwerveModuleState{
+wpi::math::SwerveModuleVelocity SwerveModule::GetState() const {
+  return wpi::math::SwerveModuleVelocity{
       m_driveMotorController->GetMeasurementVelocity(),
-      frc::Rotation2d{units::radian_t{m_azimuthMotorController->GetMechanismPosition()}}};
+      wpi::math::Rotation2d{wpi::units::radian_t{m_azimuthMotorController->GetMechanismPosition()}}};
 }
 
-frc::SwerveModulePosition SwerveModule::GetPosition() const {
-  return frc::SwerveModulePosition{
+wpi::math::SwerveModulePosition SwerveModule::GetPosition() const {
+  return wpi::math::SwerveModulePosition{
       m_driveMotorController->GetMeasurementPosition(),
-      frc::Rotation2d{units::radian_t{m_azimuthMotorController->GetMechanismPosition()}}};
+      wpi::math::Rotation2d{wpi::units::radian_t{m_azimuthMotorController->GetMechanismPosition()}}};
 }
 
 void SwerveModule::UpdateTelemetry() {

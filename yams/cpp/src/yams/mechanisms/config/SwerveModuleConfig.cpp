@@ -3,8 +3,8 @@
 
 #include "yams/mechanisms/config/SwerveModuleConfig.hpp"
 
-#include <frc/geometry/Rotation2d.h>
-#include <units/math.h>
+#include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/units/math.hpp>
 
 #include <cmath>
 #include <numbers>
@@ -37,7 +37,7 @@ SwerveModuleConfig& SwerveModuleConfig::WithCosineCompensation(bool compensate) 
 }
 
 SwerveModuleConfig& SwerveModuleConfig::WithAbsoluteEncoder(
-    std::function<units::degree_t()> supplier) {
+    std::function<wpi::units::degree_t()> supplier) {
   m_absoluteEncoderSupplier = std::move(supplier);
   return *this;
 }
@@ -48,7 +48,7 @@ SwerveModuleConfig& SwerveModuleConfig::WithAbsoluteEncoderGearing(
   return *this;
 }
 
-SwerveModuleConfig& SwerveModuleConfig::WithAbsoluteEncoderOffset(units::degree_t offset) {
+SwerveModuleConfig& SwerveModuleConfig::WithAbsoluteEncoderOffset(wpi::units::degree_t offset) {
   m_absoluteEncoderOffset = offset;
   if (m_azimuthMotor) {
     m_azimuthMotor->GetConfig().WithExternalEncoderZeroOffset(offset);
@@ -56,23 +56,23 @@ SwerveModuleConfig& SwerveModuleConfig::WithAbsoluteEncoderOffset(units::degree_
   return *this;
 }
 
-SwerveModuleConfig& SwerveModuleConfig::WithLocation(frc::Translation2d location) {
+SwerveModuleConfig& SwerveModuleConfig::WithLocation(wpi::math::Translation2d location) {
   m_location = location;
   return *this;
 }
 
-SwerveModuleConfig& SwerveModuleConfig::WithLocation(units::meter_t front, units::meter_t left) {
-  m_location = frc::Translation2d{front, left};
+SwerveModuleConfig& SwerveModuleConfig::WithLocation(wpi::units::meter_t front, wpi::units::meter_t left) {
+  m_location = wpi::math::Translation2d{front, left};
   return *this;
 }
 
-SwerveModuleConfig& SwerveModuleConfig::WithLocation(units::meter_t distance,
-                                                     units::degree_t angle) {
-  m_location = frc::Translation2d{distance, frc::Rotation2d{angle}};
+SwerveModuleConfig& SwerveModuleConfig::WithLocation(wpi::units::meter_t distance,
+                                                     wpi::units::degree_t angle) {
+  m_location = wpi::math::Translation2d{distance, wpi::math::Rotation2d{angle}};
   return *this;
 }
 
-SwerveModuleConfig& SwerveModuleConfig::WithWheelRadius(units::meter_t radius) {
+SwerveModuleConfig& SwerveModuleConfig::WithWheelRadius(wpi::units::meter_t radius) {
   m_wheelCircumference = radius * 2.0 * std::numbers::pi;
   if (m_driveMotor) {
     m_driveMotor->GetConfig().WithMechanismCircumference(*m_wheelCircumference);
@@ -80,7 +80,7 @@ SwerveModuleConfig& SwerveModuleConfig::WithWheelRadius(units::meter_t radius) {
   return *this;
 }
 
-SwerveModuleConfig& SwerveModuleConfig::WithWheelDiameter(units::meter_t diameter) {
+SwerveModuleConfig& SwerveModuleConfig::WithWheelDiameter(wpi::units::meter_t diameter) {
   m_wheelCircumference = diameter * std::numbers::pi;
   if (m_driveMotor) {
     m_driveMotor->GetConfig().WithMechanismCircumference(*m_wheelCircumference);
@@ -88,7 +88,7 @@ SwerveModuleConfig& SwerveModuleConfig::WithWheelDiameter(units::meter_t diamete
   return *this;
 }
 
-SwerveModuleConfig& SwerveModuleConfig::WithMinimumVelocity(units::meters_per_second_t speed) {
+SwerveModuleConfig& SwerveModuleConfig::WithMinimumVelocity(wpi::units::meters_per_second_t speed) {
   m_minimumVelocity = speed;
   return *this;
 }
@@ -124,41 +124,41 @@ std::optional<SwerveModuleConfig::TelemetryVerbosity> SwerveModuleConfig::GetTel
   return m_telemetryVerbosity;
 }
 
-std::optional<frc::Translation2d> SwerveModuleConfig::GetLocation() const { return m_location; }
+std::optional<wpi::math::Translation2d> SwerveModuleConfig::GetLocation() const { return m_location; }
 
 bool SwerveModuleConfig::GetStateOptimization() const { return m_stateOptimization; }
 
-units::degree_t SwerveModuleConfig::GetAbsoluteEncoderAngle() const {
+wpi::units::degree_t SwerveModuleConfig::GetAbsoluteEncoderAngle() const {
   if (m_absoluteEncoderSupplier) {
     auto rawAngle = (*m_absoluteEncoderSupplier)();
     auto geared = rawAngle * m_absoluteEncoderGearbox.GetInputToOutputConversionFactor();
-    auto offset = m_absoluteEncoderOffset.value_or(units::degree_t{0});
+    auto offset = m_absoluteEncoderOffset.value_or(wpi::units::degree_t{0});
     return geared - offset;
   }
-  if (!m_azimuthMotor) return units::degree_t{0};
+  if (!m_azimuthMotor) return wpi::units::degree_t{0};
   return m_azimuthMotor->GetMechanismPosition();
 }
 
 double SwerveModuleConfig::GetCosineCompensatedVelocity(
-    const frc::SwerveModuleState& desiredState) const {
-  auto diff = desiredState.angle - frc::Rotation2d{units::radian_t{GetAbsoluteEncoderAngle()}};
+    const wpi::math::SwerveModuleVelocity& desiredState) const {
+  auto diff = desiredState.angle - wpi::math::Rotation2d{wpi::units::radian_t{GetAbsoluteEncoderAngle()}};
   double cosineScalar = diff.Cos();
   if (cosineScalar < 0.0) cosineScalar = 1.0;
-  return desiredState.speed.value() * cosineScalar;
+  return desiredState.velocity.value() * cosineScalar;
 }
 
-frc::SwerveModuleState SwerveModuleConfig::GetOptimizedState(frc::SwerveModuleState state) const {
+wpi::math::SwerveModuleVelocity SwerveModuleConfig::GetOptimizedState(wpi::math::SwerveModuleVelocity state) const {
   if (m_minimumVelocity) {
-    if (units::math::abs(state.speed) <= *m_minimumVelocity) {
-      state = frc::SwerveModuleState{units::meters_per_second_t{0},
-                                     frc::Rotation2d{units::radian_t{GetAbsoluteEncoderAngle()}}};
+    if (wpi::units::math::abs(state.velocity) <= *m_minimumVelocity) {
+      state = wpi::math::SwerveModuleVelocity{wpi::units::meters_per_second_t{0},
+                                     wpi::math::Rotation2d{wpi::units::radian_t{GetAbsoluteEncoderAngle()}}};
     }
   }
   if (m_stateOptimization) {
-    state.Optimize(frc::Rotation2d{units::radian_t{GetAbsoluteEncoderAngle()}});
+    state = state.Optimize(wpi::math::Rotation2d{wpi::units::radian_t{GetAbsoluteEncoderAngle()}});
   }
   if (m_cosineCompensation) {
-    state.speed = units::meters_per_second_t{GetCosineCompensatedVelocity(state)};
+    state.velocity = wpi::units::meters_per_second_t{GetCosineCompensatedVelocity(state)};
   }
   return state;
 }

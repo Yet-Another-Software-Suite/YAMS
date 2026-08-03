@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <frc/kinematics/SwerveModulePosition.h>
-#include <frc/kinematics/SwerveModuleState.h>
+#include <wpi/math/kinematics/SwerveModulePosition.hpp>
+#include <wpi/math/kinematics/SwerveModuleVelocity.hpp>
 
 #include <string>
 
@@ -38,7 +38,7 @@ namespace yams::mechanisms::swerve {
  *
  * SmartMotorControllerConfig driveCfg;
  * driveCfg.WithSubsystem(this)
- *         .WithMechanismCircumference(units::meter_t{4.0_in * std::numbers::pi})
+ *         .WithMechanismCircumference(wpi::units::meter_t{4.0_in * std::numbers::pi})
  *         .WithFeedback(0.1, 0.0, 0.0)
  *         .WithMotorGearing(MechanismGearing{GearBox::FromStages({"6.75:1"})})
  *         .WithStatorCurrentLimit(40.0_A)
@@ -53,18 +53,18 @@ namespace yams::mechanisms::swerve {
  *           .WithClosedLoopMode()
  *           .WithTelemetry("FL_Azimuth", Cfg::TelemetryVerbosity::HIGH);
  *
- * m_driveSMC.emplace(m_driveMotor, frc::DCMotor::KrakenX60(1), driveCfg);
- * m_azimuthSMC.emplace(m_azimuthMotor, frc::DCMotor::KrakenX60(1), azimuthCfg);
+ * m_driveSMC.emplace(m_driveMotor, wpi::math::DCMotor::KrakenX60(1), driveCfg);
+ * m_azimuthSMC.emplace(m_azimuthMotor, wpi::math::DCMotor::KrakenX60(1), azimuthCfg);
  *
  * auto* enc = &m_encoder;
  * SwerveModuleConfig moduleConfig{&m_driveSMC.value(), &m_azimuthSMC.value()};
  * moduleConfig
- *     .WithAbsoluteEncoder([enc]() -> units::degree_t {
- *       return units::degree_t{units::turn_t{enc->GetAbsolutePosition().GetValue()}};
+ *     .WithAbsoluteEncoder([enc]() -> wpi::units::degree_t {
+ *       return wpi::units::degree_t{wpi::units::turn_t{enc->GetAbsolutePosition().GetValue()}};
  *     })
  *     .WithAbsoluteEncoderOffset(15.0_deg)
  *     .WithWheelDiameter(4.0_in)
- *     .WithLocation(units::inch_t{12}, units::inch_t{12})
+ *     .WithLocation(wpi::units::inch_t{12}, wpi::units::inch_t{12})
  *     .WithOptimization(true)
  *     .WithCosineCompensation(true)
  *     .WithTelemetry("FrontLeft", Cfg::TelemetryVerbosity::HIGH);
@@ -101,13 +101,13 @@ class SwerveModule {
    *
    * @param state Target module state.
    */
-  void SetSwerveModuleState(frc::SwerveModuleState state);
+  void SetSwerveModuleState(wpi::math::SwerveModuleVelocity state);
 
   /** Get the current measured module state (speed and heading). */
-  frc::SwerveModuleState GetState() const;
+  wpi::math::SwerveModuleVelocity GetState() const;
 
   /** Get the current measured module position (distance and heading). */
-  frc::SwerveModulePosition GetPosition() const;
+  wpi::math::SwerveModulePosition GetPosition() const;
 
   /** Publish drive and azimuth motor telemetry to NetworkTables. */
   void UpdateTelemetry();
