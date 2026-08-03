@@ -6,6 +6,7 @@
 #include <cxxabi.h>
 #include <dlfcn.h>
 #include <execinfo.h>
+#include <typeinfo>
 
 #include <cstdio>
 #include <cstdlib>
@@ -13,6 +14,7 @@
 #include <mutex>
 #include <string>
 #include <utility>
+#include <exception>
 
 namespace {
 
@@ -69,7 +71,7 @@ void ClearLastExceptionStackTrace() {
 // the complete call stack is still intact here.  We capture it, store it
 // globally, then forward to the real implementation in libstdc++.
 // ---------------------------------------------------------------------------
-extern "C" void __cxa_throw(void* obj, void* tinfo, void (*dest)(void*)) {
+extern "C" void __cxa_throw(void* obj, std::type_info* tinfo, void (*dest)(void*)) {
   if (!s_capturing) {
     s_capturing = true;
 
