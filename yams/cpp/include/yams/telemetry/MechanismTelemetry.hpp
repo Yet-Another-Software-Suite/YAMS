@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <networktables/DoubleTopic.h>
-#include <networktables/NetworkTable.h>
+#include <wpi/nt/DoubleTopic.hpp>
+#include <wpi/nt/NetworkTable.hpp>
 
 #include <memory>
 #include <optional>
@@ -45,17 +45,17 @@ class MechanismTelemetry {
   void UpdateLoopTime();
 
   /** @return The data NT4 table ("Mechanisms/<name>"). */
-  std::shared_ptr<nt::NetworkTable> GetDataTable() const;
+  std::shared_ptr<wpi::nt::NetworkTable> GetDataTable() const;
 
   /** @return The tuning NT4 table ("Tuning/<name>"). */
-  std::shared_ptr<nt::NetworkTable> GetTuningTable() const;
+  std::shared_ptr<wpi::nt::NetworkTable> GetTuningTable() const;
 
  private:
   void SetupLoopTime();
 
-  std::shared_ptr<nt::NetworkTable> m_networkTable;
-  std::shared_ptr<nt::NetworkTable> m_tuningNetworkTable;
-  std::optional<nt::DoublePublisher> m_loopTimePublisher;
+  std::shared_ptr<wpi::nt::NetworkTable> m_networkTable;
+  std::shared_ptr<wpi::nt::NetworkTable> m_tuningNetworkTable;
+  std::optional<wpi::nt::DoublePublisher> m_loopTimePublisher;
   double m_prevTimestamp{0.0};
 };
 

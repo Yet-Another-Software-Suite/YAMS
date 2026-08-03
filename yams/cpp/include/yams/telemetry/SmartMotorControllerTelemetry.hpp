@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include <networktables/BooleanTopic.h>
-#include <networktables/DoubleTopic.h>
-#include <networktables/NetworkTable.h>
-#include <wpi/DataLog.h>
+#include <wpi/nt/BooleanTopic.hpp>
+#include <wpi/nt/DoubleTopic.hpp>
+#include <wpi/nt/NetworkTable.hpp>
+#include <wpi/datalog/DataLog.hpp>
 
 #include <memory>
 #include <optional>
@@ -133,15 +133,15 @@ class DoubleTelemetry {
    * @param dataTable   NT4 table for read-only sensor data.
    * @param tuningTable NT4 table for live-tunable gains.
    */
-  void SetupNetworkTables(std::shared_ptr<nt::NetworkTable> dataTable,
-                          std::shared_ptr<nt::NetworkTable> tuningTable);
+  void SetupNetworkTables(std::shared_ptr<wpi::nt::NetworkTable> dataTable,
+                          std::shared_ptr<wpi::nt::NetworkTable> tuningTable);
 
   /**
    * Create a read-only NT4 publisher under the data table (no tuning table).
    *
    * @param dataTable NT4 table for sensor data.
    */
-  void SetupNetworkTable(std::shared_ptr<nt::NetworkTable> dataTable);
+  void SetupNetworkTable(std::shared_ptr<wpi::nt::NetworkTable> dataTable);
 
   /**
    * Create a DataLog entry under the given prefix path.
@@ -207,13 +207,13 @@ class DoubleTelemetry {
   double m_defaultValue;
   double m_cachedValue;
 
-  std::optional<nt::DoublePublisher> m_publisher;
-  std::optional<nt::DoubleSubscriber> m_subscriber;
-  std::optional<nt::DoublePublisher> m_subPublisher;  // tunable: publish + subscribe
+  std::optional<wpi::nt::DoublePublisher> m_publisher;
+  std::optional<wpi::nt::DoubleSubscriber> m_subscriber;
+  std::optional<wpi::nt::DoublePublisher> m_subPublisher;  // tunable: publish + subscribe
   std::optional<wpi::log::DoubleLogEntry> m_dataLogEntry;
 
-  std::shared_ptr<nt::NetworkTable> m_tuningTable;
-  std::shared_ptr<nt::NetworkTable> m_dataTable;
+  std::shared_ptr<wpi::nt::NetworkTable> m_tuningTable;
+  std::shared_ptr<wpi::nt::NetworkTable> m_dataTable;
 };
 
 // ---- BooleanTelemetry -------------------------------------------------------
@@ -246,15 +246,15 @@ class BooleanTelemetry {
    * @param dataTable   NT4 table for read-only status data.
    * @param tuningTable NT4 table for live-tunable fields.
    */
-  void SetupNetworkTables(std::shared_ptr<nt::NetworkTable> dataTable,
-                          std::shared_ptr<nt::NetworkTable> tuningTable);
+  void SetupNetworkTables(std::shared_ptr<wpi::nt::NetworkTable> dataTable,
+                          std::shared_ptr<wpi::nt::NetworkTable> tuningTable);
 
   /**
    * Create a read-only NT4 publisher under the data table (no tuning table).
    *
    * @param dataTable NT4 table for status data.
    */
-  void SetupNetworkTable(std::shared_ptr<nt::NetworkTable> dataTable);
+  void SetupNetworkTable(std::shared_ptr<wpi::nt::NetworkTable> dataTable);
 
   /**
    * Create a DataLog entry under the given prefix path.
@@ -311,13 +311,13 @@ class BooleanTelemetry {
   bool m_defaultValue;
   bool m_cachedValue;
 
-  std::optional<nt::BooleanPublisher> m_publisher;
-  std::optional<nt::BooleanSubscriber> m_subscriber;
-  std::optional<nt::BooleanPublisher> m_pubSub;  // tunable: publish + subscribe
+  std::optional<wpi::nt::BooleanPublisher> m_publisher;
+  std::optional<wpi::nt::BooleanSubscriber> m_subscriber;
+  std::optional<wpi::nt::BooleanPublisher> m_pubSub;  // tunable: publish + subscribe
   std::optional<wpi::log::BooleanLogEntry> m_dataLogEntry;
 
-  std::shared_ptr<nt::NetworkTable> m_tuningTable;
-  std::shared_ptr<nt::NetworkTable> m_dataTable;
+  std::shared_ptr<wpi::nt::NetworkTable> m_tuningTable;
+  std::shared_ptr<wpi::nt::NetworkTable> m_dataTable;
 };
 
 // ---- SmartMotorControllerTelemetry ------------------------------------------
@@ -343,8 +343,8 @@ class SmartMotorControllerTelemetry {
    * @param dataLogName  Optional DataLog prefix.
    */
   void SetupTelemetry(motorcontrollers::SmartMotorController& smc,
-                      std::shared_ptr<nt::NetworkTable> publishTable,
-                      std::shared_ptr<nt::NetworkTable> tuningTable,
+                      std::shared_ptr<wpi::nt::NetworkTable> publishTable,
+                      std::shared_ptr<wpi::nt::NetworkTable> tuningTable,
                       std::unordered_map<DoubleTelemetryField, DoubleTelemetry>& doubleFields,
                       std::unordered_map<BooleanTelemetryField, BooleanTelemetry>& boolFields,
                       bool nt4Enabled, std::optional<std::string> dataLogName);
@@ -370,8 +370,8 @@ class SmartMotorControllerTelemetry {
   void Close();
 
  private:
-  std::shared_ptr<nt::NetworkTable> m_dataTable;
-  std::shared_ptr<nt::NetworkTable> m_tuningTable;
+  std::shared_ptr<wpi::nt::NetworkTable> m_dataTable;
+  std::shared_ptr<wpi::nt::NetworkTable> m_tuningTable;
 
   std::unordered_map<DoubleTelemetryField, DoubleTelemetry>* m_doubleFields{nullptr};
   std::unordered_map<BooleanTelemetryField, BooleanTelemetry>* m_boolFields{nullptr};

@@ -3,8 +3,8 @@
 
 #include "yams/telemetry/SmartMotorControllerTelemetryConfig.hpp"
 
-#include <units/angle.h>
-#include <units/length.h>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/length.hpp>
 
 #include <string>
 #include <unordered_map>
@@ -416,10 +416,10 @@ SmartMotorControllerTelemetryConfig::GetDoubleFields(SmartMotorController& smc) 
   // Set mechanism limit defaults (in degrees for human readability)
   if (auto lim = cfg.GetMechanismUpperLimit())
     m_doubleFields.at(DoubleTelemetryField::MechanismUpperLimit)
-        .SetDefaultValue(units::degree_t{*lim}.value());
+        .SetDefaultValue(wpi::units::degree_t{*lim}.value());
   if (auto lim = cfg.GetMechanismLowerLimit())
     m_doubleFields.at(DoubleTelemetryField::MechanismLowerLimit)
-        .SetDefaultValue(units::degree_t{*lim}.value());
+        .SetDefaultValue(wpi::units::degree_t{*lim}.value());
 
   // Current limit defaults
   if (auto lim = cfg.GetSupplyStallCurrentLimit())
