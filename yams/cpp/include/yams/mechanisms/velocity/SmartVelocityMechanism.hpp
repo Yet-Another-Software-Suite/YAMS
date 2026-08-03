@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include <frc/smartdashboard/MechanismLigament2d.h>
-#include <frc/smartdashboard/MechanismRoot2d.h>
-#include <frc2/command/button/Trigger.h>
+#include <wpi/smartdashboard/MechanismLigament2d.hpp>
+#include <wpi/smartdashboard/MechanismRoot2d.hpp>
+#include <wpi/commands2/button/Trigger.hpp>
 
 #include "yams/mechanisms/SmartMechanism.hpp"
 
@@ -31,7 +31,7 @@ class SmartVelocityMechanism : public SmartMechanism {
    *
    * @return Trigger for the maximum limit condition.
    */
-  virtual frc2::Trigger Max() = 0;
+  virtual wpi::cmd::Trigger Max() = 0;
 
   /**
    * Trigger that becomes true when the mechanism is at or past its minimum
@@ -39,7 +39,7 @@ class SmartVelocityMechanism : public SmartMechanism {
    *
    * @return Trigger for the minimum limit condition.
    */
-  virtual frc2::Trigger Min() = 0;
+  virtual wpi::cmd::Trigger Min() = 0;
 
   // ---- Visualisation accessors ----------------------------------------------
 
@@ -48,14 +48,14 @@ class SmartVelocityMechanism : public SmartMechanism {
    *
    * @return Pointer to the ligament, or nullptr if not initialised.
    */
-  frc::MechanismLigament2d* GetMechanismLigament();
+  wpi::MechanismLigament2d* GetMechanismLigament();
 
   /**
    * Get the MechanismRoot2d anchor point for this mechanism.
    *
    * @return Pointer to the root, or nullptr if not initialised.
    */
-  frc::MechanismRoot2d* GetMechanismRoot();
+  wpi::MechanismRoot2d* GetMechanismRoot();
 
   // ---- Motor accessor -------------------------------------------------------
 
@@ -68,10 +68,10 @@ class SmartVelocityMechanism : public SmartMechanism {
 
  protected:
   /** Root anchor point in the Mechanism2d canvas. */
-  frc::MechanismRoot2d* m_mechanismRoot{nullptr};
+  wpi::MechanismRoot2d* m_mechanismRoot{nullptr};
 
   /** Animated ligament representing the spinning element of the mechanism. */
-  frc::MechanismLigament2d* m_mechanismLigament{nullptr};
+  wpi::MechanismLigament2d* m_mechanismLigament{nullptr};
 };
 
 }  // namespace yams::mechanisms::velocity
