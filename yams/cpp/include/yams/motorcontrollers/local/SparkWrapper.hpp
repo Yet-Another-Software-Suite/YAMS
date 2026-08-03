@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <frc/Alert.h>
-#include <frc/simulation/DCMotorSim.h>
+#include <wpi/driverstation/Alert.hpp>
+#include <wpi/simulation/DCMotorSim.hpp>
 #include <rev/SparkAbsoluteEncoder.h>
 #include <rev/SparkClosedLoopController.h>
 #include <rev/SparkFlex.h>
@@ -52,13 +52,13 @@ namespace yams::motorcontrollers::local {
  *    .WithIdleMode(Cfg::MotorMode::BRAKE)
  *    .WithSupplyCurrentLimit(40.0_A)
  *    .WithMotorInverted(false)
- *    .WithFeedforward(frc::ElevatorFeedforward{
- *        0.0_V, 0.0_V, units::unit_t<frc::ElevatorFeedforward::kv_unit>{0.0},
- *        units::unit_t<frc::ElevatorFeedforward::ka_unit>{0.0}})
+ *    .WithFeedforward(wpi::math::ElevatorFeedforward{
+ *        0.0_V, 0.0_V, wpi::units::unit_t<wpi::math::ElevatorFeedforward::kv_unit>{0.0},
+ *        wpi::units::unit_t<wpi::math::ElevatorFeedforward::ka_unit>{0.0}})
  *    .WithClosedLoopMode()
  *    .WithTelemetry("ElevatorMotor", Cfg::TelemetryVerbosity::HIGH);
  *
- * m_smc.emplace(&m_sparkMax, frc::DCMotor::NEO(1), &cfg);
+ * m_smc.emplace(&m_sparkMax, wpi::math::DCMotor::NEO(1), &cfg);
  * @endcode
  *
  * ### Example usage — SPARK Flex
@@ -68,7 +68,7 @@ namespace yams::motorcontrollers::local {
  * rev::spark::SparkLowLevel::MotorType::kBrushless};
  * //   std::optional<SparkWrapper>  m_smc;
  *
- * m_smc.emplace(&m_sparkFlex, frc::DCMotor::NeoVortex(1), &cfg);
+ * m_smc.emplace(&m_sparkFlex, wpi::math::DCMotor::NeoVortex(1), &cfg);
  * @endcode
  */
 class SparkWrapper : public SmartMotorController {
@@ -80,7 +80,7 @@ class SparkWrapper : public SmartMotorController {
    * @param motor  DC motor model used for simulation.
    * @param config Pointer to the SmartMotorControllerConfig (must outlive this wrapper).
    */
-  SparkWrapper(rev::spark::SparkMax* spark, frc::DCMotor motor, SmartMotorControllerConfig* config);
+  SparkWrapper(rev::spark::SparkMax* spark, wpi::math::DCMotor motor, SmartMotorControllerConfig* config);
 
   /**
    * Construct a SparkWrapper around a SPARK Flex.
@@ -89,7 +89,7 @@ class SparkWrapper : public SmartMotorController {
    * @param motor  DC motor model used for simulation.
    * @param config Pointer to the SmartMotorControllerConfig (must outlive this wrapper).
    */
-  SparkWrapper(rev::spark::SparkFlex* spark, frc::DCMotor motor,
+  SparkWrapper(rev::spark::SparkFlex* spark, wpi::math::DCMotor motor,
                SmartMotorControllerConfig* config);
   ~SparkWrapper();
 
@@ -119,76 +119,76 @@ class SparkWrapper : public SmartMotorController {
   /** @copydoc SmartMotorController::GetDutyCycle */
   double GetDutyCycle() override;
   /** @copydoc SmartMotorController::SetVoltage */
-  void SetVoltage(units::volt_t voltage) override;
+  void SetVoltage(wpi::units::volt_t voltage) override;
   /** @copydoc SmartMotorController::GetVoltage */
-  units::volt_t GetVoltage() override;
+  wpi::units::volt_t GetVoltage() override;
 
   // ---- Closed-loop setpoints ----------------------------------------------
-  /** @copydoc SmartMotorController::SetPosition(units::turn_t) */
-  void SetPosition(units::turn_t angle) override;
+  /** @copydoc SmartMotorController::SetPosition(wpi::units::turn_t) */
+  void SetPosition(wpi::units::turn_t angle) override;
   /**
    * Command a linear measurement position setpoint (closed-loop).
    * Converts distance to turns using the configured mechanism circumference.
    *
    * @param distance Target linear distance.
    */
-  void SetPosition(units::meter_t distance) override;
-  /** @copydoc SmartMotorController::SetVelocity(units::turns_per_second_t) */
-  void SetVelocity(units::turns_per_second_t velocity) override;
+  void SetPosition(wpi::units::meter_t distance) override;
+  /** @copydoc SmartMotorController::SetVelocity(wpi::units::turns_per_second_t) */
+  void SetVelocity(wpi::units::turns_per_second_t velocity) override;
   /**
    * Command a linear measurement velocity setpoint (closed-loop).
    * Converts linear velocity to turns per second using the configured mechanism circumference.
    *
    * @param velocity Target linear velocity.
    */
-  void SetVelocity(units::meters_per_second_t velocity) override;
+  void SetVelocity(wpi::units::meters_per_second_t velocity) override;
 
   // ---- Encoder writes -----------------------------------------------------
-  /** @copydoc SmartMotorController::SetEncoderPosition(units::turn_t) */
-  void SetEncoderPosition(units::turn_t angle) override;
+  /** @copydoc SmartMotorController::SetEncoderPosition(wpi::units::turn_t) */
+  void SetEncoderPosition(wpi::units::turn_t angle) override;
   /**
    * Write a linear distance into the encoder (seeds the position).
    * Converts distance to turns using the configured mechanism circumference.
    *
    * @param distance Linear distance to write.
    */
-  void SetEncoderPosition(units::meter_t distance) override;
+  void SetEncoderPosition(wpi::units::meter_t distance) override;
   /** Not supported by SPARK hardware; has no effect. */
-  void SetEncoderVelocity(units::turns_per_second_t velocity) override;
+  void SetEncoderVelocity(wpi::units::turns_per_second_t velocity) override;
   /** Not supported by SPARK hardware; has no effect. */
-  void SetEncoderVelocity(units::meters_per_second_t velocity) override;
+  void SetEncoderVelocity(wpi::units::meters_per_second_t velocity) override;
 
   // ---- Encoder reads ------------------------------------------------------
   /** @copydoc SmartMotorController::GetMechanismPosition */
-  units::turn_t GetMechanismPosition() override;
+  wpi::units::turn_t GetMechanismPosition() override;
   /** @copydoc SmartMotorController::GetMechanismVelocity */
-  units::turns_per_second_t GetMechanismVelocity() override;
+  wpi::units::turns_per_second_t GetMechanismVelocity() override;
   /** @copydoc SmartMotorController::GetMechanismAcceleration */
-  units::turns_per_second_squared_t GetMechanismAcceleration() override;
+  wpi::units::turns_per_second_squared_t GetMechanismAcceleration() override;
   /** @copydoc SmartMotorController::GetRotorPosition */
-  units::turn_t GetRotorPosition() override;
+  wpi::units::turn_t GetRotorPosition() override;
   /** @copydoc SmartMotorController::GetRotorVelocity */
-  units::turns_per_second_t GetRotorVelocity() override;
+  wpi::units::turns_per_second_t GetRotorVelocity() override;
   /** @copydoc SmartMotorController::GetMeasurementPosition */
-  units::meter_t GetMeasurementPosition() override;
+  wpi::units::meter_t GetMeasurementPosition() override;
   /** @copydoc SmartMotorController::GetMeasurementVelocity */
-  units::meters_per_second_t GetMeasurementVelocity() override;
+  wpi::units::meters_per_second_t GetMeasurementVelocity() override;
   /** @copydoc SmartMotorController::GetMeasurementAcceleration */
-  units::meters_per_second_squared_t GetMeasurementAcceleration() override;
+  wpi::units::meters_per_second_squared_t GetMeasurementAcceleration() override;
   /** @copydoc SmartMotorController::GetExternalEncoderPosition */
-  std::optional<units::degree_t> GetExternalEncoderPosition() override;
+  std::optional<wpi::units::degree_t> GetExternalEncoderPosition() override;
   /** @copydoc SmartMotorController::GetExternalEncoderVelocity */
-  std::optional<units::degrees_per_second_t> GetExternalEncoderVelocity() override;
+  std::optional<wpi::units::degrees_per_second_t> GetExternalEncoderVelocity() override;
 
   // ---- Motor status -------------------------------------------------------
   /** @copydoc SmartMotorController::GetSupplyCurrent */
-  std::optional<units::ampere_t> GetSupplyCurrent() override;
+  std::optional<wpi::units::ampere_t> GetSupplyCurrent() override;
   /** @copydoc SmartMotorController::GetStatorCurrent */
-  units::ampere_t GetStatorCurrent() override;
+  wpi::units::ampere_t GetStatorCurrent() override;
   /** @copydoc SmartMotorController::GetTemperature */
-  units::celsius_t GetTemperature() override;
+  wpi::units::celsius_t GetTemperature() override;
   /** @copydoc SmartMotorController::GetDCMotor */
-  frc::DCMotor GetDCMotor() override;
+  wpi::math::DCMotor GetDCMotor() override;
 
   // ---- Configuration setters (live tuning) --------------------------------
   /** @copydoc SmartMotorController::SetIdleMode */
@@ -223,19 +223,19 @@ class SparkWrapper : public SmartMotorController {
   /** @copydoc SmartMotorController::SetFeedforward */
   void SetFeedforward(double kS, double kV, double kA, double kG) override;
   /** @copydoc SmartMotorController::SetStatorCurrentLimit */
-  void SetStatorCurrentLimit(units::ampere_t currentLimit) override;
+  void SetStatorCurrentLimit(wpi::units::ampere_t currentLimit) override;
   /** @copydoc SmartMotorController::SetSupplyCurrentLimit */
-  void SetSupplyCurrentLimit(units::ampere_t currentLimit) override;
+  void SetSupplyCurrentLimit(wpi::units::ampere_t currentLimit) override;
   /** @copydoc SmartMotorController::SetClosedLoopRampRate */
-  void SetClosedLoopRampRate(units::second_t rampRate) override;
+  void SetClosedLoopRampRate(wpi::units::second_t rampRate) override;
   /** @copydoc SmartMotorController::SetOpenLoopRampRate */
-  void SetOpenLoopRampRate(units::second_t rampRate) override;
+  void SetOpenLoopRampRate(wpi::units::second_t rampRate) override;
   /** @copydoc SmartMotorController::SetMechanismUpperLimit */
-  void SetMechanismUpperLimit(units::turn_t upperLimit) override;
+  void SetMechanismUpperLimit(wpi::units::turn_t upperLimit) override;
   /** @copydoc SmartMotorController::SetMechanismLowerLimit */
-  void SetMechanismLowerLimit(units::turn_t lowerLimit) override;
+  void SetMechanismLowerLimit(wpi::units::turn_t lowerLimit) override;
   /** @copydoc SmartMotorController::SetMechanismLimits */
-  void SetMechanismLimits(units::turn_t lower, units::turn_t upper) override;
+  void SetMechanismLimits(wpi::units::turn_t lower, wpi::units::turn_t upper) override;
   /** @copydoc SmartMotorController::SetMechanismLimitsEnabled */
   void SetMechanismLimitsEnabled(bool enabled) override;
   /**
@@ -247,7 +247,7 @@ class SparkWrapper : public SmartMotorController {
    *
    * @param upperLimit Maximum linear distance the mechanism may travel forward.
    */
-  void SetMeasurementUpperLimit(units::meter_t upperLimit) override;
+  void SetMeasurementUpperLimit(wpi::units::meter_t upperLimit) override;
   /**
    * Set the lower soft limit via a linear measurement.
    *
@@ -257,19 +257,19 @@ class SparkWrapper : public SmartMotorController {
    *
    * @param lowerLimit Minimum linear distance the mechanism may travel in reverse.
    */
-  void SetMeasurementLowerLimit(units::meter_t lowerLimit) override;
-  /** @copydoc SmartMotorController::SetMotionProfileMaxVelocity(units::turns_per_second_t) */
-  void SetMotionProfileMaxVelocity(units::turns_per_second_t maxVelocity) override;
+  void SetMeasurementLowerLimit(wpi::units::meter_t lowerLimit) override;
+  /** @copydoc SmartMotorController::SetMotionProfileMaxVelocity(wpi::units::turns_per_second_t) */
+  void SetMotionProfileMaxVelocity(wpi::units::turns_per_second_t maxVelocity) override;
   /**
    * Set the maximum linear velocity for the motion profile.
    * Converts linear velocity to turns per second using the configured mechanism circumference.
    *
    * @param maxVelocity Maximum linear velocity.
    */
-  void SetMotionProfileMaxVelocity(units::meters_per_second_t maxVelocity) override;
+  void SetMotionProfileMaxVelocity(wpi::units::meters_per_second_t maxVelocity) override;
   /** @copydoc
-   * SmartMotorController::SetMotionProfileMaxAcceleration(units::turns_per_second_squared_t) */
-  void SetMotionProfileMaxAcceleration(units::turns_per_second_squared_t maxAcc) override;
+   * SmartMotorController::SetMotionProfileMaxAcceleration(wpi::units::turns_per_second_squared_t) */
+  void SetMotionProfileMaxAcceleration(wpi::units::turns_per_second_squared_t maxAcc) override;
   /**
    * Set the maximum linear acceleration for the motion profile.
    * Converts linear acceleration to turns per second squared using the configured mechanism
@@ -277,12 +277,12 @@ class SparkWrapper : public SmartMotorController {
    *
    * @param maxAcc Maximum linear acceleration.
    */
-  void SetMotionProfileMaxAcceleration(units::meters_per_second_squared_t maxAcc) override;
+  void SetMotionProfileMaxAcceleration(wpi::units::meters_per_second_squared_t maxAcc) override;
   /** SPARK MAXMotion does not expose jerk limiting; has no effect. */
-  void SetMotionProfileMaxJerk(units::angular_jerk::turns_per_second_cubed_t maxJerk) override;
+  void SetMotionProfileMaxJerk(wpi::units::angular_jerk::turns_per_second_cubed_t maxJerk) override;
   /** Exponential profiles are not supported by SPARK hardware; has no effect. */
   void SetExponentialProfile(std::optional<double> kV, std::optional<double> kA,
-                             std::optional<units::volt_t> maxInput) override;
+                             std::optional<wpi::units::volt_t> maxInput) override;
   /** @copydoc SmartMotorController::SetClosedLoopSlot */
   void SetClosedLoopSlot(ClosedLoopControllerSlot slot) override;
 
@@ -307,14 +307,14 @@ class SparkWrapper : public SmartMotorController {
   rev::spark::SparkClosedLoopController* m_sparkPid{nullptr};
   rev::spark::SparkRelativeEncoder* m_relEncoder{nullptr};
   rev::spark::SparkAbsoluteEncoder* m_absEncoder{nullptr};
-  frc::DCMotor m_motor;
+  wpi::math::DCMotor m_motor;
 
   // SparkMaxConfig and SparkFlexConfig are non-copyable/non-movable;
   // exactly one will be constructed via emplace().
   std::optional<rev::spark::SparkMaxConfig> m_maxConfig;
   std::optional<rev::spark::SparkFlexConfig> m_flexConfig;
 
-  std::optional<frc::sim::DCMotorSim> m_motorSim;
+  std::optional<wpi::sim::DCMotorSim> m_motorSim;
   std::optional<rev::spark::SparkSim> m_sparkSim;
   std::optional<rev::spark::SparkRelativeEncoderSim> m_relEncoderSim;
   std::optional<rev::spark::SparkAbsoluteEncoderSim> m_absEncoderSim;
@@ -327,9 +327,9 @@ class SparkWrapper : public SmartMotorController {
 
   int m_revSlot{0};
 
-  std::optional<frc::Alert> m_rioControllerAlert;
+  std::optional<wpi::Alert> m_rioControllerAlert;
 
-  void Init(rev::spark::SparkBase* spark, frc::DCMotor motor, SmartMotorControllerConfig* config);
+  void Init(rev::spark::SparkBase* spark, wpi::math::DCMotor motor, SmartMotorControllerConfig* config);
   void ApplyBaseConfig();
   void CommitConfig();
 };
