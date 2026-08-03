@@ -3,9 +3,8 @@
 
 #pragma once
 
-#include <frc/Timer.h>
-#include <units/time.h>
-
+#include <wpi/system/Timer.hpp>
+#include <wpi/units/time.hpp>
 #include <cstdint>
 
 namespace yams::math {
@@ -26,14 +25,14 @@ class DerivativeTimeFilter {
    * @param initial         Initial value to differentiate from.
    * @param debouncerPeriod Minimum period between derivative updates.
    */
-  DerivativeTimeFilter(double initial, units::second_t debouncerPeriod);
+  DerivativeTimeFilter(double initial, wpi::units::second_t debouncerPeriod);
 
   /**
    * Create a derivative filter with no initial value (starts from 0).
    *
    * @param debouncerPeriod Minimum period between derivative updates.
    */
-  explicit DerivativeTimeFilter(units::second_t debouncerPeriod);
+  explicit DerivativeTimeFilter(wpi::units::second_t debouncerPeriod);
 
   /**
    * Get the derivative of the current value over a specified delta time.
@@ -44,7 +43,7 @@ class DerivativeTimeFilter {
    * @param dt      Delta time to use as the denominator.
    * @return Derivative of current from the previous value divided by dt.
    */
-  double Derivative(double current, units::second_t dt);
+  double Derivative(double current, wpi::units::second_t dt);
 
   /**
    * Get the derivative of the current value over the time elapsed since the last call.
@@ -58,10 +57,10 @@ class DerivativeTimeFilter {
 
  private:
   double m_last{0.0};
-  int64_t m_lastFpgaTime_us{0};
+  uint64_t m_lastFpgaTime_us{0};
   double m_value{0.0};
-  frc::Timer m_debouncer;
-  units::second_t m_debouncePeriod{0.02};
+  wpi::Timer m_debouncer;
+  wpi::units::second_t m_debouncePeriod{0.02};
 };
 
 }  // namespace yams::math
