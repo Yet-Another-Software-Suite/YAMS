@@ -67,6 +67,14 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-databind:2.19.2"
     implementation 'org.wpilib.thirdparty.opencv:opencv-java:2027-4.13.0-3'
 
+    nativeDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.desktop)
+    nativeDebug wpi.java.vendor.jniDebug(wpi.platforms.desktop)
+    simulationDebug wpi.sim.enableDebug()
+
+    nativeRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.desktop)
+    nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
+    simulationRelease wpi.sim.enableRelease()
+
     testImplementation platform("org.junit:junit-bom:5.11.4")
     testImplementation "org.junit.jupiter:junit-jupiter-api"
     testImplementation "org.junit.jupiter:junit-jupiter-params"
@@ -85,6 +93,10 @@ test {
         exceptionFormat = "full"
     }
 }
+
+wpi.sim.addGui().defaultEnabled = true
+wpi.sim.addDriverstation()
+wpi.java.configureTestTasks(test)
 
 tasks.test {
     // Disable test when running 'build' task, but enable when running 'test' task directly
