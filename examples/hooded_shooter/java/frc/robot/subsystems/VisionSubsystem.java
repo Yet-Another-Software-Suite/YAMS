@@ -19,7 +19,7 @@ import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.Transform3d;
 import org.wpilib.math.geometry.Translation3d;
-import org.wpilib.wpilibj.RobotBase;
+import org.wpilib.framework.RobotBase;
 import org.wpilib.command2.SubsystemBase;
 
 public class VisionSubsystem extends SubsystemBase {

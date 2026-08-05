@@ -16,7 +16,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import org.wpilib.math.controller.SimpleMotorFeedforward;
-import org.wpilib.math.system.plant.DCMotor;
+import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
@@ -32,7 +32,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.SparkWrapper;
 
 public class HoodSubsystem extends SubsystemBase {
-    private final SparkMax hoodMotor = new SparkMax(2, MotorType.kBrushless);
+    private final SparkMax hoodMotor = new SparkMax(1, 2, MotorType.kBrushless);
 
     private final SmartMotorControllerConfig hoodMotorConfig = new SmartMotorControllerConfig(this)
             .withClosedLoopController(0.00016541, 0, 0)

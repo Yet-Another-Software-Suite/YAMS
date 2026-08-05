@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
 import yams.motorcontrollers.SmartMotorControllerConfig;
-import org.wpilib.math.system.plant.DCMotor;
+import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;

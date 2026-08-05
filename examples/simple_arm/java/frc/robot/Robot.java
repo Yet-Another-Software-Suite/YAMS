@@ -6,7 +6,7 @@
 
 package frc.robot;
 
-import org.wpilib.wpilibj.TimedRobot;
+import org.wpilib.framework.TimedRobot;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.CommandScheduler;
 
@@ -83,15 +83,15 @@ public class Robot extends TimedRobot
     public void teleopExit() {}
 
     @Override
-    public void testInit()
+    public void utilityInit()
     {
         // Cancel everything before test mode so no stale commands carry over.
         CommandScheduler.getInstance().cancelAll();
     }
 
     @Override
-    public void testPeriodic() {}
+    public void utilityPeriodic() {}
 
     @Override
-    public void testExit() {}
+    public void utilityExit() {}
 }

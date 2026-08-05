@@ -19,7 +19,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 
 import org.wpilib.math.controller.ArmFeedforward;
-import org.wpilib.math.system.plant.DCMotor;
+import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
@@ -69,7 +69,7 @@ public class ShooterSubsystem extends SubsystemBase
    * Physical hardware
    */
   // SparkMAX on CAN ID 1; NEO is brushless so kBrushless is required.
-  private final SparkMax                   armMotor    = new SparkMax(1, MotorType.kBrushless);
+  private final SparkMax                   armMotor    = new SparkMax(1, 1, MotorType.kBrushless);
 
   //  private final SmartMotorControllerTelemetryConfig motorTelemetryConfig = new SmartMotorControllerTelemetryConfig()
 //          .withMechanismPosition()

@@ -6,7 +6,7 @@
 
 package frc.robot;
 
-import org.wpilib.wpilibj.RobotBase;
+import org.wpilib.framework.RobotBase;
 
 /**
  * Do NOT add any static variables to this class, or any initialization at all. Unless you know what you are doing, do
@@ -25,6 +25,6 @@ public final class Main
    */
   public static void main(String... args)
   {
-    RobotBase.startRobot(Robot::new);
+    RobotBase.startRobot(Robot.class);
   }
 }

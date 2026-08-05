@@ -14,7 +14,7 @@ import static org.wpilib.units.Units.Volts;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import org.wpilib.math.controller.SimpleMotorFeedforward;
-import org.wpilib.math.system.plant.DCMotor;
+import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.Voltage;
@@ -69,7 +69,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   private final ShooterInputsAutoLogged shooterInputs = new ShooterInputsAutoLogged();
 
-  private final SparkMax armMotor = new SparkMax(20, MotorType.kBrushless);
+  private final SparkMax armMotor = new SparkMax(1, 20, MotorType.kBrushless);
 
   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       // kP=1 is a starting point; a flywheel typically needs little P because

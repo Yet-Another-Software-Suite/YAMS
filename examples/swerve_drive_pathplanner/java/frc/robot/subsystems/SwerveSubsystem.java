@@ -30,6 +30,7 @@ import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.RadiansPerSecond;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -42,11 +43,11 @@ import org.wpilib.math.controller.PIDController;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.geometry.Translation2d;
-import org.wpilib.math.kinematics.ChassisSpeeds;
-import org.wpilib.math.system.plant.DCMotor;
+import org.wpilib.math.kinematics.ChassisVelocities;
+import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.LinearVelocity;
-import org.wpilib.wpilibj.DriverStation;
+import org.wpilib.driverstation.DriverStation;
 import org.wpilib.smartdashboard.Field2d;
 import org.wpilib.smartdashboard.SmartDashboard;
 import org.wpilib.command2.Command;
@@ -77,13 +78,13 @@ public class SwerveSubsystem extends SubsystemBase
   private LinearVelocity  maximumChassisSpeedsLinearVelocity  = MetersPerSecond.of(4);
 
   /**
-   * Get a {@link Supplier<ChassisSpeeds>} for the robot relative chassis speeds based on "standard" swerve drive
+   * Get a {@link Supplier<ChassisVelocities>} for the robot relative chassis speeds based on "standard" swerve drive
    * controls.
    *
    * @param translationXScalar Translation in the X direction from [-1,1]
    * @param translationYScalar Translation in the Y direction from [-1,1]
    * @param rotationScalar     Rotation speed from [-1,1]
-   * @return {@link Supplier<ChassisSpeeds>} for the robot relative chassis speeds.
+   * @return {@link Supplier<ChassisVelocities>} for the robot relative chassis speeds.
    */
   public SwerveInputStream getChassisSpeedsSupplier(DoubleSupplier translationXScalar,
                                                     DoubleSupplier translationYScalar,
@@ -99,21 +100,21 @@ public class SwerveSubsystem extends SubsystemBase
   }
 
   /**
-   * Get a {@link Supplier<ChassisSpeeds>} for the robot relative chassis speeds based on "standard" swerve drive
+   * Get a {@link Supplier<ChassisVelocities>} for the robot relative chassis speeds based on "standard" swerve drive
    * controls.
    *
    * @param translationXScalar Translation in the X direction from [-1,1]
    * @param translationYScalar Translation in the Y direction from [-1,1]
    * @param rotationScalar     Rotation speed from [-1,1]
-   * @return {@link Supplier<ChassisSpeeds>} for the robot relative chassis speeds.
+   * @return {@link Supplier<ChassisVelocities>} for the robot relative chassis speeds.
    */
-  public Supplier<ChassisSpeeds> getSimpleChassisSpeeds(DoubleSupplier translationXScalar,
+  public Supplier<ChassisVelocities> getSimpleChassisSpeeds(DoubleSupplier translationXScalar,
                                                         DoubleSupplier translationYScalar,
                                                         DoubleSupplier rotationScalar)
   {
     // Multiplies the [-1,1] scalar directly by the max velocity -- no deadband or shaping.
     // Useful for debugging or when SwerveInputStream behavior is not wanted.
-    return () -> new ChassisSpeeds(maximumChassisSpeedsLinearVelocity.times(translationXScalar.getAsDouble())
+    return () -> new ChassisVelocities(maximumChassisSpeedsLinearVelocity.times(translationXScalar.getAsDouble())
                                                                      .in(MetersPerSecond),
                                    maximumChassisSpeedsLinearVelocity.times(translationYScalar.getAsDouble())
                                                                      .in(MetersPerSecond),
@@ -154,30 +155,30 @@ public class SwerveSubsystem extends SubsystemBase
 
   public SwerveSubsystem()
   {
-    Pigeon2 gyro = new Pigeon2(14); // Pigeon2 on CAN ID 14; change to match your bus.
+    Pigeon2 gyro = new Pigeon2(14, CANBus.systemcore(1)); // Pigeon2 on CAN ID 14; change to match your bus.
     /*
      * Module locations are measured from the robot center to the wheel contact patch.
      * +X = forward, +Y = left (standard WPILib convention).
      * These are 24"x24" corner positions for a typical 26-inch square frame.
      */
-    var fl = createModule(new SparkMax(1, MotorType.kBrushless),
-                          new SparkMax(2, MotorType.kBrushless),
-                          new CANcoder(3),
+    var fl = createModule(new SparkMax(1, 1, MotorType.kBrushless),
+                          new SparkMax(1, 2, MotorType.kBrushless),
+                          new CANcoder(3, CANBus.systemcore(1)),
                           "frontleft",
                           new Translation2d(Inches.of(24), Inches.of(24)));
-    var fr = createModule(new SparkMax(4, MotorType.kBrushless),
-                          new SparkMax(5, MotorType.kBrushless),
-                          new CANcoder(6),
+    var fr = createModule(new SparkMax(1, 4, MotorType.kBrushless),
+                          new SparkMax(1, 5, MotorType.kBrushless),
+                          new CANcoder(6, CANBus.systemcore(1)),
                           "frontright",
                           new Translation2d(Inches.of(24), Inches.of(-24)));
-    var bl = createModule(new SparkMax(7, MotorType.kBrushless),
-                          new SparkMax(8, MotorType.kBrushless),
-                          new CANcoder(9),
+    var bl = createModule(new SparkMax(1, 7, MotorType.kBrushless),
+                          new SparkMax(1, 8, MotorType.kBrushless),
+                          new CANcoder(9, CANBus.systemcore(1)),
                           "backleft",
                           new Translation2d(Inches.of(-24), Inches.of(24)));
-    var br = createModule(new SparkMax(10, MotorType.kBrushless),
-                          new SparkMax(11, MotorType.kBrushless),
-                          new CANcoder(12),
+    var br = createModule(new SparkMax(1, 10, MotorType.kBrushless),
+                          new SparkMax(1, 11, MotorType.kBrushless),
+                          new CANcoder(12, CANBus.systemcore(1)),
                           "backright",
                           new Translation2d(Inches.of(-24), Inches.of(-24)));
     SwerveDriveConfig config = new SwerveDriveConfig(this, fl, fr, bl, br)
@@ -203,7 +204,7 @@ public class SwerveSubsystem extends SubsystemBase
 
   /*
    * Registers this subsystem with PathPlanner's AutoBuilder so that PathPlannerAuto commands
-   * can locate the drive and issue ChassisSpeeds without any further wiring.
+   * can locate the drive and issue ChassisVelocities without any further wiring.
    *
    * AutoBuilder.configure() is the holonomic variant; it expects robot-relative speeds in
    * and out. WPILib's ramsete/LTV controllers are NOT used here -- PathPlanner's own
@@ -217,11 +218,11 @@ public class SwerveSubsystem extends SubsystemBase
         drive::resetOdometry,
         // Method to reset odometry (will be called if your auto has a starting pose)
         drive::getRobotRelativeSpeed,
-        // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+        // ChassisVelocities supplier. MUST BE ROBOT RELATIVE
         (speedsRobotRelative, moduleFeedForwards) -> {
           drive.setRobotRelativeChassisSpeeds(speedsRobotRelative);
         },
-        // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+        // Method that will drive the robot given ROBOT RELATIVE ChassisVelocities. Also optionally outputs individual module feedforwards
         new PPHolonomicDriveController(
             // PPHolonomicController is the built in path following controller for holonomic drive trains
             new PIDConstants(5.0, 0.0, 0.0),
@@ -246,15 +247,15 @@ public class SwerveSubsystem extends SubsystemBase
   /**
    * Drive the {@link SwerveDrive} object with robot relative chassis speeds.
    *
-   * @param speedsSupplier Robot relative {@link ChassisSpeeds}.
+   * @param speedsSupplier Robot relative {@link ChassisVelocities}.
    * @return {@link Command} to run the drive.
    */
-  public Command drive(Supplier<ChassisSpeeds> speedsSupplier)
+  public Command drive(Supplier<ChassisVelocities> speedsSupplier)
   {
     return drive.drive(speedsSupplier);
   }
 
-  public Command setRobotRelativeChassisSpeeds(ChassisSpeeds speeds)
+  public Command setRobotRelativeChassisSpeeds(ChassisVelocities speeds)
   {
     return run(() -> drive.setRobotRelativeChassisSpeeds(speeds));
   }
@@ -264,7 +265,7 @@ public class SwerveSubsystem extends SubsystemBase
     return drive.driveToPose(pose);
   }
 
-  public Command driveRobotRelative(Supplier<ChassisSpeeds> speedsSupplier)
+  public Command driveRobotRelative(Supplier<ChassisVelocities> speedsSupplier)
   {
     return drive.drive(speedsSupplier);
   }

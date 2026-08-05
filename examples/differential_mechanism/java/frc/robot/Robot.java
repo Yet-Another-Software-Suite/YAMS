@@ -6,7 +6,7 @@
 
 package frc.robot;
 
-import org.wpilib.wpilibj.TimedRobot;
+import org.wpilib.framework.TimedRobot;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.CommandScheduler;
 
@@ -92,7 +92,7 @@ public class Robot extends TimedRobot
 
 
     @Override
-    public void testInit()
+    public void utilityInit()
     {
         // Clear all running commands so test mode starts from a known state.
         CommandScheduler.getInstance().cancelAll();
@@ -100,9 +100,9 @@ public class Robot extends TimedRobot
 
 
     @Override
-    public void testPeriodic() {}
+    public void utilityPeriodic() {}
 
 
     @Override
-    public void testExit() {}
+    public void utilityExit() {}
 }

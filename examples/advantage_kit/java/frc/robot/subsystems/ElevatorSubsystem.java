@@ -14,9 +14,9 @@ import static org.wpilib.units.Units.Volts;
 
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
-import org.wpilib.math.Pair;
+import org.wpilib.math.util.Pair;
 import org.wpilib.math.controller.ElevatorFeedforward;
-import org.wpilib.math.system.plant.DCMotor;
+import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.LinearVelocity;
@@ -84,8 +84,8 @@ public class ElevatorSubsystem extends SubsystemBase
   // while giving enough torque to lift 16 lb against gravity.
   private final MechanismGearing gearing        = new MechanismGearing(GearBox.fromReductionStages(3, 4));
   // CAN IDs 30/31 are the leader and follower NEOs.
-  private final SparkMax         elevatorMotor  = new SparkMax(30, SparkLowLevel.MotorType.kBrushless);
-  private final SparkMax         elevatorMotor2 = new SparkMax(31, SparkLowLevel.MotorType.kBrushless);
+  private final SparkMax         elevatorMotor  = new SparkMax(1, 30, SparkLowLevel.MotorType.kBrushless);
+  private final SparkMax         elevatorMotor2 = new SparkMax(1, 31, SparkLowLevel.MotorType.kBrushless);
 
   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)

@@ -12,7 +12,7 @@ import static org.wpilib.units.Units.Seconds;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import org.wpilib.math.controller.SimpleMotorFeedforward;
-import org.wpilib.math.system.plant.DCMotor;
+import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
@@ -42,7 +42,7 @@ import yams.motorcontrollers.local.SparkWrapper;
 public class ShooterSubsystem extends SubsystemBase
 {
   // CAN ID 10. Single NEO in brushless mode.
-  private final SparkMax                   ShooterMotor    = new SparkMax(10, MotorType.kBrushless);
+  private final SparkMax                   ShooterMotor    = new SparkMax(1, 10, MotorType.kBrushless);
 
   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       // kP=1, kI=0, kD=0. See class javadoc for the tradeoff vs a tuned feedforward.

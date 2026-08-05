@@ -6,10 +6,10 @@
 
 package frc.robot;
 
-import org.wpilib.wpilibj.DriverStation;
+import org.wpilib.driverstation.internal.DriverStationBackend;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
-import org.wpilib.command2.button.CommandXboxController;
+import org.wpilib.command2.button.CommandNiDsXboxController;
 import frc.robot.subsystems.ExponentiallyProfiledElevatorSubsystem;
 
 import static org.wpilib.units.Units.Meters;
@@ -20,12 +20,12 @@ public class RobotContainer
   // Elevator subsystem owns the motor and profile controller.
   public ExponentiallyProfiledElevatorSubsystem elevator = new ExponentiallyProfiledElevatorSubsystem();
   // Port 0 is the first USB gamepad plugged into the Driver Station.
-  public CommandXboxController xboxController = new CommandXboxController(0);
+  public CommandNiDsXboxController xboxController = new CommandNiDsXboxController(0);
 
   public RobotContainer()
   {
     // Suppress the "joystick not connected" alert in simulation so it does not flood the DS log.
-    DriverStation.silenceJoystickConnectionWarning(true);
+    DriverStationBackend.silenceJoystickConnectionWarning(true);
     // elevCmd(0) holds duty cycle at zero, acting as a safe idle when no other command is scheduled.
     elevator.setDefaultCommand(elevator.elevCmd(0));
     configureBindings();

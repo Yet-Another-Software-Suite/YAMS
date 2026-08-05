@@ -6,10 +6,10 @@
 
 package frc.robot;
 
-import org.wpilib.wpilibj.DriverStation;
+import org.wpilib.driverstation.internal.DriverStationBackend;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
-import org.wpilib.command2.button.CommandXboxController;
+import org.wpilib.command2.button.CommandNiDsXboxController;
 import frc.robot.subsystems.ElevatorSubsystem;
 
 import static org.wpilib.units.Units.Meters;
@@ -18,11 +18,11 @@ import static org.wpilib.units.Units.Meters;
 public class RobotContainer
 {
   public ElevatorSubsystem elevator = new ElevatorSubsystem();
-  public CommandXboxController xboxController = new CommandXboxController(0);
+  public CommandNiDsXboxController xboxController = new CommandNiDsXboxController(0);
 
   public RobotContainer()
   {
-    DriverStation.silenceJoystickConnectionWarning(true);
+    DriverStationBackend.silenceJoystickConnectionWarning(true);
     elevator.setDefaultCommand(elevator.elevCmd(0));
     configureBindings();
   }

@@ -1,16 +1,32 @@
 {
     "configurations": [
         {
+            "name": "Mac",
+            "includePath": [
+                "/Users/lucacarvalhojeo/FRC/YAMS/yams/cpp/include",
+                "/Users/lucacarvalhojeo/FRC/YAMS/vendordep/src/test/native/include",
+                "/Users/lucacarvalhojeo/wpilib/2027_alpha5/native-headers"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++23",
+            "intelliSenseMode": "macos-clang-arm64",
+            "compileCommands": "/Users/lucacarvalhojeo/FRC/YAMS/vendordep/build/TargetedCompileCommands/osxuniversaldebug/compile_commands.json"
+        },
+        {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**"
+                "/Users/lucacarvalhojeo/FRC/YAMS/yams/cpp/include",
+                "/Users/lucacarvalhojeo/FRC/YAMS/vendordep/src/test/native/include",
+                "/Users/lucacarvalhojeo/wpilib/2027_alpha5/native-headers"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c17",
-            "cppStandard": "gnu++17",
+            "cppStandard": "c++23",
             "intelliSenseMode": "linux-gcc-x64",
-            "configurationProvider": "vscode-wpilib"
+            "compileCommands": "/Users/lucacarvalhojeo/FRC/YAMS/vendordep/build/TargetedCompileCommands/osxuniversaldebug/compile_commands.json"
         }
     ],
     "version": 4

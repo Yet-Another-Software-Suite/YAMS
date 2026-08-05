@@ -9,7 +9,7 @@ import static org.wpilib.units.Units.Volts;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import org.wpilib.math.system.plant.DCMotor;
+import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.Voltage;
@@ -55,7 +55,7 @@ public class IndexerSubsystem extends SubsystemBase
   private final IndexerInputsAutoLogged indexerInputs = new IndexerInputsAutoLogged();
 
   // CAN ID 20 -- check against the robot wiring diagram if swapping hardware.
-  private final SparkMax someMotor = new SparkMax(20, MotorType.kBrushless);
+  private final SparkMax someMotor = new SparkMax(1, 20, MotorType.kBrushless);
 
   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       // 3:4 box = 12:1 total reduction. Fast enough for reliable feeding without

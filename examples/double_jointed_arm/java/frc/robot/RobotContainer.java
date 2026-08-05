@@ -6,10 +6,10 @@
 
 package frc.robot;
 
-import org.wpilib.wpilibj.DriverStation;
+import org.wpilib.driverstation.internal.DriverStationBackend;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
-import org.wpilib.command2.button.CommandXboxController;
+import org.wpilib.command2.button.CommandNiDsXboxController;
 import frc.robot.subsystems.DoubleJointedArmSubsystem;
 
 import static org.wpilib.units.Units.Degrees;
@@ -18,11 +18,11 @@ import static org.wpilib.units.Units.Degrees;
 public class RobotContainer
 {
   private DoubleJointedArmSubsystem jointedArm = new DoubleJointedArmSubsystem();
-  public CommandXboxController xboxController = new CommandXboxController(0);
+  public CommandNiDsXboxController xboxController = new CommandNiDsXboxController(0);
 
   public RobotContainer()
   {
-    DriverStation.silenceJoystickConnectionWarning(true);
+    DriverStationBackend.silenceJoystickConnectionWarning(true);
     jointedArm.setDefaultCommand(jointedArm.set(0.0, 0.0));
 //    jointedArm.setDefaultCommand(jointedArm.setAngle(Degrees.of(0), Degrees.of(0)));
     configureBindings();

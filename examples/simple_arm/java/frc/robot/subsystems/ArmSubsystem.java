@@ -11,7 +11,7 @@ import static org.wpilib.units.Units.Seconds;
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
 import org.wpilib.math.controller.ArmFeedforward;
-import org.wpilib.math.system.plant.DCMotor;
+import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
@@ -41,7 +41,7 @@ import yams.motorcontrollers.local.SparkWrapper;
 public class ArmSubsystem extends SubsystemBase
 {
   // NEO on CAN ID 1.  Change this to match your robot's CAN bus assignment.
-  private final SparkMax armMotor = new SparkMax(1, SparkLowLevel.MotorType.kBrushless);
+  private final SparkMax armMotor = new SparkMax(1, 1, SparkLowLevel.MotorType.kBrushless);
 
   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       // kP=4 produces 4 V per radian of error (~0.07 V/deg). I and D are 0 because

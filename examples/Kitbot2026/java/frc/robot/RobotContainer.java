@@ -13,7 +13,7 @@ import static org.wpilib.units.Units.RotationsPerSecond;
 
 import org.wpilib.command2.Command;
 import org.wpilib.command2.InstantCommand;
-import org.wpilib.command2.button.CommandXboxController;
+import org.wpilib.command2.button.CommandNiDsXboxController;
 import org.wpilib.command2.button.Trigger;
 
 /**
@@ -29,8 +29,8 @@ public class RobotContainer {
   private final ShooterSubsystem m_shooterSubsystem = new ShooterSubsystem();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
+  private final CommandNiDsXboxController m_driverController =
+      new CommandNiDsXboxController(OperatorConstants.kDriverControllerPort);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -43,7 +43,7 @@ public class RobotContainer {
    * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
    * predicate, or via the named factories in {@link
    * org.wpilib.command2.button.CommandGenericHID}'s subclasses for {@link
-   * CommandXboxController Xbox}/{@link org.wpilib.command2.button.CommandPS4Controller
+   * CommandNiDsXboxController Xbox}/{@link org.wpilib.command2.button.CommandPS4Controller
    * PS4} controllers or {@link org.wpilib.command2.button.CommandJoystick Flight
    * joysticks}.
    */

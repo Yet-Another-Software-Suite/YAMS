@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 import org.wpilib.math.controller.PIDController;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
-import org.wpilib.wpilibj.DriverStation;
+import org.wpilib.driverstation.DriverStation;
 import org.wpilib.command2.Command;
 
 public class ShooterSubsystem {

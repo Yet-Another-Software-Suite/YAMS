@@ -6,10 +6,10 @@
 
 package frc.robot;
 
-import org.wpilib.wpilibj.DriverStation;
+import org.wpilib.driverstation.internal.DriverStationBackend;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
-import org.wpilib.command2.button.CommandXboxController;
+import org.wpilib.command2.button.CommandNiDsXboxController;
 import frc.robot.subsystems.DiffyMechSubsystem;
 
 import static org.wpilib.units.Units.Degrees;
@@ -31,12 +31,12 @@ public class RobotContainer
 {
   private DiffyMechSubsystem diffyMech = new DiffyMechSubsystem();
   // Controller port 0 -- primary driver.
-  public CommandXboxController xboxController = new CommandXboxController(0);
+  public CommandNiDsXboxController xboxController = new CommandNiDsXboxController(0);
 
   public RobotContainer()
   {
     // Suppress the "joystick not connected" DS warning during sim/bench testing.
-    DriverStation.silenceJoystickConnectionWarning(true);
+    DriverStationBackend.silenceJoystickConnectionWarning(true);
     // Open-loop zero keeps the motors energized in brake mode without a position target,
     // which prevents the wrist from sagging when no button is held.
     diffyMech.setDefaultCommand(diffyMech.set(0, 0));

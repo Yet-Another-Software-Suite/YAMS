@@ -7,8 +7,8 @@ package frc.robot.subsystems;
 import static org.wpilib.units.Units.Inches;
 
 import com.revrobotics.spark.SparkMax;
-import org.wpilib.math.Pair;
-import org.wpilib.math.system.plant.DCMotor;
+import org.wpilib.math.util.Pair;
+import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.drive.DifferentialDrive;
 import org.wpilib.command2.Command;
@@ -43,12 +43,12 @@ public class DiffDriveSubsystem extends SubsystemBase
   // 4-inch wheels are the standard Kitbot wheel size.
   private Distance         wheelDiameter = Inches.of(4);
 
-  private SparkMax leftMotor  = new SparkMax(21, SparkMax.MotorType.kBrushless);
-  private SparkMax rightMotor = new SparkMax(24, SparkMax.MotorType.kBrushless);
+  private SparkMax leftMotor  = new SparkMax(1, 21, SparkMax.MotorType.kBrushless);
+  private SparkMax rightMotor = new SparkMax(1, 24, SparkMax.MotorType.kBrushless);
 
   // Followers mirror the leader output. false = same direction as leader.
-  private SparkMax leftFollowerMotor  = new SparkMax(22, SparkMax.MotorType.kBrushless);
-  private SparkMax rightFollowerMotor = new SparkMax(23, SparkMax.MotorType.kBrushless);
+  private SparkMax leftFollowerMotor  = new SparkMax(1, 22, SparkMax.MotorType.kBrushless);
+  private SparkMax rightFollowerMotor = new SparkMax(1, 23, SparkMax.MotorType.kBrushless);
 
   // Left side is inverted because the motors are physically mirrored on the
   // chassis -- positive voltage on both sides would otherwise spin them in

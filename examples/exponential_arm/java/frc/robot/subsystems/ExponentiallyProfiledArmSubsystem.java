@@ -17,7 +17,7 @@ import com.revrobotics.spark.SparkMax;
 import org.wpilib.math.controller.ArmFeedforward;
 import org.wpilib.math.trajectory.ExponentialProfile;
 import org.wpilib.math.filter.Debouncer;
-import org.wpilib.math.system.plant.DCMotor;
+import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
@@ -55,7 +55,7 @@ public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
 {
   private final String           motorTelemetryName = "ExponentiallyProfiledArmMotor";
   private final String           mechTelemetryName  = "ExponentiallyProfiledArm";
-  private final SparkMax         armMotor           = new SparkMax(1, MotorType.kBrushless);
+  private final SparkMax         armMotor           = new SparkMax(1, 1, MotorType.kBrushless);
   ///  Configuration Options
   private final DCMotor          dcMotor            = DCMotor.getNEO(1);
   // 7:1 reduction gives enough torque to hold a 10 lb arm against gravity while still

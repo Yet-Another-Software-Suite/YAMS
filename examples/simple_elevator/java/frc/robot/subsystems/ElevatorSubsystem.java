@@ -27,7 +27,7 @@ import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
 import org.wpilib.math.controller.ElevatorFeedforward;
 import org.wpilib.math.geometry.Translation3d;
-import org.wpilib.math.system.plant.DCMotor;
+import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
@@ -46,7 +46,7 @@ import yams.motorcontrollers.local.SparkWrapper;
 public class ElevatorSubsystem extends SubsystemBase
 {
   // CAN ID 2 is the elevator motor on this robot's CAN bus layout.
-  private final SparkMax                   elevatorMotor = new SparkMax(2, SparkLowLevel.MotorType.kBrushless);
+  private final SparkMax                   elevatorMotor = new SparkMax(1, 2, SparkLowLevel.MotorType.kBrushless);
 
   //  private final SmartMotorControllerTelemetryConfig motorTelemetryConfig = new SmartMotorControllerTelemetryConfig()
 //          .withMechanismPosition()

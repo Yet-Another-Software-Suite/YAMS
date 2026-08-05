@@ -13,7 +13,7 @@ import static org.wpilib.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import org.wpilib.math.controller.ArmFeedforward;
-import org.wpilib.math.system.plant.DCMotor;
+import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;

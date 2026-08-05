@@ -6,7 +6,7 @@
     "**/.settings": true,
     "**/.factorypath": true
   },
-  "C_Cpp.default.configurationProvider": "vscode-wpilib",
+  "C_Cpp.default.compileCommands": "${workspaceFolder}/build/TargetedCompileCommands/osxuniversaldebug/compile_commands.json",
   "files.associations": {
     "cmath": "cpp",
     "memory": "cpp",

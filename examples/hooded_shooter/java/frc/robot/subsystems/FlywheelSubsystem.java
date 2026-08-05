@@ -16,7 +16,7 @@ import static org.wpilib.units.Units.Seconds;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import org.wpilib.math.controller.SimpleMotorFeedforward;
-import org.wpilib.math.system.plant.DCMotor;
+import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.LinearVelocity;
@@ -53,7 +53,7 @@ public class FlywheelSubsystem extends SubsystemBase
 {
   // 4-inch wheel diameter used for the RPM <-> surface-speed conversion below.
   private final Distance flywheelDiameter = Inches.of(4);
-  private final SparkMax flywheelMotor    = new SparkMax(1, MotorType.kBrushless);
+  private final SparkMax flywheelMotor    = new SparkMax(1, 1, MotorType.kBrushless);
 
   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       // P = 0.00016541 -- very small because feedforward handles ~95% of the output;

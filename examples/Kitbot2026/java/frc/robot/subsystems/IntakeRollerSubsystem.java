@@ -7,14 +7,14 @@ package frc.robot.subsystems;
 import static org.wpilib.units.Units.Amps;
 
 import com.revrobotics.sim.SparkMaxSim;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import org.wpilib.math.system.plant.DCMotor;
-import org.wpilib.math.system.plant.LinearSystemId;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.math.system.Models;
 import org.wpilib.units.measure.Current;
 import org.wpilib.simulation.FlywheelSim;
 import org.wpilib.simulation.RoboRioSim;
@@ -42,14 +42,14 @@ public class IntakeRollerSubsystem extends SubsystemBase
   public static final double kWristMomentOfInertia = 0.00032; // kg * m^2
 
   // CAN ID 30. Neo Vortex is brushless; kBrushless is required for SparkMax.
-  private final SparkMax m_rollerMotor = new SparkMax(30, MotorType.kBrushless);
+  private final SparkMax m_rollerMotor = new SparkMax(1, 30, MotorType.kBrushless);
 
   private final DCMotor m_rollerMotorGearbox = DCMotor.getNeoVortex(1);
 
   // 1:1 gearing on the roller -- no gearbox, direct drive from the motor shaft.
   // The 1.0/4096.0 argument is the encoder counts-per-revolution conversion;
   // it is unused here but required by the FlywheelSim constructor.
-  private final FlywheelSim m_rollerSim = new FlywheelSim(LinearSystemId.createFlywheelSystem(
+  private final FlywheelSim m_rollerSim = new FlywheelSim(Models.flywheelFromPhysicalConstants(
       m_rollerMotorGearbox,
       kWristMomentOfInertia,
       1), m_rollerMotorGearbox, 1.0 / 4096.0);

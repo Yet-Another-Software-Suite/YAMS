@@ -9,11 +9,11 @@ import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.RPM;
 import static org.wpilib.units.Units.Radians;
 
-import org.wpilib.math.Pair;
+import org.wpilib.math.util.Pair;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.interpolation.InterpolatingDoubleTreeMap;
-import org.wpilib.math.kinematics.ChassisSpeeds;
+import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.CommandScheduler;
 import frc.robot.subsystems.FlywheelSubsystem;
@@ -40,7 +40,7 @@ public class ShootOnTheMoveCommand extends Command
   /**
    * Current field-oriented chassis speeds.
    */
-  private final Supplier<ChassisSpeeds> fieldOrientedChassisSpeeds;
+  private final Supplier<ChassisVelocities> fieldOrientedChassisSpeeds;
   /**
    * Pose to shoot at.
    */
@@ -68,7 +68,7 @@ public class ShootOnTheMoveCommand extends Command
    * @param goal                       Goal to shoot at.
    */
   public ShootOnTheMoveCommand(TurretSubsystem turret, HoodSubsystem hood, FlywheelSubsystem flyWheel,
-                               Supplier<Pose2d> currentPose, Supplier<ChassisSpeeds> fieldOrientedChassisSpeeds,
+                               Supplier<Pose2d> currentPose, Supplier<ChassisVelocities> fieldOrientedChassisSpeeds,
                                Pose2d goal)
   {
     turretSubsystem = turret;
@@ -105,7 +105,7 @@ public class ShootOnTheMoveCommand extends Command
     var robotSpeed = fieldOrientedChassisSpeeds.get();
     // 1. LATENCY COMP
     Translation2d futurePos = robotPose.get().getTranslation().plus(
-        new Translation2d(robotSpeed.vxMetersPerSecond, robotSpeed.vyMetersPerSecond).times(latency)
+        new Translation2d(robotSpeed.vx, robotSpeed.vy).times(latency)
                                                                    );
 
     // 2. GET TARGET VECTOR
@@ -118,7 +118,7 @@ public class ShootOnTheMoveCommand extends Command
     double idealHorizontalSpeed = shooterTable.get(dist);
 
     // 4. VECTOR SUBTRACTION
-    Translation2d robotVelVec = new Translation2d(robotSpeed.vxMetersPerSecond, robotSpeed.vyMetersPerSecond);
+    Translation2d robotVelVec = new Translation2d(robotSpeed.vx, robotSpeed.vy);
     Translation2d shotVec     = targetVec.div(dist).times(idealHorizontalSpeed).minus(robotVelVec);
 
     // 5. CONVERT TO CONTROLS
