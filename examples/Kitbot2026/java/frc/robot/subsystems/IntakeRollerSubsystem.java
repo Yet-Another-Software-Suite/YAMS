@@ -97,7 +97,7 @@ public class IntakeRollerSubsystem extends SubsystemBase
   public Command setIntakeRoller(double speed)
   {
     return runOnce(() -> {
-      m_rollerMotor.set(speed);
+      m_rollerMotor.setThrottle(speed);
     });
   }
 
@@ -123,7 +123,7 @@ public class IntakeRollerSubsystem extends SubsystemBase
   /** Returns the stator current reported by the SparkMax. Useful for game-piece detection. */
   public Current getCurrent()
   {
-    return Amps.of(m_rollerMotor.getOutputCurrent());
+    return Amps.of(m_rollerMotor.getOutputCurrent().get());
   }
 
   /**
@@ -140,6 +140,6 @@ public class IntakeRollerSubsystem extends SubsystemBase
 
   public double getDutycycle()
   {
-    return m_rollerMotor.getAppliedOutput();
+    return m_rollerMotor.getAppliedOutput().get();
   }
 }
