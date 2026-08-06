@@ -86,7 +86,7 @@ public class IntakeRollerSubsystem extends SubsystemBase
 
     // Push the sim's angular velocity back into the SparkMax sim so that
     // getOutputCurrent() and other sensor reads return plausible values.
-    m_rollerMotorSim.iterate(m_rollerSim.getAngularVelocityRPM(),
+    m_rollerMotorSim.iterate(m_rollerSim.getAngularVelocity(),
                              RoboRioSim.getVInVoltage(),
                              0.02);
   }
