@@ -11,6 +11,7 @@ import static org.wpilib.units.Units.Feet;
 import static org.wpilib.units.Units.KilogramSquareMeters;
 import static org.wpilib.units.Units.Volts;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.TalonFX;
 import org.wpilib.math.controller.ArmFeedforward;
 import org.wpilib.math.system.DCMotor;
@@ -104,7 +105,7 @@ public class ArmSubsystem extends SubsystemBase {
 
   private final ArmInputsAutoLogged armInputs = new ArmInputsAutoLogged();
 
-  private final TalonFX armMotor = new TalonFX(ArmConstants.MOTOR_ID);
+  private final TalonFX armMotor = new TalonFX(ArmConstants.MOTOR_ID, CANBus.systemcore(1));
 
   ///
   /// YAMS Configurations
