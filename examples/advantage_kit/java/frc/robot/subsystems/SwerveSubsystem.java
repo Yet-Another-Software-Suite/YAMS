@@ -26,7 +26,7 @@ import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.math.kinematics.SwerveModulePosition;
-import org.wpilib.math.kinematics.SwerveModuleState;
+import org.wpilib.math.kinematics.SwerveModuleVelocity;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
@@ -86,7 +86,7 @@ public class SwerveSubsystem extends SubsystemBase
     // Module positions (distance + heading) from each encoder; needed to tick
     // the odometry integrator during replay.
     public SwerveModulePosition[] positions           = new SwerveModulePosition[4];
-    public SwerveModuleState[]    states              = new SwerveModuleState[4];
+    public SwerveModuleVelocity[]    states              = new SwerveModuleVelocity[4];
     // Raw Pigeon 2 yaw; logged before being consumed by odometry so replay sees
     // the exact hardware value, not a processed one.
     public Angle                  gyroRotation        = Degrees.of(0);
@@ -278,7 +278,7 @@ public class SwerveSubsystem extends SubsystemBase
       // recomputed each replay loop from the same command logic, not stored.
       Logger.recordOutput("Swerve/DesiredChassisSpeeds", speeds);
       Logger.recordOutput("Swerve/DesiredOptimizedChassisSpeeds", config.optimizeRobotRelativeChassisSpeeds(speeds));
-      SwerveModuleState[] states = drive.getStateFromRobotRelativeChassisSpeeds(speeds);
+      SwerveModuleVelocity[] states = drive.getStateFromRobotRelativeChassisSpeeds(speeds);
       Logger.recordOutput("Swerve/DesiredStates", states);
       drive.setSwerveModuleStates(states);
     }).withName("Set Robot Relative Chassis Speeds");
@@ -321,7 +321,7 @@ public class SwerveSubsystem extends SubsystemBase
       Logger.recordOutput("Swerve/DesiredChassisSpeeds", speedsSupplier.get());
       Logger.recordOutput("Swerve/DesiredOptimizedChassisSpeeds",
                           config.optimizeRobotRelativeChassisSpeeds(speedsSupplier.get()));
-      SwerveModuleState[] states = drive.getStateFromRobotRelativeChassisSpeeds(speedsSupplier.get());
+      SwerveModuleVelocity[] states = drive.getStateFromRobotRelativeChassisSpeeds(speedsSupplier.get());
       Logger.recordOutput("Swerve/DesiredStates", states);
       drive.setSwerveModuleStates(states);
     }).withName("Set Robot Relative Chassis Speeds Supplier");
@@ -338,13 +338,13 @@ public class SwerveSubsystem extends SubsystemBase
       Logger.recordOutput("Swerve/DesiredChassisSpeeds", speeds);
       Logger.recordOutput("Swerve/DesiredOptimizedChassisSpeeds", speeds);
       SwerveModule[]      modules       = config.getModules();
-      SwerveModuleState[] desiredStates = new SwerveModuleState[modules.length];
+      SwerveModuleVelocity[] desiredStates = new SwerveModuleVelocity[modules.length];
       for (int i = 0; i < modules.length; i++)
       {
         // Each module points to its own corner: getAngle() returns the vector from
         // robot center to that module, which forms an X when all four are set.
         desiredStates[i] =
-            new SwerveModuleState(0, modules[i].getConfig().getLocation().orElseThrow().getAngle());
+            new SwerveModuleVelocity(0, modules[i].getConfig().getLocation().orElseThrow().getAngle());
       }
       Logger.recordOutput("Swerve/DesiredStates", desiredStates);
       drive.setSwerveModuleStates(desiredStates);
