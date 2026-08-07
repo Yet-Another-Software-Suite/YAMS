@@ -1,0 +1,35 @@
+{
+    "fileName": "AdvantageKit.json",
+    "name": "AdvantageKit",
+    "version": "27.0.0-alpha-4",
+    "uuid": "d820cc26-74e3-11ec-90d6-0242ac120003",
+    "wpilibYear": "2027_alpha5",
+    "mavenUrls": [
+        "https://frcmaven.wpi.edu/artifactory/littletonrobotics-mvn-release/"
+    ],
+    "jsonUrl": "https://github.com/Mechanical-Advantage/AdvantageKit/releases/latest/download/AdvantageKit.json",
+    "javaDependencies": [
+        {
+            "groupId": "org.littletonrobotics.akit",
+            "artifactId": "akit-java",
+            "version": "27.0.0-alpha-4"
+        }
+    ],
+    "jniDependencies": [
+        {
+            "groupId": "org.littletonrobotics.akit",
+            "artifactId": "akit-wpilibio",
+            "version": "27.0.0-alpha-4",
+            "skipInvalidPlatforms": false,
+            "isJar": false,
+            "validPlatforms": [
+                "linuxsystemcore",
+                "linuxx86-64",
+                "linuxarm64",
+                "osxuniversal",
+                "windowsx86-64"
+            ]
+        }
+    ],
+    "cppDependencies": []
+}
