@@ -3,6 +3,7 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Degrees;
@@ -30,7 +31,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.remote.TalonFXSWrapper;
 
 public class TurretSubsystem extends SubsystemBase {
-        private final TalonFXS turretMotor = new TalonFXS(1);
+        private final TalonFXS turretMotor = new TalonFXS(1, CANBus.systemcore(1));
         private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
                         .withControlMode(ControlMode.CLOSED_LOOP)
                         .withClosedLoopController(4, 0, 0)

@@ -302,16 +302,16 @@ public class SwerveSubsystem extends SubsystemBase
       var translationScalar = translationPID.calculate(distance.in(Meters), 0);
       var currentPose       = getPose(); // Returns replayed pose during log replay.
       var poseDifference    = currentPose.minus(pose);
-      setRobotRelativeChassisSpeeds(new ChassisVelocities(poseDifference.getMeasureX().per(Second)
-                                                                        .times(translationScalar),
-                                                          poseDifference.getMeasureY().per(Second)
-                                                                        .times(translationScalar),
-                                                          RadiansPerSecond.of(azimuthPID.calculate(
-                                                              currentPose.getRotation()
-                                                                         .getRadians(),
-                                                              pose.getRotation()
-                                                                  .getRadians())))
-                                        .toRobotRelative(getGyroAngle()));
+      drive.setRobotRelativeChassisSpeeds(new ChassisVelocities(poseDifference.getMeasureX().per(Second)
+                                                                              .times(translationScalar),
+                                                                poseDifference.getMeasureY().per(Second)
+                                                                              .times(translationScalar),
+                                                                RadiansPerSecond.of(azimuthPID.calculate(
+                                                                    currentPose.getRotation()
+                                                                               .getRadians(),
+                                                                    pose.getRotation()
+                                                                        .getRadians())))
+                                              .toRobotRelative(getGyroAngle()));
     }).withName("Drive to Pose");
   }
 
