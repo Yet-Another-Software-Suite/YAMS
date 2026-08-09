@@ -87,11 +87,15 @@ public class VisionSubsystem extends SubsystemBase {
 
     public Optional<PhotonTrackedTarget> getClosestTag() {
         if (!photonAvailable || camera == null) return Optional.empty();
-        return camera.getLatestResult().hasTargets()
-                ? camera.getLatestResult().getTargets().stream()
+        for(var results : camera.getAllUnreadResults()
+        ){
+            return results.hasTargets()
+                ? results.getTargets().stream()
                         .filter(t -> t.getFiducialId() > 0) // AprilTags only
                         .min(Comparator.comparingDouble(
                                 t -> t.getBestCameraToTarget().getTranslation().getNorm()))
                 : Optional.empty();
+        }
+        return Optional.empty();
     }
 }

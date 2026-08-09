@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 import org.wpilib.math.controller.PIDController;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
-import org.wpilib.driverstation.DriverStation;
+import org.wpilib.driverstation.DriverStationErrors;
 import org.wpilib.command2.Command;
 
 public class ShooterSubsystem {
@@ -53,7 +53,7 @@ public class ShooterSubsystem {
 
     public Command runShooter() {
         if (flywheelVelocitySupplier == null) {
-            DriverStation.reportWarning("Shooter velocity set to null, not running shooter", true);
+            DriverStationErrors.reportWarning("Shooter velocity set to null, not running shooter", true);
             return flywheel.idle(); // Do nothing until a valid request is set
         }
 
@@ -66,7 +66,7 @@ public class ShooterSubsystem {
 
     public Command runShooter(AngularVelocity velocity) {
         if (velocity == null) {
-            DriverStation.reportWarning("Shooter velocity set to null, defaulting to 0", true);
+            DriverStationErrors.reportWarning("Shooter velocity set to null, defaulting to 0", true);
             velocity = DegreesPerSecond.of(0);
         }
 
