@@ -47,7 +47,8 @@ import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.LinearVelocity;
-import org.wpilib.driverstation.DriverStation;
+import org.wpilib.driverstation.Alliance;
+import org.wpilib.driverstation.internal.DriverStationBackend;
 import org.wpilib.smartdashboard.Field2d;
 import org.wpilib.smartdashboard.SmartDashboard;
 import org.wpilib.command2.Command;
@@ -69,8 +70,9 @@ import yams.motorcontrollers.local.SparkWrapper;
 
 public class SwerveSubsystem extends SubsystemBase
 {
-  private final SwerveDrive drive;
-  private final Field2d     field = new Field2d();
+  private final SwerveDrive      drive;
+  private final Pigeon2          gyro;
+  private final Field2d          field = new Field2d();
 
   // 720 deg/s == two full rotations per second; aggressive but reachable with NEOs at 12 V.
   private AngularVelocity maximumChassisSpeedsAngularVelocity = DegreesPerSecond.of(720);
@@ -155,7 +157,7 @@ public class SwerveSubsystem extends SubsystemBase
 
   public SwerveSubsystem()
   {
-    Pigeon2 gyro = new Pigeon2(14, CANBus.systemcore(1)); // Pigeon2 on CAN ID 14; change to match your bus.
+    gyro = new Pigeon2(14, CANBus.systemcore(1)); // Pigeon2 on CAN ID 14; change to match your bus.
     /*
      * Module locations are measured from the robot center to the wheel contact patch.
      * +X = forward, +Y = left (standard WPILib convention).
@@ -236,8 +238,8 @@ public class SwerveSubsystem extends SubsystemBase
         () -> {
           // Flip the path to the red side when we are on Red alliance.
           // The field origin is always on the Blue alliance wall regardless of which side we drive from.
-          var alliance = DriverStation.getAlliance();
-          return alliance.filter(value -> value == DriverStation.Alliance.Red).isPresent();
+          var alliance = DriverStationBackend.getAlliance();
+          return alliance.filter(value -> value == Alliance.RED).isPresent();
         },
         this
         // Reference to this subsystem to set requirements
