@@ -96,14 +96,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: windows-latest
+          - os: windows-2025
             artifact-name: windows
             gradlew: ./gradlew.bat
-#            toolchain-path: %USERPROFILE%/.gradle/toolchains/first/2027/systemcore
-          - os: macos-latest
+            architecture: x64
+          - os: macos-15
             artifact-name: macos
             gradlew: ./gradlew
-            toolchain-path: ~/.gradle/toolchains/first/2027/systemcore
+            architecture: aarch64
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -114,6 +114,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 25
+          architecture: ${{ matrix.architecture }}
       - name: Make gradlew executable
         if: runner.os != 'Windows'
         run: chmod +x gradlew
