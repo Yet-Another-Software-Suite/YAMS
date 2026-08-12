@@ -4,6 +4,16 @@ nativeUtils.addWpiNativeUtils()
 nativeUtils.withCrossSystemCore()
 nativeUtils.withCrossLinuxArm64()
 
+nativeUtils {
+    wpi {
+        configureDependencies {
+            wpiVersion = wpilibVersion
+            mrcLibVersion = '2027.1.0-alpha-1-91-gb154ee9'
+            opencvVersion = "2027-4.13.0-3"
+        }
+    }
+}
+
 // WORKAROUND: GradleRIO 2027.0.0-alpha-6 calls nativeUtils.wpi.configureDependencies()
 // eagerly at plugin-apply time with an action that does not set mrcLibVersion (fixed in
 // post-alpha-6 source but no consumable artifact yet). configureDependencies is fire-once,
@@ -12,7 +22,7 @@ nativeUtils.withCrossLinuxArm64()
 // mrcLibVersion in WPIVersionsExtension is published to the Gradle plugin portal.
 // https://github.com/wpilibsuite/vendor-template/issues/72
 nativeUtils.wpi.versions.mrcLibVersion.set('2027.1.0-alpha-1-65-g21f308e')
-nativeUtils.wpi.versions.opencvVersion.set('2027-4.13.0-3')
+
 
 nativeUtils.wpi.addWarnings()
 nativeUtils.wpi.addWarningsAsErrors()
@@ -23,7 +33,7 @@ model {
     // Uncomment this, and remove lines below it to enable builds for just roborio
     // components {
     //     all {
-    //         targetPlatform nativeUtils.wpi.platforms.roborio
+    //         targetPlatform nativeUtils.wpi.platforms.systemcore
     //     }
     // }
     components {

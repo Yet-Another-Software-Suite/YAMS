@@ -7,7 +7,7 @@ plugins {
   id 'google-test'
   id 'idea'
   id 'org.wpilib.WPILibRepositoriesPlugin' version '2027.0.0'
-  id 'org.wpilib.NativeUtils' version '2027.10.0'
+  id 'org.wpilib.NativeUtils' version '2027.13.1'
   id 'org.wpilib.GradleJni' version '2027.0.0'
   id 'org.wpilib.GradleVsCode' version '2027.0.0'
   id 'org.wpilib.GradleRIO' version '2027.0.0-alpha-6'
@@ -117,7 +117,7 @@ tasks.whenTaskAdded { task ->
     }
 }
 
-if (project.hasProperty('onlylinuxathena') || project.hasProperty('onlylinuxarm32') || project.hasProperty('onlylinuxarm64') || project.hasProperty('onlywindowsarm64') || project.hasProperty('onlylinuxsystemcore')) {
+if (project.hasProperty('onlylinuxarm32') || project.hasProperty('onlylinuxarm64') || project.hasProperty('onlywindowsarm64') || project.hasProperty('onlylinuxsystemcore')) {
     test.enabled = false
 }
 
