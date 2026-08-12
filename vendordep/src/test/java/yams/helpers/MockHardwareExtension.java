@@ -26,7 +26,7 @@ public final class MockHardwareExtension {
 	}
 
 	private static void initializeHardware() {
-		HAL.initialize(500, 0);
+		HAL.initialize();
 		DriverStationSim.setDsAttached(true);
 		DriverStationSim.setRobotMode(RobotMode.TELEOPERATED);
 		DriverStationSim.setEnabled(true);
