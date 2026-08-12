@@ -8,7 +8,7 @@ nativeUtils {
     wpi {
         configureDependencies {
             wpiVersion = wpilibVersion
-            mrcLibVersion = '2027.1.0-alpha-1-91-gb154ee9'
+            mrcLibVersion = '2027.1.0-alpha-1-105-g5bc2129'
             opencvVersion = "2027-4.13.0-3"
         }
     }
@@ -21,7 +21,7 @@ nativeUtils {
 // directly on the already-initialized versions. Remove when a GradleRIO release with
 // mrcLibVersion in WPIVersionsExtension is published to the Gradle plugin portal.
 // https://github.com/wpilibsuite/vendor-template/issues/72
-nativeUtils.wpi.versions.mrcLibVersion.set('2027.1.0-alpha-1-65-g21f308e')
+nativeUtils.wpi.versions.mrcLibVersion.set('2027.1.0-alpha-1-105-g5bc2129')
 
 
 nativeUtils.wpi.addWarnings()
