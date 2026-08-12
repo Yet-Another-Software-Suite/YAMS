@@ -7,7 +7,7 @@ import static org.wpilib.units.Units.Inches;
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.RPM;
 
-import org.wpilib.math.util.Pair;
+import org.wpilib.util.Pair;
 import org.wpilib.math.interpolation.InterpolatingDoubleTreeMap;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Distance;

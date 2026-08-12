@@ -14,7 +14,7 @@ import static org.wpilib.units.Units.Volts;
 
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
-import org.wpilib.math.util.Pair;
+import org.wpilib.util.Pair;
 import org.wpilib.math.controller.ElevatorFeedforward;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Current;

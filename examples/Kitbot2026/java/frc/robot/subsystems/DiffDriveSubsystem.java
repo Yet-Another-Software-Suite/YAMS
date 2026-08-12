@@ -7,7 +7,7 @@ package frc.robot.subsystems;
 import static org.wpilib.units.Units.Inches;
 
 import com.revrobotics.spark.SparkMax;
-import org.wpilib.math.util.Pair;
+import org.wpilib.util.Pair;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.drive.DifferentialDrive;
