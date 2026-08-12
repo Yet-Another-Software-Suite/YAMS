@@ -99,11 +99,11 @@ jobs:
           - os: windows-latest
             artifact-name: windows
             gradlew: ./gradlew.bat
-            toolchain-path: C:/Users/Public/wpilib/2026/roborio
+            toolchain-path: %USERPROFILE%/.gradle/toolchains/first/2027/systemcore
           - os: macos-latest
             artifact-name: macos
             gradlew: ./gradlew
-            toolchain-path: ~/wpilib/2026/roborio
+            toolchain-path: ~/.gradle/toolchains/first/2027/systemcore
     runs-on: ${{ matrix.os }}
     defaults:
       run:

@@ -22,6 +22,7 @@ ext.pubVersion = System.getenv("releaseVersion") ?: System.getenv("releaseName")
 repositories {
   mavenCentral()
 }
+
 wpilibRepositories.use2027Repos()
 if (project.hasProperty('releaseMode')) {
   wpilibRepositories.addAllReleaseRepositories(project)
@@ -29,10 +30,6 @@ if (project.hasProperty('releaseMode')) {
   wpilibRepositories.addAllDevelopmentRepositories(project)
 }
 
-java {
-  sourceCompatibility = JavaVersion.VERSION_25
-  targetCompatibility = JavaVersion.VERSION_25
-}
 
 sourceSets {
     main {
