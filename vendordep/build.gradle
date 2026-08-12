@@ -14,7 +14,7 @@ plugins {
 }
 
 // WPILib Version
-ext.wpilibVersion = "2027.+"
+ext.wpilibVersion = "2027.0.0-alpha-6-294-g2af1810f8"
 ext.releasePath = "$buildDir/maven"
 ext.pubVersion = System.getenv("releaseVersion") ?: System.getenv("releaseName") ?: "test"
 
