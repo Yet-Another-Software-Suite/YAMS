@@ -118,8 +118,10 @@ jobs:
         if: runner.os != 'Windows'
         run: chmod +x gradlew
       - uses: gradle/actions/setup-gradle@v6
-      - name: Install toolchian
+      - name: Install toolchain
         run: ${{matrix.gradlew}} installSystemCoreToolchain
+      - name: Build java and C++
+        run: ${{matrix.gradlew}} build
       - name: Publish
         run: ${{ matrix.gradlew }} publish
       - uses: actions/upload-artifact@v7
