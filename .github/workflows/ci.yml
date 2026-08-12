@@ -99,7 +99,7 @@ jobs:
           - os: windows-latest
             artifact-name: windows
             gradlew: ./gradlew.bat
-            toolchain-path: %USERPROFILE%/.gradle/toolchains/first/2027/systemcore
+#            toolchain-path: %USERPROFILE%/.gradle/toolchains/first/2027/systemcore
           - os: macos-latest
             artifact-name: macos
             gradlew: ./gradlew
