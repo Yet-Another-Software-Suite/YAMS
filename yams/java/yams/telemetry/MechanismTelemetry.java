@@ -6,6 +6,9 @@ package yams.telemetry;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.wpilibj.Timer;
 import java.util.Optional;
 import yams.motorcontrollers.SmartMotorController;
@@ -102,6 +105,69 @@ public class MechanismTelemetry
     networkTable = NetworkTableInstance.getDefault().getTable("Mechanisms")
                                        .getSubTable(mechanismTelemetryName);
     setupLoopTime();
+  }
+
+  /**
+   * Wire an additional {@link SmartMotorController}'s telemetry into a named child table of this mechanism, without
+   * disturbing the mechanism's own data/tuning table references or loop-time publisher.
+   *
+   * <p>Use this for mechanisms driven by more than one {@link SmartMotorController} (e.g. a swerve module's drive and
+   * azimuth motors, or a differential mechanism's left and right motors) so that every motor shares the single
+   * {@link #setupTelemetry(String)} call and loop timer for the mechanism, instead of each motor re-running
+   * {@link #setupTelemetry(String, SmartMotorController)} and clobbering the previous motor's table/loop-time state.
+   *
+   * @param subTableName    Name of the child table to nest this motor's telemetry under, relative to the mechanism's
+   *                        data and tuning tables.
+   * @param motorController {@link SmartMotorController} to set up telemetry for.
+   */
+  public void addMotorController(String subTableName, SmartMotorController motorController)
+  {
+    motorController.setupTelemetry(networkTable.getSubTable(subTableName), tuningNetworkTable.getSubTable(subTableName));
+  }
+
+  /**
+   * Publish a mechanism-level {@code double} field under this mechanism's data table. For fields tied to a
+   * {@link SmartMotorController} use {@link #setupTelemetry(String, SmartMotorController)} or
+   * {@link #addMotorController(String, SmartMotorController)} instead.
+   *
+   * @param key  NetworkTables key, relative to this mechanism's data table.
+   * @param unit Unit metadata for the field (consumed by Advantage Scope/Elastic), or {@code null} for none.
+   * @return {@link DoublePublisher} to push values to.
+   */
+  public DoublePublisher publishDouble(String key, String unit)
+  {
+    var topic = networkTable.getDoubleTopic(key);
+    if (unit != null)
+    {
+      topic.setProperties("{\"units\": \"" + unit + "\"}");
+    }
+    return topic.publish();
+  }
+
+  /**
+   * Publish a mechanism-level struct field under this mechanism's data table.
+   *
+   * @param key    NetworkTables key, relative to this mechanism's data table.
+   * @param struct {@link Struct} schema for the published type.
+   * @param <T>    Type of the published value.
+   * @return {@link StructPublisher} to push values to.
+   */
+  public <T> StructPublisher<T> publishStruct(String key, Struct<T> struct)
+  {
+    return networkTable.getStructTopic(key, struct).publish();
+  }
+
+  /**
+   * Publish a mechanism-level struct array field under this mechanism's data table.
+   *
+   * @param key    NetworkTables key, relative to this mechanism's data table.
+   * @param struct {@link Struct} schema for the published element type.
+   * @param <T>    Type of the published array elements.
+   * @return {@link StructArrayPublisher} to push values to.
+   */
+  public <T> StructArrayPublisher<T> publishStructArray(String key, Struct<T> struct)
+  {
+    return networkTable.getStructArrayTopic(key, struct).publish();
   }
 
   /**

@@ -108,11 +108,10 @@ public class SwerveModule {
     if (m_azimuthMotorController.getConfig().getExternalEncoder().isPresent() && !m_azimuthMotorController.getConfig().getUseExternalFeedback()) {
       throw new SmartMotorControllerConfigurationException("External encoder cannot be used without external feedback", "External encoder could not be used", "withUseExternalFeedbackEncoder(true)");
     }
-    m_telemetry.setupTelemetry("swerve/" + getName() + "/drive", m_driveMotorController);
-    m_telemetry.setupTelemetry("swerve/" + getName() + "/azimuth", m_azimuthMotorController);
-    var encoderTopic = m_telemetry.getDataTable().getDoubleTopic("encoder");
-    encoderTopic.setProperties("{\"units\": \"degrees\"}");
-    m_azimuthAbsoluteEncoderTelemetry = encoderTopic.publish();
+    m_telemetry.setupTelemetry("swerve/" + getName());
+    m_telemetry.addMotorController("drive", m_driveMotorController);
+    m_telemetry.addMotorController("azimuth", m_azimuthMotorController);
+    m_azimuthAbsoluteEncoderTelemetry = m_telemetry.publishDouble("encoder", "degrees");
     seedAzimuthEncoder();
     m_azimuthEncoderWithoutOffsets = config.getRawAbsoluteEncoderAngle();
   }

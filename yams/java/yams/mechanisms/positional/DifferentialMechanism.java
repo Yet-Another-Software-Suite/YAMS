@@ -168,8 +168,9 @@ public class DifferentialMechanism extends SmartPositionalMechanism
 
     // Setup telemetry
     m_config.getTelemetryName().ifPresent(name -> {
-      m_telemetry.setupTelemetry(getName() + "/left", m_leftSMC);
-      m_telemetry.setupTelemetry(getName() + "/right", m_rightSMC);
+      m_telemetry.setupTelemetry(getName());
+      m_telemetry.addMotorController("left", m_leftSMC);
+      m_telemetry.addMotorController("right", m_rightSMC);
     });
 
     if (RobotBase.isSimulation())

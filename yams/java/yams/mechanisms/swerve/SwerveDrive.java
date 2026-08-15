@@ -212,26 +212,13 @@ public class SwerveDrive
                                                    getModulePositions(),
                                                    m_config.getInitialPose());
     m_telemetry.setupTelemetry(getName());
-    var desiredModuleStatesTopic = m_telemetry.getDataTable()
-                                              .getStructArrayTopic("states/desired", SwerveModuleState.struct);
-    var currentModuleStatesTopic = m_telemetry.getDataTable()
-                                              .getStructArrayTopic("states/current", SwerveModuleState.struct);
-    var poseTopic = m_telemetry.getDataTable().getStructTopic("pose", Pose2d.struct);
-    var gyroTopic = m_telemetry.getDataTable().getDoubleTopic("gyro");
-    gyroTopic.setProperties("{\"units\": \"degrees\"}");
-    var desiredRobotRelativeChassisSpeedsTopic = m_telemetry.getDataTable()
-                                                            .getStructTopic("chassis/desired", ChassisSpeeds.struct);
-    var fieldRelativeChassisSpeedsTopic = m_telemetry.getDataTable()
-                                                     .getStructTopic("chassis/field", ChassisSpeeds.struct);
-    var currentRobotRelativeChassisSpeedsTopic = m_telemetry.getDataTable()
-                                                            .getStructTopic("chassis/current", ChassisSpeeds.struct);
-    m_gyroPublisher = gyroTopic.publish();
-    m_currentRobotRelativeChassisSpeedsPublisher = currentRobotRelativeChassisSpeedsTopic.publish();
-    m_fieldRelativeChassisSpeedsPublisher = fieldRelativeChassisSpeedsTopic.publish();
-    m_desiredRobotRelativeChassisSpeedsPublisher = desiredRobotRelativeChassisSpeedsTopic.publish();
-    m_posePublisher = poseTopic.publish();
-    m_desiredModuleStatesPublisher = desiredModuleStatesTopic.publish();
-    m_currentModuleStatesPublisher = currentModuleStatesTopic.publish();
+    m_desiredModuleStatesPublisher = m_telemetry.publishStructArray("states/desired", SwerveModuleState.struct);
+    m_currentModuleStatesPublisher = m_telemetry.publishStructArray("states/current", SwerveModuleState.struct);
+    m_posePublisher = m_telemetry.publishStruct("pose", Pose2d.struct);
+    m_gyroPublisher = m_telemetry.publishDouble("gyro", "degrees");
+    m_desiredRobotRelativeChassisSpeedsPublisher = m_telemetry.publishStruct("chassis/desired", ChassisSpeeds.struct);
+    m_fieldRelativeChassisSpeedsPublisher = m_telemetry.publishStruct("chassis/field", ChassisSpeeds.struct);
+    m_currentRobotRelativeChassisSpeedsPublisher = m_telemetry.publishStruct("chassis/current", ChassisSpeeds.struct);
     m_field2d.setRobotPose(getPose());
     SmartDashboard.putData("Mechanisms/"+getName()+"/field", m_field2d);
     // Report as YAGSL bc this will become apart of YAGSL in 2027...
