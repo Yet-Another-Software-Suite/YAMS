@@ -61,6 +61,11 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Add a command to the registry.</div>
 </dd>
+<dt><a href="yams/telemetry/MechanismTelemetry.html#addMotorController(java.lang.String,yams.motorcontrollers.SmartMotorController)" class="member-name-link">addMotorController(String, SmartMotorController)</a> - Method in class yams.telemetry.<a href="yams/telemetry/MechanismTelemetry.html" title="class in yams.telemetry">MechanismTelemetry</a></dt>
+<dd>
+<div class="block">Wire an additional <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>'s telemetry into a named child table of this mechanism, without
+ disturbing the mechanism's own data/tuning table references or loop-time publisher.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/simulation/SensorData.html#addSimTrigger(edu.wpi.first.hal.HALValue,java.util.function.BooleanSupplier)" class="member-name-link">addSimTrigger(HALValue, BooleanSupplier)</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/SensorData.html" title="class in yams.motorcontrollers.simulation">SensorData</a></dt>
 <dd>
 <div class="block">Add a value set based on a trigger.</div>
@@ -1042,6 +1047,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/math/ExponentialProfilePIDController.html#getD()" class="member-name-link">getD()</a> - Method in class yams.math.<a href="yams/math/ExponentialProfilePIDController.html" title="class in yams.math">ExponentialProfilePIDController</a></dt>
 <dd>
 <div class="block">Get the Differential coefficient.</div>
+</dd>
+<dt><a href="yams/mechanisms/config/SwerveDriveConfig.html#getDataLogName()" class="member-name-link">getDataLogName()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config">SwerveDriveConfig</a></dt>
+<dd>
+<div class="block">Get the DataLog entry name prefix for the <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a>'s telemetry.</div>
+</dd>
+<dt><a href="yams/mechanisms/config/SwerveModuleConfig.html#getDataLogName()" class="member-name-link">getDataLogName()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></dt>
+<dd>
+<div class="block">Get the DataLog entry name prefix for this module's telemetry.</div>
 </dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#getDataLogName()" class="member-name-link">getDataLogName()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
 <dd>
@@ -2777,6 +2790,21 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Publish <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> telemetry to <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/networktables/NetworkTable.html" title="class or interface in edu.wpi.first.networktables" class="external-link"><code>NetworkTable</code></a></div>
 </dd>
+<dt><a href="yams/telemetry/MechanismTelemetry.html#publishDouble(java.lang.String,java.lang.String)" class="member-name-link">publishDouble(String, String)</a> - Method in class yams.telemetry.<a href="yams/telemetry/MechanismTelemetry.html" title="class in yams.telemetry">MechanismTelemetry</a></dt>
+<dd>
+<div class="block">Publish a mechanism-level <code>double</code> field under this mechanism's data table, and — if this mechanism was
+ set up with a DataLog name via <a href="yams/telemetry/MechanismTelemetry.html#setupTelemetry(java.lang.String,java.lang.String)"><code>MechanismTelemetry.setupTelemetry(String, String)</code></a> — to the DataLog as well.</div>
+</dd>
+<dt><a href="yams/telemetry/MechanismTelemetry.html#publishStruct(java.lang.String,edu.wpi.first.util.struct.Struct)" class="member-name-link">publishStruct(String, Struct&lt;T&gt;)</a> - Method in class yams.telemetry.<a href="yams/telemetry/MechanismTelemetry.html" title="class in yams.telemetry">MechanismTelemetry</a></dt>
+<dd>
+<div class="block">Publish a mechanism-level struct field under this mechanism's data table, and — if this mechanism was set up
+ with a DataLog name via <a href="yams/telemetry/MechanismTelemetry.html#setupTelemetry(java.lang.String,java.lang.String)"><code>MechanismTelemetry.setupTelemetry(String, String)</code></a> — to the DataLog as well.</div>
+</dd>
+<dt><a href="yams/telemetry/MechanismTelemetry.html#publishStructArray(java.lang.String,edu.wpi.first.util.struct.Struct)" class="member-name-link">publishStructArray(String, Struct&lt;T&gt;)</a> - Method in class yams.telemetry.<a href="yams/telemetry/MechanismTelemetry.html" title="class in yams.telemetry">MechanismTelemetry</a></dt>
+<dd>
+<div class="block">Publish a mechanism-level struct array field under this mechanism's data table, and — if this mechanism was set
+ up with a DataLog name via <a href="yams/telemetry/MechanismTelemetry.html#setupTelemetry(java.lang.String,java.lang.String)"><code>MechanismTelemetry.setupTelemetry(String, String)</code></a> — to the DataLog as well.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:R">R</h2>
 <dl class="index">
@@ -3679,6 +3707,12 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Setup telemetry for the Mechanism and motor controller.</div>
 </dd>
+<dt><a href="yams/telemetry/MechanismTelemetry.html#setupTelemetry(java.lang.String,java.lang.String)" class="member-name-link">setupTelemetry(String, String)</a> - Method in class yams.telemetry.<a href="yams/telemetry/MechanismTelemetry.html" title="class in yams.telemetry">MechanismTelemetry</a></dt>
+<dd>
+<div class="block">Setup telemetry for the Mechanism, additionally logging every field published through
+ <a href="yams/telemetry/MechanismTelemetry.html#publishDouble(java.lang.String,java.lang.String)"><code>MechanismTelemetry.publishDouble(String, String)</code></a>, <a href="yams/telemetry/MechanismTelemetry.html#publishStruct(java.lang.String,edu.wpi.first.util.struct.Struct)"><code>MechanismTelemetry.publishStruct(String, Struct)</code></a>, and
+ <a href="yams/telemetry/MechanismTelemetry.html#publishStructArray(java.lang.String,edu.wpi.first.util.struct.Struct)"><code>MechanismTelemetry.publishStructArray(String, Struct)</code></a> to a WPILib DataLog under the given name.</div>
+</dd>
 <dt><a href="yams/telemetry/MechanismTelemetry.html#setupTelemetry(java.lang.String,yams.motorcontrollers.SmartMotorController)" class="member-name-link">setupTelemetry(String, SmartMotorController)</a> - Method in class yams.telemetry.<a href="yams/telemetry/MechanismTelemetry.html" title="class in yams.telemetry">MechanismTelemetry</a></dt>
 <dd>
 <div class="block">Setup telemetry for the Mechanism and motor controller.</div>
@@ -4554,6 +4588,16 @@ the order they are declared.</div>
 <dt><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html#withCubeTranslationControllerAxis(java.util.function.BooleanSupplier)" class="member-name-link">withCubeTranslationControllerAxis(BooleanSupplier)</a> - Method in class yams.mechanisms.swerve.utility.<a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></dt>
 <dd>
 <div class="block">Cube the translation axis magnitude for a non-linear control scheme.</div>
+</dd>
+<dt><a href="yams/mechanisms/config/SwerveDriveConfig.html#withDataLogName(java.lang.String)" class="member-name-link">withDataLogName(String)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config">SwerveDriveConfig</a></dt>
+<dd>
+<div class="block">Log the <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a>'s telemetry (pose, gyro, chassis speeds, module states) to a WPILib DataLog under the
+ given name, in addition to NetworkTables.</div>
+</dd>
+<dt><a href="yams/mechanisms/config/SwerveModuleConfig.html#withDataLogName(java.lang.String)" class="member-name-link">withDataLogName(String)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></dt>
+<dd>
+<div class="block">Log this module's telemetry (currently just the absolute encoder field) to a WPILib DataLog under the given
+ name, in addition to NetworkTables.</div>
 </dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#withDataLogName(java.lang.String)" class="member-name-link">withDataLogName(String)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
 <dd>

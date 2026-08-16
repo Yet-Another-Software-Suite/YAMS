@@ -138,15 +138,43 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/networktables/NetworkTable.html" title="class or interface in edu.wpi.first.networktables" class="external-link">NetworkTable</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDataTable()" class="member-name-link">getDataTable</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addMotorController(java.lang.String,yams.motorcontrollers.SmartMotorController)" class="member-name-link">addMotorController</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;subTableName,
+ <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>&nbsp;motorController)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the telemetry NetworkTable.</div>
+<div class="block">Wire an additional <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>'s telemetry into a named child table of this mechanism, without
+ disturbing the mechanism's own data/tuning table references or loop-time publisher.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/networktables/NetworkTable.html" title="class or interface in edu.wpi.first.networktables" class="external-link">NetworkTable</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTuningTable()" class="member-name-link">getTuningTable</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDataTable()" class="member-name-link">getDataTable</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get the telemetry NetworkTable.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/networktables/NetworkTable.html" title="class or interface in edu.wpi.first.networktables" class="external-link">NetworkTable</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTuningTable()" class="member-name-link">getTuningTable</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the tuning NetworkTable.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleConsumer.html" title="class or interface in java.util.function" class="external-link">DoubleConsumer</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#publishDouble(java.lang.String,java.lang.String)" class="member-name-link">publishDouble</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;key,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;unit)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Publish a mechanism-level <code>double</code> field under this mechanism's data table, and — if this mechanism was
+ set up with a DataLog name via <a href="#setupTelemetry(java.lang.String,java.lang.String)"><code>setupTelemetry(String, String)</code></a> — to the DataLog as well.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>&lt;T&gt;&nbsp;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Consumer.html" title="class or interface in java.util.function" class="external-link">Consumer</a>&lt;T&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#publishStruct(java.lang.String,edu.wpi.first.util.struct.Struct)" class="member-name-link">publishStruct</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;key,
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/util/struct/Struct.html" title="class or interface in edu.wpi.first.util.struct" class="external-link">Struct</a>&lt;T&gt;&nbsp;struct)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Publish a mechanism-level struct field under this mechanism's data table, and — if this mechanism was set up
+ with a DataLog name via <a href="#setupTelemetry(java.lang.String,java.lang.String)"><code>setupTelemetry(String, String)</code></a> — to the DataLog as well.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>&lt;T&gt;&nbsp;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Consumer.html" title="class or interface in java.util.function" class="external-link">Consumer</a>&lt;T[]&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#publishStructArray(java.lang.String,edu.wpi.first.util.struct.Struct)" class="member-name-link">publishStructArray</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;key,
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/util/struct/Struct.html" title="class or interface in edu.wpi.first.util.struct" class="external-link">Struct</a>&lt;T&gt;&nbsp;struct)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Publish a mechanism-level struct array field under this mechanism's data table, and — if this mechanism was set
+ up with a DataLog name via <a href="#setupTelemetry(java.lang.String,java.lang.String)"><code>setupTelemetry(String, String)</code></a> — to the DataLog as well.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupLoopTime()" class="member-name-link">setupLoopTime</a>()</code></div>
@@ -159,14 +187,22 @@ loadScripts(document, 'script');</script>
 <div class="block">Setup telemetry for the Mechanism and motor controller.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupTelemetry(java.lang.String,yams.motorcontrollers.SmartMotorController)" class="member-name-link">setupTelemetry</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;mechanismTelemetryName,
- <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>&nbsp;motorController)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupTelemetry(java.lang.String,java.lang.String)" class="member-name-link">setupTelemetry</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;mechanismTelemetryName,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;dataLogName)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Setup telemetry for the Mechanism and motor controller.</div>
+<div class="block">Setup telemetry for the Mechanism, additionally logging every field published through
+ <a href="#publishDouble(java.lang.String,java.lang.String)"><code>publishDouble(String, String)</code></a>, <a href="#publishStruct(java.lang.String,edu.wpi.first.util.struct.Struct)"><code>publishStruct(String, Struct)</code></a>, and
+ <a href="#publishStructArray(java.lang.String,edu.wpi.first.util.struct.Struct)"><code>publishStructArray(String, Struct)</code></a> to a WPILib DataLog under the given name.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateLoopTime()" class="member-name-link">updateLoopTime</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupTelemetry(java.lang.String,yams.motorcontrollers.SmartMotorController)" class="member-name-link">setupTelemetry</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;mechanismTelemetryName,
+ <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>&nbsp;motorController)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Setup telemetry for the Mechanism and motor controller.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateLoopTime()" class="member-name-link">updateLoopTime</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Update the loop time.</div>
 </div>
 </div>
@@ -228,6 +264,95 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>mechanismTelemetryName</code> - Mechanism Telemetry Name.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="setupTelemetry(java.lang.String,java.lang.String)">
+<h3>setupTelemetry</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setupTelemetry</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;mechanismTelemetryName,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;dataLogName)</span></div>
+<div class="block">Setup telemetry for the Mechanism, additionally logging every field published through
+ <a href="#publishDouble(java.lang.String,java.lang.String)"><code>publishDouble(String, String)</code></a>, <a href="#publishStruct(java.lang.String,edu.wpi.first.util.struct.Struct)"><code>publishStruct(String, Struct)</code></a>, and
+ <a href="#publishStructArray(java.lang.String,edu.wpi.first.util.struct.Struct)"><code>publishStructArray(String, Struct)</code></a> to a WPILib DataLog under the given name.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>mechanismTelemetryName</code> - Mechanism Telemetry Name.</dd>
+<dd><code>dataLogName</code> - DataLog entry name prefix for this mechanism's fields.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="addMotorController(java.lang.String,yams.motorcontrollers.SmartMotorController)">
+<h3>addMotorController</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addMotorController</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;subTableName,
+ <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>&nbsp;motorController)</span></div>
+<div class="block">Wire an additional <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>'s telemetry into a named child table of this mechanism, without
+ disturbing the mechanism's own data/tuning table references or loop-time publisher.
+
+ <p>Use this for mechanisms driven by more than one <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> (e.g. a swerve module's drive and
+ azimuth motors, or a differential mechanism's left and right motors) so that every motor shares the single
+ <a href="#setupTelemetry(java.lang.String)"><code>setupTelemetry(String)</code></a> call and loop timer for the mechanism, instead of each motor re-running
+ <a href="#setupTelemetry(java.lang.String,yams.motorcontrollers.SmartMotorController)"><code>setupTelemetry(String, SmartMotorController)</code></a> and clobbering the previous motor's table/loop-time state.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>subTableName</code> - Name of the child table to nest this motor's telemetry under, relative to the mechanism's
+                        data and tuning tables.</dd>
+<dd><code>motorController</code> - <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> to set up telemetry for.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="publishDouble(java.lang.String,java.lang.String)">
+<h3>publishDouble</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleConsumer.html" title="class or interface in java.util.function" class="external-link">DoubleConsumer</a></span>&nbsp;<span class="element-name">publishDouble</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;key,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;unit)</span></div>
+<div class="block">Publish a mechanism-level <code>double</code> field under this mechanism's data table, and — if this mechanism was
+ set up with a DataLog name via <a href="#setupTelemetry(java.lang.String,java.lang.String)"><code>setupTelemetry(String, String)</code></a> — to the DataLog as well. For fields tied
+ to a <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> use <a href="#setupTelemetry(java.lang.String,yams.motorcontrollers.SmartMotorController)"><code>setupTelemetry(String, SmartMotorController)</code></a> or
+ <a href="#addMotorController(java.lang.String,yams.motorcontrollers.SmartMotorController)"><code>addMotorController(String, SmartMotorController)</code></a> instead.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>key</code> - NetworkTables key, relative to this mechanism's data table.</dd>
+<dd><code>unit</code> - Unit metadata for the field (consumed by Advantage Scope/Elastic), or <code>null</code> for none.</dd>
+<dt>Returns:</dt>
+<dd><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleConsumer.html" title="class or interface in java.util.function" class="external-link"><code>DoubleConsumer</code></a> to push values to.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="publishStruct(java.lang.String,edu.wpi.first.util.struct.Struct)">
+<h3>publishStruct</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="type-parameters">&lt;T&gt;</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Consumer.html" title="class or interface in java.util.function" class="external-link">Consumer</a>&lt;T&gt;</span>&nbsp;<span class="element-name">publishStruct</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;key,
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/util/struct/Struct.html" title="class or interface in edu.wpi.first.util.struct" class="external-link">Struct</a>&lt;T&gt;&nbsp;struct)</span></div>
+<div class="block">Publish a mechanism-level struct field under this mechanism's data table, and — if this mechanism was set up
+ with a DataLog name via <a href="#setupTelemetry(java.lang.String,java.lang.String)"><code>setupTelemetry(String, String)</code></a> — to the DataLog as well.</div>
+<dl class="notes">
+<dt>Type Parameters:</dt>
+<dd><code>T</code> - Type of the published value.</dd>
+<dt>Parameters:</dt>
+<dd><code>key</code> - NetworkTables key, relative to this mechanism's data table.</dd>
+<dd><code>struct</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/util/struct/Struct.html" title="class or interface in edu.wpi.first.util.struct" class="external-link"><code>Struct</code></a> schema for the published type.</dd>
+<dt>Returns:</dt>
+<dd><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Consumer.html" title="class or interface in java.util.function" class="external-link"><code>Consumer</code></a> to push values to.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="publishStructArray(java.lang.String,edu.wpi.first.util.struct.Struct)">
+<h3>publishStructArray</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="type-parameters">&lt;T&gt;</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Consumer.html" title="class or interface in java.util.function" class="external-link">Consumer</a>&lt;T[]&gt;</span>&nbsp;<span class="element-name">publishStructArray</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;key,
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/util/struct/Struct.html" title="class or interface in edu.wpi.first.util.struct" class="external-link">Struct</a>&lt;T&gt;&nbsp;struct)</span></div>
+<div class="block">Publish a mechanism-level struct array field under this mechanism's data table, and — if this mechanism was set
+ up with a DataLog name via <a href="#setupTelemetry(java.lang.String,java.lang.String)"><code>setupTelemetry(String, String)</code></a> — to the DataLog as well.</div>
+<dl class="notes">
+<dt>Type Parameters:</dt>
+<dd><code>T</code> - Type of the published array elements.</dd>
+<dt>Parameters:</dt>
+<dd><code>key</code> - NetworkTables key, relative to this mechanism's data table.</dd>
+<dd><code>struct</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/util/struct/Struct.html" title="class or interface in edu.wpi.first.util.struct" class="external-link"><code>Struct</code></a> schema for the published element type.</dd>
+<dt>Returns:</dt>
+<dd><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Consumer.html" title="class or interface in java.util.function" class="external-link"><code>Consumer</code></a> to push values to.</dd>
 </dl>
 </section>
 </li>
