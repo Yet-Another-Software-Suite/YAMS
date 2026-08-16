@@ -120,6 +120,11 @@ public class SwerveDriveConfig
    */
   private Optional<TelemetryVerbosity>        telemetryVerbosity            = Optional.empty();
   /**
+   * DataLog entry name prefix for the {@link SwerveDrive}'s telemetry. When configured, every {@link SwerveModule}
+   * (and its drive/azimuth motors) additionally logs under a subtable of this name.
+   */
+  private Optional<String>                    dataLogName                   = Optional.empty();
+  /**
    * Gyro supplier.
    */
   private Optional<Supplier<Angle>>           gyroSupplier                  = Optional.empty();
@@ -485,6 +490,31 @@ public class SwerveDriveConfig
   {
     this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
     return this;
+  }
+
+  /**
+   * Log the {@link SwerveDrive}'s telemetry (pose, gyro, chassis speeds, module states) to a WPILib DataLog under the
+   * given name, in addition to NetworkTables. When configured, every {@link SwerveModule} passed to this config —
+   * including its drive and azimuth motors — also logs under a subtable of this name (e.g. {@code <name>/<module
+   * name>/drive}), even though the modules are constructed before this config exists.
+   *
+   * @param dataLogName DataLog entry name prefix for the {@link SwerveDrive}'s telemetry.
+   * @return {@link SwerveDriveConfig} for chaining.
+   */
+  public SwerveDriveConfig withDataLogName(String dataLogName)
+  {
+    this.dataLogName = Optional.ofNullable(dataLogName);
+    return this;
+  }
+
+  /**
+   * Get the DataLog entry name prefix for the {@link SwerveDrive}'s telemetry.
+   *
+   * @return DataLog entry name prefix, if configured.
+   */
+  public Optional<String> getDataLogName()
+  {
+    return dataLogName;
   }
 
   /**

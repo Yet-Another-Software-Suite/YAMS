@@ -98,6 +98,10 @@ public class SwerveModuleConfig
    */
   private Optional<TelemetryVerbosity>   telemetryVerbosity            = Optional.empty();
   /**
+   * DataLog entry name prefix for this module's telemetry (currently just the absolute encoder field).
+   */
+  private Optional<String>               dataLogName                   = Optional.empty();
+  /**
    * Absolute encoder supplier for the azimuth {@link SmartMotorController}.
    */
   private Optional<Supplier<Angle>>      absoluteEncoderSupplier       = Optional.empty();
@@ -179,6 +183,7 @@ public class SwerveModuleConfig
     this.azimuthMotor = cfg.azimuthMotor;
     this.telemetryName = cfg.telemetryName;
     this.telemetryVerbosity = cfg.telemetryVerbosity;
+    this.dataLogName = cfg.dataLogName;
     this.absoluteEncoderSupplier = cfg.absoluteEncoderSupplier;
     this.absoluteEncoderOffset = cfg.absoluteEncoderOffset;
     this.absoluteEncoderGearbox = cfg.absoluteEncoderGearbox;
@@ -424,6 +429,29 @@ public class SwerveModuleConfig
     this.telemetryName = Optional.ofNullable(telemetryName);
     this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
     return this;
+  }
+
+  /**
+   * Log this module's telemetry (currently just the absolute encoder field) to a WPILib DataLog under the given
+   * name, in addition to NetworkTables.
+   *
+   * @param dataLogName DataLog entry name prefix for this module's telemetry.
+   * @return {@link SwerveModuleConfig} for chaining.
+   */
+  public SwerveModuleConfig withDataLogName(String dataLogName)
+  {
+    this.dataLogName = Optional.ofNullable(dataLogName);
+    return this;
+  }
+
+  /**
+   * Get the DataLog entry name prefix for this module's telemetry.
+   *
+   * @return DataLog entry name prefix, if configured.
+   */
+  public Optional<String> getDataLogName()
+  {
+    return dataLogName;
   }
 
   /**

@@ -189,11 +189,15 @@ public class DoubleJointedArm extends SmartPositionalMechanism
     });
 
     // Setup telemetry
+    if (lowerConfig.getTelemetryName().isPresent() || upperConfig.getTelemetryName().isPresent())
+    {
+      m_telemetry.setupTelemetry(getName());
+    }
     lowerConfig.getTelemetryName().ifPresent(name -> {
-      m_telemetry.setupTelemetry(getName() + "/lower", m_lowerSMC);
+      m_telemetry.addMotorController("lower", m_lowerSMC);
     });
     upperConfig.getTelemetryName().ifPresent(name -> {
-      m_telemetry.setupTelemetry(getName() + "/upper", m_upperSMC);
+      m_telemetry.addMotorController("upper", m_upperSMC);
     });
 
     if (RobotBase.isSimulation())
