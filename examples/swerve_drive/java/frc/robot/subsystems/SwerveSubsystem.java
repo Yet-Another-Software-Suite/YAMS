@@ -169,7 +169,10 @@ public class SwerveSubsystem extends SubsystemBase
         .withTelemetry(moduleName, SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
         .withLocation(location)
         // Optimization rotates the module at most 90 deg instead of 180 deg + reversing drive direction.
-        .withOptimization(true);
+        .withOptimization(true)
+        // Nested under the same "Swerve" DataLog prefix as SwerveDriveConfig below, so the module's
+        // absolute encoder shows up alongside the rest of the drive's DataLog entries.
+        .withDataLogName("Swerve/" + moduleName);
     return new SwerveModule(moduleConfig);
   }
 
@@ -211,7 +214,10 @@ public class SwerveSubsystem extends SubsystemBase
         .withStartingPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)))
         // Translation and rotation PIDs are used by driveToPose(); kP=1 is a conservative start.
         .withTranslationController(new PIDController(1, 0, 0))
-        .withRotationController(new PIDController(1, 0, 0));
+        .withRotationController(new PIDController(1, 0, 0))
+        // Logs pose/gyro/chassis speeds/module states to a WPILib DataLog (readable with AdvantageScope
+        // or DataLogTool) in addition to NetworkTables. Each module above nests under "Swerve/<name>".
+        .withDataLogName("Swerve");
     drive = new SwerveDrive(config);
 
     SmartDashboard.putData("Field", field);
