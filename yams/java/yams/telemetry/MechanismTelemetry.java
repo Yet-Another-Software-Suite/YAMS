@@ -8,9 +8,15 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.util.datalog.StructArrayLogEntry;
+import edu.wpi.first.util.datalog.StructLogEntry;
 import edu.wpi.first.util.struct.Struct;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.Timer;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
 import yams.motorcontrollers.SmartMotorController;
 
 /**
@@ -66,6 +72,13 @@ public class MechanismTelemetry
    * Loop time timer.
    */
   private double prevTimestamp = 0;
+  /**
+   * DataLog entry name prefix for this mechanism's fields, if configured via {@link #setupTelemetry(String, String)}.
+   * Must be set before {@link #publishDouble(String, String)}, {@link #publishStruct(String, Struct)}, or
+   * {@link #publishStructArray(String, Struct)} are called, since each of those decides once, at the time it's
+   * called, whether to also create a DataLog entry.
+   */
+  private Optional<String> dataLogName = Optional.empty();
 
   /**
    * Setup loop time publisher.
@@ -108,6 +121,20 @@ public class MechanismTelemetry
   }
 
   /**
+   * Setup telemetry for the Mechanism, additionally logging every field published through
+   * {@link #publishDouble(String, String)}, {@link #publishStruct(String, Struct)}, and
+   * {@link #publishStructArray(String, Struct)} to a WPILib DataLog under the given name.
+   *
+   * @param mechanismTelemetryName Mechanism Telemetry Name.
+   * @param dataLogName            DataLog entry name prefix for this mechanism's fields.
+   */
+  public void setupTelemetry(String mechanismTelemetryName, String dataLogName)
+  {
+    setupTelemetry(mechanismTelemetryName);
+    this.dataLogName = Optional.ofNullable(dataLogName);
+  }
+
+  /**
    * Wire an additional {@link SmartMotorController}'s telemetry into a named child table of this mechanism, without
    * disturbing the mechanism's own data/tuning table references or loop-time publisher.
    *
@@ -126,48 +153,69 @@ public class MechanismTelemetry
   }
 
   /**
-   * Publish a mechanism-level {@code double} field under this mechanism's data table. For fields tied to a
-   * {@link SmartMotorController} use {@link #setupTelemetry(String, SmartMotorController)} or
+   * Publish a mechanism-level {@code double} field under this mechanism's data table, and — if this mechanism was
+   * set up with a DataLog name via {@link #setupTelemetry(String, String)} — to the DataLog as well. For fields tied
+   * to a {@link SmartMotorController} use {@link #setupTelemetry(String, SmartMotorController)} or
    * {@link #addMotorController(String, SmartMotorController)} instead.
    *
    * @param key  NetworkTables key, relative to this mechanism's data table.
    * @param unit Unit metadata for the field (consumed by Advantage Scope/Elastic), or {@code null} for none.
-   * @return {@link DoublePublisher} to push values to.
+   * @return {@link DoubleConsumer} to push values to.
    */
-  public DoublePublisher publishDouble(String key, String unit)
+  public DoubleConsumer publishDouble(String key, String unit)
   {
     var topic = networkTable.getDoubleTopic(key);
     if (unit != null)
     {
       topic.setProperties("{\"units\": \"" + unit + "\"}");
     }
-    return topic.publish();
+    DoublePublisher publisher = topic.publish();
+    Optional<DoubleLogEntry> logEntry = dataLogName.map(
+        prefix -> new DoubleLogEntry(DataLogManager.getLog(), prefix + "/" + key, (long) Timer.getFPGATimestamp()));
+    return value -> {
+      publisher.accept(value);
+      logEntry.ifPresent(entry -> entry.append(value, (long) Timer.getFPGATimestamp()));
+    };
   }
 
   /**
-   * Publish a mechanism-level struct field under this mechanism's data table.
+   * Publish a mechanism-level struct field under this mechanism's data table, and — if this mechanism was set up
+   * with a DataLog name via {@link #setupTelemetry(String, String)} — to the DataLog as well.
    *
    * @param key    NetworkTables key, relative to this mechanism's data table.
    * @param struct {@link Struct} schema for the published type.
    * @param <T>    Type of the published value.
-   * @return {@link StructPublisher} to push values to.
+   * @return {@link Consumer} to push values to.
    */
-  public <T> StructPublisher<T> publishStruct(String key, Struct<T> struct)
+  public <T> Consumer<T> publishStruct(String key, Struct<T> struct)
   {
-    return networkTable.getStructTopic(key, struct).publish();
+    StructPublisher<T> publisher = networkTable.getStructTopic(key, struct).publish();
+    Optional<StructLogEntry<T>> logEntry = dataLogName.map(
+        prefix -> StructLogEntry.create(DataLogManager.getLog(), prefix + "/" + key, struct));
+    return value -> {
+      publisher.accept(value);
+      logEntry.ifPresent(entry -> entry.append(value));
+    };
   }
 
   /**
-   * Publish a mechanism-level struct array field under this mechanism's data table.
+   * Publish a mechanism-level struct array field under this mechanism's data table, and — if this mechanism was set
+   * up with a DataLog name via {@link #setupTelemetry(String, String)} — to the DataLog as well.
    *
    * @param key    NetworkTables key, relative to this mechanism's data table.
    * @param struct {@link Struct} schema for the published element type.
    * @param <T>    Type of the published array elements.
-   * @return {@link StructArrayPublisher} to push values to.
+   * @return {@link Consumer} to push values to.
    */
-  public <T> StructArrayPublisher<T> publishStructArray(String key, Struct<T> struct)
+  public <T> Consumer<T[]> publishStructArray(String key, Struct<T> struct)
   {
-    return networkTable.getStructArrayTopic(key, struct).publish();
+    StructArrayPublisher<T> publisher = networkTable.getStructArrayTopic(key, struct).publish();
+    Optional<StructArrayLogEntry<T>> logEntry = dataLogName.map(
+        prefix -> StructArrayLogEntry.create(DataLogManager.getLog(), prefix + "/" + key, struct));
+    return value -> {
+      publisher.accept(value);
+      logEntry.ifPresent(entry -> entry.append(value));
+    };
   }
 
   /**

@@ -25,9 +25,6 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.networktables.DoublePublisher;
-import edu.wpi.first.networktables.StructArrayPublisher;
-import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
@@ -43,6 +40,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
 import java.util.function.Supplier;
 import yams.mechanisms.config.SwerveDriveConfig;
 import yams.motorcontrollers.SmartMotorController;
@@ -141,31 +140,31 @@ public class SwerveDrive
   /**
    * Desired swerve module states.
    */
-  private final StructArrayPublisher<SwerveModuleState> m_desiredModuleStatesPublisher;
+  private final Consumer<SwerveModuleState[]>           m_desiredModuleStatesPublisher;
   /**
    * Current swerve module states.
    */
-  private final StructArrayPublisher<SwerveModuleState> m_currentModuleStatesPublisher;
+  private final Consumer<SwerveModuleState[]>           m_currentModuleStatesPublisher;
   /**
    * Desired robot relative chassis speeds.
    */
-  private final StructPublisher<ChassisSpeeds>          m_desiredRobotRelativeChassisSpeedsPublisher;
+  private final Consumer<ChassisSpeeds>                 m_desiredRobotRelativeChassisSpeedsPublisher;
   /**
    * Current robot relative chassis speeds.
    */
-  private final StructPublisher<ChassisSpeeds>          m_currentRobotRelativeChassisSpeedsPublisher;
+  private final Consumer<ChassisSpeeds>                 m_currentRobotRelativeChassisSpeedsPublisher;
   /**
    * Field relative chassis speeds.
    */
-  private final StructPublisher<ChassisSpeeds>          m_fieldRelativeChassisSpeedsPublisher;
+  private final Consumer<ChassisSpeeds>                 m_fieldRelativeChassisSpeedsPublisher;
   /**
    * Pose of the robot.
    */
-  private final StructPublisher<Pose2d>                 m_posePublisher;
+  private final Consumer<Pose2d>                        m_posePublisher;
   /**
    * Gyro angle.
    */
-  private final DoublePublisher                         m_gyroPublisher;
+  private final DoubleConsumer                          m_gyroPublisher;
   /**
    * Timer for simulation purposes only. Not used in real robot code.
    */
@@ -211,7 +210,8 @@ public class SwerveDrive
                                                    new Rotation2d(getGyroAngle()),
                                                    getModulePositions(),
                                                    m_config.getInitialPose());
-    m_telemetry.setupTelemetry(getName());
+    m_config.getDataLogName().ifPresentOrElse(dataLogName -> m_telemetry.setupTelemetry(getName(), dataLogName),
+                                              () -> m_telemetry.setupTelemetry(getName()));
     m_desiredModuleStatesPublisher = m_telemetry.publishStructArray("states/desired", SwerveModuleState.struct);
     m_currentModuleStatesPublisher = m_telemetry.publishStructArray("states/current", SwerveModuleState.struct);
     m_posePublisher = m_telemetry.publishStruct("pose", Pose2d.struct);
