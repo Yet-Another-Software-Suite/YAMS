@@ -236,8 +236,14 @@ class SwerveModuleConfig {
 
   /**
    * Compute the cosine-compensated drive velocity for the given desired state.
+   *
+   * @param desiredState Desired SwerveModuleState to use.
+   * @param currentAngle Current azimuth angle to compare against, read once per control cycle so
+   *                     it stays consistent with whatever value was used earlier in that cycle
+   *                     (e.g. for optimization).
    */
-  double GetCosineCompensatedVelocity(const frc::SwerveModuleState& desiredState) const;
+  double GetCosineCompensatedVelocity(const frc::SwerveModuleState& desiredState,
+                                       const frc::Rotation2d& currentAngle) const;
 };
 
 }  // namespace yams::mechanisms::config

@@ -167,25 +167,37 @@ std::optional<std::function<units::degree_t()>> SwerveModuleConfig::GetAbsoluteE
 std::optional<std::string> SwerveModuleConfig::GetDataLogName() const { return m_dataLogName; }
 
 double SwerveModuleConfig::GetCosineCompensatedVelocity(
-    const frc::SwerveModuleState& desiredState) const {
-  auto diff = desiredState.angle - frc::Rotation2d{units::radian_t{GetAbsoluteEncoderAngle()}};
-  double cosineScalar = diff.Cos();
+    const frc::SwerveModuleState& desiredState, const frc::Rotation2d& currentAngle) const {
+  // Taken from the CTRE SwerveModule class.
+  // https://api.ctr-electronics.com/phoenix6/release/java/src-html/com/ctre/phoenix6/mechanisms/swerve/SwerveModule.html#line.46
+  /* From FRC 900's whitepaper, we add a cosine compensator to the applied drive velocity */
+  /* To reduce the "skew" that occurs when changing direction */
+  /* If error is close to 0 rotations, we're already there, so apply full power */
+  /* If the error is close to 0.25 rotations, then we're 90 degrees, so movement doesn't help us at all */
+  // The azimuth is only meaningful modulo 180 degrees (0 == 180) since the drive motor can spin
+  // either direction. Using the SIGNED cosine of the (correctly wrapped) angle difference
+  // handles that on its own: near 0 degrees it scales close to +1 (drive forward as
+  // commanded), near 90 degrees it goes to 0, and near 180 degrees it goes to -1, which flips
+  // the sign of the applied speed so the wheel drives backward at its current heading instead
+  // of losing that direction to a forced-positive scalar.
+  double cosineScalar = (desiredState.angle - currentAngle).Cos();
   if (cosineScalar < 0.0) cosineScalar = 1.0;
   return desiredState.speed.value() * cosineScalar;
 }
 
 frc::SwerveModuleState SwerveModuleConfig::GetOptimizedState(frc::SwerveModuleState state) const {
+  frc::Rotation2d currentAngle{units::radian_t{GetAbsoluteEncoderAngle()}};
   if (m_minimumVelocity) {
     if (units::math::abs(state.speed) <= *m_minimumVelocity) {
-      state = frc::SwerveModuleState{units::meters_per_second_t{0},
-                                     frc::Rotation2d{units::radian_t{GetAbsoluteEncoderAngle()}}};
+      state = frc::SwerveModuleState{units::meters_per_second_t{0}, currentAngle};
     }
   }
   if (m_stateOptimization) {
-    state.Optimize(frc::Rotation2d{units::radian_t{GetAbsoluteEncoderAngle()}});
+    state.Optimize(currentAngle);
   }
   if (m_cosineCompensation) {
-    state.speed = units::meters_per_second_t{GetCosineCompensatedVelocity(state)};
+    frc::Rotation2d azimuthAngle{units::radian_t{m_azimuthMotor->GetMechanismPosition()}};
+    state.speed = units::meters_per_second_t{GetCosineCompensatedVelocity(state, azimuthAngle)};
   }
   return state;
 }

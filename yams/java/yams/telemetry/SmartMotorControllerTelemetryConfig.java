@@ -178,6 +178,7 @@ public class SmartMotorControllerTelemetryConfig
         doubleFields.get(DoubleTelemetryField.ExternalEncoderPosition).enable();
         doubleFields.get(DoubleTelemetryField.ExternalEncoderVelocity).enable();
     }
+    /*
     if (verbosity == TelemetryVerbosity.HIGH)
     {
       for (DoubleTelemetry dt : doubleFields.values())
@@ -194,7 +195,7 @@ public class SmartMotorControllerTelemetryConfig
           //System.err.println("BT " + dt.getField().name() + " is DISABLED!!");
         }
       }
-    }
+    }*/
     return this;
   }
 

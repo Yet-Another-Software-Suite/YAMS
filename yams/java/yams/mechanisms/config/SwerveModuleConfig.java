@@ -529,25 +529,28 @@ public class SwerveModuleConfig
    * Get the cosine-compensated velocity to set the swerve module to.
    *
    * @param desiredState Desired {@link SwerveModuleState} to use.
+   * @param currentAngle Current azimuth angle to compare against, read once per control cycle so
+   *                     it stays consistent with whatever value was used earlier in that cycle
+   *                     (e.g. for optimization).
    * @return Cosine compensated velocity in meters/second.
    */
-  private double getCosineCompensatedVelocity(SwerveModuleState desiredState)
+  private double getCosineCompensatedVelocity(SwerveModuleState desiredState, Rotation2d currentAngle)
   {
-    double cosineScalar = 1.0;
     // Taken from the CTRE SwerveModule class.
     // https://api.ctr-electronics.com/phoenix6/release/java/src-html/com/ctre/phoenix6/mechanisms/swerve/SwerveModule.html#line.46
     /* From FRC 900's whitepaper, we add a cosine compensator to the applied drive velocity */
     /* To reduce the "skew" that occurs when changing direction */
     /* If error is close to 0 rotations, we're already there, so apply full power */
     /* If the error is close to 0.25 rotations, then we're 90 degrees, so movement doesn't help us at all */
-    cosineScalar = Rotation2d.fromDegrees(desiredState.angle.getDegrees())
-                             .minus(Rotation2d.fromRotations(getAbsoluteEncoderAngle().in(Rotations)))
-                             .getCos(); // TODO: Investigate angle modulus by 180.
-    /* Make sure we don't invert our drive, even though we shouldn't ever target over 90 degrees anyway */
-    if (cosineScalar < 0.0)
-    {
-      cosineScalar = 1;
-    }
+    // The azimuth is only meaningful modulo 180 degrees (0 == 180) since the drive motor can spin
+    // either direction. Using the SIGNED cosine of the (correctly wrapped) angle difference
+    // handles that on its own: near 0 degrees it scales close to +1 (drive forward as
+    // commanded), near 90 degrees it goes to 0, and near 180 degrees it goes to -1, which flips
+    // the sign of the applied speed so the wheel drives backward at its current heading instead
+    // of losing that direction to a forced-positive scalar.
+    double cosineScalar = desiredState.angle.minus(currentAngle).getCos();
+    if(cosineScalar < 0.0)
+      cosineScalar = 1.0;
 
     return desiredState.speedMetersPerSecond * cosineScalar;
   }
@@ -560,12 +563,13 @@ public class SwerveModuleConfig
    */
   public SwerveModuleState getOptimizedState(SwerveModuleState state)
   {
+    Rotation2d currentAngle = new Rotation2d(getAbsoluteEncoderAngle());
     if (minimumVelocity.isPresent())
     {
       if (MetersPerSecond.of(Math.abs(state.speedMetersPerSecond)).lte(minimumVelocity.get()))
       {
 //        state = new SwerveModuleState(0, state.angle);
-        state = new SwerveModuleState(0, new Rotation2d(getAbsoluteEncoderAngle()));
+        state = new SwerveModuleState(0, currentAngle);
 
       }
     }
@@ -573,14 +577,14 @@ public class SwerveModuleConfig
     {
         if (lastCommandedAngle == null)
         {
-            lastCommandedAngle = new Rotation2d(getAbsoluteEncoderAngle());
+            lastCommandedAngle = currentAngle;
         }
         state.optimize(lastCommandedAngle);
         lastCommandedAngle = state.angle;
     }
     if (cosineCompensation)
     {
-      state.speedMetersPerSecond = getCosineCompensatedVelocity(state);
+      state.speedMetersPerSecond = getCosineCompensatedVelocity(state, new Rotation2d(azimuthMotor.orElseThrow().getMechanismPosition()));
     }
     return state;
   }
