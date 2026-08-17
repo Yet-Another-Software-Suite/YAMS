@@ -484,7 +484,7 @@ public class Elevator extends SmartPositionalMechanism
    * Set the height of the elevator.
    *
    * @param height Height of the elevator to reach.
-   * @return {@link Command} that  sets the elevator height, stops immediately.
+   * @return {@link Command} that  sets the elevator height, does not stop.
    */
   public Command run(Distance height)
   {
