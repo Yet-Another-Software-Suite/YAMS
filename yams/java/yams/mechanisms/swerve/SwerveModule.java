@@ -115,7 +115,7 @@ public class SwerveModule {
     m_telemetry.setupTelemetry("swerve/");
     m_telemetry.addMotorController("modules/" + getName(), m_driveMotorController);
     m_telemetry.addMotorController("modules/" + getName(), m_azimuthMotorController);
-    DoubleConsumer encoderNetworkTablePublisher = m_telemetry.publishDouble("encoder", "degrees");
+    DoubleConsumer encoderNetworkTablePublisher = m_telemetry.publishDouble("modules/" + getName() + "/encoder", "degrees");
     Optional<DoubleLogEntry> encoderLogEntry = config.getDataLogName().map(
             name -> new DoubleLogEntry(DataLogManager.getLog(), name + "/encoder", (long) Timer.getFPGATimestamp()));
     m_azimuthAbsoluteEncoderTelemetry = value -> {

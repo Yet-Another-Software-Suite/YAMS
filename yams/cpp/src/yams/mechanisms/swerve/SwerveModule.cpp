@@ -41,7 +41,7 @@ SwerveModule::SwerveModule(config::SwerveModuleConfig* config)
   m_telemetry.AddMotorController("modules/" + GetName(), *m_driveMotorController);
   m_telemetry.AddMotorController("modules/" + GetName(), *m_azimuthMotorController);
 
-  auto encoderNetworkTablePublisher = m_telemetry.PublishDouble("encoder", "degrees");
+  auto encoderNetworkTablePublisher = m_telemetry.PublishDouble("modules/" + GetName() + "/encoder", "degrees");
   std::shared_ptr<wpi::log::DoubleLogEntry> encoderLogEntry;
   if (auto name = config->GetDataLogName()) {
     encoderLogEntry =
