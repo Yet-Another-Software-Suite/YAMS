@@ -409,7 +409,7 @@ public class SmartMotorControllerTelemetry
     /**
      * Simple motor feedforward currently getting used.
      */
-    SimpleMotorFeedForward("control/Simple Motor Feedforward", false, false),
+    SimpleMotorFeedForward("control/feedforward/simple", false, false),
     /**
      * Motion profile currently getting used.
      */

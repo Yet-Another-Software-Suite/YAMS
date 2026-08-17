@@ -123,7 +123,7 @@ static BooleanTelemetry MakeBool(BooleanTelemetryField field) {
     case BooleanTelemetryField::ArmFeedForward:
       return {"control/feedforward/arm", false, field, false};
     case BooleanTelemetryField::SimpleMotorFeedForward:
-      return {"control/Simple Motor Feedforward", false, field, false};
+      return {"control/feedforward/simple", false, field, false};
     case BooleanTelemetryField::MotionProfile:
       return {"control/closedloop/profiled", false, field, false};
     case BooleanTelemetryField::MotorInversion:
