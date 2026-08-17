@@ -110,12 +110,16 @@ public class SmartMotorControllerTelemetry
       boolFields = config.getBoolFields(smartMotorController);
       for (Map.Entry<DoubleTelemetryField, DoubleTelemetry> entry : doubleFields.entrySet())
       {
+        if(!entry.getValue().enabled)
+          continue;
         if (config.getNT4Enabled())
         {entry.getValue().transformUnit(smcConfig).setupNetworkTables(dataNetworkTable, tuningNetworkTable);}
         config.getDataLogName().ifPresent(name -> entry.getValue().transformUnit(smcConfig).setupDataLog(name));
       }
       for (Map.Entry<BooleanTelemetryField, BooleanTelemetry> entry : boolFields.entrySet())
       {
+        if(!entry.getValue().enabled)
+          continue;
         if (config.getNT4Enabled())
         {entry.getValue().setupNetworkTables(dataNetworkTable, tuningNetworkTable);}
         config.getDataLogName().ifPresent(name -> entry.getValue().setupDataLog(name));
