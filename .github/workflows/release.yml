@@ -100,12 +100,38 @@ jobs:
 
   build-examples:
     name: Release - Examples
+    needs: [build-host]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - name: Generate Java examples
         run: mkdir -p generated && make
         working-directory: examples
+      - name: Download YAMS vendordep JSON
+        uses: actions/download-artifact@v7
+        with:
+          name: maven-windows
+          path: maven-windows/
+      - name: Strip testing-only fixups from generated examples
+        run: |
+          yamsJson="${{ github.workspace }}/maven-windows/yams.json"
+          for dir in examples/generated/*/; do
+            name=$(basename "$dir")
+            gradleFile="$dir/build.gradle"
+
+            # The YAMS_TESTING fixup compiles against yams/java directly so example
+            # builds don't depend on a published vendordep. Every real example should
+            # instead consume the generated yams.json vendordep like a real consumer would.
+            sed -i '/\/\/ YAMS_TESTING/,/\/\/ END_YAMS_TESTING/d' "$gradleFile"
+            mkdir -p "$dir/vendordeps"
+            cp "$yamsJson" "$dir/vendordeps/yams.json"
+
+            # The AKIT_TESTING fixup is only needed for examples that actually use
+            # AdvantageKit; strip it from every other example.
+            if ! grep -rq "org.littletonrobotics" "examples/$name/java" 2>/dev/null; then
+              sed -i '/\/\/ AKIT_TESTING/,/\/\/ END_AKIT_TESTING/d' "$gradleFile"
+            fi
+          done
       - name: Zip generated Java examples
         run: |
           mkdir -p ${{ github.workspace }}/example-artifacts

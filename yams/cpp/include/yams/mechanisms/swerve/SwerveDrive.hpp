@@ -18,26 +18,24 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc2/command/CommandPtr.h>
 #include <frc2/command/Commands.h>
-#include <networktables/DoubleTopic.h>
-#include <networktables/NetworkTableInstance.h>
-#include <networktables/StructArrayTopic.h>
-#include <networktables/StructTopic.h>
 #include <units/angle.h>
 #include <units/length.h>
 #include <units/math.h>
 #include <units/time.h>
 #include <units/velocity.h>
 #include <wpi/array.h>
-#include <wpi/json.h>
 
 #include <cassert>
+#include <functional>
 #include <optional>
+#include <span>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "yams/mechanisms/swerve/SwerveDriveConfig.hpp"
 #include "yams/mechanisms/swerve/SwerveModule.hpp"
+#include "yams/telemetry/MechanismTelemetry.hpp"
 
 namespace yams::mechanisms::swerve {
 
@@ -141,23 +139,23 @@ class SwerveDrive {
     assert(m_config->GetModules().size() == NumModules &&
            "Module count in SwerveDriveConfig must equal NumModules template parameter.");
 
-    auto inst = nt::NetworkTableInstance::GetDefault();
-    auto table = inst.GetTable("SmartDashboard/" + GetName());
-
+    if (auto dataLogName = m_config->GetDataLogName()) {
+      m_telemetry.SetupTelemetry(GetName(), *dataLogName);
+    } else {
+      m_telemetry.SetupTelemetry(GetName());
+    }
     m_desiredModuleStatesPublisher =
-        table->template GetStructArrayTopic<frc::SwerveModuleState>("states/desired").Publish();
+        m_telemetry.template PublishStructArray<frc::SwerveModuleState>("states/desired");
     m_currentModuleStatesPublisher =
-        table->template GetStructArrayTopic<frc::SwerveModuleState>("states/current").Publish();
-    m_posePublisher = table->template GetStructTopic<frc::Pose2d>("pose").Publish();
+        m_telemetry.template PublishStructArray<frc::SwerveModuleState>("states/current");
+    m_posePublisher = m_telemetry.template PublishStruct<frc::Pose2d>("pose");
+    m_gyroPublisher = m_telemetry.PublishDouble("gyro", "degrees");
     m_desiredRobotRelChassisSpeedsPublisher =
-        table->template GetStructTopic<frc::ChassisSpeeds>("chassis/desired").Publish();
-    m_currentRobotRelChassisSpeedsPublisher =
-        table->template GetStructTopic<frc::ChassisSpeeds>("chassis/current").Publish();
+        m_telemetry.template PublishStruct<frc::ChassisSpeeds>("chassis/desired");
     m_fieldRelChassisSpeedsPublisher =
-        table->template GetStructTopic<frc::ChassisSpeeds>("chassis/field").Publish();
-    auto gyroTopic = table->GetDoubleTopic("gyro");
-    gyroTopic.SetProperties(wpi::json{{"units", "degrees"}});
-    m_gyroPublisher = gyroTopic.Publish();
+        m_telemetry.template PublishStruct<frc::ChassisSpeeds>("chassis/field");
+    m_currentRobotRelChassisSpeedsPublisher =
+        m_telemetry.template PublishStruct<frc::ChassisSpeeds>("chassis/current");
 
     m_field2d.SetRobotPose(GetPose());
     frc::SmartDashboard::PutData("Mechanisms/" + GetName() + "/field", &m_field2d);
@@ -336,13 +334,13 @@ class SwerveDrive {
     auto pose = GetPose();
     auto currentStates = GetModuleStates();
 
-    m_gyroPublisher.Set(units::degree_t{GetGyroAngle()}.value());
-    m_desiredModuleStatesPublisher.Set(m_desiredModuleStates);
-    m_currentModuleStatesPublisher.Set(currentStates);
-    m_posePublisher.Set(pose);
-    m_desiredRobotRelChassisSpeedsPublisher.Set(m_desiredChassisSpeeds);
-    m_currentRobotRelChassisSpeedsPublisher.Set(GetRobotRelativeSpeed());
-    m_fieldRelChassisSpeedsPublisher.Set(GetFieldRelativeSpeed());
+    m_gyroPublisher(units::degree_t{GetGyroAngle()}.value());
+    m_desiredModuleStatesPublisher(m_desiredModuleStates);
+    m_currentModuleStatesPublisher(currentStates);
+    m_posePublisher(pose);
+    m_desiredRobotRelChassisSpeedsPublisher(m_desiredChassisSpeeds);
+    m_currentRobotRelChassisSpeedsPublisher(GetRobotRelativeSpeed());
+    m_fieldRelChassisSpeedsPublisher(GetFieldRelativeSpeed());
 
     for (auto* mod : m_config->GetModules()) {
       mod->UpdateTelemetry();
@@ -478,13 +476,14 @@ class SwerveDrive {
   frc::SwerveDriveKinematics<NumModules> m_kinematics;
   frc::SwerveDrivePoseEstimator<NumModules> m_poseEstimator;
 
-  nt::StructArrayPublisher<frc::SwerveModuleState> m_desiredModuleStatesPublisher;
-  nt::StructArrayPublisher<frc::SwerveModuleState> m_currentModuleStatesPublisher;
-  nt::StructPublisher<frc::ChassisSpeeds> m_desiredRobotRelChassisSpeedsPublisher;
-  nt::StructPublisher<frc::ChassisSpeeds> m_currentRobotRelChassisSpeedsPublisher;
-  nt::StructPublisher<frc::ChassisSpeeds> m_fieldRelChassisSpeedsPublisher;
-  nt::StructPublisher<frc::Pose2d> m_posePublisher;
-  nt::DoublePublisher m_gyroPublisher;
+  telemetry::MechanismTelemetry m_telemetry;
+  std::function<void(std::span<const frc::SwerveModuleState>)> m_desiredModuleStatesPublisher;
+  std::function<void(std::span<const frc::SwerveModuleState>)> m_currentModuleStatesPublisher;
+  std::function<void(const frc::ChassisSpeeds&)> m_desiredRobotRelChassisSpeedsPublisher;
+  std::function<void(const frc::ChassisSpeeds&)> m_currentRobotRelChassisSpeedsPublisher;
+  std::function<void(const frc::ChassisSpeeds&)> m_fieldRelChassisSpeedsPublisher;
+  std::function<void(const frc::Pose2d&)> m_posePublisher;
+  std::function<void(double)> m_gyroPublisher;
 
   frc::Field2d m_field2d;
   frc::Timer m_simTimer;

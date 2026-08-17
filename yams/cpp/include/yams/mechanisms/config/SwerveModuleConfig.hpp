@@ -156,6 +156,15 @@ class SwerveModuleConfig {
    */
   SwerveModuleConfig& WithTelemetry(const std::string& name, TelemetryVerbosity verbosity);
 
+  /**
+   * Log this module's telemetry (currently just the absolute encoder field) to a WPILib
+   * DataLog under the given name, in addition to NetworkTables.
+   *
+   * @param dataLogName DataLog entry name prefix for this module's telemetry.
+   * @return *this for chaining.
+   */
+  SwerveModuleConfig& WithDataLogName(const std::string& dataLogName);
+
   // ---- Getters ---------------------------------------------------------------
 
   /** Get the drive motor controller pointer. */
@@ -186,6 +195,22 @@ class SwerveModuleConfig {
   units::degree_t GetAbsoluteEncoderAngle() const;
 
   /**
+   * Get the absolute encoder angle as a supplier without offsets applied.
+   *
+   * Falls back to the azimuth motor's mechanism position (plus its external encoder zero
+   * offset, on a real robot) if no encoder supplier is set.
+   *
+   * @return Callable returning the absolute encoder angle without offsets.
+   */
+  std::function<units::degree_t()> GetRawAbsoluteEncoderAngle() const;
+
+  /** Get the absolute encoder supplier, if configured via WithAbsoluteEncoder(). */
+  std::optional<std::function<units::degree_t()>> GetAbsoluteEncoderSupplier() const;
+
+  /** Get the optional DataLog entry name prefix for this module's telemetry. */
+  std::optional<std::string> GetDataLogName() const;
+
+  /**
    * Apply all enabled optimizations (min-velocity clamp, state optimization, cosine compensation)
    * and return the resulting state.
    *
@@ -207,6 +232,7 @@ class SwerveModuleConfig {
   std::optional<units::meters_per_second_t> m_minimumVelocity;
   std::optional<frc::Translation2d> m_location;
   std::optional<units::meter_t> m_wheelCircumference;
+  std::optional<std::string> m_dataLogName;
 
   /**
    * Compute the cosine-compensated drive velocity for the given desired state.

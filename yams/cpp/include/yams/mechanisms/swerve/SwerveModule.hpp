@@ -5,11 +5,14 @@
 
 #include <frc/kinematics/SwerveModulePosition.h>
 #include <frc/kinematics/SwerveModuleState.h>
+#include <units/angle.h>
 
+#include <functional>
 #include <string>
 
 #include "yams/mechanisms/config/SwerveModuleConfig.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
+#include "yams/telemetry/MechanismTelemetry.hpp"
 
 namespace yams::mechanisms::swerve {
 
@@ -123,6 +126,9 @@ class SwerveModule {
 
  private:
   config::SwerveModuleConfig* m_config{nullptr};
+  telemetry::MechanismTelemetry m_telemetry;
+  std::function<void(double)> m_azimuthAbsoluteEncoderTelemetry;
+  std::function<units::degree_t()> m_azimuthEncoderWithoutOffsets;
 
  public:
   // Public so SwerveDrive can access them directly (mirrors Java protected fields).
