@@ -37,7 +37,7 @@ SwerveModule::SwerveModule(config::SwerveModuleConfig* config)
   }
 
   // Set up motor telemetry under the swerve hierarchy.
-  m_telemetry.SetupTelemetry("swerve/");
+  m_telemetry.SetupTelemetry("swerve");
   m_telemetry.AddMotorController("modules/" + GetName(), *m_driveMotorController);
   m_telemetry.AddMotorController("modules/" + GetName(), *m_azimuthMotorController);
 

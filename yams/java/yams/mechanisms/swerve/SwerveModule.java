@@ -112,7 +112,7 @@ public class SwerveModule {
     if (m_azimuthMotorController.getConfig().getExternalEncoder().isPresent() && !m_azimuthMotorController.getConfig().getUseExternalFeedback()) {
       throw new SmartMotorControllerConfigurationException("External encoder cannot be used without external feedback", "External encoder could not be used", "withUseExternalFeedbackEncoder(true)");
     }
-    m_telemetry.setupTelemetry("swerve/");
+    m_telemetry.setupTelemetry("swerve");
     m_telemetry.addMotorController("modules/" + getName(), m_driveMotorController);
     m_telemetry.addMotorController("modules/" + getName(), m_azimuthMotorController);
     DoubleConsumer encoderNetworkTablePublisher = m_telemetry.publishDouble("modules/" + getName() + "/encoder", "degrees");
