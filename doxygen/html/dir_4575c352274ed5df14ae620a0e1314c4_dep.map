@@ -1,34 +1,36 @@
 <map id="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams" name="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams">
-<area shape="rect" id="node2" href="dir_448fbabdda1fc06185953f2a2a356cb2.html" title="gearing" alt="" coords="38,283,109,308"/>
-<area shape="poly" id="edge1" href="dir_000017_000002.html" alt="" coords="178,81,147,86,113,96,80,112,54,138,46,153,42,170,43,206,52,240,63,269,58,271,47,242,38,206,37,169,41,151,50,134,77,108,111,91,146,81,177,76"/>
-<area shape="rect" id="edge1-headlabel" href="dir_000017_000002.html" title="8" alt="" coords="62,255,71,270"/>
-<area shape="rect" id="node3" href="dir_80404dd1ddad71d2a493dee00f151590.html" title="math" alt="" coords="244,283,300,308"/>
-<area shape="poly" id="edge2" href="dir_000017_000005.html" alt="" coords="217,87,242,135,262,207,272,269,267,270,257,208,238,137,212,90"/>
-<area shape="rect" id="edge2-headlabel" href="dir_000017_000005.html" title="9" alt="" coords="273,256,282,271"/>
-<area shape="rect" id="node4" href="dir_f53690ccfc0562cd50b025a2482e616b.html" title="mechanisms" alt="" coords="63,136,169,161"/>
-<area shape="poly" id="edge5" href="dir_000017_000006.html" alt="" coords="194,90,143,129,140,125,190,86"/>
-<area shape="rect" id="edge5-headlabel" href="dir_000017_000006.html" title="22" alt="" coords="142,124,159,139"/>
-<area shape="rect" id="node5" href="dir_f436dd42978dfa7d62bab0186ed398ce.html" title="motorcontrollers" alt="" coords="91,209,221,235"/>
-<area shape="poly" id="edge4" href="dir_000017_000007.html" alt="" coords="206,89,184,162,169,198,164,196,179,160,201,88"/>
-<area shape="rect" id="edge4-headlabel" href="dir_000017_000007.html" title="14" alt="" coords="168,189,185,203"/>
-<area shape="rect" id="node6" href="dir_e49d5c1dd0475dfeac7fe48e75ed2ae6.html" title="telemetry" alt="" coords="133,283,219,308"/>
-<area shape="poly" id="edge3" href="dir_000017_000012.html" alt="" coords="215,87,227,114,238,151,243,194,242,215,236,236,222,258,205,276,201,272,218,255,231,234,236,214,238,194,233,153,222,116,210,89"/>
-<area shape="rect" id="edge3-headlabel" href="dir_000017_000012.html" title="5" alt="" coords="207,270,217,285"/>
+<area shape="rect" id="node2" href="dir_448fbabdda1fc06185953f2a2a356cb2.html" title="gearing" alt="" coords="54,283,125,308"/>
+<area shape="poly" id="edge1" href="dir_000017_000002.html" alt="" coords="153,86,108,104,87,118,70,137,63,153,59,170,60,206,69,240,80,269,75,271,63,242,55,207,54,170,58,152,66,135,83,114,105,99,151,81"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000017_000002.html" title="8" alt="" coords="78,255,88,270"/>
+<area shape="rect" id="node3" href="dir_80404dd1ddad71d2a493dee00f151590.html" title="math" alt="" coords="149,283,205,308"/>
+<area shape="poly" id="edge2" href="dir_000017_000005.html" alt="" coords="153,87,113,106,95,120,81,137,77,148,77,161,84,189,108,233,127,255,149,273,145,277,123,259,103,236,79,191,72,161,72,147,76,135,91,116,110,101,150,82"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000017_000005.html" title="9" alt="" coords="144,258,153,273"/>
+<area shape="rect" id="node4" href="dir_f53690ccfc0562cd50b025a2482e616b.html" title="mechanisms" alt="" coords="90,136,195,161"/>
+<area shape="poly" id="edge5" href="dir_000017_000006.html" alt="" coords="177,90,158,125,153,123,173,87"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000017_000006.html" title="22" alt="" coords="156,117,174,131"/>
+<area shape="rect" id="node5" href="dir_f436dd42978dfa7d62bab0186ed398ce.html" title="motorcontrollers" alt="" coords="117,209,248,235"/>
+<area shape="poly" id="edge4" href="dir_000017_000007.html" alt="" coords="191,87,202,109,211,136,210,169,199,198,194,196,204,168,205,136,197,111,186,90"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000017_000007.html" title="14" alt="" coords="197,190,215,205"/>
+<area shape="rect" id="node6" href="dir_e49d5c1dd0475dfeac7fe48e75ed2ae6.html" title="telemetry" alt="" coords="230,283,317,308"/>
+<area shape="poly" id="edge3" href="dir_000017_000012.html" alt="" coords="195,86,236,136,258,171,275,209,280,240,279,269,274,269,274,240,269,210,253,173,232,139,191,90"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000017_000012.html" title="7" alt="" coords="281,258,290,272"/>
 <area shape="rect" id="node7" href="dir_fb92314239e022d2e3678c1ad72c176e.html" title="units" alt="" coords="273,136,327,161"/>
-<area shape="poly" id="edge6" href="dir_000017_000013.html" alt="" coords="223,86,276,125,272,130,220,90"/>
-<area shape="rect" id="edge6-headlabel" href="dir_000017_000013.html" title="1" alt="" coords="271,111,280,125"/>
-<area shape="poly" id="edge7" href="dir_000006_000002.html" alt="" coords="109,163,94,184,81,210,75,240,74,269,69,269,70,240,76,208,89,181,104,160"/>
-<area shape="rect" id="edge7-headlabel" href="dir_000006_000002.html" title="1" alt="" coords="75,256,85,271"/>
-<area shape="poly" id="edge8" href="dir_000006_000007.html" alt="" coords="125,160,145,196,140,199,120,163"/>
-<area shape="rect" id="edge8-headlabel" href="dir_000006_000007.html" title="7" alt="" coords="143,182,153,197"/>
-<area shape="poly" id="edge9" href="dir_000007_000002.html" alt="" coords="144,237,99,276,96,271,141,233"/>
-<area shape="rect" id="edge9-headlabel" href="dir_000007_000002.html" title="4" alt="" coords="101,270,111,284"/>
-<area shape="poly" id="edge10" href="dir_000007_000005.html" alt="" coords="176,232,243,273,240,278,173,237"/>
-<area shape="rect" id="edge10-headlabel" href="dir_000007_000005.html" title="5" alt="" coords="237,258,247,273"/>
-<area shape="poly" id="edge11" href="dir_000007_000012.html" alt="" coords="155,234,163,269,158,271,150,236"/>
-<area shape="rect" id="edge11-headlabel" href="dir_000007_000012.html" title="2" alt="" coords="162,255,171,270"/>
-<area shape="poly" id="edge12" href="dir_000012_000007.html" alt="" coords="177,283,169,248,174,247,182,282"/>
-<area shape="rect" id="edge12-headlabel" href="dir_000012_000007.html" title="1" alt="" coords="161,248,170,262"/>
+<area shape="poly" id="edge6" href="dir_000017_000013.html" alt="" coords="202,86,270,126,267,131,199,90"/>
+<area shape="rect" id="edge6-headlabel" href="dir_000017_000013.html" title="1" alt="" coords="265,112,274,127"/>
+<area shape="poly" id="edge7" href="dir_000006_000002.html" alt="" coords="136,163,121,184,108,210,99,240,94,269,89,268,94,239,103,208,117,182,131,160"/>
+<area shape="rect" id="edge7-headlabel" href="dir_000006_000002.html" title="1" alt="" coords="96,258,105,272"/>
+<area shape="poly" id="edge8" href="dir_000006_000007.html" alt="" coords="152,160,172,196,167,199,147,163"/>
+<area shape="rect" id="edge8-headlabel" href="dir_000006_000007.html" title="7" alt="" coords="170,182,179,197"/>
+<area shape="poly" id="edge9" href="dir_000006_000012.html" alt="" coords="188,159,228,177,246,191,262,208,275,238,278,269,273,269,270,239,258,211,243,195,225,182,186,164"/>
+<area shape="rect" id="edge9-headlabel" href="dir_000006_000012.html" title="2" alt="" coords="279,257,288,272"/>
+<area shape="poly" id="edge10" href="dir_000007_000002.html" alt="" coords="169,237,117,276,114,272,166,233"/>
+<area shape="rect" id="edge10-headlabel" href="dir_000007_000002.html" title="4" alt="" coords="119,271,129,286"/>
+<area shape="poly" id="edge11" href="dir_000007_000005.html" alt="" coords="184,235,182,269,177,269,179,235"/>
+<area shape="rect" id="edge11-headlabel" href="dir_000007_000005.html" title="5" alt="" coords="183,258,193,272"/>
+<area shape="poly" id="edge12" href="dir_000007_000012.html" alt="" coords="192,233,242,273,239,277,189,237"/>
+<area shape="rect" id="edge12-headlabel" href="dir_000007_000012.html" title="2" alt="" coords="237,258,246,273"/>
+<area shape="poly" id="edge13" href="dir_000012_000007.html" alt="" coords="264,285,214,245,217,240,267,280"/>
+<area shape="rect" id="edge13-headlabel" href="dir_000012_000007.html" title="1" alt="" coords="209,245,219,259"/>
 <area shape="rect" id="clust2" href="dir_4575c352274ed5df14ae620a0e1314c4.html" alt="" coords="27,52,339,319"/>
 <area shape="rect" id="clust1" href="dir_ba983bb5399966c8864afc22b6f52f27.html" title="include" alt="" coords="16,16,349,329"/>
 </map>

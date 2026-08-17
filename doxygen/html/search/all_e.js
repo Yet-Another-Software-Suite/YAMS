@@ -7,5 +7,8 @@ var searchData=
   ['pivotconfig_2ehpp_4',['PivotConfig.hpp',['../PivotConfig_8hpp.html',1,'']]],
   ['pivotconfigurationexception_5',['pivotconfigurationexception',['../classyams_1_1exceptions_1_1PivotConfigurationException.html',1,'yams::exceptions::PivotConfigurationException'],['../classyams_1_1exceptions_1_1PivotConfigurationException.html#a753525e71b467bf1d2290384077b28c2',1,'yams::exceptions::PivotConfigurationException::PivotConfigurationException()']]],
   ['preset_20via_20smartmotorcontrollerconfig_6',['Quick preset via SmartMotorControllerConfig',['../classyams_1_1telemetry_1_1SmartMotorControllerTelemetryConfig.html#autotoc_md18',1,'']]],
-  ['publish_7',['Publish',['../classyams_1_1telemetry_1_1SmartMotorControllerTelemetry.html#a0c3ecc937727e3fa1c0c691d7f95cb28',1,'yams::telemetry::SmartMotorControllerTelemetry']]]
+  ['publish_7',['Publish',['../classyams_1_1telemetry_1_1SmartMotorControllerTelemetry.html#a0c3ecc937727e3fa1c0c691d7f95cb28',1,'yams::telemetry::SmartMotorControllerTelemetry']]],
+  ['publishdouble_8',['PublishDouble',['../classyams_1_1telemetry_1_1MechanismTelemetry.html#a474a0a9ed3477ebc517d6822aec62a5c',1,'yams::telemetry::MechanismTelemetry']]],
+  ['publishstruct_9',['PublishStruct',['../classyams_1_1telemetry_1_1MechanismTelemetry.html#a475bdbb4011272a96a9ff99d3f1ef534',1,'yams::telemetry::MechanismTelemetry']]],
+  ['publishstructarray_10',['PublishStructArray',['../classyams_1_1telemetry_1_1MechanismTelemetry.html#a04c1b0a0d87f3e994d1606b37495e41e',1,'yams::telemetry::MechanismTelemetry']]]
 ];

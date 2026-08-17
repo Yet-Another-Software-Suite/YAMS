@@ -121,6 +121,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:afa6b14165b1a8606a7eccf5b4dcc38b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae6e6f9e1426f7094fa8b34ea1b1707e9" id="r_ae6e6f9e1426f7094fa8b34ea1b1707e9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html">SwerveModuleConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html#ae6e6f9e1426f7094fa8b34ea1b1707e9">WithTelemetry</a> (const std::string &amp;name, <a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#a3f238a96c96348553cc916ab4525620c">TelemetryVerbosity</a> verbosity)</td></tr>
 <tr class="separator:ae6e6f9e1426f7094fa8b34ea1b1707e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4026120445098063ebf25d4abb90142" id="r_ad4026120445098063ebf25d4abb90142"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html">SwerveModuleConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html#ad4026120445098063ebf25d4abb90142">WithDataLogName</a> (const std::string &amp;dataLogName)</td></tr>
+<tr class="separator:ad4026120445098063ebf25d4abb90142"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6015e59b6577770903fb836bf6d11e71" id="r_a6015e59b6577770903fb836bf6d11e71"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html">motorcontrollers::SmartMotorController</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html#a6015e59b6577770903fb836bf6d11e71">GetDriveMotor</a> () const</td></tr>
 <tr class="separator:a6015e59b6577770903fb836bf6d11e71"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab079525acf72d78d84d72608ab16da4b" id="r_ab079525acf72d78d84d72608ab16da4b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html">motorcontrollers::SmartMotorController</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html#ab079525acf72d78d84d72608ab16da4b">GetAzimuthMotor</a> () const</td></tr>
@@ -135,6 +137,12 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:aa8667679ccbcd6469c02de41aecf06c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a126fe0c6833943a33a5d59614bd30413" id="r_a126fe0c6833943a33a5d59614bd30413"><td class="memItemLeft" align="right" valign="top">units::degree_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html#a126fe0c6833943a33a5d59614bd30413">GetAbsoluteEncoderAngle</a> () const</td></tr>
 <tr class="separator:a126fe0c6833943a33a5d59614bd30413"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ede7454d0ec1e224bb6ae12285b369e" id="r_a6ede7454d0ec1e224bb6ae12285b369e"><td class="memItemLeft" align="right" valign="top">std::function&lt; units::degree_t()&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html#a6ede7454d0ec1e224bb6ae12285b369e">GetRawAbsoluteEncoderAngle</a> () const</td></tr>
+<tr class="separator:a6ede7454d0ec1e224bb6ae12285b369e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac59130ca978a6f7b7a79eabcd938fbfe" id="r_ac59130ca978a6f7b7a79eabcd938fbfe"><td class="memItemLeft" align="right" valign="top">std::optional&lt; std::function&lt; units::degree_t()&gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html#ac59130ca978a6f7b7a79eabcd938fbfe">GetAbsoluteEncoderSupplier</a> () const</td></tr>
+<tr class="separator:ac59130ca978a6f7b7a79eabcd938fbfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45bfa64a5809f4302613c7095e2ab1b2" id="r_a45bfa64a5809f4302613c7095e2ab1b2"><td class="memItemLeft" align="right" valign="top">std::optional&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html#a45bfa64a5809f4302613c7095e2ab1b2">GetDataLogName</a> () const</td></tr>
+<tr class="separator:a45bfa64a5809f4302613c7095e2ab1b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a581a6eb82dcfe76ce28fcac7b67cdae9" id="r_a581a6eb82dcfe76ce28fcac7b67cdae9"><td class="memItemLeft" align="right" valign="top">frc::SwerveModuleState&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html#a581a6eb82dcfe76ce28fcac7b67cdae9">GetOptimizedState</a> (frc::SwerveModuleState state) const</td></tr>
 <tr class="separator:a581a6eb82dcfe76ce28fcac7b67cdae9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -239,6 +247,24 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="ac59130ca978a6f7b7a79eabcd938fbfe" name="ac59130ca978a6f7b7a79eabcd938fbfe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac59130ca978a6f7b7a79eabcd938fbfe">&#9670;&#160;</a></span>GetAbsoluteEncoderSupplier()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; std::function&lt; units::degree_t()&gt; &gt; yams::mechanisms::config::SwerveModuleConfig::GetAbsoluteEncoderSupplier </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Get the absolute encoder supplier, if configured via <a class="el" href="classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html#a642e9276450b5d88dcf1fbda9dafe7ab">WithAbsoluteEncoder()</a>. </p>
+
+</div>
+</div>
 <a id="ab079525acf72d78d84d72608ab16da4b" name="ab079525acf72d78d84d72608ab16da4b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab079525acf72d78d84d72608ab16da4b">&#9670;&#160;</a></span>GetAzimuthMotor()</h2>
 
@@ -254,6 +280,24 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Get the azimuth motor controller pointer. </p>
+
+</div>
+</div>
+<a id="a45bfa64a5809f4302613c7095e2ab1b2" name="a45bfa64a5809f4302613c7095e2ab1b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45bfa64a5809f4302613c7095e2ab1b2">&#9670;&#160;</a></span>GetDataLogName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; std::string &gt; yams::mechanisms::config::SwerveModuleConfig::GetDataLogName </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Get the optional DataLog entry name prefix for this module's telemetry. </p>
 
 </div>
 </div>
@@ -316,6 +360,26 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Optimized state. </dd></dl>
+
+</div>
+</div>
+<a id="a6ede7454d0ec1e224bb6ae12285b369e" name="a6ede7454d0ec1e224bb6ae12285b369e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6ede7454d0ec1e224bb6ae12285b369e">&#9670;&#160;</a></span>GetRawAbsoluteEncoderAngle()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::function&lt; units::degree_t()&gt; yams::mechanisms::config::SwerveModuleConfig::GetRawAbsoluteEncoderAngle </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Get the absolute encoder angle as a supplier without offsets applied.</p>
+<p>Falls back to the azimuth motor's mechanism position (plus its external encoder zero offset, on a real robot) if no encoder supplier is set.</p>
+<dl class="section return"><dt>Returns</dt><dd>Callable returning the absolute encoder angle without offsets. </dd></dl>
 
 </div>
 </div>
@@ -471,6 +535,32 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">compensate</td><td>true to enable. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
+
+</div>
+</div>
+<a id="ad4026120445098063ebf25d4abb90142" name="ad4026120445098063ebf25d4abb90142"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4026120445098063ebf25d4abb90142">&#9670;&#160;</a></span>WithDataLogName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html">SwerveModuleConfig</a> &amp; yams::mechanisms::config::SwerveModuleConfig::WithDataLogName </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>dataLogName</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Log this module's telemetry (currently just the absolute encoder field) to a WPILib DataLog under the given name, in addition to NetworkTables.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dataLogName</td><td>DataLog entry name prefix for this module's telemetry. </td></tr>
   </table>
   </dd>
 </dl>
