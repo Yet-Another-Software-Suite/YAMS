@@ -607,4 +607,34 @@ public class SmartMotorControllerTelemetryConfig
     doubleFields.get(DoubleTelemetryField.RotorVelocity).enable();
     return this;
   }
+
+  /**
+   * Escape hatch for unimplemented fields which should be enabled or disabled.
+   * @param field Field to configure
+   * @param value Enable on true, Disable on false.
+   * @return {@link SmartMotorControllerTelemetryConfig} for chaining
+   */
+  public SmartMotorControllerTelemetryConfig withCustom(DoubleTelemetryField field, boolean value)
+  {
+    if(value)
+      doubleFields.get(field).enable();
+    else
+      doubleFields.get(field).disable();
+    return this;
+  }
+
+  /**
+   * Escape hatch for unimplemented fields which should be enabled or disabled.
+   * @param field Field to configure
+   * @param value Enable on true, Disable on false.
+   * @return {@link SmartMotorControllerTelemetryConfig} for chaining
+   */
+  public SmartMotorControllerTelemetryConfig withCustom(BooleanTelemetryField field, boolean value)
+  {
+    if(value)
+      boolFields.get(field).enable();
+    else
+      boolFields.get(field).disable();
+    return this;
+  }
 }
