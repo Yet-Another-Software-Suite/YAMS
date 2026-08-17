@@ -3,11 +3,13 @@
 
 #include "yams/mechanisms/swerve/SwerveModule.hpp"
 
+#include <frc/DataLogManager.h>
 #include <frc/RobotBase.h>
 #include <frc/geometry/Rotation2d.h>
-#include <networktables/NetworkTableInstance.h>
 #include <units/angle.h>
+#include <wpi/DataLog.h>
 
+#include <memory>
 #include <stdexcept>
 #include <string>
 
@@ -35,16 +37,23 @@ SwerveModule::SwerveModule(config::SwerveModuleConfig* config)
   }
 
   // Set up motor telemetry under the swerve hierarchy.
-  auto instance = nt::NetworkTableInstance::GetDefault();
-  auto driveTable = instance.GetTable("SmartDashboard/swerve/" + GetName() + "/drive");
-  auto driveTuning = instance.GetTable("SmartDashboard/swerve/" + GetName() + "/drive/tuning");
-  auto azimuthTable = instance.GetTable("SmartDashboard/swerve/" + GetName() + "/azimuth");
-  auto azimuthTuning = instance.GetTable("SmartDashboard/swerve/" + GetName() + "/azimuth/tuning");
+  m_telemetry.SetupTelemetry("swerve/" + GetName());
+  m_telemetry.AddMotorController("drive", *m_driveMotorController);
+  m_telemetry.AddMotorController("azimuth", *m_azimuthMotorController);
 
-  m_driveMotorController->SetupTelemetry(driveTable, driveTuning);
-  m_azimuthMotorController->SetupTelemetry(azimuthTable, azimuthTuning);
+  auto encoderNetworkTablePublisher = m_telemetry.PublishDouble("encoder", "degrees");
+  std::shared_ptr<wpi::log::DoubleLogEntry> encoderLogEntry;
+  if (auto name = config->GetDataLogName()) {
+    encoderLogEntry =
+        std::make_shared<wpi::log::DoubleLogEntry>(frc::DataLogManager::GetLog(), *name + "/encoder");
+  }
+  m_azimuthAbsoluteEncoderTelemetry = [encoderNetworkTablePublisher, encoderLogEntry](double value) {
+    encoderNetworkTablePublisher(value);
+    if (encoderLogEntry) encoderLogEntry->Append(value);
+  };
 
   SeedAzimuthEncoder();
+  m_azimuthEncoderWithoutOffsets = config->GetRawAbsoluteEncoderAngle();
 }
 
 void SwerveModule::SeedAzimuthEncoder() {
@@ -87,6 +96,8 @@ frc::SwerveModulePosition SwerveModule::GetPosition() const {
 void SwerveModule::UpdateTelemetry() {
   m_driveMotorController->UpdateTelemetry();
   m_azimuthMotorController->UpdateTelemetry();
+  m_azimuthAbsoluteEncoderTelemetry(m_azimuthEncoderWithoutOffsets().value());
+  m_telemetry.UpdateLoopTime();
 }
 
 void SwerveModule::SimIterate() {

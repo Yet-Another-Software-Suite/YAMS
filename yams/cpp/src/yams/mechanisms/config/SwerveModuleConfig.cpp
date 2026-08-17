@@ -3,6 +3,7 @@
 
 #include "yams/mechanisms/config/SwerveModuleConfig.hpp"
 
+#include <frc/RobotBase.h>
 #include <frc/geometry/Rotation2d.h>
 #include <units/math.h>
 
@@ -105,6 +106,11 @@ SwerveModuleConfig& SwerveModuleConfig::WithTelemetry(const std::string& name,
   return *this;
 }
 
+SwerveModuleConfig& SwerveModuleConfig::WithDataLogName(const std::string& dataLogName) {
+  m_dataLogName = dataLogName;
+  return *this;
+}
+
 // ---- Getters ------------------------------------------------------------------
 
 motorcontrollers::SmartMotorController* SwerveModuleConfig::GetDriveMotor() const {
@@ -138,6 +144,27 @@ units::degree_t SwerveModuleConfig::GetAbsoluteEncoderAngle() const {
   if (!m_azimuthMotor) return units::degree_t{0};
   return m_azimuthMotor->GetMechanismPosition();
 }
+
+std::function<units::degree_t()> SwerveModuleConfig::GetRawAbsoluteEncoderAngle() const {
+  if (m_absoluteEncoderSupplier) {
+    return *m_absoluteEncoderSupplier;
+  }
+  auto* azimuth = m_azimuthMotor;
+  units::degree_t offset{0};
+  if (!frc::RobotBase::IsSimulation() && azimuth) {
+    offset = units::degree_t{azimuth->GetConfig().GetExternalEncoderZeroOffset().value_or(units::turn_t{0})};
+  }
+  return [azimuth, offset]() -> units::degree_t {
+    return units::degree_t{azimuth->GetMechanismPosition()} + offset;
+  };
+}
+
+std::optional<std::function<units::degree_t()>> SwerveModuleConfig::GetAbsoluteEncoderSupplier()
+    const {
+  return m_absoluteEncoderSupplier;
+}
+
+std::optional<std::string> SwerveModuleConfig::GetDataLogName() const { return m_dataLogName; }
 
 double SwerveModuleConfig::GetCosineCompensatedVelocity(
     const frc::SwerveModuleState& desiredState) const {

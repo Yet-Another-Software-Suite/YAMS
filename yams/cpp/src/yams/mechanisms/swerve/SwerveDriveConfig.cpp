@@ -122,6 +122,11 @@ SwerveDriveConfig& SwerveDriveConfig::WithTelemetry(TelemetryVerbosity verbosity
   return *this;
 }
 
+SwerveDriveConfig& SwerveDriveConfig::WithDataLogName(const std::string& dataLogName) {
+  m_dataLogName = dataLogName;
+  return *this;
+}
+
 // ---- Getters -----------------------------------------------------------------
 
 const std::vector<SwerveModule*>& SwerveDriveConfig::GetModules() const { return m_modules; }
@@ -153,6 +158,8 @@ std::optional<SwerveDriveConfig::TelemetryVerbosity> SwerveDriveConfig::GetTelem
     const {
   return m_telemetryVerbosity;
 }
+
+std::optional<std::string> SwerveDriveConfig::GetDataLogName() const { return m_dataLogName; }
 
 units::degree_t SwerveDriveConfig::GetGyroOffset() const {
   return m_gyroOffset.value_or(units::degree_t{0});
