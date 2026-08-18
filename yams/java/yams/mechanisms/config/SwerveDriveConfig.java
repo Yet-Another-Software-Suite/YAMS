@@ -709,6 +709,15 @@ public class SwerveDriveConfig
     return new Translation2d(translation.getNorm() * scalar, translation.getAngle());
   }
 
+  /**
+   * Get the discretization time for the pose estimation used by {@link #optimizeRobotRelativeChassisSpeeds(ChassisSpeeds)}
+   * @return Discretization time for the pose estimation.
+   */
+  public Optional<Time> getDiscretization()
+  {
+    return RobotBase.isSimulation() ? simDiscretizationSeconds : discretizationSeconds;
+  }
+
 //  /**
 //   * Get the {@link SelfControlledSwerveDriveSimulation} if it is configured.
 //   *

@@ -135,12 +135,15 @@ jobs:
       - name: Zip generated Java examples
         run: |
           mkdir -p ${{ github.workspace }}/example-artifacts
-          for dir in examples/generated/*/; do
+          cd examples/generated
+          for dir in */; do
             name=$(basename "$dir")
-            zip -r "${{ github.workspace }}/example-artifacts/example-${name}.zip" "$dir"
+            zip -r "${{ github.workspace }}/example-artifacts/example-${name}.zip" "$name"
           done
       - name: Zip C++ example
-        run: zip -r ${{ github.workspace }}/example-artifacts/example-cpptest.zip examples/cpptest/ -x "examples/cpptest/.gradle/*" -x "examples/cpptest/build/*"
+        run: |
+          cd examples
+          zip -r ${{ github.workspace }}/example-artifacts/example-cpptest.zip cpptest/ -x "cpptest/.gradle/*" -x "cpptest/build/*"
       - uses: actions/upload-artifact@v7
         with:
           name: release-examples
