@@ -659,7 +659,7 @@ public class SwerveDriveConfig
     {
       return translation;
     }
-    return new Translation2d(Math.pow(translation.getNorm(), 3), translation.getAngle());
+    return new Translation2d(Math.pow(translation.getNorm(), 3), translation.getAngle().orElse(new Rotation2d()));
   }
 
   /**
@@ -675,7 +675,7 @@ public class SwerveDriveConfig
     {
       return translation;
     }
-    return new Translation2d(translation.getNorm() * scalar, translation.getAngle());
+    return new Translation2d(translation.getNorm() * scalar, translation.getAngle().orElse(new Rotation2d()));
   }
 
 //  /**

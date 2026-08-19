@@ -281,7 +281,7 @@ public class SwerveDrive
     for (int i = 0; i < m_modules.length; i++)
     {
       desiredStates[i] =
-          new SwerveModuleVelocity(0, m_modules[i].getConfig().getLocation().orElseThrow().getAngle());
+          new SwerveModuleVelocity(0, m_modules[i].getConfig().getLocation().orElseThrow().getAngle().orElse(new Rotation2d()));
     }
     setSwerveModuleStates(desiredStates);
     m_desiredChassisSpeeds = new ChassisVelocities();
