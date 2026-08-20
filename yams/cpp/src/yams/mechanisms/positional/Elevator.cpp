@@ -6,8 +6,6 @@
 #include <frc/RobotBase.h>
 #include <frc/geometry/Rotation3d.h>
 #include <frc/geometry/Translation3d.h>
-#include <frc/simulation/BatterySim.h>
-#include <frc/simulation/RoboRioSim.h>
 #include <frc/smartdashboard/Mechanism2d.h>
 #include <frc/smartdashboard/MechanismLigament2d.h>
 #include <frc/smartdashboard/MechanismRoot2d.h>
@@ -155,10 +153,6 @@ void Elevator::SimIterate() {
     m_smc->SimIterate();
     ss->StarveWatchdog();
 
-    if (!m_elevatorConfig->GetMinHeight() || GetHeight() >= *m_elevatorConfig->GetMinHeight()) {
-      frc::sim::RoboRioSim::SetVInVoltage(
-          frc::sim::BatterySim::Calculate({ss->GetCurrentDrawAmps()}));
-    }
     VisualizationUpdate();
   }
 }

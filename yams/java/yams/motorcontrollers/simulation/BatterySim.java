@@ -29,17 +29,17 @@ public class BatterySim {
   /**
    * Battery voltage.
    */
-  public static Voltage batteryVoltage = Volts.of(12);
+  private static Voltage batteryVoltage = Volts.of(12);
   /**
    * Battery resistance.
    */
-  public static Resistance batteryResistance = MilliOhms.of(20);
+  private static Resistance batteryResistance = MilliOhms.of(20);
   /**
    * Open circuit voltage of the battery as a function of state of charge (0 to 1), based on a
    * typical FRC sealed lead-acid battery discharge curve. Voltage stays relatively flat for most
    * of the discharge before sagging quickly near depletion.
    */
-  private static final InterpolatingDoubleTreeMap SOC_TO_VOLTAGE = new InterpolatingDoubleTreeMap();
+  private static InterpolatingDoubleTreeMap SOC_TO_VOLTAGE = new InterpolatingDoubleTreeMap();
 
   static {
     SOC_TO_VOLTAGE.put(0.00, 9.0);
@@ -72,16 +72,62 @@ public class BatterySim {
   private static double lastTimestampSeconds = Double.NaN;
 
   /**
+   * Replace the default state-of-charge &rarr; open circuit voltage interpolation table used when
+   * discharge simulation is enabled with {@link #enableDischarge(double, Voltage, Resistance)}.
+   *
+   * <p>
+   * Not every battery discharges like YAMS's built-in sealed lead-acid curve. Reach for this
+   * method when you want to model something different, for example:
+   * </p>
+   * <ul>
+   *   <li>A well-used competition battery that sags earlier and harder than a fresh one.</li>
+   *   <li>Matching a curve you measured from an actual battery on a load tester, for the most
+   *       accurate brownout predictions possible.</li>
+   * </ul>
+   *
+   * <pre>{@code
+   * // Model a well-used competition battery that sags earlier and more severely than a new one.
+   * InterpolatingDoubleTreeMap wornBatteryCurve = new InterpolatingDoubleTreeMap();
+   * wornBatteryCurve.put(0.00, 8.0);
+   * wornBatteryCurve.put(0.05, 9.5);
+   * wornBatteryCurve.put(0.10, 10.5);
+   * wornBatteryCurve.put(0.20, 11.2);
+   * wornBatteryCurve.put(0.40, 11.6);
+   * wornBatteryCurve.put(0.60, 11.9);
+   * wornBatteryCurve.put(0.80, 12.2);
+   * wornBatteryCurve.put(0.90, 12.4);
+   * wornBatteryCurve.put(1.00, 12.6);
+   *
+   * BatterySim.replaceSOCInterpolation(wornBatteryCurve);
+   * // Pair with a reduced usable capacity and higher resistance to match a worn battery.
+   * BatterySim.enableDischarge(15.0, Volts.of(12.6), Milliohms.of(28));
+   * }</pre>
+   *
+   * @param socToVoltage Interpolation table mapping state of charge {@code [0, 1]} to open
+   *                     circuit voltage. Call this before {@link #enableDischarge(double,
+   *                     Voltage, Resistance)} so discharge simulation uses the new curve from the
+   *                     start.
+   */
+  public static void replaceSOCInterpolation(InterpolatingDoubleTreeMap socToVoltage) {
+    BatterySim.SOC_TO_VOLTAGE = socToVoltage;
+  }
+
+  /**
    * Enable realistic battery discharge simulation. As current is drawn from the battery over time
    * its state of charge will drop, reducing the open circuit voltage and increasing the internal
    * resistance to more realistically model a depleted battery.
    *
    * @param batteryCapacityAmpHours Capacity of the battery in amp-hours (Ah). A typical FRC
    *                                battery is around 18 Ah.
+   * @param nomVoltage              Nominal (fully charged) open circuit voltage of the battery.
+   * @param nomResistance           Nominal internal resistance of the battery.
    */
-  public static void enableDischarge(double batteryCapacityAmpHours) {
+  public static void enableDischarge(
+      double batteryCapacityAmpHours, Voltage nomVoltage, Resistance nomResistance) {
     dischargeEnabled = true;
     BatterySim.batteryCapacityAmpHours = batteryCapacityAmpHours;
+    BatterySim.batteryResistance = nomResistance;
+    BatterySim.batteryVoltage = nomVoltage;
   }
 
   /**

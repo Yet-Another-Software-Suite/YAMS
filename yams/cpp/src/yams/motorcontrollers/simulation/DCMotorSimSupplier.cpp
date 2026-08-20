@@ -7,6 +7,8 @@
 
 #include <utility>
 
+#include "yams/motorcontrollers/simulation/BatterySim.hpp"
+
 namespace yams::motorcontrollers::simulation {
 
 DCMotorSimSupplier::DCMotorSimSupplier(frc::sim::DCMotorSim& sim,
@@ -22,6 +24,7 @@ void DCMotorSimSupplier::UpdateSim() {
   if (!m_inputFed) {
     m_lastInputVoltage = units::volt_t{m_dutyCycleSupplier() * GetMechanismSupplyVoltage().value()};
     m_sim.SetInputVoltage(m_lastInputVoltage);
+    frc::sim::RoboRioSim::SetVInVoltage(BatterySim::CalculateVoltage(this, m_sim.GetCurrentDraw()));
   }
   m_inputFed = false;
   m_sim.Update(m_period);
