@@ -160,6 +160,13 @@ loadScripts(document, 'script');</script>
 </dl>
 <h2 class="title" id="I:B">B</h2>
 <dl class="index">
+<dt><a href="yams/motorcontrollers/simulation/BatterySim.html" class="type-name-link" title="class in yams.motorcontrollers.simulation">BatterySim</a> - Class in <a href="yams/motorcontrollers/simulation/package-summary.html">yams.motorcontrollers.simulation</a></dt>
+<dd>
+<div class="block">Battery Simulation that takes the entirety of the robot into account by storing all currently
+ used currents on the robot.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/simulation/BatterySim.html#%3Cinit%3E()" class="member-name-link">BatterySim()</a> - Constructor for class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/BatterySim.html" title="class in yams.motorcontrollers.simulation">BatterySim</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/mechanisms/positional/Arm.html#between(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)" class="member-name-link">between(Angle, Angle)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional">Arm</a></dt>
 <dd>
 <div class="block">Between two angles.</div>
@@ -214,6 +221,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/math/LQRController.html#calculate(edu.wpi.first.units.measure.LinearVelocity,edu.wpi.first.units.measure.LinearVelocity)" class="member-name-link">calculate(LinearVelocity, LinearVelocity)</a> - Method in class yams.math.<a href="yams/math/LQRController.html" title="class in yams.math">LQRController</a></dt>
 <dd>
 <div class="block">Calculate the voltage for a Flywheel LQR</div>
+</dd>
+<dt><a href="yams/motorcontrollers/simulation/BatterySim.html#calculateVoltage(java.util.UUID,double)" class="member-name-link">calculateVoltage(UUID, double)</a> - Static method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/BatterySim.html" title="class in yams.motorcontrollers.simulation">BatterySim</a></dt>
+<dd>
+<div class="block">Calculate the voltage based on the currents used by the robot.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/simulation/BatterySim.html#calculateVoltage(java.util.UUID,edu.wpi.first.units.measure.Current)" class="member-name-link">calculateVoltage(UUID, Current)</a> - Static method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/BatterySim.html" title="class in yams.motorcontrollers.simulation">BatterySim</a></dt>
+<dd>
+<div class="block">Calculate the voltage based on the currents used by the robot.</div>
 </dd>
 <dt><a href="yams/units/YUnits.html#Chain" class="member-name-link">Chain</a> - Static variable in class yams.units.<a href="yams/units/YUnits.html" title="class in yams.units">YUnits</a></dt>
 <dd>
@@ -498,6 +513,11 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Disable the telemetry.</div>
 </dd>
+<dt><a href="yams/motorcontrollers/simulation/BatterySim.html#disableDischarge()" class="member-name-link">disableDischarge()</a> - Static method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/BatterySim.html" title="class in yams.motorcontrollers.simulation">BatterySim</a></dt>
+<dd>
+<div class="block">Disable battery discharge simulation, reverting to a constant <code>BatterySim.batteryVoltage</code> and
+ <code>BatterySim.batteryResistance</code>.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/remote/TalonFXSWrapper.html#disableFOC()" class="member-name-link">disableFOC()</a> - Method in class yams.motorcontrollers.remote.<a href="yams/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXSWrapper</a></dt>
 <dd>
 <div class="block">Disable FOC control, ignored if the device isn't PRO licensed.</div>
@@ -623,6 +643,15 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Elevator feedforward currently getting used.</div>
 </dd>
+<dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" class="type-name-link" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a> - Class in <a href="yams/motorcontrollers/simulation/package-summary.html">yams.motorcontrollers.simulation</a></dt>
+<dd>
+<div class="block">ElevatorSim Supplier — simulates an elevator mechanism using WPILib's
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/ElevatorSim.html" title="class or interface in edu.wpi.first.wpilibj.simulation" class="external-link"><code>ElevatorSim</code></a>.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html#%3Cinit%3E(edu.wpi.first.wpilibj.simulation.ElevatorSim,yams.motorcontrollers.SmartMotorController)" class="member-name-link">ElevatorSimSupplier(ElevatorSim, SmartMotorController)</a> - Constructor for class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
+<dd>
+<div class="block">Construct the ElevatorSim supplier</div>
+</dd>
 <dt><a href="yams/telemetry/BooleanTelemetry.html#enable()" class="member-name-link">enable()</a> - Method in class yams.telemetry.<a href="yams/telemetry/BooleanTelemetry.html" title="class in yams.telemetry">BooleanTelemetry</a></dt>
 <dd>
 <div class="block">Enable the telemetry.</div>
@@ -642,6 +671,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/telemetry/DoubleTelemetry.html#enabled" class="member-name-link">enabled</a> - Variable in class yams.telemetry.<a href="yams/telemetry/DoubleTelemetry.html" title="class in yams.telemetry">DoubleTelemetry</a></dt>
 <dd>
 <div class="block">Enabled?</div>
+</dd>
+<dt><a href="yams/motorcontrollers/simulation/BatterySim.html#enableDischarge(double,edu.wpi.first.units.measure.Voltage,edu.wpi.first.units.measure.Resistance)" class="member-name-link">enableDischarge(double, Voltage, Resistance)</a> - Static method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/BatterySim.html" title="class in yams.motorcontrollers.simulation">BatterySim</a></dt>
+<dd>
+<div class="block">Enable realistic battery discharge simulation.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/remote/TalonFXSWrapper.html#enableFOC()" class="member-name-link">enableFOC()</a> - Method in class yams.motorcontrollers.remote.<a href="yams/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXSWrapper</a></dt>
 <dd>
@@ -710,6 +743,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html#feedInput()" class="member-name-link">feedInput()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html#feedInput()" class="member-name-link">feedInput()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/SimSupplier.html#feedUpdateSim()" class="member-name-link">feedUpdateSim()</a> - Method in interface yams.motorcontrollers.<a href="yams/motorcontrollers/SimSupplier.html" title="interface in yams.motorcontrollers">SimSupplier</a></dt>
 <dd>
 <div class="block">Feed the update sim watch</div>
@@ -717,6 +752,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/simulation/ArmSimSupplier.html#feedUpdateSim()" class="member-name-link">feedUpdateSim()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ArmSimSupplier.html" title="class in yams.motorcontrollers.simulation">ArmSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html#feedUpdateSim()" class="member-name-link">feedUpdateSim()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html#feedUpdateSim()" class="member-name-link">feedUpdateSim()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/units/EasyCRTConfig.html#findSmallestCrtGearPair(int,double,edu.wpi.first.units.measure.Angle,double,int,int,int)" class="member-name-link">findSmallestCrtGearPair(int, double, Angle, double, int, int, int)</a> - Static method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
@@ -1035,6 +1072,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/simulation/ArmSimSupplier.html#getCurrentDraw()" class="member-name-link">getCurrentDraw()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ArmSimSupplier.html" title="class in yams.motorcontrollers.simulation">ArmSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html#getCurrentDraw()" class="member-name-link">getCurrentDraw()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html#getCurrentDraw()" class="member-name-link">getCurrentDraw()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/math/ExponentialProfilePIDController.html#getCurrentState()" class="member-name-link">getCurrentState()</a> - Method in class yams.math.<a href="yams/math/ExponentialProfilePIDController.html" title="class in yams.math">ExponentialProfilePIDController</a></dt>
 <dd>
@@ -1435,6 +1474,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html#getMechanismPosition()" class="member-name-link">getMechanismPosition()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html#getMechanismPosition()" class="member-name-link">getMechanismPosition()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorController.html#getMechanismPosition()" class="member-name-link">getMechanismPosition()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Get the mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Angle</code></a> taking the configured <a href="yams/gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> from
@@ -1496,6 +1537,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html#getMechanismStatorVoltage()" class="member-name-link">getMechanismStatorVoltage()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html#getMechanismStatorVoltage()" class="member-name-link">getMechanismStatorVoltage()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/SimSupplier.html#getMechanismSupplyVoltage()" class="member-name-link">getMechanismSupplyVoltage()</a> - Method in interface yams.motorcontrollers.<a href="yams/motorcontrollers/SimSupplier.html" title="interface in yams.motorcontrollers">SimSupplier</a></dt>
 <dd>
 <div class="block">Gets the supply voltage for the motor controller.</div>
@@ -1503,6 +1546,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/simulation/ArmSimSupplier.html#getMechanismSupplyVoltage()" class="member-name-link">getMechanismSupplyVoltage()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ArmSimSupplier.html" title="class in yams.motorcontrollers.simulation">ArmSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html#getMechanismSupplyVoltage()" class="member-name-link">getMechanismSupplyVoltage()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html#getMechanismSupplyVoltage()" class="member-name-link">getMechanismSupplyVoltage()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/gearing/MechanismGearing.html#getMechanismToRotorRatio()" class="member-name-link">getMechanismToRotorRatio()</a> - Method in class yams.gearing.<a href="yams/gearing/MechanismGearing.html" title="class in yams.gearing">MechanismGearing</a></dt>
 <dd>
@@ -1525,6 +1570,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/simulation/ArmSimSupplier.html#getMechanismVelocity()" class="member-name-link">getMechanismVelocity()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ArmSimSupplier.html" title="class in yams.motorcontrollers.simulation">ArmSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html#getMechanismVelocity()" class="member-name-link">getMechanismVelocity()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html#getMechanismVelocity()" class="member-name-link">getMechanismVelocity()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorController.html#getMechanismVelocity()" class="member-name-link">getMechanismVelocity()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>
@@ -1735,12 +1782,14 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/mechanisms/positional/Arm.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional">Arm</a></dt>
 <dd>
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined in the
+<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
+ in the
  <a href="yams/mechanisms/config/MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
 </dd>
 <dt><a href="yams/mechanisms/positional/DifferentialMechanism.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional">DifferentialMechanism</a></dt>
 <dd>
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined in the
+<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
+ in the
  <a href="yams/mechanisms/config/MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
 </dd>
 <dt><a href="yams/mechanisms/positional/DoubleJointedArm.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/DoubleJointedArm.html" title="class in yams.mechanisms.positional">DoubleJointedArm</a></dt>
@@ -1764,7 +1813,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/mechanisms/velocity/FlyWheel.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.mechanisms.velocity.<a href="yams/mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity">FlyWheel</a></dt>
 <dd>
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined in the
+<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
+ in the
  <a href="yams/mechanisms/config/MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
 </dd>
 <dt><a href="yams/mechanisms/config/MechanismPositionConfig.html#getRelativePosition()" class="member-name-link">getRelativePosition()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/MechanismPositionConfig.html" title="class in yams.mechanisms.config">MechanismPositionConfig</a></dt>
@@ -1799,6 +1849,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html#getRotorAcceleration()" class="member-name-link">getRotorAcceleration()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html#getRotorAcceleration()" class="member-name-link">getRotorAcceleration()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/local/SparkWrapper.html#getRotorPosition()" class="member-name-link">getRotorPosition()</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/SparkWrapper.html" title="class in yams.motorcontrollers.local">SparkWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/remote/TalonFXSWrapper.html#getRotorPosition()" class="member-name-link">getRotorPosition()</a> - Method in class yams.motorcontrollers.remote.<a href="yams/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXSWrapper</a></dt>
@@ -1812,6 +1864,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/simulation/ArmSimSupplier.html#getRotorPosition()" class="member-name-link">getRotorPosition()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ArmSimSupplier.html" title="class in yams.motorcontrollers.simulation">ArmSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html#getRotorPosition()" class="member-name-link">getRotorPosition()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html#getRotorPosition()" class="member-name-link">getRotorPosition()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorController.html#getRotorPosition()" class="member-name-link">getRotorPosition()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>
@@ -1835,6 +1889,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/simulation/ArmSimSupplier.html#getRotorVelocity()" class="member-name-link">getRotorVelocity()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ArmSimSupplier.html" title="class in yams.motorcontrollers.simulation">ArmSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html#getRotorVelocity()" class="member-name-link">getRotorVelocity()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html#getRotorVelocity()" class="member-name-link">getRotorVelocity()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorController.html#getRotorVelocity()" class="member-name-link">getRotorVelocity()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>
@@ -1911,6 +1967,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/swerve/SwerveDrive.html#getStateFromRobotRelativeChassisSpeeds(edu.wpi.first.math.kinematics.ChassisSpeeds)" class="member-name-link">getStateFromRobotRelativeChassisSpeeds(ChassisSpeeds)</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
 <div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState</code></a>s of the swerve drive given a robot relative chassis speed..</div>
+</dd>
+<dt><a href="yams/motorcontrollers/simulation/BatterySim.html#getStateOfCharge()" class="member-name-link">getStateOfCharge()</a> - Static method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/BatterySim.html" title="class in yams.motorcontrollers.simulation">BatterySim</a></dt>
+<dd>
+<div class="block">Get the simulated state of charge of the battery, from 0 (empty) to 1 (full).</div>
 </dd>
 <dt><a href="yams/mechanisms/config/SwerveModuleConfig.html#getStateOptimization()" class="member-name-link">getStateOptimization()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></dt>
 <dd>
@@ -2118,6 +2178,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html#getUpdatedSim()" class="member-name-link">getUpdatedSim()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html#getUpdatedSim()" class="member-name-link">getUpdatedSim()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/mechanisms/positional/DoubleJointedArm.html#getUpperAngle()" class="member-name-link">getUpperAngle()</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/DoubleJointedArm.html" title="class in yams.mechanisms.positional">DoubleJointedArm</a></dt>
 <dd>
 <div class="block">Get the elbow angle of the DoubleJointedArm</div>
@@ -2257,6 +2319,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/simulation/ArmSimSupplier.html#isInputFed()" class="member-name-link">isInputFed()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ArmSimSupplier.html" title="class in yams.motorcontrollers.simulation">ArmSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html#isInputFed()" class="member-name-link">isInputFed()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html#isInputFed()" class="member-name-link">isInputFed()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorController.html#isMotor(edu.wpi.first.math.system.plant.DCMotor,edu.wpi.first.math.system.plant.DCMotor)" class="member-name-link">isMotor(DCMotor, DCMotor)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>
@@ -2414,6 +2478,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/swerve/SwerveModule.html#m_azimuthMotorController" class="member-name-link">m_azimuthMotorController</a> - Variable in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve">SwerveModule</a></dt>
 <dd>
 <div class="block">Azimuth motor controller.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/SmartMotorController.html#m_batterySimUUID" class="member-name-link">m_batterySimUUID</a> - Variable in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
+<dd>
+<div class="block">Battery simulation UUID used when standalone simulation.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorController.html#m_closedLoopControllerThread" class="member-name-link">m_closedLoopControllerThread</a> - Variable in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>
@@ -2828,6 +2896,11 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Remove all commands registered for the given subsystem instance.</div>
 </dd>
+<dt><a href="yams/motorcontrollers/simulation/BatterySim.html#replaceSOCInterpolation(edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap)" class="member-name-link">replaceSOCInterpolation(InterpolatingDoubleTreeMap)</a> - Static method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/BatterySim.html" title="class in yams.motorcontrollers.simulation">BatterySim</a></dt>
+<dd>
+<div class="block">Replace the default state-of-charge &rarr; open circuit voltage interpolation table used when
+ discharge simulation is enabled with <a href="yams/motorcontrollers/simulation/BatterySim.html#enableDischarge(double,edu.wpi.first.units.measure.Voltage,edu.wpi.first.units.measure.Resistance)"><code>BatterySim.enableDischarge(double, Voltage, Resistance)</code></a>.</div>
+</dd>
 <dt><a href="yams/math/ExponentialProfilePIDController.html#reset(double,double)" class="member-name-link">reset(double, double)</a> - Method in class yams.math.<a href="yams/math/ExponentialProfilePIDController.html" title="class in yams.math">ExponentialProfilePIDController</a></dt>
 <dd>
 <div class="block">Reset the PID and profile with the given position and velocity as the measured position and velocity.</div>
@@ -2847,6 +2920,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/swerve/SwerveDrive.html#resetAzimuthPID()" class="member-name-link">resetAzimuthPID()</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
 <div class="block">Resets the azimuth PID controller.</div>
+</dd>
+<dt><a href="yams/motorcontrollers/simulation/BatterySim.html#resetDischarge()" class="member-name-link">resetDischarge()</a> - Static method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/BatterySim.html" title="class in yams.motorcontrollers.simulation">BatterySim</a></dt>
+<dd>
+<div class="block">Reset the simulated battery back to a full charge.</div>
 </dd>
 <dt><a href="yams/mechanisms/swerve/SwerveDrive.html#resetOdometry(edu.wpi.first.math.geometry.Pose2d)" class="member-name-link">resetOdometry(Pose2d)</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
@@ -3451,6 +3528,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html#setMechanismPosition(edu.wpi.first.units.measure.Angle)" class="member-name-link">setMechanismPosition(Angle)</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html#setMechanismPosition(edu.wpi.first.units.measure.Angle)" class="member-name-link">setMechanismPosition(Angle)</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/mechanisms/SmartMechanism.html#setMechanismPositionSetpoint(edu.wpi.first.units.measure.Angle)" class="member-name-link">setMechanismPositionSetpoint(Angle)</a> - Method in class yams.mechanisms.<a href="yams/mechanisms/SmartMechanism.html" title="class in yams.mechanisms">SmartMechanism</a></dt>
 <dd>
 <div class="block">Sets the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> to the given angle.</div>
@@ -3463,6 +3542,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html#setMechanismStatorDutyCycle(double)" class="member-name-link">setMechanismStatorDutyCycle(double)</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html#setMechanismStatorDutyCycle(double)" class="member-name-link">setMechanismStatorDutyCycle(double)</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/SimSupplier.html#setMechanismStatorVoltage(edu.wpi.first.units.measure.Voltage)" class="member-name-link">setMechanismStatorVoltage(Voltage)</a> - Method in interface yams.motorcontrollers.<a href="yams/motorcontrollers/SimSupplier.html" title="interface in yams.motorcontrollers">SimSupplier</a></dt>
 <dd>
 <div class="block">Set mechanism voltage, mostly used for SysId testing.</div>
@@ -3470,6 +3551,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/simulation/ArmSimSupplier.html#setMechanismStatorVoltage(edu.wpi.first.units.measure.Voltage)" class="member-name-link">setMechanismStatorVoltage(Voltage)</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ArmSimSupplier.html" title="class in yams.motorcontrollers.simulation">ArmSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html#setMechanismStatorVoltage(edu.wpi.first.units.measure.Voltage)" class="member-name-link">setMechanismStatorVoltage(Voltage)</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html#setMechanismStatorVoltage(edu.wpi.first.units.measure.Voltage)" class="member-name-link">setMechanismStatorVoltage(Voltage)</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/local/SparkWrapper.html#setMechanismUpperLimit(edu.wpi.first.units.measure.Angle)" class="member-name-link">setMechanismUpperLimit(Angle)</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/SparkWrapper.html" title="class in yams.motorcontrollers.local">SparkWrapper</a></dt>
 <dd>&nbsp;</dd>
@@ -3488,6 +3571,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/simulation/ArmSimSupplier.html#setMechanismVelocity(edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">setMechanismVelocity(AngularVelocity)</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ArmSimSupplier.html" title="class in yams.motorcontrollers.simulation">ArmSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html#setMechanismVelocity(edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">setMechanismVelocity(AngularVelocity)</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html#setMechanismVelocity(edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">setMechanismVelocity(AngularVelocity)</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/mechanisms/SmartMechanism.html#setMechanismVelocitySetpoint(edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">setMechanismVelocitySetpoint(AngularVelocity)</a> - Method in class yams.mechanisms.<a href="yams/mechanisms/SmartMechanism.html" title="class in yams.mechanisms">SmartMechanism</a></dt>
 <dd>
@@ -3960,6 +4045,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html#starveInput()" class="member-name-link">starveInput()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html#starveInput()" class="member-name-link">starveInput()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/SimSupplier.html#starveUpdateSim()" class="member-name-link">starveUpdateSim()</a> - Method in interface yams.motorcontrollers.<a href="yams/motorcontrollers/SimSupplier.html" title="interface in yams.motorcontrollers">SimSupplier</a></dt>
 <dd>
 <div class="block">Starve the update sim watch.</div>
@@ -3967,6 +4054,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/simulation/ArmSimSupplier.html#starveUpdateSim()" class="member-name-link">starveUpdateSim()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ArmSimSupplier.html" title="class in yams.motorcontrollers.simulation">ArmSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html#starveUpdateSim()" class="member-name-link">starveUpdateSim()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html#starveUpdateSim()" class="member-name-link">starveUpdateSim()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.SmartMotorControllerOptions.html#STATOR_CURRENT_LIMIT" class="member-name-link">STATOR_CURRENT_LIMIT</a> - Enum constant in enum class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.SmartMotorControllerOptions.html" title="enum class in yams.motorcontrollers">SmartMotorControllerConfig.SmartMotorControllerOptions</a></dt>
 <dd>
@@ -4182,6 +4271,8 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/simulation/ArmSimSupplier.html#updateSimState()" class="member-name-link">updateSimState()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ArmSimSupplier.html" title="class in yams.motorcontrollers.simulation">ArmSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html#updateSimState()" class="member-name-link">updateSimState()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html#updateSimState()" class="member-name-link">updateSimState()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/mechanisms/positional/Arm.html#updateTelemetry()" class="member-name-link">updateTelemetry()</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional">Arm</a></dt>
 <dd>&nbsp;</dd>

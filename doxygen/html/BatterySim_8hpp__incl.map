@@ -1,0 +1,13 @@
+<map id="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/motorcontrollers/simulation/BatterySim.hpp" name="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/motorcontrollers/simulation/BatterySim.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="271,5,471,75"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,123,121,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="272,74,115,121,113,116,270,69"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="145,123,288,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="317,77,249,118,246,113,314,73"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="312,123,431,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="374,75,374,109,369,109,369,75"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="455,123,506,148"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="413,73,458,112,455,116,409,77"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="531,123,655,148"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="452,72,554,115,552,120,450,77"/>
+</map>
