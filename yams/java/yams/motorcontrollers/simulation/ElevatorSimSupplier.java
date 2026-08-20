@@ -4,9 +4,12 @@
 package yams.motorcontrollers.simulation;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Microsecond;
 import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -15,77 +18,83 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import java.util.UUID;
 import java.util.function.Supplier;
 import yams.gearing.MechanismGearing;
+import yams.math.DerivativeTimeFilter;
 import yams.motorcontrollers.SimSupplier;
 import yams.motorcontrollers.SmartMotorController;
+import yams.motorcontrollers.SmartMotorControllerConfig;
 
 /**
- * DCMotorSim Supplier — simulates a generic DC motor load (flywheel, roller, or elevator)
- * using WPILib's {@link edu.wpi.first.wpilibj.simulation.DCMotorSim}.
+ * ElevatorSim Supplier — simulates an elevator mechanism using WPILib's
+ * {@link edu.wpi.first.wpilibj.simulation.ElevatorSim}.
  *
  * <p>
- * This supplier steps WPILib's {@code DCMotorSim} physics model each control loop and exposes the
- * resulting angular position, angular velocity, current draw, and acceleration through the
- * {@link yams.motorcontrollers.SimSupplier} interface. Unlike
- * {@link yams.motorcontrollers.simulation.ArmSimSupplier}, this model does not simulate gravity or
- * joint limits — it is suited for continuous-rotation mechanisms such as flywheels or rollers, as
- * well as linear mechanisms (elevators) when paired with appropriate gearing.
- * </p>
- *
- * <p>
- * The gear ratio and control period are read from the associated
- * {@link yams.motorcontrollers.SmartMotorController}'s config, so they do not need to be repeated
- * here.
+ * This supplier steps WPILib's {@code ElevatorSim} physics model each control loop and exposes
+ * the resulting height, linear velocity, current draw, and voltage through the
+ * {@link yams.motorcontrollers.SimSupplier} interface. Because {@code ElevatorSim} operates in
+ * linear units (meters), positions and velocities are converted to and from mechanism (angular)
+ * units using the associated {@link yams.motorcontrollers.SmartMotorController}'s config.
  * </p>
  *
  * <h2>Example</h2>
  * <pre>{@code
- * // 1. Build the WPILib DC motor physics model (e.g. a flywheel with MOI 0.001 kg·m²)
- * DCMotorSim flywheelPhysics = new DCMotorSim(
- *     LinearSystemId.createDCMotorSystem(DCMotor.getNEO(1), 0.001, 1.0),
- *     DCMotor.getNEO(1));
+ * // 1. Build the WPILib elevator physics model
+ * ElevatorSim elevatorPhysics = new ElevatorSim(
+ *     DCMotor.getNEO(1),
+ *     10.0,                 // gear ratio (rotor/mechanism)
+ *     5.0,                  // carriage mass (kg)
+ *     Units.inchesToMeters(1.0), // drum radius (meters)
+ *     0.0,                  // minimum height (meters)
+ *     1.5,                  // maximum height (meters)
+ *     true,                 // simulate gravity
+ *     0.0);                 // starting height (meters)
  *
  * // 2. Configure and build the YAMS smart motor controller
  * SmartMotorController motor = new SparkMaxController(
  *     new SmartMotorControllerConfig()
- *         .withGearing(new MechanismGearing(1.0))
+ *         .withGearing(new MechanismGearing(10.0))
  *         .withClosedLoopControlPeriod(Milliseconds.of(20)));
  *
  * // 3. Wrap physics model in the supplier and register it
- * DCMotorSimSupplier sim = new DCMotorSimSupplier(flywheelPhysics, motor);
+ * ElevatorSimSupplier sim = new ElevatorSimSupplier(elevatorPhysics, motor);
  * motor.getConfig().withSimSupplier(sim);
  * }</pre>
  */
-public class DCMotorSimSupplier implements SimSupplier {
-  private boolean inputFed = false;
-  private boolean simUpdated = false;
-  private final Supplier<Double> motorDutyCycleSupplier;
-  private final DCMotorSim sim;
+public class ElevatorSimSupplier implements SimSupplier {
+  private final ElevatorSim sim;
+  private final SmartMotorControllerConfig config;
   private final MechanismGearing mechGearing;
-  private final Time period;
   private final DCMotor motor;
   private final UUID uuid;
+  private final Supplier<Double> motorDutyCycleSupplier;
+  private final Supplier<Double> pos;
+  private final Supplier<Double> mps;
+  private final DerivativeTimeFilter mpsps;
+  private boolean inputFed = false;
+  private boolean simUpdated = false;
 
   /**
-   * Construct the DCMotorSim supplier
+   * Construct the ElevatorSim supplier
    *
-   * @param simulation           Simulatoin instance
-   * @param smartMotorController SMC for the DCMotorSim..
+   * @param simulation           Simulation instance
+   * @param smartMotorController SMC for the ElevatorSim.
    */
-  public DCMotorSimSupplier(DCMotorSim simulation, SmartMotorController smartMotorController) {
-    var config = smartMotorController.getConfig();
+  public ElevatorSimSupplier(ElevatorSim simulation, SmartMotorController smartMotorController) {
     sim = simulation;
-    motorDutyCycleSupplier = smartMotorController::getDutyCycle;
+    config = smartMotorController.getConfig();
     mechGearing = config.getGearing();
-    period = config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20));
     motor = smartMotorController.getDCMotor();
     uuid = smartMotorController.m_batterySimUUID;
+    motorDutyCycleSupplier = smartMotorController::getDutyCycle;
+    pos = sim::getPositionMeters;
+    mps = sim::getVelocityMetersPerSecond;
+    mpsps = new DerivativeTimeFilter(
+        pos.get(), config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20)));
   }
 
   @Override
@@ -96,11 +105,7 @@ public class DCMotorSimSupplier implements SimSupplier {
     }
     if (!simUpdated) {
       starveInput();
-      sim.update(period.in(Seconds));
-      try {
-        // Thread.sleep(1);
-      } catch (Exception e) {
-      }
+      sim.update(config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Seconds));
       feedUpdateSim();
     }
   }
@@ -148,8 +153,8 @@ public class DCMotorSimSupplier implements SimSupplier {
 
   @Override
   public Voltage getMechanismStatorVoltage() {
-    return Volts.of(
-        motor.getVoltage(sim.getTorqueNewtonMeters(), sim.getAngularVelocityRadPerSec()));
+    return Volts.of(motor.getVoltage(
+        motor.getTorque(sim.getCurrentDrawAmps()), getMechanismVelocity().in(RadiansPerSecond)));
   }
 
   @Override
@@ -160,13 +165,12 @@ public class DCMotorSimSupplier implements SimSupplier {
 
   @Override
   public Angle getMechanismPosition() {
-    return sim.getAngularPosition();
+    return config.convertToMechanism(Meters.of(pos.get()));
   }
 
   @Override
   public void setMechanismPosition(Angle position) {
-    sim.setAngle(position.in(
-        Radians)); //.times(config.getGearing().getMechanismToRotorRatio()).in(Radians));
+    sim.setState(config.convertFromMechanism(position).in(Meters), mps.get());
   }
 
   @Override
@@ -176,12 +180,12 @@ public class DCMotorSimSupplier implements SimSupplier {
 
   @Override
   public AngularVelocity getMechanismVelocity() {
-    return sim.getAngularVelocity();
+    return config.convertToMechanism(MetersPerSecond.of(mps.get()));
   }
 
   @Override
   public void setMechanismVelocity(AngularVelocity velocity) {
-    sim.setAngularVelocity(velocity.in(RadiansPerSecond));
+    sim.setState(pos.get(), config.convertFromMechanism(velocity).in(MetersPerSecond));
   }
 
   @Override
@@ -196,6 +200,7 @@ public class DCMotorSimSupplier implements SimSupplier {
 
   @Override
   public AngularAcceleration getRotorAcceleration() {
-    return sim.getAngularAcceleration();
+    return RotationsPerSecond.per(Microsecond)
+        .of(mpsps.derivative(getRotorVelocity().in(RotationsPerSecond)));
   }
 }

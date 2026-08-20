@@ -13,7 +13,6 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
@@ -446,9 +445,6 @@ public class DoubleJointedArm extends SmartPositionalMechanism
       m_upperSMC.getSimSupplier().get().updateSimState();
       m_upperSMC.simIterate();
       m_upperSMC.getSimSupplier().get().starveUpdateSim();
-      RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_lowerArmSim.get().getCurrentDrawAmps(),
-                                                                               m_upperArmSim.get()
-                                                                                            .getCurrentDrawAmps()));
       visualizationUpdate();
     }
   }

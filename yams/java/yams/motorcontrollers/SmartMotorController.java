@@ -48,6 +48,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import java.util.UUID;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -166,6 +167,10 @@ public abstract class SmartMotorController
    * Alert shown when the closed loop controller is running on the RIO.
    */
   private   Alert                                         m_rioClosedLoopAlert          = null;
+  /**
+   * Battery simulation UUID used when standalone simulation.
+   */
+  public   final UUID                                    m_batterySimUUID = UUID.randomUUID();
 
   /**
    * Create a {@link SmartMotorController} wrapper from the provided motor controller object.
