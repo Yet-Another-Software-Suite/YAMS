@@ -89,8 +89,7 @@ loadScripts(document, 'script');</script>
  // Build and construct
  SmartMotorController motor = new SparkWrapper(
      new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1),
-     new
- SmartMotorControllerConfig().withClosedLoopController(0.2,0,0).withStatorCurrentLimit(Amps.of(40)));
+     new SmartMotorControllerConfig().withClosedLoopController(0.2,0,0).withStatorCurrentLimit(Amps.of(40)));
  ArmConfig armConfig = new ArmConfig().withLength(Meters.of(0.5));
  Arm arm = new Arm(armConfig, motor);
 
@@ -172,8 +171,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Translation3d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link">Translation3d</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
- in the
+<div class="block">Get the relative position of the mechanism, taking into account the relative position defined in the
  <a href="../config/MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/button/Trigger.html" title="class or interface in edu.wpi.first.wpilibj2.command.button" class="external-link">Trigger</a></code></div>
@@ -340,8 +338,7 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getRelativeMechanismPosition()">
 <h3>getRelativeMechanismPosition</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Translation3d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link">Translation3d</a></span>&nbsp;<span class="element-name">getRelativeMechanismPosition</span>()</div>
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
- in the
+<div class="block">Get the relative position of the mechanism, taking into account the relative position defined in the
  <a href="../config/MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
@@ -441,8 +438,7 @@ loadScripts(document, 'script');</script>
 <dt>Returns:</dt>
 <dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> that sets the arm to the desired angle.</dd>
 <dt>Implementation Note:</dt>
-<dd>This command will not stop. It should NOT be used when there is a default command on
- the Subsystem.</dd>
+<dd>This command will not stop. It should NOT be used when there is a default command on the Subsystem.</dd>
 </dl>
 </section>
 </li>
@@ -459,8 +455,7 @@ loadScripts(document, 'script');</script>
 <dt>Returns:</dt>
 <dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> that sets the arm to the desired angle.</dd>
 <dt>Implementation Note:</dt>
-<dd>This command will stop, but the last control request to the motor controller will
- continue. It should NOT be used when there is a default command on the Subsystem.</dd>
+<dd>This command will stop, but the last control request to the motor controller will continue. It should NOT be used when there is a default command on the Subsystem.</dd>
 </dl>
 </section>
 </li>

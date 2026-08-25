@@ -98,10 +98,10 @@ loadScripts(document, 'script');</script>
      .withMotorInverted(false)
      .withStatorCurrentLimit(Amps.of(40))
      .withClosedLoopController(0.2,0,0)
-     .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5)); // required for
- SparkAbsoluteEncoder SmartMotorController motor = new SparkWrapper( new SparkMax(3,
- MotorType.kBrushless), DCMotor.getNEO(1), config); Arm arm = new Arm(new
- ArmConfig(motor).withLength(Meters.of(0.6)));
+     .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5)); // required for SparkAbsoluteEncoder
+ SmartMotorController motor = new SparkWrapper(
+     new SparkMax(3, MotorType.kBrushless), DCMotor.getNEO(1), config);
+ Arm arm = new Arm(new ArmConfig(motor).withLength(Meters.of(0.6)));
  </code></pre></div>
 </section>
 <section class="summary">
@@ -528,8 +528,7 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>controller</code> - <a href="https://codedocs.revrobotics.com/java/com/revrobotics/spark/SparkMax.html" title="class or interface in com.revrobotics.spark" class="external-link"><code>SparkMax</code></a> or <a href="https://codedocs.revrobotics.com/java/com/revrobotics/spark/SparkFlex.html" title="class or interface in com.revrobotics.spark" class="external-link"><code>SparkFlex</code></a></dd>
-<dd><code>motor</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/system/plant/DCMotor.html" title="class or interface in edu.wpi.first.math.system.plant" class="external-link"><code>DCMotor</code></a> controller by the <a href="https://codedocs.revrobotics.com/java/com/revrobotics/spark/SparkFlex.html" title="class or interface in com.revrobotics.spark" class="external-link"><code>SparkFlex</code></a> or <a href="https://codedocs.revrobotics.com/java/com/revrobotics/spark/SparkMax.html" title="class or interface in com.revrobotics.spark" class="external-link"><code>SparkMax</code></a>. Must
-     be a brushless
+<dd><code>motor</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/system/plant/DCMotor.html" title="class or interface in edu.wpi.first.math.system.plant" class="external-link"><code>DCMotor</code></a> controller by the <a href="https://codedocs.revrobotics.com/java/com/revrobotics/spark/SparkFlex.html" title="class or interface in com.revrobotics.spark" class="external-link"><code>SparkFlex</code></a> or <a href="https://codedocs.revrobotics.com/java/com/revrobotics/spark/SparkMax.html" title="class or interface in com.revrobotics.spark" class="external-link"><code>SparkMax</code></a>. Must be a brushless
                    motor.</dd>
 <dd><code>config</code> - <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> to apply.</dd>
 </dl>

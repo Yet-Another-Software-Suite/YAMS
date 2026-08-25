@@ -145,6 +145,12 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ab8f579c31c5bcd8d76ddc2bdaeb9e977"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af2cf42b1618d4f3ebabe905bee28b3a6" id="r_af2cf42b1618d4f3ebabe905bee28b3a6"><td class="memItemLeft" align="right" valign="top">frc::SwerveDriveKinematics&lt; NumModules &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af2cf42b1618d4f3ebabe905bee28b3a6">GetKinematics</a> ()</td></tr>
 <tr class="separator:af2cf42b1618d4f3ebabe905bee28b3a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72033ae1c91d9642a75710a0c742788d" id="r_a72033ae1c91d9642a75710a0c742788d"><td class="memItemLeft" align="right" valign="top">frc::Field2d &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a72033ae1c91d9642a75710a0c742788d">GetField2d</a> ()</td></tr>
+<tr class="separator:a72033ae1c91d9642a75710a0c742788d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a00c419db374bd239a4e811c94eb1e6d8" id="r_a00c419db374bd239a4e811c94eb1e6d8"><td class="memItemLeft" align="right" valign="top">frc::ChassisSpeeds&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a00c419db374bd239a4e811c94eb1e6d8">GetDesiredChassisSpeeds</a> ()</td></tr>
+<tr class="separator:a00c419db374bd239a4e811c94eb1e6d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45cd5eccf8bc2bb2e89a17fe82461245" id="r_a45cd5eccf8bc2bb2e89a17fe82461245"><td class="memItemLeft" align="right" valign="top">frc::SwerveDrivePoseEstimator&lt; NumModules &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a45cd5eccf8bc2bb2e89a17fe82461245">GetPoseEstimator</a> ()</td></tr>
+<tr class="separator:a45cd5eccf8bc2bb2e89a17fe82461245"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;size_t NumModules = 4&gt;<br />
@@ -506,6 +512,35 @@ template&lt;size_t NumModules = 4&gt; </div>
 
 </div>
 </div>
+<a id="a00c419db374bd239a4e811c94eb1e6d8" name="a00c419db374bd239a4e811c94eb1e6d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a00c419db374bd239a4e811c94eb1e6d8">&#9670;&#160;</a></span>GetDesiredChassisSpeeds()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;size_t NumModules = 4&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">frc::ChassisSpeeds <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1_swerve_drive.html">yams::mechanisms::swerve::SwerveDrive</a>&lt; NumModules &gt;::GetDesiredChassisSpeeds </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get the last-commanded desired robot-relative chassis speeds. This is the value cached by <a class="el" href="#a854d53023732eb9fe1c4b1eaceb47efd">SetRobotRelativeChassisSpeeds()</a> (which <a class="el" href="#af3b6d98926171086de2cef9a3a80e35c">SetFieldRelativeChassisSpeeds()</a> and <a class="el" href="#aa1e0f9585f97f6f327973cfc7a8dd22d">Drive()</a> funnel through) and published on every <a class="el" href="#a6ae682c0cf8dac806b53199430eca32f">UpdateTelemetry()</a> call; it is a setpoint, not a measurement of actual robot motion. Use <a class="el" href="#a8f86e9de55a5a9a217fd480b1e3b980e">GetRobotRelativeSpeed()</a> or <a class="el" href="#a1c6a323cea5784905ec1fe9b35f2d856">GetFieldRelativeSpeed()</a> instead if you need the drive's actual measured speed.</p>
+<dl class="section return"><dt>Returns</dt><dd>Robot-relative chassis speeds last commanded to the drive. Defaults to a zeroed frc::ChassisSpeeds if the drive has never been commanded. </dd></dl>
+
+</div>
+</div>
 <a id="acd4e4bbbde94cde2cce833bebb89b050" name="acd4e4bbbde94cde2cce833bebb89b050"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#acd4e4bbbde94cde2cce833bebb89b050">&#9670;&#160;</a></span>GetDistanceFromPose()</h2>
 
@@ -538,6 +573,34 @@ template&lt;size_t NumModules = 4&gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Distance in metres. </dd></dl>
+
+</div>
+</div>
+<a id="a72033ae1c91d9642a75710a0c742788d" name="a72033ae1c91d9642a75710a0c742788d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a72033ae1c91d9642a75710a0c742788d">&#9670;&#160;</a></span>GetField2d()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;size_t NumModules = 4&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">frc::Field2d &amp; <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1_swerve_drive.html">yams::mechanisms::swerve::SwerveDrive</a>&lt; NumModules &gt;::GetField2d </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get the Field2d used to display the robot's pose, so callers (e.g. vision subsystems) can publish additional objects onto the same field widget instead of creating their own. </p>
 
 </div>
 </div>
@@ -770,6 +833,36 @@ template&lt;size_t NumModules = 4&gt; </div>
 </table>
 </div><div class="memdoc">
 <p>Get the current estimated field-relative pose. </p>
+
+</div>
+</div>
+<a id="a45cd5eccf8bc2bb2e89a17fe82461245" name="a45cd5eccf8bc2bb2e89a17fe82461245"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45cd5eccf8bc2bb2e89a17fe82461245">&#9670;&#160;</a></span>GetPoseEstimator()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;size_t NumModules = 4&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">frc::SwerveDrivePoseEstimator&lt; NumModules &gt; &amp; <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1_swerve_drive.html">yams::mechanisms::swerve::SwerveDrive</a>&lt; NumModules &gt;::GetPoseEstimator </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get the SwerveDrivePoseEstimator backing this drive's odometry.</p>
+<dl class="section warning"><dt>Warning</dt><dd>Do not update this outside of <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1_swerve_drive.html">SwerveDrive</a> code. <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1_swerve_drive.html">SwerveDrive</a> calls Update() on this estimator internally every loop (from <a class="el" href="#a6ae682c0cf8dac806b53199430eca32f">UpdateTelemetry()</a>); calling Update() yourself will feed it duplicate or out-of-order gyro/module-position samples and corrupt the pose estimate. Likewise, do not call ResetPosition()/ResetPose() on the returned reference directly &ndash; call <a class="el" href="#ab61fdd85d7d22e9944fde3d941285bd4">ResetOdometry()</a> instead so the drive's own gyro offset and cached state stay consistent with the estimator. Calling <a class="el" href="#aa2fffb6b1058eee87caac150a4e78652">AddVisionMeasurement()</a> on the returned reference (or via the <a class="el" href="#aa2fffb6b1058eee87caac150a4e78652">SwerveDrive::AddVisionMeasurement()</a> overloads) is safe and is the intended way to fuse external measurements. The returned reference is not thread-safe; only call its mutating methods from the thread that calls <a class="el" href="#a6ae682c0cf8dac806b53199430eca32f">UpdateTelemetry()</a> (normally the main robot loop).</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>SwerveDrivePoseEstimator of the drive. </dd></dl>
 
 </div>
 </div>

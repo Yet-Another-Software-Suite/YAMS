@@ -185,16 +185,16 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addVisionMeasurement(edu.wpi.first.math.geometry.Pose2d,double)" class="member-name-link">addVisionMeasurement</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Pose2d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link">Pose2d</a>&nbsp;robotPose,
  double&nbsp;timestamp)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Add a vision measurement to the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>SwerveDrivePoseEstimator</code></a> and update the gyro reading with the given
- timestamp of the vision measurement.</div>
+<div class="block">Add a vision measurement to the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>SwerveDrivePoseEstimator</code></a> and update the gyro reading
+ with the given timestamp of the vision measurement.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addVisionMeasurement(edu.wpi.first.math.geometry.Pose2d,double,edu.wpi.first.math.Matrix)" class="member-name-link">addVisionMeasurement</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Pose2d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link">Pose2d</a>&nbsp;robotPose,
  double&nbsp;timestamp,
  <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/Matrix.html" title="class or interface in edu.wpi.first.math" class="external-link">Matrix</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/numbers/N3.html" title="class or interface in edu.wpi.first.math.numbers" class="external-link">N3</a>,<wbr><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/numbers/N1.html" title="class or interface in edu.wpi.first.math.numbers" class="external-link">N1</a>&gt;&nbsp;visionMeasurementStdDevs)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Add a vision measurement to the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>SwerveDrivePoseEstimator</code></a> and update the gyro reading with the given
- timestamp of the vision measurement.</div>
+<div class="block">Add a vision measurement to the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>SwerveDrivePoseEstimator</code></a> and update the gyro reading
+ with the given timestamp of the vision measurement.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link">Command</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#drive(java.util.function.Supplier)" class="member-name-link">drive</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">ChassisSpeeds</a>&gt;&nbsp;robotRelativeChassisSpeeds)</code></div>
@@ -216,10 +216,20 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the <a href="../config/SwerveDriveConfig.html" title="class in yams.mechanisms.config"><code>SwerveDriveConfig</code></a> of the drive.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDistanceFromPose(edu.wpi.first.math.geometry.Pose2d)" class="member-name-link">getDistanceFromPose</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Pose2d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link">Pose2d</a>&nbsp;pose)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">ChassisSpeeds</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDesiredChassisSpeeds()" class="member-name-link">getDesiredChassisSpeeds</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get the last-commanded desired robot-relative <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> of the drive.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDistanceFromPose(edu.wpi.first.math.geometry.Pose2d)" class="member-name-link">getDistanceFromPose</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Pose2d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link">Pose2d</a>&nbsp;pose)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Distance</code></a> from the given pose to the robot.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/Field2d.html" title="class or interface in edu.wpi.first.wpilibj.smartdashboard" class="external-link">Field2d</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getField2d()" class="member-name-link">getField2d</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/Field2d.html" title="class or interface in edu.wpi.first.wpilibj.smartdashboard" class="external-link"><code>Field2d</code></a> used to display the robot's pose, so callers (e.g.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">ChassisSpeeds</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getFieldRelativeSpeed()" class="member-name-link">getFieldRelativeSpeed</a>()</code></div>
@@ -261,71 +271,76 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Gets the measured pose (position and rotation) of the robot, as reported by odometry.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">ChassisSpeeds</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRobotRelativeSpeed()" class="member-name-link">getRobotRelativeSpeed</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link">SwerveDrivePoseEstimator</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPoseEstimator()" class="member-name-link">getPoseEstimator</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>SwerveDrivePoseEstimator</code></a> backing this drive's odometry.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">ChassisSpeeds</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRobotRelativeSpeed()" class="member-name-link">getRobotRelativeSpeed</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the robot relative speed of the drive.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">SwerveModuleState</a>[]</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getStateFromRobotRelativeChassisSpeeds(edu.wpi.first.math.kinematics.ChassisSpeeds)" class="member-name-link">getStateFromRobotRelativeChassisSpeeds</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">ChassisSpeeds</a>&nbsp;robotRelativeChassisSpeeds)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">SwerveModuleState</a>[]</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getStateFromRobotRelativeChassisSpeeds(edu.wpi.first.math.kinematics.ChassisSpeeds)" class="member-name-link">getStateFromRobotRelativeChassisSpeeds</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">ChassisSpeeds</a>&nbsp;robotRelativeChassisSpeeds)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState</code></a>s of the swerve drive given a robot relative chassis speed..</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#lockPose()" class="member-name-link">lockPose</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#lockPose()" class="member-name-link">lockPose</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Point all modules toward the robot center, thus making the robot very difficult to move.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetAzimuthPID()" class="member-name-link">resetAzimuthPID</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetAzimuthPID()" class="member-name-link">resetAzimuthPID</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Resets the azimuth PID controller.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetOdometry(edu.wpi.first.math.geometry.Pose2d)" class="member-name-link">resetOdometry</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Pose2d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link">Pose2d</a>&nbsp;pose)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetOdometry(edu.wpi.first.math.geometry.Pose2d)" class="member-name-link">resetOdometry</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Pose2d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link">Pose2d</a>&nbsp;pose)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Resets odometry to the given pose.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetTranslationPID()" class="member-name-link">resetTranslationPID</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetTranslationPID()" class="member-name-link">resetTranslationPID</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Resets the translation PID controller.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setFieldRelativeChassisSpeeds(edu.wpi.first.math.kinematics.ChassisSpeeds)" class="member-name-link">setFieldRelativeChassisSpeeds</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">ChassisSpeeds</a>&nbsp;fieldRelativeChassisSpeeds)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setFieldRelativeChassisSpeeds(edu.wpi.first.math.kinematics.ChassisSpeeds)" class="member-name-link">setFieldRelativeChassisSpeeds</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">ChassisSpeeds</a>&nbsp;fieldRelativeChassisSpeeds)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set field relative chassis speeds.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setRobotRelativeChassisSpeeds(edu.wpi.first.math.kinematics.ChassisSpeeds)" class="member-name-link">setRobotRelativeChassisSpeeds</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">ChassisSpeeds</a>&nbsp;robotRelativeChassisSpeeds)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setRobotRelativeChassisSpeeds(edu.wpi.first.math.kinematics.ChassisSpeeds)" class="member-name-link">setRobotRelativeChassisSpeeds</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">ChassisSpeeds</a>&nbsp;robotRelativeChassisSpeeds)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set robot relative chassis speeds.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSwerveModuleStates(edu.wpi.first.math.kinematics.SwerveModuleState%5B%5D)" class="member-name-link">setSwerveModuleStates</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">SwerveModuleState</a>[]&nbsp;states)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSwerveModuleStates(edu.wpi.first.math.kinematics.SwerveModuleState%5B%5D)" class="member-name-link">setSwerveModuleStates</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">SwerveModuleState</a>[]&nbsp;states)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState</code></a>s of the swerve drive directly.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setVisionMeasurementStdDevs(edu.wpi.first.math.Matrix)" class="member-name-link">setVisionMeasurementStdDevs</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/Matrix.html" title="class or interface in edu.wpi.first.math" class="external-link">Matrix</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/numbers/N3.html" title="class or interface in edu.wpi.first.math.numbers" class="external-link">N3</a>,<wbr><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/numbers/N1.html" title="class or interface in edu.wpi.first.math.numbers" class="external-link">N1</a>&gt;&nbsp;visionMeasurementStdDevs)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setVisionMeasurementStdDevs(edu.wpi.first.math.Matrix)" class="member-name-link">setVisionMeasurementStdDevs</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/Matrix.html" title="class or interface in edu.wpi.first.math" class="external-link">Matrix</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/numbers/N3.html" title="class or interface in edu.wpi.first.math.numbers" class="external-link">N3</a>,<wbr><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/numbers/N1.html" title="class or interface in edu.wpi.first.math.numbers" class="external-link">N1</a>&gt;&nbsp;visionMeasurementStdDevs)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Sets the pose estimator's trust of global measurements.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#simIterate()" class="member-name-link">simIterate</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#simIterate()" class="member-name-link">simIterate</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Simulate the drive, updating the gyroscope based off of module states.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateTelemetry()" class="member-name-link">updateTelemetry</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateTelemetry()" class="member-name-link">updateTelemetry</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Update the telemetry and <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>SwerveDrivePoseEstimator</code></a> of the drive.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#zeroGyro()" class="member-name-link">zeroGyro</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Resets the gyro angle to zero and resets odometry to the same position, but facing toward 0 (red alliance
- station).</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#zeroGyro()" class="member-name-link">zeroGyro</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Resets the gyro angle to zero and resets odometry to the same position, but facing toward 0
+ (red alliance station).</div>
 </div>
 </div>
 </div>
@@ -370,8 +385,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Create a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/RunCommand.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>RunCommand</code></a> to drive the swerve drive with robot relative chassis speeds.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>robotRelativeChassisSpeeds</code> - <code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">ChassisSpeeds</a>&gt;</code> for the robot relative chassis speeds. Could also
-                                   use <a href="utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a></dd>
+<dd><code>robotRelativeChassisSpeeds</code> - <code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">ChassisSpeeds</a>&gt;</code> for the robot relative
+     chassis speeds. Could also use <a href="utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a></dd>
 <dt>Returns:</dt>
 <dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/RunCommand.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>RunCommand</code></a> to drive the swerve drive.</dd>
 <dt>Implementation Note:</dt>
@@ -394,8 +409,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="lockPose()">
 <h3>lockPose</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">lockPose</span>()</div>
-<div class="block">Point all modules toward the robot center, thus making the robot very difficult to move. Forcing the robot to keep
- the current pose.</div>
+<div class="block">Point all modules toward the robot center, thus making the robot very difficult to move.
+ Forcing the robot to keep the current pose.</div>
 <dl class="notes">
 <dt>Implementation Note:</dt>
 <dd>Not compatible with AdvantageKit</dd>
@@ -409,7 +424,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState</code></a>s of the swerve drive directly.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>states</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState</code></a>s to use, must be the same count as the swerve drive is configured order is
+<dd><code>states</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState</code></a>s to use, must be the same count as the swerve drive is
+     configured order is
                Clockwise from FL.</dd>
 <dt>Implementation Note:</dt>
 <dd>Not compatible with AdvantageKit if MapleSim is defined.</dd>
@@ -477,8 +493,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="zeroGyro()">
 <h3>zeroGyro</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">zeroGyro</span>()</div>
-<div class="block">Resets the gyro angle to zero and resets odometry to the same position, but facing toward 0 (red alliance
- station).</div>
+<div class="block">Resets the gyro angle to zero and resets odometry to the same position, but facing toward 0
+ (red alliance station).</div>
 <dl class="notes">
 <dt>Implementation Note:</dt>
 <dd>Not compatible with AdvantageKit</dd>
@@ -500,13 +516,13 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="resetOdometry(edu.wpi.first.math.geometry.Pose2d)">
 <h3>resetOdometry</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">resetOdometry</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Pose2d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link">Pose2d</a>&nbsp;pose)</span></div>
-<div class="block">Resets odometry to the given pose. Gyro angle and module positions do not need to be reset when calling this
- method. However, if either gyro angle or module position is reset, this must be called in order for odometry to
- keep working.</div>
+<div class="block">Resets odometry to the given pose. Gyro angle and module positions do not need to be reset when
+ calling this method. However, if either gyro angle or module position is reset, this must be
+ called in order for odometry to keep working.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>pose</code> - The pose to set the odometry to. Field relative, blue-origin where 0deg is facing towards RED
-             alliance.</dd>
+<dd><code>pose</code> - The pose to set the odometry to. Field relative, blue-origin where 0deg is facing
+     towards RED alliance.</dd>
 </dl>
 </section>
 </li>
@@ -557,7 +573,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Drive the robot to the given pose.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>pose</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Pose2d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link"><code>Pose2d</code></a> to drive the robot to. Field relative, blue-origin where 0deg is facing towards RED</dd>
+<dd><code>pose</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Pose2d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link"><code>Pose2d</code></a> to drive the robot to. Field relative, blue-origin where 0deg is
+     facing towards RED</dd>
 <dt>Returns:</dt>
 <dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> to drive the robot to the given pose.</dd>
 <dt>Implementation Note:</dt>
@@ -571,19 +588,19 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addVisionMeasurement</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Pose2d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link">Pose2d</a>&nbsp;robotPose,
  double&nbsp;timestamp,
  <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/Matrix.html" title="class or interface in edu.wpi.first.math" class="external-link">Matrix</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/numbers/N3.html" title="class or interface in edu.wpi.first.math.numbers" class="external-link">N3</a>,<wbr><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/numbers/N1.html" title="class or interface in edu.wpi.first.math.numbers" class="external-link">N1</a>&gt;&nbsp;visionMeasurementStdDevs)</span></div>
-<div class="block">Add a vision measurement to the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>SwerveDrivePoseEstimator</code></a> and update the gyro reading with the given
- timestamp of the vision measurement.</div>
+<div class="block">Add a vision measurement to the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>SwerveDrivePoseEstimator</code></a> and update the gyro reading
+ with the given timestamp of the vision measurement.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>robotPose</code> - Robot <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Pose2d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link"><code>Pose2d</code></a> as measured by vision.</dd>
-<dd><code>timestamp</code> - Timestamp the measurement was taken as time since startup, should be taken from
+<dd><code>timestamp</code> - Timestamp the measurement was taken as time since startup,
+     should be taken from
                                  <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/Timer.html#getFPGATimestamp()" title="class or interface in edu.wpi.first.wpilibj" class="external-link"><code>Timer.getFPGATimestamp()</code></a> or similar sources.</dd>
 <dd><code>visionMeasurementStdDevs</code> - Vision measurement standard deviation that will be sent to the
-                                 <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>SwerveDrivePoseEstimator</code></a>.The standard deviation of the vision measurement,
-                                 for best accuracy calculate the standard deviation at 2 or more points and fit a
-                                 line to it with the calculated optimal standard deviation. (Units should be meters
-                                 per pixel). By optimizing this you can get * vision accurate to inches instead of
-                                 feet.</dd>
+                                 <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>SwerveDrivePoseEstimator</code></a>.The standard deviation of the
+ vision measurement, for best accuracy calculate the standard deviation at 2 or more points and
+ fit a line to it with the calculated optimal standard deviation. (Units should be meters per
+ pixel). By optimizing this you can get * vision accurate to inches instead of feet.</dd>
 </dl>
 </section>
 </li>
@@ -591,13 +608,15 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="setVisionMeasurementStdDevs(edu.wpi.first.math.Matrix)">
 <h3>setVisionMeasurementStdDevs</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setVisionMeasurementStdDevs</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/Matrix.html" title="class or interface in edu.wpi.first.math" class="external-link">Matrix</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/numbers/N3.html" title="class or interface in edu.wpi.first.math.numbers" class="external-link">N3</a>,<wbr><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/numbers/N1.html" title="class or interface in edu.wpi.first.math.numbers" class="external-link">N1</a>&gt;&nbsp;visionMeasurementStdDevs)</span></div>
-<div class="block">Sets the pose estimator's trust of global measurements. This might be used to change trust in vision measurements
- after the autonomous period, or to change trust as distance to a vision target increases.</div>
+<div class="block">Sets the pose estimator's trust of global measurements. This might be used to change trust in
+ vision measurements after the autonomous period, or to change trust as distance to a vision
+ target increases.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>visionMeasurementStdDevs</code> - Standard deviations of the vision measurements. Increase these numbers to trust
-                                 global measurements from vision less. This matrix is in the form [x, y, theta],
-                                 with units in meters and radians.</dd>
+<dd><code>visionMeasurementStdDevs</code> - Standard deviations of the vision measurements. Increase these
+     numbers to trust
+                                 global measurements from vision less. This matrix is in the
+ form [x, y, theta], with units in meters and radians.</dd>
 </dl>
 </section>
 </li>
@@ -606,13 +625,13 @@ loadScripts(document, 'script');</script>
 <h3>addVisionMeasurement</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addVisionMeasurement</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Pose2d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link">Pose2d</a>&nbsp;robotPose,
  double&nbsp;timestamp)</span></div>
-<div class="block">Add a vision measurement to the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>SwerveDrivePoseEstimator</code></a> and update the gyro reading with the given
- timestamp of the vision measurement.</div>
+<div class="block">Add a vision measurement to the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>SwerveDrivePoseEstimator</code></a> and update the gyro reading
+ with the given timestamp of the vision measurement.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>robotPose</code> - Robot <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Pose2d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link"><code>Pose2d</code></a> as measured by vision.</dd>
-<dd><code>timestamp</code> - Timestamp the measurement was taken as time since startup, should be taken from
-                  <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/Timer.html#getFPGATimestamp()" title="class or interface in edu.wpi.first.wpilibj" class="external-link"><code>Timer.getFPGATimestamp()</code></a> or similar sources.</dd>
+<dd><code>timestamp</code> - Timestamp the measurement was taken as time since startup, should be taken
+     from <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/Timer.html#getFPGATimestamp()" title="class or interface in edu.wpi.first.wpilibj" class="external-link"><code>Timer.getFPGATimestamp()</code></a> or similar sources.</dd>
 </dl>
 </section>
 </li>
@@ -682,6 +701,52 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd><a href="../config/SwerveDriveConfig.html" title="class in yams.mechanisms.config"><code>SwerveDriveConfig</code></a> of the drive.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getField2d()">
+<h3>getField2d</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/Field2d.html" title="class or interface in edu.wpi.first.wpilibj.smartdashboard" class="external-link">Field2d</a></span>&nbsp;<span class="element-name">getField2d</span>()</div>
+<div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/Field2d.html" title="class or interface in edu.wpi.first.wpilibj.smartdashboard" class="external-link"><code>Field2d</code></a> used to display the robot's pose, so callers (e.g. vision subsystems)
+ can publish additional <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/FieldObject2d.html" title="class or interface in edu.wpi.first.wpilibj.smartdashboard" class="external-link"><code>FieldObject2d</code></a>s onto the
+ same field widget instead of creating their own.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/Field2d.html" title="class or interface in edu.wpi.first.wpilibj.smartdashboard" class="external-link"><code>Field2d</code></a> of the drive.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getDesiredChassisSpeeds()">
+<h3>getDesiredChassisSpeeds</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">ChassisSpeeds</a></span>&nbsp;<span class="element-name">getDesiredChassisSpeeds</span>()</div>
+<div class="block">Get the last-commanded desired robot-relative <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> of the drive. This is the
+ value cached by <a href="#setRobotRelativeChassisSpeeds(edu.wpi.first.math.kinematics.ChassisSpeeds)"><code>setRobotRelativeChassisSpeeds(ChassisSpeeds)</code></a> (which
+ <a href="#setFieldRelativeChassisSpeeds(edu.wpi.first.math.kinematics.ChassisSpeeds)"><code>setFieldRelativeChassisSpeeds(ChassisSpeeds)</code></a> and
+ <a href="#drive(java.util.function.Supplier)"><code>drive(java.util.function.Supplier)</code></a> funnel through) and published on every
+ <a href="#updateTelemetry()"><code>updateTelemetry()</code></a> call.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>Robot-relative <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> last commanded to the drive. Defaults to a
+         zeroed <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> if the drive has never been commanded.</dd>
+<dt>Implementation Note:</dt>
+<dd>It is a setpoint, not a measurement of actual robot motion.
+ Use <a href="#getRobotRelativeSpeed()"><code>getRobotRelativeSpeed()</code></a> or <a href="#getFieldRelativeSpeed()"><code>getFieldRelativeSpeed()</code></a> instead if you need
+ the drive's actual measured speed.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getPoseEstimator()">
+<h3>getPoseEstimator</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link">SwerveDrivePoseEstimator</a></span>&nbsp;<span class="element-name">getPoseEstimator</span>()</div>
+<div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>SwerveDrivePoseEstimator</code></a> backing this drive's odometry.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>SwerveDrivePoseEstimator</code></a> of the drive.</dd>
+<dt>Implementation Note:</dt>
+<dd>DO NOT UPDATE THIS OUTSIDE OF <a href="SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> CODE.</dd>
 </dl>
 </section>
 </li>

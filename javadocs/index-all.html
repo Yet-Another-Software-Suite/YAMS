@@ -76,13 +76,13 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/mechanisms/swerve/SwerveDrive.html#addVisionMeasurement(edu.wpi.first.math.geometry.Pose2d,double)" class="member-name-link">addVisionMeasurement(Pose2d, double)</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
-<div class="block">Add a vision measurement to the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>SwerveDrivePoseEstimator</code></a> and update the gyro reading with the given
- timestamp of the vision measurement.</div>
+<div class="block">Add a vision measurement to the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>SwerveDrivePoseEstimator</code></a> and update the gyro reading
+ with the given timestamp of the vision measurement.</div>
 </dd>
 <dt><a href="yams/mechanisms/swerve/SwerveDrive.html#addVisionMeasurement(edu.wpi.first.math.geometry.Pose2d,double,edu.wpi.first.math.Matrix)" class="member-name-link">addVisionMeasurement(Pose2d, double, Matrix&lt;N3, N1&gt;)</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
-<div class="block">Add a vision measurement to the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>SwerveDrivePoseEstimator</code></a> and update the gyro reading with the given
- timestamp of the vision measurement.</div>
+<div class="block">Add a vision measurement to the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>SwerveDrivePoseEstimator</code></a> and update the gyro reading
+ with the given timestamp of the vision measurement.</div>
 </dd>
 <dt><a href="yams/units/EasyCRT.CRTStatus.html#AMBIGUOUS" class="member-name-link">AMBIGUOUS</a> - Enum constant in enum class yams.units.<a href="yams/units/EasyCRT.CRTStatus.html" title="enum class in yams.units">EasyCRT.CRTStatus</a></dt>
 <dd>
@@ -1117,6 +1117,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the default value.</div>
 </dd>
+<dt><a href="yams/mechanisms/swerve/SwerveDrive.html#getDesiredChassisSpeeds()" class="member-name-link">getDesiredChassisSpeeds()</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
+<dd>
+<div class="block">Get the last-commanded desired robot-relative <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> of the drive.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/simulation/Sensor.html#getDevice()" class="member-name-link">getDevice()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/Sensor.html" title="class in yams.motorcontrollers.simulation">Sensor</a></dt>
 <dd>
 <div class="block">Get the simulated device.</div>
@@ -1230,6 +1234,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/simulation/Sensor.html#getField(java.lang.String)" class="member-name-link">getField(String)</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/Sensor.html" title="class in yams.motorcontrollers.simulation">Sensor</a></dt>
 <dd>
 <div class="block">Get a field from the simulated or real sensor.</div>
+</dd>
+<dt><a href="yams/mechanisms/swerve/SwerveDrive.html#getField2d()" class="member-name-link">getField2d()</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
+<dd>
+<div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/Field2d.html" title="class or interface in edu.wpi.first.wpilibj.smartdashboard" class="external-link"><code>Field2d</code></a> used to display the robot's pose, so callers (e.g.</div>
 </dd>
 <dt><a href="yams/mechanisms/swerve/SwerveDrive.html#getFieldRelativeSpeed()" class="member-name-link">getFieldRelativeSpeed()</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
@@ -1756,6 +1764,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Gets the measured pose (position and rotation) of the robot, as reported by odometry.</div>
 </dd>
+<dt><a href="yams/mechanisms/swerve/SwerveDrive.html#getPoseEstimator()" class="member-name-link">getPoseEstimator()</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
+<dd>
+<div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>SwerveDrivePoseEstimator</code></a> backing this drive's odometry.</div>
+</dd>
 <dt><a href="yams/mechanisms/positional/DoubleJointedArm.html#getPosition()" class="member-name-link">getPosition()</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/DoubleJointedArm.html" title="class in yams.mechanisms.positional">DoubleJointedArm</a></dt>
 <dd>
 <div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Translation2d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link"><code>Translation2d</code></a> of the double jointed arm.</div>
@@ -1782,14 +1794,12 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/mechanisms/positional/Arm.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional">Arm</a></dt>
 <dd>
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
- in the
+<div class="block">Get the relative position of the mechanism, taking into account the relative position defined in the
  <a href="yams/mechanisms/config/MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
 </dd>
 <dt><a href="yams/mechanisms/positional/DifferentialMechanism.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional">DifferentialMechanism</a></dt>
 <dd>
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
- in the
+<div class="block">Get the relative position of the mechanism, taking into account the relative position defined in the
  <a href="yams/mechanisms/config/MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
 </dd>
 <dt><a href="yams/mechanisms/positional/DoubleJointedArm.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/DoubleJointedArm.html" title="class in yams.mechanisms.positional">DoubleJointedArm</a></dt>
@@ -1813,8 +1823,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/mechanisms/velocity/FlyWheel.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.mechanisms.velocity.<a href="yams/mechanisms/velocity/FlyWheel.html" title="class in yams.mechanisms.velocity">FlyWheel</a></dt>
 <dd>
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
- in the
+<div class="block">Get the relative position of the mechanism, taking into account the relative position defined in the
  <a href="yams/mechanisms/config/MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
 </dd>
 <dt><a href="yams/mechanisms/config/MechanismPositionConfig.html#getRelativePosition()" class="member-name-link">getRelativePosition()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/MechanismPositionConfig.html" title="class in yams.mechanisms.config">MechanismPositionConfig</a></dt>
@@ -5585,8 +5594,8 @@ the order they are declared.</div>
 <dl class="index">
 <dt><a href="yams/mechanisms/swerve/SwerveDrive.html#zeroGyro()" class="member-name-link">zeroGyro()</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
-<div class="block">Resets the gyro angle to zero and resets odometry to the same position, but facing toward 0 (red alliance
- station).</div>
+<div class="block">Resets the gyro angle to zero and resets odometry to the same position, but facing toward 0
+ (red alliance station).</div>
 </dd>
 </dl>
 <a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:H">H</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:K">K</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:O">O</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<a href="#I:W">W</a>&nbsp;<a href="#I:X">X</a>&nbsp;<a href="#I:Y">Y</a>&nbsp;<a href="#I:Z">Z</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="serialized-form.html">Serialized&nbsp;Form</a></main>
