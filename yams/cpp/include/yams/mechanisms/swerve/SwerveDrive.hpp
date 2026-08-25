@@ -471,6 +471,42 @@ class SwerveDrive {
   /** Get the SwerveDriveKinematics object. */
   frc::SwerveDriveKinematics<NumModules>& GetKinematics() { return m_kinematics; }
 
+  /**
+   * Get the Field2d used to display the robot's pose, so callers (e.g. vision subsystems)
+   * can publish additional objects onto the same field widget instead of creating their own.
+   */
+  frc::Field2d& GetField2d() { return m_field2d; }
+
+  /**
+   * Get the last-commanded desired robot-relative chassis speeds. This is the value cached by
+   * SetRobotRelativeChassisSpeeds() (which SetFieldRelativeChassisSpeeds() and Drive() funnel
+   * through) and published on every UpdateTelemetry() call; it is a setpoint, not a measurement
+   * of actual robot motion. Use GetRobotRelativeSpeed() or GetFieldRelativeSpeed() instead if you
+   * need the drive's actual measured speed.
+   *
+   * @return Robot-relative chassis speeds last commanded to the drive. Defaults to a zeroed
+   *         frc::ChassisSpeeds if the drive has never been commanded.
+   */
+  frc::ChassisSpeeds GetDesiredChassisSpeeds() { return m_desiredChassisSpeeds; }
+
+  /**
+   * Get the SwerveDrivePoseEstimator backing this drive's odometry.
+   *
+   * @warning Do not update this outside of SwerveDrive code. SwerveDrive calls Update() on this
+   *     estimator internally every loop (from UpdateTelemetry()); calling Update() yourself will
+   *     feed it duplicate or out-of-order gyro/module-position samples and corrupt the pose
+   *     estimate. Likewise, do not call ResetPosition()/ResetPose() on the returned reference
+   *     directly -- call ResetOdometry() instead so the drive's own gyro offset and cached state
+   *     stay consistent with the estimator. Calling AddVisionMeasurement() on the returned
+   *     reference (or via the SwerveDrive::AddVisionMeasurement() overloads) is safe and is the
+   *     intended way to fuse external measurements. The returned reference is not thread-safe;
+   *     only call its mutating methods from the thread that calls UpdateTelemetry() (normally the
+   *     main robot loop).
+   *
+   * @return SwerveDrivePoseEstimator of the drive.
+   */
+  frc::SwerveDrivePoseEstimator<NumModules>& GetPoseEstimator() { return m_poseEstimator; }
+
  private:
   SwerveDriveConfig* m_config{nullptr};
   frc::SwerveDriveKinematics<NumModules> m_kinematics;
