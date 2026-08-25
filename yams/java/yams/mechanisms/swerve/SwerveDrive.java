@@ -11,7 +11,6 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Second;
-import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
@@ -25,12 +24,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.units.measure.Velocity;
-import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -44,7 +39,6 @@ import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.Supplier;
 import yams.mechanisms.config.SwerveDriveConfig;
-import yams.motorcontrollers.SmartMotorController;
 import yams.telemetry.MechanismTelemetry;
 
 /**
@@ -347,7 +341,8 @@ public class SwerveDrive {
   }
 
   /**
-   * Create the {@link SwerveDriveKinematics} so you can recreate a new {@link SwerveDrivePoseEstimator}.
+   * Create the {@link SwerveDriveKinematics} so you can recreate a new {@link
+   * SwerveDrivePoseEstimator}.
    *
    * @return {@link SwerveDriveKinematics}
    */
@@ -452,7 +447,8 @@ public class SwerveDrive {
   /**
    * Drive the robot to the given pose.
    *
-   * @param pose {@link Pose2d} to drive the robot to. Field relative, blue-origin where 0deg is facing towards RED
+   * @param pose {@link Pose2d} to drive the robot to. Field relative, blue-origin where 0deg is
+   *     facing towards RED
    * @return {@link Command} to drive the robot to the given pose.
    * @implNote Not compatible with AdvantageKit
    */
@@ -485,7 +481,8 @@ public class SwerveDrive {
    * with the given timestamp of the vision measurement.
    *
    * @param robotPose                Robot {@link Pose2d} as measured by vision.
-   * @param timestamp                Timestamp the measurement was taken as time since startup, should be taken from
+   * @param timestamp                Timestamp the measurement was taken as time since startup,
+   *     should be taken from
    *                                 {@link Timer#getFPGATimestamp()} or similar sources.
    * @param visionMeasurementStdDevs Vision measurement standard deviation that will be sent to the
    *                                 {@link SwerveDrivePoseEstimator}.The standard deviation of the
@@ -525,7 +522,8 @@ public class SwerveDrive {
   }
 
   /**
-   * Update the {@link SwerveDrivePoseEstimator} with the current gyro angle and {@link SwerveModulePosition}
+   * Update the {@link SwerveDrivePoseEstimator} with the current gyro angle and {@link
+   * SwerveModulePosition}
    */
   private void updatePoseEstimator() {
     m_poseEstimator.update(new Rotation2d(getGyroAngle()), getModulePositions());
@@ -669,19 +667,7 @@ public class SwerveDrive {
   /**
    * Get the {@link SwerveDrivePoseEstimator} backing this drive's odometry.
    *
-   * @implNote DO NOT UPDATE THIS OUTSIDE OF {@link SwerveDrive} CODE. {@link SwerveDrive} calls
-   *     {@link SwerveDrivePoseEstimator#update(Rotation2d, SwerveModulePosition[])}
-   *     internally every loop; calling {@code update} yourself will feed it duplicate or
-   *     out-of-order gyro/module-position samples and corrupt the pose estimate. Likewise, do not
-   *     call {@code resetPosition}/{@code resetPose} on the returned object directly — use
-   *     {@link #resetOdometry(Pose2d)} instead so the drive's own gyro offset and cached state stay
-   *     consistent with the estimator.
-   *     @implSpec Adding vision measurements via
-   *     {@link #addVisionMeasurement(Pose2d, double, Matrix)} or
-   *     {@link #addVisionMeasurement(Pose2d, double)} is safe and is the intended way to fuse
-   *     external measurements. The returned reference is not thread-safe; only call its mutating
-   *     methods from the thread that calls {@link #updateTelemetry()} (normally the main robot
-   *     loop).
+   * @implNote DO NOT UPDATE THIS OUTSIDE OF {@link SwerveDrive} CODE.
    * @return {@link SwerveDrivePoseEstimator} of the drive.
    */
   public SwerveDrivePoseEstimator getPoseEstimator() {
