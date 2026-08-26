@@ -7,7 +7,7 @@ import org.wpilib.hardware.hal.HALValue;
 import org.wpilib.hardware.hal.SimDevice;
 import org.wpilib.hardware.hal.SimDevice.Direction;
 import org.wpilib.hardware.hal.SimValue;
-import org.wpilib.util.Pair;
+import org.wpilib.math.util.Pair;
 import org.wpilib.framework.RobotBase;
 import java.util.ArrayList;
 import java.util.List;

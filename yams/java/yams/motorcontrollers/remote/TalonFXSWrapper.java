@@ -62,7 +62,7 @@ import org.wpilib.math.controller.SimpleMotorFeedforward;
 import org.wpilib.math.trajectory.ExponentialProfile;
 import org.wpilib.math.trajectory.TrapezoidProfile;
 import org.wpilib.math.trajectory.TrapezoidProfile.Constraints;
-import org.wpilib.util.Pair;
+import org.wpilib.math.util.Pair;
 import org.wpilib.units.AngularAccelerationUnit;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularAcceleration;
