@@ -1121,6 +1121,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the last-commanded desired robot-relative <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> of the drive.</div>
 </dd>
+<dt><a href="yams/mechanisms/swerve/SwerveDrive.html#getDesiredModuleStates()" class="member-name-link">getDesiredModuleStates()</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
+<dd>
+<div class="block">Get the last-commanded desired <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState</code></a>s of the drive.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/simulation/Sensor.html#getDevice()" class="member-name-link">getDevice()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/Sensor.html" title="class in yams.motorcontrollers.simulation">Sensor</a></dt>
 <dd>
 <div class="block">Get the simulated device.</div>
@@ -1842,6 +1846,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the right <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> of the <a href="yams/mechanisms/positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a></div>
 </dd>
+<dt><a href="yams/mechanisms/swerve/SwerveDrive.html#getRobotRelativeChassisSpeedsFromState(edu.wpi.first.math.kinematics.SwerveModuleState%5B%5D)" class="member-name-link">getRobotRelativeChassisSpeedsFromState(SwerveModuleState[])</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
+<dd>
+<div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> based off the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState</code></a>s.</div>
+</dd>
 <dt><a href="yams/mechanisms/swerve/SwerveDrive.html#getRobotRelativeSpeed()" class="member-name-link">getRobotRelativeSpeed()</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
 <div class="block">Get the robot relative speed of the drive.</div>
@@ -1940,6 +1948,11 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getSimpleFeedforward(yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">getSimpleFeedforward(SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/SimpleMotorFeedforward.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>SimpleMotorFeedforward</code></a> <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link"><code>Optional</code></a>.</div>
+</dd>
+<dt><a href="yams/mechanisms/swerve/SwerveDrive.html#getSimPose()" class="member-name-link">getSimPose()</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
+<dd>
+<div class="block">Get the simulated pose of the robot, assuming the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState</code></a>s commanded to the
+ modules are met perfectly.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorController.html#getSimSupplier()" class="member-name-link">getSimSupplier()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>
