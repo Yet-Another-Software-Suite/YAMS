@@ -709,16 +709,6 @@ public class SwerveDrive {
   }
 
   /**
-   * Get the {@link SwerveDrivePoseEstimator} backing this drive's odometry.
-   *
-   * @implNote DO NOT UPDATE THIS OUTSIDE OF {@link SwerveDrive} CODE.
-   * @return {@link SwerveDrivePoseEstimator} of the drive.
-   */
-  public SwerveDrivePoseEstimator getPoseEstimator() {
-    return m_poseEstimator;
-  }
-
-  /**
    * Get a module by its name.
    *
    * @param moduleName Name of the module.
