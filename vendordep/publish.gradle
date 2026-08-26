@@ -148,10 +148,12 @@ task cppDoxygenZip(type: Zip, dependsOn: generateDoxygen) {
 //    }
 //}
 
-build.dependsOn cppHeadersZip
-addTaskToCopyAllOutputs(cppHeadersZip)
-build.dependsOn cppSourceZip
-addTaskToCopyAllOutputs(cppSourceZip)
+if (!skipCpp) {
+    build.dependsOn cppHeadersZip
+    addTaskToCopyAllOutputs(cppHeadersZip)
+    build.dependsOn cppSourceZip
+    addTaskToCopyAllOutputs(cppSourceZip)
+}
 //build.dependsOn cppDriverHeadersZip
 //addTaskToCopyAllOutputs(cppDriverHeadersZip)
 
@@ -185,6 +187,26 @@ task outputJavadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
+def cppDependenciesJson = skipCpp ? "" : """
+    {
+      "groupId": "${artifactGroupId}",
+      "artifactId": "${baseArtifactId}-cpp",
+      "version": "${pubVersion}",
+      "libName": "YAMS",
+      "headerClassifier": "headers",
+      "sharedLibrary": true,
+      "skipInvalidPlatforms": true,
+      "binaryPlatforms": [
+        "windowsx86-64",
+        "linuxarm64",
+        "linuxx86-64",
+        "linuxathena",
+        "linuxarm32",
+        "osxuniversal"
+      ]
+    }
+  """
+
 // Apply template variables from the vendordep file.
 // Replaces ${VARIABLE} with VARIABLE: value in expand()
 task vendordepJson() {
@@ -197,7 +219,8 @@ task vendordepJson() {
         into "$releasePath/"
         expand(version: pubVersion,
                 groupId: artifactGroupId,
-                artifactId: baseArtifactId)
+                artifactId: baseArtifactId,
+                cppDependencies: cppDependenciesJson)
     }
 }
 
@@ -225,19 +248,20 @@ addTaskToCopyAllOutputs(outputSourcesJar)
 addTaskToCopyAllOutputs(outputJavadocJar)
 addTaskToCopyAllOutputs(outputJar)
 addTaskToCopyAllOutputs(vendordepJsonZip)
-addTaskToCopyAllOutputs(cppHeadersZip)
-addTaskToCopyAllOutputs(cppSourceZip)
-
 
 build.dependsOn outputSourcesJar
 build.dependsOn outputJavadocJar
 build.dependsOn outputJar
 build.dependsOn vendordepJsonZip
-build.dependsOn cppHeadersZip
-build.dependsOn cppSourceZip
-if (doxygenAvailable) {
-    build.dependsOn cppDoxygenZip
-    addTaskToCopyAllOutputs(cppDoxygenZip)
+if (!skipCpp) {
+    addTaskToCopyAllOutputs(cppHeadersZip)
+    addTaskToCopyAllOutputs(cppSourceZip)
+    build.dependsOn cppHeadersZip
+    build.dependsOn cppSourceZip
+    if (doxygenAvailable) {
+        build.dependsOn cppDoxygenZip
+        addTaskToCopyAllOutputs(cppDoxygenZip)
+    }
 }
 
 libraryBuild.dependsOn build
@@ -265,19 +289,21 @@ model {
 //        def driverTaskList = createComponentZipTasks($.components, ['VendorDriver'], driverZipBaseName, Zip, project, includeStandardZipFormat)
 //
         publications {
-            cpp(MavenPublication) {
-                taskList.each {
-                    artifact it
-                }
-                artifact cppHeadersZip
-                artifact cppSourceZip
-                if (doxygenAvailable) {
-                    artifact cppDoxygenZip
-                }
+            if (!skipCpp) {
+                cpp(MavenPublication) {
+                    taskList.each {
+                        artifact it
+                    }
+                    artifact cppHeadersZip
+                    artifact cppSourceZip
+                    if (doxygenAvailable) {
+                        artifact cppDoxygenZip
+                    }
 
-                artifactId = "${baseArtifactId}-cpp"
-                groupId = artifactGroupId
-                version = pubVersion
+                    artifactId = "${baseArtifactId}-cpp"
+                    groupId = artifactGroupId
+                    version = pubVersion
+                }
             }
 //            driver(MavenPublication) {
 //                driverTaskList.each {

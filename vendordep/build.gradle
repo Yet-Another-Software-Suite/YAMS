@@ -17,6 +17,9 @@ plugins {
 ext.wpilibVersion = "2026.2.1"
 ext.releasePath = "$buildDir/maven"
 ext.pubVersion = System.getenv("releaseVersion") ?: System.getenv("releaseName") ?: "test"
+// Set -PskipCpp=true to skip building/publishing the C++ library entirely. The generated
+// vendordep JSON's cppDependencies then comes out as an empty array. See publish.gradle.
+ext.skipCpp = project.hasProperty('skipCpp') && project.property('skipCpp').toString().toBoolean()
 
 
 repositories {
@@ -176,6 +179,10 @@ model {
           // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
           wpi.cpp.vendor.cpp(it)
           wpi.cpp.deps.wpilib(it)
+
+          if (skipCpp) {
+              binaries.all { buildable = false }
+          }
       }
   }
   testSuites {

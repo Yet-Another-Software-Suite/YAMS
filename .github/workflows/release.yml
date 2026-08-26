@@ -10,9 +10,15 @@ on:
         type: boolean
         description: "Publish to WPILib"
         default: false
+      buildCpp:
+        type: boolean
+        description: "Build and release the C++ library (always on when Publish to WPILib is checked)"
+        default: true
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  # Publishing to WPILib always includes the C++ library, regardless of the buildCpp input.
+  skipCpp: ${{ !(inputs.publish || inputs.buildCpp) }}
 
 jobs:
   build-cross:
@@ -39,7 +45,7 @@ jobs:
       - name: Configure git safe directory
         run: git config --global --add safe.directory /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}
       - name: Publish
-        run: ./gradlew publish ${{ matrix.build-options }}
+        run: ./gradlew publish ${{ matrix.build-options }} -PskipCpp=${{ env.skipCpp }}
         working-directory: vendordep
       - uses: actions/upload-artifact@v7
         with:
@@ -92,7 +98,7 @@ jobs:
             sleep 5
           done
       - name: Publish
-        run: ${{ matrix.gradlew }} publish
+        run: ${{ matrix.gradlew }} publish -PskipCpp=${{ env.skipCpp }}
       - uses: actions/upload-artifact@v7
         with:
           name: maven-${{ matrix.artifact-name }}
@@ -224,7 +230,7 @@ jobs:
           done
 
       - name: Build and publish — stitch current version maven metadata
-        run: ./gradlew publish
+        run: ./gradlew publish -PskipCpp=${{ env.skipCpp }}
         working-directory: ${{ env.workingDirectory }}
 
       - name: Download example artifacts
@@ -256,7 +262,7 @@ jobs:
           done
 
       - name: Build and publish (Linux — fixes maven metadata for all versions)
-        run: ./gradlew publish
+        run: ./gradlew publish -PskipCpp=${{ env.skipCpp }}
         working-directory: ${{ env.workingDirectory }}
 
       - name: Create versioned vendordep JSON
