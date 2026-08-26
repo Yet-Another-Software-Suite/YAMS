@@ -15,7 +15,25 @@
       "version": "${version}"
     }
   ],
-  "cppDependencies": [${cppDependencies}],
+  "cppDependencies": [
+    {
+      "groupId": "${groupId}",
+      "artifactId": "${artifactId}-cpp",
+      "version": "${version}",
+      "libName": "YAMS",
+      "headerClassifier": "headers",
+      "sharedLibrary": true,
+      "skipInvalidPlatforms": true,
+      "binaryPlatforms": [
+        "windowsx86-64",
+        "linuxarm64",
+        "linuxx86-64",
+        "linuxathena",
+        "linuxarm32",
+        "osxuniversal"
+      ]
+    }
+  ],
   "jniDependencies": [],
   "requires": []
 }

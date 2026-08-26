@@ -1,5 +1,7 @@
 import org.apache.tools.ant.filters.FixCrLfFilter
 import org.apache.tools.ant.filters.ReplaceTokens
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 
 apply plugin: 'maven-publish'
 
@@ -187,26 +189,6 @@ task outputJavadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
-def cppDependenciesJson = skipCpp ? "" : """
-    {
-      "groupId": "${artifactGroupId}",
-      "artifactId": "${baseArtifactId}-cpp",
-      "version": "${pubVersion}",
-      "libName": "YAMS",
-      "headerClassifier": "headers",
-      "sharedLibrary": true,
-      "skipInvalidPlatforms": true,
-      "binaryPlatforms": [
-        "windowsx86-64",
-        "linuxarm64",
-        "linuxx86-64",
-        "linuxathena",
-        "linuxarm32",
-        "osxuniversal"
-      ]
-    }
-  """
-
 // Apply template variables from the vendordep file.
 // Replaces ${VARIABLE} with VARIABLE: value in expand()
 task vendordepJson() {
@@ -219,8 +201,20 @@ task vendordepJson() {
         into "$releasePath/"
         expand(version: pubVersion,
                 groupId: artifactGroupId,
-                artifactId: baseArtifactId,
-                cppDependencies: cppDependenciesJson)
+                artifactId: baseArtifactId)
+    }
+
+    // When C++ isn't being built, strip cppDependencies from the generated vendordep JSON by
+    // editing the parsed structure directly, rather than templating the array in/out as text.
+    if (skipCpp) {
+        def vendorFile = file("$releasePath/$templateVendorFile")
+        def vendordep = new JsonSlurper().parse(vendorFile)
+        vendordep.cppDependencies = []
+        def pretty = JsonOutput.prettyPrint(JsonOutput.toJson(vendordep))
+        // Groovy's pretty-printer spreads empty arrays/objects across three lines; collapse
+        // them back down so cppDependencies renders as a plain "[]" like the other empty fields.
+        pretty = pretty.replaceAll(/(?s)\[\s*\]/, '[]').replaceAll(/(?s)\{\s*\}/, '{}')
+        vendorFile.text = pretty
     }
 }
 
