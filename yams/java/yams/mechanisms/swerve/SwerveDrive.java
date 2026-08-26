@@ -18,6 +18,7 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -187,6 +188,10 @@ public class SwerveDrive {
    * updateTelemetry.
    */
   private ChassisSpeeds m_desiredChassisSpeeds = new ChassisSpeeds();
+  /**
+   * The simulated pose of the robot if the {@link SwerveModuleState} were met perfectly.
+   */
+  private Pose2d m_simPose = new Pose2d();
 
   /**
    * Create a SwerveDrive.
@@ -197,6 +202,7 @@ public class SwerveDrive {
     m_config = config;
     m_modules = config.getModules();
     m_desiredModuleStates = new SwerveModuleState[m_modules.length];
+    m_simPose = config.getInitialPose();
     Arrays.fill(m_desiredModuleStates, new SwerveModuleState());
     m_kinematics = getKinematics();
     m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics, new Rotation2d(getGyroAngle()),
@@ -256,6 +262,18 @@ public class SwerveDrive {
   }
 
   /**
+   * Get the simulated pose of the robot, assuming the {@link SwerveModuleState}s commanded to the
+   * modules are met perfectly. Useful for feeding a simulated vision system with ground-truth
+   * poses under perfect-world conditions.
+   *
+   * @return Simulated {@link Pose2d} of the robot. Only updated in simulation by {@link
+   *     #simIterate()}; on a real robot this remains the configured starting pose.
+   */
+  public Pose2d getSimPose() {
+    return m_simPose;
+  }
+
+  /**
    * Point all modules toward the robot center, thus making the robot very difficult to move.
    * Forcing the robot to keep the current pose.
    *
@@ -305,6 +323,16 @@ public class SwerveDrive {
         ? m_kinematics.toSwerveModuleStates(
               robotRelativeChassisSpeeds, m_config.getCenterOfRotation().get())
         : m_kinematics.toSwerveModuleStates(robotRelativeChassisSpeeds);
+  }
+
+  /**
+   * Get the {@link ChassisSpeeds} based off the {@link SwerveModuleState}s.
+   * @param states {@link SwerveModuleState}s to use, must be the same count as the swerve drive is.
+   *
+   * @return {@link ChassisSpeeds} based off the {@link SwerveModuleState}s.
+   */
+  public ChassisSpeeds getRobotRelativeChassisSpeedsFromState(SwerveModuleState[] states) {
+    return m_kinematics.toChassisSpeeds(states);
   }
 
   /**
@@ -408,6 +436,7 @@ public class SwerveDrive {
     m_poseEstimator.resetPosition(new Rotation2d(getGyroAngle()), getModulePositions(), pose);
     m_desiredChassisSpeeds = new ChassisSpeeds();
     m_desiredModuleStates = m_kinematics.toSwerveModuleStates(new ChassisSpeeds());
+    m_simPose = pose;
   }
 
   /**
@@ -573,8 +602,14 @@ public class SwerveDrive {
       m_simTimer.start();
     }
     Arrays.stream(m_modules).forEach(SwerveModule::simIterate);
-    m_simGyroAngle = m_simGyroAngle.plus(Radians.of(
-        m_kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond * m_simTimer.get()));
+    ChassisSpeeds desired = m_kinematics.toChassisSpeeds(m_desiredModuleStates);
+
+    var dt = m_simTimer.get();
+    Twist2d twist = new Twist2d(desired.vxMetersPerSecond * dt, desired.vyMetersPerSecond * dt,
+        desired.omegaRadiansPerSecond * dt);
+    m_simPose = m_simPose.exp(twist);
+    m_simGyroAngle = m_simGyroAngle.plus(
+        Radians.of(m_kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond * dt));
     m_simTimer.reset();
   }
 
@@ -662,6 +697,15 @@ public class SwerveDrive {
    */
   public ChassisSpeeds getDesiredChassisSpeeds() {
     return m_desiredChassisSpeeds;
+  }
+
+  /**
+   * Get the last-commanded desired {@link SwerveModuleState}s of the drive.
+   * @return {@link SwerveModuleState}s last commanded to the drive. Defaults to a zeroed {@link
+   *     SwerveModuleState}s if the drive has never been commanded.
+   */
+  public SwerveModuleState[] getDesiredModuleStates() {
+    return m_desiredModuleStates;
   }
 
   /**

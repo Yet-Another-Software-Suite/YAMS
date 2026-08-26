@@ -9,6 +9,7 @@
 #include <frc/geometry/Pose2d.h>
 #include <frc/geometry/Rotation2d.h>
 #include <frc/geometry/Translation2d.h>
+#include <frc/geometry/Twist2d.h>
 #include <frc/kinematics/ChassisSpeeds.h>
 #include <frc/kinematics/SwerveDriveKinematics.h>
 #include <frc/kinematics/SwerveModulePosition.h>
@@ -139,6 +140,8 @@ class SwerveDrive {
     assert(m_config->GetModules().size() == NumModules &&
            "Module count in SwerveDriveConfig must equal NumModules template parameter.");
 
+    m_simPose = m_config->GetInitialPose();
+
     if (auto dataLogName = m_config->GetDataLogName()) {
       m_telemetry.SetupTelemetry(GetName(), *dataLogName);
     } else {
@@ -240,6 +243,17 @@ class SwerveDrive {
   }
 
   /**
+   * Convert module states back to robot-relative chassis speeds.
+   *
+   * @param states Module states (one per module, clockwise from front-left).
+   * @return Robot-relative chassis speeds corresponding to the given states.
+   */
+  frc::ChassisSpeeds GetRobotRelativeChassisSpeedsFromState(
+      const wpi::array<frc::SwerveModuleState, NumModules>& states) {
+    return m_kinematics.ToChassisSpeeds(states);
+  }
+
+  /**
    * Set robot-relative chassis speeds.
    *
    * @param robotRelativeSpeeds Desired robot-relative chassis speeds.
@@ -290,6 +304,7 @@ class SwerveDrive {
                                   GetModulePositions(), pose);
     m_desiredChassisSpeeds = frc::ChassisSpeeds{};
     m_desiredModuleStates = m_kinematics.ToSwerveModuleStates(frc::ChassisSpeeds{});
+    m_simPose = pose;
   }
 
   /**
@@ -362,17 +377,24 @@ class SwerveDrive {
   /**
    * Advance the simulation model.
    *
-   * Iterates each module's sim model and integrates the simulated gyro angle
-   * from the chassis angular velocity.
+   * Iterates each module's sim model, integrates the simulated ground-truth pose from the
+   * commanded (desired) module states assuming they are met perfectly, and integrates the
+   * simulated gyro angle from the measured chassis angular velocity.
    */
   void SimIterate() {
     if (!m_simTimer.IsRunning()) m_simTimer.Start();
     for (auto* mod : m_config->GetModules()) {
       mod->SimIterate();
     }
+    auto desired = m_kinematics.ToChassisSpeeds(m_desiredModuleStates);
+
+    auto dt = m_simTimer.Get();
+    frc::Twist2d twist{desired.vx * dt, desired.vy * dt, desired.omega * dt};
+    m_simPose = m_simPose.Exp(twist);
+
     auto speeds = m_kinematics.ToChassisSpeeds(GetModuleStates());
-    m_simGyroAngle += units::degree_t{units::degrees_per_second_t{speeds.omega}.value() *
-                                      m_simTimer.Get().value()};
+    m_simGyroAngle +=
+        units::degree_t{units::degrees_per_second_t{speeds.omega}.value() * dt.value()};
     m_simTimer.Reset();
   }
 
@@ -387,6 +409,16 @@ class SwerveDrive {
     if (frc::RobotBase::IsSimulation()) return m_simGyroAngle;
     return m_config->GetGyroAngle();
   }
+
+  /**
+   * Get the simulated pose of the robot, assuming the commanded module states are met perfectly.
+   * Useful for feeding a simulated vision system with ground-truth poses under perfect-world
+   * conditions.
+   *
+   * Only updated in simulation by SimIterate(); on a real robot this remains the configured
+   * starting pose.
+   */
+  frc::Pose2d GetSimPose() { return m_simPose; }
 
   /** Get the robot-relative chassis speeds derived from the module states. */
   frc::ChassisSpeeds GetRobotRelativeSpeed() {
@@ -490,6 +522,16 @@ class SwerveDrive {
   frc::ChassisSpeeds GetDesiredChassisSpeeds() { return m_desiredChassisSpeeds; }
 
   /**
+   * Get the last-commanded desired module states of the drive.
+   *
+   * @return Module states last commanded to the drive. Defaults to a zeroed set of module states
+   *         if the drive has never been commanded.
+   */
+  wpi::array<frc::SwerveModuleState, NumModules> GetDesiredModuleStates() {
+    return m_desiredModuleStates;
+  }
+
+  /**
    * Get the SwerveDrivePoseEstimator backing this drive's odometry.
    *
    * @warning Do not update this outside of SwerveDrive code. SwerveDrive calls Update() on this
@@ -524,6 +566,7 @@ class SwerveDrive {
   frc::Field2d m_field2d;
   frc::Timer m_simTimer;
   units::degree_t m_simGyroAngle{0};
+  frc::Pose2d m_simPose;
 
   wpi::array<frc::SwerveModuleState, NumModules> m_desiredModuleStates{wpi::empty_array};
   frc::ChassisSpeeds m_desiredChassisSpeeds{};
