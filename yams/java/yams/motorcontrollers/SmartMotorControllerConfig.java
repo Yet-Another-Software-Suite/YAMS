@@ -18,7 +18,7 @@ import static org.wpilib.units.Units.Second;
 import static org.wpilib.units.Units.Volts;
 
 import org.wpilib.hardware.hal.HAL;
-import org.wpilib.math.util.Pair;
+import org.wpilib.util.Pair;
 import org.wpilib.math.controller.ArmFeedforward;
 import org.wpilib.math.controller.ElevatorFeedforward;
 import org.wpilib.math.controller.PIDController;
