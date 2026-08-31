@@ -246,6 +246,7 @@ public class SwerveModuleConfig
   public SwerveModuleConfig withAbsoluteEncoder(Object absoluteEncoder)
   {
     this.absoluteEncoder = Optional.ofNullable(absoluteEncoder);
+    this.absoluteEncoderSupplier = Optional.empty();
     azimuthMotor.ifPresent(azimuthMotor -> azimuthMotor.getConfig().withExternalEncoder(absoluteEncoder));
     return this;
   }
