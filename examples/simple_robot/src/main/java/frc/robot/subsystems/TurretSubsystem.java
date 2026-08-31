@@ -36,7 +36,7 @@ import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class TurretSubsystem extends SubsystemBase
 {
-  double[] ratio = {144.0 / 15.0, 5.0, 1.08.0};
+  double[] ratio = {144.0 / 15.0, 5.0, 1.08};
 
   SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)

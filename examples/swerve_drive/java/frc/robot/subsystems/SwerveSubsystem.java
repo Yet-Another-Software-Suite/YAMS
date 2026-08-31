@@ -38,6 +38,7 @@ import yams.mechanisms.config.SwerveDriveConfig;
 import yams.mechanisms.config.SwerveModuleConfig;
 import yams.mechanisms.swerve.SwerveDrive;
 import yams.mechanisms.swerve.SwerveModule;
+import yams.telemetry.SwerveDriveTelemetryConfig;
 import yams.mechanisms.swerve.utility.SwerveInputStream;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
@@ -217,7 +218,8 @@ public class SwerveSubsystem extends SubsystemBase
         .withRotationController(new PIDController(1, 0, 0))
         // Logs pose/gyro/chassis speeds/module states to a WPILib DataLog (readable with AdvantageScope
         // or DataLogTool) in addition to NetworkTables. Each module above nests under "Swerve/<name>".
-        .withDataLogName("Swerve");
+        .withTelemetry("swerve", new SwerveDriveTelemetryConfig().withDataLogName("Swerve")
+                                                        .withTelemetryVerbosity(SmartMotorControllerConfig.TelemetryVerbosity.HIGH));
     drive = new SwerveDrive(config);
 
     SmartDashboard.putData("Field", field);
