@@ -3,17 +3,16 @@
 
 #include "yams/mechanisms/swerve/SwerveModule.hpp"
 
-#include <frc/DataLogManager.h>
 #include <frc/RobotBase.h>
 #include <frc/geometry/Rotation2d.h>
 #include <units/angle.h>
-#include <wpi/DataLog.h>
 
-#include <memory>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 #include "yams/exceptions.hpp"
+#include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 
 namespace yams::mechanisms::swerve {
 
@@ -36,24 +35,25 @@ SwerveModule::SwerveModule(config::SwerveModuleConfig* config)
         "External encoder could not be used", "WithUseExternalFeedbackEncoder(true)");
   }
 
-  // Set up motor telemetry under the swerve hierarchy.
-  m_telemetry.SetupTelemetry("swerve");
-  m_telemetry.AddMotorController("modules/" + GetName(), *m_driveMotorController);
-  m_telemetry.AddMotorController("modules/" + GetName(), *m_azimuthMotorController);
-
-  auto encoderNetworkTablePublisher = m_telemetry.PublishDouble("modules/" + GetName() + "/encoder", "degrees");
-  std::shared_ptr<wpi::log::DoubleLogEntry> encoderLogEntry;
-  if (auto name = config->GetDataLogName()) {
-    encoderLogEntry =
-        std::make_shared<wpi::log::DoubleLogEntry>(frc::DataLogManager::GetLog(), *name + "/encoder");
-  }
-  m_azimuthAbsoluteEncoderTelemetry = [encoderNetworkTablePublisher, encoderLogEntry](double value) {
-    encoderNetworkTablePublisher(value);
-    if (encoderLogEntry) encoderLogEntry->Append(value);
-  };
-
   SeedAzimuthEncoder();
   m_azimuthEncoderWithoutOffsets = config->GetRawAbsoluteEncoderAngle();
+}
+
+void SwerveModule::SetupTelemetry(const std::string& mechName) {
+  using TelemetryVerbosity = motorcontrollers::SmartMotorControllerConfig::TelemetryVerbosity;
+
+  m_telemetry.SetupTelemetry(mechName + "/modules/" + GetName());
+
+  telemetry::SwerveModuleTelemetryConfig telemetryCfg;
+  if (auto specified = m_config->GetSwerveModuleTelemetryConfig()) {
+    telemetryCfg = std::move(*specified);
+  } else {
+    telemetryCfg.WithTelemetryVerbosity(
+        m_config->GetTelemetryVerbosity().value_or(TelemetryVerbosity::HIGH));
+  }
+
+  m_swerveModuleTelemetry.emplace(std::move(telemetryCfg));
+  m_swerveModuleTelemetry->SetupTelemetry(mechName, *this);
 }
 
 void SwerveModule::SeedAzimuthEncoder() {
@@ -93,10 +93,14 @@ frc::SwerveModulePosition SwerveModule::GetPosition() const {
       frc::Rotation2d{units::radian_t{m_azimuthMotorController->GetMechanismPosition()}}};
 }
 
+units::degree_t SwerveModule::GetRawAbsoluteEncoderAngle() const {
+  return m_azimuthEncoderWithoutOffsets();
+}
+
 void SwerveModule::UpdateTelemetry() {
   m_driveMotorController->UpdateTelemetry();
   m_azimuthMotorController->UpdateTelemetry();
-  m_azimuthAbsoluteEncoderTelemetry(m_azimuthEncoderWithoutOffsets().value());
+  m_swerveModuleTelemetry->Publish(*this);
   m_telemetry.UpdateLoopTime();
 }
 

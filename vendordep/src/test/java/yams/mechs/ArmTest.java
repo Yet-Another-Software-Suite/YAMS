@@ -300,35 +300,43 @@ public class ArmTest
   @MethodSource("createConfigs")
   void testSMCDutyCycle(SmartMotorController smc) throws InterruptedException
   {
-    SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
+    try
+    {
+      SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
 
-    startTest(smc);
-    Command dutyCycleUp   = subsys.setDutyCycle(0.5);
-    Command dutyCycleDown = subsys.setDutyCycle(-0.5);
+      startTest(smc);
+      Command dutyCycleUp   = subsys.setDutyCycle(0.5);
+      Command dutyCycleDown = subsys.setDutyCycle(-0.5);
 
-    dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
-
-    closeSMC(smc);
+      dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   @ParameterizedTest
   @MethodSource("createConfigs")
   void testArmDutyCycle(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    Arm     arm           = createArm(smc);
-    Command dutyCycleUp   = arm.set(0.5);
-    Command dutyCycleDown = arm.set(-0.5);
+    try
+    {
+      startTest(smc);
+      Arm     arm           = createArm(smc);
+      Command dutyCycleUp   = arm.set(0.5);
+      Command dutyCycleDown = arm.set(-0.5);
 
 //    if (smc instanceof TalonFXWrapper || smc instanceof TalonFXSWrapper)
 //    {
 //      System.out.println("[WARNING] TalonFX and TalonFXS Does not work with CI on linux, skipping for now.");
 //    } else
 //    {
-    dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
+      dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
 //    }
-
-    closeSMC(smc);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
 
@@ -336,27 +344,35 @@ public class ArmTest
   @MethodSource("createConfigs")
   void testSMCPositionPID(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    Command highPid = Commands.run(() -> smc.setPosition(Degrees.of(80)));
-    Command lowPid  = Commands.run(() -> smc.setPosition(Degrees.of(-80)));
+    try
+    {
+      startTest(smc);
+      Command highPid = Commands.run(() -> smc.setPosition(Degrees.of(80)));
+      Command lowPid  = Commands.run(() -> smc.setPosition(Degrees.of(-80)));
 
-    positionPidTest(smc, highPid, lowPid);
-
-    closeSMC(smc);
+      positionPidTest(smc, highPid, lowPid);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   @ParameterizedTest
   @MethodSource("createConfigs")
   void testArmPositionPID(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    Arm     arm     = createArm(smc);
-    Command highPid = arm.setAngle(Degrees.of(80));
-    Command lowPid  = arm.setAngle(Degrees.of(-80));
+    try
+    {
+      startTest(smc);
+      Arm     arm     = createArm(smc);
+      Command highPid = arm.setAngle(Degrees.of(80));
+      Command lowPid  = arm.setAngle(Degrees.of(-80));
 
-    positionPidTest(smc, highPid, lowPid);
-
-    closeSMC(smc);
+      positionPidTest(smc, highPid, lowPid);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   @BeforeEach

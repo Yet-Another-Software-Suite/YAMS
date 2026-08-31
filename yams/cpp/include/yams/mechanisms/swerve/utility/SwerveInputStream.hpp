@@ -486,7 +486,7 @@ class SwerveInputStream {
         break;
       case SwerveInputMode::HEADING:
       case SwerveInputMode::AIM:
-        m_swerveDrive->ResetAzimuthPID();
+        m_swerveDrive->ResetRotationPID();
         break;
       default:
         break;
@@ -495,11 +495,11 @@ class SwerveInputStream {
     switch (newMode) {
       case SwerveInputMode::TRANSLATION_ONLY:
         m_lockedHeading = frc::Rotation2d{units::radian_t{m_swerveDrive->GetGyroAngle()}};
-        m_swerveDrive->ResetAzimuthPID();
+        m_swerveDrive->ResetRotationPID();
         break;
       case SwerveInputMode::HEADING:
       case SwerveInputMode::AIM:
-        m_swerveDrive->ResetAzimuthPID();
+        m_swerveDrive->ResetRotationPID();
         break;
       default:
         break;

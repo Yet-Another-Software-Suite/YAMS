@@ -298,16 +298,20 @@ public class ShooterTest
   @MethodSource("createConfigs")
   void testSMCDutyCycle(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    smc.setupSimulation();
-    SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
+    try
+    {
+      startTest(smc);
+      smc.setupSimulation();
+      SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
 
-    Command dutyCycleUp   = subsys.setDutyCycle(0.5);
-    Command dutyCycleDown = subsys.setDutyCycle(-0.5);
+      Command dutyCycleUp   = subsys.setDutyCycle(0.5);
+      Command dutyCycleDown = subsys.setDutyCycle(-0.5);
 
-    dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
-
-    closeSMC(smc);
+      dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
 
@@ -315,48 +319,60 @@ public class ShooterTest
   @MethodSource("createConfigs")
   void testSMCVelocityPID(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    smc.setupSimulation();
-    Command highPid = Commands.run(() -> smc.setVelocity(RPM.of(2000)));
+    try
+    {
+      startTest(smc);
+      smc.setupSimulation();
+      Command highPid = Commands.run(() -> smc.setVelocity(RPM.of(2000)));
 //    Command lowPid  = Commands.run(() -> smc.setPosition(Degrees.of(-80)));
 
-    shooterVelocityPidTest(smc, highPid);
-
-    closeSMC(smc);
+      shooterVelocityPidTest(smc, highPid);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   @ParameterizedTest
   @MethodSource("createConfigs")
   void testShooterDutyCycle(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    FlyWheel shooter       = createShooter(smc);
-    Command  dutyCycleUp   = shooter.set(0.5);
-    Command  dutyCycleDown = shooter.set(-0.5);
+    try
+    {
+      startTest(smc);
+      FlyWheel shooter       = createShooter(smc);
+      Command  dutyCycleUp   = shooter.set(0.5);
+      Command  dutyCycleDown = shooter.set(-0.5);
 
 //    if (smc instanceof TalonFXWrapper || smc instanceof TalonFXSWrapper)
 //    {
 //      System.out.println("[WARNING] TalonFX and TalonFXS Does not work with CI on linux, skipping for now.");
 //    } else
 //    {
-    dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
+      dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
 //    }
-
-    closeSMC(smc);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   @ParameterizedTest
   @MethodSource("createConfigs")
   void testShooterVelocityPID(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    FlyWheel shooter = createShooter(smc);
-    Command  highPid = shooter.run(RPM.of(80));
-    Command  lowPid  = shooter.run(RPM.of(-80));
+    try
+    {
+      startTest(smc);
+      FlyWheel shooter = createShooter(smc);
+      Command  highPid = shooter.run(RPM.of(80));
+      Command  lowPid  = shooter.run(RPM.of(-80));
 
-    shooterVelocityPidTest(smc, highPid);
-
-    closeSMC(smc);
+      shooterVelocityPidTest(smc, highPid);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   @BeforeEach

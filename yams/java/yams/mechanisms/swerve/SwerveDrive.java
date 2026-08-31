@@ -5,7 +5,6 @@ package yams.mechanisms.swerve;
 
 import static edu.wpi.first.hal.FRCNetComm.tInstances.kRobotDriveSwerve_YAGSL;
 import static edu.wpi.first.hal.FRCNetComm.tResourceType.kResourceType_RobotDrive;
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
@@ -14,6 +13,7 @@ import static edu.wpi.first.units.Units.Second;
 
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -36,11 +36,12 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.DoubleConsumer;
 import java.util.function.Supplier;
 import yams.mechanisms.config.SwerveDriveConfig;
+import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.telemetry.MechanismTelemetry;
+import yams.telemetry.SwerveDriveTelemetry;
+import yams.telemetry.SwerveDriveTelemetryConfig;
 
 /**
  * Swerve Drive mechanism
@@ -132,34 +133,6 @@ public class SwerveDrive {
    */
   private final SwerveDriveKinematics m_kinematics;
   /**
-   * Desired swerve module states.
-   */
-  private final Consumer<SwerveModuleState[]> m_desiredModuleStatesPublisher;
-  /**
-   * Current swerve module states.
-   */
-  private final Consumer<SwerveModuleState[]> m_currentModuleStatesPublisher;
-  /**
-   * Desired robot relative chassis speeds.
-   */
-  private final Consumer<ChassisSpeeds> m_desiredRobotRelativeChassisSpeedsPublisher;
-  /**
-   * Current robot relative chassis speeds.
-   */
-  private final Consumer<ChassisSpeeds> m_currentRobotRelativeChassisSpeedsPublisher;
-  /**
-   * Field relative chassis speeds.
-   */
-  private final Consumer<ChassisSpeeds> m_fieldRelativeChassisSpeedsPublisher;
-  /**
-   * Pose of the robot.
-   */
-  private final Consumer<Pose2d> m_posePublisher;
-  /**
-   * Gyro angle.
-   */
-  private final DoubleConsumer m_gyroPublisher;
-  /**
    * Timer for simulation purposes only. Not used in real robot code.
    */
   private final Timer m_simTimer = new Timer();
@@ -168,9 +141,13 @@ public class SwerveDrive {
    */
   private final SwerveDriveConfig m_config;
   /**
-   * Mechanism telemetry.
+   * Mechanism telemetry, used for the loop time and the {@link Field2d}.
    */
   private final MechanismTelemetry m_telemetry = new MechanismTelemetry();
+  /**
+   * Pose, chassis speeds, gyro, and auto-align tuning telemetry.
+   */
+  private SwerveDriveTelemetry m_swerveTelemetry;
   /**
    * Simulated Gyro Angle. Used for simulation purposes only. Not used in real robot code.
    */
@@ -207,23 +184,38 @@ public class SwerveDrive {
     m_kinematics = getKinematics();
     m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics, new Rotation2d(getGyroAngle()),
         getModulePositions(), m_config.getInitialPose());
-    m_config.getDataLogName().ifPresentOrElse(dataLogName
-        -> m_telemetry.setupTelemetry(getName(), dataLogName),
-        () -> m_telemetry.setupTelemetry(getName()));
-    m_desiredModuleStatesPublisher =
-        m_telemetry.publishStructArray("states/desired", SwerveModuleState.struct);
-    m_currentModuleStatesPublisher =
-        m_telemetry.publishStructArray("states/current", SwerveModuleState.struct);
-    m_posePublisher = m_telemetry.publishStruct("pose", Pose2d.struct);
-    m_gyroPublisher = m_telemetry.publishDouble("gyro", "degrees");
-    m_desiredRobotRelativeChassisSpeedsPublisher =
-        m_telemetry.publishStruct("chassis/desired", ChassisSpeeds.struct);
-    m_fieldRelativeChassisSpeedsPublisher =
-        m_telemetry.publishStruct("chassis/field", ChassisSpeeds.struct);
-    m_currentRobotRelativeChassisSpeedsPublisher =
-        m_telemetry.publishStruct("chassis/current", ChassisSpeeds.struct);
+    setupTelemetry();
+  }
+
+  /**
+   * Setup telemetry for the drive; the {@link SwerveDriveTelemetry} config used is either the one
+   * supplied via
+   * {@link SwerveDriveConfig#withTelemetry(SwerveDriveTelemetryConfig)} or a default built from
+   * {@link SwerveDriveConfig#getTelemetryVerbosity()} (defaulting to {@link
+   * TelemetryVerbosity#HIGH}).
+   */
+  private void setupTelemetry() {
+    var cfg = m_config.getSwerveDriveTelemetryConfig().orElseGet(
+        ()
+            -> new SwerveDriveTelemetryConfig().withTelemetryVerbosity(
+                m_config.getTelemetryVerbosity().orElse(TelemetryVerbosity.HIGH)));
+    if (cfg.getDataLogName().isPresent()) {
+      m_telemetry.setupTelemetry(getName(), cfg.getDataLogName().get());
+    } else {
+      m_telemetry.setupTelemetry(getName());
+    }
+
+    m_swerveTelemetry = new SwerveDriveTelemetry(cfg);
+    m_swerveTelemetry.setupTelemetry(this);
     m_field2d.setRobotPose(getPose());
     SmartDashboard.putData("Mechanisms/" + getName() + "/field", m_field2d);
+    SmartDashboard.putData(
+        "Mechanisms/" + getName() + "/tuning/driveToPose", Commands.startRun(() -> {
+          System.out.println(
+              "================= Starting SwerveDrive.driveToPoseTuning() =================\n");
+          resetTranslationPID();
+          resetRotationPID();
+        }, () -> m_swerveTelemetry.applyTuningValues(this)));
     // Report as YAGSL bc this will become apart of YAGSL in 2027...
     HAL.report(kResourceType_RobotDrive, kRobotDriveSwerve_YAGSL);
   }
@@ -416,7 +408,7 @@ public class SwerveDrive {
    * @return Name of the drive.
    */
   public String getName() {
-    return "swerve";
+    return m_config.getTelemetryName();
   }
 
   /**
@@ -440,17 +432,45 @@ public class SwerveDrive {
   }
 
   /**
-   * Resets the azimuth PID controller.
+   * Resets the auto-align rotational PID controller.
    */
-  public void resetAzimuthPID() {
+  public void resetRotationPID() {
     m_config.getRotationPID().reset();
   }
 
   /**
-   * Resets the translation PID controller.
+   * Resets the auto-align translation PID controller.
    */
   public void resetTranslationPID() {
     m_config.getTranslationPID().reset();
+  }
+
+  /**
+   * Set the auto-align rotational PID controller.
+   * @param controller {@link PIDController} to use, units given is in Radians.
+   */
+  public void setRotationPID(PIDController controller) {
+    var currentRotationPID = m_config.getRotationPID();
+    if (currentRotationPID.getP() != controller.getP()
+        || currentRotationPID.getI() != controller.getI()
+        || currentRotationPID.getD() != controller.getD()) {
+      controller.reset();
+      m_config.withRotationController(controller);
+    }
+  }
+
+  /**
+   * Sets the auto-align translation PID controller.
+   * @param controller {@link PIDController} to reset, Units given is in Meters.
+   */
+  public void setTranslationPID(PIDController controller) {
+    var currentTranslationPID = m_config.getTranslationPID();
+    if (currentTranslationPID.getP() != controller.getP()
+        || currentTranslationPID.getI() != controller.getI()
+        || currentTranslationPID.getD() != controller.getD()) {
+      controller.reset();
+      m_config.withTranslationController(controller);
+    }
   }
 
   /**
@@ -485,24 +505,34 @@ public class SwerveDrive {
     return Commands
         .runOnce(() -> {
           resetTranslationPID();
-          resetAzimuthPID();
+          resetRotationPID();
         })
-        .andThen(drive(() -> {
-          var azimuthPID = m_config.getRotationPID();
-          var translationPID = m_config.getTranslationPID();
-          var distance = getDistanceFromPose(pose);
-          var angleDifference = getAngleDifferenceFromPose(pose);
-          var translationScalar = translationPID.calculate(distance.in(Meters), 0);
-          var currentPose = getPose();
-          var poseDifference = currentPose.minus(pose);
-          return ChassisSpeeds.fromFieldRelativeSpeeds(
-              poseDifference.getMeasureX().per(Second).times(translationScalar),
-              poseDifference.getMeasureY().per(Second).times(translationScalar),
-              RadiansPerSecond.of(azimuthPID.calculate(
-                  currentPose.getRotation().getRadians(), pose.getRotation().getRadians())),
-              new Rotation2d(getGyroAngle()));
-        }))
+        .andThen(drive(() -> driveToPoseSetpoint(pose)))
         .withName("Drive to Pose");
+  }
+
+  /**
+   * Drive to the target pose, primarily for use in Live Tuning, could also be used for setpoint
+   * commands.
+   * @param targetPose Pose to drive towards.
+   * @implNote Remember to call {@link #resetRotationPID()} and {@link #resetTranslationPID()}
+   * before calling this method in a loop.
+   * @return robot-relative {@link ChassisSpeeds} to drive the robot to the given pose.
+   */
+  public ChassisSpeeds driveToPoseSetpoint(Pose2d targetPose) {
+    var rotationPID = m_config.getRotationPID();
+    var translationPID = m_config.getTranslationPID();
+    var distance = getDistanceFromPose(targetPose);
+    //    var angleDifference = getAngleDifferenceFromPose(targetPose);
+    var translationScalar = translationPID.calculate(distance.in(Meters), 0);
+    var currentPose = getPose();
+    var poseDifference = currentPose.minus(targetPose);
+    return ChassisSpeeds.fromFieldRelativeSpeeds(
+        poseDifference.getMeasureX().per(Second).times(translationScalar),
+        poseDifference.getMeasureY().per(Second).times(translationScalar),
+        RadiansPerSecond.of(rotationPID.calculate(
+            currentPose.getRotation().getRadians(), targetPose.getRotation().getRadians())),
+        new Rotation2d(getGyroAngle()));
   }
 
   /**
@@ -566,13 +596,7 @@ public class SwerveDrive {
     Pose2d robotPose = getPose();
     SwerveModuleState[] currentStates = getModuleStates();
 
-    m_gyroPublisher.accept(getGyroAngle().in(Degrees));
-    m_desiredModuleStatesPublisher.accept(m_desiredModuleStates);
-    m_currentModuleStatesPublisher.accept(currentStates);
-    m_posePublisher.accept(robotPose);
-    m_desiredRobotRelativeChassisSpeedsPublisher.accept(m_desiredChassisSpeeds);
-    m_currentRobotRelativeChassisSpeedsPublisher.accept(getRobotRelativeSpeed());
-    m_fieldRelativeChassisSpeedsPublisher.accept(getFieldRelativeSpeed());
+    m_swerveTelemetry.publish(this);
 
     Arrays.stream(m_modules).forEach(SwerveModule::updateTelemetry);
     m_telemetry.updateLoopTime();
@@ -723,5 +747,13 @@ public class SwerveDrive {
       }
     }
     return module;
+  }
+
+  /**
+   * Get all {@link SwerveModule}s for this {@link SwerveDrive}.
+   * @return Array of {@link SwerveModule}s.
+   */
+  public SwerveModule[] getModules() {
+    return m_modules;
   }
 }

@@ -79,7 +79,7 @@ public class SmartMotorControllerTelemetryConfig
   /**
    * {@link DoubleTelemetryField} to enable or disable.
    */
-  private final Map<DoubleTelemetryField, DoubleTelemetry>   doubleFields = Arrays.stream(DoubleTelemetryField.values())
+  private final Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>   doubleFields = Arrays.stream(DoubleTelemetryField.values())
                                                                                   .collect(Collectors.toMap(e -> e,
                                                                                                             DoubleTelemetryField::create));
 
@@ -225,7 +225,7 @@ public class SmartMotorControllerTelemetryConfig
    * @param smc {@link SmartMotorController} used to disable unavailable telemetry for certain motor controllers.
    * @return Configured {@link DoubleTelemetry} for each {@link DoubleTelemetryField}
    */
-  public Map<DoubleTelemetryField, DoubleTelemetry> getDoubleFields(SmartMotorController smc)
+  public Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> getDoubleFields(SmartMotorController smc)
   {
     var config         = smc.getConfig();
     var unsupTelemetry = smc.getUnsupportedTelemetryFields();

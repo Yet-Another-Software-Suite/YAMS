@@ -106,8 +106,11 @@ SwerveModuleConfig& SwerveModuleConfig::WithTelemetry(const std::string& name,
   return *this;
 }
 
-SwerveModuleConfig& SwerveModuleConfig::WithDataLogName(const std::string& dataLogName) {
-  m_dataLogName = dataLogName;
+SwerveModuleConfig& SwerveModuleConfig::WithTelemetry(
+    const std::string& name, telemetry::SwerveModuleTelemetryConfig telemetryConfig) {
+  m_telemetryName = name;
+  m_telemetryVerbosity = TelemetryVerbosity::HIGH;
+  m_specifiedTelemetryConfig = std::move(telemetryConfig);
   return *this;
 }
 
@@ -164,7 +167,13 @@ std::optional<std::function<units::degree_t()>> SwerveModuleConfig::GetAbsoluteE
   return m_absoluteEncoderSupplier;
 }
 
-std::optional<std::string> SwerveModuleConfig::GetDataLogName() const { return m_dataLogName; }
+std::optional<telemetry::SwerveModuleTelemetryConfig>
+SwerveModuleConfig::GetSwerveModuleTelemetryConfig() {
+  if (!m_specifiedTelemetryConfig) return std::nullopt;
+  auto result = std::move(m_specifiedTelemetryConfig);
+  m_specifiedTelemetryConfig.reset();
+  return result;
+}
 
 double SwerveModuleConfig::GetCosineCompensatedVelocity(
     const frc::SwerveModuleState& desiredState, const frc::Rotation2d& currentAngle) const {

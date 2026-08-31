@@ -117,13 +117,18 @@ SwerveDriveConfig& SwerveDriveConfig::WithSimRotationController(frc::PIDControll
   return *this;
 }
 
-SwerveDriveConfig& SwerveDriveConfig::WithTelemetry(TelemetryVerbosity verbosity) {
+SwerveDriveConfig& SwerveDriveConfig::WithTelemetry(const std::string& name,
+                                                     TelemetryVerbosity verbosity) {
+  m_telemetryName = name;
   m_telemetryVerbosity = verbosity;
   return *this;
 }
 
-SwerveDriveConfig& SwerveDriveConfig::WithDataLogName(const std::string& dataLogName) {
-  m_dataLogName = dataLogName;
+SwerveDriveConfig& SwerveDriveConfig::WithTelemetry(
+    const std::string& name, telemetry::SwerveDriveTelemetryConfig telemetryConfig) {
+  m_telemetryName = name;
+  m_telemetryVerbosity.reset();
+  m_specifiedTelemetryConfig = std::move(telemetryConfig);
   return *this;
 }
 
@@ -159,7 +164,15 @@ std::optional<SwerveDriveConfig::TelemetryVerbosity> SwerveDriveConfig::GetTelem
   return m_telemetryVerbosity;
 }
 
-std::optional<std::string> SwerveDriveConfig::GetDataLogName() const { return m_dataLogName; }
+const std::string& SwerveDriveConfig::GetTelemetryName() const { return m_telemetryName; }
+
+std::optional<telemetry::SwerveDriveTelemetryConfig>
+SwerveDriveConfig::GetSwerveDriveTelemetryConfig() {
+  if (!m_specifiedTelemetryConfig) return std::nullopt;
+  auto result = std::move(m_specifiedTelemetryConfig);
+  m_specifiedTelemetryConfig.reset();
+  return result;
+}
 
 units::degree_t SwerveDriveConfig::GetGyroOffset() const {
   return m_gyroOffset.value_or(units::degree_t{0});

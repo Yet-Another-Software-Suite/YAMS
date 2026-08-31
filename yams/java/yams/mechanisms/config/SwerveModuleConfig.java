@@ -25,6 +25,7 @@ import yams.mechanisms.swerve.SwerveModule;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.telemetry.SwerveModuleTelemetryConfig;
 
 /**
  * Swerve Module
@@ -98,9 +99,9 @@ public class SwerveModuleConfig
    */
   private Optional<TelemetryVerbosity>   telemetryVerbosity            = Optional.empty();
   /**
-   * DataLog entry name prefix for this module's telemetry (currently just the absolute encoder field).
+   * User specified {@link SwerveModuleTelemetryConfig}, takes precedence over {@link #telemetryVerbosity} if present.
    */
-  private Optional<String>               dataLogName                   = Optional.empty();
+  private Optional<SwerveModuleTelemetryConfig> specifiedTelemetryConfig = Optional.empty();
   /**
    * Absolute encoder supplier for the azimuth {@link SmartMotorController}.
    */
@@ -183,7 +184,7 @@ public class SwerveModuleConfig
     this.azimuthMotor = cfg.azimuthMotor;
     this.telemetryName = cfg.telemetryName;
     this.telemetryVerbosity = cfg.telemetryVerbosity;
-    this.dataLogName = cfg.dataLogName;
+    this.specifiedTelemetryConfig = cfg.specifiedTelemetryConfig;
     this.absoluteEncoderSupplier = cfg.absoluteEncoderSupplier;
     this.absoluteEncoderOffset = cfg.absoluteEncoderOffset;
     this.absoluteEncoderGearbox = cfg.absoluteEncoderGearbox;
@@ -432,26 +433,29 @@ public class SwerveModuleConfig
   }
 
   /**
-   * Log this module's telemetry (currently just the absolute encoder field) to a WPILib DataLog under the given
-   * name, in addition to NetworkTables.
+   * Configure telemetry for the {@link SwerveModule} mechanism with a {@link SwerveModuleTelemetryConfig}.
    *
-   * @param dataLogName DataLog entry name prefix for this module's telemetry.
+   * @param telemetryName   Telemetry NetworkTable name to appear under "SmartDashboard/"
+   * @param telemetryConfig Config that specifies what to log.
    * @return {@link SwerveModuleConfig} for chaining.
    */
-  public SwerveModuleConfig withDataLogName(String dataLogName)
+  public SwerveModuleConfig withTelemetry(String telemetryName, SwerveModuleTelemetryConfig telemetryConfig)
   {
-    this.dataLogName = Optional.ofNullable(dataLogName);
+    this.telemetryName = Optional.ofNullable(telemetryName);
+    this.telemetryVerbosity = Optional.of(TelemetryVerbosity.HIGH);
+    this.specifiedTelemetryConfig = Optional.ofNullable(telemetryConfig);
     return this;
   }
 
   /**
-   * Get the DataLog entry name prefix for this module's telemetry.
+   * Get the user specified {@link SwerveModuleTelemetryConfig}, if configured via
+   * {@link #withTelemetry(String, SwerveModuleTelemetryConfig)}.
    *
-   * @return DataLog entry name prefix, if configured.
+   * @return {@link SwerveModuleTelemetryConfig} if configured.
    */
-  public Optional<String> getDataLogName()
+  public Optional<SwerveModuleTelemetryConfig> getSwerveModuleTelemetryConfig()
   {
-    return dataLogName;
+    return specifiedTelemetryConfig;
   }
 
   /**
