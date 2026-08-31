@@ -745,12 +745,8 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds> {
   @Override
   public ChassisSpeeds get() {
     var config = swerveDrive.getConfig();
-    double maximumChassisVelocity = config.getMaximumChassisLinearVelocity()
-                                        .orElse(maximumChassisLinearVelocity)
-                                        .in(MetersPerSecond);
-    double maximumChassisRotVelocity = config.getMaximumChassisAngularVelocity()
-                                           .orElse(maximumChassisAngularVelocity)
-                                           .in(RadiansPerSecond);
+    double maximumChassisVelocity = maximumChassisLinearVelocity.in(MetersPerSecond);
+    double maximumChassisRotVelocity = maximumChassisAngularVelocity.in(RadiansPerSecond);
     Translation2d scaledTranslation =
         applyTranslationScalar(applyDeadband(controllerTranslationX.getAsDouble()),
             applyDeadband(controllerTranslationY.getAsDouble()));
