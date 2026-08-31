@@ -168,15 +168,6 @@ class SwerveModuleConfig {
   SwerveModuleConfig& WithTelemetry(const std::string& name,
                                     telemetry::SwerveModuleTelemetryConfig telemetryConfig);
 
-  /**
-   * Log this module's telemetry (currently just the absolute encoder field) to a WPILib
-   * DataLog under the given name, in addition to NetworkTables.
-   *
-   * @param dataLogName DataLog entry name prefix for this module's telemetry.
-   * @return *this for chaining.
-   */
-  SwerveModuleConfig& WithDataLogName(const std::string& dataLogName);
-
   // ---- Getters ---------------------------------------------------------------
 
   /** Get the drive motor controller pointer. */
@@ -219,8 +210,6 @@ class SwerveModuleConfig {
   /** Get the absolute encoder supplier, if configured via WithAbsoluteEncoder(). */
   std::optional<std::function<units::degree_t()>> GetAbsoluteEncoderSupplier() const;
 
-  /** Get the optional DataLog entry name prefix for this module's telemetry. */
-  std::optional<std::string> GetDataLogName() const;
 
   /**
    * Get the user-specified SwerveModuleTelemetryConfig, if configured via
@@ -255,7 +244,6 @@ class SwerveModuleConfig {
   std::optional<units::meters_per_second_t> m_minimumVelocity;
   std::optional<frc::Translation2d> m_location;
   std::optional<units::meter_t> m_wheelCircumference;
-  std::optional<std::string> m_dataLogName;
 
   /**
    * Compute the cosine-compensated drive velocity for the given desired state.

@@ -114,11 +114,6 @@ SwerveModuleConfig& SwerveModuleConfig::WithTelemetry(
   return *this;
 }
 
-SwerveModuleConfig& SwerveModuleConfig::WithDataLogName(const std::string& dataLogName) {
-  m_dataLogName = dataLogName;
-  return *this;
-}
-
 // ---- Getters ------------------------------------------------------------------
 
 motorcontrollers::SmartMotorController* SwerveModuleConfig::GetDriveMotor() const {
@@ -171,8 +166,6 @@ std::optional<std::function<units::degree_t()>> SwerveModuleConfig::GetAbsoluteE
     const {
   return m_absoluteEncoderSupplier;
 }
-
-std::optional<std::string> SwerveModuleConfig::GetDataLogName() const { return m_dataLogName; }
 
 std::optional<telemetry::SwerveModuleTelemetryConfig>
 SwerveModuleConfig::GetSwerveModuleTelemetryConfig() {

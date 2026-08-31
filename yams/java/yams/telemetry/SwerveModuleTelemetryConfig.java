@@ -56,6 +56,23 @@ public class SwerveModuleTelemetryConfig
             .collect(Collectors.toMap(e -> e, DoubleTelemetryField::create));
 
   /**
+   * Default constructor.
+   */
+  public SwerveModuleTelemetryConfig()
+  {
+  }
+
+  /**
+   * Constructor with verbosity preset.
+   * @param verbosity {@link TelemetryVerbosity} to use by default.
+   */
+  public SwerveModuleTelemetryConfig(TelemetryVerbosity verbosity)
+  {
+    withTelemetryVerbosity(verbosity);
+  }
+
+
+  /**
    * Set up a DataLog entry for this {@link SwerveModule}
    *
    * @param dataLogName DataLog entry name
@@ -102,10 +119,10 @@ public class SwerveModuleTelemetryConfig
     switch (verbosity)
     {
       case HIGH:
+        structFields.get(StructTelemetryField.State).enable();
       case MID:
       case LOW:
         doubleFields.get(DoubleTelemetryField.AbsoluteEncoder).enable();
-        structFields.get(StructTelemetryField.State).enable();
     }
     return this;
   }

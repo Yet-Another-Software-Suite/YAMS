@@ -180,7 +180,7 @@ class SwerveDrive {
   frc2::CommandPtr DriveToPose(frc::Pose2d pose) {
     return frc2::cmd::RunOnce([this] {
              ResetTranslationPID();
-             ResetAzimuthPID();
+             ResetRotationPID();
            })
         .AndThen(Drive([this, pose] { return DriveToPoseSetpoint(pose); }))
         .WithName("Drive to Pose");
@@ -192,7 +192,7 @@ class SwerveDrive {
    *
    * @param targetPose Pose to drive towards.
    * @return robot-relative ChassisSpeeds to drive the robot to the given pose.
-   * @implNote Remember to call ResetTranslationPID() and ResetAzimuthPID() before calling this
+   * @implNote Remember to call ResetTranslationPID() and ResetRotationPID() before calling this
    *     method in a loop.
    */
   frc::ChassisSpeeds DriveToPoseSetpoint(frc::Pose2d targetPose) {
@@ -476,7 +476,7 @@ class SwerveDrive {
     return std::nullopt;
   }
 
-  void ResetAzimuthPID() { m_config->GetRotationPID().Reset(); }
+  void ResetRotationPID() { m_config->GetRotationPID().Reset(); }
   void ResetTranslationPID() { m_config->GetTranslationPID().Reset(); }
 
   /**
@@ -601,7 +601,7 @@ class SwerveDrive {
           std::puts(
               "================= Starting SwerveDrive.driveToPoseTuning() =================\n");
           ResetTranslationPID();
-          ResetAzimuthPID();
+          ResetRotationPID();
         },
         [this] { m_swerveTelemetry->ApplyTuningValues(this); }));
     frc::SmartDashboard::PutData("Mechanisms/" + GetName() + "/tuning/driveToPose",

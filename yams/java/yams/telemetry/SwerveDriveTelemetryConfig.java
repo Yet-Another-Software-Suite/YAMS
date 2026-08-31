@@ -69,6 +69,21 @@ public class SwerveDriveTelemetryConfig
             .collect(Collectors.toMap(e -> e, DoubleTelemetryField::create));
 
   /**
+   * Default constructor
+   */
+  public SwerveDriveTelemetryConfig()
+  {}
+
+  /**
+   * Constructor with verbosity preset.
+   * @param verbosity {@link TelemetryVerbosity} to use.
+   */
+  public SwerveDriveTelemetryConfig(TelemetryVerbosity verbosity)
+  {
+    withTelemetryVerbosity(verbosity);
+  }
+
+  /**
    * Set up a DataLog entry for this {@link SwerveDrive}
    *
    * @param dataLogName DataLog entry name

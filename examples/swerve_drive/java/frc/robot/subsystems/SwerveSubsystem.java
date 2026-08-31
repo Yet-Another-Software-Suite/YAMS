@@ -39,6 +39,7 @@ import yams.mechanisms.config.SwerveModuleConfig;
 import yams.mechanisms.swerve.SwerveDrive;
 import yams.mechanisms.swerve.SwerveModule;
 import yams.telemetry.SwerveDriveTelemetryConfig;
+import yams.telemetry.SwerveModuleTelemetryConfig;
 import yams.mechanisms.swerve.utility.SwerveInputStream;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
@@ -167,13 +168,13 @@ public class SwerveSubsystem extends SubsystemBase
     SwerveModuleConfig moduleConfig = new SwerveModuleConfig(driveSMC, azimuthSMC)
         // The CANcoder absolute position eliminates the need to home the steer motor at startup.
         .withAbsoluteEncoder(absoluteEncoder.getAbsolutePosition().asSupplier())
-        .withTelemetry(moduleName, SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
-        .withLocation(location)
-        // Optimization rotates the module at most 90 deg instead of 180 deg + reversing drive direction.
-        .withOptimization(true)
         // Nested under the same "Swerve" DataLog prefix as SwerveDriveConfig below, so the module's
         // absolute encoder shows up alongside the rest of the drive's DataLog entries.
-        .withDataLogName("Swerve/" + moduleName);
+        .withTelemetry(moduleName, new SwerveModuleTelemetryConfig().withDataLogName("Swerve/" + moduleName)
+                                                                     .withTelemetryVerbosity(SmartMotorControllerConfig.TelemetryVerbosity.HIGH))
+        .withLocation(location)
+        // Optimization rotates the module at most 90 deg instead of 180 deg + reversing drive direction.
+        .withOptimization(true);
     return new SwerveModule(moduleConfig);
   }
 

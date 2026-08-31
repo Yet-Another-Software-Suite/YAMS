@@ -232,18 +232,6 @@ class SwerveDriveConfig {
    */
   SwerveDriveConfig& WithTelemetryName(const std::string& telemetryName);
 
-  /**
-   * Log the SwerveDrive's telemetry (pose, gyro, chassis speeds, module states) to a WPILib
-   * DataLog under the given name, in addition to NetworkTables. When configured, every
-   * SwerveModule passed to this config — including its drive and azimuth motors — also logs
-   * under a subtable of this name (e.g. "<name>/<module name>/drive"), even though the modules
-   * are constructed before this config exists.
-   *
-   * @param dataLogName DataLog entry name prefix for the SwerveDrive's telemetry.
-   * @return *this for chaining.
-   */
-  SwerveDriveConfig& WithDataLogName(const std::string& dataLogName);
-
   // ---- Getters ---------------------------------------------------------------
 
   /** Get the vector of module pointers. */
@@ -266,8 +254,6 @@ class SwerveDriveConfig {
   std::optional<frc::Translation2d> GetCenterOfRotation() const;
   /** @return Optional telemetry verbosity level. */
   std::optional<TelemetryVerbosity> GetTelemetryVerbosity() const;
-  /** @return Optional DataLog entry name prefix for the SwerveDrive's telemetry. */
-  std::optional<std::string> GetDataLogName() const;
   /** @return The telemetry name for the drive (defaults to "swerve"). */
   const std::string& GetTelemetryName() const;
   /**
@@ -325,7 +311,6 @@ class SwerveDriveConfig {
   std::string m_telemetryName{"swerve"};
   std::optional<TelemetryVerbosity> m_telemetryVerbosity;
   std::optional<telemetry::SwerveDriveTelemetryConfig> m_specifiedTelemetryConfig;
-  std::optional<std::string> m_dataLogName;
   std::optional<std::function<units::degree_t()>> m_gyroSupplier;
   std::optional<std::function<units::degrees_per_second_t()>> m_gyroAngularVelocitySupplier;
   std::optional<units::degree_t> m_gyroOffset;

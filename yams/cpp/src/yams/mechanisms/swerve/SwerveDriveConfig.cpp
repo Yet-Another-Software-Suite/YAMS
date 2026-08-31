@@ -134,11 +134,6 @@ SwerveDriveConfig& SwerveDriveConfig::WithTelemetryName(const std::string& telem
   return *this;
 }
 
-SwerveDriveConfig& SwerveDriveConfig::WithDataLogName(const std::string& dataLogName) {
-  m_dataLogName = dataLogName;
-  return *this;
-}
-
 // ---- Getters -----------------------------------------------------------------
 
 const std::vector<SwerveModule*>& SwerveDriveConfig::GetModules() const { return m_modules; }
@@ -170,8 +165,6 @@ std::optional<SwerveDriveConfig::TelemetryVerbosity> SwerveDriveConfig::GetTelem
     const {
   return m_telemetryVerbosity;
 }
-
-std::optional<std::string> SwerveDriveConfig::GetDataLogName() const { return m_dataLogName; }
 
 const std::string& SwerveDriveConfig::GetTelemetryName() const { return m_telemetryName; }
 

@@ -487,31 +487,6 @@ public class SwerveDriveConfig
   /**
    * Configure telemetry for the {@link SwerveModule} mechanism.
    *
-   * @param telemetryVerbosity Telemetry verbosity to apply.
-   * @return {@link SwerveDriveConfig} for chaining.
-   */
-  public SwerveDriveConfig withTelemetry(TelemetryVerbosity telemetryVerbosity)
-  {
-    this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
-    return this;
-  }
-
-  /**
-   * Configure telemetry for the {@link SwerveDrive} with a {@link SwerveDriveTelemetryConfig}.
-   *
-   * @param telemetryConfig Config that specifies what to log.
-   * @return {@link SwerveDriveConfig} for chaining.
-   */
-  public SwerveDriveConfig withTelemetry(SwerveDriveTelemetryConfig telemetryConfig)
-  {
-    this.telemetryVerbosity = Optional.empty();
-    this.specifiedTelemetryConfig = Optional.ofNullable(telemetryConfig);
-    return this;
-  }
-
-  /**
-   * Configure telemetry for the {@link SwerveModule} mechanism.
-   *
    * @param name Telemetry Name
    * @param telemetryVerbosity Telemetry verbosity to apply.
    * @return {@link SwerveDriveConfig} for chaining.
@@ -540,25 +515,13 @@ public class SwerveDriveConfig
 
   /**
    * Get the user specified {@link SwerveDriveTelemetryConfig}, if configured via
-   * {@link #withTelemetry(SwerveDriveTelemetryConfig)}.
+   * {@link #withTelemetry(String,SwerveDriveTelemetryConfig)}.
    *
    * @return {@link SwerveDriveTelemetryConfig} if configured.
    */
   public Optional<SwerveDriveTelemetryConfig> getSwerveDriveTelemetryConfig()
   {
     return specifiedTelemetryConfig;
-  }
-
-  /**
-   * Set the telemetry name for the {@link SwerveDrive}. Defaults to {@code "swerve"}.
-   *
-   * @param telemetryName Telemetry name for the {@link SwerveDrive}.
-   * @return {@link SwerveDriveConfig} for chaining.
-   */
-  public SwerveDriveConfig withTelemetryName(String telemetryName)
-  {
-    this.telemetryName = telemetryName;
-    return this;
   }
 
   /**
