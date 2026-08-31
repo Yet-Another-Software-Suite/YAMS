@@ -53,6 +53,10 @@ loadScripts(document, 'script');</script>
 <a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:H">H</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:K">K</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:O">O</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<a href="#I:W">W</a>&nbsp;<a href="#I:X">X</a>&nbsp;<a href="#I:Y">Y</a>&nbsp;<a href="#I:Z">Z</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="serialized-form.html">Serialized&nbsp;Form</a>
 <h2 class="title" id="I:A">A</h2>
 <dl class="index">
+<dt><a href="yams/telemetry/SwerveModuleTelemetry.DoubleTelemetryField.html#AbsoluteEncoder" class="member-name-link">AbsoluteEncoder</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveModuleTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Absolute encoder angle, without offsets applied, in degrees.</div>
+</dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html#ActiveClosedLoopControllerSlot" class="member-name-link">ActiveClosedLoopControllerSlot</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></dt>
 <dd>
 <div class="block">Active closed loop controller slot.</div>
@@ -101,6 +105,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/SmartMotorController.html#applyConfig(yams.motorcontrollers.SmartMotorControllerConfig)" class="member-name-link">applyConfig(SmartMotorControllerConfig)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Apply the <a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> to the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.html#applyTuningValues(yams.mechanisms.swerve.SwerveDrive)" class="member-name-link">applyTuningValues(SwerveDrive)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.html" title="class in yams.telemetry">SwerveDriveTelemetry</a></dt>
+<dd>
+<div class="block">Apply the tuning values from <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/networktables/NetworkTable.html" title="class or interface in edu.wpi.first.networktables" class="external-link"><code>NetworkTable</code></a> to the <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a></div>
 </dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetry.html#applyTuningValues(yams.motorcontrollers.SmartMotorController)" class="member-name-link">applyTuningValues(SmartMotorController)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetry.html" title="class in yams.telemetry">SmartMotorControllerTelemetry</a></dt>
 <dd>
@@ -154,8 +162,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html#atTargetPose(double)" class="member-name-link">atTargetPose(double)</a> - Method in class yams.mechanisms.swerve.utility.<a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></dt>
 <dd>
-<div class="block">When the <a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> is in <code>SwerveInputStream.SwerveInputMode.DRIVE_TO_POSE</code> this function will return if the
- robot is at the desired pose within the defined tolerance.</div>
+<div class="block">When the <a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> is in <code>SwerveInputStream.SwerveInputMode.DRIVE_TO_POSE</code> this function
+ will return if the robot is at the desired pose within the defined tolerance.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:B">B</h2>
@@ -282,6 +290,22 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Close and unpublish telemetry.</div>
 </dd>
+<dt><a href="yams/telemetry/StructArrayTelemetry.html#close()" class="member-name-link">close()</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructArrayTelemetry.html" title="class in yams.telemetry">StructArrayTelemetry</a></dt>
+<dd>
+<div class="block">Close the telemetry field.</div>
+</dd>
+<dt><a href="yams/telemetry/StructTelemetry.html#close()" class="member-name-link">close()</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructTelemetry.html" title="class in yams.telemetry">StructTelemetry</a></dt>
+<dd>
+<div class="block">Close the telemetry field.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.html#close()" class="member-name-link">close()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.html" title="class in yams.telemetry">SwerveDriveTelemetry</a></dt>
+<dd>
+<div class="block">Close and unpublish telemetry.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetry.html#close()" class="member-name-link">close()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetry.html" title="class in yams.telemetry">SwerveModuleTelemetry</a></dt>
+<dd>
+<div class="block">Close and unpublish telemetry.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.ControlMode.html#CLOSED_LOOP" class="member-name-link">CLOSED_LOOP</a> - Enum constant in enum class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.ControlMode.html" title="enum class in yams.motorcontrollers">SmartMotorControllerConfig.ControlMode</a></dt>
 <dd>
 <div class="block">Use the PID controller.</div>
@@ -385,6 +409,26 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Create double telemetry field.</div>
 </dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#create()" class="member-name-link">create()</a> - Method in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Create a <a href="yams/telemetry/DoubleTelemetry.html" title="class in yams.telemetry"><code>DoubleTelemetry</code></a> object for non-static usage.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.StructArrayTelemetryField.html#create()" class="member-name-link">create()</a> - Method in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.StructArrayTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.StructArrayTelemetryField</a></dt>
+<dd>
+<div class="block">Create a <a href="yams/telemetry/StructArrayTelemetry.html" title="class in yams.telemetry"><code>StructArrayTelemetry</code></a> object for non-static usage.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.StructTelemetryField.html#create()" class="member-name-link">create()</a> - Method in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.StructTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.StructTelemetryField</a></dt>
+<dd>
+<div class="block">Create a <a href="yams/telemetry/StructTelemetry.html" title="class in yams.telemetry"><code>StructTelemetry</code></a> object for non-static usage.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetry.DoubleTelemetryField.html#create()" class="member-name-link">create()</a> - Method in enum class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveModuleTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Create a <a href="yams/telemetry/DoubleTelemetry.html" title="class in yams.telemetry"><code>DoubleTelemetry</code></a> object for non-static usage.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetry.StructTelemetryField.html#create()" class="member-name-link">create()</a> - Method in enum class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetry.StructTelemetryField.html" title="enum class in yams.telemetry">SwerveModuleTelemetry.StructTelemetryField</a></dt>
+<dd>
+<div class="block">Create a <a href="yams/telemetry/StructTelemetry.html" title="class in yams.telemetry"><code>StructTelemetry</code></a> object for non-static usage.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorController.html#create(java.lang.Object,edu.wpi.first.math.system.plant.DCMotor,yams.motorcontrollers.SmartMotorControllerConfig)" class="member-name-link">create(Object, DCMotor, SmartMotorControllerConfig)</a> - Static method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Create a <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> wrapper from the provided motor controller object.</div>
@@ -433,6 +477,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">457.2/1000 of a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/Units.html#Meters" title="class or interface in edu.wpi.first.units" class="external-link"><code>Units.Meters</code></a>, or 18 <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/Units.html#Inches" title="class or interface in edu.wpi.first.units" class="external-link"><code>Units.Inches</code></a>.</div>
 </dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.StructArrayTelemetryField.html#CurrentModuleStates" class="member-name-link">CurrentModuleStates</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.StructArrayTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.StructArrayTelemetryField</a></dt>
+<dd>
+<div class="block">Measured <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState</code></a>s.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.StructTelemetryField.html#CurrentRobotRelativeChassisSpeeds" class="member-name-link">CurrentRobotRelativeChassisSpeeds</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.StructTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.StructTelemetryField</a></dt>
+<dd>
+<div class="block">Measured robot relative <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a>.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:D">D</h2>
 <dl class="index">
@@ -472,6 +524,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/math/DerivativeTimeFilter.html#%3Cinit%3E(edu.wpi.first.units.measure.Time)" class="member-name-link">DerivativeTimeFilter(Time)</a> - Constructor for class yams.math.<a href="yams/math/DerivativeTimeFilter.html" title="class in yams.math">DerivativeTimeFilter</a></dt>
 <dd>
 <div class="block">Create a derivative filter with no initial value</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.StructArrayTelemetryField.html#DesiredModuleStates" class="member-name-link">DesiredModuleStates</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.StructArrayTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.StructArrayTelemetryField</a></dt>
+<dd>
+<div class="block">Last-commanded desired <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState</code></a>s.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.StructTelemetryField.html#DesiredRobotRelativeChassisSpeeds" class="member-name-link">DesiredRobotRelativeChassisSpeeds</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.StructTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.StructTelemetryField</a></dt>
+<dd>
+<div class="block">Last-commanded desired robot relative <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a>.</div>
 </dd>
 <dt><a href="yams/mechanisms/positional/DifferentialMechanism.html" class="type-name-link" title="class in yams.mechanisms.positional">DifferentialMechanism</a> - Class in <a href="yams/mechanisms/positional/package-summary.html">yams.mechanisms.positional</a></dt>
 <dd>
@@ -513,6 +573,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Disable the telemetry.</div>
 </dd>
+<dt><a href="yams/telemetry/StructArrayTelemetry.html#disable()" class="member-name-link">disable()</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructArrayTelemetry.html" title="class in yams.telemetry">StructArrayTelemetry</a></dt>
+<dd>
+<div class="block">Disable the telemetry.</div>
+</dd>
+<dt><a href="yams/telemetry/StructTelemetry.html#disable()" class="member-name-link">disable()</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructTelemetry.html" title="class in yams.telemetry">StructTelemetry</a></dt>
+<dd>
+<div class="block">Disable the telemetry.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/simulation/BatterySim.html#disableDischarge()" class="member-name-link">disableDischarge()</a> - Static method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/BatterySim.html" title="class in yams.motorcontrollers.simulation">BatterySim</a></dt>
 <dd>
 <div class="block">Disable battery discharge simulation, reverting to a constant <code>BatterySim.batteryVoltage</code> and
@@ -535,6 +603,14 @@ loadScripts(document, 'script');</script>
 <div class="block">Display the telemetry.</div>
 </dd>
 <dt><a href="yams/telemetry/DoubleTelemetry.html#display(boolean)" class="member-name-link">display(boolean)</a> - Method in class yams.telemetry.<a href="yams/telemetry/DoubleTelemetry.html" title="class in yams.telemetry">DoubleTelemetry</a></dt>
+<dd>
+<div class="block">Display the telemetry.</div>
+</dd>
+<dt><a href="yams/telemetry/StructArrayTelemetry.html#display(boolean)" class="member-name-link">display(boolean)</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructArrayTelemetry.html" title="class in yams.telemetry">StructArrayTelemetry</a></dt>
+<dd>
+<div class="block">Display the telemetry.</div>
+</dd>
+<dt><a href="yams/telemetry/StructTelemetry.html#display(boolean)" class="member-name-link">display(boolean)</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructTelemetry.html" title="class in yams.telemetry">StructTelemetry</a></dt>
 <dd>
 <div class="block">Display the telemetry.</div>
 </dd>
@@ -567,11 +643,11 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Arm configuration exception.</div>
 </dd>
-<dt><a href="yams/telemetry/DoubleTelemetry.html" class="type-name-link" title="class in yams.telemetry">DoubleTelemetry</a> - Class in <a href="yams/telemetry/package-summary.html">yams.telemetry</a></dt>
+<dt><a href="yams/telemetry/DoubleTelemetry.html" class="type-name-link" title="class in yams.telemetry">DoubleTelemetry</a>&lt;<a href="yams/telemetry/DoubleTelemetry.html" title="type parameter in DoubleTelemetry">F</a>&gt; - Class in <a href="yams/telemetry/package-summary.html">yams.telemetry</a></dt>
 <dd>
 <div class="block">Double Telemetry for SmartMotorControllers.</div>
 </dd>
-<dt><a href="yams/telemetry/DoubleTelemetry.html#%3Cinit%3E(java.lang.String,double,yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField,boolean,java.lang.String)" class="member-name-link">DoubleTelemetry(String, double, SmartMotorControllerTelemetry.DoubleTelemetryField, boolean, String)</a> - Constructor for class yams.telemetry.<a href="yams/telemetry/DoubleTelemetry.html" title="class in yams.telemetry">DoubleTelemetry</a></dt>
+<dt><a href="yams/telemetry/DoubleTelemetry.html#%3Cinit%3E(java.lang.String,double,F,boolean,java.lang.String)" class="member-name-link">DoubleTelemetry(String, double, F, boolean, String)</a> - Constructor for class yams.telemetry.<a href="yams/telemetry/DoubleTelemetry.html" title="class in yams.telemetry">DoubleTelemetry</a></dt>
 <dd>
 <div class="block">Setup double telemetry for a field.</div>
 </dd>
@@ -582,6 +658,11 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/swerve/SwerveDrive.html#driveToPose(edu.wpi.first.math.geometry.Pose2d)" class="member-name-link">driveToPose(Pose2d)</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
 <div class="block">Drive the robot to the given pose.</div>
+</dd>
+<dt><a href="yams/mechanisms/swerve/SwerveDrive.html#driveToPoseSetpoint(edu.wpi.first.math.geometry.Pose2d)" class="member-name-link">driveToPoseSetpoint(Pose2d)</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
+<dd>
+<div class="block">Drive to the target pose, primarily for use in Live Tuning, could also be used for setpoint
+ commands.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:E">E</h2>
@@ -660,6 +741,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Enable the telemetry.</div>
 </dd>
+<dt><a href="yams/telemetry/StructArrayTelemetry.html#enable()" class="member-name-link">enable()</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructArrayTelemetry.html" title="class in yams.telemetry">StructArrayTelemetry</a></dt>
+<dd>
+<div class="block">Enable the telemetry.</div>
+</dd>
+<dt><a href="yams/telemetry/StructTelemetry.html#enable()" class="member-name-link">enable()</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructTelemetry.html" title="class in yams.telemetry">StructTelemetry</a></dt>
+<dd>
+<div class="block">Enable the telemetry.</div>
+</dd>
 <dt><a href="yams/math/ExponentialProfilePIDController.html#enableContinuousInput(double,double)" class="member-name-link">enableContinuousInput(double, double)</a> - Method in class yams.math.<a href="yams/math/ExponentialProfilePIDController.html" title="class in yams.math">ExponentialProfilePIDController</a></dt>
 <dd>
 <div class="block">Enables continuous input.</div>
@@ -669,6 +758,14 @@ loadScripts(document, 'script');</script>
 <div class="block">Enabled?</div>
 </dd>
 <dt><a href="yams/telemetry/DoubleTelemetry.html#enabled" class="member-name-link">enabled</a> - Variable in class yams.telemetry.<a href="yams/telemetry/DoubleTelemetry.html" title="class in yams.telemetry">DoubleTelemetry</a></dt>
+<dd>
+<div class="block">Enabled?</div>
+</dd>
+<dt><a href="yams/telemetry/StructArrayTelemetry.html#enabled" class="member-name-link">enabled</a> - Variable in class yams.telemetry.<a href="yams/telemetry/StructArrayTelemetry.html" title="class in yams.telemetry">StructArrayTelemetry</a></dt>
+<dd>
+<div class="block">Enabled?</div>
+</dd>
+<dt><a href="yams/telemetry/StructTelemetry.html#enabled" class="member-name-link">enabled</a> - Variable in class yams.telemetry.<a href="yams/telemetry/StructTelemetry.html" title="class in yams.telemetry">StructTelemetry</a></dt>
 <dd>
 <div class="block">Enabled?</div>
 </dd>
@@ -755,6 +852,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html#feedUpdateSim()" class="member-name-link">feedUpdateSim()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.StructTelemetryField.html#FieldRelativeChassisSpeeds" class="member-name-link">FieldRelativeChassisSpeeds</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.StructTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.StructTelemetryField</a></dt>
+<dd>
+<div class="block">Measured field relative <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a>.</div>
+</dd>
 <dt><a href="yams/units/EasyCRTConfig.html#findSmallestCrtGearPair(int,double,edu.wpi.first.units.measure.Angle,double,int,int,int)" class="member-name-link">findSmallestCrtGearPair(int, double, Angle, double, int, int, int)</a> - Static method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
 <div class="block">Finds the smallest gear pair that satisfies coverage and iteration limits.</div>
@@ -876,6 +977,14 @@ loadScripts(document, 'script');</script>
 <div class="block">Get the value.</div>
 </dd>
 <dt><a href="yams/telemetry/DoubleTelemetry.html#get()" class="member-name-link">get()</a> - Method in class yams.telemetry.<a href="yams/telemetry/DoubleTelemetry.html" title="class in yams.telemetry">DoubleTelemetry</a></dt>
+<dd>
+<div class="block">Get the value.</div>
+</dd>
+<dt><a href="yams/telemetry/StructArrayTelemetry.html#get()" class="member-name-link">get()</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructArrayTelemetry.html" title="class in yams.telemetry">StructArrayTelemetry</a></dt>
+<dd>
+<div class="block">Get the value.</div>
+</dd>
+<dt><a href="yams/telemetry/StructTelemetry.html#get()" class="member-name-link">get()</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructTelemetry.html" title="class in yams.telemetry">StructTelemetry</a></dt>
 <dd>
 <div class="block">Get the value.</div>
 </dd>
@@ -1087,17 +1196,17 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the Differential coefficient.</div>
 </dd>
-<dt><a href="yams/mechanisms/config/SwerveDriveConfig.html#getDataLogName()" class="member-name-link">getDataLogName()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config">SwerveDriveConfig</a></dt>
-<dd>
-<div class="block">Get the DataLog entry name prefix for the <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a>'s telemetry.</div>
-</dd>
-<dt><a href="yams/mechanisms/config/SwerveModuleConfig.html#getDataLogName()" class="member-name-link">getDataLogName()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></dt>
-<dd>
-<div class="block">Get the DataLog entry name prefix for this module's telemetry.</div>
-</dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#getDataLogName()" class="member-name-link">getDataLogName()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
 <dd>
 <div class="block">Get the entry name for the smart motor controller in DataLog.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#getDataLogName()" class="member-name-link">getDataLogName()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Get the entry name for the <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> in DataLog.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetryConfig.html#getDataLogName()" class="member-name-link">getDataLogName()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a></dt>
+<dd>
+<div class="block">Get the entry name for the <a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a> in DataLog.</div>
 </dd>
 <dt><a href="yams/telemetry/MechanismTelemetry.html#getDataTable()" class="member-name-link">getDataTable()</a> - Method in class yams.telemetry.<a href="yams/telemetry/MechanismTelemetry.html" title="class in yams.telemetry">MechanismTelemetry</a></dt>
 <dd>
@@ -1140,6 +1249,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/swerve/SwerveDrive.html#getDistanceFromPose(edu.wpi.first.math.geometry.Pose2d)" class="member-name-link">getDistanceFromPose(Pose2d)</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
 <div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Distance</code></a> from the given pose to the robot.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#getDoubleFields()" class="member-name-link">getDoubleFields()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Get the configured double fields.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetryConfig.html#getDoubleFields()" class="member-name-link">getDoubleFields()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a></dt>
+<dd>
+<div class="block">Get the configured double fields.</div>
 </dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#getDoubleFields(yams.motorcontrollers.SmartMotorController)" class="member-name-link">getDoubleFields(SmartMotorController)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
 <dd>
@@ -1235,6 +1352,12 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the field.</div>
 </dd>
+<dt><a href="yams/telemetry/StructArrayTelemetry.html#getField()" class="member-name-link">getField()</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructArrayTelemetry.html" title="class in yams.telemetry">StructArrayTelemetry</a></dt>
+<dd>
+<div class="block">Get the field.</div>
+</dd>
+<dt><a href="yams/telemetry/StructTelemetry.html#getField()" class="member-name-link">getField()</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructTelemetry.html" title="class in yams.telemetry">StructTelemetry</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/Sensor.html#getField(java.lang.String)" class="member-name-link">getField(String)</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/Sensor.html" title="class in yams.motorcontrollers.simulation">Sensor</a></dt>
 <dd>
 <div class="block">Get a field from the simulated or real sensor.</div>
@@ -1622,6 +1745,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the <a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a>s for the <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a>.</div>
 </dd>
+<dt><a href="yams/mechanisms/swerve/SwerveDrive.html#getModules()" class="member-name-link">getModules()</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
+<dd>
+<div class="block">Get all <a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a>s for this <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a>.</div>
+</dd>
 <dt><a href="yams/mechanisms/swerve/SwerveDrive.html#getModuleStates()" class="member-name-link">getModuleStates()</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
 <div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState</code></a> of the modules.</div>
@@ -1732,6 +1859,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Log telemetry to NT4?</div>
 </dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#getNT4Enabled()" class="member-name-link">getNT4Enabled()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Log telemetry to NT4?</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetryConfig.html#getNT4Enabled()" class="member-name-link">getNT4Enabled()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a></dt>
+<dd>
+<div class="block">Log telemetry to NT4?</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#getOpenLoopRampRate()" class="member-name-link">getOpenLoopRampRate()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the open loop ramp rate.</div>
@@ -1783,6 +1918,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/config/SwerveModuleConfig.html#getRawAbsoluteEncoderAngle()" class="member-name-link">getRawAbsoluteEncoderAngle()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></dt>
 <dd>
 <div class="block">Get the absolute encoder angle as a supplier without offsets applied.</div>
+</dd>
+<dt><a href="yams/mechanisms/swerve/SwerveModule.html#getRawAbsoluteEncoderAngle()" class="member-name-link">getRawAbsoluteEncoderAngle()</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve">SwerveModule</a></dt>
+<dd>
+<div class="block">Get the absolute encoder angle without any offsets applied.</div>
 </dd>
 <dt><a href="yams/units/EasyCRTConfig.html#getRecommendedCrtGearPair()" class="member-name-link">getRecommendedCrtGearPair()</a> - Method in class yams.units.<a href="yams/units/EasyCRTConfig.html" title="class in yams.units">EasyCRTConfig</a></dt>
 <dd>
@@ -2008,6 +2147,18 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the stator stall current limit.</div>
 </dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#getStructArrayFields()" class="member-name-link">getStructArrayFields()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Get the configured struct array fields.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#getStructFields()" class="member-name-link">getStructFields()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Get the configured struct fields.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetryConfig.html#getStructFields()" class="member-name-link">getStructFields()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a></dt>
+<dd>
+<div class="block">Get the configured struct fields.</div>
+</dd>
 <dt><a href="yams/mechanisms/config/SwerveDriveConfig.html#getSubsystem()" class="member-name-link">getSubsystem()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
 <div class="block">Get the swerve drive subsystem.</div>
@@ -2032,6 +2183,16 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the supply stall current limit.</div>
 </dd>
+<dt><a href="yams/mechanisms/config/SwerveDriveConfig.html#getSwerveDriveTelemetryConfig()" class="member-name-link">getSwerveDriveTelemetryConfig()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config">SwerveDriveConfig</a></dt>
+<dd>
+<div class="block">Get the user specified <a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry"><code>SwerveDriveTelemetryConfig</code></a>, if configured via
+ <a href="yams/mechanisms/config/SwerveDriveConfig.html#withTelemetry(java.lang.String,yams.telemetry.SwerveDriveTelemetryConfig)"><code>SwerveDriveConfig.withTelemetry(String,SwerveDriveTelemetryConfig)</code></a>.</div>
+</dd>
+<dt><a href="yams/mechanisms/config/SwerveModuleConfig.html#getSwerveModuleTelemetryConfig()" class="member-name-link">getSwerveModuleTelemetryConfig()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></dt>
+<dd>
+<div class="block">Get the user specified <a href="yams/telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry"><code>SwerveModuleTelemetryConfig</code></a>, if configured via
+ <a href="yams/mechanisms/config/SwerveModuleConfig.html#withTelemetry(java.lang.String,yams.telemetry.SwerveModuleTelemetryConfig)"><code>SwerveModuleConfig.withTelemetry(String, SwerveModuleTelemetryConfig)</code></a>.</div>
+</dd>
 <dt><a href="yams/math/LQRConfig.html#getSystem()" class="member-name-link">getSystem()</a> - Method in class yams.math.<a href="yams/math/LQRConfig.html" title="class in yams.math">LQRConfig</a></dt>
 <dd>
 <div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/system/LinearSystem.html" title="class or interface in edu.wpi.first.math.system" class="external-link"><code>LinearSystem</code></a> for the LQR.</div>
@@ -2055,6 +2216,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/config/PivotConfig.html#getTelemetryName()" class="member-name-link">getTelemetryName()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config">PivotConfig</a></dt>
 <dd>
 <div class="block">Network Tables name for the <a href="yams/mechanisms/positional/Pivot.html" title="class in yams.mechanisms.positional"><code>Pivot</code></a></div>
+</dd>
+<dt><a href="yams/mechanisms/config/SwerveDriveConfig.html#getTelemetryName()" class="member-name-link">getTelemetryName()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config">SwerveDriveConfig</a></dt>
+<dd>
+<div class="block">Get the telemetry name for the <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a>.</div>
 </dd>
 <dt><a href="yams/mechanisms/config/SwerveModuleConfig.html#getTelemetryName()" class="member-name-link">getTelemetryName()</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></dt>
 <dd>
@@ -2282,6 +2447,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/positional/Elevator.html#gte(edu.wpi.first.units.measure.Distance)" class="member-name-link">gte(Distance)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Elevator.html" title="class in yams.mechanisms.positional">Elevator</a></dt>
 <dd>
 <div class="block">Greater than or equal to height.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#Gyro" class="member-name-link">Gyro</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Gyro angle, in degrees.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:H">H</h2>
@@ -2852,6 +3021,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">The plane that the mechanism is on, used for position calculations.</div>
 </dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.StructTelemetryField.html#Pose" class="member-name-link">Pose</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.StructTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.StructTelemetryField</a></dt>
+<dd>
+<div class="block">Estimated <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Pose2d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link"><code>Pose2d</code></a> of the robot, as reported by the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/SwerveDrivePoseEstimator.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>SwerveDrivePoseEstimator</code></a>.</div>
+</dd>
 <dt><a href="yams/units/YUnits.html#PoundFeetPerSecond" class="member-name-link">PoundFeetPerSecond</a> - Static variable in class yams.units.<a href="yams/units/YUnits.html" title="class in yams.units">YUnits</a></dt>
 <dd>
 <div class="block">Pounds * Feet/Second</div>
@@ -2875,6 +3048,14 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/units/YUnits.html#PoundSquareInches" class="member-name-link">PoundSquareInches</a> - Static variable in class yams.units.<a href="yams/units/YUnits.html" title="class in yams.units">YUnits</a></dt>
 <dd>
 <div class="block">Pounds^2 * Inches *Radians/Second</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.html#publish(yams.mechanisms.swerve.SwerveDrive)" class="member-name-link">publish(SwerveDrive)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.html" title="class in yams.telemetry">SwerveDriveTelemetry</a></dt>
+<dd>
+<div class="block">Publish telemetry to NetworkTables and DataLog</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetry.html#publish(yams.mechanisms.swerve.SwerveModule)" class="member-name-link">publish(SwerveModule)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetry.html" title="class in yams.telemetry">SwerveModuleTelemetry</a></dt>
+<dd>
+<div class="block">Publish telemetry to NetworkTables and DataLog.</div>
 </dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetry.html#publish(yams.motorcontrollers.SmartMotorController)" class="member-name-link">publish(SmartMotorController)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetry.html" title="class in yams.telemetry">SmartMotorControllerTelemetry</a></dt>
 <dd>
@@ -2935,10 +3116,6 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Reset the Elevator LQR.</div>
 </dd>
-<dt><a href="yams/mechanisms/swerve/SwerveDrive.html#resetAzimuthPID()" class="member-name-link">resetAzimuthPID()</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
-<dd>
-<div class="block">Resets the azimuth PID controller.</div>
-</dd>
 <dt><a href="yams/motorcontrollers/simulation/BatterySim.html#resetDischarge()" class="member-name-link">resetDischarge()</a> - Static method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/BatterySim.html" title="class in yams.motorcontrollers.simulation">BatterySim</a></dt>
 <dd>
 <div class="block">Reset the simulated battery back to a full charge.</div>
@@ -2947,9 +3124,13 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Resets odometry to the given pose.</div>
 </dd>
+<dt><a href="yams/mechanisms/swerve/SwerveDrive.html#resetRotationPID()" class="member-name-link">resetRotationPID()</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
+<dd>
+<div class="block">Resets the auto-align rotational PID controller.</div>
+</dd>
 <dt><a href="yams/mechanisms/swerve/SwerveDrive.html#resetTranslationPID()" class="member-name-link">resetTranslationPID()</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
-<div class="block">Resets the translation PID controller.</div>
+<div class="block">Resets the auto-align translation PID controller.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#resetValidationCheck()" class="member-name-link">resetValidationCheck()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -2959,6 +3140,18 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/config/MechanismPositionConfig.html#robotToMechanism" class="member-name-link">robotToMechanism</a> - Variable in class yams.mechanisms.config.<a href="yams/mechanisms/config/MechanismPositionConfig.html" title="class in yams.mechanisms.config">MechanismPositionConfig</a></dt>
 <dd>
 <div class="block">The translation from the robot to the mechanism (Optional)</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#RotationD" class="member-name-link">RotationD</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Rotational derivative gain for auto-aligning the robot.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#RotationI" class="member-name-link">RotationI</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Rotational integral gain for auto-aligning the robot.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#RotationP" class="member-name-link">RotationP</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Rotational proporational gain for auto-aligning the robot.</div>
 </dd>
 <dt><a href="yams/units/YUnits.html#RotationsPerMinutePerSecond" class="member-name-link">RotationsPerMinutePerSecond</a> - Static variable in class yams.units.<a href="yams/units/YUnits.html" title="class in yams.units">YUnits</a></dt>
 <dd>
@@ -3206,6 +3399,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Set the DutyCycle of the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </dd>
+<dt><a href="yams/telemetry/StructTelemetry.html#set(T)" class="member-name-link">set(T)</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructTelemetry.html" title="class in yams.telemetry">StructTelemetry</a></dt>
+<dd>
+<div class="block">Set the value of the publisher, checking to see if the value is the same as the subscriber.</div>
+</dd>
+<dt><a href="yams/telemetry/StructArrayTelemetry.html#set(T%5B%5D)" class="member-name-link">set(T[])</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructArrayTelemetry.html" title="class in yams.telemetry">StructArrayTelemetry</a></dt>
+<dd>
+<div class="block">Set the value of the publisher, checking to see if the value is the same as the subscriber.</div>
+</dd>
 <dt><a href="yams/mechanisms/positional/Arm.html#setAngle(edu.wpi.first.units.measure.Angle)" class="member-name-link">setAngle(Angle)</a> - Method in class yams.mechanisms.positional.<a href="yams/mechanisms/positional/Arm.html" title="class in yams.mechanisms.positional">Arm</a></dt>
 <dd>
 <div class="block">Set the arm to the given angle.</div>
@@ -3263,6 +3464,14 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the default value.</div>
 </dd>
 <dt><a href="yams/telemetry/DoubleTelemetry.html#setDefaultValue(double)" class="member-name-link">setDefaultValue(double)</a> - Method in class yams.telemetry.<a href="yams/telemetry/DoubleTelemetry.html" title="class in yams.telemetry">DoubleTelemetry</a></dt>
+<dd>
+<div class="block">Set default values.</div>
+</dd>
+<dt><a href="yams/telemetry/StructTelemetry.html#setDefaultValue(T)" class="member-name-link">setDefaultValue(T)</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructTelemetry.html" title="class in yams.telemetry">StructTelemetry</a></dt>
+<dd>
+<div class="block">Set default values.</div>
+</dd>
+<dt><a href="yams/telemetry/StructArrayTelemetry.html#setDefaultValue(T%5B%5D)" class="member-name-link">setDefaultValue(T[])</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructArrayTelemetry.html" title="class in yams.telemetry">StructArrayTelemetry</a></dt>
 <dd>
 <div class="block">Set default values.</div>
 </dd>
@@ -3722,6 +3931,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Set robot relative chassis speeds.</div>
 </dd>
+<dt><a href="yams/mechanisms/swerve/SwerveDrive.html#setRotationPID(edu.wpi.first.math.controller.PIDController)" class="member-name-link">setRotationPID(PIDController)</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
+<dd>
+<div class="block">Set the auto-align rotational PID controller.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorController.html#setSimSupplier(yams.motorcontrollers.SimSupplier)" class="member-name-link">setSimSupplier(SimSupplier)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Set the <a href="yams/motorcontrollers/SimSupplier.html" title="interface in yams.motorcontrollers"><code>SimSupplier</code></a> Mechanism.</div>
@@ -3764,11 +3977,23 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Sets the error which is considered tolerable for use with atSetpoint().</div>
 </dd>
+<dt><a href="yams/mechanisms/swerve/SwerveDrive.html#setTranslationPID(edu.wpi.first.math.controller.PIDController)" class="member-name-link">setTranslationPID(PIDController)</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></dt>
+<dd>
+<div class="block">Sets the auto-align translation PID controller.</div>
+</dd>
 <dt><a href="yams/telemetry/BooleanTelemetry.html#setupDataLog(java.lang.String)" class="member-name-link">setupDataLog(String)</a> - Method in class yams.telemetry.<a href="yams/telemetry/BooleanTelemetry.html" title="class in yams.telemetry">BooleanTelemetry</a></dt>
 <dd>
 <div class="block">Setup the DataLog entry for this telemetry field.</div>
 </dd>
 <dt><a href="yams/telemetry/DoubleTelemetry.html#setupDataLog(java.lang.String)" class="member-name-link">setupDataLog(String)</a> - Method in class yams.telemetry.<a href="yams/telemetry/DoubleTelemetry.html" title="class in yams.telemetry">DoubleTelemetry</a></dt>
+<dd>
+<div class="block">Setup the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/util/datalog/DataLog.html" title="class or interface in edu.wpi.first.util.datalog" class="external-link"><code>DataLog</code></a> with this entry.</div>
+</dd>
+<dt><a href="yams/telemetry/StructArrayTelemetry.html#setupDataLog(java.lang.String)" class="member-name-link">setupDataLog(String)</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructArrayTelemetry.html" title="class in yams.telemetry">StructArrayTelemetry</a></dt>
+<dd>
+<div class="block">Setup the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/util/datalog/DataLog.html" title="class or interface in edu.wpi.first.util.datalog" class="external-link"><code>DataLog</code></a> with this entry.</div>
+</dd>
+<dt><a href="yams/telemetry/StructTelemetry.html#setupDataLog(java.lang.String)" class="member-name-link">setupDataLog(String)</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructTelemetry.html" title="class in yams.telemetry">StructTelemetry</a></dt>
 <dd>
 <div class="block">Setup the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/util/datalog/DataLog.html" title="class or interface in edu.wpi.first.util.datalog" class="external-link"><code>DataLog</code></a> with this entry.</div>
 </dd>
@@ -3784,11 +4009,27 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Setup network tables.</div>
 </dd>
+<dt><a href="yams/telemetry/StructArrayTelemetry.html#setupNetworkTable(edu.wpi.first.networktables.NetworkTable)" class="member-name-link">setupNetworkTable(NetworkTable)</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructArrayTelemetry.html" title="class in yams.telemetry">StructArrayTelemetry</a></dt>
+<dd>
+<div class="block">Setup network tables.</div>
+</dd>
+<dt><a href="yams/telemetry/StructTelemetry.html#setupNetworkTable(edu.wpi.first.networktables.NetworkTable)" class="member-name-link">setupNetworkTable(NetworkTable)</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructTelemetry.html" title="class in yams.telemetry">StructTelemetry</a></dt>
+<dd>
+<div class="block">Setup network tables.</div>
+</dd>
 <dt><a href="yams/telemetry/BooleanTelemetry.html#setupNetworkTables(edu.wpi.first.networktables.NetworkTable,edu.wpi.first.networktables.NetworkTable)" class="member-name-link">setupNetworkTables(NetworkTable, NetworkTable)</a> - Method in class yams.telemetry.<a href="yams/telemetry/BooleanTelemetry.html" title="class in yams.telemetry">BooleanTelemetry</a></dt>
 <dd>
 <div class="block">Setup network tables.</div>
 </dd>
 <dt><a href="yams/telemetry/DoubleTelemetry.html#setupNetworkTables(edu.wpi.first.networktables.NetworkTable,edu.wpi.first.networktables.NetworkTable)" class="member-name-link">setupNetworkTables(NetworkTable, NetworkTable)</a> - Method in class yams.telemetry.<a href="yams/telemetry/DoubleTelemetry.html" title="class in yams.telemetry">DoubleTelemetry</a></dt>
+<dd>
+<div class="block">Setup network tables.</div>
+</dd>
+<dt><a href="yams/telemetry/StructArrayTelemetry.html#setupNetworkTables(edu.wpi.first.networktables.NetworkTable,edu.wpi.first.networktables.NetworkTable)" class="member-name-link">setupNetworkTables(NetworkTable, NetworkTable)</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructArrayTelemetry.html" title="class in yams.telemetry">StructArrayTelemetry</a></dt>
+<dd>
+<div class="block">Setup network tables.</div>
+</dd>
+<dt><a href="yams/telemetry/StructTelemetry.html#setupNetworkTables(edu.wpi.first.networktables.NetworkTable,edu.wpi.first.networktables.NetworkTable)" class="member-name-link">setupNetworkTables(NetworkTable, NetworkTable)</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructTelemetry.html" title="class in yams.telemetry">StructTelemetry</a></dt>
 <dd>
 <div class="block">Setup network tables.</div>
 </dd>
@@ -3810,6 +4051,13 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Update the telemetry under the motor name under the given <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/networktables/NetworkTable.html" title="class or interface in edu.wpi.first.networktables" class="external-link"><code>NetworkTable</code></a></div>
 </dd>
+<dt><a href="yams/mechanisms/swerve/SwerveModule.html#setupTelemetry(java.lang.String)" class="member-name-link">setupTelemetry(String)</a> - Method in class yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve">SwerveModule</a></dt>
+<dd>
+<div class="block">Setup telemetry for the module; the <a href="yams/telemetry/SwerveModuleTelemetry.html" title="class in yams.telemetry"><code>SwerveModuleTelemetry</code></a> config used is either the one
+ supplied via <a href="yams/mechanisms/config/SwerveModuleConfig.html#withTelemetry(java.lang.String,yams.telemetry.SwerveModuleTelemetryConfig)"><code>SwerveModuleConfig.withTelemetry(String, SwerveModuleTelemetryConfig)</code></a> or a
+ default built from <a href="yams/mechanisms/config/SwerveModuleConfig.html#getTelemetryVerbosity()"><code>SwerveModuleConfig.getTelemetryVerbosity()</code></a> (defaulting to
+ <a href="yams/motorcontrollers/SmartMotorControllerConfig.TelemetryVerbosity.html#HIGH"><code>SmartMotorControllerConfig.TelemetryVerbosity.HIGH</code></a>).</div>
+</dd>
 <dt><a href="yams/telemetry/MechanismTelemetry.html#setupTelemetry(java.lang.String)" class="member-name-link">setupTelemetry(String)</a> - Method in class yams.telemetry.<a href="yams/telemetry/MechanismTelemetry.html" title="class in yams.telemetry">MechanismTelemetry</a></dt>
 <dd>
 <div class="block">Setup telemetry for the Mechanism and motor controller.</div>
@@ -3820,9 +4068,17 @@ loadScripts(document, 'script');</script>
  <a href="yams/telemetry/MechanismTelemetry.html#publishDouble(java.lang.String,java.lang.String)"><code>MechanismTelemetry.publishDouble(String, String)</code></a>, <a href="yams/telemetry/MechanismTelemetry.html#publishStruct(java.lang.String,edu.wpi.first.util.struct.Struct)"><code>MechanismTelemetry.publishStruct(String, Struct)</code></a>, and
  <a href="yams/telemetry/MechanismTelemetry.html#publishStructArray(java.lang.String,edu.wpi.first.util.struct.Struct)"><code>MechanismTelemetry.publishStructArray(String, Struct)</code></a> to a WPILib DataLog under the given name.</div>
 </dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetry.html#setupTelemetry(java.lang.String,yams.mechanisms.swerve.SwerveModule)" class="member-name-link">setupTelemetry(String, SwerveModule)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetry.html" title="class in yams.telemetry">SwerveModuleTelemetry</a></dt>
+<dd>
+<div class="block">Setup telemetry for the module.</div>
+</dd>
 <dt><a href="yams/telemetry/MechanismTelemetry.html#setupTelemetry(java.lang.String,yams.motorcontrollers.SmartMotorController)" class="member-name-link">setupTelemetry(String, SmartMotorController)</a> - Method in class yams.telemetry.<a href="yams/telemetry/MechanismTelemetry.html" title="class in yams.telemetry">MechanismTelemetry</a></dt>
 <dd>
 <div class="block">Setup telemetry for the Mechanism and motor controller.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.html#setupTelemetry(yams.mechanisms.swerve.SwerveDrive)" class="member-name-link">setupTelemetry(SwerveDrive)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.html" title="class in yams.telemetry">SwerveDriveTelemetry</a></dt>
+<dd>
+<div class="block">Setup telemetry for the drive.</div>
 </dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetry.html#setupTelemetry(yams.motorcontrollers.SmartMotorController,edu.wpi.first.networktables.NetworkTable,edu.wpi.first.networktables.NetworkTable,yams.telemetry.SmartMotorControllerTelemetryConfig)" class="member-name-link">setupTelemetry(SmartMotorController, NetworkTable, NetworkTable, SmartMotorControllerTelemetryConfig)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetry.html" title="class in yams.telemetry">SmartMotorControllerTelemetry</a></dt>
 <dd>
@@ -4075,6 +4331,10 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html#starveUpdateSim()" class="member-name-link">starveUpdateSim()</a> - Method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetry.StructTelemetryField.html#State" class="member-name-link">State</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetry.StructTelemetryField.html" title="enum class in yams.telemetry">SwerveModuleTelemetry.StructTelemetryField</a></dt>
+<dd>
+<div class="block">Measured <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState</code></a> of the module.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.SmartMotorControllerOptions.html#STATOR_CURRENT_LIMIT" class="member-name-link">STATOR_CURRENT_LIMIT</a> - Enum constant in enum class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.SmartMotorControllerOptions.html" title="enum class in yams.motorcontrollers">SmartMotorControllerConfig.SmartMotorControllerOptions</a></dt>
 <dd>
 <div class="block">Stator current limit.</div>
@@ -4090,6 +4350,22 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/SmartMotorController.html#stopClosedLoopController()" class="member-name-link">stopClosedLoopController()</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Stop the closed loop controller.</div>
+</dd>
+<dt><a href="yams/telemetry/StructArrayTelemetry.html" class="type-name-link" title="class in yams.telemetry">StructArrayTelemetry</a>&lt;<a href="yams/telemetry/StructArrayTelemetry.html" title="type parameter in StructArrayTelemetry">T</a>,<wbr><a href="yams/telemetry/StructArrayTelemetry.html" title="type parameter in StructArrayTelemetry">F</a>&gt; - Class in <a href="yams/telemetry/package-summary.html">yams.telemetry</a></dt>
+<dd>
+<div class="block">Struct array Telemetry for arbitrary <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/util/struct/Struct.html" title="class or interface in edu.wpi.first.util.struct" class="external-link"><code>Struct</code></a> serializable array types.</div>
+</dd>
+<dt><a href="yams/telemetry/StructArrayTelemetry.html#%3Cinit%3E(java.lang.String,T%5B%5D,F,edu.wpi.first.util.struct.Struct,boolean)" class="member-name-link">StructArrayTelemetry(String, T[], F, Struct&lt;T&gt;, boolean)</a> - Constructor for class yams.telemetry.<a href="yams/telemetry/StructArrayTelemetry.html" title="class in yams.telemetry">StructArrayTelemetry</a></dt>
+<dd>
+<div class="block">Setup struct array telemetry for a field.</div>
+</dd>
+<dt><a href="yams/telemetry/StructTelemetry.html" class="type-name-link" title="class in yams.telemetry">StructTelemetry</a>&lt;<a href="yams/telemetry/StructTelemetry.html" title="type parameter in StructTelemetry">T</a>,<wbr><a href="yams/telemetry/StructTelemetry.html" title="type parameter in StructTelemetry">F</a>&gt; - Class in <a href="yams/telemetry/package-summary.html">yams.telemetry</a></dt>
+<dd>
+<div class="block">Struct Telemetry for arbitrary <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/util/struct/Struct.html" title="class or interface in edu.wpi.first.util.struct" class="external-link"><code>Struct</code></a> serializable types.</div>
+</dd>
+<dt><a href="yams/telemetry/StructTelemetry.html#%3Cinit%3E(java.lang.String,T,F,edu.wpi.first.util.struct.Struct,boolean)" class="member-name-link">StructTelemetry(String, T, F, Struct&lt;T&gt;, boolean)</a> - Constructor for class yams.telemetry.<a href="yams/telemetry/StructTelemetry.html" title="class in yams.telemetry">StructTelemetry</a></dt>
+<dd>
+<div class="block">Setup struct telemetry for a field.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.SmartMotorControllerOptions.html#SUPPLY_CURRENT_LIMIT" class="member-name-link">SUPPLY_CURRENT_LIMIT</a> - Enum constant in enum class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.SmartMotorControllerOptions.html" title="enum class in yams.motorcontrollers">SmartMotorControllerConfig.SmartMotorControllerOptions</a></dt>
 <dd>
@@ -4132,17 +4408,49 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">SwerveDrive configuration exception.</div>
 </dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.html" class="type-name-link" title="class in yams.telemetry">SwerveDriveTelemetry</a> - Class in <a href="yams/telemetry/package-summary.html">yams.telemetry</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.html#%3Cinit%3E(yams.telemetry.SwerveDriveTelemetryConfig)" class="member-name-link">SwerveDriveTelemetry(SwerveDriveTelemetryConfig)</a> - Constructor for class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.html" title="class in yams.telemetry">SwerveDriveTelemetry</a></dt>
+<dd>
+<div class="block">Create SwerveDrive telemetry for logging in NetworkTables and DataLog.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" class="type-name-link" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a> - Enum Class in <a href="yams/telemetry/package-summary.html">yams.telemetry</a></dt>
+<dd>
+<div class="block">Double telemetry field for <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a>s.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.StructArrayTelemetryField.html" class="type-name-link" title="enum class in yams.telemetry">SwerveDriveTelemetry.StructArrayTelemetryField</a> - Enum Class in <a href="yams/telemetry/package-summary.html">yams.telemetry</a></dt>
+<dd>
+<div class="block">Struct array telemetry field for <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a>s.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.StructTelemetryField.html" class="type-name-link" title="enum class in yams.telemetry">SwerveDriveTelemetry.StructTelemetryField</a> - Enum Class in <a href="yams/telemetry/package-summary.html">yams.telemetry</a></dt>
+<dd>
+<div class="block">Struct telemetry field for <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a>s.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html" class="type-name-link" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a> - Class in <a href="yams/telemetry/package-summary.html">yams.telemetry</a></dt>
+<dd>
+<div class="block">Swerve drive telemetry configuration.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#%3Cinit%3E()" class="member-name-link">SwerveDriveTelemetryConfig()</a> - Constructor for class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Default constructor</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#%3Cinit%3E(yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)" class="member-name-link">SwerveDriveTelemetryConfig(SmartMotorControllerConfig.TelemetryVerbosity)</a> - Constructor for class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Constructor with verbosity preset.</div>
+</dd>
 <dt><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" class="type-name-link" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a> - Class in <a href="yams/mechanisms/swerve/utility/package-summary.html">yams.mechanisms.swerve.utility</a></dt>
 <dd>
 <div class="block">Helper class to easily transform Controller inputs into workable Chassis speeds.</div>
 </dd>
 <dt><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html#%3Cinit%3E(yams.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" class="member-name-link">SwerveInputStream(SwerveDrive, DoubleSupplier, DoubleSupplier, DoubleSupplier)</a> - Constructor for class yams.mechanisms.swerve.utility.<a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></dt>
 <dd>
-<div class="block">Create a <a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> for an easy way to generate <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> from a driver controller.</div>
+<div class="block">Create a <a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> for an easy way to generate <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> from a
+ driver controller.</div>
 </dd>
 <dt><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html#%3Cinit%3E(yams.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" class="member-name-link">SwerveInputStream(SwerveDrive, DoubleSupplier, DoubleSupplier, DoubleSupplier, DoubleSupplier)</a> - Constructor for class yams.mechanisms.swerve.utility.<a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></dt>
 <dd>
-<div class="block">Create a <a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> for an easy way to generate <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> from a driver controller.</div>
+<div class="block">Create a <a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> for an easy way to generate <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> from a
+ driver controller.</div>
 </dd>
 <dt><a href="yams/mechanisms/swerve/SwerveModule.html" class="type-name-link" title="class in yams.mechanisms.swerve">SwerveModule</a> - Class in <a href="yams/mechanisms/swerve/package-summary.html">yams.mechanisms.swerve</a></dt>
 <dd>
@@ -4163,6 +4471,34 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/mechanisms/config/SwerveModuleConfig.html#%3Cinit%3E(yams.motorcontrollers.SmartMotorController,yams.motorcontrollers.SmartMotorController)" class="member-name-link">SwerveModuleConfig(SmartMotorController, SmartMotorController)</a> - Constructor for class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></dt>
 <dd>
 <div class="block">Create the <a href="yams/mechanisms/config/SwerveModuleConfig.html" title="class in yams.mechanisms.config"><code>SwerveModuleConfig</code></a> for the <a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a></div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetry.html" class="type-name-link" title="class in yams.telemetry">SwerveModuleTelemetry</a> - Class in <a href="yams/telemetry/package-summary.html">yams.telemetry</a></dt>
+<dd>
+<div class="block">Swerve module telemetry.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetry.html#%3Cinit%3E(yams.telemetry.SwerveModuleTelemetryConfig)" class="member-name-link">SwerveModuleTelemetry(SwerveModuleTelemetryConfig)</a> - Constructor for class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetry.html" title="class in yams.telemetry">SwerveModuleTelemetry</a></dt>
+<dd>
+<div class="block">Create SwerveModule telemetry for logging in NetworkTables and DataLog.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetry.DoubleTelemetryField.html" class="type-name-link" title="enum class in yams.telemetry">SwerveModuleTelemetry.DoubleTelemetryField</a> - Enum Class in <a href="yams/telemetry/package-summary.html">yams.telemetry</a></dt>
+<dd>
+<div class="block">Double telemetry field for <a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a>s.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetry.StructTelemetryField.html" class="type-name-link" title="enum class in yams.telemetry">SwerveModuleTelemetry.StructTelemetryField</a> - Enum Class in <a href="yams/telemetry/package-summary.html">yams.telemetry</a></dt>
+<dd>
+<div class="block">Struct telemetry field for <a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a>s.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetryConfig.html" class="type-name-link" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a> - Class in <a href="yams/telemetry/package-summary.html">yams.telemetry</a></dt>
+<dd>
+<div class="block">Swerve module telemetry configuration.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetryConfig.html#%3Cinit%3E()" class="member-name-link">SwerveModuleTelemetryConfig()</a> - Constructor for class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a></dt>
+<dd>
+<div class="block">Default constructor.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetryConfig.html#%3Cinit%3E(yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)" class="member-name-link">SwerveModuleTelemetryConfig(SmartMotorControllerConfig.TelemetryVerbosity)</a> - Constructor for class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a></dt>
+<dd>
+<div class="block">Constructor with verbosity preset.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/local/SparkWrapper.html#synchronizeRelativeEncoder()" class="member-name-link">synchronizeRelativeEncoder()</a> - Method in class yams.motorcontrollers.local.<a href="yams/motorcontrollers/local/SparkWrapper.html" title="class in yams.motorcontrollers.local">SparkWrapper</a></dt>
 <dd>&nbsp;</dd>
@@ -4192,6 +4528,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/remote/TalonFXWrapper.html#%3Cinit%3E(com.ctre.phoenix6.hardware.TalonFX,edu.wpi.first.math.system.plant.DCMotor,yams.motorcontrollers.SmartMotorControllerConfig)" class="member-name-link">TalonFXWrapper(TalonFX, DCMotor, SmartMotorControllerConfig)</a> - Constructor for class yams.motorcontrollers.remote.<a href="yams/motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXWrapper</a></dt>
 <dd>
 <div class="block">Create the <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/hardware/TalonFX.html" title="class or interface in com.ctre.phoenix6.hardware" class="external-link"><code>TalonFX</code></a> wrapper</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.StructTelemetryField.html#TargetPose" class="member-name-link">TargetPose</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.StructTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.StructTelemetryField</a></dt>
+<dd>
+<div class="block">Target <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Pose2d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link"><code>Pose2d</code></a> for the robot driven using <a href="yams/mechanisms/swerve/SwerveDrive.html#driveToPose(edu.wpi.first.math.geometry.Pose2d)"><code>SwerveDrive.driveToPose(Pose2d)</code></a>.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorController.html#telemetry" class="member-name-link">telemetry</a> - Variable in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>
@@ -4231,6 +4571,18 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Set the unit.</div>
 </dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#TranslationD" class="member-name-link">TranslationD</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Translational derivative gain for auto-aligning the robot.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#TranslationI" class="member-name-link">TranslationI</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Translational integral gain for auto-aligning the robot.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#TranslationP" class="member-name-link">TranslationP</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Translational proporational gain for auto-aligning the robot.</div>
+</dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html#TrapezoidalProfileMaxAcceleration" class="member-name-link">TrapezoidalProfileMaxAcceleration</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></dt>
 <dd>
 <div class="block">Motion profile maximum accelerartion, could be in MPS^2 or RPM/s</div>
@@ -4248,6 +4600,14 @@ loadScripts(document, 'script');</script>
 <div class="block">Check to see if the value has changed.</div>
 </dd>
 <dt><a href="yams/telemetry/DoubleTelemetry.html#tunable()" class="member-name-link">tunable()</a> - Method in class yams.telemetry.<a href="yams/telemetry/DoubleTelemetry.html" title="class in yams.telemetry">DoubleTelemetry</a></dt>
+<dd>
+<div class="block">Check to see if the value has changed.</div>
+</dd>
+<dt><a href="yams/telemetry/StructArrayTelemetry.html#tunable()" class="member-name-link">tunable()</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructArrayTelemetry.html" title="class in yams.telemetry">StructArrayTelemetry</a></dt>
+<dd>
+<div class="block">Check to see if the value has changed.</div>
+</dd>
+<dt><a href="yams/telemetry/StructTelemetry.html#tunable()" class="member-name-link">tunable()</a> - Method in class yams.telemetry.<a href="yams/telemetry/StructTelemetry.html" title="class in yams.telemetry">StructTelemetry</a></dt>
 <dd>
 <div class="block">Check to see if the value has changed.</div>
 </dd>
@@ -4399,6 +4759,26 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
 </dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this class with the specified name.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.StructArrayTelemetryField.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.StructArrayTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.StructArrayTelemetryField</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this class with the specified name.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.StructTelemetryField.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.StructTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.StructTelemetryField</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this class with the specified name.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetry.DoubleTelemetryField.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveModuleTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this class with the specified name.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetry.StructTelemetryField.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetry.StructTelemetryField.html" title="enum class in yams.telemetry">SwerveModuleTelemetry.StructTelemetryField</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this class with the specified name.</div>
+</dd>
 <dt><a href="yams/units/EasyCRT.CRTStatus.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class yams.units.<a href="yams/units/EasyCRT.CRTStatus.html" title="enum class in yams.units">EasyCRT.CRTStatus</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
@@ -4453,6 +4833,31 @@ the order they are declared.</div>
 <div class="block">Returns an array containing the constants of this enum class, in
 the order they are declared.</div>
 </dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#values()" class="member-name-link">values()</a> - Static method in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum class, in
+the order they are declared.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.StructArrayTelemetryField.html#values()" class="member-name-link">values()</a> - Static method in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.StructArrayTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.StructArrayTelemetryField</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum class, in
+the order they are declared.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.StructTelemetryField.html#values()" class="member-name-link">values()</a> - Static method in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.StructTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.StructTelemetryField</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum class, in
+the order they are declared.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetry.DoubleTelemetryField.html#values()" class="member-name-link">values()</a> - Static method in enum class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveModuleTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum class, in
+the order they are declared.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetry.StructTelemetryField.html#values()" class="member-name-link">values()</a> - Static method in enum class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetry.StructTelemetryField.html" title="enum class in yams.telemetry">SwerveModuleTelemetry.StructTelemetryField</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum class, in
+the order they are declared.</div>
+</dd>
 <dt><a href="yams/units/EasyCRT.CRTStatus.html#values()" class="member-name-link">values()</a> - Static method in enum class yams.units.<a href="yams/units/EasyCRT.CRTStatus.html" title="enum class in yams.units">EasyCRT.CRTStatus</a></dt>
 <dd>
 <div class="block">Returns an array containing the constants of this enum class, in
@@ -4496,6 +4901,10 @@ the order they are declared.</div>
 <dt><a href="yams/units/YUnits.html#Weeks" class="member-name-link">Weeks</a> - Static variable in class yams.units.<a href="yams/units/YUnits.html" title="class in yams.units">YUnits</a></dt>
 <dd>
 <div class="block">7 <a href="yams/units/YUnits.html#Days"><code>Days</code></a>.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetryConfig.html#withAbsoluteEncoder()" class="member-name-link">withAbsoluteEncoder()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a></dt>
+<dd>
+<div class="block">Enables the absolute encoder angle logging.</div>
 </dd>
 <dt><a href="yams/mechanisms/config/SwerveModuleConfig.html#withAbsoluteEncoder(java.lang.Object)" class="member-name-link">withAbsoluteEncoder(Object)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></dt>
 <dd>
@@ -4702,6 +5111,14 @@ the order they are declared.</div>
 <dd>
 <div class="block">Cube the translation axis magnitude for a non-linear control scheme.</div>
 </dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#withCurrentModuleStates()" class="member-name-link">withCurrentModuleStates()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Enables the measured module states logging.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#withCurrentRobotRelativeChassisSpeeds()" class="member-name-link">withCurrentRobotRelativeChassisSpeeds()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Enables the measured robot relative chassis speeds logging.</div>
+</dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#withCustom(yams.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField%5B%5D,boolean)" class="member-name-link">withCustom(SmartMotorControllerTelemetry.BooleanTelemetryField[], boolean)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
 <dd>
 <div class="block">Escape hatch for unimplemented fields which should be enabled or disabled.</div>
@@ -4718,23 +5135,69 @@ the order they are declared.</div>
 <dd>
 <div class="block">Escape hatch for unimplemented fields which should be enabled or disabled.</div>
 </dd>
-<dt><a href="yams/mechanisms/config/SwerveDriveConfig.html#withDataLogName(java.lang.String)" class="member-name-link">withDataLogName(String)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config">SwerveDriveConfig</a></dt>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#withCustom(yams.telemetry.SwerveDriveTelemetry.DoubleTelemetryField%5B%5D,boolean)" class="member-name-link">withCustom(SwerveDriveTelemetry.DoubleTelemetryField[], boolean)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
 <dd>
-<div class="block">Log the <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a>'s telemetry (pose, gyro, chassis speeds, module states) to a WPILib DataLog under the
- given name, in addition to NetworkTables.</div>
+<div class="block">Escape hatch for unimplemented fields which should be enabled or disabled.</div>
 </dd>
-<dt><a href="yams/mechanisms/config/SwerveModuleConfig.html#withDataLogName(java.lang.String)" class="member-name-link">withDataLogName(String)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></dt>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#withCustom(yams.telemetry.SwerveDriveTelemetry.DoubleTelemetryField,boolean)" class="member-name-link">withCustom(SwerveDriveTelemetry.DoubleTelemetryField, boolean)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
 <dd>
-<div class="block">Log this module's telemetry (currently just the absolute encoder field) to a WPILib DataLog under the given
- name, in addition to NetworkTables.</div>
+<div class="block">Escape hatch for unimplemented fields which should be enabled or disabled.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#withCustom(yams.telemetry.SwerveDriveTelemetry.StructArrayTelemetryField%5B%5D,boolean)" class="member-name-link">withCustom(SwerveDriveTelemetry.StructArrayTelemetryField[], boolean)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Escape hatch for unimplemented fields which should be enabled or disabled.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#withCustom(yams.telemetry.SwerveDriveTelemetry.StructArrayTelemetryField,boolean)" class="member-name-link">withCustom(SwerveDriveTelemetry.StructArrayTelemetryField, boolean)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Escape hatch for unimplemented fields which should be enabled or disabled.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#withCustom(yams.telemetry.SwerveDriveTelemetry.StructTelemetryField%5B%5D,boolean)" class="member-name-link">withCustom(SwerveDriveTelemetry.StructTelemetryField[], boolean)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Escape hatch for unimplemented fields which should be enabled or disabled.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#withCustom(yams.telemetry.SwerveDriveTelemetry.StructTelemetryField,boolean)" class="member-name-link">withCustom(SwerveDriveTelemetry.StructTelemetryField, boolean)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Escape hatch for unimplemented fields which should be enabled or disabled.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetryConfig.html#withCustom(yams.telemetry.SwerveModuleTelemetry.DoubleTelemetryField%5B%5D,boolean)" class="member-name-link">withCustom(SwerveModuleTelemetry.DoubleTelemetryField[], boolean)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a></dt>
+<dd>
+<div class="block">Escape hatch for unimplemented fields which should be enabled or disabled.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetryConfig.html#withCustom(yams.telemetry.SwerveModuleTelemetry.DoubleTelemetryField,boolean)" class="member-name-link">withCustom(SwerveModuleTelemetry.DoubleTelemetryField, boolean)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a></dt>
+<dd>
+<div class="block">Escape hatch for unimplemented fields which should be enabled or disabled.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetryConfig.html#withCustom(yams.telemetry.SwerveModuleTelemetry.StructTelemetryField%5B%5D,boolean)" class="member-name-link">withCustom(SwerveModuleTelemetry.StructTelemetryField[], boolean)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a></dt>
+<dd>
+<div class="block">Escape hatch for unimplemented fields which should be enabled or disabled.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetryConfig.html#withCustom(yams.telemetry.SwerveModuleTelemetry.StructTelemetryField,boolean)" class="member-name-link">withCustom(SwerveModuleTelemetry.StructTelemetryField, boolean)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a></dt>
+<dd>
+<div class="block">Escape hatch for unimplemented fields which should be enabled or disabled.</div>
 </dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#withDataLogName(java.lang.String)" class="member-name-link">withDataLogName(String)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
 <dd>
 <div class="block">Set up a DataLog entry for this <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
 </dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#withDataLogName(java.lang.String)" class="member-name-link">withDataLogName(String)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Set up a DataLog entry for this <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a></div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetryConfig.html#withDataLogName(java.lang.String)" class="member-name-link">withDataLogName(String)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a></dt>
+<dd>
+<div class="block">Set up a DataLog entry for this <a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a></div>
+</dd>
 <dt><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html#withDeadband(double)" class="member-name-link">withDeadband(double)</a> - Method in class yams.mechanisms.swerve.utility.<a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></dt>
 <dd>
 <div class="block">Set a deadband for all controller axis.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#withDesiredModuleStates()" class="member-name-link">withDesiredModuleStates()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Enables the last-commanded desired module states logging.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#withDesiredRobotRelativeChassisSpeeds()" class="member-name-link">withDesiredRobotRelativeChassisSpeeds()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Enables the last-commanded desired robot relative chassis speeds logging.</div>
 </dd>
 <dt><a href="yams/mechanisms/config/FlyWheelConfig.html#withDiameter(edu.wpi.first.units.measure.Distance)" class="member-name-link">withDiameter(Distance)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></dt>
 <dd>
@@ -4862,6 +5325,10 @@ the order they are declared.</div>
 <dd>
 <div class="block">Add a field to the sensor.</div>
 </dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#withFieldRelativeChassisSpeeds()" class="member-name-link">withFieldRelativeChassisSpeeds()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Enables the measured field relative chassis speeds logging.</div>
+</dd>
 <dt><a href="yams/math/LQRConfig.html#withFlyWheel(edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">withFlyWheel(AngularVelocity, AngularVelocity, AngularVelocity)</a> - Method in class yams.math.<a href="yams/math/LQRConfig.html" title="class in yams.math">LQRConfig</a></dt>
 <dd>
 <div class="block">Construct a Flywheel LQR Configuration.</div>
@@ -4881,6 +5348,10 @@ the order they are declared.</div>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withGearing(yams.gearing.MechanismGearing)" class="member-name-link">withGearing(MechanismGearing)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the <a href="yams/gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#withGyro()" class="member-name-link">withGyro()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Enables the gyro angle logging.</div>
 </dd>
 <dt><a href="yams/mechanisms/config/SwerveDriveConfig.html#withGyro(java.util.function.Supplier)" class="member-name-link">withGyro(Supplier&lt;Angle&gt;)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
@@ -4964,7 +5435,8 @@ the order they are declared.</div>
 </dd>
 <dt><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html#withMaximumAngularVelocity(edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">withMaximumAngularVelocity(AngularVelocity)</a> - Method in class yams.mechanisms.swerve.utility.<a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></dt>
 <dd>
-<div class="block">Maximum angular velocity to use for the <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> object, will be translated to Rotations per Second.</div>
+<div class="block">Maximum angular velocity to use for the <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> object, will be translated to
+ Rotations per Second.</div>
 </dd>
 <dt><a href="yams/mechanisms/config/SwerveDriveConfig.html#withMaximumChassisSpeed(edu.wpi.first.units.measure.LinearVelocity,edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">withMaximumChassisSpeed(LinearVelocity, AngularVelocity)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
@@ -4972,7 +5444,8 @@ the order they are declared.</div>
 </dd>
 <dt><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html#withMaximumLinearVelocity(edu.wpi.first.units.measure.LinearVelocity)" class="member-name-link">withMaximumLinearVelocity(LinearVelocity)</a> - Method in class yams.mechanisms.swerve.utility.<a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></dt>
 <dd>
-<div class="block">Maximum linear velocity to use for the <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> object, will be translated to Meters per Second.</div>
+<div class="block">Maximum linear velocity to use for the <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> object, will be translated to Meters
+ per Second.</div>
 </dd>
 <dt><a href="yams/mechanisms/config/SwerveDriveConfig.html#withMaximumModuleSpeed(edu.wpi.first.units.measure.LinearVelocity)" class="member-name-link">withMaximumModuleSpeed(LinearVelocity)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
@@ -5090,6 +5563,14 @@ the order they are declared.</div>
 <dd>
 <div class="block">Enable or disable NT4 Telemetry.</div>
 </dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#withNetworkTables(boolean)" class="member-name-link">withNetworkTables(boolean)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Enable or disable NT4 Telemetry.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetryConfig.html#withNetworkTables(boolean)" class="member-name-link">withNetworkTables(boolean)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a></dt>
+<dd>
+<div class="block">Enable or disable NT4 Telemetry.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withOpenLoopRampRate(edu.wpi.first.units.measure.Time)" class="member-name-link">withOpenLoopRampRate(Time)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the open loop ramp rate.</div>
@@ -5102,6 +5583,14 @@ the order they are declared.</div>
 <dd>
 <div class="block">Disable NetworkTable output.</div>
 </dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#withoutNetworkTables()" class="member-name-link">withoutNetworkTables()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Disable NetworkTable output.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetryConfig.html#withoutNetworkTables()" class="member-name-link">withoutNetworkTables()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a></dt>
+<dd>
+<div class="block">Disable NetworkTable output.</div>
+</dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withOutputCurrentLimit(edu.wpi.first.units.measure.Current)" class="member-name-link">withOutputCurrentLimit(Current)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the stall stator current limit for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
@@ -5109,6 +5598,10 @@ the order they are declared.</div>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#withOutputVoltage()" class="member-name-link">withOutputVoltage()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
 <dd>
 <div class="block">Enables the output voltage logging if available.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#withPose()" class="member-name-link">withPose()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Enables the pose logging.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withProfile(edu.wpi.first.math.trajectory.ExponentialProfile.Constraints)" class="member-name-link">withProfile(ExponentialProfile.Constraints)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -5154,7 +5647,8 @@ the order they are declared.</div>
 </dd>
 <dt><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html#withScaleRotation(double)" class="member-name-link">withScaleRotation(double)</a> - Method in class yams.mechanisms.swerve.utility.<a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></dt>
 <dd>
-<div class="block">Scale the rotation axis input for <a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> to reduce the range in which they operate.</div>
+<div class="block">Scale the rotation axis input for <a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> to reduce the range in which they
+ operate.</div>
 </dd>
 <dt><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html#withScaleTranslation(double)" class="member-name-link">withScaleTranslation(double)</a> - Method in class yams.mechanisms.swerve.utility.<a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></dt>
 <dd>
@@ -5338,6 +5832,10 @@ the order they are declared.</div>
 <dd>
 <div class="block">Set the starting angle of the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
 </dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetryConfig.html#withState()" class="member-name-link">withState()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a></dt>
+<dd>
+<div class="block">Enables the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState</code></a> logging.</div>
+</dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#withStatorCurrent()" class="member-name-link">withStatorCurrent()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
 <dd>
 <div class="block">Enables the stator current logging if available.</div>
@@ -5378,6 +5876,10 @@ the order they are declared.</div>
 <dd>
 <div class="block">Configure telemetry for the <a href="yams/mechanisms/positional/Pivot.html" title="class in yams.mechanisms.positional"><code>Pivot</code></a> mechanism.</div>
 </dd>
+<dt><a href="yams/mechanisms/config/SwerveDriveConfig.html#withTelemetry(java.lang.String,yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)" class="member-name-link">withTelemetry(String, SmartMotorControllerConfig.TelemetryVerbosity)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config">SwerveDriveConfig</a></dt>
+<dd>
+<div class="block">Configure telemetry for the <a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a> mechanism.</div>
+</dd>
 <dt><a href="yams/mechanisms/config/SwerveModuleConfig.html#withTelemetry(java.lang.String,yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)" class="member-name-link">withTelemetry(String, SmartMotorControllerConfig.TelemetryVerbosity)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></dt>
 <dd>
 <div class="block">Configure telemetry for the <a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a> mechanism.</div>
@@ -5390,15 +5892,27 @@ the order they are declared.</div>
 <dd>
 <div class="block">Set the telemetry for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> with a <a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry"><code>SmartMotorControllerTelemetryConfig</code></a></div>
 </dd>
-<dt><a href="yams/mechanisms/config/SwerveDriveConfig.html#withTelemetry(yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)" class="member-name-link">withTelemetry(SmartMotorControllerConfig.TelemetryVerbosity)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config">SwerveDriveConfig</a></dt>
+<dt><a href="yams/mechanisms/config/SwerveDriveConfig.html#withTelemetry(java.lang.String,yams.telemetry.SwerveDriveTelemetryConfig)" class="member-name-link">withTelemetry(String, SwerveDriveTelemetryConfig)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
-<div class="block">Configure telemetry for the <a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a> mechanism.</div>
+<div class="block">Configure telemetry for the <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> with a <a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry"><code>SwerveDriveTelemetryConfig</code></a>.</div>
+</dd>
+<dt><a href="yams/mechanisms/config/SwerveModuleConfig.html#withTelemetry(java.lang.String,yams.telemetry.SwerveModuleTelemetryConfig)" class="member-name-link">withTelemetry(String, SwerveModuleTelemetryConfig)</a> - Method in class yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></dt>
+<dd>
+<div class="block">Configure telemetry for the <a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a> mechanism with a <a href="yams/telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry"><code>SwerveModuleTelemetryConfig</code></a>.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorControllerConfig.html#withTelemetry(yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)" class="member-name-link">withTelemetry(SmartMotorControllerConfig.TelemetryVerbosity)</a> - Method in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the telemetry for the <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
 </dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#withTelemetryVerbosity(yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)" class="member-name-link">withTelemetryVerbosity(SmartMotorControllerConfig.TelemetryVerbosity)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
+<dd>
+<div class="block">Setup with <a href="yams/motorcontrollers/SmartMotorControllerConfig.TelemetryVerbosity.html" title="enum class in yams.motorcontrollers"><code>SmartMotorControllerConfig.TelemetryVerbosity</code></a></div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#withTelemetryVerbosity(yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)" class="member-name-link">withTelemetryVerbosity(SmartMotorControllerConfig.TelemetryVerbosity)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Setup with <a href="yams/motorcontrollers/SmartMotorControllerConfig.TelemetryVerbosity.html" title="enum class in yams.motorcontrollers"><code>SmartMotorControllerConfig.TelemetryVerbosity</code></a></div>
+</dd>
+<dt><a href="yams/telemetry/SwerveModuleTelemetryConfig.html#withTelemetryVerbosity(yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)" class="member-name-link">withTelemetryVerbosity(SmartMotorControllerConfig.TelemetryVerbosity)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a></dt>
 <dd>
 <div class="block">Setup with <a href="yams/motorcontrollers/SmartMotorControllerConfig.TelemetryVerbosity.html" title="enum class in yams.motorcontrollers"><code>SmartMotorControllerConfig.TelemetryVerbosity</code></a></div>
 </dd>

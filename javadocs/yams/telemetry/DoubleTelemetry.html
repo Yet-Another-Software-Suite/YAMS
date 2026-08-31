@@ -69,14 +69,18 @@ loadScripts(document, 'script');</script>
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
 <div class="sub-title"><span class="package-label-in-type">Package</span>&nbsp;<a href="package-summary.html">yams.telemetry</a></div>
-<h1 title="Class DoubleTelemetry" class="title">Class DoubleTelemetry</h1>
+<h1 title="Class DoubleTelemetry" class="title">Class DoubleTelemetry&lt;F&gt;</h1>
 </div>
 <div class="inheritance" title="Inheritance Tree"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">java.lang.Object</a>
-<div class="inheritance">yams.telemetry.DoubleTelemetry</div>
+<div class="inheritance">yams.telemetry.DoubleTelemetry&lt;F&gt;</div>
 </div>
 <section class="class-description" id="class-description">
+<dl class="notes">
+<dt>Type Parameters:</dt>
+<dd><code>F</code> - Enum type identifying which field this telemetry entry represents.</dd>
+</dl>
 <hr>
-<div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">DoubleTelemetry</span>
+<div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">DoubleTelemetry&lt;F&gt;</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
 <div class="block">Double Telemetry for SmartMotorControllers.
 
@@ -89,7 +93,7 @@ loadScripts(document, 'script');</script>
  <h2>Example</h2>
  <pre><code>
  // Create and publish a double entry for shooter velocity under the Shooter table.
- DoubleTelemetry velocity = new DoubleTelemetry(
+ DoubleTelemetry&amp;lt;DoubleTelemetryField&amp;gt; velocity = new DoubleTelemetry&amp;lt;&amp;gt;(
      "velocity",                                       // NetworkTables key
      0.0,                                              // default value
      SmartMotorControllerTelemetry.DoubleTelemetryField.MechanismVelocity,
@@ -131,9 +135,9 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.lang.String,double,yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField,boolean,java.lang.String)" class="member-name-link">DoubleTelemetry</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;keyString,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.lang.String,double,F,boolean,java.lang.String)" class="member-name-link">DoubleTelemetry</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;keyString,
  double&nbsp;defaultVal,
- <a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a>&nbsp;field,
+ <a href="DoubleTelemetry.html" title="type parameter in DoubleTelemetry">F</a>&nbsp;field,
  boolean&nbsp;tunable,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;unit)</code></div>
 <div class="col-last even-row-color">
@@ -178,7 +182,7 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the value.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="DoubleTelemetry.html" title="type parameter in DoubleTelemetry">F</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getField()" class="member-name-link">getField</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the field.</div>
@@ -252,11 +256,11 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(java.lang.String,double,yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField,boolean,java.lang.String)">
-<h3>DoubleTelemetry</h3>
+<section class="detail" id="&lt;init&gt;(java.lang.String,double,F,boolean,java.lang.String)">
+<h3 id="&lt;init&gt;(java.lang.String,double,java.lang.Object,boolean,java.lang.String)">DoubleTelemetry</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">DoubleTelemetry</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;keyString,
  double&nbsp;defaultVal,
- <a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a>&nbsp;field,
+ <a href="DoubleTelemetry.html" title="type parameter in DoubleTelemetry">F</a>&nbsp;field,
  boolean&nbsp;tunable,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;unit)</span></div>
 <div class="block">Setup double telemetry for a field.</div>
@@ -401,7 +405,7 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="getField()">
 <h3>getField</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">getField</span>()</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="DoubleTelemetry.html" title="type parameter in DoubleTelemetry">F</a></span>&nbsp;<span class="element-name">getField</span>()</div>
 <div class="block">Get the field.</div>
 <dl class="notes">
 <dt>Returns:</dt>

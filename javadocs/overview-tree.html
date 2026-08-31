@@ -80,7 +80,7 @@ loadScripts(document, 'script');</script>
 <li class="circle">yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/DCMotorSimSupplier.html" class="type-name-link" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a> (implements yams.motorcontrollers.<a href="yams/motorcontrollers/SimSupplier.html" title="interface in yams.motorcontrollers">SimSupplier</a>)</li>
 <li class="circle">yams.math.<a href="yams/math/DerivativeTimeFilter.html" class="type-name-link" title="class in yams.math">DerivativeTimeFilter</a></li>
 <li class="circle">yams.mechanisms.config.<a href="yams/mechanisms/config/DifferentialMechanismConfig.html" class="type-name-link" title="class in yams.mechanisms.config">DifferentialMechanismConfig</a></li>
-<li class="circle">yams.telemetry.<a href="yams/telemetry/DoubleTelemetry.html" class="type-name-link" title="class in yams.telemetry">DoubleTelemetry</a></li>
+<li class="circle">yams.telemetry.<a href="yams/telemetry/DoubleTelemetry.html" class="type-name-link" title="class in yams.telemetry">DoubleTelemetry</a>&lt;F&gt;</li>
 <li class="circle">yams.units.<a href="yams/units/EasyCRT.html" class="type-name-link" title="class in yams.units">EasyCRT</a></li>
 <li class="circle">yams.units.<a href="yams/units/EasyCRTConfig.html" class="type-name-link" title="class in yams.units">EasyCRTConfig</a></li>
 <li class="circle">yams.mechanisms.config.<a href="yams/mechanisms/config/ElevatorConfig.html" class="type-name-link" title="class in yams.mechanisms.config">ElevatorConfig</a></li>
@@ -133,11 +133,17 @@ loadScripts(document, 'script');</script>
 <li class="circle">yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetry.html" class="type-name-link" title="class in yams.telemetry">SmartMotorControllerTelemetry</a></li>
 <li class="circle">yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" class="type-name-link" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></li>
 <li class="circle">yams.gearing.<a href="yams/gearing/Sprocket.html" class="type-name-link" title="class in yams.gearing">Sprocket</a></li>
+<li class="circle">yams.telemetry.<a href="yams/telemetry/StructArrayTelemetry.html" class="type-name-link" title="class in yams.telemetry">StructArrayTelemetry</a>&lt;T,<wbr>F&gt;</li>
+<li class="circle">yams.telemetry.<a href="yams/telemetry/StructTelemetry.html" class="type-name-link" title="class in yams.telemetry">StructTelemetry</a>&lt;T,<wbr>F&gt;</li>
 <li class="circle">yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveDrive.html" class="type-name-link" title="class in yams.mechanisms.swerve">SwerveDrive</a></li>
 <li class="circle">yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveDriveConfig.html" class="type-name-link" title="class in yams.mechanisms.config">SwerveDriveConfig</a></li>
+<li class="circle">yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.html" class="type-name-link" title="class in yams.telemetry">SwerveDriveTelemetry</a></li>
+<li class="circle">yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" class="type-name-link" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></li>
 <li class="circle">yams.mechanisms.swerve.utility.<a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" class="type-name-link" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a> (implements java.util.function.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;T&gt;)</li>
 <li class="circle">yams.mechanisms.swerve.<a href="yams/mechanisms/swerve/SwerveModule.html" class="type-name-link" title="class in yams.mechanisms.swerve">SwerveModule</a></li>
 <li class="circle">yams.mechanisms.config.<a href="yams/mechanisms/config/SwerveModuleConfig.html" class="type-name-link" title="class in yams.mechanisms.config">SwerveModuleConfig</a></li>
+<li class="circle">yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetry.html" class="type-name-link" title="class in yams.telemetry">SwerveModuleTelemetry</a></li>
+<li class="circle">yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetryConfig.html" class="type-name-link" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a></li>
 <li class="circle">java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Throwable.html" class="type-name-link external-link" title="class or interface in java.lang">Throwable</a> (implements java.io.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/Serializable.html" title="class or interface in java.io" class="external-link">Serializable</a>)
 <ul>
 <li class="circle">java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Exception.html" class="type-name-link external-link" title="class or interface in java.lang">Exception</a>
@@ -190,6 +196,11 @@ loadScripts(document, 'script');</script>
 <li class="circle">yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorControllerConfig.TelemetryVerbosity.html" class="type-name-link" title="enum class in yams.motorcontrollers">SmartMotorControllerConfig.TelemetryVerbosity</a></li>
 <li class="circle">yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetry.BooleanTelemetryField.html" class="type-name-link" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.BooleanTelemetryField</a></li>
 <li class="circle">yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" class="type-name-link" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></li>
+<li class="circle">yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" class="type-name-link" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></li>
+<li class="circle">yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.StructArrayTelemetryField.html" class="type-name-link" title="enum class in yams.telemetry">SwerveDriveTelemetry.StructArrayTelemetryField</a></li>
+<li class="circle">yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.StructTelemetryField.html" class="type-name-link" title="enum class in yams.telemetry">SwerveDriveTelemetry.StructTelemetryField</a></li>
+<li class="circle">yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetry.DoubleTelemetryField.html" class="type-name-link" title="enum class in yams.telemetry">SwerveModuleTelemetry.DoubleTelemetryField</a></li>
+<li class="circle">yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetry.StructTelemetryField.html" class="type-name-link" title="enum class in yams.telemetry">SwerveModuleTelemetry.StructTelemetryField</a></li>
 </ul>
 </li>
 </ul>

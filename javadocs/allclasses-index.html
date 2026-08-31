@@ -121,7 +121,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Thrown by <a href="yams/mechanisms/positional/DoubleJointedArm.html" title="class in yams.mechanisms.positional"><code>DoubleJointedArm</code></a> when a required field in the
  lower-joint or upper-joint <a href="yams/mechanisms/config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a> is missing or invalid.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="yams/telemetry/DoubleTelemetry.html" title="class in yams.telemetry">DoubleTelemetry</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="yams/telemetry/DoubleTelemetry.html" title="class in yams.telemetry">DoubleTelemetry</a>&lt;<a href="yams/telemetry/DoubleTelemetry.html" title="type parameter in DoubleTelemetry">F</a>&gt;</div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Double Telemetry for SmartMotorControllers.</div>
 </div>
@@ -338,6 +338,14 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Sprocket class to handle calculating the conversion factor of a sprocket in your mechanism.</div>
 </div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/telemetry/StructArrayTelemetry.html" title="class in yams.telemetry">StructArrayTelemetry</a>&lt;<a href="yams/telemetry/StructArrayTelemetry.html" title="type parameter in StructArrayTelemetry">T</a>,<wbr><a href="yams/telemetry/StructArrayTelemetry.html" title="type parameter in StructArrayTelemetry">F</a>&gt;</div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Struct array Telemetry for arbitrary <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/util/struct/Struct.html" title="class or interface in edu.wpi.first.util.struct" class="external-link"><code>Struct</code></a> serializable array types.</div>
+</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="yams/telemetry/StructTelemetry.html" title="class in yams.telemetry">StructTelemetry</a>&lt;<a href="yams/telemetry/StructTelemetry.html" title="type parameter in StructTelemetry">T</a>,<wbr><a href="yams/telemetry/StructTelemetry.html" title="type parameter in StructTelemetry">F</a>&gt;</div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Struct Telemetry for arbitrary <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/util/struct/Struct.html" title="class or interface in edu.wpi.first.util.struct" class="external-link"><code>Struct</code></a> serializable types.</div>
+</div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Swerve Drive mechanism</div>
@@ -351,28 +359,62 @@ loadScripts(document, 'script');</script>
 <div class="block">Thrown by <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> or <a href="yams/mechanisms/config/SwerveDriveConfig.html" title="class in yams.mechanisms.config"><code>SwerveDriveConfig</code></a>
  when a required field is missing or a config invariant is violated.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="yams/telemetry/SwerveDriveTelemetry.html" title="class in yams.telemetry">SwerveDriveTelemetry</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab3"><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab3">
+<div class="block">Double telemetry field for <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a>s.</div>
+</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="yams/telemetry/SwerveDriveTelemetry.StructArrayTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.StructArrayTelemetryField</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab3">
+<div class="block">Struct array telemetry field for <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a>s.</div>
+</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab3"><a href="yams/telemetry/SwerveDriveTelemetry.StructTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.StructTelemetryField</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab3">
+<div class="block">Struct telemetry field for <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a>s.</div>
+</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Swerve drive telemetry configuration.</div>
+</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/mechanisms/swerve/utility/SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Helper class to easily transform Controller inputs into workable Chassis speeds.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve">SwerveModule</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
-<div class="block">Swerve Module</div>
-</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="yams/mechanisms/config/SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve">SwerveModule</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
 <div class="block">Swerve Module</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXSWrapper</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/mechanisms/config/SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Swerve Module</div>
+</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="yams/telemetry/SwerveModuleTelemetry.html" title="class in yams.telemetry">SwerveModuleTelemetry</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Swerve module telemetry.</div>
+</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab3"><a href="yams/telemetry/SwerveModuleTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveModuleTelemetry.DoubleTelemetryField</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab3">
+<div class="block">Double telemetry field for <a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a>s.</div>
+</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="yams/telemetry/SwerveModuleTelemetry.StructTelemetryField.html" title="enum class in yams.telemetry">SwerveModuleTelemetry.StructTelemetryField</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab3">
+<div class="block">Struct telemetry field for <a href="yams/mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a>s.</div>
+</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="block">Swerve module telemetry configuration.</div>
+</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="yams/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXSWrapper</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
 <div class="block">TalonFXS wrapper for CTRE TalonFXS motor controllers.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="yams/motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXWrapper</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXWrapper</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">TalonFX wrapper for a CTRE TalonFX motor controller.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="yams/units/YUnits.html" title="class in yams.units">YUnits</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="yams/units/YUnits.html" title="class in yams.units">YUnits</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
 <div class="block">YUnits that are fun and useful!</div>
 </div>
 </div>

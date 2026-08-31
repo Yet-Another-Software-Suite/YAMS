@@ -83,9 +83,8 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">SwerveInputStream</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
 implements <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">ChassisSpeeds</a>&gt;</span></div>
-<div class="block">Helper class to easily transform Controller inputs into workable Chassis speeds. Intended to easily create an
- interface that generates <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> from <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/XboxController.html" title="class or interface in edu.wpi.first.wpilibj" class="external-link"><code>XboxController</code></a>
- <p>
+<div class="block">Helper class to easily transform Controller inputs into workable Chassis speeds. Intended to
+ easily create an interface that generates <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> from <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/XboxController.html" title="class or interface in edu.wpi.first.wpilibj" class="external-link"><code>XboxController</code></a> <p>
  <br/> Inspired by SciBorgs FRC 1155. <br/> Example:
  <pre>
  <code>
@@ -93,16 +92,19 @@ implements <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base
 
    SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
                                                                  () -&gt; driverXbox.getLeftY() * -1,
-                                                                 () -&gt; driverXbox.getLeftX() * -1) // Axis which give the desired translational angle and speed.
-                                                             .withControllerRotationAxis(driverXbox::getRightX) // Axis which give the desired angular velocity.
-                                                             .deadband(0.01)                  // Controller deadband
-                                                             .scaleTranslation(0.8)           // Scaled controller translation axis
-                                                             .allianceRelativeControl(true);  // Alliance relative controls.
+                                                                 () -&gt; driverXbox.getLeftX() * -1)
+ // Axis which give the desired translational angle and speed.
+                                                             .withControllerRotationAxis(driverXbox::getRightX)
+ // Axis which give the desired angular velocity. .deadband(0.01)                  // Controller
+ deadband .scaleTranslation(0.8)           // Scaled controller translation axis
+                                                             .allianceRelativeControl(true);  //
+ Alliance relative controls.
 
-   SwerveInputStream driveDirectAngle = driveAngularVelocity.copy()  // Copy the stream so further changes do not affect driveAngularVelocity
-                                                            .withControllerHeadingAxis(driverXbox::getRightX,
-                                                                                       driverXbox::getRightY) // Axis which give the desired heading angle using trigonometry.
-                                                            .headingWhile(true); // Enable heading based control.
+   SwerveInputStream driveDirectAngle = driveAngularVelocity.copy()  // Copy the stream so further
+ changes do not affect driveAngularVelocity .withControllerHeadingAxis(driverXbox::getRightX,
+                                                                                       driverXbox::getRightY)
+ // Axis which give the desired heading angle using trigonometry. .headingWhile(true); // Enable
+ heading based control.
  </code>
  </pre>
 
@@ -157,7 +159,8 @@ implements <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;y,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;rot)</code></div>
 <div class="col-last even-row-color">
-<div class="block">Create a <a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> for an easy way to generate <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> from a driver controller.</div>
+<div class="block">Create a <a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> for an easy way to generate <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> from a
+ driver controller.</div>
 </div>
 <div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(yams.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" class="member-name-link">SwerveInputStream</a><wbr>(<a href="../SwerveDrive.html" title="class in yams.mechanisms.swerve">SwerveDrive</a>&nbsp;drive,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;x,
@@ -165,7 +168,8 @@ implements <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;headingX,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;headingY)</code></div>
 <div class="col-last odd-row-color">
-<div class="block">Create a <a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> for an easy way to generate <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> from a driver controller.</div>
+<div class="block">Create a <a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> for an easy way to generate <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> from a
+ driver controller.</div>
 </div>
 </div>
 </section>
@@ -184,8 +188,8 @@ implements <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#atTargetPose(double)" class="member-name-link">atTargetPose</a><wbr>(double&nbsp;toleranceMeters)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">When the <a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> is in <code>SwerveInputStream.SwerveInputMode.DRIVE_TO_POSE</code> this function will return if the
- robot is at the desired pose within the defined tolerance.</div>
+<div class="block">When the <a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> is in <code>SwerveInputStream.SwerveInputMode.DRIVE_TO_POSE</code> this function
+ will return if the robot is at the desired pose within the defined tolerance.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#clone()" class="member-name-link">clone</a>()</code></div>
@@ -269,12 +273,14 @@ implements <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMaximumAngularVelocity(edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">withMaximumAngularVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&nbsp;velocity)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Maximum angular velocity to use for the <a href="../SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> object, will be translated to Rotations per Second.</div>
+<div class="block">Maximum angular velocity to use for the <a href="../SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> object, will be translated to
+ Rotations per Second.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMaximumLinearVelocity(edu.wpi.first.units.measure.LinearVelocity)" class="member-name-link">withMaximumLinearVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearVelocity</a>&nbsp;velocity)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Maximum linear velocity to use for the <a href="../SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> object, will be translated to Meters per Second.</div>
+<div class="block">Maximum linear velocity to use for the <a href="../SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> object, will be translated to Meters
+ per Second.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withRobotRelative()" class="member-name-link">withRobotRelative</a>()</code></div>
@@ -289,7 +295,8 @@ implements <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withScaleRotation(double)" class="member-name-link">withScaleRotation</a><wbr>(double&nbsp;scaleRotation)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Scale the rotation axis input for <a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> to reduce the range in which they operate.</div>
+<div class="block">Scale the rotation axis input for <a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> to reduce the range in which they
+ operate.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withScaleTranslation(double)" class="member-name-link">withScaleTranslation</a><wbr>(double&nbsp;scaleTranslation)</code></div>
@@ -336,7 +343,8 @@ implements <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;x,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;y,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;rot)</span></div>
-<div class="block">Create a <a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> for an easy way to generate <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> from a driver controller.</div>
+<div class="block">Create a <a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> for an easy way to generate <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> from a
+ driver controller.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>drive</code> - <a href="../SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> object for transformation.</dd>
@@ -354,7 +362,8 @@ implements <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;y,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;headingX,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;headingY)</span></div>
-<div class="block">Create a <a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> for an easy way to generate <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> from a driver controller.</div>
+<div class="block">Create a <a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> for an easy way to generate <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> from a
+ driver controller.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>drive</code> - <a href="../SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> object for transformation.</dd>
@@ -383,8 +392,10 @@ implements <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>drive</code> - <a href="../SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> object for transformation.</dd>
-<dd><code>x</code> - <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link"><code>DoubleSupplier</code></a> of the translation X axis of the controller joystick to use.</dd>
-<dd><code>y</code> - <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link"><code>DoubleSupplier</code></a> of the translation X axis of the controller joystick to use.</dd>
+<dd><code>x</code> - <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link"><code>DoubleSupplier</code></a> of the translation X axis of the controller joystick to
+     use.</dd>
+<dd><code>y</code> - <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link"><code>DoubleSupplier</code></a> of the translation X axis of the controller joystick to
+     use.</dd>
 <dt>Returns:</dt>
 <dd><a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> to use as you see fit.</dd>
 </dl>
@@ -407,8 +418,8 @@ implements <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base
 <section class="detail" id="withMaximumLinearVelocity(edu.wpi.first.units.measure.LinearVelocity)">
 <h3>withMaximumLinearVelocity</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></span>&nbsp;<span class="element-name">withMaximumLinearVelocity</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearVelocity</a>&nbsp;velocity)</span></div>
-<div class="block">Maximum linear velocity to use for the <a href="../SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> object, will be translated to Meters per Second. Default
- is 4 Meters per Second.</div>
+<div class="block">Maximum linear velocity to use for the <a href="../SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> object, will be translated to Meters
+ per Second. Default is 4 Meters per Second.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>velocity</code> - Linear velocity to use.</dd>
@@ -421,8 +432,8 @@ implements <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base
 <section class="detail" id="withMaximumAngularVelocity(edu.wpi.first.units.measure.AngularVelocity)">
 <h3>withMaximumAngularVelocity</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></span>&nbsp;<span class="element-name">withMaximumAngularVelocity</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&nbsp;velocity)</span></div>
-<div class="block">Maximum angular velocity to use for the <a href="../SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> object, will be translated to Rotations per Second.
- Default is 1 Rotation per Second.</div>
+<div class="block">Maximum angular velocity to use for the <a href="../SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> object, will be translated to
+ Rotations per Second. Default is 1 Rotation per Second.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>velocity</code> - Angular velocity to use.</dd>
@@ -626,7 +637,8 @@ implements <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base
 <section class="detail" id="withScaleRotation(double)">
 <h3>withScaleRotation</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility">SwerveInputStream</a></span>&nbsp;<span class="element-name">withScaleRotation</span><wbr><span class="parameters">(double&nbsp;scaleRotation)</span></div>
-<div class="block">Scale the rotation axis input for <a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> to reduce the range in which they operate.</div>
+<div class="block">Scale the rotation axis input for <a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> to reduce the range in which they
+ operate.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>scaleRotation</code> - Angular velocity axis scalar value. (0, 1]</dd>
@@ -680,13 +692,14 @@ implements <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base
 <section class="detail" id="atTargetPose(double)">
 <h3>atTargetPose</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">atTargetPose</span><wbr><span class="parameters">(double&nbsp;toleranceMeters)</span></div>
-<div class="block">When the <a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> is in <code>SwerveInputStream.SwerveInputMode.DRIVE_TO_POSE</code> this function will return if the
- robot is at the desired pose within the defined tolerance.</div>
+<div class="block">When the <a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> is in <code>SwerveInputStream.SwerveInputMode.DRIVE_TO_POSE</code> this function
+ will return if the robot is at the desired pose within the defined tolerance.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>toleranceMeters</code> - Tolerance in meters.</dd>
 <dt>Returns:</dt>
-<dd>At target pose, true if current mode is not <code>SwerveInputStream.SwerveInputMode.DRIVE_TO_POSE</code> and no pose supplier has
+<dd>At target pose, true if current mode is not <code>SwerveInputStream.SwerveInputMode.DRIVE_TO_POSE</code> and
+     no pose supplier has
  been given.</dd>
 </dl>
 </section>
