@@ -3,24 +3,21 @@
 
 package yams.mechanisms.swerve;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.util.datalog.DoubleLogEntry;
-import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.Timer;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.mechanisms.config.SwerveModuleConfig;
 import yams.motorcontrollers.SmartMotorController;
+import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.telemetry.MechanismTelemetry;
+import yams.telemetry.SwerveModuleTelemetry;
+import yams.telemetry.SwerveModuleTelemetryConfig;
 
-import java.util.Optional;
-import java.util.function.DoubleConsumer;
 import java.util.function.Supplier;
 
 /**
@@ -82,13 +79,13 @@ public class SwerveModule {
    */
   private final SwerveModuleConfig m_config;
   /**
-   * Mechanism Telemetry
+   * Mechanism Telemetry, used for the loop time.
    */
   private final MechanismTelemetry m_telemetry = new MechanismTelemetry();
   /**
-   * Azimuth absolute encoder field.
+   * Absolute encoder angle, and drive/azimuth motor controller telemetry.
    */
-  private final DoubleConsumer m_azimuthAbsoluteEncoderTelemetry;
+  private SwerveModuleTelemetry m_swerveModuleTelemetry;
   /**
    * Absolute encoder angle without any offsets applied.
    */
@@ -112,18 +109,35 @@ public class SwerveModule {
     if (m_azimuthMotorController.getConfig().getExternalEncoder().isPresent() && !m_azimuthMotorController.getConfig().getUseExternalFeedback()) {
       throw new SmartMotorControllerConfigurationException("External encoder cannot be used without external feedback", "External encoder could not be used", "withUseExternalFeedbackEncoder(true)");
     }
-    m_telemetry.setupTelemetry("swerve");
-    m_telemetry.addMotorController("modules/" + getName(), m_driveMotorController);
-    m_telemetry.addMotorController("modules/" + getName(), m_azimuthMotorController);
-    DoubleConsumer encoderNetworkTablePublisher = m_telemetry.publishDouble("modules/" + getName() + "/encoder", "degrees");
-    Optional<DoubleLogEntry> encoderLogEntry = config.getDataLogName().map(
-            name -> new DoubleLogEntry(DataLogManager.getLog(), name + "/encoder", (long) Timer.getFPGATimestamp()));
-    m_azimuthAbsoluteEncoderTelemetry = value -> {
-      encoderNetworkTablePublisher.accept(value);
-      encoderLogEntry.ifPresent(entry -> entry.append(value, (long) Timer.getFPGATimestamp()));
-    };
     seedAzimuthEncoder();
     m_azimuthEncoderWithoutOffsets = config.getRawAbsoluteEncoderAngle();
+  }
+
+  /**
+   * Setup telemetry for the module; the {@link SwerveModuleTelemetry} config used is either the one
+   * supplied via {@link SwerveModuleConfig#withTelemetry(String, SwerveModuleTelemetryConfig)} or a
+   * default built from {@link SwerveModuleConfig#getTelemetryVerbosity()} (defaulting to
+   * {@link TelemetryVerbosity#HIGH}).
+   *
+   * @param mechName Telemetry name of the parent {@link SwerveDrive}.
+   */
+  public void setupTelemetry(String mechName)
+  {
+    m_telemetry.setupTelemetry(mechName + "/modules/" + getName());
+    var cfg = m_config.getSwerveModuleTelemetryConfig().orElseGet(
+        () -> new SwerveModuleTelemetryConfig().withTelemetryVerbosity(m_config.getTelemetryVerbosity()
+                                                                               .orElse(TelemetryVerbosity.HIGH)));
+    m_swerveModuleTelemetry = new SwerveModuleTelemetry(cfg);
+    m_swerveModuleTelemetry.setupTelemetry(mechName, this);
+  }
+
+  /**
+   * Get the absolute encoder angle without any offsets applied.
+   *
+   * @return {@link Angle} of the absolute encoder without offsets.
+   */
+  public Angle getRawAbsoluteEncoderAngle() {
+    return m_azimuthEncoderWithoutOffsets.get();
   }
 
   /**
@@ -190,7 +204,7 @@ public class SwerveModule {
   public void updateTelemetry() {
     m_driveMotorController.updateTelemetry();
     m_azimuthMotorController.updateTelemetry();
-    m_azimuthAbsoluteEncoderTelemetry.accept(m_azimuthEncoderWithoutOffsets.get().in(Degrees));
+    m_swerveModuleTelemetry.publish(this);
     m_telemetry.updateLoopTime();
   }
 

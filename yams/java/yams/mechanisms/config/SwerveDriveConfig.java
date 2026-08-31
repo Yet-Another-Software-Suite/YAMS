@@ -26,6 +26,7 @@ import java.util.function.Supplier;
 import yams.mechanisms.swerve.SwerveDrive;
 import yams.mechanisms.swerve.SwerveModule;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.telemetry.SwerveDriveTelemetryConfig;
 
 /**
  * Swerve Drive Configuration
@@ -116,14 +117,17 @@ public class SwerveDriveConfig
    */
   private SwerveModule[]                      modules;
   /**
+   * Telemetry name for the {@link SwerveDrive}.
+   */
+  private String                              telemetryName                 = "swerve";
+  /**
    * Telemetry verbosity
    */
   private Optional<TelemetryVerbosity>        telemetryVerbosity            = Optional.empty();
   /**
-   * DataLog entry name prefix for the {@link SwerveDrive}'s telemetry. When configured, every {@link SwerveModule}
-   * (and its drive/azimuth motors) additionally logs under a subtable of this name.
+   * User specified {@link SwerveDriveTelemetryConfig}, takes precedence over {@link #telemetryVerbosity} if present.
    */
-  private Optional<String>                    dataLogName                   = Optional.empty();
+  private Optional<SwerveDriveTelemetryConfig> specifiedTelemetryConfig     = Optional.empty();
   /**
    * Gyro supplier.
    */
@@ -493,28 +497,78 @@ public class SwerveDriveConfig
   }
 
   /**
-   * Log the {@link SwerveDrive}'s telemetry (pose, gyro, chassis speeds, module states) to a WPILib DataLog under the
-   * given name, in addition to NetworkTables. When configured, every {@link SwerveModule} passed to this config —
-   * including its drive and azimuth motors — also logs under a subtable of this name (e.g. {@code <name>/<module
-   * name>/drive}), even though the modules are constructed before this config exists.
+   * Configure telemetry for the {@link SwerveDrive} with a {@link SwerveDriveTelemetryConfig}.
    *
-   * @param dataLogName DataLog entry name prefix for the {@link SwerveDrive}'s telemetry.
+   * @param telemetryConfig Config that specifies what to log.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withDataLogName(String dataLogName)
+  public SwerveDriveConfig withTelemetry(SwerveDriveTelemetryConfig telemetryConfig)
   {
-    this.dataLogName = Optional.ofNullable(dataLogName);
+    this.telemetryVerbosity = Optional.empty();
+    this.specifiedTelemetryConfig = Optional.ofNullable(telemetryConfig);
     return this;
   }
 
   /**
-   * Get the DataLog entry name prefix for the {@link SwerveDrive}'s telemetry.
+   * Configure telemetry for the {@link SwerveModule} mechanism.
    *
-   * @return DataLog entry name prefix, if configured.
+   * @param name Telemetry Name
+   * @param telemetryVerbosity Telemetry verbosity to apply.
+   * @return {@link SwerveDriveConfig} for chaining.
    */
-  public Optional<String> getDataLogName()
+  public SwerveDriveConfig withTelemetry(String name, TelemetryVerbosity telemetryVerbosity)
   {
-    return dataLogName;
+    this.telemetryName = name;
+    this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
+    return this;
+  }
+
+  /**
+   * Configure telemetry for the {@link SwerveDrive} with a {@link SwerveDriveTelemetryConfig}.
+   *
+   * @param name Telemetry Name
+   * @param telemetryConfig Config that specifies what to log.
+   * @return {@link SwerveDriveConfig} for chaining.
+   */
+  public SwerveDriveConfig withTelemetry(String name, SwerveDriveTelemetryConfig telemetryConfig)
+  {
+    this.telemetryName = name;
+    this.telemetryVerbosity = Optional.empty();
+    this.specifiedTelemetryConfig = Optional.ofNullable(telemetryConfig);
+    return this;
+  }
+
+  /**
+   * Get the user specified {@link SwerveDriveTelemetryConfig}, if configured via
+   * {@link #withTelemetry(SwerveDriveTelemetryConfig)}.
+   *
+   * @return {@link SwerveDriveTelemetryConfig} if configured.
+   */
+  public Optional<SwerveDriveTelemetryConfig> getSwerveDriveTelemetryConfig()
+  {
+    return specifiedTelemetryConfig;
+  }
+
+  /**
+   * Set the telemetry name for the {@link SwerveDrive}. Defaults to {@code "swerve"}.
+   *
+   * @param telemetryName Telemetry name for the {@link SwerveDrive}.
+   * @return {@link SwerveDriveConfig} for chaining.
+   */
+  public SwerveDriveConfig withTelemetryName(String telemetryName)
+  {
+    this.telemetryName = telemetryName;
+    return this;
+  }
+
+  /**
+   * Get the telemetry name for the {@link SwerveDrive}.
+   *
+   * @return Telemetry name for the {@link SwerveDrive}.
+   */
+  public String getTelemetryName()
+  {
+    return telemetryName;
   }
 
   /**

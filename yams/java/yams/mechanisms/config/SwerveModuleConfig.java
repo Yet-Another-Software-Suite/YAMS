@@ -25,6 +25,7 @@ import yams.mechanisms.swerve.SwerveModule;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.telemetry.SwerveModuleTelemetryConfig;
 
 /**
  * Swerve Module
@@ -97,6 +98,10 @@ public class SwerveModuleConfig
    * Telemetry verbosity
    */
   private Optional<TelemetryVerbosity>   telemetryVerbosity            = Optional.empty();
+  /**
+   * User specified {@link SwerveModuleTelemetryConfig}, takes precedence over {@link #telemetryVerbosity} if present.
+   */
+  private Optional<SwerveModuleTelemetryConfig> specifiedTelemetryConfig = Optional.empty();
   /**
    * DataLog entry name prefix for this module's telemetry (currently just the absolute encoder field).
    */
@@ -183,6 +188,7 @@ public class SwerveModuleConfig
     this.azimuthMotor = cfg.azimuthMotor;
     this.telemetryName = cfg.telemetryName;
     this.telemetryVerbosity = cfg.telemetryVerbosity;
+    this.specifiedTelemetryConfig = cfg.specifiedTelemetryConfig;
     this.dataLogName = cfg.dataLogName;
     this.absoluteEncoderSupplier = cfg.absoluteEncoderSupplier;
     this.absoluteEncoderOffset = cfg.absoluteEncoderOffset;
@@ -429,6 +435,32 @@ public class SwerveModuleConfig
     this.telemetryName = Optional.ofNullable(telemetryName);
     this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
     return this;
+  }
+
+  /**
+   * Configure telemetry for the {@link SwerveModule} mechanism with a {@link SwerveModuleTelemetryConfig}.
+   *
+   * @param telemetryName   Telemetry NetworkTable name to appear under "SmartDashboard/"
+   * @param telemetryConfig Config that specifies what to log.
+   * @return {@link SwerveModuleConfig} for chaining.
+   */
+  public SwerveModuleConfig withTelemetry(String telemetryName, SwerveModuleTelemetryConfig telemetryConfig)
+  {
+    this.telemetryName = Optional.ofNullable(telemetryName);
+    this.telemetryVerbosity = Optional.of(TelemetryVerbosity.HIGH);
+    this.specifiedTelemetryConfig = Optional.ofNullable(telemetryConfig);
+    return this;
+  }
+
+  /**
+   * Get the user specified {@link SwerveModuleTelemetryConfig}, if configured via
+   * {@link #withTelemetry(String, SwerveModuleTelemetryConfig)}.
+   *
+   * @return {@link SwerveModuleTelemetryConfig} if configured.
+   */
+  public Optional<SwerveModuleTelemetryConfig> getSwerveModuleTelemetryConfig()
+  {
+    return specifiedTelemetryConfig;
   }
 
   /**
