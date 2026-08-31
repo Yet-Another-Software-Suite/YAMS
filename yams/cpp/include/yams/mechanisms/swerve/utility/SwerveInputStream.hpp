@@ -339,14 +339,8 @@ class SwerveInputStream {
    * @return Field-relative (or robot-relative, if configured) ChassisSpeeds.
    */
   frc::ChassisSpeeds Get() {
-    auto& cfg = m_swerveDrive->GetConfig();
-
-    double maxLinear =
-        cfg.GetMaximumChassisLinearVelocity().value_or(m_maximumChassisLinearVelocity).value();
-    units::radians_per_second_t maxAngular =
-        cfg.GetMaximumChassisAngularVelocity().has_value()
-            ? units::radians_per_second_t{cfg.GetMaximumChassisAngularVelocity().value()}
-            : m_maximumChassisAngularVelocity;
+    double maxLinear = m_maximumChassisLinearVelocity.value();
+    units::radians_per_second_t maxAngular = m_maximumChassisAngularVelocity;
 
     frc::Translation2d scaledTranslation = ApplyTranslationScalar(
         ApplyDeadband(m_controllerTranslationX()), ApplyDeadband(m_controllerTranslationY()));
@@ -423,7 +417,15 @@ class SwerveInputStream {
                     std::function<double()> y)
       : m_swerveDrive{&drive},
         m_controllerTranslationX{std::move(x)},
-        m_controllerTranslationY{std::move(y)} {}
+        m_controllerTranslationY{std::move(y)} {
+    auto& cfg = drive.GetConfig();
+    if (auto maxLinear = cfg.GetMaximumChassisLinearVelocity()) {
+      m_maximumChassisLinearVelocity = *maxLinear;
+    }
+    if (auto maxAngular = cfg.GetMaximumChassisAngularVelocity()) {
+      m_maximumChassisAngularVelocity = units::radians_per_second_t{*maxAngular};
+    }
+  }
 
   SwerveDrive<NumModules>* m_swerveDrive;
   std::function<double()> m_controllerTranslationX;
