@@ -208,29 +208,24 @@ class SwerveDriveConfig {
   SwerveDriveConfig& WithSimRotationController(frc::PIDController controller);
 
   /**
-   * Set the telemetry verbosity for the drive.
+   * Set the telemetry name and verbosity for the drive.
    *
+   * @param name Telemetry name (defaults to "swerve").
    * @param verbosity Amount of data to publish.
    * @return *this for chaining.
    */
-  SwerveDriveConfig& WithTelemetry(TelemetryVerbosity verbosity);
+  SwerveDriveConfig& WithTelemetry(const std::string& name, TelemetryVerbosity verbosity);
 
   /**
    * Configure telemetry for the drive with an explicit SwerveDriveTelemetryConfig, taking
-   * precedence over WithTelemetry(TelemetryVerbosity).
+   * precedence over WithTelemetry(name, TelemetryVerbosity).
    *
+   * @param name Telemetry name (defaults to "swerve").
    * @param telemetryConfig Config that specifies what to log.
    * @return *this for chaining.
    */
-  SwerveDriveConfig& WithTelemetry(telemetry::SwerveDriveTelemetryConfig telemetryConfig);
-
-  /**
-   * Set the telemetry name for the drive (defaults to "swerve").
-   *
-   * @param telemetryName Telemetry name.
-   * @return *this for chaining.
-   */
-  SwerveDriveConfig& WithTelemetryName(const std::string& telemetryName);
+  SwerveDriveConfig& WithTelemetry(const std::string& name,
+                                   telemetry::SwerveDriveTelemetryConfig telemetryConfig);
 
   // ---- Getters ---------------------------------------------------------------
 
@@ -258,7 +253,7 @@ class SwerveDriveConfig {
   const std::string& GetTelemetryName() const;
   /**
    * Get the user-specified SwerveDriveTelemetryConfig, if configured via
-   * WithTelemetry(SwerveDriveTelemetryConfig). Moves the config out of this SwerveDriveConfig;
+   * WithTelemetry(name, SwerveDriveTelemetryConfig). Moves the config out of this SwerveDriveConfig;
    * intended to be called exactly once, when the owning SwerveDrive sets up its telemetry.
    *
    * @return SwerveDriveTelemetryConfig if configured.

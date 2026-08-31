@@ -54,6 +54,13 @@ class SwerveModuleTelemetryConfig {
   SwerveModuleTelemetryConfig();
 
   /**
+   * Construct with a verbosity preset.
+   *
+   * @param verbosity TelemetryVerbosity to use by default.
+   */
+  explicit SwerveModuleTelemetryConfig(TelemetryVerbosity verbosity);
+
+  /**
    * Set up a DataLog entry for this module.
    *
    * @param dataLogName DataLog entry name.

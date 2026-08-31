@@ -117,20 +117,18 @@ SwerveDriveConfig& SwerveDriveConfig::WithSimRotationController(frc::PIDControll
   return *this;
 }
 
-SwerveDriveConfig& SwerveDriveConfig::WithTelemetry(TelemetryVerbosity verbosity) {
+SwerveDriveConfig& SwerveDriveConfig::WithTelemetry(const std::string& name,
+                                                     TelemetryVerbosity verbosity) {
+  m_telemetryName = name;
   m_telemetryVerbosity = verbosity;
   return *this;
 }
 
 SwerveDriveConfig& SwerveDriveConfig::WithTelemetry(
-    telemetry::SwerveDriveTelemetryConfig telemetryConfig) {
+    const std::string& name, telemetry::SwerveDriveTelemetryConfig telemetryConfig) {
+  m_telemetryName = name;
   m_telemetryVerbosity.reset();
   m_specifiedTelemetryConfig = std::move(telemetryConfig);
-  return *this;
-}
-
-SwerveDriveConfig& SwerveDriveConfig::WithTelemetryName(const std::string& telemetryName) {
-  m_telemetryName = telemetryName;
   return *this;
 }
 

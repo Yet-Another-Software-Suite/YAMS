@@ -18,6 +18,11 @@ SwerveModuleTelemetryConfig::SwerveModuleTelemetryConfig() {
           "state", frc::SwerveModuleState{}, StructTelemetryField::State, false});
 }
 
+SwerveModuleTelemetryConfig::SwerveModuleTelemetryConfig(TelemetryVerbosity verbosity)
+    : SwerveModuleTelemetryConfig() {
+  WithTelemetryVerbosity(verbosity);
+}
+
 SwerveModuleTelemetryConfig& SwerveModuleTelemetryConfig::WithDataLogName(
     const std::string& dataLogName) {
   m_dataLogName = dataLogName;
@@ -38,10 +43,11 @@ SwerveModuleTelemetryConfig& SwerveModuleTelemetryConfig::WithTelemetryVerbosity
     TelemetryVerbosity verbosity) {
   switch (verbosity) {
     case TelemetryVerbosity::HIGH:
+      m_structFields.at(StructTelemetryField::State).Enable();
+      [[fallthrough]];
     case TelemetryVerbosity::MEDIUM:
     case TelemetryVerbosity::LOW:
       m_doubleFields.at(DoubleTelemetryField::AbsoluteEncoder).Enable();
-      m_structFields.at(StructTelemetryField::State).Enable();
       break;
     case TelemetryVerbosity::NONE:
       break;

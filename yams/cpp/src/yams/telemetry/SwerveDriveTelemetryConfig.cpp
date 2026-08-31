@@ -62,6 +62,11 @@ SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig() {
                                                                "degrees"});
 }
 
+SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig(TelemetryVerbosity verbosity)
+    : SwerveDriveTelemetryConfig() {
+  WithTelemetryVerbosity(verbosity);
+}
+
 SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithDataLogName(
     const std::string& dataLogName) {
   m_dataLogName = dataLogName;

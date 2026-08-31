@@ -96,6 +96,13 @@ class SwerveDriveTelemetryConfig {
   SwerveDriveTelemetryConfig();
 
   /**
+   * Construct with a verbosity preset.
+   *
+   * @param verbosity TelemetryVerbosity to use by default.
+   */
+  explicit SwerveDriveTelemetryConfig(TelemetryVerbosity verbosity);
+
+  /**
    * Set up a DataLog entry for this drive.
    *
    * @param dataLogName DataLog entry name.
