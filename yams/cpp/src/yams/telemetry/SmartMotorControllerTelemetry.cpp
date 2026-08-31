@@ -28,119 +28,7 @@ namespace yams::telemetry {
 
 using namespace yams::motorcontrollers;
 
-// ============================================================================
-// DoubleTelemetry
-// ============================================================================
-
-DoubleTelemetry::DoubleTelemetry(std::string key, double defaultVal, DoubleTelemetryField field,
-                                 bool tunable, std::string unit)
-    : m_field{field},
-      m_key{std::move(key)},
-      m_tunable{tunable},
-      m_unit{std::move(unit)},
-      m_defaultValue{defaultVal},
-      m_cachedValue{defaultVal} {}
-
-void DoubleTelemetry::SetDefaultValue(double value) { m_cachedValue = m_defaultValue = value; }
-
-void DoubleTelemetry::SetupNetworkTables(std::shared_ptr<nt::NetworkTable> dataTable,
-                                         std::shared_ptr<nt::NetworkTable> tuningTable) {
-  m_dataTable = dataTable;
-  m_tuningTable = tuningTable;
-  if (!m_enabled) return;
-
-  if (tuningTable && m_tunable) {
-    auto topic = tuningTable->GetDoubleTopic(m_key);
-    if (m_unit != "none") {
-      topic.SetProperties(wpi::json{{"units", m_unit}});
-    }
-    m_subPublisher = topic.Publish();
-    m_subPublisher->SetDefault(m_defaultValue);
-    m_subscriber = topic.Subscribe(m_defaultValue);
-  } else if (dataTable) {
-    auto topic = dataTable->GetDoubleTopic(m_key);
-    if (m_unit != "none") {
-      topic.SetProperties(wpi::json{{"units", m_unit}});
-    }
-    m_publisher = topic.Publish();
-    m_publisher->SetDefault(m_defaultValue);
-  }
-}
-
-void DoubleTelemetry::SetupNetworkTable(std::shared_ptr<nt::NetworkTable> dataTable) {
-  SetupNetworkTables(dataTable, nullptr);
-}
-
-void DoubleTelemetry::SetupDataLog(const std::string& prefix) {
-  if (m_tunable) return;
-  std::string path = prefix;
-  if (!path.empty() && path.back() != '/') path += '/';
-  path += m_unit + '/' + m_key;
-  m_dataLogEntry = wpi::log::DoubleLogEntry{frc::DataLogManager::GetLog(), path};
-}
-
-void DoubleTelemetry::TransformUnit(const SmartMotorControllerConfig& cfg) {
-  bool linear = cfg.GetLinearClosedLoopControllerUse();
-  if (m_unit == "tunable_position") {
-    m_unit = linear ? "meter" : "degrees";
-  } else if (m_unit == "position") {
-    m_unit = linear ? "meter" : "rotations";
-  } else if (m_unit == "tunable_velocity") {
-    m_unit = linear ? "meter_per_second" : "rotations_per_minute";
-  } else if (m_unit == "velocity") {
-    m_unit = linear ? "meter_per_second" : "rotation_per_second";
-  } else if (m_unit == "tunable_acceleration") {
-    m_unit = linear ? "meter_per_second_per_second" : "rotations_per_minute_per_second";
-  } else if (m_unit == "acceleration") {
-    m_unit = linear ? "meter_per_second_per_second" : "rotation_per_second_per_second";
-  }
-}
-
-bool DoubleTelemetry::Set(double value) {
-  if (!m_enabled) return false;
-  if (m_dataLogEntry) {
-    m_dataLogEntry->Append(value);
-  }
-  if (m_subscriber) {
-    double tuningValue = m_subscriber->Get(m_defaultValue);
-    if (tuningValue != value) return false;
-  }
-  if (m_publisher) {
-    m_publisher->Set(value);
-  }
-  return true;
-}
-
-double DoubleTelemetry::Get() const {
-  if (!m_enabled) return m_defaultValue;
-  if (m_subscriber) {
-    return m_subscriber->Get(m_defaultValue);
-  }
-  throw std::runtime_error("Tuning table not configured for " + m_key + "!");
-}
-
-bool DoubleTelemetry::IsTunable() {
-  if (m_subscriber && m_tunable && m_enabled) {
-    double current = m_subscriber->Get(m_defaultValue);
-    if (current != m_cachedValue) {
-      m_cachedValue = current;
-      return true;
-    }
-  }
-  return false;
-}
-
-void DoubleTelemetry::Close() {
-  m_subscriber.reset();
-  m_subPublisher.reset();
-  m_publisher.reset();
-  if (m_dataTable) {
-    m_dataTable->GetEntry(m_key).Unpublish();
-  }
-  if (m_tuningTable) {
-    m_tuningTable->GetEntry(m_key).Unpublish();
-  }
-}
+// DoubleTelemetry<F> is now a header-only template; see SmartMotorControllerTelemetry.hpp.
 
 // ============================================================================
 // BooleanTelemetry
@@ -239,7 +127,7 @@ void BooleanTelemetry::Close() {
 void SmartMotorControllerTelemetry::SetupTelemetry(
     SmartMotorController& smc, std::shared_ptr<nt::NetworkTable> publishTable,
     std::shared_ptr<nt::NetworkTable> tuningTable,
-    std::unordered_map<DoubleTelemetryField, DoubleTelemetry>& doubleFields,
+    std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>& doubleFields,
     std::unordered_map<BooleanTelemetryField, BooleanTelemetry>& boolFields, bool nt4Enabled,
     std::optional<std::string> dataLogName) {
   if (m_dataTable && m_dataTable == publishTable) return;  // already set up

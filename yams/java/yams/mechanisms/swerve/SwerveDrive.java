@@ -209,13 +209,13 @@ public class SwerveDrive {
     m_swerveTelemetry.setupTelemetry(this);
     m_field2d.setRobotPose(getPose());
     SmartDashboard.putData("Mechanisms/" + getName() + "/field", m_field2d);
-    SmartDashboard.putData("Mechanisms/" + getName() + "/tuning/driveToPose",
-        Commands
-            .startRun(()->{
-              System.out.println("================= Starting SwerveDrive.driveToPoseTuning() =================\n");
-              resetTranslationPID();
-              resetRotationPID();
-            }, () -> m_swerveTelemetry.applyTuningValues(this)));
+    SmartDashboard.putData(
+        "Mechanisms/" + getName() + "/tuning/driveToPose", Commands.startRun(() -> {
+          System.out.println(
+              "================= Starting SwerveDrive.driveToPoseTuning() =================\n");
+          resetTranslationPID();
+          resetRotationPID();
+        }, () -> m_swerveTelemetry.applyTuningValues(this)));
     // Report as YAGSL bc this will become apart of YAGSL in 2027...
     HAL.report(kResourceType_RobotDrive, kRobotDriveSwerve_YAGSL);
   }
@@ -450,8 +450,13 @@ public class SwerveDrive {
    * @param controller {@link PIDController} to use, units given is in Radians.
    */
   public void setRotationPID(PIDController controller) {
-    controller.reset();
-    m_config.withRotationController(controller);
+    var currentRotationPID = m_config.getRotationPID();
+    if (currentRotationPID.getP() != controller.getP()
+        || currentRotationPID.getI() != controller.getI()
+        || currentRotationPID.getD() != controller.getD()) {
+      controller.reset();
+      m_config.withRotationController(controller);
+    }
   }
 
   /**
@@ -459,8 +464,13 @@ public class SwerveDrive {
    * @param controller {@link PIDController} to reset, Units given is in Meters.
    */
   public void setTranslationPID(PIDController controller) {
-    controller.reset();
-    m_config.withTranslationController(controller);
+    var currentTranslationPID = m_config.getTranslationPID();
+    if (currentTranslationPID.getP() != controller.getP()
+        || currentTranslationPID.getI() != controller.getI()
+        || currentTranslationPID.getD() != controller.getD()) {
+      controller.reset();
+      m_config.withTranslationController(controller);
+    }
   }
 
   /**
@@ -502,24 +512,25 @@ public class SwerveDrive {
   }
 
   /**
-   * Drive to the target pose, primarily for use in Live Tuning, could also be used for setpoint commands.
+   * Drive to the target pose, primarily for use in Live Tuning, could also be used for setpoint
+   * commands.
    * @param targetPose Pose to drive towards.
    * @implNote Remember to call {@link #resetRotationPID()} and {@link #resetTranslationPID()}
    * before calling this method in a loop.
-   * @return {@link ChassisSpeeds} to drive the robot to the given pose.
+   * @return robot-relative {@link ChassisSpeeds} to drive the robot to the given pose.
    */
   public ChassisSpeeds driveToPoseSetpoint(Pose2d targetPose) {
-    var azimuthPID = m_config.getRotationPID();
+    var rotationPID = m_config.getRotationPID();
     var translationPID = m_config.getTranslationPID();
     var distance = getDistanceFromPose(targetPose);
-    var angleDifference = getAngleDifferenceFromPose(targetPose);
+    //    var angleDifference = getAngleDifferenceFromPose(targetPose);
     var translationScalar = translationPID.calculate(distance.in(Meters), 0);
     var currentPose = getPose();
     var poseDifference = currentPose.minus(targetPose);
     return ChassisSpeeds.fromFieldRelativeSpeeds(
         poseDifference.getMeasureX().per(Second).times(translationScalar),
         poseDifference.getMeasureY().per(Second).times(translationScalar),
-        RadiansPerSecond.of(azimuthPID.calculate(
+        RadiansPerSecond.of(rotationPID.calculate(
             currentPose.getRotation().getRadians(), targetPose.getRotation().getRadians())),
         new Rotation2d(getGyroAngle()));
   }

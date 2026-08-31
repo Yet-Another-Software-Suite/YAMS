@@ -17,6 +17,7 @@
 #include "yams/gearing/GearBox.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
+#include "yams/telemetry/SwerveModuleTelemetryConfig.hpp"
 
 namespace yams::mechanisms::config {
 
@@ -157,6 +158,17 @@ class SwerveModuleConfig {
   SwerveModuleConfig& WithTelemetry(const std::string& name, TelemetryVerbosity verbosity);
 
   /**
+   * Set the telemetry name for this module and configure telemetry with an explicit
+   * SwerveModuleTelemetryConfig, taking precedence over WithTelemetry(name, TelemetryVerbosity).
+   *
+   * @param name            NetworkTable key for this module's data.
+   * @param telemetryConfig Config that specifies what to log.
+   * @return *this for chaining.
+   */
+  SwerveModuleConfig& WithTelemetry(const std::string& name,
+                                    telemetry::SwerveModuleTelemetryConfig telemetryConfig);
+
+  /**
    * Log this module's telemetry (currently just the absolute encoder field) to a WPILib
    * DataLog under the given name, in addition to NetworkTables.
    *
@@ -211,6 +223,16 @@ class SwerveModuleConfig {
   std::optional<std::string> GetDataLogName() const;
 
   /**
+   * Get the user-specified SwerveModuleTelemetryConfig, if configured via
+   * WithTelemetry(name, SwerveModuleTelemetryConfig). Moves the config out of this
+   * SwerveModuleConfig; intended to be called exactly once, when the owning SwerveModule sets up
+   * its telemetry.
+   *
+   * @return SwerveModuleTelemetryConfig if configured.
+   */
+  std::optional<telemetry::SwerveModuleTelemetryConfig> GetSwerveModuleTelemetryConfig();
+
+  /**
    * Apply all enabled optimizations (min-velocity clamp, state optimization, cosine compensation)
    * and return the resulting state.
    *
@@ -224,6 +246,7 @@ class SwerveModuleConfig {
   motorcontrollers::SmartMotorController* m_azimuthMotor{nullptr};
   std::optional<std::string> m_telemetryName;
   std::optional<TelemetryVerbosity> m_telemetryVerbosity;
+  std::optional<telemetry::SwerveModuleTelemetryConfig> m_specifiedTelemetryConfig;
   std::optional<std::function<units::degree_t()>> m_absoluteEncoderSupplier;
   std::optional<units::degree_t> m_absoluteEncoderOffset;
   gearing::GearBox m_absoluteEncoderGearbox{1.0};

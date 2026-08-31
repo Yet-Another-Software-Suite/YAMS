@@ -147,7 +147,7 @@ public class SwerveDriveTelemetry {
       switch (stt.getField()) {
         case TargetPose -> {
           var targetPose = ((StructTelemetry<Pose2d, StructTelemetryField>) stt).get();
-          drive.driveToPose(targetPose);
+          drive.setRobotRelativeChassisSpeeds(drive.driveToPoseSetpoint(targetPose));
         }
       }
     }
