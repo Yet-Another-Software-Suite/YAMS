@@ -210,6 +210,13 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds> {
     controllerTranslationX = x;
     controllerTranslationY = y;
     swerveDrive = drive;
+    var drvCfg = drive.getConfig();
+    drvCfg.getMaximumChassisAngularVelocity().ifPresent( vel ->
+        this.maximumChassisAngularVelocity = vel
+    );
+    drvCfg.getMaximumChassisLinearVelocity().ifPresent( vel ->
+        this.maximumChassisLinearVelocity = vel
+    );
   }
 
   /**
