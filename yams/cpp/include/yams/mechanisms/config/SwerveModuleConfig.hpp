@@ -205,10 +205,10 @@ class SwerveModuleConfig {
    *
    * @return Callable returning the absolute encoder angle without offsets.
    */
-  std::function<units::degree_t()> GetRawAbsoluteEncoderAngle() const;
+  std::function<wpi::units::degree_t()> GetRawAbsoluteEncoderAngle() const;
 
   /** Get the absolute encoder supplier, if configured via WithAbsoluteEncoder(). */
-  std::optional<std::function<units::degree_t()>> GetAbsoluteEncoderSupplier() const;
+  std::optional<std::function<wpi::units::degree_t()>> GetAbsoluteEncoderSupplier() const;
 
 
   /**

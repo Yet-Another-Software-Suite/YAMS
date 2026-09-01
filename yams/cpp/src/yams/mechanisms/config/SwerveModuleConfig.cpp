@@ -148,21 +148,21 @@ wpi::units::degree_t SwerveModuleConfig::GetAbsoluteEncoderAngle() const {
   return m_azimuthMotor->GetMechanismPosition();
 }
 
-std::function<units::degree_t()> SwerveModuleConfig::GetRawAbsoluteEncoderAngle() const {
+std::function<wpi::units::degree_t()> SwerveModuleConfig::GetRawAbsoluteEncoderAngle() const {
   if (m_absoluteEncoderSupplier) {
     return *m_absoluteEncoderSupplier;
   }
   auto* azimuth = m_azimuthMotor;
-  units::degree_t offset{0};
+  wpi::units::degree_t offset{0};
   if (!wpi::RobotBase::IsSimulation() && azimuth) {
-    offset = units::degree_t{azimuth->GetConfig().GetExternalEncoderZeroOffset().value_or(units::turn_t{0})};
+    offset = wpi::units::degree_t{azimuth->GetConfig().GetExternalEncoderZeroOffset().value_or(wpi::units::turn_t{0})};
   }
-  return [azimuth, offset]() -> units::degree_t {
-    return units::degree_t{azimuth->GetMechanismPosition()} + offset;
+  return [azimuth, offset]() -> wpi::units::degree_t {
+    return wpi::units::degree_t{azimuth->GetMechanismPosition()} + offset;
   };
 }
 
-std::optional<std::function<units::degree_t()>> SwerveModuleConfig::GetAbsoluteEncoderSupplier()
+std::optional<std::function<wpi::units::degree_t()>> SwerveModuleConfig::GetAbsoluteEncoderSupplier()
     const {
   return m_absoluteEncoderSupplier;
 }

@@ -381,8 +381,7 @@ class SwerveDrive {
     auto desired = m_kinematics.ToChassisVelocities(m_desiredModuleStates);
 
     auto dt = m_simTimer.Get();
-    wpi::math::Twist2d twist{(desired.vx * dt).value(), (desired.vy * dt).value(),
-                             (desired.omega * dt).value()};
+    wpi::math::Twist2d twist{desired.vx * dt, desired.vy * dt, desired.omega * dt};
     m_simPose = m_simPose + twist.Exp();
 
     auto speeds = m_kinematics.ToChassisVelocities(GetModuleStates());
