@@ -4,6 +4,11 @@ plugins {
     id "com.gradleup.shadow" version "9.3.0"
 }
 
+// The GradleRIO plugin defaults wpi.versions.wpilibVersion to the exact "2027.0.0-alpha-6" tag,
+// which predates org.wpilib.util.Pair being added to wpiutil-java. Match vendordep/build.gradle's
+// use of a floating "2027.+" range so wpi.java.deps.wpilib() resolves a snapshot that has it.
+wpi.versions.wpilibVersion = "2027.+"
+
 java {
     sourceCompatibility = JavaVersion.VERSION_25
     targetCompatibility = JavaVersion.VERSION_25
