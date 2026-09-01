@@ -68,6 +68,7 @@ public final class SchedulerPumpHelper {
 	 * @throws InterruptedException Thrown if sleeping is interrupted.
 	 */
 	private static void awaitNotifierSettle(long nowMicros) throws InterruptedException {
+    Thread.sleep(1);
 		for (int attempt = 0; attempt < MAX_NOTIFIER_SETTLE_ATTEMPTS; attempt++) {
 			if (NotifierDataJNI.getNumNotifiers() == 0 || NotifierDataJNI.getNextTimeout() > nowMicros) {
 				return;
