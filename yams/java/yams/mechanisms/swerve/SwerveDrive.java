@@ -216,7 +216,7 @@ public class SwerveDrive {
           resetTranslationPID();
           resetRotationPID();
         }, () -> m_swerveTelemetry.applyTuningValues(this)));
-    // Report as YAGSL bc this will become apart of YAGSL in 2027...
+    // Report as YAGSL bc this will become apart of YAGSL in 2027...s
     HAL.report(kResourceType_RobotDrive, kRobotDriveSwerve_YAGSL);
   }
 
