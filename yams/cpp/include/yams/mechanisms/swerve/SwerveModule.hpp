@@ -5,11 +5,16 @@
 
 #include <wpi/math/kinematics/SwerveModulePosition.hpp>
 #include <wpi/math/kinematics/SwerveModuleVelocity.hpp>
+#include <wpi/units/angle.hpp>
 
+#include <functional>
+#include <optional>
 #include <string>
 
 #include "yams/mechanisms/config/SwerveModuleConfig.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
+#include "yams/telemetry/MechanismTelemetry.hpp"
+#include "yams/telemetry/SwerveModuleTelemetry.hpp"
 
 namespace yams::mechanisms::swerve {
 
@@ -83,12 +88,25 @@ class SwerveModule {
   explicit SwerveModule(config::SwerveModuleConfig* config);
 
   /**
+   * Setup telemetry for the module; the SwerveModuleTelemetry config used is either the one
+   * supplied via SwerveModuleConfig::WithTelemetry(name, SwerveModuleTelemetryConfig) or a
+   * default built from SwerveModuleConfig::GetTelemetryVerbosity() (defaulting to
+   * TelemetryVerbosity::HIGH).
+   *
+   * @param mechName Telemetry name of the parent SwerveDrive.
+   */
+  void SetupTelemetry(const std::string& mechName);
+
+  /**
    * Seed the azimuth encoder from the absolute encoder reading (real robot only).
    */
   void SeedAzimuthEncoder();
 
   /** Get the module name (from telemetry config). */
   std::string GetName() const;
+
+  /** Get the absolute encoder angle without any offsets applied. */
+  wpi::units::degree_t GetRawAbsoluteEncoderAngle() const;
 
   /** Get the module configuration. */
   const config::SwerveModuleConfig& GetConfig() const;
@@ -123,6 +141,10 @@ class SwerveModule {
 
  private:
   config::SwerveModuleConfig* m_config{nullptr};
+  /** Used for the loop time only; module state/encoder telemetry lives in m_swerveModuleTelemetry. */
+  telemetry::MechanismTelemetry m_telemetry;
+  std::optional<telemetry::SwerveModuleTelemetry> m_swerveModuleTelemetry;
+  std::function<wpi::units::degree_t()> m_azimuthEncoderWithoutOffsets;
 
  public:
   // Public so SwerveDrive can access them directly (mirrors Java protected fields).

@@ -150,7 +150,7 @@ class SmartMotorControllerTelemetryConfig {
    *
    * @param smc Motor controller to configure for.
    */
-  std::unordered_map<DoubleTelemetryField, DoubleTelemetry>& GetDoubleFields(
+  std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>& GetDoubleFields(
       motorcontrollers::SmartMotorController& smc);
   std::unordered_map<BooleanTelemetryField, BooleanTelemetry>& GetBoolFields(
       motorcontrollers::SmartMotorController& smc);
@@ -159,7 +159,7 @@ class SmartMotorControllerTelemetryConfig {
   std::optional<std::string> m_dataLogName;
   bool m_nt4Telemetry{true};
 
-  std::unordered_map<DoubleTelemetryField, DoubleTelemetry> m_doubleFields;
+  std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> m_doubleFields;
   std::unordered_map<BooleanTelemetryField, BooleanTelemetry> m_boolFields;
 };
 

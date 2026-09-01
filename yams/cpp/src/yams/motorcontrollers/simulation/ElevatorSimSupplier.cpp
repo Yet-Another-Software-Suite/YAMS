@@ -7,6 +7,8 @@
 
 #include <utility>
 
+#include "yams/motorcontrollers/simulation/BatterySim.hpp"
+
 namespace yams::motorcontrollers::simulation {
 
 ElevatorSimSupplier::ElevatorSimSupplier(wpi::sim::ElevatorSim& sim,
@@ -23,6 +25,7 @@ void ElevatorSimSupplier::UpdateSim() {
   if (!m_inputFed) {
     m_lastInputVoltage = wpi::units::volt_t{m_dutyCycleSupplier() * GetMechanismSupplyVoltage().value()};
     m_sim.SetInputVoltage(m_lastInputVoltage);
+    wpi::sim::RoboRioSim::SetVInVoltage(BatterySim::CalculateVoltage(this, m_sim.GetCurrentDraw()));
   }
   m_inputFed = false;
   m_sim.Update(m_period);

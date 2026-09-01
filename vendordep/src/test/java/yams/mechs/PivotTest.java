@@ -292,16 +292,20 @@ public class PivotTest
   @MethodSource("createConfigs")
   void testSMCDutyCycle(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    smc.setupSimulation();
-    SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
+    try
+    {
+      startTest(smc);
+      smc.setupSimulation();
+      SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
 
-    Command dutyCycleUp   = subsys.setDutyCycle(0.5);
-    Command dutyCycleDown = subsys.setDutyCycle(-0.5);
+      Command dutyCycleUp   = subsys.setDutyCycle(0.5);
+      Command dutyCycleDown = subsys.setDutyCycle(-0.5);
 
-    dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
-
-    closeSMC(smc);
+      dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
 
@@ -309,28 +313,36 @@ public class PivotTest
   @MethodSource("createConfigs")
   void testSMCPositionPID(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    smc.setupSimulation();
-    Command highPid = Commands.run(() -> smc.setPosition(Degrees.of(80)));
-    Command lowPid  = Commands.run(() -> smc.setPosition(Degrees.of(-80)));
+    try
+    {
+      startTest(smc);
+      smc.setupSimulation();
+      Command highPid = Commands.run(() -> smc.setPosition(Degrees.of(80)));
+      Command lowPid  = Commands.run(() -> smc.setPosition(Degrees.of(-80)));
 
-    positionPidTest(smc, highPid, lowPid);
-
-    closeSMC(smc);
+      positionPidTest(smc, highPid, lowPid);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   @ParameterizedTest
   @MethodSource("createConfigs")
   void testPivotDutyCycle(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    Pivot   pivot         = createPivot(smc);
-    Command dutyCycleUp   = pivot.set(0.5);
-    Command dutyCycleDown = pivot.set(-0.5);
+    try
+    {
+      startTest(smc);
+      Pivot   pivot         = createPivot(smc);
+      Command dutyCycleUp   = pivot.set(0.5);
+      Command dutyCycleDown = pivot.set(-0.5);
 
-    dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
-
-    closeSMC(smc);
+      dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
 
@@ -338,14 +350,18 @@ public class PivotTest
   @MethodSource("createConfigs")
   void testPivotPositionPID(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    Pivot   pivot   = createPivot(smc);
-    Command highPid = pivot.setAngle(Degrees.of(80));
-    Command lowPid  = pivot.setAngle(Degrees.of(-80));
+    try
+    {
+      startTest(smc);
+      Pivot   pivot   = createPivot(smc);
+      Command highPid = pivot.setAngle(Degrees.of(80));
+      Command lowPid  = pivot.setAngle(Degrees.of(-80));
 
-    positionPidTest(smc, highPid, lowPid);
-
-    closeSMC(smc);
+      positionPidTest(smc, highPid, lowPid);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   @BeforeEach

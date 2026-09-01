@@ -39,6 +39,8 @@ import yams.mechanisms.config.SwerveDriveConfig;
 import yams.mechanisms.config.SwerveModuleConfig;
 import yams.mechanisms.swerve.SwerveDrive;
 import yams.mechanisms.swerve.SwerveModule;
+import yams.telemetry.SwerveDriveTelemetryConfig;
+import yams.telemetry.SwerveModuleTelemetryConfig;
 import yams.mechanisms.swerve.utility.SwerveInputStream;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
@@ -167,7 +169,10 @@ public class SwerveSubsystem extends SubsystemBase
     SwerveModuleConfig moduleConfig = new SwerveModuleConfig(driveSMC, azimuthSMC)
         // The CANcoder absolute position eliminates the need to home the steer motor at startup.
         .withAbsoluteEncoder(absoluteEncoder.getAbsolutePosition().asSupplier())
-        .withTelemetry(moduleName, SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
+        // Nested under the same "Swerve" DataLog prefix as SwerveDriveConfig below, so the module's
+        // absolute encoder shows up alongside the rest of the drive's DataLog entries.
+        .withTelemetry(moduleName, new SwerveModuleTelemetryConfig().withDataLogName("Swerve/" + moduleName)
+                                                                     .withTelemetryVerbosity(SmartMotorControllerConfig.TelemetryVerbosity.HIGH))
         .withLocation(location)
         // Optimization rotates the module at most 90 deg instead of 180 deg + reversing drive direction.
         .withOptimization(true);
@@ -212,7 +217,11 @@ public class SwerveSubsystem extends SubsystemBase
         .withStartingPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)))
         // Translation and rotation PIDs are used by driveToPose(); kP=1 is a conservative start.
         .withTranslationController(new PIDController(1, 0, 0))
-        .withRotationController(new PIDController(1, 0, 0));
+        .withRotationController(new PIDController(1, 0, 0))
+        // Logs pose/gyro/chassis speeds/module states to a WPILib DataLog (readable with AdvantageScope
+        // or DataLogTool) in addition to NetworkTables. Each module above nests under "Swerve/<name>".
+        .withTelemetry("swerve", new SwerveDriveTelemetryConfig().withDataLogName("Swerve")
+                                                        .withTelemetryVerbosity(SmartMotorControllerConfig.TelemetryVerbosity.HIGH));
     drive = new SwerveDrive(config);
 
     SmartDashboard.putData("Field", field);

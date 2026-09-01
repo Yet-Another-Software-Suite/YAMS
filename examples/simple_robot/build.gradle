@@ -16,17 +16,21 @@ sourceSets {
     main {
         java {
             srcDirs 'src/main/java'
+            // YAMS_TESTING
             srcDirs '../../../yams/java'
+            // END_YAMS_TESTING
         }
     }
 }
 
 def ROBOT_MAIN_CLASS = "frc.robot.Main"
 
+// AKIT_TESTING
 task(replayWatch, type: JavaExec) {
     mainClass = "org.littletonrobotics.junction.ReplayWatch"
     classpath = sourceSets.main.runtimeClasspath
 }
+// END_AKIT_TESTING
 
 // Define my targets (RoboRIO) and artifacts (deployable files)
 // This is added by GradleRIO's backing project DeployUtils.
@@ -98,8 +102,11 @@ dependencies {
     testImplementation "org.mockito:mockito-core:5.3.1"
     testImplementation "org.mockito:mockito-junit-jupiter:5.3.1"
     testImplementation wpi.java.vendor.java()
+// AKIT_TESTING
     def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit-26.0.0.json").text)
     annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
+// END_AKIT_TESTING
+
 }
 
 test{

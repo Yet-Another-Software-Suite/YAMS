@@ -17,6 +17,9 @@ plugins {
 ext.wpilibVersion = "2027.+"
 ext.releasePath = "$buildDir/maven"
 ext.pubVersion = System.getenv("releaseVersion") ?: System.getenv("releaseName") ?: "test"
+// Set -PskipCpp=true to skip building/publishing the C++ library entirely. The generated
+// vendordep JSON's cppDependencies then comes out as an empty array. See publish.gradle.
+ext.skipCpp = project.hasProperty('skipCpp') && project.property('skipCpp').toString().toBoolean()
 
 
 repositories {

@@ -20,6 +20,7 @@ import org.wpilib.units.measure.Time;
 import org.wpilib.units.measure.Voltage;
 import org.wpilib.simulation.DCMotorSim;
 import org.wpilib.simulation.RoboRioSim;
+import java.util.UUID;
 import java.util.function.Supplier;
 import yams.gearing.MechanismGearing;
 import yams.motorcontrollers.SimSupplier;
@@ -71,6 +72,7 @@ public class DCMotorSimSupplier implements SimSupplier
   private final MechanismGearing mechGearing;
   private final Time             period;
   private final DCMotor          motor;
+  private final UUID             uuid;
 
 
   /**
@@ -87,6 +89,7 @@ public class DCMotorSimSupplier implements SimSupplier
     mechGearing = config.getGearing();
     period = config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20));
     motor = smartMotorController.getDCMotor();
+    uuid = smartMotorController.m_batterySimUUID;
   }
 
   @Override
@@ -95,6 +98,7 @@ public class DCMotorSimSupplier implements SimSupplier
     if (!isInputFed())
     {
       sim.setInputVoltage(motorDutyCycleSupplier.get() * RoboRioSim.getVInVoltage());
+      RoboRioSim.setVInVoltage(BatterySim.calculateVoltage(uuid, sim.getCurrentDraw()));
     }
     if (!simUpdated)
     {

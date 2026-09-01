@@ -5,13 +5,14 @@
 
 #include <wpi/framework/RobotBase.hpp>
 #include <wpi/math/geometry/Rotation2d.hpp>
-#include <wpi/nt/NetworkTableInstance.hpp>
 #include <wpi/units/angle.hpp>
 
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 #include "yams/exceptions.hpp"
+#include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 
 namespace yams::mechanisms::swerve {
 
@@ -34,17 +35,25 @@ SwerveModule::SwerveModule(config::SwerveModuleConfig* config)
         "External encoder could not be used", "WithUseExternalFeedbackEncoder(true)");
   }
 
-  // Set up motor telemetry under the swerve hierarchy.
-  auto instance = wpi::nt::NetworkTableInstance::GetDefault();
-  auto driveTable = instance.GetTable("SmartDashboard/swerve/" + GetName() + "/drive");
-  auto driveTuning = instance.GetTable("SmartDashboard/swerve/" + GetName() + "/drive/tuning");
-  auto azimuthTable = instance.GetTable("SmartDashboard/swerve/" + GetName() + "/azimuth");
-  auto azimuthTuning = instance.GetTable("SmartDashboard/swerve/" + GetName() + "/azimuth/tuning");
-
-  m_driveMotorController->SetupTelemetry(driveTable, driveTuning);
-  m_azimuthMotorController->SetupTelemetry(azimuthTable, azimuthTuning);
-
   SeedAzimuthEncoder();
+  m_azimuthEncoderWithoutOffsets = config->GetRawAbsoluteEncoderAngle();
+}
+
+void SwerveModule::SetupTelemetry(const std::string& mechName) {
+  using TelemetryVerbosity = motorcontrollers::SmartMotorControllerConfig::TelemetryVerbosity;
+
+  m_telemetry.SetupTelemetry(mechName + "/modules/" + GetName());
+
+  telemetry::SwerveModuleTelemetryConfig telemetryCfg;
+  if (auto specified = m_config->GetSwerveModuleTelemetryConfig()) {
+    telemetryCfg = std::move(*specified);
+  } else {
+    telemetryCfg.WithTelemetryVerbosity(
+        m_config->GetTelemetryVerbosity().value_or(TelemetryVerbosity::HIGH));
+  }
+
+  m_swerveModuleTelemetry.emplace(std::move(telemetryCfg));
+  m_swerveModuleTelemetry->SetupTelemetry(mechName, *this);
 }
 
 void SwerveModule::SeedAzimuthEncoder() {
@@ -84,9 +93,15 @@ wpi::math::SwerveModulePosition SwerveModule::GetPosition() const {
       wpi::math::Rotation2d{wpi::units::radian_t{m_azimuthMotorController->GetMechanismPosition()}}};
 }
 
+wpi::units::degree_t SwerveModule::GetRawAbsoluteEncoderAngle() const {
+  return m_azimuthEncoderWithoutOffsets();
+}
+
 void SwerveModule::UpdateTelemetry() {
   m_driveMotorController->UpdateTelemetry();
   m_azimuthMotorController->UpdateTelemetry();
+  m_swerveModuleTelemetry->Publish(*this);
+  m_telemetry.UpdateLoopTime();
 }
 
 void SwerveModule::SimIterate() {

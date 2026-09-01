@@ -22,6 +22,7 @@
 
 #include "yams/exceptions.hpp"
 #include "yams/math/LQRController.hpp"
+#include "yams/motorcontrollers/simulation/BatterySim.hpp"
 #include "yams/motorcontrollers/simulation/DCMotorSimSupplier.hpp"
 
 using namespace ctre::phoenix6;
@@ -457,6 +458,8 @@ void TalonFXWrapper::SimIterate() {
 
   m_simSupplier->SetInputVoltage(sim.GetMotorVoltage());
   m_simSupplier->UpdateSim();
+  simulation::BatterySim::CalculateVoltage(m_simSupplier.get(),
+                                           m_simSupplier->GetCurrentDrawAmps());
 
   sim.SetRawRotorPosition(wpi::units::turn_t{m_simSupplier->GetRotorPosition()});
   sim.SetRotorVelocity(wpi::units::turns_per_second_t{m_simSupplier->GetRotorVelocity()});

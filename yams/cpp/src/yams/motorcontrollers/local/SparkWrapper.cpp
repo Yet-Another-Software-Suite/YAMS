@@ -20,6 +20,7 @@
 
 #include "yams/exceptions.hpp"
 #include "yams/math/LQRController.hpp"
+#include "yams/motorcontrollers/simulation/BatterySim.hpp"
 #include "yams/motorcontrollers/simulation/DCMotorSimSupplier.hpp"
 
 using namespace rev::spark;
@@ -371,6 +372,8 @@ void SparkWrapper::SimIterate() {
   if (m_simSupplier) {
     if (m_simSupplier->IsWatchdogExpired()) {
       m_simSupplier->UpdateSim();
+      simulation::BatterySim::CalculateVoltage(m_simSupplier.get(),
+                                               m_simSupplier->GetCurrentDrawAmps());
     }
     wpi::units::second_t dt = m_config->GetClosedLoopControlPeriod().value_or(20_ms);
     wpi::units::turns_per_second_t mechVelRps = m_simSupplier->GetMechanismVelocity();

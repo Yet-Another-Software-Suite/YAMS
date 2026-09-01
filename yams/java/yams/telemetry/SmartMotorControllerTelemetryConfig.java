@@ -79,7 +79,7 @@ public class SmartMotorControllerTelemetryConfig
   /**
    * {@link DoubleTelemetryField} to enable or disable.
    */
-  private final Map<DoubleTelemetryField, DoubleTelemetry>   doubleFields = Arrays.stream(DoubleTelemetryField.values())
+  private final Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>   doubleFields = Arrays.stream(DoubleTelemetryField.values())
                                                                                   .collect(Collectors.toMap(e -> e,
                                                                                                             DoubleTelemetryField::create));
 
@@ -178,6 +178,7 @@ public class SmartMotorControllerTelemetryConfig
         doubleFields.get(DoubleTelemetryField.ExternalEncoderPosition).enable();
         doubleFields.get(DoubleTelemetryField.ExternalEncoderVelocity).enable();
     }
+    /*
     if (verbosity == TelemetryVerbosity.HIGH)
     {
       for (DoubleTelemetry dt : doubleFields.values())
@@ -194,7 +195,7 @@ public class SmartMotorControllerTelemetryConfig
           //System.err.println("BT " + dt.getField().name() + " is DISABLED!!");
         }
       }
-    }
+    }*/
     return this;
   }
 
@@ -224,7 +225,7 @@ public class SmartMotorControllerTelemetryConfig
    * @param smc {@link SmartMotorController} used to disable unavailable telemetry for certain motor controllers.
    * @return Configured {@link DoubleTelemetry} for each {@link DoubleTelemetryField}
    */
-  public Map<DoubleTelemetryField, DoubleTelemetry> getDoubleFields(SmartMotorController smc)
+  public Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> getDoubleFields(SmartMotorController smc)
   {
     var config         = smc.getConfig();
     var unsupTelemetry = smc.getUnsupportedTelemetryFields();
@@ -605,6 +606,66 @@ public class SmartMotorControllerTelemetryConfig
   public SmartMotorControllerTelemetryConfig withRotorVelocity()
   {
     doubleFields.get(DoubleTelemetryField.RotorVelocity).enable();
+    return this;
+  }
+
+  /**
+   * Escape hatch for unimplemented fields which should be enabled or disabled.
+   * @param field Field to configure
+   * @param value Enable on true, Disable on false.
+   * @return {@link SmartMotorControllerTelemetryConfig} for chaining
+   */
+  public SmartMotorControllerTelemetryConfig withCustom(DoubleTelemetryField field, boolean value)
+  {
+    if(value)
+      doubleFields.get(field).enable();
+    else
+      doubleFields.get(field).disable();
+    return this;
+  }
+
+  /**
+   * Escape hatch for unimplemented fields which should be enabled or disabled.
+   * @param field Field to configure
+   * @param value Enable on true, Disable on false.
+   * @return {@link SmartMotorControllerTelemetryConfig} for chaining
+   */
+  public SmartMotorControllerTelemetryConfig withCustom(BooleanTelemetryField field, boolean value)
+  {
+    if(value)
+      boolFields.get(field).enable();
+    else
+      boolFields.get(field).disable();
+    return this;
+  }
+
+  /**
+   * Escape hatch for unimplemented fields which should be enabled or disabled.
+   * @param field Field to configure
+   * @param value Enable on true, Disable on false.
+   * @return {@link SmartMotorControllerTelemetryConfig} for chaining
+   */
+  public SmartMotorControllerTelemetryConfig withCustom(BooleanTelemetryField[] field, boolean value)
+  {
+    for (BooleanTelemetryField field1 : field)
+    {
+      withCustom(field1, value);
+    }
+    return this;
+  }
+
+  /**
+   * Escape hatch for unimplemented fields which should be enabled or disabled.
+   * @param field Field to configure
+   * @param value Enable on true, Disable on false.
+   * @return {@link SmartMotorControllerTelemetryConfig} for chaining
+   */
+  public SmartMotorControllerTelemetryConfig withCustom(DoubleTelemetryField[] field, boolean value)
+  {
+    for (DoubleTelemetryField field1 : field)
+    {
+      withCustom(field1, value);
+    }
     return this;
   }
 }

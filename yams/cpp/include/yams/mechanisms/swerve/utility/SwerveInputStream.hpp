@@ -423,7 +423,15 @@ class SwerveInputStream {
                     std::function<double()> y)
       : m_swerveDrive{&drive},
         m_controllerTranslationX{std::move(x)},
-        m_controllerTranslationY{std::move(y)} {}
+        m_controllerTranslationY{std::move(y)} {
+    auto& cfg = drive.GetConfig();
+    if (auto maxLinear = cfg.GetMaximumChassisLinearVelocity()) {
+      m_maximumChassisLinearVelocity = *maxLinear;
+    }
+    if (auto maxAngular = cfg.GetMaximumChassisAngularVelocity()) {
+      m_maximumChassisAngularVelocity = wpi::units::radians_per_second_t{*maxAngular};
+    }
+  }
 
   SwerveDrive<NumModules>* m_swerveDrive;
   std::function<double()> m_controllerTranslationX;
@@ -486,7 +494,7 @@ class SwerveInputStream {
         break;
       case SwerveInputMode::HEADING:
       case SwerveInputMode::AIM:
-        m_swerveDrive->ResetAzimuthPID();
+        m_swerveDrive->ResetRotationPID();
         break;
       default:
         break;
@@ -495,11 +503,11 @@ class SwerveInputStream {
     switch (newMode) {
       case SwerveInputMode::TRANSLATION_ONLY:
         m_lockedHeading = wpi::math::Rotation2d{wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}};
-        m_swerveDrive->ResetAzimuthPID();
+        m_swerveDrive->ResetRotationPID();
         break;
       case SwerveInputMode::HEADING:
       case SwerveInputMode::AIM:
-        m_swerveDrive->ResetAzimuthPID();
+        m_swerveDrive->ResetRotationPID();
         break;
       default:
         break;

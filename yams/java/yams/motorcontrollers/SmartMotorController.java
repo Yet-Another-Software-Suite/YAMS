@@ -47,6 +47,7 @@ import org.wpilib.units.measure.Voltage;
 import org.wpilib.smartdashboard.SmartDashboard;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
+import java.util.UUID;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -165,6 +166,10 @@ public abstract class SmartMotorController
    * Alert shown when the closed loop controller is running on the RIO.
    */
   private   Alert                                         m_rioClosedLoopAlert          = null;
+  /**
+   * Battery simulation UUID used when standalone simulation.
+   */
+  public   final UUID                                    m_batterySimUUID = UUID.randomUUID();
 
   /**
    * Create a {@link SmartMotorController} wrapper from the provided motor controller object.

@@ -648,13 +648,13 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>
       }
       case HEADING, AIM ->
       {
-        swerveDrive.resetAzimuthPID();
+        swerveDrive.resetRotationPID();
         break;
       }
       case DRIVE_TO_POSE ->
       {
         swerveDrive.resetTranslationPID();
-        swerveDrive.resetAzimuthPID();
+        swerveDrive.resetRotationPID();
         break;
       }
     }
@@ -665,7 +665,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>
       case TRANSLATION_ONLY ->
       {
         lockedHeading = Optional.of(new Rotation2d(swerveDrive.getGyroAngle()));
-        swerveDrive.resetAzimuthPID();
+        swerveDrive.resetRotationPID();
         break;
       }
       case ANGULAR_VELOCITY ->
@@ -674,7 +674,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>
       }
       case HEADING, AIM ->
       {
-        swerveDrive.resetAzimuthPID();
+        swerveDrive.resetRotationPID();
         break;
       }
       case DRIVE_TO_POSE ->
@@ -682,7 +682,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>
         driveToPoseOmegaPIDController.ifPresent(pid -> pid.reset(swerveDrive.getPose().getRotation().getRadians()));
         driveToPoseTranslationPIDController.ifPresent(
             pid -> pid.reset(swerveDrive.getDistanceFromPose(driveToPose.orElse(swerveDrive::getPose).get()).in(Meters)));
-//        swerveDrive.resetAzimuthPID();
+//        swerveDrive.resetRotationPID();
 //        swerveDrive.resetTranslationPID();
         break;
       }

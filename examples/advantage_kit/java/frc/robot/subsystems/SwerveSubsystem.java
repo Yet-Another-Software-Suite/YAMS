@@ -293,7 +293,7 @@ public class SwerveSubsystem extends SubsystemBase
   {
     return startRun(() -> {
       drive.resetTranslationPID();
-      drive.resetAzimuthPID();
+      drive.resetRotationPID();
     }, () -> {
       var azimuthPID        = config.getRotationPID();
       var translationPID    = config.getTranslationPID();

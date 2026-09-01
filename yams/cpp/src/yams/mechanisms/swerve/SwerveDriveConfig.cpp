@@ -117,8 +117,18 @@ SwerveDriveConfig& SwerveDriveConfig::WithSimRotationController(wpi::math::PIDCo
   return *this;
 }
 
-SwerveDriveConfig& SwerveDriveConfig::WithTelemetry(TelemetryVerbosity verbosity) {
+SwerveDriveConfig& SwerveDriveConfig::WithTelemetry(const std::string& name,
+                                                     TelemetryVerbosity verbosity) {
+  m_telemetryName = name;
   m_telemetryVerbosity = verbosity;
+  return *this;
+}
+
+SwerveDriveConfig& SwerveDriveConfig::WithTelemetry(
+    const std::string& name, telemetry::SwerveDriveTelemetryConfig telemetryConfig) {
+  m_telemetryName = name;
+  m_telemetryVerbosity.reset();
+  m_specifiedTelemetryConfig = std::move(telemetryConfig);
   return *this;
 }
 
@@ -152,6 +162,16 @@ std::optional<wpi::math::Translation2d> SwerveDriveConfig::GetCenterOfRotation()
 std::optional<SwerveDriveConfig::TelemetryVerbosity> SwerveDriveConfig::GetTelemetryVerbosity()
     const {
   return m_telemetryVerbosity;
+}
+
+const std::string& SwerveDriveConfig::GetTelemetryName() const { return m_telemetryName; }
+
+std::optional<telemetry::SwerveDriveTelemetryConfig>
+SwerveDriveConfig::GetSwerveDriveTelemetryConfig() {
+  if (!m_specifiedTelemetryConfig) return std::nullopt;
+  auto result = std::move(m_specifiedTelemetryConfig);
+  m_specifiedTelemetryConfig.reset();
+  return result;
 }
 
 wpi::units::degree_t SwerveDriveConfig::GetGyroOffset() const {

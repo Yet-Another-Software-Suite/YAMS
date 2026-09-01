@@ -77,17 +77,65 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
       - name: Install toolchain
         run: ./gradlew installSystemCoreToolchain
-      - name: C++ unit tests
-        run: ./gradlew googleTest
-        continue-on-error: true
-      - name: Java unit tests
-        run: ./gradlew test
       - name: Publish
         run: ./gradlew publish
       - uses: actions/upload-artifact@v7
         with:
           name: maven-linux
           path: vendordep/build/maven/
+
+  test-cpp:
+    name: C++ unit tests
+    needs: [build-linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: vendordep
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+      - run: chmod +x gradlew
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Install toolchain
+        run: ./gradlew installSystemCoreToolchain
+      - uses: actions/download-artifact@v7
+        with:
+          name: maven-linux
+          path: vendordep/build/maven/
+      - name: C++ unit tests
+        run: ./gradlew googleTest
+        continue-on-error: true
+
+  test-java:
+    name: Java unit tests
+    needs: [build-linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: vendordep
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+      - run: chmod +x gradlew
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Install toolchain
+        run: ./gradlew installSystemCoreToolchain
+      - uses: actions/download-artifact@v7
+        with:
+          name: maven-linux
+          path: vendordep/build/maven/
+      - name: Java unit tests
+        run: ./gradlew test
 
   build-host:
     name: Build - ${{ matrix.artifact-name }}

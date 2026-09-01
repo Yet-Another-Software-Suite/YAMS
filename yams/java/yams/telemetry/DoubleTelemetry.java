@@ -13,7 +13,6 @@ import org.wpilib.system.DataLogManager;
 import org.wpilib.system.Timer;
 import java.util.Optional;
 import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
 
 /**
  * Double Telemetry for SmartMotorControllers.
@@ -27,7 +26,7 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * <h2>Example</h2>
  * <pre>{@code
  * // Create and publish a double entry for shooter velocity under the Shooter table.
- * DoubleTelemetry velocity = new DoubleTelemetry(
+ * DoubleTelemetry&lt;DoubleTelemetryField&gt; velocity = new DoubleTelemetry&lt;&gt;(
  *     "velocity",                                       // NetworkTables key
  *     0.0,                                              // default value
  *     SmartMotorControllerTelemetry.DoubleTelemetryField.MechanismVelocity,
@@ -41,13 +40,15 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * // In periodic:
  * velocity.set(shooter.getVelocityRPS());
  * }</pre>
+ *
+ * @param <F> Enum type identifying which field this telemetry entry represents.
  */
-public class DoubleTelemetry
+public class DoubleTelemetry<F>
 {
   /**
    * Field representing.
    */
-  private final DoubleTelemetryField       field;
+  private final F                          field;
   /**
    * Network table key.
    */
@@ -111,7 +112,7 @@ public class DoubleTelemetry
    * @param tunable    Tunable.
    * @param unit       Unit to display.
    */
-  public DoubleTelemetry(String keyString, double defaultVal, DoubleTelemetryField field, boolean tunable, String unit)
+  public DoubleTelemetry(String keyString, double defaultVal, F field, boolean tunable, String unit)
   {
     key = keyString;
     cachedValue = defaultValue = defaultVal;
@@ -324,7 +325,7 @@ public class DoubleTelemetry
    *
    * @return field.
    */
-  public DoubleTelemetryField getField()
+  public F getField()
   {
     return field;
   }

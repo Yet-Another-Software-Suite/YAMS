@@ -18,7 +18,7 @@ using motorcontrollers::SmartMotorController;
 using motorcontrollers::SmartMotorControllerConfig;
 
 // Helper: create a DoubleTelemetry for a given field
-static DoubleTelemetry MakeDouble(DoubleTelemetryField field) {
+static DoubleTelemetry<DoubleTelemetryField> MakeDouble(DoubleTelemetryField field) {
   switch (field) {
     case DoubleTelemetryField::ExponentialProfileKV:
       return {"closedloop/motionprofile/kV", 0.0, field, true, "none"};
@@ -123,7 +123,7 @@ static BooleanTelemetry MakeBool(BooleanTelemetryField field) {
     case BooleanTelemetryField::ArmFeedForward:
       return {"control/feedforward/arm", false, field, false};
     case BooleanTelemetryField::SimpleMotorFeedForward:
-      return {"control/Simple Motor Feedforward", false, field, false};
+      return {"control/feedforward/simple", false, field, false};
     case BooleanTelemetryField::MotionProfile:
       return {"control/closedloop/profiled", false, field, false};
     case BooleanTelemetryField::MotorInversion:
@@ -365,7 +365,7 @@ std::optional<std::string> SmartMotorControllerTelemetryConfig::GetDataLogName()
 }
 bool SmartMotorControllerTelemetryConfig::GetNT4Enabled() const { return m_nt4Telemetry; }
 
-std::unordered_map<DoubleTelemetryField, DoubleTelemetry>&
+std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>&
 SmartMotorControllerTelemetryConfig::GetDoubleFields(SmartMotorController& smc) {
   SmartMotorControllerConfig& cfg = smc.GetConfig();
   auto slot = smc.GetClosedLoopControllerSlot();

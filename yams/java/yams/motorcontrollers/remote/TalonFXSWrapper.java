@@ -90,6 +90,7 @@ import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.motorcontrollers.simulation.BatterySim;
 import yams.motorcontrollers.simulation.DCMotorSimSupplier;
 import yams.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
 import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
@@ -438,6 +439,7 @@ public class TalonFXSWrapper extends SmartMotorController
         simSupplier.setMechanismStatorVoltage(motorVoltage); // dcmotorSim.setInputVoltage(motorVoltage)
         simSupplier.updateSimState(); // dcmotorSim.update(0.020)
         simSupplier.starveUpdateSim(); // clear update once atomic
+        BatterySim.calculateVoltage(m_batterySimUUID, simSupplier.getCurrentDraw());
       });
 
       // apply the new rotor position and velocity to the TalonFX;

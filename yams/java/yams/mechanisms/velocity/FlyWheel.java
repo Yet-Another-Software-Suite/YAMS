@@ -27,7 +27,6 @@ import org.wpilib.command2.Commands;
 import org.wpilib.command2.button.Trigger;
 import java.util.Optional;
 import java.util.function.Supplier;
-import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.FlyWheelConfig;
 import yams.mechanisms.config.MechanismPositionConfig;
 import yams.motorcontrollers.SmartMotorController;
@@ -89,10 +88,8 @@ public class FlyWheel extends SmartVelocityMechanism
   {
     m_config = config;
     m_smc = smc;
-    SmartMotorControllerConfig smcCfg = smc.getConfig();
-    SmartMotorControllerConfig motorConfig = m_smc.getConfig();
-    DCMotor                    dcMotor     = m_smc.getDCMotor();
-    MechanismGearing           gearing     = m_smc.getConfig().getGearing();
+    SmartMotorControllerConfig smcCfg  = smc.getConfig();
+    DCMotor                    dcMotor = m_smc.getDCMotor();
     m_subsystem = m_smc.getConfig().getSubsystem();
     // Seed the relative encoder
     if (m_smc.getConfig().getExternalEncoder().isPresent())

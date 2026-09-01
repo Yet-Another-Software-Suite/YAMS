@@ -36,6 +36,36 @@ void MechanismTelemetry::SetupTelemetry(const std::string& mechanismName) {
   SetupLoopTime();
 }
 
+void MechanismTelemetry::SetupTelemetry(const std::string& mechanismName,
+                                        const std::string& dataLogName) {
+  SetupTelemetry(mechanismName);
+  m_dataLogName = dataLogName;
+}
+
+void MechanismTelemetry::AddMotorController(
+    const std::string& subTableName, motorcontrollers::SmartMotorController& motorController) {
+  motorController.SetupTelemetry(m_networkTable->GetSubTable(subTableName),
+                                 m_tuningNetworkTable->GetSubTable(subTableName));
+}
+
+std::function<void(double)> MechanismTelemetry::PublishDouble(const std::string& key,
+                                                               const std::string& unit) {
+  auto topic = m_networkTable->GetDoubleTopic(key);
+  if (!unit.empty()) {
+    topic.SetProperties(wpi::util::json{{"units", unit}});
+  }
+  auto publisher = std::make_shared<wpi::nt::DoublePublisher>(topic.Publish());
+  std::shared_ptr<wpi::log::DoubleLogEntry> logEntry;
+  if (m_dataLogName) {
+    logEntry =
+        std::make_shared<wpi::log::DoubleLogEntry>(wpi::DataLogManager::GetLog(), *m_dataLogName + "/" + key);
+  }
+  return [publisher, logEntry](double value) {
+    publisher->Set(value);
+    if (logEntry) logEntry->Append(value);
+  };
+}
+
 void MechanismTelemetry::UpdateLoopTime() {
   if (!m_loopTimePublisher) return;
   double now = wpi::Timer::GetTimestamp().value();

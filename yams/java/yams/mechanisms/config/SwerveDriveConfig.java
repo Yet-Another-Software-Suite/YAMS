@@ -26,6 +26,7 @@ import java.util.function.Supplier;
 import yams.mechanisms.swerve.SwerveDrive;
 import yams.mechanisms.swerve.SwerveModule;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.telemetry.SwerveDriveTelemetryConfig;
 
 /**
  * Swerve Drive Configuration
@@ -116,9 +117,17 @@ public class SwerveDriveConfig
    */
   private SwerveModule[]                      modules;
   /**
+   * Telemetry name for the {@link SwerveDrive}.
+   */
+  private String                              telemetryName                 = "swerve";
+  /**
    * Telemetry verbosity
    */
   private Optional<TelemetryVerbosity>        telemetryVerbosity            = Optional.empty();
+  /**
+   * User specified {@link SwerveDriveTelemetryConfig}, takes precedence over {@link #telemetryVerbosity} if present.
+   */
+  private Optional<SwerveDriveTelemetryConfig> specifiedTelemetryConfig     = Optional.empty();
   /**
    * Gyro supplier.
    */
@@ -478,13 +487,51 @@ public class SwerveDriveConfig
   /**
    * Configure telemetry for the {@link SwerveModule} mechanism.
    *
+   * @param name Telemetry Name
    * @param telemetryVerbosity Telemetry verbosity to apply.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withTelemetry(TelemetryVerbosity telemetryVerbosity)
+  public SwerveDriveConfig withTelemetry(String name, TelemetryVerbosity telemetryVerbosity)
   {
+    this.telemetryName = name;
     this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
     return this;
+  }
+
+  /**
+   * Configure telemetry for the {@link SwerveDrive} with a {@link SwerveDriveTelemetryConfig}.
+   *
+   * @param name Telemetry Name
+   * @param telemetryConfig Config that specifies what to log.
+   * @return {@link SwerveDriveConfig} for chaining.
+   */
+  public SwerveDriveConfig withTelemetry(String name, SwerveDriveTelemetryConfig telemetryConfig)
+  {
+    this.telemetryName = name;
+    this.telemetryVerbosity = Optional.empty();
+    this.specifiedTelemetryConfig = Optional.ofNullable(telemetryConfig);
+    return this;
+  }
+
+  /**
+   * Get the user specified {@link SwerveDriveTelemetryConfig}, if configured via
+   * {@link #withTelemetry(String,SwerveDriveTelemetryConfig)}.
+   *
+   * @return {@link SwerveDriveTelemetryConfig} if configured.
+   */
+  public Optional<SwerveDriveTelemetryConfig> getSwerveDriveTelemetryConfig()
+  {
+    return specifiedTelemetryConfig;
+  }
+
+  /**
+   * Get the telemetry name for the {@link SwerveDrive}.
+   *
+   * @return Telemetry name for the {@link SwerveDrive}.
+   */
+  public String getTelemetryName()
+  {
+    return telemetryName;
   }
 
   /**
@@ -676,6 +723,15 @@ public class SwerveDriveConfig
       return translation;
     }
     return new Translation2d(translation.getNorm() * scalar, translation.getAngle().orElse(new Rotation2d()));
+  }
+
+  /**
+   * Get the discretization time for the pose estimation used by {@link #optimizeRobotRelativeChassisSpeeds(ChassisSpeeds)}
+   * @return Discretization time for the pose estimation.
+   */
+  public Optional<Time> getDiscretization()
+  {
+    return RobotBase.isSimulation() ? simDiscretizationSeconds : discretizationSeconds;
   }
 
 //  /**

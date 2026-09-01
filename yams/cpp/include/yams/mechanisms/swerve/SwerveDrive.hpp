@@ -9,6 +9,7 @@
 #include <wpi/math/geometry/Pose2d.hpp>
 #include <wpi/math/geometry/Rotation2d.hpp>
 #include <wpi/math/geometry/Translation2d.hpp>
+#include <wpi/math/geometry/Twist2d.hpp>
 #include <wpi/math/kinematics/ChassisVelocities.hpp>
 #include <wpi/math/kinematics/SwerveDriveKinematics.hpp>
 #include <wpi/math/kinematics/SwerveModulePosition.hpp>
@@ -18,26 +19,28 @@
 #include <wpi/smartdashboard/SmartDashboard.hpp>
 #include <wpi/commands2/CommandPtr.hpp>
 #include <wpi/commands2/Commands.hpp>
-#include <wpi/nt/DoubleTopic.hpp>
 #include <wpi/nt/NetworkTableInstance.hpp>
-#include <wpi/nt/StructArrayTopic.hpp>
-#include <wpi/nt/StructTopic.hpp>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/length.hpp>
 #include <wpi/units/math.hpp>
 #include <wpi/units/time.hpp>
 #include <wpi/units/velocity.hpp>
 #include <wpi/util/array.hpp>
-#include <wpi/util/json.hpp>
 
 #include <cassert>
+#include <cstdio>
+#include <functional>
 #include <optional>
+#include <span>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "yams/mechanisms/swerve/SwerveDriveConfig.hpp"
 #include "yams/mechanisms/swerve/SwerveModule.hpp"
+#include "yams/telemetry/MechanismTelemetry.hpp"
+#include "yams/telemetry/SwerveDriveTelemetry.hpp"
+#include "yams/telemetry/SwerveDriveTelemetryConfig.hpp"
 
 namespace yams::mechanisms::swerve {
 
@@ -141,23 +144,9 @@ class SwerveDrive {
     assert(m_config->GetModules().size() == NumModules &&
            "Module count in SwerveDriveConfig must equal NumModules template parameter.");
 
-    auto inst = wpi::nt::NetworkTableInstance::GetDefault();
-    auto table = inst.GetTable("SmartDashboard/" + GetName());
+    m_simPose = m_config->GetInitialPose();
 
-    m_desiredModuleStatesPublisher =
-        table->template GetStructArrayTopic<wpi::math::SwerveModuleVelocity>("states/desired").Publish();
-    m_currentModuleStatesPublisher =
-        table->template GetStructArrayTopic<wpi::math::SwerveModuleVelocity>("states/current").Publish();
-    m_posePublisher = table->template GetStructTopic<wpi::math::Pose2d>("pose").Publish();
-    m_desiredRobotRelChassisSpeedsPublisher =
-        table->template GetStructTopic<wpi::math::ChassisVelocities>("chassis/desired").Publish();
-    m_currentRobotRelChassisSpeedsPublisher =
-        table->template GetStructTopic<wpi::math::ChassisVelocities>("chassis/current").Publish();
-    m_fieldRelChassisSpeedsPublisher =
-        table->template GetStructTopic<wpi::math::ChassisVelocities>("chassis/field").Publish();
-    auto gyroTopic = table->GetDoubleTopic("gyro");
-    gyroTopic.SetProperties(wpi::util::json::object("units", "degrees"));
-    m_gyroPublisher = gyroTopic.Publish();
+    SetupTelemetry();
 
     m_field2d.SetRobotPose(GetPose());
     wpi::SmartDashboard::PutData("Mechanisms/" + GetName() + "/field", &m_field2d);
@@ -191,23 +180,35 @@ class SwerveDrive {
   wpi::cmd::CommandPtr DriveToPose(wpi::math::Pose2d pose) {
     return wpi::cmd::RunOnce([this] {
              ResetTranslationPID();
-             ResetAzimuthPID();
+             ResetRotationPID();
            })
-        .AndThen(Drive([this, pose]() -> wpi::math::ChassisVelocities {
-          auto& azimuthPID = m_config->GetRotationPID();
-          auto& translationPID = m_config->GetTranslationPID();
-          auto currentPose = GetPose();
-          auto distance = GetDistanceFromPose(pose);
-          auto translationScalar = translationPID.Calculate(distance.value(), 0.0);
-          auto poseDiff = currentPose.RelativeTo(pose);
-          return (wpi::math::ChassisVelocities{
-                  wpi::units::meters_per_second_t{poseDiff.X().value() * translationScalar},
-                  wpi::units::meters_per_second_t{poseDiff.Y().value() * translationScalar},
-                  wpi::units::radians_per_second_t{
-                      azimuthPID.Calculate(currentPose.Rotation().Radians().value(),
-                                           pose.Rotation().Radians().value())}}).ToRobotRelative(wpi::math::Rotation2d{wpi::units::radian_t{GetGyroAngle()}});
-        }))
+        .AndThen(Drive([this, pose] { return DriveToPoseSetpoint(pose); }))
         .WithName("Drive to Pose");
+  }
+
+  /**
+   * Drive to the target pose, primarily for use in Live Tuning; could also be used for setpoint
+   * commands.
+   *
+   * @param targetPose Pose to drive towards.
+   * @return robot-relative ChassisSpeeds to drive the robot to the given pose.
+   * @implNote Remember to call ResetTranslationPID() and ResetRotationPID() before calling this
+   *     method in a loop.
+   */
+  wpi::math::ChassisVelocities DriveToPoseSetpoint(wpi::math::Pose2d targetPose) {
+    auto& rotationPID = m_config->GetRotationPID();
+    auto& translationPID = m_config->GetTranslationPID();
+    auto distance = GetDistanceFromPose(targetPose);
+    auto translationScalar = translationPID.Calculate(distance.value(), 0.0);
+    auto currentPose = GetPose();
+    auto poseDiff = currentPose.RelativeTo(targetPose);
+    return (wpi::math::ChassisVelocities{
+                wpi::units::meters_per_second_t{poseDiff.X().value() * translationScalar},
+                wpi::units::meters_per_second_t{poseDiff.Y().value() * translationScalar},
+                wpi::units::radians_per_second_t{
+                    rotationPID.Calculate(currentPose.Rotation().Radians().value(),
+                                         targetPose.Rotation().Radians().value())}})
+        .ToRobotRelative(wpi::math::Rotation2d{wpi::units::radian_t{GetGyroAngle()}});
   }
 
   // ---- Core drive methods ---------------------------------------------------
@@ -237,6 +238,17 @@ class SwerveDrive {
       return m_kinematics.ToSwerveModuleVelocities(robotRelativeSpeeds, *cor);
     }
     return m_kinematics.ToSwerveModuleVelocities(robotRelativeSpeeds);
+  }
+
+  /**
+   * Convert module states back to robot-relative chassis speeds.
+   *
+   * @param states Module states (one per module, clockwise from front-left).
+   * @return Robot-relative chassis speeds corresponding to the given states.
+   */
+  wpi::math::ChassisVelocities GetRobotRelativeChassisSpeedsFromState(
+      const wpi::util::array<wpi::math::SwerveModuleVelocity, NumModules>& states) {
+    return m_kinematics.ToChassisVelocities(states);
   }
 
   /**
@@ -289,6 +301,7 @@ class SwerveDrive {
                                   GetModulePositions(), pose);
     m_desiredChassisSpeeds = wpi::math::ChassisVelocities{};
     m_desiredModuleStates = m_kinematics.ToSwerveModuleVelocities(wpi::math::ChassisVelocities{});
+    m_simPose = pose;
   }
 
   /**
@@ -333,17 +346,12 @@ class SwerveDrive {
     auto pose = GetPose();
     auto currentStates = GetModuleStates();
 
-    m_gyroPublisher.Set(wpi::units::degree_t{GetGyroAngle()}.value());
-    m_desiredModuleStatesPublisher.Set(m_desiredModuleStates);
-    m_currentModuleStatesPublisher.Set(currentStates);
-    m_posePublisher.Set(pose);
-    m_desiredRobotRelChassisSpeedsPublisher.Set(m_desiredChassisSpeeds);
-    m_currentRobotRelChassisSpeedsPublisher.Set(GetRobotRelativeSpeed());
-    m_fieldRelChassisSpeedsPublisher.Set(GetFieldRelativeSpeed());
+    m_swerveTelemetry->Publish(this);
 
     for (auto* mod : m_config->GetModules()) {
       mod->UpdateTelemetry();
     }
+    m_telemetry.UpdateLoopTime();
 
     m_field2d.SetRobotPose(pose);
     std::vector<wpi::math::Pose2d> modulePoses;
@@ -361,17 +369,25 @@ class SwerveDrive {
   /**
    * Advance the simulation model.
    *
-   * Iterates each module's sim model and integrates the simulated gyro angle
-   * from the chassis angular velocity.
+   * Iterates each module's sim model, integrates the simulated ground-truth pose from the
+   * commanded (desired) module states assuming they are met perfectly, and integrates the
+   * simulated gyro angle from the measured chassis angular velocity.
    */
   void SimIterate() {
     if (!m_simTimer.IsRunning()) m_simTimer.Start();
     for (auto* mod : m_config->GetModules()) {
       mod->SimIterate();
     }
+    auto desired = m_kinematics.ToChassisVelocities(m_desiredModuleStates);
+
+    auto dt = m_simTimer.Get();
+    wpi::math::Twist2d twist{(desired.vx * dt).value(), (desired.vy * dt).value(),
+                             (desired.omega * dt).value()};
+    m_simPose = m_simPose + twist.Exp();
+
     auto speeds = m_kinematics.ToChassisVelocities(GetModuleStates());
-    m_simGyroAngle += wpi::units::degree_t{wpi::units::degrees_per_second_t{speeds.omega}.value() *
-                                      m_simTimer.Get().value()};
+    m_simGyroAngle += wpi::units::degree_t{
+        wpi::units::degrees_per_second_t{speeds.omega}.value() * dt.value()};
     m_simTimer.Reset();
   }
 
@@ -386,6 +402,16 @@ class SwerveDrive {
     if (wpi::RobotBase::IsSimulation()) return m_simGyroAngle;
     return m_config->GetGyroAngle();
   }
+
+  /**
+   * Get the simulated pose of the robot, assuming the commanded module states are met perfectly.
+   * Useful for feeding a simulated vision system with ground-truth poses under perfect-world
+   * conditions.
+   *
+   * Only updated in simulation by SimIterate(); on a real robot this remains the configured
+   * starting pose.
+   */
+  wpi::math::Pose2d GetSimPose() { return m_simPose; }
 
   /** Get the robot-relative chassis speeds derived from the module states. */
   wpi::math::ChassisVelocities GetRobotRelativeSpeed() {
@@ -449,8 +475,38 @@ class SwerveDrive {
     return std::nullopt;
   }
 
-  void ResetAzimuthPID() { m_config->GetRotationPID().Reset(); }
+  void ResetRotationPID() { m_config->GetRotationPID().Reset(); }
   void ResetTranslationPID() { m_config->GetTranslationPID().Reset(); }
+
+  /**
+   * Set the auto-align rotational PID controller.
+   *
+   * @param controller PIDController to use, input units are radians.
+   */
+  void SetRotationPID(wpi::math::PIDController controller) {
+    auto& currentRotationPID = m_config->GetRotationPID();
+    if (currentRotationPID.GetP() != controller.GetP() ||
+        currentRotationPID.GetI() != controller.GetI() ||
+        currentRotationPID.GetD() != controller.GetD()) {
+      controller.Reset();
+      m_config->WithRotationController(std::move(controller));
+    }
+  }
+
+  /**
+   * Set the auto-align translation PID controller.
+   *
+   * @param controller PIDController to use, input units are metres.
+   */
+  void SetTranslationPID(wpi::math::PIDController controller) {
+    auto& currentTranslationPID = m_config->GetTranslationPID();
+    if (currentTranslationPID.GetP() != controller.GetP() ||
+        currentTranslationPID.GetI() != controller.GetI() ||
+        currentTranslationPID.GetD() != controller.GetD()) {
+      controller.Reset();
+      m_config->WithTranslationController(std::move(controller));
+    }
+  }
 
   /**
    * Set the standard deviations used for the vision pose estimator noise model.
@@ -461,8 +517,8 @@ class SwerveDrive {
     m_poseEstimator.SetVisionMeasurementStdDevs(stdDevs);
   }
 
-  /** Get the drive's unique name (always "swerve"). */
-  std::string GetName() const { return "swerve"; }
+  /** Get the drive's telemetry name (from SwerveDriveConfig, defaults to "swerve"). */
+  std::string GetName() const { return m_config->GetTelemetryName(); }
 
   /** Get a mutable reference to the drive configuration. */
   SwerveDriveConfig& GetConfig() { return *m_config; }
@@ -470,25 +526,86 @@ class SwerveDrive {
   /** Get the SwerveDriveKinematics object. */
   wpi::math::SwerveDriveKinematics<NumModules>& GetKinematics() { return m_kinematics; }
 
+  /**
+   * Get the Field2d used to display the robot's pose, so callers (e.g. vision subsystems)
+   * can publish additional objects onto the same field widget instead of creating their own.
+   */
+  wpi::Field2d& GetField2d() { return m_field2d; }
+
+  /**
+   * Get the last-commanded desired robot-relative chassis speeds. This is the value cached by
+   * SetRobotRelativeChassisSpeeds() (which SetFieldRelativeChassisSpeeds() and Drive() funnel
+   * through) and published on every UpdateTelemetry() call; it is a setpoint, not a measurement
+   * of actual robot motion. Use GetRobotRelativeSpeed() or GetFieldRelativeSpeed() instead if you
+   * need the drive's actual measured speed.
+   *
+   * @return Robot-relative chassis speeds last commanded to the drive. Defaults to a zeroed
+   *         wpi::math::ChassisVelocities if the drive has never been commanded.
+   */
+  wpi::math::ChassisVelocities GetDesiredChassisSpeeds() { return m_desiredChassisSpeeds; }
+
+  /**
+   * Get the last-commanded desired module states of the drive.
+   *
+   * @return Module states last commanded to the drive. Defaults to a zeroed set of module states
+   *         if the drive has never been commanded.
+   */
+  wpi::util::array<wpi::math::SwerveModuleVelocity, NumModules> GetDesiredModuleStates() {
+    return m_desiredModuleStates;
+  }
+
  private:
   SwerveDriveConfig* m_config{nullptr};
   wpi::math::SwerveDriveKinematics<NumModules> m_kinematics;
   wpi::math::SwerveDrivePoseEstimator<NumModules> m_poseEstimator;
 
-  wpi::nt::StructArrayPublisher<wpi::math::SwerveModuleVelocity> m_desiredModuleStatesPublisher;
-  wpi::nt::StructArrayPublisher<wpi::math::SwerveModuleVelocity> m_currentModuleStatesPublisher;
-  wpi::nt::StructPublisher<wpi::math::ChassisVelocities> m_desiredRobotRelChassisSpeedsPublisher;
-  wpi::nt::StructPublisher<wpi::math::ChassisVelocities> m_currentRobotRelChassisSpeedsPublisher;
-  wpi::nt::StructPublisher<wpi::math::ChassisVelocities> m_fieldRelChassisSpeedsPublisher;
-  wpi::nt::StructPublisher<wpi::math::Pose2d> m_posePublisher;
-  wpi::nt::DoublePublisher m_gyroPublisher;
+  telemetry::MechanismTelemetry m_telemetry;
+  std::optional<telemetry::SwerveDriveTelemetry> m_swerveTelemetry;
+  std::optional<wpi::cmd::CommandPtr> m_driveToPoseTuningCommand;
 
   wpi::Field2d m_field2d;
   wpi::Timer m_simTimer;
   wpi::units::degree_t m_simGyroAngle{0};
+  wpi::math::Pose2d m_simPose;
 
   wpi::util::array<wpi::math::SwerveModuleVelocity, NumModules> m_desiredModuleStates{wpi::util::empty_array};
   wpi::math::ChassisVelocities m_desiredChassisSpeeds{};
+
+  /**
+   * Setup telemetry for the drive; the SwerveDriveTelemetry config used is either the one
+   * supplied via SwerveDriveConfig::WithTelemetry(SwerveDriveTelemetryConfig) or a default built
+   * from SwerveDriveConfig::GetTelemetryVerbosity() (defaulting to TelemetryVerbosity::HIGH).
+   */
+  void SetupTelemetry() {
+    using TelemetryVerbosity = motorcontrollers::SmartMotorControllerConfig::TelemetryVerbosity;
+    telemetry::SwerveDriveTelemetryConfig telemetryCfg;
+    if (auto specified = m_config->GetSwerveDriveTelemetryConfig()) {
+      telemetryCfg = std::move(*specified);
+    } else {
+      telemetryCfg.WithTelemetryVerbosity(
+          m_config->GetTelemetryVerbosity().value_or(TelemetryVerbosity::HIGH));
+    }
+
+    if (auto dataLogName = telemetryCfg.GetDataLogName()) {
+      m_telemetry.SetupTelemetry(GetName(), *dataLogName);
+    } else {
+      m_telemetry.SetupTelemetry(GetName());
+    }
+
+    m_swerveTelemetry.emplace(std::move(telemetryCfg));
+    m_swerveTelemetry->SetupTelemetry(this);
+
+    m_driveToPoseTuningCommand.emplace(wpi::cmd::StartRun(
+        [this] {
+          std::puts(
+              "================= Starting SwerveDrive.driveToPoseTuning() =================\n");
+          ResetTranslationPID();
+          ResetRotationPID();
+        },
+        [this] { m_swerveTelemetry->ApplyTuningValues(this); }));
+    wpi::SmartDashboard::PutData("Mechanisms/" + GetName() + "/tuning/driveToPose",
+                                 m_driveToPoseTuningCommand->get());
+  }
 
   void UpdatePoseEstimator() {
     m_poseEstimator.Update(wpi::math::Rotation2d{wpi::units::radian_t{GetGyroAngle()}}, GetModulePositions());
@@ -519,3 +636,154 @@ class SwerveDrive {
 };
 
 }  // namespace yams::mechanisms::swerve
+
+namespace yams::telemetry {
+
+// SwerveDriveTelemetry::SetupTelemetry()/Publish()/ApplyTuningValues() are templated on the
+// SwerveDrive's module count so that SwerveDriveTelemetry itself need not be a template. Their
+// bodies live here — after SwerveDrive<NumModules> is fully defined above — because this is the
+// only place both SwerveDriveTelemetry's private members and SwerveDrive<NumModules>'s interface
+// are simultaneously visible.
+
+template <std::size_t NumModules>
+void SwerveDriveTelemetry::SetupTelemetry(mechanisms::swerve::SwerveDrive<NumModules>* drive) {
+  auto driveName = drive->GetName();
+  for (auto* module : drive->GetConfig().GetModules()) {
+    module->SetupTelemetry(driveName);
+  }
+
+  auto inst = wpi::nt::NetworkTableInstance::GetDefault();
+  m_dataTable = inst.GetTable("Mechanisms")->GetSubTable(driveName);
+  m_tuningTable = inst.GetTable("Tuning")->GetSubTable(driveName);
+
+  bool nt4Enabled = m_config.GetNT4Enabled();
+  auto dataLogName = m_config.GetDataLogName();
+
+  for (auto& [field, dt] : m_config.GetDoubleFields()) {
+    if (!dt.IsEnabled()) continue;
+    if (nt4Enabled) dt.SetupNetworkTables(m_dataTable, m_tuningTable);
+    if (dataLogName) dt.SetupDataLog(*dataLogName);
+  }
+  for (auto& [field, stt] : m_config.GetPoseFields()) {
+    if (!stt.IsEnabled()) continue;
+    if (nt4Enabled) stt.SetupNetworkTables(m_dataTable, m_tuningTable);
+    if (dataLogName) stt.SetupDataLog(*dataLogName);
+  }
+  for (auto& [field, stt] : m_config.GetChassisSpeedsFields()) {
+    if (!stt.IsEnabled()) continue;
+    if (nt4Enabled) stt.SetupNetworkTables(m_dataTable, m_tuningTable);
+    if (dataLogName) stt.SetupDataLog(*dataLogName);
+  }
+  for (auto& [field, stat] : m_config.GetModuleStatesFields()) {
+    if (!stat.IsEnabled()) continue;
+    if (nt4Enabled) stat.SetupNetworkTables(m_dataTable, m_tuningTable);
+    if (dataLogName) stat.SetupDataLog(*dataLogName);
+  }
+}
+
+template <std::size_t NumModules>
+void SwerveDriveTelemetry::Publish(mechanisms::swerve::SwerveDrive<NumModules>* drive) {
+  for (auto& [field, stt] : m_config.GetPoseFields()) {
+    if (!stt.IsEnabled()) continue;
+    switch (field) {
+      case StructTelemetryField::Pose:
+        stt.Set(drive->GetPose());
+        break;
+      default:
+        break;
+    }
+  }
+  for (auto& [field, stt] : m_config.GetChassisSpeedsFields()) {
+    if (!stt.IsEnabled()) continue;
+    switch (field) {
+      case StructTelemetryField::DesiredRobotRelativeChassisSpeeds:
+        stt.Set(drive->GetDesiredChassisSpeeds());
+        break;
+      case StructTelemetryField::CurrentRobotRelativeChassisSpeeds:
+        stt.Set(drive->GetRobotRelativeSpeed());
+        break;
+      case StructTelemetryField::FieldRelativeChassisSpeeds:
+        stt.Set(drive->GetFieldRelativeSpeed());
+        break;
+      default:
+        break;
+    }
+  }
+  for (auto& [field, dt] : m_config.GetDoubleFields()) {
+    if (!dt.IsEnabled()) continue;
+    switch (field) {
+      case DoubleTelemetryField::Gyro:
+        dt.Set(drive->GetGyroAngle().value());
+        break;
+      default:
+        break;
+    }
+  }
+  for (auto& [field, stat] : m_config.GetModuleStatesFields()) {
+    if (!stat.IsEnabled()) continue;
+    switch (field) {
+      case StructArrayTelemetryField::DesiredModuleStates: {
+        auto states = drive->GetDesiredModuleStates();
+        stat.Set(std::vector<wpi::math::SwerveModuleVelocity>(states.begin(), states.end()));
+        break;
+      }
+      case StructArrayTelemetryField::CurrentModuleStates: {
+        auto states = drive->GetModuleStates();
+        stat.Set(std::vector<wpi::math::SwerveModuleVelocity>(states.begin(), states.end()));
+        break;
+      }
+      default:
+        break;
+    }
+  }
+}
+
+template <std::size_t NumModules>
+void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<NumModules>* drive) {
+  for (auto& [field, stt] : m_config.GetPoseFields()) {
+    if (!stt.IsTunable()) continue;
+    switch (field) {
+      case StructTelemetryField::TargetPose:
+        drive->SetRobotRelativeChassisSpeeds(drive->DriveToPoseSetpoint(stt.Get()));
+        break;
+      default:
+        break;
+    }
+  }
+
+  auto translationPID = drive->GetConfig().GetTranslationPID();
+  auto rotationPID = drive->GetConfig().GetRotationPID();
+  for (auto& [field, dt] : m_config.GetDoubleFields()) {
+    if (!dt.IsTunable()) continue;
+    switch (field) {
+      case DoubleTelemetryField::TranslationP:
+        translationPID.SetP(dt.Get());
+        drive->SetTranslationPID(translationPID);
+        break;
+      case DoubleTelemetryField::TranslationI:
+        translationPID.SetI(dt.Get());
+        drive->SetTranslationPID(translationPID);
+        break;
+      case DoubleTelemetryField::TranslationD:
+        translationPID.SetD(dt.Get());
+        drive->SetTranslationPID(translationPID);
+        break;
+      case DoubleTelemetryField::RotationP:
+        rotationPID.SetP(dt.Get());
+        drive->SetRotationPID(rotationPID);
+        break;
+      case DoubleTelemetryField::RotationI:
+        rotationPID.SetI(dt.Get());
+        drive->SetRotationPID(rotationPID);
+        break;
+      case DoubleTelemetryField::RotationD:
+        rotationPID.SetD(dt.Get());
+        drive->SetRotationPID(rotationPID);
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+}  // namespace yams::telemetry

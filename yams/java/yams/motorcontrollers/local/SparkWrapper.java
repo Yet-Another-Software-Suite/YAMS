@@ -73,6 +73,7 @@ import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.motorcontrollers.simulation.BatterySim;
 import yams.motorcontrollers.simulation.DCMotorSimSupplier;
 import yams.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
 import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
@@ -301,6 +302,7 @@ public class SparkWrapper extends SmartMotorController
       {
         m_simSupplier.get().updateSimState();
         m_simSupplier.get().starveUpdateSim();
+        BatterySim.calculateVoltage(m_batterySimUUID, m_simSupplier.get().getCurrentDraw());
       }
       Time controlLoop = m_config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20));
       m_simSupplier.ifPresent(mSimSupplier -> {

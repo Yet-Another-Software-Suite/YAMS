@@ -17,6 +17,7 @@
 #include "yams/gearing/GearBox.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
+#include "yams/telemetry/SwerveModuleTelemetryConfig.hpp"
 
 namespace yams::mechanisms::config {
 
@@ -156,6 +157,17 @@ class SwerveModuleConfig {
    */
   SwerveModuleConfig& WithTelemetry(const std::string& name, TelemetryVerbosity verbosity);
 
+  /**
+   * Set the telemetry name for this module and configure telemetry with an explicit
+   * SwerveModuleTelemetryConfig, taking precedence over WithTelemetry(name, TelemetryVerbosity).
+   *
+   * @param name            NetworkTable key for this module's data.
+   * @param telemetryConfig Config that specifies what to log.
+   * @return *this for chaining.
+   */
+  SwerveModuleConfig& WithTelemetry(const std::string& name,
+                                    telemetry::SwerveModuleTelemetryConfig telemetryConfig);
+
   // ---- Getters ---------------------------------------------------------------
 
   /** Get the drive motor controller pointer. */
@@ -186,6 +198,30 @@ class SwerveModuleConfig {
   wpi::units::degree_t GetAbsoluteEncoderAngle() const;
 
   /**
+   * Get the absolute encoder angle as a supplier without offsets applied.
+   *
+   * Falls back to the azimuth motor's mechanism position (plus its external encoder zero
+   * offset, on a real robot) if no encoder supplier is set.
+   *
+   * @return Callable returning the absolute encoder angle without offsets.
+   */
+  std::function<units::degree_t()> GetRawAbsoluteEncoderAngle() const;
+
+  /** Get the absolute encoder supplier, if configured via WithAbsoluteEncoder(). */
+  std::optional<std::function<units::degree_t()>> GetAbsoluteEncoderSupplier() const;
+
+
+  /**
+   * Get the user-specified SwerveModuleTelemetryConfig, if configured via
+   * WithTelemetry(name, SwerveModuleTelemetryConfig). Moves the config out of this
+   * SwerveModuleConfig; intended to be called exactly once, when the owning SwerveModule sets up
+   * its telemetry.
+   *
+   * @return SwerveModuleTelemetryConfig if configured.
+   */
+  std::optional<telemetry::SwerveModuleTelemetryConfig> GetSwerveModuleTelemetryConfig();
+
+  /**
    * Apply all enabled optimizations (min-velocity clamp, state optimization, cosine compensation)
    * and return the resulting state.
    *
@@ -199,6 +235,7 @@ class SwerveModuleConfig {
   motorcontrollers::SmartMotorController* m_azimuthMotor{nullptr};
   std::optional<std::string> m_telemetryName;
   std::optional<TelemetryVerbosity> m_telemetryVerbosity;
+  std::optional<telemetry::SwerveModuleTelemetryConfig> m_specifiedTelemetryConfig;
   std::optional<std::function<wpi::units::degree_t()>> m_absoluteEncoderSupplier;
   std::optional<wpi::units::degree_t> m_absoluteEncoderOffset;
   gearing::GearBox m_absoluteEncoderGearbox{1.0};
@@ -210,8 +247,14 @@ class SwerveModuleConfig {
 
   /**
    * Compute the cosine-compensated drive velocity for the given desired state.
+   *
+   * @param desiredState Desired SwerveModuleState to use.
+   * @param currentAngle Current azimuth angle to compare against, read once per control cycle so
+   *                     it stays consistent with whatever value was used earlier in that cycle
+   *                     (e.g. for optimization).
    */
-  double GetCosineCompensatedVelocity(const wpi::math::SwerveModuleVelocity& desiredState) const;
+  double GetCosineCompensatedVelocity(const wpi::math::SwerveModuleVelocity& desiredState,
+                                       const wpi::math::Rotation2d& currentAngle) const;
 };
 
 }  // namespace yams::mechanisms::config

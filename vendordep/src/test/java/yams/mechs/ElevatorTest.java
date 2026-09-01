@@ -305,16 +305,20 @@ public class ElevatorTest
   @MethodSource("createConfigs")
   void testSMCDutyCycle(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    smc.setupSimulation();
-    SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
+    try
+    {
+      startTest(smc);
+      smc.setupSimulation();
+      SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
 
-    Command dutyCycleUp   = subsys.setDutyCycle(1);
-    Command dutyCycleDown = subsys.setDutyCycle(-1);
+      Command dutyCycleUp   = subsys.setDutyCycle(1);
+      Command dutyCycleDown = subsys.setDutyCycle(-1);
 
-    dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
-
-    closeSMC(smc);
+      dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
 
@@ -322,46 +326,54 @@ public class ElevatorTest
   @MethodSource("createConfigs")
   void testSMCPositionPID(SmartMotorController smc) throws InterruptedException
   {
-    if (smc instanceof TalonFXSWrapper)
+    try
     {
+      if (smc instanceof TalonFXSWrapper)
+      {
 //      smc.applyConfig(smc.getConfig()
 //                         .withClosedLoopController(0.2,
 //                                                   0,
 //                                                   0,
 //                                                   MetersPerSecond.of(0.1),
 //                                                   MetersPerSecondPerSecond.of(0.5)));
-    }
-    if (smc instanceof TalonFXWrapper)
-    {
+      }
+      if (smc instanceof TalonFXWrapper)
+      {
 //      smc.applyConfig(smc.getConfig()
 //                         .withClosedLoopController(0.02,
 //                                                   0,
 //                                                   0,
 //                                                   MetersPerSecond.of(0.1),
 //                                                   MetersPerSecondPerSecond.of(0.5)));
+      }
+      startTest(smc);
+      smc.setupSimulation();
+      Command highPid = Commands.run(() -> smc.setPosition(Meters.of(2)));
+      Command lowPid  = Commands.run(() -> smc.setPosition(Meters.of(0)));
+
+      positionPidTest(smc, highPid, lowPid);
+    } finally
+    {
+      closeSMC(smc);
     }
-    startTest(smc);
-    smc.setupSimulation();
-    Command highPid = Commands.run(() -> smc.setPosition(Meters.of(2)));
-    Command lowPid  = Commands.run(() -> smc.setPosition(Meters.of(0)));
-
-    positionPidTest(smc, highPid, lowPid);
-
-    closeSMC(smc);
   }
 
   @ParameterizedTest
   @MethodSource("createConfigs")
   void testElevatorDutyCycle(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    Elevator elevator      = createElevator(smc);
-    Command  dutyCycleUp   = elevator.set(1);
-    Command  dutyCycleDown = elevator.set(-0.5);
+    try
+    {
+      startTest(smc);
+      Elevator elevator      = createElevator(smc);
+      Command  dutyCycleUp   = elevator.set(1);
+      Command  dutyCycleDown = elevator.set(-0.5);
 
-    dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
-
-    closeSMC(smc);
+      dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
 
@@ -369,14 +381,18 @@ public class ElevatorTest
   @MethodSource("createConfigs")
   void testElevatorPositionPID(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    Elevator elevator = createElevator(smc);
-    Command  highPid  = elevator.setHeight(Meters.of(2));
-    Command  lowPid   = elevator.setHeight(Meters.of(0.5));
+    try
+    {
+      startTest(smc);
+      Elevator elevator = createElevator(smc);
+      Command  highPid  = elevator.setHeight(Meters.of(2));
+      Command  lowPid   = elevator.setHeight(Meters.of(0.5));
 
-    positionPidTest(smc, highPid, lowPid);
-
-    closeSMC(smc);
+      positionPidTest(smc, highPid, lowPid);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   @BeforeEach

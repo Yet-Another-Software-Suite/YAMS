@@ -3,30 +3,18 @@
 
 package yams.mechanisms.positional;
 
-import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Inches;
 import static org.wpilib.units.Units.Kilograms;
 import static org.wpilib.units.Units.Meters;
-import static org.wpilib.units.Units.MetersPerSecond;
-import static org.wpilib.units.Units.Microsecond;
 import static org.wpilib.units.Units.Milliseconds;
-import static org.wpilib.units.Units.RadiansPerSecond;
-import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.Seconds;
-import static org.wpilib.units.Units.Volts;
 
 import org.wpilib.math.filter.Debouncer.DebounceType;
 import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.Translation3d;
-import org.wpilib.math.system.DCMotor;
-import org.wpilib.units.measure.Angle;
-import org.wpilib.units.measure.AngularAcceleration;
-import org.wpilib.units.measure.AngularVelocity;
-import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.LinearVelocity;
-import org.wpilib.units.measure.Voltage;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.simulation.BatterySim;
 import org.wpilib.simulation.ElevatorSim;
@@ -43,14 +31,12 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import yams.exceptions.ElevatorConfigurationException;
 import yams.exceptions.SmartMotorControllerConfigurationException;
-import yams.gearing.MechanismGearing;
-import yams.math.DerivativeTimeFilter;
 import yams.mechanisms.config.ElevatorConfig;
 import yams.mechanisms.config.MechanismPositionConfig;
 import yams.mechanisms.config.MechanismPositionConfig.Plane;
-import yams.motorcontrollers.SimSupplier;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
+import yams.motorcontrollers.simulation.ElevatorSimSupplier;
 
 /**
  * Elevator mechanism.
@@ -102,8 +88,6 @@ public class Elevator extends SmartPositionalMechanism
     m_config = config;
     m_smc = smc;
     SmartMotorControllerConfig smcCfg = smc.getConfig();
-    DCMotor                    dcMotor   = m_smc.getDCMotor();
-    MechanismGearing           gearing   = m_smc.getConfig().getGearing();
     SmartMotorControllerConfig smcConfig = m_smc.getConfig();
     m_subsystem = smcCfg.getSubsystem();
     if (config.getTelemetryName().isPresent())
@@ -159,144 +143,7 @@ public class Elevator extends SmartPositionalMechanism
                                           simulateGravity,
               smcConfig.convertFromMechanism(smcConfig.getStartingPosition().orElseThrow()).in(Meters),
                                           0.01 / 4096, 0.01 / 4096));
-      m_smc.setSimSupplier(new SimSupplier()
-      {
-        final Supplier<Double> pos = m_sim.get()::getPosition;
-        final Supplier<Double> mps = m_sim.get()::getVelocity;
-        final DerivativeTimeFilter mpsps = new DerivativeTimeFilter(pos.get(),
-                                                                    smcConfig.getClosedLoopControlPeriod()
-                                                                             .orElse(Milliseconds.of(20)));
-        boolean inputFed   = false;
-        boolean updatedSim = false;
-
-        @Override
-        public void updateSimState()
-        {
-          if (!isInputFed())
-          {
-            m_sim.get().setInput(m_smc.getDutyCycle() * RoboRioSim.getVInVoltage());
-          }
-          if (!updatedSim)
-          {
-            starveInput();
-            m_sim.get().update(smcConfig.getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Seconds));
-            feedUpdateSim();
-          }
-        }
-
-        @Override
-        public boolean getUpdatedSim()
-        {
-          return updatedSim;
-        }
-
-        @Override
-        public void feedUpdateSim()
-        {
-          updatedSim = true;
-        }
-
-        @Override
-        public void starveUpdateSim()
-        {
-          updatedSim = false;
-        }
-
-        @Override
-        public boolean isInputFed()
-        {
-          return inputFed;
-        }
-
-        @Override
-        public void feedInput()
-        {
-          inputFed = true;
-        }
-
-        @Override
-        public void starveInput()
-        {
-          inputFed = false;
-        }
-
-        @Override
-        public void setMechanismStatorDutyCycle(double dutyCycle)
-        {
-          feedInput();
-          m_sim.get().setInputVoltage(dutyCycle * getMechanismSupplyVoltage().in(Volts));
-        }
-
-        @Override
-        public Voltage getMechanismSupplyVoltage()
-        {
-          return Volts.of(RoboRioSim.getVInVoltage());
-        }
-
-        @Override
-        public Voltage getMechanismStatorVoltage()
-        {
-          return Volts.of(dcMotor.getVoltage(dcMotor.getTorque(m_sim.get().getCurrentDraw()),
-                                             getMechanismVelocity().in(RadiansPerSecond)));
-        }
-
-        @Override
-        public void setMechanismStatorVoltage(Voltage volts)
-        {
-          feedInput();
-          m_sim.get().setInputVoltage(volts.in(Volts));
-        }
-
-        @Override
-        public Angle getMechanismPosition()
-        {
-          return smcConfig.convertToMechanism(Meters.of(pos.get()));
-        }
-
-        @Override
-        public void setMechanismPosition(Angle position)
-        {
-          m_sim.get().setState(smcConfig.convertFromMechanism(position).in(Meters), mps.get());
-
-        }
-
-        @Override
-        public Angle getRotorPosition()
-        {
-          return getMechanismPosition().times(gearing.getMechanismToRotorRatio());
-        }
-
-        @Override
-        public AngularVelocity getMechanismVelocity()
-        {
-          return smcConfig.convertToMechanism(MetersPerSecond.of(mps.get()));
-
-        }
-
-        @Override
-        public void setMechanismVelocity(AngularVelocity velocity)
-        {
-          m_sim.get().setState(pos.get(), smcConfig.convertFromMechanism(velocity).in(MetersPerSecond));
-        }
-
-        @Override
-        public AngularVelocity getRotorVelocity()
-        {
-          return getMechanismVelocity().times(gearing.getMechanismToRotorRatio());
-        }
-
-        @Override
-        public Current getCurrentDraw()
-        {
-          return Amps.of(m_sim.get().getCurrentDraw());
-        }
-
-        @Override
-        public AngularAcceleration getRotorAcceleration()
-        {
-          return RotationsPerSecond.per(Microsecond).of(mpsps.derivative(getRotorVelocity().in(RotationsPerSecond)));
-        }
-      });
+      m_smc.setSimSupplier(new ElevatorSimSupplier(m_sim.get(), m_smc));
       m_mechanismWindow = new Mechanism2d(config.getMaximumHeight().get().in(Meters) * 2,
                                           config.getMaximumHeight().get().in(Meters) * 2);
 
@@ -484,7 +331,7 @@ public class Elevator extends SmartPositionalMechanism
    * Set the height of the elevator.
    *
    * @param height Height of the elevator to reach.
-   * @return {@link Command} that  sets the elevator height, stops immediately.
+   * @return {@link Command} that  sets the elevator height, does not stop.
    */
   public Command run(Distance height)
   {
