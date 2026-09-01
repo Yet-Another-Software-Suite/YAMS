@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <wpi/driverstation/Alert.hpp>
+#include <wpi/util/Alert.hpp>
 #include <wpi/simulation/DCMotorSim.hpp>
 #include <rev/SparkAbsoluteEncoder.h>
 #include <rev/SparkClosedLoopController.h>
@@ -327,7 +327,7 @@ class SparkWrapper : public SmartMotorController {
 
   int m_revSlot{0};
 
-  std::optional<wpi::Alert> m_rioControllerAlert;
+  std::optional<wpi::util::Alert> m_rioControllerAlert;
 
   void Init(rev::spark::SparkBase* spark, wpi::math::DCMotor motor, SmartMotorControllerConfig* config);
   void ApplyBaseConfig();

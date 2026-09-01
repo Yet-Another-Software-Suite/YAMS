@@ -3,7 +3,7 @@
 
 #include "yams/motorcontrollers/local/SparkWrapper.hpp"
 
-#include <wpi/driverstation/Alert.hpp>
+#include <wpi/util/Alert.hpp>
 #include <wpi/framework/RobotBase.hpp>
 #include <wpi/simulation/RoboRioSim.hpp>
 #include <wpi/math/system/Models.hpp>
@@ -261,7 +261,7 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
         "[YAMS] Spark(" + std::to_string(deviceId) +
         ") is running closed-loop control on the SystemCore (exponential profile or LQR active). "
         "Gains are not consistent with Spark hardware PID and control runs at a lower frequency.";
-    m_rioControllerAlert.emplace(alertText, wpi::Alert::Level::MEDIUM);
+    m_rioControllerAlert.emplace(alertText, wpi::util::Alert::Level::MEDIUM);
     m_rioControllerAlert->Set(true);
 
     std::fprintf(stderr, "====== Spark(%d) Using RIO Closed Loop Controller ======\n", deviceId);

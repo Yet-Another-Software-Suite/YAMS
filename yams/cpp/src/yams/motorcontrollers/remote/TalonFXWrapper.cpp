@@ -252,7 +252,7 @@ bool TalonFXWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
         ") is running closed-loop control on the SystemCore (LQR active). "
         "Gains are not consistent with Phoenix 6 hardware PID and control runs at a lower "
         "frequency.";
-    m_rioControllerAlert.emplace(alertText, wpi::Alert::Level::MEDIUM);
+    m_rioControllerAlert.emplace(alertText, wpi::util::Alert::Level::MEDIUM);
     m_rioControllerAlert->Set(true);
 
     std::fprintf(stderr, "====== TalonFX(%d) Using RIO Closed Loop Controller ======\n", deviceId);

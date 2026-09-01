@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <wpi/driverstation/Alert.hpp>
+#include <wpi/util/Alert.hpp>
 #include <wpi/simulation/DCMotorSim.hpp>
 
 #include <any>
@@ -321,7 +321,7 @@ class TalonFXWrapper : public SmartMotorController {
 
   math::DerivativeTimeFilter m_accelFilter{20_ms};
 
-  std::optional<wpi::Alert> m_rioControllerAlert;
+  std::optional<wpi::util::Alert> m_rioControllerAlert;
 
   void ApplyPIDConfig();
   void ApplyFeedforwardConfig();

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <wpi/driverstation/Alert.hpp>
+#include <wpi/util/Alert.hpp>
 #include <wpi/simulation/DCMotorSim.hpp>
 
 #include <any>
@@ -321,7 +321,7 @@ class TalonFXSWrapper : public SmartMotorController {
   std::optional<wpi::sim::DCMotorSim> m_motorSim;
   math::DerivativeTimeFilter m_accelFilter{20_ms};
 
-  std::optional<wpi::Alert> m_rioControllerAlert;
+  std::optional<wpi::util::Alert> m_rioControllerAlert;
 
   ctre::phoenix6::signals::ExternalFeedbackSensorSourceValue ArrangementToFeedbackSource() const;
 
