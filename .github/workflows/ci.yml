@@ -87,17 +87,91 @@ jobs:
             echo "Attempt $i failed, retrying in 15s..."
             sleep 15
           done
-      - name: C++ unit tests
-        run: ./gradlew googleTest
-        continue-on-error: true
-      - name: Java unit tests
-        run: ./gradlew test
       - name: Publish
         run: ./gradlew publish
       - uses: actions/upload-artifact@v7
         with:
           name: maven-linux
           path: vendordep/build/maven/
+
+  test-cpp:
+    name: C++ unit tests
+    needs: [build-linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: vendordep
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: chmod +x gradlew
+      - name: Cache roboRIO toolchain
+        id: toolchain-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/wpilib/2026/roborio
+          key: roborio-toolchain-linux
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Install roboRIO toolchain
+        if: steps.toolchain-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            ./gradlew installRoboRioToolchain && break
+            echo "Attempt $i failed, retrying in 15s..."
+            sleep 15
+          done
+      - uses: actions/download-artifact@v7
+        with:
+          name: maven-linux
+          path: vendordep/build/maven/
+      - name: C++ unit tests
+        run: ./gradlew googleTest
+        continue-on-error: true
+
+  test-java:
+    name: Java unit tests
+    needs: [build-linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: vendordep
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: chmod +x gradlew
+      - name: Cache roboRIO toolchain
+        id: toolchain-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/wpilib/2026/roborio
+          key: roborio-toolchain-linux
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Install roboRIO toolchain
+        if: steps.toolchain-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            ./gradlew installRoboRioToolchain && break
+            echo "Attempt $i failed, retrying in 15s..."
+            sleep 15
+          done
+      - uses: actions/download-artifact@v7
+        with:
+          name: maven-linux
+          path: vendordep/build/maven/
+      - name: Java unit tests
+        run: ./gradlew test
 
   build-host:
     name: Build - ${{ matrix.artifact-name }}
