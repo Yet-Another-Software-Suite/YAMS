@@ -1,0 +1,33 @@
+<map id="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/telemetry/StructTelemetry.hpp" name="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/telemetry/StructTelemetry.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="350,5,613,60"/>
+<area shape="rect" id="Node000002" href="$SwerveDriveTelemetryConfig_8hpp.html" title=" " alt="" coords="437,343,720,412"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="521,69,545,107,566,170,577,235,582,294,583,342,577,342,577,295,572,235,561,171,540,109,516,72"/>
+<area shape="rect" id="Node000008" href="$SwerveModuleTelemetryConfig_8hpp.html" title=" " alt="" coords="235,108,530,177"/>
+<area shape="poly" id="edge12_Node000001_Node000008" title=" " alt="" coords="450,73,415,110,412,106,446,69"/>
+<area shape="rect" id="Node000003" href="$SwerveDrive_8hpp.html" title=" " alt="" coords="375,577,575,647"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="550,425,529,461,504,522,486,578,481,576,499,520,524,459,545,422"/>
+<area shape="rect" id="Node000006" href="$SwerveDriveConfig_8hpp.html" title=" " alt="" coords="212,460,412,529"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="489,420,391,462,389,457,487,415"/>
+<area shape="rect" id="Node000007" href="$SwerveDriveTelemetry_8hpp.html" title=" " alt="" coords="538,467,846,522"/>
+<area shape="poly" id="edge10_Node000002_Node000007" title=" " alt="" coords="624,420,668,465,664,469,620,424"/>
+<area shape="rect" id="Node000004" href="$YAMS_8hpp.html" title=" " alt="" coords="130,812,315,867"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="500,659,508,685,513,713,510,740,498,766,470,786,425,803,316,828,315,822,423,798,467,782,494,762,505,739,507,713,503,686,495,660"/>
+<area shape="rect" id="Node000005" href="$SwerveInputStream_8hpp.html" title=" " alt="" coords="260,695,484,764"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="437,659,404,696,400,693,433,655"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="316,774,261,814,258,810,313,770"/>
+<area shape="poly" id="edge8_Node000006_Node000003" title=" " alt="" coords="372,535,428,575,425,579,369,540"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="298,543,274,614,251,695,229,812,224,811,245,694,269,613,293,541"/>
+<area shape="poly" id="edge9_Node000006_Node000005" title=" " alt="" coords="327,542,366,694,361,695,322,544"/>
+<area shape="poly" id="edge11_Node000007_Node000003" title=" " alt="" coords="632,531,539,579,537,575,629,526"/>
+<area shape="rect" id="Node000009" href="$SwerveModuleConfig_8hpp.html" title=" " alt="" coords="5,225,197,295"/>
+<area shape="poly" id="edge13_Node000008_Node000009" title=" " alt="" coords="289,185,185,228,183,223,287,180"/>
+<area shape="rect" id="Node000011" href="$SwerveModuleTelemetry_8hpp.html" title=" " alt="" coords="222,233,543,287"/>
+<area shape="poly" id="edge19_Node000008_Node000011" title=" " alt="" coords="385,191,385,232,380,232,380,191"/>
+<area shape="poly" id="edge14_Node000009_Node000004" title=" " alt="" coords="108,308,114,394,117,493,117,613,120,642,126,671,148,726,176,773,202,810,198,813,171,776,143,728,121,673,114,643,112,613,112,493,109,394,103,309"/>
+<area shape="rect" id="Node000010" href="$SwerveModule_8hpp.html" title=" " alt="" coords="212,343,412,412"/>
+<area shape="poly" id="edge15_Node000009_Node000010" title=" " alt="" coords="176,299,252,340,249,345,173,304"/>
+<area shape="poly" id="edge17_Node000010_Node000003" title=" " alt="" coords="385,418,407,437,426,458,443,487,457,519,472,576,467,577,451,520,439,490,422,462,403,441,381,422"/>
+<area shape="poly" id="edge16_Node000010_Node000004" title=" " alt="" coords="236,422,217,440,202,461,185,507,176,557,174,607,177,656,195,746,215,811,210,813,190,747,172,657,169,607,170,556,180,506,198,459,213,437,232,418"/>
+<area shape="poly" id="edge18_Node000010_Node000006" title=" " alt="" coords="315,426,315,460,309,460,309,426"/>
+<area shape="poly" id="edge20_Node000011_Node000010" title=" " alt="" coords="362,300,335,344,331,341,357,298"/>
+</map>

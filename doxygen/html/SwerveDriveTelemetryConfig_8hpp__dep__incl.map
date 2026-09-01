@@ -1,0 +1,18 @@
+<map id="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/telemetry/SwerveDriveTelemetryConfig.hpp" name="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/telemetry/SwerveDriveTelemetryConfig.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="43,5,326,75"/>
+<area shape="rect" id="Node000002" href="$SwerveDrive_8hpp.html" title=" " alt="" coords="84,240,284,309"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="61,84,38,102,20,124,11,142,8,157,11,173,20,191,33,207,48,221,85,244,82,248,45,226,29,211,15,193,6,175,3,157,6,140,15,121,34,98,58,80"/>
+<area shape="rect" id="Node000005" href="$SwerveDriveConfig_8hpp.html" title=" " alt="" coords="363,123,563,192"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="279,78,382,120,380,125,277,82"/>
+<area shape="rect" id="Node000006" href="$SwerveDriveTelemetry_8hpp.html" title=" " alt="" coords="30,130,338,185"/>
+<area shape="poly" id="edge9_Node000001_Node000006" title=" " alt="" coords="187,89,187,130,182,130,182,89"/>
+<area shape="rect" id="Node000003" href="$YAMS_8hpp.html" title=" " alt="" coords="230,475,416,529"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="181,323,183,375,190,401,201,425,225,452,256,472,253,477,222,456,197,428,185,403,178,376,176,323"/>
+<area shape="rect" id="Node000004" href="$SwerveInputStream_8hpp.html" title=" " alt="" coords="211,357,435,427"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="237,316,284,355,280,359,233,320"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="326,440,326,474,320,474,320,440"/>
+<area shape="poly" id="edge7_Node000005_Node000002" title=" " alt="" coords="370,200,267,242,265,237,368,195"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="475,205,481,254,481,312,472,372,463,401,449,428,425,456,394,477,391,472,421,452,445,425,458,399,467,371,476,312,475,254,470,206"/>
+<area shape="poly" id="edge8_Node000005_Node000004" title=" " alt="" coords="438,205,345,359,341,356,433,203"/>
+<area shape="poly" id="edge10_Node000006_Node000002" title=" " alt="" coords="187,198,187,240,182,240,182,198"/>
+</map>

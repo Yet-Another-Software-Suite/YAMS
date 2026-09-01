@@ -1,0 +1,10 @@
+<map id="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/telemetry/SwerveDriveTelemetry.hpp" name="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/telemetry/SwerveDriveTelemetry.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,313,60"/>
+<area shape="rect" id="Node000002" href="$SwerveDrive_8hpp.html" title=" " alt="" coords="59,108,259,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="162,74,162,108,157,108,157,74"/>
+<area shape="rect" id="Node000003" href="$YAMS_8hpp.html" title=" " alt="" coords="67,343,252,397"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="129,190,113,226,106,260,113,294,124,319,139,341,134,344,119,321,107,295,101,260,107,225,124,188"/>
+<area shape="rect" id="Node000004" href="$SwerveInputStream_8hpp.html" title=" " alt="" coords="122,225,346,295"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="191,188,214,224,210,227,186,190"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="205,307,180,344,175,341,201,304"/>
+</map>

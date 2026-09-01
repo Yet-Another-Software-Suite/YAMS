@@ -15,9 +15,15 @@ var searchData=
   ['smartvelocitymechanism_2ehpp_12',['SmartVelocityMechanism.hpp',['../SmartVelocityMechanism_8hpp.html',1,'']]],
   ['sparkwrapper_2ehpp_13',['SparkWrapper.hpp',['../SparkWrapper_8hpp.html',1,'']]],
   ['sprocket_2ehpp_14',['Sprocket.hpp',['../Sprocket_8hpp.html',1,'']]],
-  ['swervedrive_2ehpp_15',['SwerveDrive.hpp',['../SwerveDrive_8hpp.html',1,'']]],
-  ['swervedriveconfig_2ehpp_16',['SwerveDriveConfig.hpp',['../SwerveDriveConfig_8hpp.html',1,'']]],
-  ['swerveinputstream_2ehpp_17',['SwerveInputStream.hpp',['../SwerveInputStream_8hpp.html',1,'']]],
-  ['swervemodule_2ehpp_18',['SwerveModule.hpp',['../SwerveModule_8hpp.html',1,'']]],
-  ['swervemoduleconfig_2ehpp_19',['SwerveModuleConfig.hpp',['../SwerveModuleConfig_8hpp.html',1,'']]]
+  ['structarraytelemetry_2ehpp_15',['StructArrayTelemetry.hpp',['../StructArrayTelemetry_8hpp.html',1,'']]],
+  ['structtelemetry_2ehpp_16',['StructTelemetry.hpp',['../StructTelemetry_8hpp.html',1,'']]],
+  ['swervedrive_2ehpp_17',['SwerveDrive.hpp',['../SwerveDrive_8hpp.html',1,'']]],
+  ['swervedriveconfig_2ehpp_18',['SwerveDriveConfig.hpp',['../SwerveDriveConfig_8hpp.html',1,'']]],
+  ['swervedrivetelemetry_2ehpp_19',['SwerveDriveTelemetry.hpp',['../SwerveDriveTelemetry_8hpp.html',1,'']]],
+  ['swervedrivetelemetryconfig_2ehpp_20',['SwerveDriveTelemetryConfig.hpp',['../SwerveDriveTelemetryConfig_8hpp.html',1,'']]],
+  ['swerveinputstream_2ehpp_21',['SwerveInputStream.hpp',['../SwerveInputStream_8hpp.html',1,'']]],
+  ['swervemodule_2ehpp_22',['SwerveModule.hpp',['../SwerveModule_8hpp.html',1,'']]],
+  ['swervemoduleconfig_2ehpp_23',['SwerveModuleConfig.hpp',['../SwerveModuleConfig_8hpp.html',1,'']]],
+  ['swervemoduletelemetry_2ehpp_24',['SwerveModuleTelemetry.hpp',['../SwerveModuleTelemetry_8hpp.html',1,'']]],
+  ['swervemoduletelemetryconfig_2ehpp_25',['SwerveModuleTelemetryConfig.hpp',['../SwerveModuleTelemetryConfig_8hpp.html',1,'']]]
 ];

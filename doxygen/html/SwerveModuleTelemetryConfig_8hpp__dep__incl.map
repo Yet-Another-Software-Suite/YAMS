@@ -1,0 +1,24 @@
+<map id="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/telemetry/SwerveModuleTelemetryConfig.hpp" name="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/telemetry/SwerveModuleTelemetryConfig.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="94,5,389,75"/>
+<area shape="rect" id="Node000002" href="$SwerveModuleConfig_8hpp.html" title=" " alt="" coords="5,123,197,192"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,86,144,124,141,120,188,81"/>
+<area shape="rect" id="Node000008" href="$SwerveModuleTelemetry_8hpp.html" title=" " alt="" coords="222,130,543,185"/>
+<area shape="poly" id="edge13_Node000001_Node000008" title=" " alt="" coords="295,81,352,128,349,132,291,85"/>
+<area shape="rect" id="Node000003" href="$YAMS_8hpp.html" title=" " alt="" coords="110,709,295,764"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="104,206,104,391,104,511,106,539,112,568,133,622,159,670,184,707,179,710,154,673,128,625,107,569,101,540,99,511,99,391,99,206"/>
+<area shape="rect" id="Node000004" href="$SwerveModule_8hpp.html" title=" " alt="" coords="189,240,389,309"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="169,197,235,237,233,242,167,202"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="257,322,214,392,194,433,180,475,174,507,171,540,175,605,185,664,197,709,192,710,180,665,170,606,166,540,169,507,175,474,190,431,209,389,253,319"/>
+<area shape="rect" id="Node000005" href="$SwerveDrive_8hpp.html" title=" " alt="" coords="189,475,389,544"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="292,324,292,475,287,475,287,324"/>
+<area shape="rect" id="Node000007" href="$SwerveDriveConfig_8hpp.html" title=" " alt="" coords="327,357,527,427"/>
+<area shape="poly" id="edge9_Node000004_Node000007" title=" " alt="" coords="341,316,388,355,385,359,338,320"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="253,556,230,593,220,623,213,654,206,709,201,709,208,653,215,622,226,591,248,553"/>
+<area shape="rect" id="Node000006" href="$SwerveInputStream_8hpp.html" title=" " alt="" coords="240,592,464,661"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="317,555,336,591,331,593,312,558"/>
+<area shape="poly" id="edge8_Node000006_Node000003" title=" " alt="" coords="296,672,241,711,238,707,293,667"/>
+<area shape="poly" id="edge10_Node000007_Node000003" title=" " alt="" coords="457,438,480,488,498,547,502,577,501,608,493,636,478,663,450,684,405,701,296,725,295,720,403,696,447,679,474,660,488,634,495,607,497,578,493,548,475,490,452,440"/>
+<area shape="poly" id="edge11_Node000007_Node000005" title=" " alt="" coords="378,438,331,476,328,472,375,433"/>
+<area shape="poly" id="edge12_Node000007_Node000006" title=" " alt="" coords="426,441,418,492,404,545,379,593,374,591,399,543,413,491,421,440"/>
+<area shape="poly" id="edge14_Node000008_Node000004" title=" " alt="" coords="355,197,319,241,315,238,351,193"/>
+</map>
