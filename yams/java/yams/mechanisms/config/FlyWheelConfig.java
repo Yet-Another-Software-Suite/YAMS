@@ -3,22 +3,22 @@
 
 package yams.mechanisms.config;
 
-import static edu.wpi.first.units.Units.KilogramSquareMeters;
-import static edu.wpi.first.units.Units.Kilograms;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.Second;
+import static org.wpilib.units.Units.KilogramSquareMeters;
+import static org.wpilib.units.Units.Kilograms;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.Second;
 
-import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.units.measure.MomentOfInertia;
-import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
-import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.util.Color8Bit;
+import org.wpilib.units.Units;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.LinearVelocity;
+import org.wpilib.units.measure.Mass;
+import org.wpilib.units.measure.MomentOfInertia;
+import org.wpilib.simulation.SingleJointedArmSim;
+import org.wpilib.util.Color;
+import org.wpilib.util.Color8Bit;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import yams.exceptions.FlyWheelConfigurationException;
@@ -68,7 +68,7 @@ public class FlyWheelConfig
   /**
    * Sim color value
    */
-  private   Color8Bit                      simColor                = new Color8Bit(Color.kOrange);
+  private   Color8Bit                      simColor                = new Color8Bit(Color.ORANGE);
   /**
    * Mechanism position configuration for the {@link Pivot} (Optional).
    */

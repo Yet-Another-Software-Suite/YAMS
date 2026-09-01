@@ -3,42 +3,43 @@
 
 package yams.math;
 
-import static edu.wpi.first.units.Units.KilogramSquareMeters;
-import static edu.wpi.first.units.Units.Kilograms;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
+import static org.wpilib.units.Units.KilogramSquareMeters;
+import static org.wpilib.units.Units.Kilograms;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.MetersPerSecondPerSecond;
+import static org.wpilib.units.Units.Milliseconds;
+import static org.wpilib.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.RadiansPerSecondPerSecond;
+import static org.wpilib.units.Units.Rotations;
+import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
+import static org.wpilib.units.Units.Seconds;
+import static org.wpilib.units.Units.Volts;
 
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.math.trajectory.ExponentialProfile;
-import edu.wpi.first.math.trajectory.ExponentialProfile.Constraints;
-import edu.wpi.first.math.trajectory.ExponentialProfile.State;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.units.measure.MomentOfInertia;
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import org.wpilib.math.controller.PIDController;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.math.system.Models;
+import org.wpilib.math.trajectory.ExponentialProfile;
+import org.wpilib.math.trajectory.ExponentialProfile.Constraints;
+import org.wpilib.math.trajectory.ExponentialProfile.State;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularAcceleration;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.Mass;
+import org.wpilib.units.measure.MomentOfInertia;
+import org.wpilib.units.measure.Time;
+import org.wpilib.units.measure.Voltage;
+import org.wpilib.simulation.SingleJointedArmSim;
+import org.wpilib.system.Timer;
+
 import java.util.Optional;
 import yams.gearing.MechanismGearing;
 
 /**
  * Exponential profile PID controller. Similar to {@link PIDController} or
- * {@link edu.wpi.first.math.controller.ProfiledPIDController}, but uses an {@link ExponentialProfile}
+ * {@link org.wpilib.math.controller.ProfiledPIDController}, but uses an {@link ExponentialProfile}
  *
  * <p>This controller combines an {@link ExponentialProfile} motion profile with a
  * {@link PIDController} to achieve smooth, continuous position control. On each iteration the
@@ -53,7 +54,7 @@ import yams.gearing.MechanismGearing;
  *
  * <h2>Example — arm position control</h2>
  * <pre>{@code
- * import static edu.wpi.first.units.Units.*;
+ * import static org.wpilib.units.Units.*;
  *
  * // Derive constraints from the physical arm model
  * ExponentialProfile.Constraints armConstraints =
@@ -148,10 +149,10 @@ public class ExponentialProfilePIDController
                                                                          Distance drumRadius,
                                                                          MechanismGearing gearing)
   {
-    var sysid = LinearSystemId.createElevatorSystem(motor,
-                                                    mass.in(Kilograms),
-                                                    drumRadius.in(Meters),
-                                                    gearing.getMechanismToRotorRatio());
+    var sysid = Models.elevatorFromPhysicalConstants(motor,
+                                                     mass.in(Kilograms),
+                                                     drumRadius.in(Meters),
+                                                     gearing.getMechanismToRotorRatio());
     var circumference = (2.0 * Math.PI * drumRadius.in(Meters));
 
     var A  = sysid.getA(0, 0);
@@ -177,9 +178,9 @@ public class ExponentialProfilePIDController
   public static ExponentialProfile.Constraints createArmConstraints(Voltage maxVolts, DCMotor motor, MomentOfInertia moi,
                                                                     MechanismGearing gearing)
   {
-    var sysid = LinearSystemId.createSingleJointedArmSystem(motor,
-                                                            moi.in(KilogramSquareMeters),
-                                                            gearing.getMechanismToRotorRatio());
+    var sysid = Models.singleJointedArmFromPhysicalConstants(motor,
+                                                             moi.in(KilogramSquareMeters),
+                                                             gearing.getMechanismToRotorRatio());
     var A  = sysid.getA(0, 0); // radians
     var B  = sysid.getB(0, 0); // radians
     var kV = RadiansPerSecond.of(-A / B);

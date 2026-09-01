@@ -42,7 +42,7 @@
  *
  * <h2>Trigger Factory Methods</h2>
  * <p>Each positional mechanism exposes factory methods that return
- * {@link edu.wpi.first.wpilibj2.command.button.Trigger} objects. These allow condition-based
+ * {@link org.wpilib.command2.button.Trigger} objects. These allow condition-based
  * command scheduling without manual polling in {@code periodic()}:
  * <ul>
  *   <li>{@code isNear(setpoint, tolerance)} — fires while the mechanism is within

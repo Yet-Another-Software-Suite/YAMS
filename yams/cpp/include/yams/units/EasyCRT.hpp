@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <units/angle.h>
+#include <wpi/units/angle.hpp>
 
 #include <cmath>
 #include <functional>
@@ -21,11 +21,11 @@
  * @code{.cpp}
  * #include "yams/units/EasyCRT.hpp"
  * #include <ctre/phoenix6/CANcoder.hpp>
- * #include <frc2/command/SubsystemBase.h>
+ * #include <wpi/commands2/SubsystemBase.hpp>
  *
  * using namespace yams::units;
  *
- * class Turret : public frc2::SubsystemBase {
+ * class Turret : public wpi::cmd::SubsystemBase {
  *  public:
  *   Turret() {
  *     // enc1Teeth=19, enc2Teeth=21 are coprime.
@@ -57,7 +57,7 @@
  *     }
  *
  *     // Log for tolerance tuning.
- *     frc::SmartDashboard::PutNumber("CRT/error", m_crt->GetLastError());
+ *     wpi::SmartDashboard::PutNumber("CRT/error", m_crt->GetLastError());
  *   }
  *
  *  private:
@@ -172,8 +172,8 @@ inline double CrtCommonK(double commonRatio, int driveTeeth) { return commonRati
  * the encoder physically reads backwards and cannot be inverted in firmware.
  */
 struct EasyCRTConfig {
-  std::function<::units::turn_t()> enc1; /**< Supplier for absolute encoder 1. */
-  std::function<::units::turn_t()> enc2; /**< Supplier for absolute encoder 2. */
+  std::function<wpi::units::turn_t()> enc1; /**< Supplier for absolute encoder 1. */
+  std::function<wpi::units::turn_t()> enc2; /**< Supplier for absolute encoder 2. */
 
   int enc1Teeth = 19; /**< Tooth count of encoder 1 gear — must be coprime with enc2Teeth. */
   int enc2Teeth = 21; /**< Tooth count of encoder 2 gear — must be coprime with enc1Teeth. */
@@ -289,7 +289,7 @@ struct EasyCRTConfig {
  * EasyCRT solver{cfg};
  *
  * // In periodic:
- * auto angle = solver.GetAngle();  // std::optional<units::turn_t>
+ * auto angle = solver.GetAngle();  // std::optional<wpi::units::turn_t>
  * @endcode
  */
 class EasyCRT {
@@ -325,7 +325,7 @@ class EasyCRT {
    *
    * @return Mechanism angle in turns, or @c std::nullopt on failure.
    */
-  std::optional<::units::turn_t> GetAngle();
+  std::optional<wpi::units::turn_t> GetAngle();
 
   /**
    * @brief Returns the status from the most recent GetAngle() call.

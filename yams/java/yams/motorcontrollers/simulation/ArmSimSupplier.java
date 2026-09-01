@@ -3,24 +3,25 @@
 
 package yams.motorcontrollers.simulation;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Microsecond;
-import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Microsecond;
+import static org.wpilib.units.Units.Milliseconds;
+import static org.wpilib.units.Units.Radians;
+import static org.wpilib.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.Seconds;
+import static org.wpilib.units.Units.Volts;
 
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
-import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularAcceleration;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Current;
+import org.wpilib.units.measure.Time;
+import org.wpilib.units.measure.Voltage;
+import org.wpilib.simulation.RoboRioSim;
+import org.wpilib.simulation.SingleJointedArmSim;
+import java.util.UUID;
 import java.util.function.Supplier;
 import yams.gearing.MechanismGearing;
 import yams.math.DerivativeTimeFilter;
@@ -29,7 +30,7 @@ import yams.motorcontrollers.SmartMotorController;
 
 /**
  * ArmSim Supplier — simulates a single-jointed arm mechanism using WPILib's
- * {@link edu.wpi.first.wpilibj.simulation.SingleJointedArmSim}.
+ * {@link org.wpilib.simulation.SingleJointedArmSim}.
  *
  * <p>
  * This supplier steps WPILib's {@code SingleJointedArmSim} physics model each control loop and
@@ -73,6 +74,7 @@ public class ArmSimSupplier implements SimSupplier
   private final MechanismGearing    mechGearing;
   private final Time                period;
   private final DCMotor             motor;
+  private final UUID                uuid;
 
 
   /**
@@ -90,6 +92,7 @@ public class ArmSimSupplier implements SimSupplier
     period = config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20));
     motor = smartMotorController.getDCMotor();
     accel = new DerivativeTimeFilter(period);
+    uuid = smartMotorController.m_batterySimUUID;
   }
 
   @Override
@@ -98,6 +101,7 @@ public class ArmSimSupplier implements SimSupplier
     if (!isInputFed())
     {
       sim.setInputVoltage(motorDutyCycleSupplier.get() * RoboRioSim.getVInVoltage());
+      RoboRioSim.setVInVoltage(BatterySim.calculateVoltage(uuid, sim.getCurrentDraw()));
     }
     if (!simUpdated)
     {
@@ -166,8 +170,8 @@ public class ArmSimSupplier implements SimSupplier
   @Override
   public Voltage getMechanismStatorVoltage()
   {
-    return Volts.of(motor.getVoltage(motor.getTorque(sim.getCurrentDrawAmps()),
-                                     sim.getVelocityRadPerSec()));
+    return Volts.of(motor.getVoltage(motor.getTorque(sim.getCurrentDraw()),
+                                     sim.getVelocity()));
   }
 
   @Override
@@ -180,14 +184,14 @@ public class ArmSimSupplier implements SimSupplier
   @Override
   public Angle getMechanismPosition()
   {
-    return Radians.of(sim.getAngleRads());
+    return Radians.of(sim.getAngle());
   }
 
   @Override
   public void setMechanismPosition(Angle position)
   {
     sim.setState(position.in(Radians),
-                 sim.getVelocityRadPerSec());//.times(config.getGearing().getMechanismToRotorRatio()).in(Radians));
+                 sim.getVelocity());//.times(config.getGearing().getMechanismToRotorRatio()).in(Radians));
   }
 
   @Override
@@ -199,13 +203,13 @@ public class ArmSimSupplier implements SimSupplier
   @Override
   public AngularVelocity getMechanismVelocity()
   {
-    return RadiansPerSecond.of(sim.getVelocityRadPerSec());
+    return RadiansPerSecond.of(sim.getVelocity());
   }
 
   @Override
   public void setMechanismVelocity(AngularVelocity velocity)
   {
-    sim.setState(sim.getAngleRads(), velocity.in(RadiansPerSecond));
+    sim.setState(sim.getAngle(), velocity.in(RadiansPerSecond));
   }
 
   @Override
@@ -217,7 +221,7 @@ public class ArmSimSupplier implements SimSupplier
   @Override
   public Current getCurrentDraw()
   {
-    return Amps.of(sim.getCurrentDrawAmps());
+    return Amps.of(sim.getCurrentDraw());
   }
 
   @Override

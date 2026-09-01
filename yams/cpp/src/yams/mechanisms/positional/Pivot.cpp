@@ -3,21 +3,21 @@
 
 #include "yams/mechanisms/positional/Pivot.hpp"
 
-#include <frc/RobotBase.h>
-#include <frc/geometry/Rotation3d.h>
-#include <frc/geometry/Translation3d.h>
-#include <frc/simulation/BatterySim.h>
-#include <frc/simulation/RoboRioSim.h>
-#include <frc/smartdashboard/Mechanism2d.h>
-#include <frc/smartdashboard/MechanismLigament2d.h>
-#include <frc/smartdashboard/MechanismRoot2d.h>
-#include <frc/smartdashboard/SmartDashboard.h>
-#include <frc/system/plant/LinearSystemId.h>
-#include <frc/util/Color.h>
-#include <frc/util/Color8Bit.h>
-#include <frc2/command/Commands.h>
-#include <units/angle.h>
-#include <units/time.h>
+#include <wpi/framework/RobotBase.hpp>
+#include <wpi/math/geometry/Rotation3d.hpp>
+#include <wpi/math/geometry/Translation3d.hpp>
+#include <wpi/simulation/BatterySim.hpp>
+#include <wpi/simulation/RoboRioSim.hpp>
+#include <wpi/smartdashboard/Mechanism2d.hpp>
+#include <wpi/smartdashboard/MechanismLigament2d.hpp>
+#include <wpi/smartdashboard/MechanismRoot2d.hpp>
+#include <wpi/smartdashboard/SmartDashboard.hpp>
+#include <wpi/math/system/Models.hpp>
+#include <wpi/util/Color.hpp>
+#include <wpi/util/Color8Bit.hpp>
+#include <wpi/commands2/Commands.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/time.hpp>
 
 #include <cmath>
 #include <memory>
@@ -54,22 +54,22 @@ Pivot::Pivot(config::PivotConfig* config, motorcontrollers::SmartMotorController
     m_smc->SetEncoderPosition(*startA);
   }
 
-  if (frc::RobotBase::IsSimulation()) {
+  if (wpi::RobotBase::IsSimulation()) {
     // Configuration checks.
     if (!m_pivotConfig->GetMinAngle().has_value()) {
       throw exceptions::PivotConfigurationException("Pivot lower hard limit is empty",
                                                     "Cannot create simulation.",
-                                                    "WithMinAngle(units::degree_t)");
+                                                    "WithMinAngle(wpi::units::degree_t)");
     }
     if (!m_pivotConfig->GetMaxAngle().has_value()) {
       throw exceptions::PivotConfigurationException("Pivot upper hard limit is empty",
                                                     "Cannot create simulation.",
-                                                    "WithMaxAngle(units::degree_t)");
+                                                    "WithMaxAngle(wpi::units::degree_t)");
     }
     if (!m_smc->GetConfig().GetStartingPosition().has_value()) {
       throw exceptions::PivotConfigurationException("Pivot starting angle is empty",
                                                     "Cannot create simulation.",
-                                                    "smc.WithStartingPosition(units::degree_t)");
+                                                    "smc.WithStartingPosition(wpi::units::degree_t)");
     }
     if (!m_smc->GetConfig().GetMOI()) {
       throw exceptions::PivotConfigurationException("Pivot MOI is empty",
@@ -78,15 +78,15 @@ Pivot::Pivot(config::PivotConfig* config, motorcontrollers::SmartMotorController
     }
 
     // Create DCMotorSim and wire up DCMotorSimSupplier.
-    frc::DCMotor dcMotor = m_smc->GetDCMotor();
+    wpi::math::DCMotor dcMotor = m_smc->GetDCMotor();
     auto& gearingOpt = m_smc->GetConfig().GetMotorGearing();
     gearing::MechanismGearing gearing = gearingOpt.value_or(gearing::MechanismGearing::kOne);
 
-    auto plant = frc::LinearSystemId::DCMotorSystem(dcMotor, m_smc->GetConfig().GetMOI(),
+    auto plant = wpi::math::Models::SingleJointedArmFromPhysicalConstants(dcMotor, m_smc->GetConfig().GetMOI(),
                                                     gearing.GetMechanismToRotorRatio());
     m_dcMotorSim.emplace(plant, dcMotor);
 
-    units::second_t period = m_smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms);
+    wpi::units::second_t period = m_smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms);
     m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::DCMotorSimSupplier>(
         *m_dcMotorSim, [this]() { return m_smc->GetDutyCycle(); }, gearing, period));
 
@@ -95,30 +95,30 @@ Pivot::Pivot(config::PivotConfig* config, motorcontrollers::SmartMotorController
     m_mechanismWindow.emplace(kPivotLen * 2.0, kPivotLen * 2.0);
     m_mechanismRoot = m_mechanismWindow->GetRoot(m_name + "Root", kPivotLen, kPivotLen);
 
-    units::degree_t startDeg = *m_smc->GetConfig().GetStartingPosition();
-    m_mechanismLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
+    wpi::units::degree_t startDeg = *m_smc->GetConfig().GetStartingPosition();
+    m_mechanismLigament = m_mechanismRoot->Append<wpi::MechanismLigament2d>(
         m_name, kPivotLen, startDeg, 6, m_pivotConfig->GetSimColor());
-    m_setpointLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
-        "Setpoint", kPivotLen, startDeg, 3, frc::Color8Bit{frc::Color::kWhite});
+    m_setpointLigament = m_mechanismRoot->Append<wpi::MechanismLigament2d>(
+        "Setpoint", kPivotLen, startDeg, 3, wpi::util::Color8Bit{wpi::util::Color::WHITE});
 
     constexpr double kTickLen = 3.0 * 0.0254;  // 3 inches in metres
-    m_mechanismRoot->Append<frc::MechanismLigament2d>("MaxHard", kTickLen,
+    m_mechanismRoot->Append<wpi::MechanismLigament2d>("MaxHard", kTickLen,
                                                       m_pivotConfig->GetMaxAngle().value(), 4,
-                                                      frc::Color8Bit{frc::Color::kLimeGreen});
-    m_mechanismRoot->Append<frc::MechanismLigament2d>("MinHard", kTickLen,
+                                                      wpi::util::Color8Bit{wpi::util::Color::LIME_GREEN});
+    m_mechanismRoot->Append<wpi::MechanismLigament2d>("MinHard", kTickLen,
                                                       m_pivotConfig->GetMinAngle().value(), 4,
-                                                      frc::Color8Bit{frc::Color::kRed});
+                                                      wpi::util::Color8Bit{wpi::util::Color::RED});
 
     auto smcUpperLimit = m_smc->GetConfig().GetMechanismUpperLimit();
     auto smcLowerLimit = m_smc->GetConfig().GetMechanismLowerLimit();
     if (smcUpperLimit.has_value() && smcLowerLimit.has_value()) {
-      m_mechanismRoot->Append<frc::MechanismLigament2d>("MaxSoft", kTickLen, smcUpperLimit.value(),
-                                                        4, frc::Color8Bit{frc::Color::kHotPink});
-      m_mechanismRoot->Append<frc::MechanismLigament2d>("MinSoft", kTickLen, smcLowerLimit.value(),
-                                                        4, frc::Color8Bit{frc::Color::kYellow});
+      m_mechanismRoot->Append<wpi::MechanismLigament2d>("MaxSoft", kTickLen, smcUpperLimit.value(),
+                                                        4, wpi::util::Color8Bit{wpi::util::Color::HOT_PINK});
+      m_mechanismRoot->Append<wpi::MechanismLigament2d>("MinSoft", kTickLen, smcLowerLimit.value(),
+                                                        4, wpi::util::Color8Bit{wpi::util::Color::YELLOW});
     }
 
-    frc::SmartDashboard::PutData(m_name + "/mechanism", &(*m_mechanismWindow));
+    wpi::SmartDashboard::PutData(m_name + "/mechanism", &(*m_mechanismWindow));
   }
 }
 
@@ -140,8 +140,8 @@ void Pivot::SimIterate() {
         GetAngle() > *m_pivotConfig->GetMaxAngle()) {
       m_smc->SetEncoderPosition(*m_pivotConfig->GetMaxAngle());
     }
-    frc::sim::RoboRioSim::SetVInVoltage(
-        frc::sim::BatterySim::Calculate({ss->GetCurrentDrawAmps()}));
+    wpi::sim::RoboRioSim::SetVInVoltage(
+        wpi::sim::BatterySim::Calculate({ss->GetCurrentDrawAmps()}));
     VisualizationUpdate();
   }
 }
@@ -161,75 +161,75 @@ std::string Pivot::GetName() const { return m_name; }
 
 // ---- SmartPositionalMechanism overrides -------------------------------------
 
-frc2::Trigger Pivot::Max() {
-  return frc2::Trigger{[this] {
-    return GetAngle() >= m_pivotConfig->GetMaxAngle().value_or(units::degree_t{36000});
+wpi::cmd::Trigger Pivot::Max() {
+  return wpi::cmd::Trigger{[this] {
+    return GetAngle() >= m_pivotConfig->GetMaxAngle().value_or(wpi::units::degree_t{36000});
   }};
 }
 
-frc2::Trigger Pivot::Min() {
-  return frc2::Trigger{[this] {
-    return GetAngle() <= m_pivotConfig->GetMinAngle().value_or(units::degree_t{-36000});
+wpi::cmd::Trigger Pivot::Min() {
+  return wpi::cmd::Trigger{[this] {
+    return GetAngle() <= m_pivotConfig->GetMinAngle().value_or(wpi::units::degree_t{-36000});
   }};
 }
 
 // ---- Pivot-specific interface -----------------------------------------------
 
-frc2::CommandPtr Pivot::Run(units::degree_t angle) {
-  return frc2::cmd::Run([this, angle] { SetMechanismPositionSetpoint(angle); }, {m_subsystem})
+wpi::cmd::CommandPtr Pivot::Run(wpi::units::degree_t angle) {
+  return wpi::cmd::Run([this, angle] { SetMechanismPositionSetpoint(angle); }, {m_subsystem})
       .WithName(m_name + " Run");
 }
 
-frc2::CommandPtr Pivot::Run(std::function<units::degree_t()> angle) {
-  return frc2::cmd::Run([this, angle] { SetMechanismPositionSetpoint(angle()); }, {m_subsystem})
+wpi::cmd::CommandPtr Pivot::Run(std::function<wpi::units::degree_t()> angle) {
+  return wpi::cmd::Run([this, angle] { SetMechanismPositionSetpoint(angle()); }, {m_subsystem})
       .WithName(m_name + " Run Supplier");
 }
 
-frc2::CommandPtr Pivot::RunTo(units::degree_t angle, units::degree_t tolerance) {
-  frc2::Trigger near = IsNear(angle, tolerance).Debounce(units::second_t{0.1});
-  return frc2::cmd::RunOnce([this, angle] { SetMechanismPositionSetpoint(angle); }, {m_subsystem})
-      .AndThen(frc2::cmd::WaitUntil([near] { return near.Get(); }))
+wpi::cmd::CommandPtr Pivot::RunTo(wpi::units::degree_t angle, wpi::units::degree_t tolerance) {
+  wpi::cmd::Trigger near = IsNear(angle, tolerance).Debounce(wpi::units::second_t{0.1});
+  return wpi::cmd::RunOnce([this, angle] { SetMechanismPositionSetpoint(angle); }, {m_subsystem})
+      .AndThen(wpi::cmd::WaitUntil([near] { return near.Get(); }))
       .WithName(m_name + " RunTo");
 }
 
-frc2::CommandPtr Pivot::RunTo(std::function<units::degree_t()> angle, units::degree_t tolerance) {
-  units::degree_t target = angle();
-  frc2::Trigger near = IsNear(target, tolerance).Debounce(units::second_t{0.1});
-  return frc2::cmd::RunOnce([this, target] { SetMechanismPositionSetpoint(target); }, {m_subsystem})
-      .AndThen(frc2::cmd::WaitUntil([near] { return near.Get(); }))
+wpi::cmd::CommandPtr Pivot::RunTo(std::function<wpi::units::degree_t()> angle, wpi::units::degree_t tolerance) {
+  wpi::units::degree_t target = angle();
+  wpi::cmd::Trigger near = IsNear(target, tolerance).Debounce(wpi::units::second_t{0.1});
+  return wpi::cmd::RunOnce([this, target] { SetMechanismPositionSetpoint(target); }, {m_subsystem})
+      .AndThen(wpi::cmd::WaitUntil([near] { return near.Get(); }))
       .WithName(m_name + " RunTo Supplier");
 }
 
-frc2::Trigger Pivot::Gte(units::degree_t angle) {
-  return frc2::Trigger{[this, angle] { return GetAngle() >= angle; }};
+wpi::cmd::Trigger Pivot::Gte(wpi::units::degree_t angle) {
+  return wpi::cmd::Trigger{[this, angle] { return GetAngle() >= angle; }};
 }
 
-frc2::Trigger Pivot::Lte(units::degree_t angle) {
-  return frc2::Trigger{[this, angle] { return GetAngle() <= angle; }};
+wpi::cmd::Trigger Pivot::Lte(wpi::units::degree_t angle) {
+  return wpi::cmd::Trigger{[this, angle] { return GetAngle() <= angle; }};
 }
 
-frc2::Trigger Pivot::Between(units::degree_t start, units::degree_t end) {
+wpi::cmd::Trigger Pivot::Between(wpi::units::degree_t start, wpi::units::degree_t end) {
   return Gte(start) && (Lte(end));
 }
 
-frc2::Trigger Pivot::IsNear(units::degree_t angle, units::degree_t within) {
-  return frc2::Trigger{[this, angle, within] {
+wpi::cmd::Trigger Pivot::IsNear(wpi::units::degree_t angle, wpi::units::degree_t within) {
+  return wpi::cmd::Trigger{[this, angle, within] {
     return std::abs(GetAngle().value() - angle.value()) <= within.value();
   }};
 }
 
 const config::PivotConfig& Pivot::GetConfig() const { return *m_pivotConfig; }
 
-frc::Translation3d Pivot::GetRelativeMechanismPosition() const {
+wpi::math::Translation3d Pivot::GetRelativeMechanismPosition() const {
   if (m_mechanismLigament) {
-    return frc::Translation3d{units::meter_t{m_mechanismLigament->GetLength()},
-                              frc::Rotation3d{0_rad, 0_rad, units::radian_t{GetAngle()}}};
+    return wpi::math::Translation3d{wpi::units::meter_t{m_mechanismLigament->GetLength()},
+                              wpi::math::Rotation3d{0_rad, 0_rad, wpi::units::radian_t{GetAngle()}}};
   }
-  return frc::Translation3d{};
+  return wpi::math::Translation3d{};
 }
 
-void Pivot::SetAngle(units::degree_t angle) { SetMechanismPositionSetpoint(angle); }
+void Pivot::SetAngle(wpi::units::degree_t angle) { SetMechanismPositionSetpoint(angle); }
 
-units::degree_t Pivot::GetAngle() const { return m_smc->GetMechanismPosition(); }
+wpi::units::degree_t Pivot::GetAngle() const { return m_smc->GetMechanismPosition(); }
 
 }  // namespace yams::mechanisms::positional

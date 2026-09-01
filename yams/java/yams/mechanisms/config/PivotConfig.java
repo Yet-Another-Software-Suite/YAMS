@@ -3,11 +3,11 @@
 
 package yams.mechanisms.config;
 
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.util.Color8Bit;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.Mass;
+import org.wpilib.util.Color;
+import org.wpilib.util.Color8Bit;
 import java.util.Optional;
 import yams.exceptions.PivotConfigurationException;
 import yams.mechanisms.config.MechanismPositionConfig.Plane;
@@ -65,7 +65,7 @@ public class PivotConfig
   /**
    * Sim color value
    */
-  private   Color8Bit                      simColor                = new Color8Bit(Color.kOrange);
+  private   Color8Bit                      simColor                = new Color8Bit(Color.ORANGE);
   /**
    * Mechanism position configuration for the {@link Pivot}
    */

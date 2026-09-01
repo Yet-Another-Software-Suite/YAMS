@@ -22,7 +22,7 @@
  *       composed, or scheduled directly via the command scheduler.</li>
  *   <li><b>React to conditions</b> — use trigger factory methods ({@code isNear()}, {@code max()},
  *       {@code min()}, {@code between()}, {@code lte()}, {@code gte()}) to obtain
- *       {@link edu.wpi.first.wpilibj2.command.button.Trigger} objects that fire when the mechanism
+ *       {@link org.wpilib.command2.button.Trigger} objects that fire when the mechanism
  *       satisfies a particular condition, enabling condition-based command scheduling without
  *       polling in {@code periodic()}.</li>
  * </ol>

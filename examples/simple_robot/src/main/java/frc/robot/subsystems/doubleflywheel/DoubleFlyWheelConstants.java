@@ -3,14 +3,14 @@
 
 package frc.robot.subsystems.doubleflywheel;
 
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.RPM;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.RPM;
 
-import edu.wpi.first.math.Pair;
-import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Distance;
+import org.wpilib.math.Pair;
+import org.wpilib.math.interpolation.InterpolatingDoubleTreeMap;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Distance;
 import java.util.List;
 
 public class DoubleFlyWheelConstants

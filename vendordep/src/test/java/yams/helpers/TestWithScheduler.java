@@ -3,9 +3,9 @@
 
 package yams.helpers;
 
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.wpilib.units.measure.Time;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.CommandScheduler;
 
 ;
 //https://github.com/robototes/2020_Template/blob/main/src/test/java/frc/team2412/robot/subsystems/ExampleSubsystemTest.java

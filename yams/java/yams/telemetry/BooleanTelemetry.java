@@ -3,14 +3,14 @@
 
 package yams.telemetry;
 
-import edu.wpi.first.networktables.BooleanPublisher;
-import edu.wpi.first.networktables.BooleanSubscriber;
-import edu.wpi.first.networktables.BooleanTopic;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.PubSub;
-import edu.wpi.first.util.datalog.BooleanLogEntry;
-import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.Timer;
+import org.wpilib.networktables.BooleanPublisher;
+import org.wpilib.networktables.BooleanSubscriber;
+import org.wpilib.networktables.BooleanTopic;
+import org.wpilib.networktables.NetworkTable;
+import org.wpilib.networktables.PubSub;
+import org.wpilib.datalog.BooleanLogEntry;
+import org.wpilib.system.DataLogManager;
+import org.wpilib.system.Timer;
 import java.util.Optional;
 import yams.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
 
@@ -148,7 +148,7 @@ public class BooleanTelemetry
       {prefix += "/";}
       dataLogEntry = Optional.of(new BooleanLogEntry(DataLogManager.getLog(),
                                                      prefix + key,
-                                                     (long) Timer.getFPGATimestamp()));
+                                                     (long) Timer.getTimestamp()));
     }
   }
 

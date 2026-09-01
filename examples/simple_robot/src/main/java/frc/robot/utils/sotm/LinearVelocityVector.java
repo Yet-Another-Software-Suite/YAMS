@@ -3,14 +3,14 @@
 
 package frc.robot.utils.sotm;
 
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Seconds;
+import static org.wpilib.units.Units.RPM;
+import static org.wpilib.units.Units.Seconds;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Time;
+import org.wpilib.math.geometry.Pose2d;
+import org.wpilib.math.geometry.Translation2d;
+import org.wpilib.math.kinematics.ChassisSpeeds;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Time;
 
 /**
  * Linear velocity vector of the robot.

@@ -3,18 +3,17 @@
 
 package yams.motorcontrollers.remote;
 
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Second;
-import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.MetersPerSecondPerSecond;
+import static org.wpilib.units.Units.Milliseconds;
+import static org.wpilib.units.Units.Rotations;
+import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
+import static org.wpilib.units.Units.Second;
+import static org.wpilib.units.Units.Seconds;
+import static org.wpilib.units.Units.Volts;
 
-import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -22,6 +21,7 @@ import com.ctre.phoenix6.configs.CANdiConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.ControlRequest;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
 import com.ctre.phoenix6.controls.MotionMagicExpoDutyCycle;
@@ -49,33 +49,33 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
-import edu.wpi.first.math.Pair;
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.math.trajectory.ExponentialProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.units.AngularAccelerationUnit;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearAcceleration;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Temperature;
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.units.measure.Velocity;
-import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Notifier;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
+import org.wpilib.util.Pair;
+import org.wpilib.math.controller.ArmFeedforward;
+import org.wpilib.math.controller.ElevatorFeedforward;
+import org.wpilib.math.controller.SimpleMotorFeedforward;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.math.system.Models;
+import org.wpilib.math.trajectory.ExponentialProfile;
+import org.wpilib.math.trajectory.TrapezoidProfile;
+import org.wpilib.math.trajectory.TrapezoidProfile.Constraints;
+import org.wpilib.units.AngularAccelerationUnit;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularAcceleration;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Current;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.LinearAcceleration;
+import org.wpilib.units.measure.LinearVelocity;
+import org.wpilib.units.measure.Temperature;
+import org.wpilib.units.measure.Time;
+import org.wpilib.units.measure.Velocity;
+import org.wpilib.units.measure.Voltage;
+import org.wpilib.driverstation.DriverStationErrors;
+import org.wpilib.system.Notifier;
+import org.wpilib.framework.RobotBase;
+import org.wpilib.system.Timer;
+import org.wpilib.simulation.DCMotorSim;
+import org.wpilib.simulation.RoboRioSim;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -86,6 +86,7 @@ import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.motorcontrollers.simulation.BatterySim;
 import yams.motorcontrollers.simulation.DCMotorSimSupplier;
 import yams.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
 import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
@@ -361,7 +362,7 @@ public class TalonFXWrapper extends SmartMotorController
       var setupRan = m_dcmotorSim.isPresent();
       if (!setupRan)
       {
-        m_dcmotorSim = Optional.of(new DCMotorSim(LinearSystemId.createDCMotorSystem(m_dcmotor,
+        m_dcmotorSim = Optional.of(new DCMotorSim(Models.singleJointedArmFromPhysicalConstants(m_dcmotor,
                                                                                      m_config.getMOI(),
                                                                                      m_config.getGearing()
                                                                                              .getMechanismToRotorRatio()),
@@ -402,6 +403,7 @@ public class TalonFXWrapper extends SmartMotorController
         simSupplier.setMechanismStatorVoltage(motorVoltage); // dcmotorSim.setInputVoltage(motorVoltage)
         simSupplier.updateSimState(); // dcmotorSim.update(0.020)
         simSupplier.starveUpdateSim(); // clear update once atomic
+        BatterySim.calculateVoltage(m_batterySimUUID, simSupplier.getCurrentDraw());
       });
 
       // apply the new rotor position and velocity to the TalonFX;
@@ -690,7 +692,7 @@ public class TalonFXWrapper extends SmartMotorController
   @Override
   public void setDutyCycle(double dutyCycle)
   {
-    m_talonfx.set(dutyCycle);
+    m_talonfx.setControl(new DutyCycleOut(dutyCycle));
     if (dutyCycle == 0.0)
     {
       m_looseFollowers.ifPresent(looseFollower -> {
@@ -718,6 +720,9 @@ public class TalonFXWrapper extends SmartMotorController
           case SLOT_0 -> m_talonConfig.Slot0.withKP(pid.getP()).withKI(pid.getI()).withKD(pid.getD());
           case SLOT_1 -> m_talonConfig.Slot1.withKP(pid.getP()).withKI(pid.getI()).withKD(pid.getD());
           case SLOT_2 -> m_talonConfig.Slot2.withKP(pid.getP()).withKI(pid.getI()).withKD(pid.getD());
+          case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX",
+                                                                               "Cannot use Slot 3 on TalonFX",
+                                                                       "");
         }
       });
     }
@@ -835,6 +840,9 @@ public class TalonFXWrapper extends SmartMotorController
             case SLOT_0 -> m_talonConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
             case SLOT_1 -> m_talonConfig.Slot1.GravityType = GravityTypeValue.Arm_Cosine;
             case SLOT_2 -> m_talonConfig.Slot2.GravityType = GravityTypeValue.Arm_Cosine;
+            case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX",
+                                                                                 "Cannot use Slot 3 on TalonFX",
+                                                                         "");
           }
         } else if (elevatorFeedforward.isPresent())
         {
@@ -848,6 +856,9 @@ public class TalonFXWrapper extends SmartMotorController
             case SLOT_0 -> m_talonConfig.Slot0.GravityType = GravityTypeValue.Elevator_Static;
             case SLOT_1 -> m_talonConfig.Slot1.GravityType = GravityTypeValue.Elevator_Static;
             case SLOT_2 -> m_talonConfig.Slot2.GravityType = GravityTypeValue.Elevator_Static;
+            case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX",
+                                                                                 "Cannot use Slot 3 on TalonFX",
+                                                                         "");
           }
         } else
         {
@@ -861,6 +872,9 @@ public class TalonFXWrapper extends SmartMotorController
           case SLOT_0 -> m_talonConfig.Slot0.withKS(kS).withKV(kV).withKA(kA).withKG(kG);
           case SLOT_1 -> m_talonConfig.Slot1.withKS(kS).withKV(kV).withKA(kA).withKG(kG);
           case SLOT_2 -> m_talonConfig.Slot2.withKS(kS).withKV(kV).withKA(kA).withKG(kG);
+          case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX",
+                                                                               "Cannot use Slot 3 on TalonFX",
+                                                                       "");
         }
       }
     }
@@ -925,7 +939,7 @@ public class TalonFXWrapper extends SmartMotorController
       // Starting position
       if (config.getStartingPosition().isPresent())
       {
-        DriverStation.reportWarning("[WARNING] Starting position is not applied to " +
+        DriverStationErrors.reportWarning("[WARNING] Starting position is not applied to " +
                                     (config.getTelemetryName().isPresent() ? getName()
                                                                            : ("TalonFX(" + m_talonfx.getDeviceID() +
                                                                               ")"))
@@ -1062,7 +1076,7 @@ public class TalonFXWrapper extends SmartMotorController
       // Discontinuity point
       if (config.getExternalEncoderDiscontinuityPoint().isPresent())
       {
-        DriverStation.reportWarning(
+        DriverStationErrors.reportWarning(
             "[WARNING] Discontinuity point is not supported in TalonFX(" + m_talonfx.getDeviceID() +
             ") without external encoder.",
             false);
@@ -1099,7 +1113,7 @@ public class TalonFXWrapper extends SmartMotorController
         {
           if (follower.getFirst() instanceof TalonFXS)
           {
-            config.getIdleMode().ifPresent(mode -> ((TalonFXS) follower.getFirst()).setNeutralMode(mode == MotorMode.BRAKE ? NeutralModeValue.Brake : NeutralModeValue.Coast));
+            config.getIdleMode().ifPresent(mode -> ((TalonFXS) follower.getFirst()).configNeutralMode(mode == MotorMode.BRAKE ? NeutralModeValue.Brake : NeutralModeValue.Coast));
             applied = ((TalonFXS) follower.getFirst()).setControl(new Follower(m_talonfx.getDeviceID(),
                                                                                follower.getSecond()
                                                                                ? MotorAlignmentValue.Opposed
@@ -1108,7 +1122,7 @@ public class TalonFXWrapper extends SmartMotorController
 
           } else if (follower.getFirst() instanceof TalonFX)
           {
-            config.getIdleMode().ifPresent(mode -> ((TalonFX) follower.getFirst()).setNeutralMode(mode == MotorMode.BRAKE ? NeutralModeValue.Brake : NeutralModeValue.Coast));
+            config.getIdleMode().ifPresent(mode -> ((TalonFX) follower.getFirst()).configNeutralMode(mode == MotorMode.BRAKE ? NeutralModeValue.Brake : NeutralModeValue.Coast));
             applied = ((TalonFX) follower.getFirst()).setControl(new Follower(m_talonfx.getDeviceID(),
                                                                               follower.getSecond()
                                                                               ? MotorAlignmentValue.Opposed
@@ -1505,6 +1519,9 @@ public class TalonFXWrapper extends SmartMotorController
       case SLOT_0 -> m_talonConfig.Slot0.kP = kP;
       case SLOT_1 -> m_talonConfig.Slot1.kP = kP;
       case SLOT_2 -> m_talonConfig.Slot2.kP = kP;
+      case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX",
+                                                                          "Cannot use Slot 3 on TalonFX",
+                                                                          "");
     }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKp(kP);}});
@@ -1521,6 +1538,9 @@ public class TalonFXWrapper extends SmartMotorController
       case SLOT_0 -> m_talonConfig.Slot0.kI = kI;
       case SLOT_1 -> m_talonConfig.Slot1.kI = kI;
       case SLOT_2 -> m_talonConfig.Slot2.kI = kI;
+      case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX",
+                                                                          "Cannot use Slot 3 on TalonFX",
+                                                                          "");
     }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKi(kI);}});
@@ -1537,6 +1557,9 @@ public class TalonFXWrapper extends SmartMotorController
       case SLOT_0 -> m_talonConfig.Slot0.kD = kD;
       case SLOT_1 -> m_talonConfig.Slot1.kD = kD;
       case SLOT_2 -> m_talonConfig.Slot2.kD = kD;
+      case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX",
+                                                                          "Cannot use Slot 3 on TalonFX",
+                                                                          "");
     }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKd(kD);}});
@@ -1560,6 +1583,9 @@ public class TalonFXWrapper extends SmartMotorController
       case SLOT_0 -> m_talonConfig.Slot0.withKP(kP).withKI(kI).withKD(kD);
       case SLOT_1 -> m_talonConfig.Slot1.withKP(kP).withKI(kI).withKD(kD);
       case SLOT_2 -> m_talonConfig.Slot2.withKP(kP).withKI(kI).withKD(kD);
+      case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX",
+                                                                          "Cannot use Slot 3 on TalonFX",
+                                                                          "");
     }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setFeedback(kP, kI, kD);}});
@@ -1582,6 +1608,9 @@ public class TalonFXWrapper extends SmartMotorController
       case SLOT_0 -> m_talonConfig.Slot0.withKS(kS);
       case SLOT_1 -> m_talonConfig.Slot1.withKS(kS);
       case SLOT_2 -> m_talonConfig.Slot2.withKS(kS);
+      case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX",
+                                                                          "Cannot use Slot 3 on TalonFX",
+                                                                          "");
     }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKs(kS);}});
@@ -1604,6 +1633,9 @@ public class TalonFXWrapper extends SmartMotorController
       case SLOT_0 -> m_talonConfig.Slot0.withKV(kV);
       case SLOT_1 -> m_talonConfig.Slot1.withKV(kV);
       case SLOT_2 -> m_talonConfig.Slot2.withKV(kV);
+      case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX",
+                                                                          "Cannot use Slot 3 on TalonFX",
+                                                                          "");
     }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKv(kV);}});
@@ -1626,6 +1658,9 @@ public class TalonFXWrapper extends SmartMotorController
       case SLOT_0 -> m_talonConfig.Slot0.withKA(kA);
       case SLOT_1 -> m_talonConfig.Slot1.withKA(kA);
       case SLOT_2 -> m_talonConfig.Slot2.withKA(kA);
+      case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX",
+                                                                          "Cannot use Slot 3 on TalonFX",
+                                                                          "");
     }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKa(kA);}});
@@ -1645,6 +1680,9 @@ public class TalonFXWrapper extends SmartMotorController
       case SLOT_0 -> m_talonConfig.Slot0.withKG(kG);
       case SLOT_1 -> m_talonConfig.Slot1.withKG(kG);
       case SLOT_2 -> m_talonConfig.Slot2.withKG(kG);
+      case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX",
+                                                                          "Cannot use Slot 3 on TalonFX",
+                                                                          "");
     }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setKg(kG);}});
@@ -1668,6 +1706,9 @@ public class TalonFXWrapper extends SmartMotorController
         case SLOT_0 -> m_talonConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
         case SLOT_1 -> m_talonConfig.Slot1.GravityType = GravityTypeValue.Arm_Cosine;
         case SLOT_2 -> m_talonConfig.Slot2.GravityType = GravityTypeValue.Arm_Cosine;
+        case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX",
+                                                                            "Cannot use Slot 3 on TalonFX",
+                                                                            "");
       }
     });
     m_config.getElevatorFeedforward(m_slot).ifPresent(elevatorFeedforward -> {
@@ -1680,6 +1721,9 @@ public class TalonFXWrapper extends SmartMotorController
         case SLOT_0 -> m_talonConfig.Slot0.GravityType = GravityTypeValue.Elevator_Static;
         case SLOT_1 -> m_talonConfig.Slot1.GravityType = GravityTypeValue.Elevator_Static;
         case SLOT_2 -> m_talonConfig.Slot2.GravityType = GravityTypeValue.Elevator_Static;
+        case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX",
+                                                                            "Cannot use Slot 3 on TalonFX",
+                                                                            "");
       }
     });
     switch (m_slot)
@@ -1687,6 +1731,9 @@ public class TalonFXWrapper extends SmartMotorController
       case SLOT_0 -> m_talonConfig.Slot0.withKS(kS).withKV(kV).withKA(kA).withKG(kG);
       case SLOT_1 -> m_talonConfig.Slot1.withKS(kS).withKV(kV).withKA(kA).withKG(kG);
       case SLOT_2 -> m_talonConfig.Slot2.withKS(kS).withKV(kV).withKA(kA).withKG(kG);
+      case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX",
+                                                                          "Cannot use Slot 3 on TalonFX",
+                                                                          "");
     }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {for (var f : smcs) {f.setFeedforward(kS, kV, kA, kG);}});

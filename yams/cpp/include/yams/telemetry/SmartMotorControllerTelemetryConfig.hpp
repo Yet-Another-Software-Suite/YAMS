@@ -35,7 +35,7 @@ namespace yams::telemetry {
  * using TelCfg = yams::telemetry::SmartMotorControllerTelemetryConfig;
  *
  * ctre::phoenix6::hardware::TalonFX talon{1};
- * TalonFXWrapper smc{talon, frc::DCMotor::KrakenX60(1), cfg};
+ * TalonFXWrapper smc{talon, wpi::math::DCMotor::KrakenX60(1), cfg};
  *
  * smc.WithTelemetry(
  *     TelCfg{}
@@ -150,7 +150,7 @@ class SmartMotorControllerTelemetryConfig {
    *
    * @param smc Motor controller to configure for.
    */
-  std::unordered_map<DoubleTelemetryField, DoubleTelemetry>& GetDoubleFields(
+  std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>& GetDoubleFields(
       motorcontrollers::SmartMotorController& smc);
   std::unordered_map<BooleanTelemetryField, BooleanTelemetry>& GetBoolFields(
       motorcontrollers::SmartMotorController& smc);
@@ -159,7 +159,7 @@ class SmartMotorControllerTelemetryConfig {
   std::optional<std::string> m_dataLogName;
   bool m_nt4Telemetry{true};
 
-  std::unordered_map<DoubleTelemetryField, DoubleTelemetry> m_doubleFields;
+  std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> m_doubleFields;
   std::unordered_map<BooleanTelemetryField, BooleanTelemetry> m_boolFields;
 };
 

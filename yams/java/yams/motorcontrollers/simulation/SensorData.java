@@ -3,12 +3,12 @@
 
 package yams.motorcontrollers.simulation;
 
-import edu.wpi.first.hal.HALValue;
-import edu.wpi.first.hal.SimDevice;
-import edu.wpi.first.hal.SimDevice.Direction;
-import edu.wpi.first.hal.SimValue;
-import edu.wpi.first.math.Pair;
-import edu.wpi.first.wpilibj.RobotBase;
+import org.wpilib.hardware.hal.HALValue;
+import org.wpilib.hardware.hal.SimDevice;
+import org.wpilib.hardware.hal.SimDevice.Direction;
+import org.wpilib.hardware.hal.SimValue;
+import org.wpilib.util.Pair;
+import org.wpilib.framework.RobotBase;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +24,7 @@ import java.util.function.Supplier;
  * <p>
  * {@code SensorData} represents a single named field within a {@link Sensor}. It wraps a
  * real-hardware supplier (e.g. a lambda reading an encoder), a default value, and an optional
- * {@link edu.wpi.first.hal.SimValue} registered with WPILib's simulation layer so the Glass GUI
+ * {@link org.wpilib.hardware.hal.SimValue} registered with WPILib's simulation layer so the Glass GUI
  * can override the value during simulation without touching production code.
  * </p>
  *
@@ -35,7 +35,7 @@ import java.util.function.Supplier;
  *   <li><b>Real robot</b> — always returns the live hardware supplier value immediately.</li>
  *   <li><b>Trigger override</b> — if any registered {@link #addSimTrigger trigger} condition is
  *       currently {@code true}, the associated override value is returned and written to Glass.</li>
- *   <li><b>Glass value</b> — if a {@link edu.wpi.first.hal.SimValue} exists and no trigger
+ *   <li><b>Glass value</b> — if a {@link org.wpilib.hardware.hal.SimValue} exists and no trigger
  *       fired, returns whatever Glass has set (including the default).</li>
  *   <li><b>Supplier fallback</b> — returns the supplier value if no Glass value is available.</li>
  * </ol>
@@ -49,8 +49,8 @@ import java.util.function.Supplier;
  *   <li>{@code m_defaultValue} — the initial value published to Glass at startup.</li>
  *   <li>{@code m_triggerValues} — ordered list of {@code (condition, value)} pairs checked
  *       before the Glass value each loop.</li>
- *   <li>{@code m_glassValue} — the live {@link edu.wpi.first.hal.SimValue} registered with the
- *       parent {@link edu.wpi.first.hal.SimDevice}; empty on a real robot.</li>
+ *   <li>{@code m_glassValue} — the live {@link org.wpilib.hardware.hal.SimValue} registered with the
+ *       parent {@link org.wpilib.hardware.hal.SimDevice}; empty on a real robot.</li>
  * </ul>
  *
  * <h2>Example</h2>
@@ -460,7 +460,7 @@ public class SensorData
   public SimValue createValue(SimDevice device, Direction direction)
   {
     var simVal = device.createValue(m_name, direction, m_defaultValue);
-    if (direction == Direction.kBidir || direction == Direction.kInput)
+    if (direction == Direction.BIDIR || direction == Direction.INPUT)
     {
       m_glassValue = Optional.of(simVal);
     }

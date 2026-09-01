@@ -3,17 +3,16 @@
 
 package yams.telemetry;
 
-import edu.wpi.first.networktables.DoublePublisher;
-import edu.wpi.first.networktables.DoubleSubscriber;
-import edu.wpi.first.networktables.DoubleTopic;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.PubSub;
-import edu.wpi.first.util.datalog.DoubleLogEntry;
-import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.Timer;
+import org.wpilib.networktables.DoublePublisher;
+import org.wpilib.networktables.DoubleSubscriber;
+import org.wpilib.networktables.DoubleTopic;
+import org.wpilib.networktables.NetworkTable;
+import org.wpilib.networktables.PubSub;
+import org.wpilib.datalog.DoubleLogEntry;
+import org.wpilib.system.DataLogManager;
+import org.wpilib.system.Timer;
 import java.util.Optional;
 import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
 
 /**
  * Double Telemetry for SmartMotorControllers.
@@ -27,7 +26,7 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * <h2>Example</h2>
  * <pre>{@code
  * // Create and publish a double entry for shooter velocity under the Shooter table.
- * DoubleTelemetry velocity = new DoubleTelemetry(
+ * DoubleTelemetry&lt;DoubleTelemetryField&gt; velocity = new DoubleTelemetry&lt;&gt;(
  *     "velocity",                                       // NetworkTables key
  *     0.0,                                              // default value
  *     SmartMotorControllerTelemetry.DoubleTelemetryField.MechanismVelocity,
@@ -41,13 +40,15 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * // In periodic:
  * velocity.set(shooter.getVelocityRPS());
  * }</pre>
+ *
+ * @param <F> Enum type identifying which field this telemetry entry represents.
  */
-public class DoubleTelemetry
+public class DoubleTelemetry<F>
 {
   /**
    * Field representing.
    */
-  private final DoubleTelemetryField       field;
+  private final F                          field;
   /**
    * Network table key.
    */
@@ -111,7 +112,7 @@ public class DoubleTelemetry
    * @param tunable    Tunable.
    * @param unit       Unit to display.
    */
-  public DoubleTelemetry(String keyString, double defaultVal, DoubleTelemetryField field, boolean tunable, String unit)
+  public DoubleTelemetry(String keyString, double defaultVal, F field, boolean tunable, String unit)
   {
     key = keyString;
     cachedValue = defaultValue = defaultVal;
@@ -162,9 +163,9 @@ public class DoubleTelemetry
   }
 
   /**
-   * Setup the {@link edu.wpi.first.util.datalog.DataLog} with this entry.
+   * Setup the {@link org.wpilib.datalog.DataLog} with this entry.
    *
-   * @param prefix The prefix to this entry in {@link edu.wpi.first.util.datalog.DataLog}
+   * @param prefix The prefix to this entry in {@link org.wpilib.datalog.DataLog}
    */
   public void setupDataLog(String prefix)
   {
@@ -175,7 +176,7 @@ public class DoubleTelemetry
       prefix += unit + "/";
       dataLogEntry = Optional.of(new DoubleLogEntry(DataLogManager.getLog(),
                                                     prefix + key,
-                                                    (long) Timer.getFPGATimestamp()));
+                                                    (long) Timer.getTimestamp()));
     }
   }
 
@@ -239,7 +240,7 @@ public class DoubleTelemetry
     {return false;}
     if (dataLogEntry.isPresent())
     {
-      dataLogEntry.get().append(value, (long) Timer.getFPGATimestamp());
+      dataLogEntry.get().append(value, (long) Timer.getTimestamp());
     }
     if (subscriber.isPresent())
     {
@@ -324,7 +325,7 @@ public class DoubleTelemetry
    *
    * @return field.
    */
-  public DoubleTelemetryField getField()
+  public F getField()
   {
     return field;
   }

@@ -3,52 +3,50 @@
 
 package yams.motorcontrollers;
 
-import static edu.wpi.first.hal.FRCNetComm.tResourceType.kResourceType_YAMS;
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.KilogramSquareMeters;
-import static edu.wpi.first.units.Units.Kilograms;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Second;
-import static edu.wpi.first.units.Units.Volts;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.KilogramSquareMeters;
+import static org.wpilib.units.Units.Kilograms;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.MetersPerSecondPerSecond;
+import static org.wpilib.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.RadiansPerSecondPerSecond;
+import static org.wpilib.units.Units.Rotations;
+import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
+import static org.wpilib.units.Units.Second;
+import static org.wpilib.units.Units.Volts;
 
-import edu.wpi.first.hal.HAL;
-import edu.wpi.first.math.Pair;
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.math.trajectory.ExponentialProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.units.AngularAccelerationUnit;
-import edu.wpi.first.units.LinearAccelerationUnit;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.Frequency;
-import edu.wpi.first.units.measure.LinearAcceleration;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.units.measure.MomentOfInertia;
-import edu.wpi.first.units.measure.Temperature;
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.units.measure.Velocity;
-import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
-import edu.wpi.first.wpilibj2.command.Subsystem;
+import org.wpilib.hardware.hal.HAL;
+import org.wpilib.util.Pair;
+import org.wpilib.math.controller.ArmFeedforward;
+import org.wpilib.math.controller.ElevatorFeedforward;
+import org.wpilib.math.controller.PIDController;
+import org.wpilib.math.controller.SimpleMotorFeedforward;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.math.system.Models;
+import org.wpilib.math.trajectory.ExponentialProfile;
+import org.wpilib.math.trajectory.TrapezoidProfile;
+import org.wpilib.units.AngularAccelerationUnit;
+import org.wpilib.units.LinearAccelerationUnit;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularAcceleration;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Current;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.Frequency;
+import org.wpilib.units.measure.LinearAcceleration;
+import org.wpilib.units.measure.LinearVelocity;
+import org.wpilib.units.measure.Mass;
+import org.wpilib.units.measure.MomentOfInertia;
+import org.wpilib.units.measure.Temperature;
+import org.wpilib.units.measure.Time;
+import org.wpilib.units.measure.Velocity;
+import org.wpilib.units.measure.Voltage;
+import org.wpilib.simulation.SingleJointedArmSim;
+import org.wpilib.command2.Subsystem;
+import org.wpilib.driverstation.internal.DriverStationBackend;
+import org.wpilib.framework.RobotBase;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -59,11 +57,9 @@ import java.util.Set;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.gearing.MechanismGearing;
 import yams.math.LQRController;
-import yams.mechanisms.config.ElevatorConfig;
 import yams.mechanisms.positional.Elevator;
 import yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
 import yams.telemetry.SmartMotorControllerTelemetryConfig;
-
 /**
  * Smart motor controller config.
  *
@@ -326,7 +322,7 @@ public class SmartMotorControllerConfig {
    * @param subsystem {@link Subsystem} to use.
    */
   public SmartMotorControllerConfig(Subsystem subsystem) {
-    HAL.report(kResourceType_YAMS, 1);
+    HAL.reportUsage("YAMS", "1");
     this.subsystem = Optional.ofNullable(subsystem);
   }
 
@@ -337,7 +333,7 @@ public class SmartMotorControllerConfig {
    * SmartMotorController}
    */
   public SmartMotorControllerConfig() {
-    HAL.report(kResourceType_YAMS, 1);
+    HAL.reportUsage(null, null);
   }
 
   /**
@@ -423,18 +419,6 @@ public class SmartMotorControllerConfig {
    */
   public SmartMotorControllerConfig withVendorConfig(Object vendorConfig) {
     this.vendorConfig = Optional.ofNullable(vendorConfig);
-    return this;
-  }
-
-  /**
-   * Set the vendor specific control request for the {@link SmartMotorController} which will be used
-   * in place of default or calculated ones.
-   *
-   * @param vendorControlRequest Vendor specific control request for velocity or position.
-   * @return {@link SmartMotorControllerConfig} for chaining
-   */
-  public SmartMotorControllerConfig withVendorControlRequest(Object vendorControlRequest) {
-    this.vendorControlRequest = Optional.ofNullable(vendorControlRequest);
     return this;
   }
 
@@ -908,7 +892,7 @@ public class SmartMotorControllerConfig {
 
   /**
    * Get the Moment of Inertia of the {@link SmartMotorController}'s mechanism for the
-   * {@link edu.wpi.first.wpilibj.simulation.DCMotorSim}.
+   * {@link org.wpilib.simulation.DCMotorSim}.
    *
    * @return Moment of Inertia in JKgMetersSquared.
    */
@@ -1461,10 +1445,10 @@ public class SmartMotorControllerConfig {
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withProfile(TrapezoidProfile.Constraints profile) {
-    DriverStation.reportWarning("Trapezoidal profile will be given rotations/s and rotations/s^2 "
+    DriverStationBackend.reportWarning("Trapezoidal profile will be given rotations/s and rotations/s^2 "
                                 + "for rotational closed loop controllers.",
         true);
-    DriverStation.reportWarning("Trapezoidal profile will be given meters/s and meters/s^2 for "
+    DriverStationBackend.reportWarning("Trapezoidal profile will be given meters/s and meters/s^2 for "
                                 + "linear closed loop controllers.",
         true);
     this.exponentialProfile = Optional.empty();
@@ -1546,10 +1530,10 @@ public class SmartMotorControllerConfig {
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withProfile(ExponentialProfile.Constraints profile) {
-    DriverStation.reportWarning("Exponential profile will be given rotations/s and rotations/s^2 "
+    DriverStationBackend.reportWarning("Exponential profile will be given rotations/s and rotations/s^2 "
                                 + "for rotational closed loop controllers.",
         true);
-    DriverStation.reportWarning("Exponential profile will be given meters/s and meters/s^2 for "
+    DriverStationBackend.reportWarning("Exponential profile will be given meters/s and meters/s^2 for "
                                 + "linear closed loop controllers.",
         true);
     this.exponentialProfile = Optional.ofNullable(profile);
@@ -1568,7 +1552,7 @@ public class SmartMotorControllerConfig {
   public SmartMotorControllerConfig withExponentialProfile(
       Voltage maxVolts, DCMotor motor, MomentOfInertia moi) {
     this.moi = moi;
-    var sysid = LinearSystemId.createSingleJointedArmSystem(
+    var sysid = Models.singleJointedArmFromPhysicalConstants(
         motor, moi.in(KilogramSquareMeters), gearing.getMechanismToRotorRatio());
     var A = sysid.getA(0, 0); // radians
     var B = sysid.getB(0, 0); // radians
@@ -1591,10 +1575,9 @@ public class SmartMotorControllerConfig {
    */
   public SmartMotorControllerConfig withExponentialProfile(
       Voltage maxVolts, DCMotor motor, Mass mass, Distance drumRadius) {
-    var sysid = LinearSystemId.createElevatorSystem(
+    var sysid = Models.elevatorFromPhysicalConstants(
         motor, mass.in(Kilograms), drumRadius.in(Meters), gearing.getMechanismToRotorRatio());
     var circumference = (2.0 * Math.PI * drumRadius.in(Meters));
-
     var A = sysid.getA(0, 0);
     var B = sysid.getB(0, 0);
     var kV = MetersPerSecond.of(-A / B);
@@ -2204,7 +2187,7 @@ public class SmartMotorControllerConfig {
   public SmartMotorControllerConfig withExternalEncoderGearing(
       MechanismGearing externalEncoderGearing) {
     if (externalEncoderGearing.getRotorToMechanismRatio() > 1) {
-      DriverStation.reportWarning("[IMPORTANT] Your gearing is set in a way that the external "
+      DriverStationBackend.reportWarning("[IMPORTANT] Your gearing is set in a way that the external "
                                   + "encoder will exceed the maximum reading, "
               + "this WILL result in multiple angle's being read as the same 'angle.\n\t"
               + "Ignore this warning IF your mechanism will never travel outside of the slice you "
@@ -2225,7 +2208,7 @@ public class SmartMotorControllerConfig {
    */
   public SmartMotorControllerConfig withExternalEncoderGearing(double reductionRatio) {
     if (reductionRatio > 1) {
-      DriverStation.reportWarning("[IMPORTANT] Your gearing is set in a way that the external "
+      DriverStationBackend.reportWarning("[IMPORTANT] Your gearing is set in a way that the external "
                                   + "encoder will exceed the maximum reading, "
               + "this WILL result in multiple angle's being read as the same 'angle.\n\t"
               + "Ignore this warning IF your mechanism will never travel outside of the slice you "
@@ -2303,6 +2286,19 @@ public class SmartMotorControllerConfig {
    */
   public Optional<Object> getVendorConfig() {
     return vendorConfig;
+  }
+
+
+  /**
+   * Set the vendor specific control request for the {@link SmartMotorController} which will be used
+   * in place of default or calculated ones.
+   *
+   * @param vendorControlRequest Vendor specific control request for velocity or position.
+   * @return {@link SmartMotorControllerConfig} for chaining
+   */
+  public SmartMotorControllerConfig withVendorControlRequest(Object vendorControlRequest) {
+    this.vendorControlRequest = Optional.ofNullable(vendorControlRequest);
+    return this;
   }
 
   /**

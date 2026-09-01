@@ -3,22 +3,24 @@
 
 package yams.motorcontrollers.simulation;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Milliseconds;
+import static org.wpilib.units.Units.Radians;
+import static org.wpilib.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.RadiansPerSecondPerSecond;
+import static org.wpilib.units.Units.Seconds;
+import static org.wpilib.units.Units.Volts;
 
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularAcceleration;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Current;
+import org.wpilib.units.measure.Time;
+import org.wpilib.units.measure.Voltage;
+import org.wpilib.simulation.DCMotorSim;
+import org.wpilib.simulation.RoboRioSim;
+import java.util.UUID;
 import java.util.function.Supplier;
 import yams.gearing.MechanismGearing;
 import yams.motorcontrollers.SimSupplier;
@@ -26,7 +28,7 @@ import yams.motorcontrollers.SmartMotorController;
 
 /**
  * DCMotorSim Supplier — simulates a generic DC motor load (flywheel, roller, or elevator)
- * using WPILib's {@link edu.wpi.first.wpilibj.simulation.DCMotorSim}.
+ * using WPILib's {@link org.wpilib.simulation.DCMotorSim}.
  *
  * <p>
  * This supplier steps WPILib's {@code DCMotorSim} physics model each control loop and exposes the
@@ -47,7 +49,7 @@ import yams.motorcontrollers.SmartMotorController;
  * <pre>{@code
  * // 1. Build the WPILib DC motor physics model (e.g. a flywheel with MOI 0.001 kg·m²)
  * DCMotorSim flywheelPhysics = new DCMotorSim(
- *     LinearSystemId.createDCMotorSystem(DCMotor.getNEO(1), 0.001, 1.0),
+ *     Models.singleJointedArmFromPhysicalConstants(DCMotor.getNEO(1), 0.001, 1.0),
  *     DCMotor.getNEO(1));
  *
  * // 2. Configure and build the YAMS smart motor controller
@@ -70,6 +72,7 @@ public class DCMotorSimSupplier implements SimSupplier
   private final MechanismGearing mechGearing;
   private final Time             period;
   private final DCMotor          motor;
+  private final UUID             uuid;
 
 
   /**
@@ -86,6 +89,7 @@ public class DCMotorSimSupplier implements SimSupplier
     mechGearing = config.getGearing();
     period = config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20));
     motor = smartMotorController.getDCMotor();
+    uuid = smartMotorController.m_batterySimUUID;
   }
 
   @Override
@@ -94,6 +98,7 @@ public class DCMotorSimSupplier implements SimSupplier
     if (!isInputFed())
     {
       sim.setInputVoltage(motorDutyCycleSupplier.get() * RoboRioSim.getVInVoltage());
+      RoboRioSim.setVInVoltage(BatterySim.calculateVoltage(uuid, sim.getCurrentDraw()));
     }
     if (!simUpdated)
     {
@@ -162,8 +167,8 @@ public class DCMotorSimSupplier implements SimSupplier
   @Override
   public Voltage getMechanismStatorVoltage()
   {
-    return Volts.of(motor.getVoltage(sim.getTorqueNewtonMeters(),
-                                     sim.getAngularVelocityRadPerSec()));
+    return Volts.of(motor.getVoltage(sim.getTorque(),
+                                     sim.getAngularVelocity()));
   }
 
   @Override
@@ -176,7 +181,7 @@ public class DCMotorSimSupplier implements SimSupplier
   @Override
   public Angle getMechanismPosition()
   {
-    return sim.getAngularPosition();
+    return Radians.of(sim.getAngularPosition());
   }
 
   @Override
@@ -195,7 +200,7 @@ public class DCMotorSimSupplier implements SimSupplier
   @Override
   public AngularVelocity getMechanismVelocity()
   {
-    return sim.getAngularVelocity();
+    return RadiansPerSecond.of(sim.getAngularVelocity());
   }
 
   @Override
@@ -213,12 +218,12 @@ public class DCMotorSimSupplier implements SimSupplier
   @Override
   public Current getCurrentDraw()
   {
-    return Amps.of(sim.getCurrentDrawAmps());
+    return Amps.of(sim.getCurrentDraw());
   }
 
   @Override
   public AngularAcceleration getRotorAcceleration()
   {
-    return sim.getAngularAcceleration();
+    return RadiansPerSecondPerSecond.of(sim.getAngularAcceleration());
   }
 }

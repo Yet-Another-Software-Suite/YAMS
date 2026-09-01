@@ -3,9 +3,9 @@
 
 package yams.mechanisms.positional;
 
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import org.wpilib.smartdashboard.MechanismLigament2d;
+import org.wpilib.smartdashboard.MechanismRoot2d;
+import org.wpilib.command2.button.Trigger;
 import yams.mechanisms.SmartMechanism;
 import yams.motorcontrollers.SmartMotorController;
 
@@ -22,15 +22,15 @@ import yams.motorcontrollers.SmartMotorController;
  * <ul>
  *   <li>Setpoint management via {@link yams.mechanisms.SmartMechanism#setMechanismPositionSetpoint}
  *       and {@link yams.mechanisms.SmartMechanism#setMeasurementPositionSetpoint}</li>
- *   <li>Position-based {@link edu.wpi.first.wpilibj2.command.button.Trigger} factories
+ *   <li>Position-based {@link org.wpilib.command2.button.Trigger} factories
  *       ({@code isNear()}, {@code gte()}, {@code lte()}, {@code between()}, {@code max()},
  *       {@code min()}) — defined by each concrete subclass</li>
  *   <li>Command factories such as {@code setAngle()} and {@code setHeight()} defined by each
  *       concrete subclass, which internally call
  *       {@link yams.mechanisms.SmartMechanism#setMechanismPositionSetpoint} or
  *       {@link yams.mechanisms.SmartMechanism#setMeasurementPositionSetpoint}</li>
- *   <li>A 2D visualization model via {@link edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d}
- *       and {@link edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d} fields that subclasses
+ *   <li>A 2D visualization model via {@link org.wpilib.smartdashboard.MechanismRoot2d}
+ *       and {@link org.wpilib.smartdashboard.MechanismLigament2d} fields that subclasses
  *       populate and update</li>
  * </ul>
  *
@@ -64,7 +64,7 @@ import yams.motorcontrollers.SmartMotorController;
  * </p>
  * <ul>
  *   <li>{@link yams.mechanisms.SmartMechanism#getRelativeMechanismPosition()} — returns the
- *       current 3-D position of the mechanism end-point in {@link edu.wpi.first.wpilibj.smartdashboard.Mechanism2d}
+ *       current 3-D position of the mechanism end-point in {@link org.wpilib.smartdashboard.Mechanism2d}
  *       coordinates</li>
  *   <li>{@link yams.mechanisms.SmartMechanism#visualizationUpdate()} — updates
  *       {@code m_mechanismLigament} (and any setpoint ligament) to reflect the current state</li>
@@ -73,11 +73,11 @@ import yams.motorcontrollers.SmartMotorController;
  *   <li>{@link yams.mechanisms.SmartMechanism#simIterate()} — advances the physics simulation
  *       model and writes back simulated encoder values each robot loop</li>
  *   <li>{@link yams.mechanisms.SmartMechanism#updateTelemetry()} — publishes mechanism state
- *       to {@link edu.wpi.first.wpilibj.smartdashboard.SmartDashboard} or an equivalent
+ *       to {@link org.wpilib.smartdashboard.SmartDashboard} or an equivalent
  *       telemetry sink</li>
- *   <li>{@link #max()} — returns a {@link edu.wpi.first.wpilibj2.command.button.Trigger} that
+ *   <li>{@link #max()} — returns a {@link org.wpilib.command2.button.Trigger} that
  *       activates when the mechanism reaches its configured maximum limit</li>
- *   <li>{@link #min()} — returns a {@link edu.wpi.first.wpilibj2.command.button.Trigger} that
+ *   <li>{@link #min()} — returns a {@link org.wpilib.command2.button.Trigger} that
  *       activates when the mechanism reaches its configured minimum limit</li>
  * </ul>
  */

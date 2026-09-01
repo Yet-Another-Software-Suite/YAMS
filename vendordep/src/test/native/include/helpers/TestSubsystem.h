@@ -7,35 +7,33 @@
 // a SmartMotorController reference and wires up simulation/telemetry
 // periodics for use in integration tests.
 
-#include <frc2/command/CommandPtr.h>
-#include <frc2/command/Commands.h>
-#include <frc2/command/SubsystemBase.h>
-#include <units/angle.h>
-#include <units/length.h>
-
+#include <wpi/commands2/Commands.hpp>
+#include <wpi/commands2/SubsystemBase.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/length.hpp>
 #include <functional>
 
 #include "yams/motorcontrollers/SmartMotorController.hpp"
 
 namespace yams::test {
 
-class TestSubsystem : public frc2::SubsystemBase {
+class TestSubsystem : public wpi::cmd::SubsystemBase {
  public:
   TestSubsystem() = default;
 
   void SetSMC(motorcontrollers::SmartMotorController* smc) { m_smc = smc; }
 
-  frc2::CommandPtr SetDutyCycle(double dutyCycle) {
+  wpi::cmd::CommandPtr SetDutyCycle(double dutyCycle) {
     return StartRun([this] { m_smc->StopClosedLoopController(); },
                     [this, dutyCycle] { m_smc->SetDutyCycle(dutyCycle); })
         .FinallyDo([this](bool) { m_smc->StartClosedLoopController(); });
   }
 
-  frc2::CommandPtr SetPositionSetpoint(units::degree_t position) {
+  wpi::cmd::CommandPtr SetPositionSetpoint(wpi::units::degree_t position) {
     return Run([this, position] { m_smc->SetPosition(position); });
   }
 
-  frc2::CommandPtr SetPositionSetpoint(units::meter_t position) {
+  wpi::cmd::CommandPtr SetPositionSetpoint(wpi::units::meter_t position) {
     return Run([this, position] { m_smc->SetPosition(position); });
   }
 

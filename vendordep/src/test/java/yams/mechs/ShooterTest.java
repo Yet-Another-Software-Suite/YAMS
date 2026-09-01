@@ -3,29 +3,29 @@
 
 package yams.mechs;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Millisecond;
-import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Second;
-import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.DegreesPerSecond;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Millisecond;
+import static org.wpilib.units.Units.Milliseconds;
+import static org.wpilib.units.Units.RPM;
+import static org.wpilib.units.Units.Second;
+import static org.wpilib.units.Units.Seconds;
+import static org.wpilib.units.Units.Volts;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.wpilibj.Preferences;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
+import org.wpilib.math.controller.SimpleMotorFeedforward;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.util.Preferences;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.CommandScheduler;
+import org.wpilib.command2.Commands;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
@@ -298,16 +298,20 @@ public class ShooterTest
   @MethodSource("createConfigs")
   void testSMCDutyCycle(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    smc.setupSimulation();
-    SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
+    try
+    {
+      startTest(smc);
+      smc.setupSimulation();
+      SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
 
-    Command dutyCycleUp   = subsys.setDutyCycle(0.5);
-    Command dutyCycleDown = subsys.setDutyCycle(-0.5);
+      Command dutyCycleUp   = subsys.setDutyCycle(0.5);
+      Command dutyCycleDown = subsys.setDutyCycle(-0.5);
 
-    dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
-
-    closeSMC(smc);
+      dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
 
@@ -315,48 +319,60 @@ public class ShooterTest
   @MethodSource("createConfigs")
   void testSMCVelocityPID(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    smc.setupSimulation();
-    Command highPid = Commands.run(() -> smc.setVelocity(RPM.of(2000)));
+    try
+    {
+      startTest(smc);
+      smc.setupSimulation();
+      Command highPid = Commands.run(() -> smc.setVelocity(RPM.of(2000)));
 //    Command lowPid  = Commands.run(() -> smc.setPosition(Degrees.of(-80)));
 
-    shooterVelocityPidTest(smc, highPid);
-
-    closeSMC(smc);
+      shooterVelocityPidTest(smc, highPid);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   @ParameterizedTest
   @MethodSource("createConfigs")
   void testShooterDutyCycle(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    FlyWheel shooter       = createShooter(smc);
-    Command  dutyCycleUp   = shooter.set(0.5);
-    Command  dutyCycleDown = shooter.set(-0.5);
+    try
+    {
+      startTest(smc);
+      FlyWheel shooter       = createShooter(smc);
+      Command  dutyCycleUp   = shooter.set(0.5);
+      Command  dutyCycleDown = shooter.set(-0.5);
 
 //    if (smc instanceof TalonFXWrapper || smc instanceof TalonFXSWrapper)
 //    {
 //      System.out.println("[WARNING] TalonFX and TalonFXS Does not work with CI on linux, skipping for now.");
 //    } else
 //    {
-    dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
+      dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
 //    }
-
-    closeSMC(smc);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   @ParameterizedTest
   @MethodSource("createConfigs")
   void testShooterVelocityPID(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    FlyWheel shooter = createShooter(smc);
-    Command  highPid = shooter.run(RPM.of(80));
-    Command  lowPid  = shooter.run(RPM.of(-80));
+    try
+    {
+      startTest(smc);
+      FlyWheel shooter = createShooter(smc);
+      Command  highPid = shooter.run(RPM.of(80));
+      Command  lowPid  = shooter.run(RPM.of(-80));
 
-    shooterVelocityPidTest(smc, highPid);
-
-    closeSMC(smc);
+      shooterVelocityPidTest(smc, highPid);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   @BeforeEach

@@ -3,17 +3,17 @@
 
 package yams.motorcontrollers;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.Subsystem;
+import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.Commands;
+import org.wpilib.command2.Subsystem;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Registry for WPILib {@link edu.wpi.first.wpilibj2.command.Command} instances associated with a
+ * Registry for WPILib {@link org.wpilib.command2.Command} instances associated with a
  * {@link yams.motorcontrollers.SmartMotorController}. Mechanisms register setpoint commands here
  * so the scheduler can manage them.
  */

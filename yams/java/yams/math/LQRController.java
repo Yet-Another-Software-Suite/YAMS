@@ -3,23 +3,23 @@
 
 package yams.math;
 
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.Radians;
+import static org.wpilib.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.Seconds;
+import static org.wpilib.units.Units.Volts;
 
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N2;
-import edu.wpi.first.math.system.LinearSystemLoop;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.units.measure.Voltage;
+import org.wpilib.math.linalg.VecBuilder;
+import org.wpilib.math.numbers.N1;
+import org.wpilib.math.numbers.N2;
+import org.wpilib.math.system.LinearSystemLoop;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.LinearVelocity;
+import org.wpilib.units.measure.Time;
+import org.wpilib.units.measure.Voltage;
 import java.util.Objects;
 import java.util.Optional;
 import yams.math.LQRConfig.LQRType;
@@ -34,13 +34,13 @@ import yams.math.LQRConfig.LQRType;
  *
  * <p>On each robot loop iteration, call the appropriate {@code calculate()} overload with the
  * current sensor measurement and the desired setpoint. The controller internally runs a
- * {@link edu.wpi.first.math.system.LinearSystemLoop} that fuses a
- * {@link edu.wpi.first.math.controller.LinearQuadraticRegulator} with a
- * {@link edu.wpi.first.math.estimator.KalmanFilter} observer.
+ * {@link org.wpilib.math.system.LinearSystemLoop} that fuses a
+ * {@link org.wpilib.math.controller.LinearQuadraticRegulator} with a
+ * {@link org.wpilib.math.estimator.KalmanFilter} observer.
  *
  * <h2>Example — construct from LQRConfig and calculate arm voltage</h2>
  * <pre>{@code
- * import static edu.wpi.first.units.Units.*;
+ * import static org.wpilib.units.Units.*;
  *
  * // Build configuration (see LQRConfig for full parameter details)
  * LQRConfig config = new LQRConfig(

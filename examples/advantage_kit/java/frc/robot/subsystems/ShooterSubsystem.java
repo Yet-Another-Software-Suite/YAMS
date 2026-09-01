@@ -3,24 +3,24 @@
 
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Pounds;
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Second;
-import static edu.wpi.first.units.Units.Volts;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.DegreesPerSecond;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Pounds;
+import static org.wpilib.units.Units.RPM;
+import static org.wpilib.units.Units.Second;
+import static org.wpilib.units.Units.Volts;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.wpilib.math.controller.SimpleMotorFeedforward;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Current;
+import org.wpilib.units.measure.Voltage;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.Commands;
+import org.wpilib.command2.SubsystemBase;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
@@ -69,7 +69,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   private final ShooterInputsAutoLogged shooterInputs = new ShooterInputsAutoLogged();
 
-  private final SparkMax armMotor = new SparkMax(20, MotorType.kBrushless);
+  private final SparkMax armMotor = new SparkMax(1, 20, MotorType.kBrushless);
 
   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       // kP=1 is a starting point; a flywheel typically needs little P because
@@ -134,7 +134,7 @@ public class ShooterSubsystem extends SubsystemBase {
    * Set the shooter velocity.
    *
    * @param speed Speed to set.
-   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
+   * @return {@link org.wpilib.command2.RunCommand}
    */
   public Command setVelocity(AngularVelocity speed) {
     // recordOutput logs the setpoint as a computed output -- it is NOT replayed.
@@ -148,7 +148,7 @@ public class ShooterSubsystem extends SubsystemBase {
    * Set the dutycycle of the shooter.
    *
    * @param dutyCycle DutyCycle to set.
-   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
+   * @return {@link org.wpilib.command2.RunCommand}
    */
   public Command set(double dutyCycle) {
     Logger.recordOutput("Shooter/DutyCycle", dutyCycle);

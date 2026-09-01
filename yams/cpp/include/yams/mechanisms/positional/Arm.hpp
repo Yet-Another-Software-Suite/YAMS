@@ -3,12 +3,12 @@
 
 #pragma once
 
-#include <frc/geometry/Translation3d.h>
-#include <frc/simulation/SingleJointedArmSim.h>
-#include <frc/smartdashboard/MechanismLigament2d.h>
-#include <frc2/command/CommandPtr.h>
-#include <frc2/command/button/Trigger.h>
-#include <units/angle.h>
+#include <wpi/math/geometry/Translation3d.hpp>
+#include <wpi/simulation/SingleJointedArmSim.hpp>
+#include <wpi/smartdashboard/MechanismLigament2d.hpp>
+#include <wpi/commands2/CommandPtr.hpp>
+#include <wpi/commands2/button/Trigger.hpp>
+#include <wpi/units/angle.hpp>
 
 #include <functional>
 #include <optional>
@@ -42,19 +42,19 @@ namespace yams::mechanisms::positional {
  * SmartMotorControllerConfig motorCfg;
  * motorCfg.WithSubsystem(this)
  *         .WithFeedback(4.0, 0.0, 0.0)
- *         .WithTrapezoidProfile(units::turns_per_second_t{0.5},
- *                               units::turns_per_second_squared_t{0.25})
+ *         .WithTrapezoidProfile(wpi::units::turns_per_second_t{0.5},
+ *                               wpi::units::turns_per_second_squared_t{0.25})
  *         .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
  *         .WithIdleMode(Cfg::MotorMode::BRAKE)
  *         .WithStatorCurrentLimit(40.0_A)
  *         .WithMotorInverted(false)
- *         .WithFeedforward(frc::ArmFeedforward{
- *             0.0_V, 0.0_V, units::unit_t<frc::ArmFeedforward::kv_unit>{0.0},
- *             units::unit_t<frc::ArmFeedforward::ka_unit>{0.0}})
+ *         .WithFeedforward(wpi::math::ArmFeedforward{
+ *             0.0_V, 0.0_V, wpi::units::unit_t<wpi::math::ArmFeedforward::kv_unit>{0.0},
+ *             wpi::units::unit_t<wpi::math::ArmFeedforward::ka_unit>{0.0}})
  *         .WithClosedLoopMode()
  *         .WithTelemetry("ArmMotor", Cfg::TelemetryVerbosity::HIGH);
  *
- * m_smc.emplace(m_talon, frc::DCMotor::KrakenX60(1), motorCfg);
+ * m_smc.emplace(m_talon, wpi::math::DCMotor::KrakenX60(1), motorCfg);
  *
  * m_armConfig.WithMinAngle(-100.0_deg)
  *            .WithMaxAngle(200.0_deg)
@@ -99,7 +99,7 @@ class Arm : public SmartPositionalMechanism {
    *
    * @return Trigger for the upper angular hard limit.
    */
-  frc2::Trigger Max() override;
+  wpi::cmd::Trigger Max() override;
 
   /**
    * Trigger that becomes true when the arm is at or past its minimum
@@ -107,7 +107,7 @@ class Arm : public SmartPositionalMechanism {
    *
    * @return Trigger for the lower angular hard limit.
    */
-  frc2::Trigger Min() override;
+  wpi::cmd::Trigger Min() override;
 
   // ---- Arm-specific interface -----------------------------------------------
 
@@ -117,7 +117,7 @@ class Arm : public SmartPositionalMechanism {
    * @param angle Arm angle to go to.
    * @return CommandPtr that requires the configured subsystem.
    */
-  frc2::CommandPtr Run(units::degree_t angle);
+  wpi::cmd::CommandPtr Run(wpi::units::degree_t angle);
 
   /**
    * Set the arm to the given angle via a supplier.
@@ -125,7 +125,7 @@ class Arm : public SmartPositionalMechanism {
    * @param angle Supplier returning the desired arm angle each loop.
    * @return CommandPtr that requires the configured subsystem.
    */
-  frc2::CommandPtr Run(std::function<units::degree_t()> angle);
+  wpi::cmd::CommandPtr Run(std::function<wpi::units::degree_t()> angle);
 
   /**
    * Command the arm to a fixed angle, then end when within tolerance.
@@ -134,7 +134,7 @@ class Arm : public SmartPositionalMechanism {
    * @param tolerance Acceptable error.
    * @return CommandPtr that ends once the arm is near the target.
    */
-  frc2::CommandPtr RunTo(units::degree_t angle, units::degree_t tolerance = units::degree_t{1.0});
+  wpi::cmd::CommandPtr RunTo(wpi::units::degree_t angle, wpi::units::degree_t tolerance = wpi::units::degree_t{1.0});
 
   /**
    * Command the arm to an angle from a supplier, then end when within tolerance.
@@ -145,15 +145,15 @@ class Arm : public SmartPositionalMechanism {
    * @param tolerance Acceptable error.
    * @return CommandPtr that ends once the arm is near the target.
    */
-  frc2::CommandPtr RunTo(std::function<units::degree_t()> angle,
-                         units::degree_t tolerance = units::degree_t{1.0});
+  wpi::cmd::CommandPtr RunTo(std::function<wpi::units::degree_t()> angle,
+                         wpi::units::degree_t tolerance = wpi::units::degree_t{1.0});
 
   /**
    * Get the current joint angle from the motor encoder.
    *
    * @return Current mechanism angle in degrees.
    */
-  units::degree_t GetAngle() const;
+  wpi::units::degree_t GetAngle() const;
 
   /**
    * Trigger that fires while the arm angle is >= the given angle.
@@ -161,7 +161,7 @@ class Arm : public SmartPositionalMechanism {
    * @param angle Reference angle.
    * @return Trigger for the >= condition.
    */
-  frc2::Trigger Gte(units::degree_t angle);
+  wpi::cmd::Trigger Gte(wpi::units::degree_t angle);
 
   /**
    * Trigger that fires while the arm angle is <= the given angle.
@@ -169,7 +169,7 @@ class Arm : public SmartPositionalMechanism {
    * @param angle Reference angle.
    * @return Trigger for the <= condition.
    */
-  frc2::Trigger Lte(units::degree_t angle);
+  wpi::cmd::Trigger Lte(wpi::units::degree_t angle);
 
   /**
    * Trigger that fires while the arm angle is between start and end (inclusive).
@@ -178,7 +178,7 @@ class Arm : public SmartPositionalMechanism {
    * @param end   Upper bound.
    * @return Trigger for the range condition.
    */
-  frc2::Trigger Between(units::degree_t start, units::degree_t end);
+  wpi::cmd::Trigger Between(wpi::units::degree_t start, wpi::units::degree_t end);
 
   /**
    * Trigger that fires while the arm is within tolerance of an angle.
@@ -187,7 +187,7 @@ class Arm : public SmartPositionalMechanism {
    * @param within Tolerance.
    * @return Trigger for the near condition.
    */
-  frc2::Trigger IsNear(units::degree_t angle, units::degree_t within = units::degree_t{1.0});
+  wpi::cmd::Trigger IsNear(wpi::units::degree_t angle, wpi::units::degree_t within = wpi::units::degree_t{1.0});
 
   /**
    * Get the configuration used to construct this arm.
@@ -201,20 +201,20 @@ class Arm : public SmartPositionalMechanism {
    *
    * @return Translation3d representing the mechanism endpoint.
    */
-  frc::Translation3d GetRelativeMechanismPosition() const;
+  wpi::math::Translation3d GetRelativeMechanismPosition() const;
 
   /**
    * Directly command the arm to an angle setpoint (non-command, for use in periodic).
    *
    * @param angle Desired joint angle.
    */
-  void SetAngle(units::degree_t angle);
+  void SetAngle(wpi::units::degree_t angle);
 
  private:
   config::ArmConfig* m_armConfig{nullptr};
   std::string m_name{"Arm"};
-  std::optional<frc::sim::SingleJointedArmSim> m_armSim;
-  frc::MechanismLigament2d* m_setpointLigament{nullptr};
+  std::optional<wpi::sim::SingleJointedArmSim> m_armSim;
+  wpi::MechanismLigament2d* m_setpointLigament{nullptr};
 };
 
 }  // namespace yams::mechanisms::positional

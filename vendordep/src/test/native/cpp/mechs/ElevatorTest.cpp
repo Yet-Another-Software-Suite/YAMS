@@ -4,13 +4,14 @@
 // Mirrors Java ElevatorTest — exercises duty-cycle and position-PID control
 // for each (HardwareType × ProfileType) combination using WPILib simulation.
 
-#include <frc/system/plant/DCMotor.h>
-#include <frc2/command/Commands.h>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/commands2/CommandScheduler.hpp>
+#include <wpi/commands2/Commands.hpp>
 #include <gtest/gtest.h>
-#include <units/acceleration.h>
-#include <units/length.h>
-#include <units/mass.h>
-#include <units/velocity.h>
+#include <wpi/units/acceleration.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/mass.hpp>
+#include <wpi/units/velocity.hpp>
 
 #include <chrono>
 #include <cmath>
@@ -48,9 +49,9 @@ static SmartMotorControllerConfig MakeElevatorSMCConfig(ProfileType profile, Har
       .WithIdleMode(SmartMotorControllerConfig::MotorMode::BRAKE)
       .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
-      .WithFeedforward(frc::ElevatorFeedforward{
-          1.0_V, 0.0_V, units::unit_t<frc::ElevatorFeedforward::kv_unit>{0.0},
-          units::unit_t<frc::ElevatorFeedforward::ka_unit>{0.0}})
+      .WithFeedforward(wpi::math::ElevatorFeedforward{
+          1.0_V, 0.0_V, wpi::units::unit_t<wpi::math::ElevatorFeedforward::kv_unit>{0.0},
+          wpi::units::unit_t<wpi::math::ElevatorFeedforward::ka_unit>{0.0}})
       .WithClosedLoopMode()
       .WithSubsystem(subsys)
       .WithTelemetry(name);
@@ -86,7 +87,7 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
 
   auto* subsys = static_cast<TestSubsystem*>(smc->GetConfig().GetSubsystem());
   auto cmd = subsys->SetDutyCycle(1.0);
-  frc2::CommandScheduler::GetInstance().Schedule(cmd);
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(cmd);
 
   SchedulerHelper::RunForDuration(1.0_s, [&] {
     if (smc->GetDutyCycle() != 0.0) passed = true;
@@ -114,10 +115,10 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE, bool deb
   auto preDist = smc->GetMeasurementPosition();
   bool passed = false;
 
-  auto cmd = frc2::cmd::Run([smc] { smc->SetPosition(2.0_m); }, {smc->GetConfig().GetSubsystem()});
-  frc2::CommandScheduler::GetInstance().Schedule(cmd);
+  auto cmd = wpi::cmd::Run([smc] { smc->SetPosition(2.0_m); }, {smc->GetConfig().GetSubsystem()});
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(cmd);
 
-  units::millisecond_t period{
+  wpi::units::millisecond_t period{
       smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms).value() * 1000.0};
 
   SchedulerHelper::RunForDuration(isCTRE ? 1.0_s : 20.0_s, [&] {
@@ -190,7 +191,7 @@ TEST_P(ElevatorTest, ElevatorDutyCycle) {
 
   auto elevator = CreateElevator(bundle.smc, bundle.subsystem.get());
   auto upCmd = elevator->Set(1.0);
-  frc2::CommandScheduler::GetInstance().Schedule(upCmd);
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(upCmd);
 
   DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
   CloseBundle(bundle);
@@ -207,7 +208,7 @@ TEST_P(ElevatorTest, ElevatorPositionPID) {
 
   auto elevator = CreateElevator(bundle.smc, bundle.subsystem.get());
   auto highPid = elevator->RunTo(2.0_m);
-  frc2::CommandScheduler::GetInstance().Schedule(highPid);
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(highPid);
 
   PositionPIDTestBody(bundle.smc, IsCTRE(bundle), param.name == "TalonFXS_NoPro");
   CloseBundle(bundle);

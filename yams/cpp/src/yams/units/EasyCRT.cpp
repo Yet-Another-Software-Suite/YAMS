@@ -3,7 +3,7 @@
 
 #include "yams/units/EasyCRT.hpp"
 
-#include <frc/MathUtil.h>
+#include <wpi/math/util/MathUtil.hpp>
 
 #include <cmath>
 #include <cstdint>
@@ -36,15 +36,15 @@ EasyCRT::EasyCRT(EasyCRTConfig cfg) : m_cfg{std::move(cfg)} {
   m_crtW2 = (ModInverse(m1, m2) * m1) % m_crtMod;
 }
 
-std::optional<::units::turn_t> EasyCRT::GetAngle() {
+std::optional<wpi::units::turn_t> EasyCRT::GetAngle() {
   m_lastIter = 4;
   m_lastErr = std::numeric_limits<double>::quiet_NaN();
 
   // Read, offset, wrap, then optionally invert into the CRT coordinate frame.
-  const double r1 = frc::InputModulus(m_cfg.enc1().value() + m_cfg.offset1, 0.0, 1.0);
-  const double r2 = frc::InputModulus(m_cfg.enc2().value() + m_cfg.offset2, 0.0, 1.0);
-  const double abs1 = m_cfg.inv1 ? frc::InputModulus(1.0 - r1, 0.0, 1.0) : r1;
-  const double abs2 = m_cfg.inv2 ? frc::InputModulus(1.0 - r2, 0.0, 1.0) : r2;
+  const double r1 = wpi::math::InputModulus(m_cfg.enc1().value() + m_cfg.offset1, 0.0, 1.0);
+  const double r2 = wpi::math::InputModulus(m_cfg.enc2().value() + m_cfg.offset2, 0.0, 1.0);
+  const double abs1 = m_cfg.inv1 ? wpi::math::InputModulus(1.0 - r1, 0.0, 1.0) : r1;
+  const double abs2 = m_cfg.inv2 ? wpi::math::InputModulus(1.0 - r2, 0.0, 1.0) : r2;
 
   // Single flat validity check.
   if (!std::isfinite(abs1) || !std::isfinite(abs2) || !std::isfinite(m_cfg.commonK) ||
@@ -112,7 +112,7 @@ std::optional<::units::turn_t> EasyCRT::GetAngle() {
   bestRot += CenteredMod(raw2 - pred2_teeth, 0.5) / k;
 
   m_status = Status::Ok;
-  return ::units::turn_t{bestRot};
+  return wpi::units::turn_t{bestRot};
 }
 
 double EasyCRT::ModularError(double a, double b) {

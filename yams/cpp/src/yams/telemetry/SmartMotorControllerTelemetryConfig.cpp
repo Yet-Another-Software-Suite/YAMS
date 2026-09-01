@@ -3,8 +3,8 @@
 
 #include "yams/telemetry/SmartMotorControllerTelemetryConfig.hpp"
 
-#include <units/angle.h>
-#include <units/length.h>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/length.hpp>
 
 #include <string>
 #include <unordered_map>
@@ -18,7 +18,7 @@ using motorcontrollers::SmartMotorController;
 using motorcontrollers::SmartMotorControllerConfig;
 
 // Helper: create a DoubleTelemetry for a given field
-static DoubleTelemetry MakeDouble(DoubleTelemetryField field) {
+static DoubleTelemetry<DoubleTelemetryField> MakeDouble(DoubleTelemetryField field) {
   switch (field) {
     case DoubleTelemetryField::ExponentialProfileKV:
       return {"closedloop/motionprofile/kV", 0.0, field, true, "none"};
@@ -123,7 +123,7 @@ static BooleanTelemetry MakeBool(BooleanTelemetryField field) {
     case BooleanTelemetryField::ArmFeedForward:
       return {"control/feedforward/arm", false, field, false};
     case BooleanTelemetryField::SimpleMotorFeedForward:
-      return {"control/Simple Motor Feedforward", false, field, false};
+      return {"control/feedforward/simple", false, field, false};
     case BooleanTelemetryField::MotionProfile:
       return {"control/closedloop/profiled", false, field, false};
     case BooleanTelemetryField::MotorInversion:
@@ -365,7 +365,7 @@ std::optional<std::string> SmartMotorControllerTelemetryConfig::GetDataLogName()
 }
 bool SmartMotorControllerTelemetryConfig::GetNT4Enabled() const { return m_nt4Telemetry; }
 
-std::unordered_map<DoubleTelemetryField, DoubleTelemetry>&
+std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>&
 SmartMotorControllerTelemetryConfig::GetDoubleFields(SmartMotorController& smc) {
   SmartMotorControllerConfig& cfg = smc.GetConfig();
   auto slot = smc.GetClosedLoopControllerSlot();
@@ -416,10 +416,10 @@ SmartMotorControllerTelemetryConfig::GetDoubleFields(SmartMotorController& smc) 
   // Set mechanism limit defaults (in degrees for human readability)
   if (auto lim = cfg.GetMechanismUpperLimit())
     m_doubleFields.at(DoubleTelemetryField::MechanismUpperLimit)
-        .SetDefaultValue(units::degree_t{*lim}.value());
+        .SetDefaultValue(wpi::units::degree_t{*lim}.value());
   if (auto lim = cfg.GetMechanismLowerLimit())
     m_doubleFields.at(DoubleTelemetryField::MechanismLowerLimit)
-        .SetDefaultValue(units::degree_t{*lim}.value());
+        .SetDefaultValue(wpi::units::degree_t{*lim}.value());
 
   // Current limit defaults
   if (auto lim = cfg.GetSupplyStallCurrentLimit())

@@ -3,7 +3,7 @@
 
 #include <cxxabi.h>
 #include <execinfo.h>
-#include <hal/HAL.h>
+#include <wpi/hal/HAL.h>
 
 #include <csignal>
 #include <cstdio>

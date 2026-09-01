@@ -30,21 +30,24 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - container: wpilib/roborio-cross-ubuntu:2025-22.04
-            artifact-name: athena
-            build-options: "-Ponlylinuxathena"
-          - container: wpilib/raspbian-cross-ubuntu:bookworm-22.04
-            artifact-name: arm32
-            build-options: "-Ponlylinuxarm32"
-          - container: wpilib/aarch64-cross-ubuntu:bookworm-22.04
-            artifact-name: arm64
+          - container: wpilib/systemcore-cross-debian:trixie
+            artifact-name: SystemCore
+            build-options: "-Ponlylinuxsystemcore"
+          - container: wpilib/aarch64-cross-debian:trixie
+            artifact-name: Arm64
             build-options: "-Ponlylinuxarm64"
-    runs-on: ubuntu-22.04
+          - container: wpilib/systemcore-cross-debian:trixie
+            artifact-name: Linux
+            build-options: ""
+    runs-on: ubuntu-24.04
     container: ${{ matrix.container }}
     steps:
       - uses: actions/checkout@v7
       - name: Configure git safe directory
         run: git config --global --add safe.directory /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}
+      - name: Install toolchain
+        run: ./gradlew installSystemCoreToolchain
+        working-directory: vendordep
       - name: Publish
         run: ./gradlew publish ${{ matrix.build-options }}
         working-directory: vendordep
@@ -64,40 +67,75 @@ jobs:
         working-directory: vendordep
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 25
       - run: chmod +x gradlew
       - name: Install doxygen and graphviz
         run: sudo apt-get install -y doxygen graphviz
-      - name: Cache roboRIO toolchain
-        id: toolchain-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/wpilib/2026/roborio
-          key: roborio-toolchain-linux
       - uses: gradle/actions/setup-gradle@v6
-      - name: Install roboRIO toolchain
-        if: steps.toolchain-cache.outputs.cache-hit != 'true'
-        shell: bash
-        run: |
-          for i in 1 2 3; do
-            ./gradlew installRoboRioToolchain && break
-            echo "Attempt $i failed, retrying in 15s..."
-            sleep 15
-          done
-      - name: C++ unit tests
-        run: ./gradlew googleTest
-        continue-on-error: true
-      - name: Java unit tests
-        run: ./gradlew test
+      - name: Install toolchain
+        run: ./gradlew installSystemCoreToolchain
       - name: Publish
         run: ./gradlew publish
       - uses: actions/upload-artifact@v7
         with:
           name: maven-linux
           path: vendordep/build/maven/
+
+  test-cpp:
+    name: C++ unit tests
+    needs: [build-linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: vendordep
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+      - run: chmod +x gradlew
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Install toolchain
+        run: ./gradlew installSystemCoreToolchain
+      - uses: actions/download-artifact@v7
+        with:
+          name: maven-linux
+          path: vendordep/build/maven/
+      - name: C++ unit tests
+        run: ./gradlew googleTest
+        continue-on-error: true
+
+  test-java:
+    name: Java unit tests
+    needs: [build-linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: vendordep
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+      - run: chmod +x gradlew
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Install toolchain
+        run: ./gradlew installSystemCoreToolchain
+      - uses: actions/download-artifact@v7
+        with:
+          name: maven-linux
+          path: vendordep/build/maven/
+      - name: Java unit tests
+        run: ./gradlew test
 
   build-host:
     name: Build - ${{ matrix.artifact-name }}
@@ -106,43 +144,33 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: windows-latest
+          - os: windows-2025
             artifact-name: windows
             gradlew: ./gradlew.bat
-            toolchain-path: C:/Users/Public/wpilib/2026/roborio
-          - os: macos-latest
+            architecture: x64
+          - os: macos-15
             artifact-name: macos
             gradlew: ./gradlew
-            toolchain-path: ~/wpilib/2026/roborio
+            architecture: aarch64
     runs-on: ${{ matrix.os }}
     defaults:
       run:
         working-directory: vendordep
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 25
+          architecture: ${{ matrix.architecture }}
       - name: Make gradlew executable
         if: runner.os != 'Windows'
         run: chmod +x gradlew
-      - name: Cache roboRIO toolchain
-        id: toolchain-cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ matrix.toolchain-path }}
-          key: roborio-toolchain-${{ matrix.artifact-name }}
       - uses: gradle/actions/setup-gradle@v6
-      - name: Install roboRIO toolchain
-        if: steps.toolchain-cache.outputs.cache-hit != 'true'
-        shell: bash
-        run: |
-          for i in 1 2 3; do
-            ./gradlew installRoboRioToolchain && break
-            echo "Attempt $i failed, retrying in 15s..."
-            sleep 5
-          done
+      - name: Install toolchain
+        run: ${{matrix.gradlew}} installSystemCoreToolchain
+      - name: Build java and C++
+        run: ${{matrix.gradlew}} build
       - name: Publish
         run: ${{ matrix.gradlew }} publish
       - uses: actions/upload-artifact@v7

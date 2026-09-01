@@ -4,15 +4,15 @@
 package frc.robot.subsystems;
 
 
-import static edu.wpi.first.units.Units.Inches;
+import static org.wpilib.units.Units.Inches;
 
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.math.Pair;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.wpilib.math.Pair;
+import org.wpilib.math.system.plant.DCMotor;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.drive.DifferentialDrive;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.SubsystemBase;
 import java.util.function.DoubleSupplier;
 import yams.gearing.MechanismGearing;
 import yams.motorcontrollers.SmartMotorController;

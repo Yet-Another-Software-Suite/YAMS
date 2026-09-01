@@ -3,20 +3,20 @@
 
 #include "yams/mechanisms/positional/Elevator.hpp"
 
-#include <frc/RobotBase.h>
-#include <frc/geometry/Rotation3d.h>
-#include <frc/geometry/Translation3d.h>
-#include <frc/simulation/BatterySim.h>
-#include <frc/simulation/RoboRioSim.h>
-#include <frc/smartdashboard/Mechanism2d.h>
-#include <frc/smartdashboard/MechanismLigament2d.h>
-#include <frc/smartdashboard/MechanismRoot2d.h>
-#include <frc/smartdashboard/SmartDashboard.h>
-#include <frc/util/Color.h>
-#include <frc/util/Color8Bit.h>
-#include <frc2/command/Commands.h>
-#include <units/length.h>
-#include <units/time.h>
+#include <wpi/framework/RobotBase.hpp>
+#include <wpi/math/geometry/Rotation3d.hpp>
+#include <wpi/math/geometry/Translation3d.hpp>
+#include <wpi/simulation/BatterySim.hpp>
+#include <wpi/simulation/RoboRioSim.hpp>
+#include <wpi/smartdashboard/Mechanism2d.hpp>
+#include <wpi/smartdashboard/MechanismLigament2d.hpp>
+#include <wpi/smartdashboard/MechanismRoot2d.hpp>
+#include <wpi/smartdashboard/SmartDashboard.hpp>
+#include <wpi/util/Color.hpp>
+#include <wpi/util/Color8Bit.hpp>
+#include <wpi/commands2/Commands.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/time.hpp>
 
 #include <array>
 #include <cmath>
@@ -55,42 +55,42 @@ Elevator::Elevator(config::ElevatorConfig* config, motorcontrollers::SmartMotorC
     m_smc->SetEncoderPosition(m_smc->GetConfig().ConvertFromMechanism(*startPos));
   }
 
-  if (frc::RobotBase::IsSimulation()) {
+  if (wpi::RobotBase::IsSimulation()) {
     // Configuration checks.
     if (!m_elevatorConfig->GetCarriageMass().has_value()) {
       throw exceptions::ElevatorConfigurationException("Mass is not configured!",
                                                        "Cannot create simulator",
-                                                       "WithCarriageMass(units::kilogram_t)");
+                                                       "WithCarriageMass(wpi::units::kilogram_t)");
     }
     if (!m_elevatorConfig->GetMinHeight().has_value()) {
       throw exceptions::ElevatorConfigurationException("Minimum height is not configured!",
                                                        "Cannot create simulator",
-                                                       "WithMinimumHeight(units::meter_t)");
+                                                       "WithMinimumHeight(wpi::units::meter_t)");
     }
     if (!m_elevatorConfig->GetMaxHeight().has_value()) {
       throw exceptions::ElevatorConfigurationException("Maximum height is not configured!",
                                                        "Cannot create simulator",
-                                                       "WithMaximumHeight(units::meter_t)");
+                                                       "WithMaximumHeight(wpi::units::meter_t)");
     }
     if (!m_smc->GetConfig().GetStartingPosition().has_value()) {
       throw exceptions::ElevatorConfigurationException("Starting position is not configured!",
                                                        "Cannot create simulator",
-                                                       "smc.WithStartingPosition(units::meter_t)");
+                                                       "smc.WithStartingPosition(wpi::units::meter_t)");
     }
     if (!m_smc->GetConfig().GetMechanismCircumference().has_value()) {
       throw exceptions::ElevatorConfigurationException(
           "Mechanism circumference is not configured!", "Cannot create simulator",
-          "SMC.WithMechanismCircumference(units::meter_t)");
+          "SMC.WithMechanismCircumference(wpi::units::meter_t)");
     }
 
-    frc::DCMotor dcMotor = m_smc->GetDCMotor();
+    wpi::math::DCMotor dcMotor = m_smc->GetDCMotor();
     auto& gearingOpt = m_smc->GetConfig().GetMotorGearing();
     gearing::MechanismGearing gearing = gearingOpt.value_or(gearing::MechanismGearing::kOne);
 
     bool simulateGravity = !m_elevatorConfig->IsHorizontal();
-    units::meter_t circumference = m_smc->GetConfig().GetMechanismCircumference().value();
+    wpi::units::meter_t circumference = m_smc->GetConfig().GetMechanismCircumference().value();
 
-    units::meter_t startH =
+    wpi::units::meter_t startH =
         m_smc->GetConfig().ConvertFromMechanism(*m_smc->GetConfig().GetStartingPosition());
 
     m_elevatorSim.emplace(
@@ -99,7 +99,7 @@ Elevator::Elevator(config::ElevatorConfig* config, motorcontrollers::SmartMotorC
         m_elevatorConfig->GetMaxHeight().value(), simulateGravity, startH,
         std::array<double, 2>{0.01 / 4096.0, 0.01 / 4096.0});
 
-    units::second_t period = m_smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms);
+    wpi::units::second_t period = m_smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms);
     m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::ElevatorSimSupplier>(
         *m_elevatorSim, [this]() { return m_smc->GetDutyCycle(); }, gearing, circumference,
         period));
@@ -107,7 +107,7 @@ Elevator::Elevator(config::ElevatorConfig* config, motorcontrollers::SmartMotorC
     // Build Mechanism2d window.
     double maxH = m_elevatorConfig->GetMaxHeight().value().value();
     double startHValue = startH.value();
-    units::degree_t angle = m_elevatorConfig->GetAngle();
+    wpi::units::degree_t angle = m_elevatorConfig->GetAngle();
     constexpr double kSoftOffset = 6.0 * 0.0254;  // 6 inches
     constexpr double kHardOffset = 8.0 * 0.0254;  // 8 inches
 
@@ -118,31 +118,31 @@ Elevator::Elevator(config::ElevatorConfig* config, motorcontrollers::SmartMotorC
     auto smcUpperLimit = m_smc->GetConfig().GetMechanismUpperLimit();
     if (smcLowerLimit.has_value()) {
       m_mechanismWindow->GetRoot("MinSoft", maxH - kSoftOffset, 0.0)
-          ->Append<frc::MechanismLigament2d>(
+          ->Append<wpi::MechanismLigament2d>(
               "Limit", m_smc->GetConfig().ConvertFromMechanism(smcLowerLimit.value()).value(),
-              angle, 3, frc::Color8Bit{frc::Color::kYellow});
+              angle, 3, wpi::util::Color8Bit{wpi::util::Color::YELLOW});
     }
     if (smcUpperLimit.has_value()) {
       m_mechanismWindow->GetRoot("MaxSoft", maxH - kSoftOffset, 0.0)
-          ->Append<frc::MechanismLigament2d>(
+          ->Append<wpi::MechanismLigament2d>(
               "Limit", m_smc->GetConfig().ConvertFromMechanism(smcUpperLimit.value()).value(),
-              angle, 3, frc::Color8Bit{frc::Color::kHotPink});
+              angle, 3, wpi::util::Color8Bit{wpi::util::Color::HOT_PINK});
     }
     m_mechanismWindow->GetRoot("MinHard", maxH - kHardOffset, 0.0)
-        ->Append<frc::MechanismLigament2d>("Limit",
+        ->Append<wpi::MechanismLigament2d>("Limit",
                                            m_elevatorConfig->GetMinHeight().value().value(), angle,
-                                           3, frc::Color8Bit{frc::Color::kRed});
+                                           3, wpi::util::Color8Bit{wpi::util::Color::RED});
     m_mechanismWindow->GetRoot("MaxHard", maxH - kHardOffset, 0.0)
-        ->Append<frc::MechanismLigament2d>("Limit",
+        ->Append<wpi::MechanismLigament2d>("Limit",
                                            m_elevatorConfig->GetMaxHeight().value().value(), angle,
-                                           3, frc::Color8Bit{frc::Color::kLimeGreen});
+                                           3, wpi::util::Color8Bit{wpi::util::Color::LIME_GREEN});
 
-    m_mechanismLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
+    m_mechanismLigament = m_mechanismRoot->Append<wpi::MechanismLigament2d>(
         m_name, startHValue, angle, 6, m_elevatorConfig->GetSimColor());
-    m_setpointLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
-        "Setpoint", startHValue, angle, 3, frc::Color8Bit{frc::Color::kWhite});
+    m_setpointLigament = m_mechanismRoot->Append<wpi::MechanismLigament2d>(
+        "Setpoint", startHValue, angle, 3, wpi::util::Color8Bit{wpi::util::Color::WHITE});
 
-    frc::SmartDashboard::PutData(m_name + "/mechanism", &(*m_mechanismWindow));
+    wpi::SmartDashboard::PutData(m_name + "/mechanism", &(*m_mechanismWindow));
   }
 }
 
@@ -156,8 +156,8 @@ void Elevator::SimIterate() {
     ss->StarveWatchdog();
 
     if (!m_elevatorConfig->GetMinHeight() || GetHeight() >= *m_elevatorConfig->GetMinHeight()) {
-      frc::sim::RoboRioSim::SetVInVoltage(
-          frc::sim::BatterySim::Calculate({ss->GetCurrentDrawAmps()}));
+      wpi::sim::RoboRioSim::SetVInVoltage(
+          wpi::sim::BatterySim::Calculate({ss->GetCurrentDrawAmps()}));
     }
     VisualizationUpdate();
   }
@@ -182,76 +182,76 @@ std::string Elevator::GetName() const { return m_name; }
 
 // ---- SmartPositionalMechanism overrides -------------------------------------
 
-frc2::Trigger Elevator::Max() {
-  return frc2::Trigger{[this] {
-    return GetHeight() >= m_elevatorConfig->GetMaxHeight().value_or(units::meter_t{99});
+wpi::cmd::Trigger Elevator::Max() {
+  return wpi::cmd::Trigger{[this] {
+    return GetHeight() >= m_elevatorConfig->GetMaxHeight().value_or(wpi::units::meter_t{99});
   }};
 }
 
-frc2::Trigger Elevator::Min() {
-  return frc2::Trigger{[this] {
-    return GetHeight() <= m_elevatorConfig->GetMinHeight().value_or(units::meter_t{-99});
+wpi::cmd::Trigger Elevator::Min() {
+  return wpi::cmd::Trigger{[this] {
+    return GetHeight() <= m_elevatorConfig->GetMinHeight().value_or(wpi::units::meter_t{-99});
   }};
 }
 
 // ---- Elevator-specific interface --------------------------------------------
 
-frc2::CommandPtr Elevator::Run(units::meter_t height) {
-  return frc2::cmd::Run([this, height] { SetMeasurementPositionSetpoint(height); }, {m_subsystem})
+wpi::cmd::CommandPtr Elevator::Run(wpi::units::meter_t height) {
+  return wpi::cmd::Run([this, height] { SetMeasurementPositionSetpoint(height); }, {m_subsystem})
       .WithName(m_name + " Run");
 }
 
-frc2::CommandPtr Elevator::Run(std::function<units::meter_t()> height) {
-  return frc2::cmd::Run([this, height] { SetMeasurementPositionSetpoint(height()); }, {m_subsystem})
+wpi::cmd::CommandPtr Elevator::Run(std::function<wpi::units::meter_t()> height) {
+  return wpi::cmd::Run([this, height] { SetMeasurementPositionSetpoint(height()); }, {m_subsystem})
       .WithName(m_name + " Run Supplier");
 }
 
-frc2::CommandPtr Elevator::RunTo(units::meter_t height, units::meter_t tolerance) {
-  frc2::Trigger near = IsNear(height, tolerance).Debounce(units::second_t{0.1});
-  return frc2::cmd::RunOnce([this, height] { SetMeasurementPositionSetpoint(height); },
+wpi::cmd::CommandPtr Elevator::RunTo(wpi::units::meter_t height, wpi::units::meter_t tolerance) {
+  wpi::cmd::Trigger near = IsNear(height, tolerance).Debounce(wpi::units::second_t{0.1});
+  return wpi::cmd::RunOnce([this, height] { SetMeasurementPositionSetpoint(height); },
                             {m_subsystem})
-      .AndThen(frc2::cmd::WaitUntil([near] { return near.Get(); }))
+      .AndThen(wpi::cmd::WaitUntil([near] { return near.Get(); }))
       .WithName(m_name + " RunTo");
 }
 
-frc2::CommandPtr Elevator::RunTo(std::function<units::meter_t()> height, units::meter_t tolerance) {
-  units::meter_t target = height();
-  frc2::Trigger near = IsNear(target, tolerance).Debounce(units::second_t{0.1});
-  return frc2::cmd::RunOnce([this, target] { SetMeasurementPositionSetpoint(target); },
+wpi::cmd::CommandPtr Elevator::RunTo(std::function<wpi::units::meter_t()> height, wpi::units::meter_t tolerance) {
+  wpi::units::meter_t target = height();
+  wpi::cmd::Trigger near = IsNear(target, tolerance).Debounce(wpi::units::second_t{0.1});
+  return wpi::cmd::RunOnce([this, target] { SetMeasurementPositionSetpoint(target); },
                             {m_subsystem})
-      .AndThen(frc2::cmd::WaitUntil([near] { return near.Get(); }))
+      .AndThen(wpi::cmd::WaitUntil([near] { return near.Get(); }))
       .WithName(m_name + " RunTo Supplier");
 }
 
-frc2::Trigger Elevator::Gte(units::meter_t height) {
-  return frc2::Trigger{[this, height] { return GetHeight() >= height; }};
+wpi::cmd::Trigger Elevator::Gte(wpi::units::meter_t height) {
+  return wpi::cmd::Trigger{[this, height] { return GetHeight() >= height; }};
 }
 
-frc2::Trigger Elevator::Lte(units::meter_t height) {
-  return frc2::Trigger{[this, height] { return GetHeight() <= height; }};
+wpi::cmd::Trigger Elevator::Lte(wpi::units::meter_t height) {
+  return wpi::cmd::Trigger{[this, height] { return GetHeight() <= height; }};
 }
 
-frc2::Trigger Elevator::Between(units::meter_t start, units::meter_t end) {
+wpi::cmd::Trigger Elevator::Between(wpi::units::meter_t start, wpi::units::meter_t end) {
   return Gte(start) && (Lte(end));
 }
 
-frc2::Trigger Elevator::IsNear(units::meter_t height, units::meter_t within) {
-  return frc2::Trigger{[this, height, within] {
+wpi::cmd::Trigger Elevator::IsNear(wpi::units::meter_t height, wpi::units::meter_t within) {
+  return wpi::cmd::Trigger{[this, height, within] {
     return std::abs(GetHeight().value() - height.value()) <= within.value();
   }};
 }
 
 const config::ElevatorConfig& Elevator::GetConfig() const { return *m_elevatorConfig; }
 
-frc::Translation3d Elevator::GetRelativeMechanismPosition() const {
+wpi::math::Translation3d Elevator::GetRelativeMechanismPosition() const {
   if (m_mechanismLigament) {
-    return frc::Translation3d{0_m, 0_m, units::meter_t{m_mechanismLigament->GetLength()}};
+    return wpi::math::Translation3d{0_m, 0_m, wpi::units::meter_t{m_mechanismLigament->GetLength()}};
   }
-  return frc::Translation3d{};
+  return wpi::math::Translation3d{};
 }
 
-void Elevator::SetHeight(units::meter_t height) { SetMeasurementPositionSetpoint(height); }
+void Elevator::SetHeight(wpi::units::meter_t height) { SetMeasurementPositionSetpoint(height); }
 
-units::meter_t Elevator::GetHeight() const { return m_smc->GetMeasurementPosition(); }
+wpi::units::meter_t Elevator::GetHeight() const { return m_smc->GetMeasurementPosition(); }
 
 }  // namespace yams::mechanisms::positional

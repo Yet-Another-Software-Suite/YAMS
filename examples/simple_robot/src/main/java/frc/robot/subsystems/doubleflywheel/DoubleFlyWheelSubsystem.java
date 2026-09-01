@@ -4,21 +4,21 @@
 package frc.robot.subsystems.doubleflywheel;
 
 
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Pounds;
-import static edu.wpi.first.units.Units.RPM;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.Pounds;
+import static org.wpilib.units.Units.RPM;
 
 import com.ctre.phoenix6.hardware.TalonFX;
-import edu.wpi.first.math.Pair;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.wpilib.math.Pair;
+import org.wpilib.math.controller.SimpleMotorFeedforward;
+import org.wpilib.math.system.plant.DCMotor;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.LinearVelocity;
+import org.wpilib.units.measure.Voltage;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.SubsystemBase;
 import java.util.function.Supplier;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
@@ -91,7 +91,7 @@ public class DoubleFlyWheelSubsystem extends SubsystemBase
    *
    * @param lower Lower duty cycle.
    * @param upper Upper duty cycle.
-   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
+   * @return {@link org.wpilib.command2.RunCommand}
    */
   public Command setDutyCycle(double lower, double upper)
   {
@@ -112,7 +112,7 @@ public class DoubleFlyWheelSubsystem extends SubsystemBase
    *
    * @param lower Lower voltage.
    * @param upper Upper voltage.
-   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
+   * @return {@link org.wpilib.command2.RunCommand}
    */
   public Command setVoltage(Voltage lower, Voltage upper)
   {
@@ -129,11 +129,11 @@ public class DoubleFlyWheelSubsystem extends SubsystemBase
   }
 
   /**
-   * Create a {@link edu.wpi.first.wpilibj2.command.RunCommand} to set the speeds for the upper and lower flywheels
+   * Create a {@link org.wpilib.command2.RunCommand} to set the speeds for the upper and lower flywheels
    * based off the distance to the goal.
    *
    * @param distanceToGoal Distance from the center of the robot to the goal on the XY plane.
-   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
+   * @return {@link org.wpilib.command2.RunCommand}
    */
   public Command setSpeedForDistance(Supplier<Distance> distanceToGoal)
   {
@@ -152,7 +152,7 @@ public class DoubleFlyWheelSubsystem extends SubsystemBase
    *
    * @param lower Lower supplier
    * @param upper Upper velocity supplier
-   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
+   * @return {@link org.wpilib.command2.RunCommand}
    */
   public Command setVelocity(Supplier<AngularVelocity> lower, Supplier<AngularVelocity> upper)
   {
@@ -167,7 +167,7 @@ public class DoubleFlyWheelSubsystem extends SubsystemBase
    *
    * @param lower Lower Velocity
    * @param upper Upper velocity
-   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
+   * @return {@link org.wpilib.command2.RunCommand}
    */
   public Command setVelocity(AngularVelocity lower, AngularVelocity upper)
   {

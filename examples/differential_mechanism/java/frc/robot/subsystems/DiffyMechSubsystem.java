@@ -5,11 +5,11 @@ package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.wpilib.math.controller.ArmFeedforward;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.SubsystemBase;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.DifferentialMechanismConfig;
@@ -18,7 +18,7 @@ import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.local.SparkWrapper;
 
-import static edu.wpi.first.units.Units.*;
+import static org.wpilib.units.Units.*;
 
 /**
  * Subsystem for a two-DOF differential (diffy) mechanism driven by two NEO motors.
@@ -50,7 +50,7 @@ public class DiffyMechSubsystem extends SubsystemBase
   // Left motor -- CAN ID 1
   // -----------------------------------------------------------------------
 
-  private final SparkMax                   leftMotor  = new SparkMax(1, SparkLowLevel.MotorType.kBrushless);
+  private final SparkMax                   leftMotor  = new SparkMax(1, 1, SparkLowLevel.MotorType.kBrushless);
   private final SmartMotorControllerConfig leftConfig = new SmartMotorControllerConfig(this)
           // kP=16 was tuned empirically; high gain is workable here because the 60:1 reduction
           // dramatically damps the plant and the trapezoidal profile limits velocity error.
@@ -85,7 +85,7 @@ public class DiffyMechSubsystem extends SubsystemBase
   // because the differential splits effort equally between the two DOFs.
   // -----------------------------------------------------------------------
 
-  private final SparkMax                   rightMotor  = new SparkMax(2, SparkLowLevel.MotorType.kBrushless);
+  private final SparkMax                   rightMotor  = new SparkMax(1, 2, SparkLowLevel.MotorType.kBrushless);
   private final SmartMotorControllerConfig rightConfig = new SmartMotorControllerConfig(this)
           // Same kP as left -- symmetric gearbox means symmetric closed-loop dynamics.
           .withClosedLoopController(16, 0, 0)

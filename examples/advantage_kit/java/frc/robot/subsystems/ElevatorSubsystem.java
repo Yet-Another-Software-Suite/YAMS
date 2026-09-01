@@ -4,27 +4,27 @@
 package frc.robot.subsystems;
 
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Pounds;
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.Volts;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.Pounds;
+import static org.wpilib.units.Units.Rotations;
+import static org.wpilib.units.Units.Volts;
 
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.math.Pair;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import org.wpilib.util.Pair;
+import org.wpilib.math.controller.ElevatorFeedforward;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.measure.Current;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.LinearVelocity;
+import org.wpilib.units.measure.Mass;
+import org.wpilib.units.measure.Voltage;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.SubsystemBase;
+import org.wpilib.command2.button.Trigger;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 import yams.gearing.GearBox;
@@ -84,8 +84,8 @@ public class ElevatorSubsystem extends SubsystemBase
   // while giving enough torque to lift 16 lb against gravity.
   private final MechanismGearing gearing        = new MechanismGearing(GearBox.fromReductionStages(3, 4));
   // CAN IDs 30/31 are the leader and follower NEOs.
-  private final SparkMax         elevatorMotor  = new SparkMax(30, SparkLowLevel.MotorType.kBrushless);
-  private final SparkMax         elevatorMotor2 = new SparkMax(31, SparkLowLevel.MotorType.kBrushless);
+  private final SparkMax         elevatorMotor  = new SparkMax(1, 30, SparkLowLevel.MotorType.kBrushless);
+  private final SparkMax         elevatorMotor2 = new SparkMax(1, 31, SparkLowLevel.MotorType.kBrushless);
 
   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)

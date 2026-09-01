@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include <frc/simulation/DCMotorSim.h>
-#include <units/angle.h>
-#include <units/angular_velocity.h>
-#include <units/time.h>
-#include <units/voltage.h>
+#include <wpi/simulation/DCMotorSim.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/time.hpp>
+#include <wpi/units/voltage.hpp>
 
 #include <functional>
 
@@ -33,40 +33,40 @@ class DCMotorSimSupplier : public SimSupplier {
    * @param gearing           Mechanism gearing used to derive rotor position/velocity.
    * @param period            Simulation update period.
    */
-  DCMotorSimSupplier(frc::sim::DCMotorSim& sim, std::function<double()> dutyCycleSupplier,
-                     const gearing::MechanismGearing& gearing, units::second_t period);
+  DCMotorSimSupplier(wpi::sim::DCMotorSim& sim, std::function<double()> dutyCycleSupplier,
+                     const gearing::MechanismGearing& gearing, wpi::units::second_t period);
 
   void UpdateSim() override;
-  void SetInputVoltage(units::volt_t volts) override;
+  void SetInputVoltage(wpi::units::volt_t volts) override;
 
-  units::turn_t GetMechanismPosition() override;
-  units::turns_per_second_t GetMechanismVelocity() override;
-  units::turns_per_second_squared_t GetMechanismAcceleration() override;
-  units::turn_t GetRotorPosition() override;
-  units::turns_per_second_t GetRotorVelocity() override;
-  units::turns_per_second_squared_t GetRotorAcceleration() override;
+  wpi::units::turn_t GetMechanismPosition() override;
+  wpi::units::turns_per_second_t GetMechanismVelocity() override;
+  wpi::units::turns_per_second_squared_t GetMechanismAcceleration() override;
+  wpi::units::turn_t GetRotorPosition() override;
+  wpi::units::turns_per_second_t GetRotorVelocity() override;
+  wpi::units::turns_per_second_squared_t GetRotorAcceleration() override;
 
-  void SetMechanismPosition(units::turn_t angle) override;
-  void SetMechanismVelocity(units::turns_per_second_t velocity) override;
-  void SetRotorPosition(units::turn_t angle) override;
-  void SetRotorVelocity(units::turns_per_second_t velocity) override;
+  void SetMechanismPosition(wpi::units::turn_t angle) override;
+  void SetMechanismVelocity(wpi::units::turns_per_second_t velocity) override;
+  void SetRotorPosition(wpi::units::turn_t angle) override;
+  void SetRotorVelocity(wpi::units::turns_per_second_t velocity) override;
 
   bool IsWatchdogExpired() override;
   void FeedWatchdog() override;
   void StarveWatchdog() override;
-  units::ampere_t GetCurrentDrawAmps() override;
-  units::volt_t GetMechanismSupplyVoltage() override;
-  units::volt_t GetMechanismStatorVoltage() override;
-  void SetMechanismStatorVoltage(units::volt_t volts) override;
+  wpi::units::ampere_t GetCurrentDrawAmps() override;
+  wpi::units::volt_t GetMechanismSupplyVoltage() override;
+  wpi::units::volt_t GetMechanismStatorVoltage() override;
+  void SetMechanismStatorVoltage(wpi::units::volt_t volts) override;
 
  private:
-  frc::sim::DCMotorSim& m_sim;
+  wpi::sim::DCMotorSim& m_sim;
   std::function<double()> m_dutyCycleSupplier;
   gearing::MechanismGearing m_gearing;
-  units::second_t m_period;
+  wpi::units::second_t m_period;
   bool m_inputFed{false};
   bool m_watchdogFed{false};
-  units::volt_t m_lastInputVoltage{0};
+  wpi::units::volt_t m_lastInputVoltage{0};
 };
 
 }  // namespace yams::motorcontrollers::simulation

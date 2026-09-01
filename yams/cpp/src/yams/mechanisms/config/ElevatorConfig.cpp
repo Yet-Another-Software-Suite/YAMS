@@ -3,10 +3,10 @@
 
 #include "yams/mechanisms/config/ElevatorConfig.hpp"
 
-#include <frc/util/Color8Bit.h>
-#include <units/angle.h>
-#include <units/length.h>
-#include <units/mass.h>
+#include <wpi/util/Color8Bit.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/mass.hpp>
 
 #include <string>
 
@@ -17,17 +17,17 @@ ElevatorConfig& ElevatorConfig::WithTelemetryName(const std::string& name) {
   return *this;
 }
 
-ElevatorConfig& ElevatorConfig::WithMinimumHeight(units::meter_t height) {
+ElevatorConfig& ElevatorConfig::WithMinimumHeight(wpi::units::meter_t height) {
   m_minHeight = height;
   return *this;
 }
 
-ElevatorConfig& ElevatorConfig::WithMaximumHeight(units::meter_t height) {
+ElevatorConfig& ElevatorConfig::WithMaximumHeight(wpi::units::meter_t height) {
   m_maxHeight = height;
   return *this;
 }
 
-ElevatorConfig& ElevatorConfig::WithCarriageMass(units::kilogram_t mass) {
+ElevatorConfig& ElevatorConfig::WithCarriageMass(wpi::units::kilogram_t mass) {
   m_carriageMass = mass;
   return *this;
 }
@@ -37,28 +37,28 @@ ElevatorConfig& ElevatorConfig::WithIsHorizontal(bool horizontal) {
   return *this;
 }
 
-ElevatorConfig& ElevatorConfig::WithSimColor(const frc::Color8Bit& color) {
+ElevatorConfig& ElevatorConfig::WithSimColor(const wpi::util::Color8Bit& color) {
   m_simColor = color;
   return *this;
 }
 
-ElevatorConfig& ElevatorConfig::WithAngle(units::degree_t angle) {
+ElevatorConfig& ElevatorConfig::WithAngle(wpi::units::degree_t angle) {
   m_angle = angle;
   return *this;
 }
 
 std::string ElevatorConfig::GetTelemetryName() const { return m_telemetryName; }
 
-std::optional<units::meter_t> ElevatorConfig::GetMinHeight() const { return m_minHeight; }
+std::optional<wpi::units::meter_t> ElevatorConfig::GetMinHeight() const { return m_minHeight; }
 
-std::optional<units::meter_t> ElevatorConfig::GetMaxHeight() const { return m_maxHeight; }
+std::optional<wpi::units::meter_t> ElevatorConfig::GetMaxHeight() const { return m_maxHeight; }
 
-std::optional<units::kilogram_t> ElevatorConfig::GetCarriageMass() const { return m_carriageMass; }
+std::optional<wpi::units::kilogram_t> ElevatorConfig::GetCarriageMass() const { return m_carriageMass; }
 
 bool ElevatorConfig::IsHorizontal() const { return m_isHorizontal; }
 
-frc::Color8Bit ElevatorConfig::GetSimColor() const { return m_simColor; }
+wpi::util::Color8Bit ElevatorConfig::GetSimColor() const { return m_simColor; }
 
-units::degree_t ElevatorConfig::GetAngle() const { return m_angle; }
+wpi::units::degree_t ElevatorConfig::GetAngle() const { return m_angle; }
 
 }  // namespace yams::mechanisms::config

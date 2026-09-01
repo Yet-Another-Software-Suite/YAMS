@@ -1,5 +1,7 @@
 import org.apache.tools.ant.filters.FixCrLfFilter
 import org.apache.tools.ant.filters.ReplaceTokens
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 
 apply plugin: 'maven-publish'
 
@@ -148,10 +150,12 @@ task cppDoxygenZip(type: Zip, dependsOn: generateDoxygen) {
 //    }
 //}
 
-build.dependsOn cppHeadersZip
-addTaskToCopyAllOutputs(cppHeadersZip)
-build.dependsOn cppSourceZip
-addTaskToCopyAllOutputs(cppSourceZip)
+if (!skipCpp) {
+    build.dependsOn cppHeadersZip
+    addTaskToCopyAllOutputs(cppHeadersZip)
+    build.dependsOn cppSourceZip
+    addTaskToCopyAllOutputs(cppSourceZip)
+}
 //build.dependsOn cppDriverHeadersZip
 //addTaskToCopyAllOutputs(cppDriverHeadersZip)
 
@@ -199,6 +203,19 @@ task vendordepJson() {
                 groupId: artifactGroupId,
                 artifactId: baseArtifactId)
     }
+
+    // When C++ isn't being built, strip cppDependencies from the generated vendordep JSON by
+    // editing the parsed structure directly, rather than templating the array in/out as text.
+    if (skipCpp) {
+        def vendorFile = file("$releasePath/$templateVendorFile")
+        def vendordep = new JsonSlurper().parse(vendorFile)
+        vendordep.cppDependencies = []
+        def pretty = JsonOutput.prettyPrint(JsonOutput.toJson(vendordep))
+        // Groovy's pretty-printer spreads empty arrays/objects across three lines; collapse
+        // them back down so cppDependencies renders as a plain "[]" like the other empty fields.
+        pretty = pretty.replaceAll(/(?s)\[\s*\]/, '[]').replaceAll(/(?s)\{\s*\}/, '{}')
+        vendorFile.text = pretty
+    }
 }
 
 task vendordepJsonZip(type: Zip) {
@@ -225,19 +242,20 @@ addTaskToCopyAllOutputs(outputSourcesJar)
 addTaskToCopyAllOutputs(outputJavadocJar)
 addTaskToCopyAllOutputs(outputJar)
 addTaskToCopyAllOutputs(vendordepJsonZip)
-addTaskToCopyAllOutputs(cppHeadersZip)
-addTaskToCopyAllOutputs(cppSourceZip)
-
 
 build.dependsOn outputSourcesJar
 build.dependsOn outputJavadocJar
 build.dependsOn outputJar
 build.dependsOn vendordepJsonZip
-build.dependsOn cppHeadersZip
-build.dependsOn cppSourceZip
-if (doxygenAvailable) {
-    build.dependsOn cppDoxygenZip
-    addTaskToCopyAllOutputs(cppDoxygenZip)
+if (!skipCpp) {
+    addTaskToCopyAllOutputs(cppHeadersZip)
+    addTaskToCopyAllOutputs(cppSourceZip)
+    build.dependsOn cppHeadersZip
+    build.dependsOn cppSourceZip
+    if (doxygenAvailable) {
+        build.dependsOn cppDoxygenZip
+        addTaskToCopyAllOutputs(cppDoxygenZip)
+    }
 }
 
 libraryBuild.dependsOn build
@@ -265,19 +283,21 @@ model {
 //        def driverTaskList = createComponentZipTasks($.components, ['VendorDriver'], driverZipBaseName, Zip, project, includeStandardZipFormat)
 //
         publications {
-            cpp(MavenPublication) {
-                taskList.each {
-                    artifact it
-                }
-                artifact cppHeadersZip
-                artifact cppSourceZip
-                if (doxygenAvailable) {
-                    artifact cppDoxygenZip
-                }
+            if (!skipCpp) {
+                cpp(MavenPublication) {
+                    taskList.each {
+                        artifact it
+                    }
+                    artifact cppHeadersZip
+                    artifact cppSourceZip
+                    if (doxygenAvailable) {
+                        artifact cppDoxygenZip
+                    }
 
-                artifactId = "${baseArtifactId}-cpp"
-                groupId = artifactGroupId
-                version = pubVersion
+                    artifactId = "${baseArtifactId}-cpp"
+                    groupId = artifactGroupId
+                    version = pubVersion
+                }
             }
 //            driver(MavenPublication) {
 //                driverTaskList.each {

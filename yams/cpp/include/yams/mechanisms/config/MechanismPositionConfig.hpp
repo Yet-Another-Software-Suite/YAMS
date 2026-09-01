@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <units/angle.h>
-#include <units/length.h>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/length.hpp>
 
 #include <optional>
 #include <string>
@@ -32,7 +32,7 @@ class MechanismPositionConfig {
    * @param name  Human-readable name for this position.
    * @param angle Target angle setpoint.
    */
-  MechanismPositionConfig(const std::string& name, units::degree_t angle);
+  MechanismPositionConfig(const std::string& name, wpi::units::degree_t angle);
 
   /**
    * Create a named linear position config.
@@ -40,7 +40,7 @@ class MechanismPositionConfig {
    * @param name     Human-readable name for this position.
    * @param distance Target distance setpoint.
    */
-  MechanismPositionConfig(const std::string& name, units::meter_t distance);
+  MechanismPositionConfig(const std::string& name, wpi::units::meter_t distance);
 
   /**
    * Get the human-readable name of this position.
@@ -54,14 +54,14 @@ class MechanismPositionConfig {
    *
    * @return Angle if this is an angular position config, otherwise empty.
    */
-  std::optional<units::degree_t> GetAngle() const;
+  std::optional<wpi::units::degree_t> GetAngle() const;
 
   /**
    * Get the optional linear setpoint.
    *
    * @return Distance if this is a linear position config, otherwise empty.
    */
-  std::optional<units::meter_t> GetDistance() const;
+  std::optional<wpi::units::meter_t> GetDistance() const;
 
   /**
    * Return true if this config holds an angular setpoint.
@@ -79,8 +79,8 @@ class MechanismPositionConfig {
 
  private:
   std::string m_name;
-  std::optional<units::degree_t> m_angle;
-  std::optional<units::meter_t> m_distance;
+  std::optional<wpi::units::degree_t> m_angle;
+  std::optional<wpi::units::meter_t> m_distance;
 };
 
 }  // namespace yams::mechanisms::config

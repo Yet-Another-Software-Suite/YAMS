@@ -6,9 +6,9 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.wpilib.framework.TimedRobot;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.CommandScheduler;
 
 /**
  * Top-level robot class for the differential mechanism example.
@@ -92,7 +92,7 @@ public class Robot extends TimedRobot
 
 
     @Override
-    public void testInit()
+    public void utilityInit()
     {
         // Clear all running commands so test mode starts from a known state.
         CommandScheduler.getInstance().cancelAll();
@@ -100,9 +100,9 @@ public class Robot extends TimedRobot
 
 
     @Override
-    public void testPeriodic() {}
+    public void utilityPeriodic() {}
 
 
     @Override
-    public void testExit() {}
+    public void utilityExit() {}
 }

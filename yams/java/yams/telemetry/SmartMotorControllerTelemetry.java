@@ -3,21 +3,21 @@
 
 package yams.telemetry;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Fahrenheit;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Second;
-import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.Fahrenheit;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.MetersPerSecondPerSecond;
+import static org.wpilib.units.Units.RPM;
+import static org.wpilib.units.Units.Rotations;
+import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
+import static org.wpilib.units.Units.Second;
+import static org.wpilib.units.Units.Seconds;
+import static org.wpilib.units.Units.Volts;
 
-import edu.wpi.first.networktables.NetworkTable;
+import org.wpilib.networktables.NetworkTable;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -62,13 +62,9 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 public class SmartMotorControllerTelemetry
 {
   /**
-   * {@link TelemetryVerbosity} for the {@link SmartMotorController}
-   */
-  private final TelemetryVerbosity                           verbosity = TelemetryVerbosity.HIGH;
-  /**
    * Double telemetry fields that will be outputted.
    */
-  private       Map<DoubleTelemetryField, DoubleTelemetry>   doubleFields;
+  private       Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>   doubleFields;
   /**
    * Boolean telemetry fields that will be outputted.
    */
@@ -108,14 +104,18 @@ public class SmartMotorControllerTelemetry
       this.config = config;
       doubleFields = config.getDoubleFields(smartMotorController);
       boolFields = config.getBoolFields(smartMotorController);
-      for (Map.Entry<DoubleTelemetryField, DoubleTelemetry> entry : doubleFields.entrySet())
+      for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : doubleFields.entrySet())
       {
+        if(!entry.getValue().enabled)
+          continue;
         if (config.getNT4Enabled())
         {entry.getValue().transformUnit(smcConfig).setupNetworkTables(dataNetworkTable, tuningNetworkTable);}
         config.getDataLogName().ifPresent(name -> entry.getValue().transformUnit(smcConfig).setupDataLog(name));
       }
       for (Map.Entry<BooleanTelemetryField, BooleanTelemetry> entry : boolFields.entrySet())
       {
+        if(!entry.getValue().enabled)
+          continue;
         if (config.getNT4Enabled())
         {entry.getValue().setupNetworkTables(dataNetworkTable, tuningNetworkTable);}
         config.getDataLogName().ifPresent(name -> entry.getValue().setupDataLog(name));
@@ -156,9 +156,9 @@ public class SmartMotorControllerTelemetry
         case MotionProfile -> bt.set(cfg.getExponentialProfile().isPresent() || cfg.getTrapezoidProfile().isPresent());
       }
     }
-    for (Map.Entry<DoubleTelemetryField, DoubleTelemetry> entry : doubleFields.entrySet())
+    for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : doubleFields.entrySet())
     {
-      DoubleTelemetry dt = entry.getValue();
+      DoubleTelemetry<DoubleTelemetryField> dt = entry.getValue();
       if (!dt.enabled)
       {
         continue;
@@ -232,9 +232,9 @@ public class SmartMotorControllerTelemetry
         }
       }
     }
-    for (Map.Entry<DoubleTelemetryField, DoubleTelemetry> entry : doubleFields.entrySet())
+    for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : doubleFields.entrySet())
     {
-      DoubleTelemetry dt = entry.getValue();
+      DoubleTelemetry<DoubleTelemetryField> dt = entry.getValue();
       if (dt.tunable())
       {
         switch (dt.getField())
@@ -347,7 +347,7 @@ public class SmartMotorControllerTelemetry
   {
     if (doubleFields != null)
     {
-      for (Map.Entry<DoubleTelemetryField, DoubleTelemetry> entry : doubleFields.entrySet())
+      for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : doubleFields.entrySet())
       {
         entry.getValue().close();
       }
@@ -405,7 +405,7 @@ public class SmartMotorControllerTelemetry
     /**
      * Simple motor feedforward currently getting used.
      */
-    SimpleMotorFeedForward("control/Simple Motor Feedforward", false, false),
+    SimpleMotorFeedForward("control/feedforward/simple", false, false),
     /**
      * Motion profile currently getting used.
      */
@@ -658,9 +658,9 @@ public class SmartMotorControllerTelemetry
      *
      * @return Double telemetry field.
      */
-    public DoubleTelemetry create()
+    public DoubleTelemetry<DoubleTelemetryField> create()
     {
-      return new DoubleTelemetry(key, defaultVal, this, tunable, unit);
+      return new DoubleTelemetry<>(key, defaultVal, this, tunable, unit);
     }
 
   }

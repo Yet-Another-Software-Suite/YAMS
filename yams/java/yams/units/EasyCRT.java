@@ -3,10 +3,10 @@
 
 package yams.units;
 
-import static edu.wpi.first.units.Units.Rotations;
+import static org.wpilib.units.Units.Rotations;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.units.measure.Angle;
+import org.wpilib.math.util.MathUtil;
+import org.wpilib.units.measure.Angle;
 import java.util.Optional;
 
 /**
@@ -27,12 +27,12 @@ import java.util.Optional;
  * <h2>Usage</h2>
  * <p>Construct an {@code EasyCRT} from a fully-configured {@link EasyCRTConfig}, then call
  * {@link #getAngleOptional()} periodically. The return value is an {@link java.util.Optional}
- * containing the resolved mechanism {@link edu.wpi.first.units.measure.Angle} when a unique
+ * containing the resolved mechanism {@link org.wpilib.units.measure.Angle} when a unique
  * solution is found, or {@link java.util.Optional#empty()} when the solve fails or is ambiguous.
  * Inspect {@link #getLastStatus()} and {@link #getLastErrorRotations()} for diagnostics.
  *
  * <pre>{@code
- * import static edu.wpi.first.units.Units.Rotations;
+ * import static org.wpilib.units.Units.Rotations;
  * import yams.units.EasyCRT;
  * import yams.units.EasyCRTConfig;
  *

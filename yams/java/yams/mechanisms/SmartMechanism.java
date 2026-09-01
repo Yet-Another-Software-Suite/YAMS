@@ -3,16 +3,16 @@
 
 package yams.mechanisms;
 
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.Subsystem;
+import org.wpilib.math.geometry.Translation3d;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.LinearVelocity;
+import org.wpilib.units.measure.Voltage;
+import org.wpilib.smartdashboard.Mechanism2d;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.Commands;
+import org.wpilib.command2.Subsystem;
 import java.util.Optional;
 import java.util.function.Supplier;
 import yams.motorcontrollers.SmartMotorController;
@@ -24,7 +24,7 @@ import yams.telemetry.MechanismTelemetry;
  * <p>
  * {@code SmartMechanism} is the abstract root of all YAMS mechanism implementations. It combines a
  * {@link yams.motorcontrollers.SmartMotorController} with integrated telemetry, simulation support,
- * and WPILib {@link edu.wpi.first.wpilibj2.command.Command} / {@link edu.wpi.first.wpilibj2.command.button.Trigger}
+ * and WPILib {@link org.wpilib.command2.Command} / {@link org.wpilib.command2.button.Trigger}
  * integration so that every concrete mechanism (Arm, Elevator, Flywheel, etc.) shares a consistent
  * API for control, feedback, and visualization.
  * </p>
@@ -41,7 +41,7 @@ import yams.telemetry.MechanismTelemetry;
  * <p>
  * <b>Periodic calls required:</b> {@link #simIterate()}, {@link #updateTelemetry()}, and
  * {@link #visualizationUpdate()} must be called periodically — typically from
- * {@code robotPeriodic()} — so that simulation state, telemetry, and the {@link edu.wpi.first.wpilibj.smartdashboard.Mechanism2d}
+ * {@code robotPeriodic()} — so that simulation state, telemetry, and the {@link org.wpilib.smartdashboard.Mechanism2d}
  * visualization remain up to date.
  * </p>
  *

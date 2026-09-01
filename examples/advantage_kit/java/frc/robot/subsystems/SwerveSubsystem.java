@@ -4,36 +4,37 @@
 package frc.robot.subsystems;
 
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Second;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.DegreesPerSecond;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.Radians;
+import static org.wpilib.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.Second;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.wpilib.math.controller.PIDController;
+import org.wpilib.math.estimator.SwerveDrivePoseEstimator;
+import org.wpilib.math.geometry.Pose2d;
+import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Translation2d;
+import org.wpilib.math.kinematics.ChassisVelocities;
+import org.wpilib.math.kinematics.SwerveModulePosition;
+import org.wpilib.math.kinematics.SwerveModuleVelocity;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.LinearVelocity;
+import org.wpilib.smartdashboard.Field2d;
+import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.SubsystemBase;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLog;
@@ -85,11 +86,11 @@ public class SwerveSubsystem extends SubsystemBase
     // Module positions (distance + heading) from each encoder; needed to tick
     // the odometry integrator during replay.
     public SwerveModulePosition[] positions           = new SwerveModulePosition[4];
-    public SwerveModuleState[]    states              = new SwerveModuleState[4];
+    public SwerveModuleVelocity[]    states              = new SwerveModuleVelocity[4];
     // Raw Pigeon 2 yaw; logged before being consumed by odometry so replay sees
     // the exact hardware value, not a processed one.
     public Angle                  gyroRotation        = Degrees.of(0);
-    public ChassisSpeeds          robotRelativeSpeeds = new ChassisSpeeds(0, 0, 0);
+    public ChassisVelocities          robotRelativeSpeeds = new ChassisVelocities(0, 0, 0);
     // Pose from the SwerveDrive's internal odometry; logged here so getPose()
     // is consistent in replay without re-running the kinematics integrator.
     public Pose2d                 estimatedPose       = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
@@ -154,13 +155,13 @@ public class SwerveSubsystem extends SubsystemBase
   }
 
   /**
-   * Get a {@link Supplier<ChassisSpeeds>} for the robot relative chassis speeds based on "standard" swerve drive
+   * Get a {@link Supplier<ChassisVelocities>} for the robot relative chassis speeds based on "standard" swerve drive
    * controls.
    *
    * @param translationXScalar Translation in the X direction from [-1,1]
    * @param translationYScalar Translation in the Y direction from [-1,1]
    * @param rotationScalar     Rotation speed from [-1,1]
-   * @return {@link Supplier<ChassisSpeeds>} for the robot relative chassis speeds.
+   * @return {@link Supplier<ChassisVelocities>} for the robot relative chassis speeds.
    */
   public SwerveInputStream getChassisSpeedsSupplier(DoubleSupplier translationXScalar,
                                                     DoubleSupplier translationYScalar,
@@ -181,19 +182,19 @@ public class SwerveSubsystem extends SubsystemBase
   }
 
   /**
-   * Get a {@link Supplier<ChassisSpeeds>} for the robot relative chassis speeds based on "standard" swerve drive
+   * Get a {@link Supplier<ChassisVelocities>} for the robot relative chassis speeds based on "standard" swerve drive
    * controls.
    *
    * @param translationXScalar Translation in the X direction from [-1,1]
    * @param translationYScalar Translation in the Y direction from [-1,1]
    * @param rotationScalar     Rotation speed from [-1,1]
-   * @return {@link Supplier<ChassisSpeeds>} for the robot relative chassis speeds.
+   * @return {@link Supplier<ChassisVelocities>} for the robot relative chassis speeds.
    */
-  public Supplier<ChassisSpeeds> getSimpleChassisSpeeds(DoubleSupplier translationXScalar,
+  public Supplier<ChassisVelocities> getSimpleChassisSpeeds(DoubleSupplier translationXScalar,
                                                         DoubleSupplier translationYScalar,
                                                         DoubleSupplier rotationScalar)
   {
-    return () -> new ChassisSpeeds(maximumChassisSpeedsLinearVelocity.times(translationXScalar.getAsDouble())
+    return () -> new ChassisVelocities(maximumChassisSpeedsLinearVelocity.times(translationXScalar.getAsDouble())
                                                                      .in(MetersPerSecond),
                                    maximumChassisSpeedsLinearVelocity.times(translationYScalar.getAsDouble())
                                                                      .in(MetersPerSecond),
@@ -204,28 +205,28 @@ public class SwerveSubsystem extends SubsystemBase
   public SwerveSubsystem()
   {
     // Pigeon 2 on CAN ID 14; yaw supplier is read in updateInputs() each loop.
-    Pigeon2 gyro = new Pigeon2(14);
+    Pigeon2 gyro = new Pigeon2(14, CANBus.systemcore(1));
     gyroAngleSupplier = gyro.getYaw().asSupplier();
 
     // Module locations are 24 in from center along each axis (48 in x 48 in base).
-    var fl = createModule(new SparkMax(1, MotorType.kBrushless),
-                          new SparkMax(2, MotorType.kBrushless),
-                          new CANcoder(3),
+    var fl = createModule(new SparkMax(1, 1, MotorType.kBrushless),
+                          new SparkMax(1, 2, MotorType.kBrushless),
+                          new CANcoder(3, CANBus.systemcore(1)),
                           "frontleft",
                           new Translation2d(Inches.of(24), Inches.of(24)));
-    var fr = createModule(new SparkMax(4, MotorType.kBrushless),
-                          new SparkMax(5, MotorType.kBrushless),
-                          new CANcoder(6),
+    var fr = createModule(new SparkMax(1, 4, MotorType.kBrushless),
+                          new SparkMax(1, 5, MotorType.kBrushless),
+                          new CANcoder(6, CANBus.systemcore(1)),
                           "frontright",
                           new Translation2d(Inches.of(24), Inches.of(-24)));
-    var bl = createModule(new SparkMax(7, MotorType.kBrushless),
-                          new SparkMax(8, MotorType.kBrushless),
-                          new CANcoder(9),
+    var bl = createModule(new SparkMax(1, 7, MotorType.kBrushless),
+                          new SparkMax(1, 8, MotorType.kBrushless),
+                          new CANcoder(9, CANBus.systemcore(1)),
                           "backleft",
                           new Translation2d(Inches.of(-24), Inches.of(24)));
-    var br = createModule(new SparkMax(10, MotorType.kBrushless),
-                          new SparkMax(11, MotorType.kBrushless),
-                          new CANcoder(12),
+    var br = createModule(new SparkMax(1, 10, MotorType.kBrushless),
+                          new SparkMax(1, 11, MotorType.kBrushless),
+                          new CANcoder(12, CANBus.systemcore(1)),
                           "backright",
                           new Translation2d(Inches.of(-24), Inches.of(-24)));
 
@@ -270,14 +271,14 @@ public class SwerveSubsystem extends SubsystemBase
     swerveInputs.gyroRotation = gyroAngleSupplier.get();
   }
 
-  public Command setRobotRelativeChassisSpeeds(ChassisSpeeds speeds)
+  public Command setRobotRelativeChassisSpeeds(ChassisVelocities speeds)
   {
     return run(() -> {
       // DesiredChassisSpeeds and DesiredStates are computed outputs -- they are
       // recomputed each replay loop from the same command logic, not stored.
       Logger.recordOutput("Swerve/DesiredChassisSpeeds", speeds);
       Logger.recordOutput("Swerve/DesiredOptimizedChassisSpeeds", config.optimizeRobotRelativeChassisSpeeds(speeds));
-      SwerveModuleState[] states = drive.getStateFromRobotRelativeChassisSpeeds(speeds);
+      SwerveModuleVelocity[] states = drive.getStateFromRobotRelativeChassisSpeeds(speeds);
       Logger.recordOutput("Swerve/DesiredStates", states);
       drive.setSwerveModuleStates(states);
     }).withName("Set Robot Relative Chassis Speeds");
@@ -292,7 +293,7 @@ public class SwerveSubsystem extends SubsystemBase
   {
     return startRun(() -> {
       drive.resetTranslationPID();
-      drive.resetAzimuthPID();
+      drive.resetRotationPID();
     }, () -> {
       var azimuthPID        = config.getRotationPID();
       var translationPID    = config.getTranslationPID();
@@ -301,26 +302,26 @@ public class SwerveSubsystem extends SubsystemBase
       var translationScalar = translationPID.calculate(distance.in(Meters), 0);
       var currentPose       = getPose(); // Returns replayed pose during log replay.
       var poseDifference    = currentPose.minus(pose);
-      setRobotRelativeChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(poseDifference.getMeasureX().per(Second)
-                                                                                        .times(translationScalar),
-                                                                          poseDifference.getMeasureY().per(Second)
-                                                                                        .times(translationScalar),
-                                                                          RadiansPerSecond.of(azimuthPID.calculate(
-                                                                              currentPose.getRotation()
-                                                                                         .getRadians(),
-                                                                              pose.getRotation()
-                                                                                  .getRadians())),
-                                                                          getGyroAngle()));
+      drive.setRobotRelativeChassisSpeeds(new ChassisVelocities(poseDifference.getMeasureX().per(Second)
+                                                                              .times(translationScalar),
+                                                                poseDifference.getMeasureY().per(Second)
+                                                                              .times(translationScalar),
+                                                                RadiansPerSecond.of(azimuthPID.calculate(
+                                                                    currentPose.getRotation()
+                                                                               .getRadians(),
+                                                                    pose.getRotation()
+                                                                        .getRadians())))
+                                              .toRobotRelative(getGyroAngle()));
     }).withName("Drive to Pose");
   }
 
-  public Command setRobotRelativeChassisSpeeds(Supplier<ChassisSpeeds> speedsSupplier)
+  public Command setRobotRelativeChassisSpeeds(Supplier<ChassisVelocities> speedsSupplier)
   {
     return run(() -> {
       Logger.recordOutput("Swerve/DesiredChassisSpeeds", speedsSupplier.get());
       Logger.recordOutput("Swerve/DesiredOptimizedChassisSpeeds",
                           config.optimizeRobotRelativeChassisSpeeds(speedsSupplier.get()));
-      SwerveModuleState[] states = drive.getStateFromRobotRelativeChassisSpeeds(speedsSupplier.get());
+      SwerveModuleVelocity[] states = drive.getStateFromRobotRelativeChassisSpeeds(speedsSupplier.get());
       Logger.recordOutput("Swerve/DesiredStates", states);
       drive.setSwerveModuleStates(states);
     }).withName("Set Robot Relative Chassis Speeds Supplier");
@@ -333,17 +334,17 @@ public class SwerveSubsystem extends SubsystemBase
   public Command lock()
   {
     return run(() -> {
-      ChassisSpeeds speeds = new ChassisSpeeds();
+      ChassisVelocities speeds = new ChassisVelocities();
       Logger.recordOutput("Swerve/DesiredChassisSpeeds", speeds);
       Logger.recordOutput("Swerve/DesiredOptimizedChassisSpeeds", speeds);
       SwerveModule[]      modules       = config.getModules();
-      SwerveModuleState[] desiredStates = new SwerveModuleState[modules.length];
+      SwerveModuleVelocity[] desiredStates = new SwerveModuleVelocity[modules.length];
       for (int i = 0; i < modules.length; i++)
       {
         // Each module points to its own corner: getAngle() returns the vector from
         // robot center to that module, which forms an X when all four are set.
         desiredStates[i] =
-            new SwerveModuleState(0, modules[i].getConfig().getLocation().orElseThrow().getAngle());
+            new SwerveModuleVelocity(0, modules[i].getConfig().getLocation().orElseThrow().getAngle());
       }
       Logger.recordOutput("Swerve/DesiredStates", desiredStates);
       drive.setSwerveModuleStates(desiredStates);
@@ -363,7 +364,7 @@ public class SwerveSubsystem extends SubsystemBase
     return swerveInputs.estimatedPose;
   }
 
-  public ChassisSpeeds getRobotRelativeSpeeds()
+  public ChassisVelocities getRobotRelativeSpeeds()
   {
     return swerveInputs.robotRelativeSpeeds;
   }

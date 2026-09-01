@@ -5,11 +5,11 @@
 
 namespace yams::mechanisms::positional {
 
-frc::MechanismLigament2d* SmartPositionalMechanism::GetMechanismLigament() {
+wpi::MechanismLigament2d* SmartPositionalMechanism::GetMechanismLigament() {
   return m_mechanismLigament;
 }
 
-frc::MechanismRoot2d* SmartPositionalMechanism::GetMechanismRoot() { return m_mechanismRoot; }
+wpi::MechanismRoot2d* SmartPositionalMechanism::GetMechanismRoot() { return m_mechanismRoot; }
 
 motorcontrollers::SmartMotorController* SmartPositionalMechanism::GetMotor() {
   return GetMotorController();

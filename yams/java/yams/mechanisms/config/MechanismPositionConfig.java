@@ -3,9 +3,9 @@
 
 package yams.mechanisms.config;
 
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.units.measure.Distance;
+import org.wpilib.math.geometry.Pose3d;
+import org.wpilib.math.geometry.Translation3d;
+import org.wpilib.units.measure.Distance;
 import java.util.Optional;
 import yams.mechanisms.positional.SmartPositionalMechanism;
 
@@ -19,7 +19,7 @@ import yams.mechanisms.positional.SmartPositionalMechanism;
  * information:
  *
  * <ul>
- *   <li><b>Robot-relative position</b> — a {@link edu.wpi.first.math.geometry.Translation3d}
+ *   <li><b>Robot-relative position</b> — a {@link org.wpilib.math.geometry.Translation3d}
  *       that places the mechanism's pivot/root inside the robot frame. When set, the Mechanism2d
  *       window is automatically offset so the mechanism appears in the correct position relative
  *       to the robot outline.</li>
@@ -33,8 +33,8 @@ import yams.mechanisms.positional.SmartPositionalMechanism;
  *
  * <h2>Example</h2>
  * <pre>{@code
- * import static edu.wpi.first.units.Units.Meters;
- * import edu.wpi.first.math.geometry.Translation3d;
+ * import static org.wpilib.units.Units.Meters;
+ * import org.wpilib.math.geometry.Translation3d;
  * import yams.mechanisms.config.MechanismPositionConfig;
  *
  * MechanismPositionConfig posConfig = new MechanismPositionConfig()

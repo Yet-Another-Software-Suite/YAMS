@@ -3,12 +3,12 @@
 
 package yams.mechs;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.Pounds;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.Milliseconds;
+import static org.wpilib.units.Units.Pounds;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -17,14 +17,14 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.Preferences;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.wpilib.math.controller.ArmFeedforward;
+import org.wpilib.math.controller.ElevatorFeedforward;
+import org.wpilib.math.controller.SimpleMotorFeedforward;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.util.Preferences;
+import org.wpilib.command2.CommandScheduler;
 import java.util.ArrayList;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
@@ -475,72 +475,102 @@ public class MechanismLimitTest
   @MethodSource("pivotMinArgs")
   void testPivotMinTrigger(SmartMotorController smc, boolean expectedTrigger) throws InterruptedException
   {
-    Pivot pivot = createPivot(smc);
-    startTest(smc);
-    TestWithScheduler.cycle(Milliseconds.of(20));
-    assertEquals(expectedTrigger, pivot.min().getAsBoolean(),
-                 "pivot.min() at " + smc.getMechanismPosition() + " vs soft lower limit (-100°)");
-    closeSMC(smc);
+    try
+    {
+      Pivot pivot = createPivot(smc);
+      startTest(smc);
+      TestWithScheduler.cycle(Milliseconds.of(20));
+      assertEquals(expectedTrigger, pivot.min().getAsBoolean(),
+                   "pivot.min() at " + smc.getMechanismPosition() + " vs soft lower limit (-100°)");
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   @ParameterizedTest
   @MethodSource("pivotMaxArgs")
   void testPivotMaxTrigger(SmartMotorController smc, boolean expectedTrigger) throws InterruptedException
   {
-    Pivot pivot = createPivot(smc);
-    startTest(smc);
-    TestWithScheduler.cycle(Milliseconds.of(20));
-    assertEquals(expectedTrigger, pivot.max().getAsBoolean(),
-                 "pivot.max() at " + smc.getMechanismPosition() + " vs soft upper limit (100°)");
-    closeSMC(smc);
+    try
+    {
+      Pivot pivot = createPivot(smc);
+      startTest(smc);
+      TestWithScheduler.cycle(Milliseconds.of(20));
+      assertEquals(expectedTrigger, pivot.max().getAsBoolean(),
+                   "pivot.max() at " + smc.getMechanismPosition() + " vs soft upper limit (100°)");
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   @ParameterizedTest
   @MethodSource("armMinArgs")
   void testArmMinTrigger(SmartMotorController smc, boolean expectedTrigger) throws InterruptedException
   {
-    Arm arm = createArm(smc);
-    startTest(smc);
-    TestWithScheduler.cycle(Milliseconds.of(20));
-    assertEquals(expectedTrigger, arm.min().getAsBoolean(),
-                 "arm.min() at " + smc.getMechanismPosition() + " vs soft lower limit (-100°)");
-    closeSMC(smc);
+    try
+    {
+      Arm arm = createArm(smc);
+      startTest(smc);
+      TestWithScheduler.cycle(Milliseconds.of(20));
+      assertEquals(expectedTrigger, arm.min().getAsBoolean(),
+                   "arm.min() at " + smc.getMechanismPosition() + " vs soft lower limit (-100°)");
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   @ParameterizedTest
   @MethodSource("armMaxArgs")
   void testArmMaxTrigger(SmartMotorController smc, boolean expectedTrigger) throws InterruptedException
   {
-    Arm arm = createArm(smc);
-    startTest(smc);
-    TestWithScheduler.cycle(Milliseconds.of(20));
-    assertEquals(expectedTrigger, arm.max().getAsBoolean(),
-                 "arm.max() at " + smc.getMechanismPosition() + " vs soft upper limit (100°)");
-    closeSMC(smc);
+    try
+    {
+      Arm arm = createArm(smc);
+      startTest(smc);
+      TestWithScheduler.cycle(Milliseconds.of(20));
+      assertEquals(expectedTrigger, arm.max().getAsBoolean(),
+                   "arm.max() at " + smc.getMechanismPosition() + " vs soft upper limit (100°)");
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   @ParameterizedTest
   @MethodSource("elevatorMinArgs")
   void testElevatorMinTrigger(SmartMotorController smc, boolean expectedTrigger) throws InterruptedException
   {
-    Elevator elevator = createElevator(smc);
-    startTest(smc);
-    TestWithScheduler.cycle(Milliseconds.of(20));
-    assertEquals(expectedTrigger, elevator.min().getAsBoolean(),
-                 "elevator.min() at " + smc.getMechanismPosition() + " vs soft lower limit (0 m)");
-    closeSMC(smc);
+    try
+    {
+      Elevator elevator = createElevator(smc);
+      startTest(smc);
+      TestWithScheduler.cycle(Milliseconds.of(20));
+      assertEquals(expectedTrigger, elevator.min().getAsBoolean(),
+                   "elevator.min() at " + smc.getMechanismPosition() + " vs soft lower limit (0 m)");
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   @ParameterizedTest
   @MethodSource("elevatorMaxArgs")
   void testElevatorMaxTrigger(SmartMotorController smc, boolean expectedTrigger) throws InterruptedException
   {
-    Elevator elevator = createElevator(smc);
-    startTest(smc);
-    TestWithScheduler.cycle(Milliseconds.of(20));
-    assertEquals(expectedTrigger, elevator.max().getAsBoolean(),
-                 "elevator.max() at " + smc.getMechanismPosition() + " vs soft upper limit (5 m)");
-    closeSMC(smc);
+    try
+    {
+      Elevator elevator = createElevator(smc);
+      startTest(smc);
+      TestWithScheduler.cycle(Milliseconds.of(20));
+      assertEquals(expectedTrigger, elevator.max().getAsBoolean(),
+                   "elevator.max() at " + smc.getMechanismPosition() + " vs soft upper limit (5 m)");
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   // ──────────────────────────────────────────────
@@ -556,12 +586,17 @@ public class MechanismLimitTest
   @MethodSource("createStartingPosConfigs")
   void testStartingPositionAppliedAfterSetup(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    smc.setupSimulation();
-    TestWithScheduler.cycle(Milliseconds.of(20));
-    assertTrue(smc.getMechanismPosition().isNear(Degrees.of(45), Degrees.of(2)),
-               "Expected starting position ~45° but got " + smc.getMechanismPosition());
-    closeSMC(smc);
+    try
+    {
+      startTest(smc);
+      smc.setupSimulation();
+      TestWithScheduler.cycle(Milliseconds.of(20));
+      assertTrue(smc.getMechanismPosition().isNear(Degrees.of(45), Degrees.of(2)),
+                 "Expected starting position ~45° but got " + smc.getMechanismPosition());
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   // ──────────────────────────────────────────────

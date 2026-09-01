@@ -3,31 +3,32 @@
 
 package yams.mechanisms.positional;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Radians;
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.Radians;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.simulation.BatterySim;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.util.Color8Bit;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Rotation3d;
+import org.wpilib.math.geometry.Translation2d;
+import org.wpilib.math.geometry.Translation3d;
+import org.wpilib.math.system.Models;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.simulation.BatterySim;
+import org.wpilib.simulation.DCMotorSim;
+import org.wpilib.simulation.RoboRioSim;
+import org.wpilib.smartdashboard.Mechanism2d;
+import org.wpilib.smartdashboard.MechanismLigament2d;
+import org.wpilib.smartdashboard.MechanismRoot2d;
+import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.util.Color;
+import org.wpilib.util.Color8Bit;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.Commands;
+import org.wpilib.command2.button.Trigger;
+import org.wpilib.framework.RobotBase;
+
 import java.util.Optional;
 import java.util.function.Supplier;
 import yams.exceptions.DifferentialMechanismConfigurationException;
@@ -168,8 +169,9 @@ public class DifferentialMechanism extends SmartPositionalMechanism
 
     // Setup telemetry
     m_config.getTelemetryName().ifPresent(name -> {
-      m_telemetry.setupTelemetry(getName() + "/left", m_leftSMC);
-      m_telemetry.setupTelemetry(getName() + "/right", m_rightSMC);
+      m_telemetry.setupTelemetry(getName());
+      m_telemetry.addMotorController("left", m_leftSMC);
+      m_telemetry.addMotorController("right", m_rightSMC);
     });
 
     if (RobotBase.isSimulation())
@@ -182,14 +184,14 @@ public class DifferentialMechanism extends SmartPositionalMechanism
 
       // Setup Sim
       m_leftSim = Optional.of(new DCMotorSim(
-          LinearSystemId.createDCMotorSystem(m_leftSMC.getDCMotor(),
-                                             m_config.getMOI(),
-                                             m_leftSMC.getConfig().getGearing().getMechanismToRotorRatio()),
+          Models.singleJointedArmFromPhysicalConstants(m_leftSMC.getDCMotor(),
+                                                       m_config.getMOI(),
+                                                       m_leftSMC.getConfig().getGearing().getMechanismToRotorRatio()),
           m_leftSMC.getDCMotor()));
       m_rightSim = Optional.of(new DCMotorSim(
-          LinearSystemId.createDCMotorSystem(m_rightSMC.getDCMotor(),
-                                             m_config.getMOI(),
-                                             m_rightSMC.getConfig().getGearing().getMechanismToRotorRatio()),
+          Models.singleJointedArmFromPhysicalConstants(m_rightSMC.getDCMotor(),
+                                                       m_config.getMOI(),
+                                                       m_rightSMC.getConfig().getGearing().getMechanismToRotorRatio()),
           m_rightSMC.getDCMotor()));
       m_leftSMC.setSimSupplier(new DCMotorSimSupplier(m_leftSim.get(), m_leftSMC));
       m_rightSMC.setSimSupplier(new DCMotorSimSupplier(m_rightSim.get(), m_rightSMC));
@@ -207,7 +209,7 @@ public class DifferentialMechanism extends SmartPositionalMechanism
                                                                    Inches.of(4).in(Meters),
                                                                    startingtwist.in(Degrees),
                                                                    6,
-                                                                   new Color8Bit(Color.kRed)));
+                                                                   new Color8Bit(Color.RED)));
 
       SmartDashboard.putData(getName() + "/mechanism", m_mechanismWindow);
 
@@ -252,7 +254,7 @@ public class DifferentialMechanism extends SmartPositionalMechanism
    *
    * @param tilt  Tilt of the Differential Mechanism.
    * @param twist Twist of the Differential Mechanism.
-   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand} to set the position.
+   * @return {@link org.wpilib.command2.RunCommand} to set the position.
    */
   public Command setPosition(Supplier<Angle> tilt, Supplier<Angle> twist)
   {
@@ -269,7 +271,7 @@ public class DifferentialMechanism extends SmartPositionalMechanism
    *
    * @param twist Twist dutycycle.
    * @param tilt  Tilt dutycycle.
-   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand} to set the differential mechanism duty cycle.
+   * @return {@link org.wpilib.command2.RunCommand} to set the differential mechanism duty cycle.
    */
   public Command set(double twist, double tilt)
   {
@@ -292,7 +294,7 @@ public class DifferentialMechanism extends SmartPositionalMechanism
    *
    * @param tilt  Tilt of the differential mechanism.
    * @param twist Twist of the differential mechanism.
-   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand} to set the position.
+   * @return {@link org.wpilib.command2.RunCommand} to set the position.
    */
   public Command setPosition(Angle tilt, Angle twist)
   {
@@ -309,7 +311,7 @@ public class DifferentialMechanism extends SmartPositionalMechanism
    *
    * @param tilt  Tilt of the differential mechanism.
    * @param twist Twist of the differential mechanism.
-   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand} to set the position.
+   * @return {@link org.wpilib.command2.RunCommand} to set the position.
    */
   public Command run(Angle tilt, Angle twist)
   {
@@ -326,7 +328,7 @@ public class DifferentialMechanism extends SmartPositionalMechanism
    *
    * @param tilt  Supplier of the tilt angle.
    * @param twist Supplier of the twist angle.
-   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand} to run the differential mechanism to the position.
+   * @return {@link org.wpilib.command2.RunCommand} to run the differential mechanism to the position.
    */
   public Command run(Supplier<Angle> tilt, Supplier<Angle> twist)
   {
@@ -359,8 +361,8 @@ public class DifferentialMechanism extends SmartPositionalMechanism
       m_rightSMC.simIterate();
       m_rightSMC.getSimSupplier().get().starveUpdateSim();
       RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(
-          m_leftSim.get().getCurrentDrawAmps(),
-          m_rightSim.get().getCurrentDrawAmps()));
+          m_leftSim.get().getCurrentDraw(),
+          m_rightSim.get().getCurrentDraw()));
       visualizationUpdate();
     }
   }

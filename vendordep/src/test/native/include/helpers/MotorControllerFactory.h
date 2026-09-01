@@ -6,7 +6,7 @@
 // Factory helpers used by all mechanism tests to create SmartMotorController
 // instances for each (HardwareType × ProfileType) combination.
 
-#include <frc/system/plant/DCMotor.h>
+#include <wpi/math/system/DCMotor.hpp>
 #include <rev/SparkFlex.h>
 #include <rev/SparkMax.h>
 
@@ -82,18 +82,18 @@ inline SmartMotorControllerConfig MakeBaseConfig(ProfileType profile, double kP,
 }
 
 // Return the canonical DCMotor model for a given hardware type.
-inline frc::DCMotor MotorForHardware(HardwareType hw) {
+inline wpi::math::DCMotor MotorForHardware(HardwareType hw) {
   switch (hw) {
     case HardwareType::SparkMax:
-      return frc::DCMotor::NEO(1);
+      return wpi::math::DCMotor::NEO(1);
     case HardwareType::SparkFlex:
-      return frc::DCMotor::NeoVortex(1);
+      return wpi::math::DCMotor::NeoVortex(1);
     case HardwareType::TalonFXS:
-      return frc::DCMotor::NEO(2);
+      return wpi::math::DCMotor::NEO(2);
     case HardwareType::TalonFX:
-      return frc::DCMotor::KrakenX60(1);
+      return wpi::math::DCMotor::KrakenX60(1);
   }
-  return frc::DCMotor::NEO(1);
+  return wpi::math::DCMotor::NEO(1);
 }
 
 // Create a bundle (hardware + subsystem + wrapper) for a given parameter set.
@@ -112,27 +112,29 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
   switch (param.hardware) {
     case HardwareType::SparkMax: {
       bundle.sparkMax = std::make_unique<rev::spark::SparkMax>(
-          canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
+          0, canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
       bundle.smc = new local::SparkWrapper(bundle.sparkMax.get(), MotorForHardware(param.hardware),
                                            &bundle.cfg);
       break;
     }
     case HardwareType::SparkFlex: {
       bundle.sparkFlex = std::make_unique<rev::spark::SparkFlex>(
-          canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
+          0, canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
       bundle.smc = new local::SparkWrapper(bundle.sparkFlex.get(), MotorForHardware(param.hardware),
                                            &bundle.cfg);
       break;
     }
     case HardwareType::TalonFXS: {
-      bundle.talonFXS = std::make_unique<ctre::phoenix6::hardware::TalonFXS>(canId);
+      bundle.talonFXS = std::make_unique<ctre::phoenix6::hardware::TalonFXS>(
+          canId, ctre::phoenix6::CANBus{});
       bundle.smc =
           new remote::TalonFXSWrapper(bundle.talonFXS.get(), MotorForHardware(param.hardware),
                                       remote::TalonFXSWrapper::MotorArrangement::NEO, &bundle.cfg);
       break;
     }
     case HardwareType::TalonFX: {
-      bundle.talonFX = std::make_unique<ctre::phoenix6::hardware::TalonFX>(canId);
+      bundle.talonFX = std::make_unique<ctre::phoenix6::hardware::TalonFX>(
+          canId, ctre::phoenix6::CANBus{});
       bundle.smc = new remote::TalonFXWrapper(bundle.talonFX.get(),
                                               MotorForHardware(param.hardware), &bundle.cfg);
       break;
@@ -151,7 +153,7 @@ inline bool IsCTRE(const HardwareBundle& b) {
 // Standard teardown: unregister subsystem, close SMC, delete wrapper.
 inline void CloseBundle(HardwareBundle& b) {
   motorcontrollers::SmartMotorControllerCommandRegistry::RemoveCommands(b.subsystem.get());
-  frc2::CommandScheduler::GetInstance().UnregisterSubsystem(b.subsystem.get());
+  wpi::cmd::CommandScheduler::GetInstance().UnregisterSubsystem(b.subsystem.get());
   b.subsystem->Close();
   delete b.smc;
   b.smc = nullptr;

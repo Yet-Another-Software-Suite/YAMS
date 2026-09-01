@@ -3,22 +3,22 @@
 
 package yams.mechanisms.config;
 
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.Seconds;
+import static org.wpilib.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.Rotations;
+import static org.wpilib.units.Units.Seconds;
 
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj2.command.Subsystem;
+import org.wpilib.math.controller.PIDController;
+import org.wpilib.math.geometry.Pose2d;
+import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Translation2d;
+import org.wpilib.math.kinematics.ChassisVelocities;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.LinearVelocity;
+import org.wpilib.units.measure.Time;
+import org.wpilib.framework.RobotBase;
+import org.wpilib.command2.Subsystem;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.function.Supplier;
@@ -26,6 +26,7 @@ import java.util.function.Supplier;
 import yams.mechanisms.swerve.SwerveDrive;
 import yams.mechanisms.swerve.SwerveModule;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.telemetry.SwerveDriveTelemetryConfig;
 
 /**
  * Swerve Drive Configuration
@@ -116,9 +117,17 @@ public class SwerveDriveConfig
    */
   private SwerveModule[]                      modules;
   /**
+   * Telemetry name for the {@link SwerveDrive}.
+   */
+  private String                              telemetryName                 = "swerve";
+  /**
    * Telemetry verbosity
    */
   private Optional<TelemetryVerbosity>        telemetryVerbosity            = Optional.empty();
+  /**
+   * User specified {@link SwerveDriveTelemetryConfig}, takes precedence over {@link #telemetryVerbosity} if present.
+   */
+  private Optional<SwerveDriveTelemetryConfig> specifiedTelemetryConfig     = Optional.empty();
   /**
    * Gyro supplier.
    */
@@ -478,13 +487,51 @@ public class SwerveDriveConfig
   /**
    * Configure telemetry for the {@link SwerveModule} mechanism.
    *
+   * @param name Telemetry Name
    * @param telemetryVerbosity Telemetry verbosity to apply.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withTelemetry(TelemetryVerbosity telemetryVerbosity)
+  public SwerveDriveConfig withTelemetry(String name, TelemetryVerbosity telemetryVerbosity)
   {
+    this.telemetryName = name;
     this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
     return this;
+  }
+
+  /**
+   * Configure telemetry for the {@link SwerveDrive} with a {@link SwerveDriveTelemetryConfig}.
+   *
+   * @param name Telemetry Name
+   * @param telemetryConfig Config that specifies what to log.
+   * @return {@link SwerveDriveConfig} for chaining.
+   */
+  public SwerveDriveConfig withTelemetry(String name, SwerveDriveTelemetryConfig telemetryConfig)
+  {
+    this.telemetryName = name;
+    this.telemetryVerbosity = Optional.empty();
+    this.specifiedTelemetryConfig = Optional.ofNullable(telemetryConfig);
+    return this;
+  }
+
+  /**
+   * Get the user specified {@link SwerveDriveTelemetryConfig}, if configured via
+   * {@link #withTelemetry(String,SwerveDriveTelemetryConfig)}.
+   *
+   * @return {@link SwerveDriveTelemetryConfig} if configured.
+   */
+  public Optional<SwerveDriveTelemetryConfig> getSwerveDriveTelemetryConfig()
+  {
+    return specifiedTelemetryConfig;
+  }
+
+  /**
+   * Get the telemetry name for the {@link SwerveDrive}.
+   *
+   * @return Telemetry name for the {@link SwerveDrive}.
+   */
+  public String getTelemetryName()
+  {
+    return telemetryName;
   }
 
   /**
@@ -576,9 +623,9 @@ public class SwerveDriveConfig
    * Correct for skew that worsens as angular velocity increases
    *
    * @param robotRelativeVelocity The chassis speeds to set the robot to achieve.
-   * @return {@link ChassisSpeeds} of the robot after angular velocity skew correction.
+   * @return {@link ChassisVelocities} of the robot after angular velocity skew correction.
    */
-  private ChassisSpeeds angularVelocitySkewCorrection(ChassisSpeeds robotRelativeVelocity)
+  private ChassisVelocities angularVelocitySkewCorrection(ChassisVelocities robotRelativeVelocity)
   {
     var angularVelocity = new Rotation2d(gyroAngularVelocitySupplier.orElseThrow().get().in(RadiansPerSecond) *
                                          (RobotBase.isSimulation() ?
@@ -588,9 +635,8 @@ public class SwerveDriveConfig
     if (angularVelocity.getRadians() != 0.0)
     {
       var           gyroRotation          = new Rotation2d(gyroSupplier.orElseThrow().get());
-      ChassisSpeeds fieldRelativeVelocity = ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeVelocity, gyroRotation);
-      robotRelativeVelocity = ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeVelocity,
-                                                                    gyroRotation.plus(angularVelocity));
+      ChassisVelocities fieldRelativeVelocity = robotRelativeVelocity.toFieldRelative(gyroRotation);
+      robotRelativeVelocity = fieldRelativeVelocity.toRobotRelative(gyroRotation.plus(angularVelocity));
     }
     return robotRelativeVelocity;
   }
@@ -598,10 +644,10 @@ public class SwerveDriveConfig
   /**
    * Optimize the given chassis speeds.
    *
-   * @param speeds {@link ChassisSpeeds} to optimize.
-   * @return Optimized {@link ChassisSpeeds}.
+   * @param speeds {@link ChassisVelocities} to optimize.
+   * @return Optimized {@link ChassisVelocities}.
    */
-  public ChassisSpeeds optimizeRobotRelativeChassisSpeeds(ChassisSpeeds speeds)
+  public ChassisVelocities optimizeRobotRelativeChassisSpeeds(ChassisVelocities speeds)
   {
     if (angularVelocityScaleFactor.isPresent())
     {
@@ -609,7 +655,7 @@ public class SwerveDriveConfig
     }
     if (discretizationSeconds.isPresent())
     {
-      speeds = ChassisSpeeds.discretize(speeds, (RobotBase.isSimulation() ?
+      speeds = speeds.discretize((RobotBase.isSimulation() ?
                                                  simDiscretizationSeconds.orElse(discretizationSeconds.get()) :
                                                  discretizationSeconds.get()).in(Seconds));
     }
@@ -660,7 +706,7 @@ public class SwerveDriveConfig
     {
       return translation;
     }
-    return new Translation2d(Math.pow(translation.getNorm(), 3), translation.getAngle());
+    return new Translation2d(Math.pow(translation.getNorm(), 3), translation.getAngle().orElse(new Rotation2d()));
   }
 
   /**
@@ -676,7 +722,16 @@ public class SwerveDriveConfig
     {
       return translation;
     }
-    return new Translation2d(translation.getNorm() * scalar, translation.getAngle());
+    return new Translation2d(translation.getNorm() * scalar, translation.getAngle().orElse(new Rotation2d()));
+  }
+
+  /**
+   * Get the discretization time for the pose estimation used by {@link #optimizeRobotRelativeChassisSpeeds(ChassisSpeeds)}
+   * @return Discretization time for the pose estimation.
+   */
+  public Optional<Time> getDiscretization()
+  {
+    return RobotBase.isSimulation() ? simDiscretizationSeconds : discretizationSeconds;
   }
 
 //  /**

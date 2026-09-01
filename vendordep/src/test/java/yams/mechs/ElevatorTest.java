@@ -3,30 +3,30 @@
 
 package yams.mechs;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Millisecond;
-import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.Pounds;
-import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.MetersPerSecondPerSecond;
+import static org.wpilib.units.Units.Millisecond;
+import static org.wpilib.units.Units.Milliseconds;
+import static org.wpilib.units.Units.Pounds;
+import static org.wpilib.units.Units.Seconds;
+import static org.wpilib.units.Units.Volts;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.wpilibj.Preferences;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
+import org.wpilib.math.controller.ElevatorFeedforward;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.LinearVelocity;
+import org.wpilib.util.Preferences;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.CommandScheduler;
+import org.wpilib.command2.Commands;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
@@ -305,16 +305,20 @@ public class ElevatorTest
   @MethodSource("createConfigs")
   void testSMCDutyCycle(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    smc.setupSimulation();
-    SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
+    try
+    {
+      startTest(smc);
+      smc.setupSimulation();
+      SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
 
-    Command dutyCycleUp   = subsys.setDutyCycle(1);
-    Command dutyCycleDown = subsys.setDutyCycle(-1);
+      Command dutyCycleUp   = subsys.setDutyCycle(1);
+      Command dutyCycleDown = subsys.setDutyCycle(-1);
 
-    dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
-
-    closeSMC(smc);
+      dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
 
@@ -322,46 +326,54 @@ public class ElevatorTest
   @MethodSource("createConfigs")
   void testSMCPositionPID(SmartMotorController smc) throws InterruptedException
   {
-    if (smc instanceof TalonFXSWrapper)
+    try
     {
+      if (smc instanceof TalonFXSWrapper)
+      {
 //      smc.applyConfig(smc.getConfig()
 //                         .withClosedLoopController(0.2,
 //                                                   0,
 //                                                   0,
 //                                                   MetersPerSecond.of(0.1),
 //                                                   MetersPerSecondPerSecond.of(0.5)));
-    }
-    if (smc instanceof TalonFXWrapper)
-    {
+      }
+      if (smc instanceof TalonFXWrapper)
+      {
 //      smc.applyConfig(smc.getConfig()
 //                         .withClosedLoopController(0.02,
 //                                                   0,
 //                                                   0,
 //                                                   MetersPerSecond.of(0.1),
 //                                                   MetersPerSecondPerSecond.of(0.5)));
+      }
+      startTest(smc);
+      smc.setupSimulation();
+      Command highPid = Commands.run(() -> smc.setPosition(Meters.of(2)));
+      Command lowPid  = Commands.run(() -> smc.setPosition(Meters.of(0)));
+
+      positionPidTest(smc, highPid, lowPid);
+    } finally
+    {
+      closeSMC(smc);
     }
-    startTest(smc);
-    smc.setupSimulation();
-    Command highPid = Commands.run(() -> smc.setPosition(Meters.of(2)));
-    Command lowPid  = Commands.run(() -> smc.setPosition(Meters.of(0)));
-
-    positionPidTest(smc, highPid, lowPid);
-
-    closeSMC(smc);
   }
 
   @ParameterizedTest
   @MethodSource("createConfigs")
   void testElevatorDutyCycle(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    Elevator elevator      = createElevator(smc);
-    Command  dutyCycleUp   = elevator.set(1);
-    Command  dutyCycleDown = elevator.set(-0.5);
+    try
+    {
+      startTest(smc);
+      Elevator elevator      = createElevator(smc);
+      Command  dutyCycleUp   = elevator.set(1);
+      Command  dutyCycleDown = elevator.set(-0.5);
 
-    dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
-
-    closeSMC(smc);
+      dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
 
@@ -369,14 +381,18 @@ public class ElevatorTest
   @MethodSource("createConfigs")
   void testElevatorPositionPID(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    Elevator elevator = createElevator(smc);
-    Command  highPid  = elevator.setHeight(Meters.of(2));
-    Command  lowPid   = elevator.setHeight(Meters.of(0.5));
+    try
+    {
+      startTest(smc);
+      Elevator elevator = createElevator(smc);
+      Command  highPid  = elevator.setHeight(Meters.of(2));
+      Command  lowPid   = elevator.setHeight(Meters.of(0.5));
 
-    positionPidTest(smc, highPid, lowPid);
-
-    closeSMC(smc);
+      positionPidTest(smc, highPid, lowPid);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   @BeforeEach

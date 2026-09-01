@@ -3,30 +3,30 @@
 
 package yams.mechanisms.positional;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Inch;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meters;
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.Inch;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Meters;
 
-import edu.wpi.first.math.filter.Debouncer.DebounceType;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.simulation.BatterySim;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.util.Color8Bit;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import org.wpilib.math.filter.Debouncer.DebounceType;
+import org.wpilib.math.geometry.Rotation3d;
+import org.wpilib.math.geometry.Translation3d;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.math.system.Models;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.framework.RobotBase;
+import org.wpilib.simulation.BatterySim;
+import org.wpilib.simulation.DCMotorSim;
+import org.wpilib.simulation.RoboRioSim;
+import org.wpilib.smartdashboard.Mechanism2d;
+import org.wpilib.smartdashboard.MechanismLigament2d;
+import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.util.Color;
+import org.wpilib.util.Color8Bit;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.Commands;
+import org.wpilib.command2.button.Trigger;
 import java.util.Optional;
 import java.util.function.Supplier;
 import yams.exceptions.PivotConfigurationException;
@@ -153,7 +153,7 @@ public class Pivot extends SmartPositionalMechanism
                                               "Cannot create simulation.",
                                               "SmartMotorControllerConfig.withStartingPosition(Angle)");
       }
-      m_dcmotorSim = Optional.of(new DCMotorSim(LinearSystemId.createDCMotorSystem(dcMotor,
+      m_dcmotorSim = Optional.of(new DCMotorSim(Models.singleJointedArmFromPhysicalConstants(dcMotor,
                                                                                    smc.getConfig().getMOI(),
                                                                                    smc.getConfig().getGearing()
                                                                                       .getMechanismToRotorRatio()),
@@ -175,17 +175,17 @@ public class Pivot extends SmartPositionalMechanism
                                                                           smc.getConfig().getStartingPosition().get()
                                                                                 .in(Degrees),
                                                                           3,
-                                                                          new Color8Bit(Color.kWhite)));
+                                                                          new Color8Bit(Color.WHITE)));
       m_mechanismRoot.append(new MechanismLigament2d("MaxHard",
                                                      Inch.of(3).in(Meters),
                                                      config.getUpperHardLimit().get()
                                                            .in(Degrees),
                                                      4,
-                                                     new Color8Bit(Color.kLimeGreen)));
+                                                     new Color8Bit(Color.LIME_GREEN)));
       m_mechanismRoot.append(new MechanismLigament2d("MinHard", Inch.of(3).in(Meters),
                                                      config.getLowerHardLimit().get()
                                                            .in(Degrees),
-                                                     4, new Color8Bit(Color.kRed)));
+                                                     4, new Color8Bit(Color.RED)));
       if (smc.getConfig().getMechanismLowerLimit().isPresent() &&
           smc.getConfig().getMechanismUpperLimit().isPresent())
       {
@@ -194,11 +194,11 @@ public class Pivot extends SmartPositionalMechanism
                                                        smc.getConfig().getMechanismUpperLimit().get()
                                                           .in(Degrees),
                                                        4,
-                                                       new Color8Bit(Color.kHotPink)));
+                                                       new Color8Bit(Color.HOT_PINK)));
         m_mechanismRoot.append(new MechanismLigament2d("MinSoft", Inch.of(3).in(Meters),
                                                        smc.getConfig().getMechanismLowerLimit().get()
                                                           .in(Degrees),
-                                                       4, new Color8Bit(Color.kYellow)));
+                                                       4, new Color8Bit(Color.YELLOW)));
       }
       SmartDashboard.putData(getName() + "/mechanism",
                              m_mechanismWindow);
@@ -376,18 +376,18 @@ public class Pivot extends SmartPositionalMechanism
       m_smc.getSimSupplier().get().updateSimState();
       m_smc.simIterate();
       m_smc.getSimSupplier().get().starveUpdateSim();
-      if (m_config.getLowerHardLimit().isPresent() && m_dcmotorSim.get().getAngularVelocityRadPerSec() < 0 &&
+      if (m_config.getLowerHardLimit().isPresent() && m_dcmotorSim.get().getAngularVelocity() < 0 &&
           m_smc.getMechanismPosition().lt(m_config.getLowerHardLimit().get()))
       {
         m_smc.setEncoderPosition(m_config.getLowerHardLimit().get());
       }
-      if (m_config.getUpperHardLimit().isPresent() && m_dcmotorSim.get().getAngularVelocityRadPerSec() > 0 &&
+      if (m_config.getUpperHardLimit().isPresent() && m_dcmotorSim.get().getAngularVelocity() > 0 &&
           m_smc.getMechanismPosition().gt(m_config.getUpperHardLimit().get()))
       {
         m_smc.setEncoderPosition(m_config.getUpperHardLimit().get());
       }
       RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_dcmotorSim.get()
-                                                                                           .getCurrentDrawAmps()));
+                                                                                           .getCurrentDraw()));
       visualizationUpdate();
     }
   }

@@ -3,31 +3,31 @@
 
 package yams.mechs;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Millisecond;
-import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.DegreesPerSecond;
+import static org.wpilib.units.Units.DegreesPerSecondPerSecond;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Millisecond;
+import static org.wpilib.units.Units.Milliseconds;
+import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
+import static org.wpilib.units.Units.Seconds;
+import static org.wpilib.units.Units.Volts;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.wpilibj.Preferences;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
+import org.wpilib.math.controller.ArmFeedforward;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.util.Preferences;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.CommandScheduler;
+import org.wpilib.command2.Commands;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
@@ -300,35 +300,43 @@ public class ArmTest
   @MethodSource("createConfigs")
   void testSMCDutyCycle(SmartMotorController smc) throws InterruptedException
   {
-    SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
+    try
+    {
+      SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
 
-    startTest(smc);
-    Command dutyCycleUp   = subsys.setDutyCycle(0.5);
-    Command dutyCycleDown = subsys.setDutyCycle(-0.5);
+      startTest(smc);
+      Command dutyCycleUp   = subsys.setDutyCycle(0.5);
+      Command dutyCycleDown = subsys.setDutyCycle(-0.5);
 
-    dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
-
-    closeSMC(smc);
+      dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   @ParameterizedTest
   @MethodSource("createConfigs")
   void testArmDutyCycle(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    Arm     arm           = createArm(smc);
-    Command dutyCycleUp   = arm.set(0.5);
-    Command dutyCycleDown = arm.set(-0.5);
+    try
+    {
+      startTest(smc);
+      Arm     arm           = createArm(smc);
+      Command dutyCycleUp   = arm.set(0.5);
+      Command dutyCycleDown = arm.set(-0.5);
 
 //    if (smc instanceof TalonFXWrapper || smc instanceof TalonFXSWrapper)
 //    {
 //      System.out.println("[WARNING] TalonFX and TalonFXS Does not work with CI on linux, skipping for now.");
 //    } else
 //    {
-    dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
+      dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
 //    }
-
-    closeSMC(smc);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
 
@@ -336,27 +344,35 @@ public class ArmTest
   @MethodSource("createConfigs")
   void testSMCPositionPID(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    Command highPid = Commands.run(() -> smc.setPosition(Degrees.of(80)));
-    Command lowPid  = Commands.run(() -> smc.setPosition(Degrees.of(-80)));
+    try
+    {
+      startTest(smc);
+      Command highPid = Commands.run(() -> smc.setPosition(Degrees.of(80)));
+      Command lowPid  = Commands.run(() -> smc.setPosition(Degrees.of(-80)));
 
-    positionPidTest(smc, highPid, lowPid);
-
-    closeSMC(smc);
+      positionPidTest(smc, highPid, lowPid);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   @ParameterizedTest
   @MethodSource("createConfigs")
   void testArmPositionPID(SmartMotorController smc) throws InterruptedException
   {
-    startTest(smc);
-    Arm     arm     = createArm(smc);
-    Command highPid = arm.setAngle(Degrees.of(80));
-    Command lowPid  = arm.setAngle(Degrees.of(-80));
+    try
+    {
+      startTest(smc);
+      Arm     arm     = createArm(smc);
+      Command highPid = arm.setAngle(Degrees.of(80));
+      Command lowPid  = arm.setAngle(Degrees.of(-80));
 
-    positionPidTest(smc, highPid, lowPid);
-
-    closeSMC(smc);
+      positionPidTest(smc, highPid, lowPid);
+    } finally
+    {
+      closeSMC(smc);
+    }
   }
 
   @BeforeEach

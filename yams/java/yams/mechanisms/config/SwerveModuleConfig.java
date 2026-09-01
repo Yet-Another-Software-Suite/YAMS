@@ -3,28 +3,28 @@
 
 package yams.mechanisms.config;
 
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Rotations;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.Rotations;
 
-import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
+import org.wpilib.framework.RobotBase;
+import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Translation2d;
+import org.wpilib.math.kinematics.SwerveModuleVelocity;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.LinearVelocity;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-import edu.wpi.first.wpilibj.RobotBase;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.swerve.SwerveModule;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.telemetry.SwerveModuleTelemetryConfig;
 
 /**
  * Swerve Module
@@ -35,10 +35,10 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  * swerve module using TalonFX motors and a CANcoder absolute encoder.
  * </p>
  * <pre>{@code
- * import static edu.wpi.first.units.Units.*;
+ * import static org.wpilib.units.Units.*;
  * import com.ctre.phoenix6.hardware.TalonFX;
  * import com.ctre.phoenix6.hardware.CANcoder;
- * import edu.wpi.first.math.system.plant.DCMotor;
+ * import org.wpilib.math.system.DCMotor;
  * import yams.motorcontrollers.SmartMotorControllerConfig;
  * import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
  * import yams.motorcontrollers.SmartMotorController;
@@ -98,6 +98,10 @@ public class SwerveModuleConfig
    */
   private Optional<TelemetryVerbosity>   telemetryVerbosity            = Optional.empty();
   /**
+   * User specified {@link SwerveModuleTelemetryConfig}, takes precedence over {@link #telemetryVerbosity} if present.
+   */
+  private Optional<SwerveModuleTelemetryConfig> specifiedTelemetryConfig = Optional.empty();
+  /**
    * Absolute encoder supplier for the azimuth {@link SmartMotorController}.
    */
   private Optional<Supplier<Angle>>      absoluteEncoderSupplier       = Optional.empty();
@@ -111,7 +115,7 @@ public class SwerveModuleConfig
   private GearBox                        absoluteEncoderGearbox        = new GearBox(new double[]{1});
   /**
    * Swerve module state optimization using
-   * {@link edu.wpi.first.math.kinematics.SwerveModuleState#optimize(Rotation2d)}.
+   * {@link org.wpilib.math.kinematics.SwerveModuleVelocity#optimize(Rotation2d)}.
    */
   private boolean                        swerveModuleStateOptimization = true;
   /**
@@ -139,7 +143,7 @@ public class SwerveModuleConfig
    */
   private Optional<Distance> wheelCircumference = Optional.empty();
   /**
-   * Last angle this config actually commanded via {@link #getOptimizedState(SwerveModuleState)}.
+   * Last angle this config actually commanded via {@link #getOptimizedState(SwerveModuleVelocity)}.
    * The flip decision is made against this, not the live absolute encoder reading: kinematics
    * recomputes the raw desired angle every loop with no memory of a prior flip, so if the
    * decision were re-derived from the encoder, holding the raw state while a flip is debouncing
@@ -179,6 +183,7 @@ public class SwerveModuleConfig
     this.azimuthMotor = cfg.azimuthMotor;
     this.telemetryName = cfg.telemetryName;
     this.telemetryVerbosity = cfg.telemetryVerbosity;
+    this.specifiedTelemetryConfig = cfg.specifiedTelemetryConfig;
     this.absoluteEncoderSupplier = cfg.absoluteEncoderSupplier;
     this.absoluteEncoderOffset = cfg.absoluteEncoderOffset;
     this.absoluteEncoderGearbox = cfg.absoluteEncoderGearbox;
@@ -240,6 +245,7 @@ public class SwerveModuleConfig
   public SwerveModuleConfig withAbsoluteEncoder(Object absoluteEncoder)
   {
     this.absoluteEncoder = Optional.ofNullable(absoluteEncoder);
+    this.absoluteEncoderSupplier = Optional.empty();
     azimuthMotor.ifPresent(azimuthMotor -> azimuthMotor.getConfig().withExternalEncoder(absoluteEncoder));
     return this;
   }
@@ -401,7 +407,7 @@ public class SwerveModuleConfig
   }
 
   /**
-   * Use {@link edu.wpi.first.math.kinematics.SwerveModuleState#optimize(Rotation2d)} to optimize each state.
+   * Use {@link org.wpilib.math.kinematics.SwerveModuleVelocity#optimize(Rotation2d)} to optimize each state.
    *
    * @param swerveModuleStateOptimization True to enable optimization, false otherwise.
    * @return {@link SwerveModuleConfig} for chaining.
@@ -424,6 +430,32 @@ public class SwerveModuleConfig
     this.telemetryName = Optional.ofNullable(telemetryName);
     this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
     return this;
+  }
+
+  /**
+   * Configure telemetry for the {@link SwerveModule} mechanism with a {@link SwerveModuleTelemetryConfig}.
+   *
+   * @param telemetryName   Telemetry NetworkTable name to appear under "SmartDashboard/"
+   * @param telemetryConfig Config that specifies what to log.
+   * @return {@link SwerveModuleConfig} for chaining.
+   */
+  public SwerveModuleConfig withTelemetry(String telemetryName, SwerveModuleTelemetryConfig telemetryConfig)
+  {
+    this.telemetryName = Optional.ofNullable(telemetryName);
+    this.telemetryVerbosity = Optional.of(TelemetryVerbosity.HIGH);
+    this.specifiedTelemetryConfig = Optional.ofNullable(telemetryConfig);
+    return this;
+  }
+
+  /**
+   * Get the user specified {@link SwerveModuleTelemetryConfig}, if configured via
+   * {@link #withTelemetry(String, SwerveModuleTelemetryConfig)}.
+   *
+   * @return {@link SwerveModuleTelemetryConfig} if configured.
+   */
+  public Optional<SwerveModuleTelemetryConfig> getSwerveModuleTelemetryConfig()
+  {
+    return specifiedTelemetryConfig;
   }
 
   /**
@@ -500,44 +532,48 @@ public class SwerveModuleConfig
   /**
    * Get the cosine-compensated velocity to set the swerve module to.
    *
-   * @param desiredState Desired {@link SwerveModuleState} to use.
+   * @param desiredState Desired {@link SwerveModuleVelocity} to use.
+   * @param currentAngle Current azimuth angle to compare against, read once per control cycle so
+   *                     it stays consistent with whatever value was used earlier in that cycle
+   *                     (e.g. for optimization).
    * @return Cosine compensated velocity in meters/second.
    */
-  private double getCosineCompensatedVelocity(SwerveModuleState desiredState)
+  private double getCosineCompensatedVelocity(SwerveModuleVelocity desiredState, Rotation2d currentAngle)
   {
-    double cosineScalar = 1.0;
     // Taken from the CTRE SwerveModule class.
     // https://api.ctr-electronics.com/phoenix6/release/java/src-html/com/ctre/phoenix6/mechanisms/swerve/SwerveModule.html#line.46
     /* From FRC 900's whitepaper, we add a cosine compensator to the applied drive velocity */
     /* To reduce the "skew" that occurs when changing direction */
     /* If error is close to 0 rotations, we're already there, so apply full power */
     /* If the error is close to 0.25 rotations, then we're 90 degrees, so movement doesn't help us at all */
-    cosineScalar = Rotation2d.fromDegrees(desiredState.angle.getDegrees())
-                             .minus(Rotation2d.fromRotations(getAbsoluteEncoderAngle().in(Rotations)))
-                             .getCos(); // TODO: Investigate angle modulus by 180.
-    /* Make sure we don't invert our drive, even though we shouldn't ever target over 90 degrees anyway */
-    if (cosineScalar < 0.0)
-    {
-      cosineScalar = 1;
-    }
+    // The azimuth is only meaningful modulo 180 degrees (0 == 180) since the drive motor can spin
+    // either direction. Using the SIGNED cosine of the (correctly wrapped) angle difference
+    // handles that on its own: near 0 degrees it scales close to +1 (drive forward as
+    // commanded), near 90 degrees it goes to 0, and near 180 degrees it goes to -1, which flips
+    // the sign of the applied speed so the wheel drives backward at its current heading instead
+    // of losing that direction to a forced-positive scalar.
+    double cosineScalar = desiredState.angle.minus(currentAngle).getCos();
+    if(cosineScalar < 0.0)
+      cosineScalar = 1.0;
 
-    return desiredState.speedMetersPerSecond * cosineScalar;
+    return desiredState.velocity * cosineScalar;
   }
 
   /**
-   * Get the optimized {@link SwerveModuleState} applying all optional optimizations.
+   * Get the optimized {@link SwerveModuleVelocity} applying all optional optimizations.
    *
-   * @param state {@link SwerveModuleState} to optimize.
-   * @return {@link SwerveModuleState} optimized.
+   * @param state {@link SwerveModuleVelocity} to optimize.
+   * @return {@link SwerveModuleVelocity} optimized.
    */
-  public SwerveModuleState getOptimizedState(SwerveModuleState state)
+  public SwerveModuleVelocity getOptimizedState(SwerveModuleVelocity state)
   {
+    Rotation2d currentAngle = new Rotation2d(getAbsoluteEncoderAngle());
     if (minimumVelocity.isPresent())
     {
-      if (MetersPerSecond.of(Math.abs(state.speedMetersPerSecond)).lte(minimumVelocity.get()))
+      if (MetersPerSecond.of(Math.abs(state.velocity)).lte(minimumVelocity.get()))
       {
-//        state = new SwerveModuleState(0, state.angle);
-        state = new SwerveModuleState(0, new Rotation2d(getAbsoluteEncoderAngle()));
+//        state = new SwerveModuleVelocity(0, state.angle);
+        state = new SwerveModuleVelocity(0, currentAngle);
 
       }
     }
@@ -545,14 +581,14 @@ public class SwerveModuleConfig
     {
         if (lastCommandedAngle == null)
         {
-            lastCommandedAngle = new Rotation2d(getAbsoluteEncoderAngle());
+            lastCommandedAngle = currentAngle;
         }
-        state.optimize(lastCommandedAngle);
+        state = state.optimize(lastCommandedAngle);
         lastCommandedAngle = state.angle;
     }
     if (cosineCompensation)
     {
-      state.speedMetersPerSecond = getCosineCompensatedVelocity(state);
+      state.velocity = getCosineCompensatedVelocity(state, new Rotation2d(azimuthMotor.orElseThrow().getMechanismPosition()));
     }
     return state;
   }

@@ -3,54 +3,40 @@
 
 package yams.mechanisms.positional;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Kilograms;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Microsecond;
-import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Kilograms;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.Milliseconds;
+import static org.wpilib.units.Units.Seconds;
 
-import edu.wpi.first.math.filter.Debouncer.DebounceType;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.simulation.BatterySim;
-import edu.wpi.first.wpilibj.simulation.ElevatorSim;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.util.Color8Bit;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import org.wpilib.math.filter.Debouncer.DebounceType;
+import org.wpilib.math.geometry.Rotation3d;
+import org.wpilib.math.geometry.Translation3d;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.LinearVelocity;
+import org.wpilib.framework.RobotBase;
+import org.wpilib.simulation.BatterySim;
+import org.wpilib.simulation.ElevatorSim;
+import org.wpilib.simulation.RoboRioSim;
+import org.wpilib.smartdashboard.Mechanism2d;
+import org.wpilib.smartdashboard.MechanismLigament2d;
+import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.util.Color;
+import org.wpilib.util.Color8Bit;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.Commands;
+import org.wpilib.command2.button.Trigger;
 import java.util.Optional;
 import java.util.function.Supplier;
 import yams.exceptions.ElevatorConfigurationException;
 import yams.exceptions.SmartMotorControllerConfigurationException;
-import yams.gearing.MechanismGearing;
-import yams.math.DerivativeTimeFilter;
 import yams.mechanisms.config.ElevatorConfig;
 import yams.mechanisms.config.MechanismPositionConfig;
 import yams.mechanisms.config.MechanismPositionConfig.Plane;
-import yams.motorcontrollers.SimSupplier;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
+import yams.motorcontrollers.simulation.ElevatorSimSupplier;
 
 /**
  * Elevator mechanism.
@@ -102,8 +88,6 @@ public class Elevator extends SmartPositionalMechanism
     m_config = config;
     m_smc = smc;
     SmartMotorControllerConfig smcCfg = smc.getConfig();
-    DCMotor                    dcMotor   = m_smc.getDCMotor();
-    MechanismGearing           gearing   = m_smc.getConfig().getGearing();
     SmartMotorControllerConfig smcConfig = m_smc.getConfig();
     m_subsystem = smcCfg.getSubsystem();
     if (config.getTelemetryName().isPresent())
@@ -159,144 +143,7 @@ public class Elevator extends SmartPositionalMechanism
                                           simulateGravity,
               smcConfig.convertFromMechanism(smcConfig.getStartingPosition().orElseThrow()).in(Meters),
                                           0.01 / 4096, 0.01 / 4096));
-      m_smc.setSimSupplier(new SimSupplier()
-      {
-        final Supplier<Double> pos = m_sim.get()::getPositionMeters;
-        final Supplier<Double> mps = m_sim.get()::getVelocityMetersPerSecond;
-        final DerivativeTimeFilter mpsps = new DerivativeTimeFilter(pos.get(),
-                                                                    smcConfig.getClosedLoopControlPeriod()
-                                                                             .orElse(Milliseconds.of(20)));
-        boolean inputFed   = false;
-        boolean updatedSim = false;
-
-        @Override
-        public void updateSimState()
-        {
-          if (!isInputFed())
-          {
-            m_sim.get().setInput(m_smc.getDutyCycle() * RoboRioSim.getVInVoltage());
-          }
-          if (!updatedSim)
-          {
-            starveInput();
-            m_sim.get().update(smcConfig.getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Seconds));
-            feedUpdateSim();
-          }
-        }
-
-        @Override
-        public boolean getUpdatedSim()
-        {
-          return updatedSim;
-        }
-
-        @Override
-        public void feedUpdateSim()
-        {
-          updatedSim = true;
-        }
-
-        @Override
-        public void starveUpdateSim()
-        {
-          updatedSim = false;
-        }
-
-        @Override
-        public boolean isInputFed()
-        {
-          return inputFed;
-        }
-
-        @Override
-        public void feedInput()
-        {
-          inputFed = true;
-        }
-
-        @Override
-        public void starveInput()
-        {
-          inputFed = false;
-        }
-
-        @Override
-        public void setMechanismStatorDutyCycle(double dutyCycle)
-        {
-          feedInput();
-          m_sim.get().setInputVoltage(dutyCycle * getMechanismSupplyVoltage().in(Volts));
-        }
-
-        @Override
-        public Voltage getMechanismSupplyVoltage()
-        {
-          return Volts.of(RoboRioSim.getVInVoltage());
-        }
-
-        @Override
-        public Voltage getMechanismStatorVoltage()
-        {
-          return Volts.of(dcMotor.getVoltage(dcMotor.getTorque(m_sim.get().getCurrentDrawAmps()),
-                                             getMechanismVelocity().in(RadiansPerSecond)));
-        }
-
-        @Override
-        public void setMechanismStatorVoltage(Voltage volts)
-        {
-          feedInput();
-          m_sim.get().setInputVoltage(volts.in(Volts));
-        }
-
-        @Override
-        public Angle getMechanismPosition()
-        {
-          return smcConfig.convertToMechanism(Meters.of(pos.get()));
-        }
-
-        @Override
-        public void setMechanismPosition(Angle position)
-        {
-          m_sim.get().setState(smcConfig.convertFromMechanism(position).in(Meters), mps.get());
-
-        }
-
-        @Override
-        public Angle getRotorPosition()
-        {
-          return getMechanismPosition().times(gearing.getMechanismToRotorRatio());
-        }
-
-        @Override
-        public AngularVelocity getMechanismVelocity()
-        {
-          return smcConfig.convertToMechanism(MetersPerSecond.of(mps.get()));
-
-        }
-
-        @Override
-        public void setMechanismVelocity(AngularVelocity velocity)
-        {
-          m_sim.get().setState(pos.get(), smcConfig.convertFromMechanism(velocity).in(MetersPerSecond));
-        }
-
-        @Override
-        public AngularVelocity getRotorVelocity()
-        {
-          return getMechanismVelocity().times(gearing.getMechanismToRotorRatio());
-        }
-
-        @Override
-        public Current getCurrentDraw()
-        {
-          return Amps.of(m_sim.get().getCurrentDrawAmps());
-        }
-
-        @Override
-        public AngularAcceleration getRotorAcceleration()
-        {
-          return RotationsPerSecond.per(Microsecond).of(mpsps.derivative(getRotorVelocity().in(RotationsPerSecond)));
-        }
-      });
+      m_smc.setSimSupplier(new ElevatorSimSupplier(m_sim.get(), m_smc));
       m_mechanismWindow = new Mechanism2d(config.getMaximumHeight().get().in(Meters) * 2,
                                           config.getMaximumHeight().get().in(Meters) * 2);
 
@@ -321,7 +168,7 @@ public class Elevator extends SmartPositionalMechanism
                                   .in(Meters),
                              config.getAngle().in(Degrees),
                              3,
-                             new Color8Bit(Color.kYellow)
+                             new Color8Bit(Color.YELLOW)
                          ));
       }
       if (m_smc.getConfig().getMechanismUpperLimit().isPresent())
@@ -338,7 +185,7 @@ public class Elevator extends SmartPositionalMechanism
                                   .in(Meters),
                              config.getAngle().in(Degrees),
                              3,
-                             new Color8Bit(Color.kHotPink)
+                             new Color8Bit(Color.HOT_PINK)
                          ));
       }
       m_mechanismWindow.getRoot(
@@ -351,7 +198,7 @@ public class Elevator extends SmartPositionalMechanism
                            config.getMinimumHeight().get().in(Meters),
                            config.getAngle().in(Degrees),
                            3,
-                           new Color8Bit(Color.kRed)
+                           new Color8Bit(Color.RED)
                        ));
       m_mechanismWindow.getRoot(
                            "MaxHard",
@@ -363,7 +210,7 @@ public class Elevator extends SmartPositionalMechanism
                            config.getMaximumHeight().get().in(Meters),
                            config.getAngle().in(Degrees),
                            3,
-                           new Color8Bit(Color.kLimeGreen)
+                           new Color8Bit(Color.LIME_GREEN)
                        ));
 
       m_mechanismLigament = m_mechanismRoot.append(new MechanismLigament2d(getName(),
@@ -375,7 +222,7 @@ public class Elevator extends SmartPositionalMechanism
               smcConfig.convertFromMechanism(smcConfig.getStartingPosition().orElseThrow()).in(Meters),
                                                                           config.getAngle().in(Degrees),
                                                                           3,
-                                                                          new Color8Bit(Color.kWhite)));
+                                                                          new Color8Bit(Color.WHITE)));
       SmartDashboard.putData(getName() + "/mechanism", m_mechanismWindow);
     }
   }
@@ -405,7 +252,7 @@ public class Elevator extends SmartPositionalMechanism
 //        m_motor.setEncoderPosition(m_config.getMinimumHeight().get());
       } else
       {
-        RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_sim.get().getCurrentDrawAmps()));
+        RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_sim.get().getCurrentDraw()));
       }
       visualizationUpdate();
     }
@@ -484,7 +331,7 @@ public class Elevator extends SmartPositionalMechanism
    * Set the height of the elevator.
    *
    * @param height Height of the elevator to reach.
-   * @return {@link Command} that  sets the elevator height, stops immediately.
+   * @return {@link Command} that  sets the elevator height, does not stop.
    */
   public Command run(Distance height)
   {

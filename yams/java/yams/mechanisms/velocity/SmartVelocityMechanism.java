@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 package yams.mechanisms.velocity;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import org.wpilib.smartdashboard.MechanismLigament2d;
+import org.wpilib.smartdashboard.MechanismRoot2d;
+import org.wpilib.command2.button.Trigger;
 import yams.mechanisms.SmartMechanism;
 import yams.motorcontrollers.SmartMotorController;
 
@@ -21,13 +21,13 @@ import yams.motorcontrollers.SmartMotorController;
  *   <li>Velocity setpoint management via
  *       {@link yams.mechanisms.SmartMechanism#setMechanismVelocitySetpoint} and
  *       {@link yams.mechanisms.SmartMechanism#setMeasurementVelocitySetpoint}</li>
- *   <li>Velocity-based {@link edu.wpi.first.wpilibj2.command.button.Trigger} factories
+ *   <li>Velocity-based {@link org.wpilib.command2.button.Trigger} factories
  *       ({@code isNear()}, {@code gte()}, {@code lte()}, {@code between()}) — defined by each
  *       concrete subclass</li>
  *   <li>Command factories such as {@code setSpeed()} defined by each concrete subclass, which
  *       internally call the base-class velocity setpoint methods</li>
- *   <li>A 2D visualization model via {@link edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d}
- *       and {@link edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d} fields that subclasses
+ *   <li>A 2D visualization model via {@link org.wpilib.smartdashboard.MechanismRoot2d}
+ *       and {@link org.wpilib.smartdashboard.MechanismLigament2d} fields that subclasses
  *       populate and update</li>
  * </ul>
  *
@@ -69,7 +69,7 @@ import yams.motorcontrollers.SmartMotorController;
  * <ul>
  *   <li>{@link yams.mechanisms.SmartMechanism#getRelativeMechanismPosition()} — returns the
  *       current 3-D position of the mechanism end-point in
- *       {@link edu.wpi.first.wpilibj.smartdashboard.Mechanism2d} coordinates</li>
+ *       {@link org.wpilib.smartdashboard.Mechanism2d} coordinates</li>
  *   <li>{@link yams.mechanisms.SmartMechanism#visualizationUpdate()} — updates
  *       {@code mechanismLigament} to reflect the current rotational state</li>
  *   <li>{@link yams.mechanisms.SmartMechanism#getName()} — returns a human-readable mechanism
@@ -77,7 +77,7 @@ import yams.motorcontrollers.SmartMotorController;
  *   <li>{@link yams.mechanisms.SmartMechanism#simIterate()} — advances the physics simulation
  *       model and writes back simulated encoder values each robot loop</li>
  *   <li>{@link yams.mechanisms.SmartMechanism#updateTelemetry()} — publishes mechanism state
- *       to {@link edu.wpi.first.wpilibj.smartdashboard.SmartDashboard} or an equivalent
+ *       to {@link org.wpilib.smartdashboard.SmartDashboard} or an equivalent
  *       telemetry sink</li>
  *   <li>{@link #max()} — must throw {@link java.lang.UnsupportedOperationException}; velocity
  *       mechanisms do not support positional limits</li>

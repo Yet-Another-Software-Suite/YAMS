@@ -4,8 +4,8 @@
 package frc.robot.commands;
 
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Translation2d;
+import org.wpilib.math.MathUtil;
+import org.wpilib.math.geometry.Translation2d;
 
 public record Bounds(double minX, double maxX, double minY, double maxY)
 {

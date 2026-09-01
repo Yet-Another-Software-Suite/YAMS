@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include <frc/controller/LinearQuadraticRegulator.h>
-#include <frc/estimator/KalmanFilter.h>
-#include <frc/system/LinearSystem.h>
-#include <frc/system/LinearSystemLoop.h>
-#include <frc/system/plant/DCMotor.h>
-#include <frc/system/plant/LinearSystemId.h>
-#include <units/time.h>
-#include <units/voltage.h>
+#include <wpi/math/controller/LinearQuadraticRegulator.hpp>
+#include <wpi/math/estimator/KalmanFilter.hpp>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/math/system/LinearSystem.hpp>
+#include <wpi/math/system/LinearSystemLoop.hpp>
+#include <wpi/math/system/Models.hpp>
+#include <wpi/units/time.hpp>
+#include <wpi/units/voltage.hpp>
 
 #include <optional>
 #include <variant>
@@ -35,9 +35,9 @@ class LQRConfig {
   };
 
   /** LinearSystemLoop type alias for 1-state plants (flywheel). */
-  using Loop1 = frc::LinearSystemLoop<1, 1, 1>;
+  using Loop1 = wpi::math::LinearSystemLoop<1, 1, 1>;
   /** LinearSystemLoop type alias for 2-state plants (arm, elevator). */
-  using Loop2 = frc::LinearSystemLoop<2, 1, 1>;
+  using Loop2 = wpi::math::LinearSystemLoop<2, 1, 1>;
 
   /**
    * Set the LQR plant type explicitly.
@@ -55,7 +55,7 @@ class LQRConfig {
    * @param gearing        Gear reduction from motor to flywheel.
    * @return *this for chaining.
    */
-  LQRConfig& WithFlywheelSystem(const frc::DCMotor& motor, double momentOfInertia, double gearing);
+  LQRConfig& WithFlywheelSystem(const wpi::math::DCMotor& motor, double momentOfInertia, double gearing);
 
   /**
    * Configure a single-jointed arm plant model.
@@ -65,7 +65,7 @@ class LQRConfig {
    * @param gearing        Gear reduction from motor to arm joint.
    * @return *this for chaining.
    */
-  LQRConfig& WithArmSystem(const frc::DCMotor& motor, double momentOfInertia, double gearing);
+  LQRConfig& WithArmSystem(const wpi::math::DCMotor& motor, double momentOfInertia, double gearing);
 
   /**
    * Configure an elevator plant model.
@@ -76,7 +76,7 @@ class LQRConfig {
    * @param gearing    Gear reduction from motor to drum.
    * @return *this for chaining.
    */
-  LQRConfig& WithElevatorSystem(const frc::DCMotor& motor, double mass, double drumRadius,
+  LQRConfig& WithElevatorSystem(const wpi::math::DCMotor& motor, double mass, double drumRadius,
                                 double gearing);
 
   /**
@@ -122,7 +122,7 @@ class LQRConfig {
    * @param maxVoltage Maximum voltage (default 12 V).
    * @return *this for chaining.
    */
-  LQRConfig& WithMaxVoltage(units::volt_t maxVoltage);
+  LQRConfig& WithMaxVoltage(wpi::units::volt_t maxVoltage);
 
   /**
    * Set the loop period for the LQR.
@@ -130,7 +130,7 @@ class LQRConfig {
    * @param period Loop period (default 20 ms).
    * @return *this for chaining.
    */
-  LQRConfig& WithPeriod(units::second_t period);
+  LQRConfig& WithPeriod(wpi::units::second_t period);
 
   /**
    * Get the configured LQR plant type.
@@ -144,21 +144,21 @@ class LQRConfig {
    *
    * @return Loop period.
    */
-  units::second_t GetPeriod() const;
+  wpi::units::second_t GetPeriod() const;
 
   /**
    * Get the configured maximum voltage.
    *
    * @return Maximum voltage.
    */
-  units::volt_t GetMaxVoltage() const;
+  wpi::units::volt_t GetMaxVoltage() const;
 
   /**
    * Build and return the linear plant model.
    *
    * @return Variant holding a 1-state system (flywheel) or 2-state system (arm/elevator).
    */
-  std::variant<frc::LinearSystem<1, 1, 1>, frc::LinearSystem<2, 1, 1>> GetSystem() const;
+  std::variant<wpi::math::LinearSystem<1, 1, 1>, wpi::math::LinearSystem<2, 1, 1>> GetSystem() const;
 
   /**
    * Build and return the complete LinearSystemLoop ready for use.
@@ -171,16 +171,16 @@ class LQRConfig {
   friend class LQRController;
 
   std::optional<LQRType> m_type;
-  std::optional<frc::LinearSystem<1, 1, 1>> m_flywheelPlant;
-  std::optional<frc::LinearSystem<2, 1, 1>> m_armElevatorPlant;
+  std::optional<wpi::math::LinearSystem<1, 1, 1>> m_flywheelPlant;
+  std::optional<wpi::math::LinearSystem<2, 1, 1>> m_armElevatorPlant;
 
   std::vector<double> m_qElems;
   std::vector<double> m_rElems;
   std::vector<double> m_stateStdDevs;
   std::vector<double> m_measStdDevs;
 
-  units::volt_t m_maxVoltage{12.0_V};
-  units::second_t m_period{0.020_s};
+  wpi::units::volt_t m_maxVoltage{wpi::units::volt_t{12.0}};
+  wpi::units::second_t m_period{wpi::units::second_t{0.020}};
 };
 
 }  // namespace yams::math

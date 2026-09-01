@@ -3,10 +3,10 @@
 
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 
-#include <frc/Errors.h>
-#include <frc/RobotBase.h>
-#include <frc/simulation/SingleJointedArmSim.h>
-#include <frc/system/plant/LinearSystemId.h>
+#include <wpi/system/Errors.hpp>
+#include <wpi/framework/RobotBase.hpp>
+#include <wpi/simulation/SingleJointedArmSim.hpp>
+#include <wpi/math/system/Models.hpp>
 
 #include <cmath>
 #include <iostream>
@@ -157,15 +157,15 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithFeedback(
 // ---- Feedforward ---------------------------------------------------------
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithFeedforward(
-    const frc::ArmFeedforward& ff, ClosedLoopControllerSlot slot) {
+    const wpi::math::ArmFeedforward& ff, ClosedLoopControllerSlot slot) {
   // ArmFeedforward's kV/kA are natively per-radian; the hardware closed loop runs in
   // mechanism turns, so convert via the units library before storing the raw gains.
-  using kv_unit = frc::SimpleMotorFeedforward<units::turns>::kv_unit;
-  using ka_unit = frc::SimpleMotorFeedforward<units::turns>::ka_unit;
+  using kv_unit = wpi::math::SimpleMotorFeedforward<wpi::units::turns>::kv_unit;
+  using ka_unit = wpi::math::SimpleMotorFeedforward<wpi::units::turns>::ka_unit;
   auto& s = m_slots[SlotIndex(slot)];
   s.kS = ff.GetKs().value();
-  s.kV = units::unit_t<kv_unit>{ff.GetKv()}.value();
-  s.kA = units::unit_t<ka_unit>{ff.GetKa()}.value();
+  s.kV = wpi::units::unit_t<kv_unit>{ff.GetKv()}.value();
+  s.kA = wpi::units::unit_t<ka_unit>{ff.GetKa()}.value();
   s.kG = ff.GetKg().value();
   s.armFF = ff;
   s.elevatorFF.reset();
@@ -174,7 +174,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithFeedforward(
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithFeedforward(
-    const frc::ElevatorFeedforward& ff, ClosedLoopControllerSlot slot) {
+    const wpi::math::ElevatorFeedforward& ff, ClosedLoopControllerSlot slot) {
   auto& s = m_slots[SlotIndex(slot)];
   s.kS = ff.GetKs().value();
   s.kV = ff.GetKv().value();
@@ -187,13 +187,13 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithFeedforward(
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithFeedforward(
-    const frc::SimpleMotorFeedforward<units::turns>& ff, ClosedLoopControllerSlot slot) {
-  using kv_unit = frc::SimpleMotorFeedforward<units::turns>::kv_unit;
-  using ka_unit = frc::SimpleMotorFeedforward<units::turns>::ka_unit;
+    const wpi::math::SimpleMotorFeedforward<wpi::units::turns>& ff, ClosedLoopControllerSlot slot) {
+  using kv_unit = wpi::math::SimpleMotorFeedforward<wpi::units::turns>::kv_unit;
+  using ka_unit = wpi::math::SimpleMotorFeedforward<wpi::units::turns>::ka_unit;
   auto& s = m_slots[SlotIndex(slot)];
   s.kS = ff.GetKs().value();
-  s.kV = units::unit_t<kv_unit>{ff.GetKv()}.value();
-  s.kA = units::unit_t<ka_unit>{ff.GetKa()}.value();
+  s.kV = wpi::units::unit_t<kv_unit>{ff.GetKv()}.value();
+  s.kA = wpi::units::unit_t<ka_unit>{ff.GetKa()}.value();
   s.simpleFF = ff;
   s.armFF.reset();
   s.elevatorFF.reset();
@@ -203,8 +203,8 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithFeedforward(
 // ---- Motion Profiles -----------------------------------------------------
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithTrapezoidProfile(
-    units::turns_per_second_t maxVelocity, units::turns_per_second_squared_t maxAcceleration) {
-  m_trapProfile = frc::TrapezoidProfile<units::turns>{{maxVelocity, maxAcceleration}};
+    wpi::units::turns_per_second_t maxVelocity, wpi::units::turns_per_second_squared_t maxAcceleration) {
+  m_trapProfile = wpi::math::TrapezoidProfile<wpi::units::turns>{{maxVelocity, maxAcceleration}};
   m_trapMaxVelTurns = maxVelocity;
   m_trapMaxAccTurns = maxAcceleration;
   m_velocityTrapProfile = false;
@@ -212,8 +212,8 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithTrapezoidProfile(
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithLinearTrapezoidProfile(
-    units::meters_per_second_t maxVelocity, units::meters_per_second_squared_t maxAcceleration) {
-  m_linearTrapProfile = frc::TrapezoidProfile<units::meters>{{maxVelocity, maxAcceleration}};
+    wpi::units::meters_per_second_t maxVelocity, wpi::units::meters_per_second_squared_t maxAcceleration) {
+  m_linearTrapProfile = wpi::math::TrapezoidProfile<wpi::units::meters>{{maxVelocity, maxAcceleration}};
   m_trapMaxVelLinear = maxVelocity;
   m_trapMaxAccLinear = maxAcceleration;
   m_velocityTrapProfile = false;
@@ -221,8 +221,8 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithLinearTrapezoidProfi
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithVelocityTrapezoidProfile(
-    units::turns_per_second_t maxVelocity, units::turns_per_second_squared_t maxAcceleration) {
-  m_trapProfile = frc::TrapezoidProfile<units::turns>{{maxVelocity, maxAcceleration}};
+    wpi::units::turns_per_second_t maxVelocity, wpi::units::turns_per_second_squared_t maxAcceleration) {
+  m_trapProfile = wpi::math::TrapezoidProfile<wpi::units::turns>{{maxVelocity, maxAcceleration}};
   m_trapMaxVelTurns = maxVelocity;
   m_trapMaxAccTurns = maxAcceleration;
   m_velocityTrapProfile = true;
@@ -230,8 +230,8 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithVelocityTrapezoidPro
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
-    double kV, double kA, units::volt_t maxInput) {
-  using Profile = frc::ExponentialProfile<units::turns, units::volts>;
+    double kV, double kA, wpi::units::volt_t maxInput) {
+  using Profile = wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>;
   m_expoProfile = Profile{Profile::Constraints{maxInput, Profile::kV_t{kV}, Profile::kA_t{kA}}};
   m_linearExpoProfile = std::nullopt;
   m_trapProfile = std::nullopt;
@@ -242,11 +242,11 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
-    units::volt_t maxVolts, frc::DCMotor motor, units::kilogram_square_meter_t moi) {
-  using Profile = frc::ExponentialProfile<units::turns, units::volts>;
+    wpi::units::volt_t maxVolts, wpi::math::DCMotor motor, wpi::units::kilogram_square_meter_t moi) {
+  using Profile = wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>;
   m_moi = moi;
   double gearing = m_motorGearing ? m_motorGearing->GetMechanismToRotorRatio() : 1.0;
-  auto sys = frc::LinearSystemId::FlywheelSystem(motor, moi, gearing);
+  auto sys = wpi::math::Models::FlywheelFromPhysicalConstants(motor, moi, gearing);
   // A is [1/s], B is [(rad/s²)/V] from the flywheel velocity model.
   // Convert to turns: kV [V/(turn/s)] = (-A/B) * 2π, kA [V/(turn/s²)] = (2π/B).
   double A = sys.A()(0, 0);
@@ -263,10 +263,10 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
-    units::volt_t maxVolts, frc::DCMotor motor, units::kilogram_t mass, units::meter_t drumRadius) {
-  using LinearProfile = frc::ExponentialProfile<units::meters, units::volts>;
+    wpi::units::volt_t maxVolts, wpi::math::DCMotor motor, wpi::units::kilogram_t mass, wpi::units::meter_t drumRadius) {
+  using LinearProfile = wpi::math::ExponentialProfile<wpi::units::meters, wpi::units::volts>;
   double gearing = m_motorGearing ? m_motorGearing->GetMechanismToRotorRatio() : 1.0;
-  auto sys = frc::LinearSystemId::ElevatorSystem(motor, mass, drumRadius, gearing);
+  auto sys = wpi::math::Models::ElevatorFromPhysicalConstants(motor, mass, drumRadius, gearing);
   // Extract velocity-row coefficients from the 2-state [position, velocity] system.
   // A[1][1] is [1/s], B[1][0] is [(m/s²)/V] — already in meters, no conversion needed.
   double A = sys.A()(1, 1);
@@ -288,9 +288,9 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
-    units::volt_t maxVolts, units::turns_per_second_t maxVelocity,
-    units::turns_per_second_squared_t maxAcceleration) {
-  using Profile = frc::ExponentialProfile<units::turns, units::volts>;
+    wpi::units::volt_t maxVolts, wpi::units::turns_per_second_t maxVelocity,
+    wpi::units::turns_per_second_squared_t maxAcceleration) {
+  using Profile = wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>;
   m_expoProfile = Profile{Profile::Constraints{maxVolts, Profile::kV_t{maxVolts / maxVelocity},
                                                Profile::kA_t{maxVolts / maxAcceleration}}};
   m_linearExpoProfile = std::nullopt;
@@ -302,8 +302,8 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
-    frc::ExponentialProfile<units::turns, units::volts>::Constraints constraints) {
-  using Profile = frc::ExponentialProfile<units::turns, units::volts>;
+    wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>::Constraints constraints) {
+  using Profile = wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>;
   m_expoProfile = Profile{constraints};
   m_linearExpoProfile = std::nullopt;
   m_trapProfile = std::nullopt;
@@ -329,29 +329,29 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithMotorGearing(
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithMechanismCircumference(
-    units::meter_t circumference) {
+    wpi::units::meter_t circumference) {
   m_mechanismCircumference = circumference;
   return *this;
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithMechanismCircumference(
-    units::meter_t gearPitch, int teeth) {
+    wpi::units::meter_t gearPitch, int teeth) {
   return WithMechanismCircumference(gearPitch * teeth);
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithMechanismDiameter(
-    units::meter_t diameter) {
+    wpi::units::meter_t diameter) {
   return WithMechanismCircumference(diameter * std::numbers::pi);
 }
 
-SmartMotorControllerConfig& SmartMotorControllerConfig::WithMechanismRadius(units::meter_t radius) {
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithMechanismRadius(wpi::units::meter_t radius) {
   return WithMechanismCircumference(radius * 2.0 * std::numbers::pi);
 }
 
 // ---- Limits --------------------------------------------------------------
 
-SmartMotorControllerConfig& SmartMotorControllerConfig::WithMechanismLimits(units::turn_t lower,
-                                                                            units::turn_t upper) {
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithMechanismLimits(wpi::units::turn_t lower,
+                                                                            wpi::units::turn_t upper) {
   if (m_continuousWrappingMax)
     throw exceptions::SmartMotorControllerConfigurationException(
         "Soft limits set while configuring continuous wrapping", "Cannot set soft limits",
@@ -362,35 +362,35 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithMechanismLimits(unit
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithMeasurementLimits(
-    units::meter_t lower, units::meter_t upper) {
+    wpi::units::meter_t lower, wpi::units::meter_t upper) {
   m_measLowerLimit = lower;
   m_measUpperLimit = upper;
   return *this;
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithStatorCurrentLimit(
-    units::ampere_t limit) {
+    wpi::units::ampere_t limit) {
   m_statorCurrentLimit = limit;
   return *this;
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithSupplyCurrentLimit(
-    units::ampere_t limit) {
+    wpi::units::ampere_t limit) {
   m_supplyCurrentLimit = limit;
   return *this;
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithTemperatureCutoff(
-    units::celsius_t temp) {
+    wpi::units::celsius_t temp) {
   m_temperatureCutoff = temp;
   return *this;
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithClosedLoopMaxVoltage(
-    units::volt_t maxV) {
+    wpi::units::volt_t maxV) {
   m_closedLoopMaxVoltage = maxV;
   return *this;
 }
 
-SmartMotorControllerConfig& SmartMotorControllerConfig::WithContinuousWrapping(units::turn_t min,
-                                                                               units::turn_t max) {
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithContinuousWrapping(wpi::units::turn_t min,
+                                                                               wpi::units::turn_t max) {
   if (m_mechLowerLimit || m_mechUpperLimit)
     throw exceptions::SmartMotorControllerConfigurationException(
         "Soft limits set while configuring continuous wrapping", "Cannot set continuous wrapping",
@@ -423,15 +423,15 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithOpenLoopMode() {
   return *this;
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithClosedLoopControlPeriod(
-    units::second_t p) {
+    wpi::units::second_t p) {
   m_closedLoopPeriod = p;
   return *this;
 }
-SmartMotorControllerConfig& SmartMotorControllerConfig::WithOpenLoopRampRate(units::second_t r) {
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithOpenLoopRampRate(wpi::units::second_t r) {
   m_openLoopRampRate = r;
   return *this;
 }
-SmartMotorControllerConfig& SmartMotorControllerConfig::WithClosedLoopRampRate(units::second_t r) {
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithClosedLoopRampRate(wpi::units::second_t r) {
   m_closedLoopRampRate = r;
   return *this;
 }
@@ -462,14 +462,14 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExternalEncoderConve
   return *this;
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithExternalEncoderZeroOffset(
-    units::turn_t o) {
+    wpi::units::turn_t o) {
   m_externalEncoderZeroOffset = o;
   return *this;
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithExternalEncoderGearing(
     const gearing::MechanismGearing& gearing) {
   if (gearing.GetRotorToMechanismRatio() > 1.0) {
-    FRC_ReportWarning(
+    WPILIB_ReportWarning(
         "[IMPORTANT] Your gearing is set in a way that the external encoder will exceed the "
         "maximum reading, this WILL result in multiple angles being read as the same angle. "
         "Ignore this warning IF your mechanism will never travel outside of the slice you are "
@@ -483,12 +483,12 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExternalEncoderGeari
   return WithExternalEncoderGearing(gearing::MechanismGearing{reductionRatio});
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithExternalEncoderDiscontinuityPoint(
-    units::turn_t discontinuityPoint) {
-  if (discontinuityPoint != units::turn_t{0.5} && discontinuityPoint != units::turn_t{1.0}) {
+    wpi::units::turn_t discontinuityPoint) {
+  if (discontinuityPoint != wpi::units::turn_t{0.5} && discontinuityPoint != wpi::units::turn_t{1.0}) {
     throw exceptions::SmartMotorControllerConfigurationException(
         "Cannot set external encoder discontinuity point",
         "Discontinuity point must be 0.5 or 1 rotations",
-        "WithExternalEncoderDiscontinuityPoint(units::turn_t{0.5})");
+        "WithExternalEncoderDiscontinuityPoint(wpi::units::turn_t{0.5})");
   }
   m_externalEncoderDiscontinuityPoint = discontinuityPoint;
   return *this;
@@ -500,36 +500,36 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithTelemetry(
   m_verbosity = verbosity;
   return *this;
 }
-SmartMotorControllerConfig& SmartMotorControllerConfig::WithSubsystem(frc2::SubsystemBase* sys) {
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithSubsystem(wpi::cmd::SubsystemBase* sys) {
   m_subsystem = sys;
   return *this;
 }
-SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimMotor(frc::DCMotor motor) {
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimMotor(wpi::math::DCMotor motor) {
   m_simMotor = motor;
   return *this;
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithMOI(
-    units::kilogram_square_meter_t moi) {
+    wpi::units::kilogram_square_meter_t moi) {
   m_moi = moi;
   return *this;
 }
 
-SmartMotorControllerConfig& SmartMotorControllerConfig::WithMOI(units::meter_t length,
-                                                                units::kilogram_t mass) {
-  m_moi = frc::sim::SingleJointedArmSim::EstimateMOI(length, mass);
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithMOI(wpi::units::meter_t length,
+                                                                wpi::units::kilogram_t mass) {
+  m_moi = wpi::sim::SingleJointedArmSim::EstimateMOI(length, mass);
   return *this;
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithStartingPosition(
-    units::degree_t startingAngle) {
+    wpi::units::degree_t startingAngle) {
   if (m_startingPositionDistance.has_value())
     throw std::invalid_argument(
         "Cannot set starting position as both an angle and a distance. "
         "Call only one of WithStartingPosition(degree_t) or WithStartingPosition(meter_t).");
-  m_startingPosition = units::turn_t{startingAngle};
+  m_startingPosition = wpi::units::turn_t{startingAngle};
   return *this;
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithStartingPosition(
-    units::meter_t startingDistance) {
+    wpi::units::meter_t startingDistance) {
   if (m_startingPosition.has_value())
     throw std::invalid_argument(
         "Cannot set starting position as both an angle and a distance. "
@@ -538,7 +538,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithStartingPosition(
     throw std::invalid_argument(
         "WithStartingPosition(meter_t) requires WithMechanismCircumference to be called first.");
   m_startingPositionDistance = startingDistance;
-  m_startingPosition = units::turn_t{startingDistance.value() / m_mechanismCircumference->value()};
+  m_startingPosition = wpi::units::turn_t{startingDistance.value() / m_mechanismCircumference->value()};
   return *this;
 }
 
@@ -555,23 +555,23 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithVendorControlRequest
 // ---- Simulation overrides ------------------------------------------------
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimStartingPosition(
-    units::degree_t startingAngle) {
-  m_simStartingPosition = units::turn_t{startingAngle};
+    wpi::units::degree_t startingAngle) {
+  m_simStartingPosition = wpi::units::turn_t{startingAngle};
   return *this;
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimStartingPosition(
-    units::meter_t startingDistance) {
+    wpi::units::meter_t startingDistance) {
   if (!m_mechanismCircumference.has_value())
     throw std::invalid_argument(
         "WithSimStartingPosition(meter_t) requires WithMechanismCircumference to be called first.");
   m_simStartingPosition =
-      units::turn_t{startingDistance.value() / m_mechanismCircumference->value()};
+      wpi::units::turn_t{startingDistance.value() / m_mechanismCircumference->value()};
   return *this;
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimFeedforward(
-    const frc::ArmFeedforward& ff, ClosedLoopControllerSlot slot) {
+    const wpi::math::ArmFeedforward& ff, ClosedLoopControllerSlot slot) {
   auto& sim = m_simGains[SlotIndex(slot)];
   sim.armFF = ff;
   sim.elevatorFF.reset();
@@ -580,7 +580,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimFeedforward(
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimFeedforward(
-    const frc::ElevatorFeedforward& ff, ClosedLoopControllerSlot slot) {
+    const wpi::math::ElevatorFeedforward& ff, ClosedLoopControllerSlot slot) {
   auto& sim = m_simGains[SlotIndex(slot)];
   sim.elevatorFF = ff;
   sim.armFF.reset();
@@ -589,7 +589,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimFeedforward(
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimFeedforward(
-    const frc::SimpleMotorFeedforward<units::turns>& ff, ClosedLoopControllerSlot slot) {
+    const wpi::math::SimpleMotorFeedforward<wpi::units::turns>& ff, ClosedLoopControllerSlot slot) {
   auto& sim = m_simGains[SlotIndex(slot)];
   sim.simpleFF = ff;
   sim.armFF.reset();
@@ -607,20 +607,20 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimClosedLoopControl
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimTrapezoidProfile(
-    units::turns_per_second_t maxVelocity, units::turns_per_second_squared_t maxAcceleration) {
-  m_simTrapProfile = frc::TrapezoidProfile<units::turns>{{maxVelocity, maxAcceleration}};
+    wpi::units::turns_per_second_t maxVelocity, wpi::units::turns_per_second_squared_t maxAcceleration) {
+  m_simTrapProfile = wpi::math::TrapezoidProfile<wpi::units::turns>{{maxVelocity, maxAcceleration}};
   return *this;
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimTrapezoidProfile(
-    units::meters_per_second_t maxVelocity, units::meters_per_second_squared_t maxAcceleration) {
-  m_simLinearTrapProfile = frc::TrapezoidProfile<units::meters>{{maxVelocity, maxAcceleration}};
+    wpi::units::meters_per_second_t maxVelocity, wpi::units::meters_per_second_squared_t maxAcceleration) {
+  m_simLinearTrapProfile = wpi::math::TrapezoidProfile<wpi::units::meters>{{maxVelocity, maxAcceleration}};
   return *this;
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimExponentialProfile(
-    frc::ExponentialProfile<units::turns, units::volts>::Constraints constraints) {
-  using Profile = frc::ExponentialProfile<units::turns, units::volts>;
+    wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>::Constraints constraints) {
+  using Profile = wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>;
   m_simExpoProfile = Profile{constraints};
   return *this;
 }
@@ -631,7 +631,7 @@ SmartMotorControllerConfig::PIDGains SmartMotorControllerConfig::GetSlotGains(
     ClosedLoopControllerSlot slot) const {
   m_basicOptions.erase(BasicOptions::SlotGains);
   PIDGains result = m_slots[SlotIndex(slot)];
-  if (frc::RobotBase::IsSimulation()) {
+  if (wpi::RobotBase::IsSimulation()) {
     const auto& sim = m_simGains[SlotIndex(slot)];
     if (sim.kP) result.kP = *sim.kP;
     if (sim.kI) result.kI = *sim.kI;
@@ -653,24 +653,24 @@ SmartMotorControllerConfig::PIDGains SmartMotorControllerConfig::GetSlotGains(
   return result;
 }
 
-std::optional<frc::ArmFeedforward> SmartMotorControllerConfig::GetArmFeedforward(
+std::optional<wpi::math::ArmFeedforward> SmartMotorControllerConfig::GetArmFeedforward(
     ClosedLoopControllerSlot slot) const {
   m_basicOptions.erase(BasicOptions::SlotGains);
-  if (frc::RobotBase::IsSimulation() && m_simGains[SlotIndex(slot)].armFF)
+  if (wpi::RobotBase::IsSimulation() && m_simGains[SlotIndex(slot)].armFF)
     return m_simGains[SlotIndex(slot)].armFF;
   return m_slots[SlotIndex(slot)].armFF;
 }
-std::optional<frc::ElevatorFeedforward> SmartMotorControllerConfig::GetElevatorFeedforward(
+std::optional<wpi::math::ElevatorFeedforward> SmartMotorControllerConfig::GetElevatorFeedforward(
     ClosedLoopControllerSlot slot) const {
   m_basicOptions.erase(BasicOptions::SlotGains);
-  if (frc::RobotBase::IsSimulation() && m_simGains[SlotIndex(slot)].elevatorFF)
+  if (wpi::RobotBase::IsSimulation() && m_simGains[SlotIndex(slot)].elevatorFF)
     return m_simGains[SlotIndex(slot)].elevatorFF;
   return m_slots[SlotIndex(slot)].elevatorFF;
 }
-std::optional<frc::SimpleMotorFeedforward<units::turns>>
+std::optional<wpi::math::SimpleMotorFeedforward<wpi::units::turns>>
 SmartMotorControllerConfig::GetSimpleFeedforward(ClosedLoopControllerSlot slot) const {
   m_basicOptions.erase(BasicOptions::SlotGains);
-  if (frc::RobotBase::IsSimulation() && m_simGains[SlotIndex(slot)].simpleFF)
+  if (wpi::RobotBase::IsSimulation() && m_simGains[SlotIndex(slot)].simpleFF)
     return m_simGains[SlotIndex(slot)].simpleFF;
   return m_slots[SlotIndex(slot)].simpleFF;
 }
@@ -694,24 +694,24 @@ bool SmartMotorControllerConfig::GetLinearClosedLoopControllerUse() const {
   return m_mechanismCircumference.has_value();
 }
 
-std::optional<units::turn_t> SmartMotorControllerConfig::GetMechanismLowerLimit() const {
+std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetMechanismLowerLimit() const {
   m_basicOptions.erase(BasicOptions::LowerLimit);
   return m_mechLowerLimit;
 }
-std::optional<units::turn_t> SmartMotorControllerConfig::GetMechanismUpperLimit() const {
+std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetMechanismUpperLimit() const {
   m_basicOptions.erase(BasicOptions::UpperLimit);
   return m_mechUpperLimit;
 }
-std::optional<units::meter_t> SmartMotorControllerConfig::GetMeasurementLowerLimit() const {
+std::optional<wpi::units::meter_t> SmartMotorControllerConfig::GetMeasurementLowerLimit() const {
   m_basicOptions.erase(BasicOptions::LowerLimit);
   return m_measLowerLimit;
 }
-std::optional<units::meter_t> SmartMotorControllerConfig::GetMeasurementUpperLimit() const {
+std::optional<wpi::units::meter_t> SmartMotorControllerConfig::GetMeasurementUpperLimit() const {
   m_basicOptions.erase(BasicOptions::UpperLimit);
   return m_measUpperLimit;
 }
 
-std::optional<units::turn_t> SmartMotorControllerConfig::GetContinuousWrapping() const {
+std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetContinuousWrapping() const {
   if (m_continuousWrappingMax && m_continuousWrappingMin &&
       std::abs((m_continuousWrappingMax->value() - 1.0) - m_continuousWrappingMin->value()) > 1e-9)
     throw exceptions::SmartMotorControllerConfigurationException(
@@ -721,7 +721,7 @@ std::optional<units::turn_t> SmartMotorControllerConfig::GetContinuousWrapping()
   return m_continuousWrappingMax;
 }
 
-std::optional<units::turn_t> SmartMotorControllerConfig::GetContinuousWrappingMin() const {
+std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetContinuousWrappingMin() const {
   if (m_continuousWrappingMax && m_continuousWrappingMin &&
       std::abs((m_continuousWrappingMax->value() - 1.0) - m_continuousWrappingMin->value()) > 1e-9)
     throw exceptions::SmartMotorControllerConfigurationException(
@@ -730,7 +730,7 @@ std::optional<units::turn_t> SmartMotorControllerConfig::GetContinuousWrappingMi
   return m_continuousWrappingMin;
 }
 
-std::optional<units::ampere_t> SmartMotorControllerConfig::GetStatorCurrentLimit() const {
+std::optional<wpi::units::ampere_t> SmartMotorControllerConfig::GetStatorCurrentLimit() const {
   m_basicOptions.erase(BasicOptions::StatorCurrentLimit);
   return m_statorCurrentLimit;
 }
@@ -744,15 +744,15 @@ std::optional<int> SmartMotorControllerConfig::GetSupplyStallCurrentLimit() cons
   if (!m_supplyCurrentLimit) return std::nullopt;
   return static_cast<int>(m_supplyCurrentLimit->value());
 }
-std::optional<units::ampere_t> SmartMotorControllerConfig::GetSupplyCurrentLimit() const {
+std::optional<wpi::units::ampere_t> SmartMotorControllerConfig::GetSupplyCurrentLimit() const {
   m_basicOptions.erase(BasicOptions::SupplyCurrentLimit);
   return m_supplyCurrentLimit;
 }
-std::optional<units::celsius_t> SmartMotorControllerConfig::GetTemperatureCutoff() const {
+std::optional<wpi::units::celsius_t> SmartMotorControllerConfig::GetTemperatureCutoff() const {
   m_basicOptions.erase(BasicOptions::TemperatureCutoff);
   return m_temperatureCutoff;
 }
-std::optional<units::volt_t> SmartMotorControllerConfig::GetClosedLoopControllerMaximumVoltage()
+std::optional<wpi::units::volt_t> SmartMotorControllerConfig::GetClosedLoopControllerMaximumVoltage()
     const {
   m_basicOptions.erase(BasicOptions::ClosedLoopMaxVoltage);
   return m_closedLoopMaxVoltage;
@@ -766,14 +766,14 @@ SmartMotorControllerConfig::MotorMode SmartMotorControllerConfig::GetIdleMode() 
   m_basicOptions.erase(BasicOptions::IdleMode);
   return m_idleMode;
 }
-std::optional<units::second_t> SmartMotorControllerConfig::GetClosedLoopControlPeriod() const {
+std::optional<wpi::units::second_t> SmartMotorControllerConfig::GetClosedLoopControlPeriod() const {
   return m_closedLoopPeriod;
 }
-std::optional<units::second_t> SmartMotorControllerConfig::GetOpenLoopRampRate() const {
+std::optional<wpi::units::second_t> SmartMotorControllerConfig::GetOpenLoopRampRate() const {
   m_basicOptions.erase(BasicOptions::OpenLoopRampRate);
   return m_openLoopRampRate;
 }
-std::optional<units::second_t> SmartMotorControllerConfig::GetClosedLoopRampRate() const {
+std::optional<wpi::units::second_t> SmartMotorControllerConfig::GetClosedLoopRampRate() const {
   m_basicOptions.erase(BasicOptions::ClosedLoopRampRate);
   return m_closedLoopRampRate;
 }
@@ -798,12 +798,12 @@ std::optional<SmartMotorControllerConfig::TelemetryVerbosity>
 SmartMotorControllerConfig::GetVerbosity() const {
   return m_verbosity;
 }
-frc2::SubsystemBase* SmartMotorControllerConfig::GetSubsystem() const { return m_subsystem; }
-std::optional<frc::DCMotor> SmartMotorControllerConfig::GetSimMotor() const { return m_simMotor; }
-units::kilogram_square_meter_t SmartMotorControllerConfig::GetMOI() const { return m_moi; }
-std::optional<units::turn_t> SmartMotorControllerConfig::GetStartingPosition() const {
+wpi::cmd::SubsystemBase* SmartMotorControllerConfig::GetSubsystem() const { return m_subsystem; }
+std::optional<wpi::math::DCMotor> SmartMotorControllerConfig::GetSimMotor() const { return m_simMotor; }
+wpi::units::kilogram_square_meter_t SmartMotorControllerConfig::GetMOI() const { return m_moi; }
+std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetStartingPosition() const {
   m_basicOptions.erase(BasicOptions::StartingPosition);
-  if (frc::RobotBase::IsSimulation() && m_simStartingPosition.has_value())
+  if (wpi::RobotBase::IsSimulation() && m_simStartingPosition.has_value())
     return m_simStartingPosition;
   return m_startingPosition;
 }
@@ -821,7 +821,7 @@ const std::optional<gearing::MechanismGearing>& SmartMotorControllerConfig::GetM
   m_basicOptions.erase(BasicOptions::Gearing);
   return m_motorGearing;
 }
-std::optional<units::meter_t> SmartMotorControllerConfig::GetMechanismCircumference() const {
+std::optional<wpi::units::meter_t> SmartMotorControllerConfig::GetMechanismCircumference() const {
   return m_mechanismCircumference;
 }
 
@@ -840,7 +840,7 @@ std::optional<bool> SmartMotorControllerConfig::GetExternalEncoderInverted() con
 std::optional<double> SmartMotorControllerConfig::GetExternalEncoderConversionFactor() const {
   return m_externalEncoderConversionFactor;
 }
-std::optional<units::turn_t> SmartMotorControllerConfig::GetExternalEncoderZeroOffset() const {
+std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetExternalEncoderZeroOffset() const {
   m_externalEncoderOptions.erase(ExternalEncoderOptions::ZeroOffset);
   return m_externalEncoderZeroOffset;
 }
@@ -849,7 +849,7 @@ SmartMotorControllerConfig::GetExternalEncoderGearing() const {
   m_externalEncoderOptions.erase(ExternalEncoderOptions::ExternalGearing);
   return m_externalEncoderGearing;
 }
-std::optional<units::turn_t> SmartMotorControllerConfig::GetExternalEncoderDiscontinuityPoint()
+std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetExternalEncoderDiscontinuityPoint()
     const {
   m_externalEncoderOptions.erase(ExternalEncoderOptions::DiscontinuityPoint);
   return m_externalEncoderDiscontinuityPoint;
@@ -868,47 +868,47 @@ bool SmartMotorControllerConfig::HasLinearExponentialProfile() const {
   return m_linearExpoProfile.has_value();
 }
 
-std::optional<frc::TrapezoidProfile<units::turns>> SmartMotorControllerConfig::GetTrapezoidProfile()
+std::optional<wpi::math::TrapezoidProfile<wpi::units::turns>> SmartMotorControllerConfig::GetTrapezoidProfile()
     const {
   m_basicOptions.erase(BasicOptions::TrapezoidProfile);
-  if (frc::RobotBase::IsSimulation() && m_simTrapProfile.has_value()) return m_simTrapProfile;
+  if (wpi::RobotBase::IsSimulation() && m_simTrapProfile.has_value()) return m_simTrapProfile;
   return m_trapProfile;
 }
-std::optional<frc::TrapezoidProfile<units::meters>>
+std::optional<wpi::math::TrapezoidProfile<wpi::units::meters>>
 SmartMotorControllerConfig::GetLinearTrapezoidProfile() const {
   m_basicOptions.erase(BasicOptions::TrapezoidProfile);
-  if (frc::RobotBase::IsSimulation() && m_simLinearTrapProfile.has_value())
+  if (wpi::RobotBase::IsSimulation() && m_simLinearTrapProfile.has_value())
     return m_simLinearTrapProfile;
   return m_linearTrapProfile;
 }
-std::optional<frc::ExponentialProfile<units::turns, units::volts>>
+std::optional<wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>>
 SmartMotorControllerConfig::GetExponentialProfile() const {
   m_basicOptions.erase(BasicOptions::ExponentialProfile);
-  if (frc::RobotBase::IsSimulation() && m_simExpoProfile.has_value()) return m_simExpoProfile;
+  if (wpi::RobotBase::IsSimulation() && m_simExpoProfile.has_value()) return m_simExpoProfile;
   return m_expoProfile;
 }
-std::optional<frc::ExponentialProfile<units::meters, units::volts>>
+std::optional<wpi::math::ExponentialProfile<wpi::units::meters, wpi::units::volts>>
 SmartMotorControllerConfig::GetLinearExponentialProfile() const {
   m_basicOptions.erase(BasicOptions::ExponentialProfile);
   return m_linearExpoProfile;
 }
 
-std::optional<units::turns_per_second_t> SmartMotorControllerConfig::GetTrapMaxVelocityTurns()
+std::optional<wpi::units::turns_per_second_t> SmartMotorControllerConfig::GetTrapMaxVelocityTurns()
     const {
   m_basicOptions.erase(BasicOptions::TrapezoidProfile);
   return m_trapMaxVelTurns;
 }
-std::optional<units::turns_per_second_squared_t> SmartMotorControllerConfig::GetTrapMaxAccelTurns()
+std::optional<wpi::units::turns_per_second_squared_t> SmartMotorControllerConfig::GetTrapMaxAccelTurns()
     const {
   m_basicOptions.erase(BasicOptions::TrapezoidProfile);
   return m_trapMaxAccTurns;
 }
-std::optional<units::meters_per_second_t> SmartMotorControllerConfig::GetTrapMaxVelocityLinear()
+std::optional<wpi::units::meters_per_second_t> SmartMotorControllerConfig::GetTrapMaxVelocityLinear()
     const {
   m_basicOptions.erase(BasicOptions::TrapezoidProfile);
   return m_trapMaxVelLinear;
 }
-std::optional<units::meters_per_second_squared_t>
+std::optional<wpi::units::meters_per_second_squared_t>
 SmartMotorControllerConfig::GetTrapMaxAccelLinear() const {
   m_basicOptions.erase(BasicOptions::TrapezoidProfile);
   return m_trapMaxAccLinear;
@@ -922,20 +922,20 @@ std::optional<double> SmartMotorControllerConfig::GetExponentialProfileKA() cons
   return m_expoMotionMagicKA;
 }
 
-std::optional<units::volt_t> SmartMotorControllerConfig::GetExponentialProfileMaxInput() const {
+std::optional<wpi::units::volt_t> SmartMotorControllerConfig::GetExponentialProfileMaxInput() const {
   return m_expoMaxInput;
 }
 
-units::meter_t SmartMotorControllerConfig::ConvertFromMechanism(
-    units::turn_t mechanismPosition) const {
-  double circ = m_mechanismCircumference.value_or(units::meter_t{1.0}).value();
-  return units::meter_t{mechanismPosition.value() * circ};
+wpi::units::meter_t SmartMotorControllerConfig::ConvertFromMechanism(
+    wpi::units::turn_t mechanismPosition) const {
+  double circ = m_mechanismCircumference.value_or(wpi::units::meter_t{1.0}).value();
+  return wpi::units::meter_t{mechanismPosition.value() * circ};
 }
 
-units::meters_per_second_t SmartMotorControllerConfig::ConvertFromMechanism(
-    units::turns_per_second_t mechanismVelocity) const {
-  double circ = m_mechanismCircumference.value_or(units::meter_t{1.0}).value();
-  return units::meters_per_second_t{mechanismVelocity.value() * circ};
+wpi::units::meters_per_second_t SmartMotorControllerConfig::ConvertFromMechanism(
+    wpi::units::turns_per_second_t mechanismVelocity) const {
+  double circ = m_mechanismCircumference.value_or(wpi::units::meter_t{1.0}).value();
+  return wpi::units::meters_per_second_t{mechanismVelocity.value() * circ};
 }
 
 // ---- Followers ----------------------------------------------------------------

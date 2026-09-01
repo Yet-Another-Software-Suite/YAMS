@@ -3,12 +3,12 @@
 
 package yams.math;
 
-import static edu.wpi.first.units.Units.Microseconds;
-import static edu.wpi.first.units.Units.Seconds;
+import static org.wpilib.units.Units.Microseconds;
+import static org.wpilib.units.Units.Seconds;
 
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.Timer;
+import org.wpilib.system.RobotController;
+import org.wpilib.system.Timer;
+import org.wpilib.units.measure.Time;
 
 /**
  * Find the derivative of a value over time in microseconds.
@@ -21,13 +21,13 @@ import edu.wpi.first.wpilibj.Timer;
  * <p>Two {@code derivative()} overloads are available:
  * <ul>
  *   <li>{@link #derivative(double)} — uses the FPGA clock to measure elapsed time automatically.</li>
- *   <li>{@link #derivative(double, edu.wpi.first.units.measure.Time)} — uses a caller-supplied
+ *   <li>{@link #derivative(double, org.wpilib.units.measure.Time)} — uses a caller-supplied
  *       delta-time (useful when the loop period is already known).</li>
  * </ul>
  *
  * <h2>Example</h2>
  * <pre>{@code
- * import static edu.wpi.first.units.Units.Milliseconds;
+ * import static org.wpilib.units.Units.Milliseconds;
  *
  * // Debounce period matches the 20 ms robot loop
  * DerivativeTimeFilter filter = new DerivativeTimeFilter(0.0, Milliseconds.of(20));
@@ -69,7 +69,7 @@ public class DerivativeTimeFilter
   public DerivativeTimeFilter(double initial, Time debouncerPeriod)
   {
     last = initial;
-    lastFpgaTime_us = RobotController.getFPGATime();
+    lastFpgaTime_us = RobotController.getTime();
     debouncer = new Timer();
     this.debouncePeriod = debouncerPeriod;
     debouncer.start();
@@ -120,7 +120,7 @@ public class DerivativeTimeFilter
   {
     if (debouncer.hasElapsed(debouncePeriod))
     {
-      long   currentFpgaTime_us = RobotController.getFPGATime();
+      long   currentFpgaTime_us = RobotController.getTime();
       double derivative         = derivative(current, Microseconds.of(currentFpgaTime_us - lastFpgaTime_us));
       lastFpgaTime_us = currentFpgaTime_us;
       return derivative;

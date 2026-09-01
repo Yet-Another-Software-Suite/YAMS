@@ -3,10 +3,10 @@
 
 package yams.motorcontrollers.simulation;
 
-import edu.wpi.first.hal.HALValue;
-import edu.wpi.first.hal.SimDevice;
-import edu.wpi.first.hal.SimDevice.Direction;
-import edu.wpi.first.wpilibj.RobotBase;
+import org.wpilib.hardware.hal.HALValue;
+import org.wpilib.hardware.hal.SimDevice;
+import org.wpilib.hardware.hal.SimDevice.Direction;
+import org.wpilib.framework.RobotBase;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import yams.mechanisms.config.SensorConfig;
 
 /**
- * Sensor class using {@link edu.wpi.first.hal.SimDevice}; All fields will use the given supplier on real robots. Fake
+ * Sensor class using {@link org.wpilib.hardware.hal.SimDevice}; All fields will use the given supplier on real robots. Fake
  * data is only given when connected to simulation.
  *
  * <p>
@@ -26,7 +26,7 @@ import yams.mechanisms.config.SensorConfig;
  *
  * <p>
  * On a <b>real robot</b> every field delegates to the real-hardware supplier provided at
- * construction time. In <b>simulation</b>, a {@link edu.wpi.first.hal.SimDevice} is registered
+ * construction time. In <b>simulation</b>, a {@link org.wpilib.hardware.hal.SimDevice} is registered
  * with WPILib so the WPILib Glass simulation GUI can read and override individual field values,
  * enabling hardware-in-the-loop-style testing without real hardware.
  * </p>
@@ -43,9 +43,9 @@ import yams.mechanisms.config.SensorConfig;
  *   <li>{@link #getAsDouble(String)}, {@link #getAsInt(String)}, {@link #getAsBoolean(String)},
  *       {@link #getAsLong(String)} — typed convenience accessors that call through to
  *       the underlying field.</li>
- *   <li>{@link #addSimTrigger(String, edu.wpi.first.hal.HALValue, java.util.function.BooleanSupplier)}
+ *   <li>{@link #addSimTrigger(String, org.wpilib.hardware.hal.HALValue, java.util.function.BooleanSupplier)}
  *       — inject a simulated override value whenever a condition is true.</li>
- *   <li>{@link #getDevice()} — returns the underlying {@link edu.wpi.first.hal.SimDevice}
+ *   <li>{@link #getDevice()} — returns the underlying {@link org.wpilib.hardware.hal.SimDevice}
  *       (empty when running on a real robot).</li>
  * </ul>
  *
@@ -95,7 +95,7 @@ public class Sensor
       m_simDevice = Optional.of(SimDevice.create("Sensor[" + sensorName + "]"));
       for (var field : sensorFields)
       {
-        field.createValue(m_simDevice.get(), Direction.kBidir);
+        field.createValue(m_simDevice.get(), Direction.BIDIR);
       }
     } else
     {

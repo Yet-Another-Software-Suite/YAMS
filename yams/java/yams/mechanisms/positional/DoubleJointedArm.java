@@ -3,26 +3,26 @@
 
 package yams.mechanisms.positional;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Radians;
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.Radians;
 
-import edu.wpi.first.math.Pair;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.simulation.BatterySim;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
-import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import org.wpilib.util.Pair;
+import org.wpilib.math.geometry.Translation2d;
+import org.wpilib.math.geometry.Translation3d;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.framework.RobotBase;
+import org.wpilib.simulation.BatterySim;
+import org.wpilib.simulation.RoboRioSim;
+import org.wpilib.simulation.SingleJointedArmSim;
+import org.wpilib.smartdashboard.Mechanism2d;
+import org.wpilib.smartdashboard.MechanismLigament2d;
+import org.wpilib.smartdashboard.MechanismRoot2d;
+import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.Commands;
+import org.wpilib.command2.button.Trigger;
 import java.util.Optional;
 import java.util.function.Supplier;
 import yams.exceptions.DoubleJointedArmConfigurationException;
@@ -189,11 +189,15 @@ public class DoubleJointedArm extends SmartPositionalMechanism
     });
 
     // Setup telemetry
+    if (lowerConfig.getTelemetryName().isPresent() || upperConfig.getTelemetryName().isPresent())
+    {
+      m_telemetry.setupTelemetry(getName());
+    }
     lowerConfig.getTelemetryName().ifPresent(name -> {
-      m_telemetry.setupTelemetry(getName() + "/lower", m_lowerSMC);
+      m_telemetry.addMotorController("lower", m_lowerSMC);
     });
     upperConfig.getTelemetryName().ifPresent(name -> {
-      m_telemetry.setupTelemetry(getName() + "/upper", m_upperSMC);
+      m_telemetry.addMotorController("upper", m_upperSMC);
     });
 
     if (RobotBase.isSimulation())
@@ -442,9 +446,9 @@ public class DoubleJointedArm extends SmartPositionalMechanism
       m_upperSMC.getSimSupplier().get().updateSimState();
       m_upperSMC.simIterate();
       m_upperSMC.getSimSupplier().get().starveUpdateSim();
-      RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_lowerArmSim.get().getCurrentDrawAmps(),
+      RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_lowerArmSim.get().getCurrentDraw(),
                                                                                m_upperArmSim.get()
-                                                                                            .getCurrentDrawAmps()));
+                                                                                            .getCurrentDraw()));
       visualizationUpdate();
     }
   }

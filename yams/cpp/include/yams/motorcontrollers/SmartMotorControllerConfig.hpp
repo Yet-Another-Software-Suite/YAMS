@@ -3,25 +3,25 @@
 
 #pragma once
 
-#include <frc/controller/ArmFeedforward.h>
-#include <frc/controller/ElevatorFeedforward.h>
-#include <frc/controller/SimpleMotorFeedforward.h>
-#include <frc/system/plant/DCMotor.h>
-#include <frc/trajectory/ExponentialProfile.h>
-#include <frc/trajectory/TrapezoidProfile.h>
-#include <frc2/command/SubsystemBase.h>
-#include <units/acceleration.h>
-#include <units/angle.h>
-#include <units/angular_acceleration.h>
-#include <units/angular_velocity.h>
-#include <units/current.h>
-#include <units/length.h>
-#include <units/mass.h>
-#include <units/moment_of_inertia.h>
-#include <units/temperature.h>
-#include <units/time.h>
-#include <units/velocity.h>
-#include <units/voltage.h>
+#include <wpi/math/controller/ArmFeedforward.hpp>
+#include <wpi/math/controller/ElevatorFeedforward.hpp>
+#include <wpi/math/controller/SimpleMotorFeedforward.hpp>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/math/trajectory/ExponentialProfile.hpp>
+#include <wpi/math/trajectory/TrapezoidProfile.hpp>
+#include <wpi/commands2/SubsystemBase.hpp>
+#include <wpi/units/acceleration.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/angular_acceleration.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/current.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/mass.hpp>
+#include <wpi/units/moment_of_inertia.hpp>
+#include <wpi/units/temperature.hpp>
+#include <wpi/units/time.hpp>
+#include <wpi/units/velocity.hpp>
+#include <wpi/units/voltage.hpp>
 
 #include <any>
 #include <optional>
@@ -83,7 +83,7 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithFeedforward(
-      const frc::ArmFeedforward& ff,
+      const wpi::math::ArmFeedforward& ff,
       ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
 
   /**
@@ -94,7 +94,7 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithFeedforward(
-      const frc::ElevatorFeedforward& ff,
+      const wpi::math::ElevatorFeedforward& ff,
       ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
 
   /**
@@ -105,7 +105,7 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithFeedforward(
-      const frc::SimpleMotorFeedforward<units::turns>& ff,
+      const wpi::math::SimpleMotorFeedforward<wpi::units::turns>& ff,
       ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
 
   // ---- Motion profiles ---------------------------------------------------
@@ -118,7 +118,7 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithTrapezoidProfile(
-      units::turns_per_second_t maxVelocity, units::turns_per_second_squared_t maxAcceleration);
+      wpi::units::turns_per_second_t maxVelocity, wpi::units::turns_per_second_squared_t maxAcceleration);
 
   /**
    * Enable a trapezoidal motion profile for linear position control.
@@ -128,7 +128,7 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithLinearTrapezoidProfile(
-      units::meters_per_second_t maxVelocity, units::meters_per_second_squared_t maxAcceleration);
+      wpi::units::meters_per_second_t maxVelocity, wpi::units::meters_per_second_squared_t maxAcceleration);
 
   /**
    * Enable a trapezoidal motion profile for velocity control.
@@ -138,7 +138,7 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithVelocityTrapezoidProfile(
-      units::turns_per_second_t maxVelocity, units::turns_per_second_squared_t maxAcceleration);
+      wpi::units::turns_per_second_t maxVelocity, wpi::units::turns_per_second_squared_t maxAcceleration);
 
   /**
    * Enable an exponential motion profile for position control.
@@ -148,7 +148,7 @@ class SmartMotorControllerConfig {
    * @param maxInput Maximum voltage input.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithExponentialProfile(double kV, double kA, units::volt_t maxInput);
+  SmartMotorControllerConfig& WithExponentialProfile(double kV, double kA, wpi::units::volt_t maxInput);
 
   /**
    * Derive an exponential motion profile from arm/flywheel system characteristics.
@@ -162,8 +162,8 @@ class SmartMotorControllerConfig {
    * @param moi      Moment of inertia of the mechanism.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithExponentialProfile(units::volt_t maxVolts, frc::DCMotor motor,
-                                                     units::kilogram_square_meter_t moi);
+  SmartMotorControllerConfig& WithExponentialProfile(wpi::units::volt_t maxVolts, wpi::math::DCMotor motor,
+                                                     wpi::units::kilogram_square_meter_t moi);
 
   /**
    * Derive a linear exponential motion profile from elevator system characteristics.
@@ -178,9 +178,9 @@ class SmartMotorControllerConfig {
    * @param drumRadius Radius of the elevator drum.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithExponentialProfile(units::volt_t maxVolts, frc::DCMotor motor,
-                                                     units::kilogram_t mass,
-                                                     units::meter_t drumRadius);
+  SmartMotorControllerConfig& WithExponentialProfile(wpi::units::volt_t maxVolts, wpi::math::DCMotor motor,
+                                                     wpi::units::kilogram_t mass,
+                                                     wpi::units::meter_t drumRadius);
 
   /**
    * Build an exponential motion profile from max velocity and acceleration constraints.
@@ -191,8 +191,8 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithExponentialProfile(
-      units::volt_t maxVolts, units::turns_per_second_t maxVelocity,
-      units::turns_per_second_squared_t maxAcceleration);
+      wpi::units::volt_t maxVolts, wpi::units::turns_per_second_t maxVelocity,
+      wpi::units::turns_per_second_squared_t maxAcceleration);
 
   /**
    * Set the exponential motion profile directly from a Constraints object.
@@ -201,7 +201,7 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithExponentialProfile(
-      frc::ExponentialProfile<units::turns, units::volts>::Constraints constraints);
+      wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>::Constraints constraints);
 
   // ---- LQR ---------------------------------------------------------------
 
@@ -232,7 +232,7 @@ class SmartMotorControllerConfig {
    * @param circumference Wheel or drum circumference in meters.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithMechanismCircumference(units::meter_t circumference);
+  SmartMotorControllerConfig& WithMechanismCircumference(wpi::units::meter_t circumference);
 
   /**
    * Set the mechanism circumference from a sprocket or gear pitch and tooth count.
@@ -243,7 +243,7 @@ class SmartMotorControllerConfig {
    * @param teeth     Number of teeth on the sprocket or gear.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithMechanismCircumference(units::meter_t gearPitch, int teeth);
+  SmartMotorControllerConfig& WithMechanismCircumference(wpi::units::meter_t gearPitch, int teeth);
 
   /**
    * Set the mechanism circumference from a wheel or drum diameter.
@@ -253,7 +253,7 @@ class SmartMotorControllerConfig {
    * @param diameter Wheel or drum diameter.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithMechanismDiameter(units::meter_t diameter);
+  SmartMotorControllerConfig& WithMechanismDiameter(wpi::units::meter_t diameter);
 
   /**
    * Set the mechanism circumference from a wheel or drum radius.
@@ -263,7 +263,7 @@ class SmartMotorControllerConfig {
    * @param radius Wheel or drum radius.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithMechanismRadius(units::meter_t radius);
+  SmartMotorControllerConfig& WithMechanismRadius(wpi::units::meter_t radius);
 
   // ---- Limits ------------------------------------------------------------
 
@@ -274,7 +274,7 @@ class SmartMotorControllerConfig {
    * @param upper Upper angle limit (in turns; accepts any angular unit via implicit conversion).
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithMechanismLimits(units::turn_t lower, units::turn_t upper);
+  SmartMotorControllerConfig& WithMechanismLimits(wpi::units::turn_t lower, wpi::units::turn_t upper);
 
   /**
    * Set linear soft limits for the mechanism.
@@ -283,7 +283,7 @@ class SmartMotorControllerConfig {
    * @param upper Upper distance limit.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithMeasurementLimits(units::meter_t lower, units::meter_t upper);
+  SmartMotorControllerConfig& WithMeasurementLimits(wpi::units::meter_t lower, wpi::units::meter_t upper);
 
   /**
    * Set the stator (output) current limit.
@@ -291,7 +291,7 @@ class SmartMotorControllerConfig {
    * @param limit Maximum stator current.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithStatorCurrentLimit(units::ampere_t limit);
+  SmartMotorControllerConfig& WithStatorCurrentLimit(wpi::units::ampere_t limit);
 
   /**
    * Set the supply (input) current limit.
@@ -299,7 +299,7 @@ class SmartMotorControllerConfig {
    * @param limit Maximum supply current.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithSupplyCurrentLimit(units::ampere_t limit);
+  SmartMotorControllerConfig& WithSupplyCurrentLimit(wpi::units::ampere_t limit);
 
   /**
    * Set the temperature above which the motor controller disables output.
@@ -307,7 +307,7 @@ class SmartMotorControllerConfig {
    * @param temperature Cutoff temperature.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithTemperatureCutoff(units::celsius_t temperature);
+  SmartMotorControllerConfig& WithTemperatureCutoff(wpi::units::celsius_t temperature);
 
   /**
    * Set the maximum voltage the closed-loop controller may output.
@@ -315,7 +315,7 @@ class SmartMotorControllerConfig {
    * @param maxVoltage Maximum closed-loop output voltage.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithClosedLoopMaxVoltage(units::volt_t maxVoltage);
+  SmartMotorControllerConfig& WithClosedLoopMaxVoltage(wpi::units::volt_t maxVoltage);
 
   // ---- Control behaviour -------------------------------------------------
 
@@ -347,7 +347,7 @@ class SmartMotorControllerConfig {
    * @param period Desired loop period.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithClosedLoopControlPeriod(units::second_t period);
+  SmartMotorControllerConfig& WithClosedLoopControlPeriod(wpi::units::second_t period);
 
   // ---- Ramp rates --------------------------------------------------------
 
@@ -357,7 +357,7 @@ class SmartMotorControllerConfig {
    * @param rampRate Time to ramp from 0 to full output.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithOpenLoopRampRate(units::second_t rampRate);
+  SmartMotorControllerConfig& WithOpenLoopRampRate(wpi::units::second_t rampRate);
 
   /**
    * Set the closed-loop output ramp rate.
@@ -365,7 +365,7 @@ class SmartMotorControllerConfig {
    * @param rampRate Time to ramp from 0 to full output.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithClosedLoopRampRate(units::second_t rampRate);
+  SmartMotorControllerConfig& WithClosedLoopRampRate(wpi::units::second_t rampRate);
 
   // ---- Inversion ---------------------------------------------------------
 
@@ -442,7 +442,7 @@ class SmartMotorControllerConfig {
    * @param zeroOffset Hardware zero offset (turns).
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithExternalEncoderZeroOffset(units::turn_t zeroOffset);
+  SmartMotorControllerConfig& WithExternalEncoderZeroOffset(wpi::units::turn_t zeroOffset);
 
   /**
    * Set the external encoder gearing (encoder to mechanism).
@@ -473,7 +473,7 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithExternalEncoderDiscontinuityPoint(
-      units::turn_t discontinuityPoint);
+      wpi::units::turn_t discontinuityPoint);
 
   /**
    * Enable continuous position wrapping for the closed-loop controller.
@@ -485,7 +485,7 @@ class SmartMotorControllerConfig {
    * @param max Top of the wrapping range (turns).
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithContinuousWrapping(units::turn_t min, units::turn_t max);
+  SmartMotorControllerConfig& WithContinuousWrapping(wpi::units::turn_t min, wpi::units::turn_t max);
 
   // ---- Telemetry ----------------------------------------------------------
 
@@ -507,17 +507,17 @@ class SmartMotorControllerConfig {
    * @param subsystem Pointer to the owning subsystem (must outlive this config).
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithSubsystem(frc2::SubsystemBase* subsystem);
+  SmartMotorControllerConfig& WithSubsystem(wpi::cmd::SubsystemBase* subsystem);
 
   // ---- Simulation --------------------------------------------------------
 
   /**
    * Set the DC motor model used for simulation.
    *
-   * @param motor frc::DCMotor model describing the motor physics.
+   * @param motor wpi::math::DCMotor model describing the motor physics.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithSimMotor(frc::DCMotor motor);
+  SmartMotorControllerConfig& WithSimMotor(wpi::math::DCMotor motor);
 
   // ---- Simulation overrides -----------------------------------------------
 
@@ -530,7 +530,7 @@ class SmartMotorControllerConfig {
    * @param startingAngle Starting angle override for simulation.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithSimStartingPosition(units::degree_t startingAngle);
+  SmartMotorControllerConfig& WithSimStartingPosition(wpi::units::degree_t startingAngle);
 
   /**
    * Override the starting mechanism position (linear) used in simulation.
@@ -540,7 +540,7 @@ class SmartMotorControllerConfig {
    * @param startingDistance Starting linear distance override for simulation.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithSimStartingPosition(units::meter_t startingDistance);
+  SmartMotorControllerConfig& WithSimStartingPosition(wpi::units::meter_t startingDistance);
 
   /**
    * Override the arm feedforward for the specified slot in simulation.
@@ -550,7 +550,7 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithSimFeedforward(
-      const frc::ArmFeedforward& ff,
+      const wpi::math::ArmFeedforward& ff,
       ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
 
   /**
@@ -561,7 +561,7 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithSimFeedforward(
-      const frc::ElevatorFeedforward& ff,
+      const wpi::math::ElevatorFeedforward& ff,
       ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
 
   /**
@@ -572,7 +572,7 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithSimFeedforward(
-      const frc::SimpleMotorFeedforward<units::turns>& ff,
+      const wpi::math::SimpleMotorFeedforward<wpi::units::turns>& ff,
       ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
 
   /**
@@ -596,7 +596,7 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithSimTrapezoidProfile(
-      units::turns_per_second_t maxVelocity, units::turns_per_second_squared_t maxAcceleration);
+      wpi::units::turns_per_second_t maxVelocity, wpi::units::turns_per_second_squared_t maxAcceleration);
 
   /**
    * Override the linear trapezoidal motion profile used in simulation.
@@ -606,7 +606,7 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithSimTrapezoidProfile(
-      units::meters_per_second_t maxVelocity, units::meters_per_second_squared_t maxAcceleration);
+      wpi::units::meters_per_second_t maxVelocity, wpi::units::meters_per_second_squared_t maxAcceleration);
 
   /**
    * Override the angular exponential motion profile used in simulation.
@@ -615,7 +615,7 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithSimExponentialProfile(
-      frc::ExponentialProfile<units::turns, units::volts>::Constraints constraints);
+      wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>::Constraints constraints);
 
   /**
    * Set the moment of inertia of the mechanism for simulation.
@@ -623,7 +623,7 @@ class SmartMotorControllerConfig {
    * @param moi Moment of inertia in kg·m².
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithMOI(units::kilogram_square_meter_t moi);
+  SmartMotorControllerConfig& WithMOI(wpi::units::kilogram_square_meter_t moi);
 
   /**
    * Estimate and set the moment of inertia for simulation from arm length and mass.
@@ -634,7 +634,7 @@ class SmartMotorControllerConfig {
    * @param mass   Arm mass.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithMOI(units::meter_t length, units::kilogram_t mass);
+  SmartMotorControllerConfig& WithMOI(wpi::units::meter_t length, wpi::units::kilogram_t mass);
 
   /**
    * Set the starting mechanism position (seeds the encoder and sim objects on init).
@@ -644,7 +644,7 @@ class SmartMotorControllerConfig {
    * @param startingAngle Starting mechanism angle in degrees.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithStartingPosition(units::degree_t startingAngle);
+  SmartMotorControllerConfig& WithStartingPosition(wpi::units::degree_t startingAngle);
 
   /**
    * Set the starting mechanism position from a linear distance.
@@ -657,7 +657,7 @@ class SmartMotorControllerConfig {
    * @param startingDistance Starting linear distance (e.g. starting height for an elevator).
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithStartingPosition(units::meter_t startingDistance);
+  SmartMotorControllerConfig& WithStartingPosition(wpi::units::meter_t startingDistance);
 
   /**
    * Set a vendor-specific hardware configuration to use as the base for this motor controller.
@@ -767,9 +767,9 @@ class SmartMotorControllerConfig {
   struct PIDGains {
     double kP{0.0}, kI{0.0}, kD{0.0};
     double kS{0.0}, kV{0.0}, kA{0.0}, kG{0.0};
-    std::optional<frc::ArmFeedforward> armFF;
-    std::optional<frc::ElevatorFeedforward> elevatorFF;
-    std::optional<frc::SimpleMotorFeedforward<units::turns>> simpleFF;
+    std::optional<wpi::math::ArmFeedforward> armFF;
+    std::optional<wpi::math::ElevatorFeedforward> elevatorFF;
+    std::optional<wpi::math::SimpleMotorFeedforward<wpi::units::turns>> simpleFF;
     std::optional<math::LQRConfig> lqr;
   };
 
@@ -790,7 +790,7 @@ class SmartMotorControllerConfig {
    * @param slot Gain slot to query.
    * @return ArmFeedforward if configured, otherwise empty.
    */
-  std::optional<frc::ArmFeedforward> GetArmFeedforward(ClosedLoopControllerSlot slot) const;
+  std::optional<wpi::math::ArmFeedforward> GetArmFeedforward(ClosedLoopControllerSlot slot) const;
 
   /**
    * Get the optional elevator feedforward for the specified slot.
@@ -798,7 +798,7 @@ class SmartMotorControllerConfig {
    * @param slot Gain slot to query.
    * @return ElevatorFeedforward if configured, otherwise empty.
    */
-  std::optional<frc::ElevatorFeedforward> GetElevatorFeedforward(
+  std::optional<wpi::math::ElevatorFeedforward> GetElevatorFeedforward(
       ClosedLoopControllerSlot slot) const;
 
   /**
@@ -807,7 +807,7 @@ class SmartMotorControllerConfig {
    * @param slot Gain slot to query.
    * @return SimpleMotorFeedforward if configured, otherwise empty.
    */
-  std::optional<frc::SimpleMotorFeedforward<units::turns>> GetSimpleFeedforward(
+  std::optional<wpi::math::SimpleMotorFeedforward<wpi::units::turns>> GetSimpleFeedforward(
       ClosedLoopControllerSlot slot) const;
 
   /**
@@ -850,43 +850,43 @@ class SmartMotorControllerConfig {
   bool GetLinearClosedLoopControllerUse() const;
 
   /** @return Optional lower angular soft limit (in turns). */
-  std::optional<units::turn_t> GetMechanismLowerLimit() const;
+  std::optional<wpi::units::turn_t> GetMechanismLowerLimit() const;
   /** @return Optional upper angular soft limit (in turns). */
-  std::optional<units::turn_t> GetMechanismUpperLimit() const;
+  std::optional<wpi::units::turn_t> GetMechanismUpperLimit() const;
   /** @return Optional lower linear soft limit. */
-  std::optional<units::meter_t> GetMeasurementLowerLimit() const;
+  std::optional<wpi::units::meter_t> GetMeasurementLowerLimit() const;
   /** @return Optional upper linear soft limit. */
-  std::optional<units::meter_t> GetMeasurementUpperLimit() const;
+  std::optional<wpi::units::meter_t> GetMeasurementUpperLimit() const;
 
   /** @return Optional upper continuous wrapping bound (turns). Erases ContinuousWrapping tracking.
    */
-  std::optional<units::turn_t> GetContinuousWrapping() const;
+  std::optional<wpi::units::turn_t> GetContinuousWrapping() const;
   /** @return Optional lower continuous wrapping bound (turns). */
-  std::optional<units::turn_t> GetContinuousWrappingMin() const;
+  std::optional<wpi::units::turn_t> GetContinuousWrappingMin() const;
 
   /** @return Optional stator current limit. */
-  std::optional<units::ampere_t> GetStatorCurrentLimit() const;
+  std::optional<wpi::units::ampere_t> GetStatorCurrentLimit() const;
   /** @return Optional stator stall current limit (integer amps). */
   std::optional<int> GetStatorStallCurrentLimit() const;
   /** @return Optional supply stall current limit (integer amps). */
   std::optional<int> GetSupplyStallCurrentLimit() const;
   /** @return Optional supply current limit. */
-  std::optional<units::ampere_t> GetSupplyCurrentLimit() const;
+  std::optional<wpi::units::ampere_t> GetSupplyCurrentLimit() const;
   /** @return Optional temperature cutoff. */
-  std::optional<units::celsius_t> GetTemperatureCutoff() const;
+  std::optional<wpi::units::celsius_t> GetTemperatureCutoff() const;
   /** @return Optional maximum closed-loop output voltage. */
-  std::optional<units::volt_t> GetClosedLoopControllerMaximumVoltage() const;
+  std::optional<wpi::units::volt_t> GetClosedLoopControllerMaximumVoltage() const;
 
   /** @return Current control mode (CLOSED_LOOP or OPEN_LOOP). */
   ControlMode GetMotorControllerMode() const;
   /** @return Current idle mode (COAST or BRAKE). */
   MotorMode GetIdleMode() const;
   /** @return Optional closed-loop control thread period. */
-  std::optional<units::second_t> GetClosedLoopControlPeriod() const;
+  std::optional<wpi::units::second_t> GetClosedLoopControlPeriod() const;
   /** @return Optional open-loop ramp rate. */
-  std::optional<units::second_t> GetOpenLoopRampRate() const;
+  std::optional<wpi::units::second_t> GetOpenLoopRampRate() const;
   /** @return Optional closed-loop ramp rate. */
-  std::optional<units::second_t> GetClosedLoopRampRate() const;
+  std::optional<wpi::units::second_t> GetClosedLoopRampRate() const;
 
   /** @return Inverted state if explicitly configured, otherwise empty. */
   std::optional<bool> GetMotorInverted() const;
@@ -900,13 +900,13 @@ class SmartMotorControllerConfig {
   /** @return Optional telemetry verbosity level. */
   std::optional<TelemetryVerbosity> GetVerbosity() const;
   /** @return Owning subsystem pointer (may be nullptr). */
-  frc2::SubsystemBase* GetSubsystem() const;
+  wpi::cmd::SubsystemBase* GetSubsystem() const;
   /** @return Optional DC motor model for simulation. */
-  std::optional<frc::DCMotor> GetSimMotor() const;
+  std::optional<wpi::math::DCMotor> GetSimMotor() const;
   /** @return Moment of inertia for simulation (kg·m²). */
-  units::kilogram_square_meter_t GetMOI() const;
+  wpi::units::kilogram_square_meter_t GetMOI() const;
   /** @return Optional starting mechanism position (turns). */
-  std::optional<units::turn_t> GetStartingPosition() const;
+  std::optional<wpi::units::turn_t> GetStartingPosition() const;
   /** @return Optional vendor-specific hardware config (set via WithVendorConfig). */
   std::optional<std::any> GetVendorConfig() const;
   /** @return Optional vendor-specific control request (set via WithVendorControlRequest). */
@@ -915,7 +915,7 @@ class SmartMotorControllerConfig {
   /** @return Optional mechanism gearing. */
   const std::optional<gearing::MechanismGearing>& GetMotorGearing() const;
   /** @return Optional mechanism circumference for linear conversion. */
-  std::optional<units::meter_t> GetMechanismCircumference() const;
+  std::optional<wpi::units::meter_t> GetMechanismCircumference() const;
 
   /** @return Optional external encoder hardware object (type-erased). */
   std::optional<std::any> GetExternalEncoder() const;
@@ -926,11 +926,11 @@ class SmartMotorControllerConfig {
   /** @return Optional external encoder direct conversion factor override. */
   std::optional<double> GetExternalEncoderConversionFactor() const;
   /** @return Optional external encoder zero offset (turns). */
-  std::optional<units::turn_t> GetExternalEncoderZeroOffset() const;
+  std::optional<wpi::units::turn_t> GetExternalEncoderZeroOffset() const;
   /** @return Optional external encoder gearing. */
   const std::optional<gearing::MechanismGearing>& GetExternalEncoderGearing() const;
   /** @return Optional external encoder discontinuity point (turns). */
-  std::optional<units::turn_t> GetExternalEncoderDiscontinuityPoint() const;
+  std::optional<wpi::units::turn_t> GetExternalEncoderDiscontinuityPoint() const;
 
   /** @return true if a trapezoidal motion profile is configured. */
   bool HasTrapezoidProfile() const;
@@ -940,30 +940,30 @@ class SmartMotorControllerConfig {
   bool HasLinearExponentialProfile() const;
 
   /** @return Optional angular trapezoidal profile. */
-  std::optional<frc::TrapezoidProfile<units::turns>> GetTrapezoidProfile() const;
+  std::optional<wpi::math::TrapezoidProfile<wpi::units::turns>> GetTrapezoidProfile() const;
   /** @return Optional linear trapezoidal profile. */
-  std::optional<frc::TrapezoidProfile<units::meters>> GetLinearTrapezoidProfile() const;
+  std::optional<wpi::math::TrapezoidProfile<wpi::units::meters>> GetLinearTrapezoidProfile() const;
   /** @return Optional angular exponential profile. */
-  std::optional<frc::ExponentialProfile<units::turns, units::volts>> GetExponentialProfile() const;
+  std::optional<wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>> GetExponentialProfile() const;
   /** @return Optional linear (meters-based) exponential profile. */
-  std::optional<frc::ExponentialProfile<units::meters, units::volts>> GetLinearExponentialProfile()
+  std::optional<wpi::math::ExponentialProfile<wpi::units::meters, wpi::units::volts>> GetLinearExponentialProfile()
       const;
 
   /** @return Optional max angular velocity constraint for hardware configuration. */
-  std::optional<units::turns_per_second_t> GetTrapMaxVelocityTurns() const;
+  std::optional<wpi::units::turns_per_second_t> GetTrapMaxVelocityTurns() const;
   /** @return Optional max angular acceleration constraint for hardware configuration. */
-  std::optional<units::turns_per_second_squared_t> GetTrapMaxAccelTurns() const;
+  std::optional<wpi::units::turns_per_second_squared_t> GetTrapMaxAccelTurns() const;
   /** @return Optional max linear velocity constraint for hardware configuration. */
-  std::optional<units::meters_per_second_t> GetTrapMaxVelocityLinear() const;
+  std::optional<wpi::units::meters_per_second_t> GetTrapMaxVelocityLinear() const;
   /** @return Optional max linear acceleration constraint for hardware configuration. */
-  std::optional<units::meters_per_second_squared_t> GetTrapMaxAccelLinear() const;
+  std::optional<wpi::units::meters_per_second_squared_t> GetTrapMaxAccelLinear() const;
 
   /** @return Optional kV for CTRE MotionMagicExpo (V*s/turn = V/(turn/s)). */
   std::optional<double> GetExponentialProfileKV() const;
   /** @return Optional kA for CTRE MotionMagicExpo (V*s²/turn = V/(turn/s²)). */
   std::optional<double> GetExponentialProfileKA() const;
   /** @return Optional maximum input voltage for the exponential profile. */
-  std::optional<units::volt_t> GetExponentialProfileMaxInput() const;
+  std::optional<wpi::units::volt_t> GetExponentialProfileMaxInput() const;
 
   /**
    * Convert a mechanism position (turns) to a linear distance using the configured circumference.
@@ -971,7 +971,7 @@ class SmartMotorControllerConfig {
    * @param mechanismPosition Mechanism position in turns to convert.
    * @return Equivalent linear distance.
    */
-  units::meter_t ConvertFromMechanism(units::turn_t mechanismPosition) const;
+  wpi::units::meter_t ConvertFromMechanism(wpi::units::turn_t mechanismPosition) const;
 
   /**
    * Convert a mechanism velocity (turns/s) to a linear velocity using the configured circumference.
@@ -979,8 +979,8 @@ class SmartMotorControllerConfig {
    * @param mechanismVelocity Mechanism velocity in turns/s to convert.
    * @return Equivalent linear velocity.
    */
-  units::meters_per_second_t ConvertFromMechanism(
-      units::turns_per_second_t mechanismVelocity) const;
+  wpi::units::meters_per_second_t ConvertFromMechanism(
+      wpi::units::turns_per_second_t mechanismVelocity) const;
 
  private:
   static constexpr int kNumSlots = 4;
@@ -1026,46 +1026,46 @@ class SmartMotorControllerConfig {
   // Per-slot simulation gain overrides
   struct SimGainsOverride {
     std::optional<double> kP, kI, kD;
-    std::optional<frc::ArmFeedforward> armFF;
-    std::optional<frc::ElevatorFeedforward> elevatorFF;
-    std::optional<frc::SimpleMotorFeedforward<units::turns>> simpleFF;
+    std::optional<wpi::math::ArmFeedforward> armFF;
+    std::optional<wpi::math::ElevatorFeedforward> elevatorFF;
+    std::optional<wpi::math::SimpleMotorFeedforward<wpi::units::turns>> simpleFF;
   };
   SimGainsOverride m_simGains[kNumSlots];
 
   // Profiles
-  std::optional<frc::TrapezoidProfile<units::turns>> m_trapProfile;
-  std::optional<frc::TrapezoidProfile<units::meters>> m_linearTrapProfile;
-  std::optional<frc::ExponentialProfile<units::turns, units::volts>> m_expoProfile;
-  std::optional<frc::ExponentialProfile<units::meters, units::volts>> m_linearExpoProfile;
+  std::optional<wpi::math::TrapezoidProfile<wpi::units::turns>> m_trapProfile;
+  std::optional<wpi::math::TrapezoidProfile<wpi::units::meters>> m_linearTrapProfile;
+  std::optional<wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>> m_expoProfile;
+  std::optional<wpi::math::ExponentialProfile<wpi::units::meters, wpi::units::volts>> m_linearExpoProfile;
   bool m_velocityTrapProfile{false};
   // Stored constraint values for hardware motor controller configuration
-  std::optional<units::turns_per_second_t> m_trapMaxVelTurns;
-  std::optional<units::turns_per_second_squared_t> m_trapMaxAccTurns;
-  std::optional<units::meters_per_second_t> m_trapMaxVelLinear;
-  std::optional<units::meters_per_second_squared_t> m_trapMaxAccLinear;
+  std::optional<wpi::units::turns_per_second_t> m_trapMaxVelTurns;
+  std::optional<wpi::units::turns_per_second_squared_t> m_trapMaxAccTurns;
+  std::optional<wpi::units::meters_per_second_t> m_trapMaxVelLinear;
+  std::optional<wpi::units::meters_per_second_squared_t> m_trapMaxAccLinear;
   // kV/kA in V*s/turn and V*s²/turn for direct CTRE MotionMagicExpo assignment
   std::optional<double> m_expoMotionMagicKV;
   std::optional<double> m_expoMotionMagicKA;
-  std::optional<units::volt_t> m_expoMaxInput;
+  std::optional<wpi::units::volt_t> m_expoMaxInput;
 
   // Limits
-  std::optional<units::turn_t> m_mechLowerLimit;
-  std::optional<units::turn_t> m_mechUpperLimit;
-  std::optional<units::meter_t> m_measLowerLimit;
-  std::optional<units::meter_t> m_measUpperLimit;
-  std::optional<units::ampere_t> m_statorCurrentLimit;
-  std::optional<units::ampere_t> m_supplyCurrentLimit;
-  std::optional<units::celsius_t> m_temperatureCutoff;
-  std::optional<units::volt_t> m_closedLoopMaxVoltage;
-  std::optional<units::turn_t> m_continuousWrappingMin;
-  std::optional<units::turn_t> m_continuousWrappingMax;
+  std::optional<wpi::units::turn_t> m_mechLowerLimit;
+  std::optional<wpi::units::turn_t> m_mechUpperLimit;
+  std::optional<wpi::units::meter_t> m_measLowerLimit;
+  std::optional<wpi::units::meter_t> m_measUpperLimit;
+  std::optional<wpi::units::ampere_t> m_statorCurrentLimit;
+  std::optional<wpi::units::ampere_t> m_supplyCurrentLimit;
+  std::optional<wpi::units::celsius_t> m_temperatureCutoff;
+  std::optional<wpi::units::volt_t> m_closedLoopMaxVoltage;
+  std::optional<wpi::units::turn_t> m_continuousWrappingMin;
+  std::optional<wpi::units::turn_t> m_continuousWrappingMax;
 
   // Control behaviour
   ControlMode m_controlMode{ControlMode::CLOSED_LOOP};
   MotorMode m_idleMode{MotorMode::COAST};
-  std::optional<units::second_t> m_closedLoopPeriod;
-  std::optional<units::second_t> m_openLoopRampRate;
-  std::optional<units::second_t> m_closedLoopRampRate;
+  std::optional<wpi::units::second_t> m_closedLoopPeriod;
+  std::optional<wpi::units::second_t> m_openLoopRampRate;
+  std::optional<wpi::units::second_t> m_closedLoopRampRate;
 
   // Inversion — empty means the user never called WithMotorInverted / WithEncoderInverted.
   std::optional<bool> m_motorInverted;
@@ -1073,32 +1073,32 @@ class SmartMotorControllerConfig {
 
   // Gearing / linear
   std::optional<gearing::MechanismGearing> m_motorGearing;
-  std::optional<units::meter_t> m_mechanismCircumference;
+  std::optional<wpi::units::meter_t> m_mechanismCircumference;
 
   // External encoder
   std::optional<std::any> m_externalEncoder;
   bool m_useExternalFeedback{true};
   std::optional<bool> m_externalEncoderInverted;
   std::optional<double> m_externalEncoderConversionFactor;
-  std::optional<units::turn_t> m_externalEncoderZeroOffset;
+  std::optional<wpi::units::turn_t> m_externalEncoderZeroOffset;
   std::optional<gearing::MechanismGearing> m_externalEncoderGearing;
-  std::optional<units::turn_t> m_externalEncoderDiscontinuityPoint;
+  std::optional<wpi::units::turn_t> m_externalEncoderDiscontinuityPoint;
 
   // Telemetry
   std::optional<std::string> m_telemetryName;
   std::optional<TelemetryVerbosity> m_verbosity;
 
-  frc2::SubsystemBase* m_subsystem{nullptr};
-  std::optional<frc::DCMotor> m_simMotor;
-  units::kilogram_square_meter_t m_moi{0.0001_kg_sq_m};
-  std::optional<units::turn_t> m_startingPosition;
-  std::optional<units::meter_t> m_startingPositionDistance;
+  wpi::cmd::SubsystemBase* m_subsystem{nullptr};
+  std::optional<wpi::math::DCMotor> m_simMotor;
+  wpi::units::kilogram_square_meter_t m_moi{0.0001_kg_sq_m};
+  std::optional<wpi::units::turn_t> m_startingPosition;
+  std::optional<wpi::units::meter_t> m_startingPositionDistance;
 
   // Simulation overrides
-  std::optional<units::turn_t> m_simStartingPosition;
-  std::optional<frc::TrapezoidProfile<units::turns>> m_simTrapProfile;
-  std::optional<frc::TrapezoidProfile<units::meters>> m_simLinearTrapProfile;
-  std::optional<frc::ExponentialProfile<units::turns, units::volts>> m_simExpoProfile;
+  std::optional<wpi::units::turn_t> m_simStartingPosition;
+  std::optional<wpi::math::TrapezoidProfile<wpi::units::turns>> m_simTrapProfile;
+  std::optional<wpi::math::TrapezoidProfile<wpi::units::meters>> m_simLinearTrapProfile;
+  std::optional<wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>> m_simExpoProfile;
 
   std::optional<std::any> m_vendorConfig;
   std::optional<std::any> m_vendorControlRequest;

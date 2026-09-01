@@ -3,10 +3,11 @@
 
 package yams.helpers;
 
-import edu.wpi.first.hal.HAL;
-import edu.wpi.first.wpilibj.simulation.DriverStationSim;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
-import edu.wpi.first.wpilibj.simulation.SimHooks;
+import org.wpilib.hardware.hal.HAL;
+import org.wpilib.hardware.hal.RobotMode;
+import org.wpilib.simulation.DriverStationSim;
+import org.wpilib.simulation.RoboRioSim;
+import org.wpilib.simulation.SimHooks;
 
 /**
  * JUnit 5 testing extension which ensures all WPILib foundational bits are
@@ -25,12 +26,11 @@ public final class MockHardwareExtension {
 	}
 
 	private static void initializeHardware() {
-		HAL.initialize(500, 0);
+		HAL.initialize();
 		DriverStationSim.setDsAttached(true);
-		DriverStationSim.setAutonomous(false);
-    DriverStationSim.setTest(false);
-    DriverStationSim.setEnabled(true);
-    DriverStationSim.notifyNewData();
-    SimHooks.stepTiming(0.0); // Wait for Notifiers
+		DriverStationSim.setRobotMode(RobotMode.TELEOPERATED);
+		DriverStationSim.setEnabled(true);
+		DriverStationSim.notifyNewData();
+		SimHooks.stepTiming(0.0); // Wait for Notifiers
 	}
 }

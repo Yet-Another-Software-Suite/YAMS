@@ -3,26 +3,26 @@
 
 #pragma once
 
-#include <frc/Notifier.h>
-#include <frc/controller/ArmFeedforward.h>
-#include <frc/controller/ElevatorFeedforward.h>
-#include <frc/controller/PIDController.h>
-#include <frc/controller/SimpleMotorFeedforward.h>
-#include <frc/system/plant/DCMotor.h>
-#include <frc/trajectory/ExponentialProfile.h>
-#include <frc/trajectory/TrapezoidProfile.h>
-#include <networktables/NetworkTable.h>
-#include <units/acceleration.h>
-#include <units/angle.h>
-#include <units/angular_acceleration.h>
-#include <units/angular_jerk.h>
-#include <units/angular_velocity.h>
-#include <units/current.h>
-#include <units/length.h>
-#include <units/temperature.h>
-#include <units/time.h>
-#include <units/velocity.h>
-#include <units/voltage.h>
+#include <wpi/system/Notifier.hpp>
+#include <wpi/math/controller/ArmFeedforward.hpp>
+#include <wpi/math/controller/ElevatorFeedforward.hpp>
+#include <wpi/math/controller/PIDController.hpp>
+#include <wpi/math/controller/SimpleMotorFeedforward.hpp>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/math/trajectory/ExponentialProfile.hpp>
+#include <wpi/math/trajectory/TrapezoidProfile.hpp>
+#include <wpi/nt/NetworkTable.hpp>
+#include <wpi/units/acceleration.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/angular_acceleration.hpp>
+#include <wpi/units/angular_jerk.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/current.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/temperature.hpp>
+#include <wpi/units/time.hpp>
+#include <wpi/units/velocity.hpp>
+#include <wpi/units/voltage.hpp>
 
 #include <functional>
 #include <memory>
@@ -116,14 +116,14 @@ class SmartMotorController {
    *
    * @param voltage Voltage to apply.
    */
-  virtual void SetVoltage(units::volt_t voltage) = 0;
+  virtual void SetVoltage(wpi::units::volt_t voltage) = 0;
 
   /**
    * Get the voltage currently applied to the motor.
    *
    * @return Applied voltage.
    */
-  virtual units::volt_t GetVoltage() = 0;
+  virtual wpi::units::volt_t GetVoltage() = 0;
 
   // ---- Closed-loop setpoints ----------------------------------------------
 
@@ -132,28 +132,28 @@ class SmartMotorController {
    *
    * @param angle Target mechanism angle.
    */
-  virtual void SetPosition(units::turn_t angle) = 0;
+  virtual void SetPosition(wpi::units::turn_t angle) = 0;
 
   /**
    * Command a linear measurement position setpoint (closed-loop).
    *
    * @param distance Target linear distance.
    */
-  virtual void SetPosition(units::meter_t distance) = 0;
+  virtual void SetPosition(wpi::units::meter_t distance) = 0;
 
   /**
    * Command a mechanism angular velocity setpoint (closed-loop).
    *
    * @param velocity Target mechanism angular velocity.
    */
-  virtual void SetVelocity(units::turns_per_second_t velocity) = 0;
+  virtual void SetVelocity(wpi::units::turns_per_second_t velocity) = 0;
 
   /**
    * Command a linear measurement velocity setpoint (closed-loop).
    *
    * @param velocity Target linear velocity.
    */
-  virtual void SetVelocity(units::meters_per_second_t velocity) = 0;
+  virtual void SetVelocity(wpi::units::meters_per_second_t velocity) = 0;
 
   // ---- Encoder writes -----------------------------------------------------
 
@@ -162,28 +162,28 @@ class SmartMotorController {
    *
    * @param angle Mechanism angle to write.
    */
-  virtual void SetEncoderPosition(units::turn_t angle) = 0;
+  virtual void SetEncoderPosition(wpi::units::turn_t angle) = 0;
 
   /**
    * Write a linear distance into the encoder (seeds the position).
    *
    * @param distance Linear distance to write.
    */
-  virtual void SetEncoderPosition(units::meter_t distance) = 0;
+  virtual void SetEncoderPosition(wpi::units::meter_t distance) = 0;
 
   /**
    * Write a mechanism angular velocity into the encoder.
    *
    * @param velocity Angular velocity to write.
    */
-  virtual void SetEncoderVelocity(units::turns_per_second_t velocity) = 0;
+  virtual void SetEncoderVelocity(wpi::units::turns_per_second_t velocity) = 0;
 
   /**
    * Write a linear velocity into the encoder.
    *
    * @param velocity Linear velocity to write.
    */
-  virtual void SetEncoderVelocity(units::meters_per_second_t velocity) = 0;
+  virtual void SetEncoderVelocity(wpi::units::meters_per_second_t velocity) = 0;
 
   // ---- Encoder reads ------------------------------------------------------
 
@@ -192,70 +192,70 @@ class SmartMotorController {
    *
    * @return Mechanism position in turns.
    */
-  virtual units::turn_t GetMechanismPosition() = 0;
+  virtual wpi::units::turn_t GetMechanismPosition() = 0;
 
   /**
    * Get the mechanism velocity from the motor encoder (applies gearing).
    *
    * @return Mechanism velocity in turns per second.
    */
-  virtual units::turns_per_second_t GetMechanismVelocity() = 0;
+  virtual wpi::units::turns_per_second_t GetMechanismVelocity() = 0;
 
   /**
    * Get the mechanism acceleration (derived from velocity).
    *
    * @return Mechanism acceleration in turns per second squared.
    */
-  virtual units::turns_per_second_squared_t GetMechanismAcceleration() = 0;
+  virtual wpi::units::turns_per_second_squared_t GetMechanismAcceleration() = 0;
 
   /**
    * Get the raw rotor position (no gearing applied).
    *
    * @return Rotor position in turns.
    */
-  virtual units::turn_t GetRotorPosition() = 0;
+  virtual wpi::units::turn_t GetRotorPosition() = 0;
 
   /**
    * Get the raw rotor velocity (no gearing applied).
    *
    * @return Rotor velocity in turns per second.
    */
-  virtual units::turns_per_second_t GetRotorVelocity() = 0;
+  virtual wpi::units::turns_per_second_t GetRotorVelocity() = 0;
 
   /**
    * Get the linear measurement position (applies circumference conversion).
    *
    * @return Linear position in meters.
    */
-  virtual units::meter_t GetMeasurementPosition() = 0;
+  virtual wpi::units::meter_t GetMeasurementPosition() = 0;
 
   /**
    * Get the linear measurement velocity (applies circumference conversion).
    *
    * @return Linear velocity in meters per second.
    */
-  virtual units::meters_per_second_t GetMeasurementVelocity() = 0;
+  virtual wpi::units::meters_per_second_t GetMeasurementVelocity() = 0;
 
   /**
    * Get the linear measurement acceleration.
    *
    * @return Linear acceleration in meters per second squared.
    */
-  virtual units::meters_per_second_squared_t GetMeasurementAcceleration() = 0;
+  virtual wpi::units::meters_per_second_squared_t GetMeasurementAcceleration() = 0;
 
   /**
    * Get the position of the attached external (absolute) encoder if available.
    *
    * @return External encoder position, or empty if not present or not configured.
    */
-  virtual std::optional<units::degree_t> GetExternalEncoderPosition() = 0;
+  virtual std::optional<wpi::units::degree_t> GetExternalEncoderPosition() = 0;
 
   /**
    * Get the velocity of the attached external (absolute) encoder if available.
    *
    * @return External encoder velocity, or empty if not present or not configured.
    */
-  virtual std::optional<units::degrees_per_second_t> GetExternalEncoderVelocity() = 0;
+  virtual std::optional<wpi::units::degrees_per_second_t> GetExternalEncoderVelocity() = 0;
 
   // ---- Motor status -------------------------------------------------------
 
@@ -264,28 +264,28 @@ class SmartMotorController {
    *
    * @return Supply current, or empty if not supported by the hardware.
    */
-  virtual std::optional<units::ampere_t> GetSupplyCurrent() = 0;
+  virtual std::optional<wpi::units::ampere_t> GetSupplyCurrent() = 0;
 
   /**
    * Get the stator (output) current draw.
    *
    * @return Stator current.
    */
-  virtual units::ampere_t GetStatorCurrent() = 0;
+  virtual wpi::units::ampere_t GetStatorCurrent() = 0;
 
   /**
    * Get the motor controller temperature.
    *
    * @return Temperature in degrees Celsius.
    */
-  virtual units::celsius_t GetTemperature() = 0;
+  virtual wpi::units::celsius_t GetTemperature() = 0;
 
   /**
    * Get the DC motor model associated with this controller.
    *
-   * @return frc::DCMotor model.
+   * @return wpi::math::DCMotor model.
    */
-  virtual frc::DCMotor GetDCMotor() = 0;
+  virtual wpi::math::DCMotor GetDCMotor() = 0;
 
   // ---- Configuration setters (live tuning) --------------------------------
 
@@ -383,42 +383,42 @@ class SmartMotorController {
    *
    * @param currentLimit Maximum stator current.
    */
-  virtual void SetStatorCurrentLimit(units::ampere_t currentLimit) = 0;
+  virtual void SetStatorCurrentLimit(wpi::units::ampere_t currentLimit) = 0;
 
   /**
    * Set the supply (input) current limit.
    *
    * @param currentLimit Maximum supply current.
    */
-  virtual void SetSupplyCurrentLimit(units::ampere_t currentLimit) = 0;
+  virtual void SetSupplyCurrentLimit(wpi::units::ampere_t currentLimit) = 0;
 
   /**
    * Set the closed-loop output ramp rate.
    *
    * @param rampRate Time to ramp from 0 to full output.
    */
-  virtual void SetClosedLoopRampRate(units::second_t rampRate) = 0;
+  virtual void SetClosedLoopRampRate(wpi::units::second_t rampRate) = 0;
 
   /**
    * Set the open-loop output ramp rate.
    *
    * @param rampRate Time to ramp from 0 to full output.
    */
-  virtual void SetOpenLoopRampRate(units::second_t rampRate) = 0;
+  virtual void SetOpenLoopRampRate(wpi::units::second_t rampRate) = 0;
 
   /**
    * Set the upper angular soft limit for the mechanism.
    *
    * @param upperLimit Upper angle limit.
    */
-  virtual void SetMechanismUpperLimit(units::turn_t upperLimit) = 0;
+  virtual void SetMechanismUpperLimit(wpi::units::turn_t upperLimit) = 0;
 
   /**
    * Set the lower angular soft limit for the mechanism.
    *
    * @param lowerLimit Lower angle limit.
    */
-  virtual void SetMechanismLowerLimit(units::turn_t lowerLimit) = 0;
+  virtual void SetMechanismLowerLimit(wpi::units::turn_t lowerLimit) = 0;
 
   /**
    * Set both angular soft limits for the mechanism.
@@ -426,7 +426,7 @@ class SmartMotorController {
    * @param lower Lower angle limit.
    * @param upper Upper angle limit.
    */
-  virtual void SetMechanismLimits(units::turn_t lower, units::turn_t upper) = 0;
+  virtual void SetMechanismLimits(wpi::units::turn_t lower, wpi::units::turn_t upper) = 0;
 
   /**
    * Enable or disable the mechanism angular soft limits.
@@ -440,49 +440,49 @@ class SmartMotorController {
    *
    * @param upperLimit Upper distance limit.
    */
-  virtual void SetMeasurementUpperLimit(units::meter_t upperLimit) = 0;
+  virtual void SetMeasurementUpperLimit(wpi::units::meter_t upperLimit) = 0;
 
   /**
    * Set the lower linear soft limit for the measurement.
    *
    * @param lowerLimit Lower distance limit.
    */
-  virtual void SetMeasurementLowerLimit(units::meter_t lowerLimit) = 0;
+  virtual void SetMeasurementLowerLimit(wpi::units::meter_t lowerLimit) = 0;
 
   /**
    * Set the maximum angular velocity for the motion profile.
    *
    * @param maxVelocity Maximum mechanism angular velocity.
    */
-  virtual void SetMotionProfileMaxVelocity(units::turns_per_second_t maxVelocity) = 0;
+  virtual void SetMotionProfileMaxVelocity(wpi::units::turns_per_second_t maxVelocity) = 0;
 
   /**
    * Set the maximum linear velocity for the motion profile.
    *
    * @param maxVelocity Maximum linear velocity.
    */
-  virtual void SetMotionProfileMaxVelocity(units::meters_per_second_t maxVelocity) = 0;
+  virtual void SetMotionProfileMaxVelocity(wpi::units::meters_per_second_t maxVelocity) = 0;
 
   /**
    * Set the maximum angular acceleration for the motion profile.
    *
    * @param maxAcc Maximum mechanism angular acceleration.
    */
-  virtual void SetMotionProfileMaxAcceleration(units::turns_per_second_squared_t maxAcc) = 0;
+  virtual void SetMotionProfileMaxAcceleration(wpi::units::turns_per_second_squared_t maxAcc) = 0;
 
   /**
    * Set the maximum linear acceleration for the motion profile.
    *
    * @param maxAcc Maximum linear acceleration.
    */
-  virtual void SetMotionProfileMaxAcceleration(units::meters_per_second_squared_t maxAcc) = 0;
+  virtual void SetMotionProfileMaxAcceleration(wpi::units::meters_per_second_squared_t maxAcc) = 0;
 
   /**
    * Set the maximum angular jerk for the motion profile.
    *
    * @param maxJerk Maximum angular jerk (degrees/s²/s).
    */
-  virtual void SetMotionProfileMaxJerk(units::angular_jerk::turns_per_second_cubed_t maxJerk) = 0;
+  virtual void SetMotionProfileMaxJerk(wpi::units::angular_jerk::turns_per_second_cubed_t maxJerk) = 0;
 
   /**
    * Configure or update the exponential motion profile parameters.
@@ -492,7 +492,7 @@ class SmartMotorController {
    * @param maxInput Optional maximum voltage input (empty keeps the current value).
    */
   virtual void SetExponentialProfile(std::optional<double> kV, std::optional<double> kA,
-                                     std::optional<units::volt_t> maxInput) = 0;
+                                     std::optional<wpi::units::volt_t> maxInput) = 0;
 
   /**
    * Select the active closed-loop gain slot.
@@ -520,8 +520,8 @@ class SmartMotorController {
    * @param dataTable   Table for sensor and state data.
    * @param tuningTable Table for live gain tuning entries.
    */
-  void SetupTelemetry(std::shared_ptr<nt::NetworkTable> dataTable,
-                      std::shared_ptr<nt::NetworkTable> tuningTable);
+  void SetupTelemetry(std::shared_ptr<wpi::nt::NetworkTable> dataTable,
+                      std::shared_ptr<wpi::nt::NetworkTable> tuningTable);
 
   /** Set up NetworkTables telemetry using the name configured in the SmartMotorControllerConfig. */
   void SetupTelemetry();
@@ -564,14 +564,14 @@ class SmartMotorController {
    *
    * @return Optional mechanism angle setpoint.
    */
-  std::optional<units::turn_t> GetMechanismPositionSetpoint() const;
+  std::optional<wpi::units::turn_t> GetMechanismPositionSetpoint() const;
 
   /**
    * Get the last commanded mechanism velocity setpoint.
    *
    * @return Optional mechanism angular velocity setpoint.
    */
-  std::optional<units::turns_per_second_t> GetMechanismSetpointVelocity() const;
+  std::optional<wpi::units::turns_per_second_t> GetMechanismSetpointVelocity() const;
 
   /**
    * Get the last commanded linear measurement position setpoint.
@@ -580,7 +580,7 @@ class SmartMotorController {
    * @return Optional linear position setpoint, or empty if no setpoint has been commanded or
    *         no circumference is configured.
    */
-  std::optional<units::meter_t> GetMeasurementPositionSetpoint() const;
+  std::optional<wpi::units::meter_t> GetMeasurementPositionSetpoint() const;
 
   /**
    * Get the last commanded linear measurement velocity setpoint.
@@ -589,7 +589,7 @@ class SmartMotorController {
    * @return Optional linear velocity setpoint, or empty if no setpoint has been commanded or
    *         no circumference is configured.
    */
-  std::optional<units::meters_per_second_t> GetMeasurementSetpointVelocity() const;
+  std::optional<wpi::units::meters_per_second_t> GetMeasurementSetpointVelocity() const;
 
   /**
    * Get a mutable reference to the current configuration.
@@ -626,7 +626,7 @@ class SmartMotorController {
    * @param b Second motor model.
    * @return true if the models have matching electrical constants.
    */
-  bool IsMotor(const frc::DCMotor& a, const frc::DCMotor& b) const;
+  bool IsMotor(const wpi::math::DCMotor& a, const wpi::math::DCMotor& b) const;
 
   /** Validate the current configuration and throw if safety constraints are violated. */
   void CheckConfigSafety();
@@ -652,53 +652,53 @@ class SmartMotorController {
    * Forward a position setpoint to all loosely coupled followers.
    * Call at the end of SetPosition(turn_t) in each concrete wrapper.
    */
-  void ForwardPositionToFollowers(units::turn_t pos);
+  void ForwardPositionToFollowers(wpi::units::turn_t pos);
 
   /**
    * Forward a linear position setpoint to all loosely coupled followers.
    * Call at the end of SetPosition(meter_t) in each concrete wrapper.
    */
-  void ForwardPositionToFollowers(units::meter_t dist);
+  void ForwardPositionToFollowers(wpi::units::meter_t dist);
 
   /**
    * Forward a velocity setpoint to all loosely coupled followers.
    * Call at the end of SetVelocity(turns_per_second_t) in each concrete wrapper.
    */
-  void ForwardVelocityToFollowers(units::turns_per_second_t vel);
+  void ForwardVelocityToFollowers(wpi::units::turns_per_second_t vel);
 
   /**
    * Forward a linear velocity setpoint to all loosely coupled followers.
    * Call at the end of SetVelocity(meters_per_second_t) in each concrete wrapper.
    */
-  void ForwardVelocityToFollowers(units::meters_per_second_t vel);
+  void ForwardVelocityToFollowers(wpi::units::meters_per_second_t vel);
 
-  std::optional<frc::PIDController> m_pid;
+  std::optional<wpi::math::PIDController> m_pid;
   std::optional<math::LQRController> m_lqr;
 
   // Angular motion profile state
-  std::optional<frc::TrapezoidProfile<units::turns>::State> m_trapState;
-  std::optional<frc::ExponentialProfile<units::turns, units::volts>::State> m_expoState;
+  std::optional<wpi::math::TrapezoidProfile<wpi::units::turns>::State> m_trapState;
+  std::optional<wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>::State> m_expoState;
 
   // Linear motion profile state
-  std::optional<frc::TrapezoidProfile<units::meters>::State> m_linearTrapState;
+  std::optional<wpi::math::TrapezoidProfile<wpi::units::meters>::State> m_linearTrapState;
 
-  std::optional<units::turn_t> m_setpointPosition;
-  std::optional<units::turns_per_second_t> m_setpointVelocity;
+  std::optional<wpi::units::turn_t> m_setpointPosition;
+  std::optional<wpi::units::turns_per_second_t> m_setpointVelocity;
 
-  std::unique_ptr<frc::Notifier> m_closedLoopControllerThread;
+  std::unique_ptr<wpi::Notifier> m_closedLoopControllerThread;
   bool m_closedLoopControllerRunning{false};
 
-  std::shared_ptr<nt::NetworkTable> m_parentTable;
-  std::shared_ptr<nt::NetworkTable> m_telemetryTable;
-  std::shared_ptr<nt::NetworkTable> m_tuningTable;
+  std::shared_ptr<wpi::nt::NetworkTable> m_parentTable;
+  std::shared_ptr<wpi::nt::NetworkTable> m_telemetryTable;
+  std::shared_ptr<wpi::nt::NetworkTable> m_tuningTable;
 
   telemetry::SmartMotorControllerTelemetry m_telemetry;
   telemetry::SmartMotorControllerTelemetryConfig m_telemetryConfig;
   bool m_telemetryConfigExplicit{false};
 
  private:
-  std::optional<frc::TrapezoidProfile<units::turns>::State> GetTrapezoidalProfileState();
-  std::optional<frc::ExponentialProfile<units::turns, units::volts>::State>
+  std::optional<wpi::math::TrapezoidProfile<wpi::units::turns>::State> GetTrapezoidalProfileState();
+  std::optional<wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>::State>
   GetExponentialProfileState();
 };
 

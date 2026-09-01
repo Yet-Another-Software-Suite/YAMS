@@ -4,33 +4,34 @@
 package frc.robot.subsystems;
 
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Second;
-import static edu.wpi.first.units.Units.Volts;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.DegreesPerSecond;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.Second;
+import static org.wpilib.units.Units.Volts;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.wpilib.math.controller.PIDController;
+import org.wpilib.math.controller.SimpleMotorFeedforward;
+import org.wpilib.math.geometry.Pose2d;
+import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Translation2d;
+import org.wpilib.math.kinematics.ChassisVelocities;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.LinearVelocity;
+import org.wpilib.smartdashboard.Field2d;
+import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.SubsystemBase;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import yams.gearing.MechanismGearing;
@@ -38,6 +39,8 @@ import yams.mechanisms.config.SwerveDriveConfig;
 import yams.mechanisms.config.SwerveModuleConfig;
 import yams.mechanisms.swerve.SwerveDrive;
 import yams.mechanisms.swerve.SwerveModule;
+import yams.telemetry.SwerveDriveTelemetryConfig;
+import yams.telemetry.SwerveModuleTelemetryConfig;
 import yams.mechanisms.swerve.utility.SwerveInputStream;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
@@ -70,13 +73,13 @@ public class SwerveSubsystem extends SubsystemBase
   private LinearVelocity  maximumChassisSpeedsLinearVelocity  = MetersPerSecond.of(1);
 
   /**
-   * Get a {@link Supplier<ChassisSpeeds>} for the robot relative chassis speeds based on "standard" swerve drive
+   * Get a {@link Supplier<ChassisVelocities>} for the robot relative chassis speeds based on "standard" swerve drive
    * controls.
    *
    * @param translationXScalar Translation in the X direction from [-1,1]
    * @param translationYScalar Translation in the Y direction from [-1,1]
    * @param rotationScalar     Rotation speed from [-1,1]
-   * @return {@link Supplier<ChassisSpeeds>} for the robot relative chassis speeds.
+   * @return {@link Supplier<ChassisVelocities>} for the robot relative chassis speeds.
    */
   public SwerveInputStream getChassisSpeedsSupplier(DoubleSupplier translationXScalar,
                                                     DoubleSupplier translationYScalar,
@@ -92,19 +95,19 @@ public class SwerveSubsystem extends SubsystemBase
   }
 
   /**
-   * Get a {@link Supplier<ChassisSpeeds>} for the robot relative chassis speeds based on "standard" swerve drive
+   * Get a {@link Supplier<ChassisVelocities>} for the robot relative chassis speeds based on "standard" swerve drive
    * controls.
    *
    * @param translationXScalar Translation in the X direction from [-1,1]
    * @param translationYScalar Translation in the Y direction from [-1,1]
    * @param rotationScalar     Rotation speed from [-1,1]
-   * @return {@link Supplier<ChassisSpeeds>} for the robot relative chassis speeds.
+   * @return {@link Supplier<ChassisVelocities>} for the robot relative chassis speeds.
    */
-  public Supplier<ChassisSpeeds> getSimpleChassisSpeeds(DoubleSupplier translationXScalar,
+  public Supplier<ChassisVelocities> getSimpleChassisSpeeds(DoubleSupplier translationXScalar,
                                                         DoubleSupplier translationYScalar,
                                                         DoubleSupplier rotationScalar)
   {
-    return () -> new ChassisSpeeds(maximumChassisSpeedsLinearVelocity.times(translationXScalar.getAsDouble())
+    return () -> new ChassisVelocities(maximumChassisSpeedsLinearVelocity.times(translationXScalar.getAsDouble())
                                                                      .in(MetersPerSecond),
                                    maximumChassisSpeedsLinearVelocity.times(translationYScalar.getAsDouble())
                                                                      .in(MetersPerSecond),
@@ -166,7 +169,10 @@ public class SwerveSubsystem extends SubsystemBase
     SwerveModuleConfig moduleConfig = new SwerveModuleConfig(driveSMC, azimuthSMC)
         // The CANcoder absolute position eliminates the need to home the steer motor at startup.
         .withAbsoluteEncoder(absoluteEncoder.getAbsolutePosition().asSupplier())
-        .withTelemetry(moduleName, SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
+        // Nested under the same "Swerve" DataLog prefix as SwerveDriveConfig below, so the module's
+        // absolute encoder shows up alongside the rest of the drive's DataLog entries.
+        .withTelemetry(moduleName, new SwerveModuleTelemetryConfig().withDataLogName("Swerve/" + moduleName)
+                                                                     .withTelemetryVerbosity(SmartMotorControllerConfig.TelemetryVerbosity.HIGH))
         .withLocation(location)
         // Optimization rotates the module at most 90 deg instead of 180 deg + reversing drive direction.
         .withOptimization(true);
@@ -176,7 +182,7 @@ public class SwerveSubsystem extends SubsystemBase
   public SwerveSubsystem()
   {
     // CAN ID 14 is arbitrary; assign it to match your robot's Pigeon2 CAN ID.
-    Pigeon2 gyro = new Pigeon2(14);
+    Pigeon2 gyro = new Pigeon2(14, CANBus.systemcore(1));
     /*
      * Module locations use the WPILib coordinate frame: +X toward the front of the robot,
      * +Y toward the left side. The 24-inch offsets assume the module centers sit 24 inches
@@ -184,24 +190,24 @@ public class SwerveSubsystem extends SubsystemBase
      * CAN IDs are grouped in pairs (drive, steer) followed by the CANcoder, incrementing by
      * module to make wiring audits straightforward.
      */
-    var fl = createModule(new SparkMax(1, MotorType.kBrushless),
-                          new SparkMax(2, MotorType.kBrushless),
-                          new CANcoder(3),
+    var fl = createModule(new SparkMax(1, 1, MotorType.kBrushless),
+                          new SparkMax(1, 2, MotorType.kBrushless),
+                          new CANcoder(3, CANBus.systemcore(1)),
                           "frontleft",
                           new Translation2d(Inches.of(24), Inches.of(24)));
-    var fr = createModule(new SparkMax(4, MotorType.kBrushless),
-                          new SparkMax(5, MotorType.kBrushless),
-                          new CANcoder(6),
+    var fr = createModule(new SparkMax(1, 4, MotorType.kBrushless),
+                          new SparkMax(1, 5, MotorType.kBrushless),
+                          new CANcoder(6, CANBus.systemcore(1)),
                           "frontright",
                           new Translation2d(Inches.of(24), Inches.of(-24)));
-    var bl = createModule(new SparkMax(7, MotorType.kBrushless),
-                          new SparkMax(8, MotorType.kBrushless),
-                          new CANcoder(9),
+    var bl = createModule(new SparkMax(1, 7, MotorType.kBrushless),
+                          new SparkMax(1, 8, MotorType.kBrushless),
+                          new CANcoder(9, CANBus.systemcore(1)),
                           "backleft",
                           new Translation2d(Inches.of(-24), Inches.of(24)));
-    var br = createModule(new SparkMax(10, MotorType.kBrushless),
-                          new SparkMax(11, MotorType.kBrushless),
-                          new CANcoder(12),
+    var br = createModule(new SparkMax(1, 10, MotorType.kBrushless),
+                          new SparkMax(1, 11, MotorType.kBrushless),
+                          new CANcoder(12, CANBus.systemcore(1)),
                           "backright",
                           new Translation2d(Inches.of(-24), Inches.of(-24)));
     SwerveDriveConfig config = new SwerveDriveConfig(this, fl, fr, bl, br)
@@ -211,7 +217,11 @@ public class SwerveSubsystem extends SubsystemBase
         .withStartingPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)))
         // Translation and rotation PIDs are used by driveToPose(); kP=1 is a conservative start.
         .withTranslationController(new PIDController(1, 0, 0))
-        .withRotationController(new PIDController(1, 0, 0));
+        .withRotationController(new PIDController(1, 0, 0))
+        // Logs pose/gyro/chassis speeds/module states to a WPILib DataLog (readable with AdvantageScope
+        // or DataLogTool) in addition to NetworkTables. Each module above nests under "Swerve/<name>".
+        .withTelemetry("swerve", new SwerveDriveTelemetryConfig().withDataLogName("Swerve")
+                                                        .withTelemetryVerbosity(SmartMotorControllerConfig.TelemetryVerbosity.HIGH));
     drive = new SwerveDrive(config);
 
     SmartDashboard.putData("Field", field);
@@ -220,15 +230,15 @@ public class SwerveSubsystem extends SubsystemBase
   /**
    * Drive the {@link SwerveDrive} object with field relative chassis speeds.
    *
-   * @param speedsSupplier Field relative {@link ChassisSpeeds}.
+   * @param speedsSupplier Field relative {@link ChassisVelocities}.
    * @return {@link Command} to run the drive.
    */
-  public Command drive(Supplier<ChassisSpeeds> speedsSupplier)
+  public Command drive(Supplier<ChassisVelocities> speedsSupplier)
   {
     return run(() -> drive.setFieldRelativeChassisSpeeds(speedsSupplier.get())).withName("Field Oriented Drive");
   }
 
-  public Command setRobotRelativeChassisSpeeds(ChassisSpeeds speeds)
+  public Command setRobotRelativeChassisSpeeds(ChassisVelocities speeds)
   {
     return run(() -> drive.setRobotRelativeChassisSpeeds(speeds));
   }
@@ -238,7 +248,7 @@ public class SwerveSubsystem extends SubsystemBase
     return drive.driveToPose(pose);
   }
 
-  public Command driveRobotRelative(Supplier<ChassisSpeeds> speedsSupplier)
+  public Command driveRobotRelative(Supplier<ChassisVelocities> speedsSupplier)
   {
     return drive.drive(speedsSupplier);
   }

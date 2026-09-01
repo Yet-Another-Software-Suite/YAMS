@@ -3,51 +3,51 @@
 
 package yams.motorcontrollers;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.DegreesPerSecond;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.Milliseconds;
+import static org.wpilib.units.Units.RPM;
+import static org.wpilib.units.Units.Radians;
+import static org.wpilib.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.Rotations;
+import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.Seconds;
+import static org.wpilib.units.Units.Volts;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.Pair;
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.trajectory.ExponentialProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.units.AngularAccelerationUnit;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearAcceleration;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Temperature;
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.units.measure.Velocity;
-import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Notifier;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
+import org.wpilib.driverstation.internal.DriverStationBackend;
+import org.wpilib.framework.RobotBase;
+import org.wpilib.math.controller.ArmFeedforward;
+import org.wpilib.math.controller.ElevatorFeedforward;
+import org.wpilib.math.controller.PIDController;
+import org.wpilib.math.controller.SimpleMotorFeedforward;
+import org.wpilib.math.filter.Debouncer;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.math.trajectory.ExponentialProfile;
+import org.wpilib.math.trajectory.TrapezoidProfile;
+import org.wpilib.math.trajectory.TrapezoidProfile.State;
+import org.wpilib.util.Alert;
+import org.wpilib.util.Pair;
+import org.wpilib.networktables.NetworkTable;
+import org.wpilib.networktables.NetworkTableInstance;
+import org.wpilib.system.Notifier;
+import org.wpilib.units.AngularAccelerationUnit;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularAcceleration;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Current;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.LinearAcceleration;
+import org.wpilib.units.measure.LinearVelocity;
+import org.wpilib.units.measure.Temperature;
+import org.wpilib.units.measure.Time;
+import org.wpilib.units.measure.Velocity;
+import org.wpilib.units.measure.Voltage;
+import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.Commands;
+import java.util.UUID;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -166,6 +166,10 @@ public abstract class SmartMotorController
    * Alert shown when the closed loop controller is running on the RIO.
    */
   private   Alert                                         m_rioClosedLoopAlert          = null;
+  /**
+   * Battery simulation UUID used when standalone simulation.
+   */
+  public   final UUID                                    m_batterySimUUID = UUID.randomUUID();
 
   /**
    * Create a {@link SmartMotorController} wrapper from the provided motor controller object.
@@ -189,13 +193,13 @@ public abstract class SmartMotorController
    */
   public boolean isMotor(DCMotor a, DCMotor b)
   {
-    return a.stallTorqueNewtonMeters == b.stallTorqueNewtonMeters &&
-           a.stallCurrentAmps == b.stallCurrentAmps &&
-           a.freeCurrentAmps == b.freeCurrentAmps &&
-           a.freeSpeedRadPerSec == b.freeSpeedRadPerSec &&
-           a.KtNMPerAmp == b.KtNMPerAmp &&
-           a.KvRadPerSecPerVolt == b.KvRadPerSecPerVolt &&
-           a.nominalVoltageVolts == b.nominalVoltageVolts;
+    return a.stallTorque == b.stallTorque &&
+           a.stallCurrent == b.stallCurrent &&
+           a.freeCurrent == b.freeCurrent &&
+           a.freeSpeed == b.freeSpeed &&
+           a.Kt== b.Kt &&
+           a.Kv == b.Kv &&
+           a.nominalVoltage == b.nominalVoltage;
   }
 
   /**
@@ -317,7 +321,7 @@ public abstract class SmartMotorController
         {
           m_rioClosedLoopAlert = new Alert("YAMS",
                                            getName() + " closed loop controller is running on the RIO.",
-                                           Alert.AlertType.kWarning);
+                                           Alert.Level.MEDIUM);
         }
         m_rioClosedLoopAlert.set(true);
       }
@@ -354,7 +358,7 @@ public abstract class SmartMotorController
       {
         if (setpointPosition.get().lt(mechLowerLimit.get()))
         {
-          DriverStation.reportWarning("[WARNING] Setpoint is lower than Mechanism " +
+          DriverStationBackend.reportWarning("[WARNING] Setpoint is lower than Mechanism " +
                                       (m_config.getTelemetryName().isPresent() ? m_config.getTelemetryName().get()
                                                                                : "Unnamed smart motor") +
                                       " lower limit, changing setpoint to lower limit.", false);
@@ -365,7 +369,7 @@ public abstract class SmartMotorController
       {
         if (setpointPosition.get().gt(mechUpperLimit.get()))
         {
-          DriverStation.reportWarning("[WARNING] Setpoint is higher than Mechanism " +
+          DriverStationBackend.reportWarning("[WARNING] Setpoint is higher than Mechanism " +
                                       (m_config.getTelemetryName().isPresent() ? getName()
                                                                                : "Unnamed smart motor") +
                                       " upper limit, changing setpoint to upper limit.", false);
@@ -524,7 +528,7 @@ public abstract class SmartMotorController
         var nextVelocitySetpoint = RotationsPerSecond.of(
             m_trapezoidProfile.isPresent() ? nextTrapState.get().velocity
                                            : (m_expoProfile.isPresent() ? nextExpoState.get().velocity : 0.0));
-        feedforward.set(ff.calculateWithVelocities(getMechanismPosition().in(Radians),
+        feedforward.set(ff.calculate(getMechanismPosition().in(Radians),
                                                    currentVelocitySetpoint.in(RadiansPerSecond),
                                                    nextVelocitySetpoint.in(RadiansPerSecond)));
       } else
@@ -534,7 +538,7 @@ public abstract class SmartMotorController
                                                                     : setpointVelocity.orElse(RotationsPerSecond.zero())
                                                                                       .in(RotationsPerSecond);
         // Not profiled, so using current velocity or setpoint velocity.
-        ff.calculateWithVelocities(getMechanismPosition().in(Radians),
+        ff.calculate(getMechanismPosition().in(Radians),
                                    getMechanismVelocity().in(RadiansPerSecond),
                                    nextVelocitySetpoint);
       }
@@ -551,12 +555,12 @@ public abstract class SmartMotorController
             m_trapezoidProfile.isPresent() ? nextTrapState.get().velocity
                                            : (m_expoProfile.isPresent() ? nextExpoState.get().velocity : 0.0));
 
-        feedforward.set(ff.calculateWithVelocities(currentVelocitySetpoint.in(MetersPerSecond),
+        feedforward.set(ff.calculate(currentVelocitySetpoint.in(MetersPerSecond),
                                                    nextVelocitySetpoint.in(MetersPerSecond)));
       } else
       {
         // Not profiled, so using current velocity or setpoint velocity.
-        feedforward.set(ff.calculateWithVelocities(getMeasurementVelocity().in(MetersPerSecond), 0));
+        feedforward.set(ff.calculate(getMeasurementVelocity().in(MetersPerSecond), 0));
       }
     });
 
@@ -570,7 +574,7 @@ public abstract class SmartMotorController
         var nextVelocitySetpoint = RotationsPerSecond.of(
             m_trapezoidProfile.isPresent() ? nextTrapState.get().velocity
                                            : (m_expoProfile.isPresent() ? nextExpoState.get().velocity : 0.0));
-        feedforward.set(ff.calculateWithVelocities(currentVelocitySetpoint.in(RotationsPerSecond),
+        feedforward.set(ff.calculate(currentVelocitySetpoint.in(RotationsPerSecond),
                                                    nextVelocitySetpoint.in(RotationsPerSecond)));
 
       } else
@@ -580,7 +584,7 @@ public abstract class SmartMotorController
                                                                     : setpointVelocity.orElse(RotationsPerSecond.zero())
                                                                                       .in(RotationsPerSecond);
         // Not profiled, so using current velocity, or setpoint velocity.
-        feedforward.set(ff.calculateWithVelocities(getMechanismVelocity().in(RotationsPerSecond),
+        feedforward.set(ff.calculate(getMechanismVelocity().in(RotationsPerSecond),
                                                    nextVelocitySetpoint));
       }
     });
@@ -622,7 +626,7 @@ public abstract class SmartMotorController
     if (maximumVoltage.isPresent())
     {
       double maxVolts = maximumVoltage.get().in(Volts);
-      outputVoltage = MathUtil.clamp(outputVoltage, -maxVolts, maxVolts);
+      outputVoltage = Math.clamp(outputVoltage, -maxVolts, maxVolts);
     }
     setVoltage(Volts.of(outputVoltage));
   }

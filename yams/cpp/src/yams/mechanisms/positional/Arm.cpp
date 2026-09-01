@@ -3,21 +3,21 @@
 
 #include "yams/mechanisms/positional/Arm.hpp"
 
-#include <frc/RobotBase.h>
-#include <frc/geometry/Rotation3d.h>
-#include <frc/geometry/Translation3d.h>
-#include <frc/simulation/BatterySim.h>
-#include <frc/simulation/RoboRioSim.h>
-#include <frc/smartdashboard/Mechanism2d.h>
-#include <frc/smartdashboard/MechanismLigament2d.h>
-#include <frc/smartdashboard/MechanismRoot2d.h>
-#include <frc/smartdashboard/SmartDashboard.h>
-#include <frc/system/plant/DCMotor.h>
-#include <frc/util/Color.h>
-#include <frc/util/Color8Bit.h>
-#include <frc2/command/Commands.h>
-#include <units/angle.h>
-#include <units/time.h>
+#include <wpi/framework/RobotBase.hpp>
+#include <wpi/math/geometry/Rotation3d.hpp>
+#include <wpi/math/geometry/Translation3d.hpp>
+#include <wpi/simulation/BatterySim.hpp>
+#include <wpi/simulation/RoboRioSim.hpp>
+#include <wpi/smartdashboard/Mechanism2d.hpp>
+#include <wpi/smartdashboard/MechanismLigament2d.hpp>
+#include <wpi/smartdashboard/MechanismRoot2d.hpp>
+#include <wpi/smartdashboard/SmartDashboard.hpp>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/util/Color.hpp>
+#include <wpi/util/Color8Bit.hpp>
+#include <wpi/commands2/Commands.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/time.hpp>
 
 #include <cmath>
 #include <memory>
@@ -53,27 +53,27 @@ Arm::Arm(config::ArmConfig* config, motorcontrollers::SmartMotorController* smc)
   if (auto startA = m_smc->GetConfig().GetStartingPosition()) {
     m_smc->SetEncoderPosition(*startA);
   }
-  if (frc::RobotBase::IsSimulation()) {
+  if (wpi::RobotBase::IsSimulation()) {
     // Configuration checks — throw descriptive exceptions like Java does.
     if (!m_armConfig->GetArmLength().has_value()) {
       throw exceptions::ArmConfigurationException(
-          "Arm Length is empty", "Cannot create simulation.", "WithArmLength(units::meter_t)");
+          "Arm Length is empty", "Cannot create simulation.", "WithArmLength(wpi::units::meter_t)");
     }
     if (!m_armConfig->GetMinAngle().has_value()) {
       throw exceptions::ArmConfigurationException("Arm lower hard limit is empty",
                                                   "Cannot create simulation.",
-                                                  "WithMinAngle(units::degree_t)");
+                                                  "WithMinAngle(wpi::units::degree_t)");
     }
     if (!m_armConfig->GetMaxAngle().has_value()) {
       throw exceptions::ArmConfigurationException("Arm upper hard limit is empty",
                                                   "Cannot create simulation.",
-                                                  "WithMaxAngle(units::degree_t)");
+                                                  "WithMaxAngle(wpi::units::degree_t)");
     }
     if (!m_smc->GetConfig().GetStartingPosition().has_value() &&
         !m_smc->GetConfig().GetExternalEncoderZeroOffset().has_value()) {
       throw exceptions::ArmConfigurationException("Arm starting angle is empty",
                                                   "Cannot create simulation.",
-                                                  "smc.WithStartingPosition(units::degree_t)");
+                                                  "smc.WithStartingPosition(wpi::units::degree_t)");
     }
     if (!m_smc->GetConfig().GetMOI()) {
       throw exceptions::ArmConfigurationException("Arm MOI is empty", "Cannot create simulation.",
@@ -83,16 +83,16 @@ Arm::Arm(config::ArmConfig* config, motorcontrollers::SmartMotorController* smc)
     auto& gearingOpt = m_smc->GetConfig().GetMotorGearing();
     gearing::MechanismGearing gearing = gearingOpt.value_or(gearing::MechanismGearing::kOne);
 
-    units::radian_t startAngle =
-        m_smc->GetConfig().GetStartingPosition().value_or(units::turn_t{0});
+    wpi::units::radian_t startAngle =
+        m_smc->GetConfig().GetStartingPosition().value_or(wpi::units::turn_t{0});
 
     m_armSim.emplace(m_smc->GetDCMotor(), gearing.GetMechanismToRotorRatio(),
                      m_smc->GetConfig().GetMOI(), m_armConfig->GetArmLength().value(),
-                     units::radian_t{m_armConfig->GetMinAngle().value()},
-                     units::radian_t{m_armConfig->GetMaxAngle().value()}, true, startAngle,
+                     wpi::units::radian_t{m_armConfig->GetMinAngle().value()},
+                     wpi::units::radian_t{m_armConfig->GetMaxAngle().value()}, true, startAngle,
                      std::array<double, 2>{0, 0.002 / 4096.0});
 
-    units::second_t period = m_smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms);
+    wpi::units::second_t period = m_smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms);
     m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::ArmSimSupplier>(
         *m_armSim, [this]() { return m_smc->GetDutyCycle(); }, gearing, period));
 
@@ -102,30 +102,30 @@ Arm::Arm(config::ArmConfig* config, motorcontrollers::SmartMotorController* smc)
     m_mechanismRoot =
         m_mechanismWindow->GetRoot(m_name + "Root", armLengthM + 0.2, armLengthM + 0.2);
 
-    units::degree_t startDeg = startAngle;
-    m_mechanismLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
+    wpi::units::degree_t startDeg = startAngle;
+    m_mechanismLigament = m_mechanismRoot->Append<wpi::MechanismLigament2d>(
         m_name, armLengthM, startDeg, 6, m_armConfig->GetSimColor());
-    m_setpointLigament = m_mechanismRoot->Append<frc::MechanismLigament2d>(
-        "Setpoint", armLengthM, startDeg, 3, frc::Color8Bit{frc::Color::kWhite});
+    m_setpointLigament = m_mechanismRoot->Append<wpi::MechanismLigament2d>(
+        "Setpoint", armLengthM, startDeg, 3, wpi::util::Color8Bit{wpi::util::Color::WHITE});
 
     constexpr double kTickLength = 3.0 * 0.0254;  // 3 inches in metres
-    m_mechanismRoot->Append<frc::MechanismLigament2d>("MaxHard", kTickLength,
+    m_mechanismRoot->Append<wpi::MechanismLigament2d>("MaxHard", kTickLength,
                                                       m_armConfig->GetMaxAngle().value(), 4,
-                                                      frc::Color8Bit{frc::Color::kLimeGreen});
-    m_mechanismRoot->Append<frc::MechanismLigament2d>("MinHard", kTickLength,
+                                                      wpi::util::Color8Bit{wpi::util::Color::LIME_GREEN});
+    m_mechanismRoot->Append<wpi::MechanismLigament2d>("MinHard", kTickLength,
                                                       m_armConfig->GetMinAngle().value(), 4,
-                                                      frc::Color8Bit{frc::Color::kRed});
+                                                      wpi::util::Color8Bit{wpi::util::Color::RED});
 
     auto smcUpperLimit = m_smc->GetConfig().GetMechanismUpperLimit();
     auto smcLowerLimit = m_smc->GetConfig().GetMechanismLowerLimit();
     if (smcUpperLimit.has_value() && smcLowerLimit.has_value()) {
-      m_mechanismRoot->Append<frc::MechanismLigament2d>(
-          "MaxSoft", kTickLength, smcUpperLimit.value(), 4, frc::Color8Bit{frc::Color::kHotPink});
-      m_mechanismRoot->Append<frc::MechanismLigament2d>(
-          "MinSoft", kTickLength, smcLowerLimit.value(), 4, frc::Color8Bit{frc::Color::kYellow});
+      m_mechanismRoot->Append<wpi::MechanismLigament2d>(
+          "MaxSoft", kTickLength, smcUpperLimit.value(), 4, wpi::util::Color8Bit{wpi::util::Color::HOT_PINK});
+      m_mechanismRoot->Append<wpi::MechanismLigament2d>(
+          "MinSoft", kTickLength, smcLowerLimit.value(), 4, wpi::util::Color8Bit{wpi::util::Color::YELLOW});
     }
 
-    frc::SmartDashboard::PutData(m_name + "/mechanism", &(*m_mechanismWindow));
+    wpi::SmartDashboard::PutData(m_name + "/mechanism", &(*m_mechanismWindow));
   }
 }
 
@@ -146,8 +146,8 @@ void Arm::SimIterate() {
         GetAngle() > *m_armConfig->GetMaxAngle()) {
       m_smc->SetEncoderPosition(*m_armConfig->GetMaxAngle());
     }
-    frc::sim::RoboRioSim::SetVInVoltage(
-        frc::sim::BatterySim::Calculate({ss->GetCurrentDrawAmps()}));
+    wpi::sim::RoboRioSim::SetVInVoltage(
+        wpi::sim::BatterySim::Calculate({ss->GetCurrentDrawAmps()}));
     VisualizationUpdate();
   }
 }
@@ -167,74 +167,74 @@ std::string Arm::GetName() const { return m_name; }
 
 // ---- SmartPositionalMechanism overrides -------------------------------------
 
-frc2::Trigger Arm::Max() {
-  return frc2::Trigger{
-      [this] { return GetAngle() >= m_armConfig->GetMaxAngle().value_or(units::degree_t{36000}); }};
+wpi::cmd::Trigger Arm::Max() {
+  return wpi::cmd::Trigger{
+      [this] { return GetAngle() >= m_armConfig->GetMaxAngle().value_or(wpi::units::degree_t{36000}); }};
 }
 
-frc2::Trigger Arm::Min() {
-  return frc2::Trigger{[this] {
-    return GetAngle() <= m_armConfig->GetMinAngle().value_or(units::degree_t{-36000});
+wpi::cmd::Trigger Arm::Min() {
+  return wpi::cmd::Trigger{[this] {
+    return GetAngle() <= m_armConfig->GetMinAngle().value_or(wpi::units::degree_t{-36000});
   }};
 }
 
 // ---- Arm-specific interface -------------------------------------------------
 
-frc2::CommandPtr Arm::Run(units::degree_t angle) {
-  return frc2::cmd::Run([this, angle] { SetMechanismPositionSetpoint(angle); }, {m_subsystem})
+wpi::cmd::CommandPtr Arm::Run(wpi::units::degree_t angle) {
+  return wpi::cmd::Run([this, angle] { SetMechanismPositionSetpoint(angle); }, {m_subsystem})
       .WithName(m_name + " Run");
 }
 
-frc2::CommandPtr Arm::Run(std::function<units::degree_t()> angle) {
-  return frc2::cmd::Run([this, angle] { SetMechanismPositionSetpoint(angle()); }, {m_subsystem})
+wpi::cmd::CommandPtr Arm::Run(std::function<wpi::units::degree_t()> angle) {
+  return wpi::cmd::Run([this, angle] { SetMechanismPositionSetpoint(angle()); }, {m_subsystem})
       .WithName(m_name + " Run Supplier");
 }
 
-frc2::CommandPtr Arm::RunTo(units::degree_t angle, units::degree_t tolerance) {
-  frc2::Trigger near = IsNear(angle, tolerance).Debounce(units::second_t{0.1});
-  return frc2::cmd::RunOnce([this, angle] { SetMechanismPositionSetpoint(angle); }, {m_subsystem})
-      .AndThen(frc2::cmd::WaitUntil([near] { return near.Get(); }))
+wpi::cmd::CommandPtr Arm::RunTo(wpi::units::degree_t angle, wpi::units::degree_t tolerance) {
+  wpi::cmd::Trigger near = IsNear(angle, tolerance).Debounce(wpi::units::second_t{0.1});
+  return wpi::cmd::RunOnce([this, angle] { SetMechanismPositionSetpoint(angle); }, {m_subsystem})
+      .AndThen(wpi::cmd::WaitUntil([near] { return near.Get(); }))
       .WithName(m_name + " RunTo");
 }
 
-frc2::CommandPtr Arm::RunTo(std::function<units::degree_t()> angle, units::degree_t tolerance) {
-  units::degree_t target = angle();
-  frc2::Trigger near = IsNear(target, tolerance).Debounce(units::second_t{0.1});
-  return frc2::cmd::RunOnce([this, target] { SetMechanismPositionSetpoint(target); }, {m_subsystem})
-      .AndThen(frc2::cmd::WaitUntil([near] { return near.Get(); }))
+wpi::cmd::CommandPtr Arm::RunTo(std::function<wpi::units::degree_t()> angle, wpi::units::degree_t tolerance) {
+  wpi::units::degree_t target = angle();
+  wpi::cmd::Trigger near = IsNear(target, tolerance).Debounce(wpi::units::second_t{0.1});
+  return wpi::cmd::RunOnce([this, target] { SetMechanismPositionSetpoint(target); }, {m_subsystem})
+      .AndThen(wpi::cmd::WaitUntil([near] { return near.Get(); }))
       .WithName(m_name + " RunTo Supplier");
 }
 
-frc2::Trigger Arm::Gte(units::degree_t angle) {
-  return frc2::Trigger{[this, angle] { return GetAngle() >= angle; }};
+wpi::cmd::Trigger Arm::Gte(wpi::units::degree_t angle) {
+  return wpi::cmd::Trigger{[this, angle] { return GetAngle() >= angle; }};
 }
 
-frc2::Trigger Arm::Lte(units::degree_t angle) {
-  return frc2::Trigger{[this, angle] { return GetAngle() <= angle; }};
+wpi::cmd::Trigger Arm::Lte(wpi::units::degree_t angle) {
+  return wpi::cmd::Trigger{[this, angle] { return GetAngle() <= angle; }};
 }
 
-frc2::Trigger Arm::Between(units::degree_t start, units::degree_t end) {
+wpi::cmd::Trigger Arm::Between(wpi::units::degree_t start, wpi::units::degree_t end) {
   return Gte(start) && (Lte(end));
 }
 
-frc2::Trigger Arm::IsNear(units::degree_t angle, units::degree_t within) {
-  return frc2::Trigger{[this, angle, within] {
+wpi::cmd::Trigger Arm::IsNear(wpi::units::degree_t angle, wpi::units::degree_t within) {
+  return wpi::cmd::Trigger{[this, angle, within] {
     return std::abs(GetAngle().value() - angle.value()) <= within.value();
   }};
 }
 
 const config::ArmConfig& Arm::GetConfig() const { return *m_armConfig; }
 
-frc::Translation3d Arm::GetRelativeMechanismPosition() const {
+wpi::math::Translation3d Arm::GetRelativeMechanismPosition() const {
   if (m_mechanismLigament) {
-    return frc::Translation3d{units::meter_t{m_mechanismLigament->GetLength()},
-                              frc::Rotation3d{0_rad, 0_rad, units::radian_t{GetAngle()}}};
+    return wpi::math::Translation3d{wpi::units::meter_t{m_mechanismLigament->GetLength()},
+                              wpi::math::Rotation3d{0_rad, 0_rad, wpi::units::radian_t{GetAngle()}}};
   }
-  return frc::Translation3d{};
+  return wpi::math::Translation3d{};
 }
 
-void Arm::SetAngle(units::degree_t angle) { SetMechanismPositionSetpoint(angle); }
+void Arm::SetAngle(wpi::units::degree_t angle) { SetMechanismPositionSetpoint(angle); }
 
-units::degree_t Arm::GetAngle() const { return m_smc->GetMechanismPosition(); }
+wpi::units::degree_t Arm::GetAngle() const { return m_smc->GetMechanismPosition(); }
 
 }  // namespace yams::mechanisms::positional

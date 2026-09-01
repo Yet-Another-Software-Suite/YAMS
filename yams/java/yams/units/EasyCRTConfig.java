@@ -3,10 +3,10 @@
 
 package yams.units;
 
-import static edu.wpi.first.units.Units.Rotations;
+import static org.wpilib.units.Units.Rotations;
 
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.RobotBase;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.framework.RobotBase;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Objects;
@@ -44,7 +44,7 @@ import yams.gearing.MechanismGearing;
  *
  * <h2>Example</h2>
  * <pre>{@code
- * import static edu.wpi.first.units.Units.Rotations;
+ * import static org.wpilib.units.Units.Rotations;
  * import yams.units.EasyCRTConfig;
  *
  * EasyCRTConfig config = new EasyCRTConfig(

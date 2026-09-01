@@ -6,13 +6,13 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import org.wpilib.driverstation.internal.DriverStationBackend;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.Commands;
+import org.wpilib.command2.button.CommandNiDsXboxController;
 import frc.robot.subsystems.ExponentiallyProfiledArmSubsystem;
 
-import static edu.wpi.first.units.Units.*;
+import static org.wpilib.units.Units.*;
 
 
 /**
@@ -24,13 +24,13 @@ public class RobotContainer
 {
   private ExponentiallyProfiledArmSubsystem arm = new ExponentiallyProfiledArmSubsystem();
   // Port 0 is the driver controller. Use port 1 for a separate operator controller.
-  public CommandXboxController xboxController = new CommandXboxController(0);
+  public CommandNiDsXboxController xboxController = new CommandNiDsXboxController(0);
 
   public RobotContainer()
   {
     // Suppress the "joystick not connected" warning in sim so the log is not spammed
     // when running without a physical controller plugged in.
-    DriverStation.silenceJoystickConnectionWarning(true);
+    DriverStationBackend.silenceJoystickConnectionWarning(true);
 
     // Default command: hold the arm in place with 0% duty cycle.
     // This keeps the motor active in BRAKE mode so the arm does not sag between

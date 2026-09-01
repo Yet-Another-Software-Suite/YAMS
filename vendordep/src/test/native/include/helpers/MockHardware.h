@@ -7,27 +7,26 @@
 // simulation environment so that motor-controller and command-scheduler code
 // can run inside Google Test.
 
-#include <frc/simulation/DriverStationSim.h>
-#include <frc/simulation/RoboRioSim.h>
-#include <frc/simulation/SimHooks.h>
-#include <hal/HAL.h>
+#include <wpi/simulation/DriverStationSim.hpp>
+#include <wpi/simulation/RoboRioSim.hpp>
+#include <wpi/simulation/SimHooks.hpp>
+#include <wpi/hal/HAL.h>
 
 namespace yams::test {
 
 inline void InitializeHardware() {
   HAL_Initialize(500, 0);
-  frc::sim::DriverStationSim::SetDsAttached(true);
-  frc::sim::DriverStationSim::SetAutonomous(false);
-  frc::sim::DriverStationSim::SetTest(false);
-  frc::sim::DriverStationSim::SetEnabled(true);
-  frc::sim::DriverStationSim::NotifyNewData();
-  frc::sim::StepTiming(0.0_s);
+  wpi::sim::DriverStationSim::SetDsAttached(true);
+  wpi::sim::DriverStationSim::SetRobotMode(HAL_ROBOT_MODE_TELEOPERATED);
+  wpi::sim::DriverStationSim::SetEnabled(true);
+  wpi::sim::DriverStationSim::NotifyNewData();
+  wpi::sim::StepTiming(0.0_s);
 }
 
 inline void TeardownHardware() {
-  frc::sim::RoboRioSim::ResetData();
-  frc::sim::DriverStationSim::ResetData();
-  frc::sim::DriverStationSim::NotifyNewData();
+  wpi::sim::RoboRioSim::ResetData();
+  wpi::sim::DriverStationSim::ResetData();
+  wpi::sim::DriverStationSim::NotifyNewData();
 }
 
 }  // namespace yams::test

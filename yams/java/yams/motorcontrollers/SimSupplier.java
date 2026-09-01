@@ -3,19 +3,19 @@
 
 package yams.motorcontrollers;
 
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Voltage;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularAcceleration;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Current;
+import org.wpilib.units.measure.Voltage;
 
 /**
  * Provides sim functions for a YAMS simulated mechanism.
  *
  * <p>
  * {@code SimSupplier} is the abstract bridge between WPILib's physics simulation models (such as
- * {@link edu.wpi.first.wpilibj.simulation.SingleJointedArmSim} and
- * {@link edu.wpi.first.wpilibj.simulation.DCMotorSim}) and YAMS
+ * {@link org.wpilib.simulation.SingleJointedArmSim} and
+ * {@link org.wpilib.simulation.DCMotorSim}) and YAMS
  * {@link yams.motorcontrollers.SmartMotorController} wrappers. Concrete implementations
  * translate the simulation state — position, velocity, current draw, voltage — into the
  * typed unit-safe values that YAMS motor controller wrappers consume each control loop.

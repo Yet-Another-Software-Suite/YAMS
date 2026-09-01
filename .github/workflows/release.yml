@@ -10,9 +10,15 @@ on:
         type: boolean
         description: "Publish to WPILib"
         default: false
+      buildCpp:
+        type: boolean
+        description: "Build and release the C++ library (always on when Publish to WPILib is checked)"
+        default: true
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  # Publishing to WPILib always includes the C++ library, regardless of the buildCpp input.
+  skipCpp: ${{ !(inputs.publish || inputs.buildCpp) }}
 
 jobs:
   build-cross:
@@ -39,7 +45,7 @@ jobs:
       - name: Configure git safe directory
         run: git config --global --add safe.directory /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}
       - name: Publish
-        run: ./gradlew publish ${{ matrix.build-options }}
+        run: ./gradlew publish ${{ matrix.build-options }} -PskipCpp=${{ env.skipCpp }}
         working-directory: vendordep
       - uses: actions/upload-artifact@v7
         with:
@@ -92,7 +98,7 @@ jobs:
             sleep 5
           done
       - name: Publish
-        run: ${{ matrix.gradlew }} publish
+        run: ${{ matrix.gradlew }} publish -PskipCpp=${{ env.skipCpp }}
       - uses: actions/upload-artifact@v7
         with:
           name: maven-${{ matrix.artifact-name }}
@@ -100,21 +106,50 @@ jobs:
 
   build-examples:
     name: Release - Examples
+    needs: [build-host]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - name: Generate Java examples
         run: mkdir -p generated && make
         working-directory: examples
+      - name: Download YAMS vendordep JSON
+        uses: actions/download-artifact@v7
+        with:
+          name: maven-windows
+          path: maven-windows/
+      - name: Strip testing-only fixups from generated examples
+        run: |
+          yamsJson="${{ github.workspace }}/maven-windows/yams.json"
+          for dir in examples/generated/*/; do
+            name=$(basename "$dir")
+            gradleFile="$dir/build.gradle"
+
+            # The YAMS_TESTING fixup compiles against yams/java directly so example
+            # builds don't depend on a published vendordep. Every real example should
+            # instead consume the generated yams.json vendordep like a real consumer would.
+            sed -i '/\/\/ YAMS_TESTING/,/\/\/ END_YAMS_TESTING/d' "$gradleFile"
+            mkdir -p "$dir/vendordeps"
+            cp "$yamsJson" "$dir/vendordeps/yams.json"
+
+            # The AKIT_TESTING fixup is only needed for examples that actually use
+            # AdvantageKit; strip it from every other example.
+            if ! grep -rq "org.littletonrobotics" "examples/$name/java" 2>/dev/null; then
+              sed -i '/\/\/ AKIT_TESTING/,/\/\/ END_AKIT_TESTING/d' "$gradleFile"
+            fi
+          done
       - name: Zip generated Java examples
         run: |
           mkdir -p ${{ github.workspace }}/example-artifacts
-          for dir in examples/generated/*/; do
+          cd examples/generated
+          for dir in */; do
             name=$(basename "$dir")
-            zip -r "${{ github.workspace }}/example-artifacts/example-${name}.zip" "$dir"
+            zip -r "${{ github.workspace }}/example-artifacts/example-${name}.zip" "$name"
           done
       - name: Zip C++ example
-        run: zip -r ${{ github.workspace }}/example-artifacts/example-cpptest.zip examples/cpptest/ -x "examples/cpptest/.gradle/*" -x "examples/cpptest/build/*"
+        run: |
+          cd examples
+          zip -r ${{ github.workspace }}/example-artifacts/example-cpptest.zip cpptest/ -x "cpptest/.gradle/*" -x "cpptest/build/*"
       - uses: actions/upload-artifact@v7
         with:
           name: release-examples
@@ -195,7 +230,7 @@ jobs:
           done
 
       - name: Build and publish — stitch current version maven metadata
-        run: ./gradlew publish
+        run: ./gradlew publish -PskipCpp=${{ env.skipCpp }}
         working-directory: ${{ env.workingDirectory }}
 
       - name: Download example artifacts
@@ -227,7 +262,7 @@ jobs:
           done
 
       - name: Build and publish (Linux — fixes maven metadata for all versions)
-        run: ./gradlew publish
+        run: ./gradlew publish -PskipCpp=${{ env.skipCpp }}
         working-directory: ${{ env.workingDirectory }}
 
       - name: Create versioned vendordep JSON

@@ -3,12 +3,12 @@
 
 #pragma once
 
-#include <frc/geometry/Rotation2d.h>
-#include <frc/geometry/Translation2d.h>
-#include <frc/kinematics/SwerveModuleState.h>
-#include <units/angle.h>
-#include <units/length.h>
-#include <units/velocity.h>
+#include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/math/geometry/Translation2d.hpp>
+#include <wpi/math/kinematics/SwerveModuleVelocity.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/velocity.hpp>
 
 #include <functional>
 #include <optional>
@@ -17,6 +17,7 @@
 #include "yams/gearing/GearBox.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
+#include "yams/telemetry/SwerveModuleTelemetryConfig.hpp"
 
 namespace yams::mechanisms::config {
 
@@ -69,7 +70,7 @@ class SwerveModuleConfig {
    * @param supplier Callable that returns the current encoder angle.
    * @return *this for chaining.
    */
-  SwerveModuleConfig& WithAbsoluteEncoder(std::function<units::degree_t()> supplier);
+  SwerveModuleConfig& WithAbsoluteEncoder(std::function<wpi::units::degree_t()> supplier);
 
   /**
    * Set the gearing between the absolute encoder shaft and the azimuth mechanism.
@@ -86,7 +87,7 @@ class SwerveModuleConfig {
    * @param offset Offset angle to subtract from the raw encoder reading.
    * @return *this for chaining.
    */
-  SwerveModuleConfig& WithAbsoluteEncoderOffset(units::degree_t offset);
+  SwerveModuleConfig& WithAbsoluteEncoderOffset(wpi::units::degree_t offset);
 
   /**
    * Set the module location from the robot center as a Cartesian Translation2d
@@ -95,7 +96,7 @@ class SwerveModuleConfig {
    * @param location Location of the module.
    * @return *this for chaining.
    */
-  SwerveModuleConfig& WithLocation(frc::Translation2d location);
+  SwerveModuleConfig& WithLocation(wpi::math::Translation2d location);
 
   /**
    * Set the module location via separate forward (X) and left (Y) distances.
@@ -104,7 +105,7 @@ class SwerveModuleConfig {
    * @param left  Distance left from the centre of rotation.
    * @return *this for chaining.
    */
-  SwerveModuleConfig& WithLocation(units::meter_t front, units::meter_t left);
+  SwerveModuleConfig& WithLocation(wpi::units::meter_t front, wpi::units::meter_t left);
 
   /**
    * Set the module location via polar coordinates.
@@ -113,7 +114,7 @@ class SwerveModuleConfig {
    * @param angle    Angular position around the centre of rotation.
    * @return *this for chaining.
    */
-  SwerveModuleConfig& WithLocation(units::meter_t distance, units::degree_t angle);
+  SwerveModuleConfig& WithLocation(wpi::units::meter_t distance, wpi::units::degree_t angle);
 
   /**
    * Set the wheel radius (derives the circumference used for linear-distance conversion).
@@ -121,7 +122,7 @@ class SwerveModuleConfig {
    * @param radius Wheel radius.
    * @return *this for chaining.
    */
-  SwerveModuleConfig& WithWheelRadius(units::meter_t radius);
+  SwerveModuleConfig& WithWheelRadius(wpi::units::meter_t radius);
 
   /**
    * Set the wheel diameter (derives the circumference used for linear-distance conversion).
@@ -129,7 +130,7 @@ class SwerveModuleConfig {
    * @param diameter Wheel diameter.
    * @return *this for chaining.
    */
-  SwerveModuleConfig& WithWheelDiameter(units::meter_t diameter);
+  SwerveModuleConfig& WithWheelDiameter(wpi::units::meter_t diameter);
 
   /**
    * Minimum speed below which the module holds its current azimuth instead of tracking.
@@ -137,7 +138,7 @@ class SwerveModuleConfig {
    * @param speed Minimum speed threshold.
    * @return *this for chaining.
    */
-  SwerveModuleConfig& WithMinimumVelocity(units::meters_per_second_t speed);
+  SwerveModuleConfig& WithMinimumVelocity(wpi::units::meters_per_second_t speed);
 
   /**
    * Enable or disable WPILib SwerveModuleState optimization (flip by 180° to minimise rotation).
@@ -156,6 +157,17 @@ class SwerveModuleConfig {
    */
   SwerveModuleConfig& WithTelemetry(const std::string& name, TelemetryVerbosity verbosity);
 
+  /**
+   * Set the telemetry name for this module and configure telemetry with an explicit
+   * SwerveModuleTelemetryConfig, taking precedence over WithTelemetry(name, TelemetryVerbosity).
+   *
+   * @param name            NetworkTable key for this module's data.
+   * @param telemetryConfig Config that specifies what to log.
+   * @return *this for chaining.
+   */
+  SwerveModuleConfig& WithTelemetry(const std::string& name,
+                                    telemetry::SwerveModuleTelemetryConfig telemetryConfig);
+
   // ---- Getters ---------------------------------------------------------------
 
   /** Get the drive motor controller pointer. */
@@ -171,7 +183,7 @@ class SwerveModuleConfig {
   std::optional<TelemetryVerbosity> GetTelemetryVerbosity() const;
 
   /** Get the optional module location (Translation2d from centre of rotation). */
-  std::optional<frc::Translation2d> GetLocation() const;
+  std::optional<wpi::math::Translation2d> GetLocation() const;
 
   /** Returns true if state optimization is enabled. */
   bool GetStateOptimization() const;
@@ -183,7 +195,31 @@ class SwerveModuleConfig {
    *
    * @return Absolute angle in degrees.
    */
-  units::degree_t GetAbsoluteEncoderAngle() const;
+  wpi::units::degree_t GetAbsoluteEncoderAngle() const;
+
+  /**
+   * Get the absolute encoder angle as a supplier without offsets applied.
+   *
+   * Falls back to the azimuth motor's mechanism position (plus its external encoder zero
+   * offset, on a real robot) if no encoder supplier is set.
+   *
+   * @return Callable returning the absolute encoder angle without offsets.
+   */
+  std::function<wpi::units::degree_t()> GetRawAbsoluteEncoderAngle() const;
+
+  /** Get the absolute encoder supplier, if configured via WithAbsoluteEncoder(). */
+  std::optional<std::function<wpi::units::degree_t()>> GetAbsoluteEncoderSupplier() const;
+
+
+  /**
+   * Get the user-specified SwerveModuleTelemetryConfig, if configured via
+   * WithTelemetry(name, SwerveModuleTelemetryConfig). Moves the config out of this
+   * SwerveModuleConfig; intended to be called exactly once, when the owning SwerveModule sets up
+   * its telemetry.
+   *
+   * @return SwerveModuleTelemetryConfig if configured.
+   */
+  std::optional<telemetry::SwerveModuleTelemetryConfig> GetSwerveModuleTelemetryConfig();
 
   /**
    * Apply all enabled optimizations (min-velocity clamp, state optimization, cosine compensation)
@@ -192,26 +228,33 @@ class SwerveModuleConfig {
    * @param state Input state.
    * @return Optimized state.
    */
-  frc::SwerveModuleState GetOptimizedState(frc::SwerveModuleState state) const;
+  wpi::math::SwerveModuleVelocity GetOptimizedState(wpi::math::SwerveModuleVelocity state) const;
 
  private:
   motorcontrollers::SmartMotorController* m_driveMotor{nullptr};
   motorcontrollers::SmartMotorController* m_azimuthMotor{nullptr};
   std::optional<std::string> m_telemetryName;
   std::optional<TelemetryVerbosity> m_telemetryVerbosity;
-  std::optional<std::function<units::degree_t()>> m_absoluteEncoderSupplier;
-  std::optional<units::degree_t> m_absoluteEncoderOffset;
+  std::optional<telemetry::SwerveModuleTelemetryConfig> m_specifiedTelemetryConfig;
+  std::optional<std::function<wpi::units::degree_t()>> m_absoluteEncoderSupplier;
+  std::optional<wpi::units::degree_t> m_absoluteEncoderOffset;
   gearing::GearBox m_absoluteEncoderGearbox{1.0};
   bool m_stateOptimization{true};
   bool m_cosineCompensation{false};
-  std::optional<units::meters_per_second_t> m_minimumVelocity;
-  std::optional<frc::Translation2d> m_location;
-  std::optional<units::meter_t> m_wheelCircumference;
+  std::optional<wpi::units::meters_per_second_t> m_minimumVelocity;
+  std::optional<wpi::math::Translation2d> m_location;
+  std::optional<wpi::units::meter_t> m_wheelCircumference;
 
   /**
    * Compute the cosine-compensated drive velocity for the given desired state.
+   *
+   * @param desiredState Desired SwerveModuleState to use.
+   * @param currentAngle Current azimuth angle to compare against, read once per control cycle so
+   *                     it stays consistent with whatever value was used earlier in that cycle
+   *                     (e.g. for optimization).
    */
-  double GetCosineCompensatedVelocity(const frc::SwerveModuleState& desiredState) const;
+  double GetCosineCompensatedVelocity(const wpi::math::SwerveModuleVelocity& desiredState,
+                                       const wpi::math::Rotation2d& currentAngle) const;
 };
 
 }  // namespace yams::mechanisms::config

@@ -3,12 +3,12 @@
 
 #pragma once
 
-#include <frc/util/Color.h>
-#include <frc/util/Color8Bit.h>
-#include <units/angle.h>
-#include <units/angular_velocity.h>
-#include <units/length.h>
-#include <units/moment_of_inertia.h>
+#include <wpi/util/Color.hpp>
+#include <wpi/util/Color8Bit.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/moment_of_inertia.hpp>
 
 #include <optional>
 #include <string>
@@ -40,7 +40,7 @@ class ArmConfig {
    * @param angle Minimum angle.
    * @return *this for chaining.
    */
-  ArmConfig& WithMinAngle(units::degree_t angle);
+  ArmConfig& WithMinAngle(wpi::units::degree_t angle);
 
   /**
    * Set the maximum (upper hard) angle for simulation and soft-limit purposes.
@@ -48,7 +48,7 @@ class ArmConfig {
    * @param angle Maximum angle.
    * @return *this for chaining.
    */
-  ArmConfig& WithMaxAngle(units::degree_t angle);
+  ArmConfig& WithMaxAngle(wpi::units::degree_t angle);
 
   /**
    * Set the physical arm length for MOI estimation and visualisation.
@@ -56,7 +56,7 @@ class ArmConfig {
    * @param length Length of the arm.
    * @return *this for chaining.
    */
-  ArmConfig& WithArmLength(units::meter_t length);
+  ArmConfig& WithArmLength(wpi::units::meter_t length);
 
   /**
    * Set the Mechanism2d simulation colour for the arm ligament (default: aqua).
@@ -64,7 +64,7 @@ class ArmConfig {
    * @param color Desired colour.
    * @return *this for chaining.
    */
-  ArmConfig& WithSimColor(const frc::Color8Bit& color);
+  ArmConfig& WithSimColor(const wpi::util::Color8Bit& color);
 
   // ---- Getters ---------------------------------------------------------------
 
@@ -72,23 +72,23 @@ class ArmConfig {
   std::string GetTelemetryName() const;
 
   /** Get the optional minimum (lower hard-limit) angle. */
-  std::optional<units::degree_t> GetMinAngle() const;
+  std::optional<wpi::units::degree_t> GetMinAngle() const;
 
   /** Get the optional maximum (upper hard-limit) angle. */
-  std::optional<units::degree_t> GetMaxAngle() const;
+  std::optional<wpi::units::degree_t> GetMaxAngle() const;
 
   /** Get the optional arm length. */
-  std::optional<units::meter_t> GetArmLength() const;
+  std::optional<wpi::units::meter_t> GetArmLength() const;
 
   /** Get the Mechanism2d simulation colour. */
-  frc::Color8Bit GetSimColor() const;
+  wpi::util::Color8Bit GetSimColor() const;
 
  private:
   std::string m_telemetryName;
-  std::optional<units::degree_t> m_minAngle;
-  std::optional<units::degree_t> m_maxAngle;
-  std::optional<units::meter_t> m_armLength;
-  frc::Color8Bit m_simColor{frc::Color::kAqua};
+  std::optional<wpi::units::degree_t> m_minAngle;
+  std::optional<wpi::units::degree_t> m_maxAngle;
+  std::optional<wpi::units::meter_t> m_armLength;
+  wpi::util::Color8Bit m_simColor{wpi::util::Color::AQUA};
 };
 
 }  // namespace yams::mechanisms::config
