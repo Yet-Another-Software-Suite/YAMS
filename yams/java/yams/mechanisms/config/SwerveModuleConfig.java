@@ -584,7 +584,7 @@ public class SwerveModuleConfig
         {
             lastCommandedAngle = currentAngle;
         }
-        state.optimize(lastCommandedAngle);
+        state.optimize(currentAngle);
         lastCommandedAngle = state.angle;
     }
     if (cosineCompensation)

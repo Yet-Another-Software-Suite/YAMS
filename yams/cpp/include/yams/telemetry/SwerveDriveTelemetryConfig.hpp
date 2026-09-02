@@ -55,8 +55,6 @@ class SwerveDriveTelemetryConfig {
 
   /** Struct telemetry field for a SwerveDrive, backed by frc::Pose2d. */
   enum class StructTelemetryField {
-    /** Live-tunable target pose used by SwerveDriveTelemetry::ApplyTuningValues(). */
-    TargetPose,
     /** Estimated field-relative pose of the robot. */
     Pose,
     /** Last-commanded desired robot-relative chassis speeds. */
@@ -89,8 +87,57 @@ class SwerveDriveTelemetryConfig {
     RotationI,
     /** Rotational derivative gain for auto-aligning the robot. */
     RotationD,
+    /** X position of the auto-align target pose, in meters. */
+    AutoAlignPoseX,
+    /** Y position of the auto-align target pose, in meters. */
+    AutoAlignPoseY,
+    /** Rotation of the auto-align target pose, in degrees. */
+    AutoAlignPoseRotation,
+    /** Proportional gain for tuning every module's drive motor closed-loop controller. */
+    ModulesDriveP,
+    /** Integral gain for tuning every module's drive motor closed-loop controller. */
+    ModulesDriveI,
+    /** Derivative gain for tuning every module's drive motor closed-loop controller. */
+    ModulesDriveD,
+    /** Static feedforward gain for tuning every module's drive motor. */
+    ModulesDriveKs,
+    /** Velocity feedforward gain for tuning every module's drive motor. */
+    ModulesDriveKv,
+    /** Acceleration feedforward gain for tuning every module's drive motor. */
+    ModulesDriveKa,
+    /** Tunable velocity setpoint applied to every module's drive motor, in meters per second. */
+    ModulesDriveVelocity,
+    /** Proportional gain for tuning every module's azimuth motor closed-loop controller. */
+    ModulesAzimuthP,
+    /** Integral gain for tuning every module's azimuth motor closed-loop controller. */
+    ModulesAzimuthI,
+    /** Derivative gain for tuning every module's azimuth motor closed-loop controller. */
+    ModulesAzimuthD,
+    /** Static feedforward gain for tuning every module's azimuth motor. */
+    ModulesAzimuthKs,
+    /** Velocity feedforward gain for tuning every module's azimuth motor. */
+    ModulesAzimuthKv,
+    /** Acceleration feedforward gain for tuning every module's azimuth motor. */
+    ModulesAzimuthKa,
+    /** Tunable angle setpoint applied to every module's azimuth motor, in degrees. */
+    ModulesAzimuthAngle,
     /** Gyro angle, in degrees. */
     Gyro,
+  };
+
+  /** Boolean telemetry field for a SwerveDrive. */
+  enum class BooleanTelemetryField {
+    /** Enables or disables driving to the auto-align target pose. */
+    AutoAlignEnabled,
+    /** Enables or disables live tuning of every module's drive motor PID gains and velocity
+     *  setpoint. */
+    ModulesDriveTuningEnabled,
+    /** When enabled ensures drive testing is done with all modules oriented so the swerve drive
+     *  will drive counter-clockwise positive. */
+    ModulesDriveInPlace,
+    /** Enables or disables live tuning of every module's azimuth motor PID gains and angle
+     *  setpoint. */
+    ModulesAzimuthTuningEnabled,
   };
 
   SwerveDriveTelemetryConfig();
@@ -154,7 +201,11 @@ class SwerveDriveTelemetryConfig {
   std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>&
   GetDoubleFields();
 
-  /** @return Configured StructTelemetry<Pose2d> for TargetPose/Pose. */
+  /** @return Configured BooleanTelemetry for each BooleanTelemetryField. */
+  std::unordered_map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>>&
+  GetBoolFields();
+
+  /** @return Configured StructTelemetry<Pose2d> for Pose. */
   std::unordered_map<StructTelemetryField, StructTelemetry<frc::Pose2d, StructTelemetryField>>&
   GetPoseFields();
 
@@ -181,6 +232,8 @@ class SwerveDriveTelemetryConfig {
   /** @overload */
   SwerveDriveTelemetryConfig& WithCustom(StructArrayTelemetryField field, bool value);
   /** @overload */
+  SwerveDriveTelemetryConfig& WithCustom(BooleanTelemetryField field, bool value);
+  /** @overload */
   SwerveDriveTelemetryConfig& WithCustom(const std::vector<DoubleTelemetryField>& fields,
                                          bool value);
   /** @overload */
@@ -189,12 +242,16 @@ class SwerveDriveTelemetryConfig {
   /** @overload */
   SwerveDriveTelemetryConfig& WithCustom(const std::vector<StructArrayTelemetryField>& fields,
                                          bool value);
+  /** @overload */
+  SwerveDriveTelemetryConfig& WithCustom(const std::vector<BooleanTelemetryField>& fields,
+                                         bool value);
 
  private:
   std::optional<std::string> m_dataLogName;
   bool m_nt4Telemetry{true};
 
   std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> m_doubleFields;
+  std::unordered_map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> m_boolFields;
   std::unordered_map<StructTelemetryField, StructTelemetry<frc::Pose2d, StructTelemetryField>>
       m_poseFields;
   std::unordered_map<StructTelemetryField,

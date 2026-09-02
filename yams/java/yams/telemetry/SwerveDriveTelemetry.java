@@ -1,8 +1,10 @@
 package yams.telemetry;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTable;
@@ -18,6 +20,7 @@ public class SwerveDriveTelemetry {
   private Map<StructTelemetryField, StructTelemetry<?, StructTelemetryField>> m_structTelemetry;
   private Map<StructArrayTelemetryField, StructArrayTelemetry<?, StructArrayTelemetryField>>
       m_structArrayTelemetry;
+  private Map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> m_boolTelemetry;
   private NetworkTable m_dataNt;
   private NetworkTable m_tuningNt;
 
@@ -39,9 +42,10 @@ public class SwerveDriveTelemetry {
     }
     m_dataNt = NetworkTableInstance.getDefault().getTable("Mechanisms").getSubTable(driveName);
     m_tuningNt = NetworkTableInstance.getDefault().getTable("Tuning").getSubTable(driveName);
-    m_doubleTelemetry = m_config.getDoubleFields();
+    m_doubleTelemetry = m_config.getDoubleFields(drive);
     m_structTelemetry = m_config.getStructFields();
     m_structArrayTelemetry = m_config.getStructArrayFields();
+    m_boolTelemetry = m_config.getBoolFields();
     for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry :
         m_doubleTelemetry.entrySet()) {
       var dt = entry.getValue();
@@ -74,6 +78,17 @@ public class SwerveDriveTelemetry {
         stat.setupNetworkTables(m_dataNt, m_tuningNt);
       }
       m_config.getDataLogName().ifPresent(stat::setupDataLog);
+    }
+    for (Map.Entry<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> entry :
+        m_boolTelemetry.entrySet()) {
+      var bt = entry.getValue();
+      if (!bt.enabled) {
+        continue;
+      }
+      if (m_config.getNT4Enabled()) {
+        bt.setupNetworkTables(m_dataNt, m_tuningNt);
+      }
+      m_config.getDataLogName().ifPresent(bt::setupDataLog);
     }
   }
 
@@ -138,19 +153,83 @@ public class SwerveDriveTelemetry {
     var cfg = drive.getConfig();
     var translationPID = cfg.getTranslationPID();
     var rotationPID = cfg.getRotationPID();
-    for (Map.Entry<StructTelemetryField, StructTelemetry<?, StructTelemetryField>> entry :
-        m_structTelemetry.entrySet()) {
-      var stt = entry.getValue();
-      if (!stt.tunable()) {
-        continue;
+    boolean nt4Enabled = m_config.getNT4Enabled();
+
+    var autoAlignBt = m_boolTelemetry.get(BooleanTelemetryField.AutoAlignEnabled);
+    var driveTuningBt = m_boolTelemetry.get(BooleanTelemetryField.ModulesDriveTuningEnabled);
+    var azimuthTuningBt = m_boolTelemetry.get(BooleanTelemetryField.ModulesAzimuthTuningEnabled);
+    var driveInPlaceBt = m_boolTelemetry.get(BooleanTelemetryField.ModulesDriveInPlace);
+
+    boolean autoAlignOn = autoAlignBt.enabled && nt4Enabled && autoAlignBt.get();
+    boolean driveTuningOn = driveTuningBt.enabled && nt4Enabled && driveTuningBt.get();
+    boolean azimuthTuningOn = azimuthTuningBt.enabled && nt4Enabled && azimuthTuningBt.get();
+    boolean driveInPlaceOn = driveInPlaceBt.enabled && nt4Enabled && driveInPlaceBt.get();
+
+    // Only one tuning mode may drive the chassis at a time; enforce priority order
+    // (auto-align > drive tuning > azimuth tuning) and force the losers back off in
+    // NetworkTables so the dashboard reflects what's actually happening.
+    if (autoAlignOn) {
+      if (driveTuningOn) {
+        driveTuningBt.forceSet(false);
+        driveTuningOn = false;
       }
-      switch (stt.getField()) {
-        case TargetPose -> {
-          var targetPose = ((StructTelemetry<Pose2d, StructTelemetryField>) stt).get();
-          drive.setRobotRelativeChassisSpeeds(drive.driveToPoseSetpoint(targetPose));
+      if (azimuthTuningOn) {
+        azimuthTuningBt.forceSet(false);
+        azimuthTuningOn = false;
+      }
+    } else if (driveTuningOn && azimuthTuningOn) {
+      azimuthTuningBt.forceSet(false);
+      azimuthTuningOn = false;
+    }
+
+    if (autoAlignOn) {
+      var poseX = m_doubleTelemetry.get(DoubleTelemetryField.AutoAlignPoseX);
+      var poseY = m_doubleTelemetry.get(DoubleTelemetryField.AutoAlignPoseY);
+      var poseRotation = m_doubleTelemetry.get(DoubleTelemetryField.AutoAlignPoseRotation);
+      var targetPose =
+          new Pose2d(poseX.get(), poseY.get(), Rotation2d.fromDegrees(poseRotation.get()));
+      drive.setFieldRelativeChassisSpeeds(drive.driveToPoseSetpoint(targetPose));
+    }
+
+    if (driveTuningBt.enabled && nt4Enabled) {
+      var modules = drive.getModules();
+      var states = new SwerveModuleState[modules.length];
+      if (driveTuningOn) {
+        var velocity = MetersPerSecond.of(
+            m_doubleTelemetry.get(DoubleTelemetryField.ModulesDriveVelocity).get());
+        for (int i = 0; i < modules.length; i++) {
+          if (driveInPlaceOn) {
+            // Point each module tangent to its position around the robot center so a positive
+            // velocity spins the robot counter-clockwise (WPILib's positive rotation direction).
+            var moduleLocation = modules[i].getConfig().getLocation().orElseThrow();
+            var tangentAngle = moduleLocation.getAngle().plus(Rotation2d.fromDegrees(90));
+            states[i] = new SwerveModuleState(velocity, tangentAngle);
+          } else {
+            states[i] = new SwerveModuleState(velocity, Rotation2d.kZero);
+          }
         }
+        drive.setSwerveModuleStates(states);
+      } else if (!autoAlignOn) {
+        // Drive tuning is off (and auto-align isn't driving the chassis instead); make sure the
+        // modules don't keep spinning at whatever velocity was last commanded while it was on.
+        for (int i = 0; i < modules.length; i++) {
+          states[i] = new SwerveModuleState(MetersPerSecond.of(0), modules[i].getState().angle);
+        }
+        drive.setSwerveModuleStates(states);
       }
     }
+
+    if (azimuthTuningOn) {
+      var angle =
+          Rotation2d.fromDegrees(m_doubleTelemetry.get(DoubleTelemetryField.ModulesAzimuthAngle).get());
+      var modules = drive.getModules();
+      var states = new SwerveModuleState[modules.length];
+      for (int i = 0; i < modules.length; i++) {
+        states[i] = new SwerveModuleState(0, angle);
+      }
+      drive.setSwerveModuleStates(states);
+    }
+
     for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry :
         m_doubleTelemetry.entrySet()) {
       var dt = entry.getValue();
@@ -181,6 +260,68 @@ public class SwerveDriveTelemetry {
           rotationPID.setD(dt.get());
           drive.setRotationPID(rotationPID);
         }
+        case ModulesDriveP -> {
+          for (SwerveModule module : drive.getModules()) {
+            module.getDriveMotorController().setKp(dt.get());
+          }
+        }
+        case ModulesDriveI -> {
+          for (SwerveModule module : drive.getModules()) {
+            module.getDriveMotorController().setKi(dt.get());
+          }
+        }
+        case ModulesDriveD -> {
+          for (SwerveModule module : drive.getModules()) {
+            module.getDriveMotorController().setKd(dt.get());
+          }
+        }
+        case ModulesAzimuthP -> {
+          for (SwerveModule module : drive.getModules()) {
+            module.getAzimuthMotorController().setKp(dt.get());
+          }
+        }
+        case ModulesAzimuthI -> {
+          for (SwerveModule module : drive.getModules()) {
+            module.getAzimuthMotorController().setKi(dt.get());
+          }
+        }
+        case ModulesAzimuthD -> {
+          for (SwerveModule module : drive.getModules()) {
+            module.getAzimuthMotorController().setKd(dt.get());
+          }
+        }
+        case ModulesDriveKs -> {
+          for (SwerveModule module : drive.getModules()) {
+            module.getDriveMotorController().setKs(dt.get());
+          }
+        }
+        case ModulesDriveKv -> {
+          for (SwerveModule module : drive.getModules()) {
+            module.getDriveMotorController().setKv(dt.get());
+          }
+        }
+        case ModulesDriveKa -> {
+          for (SwerveModule module : drive.getModules()) {
+            module.getDriveMotorController().setKa(dt.get());
+          }
+        }
+        case ModulesAzimuthKs -> {
+          for (SwerveModule module : drive.getModules()) {
+            module.getAzimuthMotorController().setKs(dt.get());
+          }
+        }
+        case ModulesAzimuthKv -> {
+          for (SwerveModule module : drive.getModules()) {
+            module.getAzimuthMotorController().setKv(dt.get());
+          }
+        }
+        case ModulesAzimuthKa -> {
+          for (SwerveModule module : drive.getModules()) {
+            module.getAzimuthMotorController().setKa(dt.get());
+          }
+        }
+        default -> {
+        }
       }
     }
   }
@@ -207,6 +348,12 @@ public class SwerveDriveTelemetry {
         entry.getValue().close();
       }
     }
+    if (m_boolTelemetry != null) {
+      for (Map.Entry<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> entry :
+          m_boolTelemetry.entrySet()) {
+        entry.getValue().close();
+      }
+    }
   }
 
   /**
@@ -214,12 +361,7 @@ public class SwerveDriveTelemetry {
    */
   public enum StructTelemetryField {
     /**
-     * Target {@link Pose2d} for the robot driven using {@link SwerveDrive#driveToPose(Pose2d)}.
-     */
-    TargetPose("tuning/driveToPose", Pose2d.struct, new Pose2d(), true),
-    /**
-     * Estimated {@link Pose2d} of the robot, as reported by the {@link
-     * edu.wpi.first.math.estimator.SwerveDrivePoseEstimator}.
+     * Estimated {@link Pose2d} of the robot, as reported by the {@link edu.wpi.first.math.estimator.SwerveDrivePoseEstimator}.
      */
     Pose("pose", Pose2d.struct, new Pose2d(), false),
     /**
@@ -373,6 +515,74 @@ public class SwerveDriveTelemetry {
      */
     RotationD("autoalign/rotation/d", 0, true, "radians"),
     /**
+     * X position of the auto-align target pose, in meters.
+     */
+    AutoAlignPoseX("autoalign/setpoint/x", 3, true, "meters"),
+    /**
+     * Y position of the auto-align target pose, in meters.
+     */
+    AutoAlignPoseY("autoalign/setpoint/y", 3, true, "meters"),
+    /**
+     * Rotation of the auto-align target pose, in degrees.
+     */
+    AutoAlignPoseRotation("autoalign/setpoint/rot", 0, true, "degrees"),
+    /**
+     * Proportional gain for tuning every module's drive motor closed-loop controller.
+     */
+    ModulesDriveP("modules/drive/feedback/p", 0, true, "none"),
+    /**
+     * Integral gain for tuning every module's drive motor closed-loop controller.
+     */
+    ModulesDriveI("modules/drive/feedback/i", 0, true, "none"),
+    /**
+     * Derivative gain for tuning every module's drive motor closed-loop controller.
+     */
+    ModulesDriveD("modules/drive/feedback/d", 0, true, "none"),
+    /**
+     * Static feedforward gain for tuning every module's drive motor.
+     */
+    ModulesDriveKs("modules/drive/feedforward/s", 0, true, "none"),
+    /**
+     * Velocity feedforward gain for tuning every module's drive motor.
+     */
+    ModulesDriveKv("modules/drive/feedforward/v", 0, true, "none"),
+    /**
+     * Acceleration feedforward gain for tuning every module's drive motor.
+     */
+    ModulesDriveKa("modules/drive/feedforward/a", 0, true, "none"),
+    /**
+     * Tunable velocity setpoint applied to every module's drive motor, in meters per second.
+     */
+    ModulesDriveVelocity("modules/drive/velocity", 0, true, "meters_per_second"),
+    /**
+     * Proportional gain for tuning every module's azimuth motor closed-loop controller.
+     */
+    ModulesAzimuthP("modules/azimuth/feedback/p", 0, true, "none"),
+    /**
+     * Integral gain for tuning every module's azimuth motor closed-loop controller.
+     */
+    ModulesAzimuthI("modules/azimuth/feedback/i", 0, true, "none"),
+    /**
+     * Derivative gain for tuning every module's azimuth motor closed-loop controller.
+     */
+    ModulesAzimuthD("modules/azimuth/feedback/d", 0, true, "none"),
+    /**
+     * Static feedforward gain for tuning every module's azimuth motor.
+     */
+    ModulesAzimuthKs("modules/azimuth/feedforward/s", 0, true, "none"),
+    /**
+     * Velocity feedforward gain for tuning every module's azimuth motor.
+     */
+    ModulesAzimuthKv("modules/azimuth/feedforward/v", 0, true, "none"),
+    /**
+     * Acceleration feedforward gain for tuning every module's azimuth motor.
+     */
+    ModulesAzimuthKa("modules/azimuth/feedforward/a", 0, true, "none"),
+    /**
+     * Tunable angle setpoint applied to every module's azimuth motor, in degrees.
+     */
+    ModulesAzimuthAngle("modules/azimuth/angle", 0, true, "degrees"),
+    /**
      * Gyro angle, in degrees.
      */
     Gyro("gyro", 0, false, "degrees");
@@ -416,6 +626,65 @@ public class SwerveDriveTelemetry {
      */
     public DoubleTelemetry<DoubleTelemetryField> create() {
       return new DoubleTelemetry<>(key, defaultVal, this, tunable, unit);
+    }
+  }
+
+  /**
+   * Boolean telemetry field for {@link SwerveDrive}s.
+   */
+  public enum BooleanTelemetryField {
+    /**
+     * Enables or disables driving to the auto-align target pose.
+     */
+    AutoAlignEnabled("autoalign/enabled", false, true),
+    /**
+     * Enables or disables live tuning of every module's drive motor PID gains and velocity
+     * setpoint.
+     */
+    ModulesDriveTuningEnabled("modules/drive/enabled", false, true),
+    /**
+     * When enabled ensure drive testing is done with all modules are oriented to the swerve drive will drive counter clockwise positive.
+     */
+    ModulesDriveInPlace("modules/drive/inplace", false, true),
+    /**
+     * Enables or disables live tuning of every module's azimuth motor PID gains and angle
+     * setpoint.
+     */
+    ModulesAzimuthTuningEnabled("modules/azimuth/enabled", false, true);
+
+    /**
+     * Default value of the boolean telemetry field.
+     */
+    private final boolean defaultVal;
+    /**
+     * Key that the telemetry is stored at.
+     */
+    private final String key;
+    /**
+     * Tunable field?
+     */
+    private final boolean tunable;
+
+    /**
+     * Create a boolean telemetry field.
+     *
+     * @param fieldName    NT Field Name
+     * @param defaultValue Default value
+     * @param tunable      Tunable places it only in the Tuning Table.
+     */
+    BooleanTelemetryField(String fieldName, boolean defaultValue, boolean tunable) {
+      key = fieldName;
+      defaultVal = defaultValue;
+      this.tunable = tunable;
+    }
+
+    /**
+     * Create a {@link BooleanTelemetry} object for non-static usage.
+     *
+     * @return {@link BooleanTelemetry}
+     */
+    public BooleanTelemetry<BooleanTelemetryField> create() {
+      return new BooleanTelemetry<>(key, defaultVal, this, tunable);
     }
   }
 }

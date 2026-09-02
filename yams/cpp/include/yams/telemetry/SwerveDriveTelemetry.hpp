@@ -36,6 +36,7 @@ namespace yams::telemetry {
 class SwerveDriveTelemetry {
  public:
   using DoubleTelemetryField = SwerveDriveTelemetryConfig::DoubleTelemetryField;
+  using BooleanTelemetryField = SwerveDriveTelemetryConfig::BooleanTelemetryField;
   using StructTelemetryField = SwerveDriveTelemetryConfig::StructTelemetryField;
   using StructArrayTelemetryField = SwerveDriveTelemetryConfig::StructArrayTelemetryField;
 

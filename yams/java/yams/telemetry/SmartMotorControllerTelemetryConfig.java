@@ -72,7 +72,7 @@ public class SmartMotorControllerTelemetryConfig
   /**
    * {@link BooleanTelemetryField}s to enable or disable.
    */
-  private final Map<BooleanTelemetryField, BooleanTelemetry> boolFields   = Arrays.stream(BooleanTelemetryField.values())
+  private final Map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> boolFields   = Arrays.stream(BooleanTelemetryField.values())
                                                                                   .collect(
                                                                                       Collectors.toMap(e -> e,
                                                                                                        BooleanTelemetryField::create));
@@ -188,7 +188,7 @@ public class SmartMotorControllerTelemetryConfig
           //System.err.println("DT " + dt.getField().name() + " is DISABLED!!");
         }
       }
-      for (BooleanTelemetry dt : boolFields.values())
+      for (BooleanTelemetry<BooleanTelemetryField> dt : boolFields.values())
       {
         if (!dt.enabled)
         {
@@ -368,7 +368,7 @@ public class SmartMotorControllerTelemetryConfig
    * @param smc {@link SmartMotorController} used to disable unavailable telemetry for certain motor controllers.
    * @return Configured {@link BooleanTelemetry} for each {@link BooleanTelemetryField}.
    */
-  public Map<BooleanTelemetryField, BooleanTelemetry> getBoolFields(SmartMotorController smc)
+  public Map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> getBoolFields(SmartMotorController smc)
   {
     var config = smc.getConfig();
     if (config.getArmFeedforward(smc.getClosedLoopControllerSlot()).isEmpty())
