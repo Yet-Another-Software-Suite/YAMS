@@ -160,6 +160,22 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns true if the error is within the tolerance of the setpoint.</div>
 </dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.BooleanTelemetryField.html#AutoAlignEnabled" class="member-name-link">AutoAlignEnabled</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.BooleanTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.BooleanTelemetryField</a></dt>
+<dd>
+<div class="block">Enables or disables driving to the auto-align target pose.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#AutoAlignPoseRotation" class="member-name-link">AutoAlignPoseRotation</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Rotation of the auto-align target pose, in degrees.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#AutoAlignPoseX" class="member-name-link">AutoAlignPoseX</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">X position of the auto-align target pose, in meters.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#AutoAlignPoseY" class="member-name-link">AutoAlignPoseY</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Y position of the auto-align target pose, in meters.</div>
+</dd>
 </dl>
 <h2 class="title" id="I:B">B</h2>
 <dl class="index">
@@ -186,11 +202,11 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Between two heights.</div>
 </dd>
-<dt><a href="yams/telemetry/BooleanTelemetry.html" class="type-name-link" title="class in yams.telemetry">BooleanTelemetry</a> - Class in <a href="yams/telemetry/package-summary.html">yams.telemetry</a></dt>
+<dt><a href="yams/telemetry/BooleanTelemetry.html" class="type-name-link" title="class in yams.telemetry">BooleanTelemetry</a>&lt;<a href="yams/telemetry/BooleanTelemetry.html" title="type parameter in BooleanTelemetry">F</a>&gt; - Class in <a href="yams/telemetry/package-summary.html">yams.telemetry</a></dt>
 <dd>
 <div class="block">Boolean Telemetry for SmartMotorControllers.</div>
 </dd>
-<dt><a href="yams/telemetry/BooleanTelemetry.html#%3Cinit%3E(java.lang.String,boolean,yams.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField,boolean)" class="member-name-link">BooleanTelemetry(String, boolean, SmartMotorControllerTelemetry.BooleanTelemetryField, boolean)</a> - Constructor for class yams.telemetry.<a href="yams/telemetry/BooleanTelemetry.html" title="class in yams.telemetry">BooleanTelemetry</a></dt>
+<dt><a href="yams/telemetry/BooleanTelemetry.html#%3Cinit%3E(java.lang.String,boolean,F,boolean)" class="member-name-link">BooleanTelemetry(String, boolean, F, boolean)</a> - Constructor for class yams.telemetry.<a href="yams/telemetry/BooleanTelemetry.html" title="class in yams.telemetry">BooleanTelemetry</a></dt>
 <dd>
 <div class="block">Setup boolean telemetry for a field.</div>
 </dd>
@@ -403,6 +419,10 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html#create()" class="member-name-link">create()</a> - Method in enum class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></dt>
 <dd>
 <div class="block">Create double telemetry field.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.BooleanTelemetryField.html#create()" class="member-name-link">create()</a> - Method in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.BooleanTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.BooleanTelemetryField</a></dt>
+<dd>
+<div class="block">Create a <a href="yams/telemetry/BooleanTelemetry.html" title="class in yams.telemetry"><code>BooleanTelemetry</code></a> object for non-static usage.</div>
 </dd>
 <dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#create()" class="member-name-link">create()</a> - Method in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
 <dd>
@@ -896,6 +916,11 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Ensure setting is applied, retries every 10ms.</div>
 </dd>
+<dt><a href="yams/telemetry/BooleanTelemetry.html#forceSet(boolean)" class="member-name-link">forceSet(boolean)</a> - Method in class yams.telemetry.<a href="yams/telemetry/BooleanTelemetry.html" title="class in yams.telemetry">BooleanTelemetry</a></dt>
+<dd>
+<div class="block">Forcibly overwrite the tunable value in NetworkTables, bypassing the subscriber-must-match
+ guard in <a href="yams/telemetry/BooleanTelemetry.html#set(boolean)"><code>BooleanTelemetry.set(boolean)</code></a>.</div>
+</dd>
 <dt><a href="yams/units/YUnits.html#Fortnight" class="member-name-link">Fortnight</a> - Static variable in class yams.units.<a href="yams/units/YUnits.html" title="class in yams.units">YUnits</a></dt>
 <dd>
 <div class="block">2 <a href="yams/units/YUnits.html#Weeks"><code>Weeks</code></a>.</div>
@@ -1091,6 +1116,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the azimuth <a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#getBoolFields()" class="member-name-link">getBoolFields()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Get the configured boolean fields.</div>
+</dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#getBoolFields(yams.motorcontrollers.SmartMotorController)" class="member-name-link">getBoolFields(SmartMotorController)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
 <dd>
 <div class="block">Get the configured bool fields.</div>
@@ -1245,11 +1274,11 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Get the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Distance</code></a> from the given pose to the robot.</div>
 </dd>
-<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#getDoubleFields()" class="member-name-link">getDoubleFields()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dt><a href="yams/telemetry/SwerveModuleTelemetryConfig.html#getDoubleFields()" class="member-name-link">getDoubleFields()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a></dt>
 <dd>
 <div class="block">Get the configured double fields.</div>
 </dd>
-<dt><a href="yams/telemetry/SwerveModuleTelemetryConfig.html#getDoubleFields()" class="member-name-link">getDoubleFields()</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a></dt>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#getDoubleFields(yams.mechanisms.swerve.SwerveDrive)" class="member-name-link">getDoubleFields(SwerveDrive)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
 <dd>
 <div class="block">Get the configured double fields.</div>
 </dd>
@@ -2898,6 +2927,76 @@ loadScripts(document, 'script');</script>
 <div class="block">Minimum angle of the <a href="yams/mechanisms/velocity/SmartVelocityMechanism.html" title="class in yams.mechanisms.velocity"><code>SmartVelocityMechanism</code></a> given by the soft limit or hard limit of the
  <a href="yams/mechanisms/velocity/SmartVelocityMechanism.html" title="class in yams.mechanisms.velocity"><code>SmartVelocityMechanism</code></a>.</div>
 </dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesAzimuthAngle" class="member-name-link">ModulesAzimuthAngle</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Tunable angle setpoint applied to every module's azimuth motor, in degrees.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesAzimuthD" class="member-name-link">ModulesAzimuthD</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Derivative gain for tuning every module's azimuth motor closed-loop controller.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesAzimuthI" class="member-name-link">ModulesAzimuthI</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Integral gain for tuning every module's azimuth motor closed-loop controller.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesAzimuthKa" class="member-name-link">ModulesAzimuthKa</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Acceleration feedforward gain for tuning every module's azimuth motor.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesAzimuthKs" class="member-name-link">ModulesAzimuthKs</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Static feedforward gain for tuning every module's azimuth motor.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesAzimuthKv" class="member-name-link">ModulesAzimuthKv</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Velocity feedforward gain for tuning every module's azimuth motor.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesAzimuthP" class="member-name-link">ModulesAzimuthP</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Proportional gain for tuning every module's azimuth motor closed-loop controller.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.BooleanTelemetryField.html#ModulesAzimuthTuningEnabled" class="member-name-link">ModulesAzimuthTuningEnabled</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.BooleanTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.BooleanTelemetryField</a></dt>
+<dd>
+<div class="block">Enables or disables live tuning of every module's azimuth motor PID gains and angle
+ setpoint.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesDriveD" class="member-name-link">ModulesDriveD</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Derivative gain for tuning every module's drive motor closed-loop controller.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesDriveI" class="member-name-link">ModulesDriveI</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Integral gain for tuning every module's drive motor closed-loop controller.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.BooleanTelemetryField.html#ModulesDriveInPlace" class="member-name-link">ModulesDriveInPlace</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.BooleanTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.BooleanTelemetryField</a></dt>
+<dd>
+<div class="block">When enabled ensure drive testing is done with all modules are oriented to the swerve drive will drive counter clockwise positive.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesDriveKa" class="member-name-link">ModulesDriveKa</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Acceleration feedforward gain for tuning every module's drive motor.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesDriveKs" class="member-name-link">ModulesDriveKs</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Static feedforward gain for tuning every module's drive motor.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesDriveKv" class="member-name-link">ModulesDriveKv</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Velocity feedforward gain for tuning every module's drive motor.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesDriveP" class="member-name-link">ModulesDriveP</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Proportional gain for tuning every module's drive motor closed-loop controller.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.BooleanTelemetryField.html#ModulesDriveTuningEnabled" class="member-name-link">ModulesDriveTuningEnabled</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.BooleanTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.BooleanTelemetryField</a></dt>
+<dd>
+<div class="block">Enables or disables live tuning of every module's drive motor PID gains and velocity
+ setpoint.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesDriveVelocity" class="member-name-link">ModulesDriveVelocity</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Tunable velocity setpoint applied to every module's drive motor, in meters per second.</div>
+</dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetry.BooleanTelemetryField.html#MotionProfile" class="member-name-link">MotionProfile</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetry.BooleanTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.BooleanTelemetryField</a></dt>
 <dd>
 <div class="block">Motion profile currently getting used.</div>
@@ -4409,6 +4508,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Create SwerveDrive telemetry for logging in NetworkTables and DataLog.</div>
 </dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.BooleanTelemetryField.html" class="type-name-link" title="enum class in yams.telemetry">SwerveDriveTelemetry.BooleanTelemetryField</a> - Enum Class in <a href="yams/telemetry/package-summary.html">yams.telemetry</a></dt>
+<dd>
+<div class="block">Boolean telemetry field for <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a>s.</div>
+</dd>
 <dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" class="type-name-link" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a> - Enum Class in <a href="yams/telemetry/package-summary.html">yams.telemetry</a></dt>
 <dd>
 <div class="block">Double telemetry field for <a href="yams/mechanisms/swerve/SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a>s.</div>
@@ -4523,10 +4626,6 @@ loadScripts(document, 'script');</script>
 <dt><a href="yams/motorcontrollers/remote/TalonFXWrapper.html#%3Cinit%3E(com.ctre.phoenix6.hardware.TalonFX,edu.wpi.first.math.system.plant.DCMotor,yams.motorcontrollers.SmartMotorControllerConfig)" class="member-name-link">TalonFXWrapper(TalonFX, DCMotor, SmartMotorControllerConfig)</a> - Constructor for class yams.motorcontrollers.remote.<a href="yams/motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.motorcontrollers.remote">TalonFXWrapper</a></dt>
 <dd>
 <div class="block">Create the <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/hardware/TalonFX.html" title="class or interface in com.ctre.phoenix6.hardware" class="external-link"><code>TalonFX</code></a> wrapper</div>
-</dd>
-<dt><a href="yams/telemetry/SwerveDriveTelemetry.StructTelemetryField.html#TargetPose" class="member-name-link">TargetPose</a> - Enum constant in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.StructTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.StructTelemetryField</a></dt>
-<dd>
-<div class="block">Target <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Pose2d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link"><code>Pose2d</code></a> for the robot driven using <a href="yams/mechanisms/swerve/SwerveDrive.html#driveToPose(edu.wpi.first.math.geometry.Pose2d)"><code>SwerveDrive.driveToPose(Pose2d)</code></a>.</div>
 </dd>
 <dt><a href="yams/motorcontrollers/SmartMotorController.html#telemetry" class="member-name-link">telemetry</a> - Variable in class yams.motorcontrollers.<a href="yams/motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></dt>
 <dd>
@@ -4754,6 +4853,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
 </dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.BooleanTelemetryField.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.BooleanTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.BooleanTelemetryField</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this class with the specified name.</div>
+</dd>
 <dt><a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#valueOf(java.lang.String)" class="member-name-link">valueOf(String)</a> - Static method in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this class with the specified name.</div>
@@ -4824,6 +4927,11 @@ the order they are declared.</div>
 the order they are declared.</div>
 </dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html#values()" class="member-name-link">values()</a> - Static method in enum class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum class, in
+the order they are declared.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetry.BooleanTelemetryField.html#values()" class="member-name-link">values()</a> - Static method in enum class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetry.BooleanTelemetryField.html" title="enum class in yams.telemetry">SwerveDriveTelemetry.BooleanTelemetryField</a></dt>
 <dd>
 <div class="block">Returns an array containing the constants of this enum class, in
 the order they are declared.</div>
@@ -5127,6 +5235,14 @@ the order they are declared.</div>
 <div class="block">Escape hatch for unimplemented fields which should be enabled or disabled.</div>
 </dd>
 <dt><a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html#withCustom(yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField,boolean)" class="member-name-link">withCustom(SmartMotorControllerTelemetry.DoubleTelemetryField, boolean)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
+<dd>
+<div class="block">Escape hatch for unimplemented fields which should be enabled or disabled.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#withCustom(yams.telemetry.SwerveDriveTelemetry.BooleanTelemetryField%5B%5D,boolean)" class="member-name-link">withCustom(SwerveDriveTelemetry.BooleanTelemetryField[], boolean)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Escape hatch for unimplemented fields which should be enabled or disabled.</div>
+</dd>
+<dt><a href="yams/telemetry/SwerveDriveTelemetryConfig.html#withCustom(yams.telemetry.SwerveDriveTelemetry.BooleanTelemetryField,boolean)" class="member-name-link">withCustom(SwerveDriveTelemetry.BooleanTelemetryField, boolean)</a> - Method in class yams.telemetry.<a href="yams/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.telemetry">SwerveDriveTelemetryConfig</a></dt>
 <dd>
 <div class="block">Escape hatch for unimplemented fields which should be enabled or disabled.</div>
 </dd>

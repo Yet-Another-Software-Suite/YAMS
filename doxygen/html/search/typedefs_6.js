@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['rotations_5fper_5fyear_5ft_0',['rotations_per_year_t',['../namespaceyams_1_1units.html#ae94f4e58a46adc0f7556fd36637bfe97',1,'yams::units']]],
-  ['rpm_5fper_5fsecond_5ft_1',['rpm_per_second_t',['../namespaceyams_1_1units.html#a3c3e56daa9805013c048415a7a43e6bc',1,'yams::units']]]
+  ['mile_5ft_0',['mile_t',['../namespaceyams_1_1units.html#ad5bb9cee5bbe5e360cf37133c3f759fd',1,'yams::units']]],
+  ['mileunit_1',['MileUnit',['../namespaceyams_1_1units.html#ac713bb2b0f90d074cbebac5db9af5d99',1,'yams::units']]],
+  ['motormode_2',['MotorMode',['../classyams_1_1motorcontrollers_1_1SmartMotorController.html#a2a856aee1ca1138bf9a5cd6ce28013d4',1,'yams::motorcontrollers::SmartMotorController']]]
 ];

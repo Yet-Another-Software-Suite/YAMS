@@ -88,6 +88,8 @@ $(function() {
 Public Types</h2></td></tr>
 <tr class="memitem:a9e7579ad75f45844cde86c25da7cb879" id="r_a9e7579ad75f45844cde86c25da7cb879"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1telemetry_1_1SwerveDriveTelemetry.html#a9e7579ad75f45844cde86c25da7cb879">DoubleTelemetryField</a> = <a class="el" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a0910fa4f6540bca87994367b1bdd63d1">SwerveDriveTelemetryConfig::DoubleTelemetryField</a></td></tr>
 <tr class="separator:a9e7579ad75f45844cde86c25da7cb879"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb09adc5c5837cf198b5f6c24a86cda8" id="r_afb09adc5c5837cf198b5f6c24a86cda8"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1telemetry_1_1SwerveDriveTelemetry.html#afb09adc5c5837cf198b5f6c24a86cda8">BooleanTelemetryField</a> = <a class="el" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a133263c88b60f5e08486ebabadadf311">SwerveDriveTelemetryConfig::BooleanTelemetryField</a></td></tr>
+<tr class="separator:afb09adc5c5837cf198b5f6c24a86cda8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a651f7aef68e84432225b60b0e0bd63b5" id="r_a651f7aef68e84432225b60b0e0bd63b5"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1telemetry_1_1SwerveDriveTelemetry.html#a651f7aef68e84432225b60b0e0bd63b5">StructTelemetryField</a> = <a class="el" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#abeebd790bffb4f8fa055fa69e9dce0d0">SwerveDriveTelemetryConfig::StructTelemetryField</a></td></tr>
 <tr class="separator:a651f7aef68e84432225b60b0e0bd63b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adfe7afac11c855f0b9286d12ad1986a0" id="r_adfe7afac11c855f0b9286d12ad1986a0"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1telemetry_1_1SwerveDriveTelemetry.html#adfe7afac11c855f0b9286d12ad1986a0">StructArrayTelemetryField</a> = <a class="el" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#ae98cb7badf234d5f70f02f0ca32acdbc">SwerveDriveTelemetryConfig::StructArrayTelemetryField</a></td></tr>
@@ -115,6 +117,20 @@ Public Member Functions</h2></td></tr>
 <p><a class="el" href="classyams_1_1telemetry_1_1SwerveDriveTelemetry.html#a6a66b070215c69a440270a650c6b3915">SetupTelemetry()</a>, <a class="el" href="classyams_1_1telemetry_1_1SwerveDriveTelemetry.html#a0b312f19bfe577c3d417d824c5279f13">Publish()</a>, and <a class="el" href="classyams_1_1telemetry_1_1SwerveDriveTelemetry.html#ae67f6fe766b03e093c519a2abd8ded58">ApplyTuningValues()</a> are templated on the SwerveDrive's module count so that this class itself does not need to be templated; their bodies are defined at the bottom of <a class="el" href="SwerveDrive_8hpp.html">SwerveDrive.hpp</a> (after SwerveDrive&lt;NumModules&gt; is fully defined), which is the only place both this class's members and SwerveDrive&lt;NumModules&gt;'s interface are simultaneously complete.</p>
 <p>This class is managed internally by SwerveDrive. You do not normally instantiate it directly; instead configure telemetry through SwerveDriveConfig::WithTelemetry(...). </p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
+<a id="afb09adc5c5837cf198b5f6c24a86cda8" name="afb09adc5c5837cf198b5f6c24a86cda8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afb09adc5c5837cf198b5f6c24a86cda8">&#9670;&#160;</a></span>BooleanTelemetryField</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a133263c88b60f5e08486ebabadadf311">yams::telemetry::SwerveDriveTelemetry::BooleanTelemetryField</a> =  <a class="el" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a133263c88b60f5e08486ebabadadf311">SwerveDriveTelemetryConfig::BooleanTelemetryField</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a9e7579ad75f45844cde86c25da7cb879" name="a9e7579ad75f45844cde86c25da7cb879"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9e7579ad75f45844cde86c25da7cb879">&#9670;&#160;</a></span>DoubleTelemetryField</h2>
 

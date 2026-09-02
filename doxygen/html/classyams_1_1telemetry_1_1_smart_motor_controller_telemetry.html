@@ -87,8 +87,8 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aef28d64998646d7fc3e676acad229265" id="r_aef28d64998646d7fc3e676acad229265"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aef28d64998646d7fc3e676acad229265">SetupTelemetry</a> (<a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html">motorcontrollers::SmartMotorController</a> &amp;smc, std::shared_ptr&lt; nt::NetworkTable &gt; publishTable, std::shared_ptr&lt; nt::NetworkTable &gt; tuningTable, std::unordered_map&lt; <a class="el" href="namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7db">DoubleTelemetryField</a>, <a class="el" href="classyams_1_1telemetry_1_1_double_telemetry.html">DoubleTelemetry</a>&lt; <a class="el" href="namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7db">DoubleTelemetryField</a> &gt; &gt; &amp;doubleFields, std::unordered_map&lt; <a class="el" href="namespaceyams_1_1telemetry.html#a238ac794488fd869e4dda99a31cfd4c3">BooleanTelemetryField</a>, <a class="el" href="classyams_1_1telemetry_1_1_boolean_telemetry.html">BooleanTelemetry</a> &gt; &amp;boolFields, bool nt4Enabled, std::optional&lt; std::string &gt; dataLogName)</td></tr>
-<tr class="separator:aef28d64998646d7fc3e676acad229265"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a841590271d0f991c0c38b918ebbdda9b" id="r_a841590271d0f991c0c38b918ebbdda9b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a841590271d0f991c0c38b918ebbdda9b">SetupTelemetry</a> (<a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html">motorcontrollers::SmartMotorController</a> &amp;smc, std::shared_ptr&lt; nt::NetworkTable &gt; publishTable, std::shared_ptr&lt; nt::NetworkTable &gt; tuningTable, std::unordered_map&lt; <a class="el" href="namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7db">DoubleTelemetryField</a>, <a class="el" href="classyams_1_1telemetry_1_1_double_telemetry.html">DoubleTelemetry</a>&lt; <a class="el" href="namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7db">DoubleTelemetryField</a> &gt; &gt; &amp;doubleFields, std::unordered_map&lt; <a class="el" href="namespaceyams_1_1telemetry.html#a238ac794488fd869e4dda99a31cfd4c3">BooleanTelemetryField</a>, <a class="el" href="classyams_1_1telemetry_1_1_boolean_telemetry.html">BooleanTelemetry</a>&lt; <a class="el" href="namespaceyams_1_1telemetry.html#a238ac794488fd869e4dda99a31cfd4c3">BooleanTelemetryField</a> &gt; &gt; &amp;boolFields, bool nt4Enabled, std::optional&lt; std::string &gt; dataLogName)</td></tr>
+<tr class="separator:a841590271d0f991c0c38b918ebbdda9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0c3ecc937727e3fa1c0c691d7f95cb28" id="r_a0c3ecc937727e3fa1c0c691d7f95cb28"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0c3ecc937727e3fa1c0c691d7f95cb28">Publish</a> (<a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html">motorcontrollers::SmartMotorController</a> &amp;smc)</td></tr>
 <tr class="separator:a0c3ecc937727e3fa1c0c691d7f95cb28"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a72068b66003a10b8f8a385a943b97754" id="r_a72068b66003a10b8f8a385a943b97754"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a72068b66003a10b8f8a385a943b97754">ApplyTuningValues</a> (<a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html">motorcontrollers::SmartMotorController</a> &amp;smc)</td></tr>
@@ -100,7 +100,7 @@ Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Telemetry coordinator for a SmartMotorController.</p>
-<p>Owns all <a class="el" href="classyams_1_1telemetry_1_1_double_telemetry.html">DoubleTelemetry</a> and <a class="el" href="classyams_1_1telemetry_1_1_boolean_telemetry.html">BooleanTelemetry</a> pub/sub handles. Call <a class="el" href="#aef28d64998646d7fc3e676acad229265">SetupTelemetry()</a> once during initialization, then <a class="el" href="#a0c3ecc937727e3fa1c0c691d7f95cb28">Publish()</a> and <a class="el" href="#a72068b66003a10b8f8a385a943b97754">ApplyTuningValues()</a> each loop. </p>
+<p>Owns all <a class="el" href="classyams_1_1telemetry_1_1_double_telemetry.html">DoubleTelemetry</a> and <a class="el" href="classyams_1_1telemetry_1_1_boolean_telemetry.html">BooleanTelemetry</a> pub/sub handles. Call <a class="el" href="#a841590271d0f991c0c38b918ebbdda9b">SetupTelemetry()</a> once during initialization, then <a class="el" href="#a0c3ecc937727e3fa1c0c691d7f95cb28">Publish()</a> and <a class="el" href="#a72068b66003a10b8f8a385a943b97754">ApplyTuningValues()</a> each loop. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a72068b66003a10b8f8a385a943b97754" name="a72068b66003a10b8f8a385a943b97754"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a72068b66003a10b8f8a385a943b97754">&#9670;&#160;</a></span>ApplyTuningValues()</h2>
@@ -168,8 +168,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="aef28d64998646d7fc3e676acad229265" name="aef28d64998646d7fc3e676acad229265"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aef28d64998646d7fc3e676acad229265">&#9670;&#160;</a></span>SetupTelemetry()</h2>
+<a id="a841590271d0f991c0c38b918ebbdda9b" name="a841590271d0f991c0c38b918ebbdda9b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a841590271d0f991c0c38b918ebbdda9b">&#9670;&#160;</a></span>SetupTelemetry()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -197,7 +197,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::unordered_map&lt; <a class="el" href="namespaceyams_1_1telemetry.html#a238ac794488fd869e4dda99a31cfd4c3">BooleanTelemetryField</a>, <a class="el" href="classyams_1_1telemetry_1_1_boolean_telemetry.html">BooleanTelemetry</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>boolFields</em>, </span></td>
+          <td class="paramtype">std::unordered_map&lt; <a class="el" href="namespaceyams_1_1telemetry.html#a238ac794488fd869e4dda99a31cfd4c3">BooleanTelemetryField</a>, <a class="el" href="classyams_1_1telemetry_1_1_boolean_telemetry.html">BooleanTelemetry</a>&lt; <a class="el" href="namespaceyams_1_1telemetry.html#a238ac794488fd869e4dda99a31cfd4c3">BooleanTelemetryField</a> &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>boolFields</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>

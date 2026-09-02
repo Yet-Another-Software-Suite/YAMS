@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['week_5ft_0',['week_t',['../namespaceyams_1_1units.html#a4eb488c6c77ad1e80a623aaf62b4604b',1,'yams::units']]],
-  ['weekunit_1',['WeekUnit',['../namespaceyams_1_1units.html#a499f11f5f73c6671dc33025b5c9167d2',1,'yams::units']]]
+  ['telemetryverbosity_0',['telemetryverbosity',['../classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html#a02248e99eb621d970e9362de21aa06a5',1,'yams::mechanisms::config::SwerveModuleConfig::TelemetryVerbosity'],['../classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#ab411f24115130ff7c25899e94f2e94e3',1,'yams::mechanisms::swerve::SwerveDriveConfig::TelemetryVerbosity'],['../classyams_1_1telemetry_1_1SmartMotorControllerTelemetryConfig.html#a21b79dad9ac55c9604be67d6dd060617',1,'yams::telemetry::SmartMotorControllerTelemetryConfig::TelemetryVerbosity'],['../classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b5405847f8041eac4cbab054cf64f9a',1,'yams::telemetry::SwerveDriveTelemetryConfig::TelemetryVerbosity'],['../classyams_1_1telemetry_1_1SwerveModuleTelemetryConfig.html#a820db2c3645d789e2403b7a6ec85f793',1,'yams::telemetry::SwerveModuleTelemetryConfig::TelemetryVerbosity']]]
 ];
