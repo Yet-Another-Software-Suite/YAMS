@@ -507,15 +507,15 @@ public class SwerveDriveTelemetry {
     /**
      * X position of the auto-align target pose, in meters.
      */
-    AutoAlignPoseX("autoalign/pose/x", 3, true, "meters"),
+    AutoAlignPoseX("autoalign/setpoint/x", 3, true, "meters"),
     /**
      * Y position of the auto-align target pose, in meters.
      */
-    AutoAlignPoseY("autoalign/pose/y", 3, true, "meters"),
+    AutoAlignPoseY("autoalign/setpoint/y", 3, true, "meters"),
     /**
      * Rotation of the auto-align target pose, in degrees.
      */
-    AutoAlignPoseRotation("autoalign/pose/rot", 0, true, "degrees"),
+    AutoAlignPoseRotation("autoalign/setpoint/rot", 0, true, "degrees"),
     /**
      * Proportional gain for tuning every module's drive motor closed-loop controller.
      */

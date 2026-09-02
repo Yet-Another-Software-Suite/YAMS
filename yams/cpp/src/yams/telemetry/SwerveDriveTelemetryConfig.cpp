@@ -53,10 +53,10 @@ SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig() {
                                                                         unit});
   }
   for (auto [field, key, unit, defaultVal] :
-       {std::tuple{DoubleTelemetryField::AutoAlignPoseX, "autoalign/pose/x", "meters", 3.0},
-        std::tuple{DoubleTelemetryField::AutoAlignPoseY, "autoalign/pose/y", "meters", 3.0},
-        std::tuple{DoubleTelemetryField::AutoAlignPoseRotation, "autoalign/pose/rot", "degrees",
-                   0.0}}) {
+       {std::tuple{DoubleTelemetryField::AutoAlignPoseX, "autoalign/setpoint/x", "meters", 3.0},
+        std::tuple{DoubleTelemetryField::AutoAlignPoseY, "autoalign/setpoint/y", "meters", 3.0},
+        std::tuple{DoubleTelemetryField::AutoAlignPoseRotation, "autoalign/setpoint/rot",
+                   "degrees", 0.0}}) {
     m_doubleFields.emplace(field, DoubleTelemetry<DoubleTelemetryField>{key, defaultVal, field,
                                                                         true, unit});
   }
