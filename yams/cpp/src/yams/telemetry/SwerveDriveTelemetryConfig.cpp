@@ -11,10 +11,6 @@ namespace yams::telemetry {
 
 SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig() {
   m_poseFields.emplace(
-      StructTelemetryField::TargetPose,
-      StructTelemetry<frc::Pose2d, StructTelemetryField>{
-          "tuning/driveToPose", frc::Pose2d{}, StructTelemetryField::TargetPose, true});
-  m_poseFields.emplace(
       StructTelemetryField::Pose,
       StructTelemetry<frc::Pose2d, StructTelemetryField>{
           "pose", frc::Pose2d{}, StructTelemetryField::Pose, false});
@@ -56,10 +52,59 @@ SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig() {
     m_doubleFields.emplace(field, DoubleTelemetry<DoubleTelemetryField>{key, 0.0, field, true,
                                                                         unit});
   }
+  for (auto [field, key, unit, defaultVal] :
+       {std::tuple{DoubleTelemetryField::AutoAlignPoseX, "autoalign/pose/x", "meters", 3.0},
+        std::tuple{DoubleTelemetryField::AutoAlignPoseY, "autoalign/pose/y", "meters", 3.0},
+        std::tuple{DoubleTelemetryField::AutoAlignPoseRotation, "autoalign/pose/rot", "degrees",
+                   0.0}}) {
+    m_doubleFields.emplace(field, DoubleTelemetry<DoubleTelemetryField>{key, defaultVal, field,
+                                                                        true, unit});
+  }
+  for (auto [field, key] :
+       {std::tuple{DoubleTelemetryField::ModulesDriveP, "modules/drive/feedback/p"},
+        std::tuple{DoubleTelemetryField::ModulesDriveI, "modules/drive/feedback/i"},
+        std::tuple{DoubleTelemetryField::ModulesDriveD, "modules/drive/feedback/d"},
+        std::tuple{DoubleTelemetryField::ModulesDriveKs, "modules/drive/feedforward/s"},
+        std::tuple{DoubleTelemetryField::ModulesDriveKv, "modules/drive/feedforward/v"},
+        std::tuple{DoubleTelemetryField::ModulesDriveKa, "modules/drive/feedforward/a"},
+        std::tuple{DoubleTelemetryField::ModulesAzimuthP, "modules/azimuth/feedback/p"},
+        std::tuple{DoubleTelemetryField::ModulesAzimuthI, "modules/azimuth/feedback/i"},
+        std::tuple{DoubleTelemetryField::ModulesAzimuthD, "modules/azimuth/feedback/d"},
+        std::tuple{DoubleTelemetryField::ModulesAzimuthKs, "modules/azimuth/feedforward/s"},
+        std::tuple{DoubleTelemetryField::ModulesAzimuthKv, "modules/azimuth/feedforward/v"},
+        std::tuple{DoubleTelemetryField::ModulesAzimuthKa, "modules/azimuth/feedforward/a"}}) {
+    m_doubleFields.emplace(field, DoubleTelemetry<DoubleTelemetryField>{key, 0.0, field, true,
+                                                                        "none"});
+  }
+  m_doubleFields.emplace(
+      DoubleTelemetryField::ModulesDriveVelocity,
+      DoubleTelemetry<DoubleTelemetryField>{"modules/drive/velocity", 0.0,
+                                            DoubleTelemetryField::ModulesDriveVelocity, true,
+                                            "meters_per_second"});
+  m_doubleFields.emplace(
+      DoubleTelemetryField::ModulesAzimuthAngle,
+      DoubleTelemetry<DoubleTelemetryField>{"modules/azimuth/angle", 0.0,
+                                            DoubleTelemetryField::ModulesAzimuthAngle, true,
+                                            "degrees"});
   m_doubleFields.emplace(DoubleTelemetryField::Gyro,
                          DoubleTelemetry<DoubleTelemetryField>{"gyro", 0.0,
                                                                DoubleTelemetryField::Gyro, false,
                                                                "degrees"});
+
+  m_boolFields.emplace(
+      BooleanTelemetryField::AutoAlignEnabled,
+      BooleanTelemetry<BooleanTelemetryField>{"autoalign/enabled", false,
+                                              BooleanTelemetryField::AutoAlignEnabled, true});
+  m_boolFields.emplace(
+      BooleanTelemetryField::ModulesDriveTuningEnabled,
+      BooleanTelemetry<BooleanTelemetryField>{"modules/drive/enabled", false,
+                                              BooleanTelemetryField::ModulesDriveTuningEnabled,
+                                              true});
+  m_boolFields.emplace(
+      BooleanTelemetryField::ModulesAzimuthTuningEnabled,
+      BooleanTelemetry<BooleanTelemetryField>{"modules/azimuth/enabled", false,
+                                              BooleanTelemetryField::ModulesAzimuthTuningEnabled,
+                                              true});
 }
 
 SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig(TelemetryVerbosity verbosity)
@@ -95,6 +140,26 @@ SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithTelemetryVerbosity(
       m_doubleFields.at(DoubleTelemetryField::RotationP).Enable();
       m_doubleFields.at(DoubleTelemetryField::RotationI).Enable();
       m_doubleFields.at(DoubleTelemetryField::RotationD).Enable();
+      m_doubleFields.at(DoubleTelemetryField::AutoAlignPoseX).Enable();
+      m_doubleFields.at(DoubleTelemetryField::AutoAlignPoseY).Enable();
+      m_doubleFields.at(DoubleTelemetryField::AutoAlignPoseRotation).Enable();
+      m_boolFields.at(BooleanTelemetryField::AutoAlignEnabled).Enable();
+      m_doubleFields.at(DoubleTelemetryField::ModulesDriveP).Enable();
+      m_doubleFields.at(DoubleTelemetryField::ModulesDriveI).Enable();
+      m_doubleFields.at(DoubleTelemetryField::ModulesDriveD).Enable();
+      m_doubleFields.at(DoubleTelemetryField::ModulesDriveKs).Enable();
+      m_doubleFields.at(DoubleTelemetryField::ModulesDriveKv).Enable();
+      m_doubleFields.at(DoubleTelemetryField::ModulesDriveKa).Enable();
+      m_doubleFields.at(DoubleTelemetryField::ModulesDriveVelocity).Enable();
+      m_doubleFields.at(DoubleTelemetryField::ModulesAzimuthP).Enable();
+      m_doubleFields.at(DoubleTelemetryField::ModulesAzimuthI).Enable();
+      m_doubleFields.at(DoubleTelemetryField::ModulesAzimuthD).Enable();
+      m_doubleFields.at(DoubleTelemetryField::ModulesAzimuthKs).Enable();
+      m_doubleFields.at(DoubleTelemetryField::ModulesAzimuthKv).Enable();
+      m_doubleFields.at(DoubleTelemetryField::ModulesAzimuthKa).Enable();
+      m_doubleFields.at(DoubleTelemetryField::ModulesAzimuthAngle).Enable();
+      m_boolFields.at(BooleanTelemetryField::ModulesDriveTuningEnabled).Enable();
+      m_boolFields.at(BooleanTelemetryField::ModulesAzimuthTuningEnabled).Enable();
       [[fallthrough]];
     case TelemetryVerbosity::MEDIUM:
       m_chassisSpeedsFields.at(StructTelemetryField::CurrentRobotRelativeChassisSpeeds).Enable();
@@ -158,6 +223,12 @@ SwerveDriveTelemetryConfig::GetDoubleFields() {
   return m_doubleFields;
 }
 
+std::unordered_map<SwerveDriveTelemetryConfig::BooleanTelemetryField,
+                   BooleanTelemetry<SwerveDriveTelemetryConfig::BooleanTelemetryField>>&
+SwerveDriveTelemetryConfig::GetBoolFields() {
+  return m_boolFields;
+}
+
 std::unordered_map<
     SwerveDriveTelemetryConfig::StructTelemetryField,
     StructTelemetry<frc::Pose2d, SwerveDriveTelemetryConfig::StructTelemetryField>>&
@@ -206,6 +277,13 @@ SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithCustom(
   return *this;
 }
 
+SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithCustom(BooleanTelemetryField field,
+                                                                   bool value) {
+  auto& bt = m_boolFields.at(field);
+  value ? bt.Enable() : bt.Disable();
+  return *this;
+}
+
 SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithCustom(
     const std::vector<DoubleTelemetryField>& fields, bool value) {
   for (auto field : fields) WithCustom(field, value);
@@ -220,6 +298,12 @@ SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithCustom(
 
 SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithCustom(
     const std::vector<StructArrayTelemetryField>& fields, bool value) {
+  for (auto field : fields) WithCustom(field, value);
+  return *this;
+}
+
+SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithCustom(
+    const std::vector<BooleanTelemetryField>& fields, bool value) {
   for (auto field : fields) WithCustom(field, value);
   return *this;
 }

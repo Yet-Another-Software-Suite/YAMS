@@ -108,7 +108,7 @@ static DoubleTelemetry<DoubleTelemetryField> MakeDouble(DoubleTelemetryField fie
   }
 }
 
-static BooleanTelemetry MakeBool(BooleanTelemetryField field) {
+static BooleanTelemetry<BooleanTelemetryField> MakeBool(BooleanTelemetryField field) {
   switch (field) {
     case BooleanTelemetryField::MechanismUpperLimit:
       return {"limits/mechanism/upper", false, field, false};
@@ -517,7 +517,7 @@ SmartMotorControllerTelemetryConfig::GetDoubleFields(SmartMotorController& smc) 
   return m_doubleFields;
 }
 
-std::unordered_map<BooleanTelemetryField, BooleanTelemetry>&
+std::unordered_map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>>&
 SmartMotorControllerTelemetryConfig::GetBoolFields(SmartMotorController& smc) {
   SmartMotorControllerConfig& cfg = smc.GetConfig();
   auto slot = smc.GetClosedLoopControllerSlot();

@@ -68,7 +68,7 @@ public class SmartMotorControllerTelemetry
   /**
    * Boolean telemetry fields that will be outputted.
    */
-  private       Map<BooleanTelemetryField, BooleanTelemetry> boolFields;
+  private       Map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> boolFields;
 
   /**
    * Network table to publish to.
@@ -112,7 +112,7 @@ public class SmartMotorControllerTelemetry
         {entry.getValue().transformUnit(smcConfig).setupNetworkTables(dataNetworkTable, tuningNetworkTable);}
         config.getDataLogName().ifPresent(name -> entry.getValue().transformUnit(smcConfig).setupDataLog(name));
       }
-      for (Map.Entry<BooleanTelemetryField, BooleanTelemetry> entry : boolFields.entrySet())
+      for (Map.Entry<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> entry : boolFields.entrySet())
       {
         if(!entry.getValue().enabled)
           continue;
@@ -133,9 +133,9 @@ public class SmartMotorControllerTelemetry
   public void publish(SmartMotorController smc)
   {
     SmartMotorControllerConfig cfg = smc.getConfig();
-    for (Map.Entry<BooleanTelemetryField, BooleanTelemetry> entry : boolFields.entrySet())
+    for (Map.Entry<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> entry : boolFields.entrySet())
     {
-      BooleanTelemetry bt = entry.getValue();
+      BooleanTelemetry<BooleanTelemetryField> bt = entry.getValue();
       if (!bt.enabled)
       {
         continue;
@@ -220,9 +220,9 @@ public class SmartMotorControllerTelemetry
                                                            "Cannot apply setpoints for Live Tuning.",
                                                            ".withControlMode(ControlMode.CLOSED_LOOP) instead of .withControlMode(ControlMode.OPEN_LOOP)");
     }
-    for (Map.Entry<BooleanTelemetryField, BooleanTelemetry> entry : boolFields.entrySet())
+    for (Map.Entry<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> entry : boolFields.entrySet())
     {
-      BooleanTelemetry bt = entry.getValue();
+      BooleanTelemetry<BooleanTelemetryField> bt = entry.getValue();
       if (bt.tunable())
       {
         switch (bt.getField())
@@ -354,7 +354,7 @@ public class SmartMotorControllerTelemetry
     }
     if (boolFields != null)
     {
-      for (Map.Entry<BooleanTelemetryField, BooleanTelemetry> entry : boolFields.entrySet())
+      for (Map.Entry<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> entry : boolFields.entrySet())
       {
         entry.getValue().close();
       }
@@ -451,9 +451,9 @@ public class SmartMotorControllerTelemetry
      *
      * @return {@link BooleanTelemetry}
      */
-    public BooleanTelemetry create()
+    public BooleanTelemetry<BooleanTelemetryField> create()
     {
-      return new BooleanTelemetry(key, currentValue, this, tunable);
+      return new BooleanTelemetry<>(key, currentValue, this, tunable);
     }
 
 

@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import yams.mechanisms.swerve.SwerveDrive;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.telemetry.SwerveDriveTelemetry.BooleanTelemetryField;
 import yams.telemetry.SwerveDriveTelemetry.DoubleTelemetryField;
 import yams.telemetry.SwerveDriveTelemetry.StructArrayTelemetryField;
 import yams.telemetry.SwerveDriveTelemetry.StructTelemetryField;
@@ -67,6 +68,12 @@ public class SwerveDriveTelemetryConfig
   private final Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> doubleFields =
       Arrays.stream(DoubleTelemetryField.values())
             .collect(Collectors.toMap(e -> e, DoubleTelemetryField::create));
+  /**
+   * {@link BooleanTelemetryField}s to enable or disable.
+   */
+  private final Map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> boolFields =
+      Arrays.stream(BooleanTelemetryField.values())
+            .collect(Collectors.toMap(e -> e, BooleanTelemetryField::create));
 
   /**
    * Default constructor
@@ -138,6 +145,26 @@ public class SwerveDriveTelemetryConfig
         doubleFields.get(DoubleTelemetryField.RotationP).enable();
         doubleFields.get(DoubleTelemetryField.RotationI).enable();
         doubleFields.get(DoubleTelemetryField.RotationD).enable();
+        doubleFields.get(DoubleTelemetryField.AutoAlignPoseX).enable();
+        doubleFields.get(DoubleTelemetryField.AutoAlignPoseY).enable();
+        doubleFields.get(DoubleTelemetryField.AutoAlignPoseRotation).enable();
+        boolFields.get(BooleanTelemetryField.AutoAlignEnabled).enable();
+        doubleFields.get(DoubleTelemetryField.ModulesDriveP).enable();
+        doubleFields.get(DoubleTelemetryField.ModulesDriveI).enable();
+        doubleFields.get(DoubleTelemetryField.ModulesDriveD).enable();
+        doubleFields.get(DoubleTelemetryField.ModulesDriveKs).enable();
+        doubleFields.get(DoubleTelemetryField.ModulesDriveKv).enable();
+        doubleFields.get(DoubleTelemetryField.ModulesDriveKa).enable();
+        doubleFields.get(DoubleTelemetryField.ModulesDriveVelocity).enable();
+        doubleFields.get(DoubleTelemetryField.ModulesAzimuthP).enable();
+        doubleFields.get(DoubleTelemetryField.ModulesAzimuthI).enable();
+        doubleFields.get(DoubleTelemetryField.ModulesAzimuthD).enable();
+        doubleFields.get(DoubleTelemetryField.ModulesAzimuthKs).enable();
+        doubleFields.get(DoubleTelemetryField.ModulesAzimuthKv).enable();
+        doubleFields.get(DoubleTelemetryField.ModulesAzimuthKa).enable();
+        doubleFields.get(DoubleTelemetryField.ModulesAzimuthAngle).enable();
+        boolFields.get(BooleanTelemetryField.ModulesDriveTuningEnabled).enable();
+        boolFields.get(BooleanTelemetryField.ModulesAzimuthTuningEnabled).enable();
       case MID:
         structFields.get(StructTelemetryField.CurrentRobotRelativeChassisSpeeds).enable();
         structFields.get(StructTelemetryField.FieldRelativeChassisSpeeds).enable();
@@ -192,11 +219,62 @@ public class SwerveDriveTelemetryConfig
   /**
    * Get the configured double fields.
    *
+   * @param drive {@link SwerveDrive} used to seed the auto-align and module PID gain fields with
+   *              the currently-configured PID values, so the tuning table starts from the real
+   *              gains instead of {@code 0}.
    * @return Configured {@link DoubleTelemetry} for each {@link DoubleTelemetryField}
    */
-  public Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> getDoubleFields()
+  public Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> getDoubleFields(SwerveDrive drive)
   {
+    var cfg             = drive.getConfig();
+    var translationPID  = cfg.getTranslationPID();
+    var rotationPID     = cfg.getRotationPID();
+    doubleFields.get(DoubleTelemetryField.TranslationP).setDefaultValue(translationPID.getP());
+    doubleFields.get(DoubleTelemetryField.TranslationI).setDefaultValue(translationPID.getI());
+    doubleFields.get(DoubleTelemetryField.TranslationD).setDefaultValue(translationPID.getD());
+    doubleFields.get(DoubleTelemetryField.RotationP).setDefaultValue(rotationPID.getP());
+    doubleFields.get(DoubleTelemetryField.RotationI).setDefaultValue(rotationPID.getI());
+    doubleFields.get(DoubleTelemetryField.RotationD).setDefaultValue(rotationPID.getD());
+
+    var modules = drive.getModules();
+    if (modules.length > 0)
+    {
+      var driveMotor = modules[0].getDriveMotorController();
+      driveMotor.getConfig().getPID(driveMotor.getClosedLoopControllerSlot()).ifPresent(pid -> {
+        doubleFields.get(DoubleTelemetryField.ModulesDriveP).setDefaultValue(pid.getP());
+        doubleFields.get(DoubleTelemetryField.ModulesDriveI).setDefaultValue(pid.getI());
+        doubleFields.get(DoubleTelemetryField.ModulesDriveD).setDefaultValue(pid.getD());
+      });
+      driveMotor.getConfig().getSimpleFeedforward(driveMotor.getClosedLoopControllerSlot())
+                .ifPresent(ff -> {
+                  doubleFields.get(DoubleTelemetryField.ModulesDriveKs).setDefaultValue(ff.getKs());
+                  doubleFields.get(DoubleTelemetryField.ModulesDriveKv).setDefaultValue(ff.getKv());
+                  doubleFields.get(DoubleTelemetryField.ModulesDriveKa).setDefaultValue(ff.getKa());
+                });
+      var azimuthMotor = modules[0].getAzimuthMotorController();
+      azimuthMotor.getConfig().getPID(azimuthMotor.getClosedLoopControllerSlot()).ifPresent(pid -> {
+        doubleFields.get(DoubleTelemetryField.ModulesAzimuthP).setDefaultValue(pid.getP());
+        doubleFields.get(DoubleTelemetryField.ModulesAzimuthI).setDefaultValue(pid.getI());
+        doubleFields.get(DoubleTelemetryField.ModulesAzimuthD).setDefaultValue(pid.getD());
+      });
+      azimuthMotor.getConfig().getSimpleFeedforward(azimuthMotor.getClosedLoopControllerSlot())
+                  .ifPresent(ff -> {
+                    doubleFields.get(DoubleTelemetryField.ModulesAzimuthKs).setDefaultValue(ff.getKs());
+                    doubleFields.get(DoubleTelemetryField.ModulesAzimuthKv).setDefaultValue(ff.getKv());
+                    doubleFields.get(DoubleTelemetryField.ModulesAzimuthKa).setDefaultValue(ff.getKa());
+                  });
+    }
     return doubleFields;
+  }
+
+  /**
+   * Get the configured boolean fields.
+   *
+   * @return Configured {@link BooleanTelemetry} for each {@link BooleanTelemetryField}
+   */
+  public Map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> getBoolFields()
+  {
+    return boolFields;
   }
 
   /**
@@ -363,6 +441,37 @@ public class SwerveDriveTelemetryConfig
   public SwerveDriveTelemetryConfig withCustom(StructArrayTelemetryField[] field, boolean value)
   {
     for (StructArrayTelemetryField field1 : field)
+    {
+      withCustom(field1, value);
+    }
+    return this;
+  }
+
+  /**
+   * Escape hatch for unimplemented fields which should be enabled or disabled.
+   *
+   * @param field Field to configure
+   * @param value Enable on true, Disable on false.
+   * @return {@link SwerveDriveTelemetryConfig} for chaining
+   */
+  public SwerveDriveTelemetryConfig withCustom(BooleanTelemetryField field, boolean value)
+  {
+    if (value)
+    {boolFields.get(field).enable();} else
+    {boolFields.get(field).disable();}
+    return this;
+  }
+
+  /**
+   * Escape hatch for unimplemented fields which should be enabled or disabled.
+   *
+   * @param field Field to configure
+   * @param value Enable on true, Disable on false.
+   * @return {@link SwerveDriveTelemetryConfig} for chaining
+   */
+  public SwerveDriveTelemetryConfig withCustom(BooleanTelemetryField[] field, boolean value)
+  {
+    for (BooleanTelemetryField field1 : field)
     {
       withCustom(field1, value);
     }

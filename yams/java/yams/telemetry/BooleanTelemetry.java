@@ -12,7 +12,6 @@ import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.Timer;
 import java.util.Optional;
-import yams.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
 
 /**
  * Boolean Telemetry for SmartMotorControllers.
@@ -25,7 +24,7 @@ import yams.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
  * <h2>Example</h2>
  * <pre>{@code
  * // Create and publish a boolean entry for "at speed" under the Shooter table.
- * BooleanTelemetry atSpeed = new BooleanTelemetry(
+ * BooleanTelemetry&lt;BooleanTelemetryField&gt; atSpeed = new BooleanTelemetry&lt;&gt;(
  *     "atSpeed",                                        // NetworkTables key
  *     false,                                            // default value
  *     SmartMotorControllerTelemetry.BooleanTelemetryField.VelocityControl,
@@ -38,13 +37,15 @@ import yams.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
  * // In periodic:
  * atSpeed.set(shooter.isAtSpeed());
  * }</pre>
+ *
+ * @param <F> Enum type identifying which field this telemetry entry represents.
  */
-public class BooleanTelemetry
+public class BooleanTelemetry<F>
 {
   /**
    * Field representing.
    */
-  private final BooleanTelemetryField       field;
+  private final F                           field;
   /**
    * Network table key.
    */
@@ -102,7 +103,7 @@ public class BooleanTelemetry
    * @param field      Field representing.
    * @param tunable    Tunable?
    */
-  public BooleanTelemetry(String keyString, boolean defaultVal, BooleanTelemetryField field, boolean tunable)
+  public BooleanTelemetry(String keyString, boolean defaultVal, F field, boolean tunable)
   {
     key = keyString;
     cachedValue = defaultValue = defaultVal;
@@ -189,6 +190,21 @@ public class BooleanTelemetry
   }
 
   /**
+   * Forcibly overwrite the tunable value in NetworkTables, bypassing the subscriber-must-match
+   * guard in {@link #set(boolean)}. Used to enforce mutual exclusion between tunable modes that
+   * share the same underlying drive/mechanism.
+   *
+   * @param value Value to force onto the tuning topic.
+   */
+  public void forceSet(boolean value)
+  {
+    cachedValue = value;
+    if (pubSub != null)
+    {pubSub.accept(value);} else if (publisher != null)
+    {publisher.accept(value);}
+  }
+
+  /**
    * Get the value.
    *
    * @return Value.
@@ -252,7 +268,7 @@ public class BooleanTelemetry
    *
    * @return field.
    */
-  public BooleanTelemetryField getField()
+  public F getField()
   {
     return field;
   }

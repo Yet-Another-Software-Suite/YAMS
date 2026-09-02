@@ -5,6 +5,7 @@ package yams.mechanisms.swerve;
 
 import static edu.wpi.first.hal.FRCNetComm.tInstances.kRobotDriveSwerve_YAGSL;
 import static edu.wpi.first.hal.FRCNetComm.tResourceType.kResourceType_RobotDrive;
+import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
@@ -210,9 +211,9 @@ public class SwerveDrive {
     m_field2d.setRobotPose(getPose());
     SmartDashboard.putData("Mechanisms/" + getName() + "/field", m_field2d);
     SmartDashboard.putData(
-        "Mechanisms/" + getName() + "/tuning/driveToPose", Commands.startRun(() -> {
+        "Mechanisms/" + getName() + "/tuning", Commands.startRun(() -> {
           System.out.println(
-              "================= Starting SwerveDrive.driveToPoseTuning() =================\n");
+              "================= Starting SwerveDrive Tuning =================\n");
           resetTranslationPID();
           resetRotationPID();
         }, () -> m_swerveTelemetry.applyTuningValues(this)));
@@ -507,7 +508,8 @@ public class SwerveDrive {
           resetTranslationPID();
           resetRotationPID();
         })
-        .andThen(drive(() -> driveToPoseSetpoint(pose)))
+        .andThen(
+            () -> setFieldRelativeChassisSpeeds(driveToPoseSetpoint(pose)), m_config.getSubsystem())
         .withName("Drive to Pose");
   }
 
@@ -517,22 +519,22 @@ public class SwerveDrive {
    * @param targetPose Pose to drive towards.
    * @implNote Remember to call {@link #resetRotationPID()} and {@link #resetTranslationPID()}
    * before calling this method in a loop.
-   * @return robot-relative {@link ChassisSpeeds} to drive the robot to the given pose.
+   * @return field-relative {@link ChassisSpeeds} to drive the robot to the given pose.
    */
   public ChassisSpeeds driveToPoseSetpoint(Pose2d targetPose) {
     var rotationPID = m_config.getRotationPID();
     var translationPID = m_config.getTranslationPID();
     var distance = getDistanceFromPose(targetPose);
-    //    var angleDifference = getAngleDifferenceFromPose(targetPose);
+    var angleDifference = getAngleDifferenceFromPose(targetPose);
     var translationScalar = translationPID.calculate(distance.in(Meters), 0);
     var currentPose = getPose();
-    var poseDifference = currentPose.minus(targetPose);
-    return ChassisSpeeds.fromFieldRelativeSpeeds(
-        poseDifference.getMeasureX().per(Second).times(translationScalar),
-        poseDifference.getMeasureY().per(Second).times(translationScalar),
-        RadiansPerSecond.of(rotationPID.calculate(
-            currentPose.getRotation().getRadians(), targetPose.getRotation().getRadians())),
-        new Rotation2d(getGyroAngle()));
+    var translationDifference = currentPose.getTranslation().minus(targetPose.getTranslation());
+    return new ChassisSpeeds(
+        translationDifference.getMeasureX().per(Second).times(translationScalar),
+        translationDifference.getMeasureY().per(Second).times(translationScalar),
+        RadiansPerSecond.of(rotationPID.calculate(currentPose.getRotation().getRadians(),
+                                                  targetPose.getRotation().getRadians()))
+    );
   }
 
   /**

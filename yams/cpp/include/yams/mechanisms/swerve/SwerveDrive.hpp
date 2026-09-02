@@ -201,11 +201,14 @@ class SwerveDrive {
     auto distance = GetDistanceFromPose(targetPose);
     auto translationScalar = translationPID.Calculate(distance.value(), 0.0);
     auto currentPose = GetPose();
-    auto poseDiff = currentPose.RelativeTo(targetPose);
+    // Plain field-frame translation delta (not RelativeTo/operator-, which expresses the result
+    // in targetPose's rotated frame and would skew the commanded direction whenever targetPose's
+    // heading is non-zero).
+    auto translationDiff = currentPose.Translation() - targetPose.Translation();
     return frc::ChassisSpeeds::FromFieldRelativeSpeeds(
         frc::ChassisSpeeds{
-            units::meters_per_second_t{poseDiff.X().value() * translationScalar},
-            units::meters_per_second_t{poseDiff.Y().value() * translationScalar},
+            units::meters_per_second_t{translationDiff.X().value() * translationScalar},
+            units::meters_per_second_t{translationDiff.Y().value() * translationScalar},
             units::radians_per_second_t{
                 rotationPID.Calculate(currentPose.Rotation().Radians().value(),
                                      targetPose.Rotation().Radians().value())}},
@@ -660,10 +663,73 @@ void SwerveDriveTelemetry::SetupTelemetry(mechanisms::swerve::SwerveDrive<NumMod
   bool nt4Enabled = m_config.GetNT4Enabled();
   auto dataLogName = m_config.GetDataLogName();
 
+  {
+    auto& translationPID = drive->GetConfig().GetTranslationPID();
+    auto& rotationPID = drive->GetConfig().GetRotationPID();
+    m_config.GetDoubleFields()
+        .at(DoubleTelemetryField::TranslationP)
+        .SetDefaultValue(translationPID.GetP());
+    m_config.GetDoubleFields()
+        .at(DoubleTelemetryField::TranslationI)
+        .SetDefaultValue(translationPID.GetI());
+    m_config.GetDoubleFields()
+        .at(DoubleTelemetryField::TranslationD)
+        .SetDefaultValue(translationPID.GetD());
+    m_config.GetDoubleFields().at(DoubleTelemetryField::RotationP).SetDefaultValue(rotationPID.GetP());
+    m_config.GetDoubleFields().at(DoubleTelemetryField::RotationI).SetDefaultValue(rotationPID.GetI());
+    m_config.GetDoubleFields().at(DoubleTelemetryField::RotationD).SetDefaultValue(rotationPID.GetD());
+
+    auto& modules = drive->GetConfig().GetModules();
+    if (!modules.empty()) {
+      auto* driveMotor = modules[0]->GetDriveMotorController();
+      auto driveGains = driveMotor->GetConfig().GetSlotGains(driveMotor->GetClosedLoopControllerSlot());
+      m_config.GetDoubleFields().at(DoubleTelemetryField::ModulesDriveP).SetDefaultValue(driveGains.kP);
+      m_config.GetDoubleFields().at(DoubleTelemetryField::ModulesDriveI).SetDefaultValue(driveGains.kI);
+      m_config.GetDoubleFields().at(DoubleTelemetryField::ModulesDriveD).SetDefaultValue(driveGains.kD);
+
+      auto* azimuthMotor = modules[0]->GetAzimuthMotorController();
+      auto azimuthGains =
+          azimuthMotor->GetConfig().GetSlotGains(azimuthMotor->GetClosedLoopControllerSlot());
+      m_config.GetDoubleFields().at(DoubleTelemetryField::ModulesAzimuthP).SetDefaultValue(azimuthGains.kP);
+      m_config.GetDoubleFields().at(DoubleTelemetryField::ModulesAzimuthI).SetDefaultValue(azimuthGains.kI);
+      m_config.GetDoubleFields().at(DoubleTelemetryField::ModulesAzimuthD).SetDefaultValue(azimuthGains.kD);
+
+      if (auto driveFF = driveMotor->GetConfig().GetSimpleFeedforward(
+              driveMotor->GetClosedLoopControllerSlot())) {
+        m_config.GetDoubleFields()
+            .at(DoubleTelemetryField::ModulesDriveKs)
+            .SetDefaultValue(driveFF->GetKs().value());
+        m_config.GetDoubleFields()
+            .at(DoubleTelemetryField::ModulesDriveKv)
+            .SetDefaultValue(driveFF->GetKv().value());
+        m_config.GetDoubleFields()
+            .at(DoubleTelemetryField::ModulesDriveKa)
+            .SetDefaultValue(driveFF->GetKa().value());
+      }
+      if (auto azimuthFF = azimuthMotor->GetConfig().GetSimpleFeedforward(
+              azimuthMotor->GetClosedLoopControllerSlot())) {
+        m_config.GetDoubleFields()
+            .at(DoubleTelemetryField::ModulesAzimuthKs)
+            .SetDefaultValue(azimuthFF->GetKs().value());
+        m_config.GetDoubleFields()
+            .at(DoubleTelemetryField::ModulesAzimuthKv)
+            .SetDefaultValue(azimuthFF->GetKv().value());
+        m_config.GetDoubleFields()
+            .at(DoubleTelemetryField::ModulesAzimuthKa)
+            .SetDefaultValue(azimuthFF->GetKa().value());
+      }
+    }
+  }
+
   for (auto& [field, dt] : m_config.GetDoubleFields()) {
     if (!dt.IsEnabled()) continue;
     if (nt4Enabled) dt.SetupNetworkTables(m_dataTable, m_tuningTable);
     if (dataLogName) dt.SetupDataLog(*dataLogName);
+  }
+  for (auto& [field, bt] : m_config.GetBoolFields()) {
+    if (!bt.IsEnabled()) continue;
+    if (nt4Enabled) bt.SetupNetworkTables(m_dataTable, m_tuningTable);
+    if (dataLogName) bt.SetupDataLog(*dataLogName);
   }
   for (auto& [field, stt] : m_config.GetPoseFields()) {
     if (!stt.IsEnabled()) continue;
@@ -741,15 +807,74 @@ void SwerveDriveTelemetry::Publish(mechanisms::swerve::SwerveDrive<NumModules>* 
 
 template <std::size_t NumModules>
 void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<NumModules>* drive) {
-  for (auto& [field, stt] : m_config.GetPoseFields()) {
-    if (!stt.IsTunable()) continue;
-    switch (field) {
-      case StructTelemetryField::TargetPose:
-        drive->SetRobotRelativeChassisSpeeds(drive->DriveToPoseSetpoint(stt.Get()));
-        break;
-      default:
-        break;
+  bool nt4Enabled = m_config.GetNT4Enabled();
+
+  auto& boolFields = m_config.GetBoolFields();
+  auto& autoAlignBt = boolFields.at(BooleanTelemetryField::AutoAlignEnabled);
+  auto& driveTuningBt = boolFields.at(BooleanTelemetryField::ModulesDriveTuningEnabled);
+  auto& azimuthTuningBt = boolFields.at(BooleanTelemetryField::ModulesAzimuthTuningEnabled);
+
+  bool autoAlignOn = autoAlignBt.IsEnabled() && nt4Enabled && autoAlignBt.Get();
+  bool driveTuningOn = driveTuningBt.IsEnabled() && nt4Enabled && driveTuningBt.Get();
+  bool azimuthTuningOn = azimuthTuningBt.IsEnabled() && nt4Enabled && azimuthTuningBt.Get();
+
+  // Only one tuning mode may drive the chassis at a time; enforce priority order
+  // (auto-align > drive tuning > azimuth tuning) and force the losers back off in
+  // NetworkTables so the dashboard reflects what's actually happening.
+  if (autoAlignOn) {
+    if (driveTuningOn) {
+      driveTuningBt.ForceSet(false);
+      driveTuningOn = false;
     }
+    if (azimuthTuningOn) {
+      azimuthTuningBt.ForceSet(false);
+      azimuthTuningOn = false;
+    }
+  } else if (driveTuningOn && azimuthTuningOn) {
+    azimuthTuningBt.ForceSet(false);
+    azimuthTuningOn = false;
+  }
+
+  if (autoAlignOn) {
+    auto& doubleFields = m_config.GetDoubleFields();
+    double x = doubleFields.at(DoubleTelemetryField::AutoAlignPoseX).Get();
+    double y = doubleFields.at(DoubleTelemetryField::AutoAlignPoseY).Get();
+    double rot = doubleFields.at(DoubleTelemetryField::AutoAlignPoseRotation).Get();
+    frc::Pose2d targetPose{units::meter_t{x}, units::meter_t{y},
+                           frc::Rotation2d{units::degree_t{rot}}};
+    drive->SetRobotRelativeChassisSpeeds(drive->DriveToPoseSetpoint(targetPose));
+  }
+
+  if (driveTuningBt.IsEnabled() && nt4Enabled) {
+    auto& modules = drive->GetConfig().GetModules();
+    if (driveTuningOn) {
+      units::meters_per_second_t velocity{
+          m_config.GetDoubleFields().at(DoubleTelemetryField::ModulesDriveVelocity).Get()};
+      wpi::array<frc::SwerveModuleState, NumModules> states{wpi::empty_array};
+      for (size_t i = 0; i < NumModules; ++i) {
+        states[i] = frc::SwerveModuleState{velocity, modules[i]->GetState().angle};
+      }
+      drive->SetSwerveModuleStates(states);
+    } else if (!autoAlignOn) {
+      // Drive tuning is off (and auto-align isn't driving the chassis instead); make sure the
+      // modules don't keep spinning at whatever velocity was last commanded while it was on.
+      wpi::array<frc::SwerveModuleState, NumModules> states{wpi::empty_array};
+      for (size_t i = 0; i < NumModules; ++i) {
+        states[i] =
+            frc::SwerveModuleState{units::meters_per_second_t{0}, modules[i]->GetState().angle};
+      }
+      drive->SetSwerveModuleStates(states);
+    }
+  }
+
+  if (azimuthTuningOn) {
+    frc::Rotation2d angle{units::degree_t{
+        m_config.GetDoubleFields().at(DoubleTelemetryField::ModulesAzimuthAngle).Get()}};
+    wpi::array<frc::SwerveModuleState, NumModules> states{wpi::empty_array};
+    for (size_t i = 0; i < NumModules; ++i) {
+      states[i] = frc::SwerveModuleState{units::meters_per_second_t{0}, angle};
+    }
+    drive->SetSwerveModuleStates(states);
   }
 
   auto translationPID = drive->GetConfig().GetTranslationPID();
@@ -780,6 +905,66 @@ void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<Num
       case DoubleTelemetryField::RotationD:
         rotationPID.SetD(dt.Get());
         drive->SetRotationPID(rotationPID);
+        break;
+      case DoubleTelemetryField::ModulesDriveP:
+        for (auto* module : drive->GetConfig().GetModules()) {
+          module->GetDriveMotorController()->SetKp(dt.Get());
+        }
+        break;
+      case DoubleTelemetryField::ModulesDriveI:
+        for (auto* module : drive->GetConfig().GetModules()) {
+          module->GetDriveMotorController()->SetKi(dt.Get());
+        }
+        break;
+      case DoubleTelemetryField::ModulesDriveD:
+        for (auto* module : drive->GetConfig().GetModules()) {
+          module->GetDriveMotorController()->SetKd(dt.Get());
+        }
+        break;
+      case DoubleTelemetryField::ModulesAzimuthP:
+        for (auto* module : drive->GetConfig().GetModules()) {
+          module->GetAzimuthMotorController()->SetKp(dt.Get());
+        }
+        break;
+      case DoubleTelemetryField::ModulesAzimuthI:
+        for (auto* module : drive->GetConfig().GetModules()) {
+          module->GetAzimuthMotorController()->SetKi(dt.Get());
+        }
+        break;
+      case DoubleTelemetryField::ModulesAzimuthD:
+        for (auto* module : drive->GetConfig().GetModules()) {
+          module->GetAzimuthMotorController()->SetKd(dt.Get());
+        }
+        break;
+      case DoubleTelemetryField::ModulesDriveKs:
+        for (auto* module : drive->GetConfig().GetModules()) {
+          module->GetDriveMotorController()->SetKs(dt.Get());
+        }
+        break;
+      case DoubleTelemetryField::ModulesDriveKv:
+        for (auto* module : drive->GetConfig().GetModules()) {
+          module->GetDriveMotorController()->SetKv(dt.Get());
+        }
+        break;
+      case DoubleTelemetryField::ModulesDriveKa:
+        for (auto* module : drive->GetConfig().GetModules()) {
+          module->GetDriveMotorController()->SetKa(dt.Get());
+        }
+        break;
+      case DoubleTelemetryField::ModulesAzimuthKs:
+        for (auto* module : drive->GetConfig().GetModules()) {
+          module->GetAzimuthMotorController()->SetKs(dt.Get());
+        }
+        break;
+      case DoubleTelemetryField::ModulesAzimuthKv:
+        for (auto* module : drive->GetConfig().GetModules()) {
+          module->GetAzimuthMotorController()->SetKv(dt.Get());
+        }
+        break;
+      case DoubleTelemetryField::ModulesAzimuthKa:
+        for (auto* module : drive->GetConfig().GetModules()) {
+          module->GetAzimuthMotorController()->SetKa(dt.Get());
+        }
         break;
       default:
         break;

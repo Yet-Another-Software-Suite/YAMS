@@ -28,97 +28,8 @@ namespace yams::telemetry {
 
 using namespace yams::motorcontrollers;
 
-// DoubleTelemetry<F> is now a header-only template; see SmartMotorControllerTelemetry.hpp.
-
-// ============================================================================
-// BooleanTelemetry
-// ============================================================================
-
-BooleanTelemetry::BooleanTelemetry(std::string key, bool defaultVal, BooleanTelemetryField field,
-                                   bool tunable)
-    : m_field{field},
-      m_key{std::move(key)},
-      m_tunable{tunable},
-      m_defaultValue{defaultVal},
-      m_cachedValue{defaultVal} {}
-
-void BooleanTelemetry::SetDefaultValue(bool value) {
-  m_defaultValue = value;
-  m_cachedValue = value;
-}
-
-void BooleanTelemetry::SetupNetworkTables(std::shared_ptr<nt::NetworkTable> dataTable,
-                                          std::shared_ptr<nt::NetworkTable> tuningTable) {
-  m_dataTable = dataTable;
-  m_tuningTable = tuningTable;
-  if (tuningTable && m_tunable) {
-    auto topic = tuningTable->GetBooleanTopic(m_key);
-    m_pubSub = topic.Publish();
-    m_pubSub->SetDefault(m_defaultValue);
-    m_subscriber = topic.Subscribe(m_defaultValue);
-  } else if (dataTable) {
-    auto topic = dataTable->GetBooleanTopic(m_key);
-    m_publisher = topic.Publish();
-    m_publisher->SetDefault(m_defaultValue);
-  }
-}
-
-void BooleanTelemetry::SetupNetworkTable(std::shared_ptr<nt::NetworkTable> dataTable) {
-  SetupNetworkTables(dataTable, nullptr);
-}
-
-void BooleanTelemetry::SetupDataLog(const std::string& prefix) {
-  if (m_tunable) return;
-  std::string path = prefix;
-  if (!path.empty() && path.back() != '/') path += '/';
-  path += m_key;
-  m_dataLogEntry = wpi::log::BooleanLogEntry{frc::DataLogManager::GetLog(), path};
-}
-
-bool BooleanTelemetry::Set(bool value) {
-  if (!m_enabled) return false;
-  if (m_dataLogEntry) {
-    m_dataLogEntry->Append(value);
-  }
-  if (m_subscriber) {
-    bool tuningValue = m_subscriber->Get(m_defaultValue);
-    if (tuningValue != value) return false;
-  }
-  if (m_publisher) {
-    m_publisher->Set(value);
-  }
-  return true;
-}
-
-bool BooleanTelemetry::Get() const {
-  if (m_subscriber) {
-    return m_subscriber->Get(m_defaultValue);
-  }
-  throw std::runtime_error("Tuning table not configured for " + m_key + "!");
-}
-
-bool BooleanTelemetry::IsTunable() {
-  if (m_subscriber && m_tunable && m_enabled) {
-    bool current = m_subscriber->Get(m_defaultValue);
-    if (current != m_cachedValue) {
-      m_cachedValue = current;
-      return true;
-    }
-  }
-  return false;
-}
-
-void BooleanTelemetry::Close() {
-  m_subscriber.reset();
-  m_pubSub.reset();
-  m_publisher.reset();
-  if (m_dataTable) {
-    m_dataTable->GetEntry(m_key).Unpublish();
-  }
-  if (m_tuningTable) {
-    m_tuningTable->GetEntry(m_key).Unpublish();
-  }
-}
+// DoubleTelemetry<F> and BooleanTelemetry<F> are now header-only templates; see
+// SmartMotorControllerTelemetry.hpp.
 
 // ============================================================================
 // SmartMotorControllerTelemetry
@@ -128,8 +39,9 @@ void SmartMotorControllerTelemetry::SetupTelemetry(
     SmartMotorController& smc, std::shared_ptr<nt::NetworkTable> publishTable,
     std::shared_ptr<nt::NetworkTable> tuningTable,
     std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>& doubleFields,
-    std::unordered_map<BooleanTelemetryField, BooleanTelemetry>& boolFields, bool nt4Enabled,
-    std::optional<std::string> dataLogName) {
+    std::unordered_map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>>&
+        boolFields,
+    bool nt4Enabled, std::optional<std::string> dataLogName) {
   if (m_dataTable && m_dataTable == publishTable) return;  // already set up
 
   m_dataTable = publishTable;
