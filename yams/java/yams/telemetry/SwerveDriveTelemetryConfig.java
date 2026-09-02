@@ -165,6 +165,7 @@ public class SwerveDriveTelemetryConfig
         doubleFields.get(DoubleTelemetryField.ModulesAzimuthAngle).enable();
         boolFields.get(BooleanTelemetryField.ModulesDriveTuningEnabled).enable();
         boolFields.get(BooleanTelemetryField.ModulesAzimuthTuningEnabled).enable();
+        boolFields.get(BooleanTelemetryField.ModulesDriveInPlace).enable();
       case MID:
         structFields.get(StructTelemetryField.CurrentRobotRelativeChassisSpeeds).enable();
         structFields.get(StructTelemetryField.FieldRelativeChassisSpeeds).enable();

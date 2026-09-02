@@ -101,6 +101,10 @@ SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig() {
                                               BooleanTelemetryField::ModulesDriveTuningEnabled,
                                               true});
   m_boolFields.emplace(
+      BooleanTelemetryField::ModulesDriveInPlace,
+      BooleanTelemetry<BooleanTelemetryField>{"modules/drive/inplace", false,
+                                              BooleanTelemetryField::ModulesDriveInPlace, true});
+  m_boolFields.emplace(
       BooleanTelemetryField::ModulesAzimuthTuningEnabled,
       BooleanTelemetry<BooleanTelemetryField>{"modules/azimuth/enabled", false,
                                               BooleanTelemetryField::ModulesAzimuthTuningEnabled,
@@ -160,6 +164,7 @@ SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithTelemetryVerbosity(
       m_doubleFields.at(DoubleTelemetryField::ModulesAzimuthAngle).Enable();
       m_boolFields.at(BooleanTelemetryField::ModulesDriveTuningEnabled).Enable();
       m_boolFields.at(BooleanTelemetryField::ModulesAzimuthTuningEnabled).Enable();
+      m_boolFields.at(BooleanTelemetryField::ModulesDriveInPlace).Enable();
       [[fallthrough]];
     case TelemetryVerbosity::MEDIUM:
       m_chassisSpeedsFields.at(StructTelemetryField::CurrentRobotRelativeChassisSpeeds).Enable();

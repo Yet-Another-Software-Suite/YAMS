@@ -132,6 +132,9 @@ class SwerveDriveTelemetryConfig {
     /** Enables or disables live tuning of every module's drive motor PID gains and velocity
      *  setpoint. */
     ModulesDriveTuningEnabled,
+    /** When enabled ensures drive testing is done with all modules oriented so the swerve drive
+     *  will drive counter-clockwise positive. */
+    ModulesDriveInPlace,
     /** Enables or disables live tuning of every module's azimuth motor PID gains and angle
      *  setpoint. */
     ModulesAzimuthTuningEnabled,

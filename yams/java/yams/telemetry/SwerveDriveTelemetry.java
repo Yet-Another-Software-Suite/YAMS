@@ -158,10 +158,12 @@ public class SwerveDriveTelemetry {
     var autoAlignBt = m_boolTelemetry.get(BooleanTelemetryField.AutoAlignEnabled);
     var driveTuningBt = m_boolTelemetry.get(BooleanTelemetryField.ModulesDriveTuningEnabled);
     var azimuthTuningBt = m_boolTelemetry.get(BooleanTelemetryField.ModulesAzimuthTuningEnabled);
+    var driveInPlaceBt = m_boolTelemetry.get(BooleanTelemetryField.ModulesDriveInPlace);
 
     boolean autoAlignOn = autoAlignBt.enabled && nt4Enabled && autoAlignBt.get();
     boolean driveTuningOn = driveTuningBt.enabled && nt4Enabled && driveTuningBt.get();
     boolean azimuthTuningOn = azimuthTuningBt.enabled && nt4Enabled && azimuthTuningBt.get();
+    boolean driveInPlaceOn = driveInPlaceBt.enabled && nt4Enabled && driveInPlaceBt.get();
 
     // Only one tuning mode may drive the chassis at a time; enforce priority order
     // (auto-align > drive tuning > azimuth tuning) and force the losers back off in
@@ -196,7 +198,15 @@ public class SwerveDriveTelemetry {
         var velocity = MetersPerSecond.of(
             m_doubleTelemetry.get(DoubleTelemetryField.ModulesDriveVelocity).get());
         for (int i = 0; i < modules.length; i++) {
-          states[i] = new SwerveModuleState(velocity, modules[i].getState().angle);
+          if (driveInPlaceOn) {
+            // Point each module tangent to its position around the robot center so a positive
+            // velocity spins the robot counter-clockwise (WPILib's positive rotation direction).
+            var moduleLocation = modules[i].getConfig().getLocation().orElseThrow();
+            var tangentAngle = moduleLocation.getAngle().plus(Rotation2d.fromDegrees(90));
+            states[i] = new SwerveModuleState(velocity, tangentAngle);
+          } else {
+            states[i] = new SwerveModuleState(velocity, Rotation2d.kZero);
+          }
         }
         drive.setSwerveModuleStates(states);
       } else if (!autoAlignOn) {
@@ -632,6 +642,10 @@ public class SwerveDriveTelemetry {
      * setpoint.
      */
     ModulesDriveTuningEnabled("modules/drive/enabled", false, true),
+    /**
+     * When enabled ensure drive testing is done with all modules are oriented to the swerve drive will drive counter clockwise positive.
+     */
+    ModulesDriveInPlace("modules/drive/inplace", false, true),
     /**
      * Enables or disables live tuning of every module's azimuth motor PID gains and angle
      * setpoint.

@@ -813,10 +813,12 @@ void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<Num
   auto& autoAlignBt = boolFields.at(BooleanTelemetryField::AutoAlignEnabled);
   auto& driveTuningBt = boolFields.at(BooleanTelemetryField::ModulesDriveTuningEnabled);
   auto& azimuthTuningBt = boolFields.at(BooleanTelemetryField::ModulesAzimuthTuningEnabled);
+  auto& driveInPlaceBt = boolFields.at(BooleanTelemetryField::ModulesDriveInPlace);
 
   bool autoAlignOn = autoAlignBt.IsEnabled() && nt4Enabled && autoAlignBt.Get();
   bool driveTuningOn = driveTuningBt.IsEnabled() && nt4Enabled && driveTuningBt.Get();
   bool azimuthTuningOn = azimuthTuningBt.IsEnabled() && nt4Enabled && azimuthTuningBt.Get();
+  bool driveInPlaceOn = driveInPlaceBt.IsEnabled() && nt4Enabled && driveInPlaceBt.Get();
 
   // Only one tuning mode may drive the chassis at a time; enforce priority order
   // (auto-align > drive tuning > azimuth tuning) and force the losers back off in
@@ -852,7 +854,15 @@ void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<Num
           m_config.GetDoubleFields().at(DoubleTelemetryField::ModulesDriveVelocity).Get()};
       wpi::array<frc::SwerveModuleState, NumModules> states{wpi::empty_array};
       for (size_t i = 0; i < NumModules; ++i) {
-        states[i] = frc::SwerveModuleState{velocity, modules[i]->GetState().angle};
+        if (driveInPlaceOn) {
+          // Point each module tangent to its position around the robot center so a positive
+          // velocity spins the robot counter-clockwise (WPILib's positive rotation direction).
+          auto moduleLocation = *modules[i]->GetConfig().GetLocation();
+          auto tangentAngle = moduleLocation.Angle() + frc::Rotation2d{units::degree_t{90}};
+          states[i] = frc::SwerveModuleState{velocity, tangentAngle};
+        } else {
+          states[i] = frc::SwerveModuleState{velocity, frc::Rotation2d{}};
+        }
       }
       drive->SetSwerveModuleStates(states);
     } else if (!autoAlignOn) {
