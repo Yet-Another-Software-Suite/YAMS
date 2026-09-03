@@ -153,8 +153,8 @@ task cppDoxygenZip(type: Zip, dependsOn: generateDoxygen) {
 if (!skipCpp) {
     build.dependsOn cppHeadersZip
     addTaskToCopyAllOutputs(cppHeadersZip)
-    build.dependsOn cppSourceZip
-    addTaskToCopyAllOutputs(cppSourceZip)
+//    build.dependsOn cppSourceZip
+//    addTaskToCopyAllOutputs(cppSourceZip)
 }
 //build.dependsOn cppDriverHeadersZip
 //addTaskToCopyAllOutputs(cppDriverHeadersZip)
@@ -249,9 +249,9 @@ build.dependsOn outputJar
 build.dependsOn vendordepJsonZip
 if (!skipCpp) {
     addTaskToCopyAllOutputs(cppHeadersZip)
-    addTaskToCopyAllOutputs(cppSourceZip)
+//    addTaskToCopyAllOutputs(cppSourceZip)
     build.dependsOn cppHeadersZip
-    build.dependsOn cppSourceZip
+//    build.dependsOn cppSourceZip
     if (doxygenAvailable) {
         build.dependsOn cppDoxygenZip
         addTaskToCopyAllOutputs(cppDoxygenZip)
@@ -289,10 +289,10 @@ model {
                         artifact it
                     }
                     artifact cppHeadersZip
-                    artifact cppSourceZip
-                    if (doxygenAvailable) {
-                        artifact cppDoxygenZip
-                    }
+//                    artifact cppSourceZip
+//                    if (doxygenAvailable) {
+//                        artifact cppDoxygenZip
+//                    }
 
                     artifactId = "${baseArtifactId}-cpp"
                     groupId = artifactGroupId
