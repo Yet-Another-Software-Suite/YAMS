@@ -194,7 +194,7 @@ public class MechanismTelemetry
         prefix -> StructLogEntry.create(DataLogManager.getLog(), prefix + "/" + key, struct));
     return value -> {
       publisher.accept(value);
-      logEntry.ifPresent(entry -> entry.append(value));
+      logEntry.ifPresent(entry -> entry.append(value));//
     };
   }
 
