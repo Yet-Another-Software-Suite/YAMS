@@ -253,6 +253,20 @@ jobs:
       - name: Create versioned vendordep JSON
         run: cp ${{ env.workingDirectory }}/build/maven/yams.json ${{ env.workingDirectory }}/build/maven/yams-${{ inputs.releaseVersion }}.json
 
+      # Debug zips are large; only keep them for the version being released so
+      # gh-pages doesn't accumulate debug symbols for every past release.
+      - name: Remove C++ debug zips for old versions
+        run: |
+          cppDir="${{ env.workingDirectory }}/build/maven/releases/yams/YAMS-cpp"
+          if [ -d "$cppDir" ]; then
+            for dir in "$cppDir"/*/; do
+              version=$(basename "$dir")
+              if [ "$version" != "${{ inputs.releaseVersion }}" ]; then
+                find "$dir" -iname "*debug.zip*" -delete
+              fi
+            done
+          fi
+
       - name: Push to gh-pages
         run: git add . && git commit -m "Automatically add YAMS version ${{ inputs.releaseVersion }}" && git push
         working-directory: ${{ env.workingDirectory }}/build/maven/

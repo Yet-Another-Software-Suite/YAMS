@@ -290,9 +290,9 @@ model {
                     }
                     artifact cppHeadersZip
 //                    artifact cppSourceZip
-//                    if (doxygenAvailable) {
-//                        artifact cppDoxygenZip
-//                    }
+                    if (doxygenAvailable) {
+                        artifact cppDoxygenZip
+                    }
 
                     artifactId = "${baseArtifactId}-cpp"
                     groupId = artifactGroupId
