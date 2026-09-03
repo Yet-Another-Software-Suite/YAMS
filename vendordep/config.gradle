@@ -51,18 +51,6 @@ model {
         }
         withType(NativeBinarySpec).all {
             nativeUtils.usePlatformArguments(it)
-            // The plugin's windows PlatformConfig adds /DEBUG:FULL to the linker unconditionally
-            // (not just for the debug build type), so release binaries would otherwise still
-            // link a .pdb. Strip any debug-info-generating args from release binaries here so
-            // they never get produced in the first place, on every host platform (Linux/macOS
-            // release args are already clean by default, but this stays defensive if that ever
-            // changes upstream).
-            if (!it.buildType.name.contains('debug')) {
-                it.linker.args.removeAll { arg -> arg.startsWith('/DEBUG') }
-                [it.cppCompiler, it.cCompiler, it.objcCompiler, it.objcppCompiler].each { tool ->
-                    tool.args.removeAll { arg -> arg.startsWith('/Zi') || arg.startsWith('/ZI') || arg.startsWith('/Z7') || arg.startsWith('-g') }
-                }
-            }
         }
     }
 }
