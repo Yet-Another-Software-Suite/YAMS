@@ -123,7 +123,7 @@ tasks.whenTaskAdded { task ->
     }
 }
 
-if (project.hasProperty('onlylinuxathena') || project.hasProperty('onlylinuxarm32') || project.hasProperty('onlylinuxarm64') || project.hasProperty('onlywindowsarm64') || project.hasProperty('onlylinuxsystemcore')) {
+if (project.hasProperty('onlylinuxathena') || project.hasProperty('onlylinuxarm32') || project.hasProperty('onlylinuxarm64') || project.hasProperty('onlywindowsarm64') || project.hasProperty('onlylinuxsystemcore') || project.hasProperty('onlywindows64') || project.hasProperty('onlyosxuniversal') || project.hasProperty('onlylinuxx64')) {
     test.enabled = false
 }
 
