@@ -124,13 +124,17 @@ public class SimulationPeriodTest
       smc.setupSimulation();
 
       Angle setpoint = Degrees.of(80);
-      smc.setPosition(setpoint);
 
       int[] simIterations = {0};
       int[] telemetryIterations = {0};
       Angle finalPosition;
       try (PeriodicScheduler scheduler = new PeriodicScheduler())
       {
+        // Commanding the setpoint happens under the scheduler's own controlled clock state (started
+        // above), rather than before it, so this first call isn't at the mercy of whatever clock
+        // state an earlier test in the same JVM left behind.
+        smc.setPosition(setpoint);
+
         // simIterate() at the configured 10ms simulation period.
         scheduler.addPeriodic(() -> {
           smc.simIterate();
