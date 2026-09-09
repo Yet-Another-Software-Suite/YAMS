@@ -33,6 +33,11 @@ public class PeriodicScheduler implements AutoCloseable
 
   public PeriodicScheduler()
   {
+    // Other tests sharing this JVM (e.g. via SchedulerPumpHelper) install their own custom
+    // RobotController time source and never restore it, which can leave the clock in a stale,
+    // frozen state. Resuming (real-time) timing first forces a clean, consistent baseline before
+    // this scheduler takes manual control of it, regardless of what an earlier test left behind.
+    SimHooks.resumeTiming();
     SimHooks.pauseTiming();
   }
 
@@ -92,6 +97,18 @@ public class PeriodicScheduler implements AutoCloseable
     if (dtMicros > 0)
     {
       SimHooks.stepTiming(Microseconds.of(dtMicros).in(Seconds));
+      // Some vendor simulation SDKs (e.g. CTRE's Phoenix6 SimState) refresh their status signals
+      // from a real background thread rather than reacting to SimHooks synchronously. Since this
+      // scheduler otherwise runs a whole virtual timeline in a tight loop with no real elapsed
+      // time, that background thread may never actually get scheduled to run. Yielding a sliver of
+      // real wall-clock time here gives it a chance to catch up.
+      try
+      {
+        Thread.sleep(1);
+      } catch (InterruptedException e)
+      {
+        Thread.currentThread().interrupt();
+      }
     }
   }
 
