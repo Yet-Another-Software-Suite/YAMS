@@ -106,7 +106,7 @@ public class ElevatorSimSupplier implements SimSupplier {
   public void updateSimState() {
     if (!isInputFed()) {
       sim.setInputVoltage(motorDutyCycleSupplier.get() * RoboRioSim.getVInVoltage());
-      RoboRioSim.setVInVoltage(BatterySim.calculateVoltage(uuid, sim.getCurrentDrawAmps()));
+      RoboRioSim.setVInVoltage(BatterySim.calculateVoltage(uuid, getSupplyCurrent()));
     }
     if (!simUpdated) {
       starveInput();

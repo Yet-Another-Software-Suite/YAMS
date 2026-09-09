@@ -98,7 +98,7 @@ public class DCMotorSimSupplier implements SimSupplier {
     if (!isInputFed()) {
       sim.setInputVoltage(
           motorDutyCycleSupplier.get() * RoboRioSim.getVInVoltage()); // Supply voltage
-      RoboRioSim.setVInVoltage(BatterySim.calculateVoltage(uuid, sim.getCurrentDrawAmps()));
+      RoboRioSim.setVInVoltage(BatterySim.calculateVoltage(uuid, getSupplyCurrent()));
     }
     if (!simUpdated) {
       starveInput();
