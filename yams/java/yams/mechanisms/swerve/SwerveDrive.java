@@ -191,7 +191,7 @@ public class SwerveDrive {
   /**
    * Setup telemetry for the drive; the {@link SwerveDriveTelemetry} config used is either the one
    * supplied via
-   * {@link SwerveDriveConfig#withTelemetry(SwerveDriveTelemetryConfig)} or a default built from
+   * {@link SwerveDriveConfig#withTelemetry(String,SwerveDriveTelemetryConfig)} or a default built from
    * {@link SwerveDriveConfig#getTelemetryVerbosity()} (defaulting to {@link
    * TelemetryVerbosity#HIGH}).
    */
@@ -229,8 +229,7 @@ public class SwerveDrive {
    */
   public Command drive(Supplier<ChassisSpeeds> robotRelativeChassisSpeeds) {
     return Commands
-        .run(()
-                 -> setRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds.get()),
+        .run(() -> setRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds.get()),
             m_config.getSubsystem())
         .withName("Drive");
   }

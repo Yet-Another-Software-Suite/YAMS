@@ -74,8 +74,8 @@ public class SwerveSubsystem extends SubsystemBase {
     return new SwerveModule(moduleConfig);
   }
 
+  private final Pigeon2 gyro = new Pigeon2(14);
   public SwerveSubsystem() {
-    Pigeon2 gyro = new Pigeon2(14);
     var fl =
         createModule(new SparkMax(1, MotorType.kBrushless), new SparkMax(2, MotorType.kBrushless),
             new CANcoder(3), "frontleft", new Translation2d(Inches.of(10), Inches.of(10)));
@@ -91,11 +91,12 @@ public class SwerveSubsystem extends SubsystemBase {
     SwerveDriveConfig config =
         new SwerveDriveConfig(this, fl, fr, bl, br)
             .withGyro(gyro.getYaw().asSupplier())
+            //.withGyroVelocity(gyro.getAngularVelocityZDevice().asSupplier())
+            //.withGyroAngularVelocityScaleFactor(1)
             .withMaximumChassisSpeed(MetersPerSecond.of(4), RotationsPerSecond.of(360))
             .withStartingPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)))
             .withTranslationController(new PIDController(1, 0, 0))
-            .withRotationController(new PIDController(1, 0, 0))
-            .withGyroAngularVelocityScaleFactor(0.3);
+            .withRotationController(new PIDController(1, 0, 0));
     drive = new SwerveDrive(config);
 
     SmartDashboard.putData("Field", field);
@@ -148,6 +149,7 @@ public class SwerveSubsystem extends SubsystemBase {
   @Override
   public void simulationPeriodic() {
     drive.simIterate();
+    gyro.getSimState().setRawYaw(drive.getSimPose().getRotation().getRadians());
   }
 
   public Pose2d getPose() {
