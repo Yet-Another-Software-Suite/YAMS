@@ -239,6 +239,44 @@ public class SwerveDriveConfig
   {
   }
 
+  private SwerveDriveConfig(SwerveDriveConfig cfg)
+  {
+    this.telemetryVerbosity = cfg.telemetryVerbosity;
+    this.specifiedTelemetryConfig = cfg.specifiedTelemetryConfig;
+    this.initialPose = cfg.initialPose;
+    this.maximumChassisLinearVelocity = cfg.maximumChassisLinearVelocity;
+    this.maximumChassisAngularVelocity = cfg.maximumChassisAngularVelocity;
+    this.maximumModuleLinearVelocity = cfg.maximumModuleLinearVelocity;
+    this.discretizationSeconds = cfg.discretizationSeconds;
+    this.angularVelocityScaleFactor = cfg.angularVelocityScaleFactor;
+    this.centerOfRotation = cfg.centerOfRotation;
+    this.translationController = cfg.translationController;
+    this.rotationController = cfg.rotationController;
+    this.simTranslationController = cfg.simTranslationController;
+    this.simRotationController = cfg.simRotationController;
+    this.simDiscretizationSeconds = cfg.simDiscretizationSeconds;
+    this.simAngularVelocityScaleFactor = cfg.simAngularVelocityScaleFactor;
+    // Intentionally not copying these, as they are not user-configurable.
+//    this.gyroSupplier = cfg.gyroSupplier;
+//    this.gyroAngularVelocitySupplier = cfg.gyroAngularVelocitySupplier;
+//    this.gyroOffset = cfg.gyroOffset;
+//    this.gyroInverted = cfg.gyroInverted;
+//    this.telemetryName = cfg.telemetryName;
+//    this.modules = cfg.modules;
+//    this.subsystem = cfg.subsystem;
+//    this.noGyroAngularVelocitySupplierAlert = cfg.noGyroAngularVelocitySupplierAlert;
+  }
+
+  /**
+   * Clone the {@link SwerveDriveConfig} without modules, subsystem, telemetry name, gyro supplier, gyro angular velocity supplier,
+   * gyro offset, and gyro inversion.
+   * @return New {@link SwerveDriveConfig}
+   */
+  public SwerveDriveConfig clone()
+  {
+    return new SwerveDriveConfig(this);
+  }
+
   /**
    * Define a {@link Subsystem} for the {@link SwerveDrive}
    *

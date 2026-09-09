@@ -8,8 +8,7 @@ import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Microsecond;
-import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Milliseconds;import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
@@ -20,6 +19,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
@@ -78,6 +78,7 @@ public class ElevatorSimSupplier implements SimSupplier {
   private final Supplier<Double> mps;
   private final DerivativeTimeFilter mpsps;
   private final LinearFilter supplyCurrentFilter;
+  private final Time simPeriod;
   private boolean inputFed = false;
   private boolean simUpdated = false;
 
@@ -96,10 +97,10 @@ public class ElevatorSimSupplier implements SimSupplier {
     motorDutyCycleSupplier = smartMotorController::getDutyCycle;
     pos = sim::getPositionMeters;
     mps = sim::getVelocityMetersPerSecond;
-    mpsps = new DerivativeTimeFilter(
-        pos.get(), config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20)));
-    supplyCurrentFilter = LinearFilter.singlePoleIIR(Hertz.of(1000).asPeriod().in(Seconds),
-                                                     config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Seconds));
+    simPeriod = config.getSimulationPeriod();
+    mpsps = new DerivativeTimeFilter(pos.get(), simPeriod);
+    // Based off comment from https://github.com/wpilibsuite/allwpilib/issues/8691
+    supplyCurrentFilter = LinearFilter.singlePoleIIR(Milliseconds.of(100).in(Seconds), simPeriod.in(Seconds));
   }
 
   @Override
@@ -110,7 +111,7 @@ public class ElevatorSimSupplier implements SimSupplier {
     }
     if (!simUpdated) {
       starveInput();
-      sim.update(config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Seconds));
+      sim.update(simPeriod.in(Seconds));
       feedUpdateSim();
     }
   }

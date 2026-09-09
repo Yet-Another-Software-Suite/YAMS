@@ -304,18 +304,18 @@ public class SparkWrapper extends SmartMotorController
         m_simSupplier.get().starveUpdateSim();
         BatterySim.calculateVoltage(m_batterySimUUID, m_simSupplier.get().getSupplyCurrent());
       }
-      Time controlLoop = m_config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20));
+      Time simLoop = m_config.getSimulationPeriod();
       m_simSupplier.ifPresent(mSimSupplier -> {
         sparkSim.ifPresent(sim -> sim.iterate(mSimSupplier.getMechanismVelocity().in(RotationsPerSecond),
                                               mSimSupplier.getMechanismSupplyVoltage().in(Volts),
-                                              controlLoop.in(Second)));
+                                              simLoop.in(Second)));
         sparkRelativeEncoderSim.ifPresent(sim -> sim.iterate(mSimSupplier.getMechanismVelocity()
                                                                          .in(RotationsPerSecond),
-                                                             controlLoop.in(Seconds)));
+                                                             simLoop.in(Seconds)));
         m_sparkAbsoluteEncoderSim.ifPresent(absoluteEncoderSim ->
                                                 absoluteEncoderSim.iterate(mSimSupplier.getMechanismVelocity()
                                                                                        .in(RotationsPerSecond),
-                                                                           controlLoop.in(Seconds)));
+                                                                           simLoop.in(Seconds)));
       });
       // TODO: Uncomment after the 2026 season
 //      m_looseFollowers.ifPresent(smcs -> {for(var f : smcs){f.simIterate();}});

@@ -63,7 +63,7 @@ import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.Frequency;import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Time;
@@ -710,6 +710,11 @@ public class TalonFXWrapper extends SmartMotorController
     this.m_config = config;
     this.m_looseFollowers = config.getLooselyCoupledFollowers();
     m_lqr = config.getLQRClosedLoopController();
+
+    // Sim periodic
+    if(RobotBase.isSimulation() && !m_config.getSimulationPeriod().isEquivalent(Milliseconds.of(20)))
+      setUpdateFrequency(m_config.getSimulationPeriod().asFrequency());
+
     // Closed loop controllers.
     for (var closedLoopControlSlot : ClosedLoopControllerSlot.values())
     {
@@ -1188,6 +1193,23 @@ public class TalonFXWrapper extends SmartMotorController
     return forceConfigApply().isOK();
   }
 
+  /**
+   * Set the update frequency of the {@link StatusSignal}s used by this {@link SmartMotorController}
+   * @param freq {@link Frequency} to use.
+   */
+  public void setUpdateFrequency(Frequency freq)
+  {
+    m_mechanismPosition.setUpdateFrequency(freq);
+    m_mechanismVelocity.setUpdateFrequency(freq);
+    m_mechanismAcceleration.setUpdateFrequency(freq);
+    m_dutyCycle.setUpdateFrequency(freq);
+    m_statorCurrent.setUpdateFrequency(freq);
+    m_supplyCurrent.setUpdateFrequency(freq);
+    m_outputVoltage.setUpdateFrequency(freq);
+    m_rotorPosition.setUpdateFrequency(freq);
+    m_rotorVelocity.setUpdateFrequency(freq);
+    m_deviceTemperature.setUpdateFrequency(freq);
+  }
   @Override
   public Optional<Current> getSupplyCurrent()
   {

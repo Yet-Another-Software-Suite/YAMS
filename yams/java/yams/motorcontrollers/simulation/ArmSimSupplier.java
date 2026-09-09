@@ -74,7 +74,7 @@ public class ArmSimSupplier implements SimSupplier {
   private final LinearFilter supplyCurrentFilter;
   private final SingleJointedArmSim sim;
   private final MechanismGearing mechGearing;
-  private final Time period;
+  private final Time simPeriod;
   private final DCMotor motor;
   private final UUID uuid;
 
@@ -89,10 +89,11 @@ public class ArmSimSupplier implements SimSupplier {
     sim = simulation;
     motorDutyCycleSupplier = smartMotorController::getDutyCycle;
     mechGearing = config.getGearing();
-    period = config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20));
+    simPeriod = config.getSimulationPeriod();
     motor = smartMotorController.getDCMotor();
-    accel = new DerivativeTimeFilter(period);
-    supplyCurrentFilter = LinearFilter.singlePoleIIR(Hertz.of(1000).asPeriod().in(Seconds), period.in(Seconds));
+    accel = new DerivativeTimeFilter(simPeriod);
+    // Based off comment from https://github.com/wpilibsuite/allwpilib/issues/8691
+    supplyCurrentFilter = LinearFilter.singlePoleIIR(Milliseconds.of(100).in(Seconds), simPeriod.in(Seconds));
     uuid = smartMotorController.m_batterySimUUID;
   }
 
@@ -104,7 +105,7 @@ public class ArmSimSupplier implements SimSupplier {
     }
     if (!simUpdated) {
       starveInput();
-      sim.update(period.in(Seconds));
+      sim.update(simPeriod.in(Seconds));
       try {
         // Thread.sleep(1);
       } catch (Exception e) {

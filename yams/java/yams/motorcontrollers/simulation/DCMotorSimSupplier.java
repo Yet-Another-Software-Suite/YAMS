@@ -6,8 +6,7 @@ package yams.motorcontrollers.simulation;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Millihertz;
-import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Milliseconds;import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
@@ -72,7 +71,7 @@ public class DCMotorSimSupplier implements SimSupplier {
   private final LinearFilter supplyCurrentFilter;
   private final DCMotorSim sim;
   private final MechanismGearing mechGearing;
-  private final Time period;
+  private final Time simPeriod;
   private final DCMotor motor;
   private final UUID uuid;
 
@@ -87,9 +86,10 @@ public class DCMotorSimSupplier implements SimSupplier {
     sim = simulation;
     motorDutyCycleSupplier = smartMotorController::getDutyCycle;
     mechGearing = config.getGearing();
-    period = config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20));
+    simPeriod = config.getSimulationPeriod();
     motor = smartMotorController.getDCMotor();
-    supplyCurrentFilter = LinearFilter.singlePoleIIR(Millihertz.of(1000).in(Hertz), period.in(Seconds));
+    // Based off comment from https://github.com/wpilibsuite/allwpilib/issues/8691
+    supplyCurrentFilter = LinearFilter.singlePoleIIR(Milliseconds.of(100).in(Seconds), simPeriod.in(Seconds));
     uuid = smartMotorController.m_batterySimUUID;
   }
 
@@ -102,7 +102,7 @@ public class DCMotorSimSupplier implements SimSupplier {
     }
     if (!simUpdated) {
       starveInput();
-      sim.update(period.in(Seconds));
+      sim.update(simPeriod.in(Seconds));
       try {
         // Thread.sleep(1);
       } catch (Exception e) {

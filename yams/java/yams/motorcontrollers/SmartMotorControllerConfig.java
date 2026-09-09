@@ -10,6 +10,7 @@ import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Milliseconds;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
@@ -204,6 +205,13 @@ public class SmartMotorControllerConfig {
    */
   private Optional<Time> controlPeriod = Optional.empty();
   /**
+   * Simulation loop period, the rate at which {@link SmartMotorController#simIterate()} steps the
+   * simulated physics forward. This is independent of {@link #controlPeriod} — a robot can run its
+   * periodic loop at 20ms while stepping simulation physics at 5ms, for example. Defaults to 20ms
+   * if not configured.
+   */
+  private Optional<Time> simulationPeriod = Optional.empty();
+  /**
    * Open loop ramp rate, amount of time to go from 0 to 100 speed..
    */
   private Optional<Time> openLoopRampRate = Optional.empty();
@@ -373,6 +381,7 @@ public class SmartMotorControllerConfig {
     this.externalEncoderGearing = cfg.externalEncoderGearing;
     this.mechanismCircumference = cfg.mechanismCircumference;
     this.controlPeriod = cfg.controlPeriod;
+    this.simulationPeriod = cfg.simulationPeriod;
     this.openLoopRampRate = cfg.openLoopRampRate;
     this.closeLoopRampRate = cfg.closeLoopRampRate;
     this.statorStallCurrentLimit = cfg.statorStallCurrentLimit;
@@ -1217,6 +1226,31 @@ public class SmartMotorControllerConfig {
   public SmartMotorControllerConfig withClosedLoopControlPeriod(Frequency time) {
     controlPeriod = Optional.of(time.asPeriod());
     return this;
+  }
+
+  /**
+   * Set the simulation loop period — the rate at which {@link SmartMotorController#simIterate()}
+   * steps the simulated physics forward. Independent of {@link #withClosedLoopControlPeriod(Time)};
+   * a robot can run its periodic loop at 20ms while stepping simulation physics at 5ms, for
+   * example. Defaults to 20ms if not set.
+   *
+   * @param time Simulation loop period.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public SmartMotorControllerConfig withSimulationPeriod(Time time) {
+    simulationPeriod = Optional.of(time);
+    return this;
+  }
+
+  /**
+   * Get the simulation loop period — the rate at which {@link SmartMotorController#simIterate()}
+   * steps the simulated physics forward. Defaults to 20ms if not set via
+   * {@link #withSimulationPeriod(Time)}.
+   *
+   * @return Simulation loop period.
+   */
+  public Time getSimulationPeriod() {
+    return simulationPeriod.orElse(Milliseconds.of(20));
   }
 
   /**
