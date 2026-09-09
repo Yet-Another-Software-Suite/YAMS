@@ -302,7 +302,7 @@ public class SparkWrapper extends SmartMotorController
       {
         m_simSupplier.get().updateSimState();
         m_simSupplier.get().starveUpdateSim();
-        BatterySim.calculateVoltage(m_batterySimUUID, m_simSupplier.get().getCurrentDraw());
+        BatterySim.calculateVoltage(m_batterySimUUID, m_simSupplier.get().getSupplyCurrent());
       }
       Time controlLoop = m_config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20));
       m_simSupplier.ifPresent(mSimSupplier -> {
@@ -841,7 +841,7 @@ public class SparkWrapper extends SmartMotorController
   @Override
   public Current getStatorCurrent()
   {
-    return m_simSupplier.isPresent() ? m_simSupplier.get().getCurrentDraw() : Amps.of(m_spark.getOutputCurrent());
+    return m_simSupplier.isPresent() ? m_simSupplier.get().getStatorCurrent() : Amps.of(m_spark.getOutputCurrent());
   }
 
   @Override

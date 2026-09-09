@@ -29,8 +29,8 @@ import edu.wpi.first.units.measure.Voltage;
  *
  * <h2>How to use</h2>
  * <p>
- * Create a concrete {@code SimSupplier} (e.g. {@link yams.motorcontrollers.simulation.ArmSimSupplier}
- * or {@link yams.motorcontrollers.simulation.DCMotorSimSupplier}) and pass it to
+ * Create a concrete {@code SimSupplier} (e.g. {@link yams.motorcontrollers.simulation.ArmSimSupplier} or {@link
+  yams.motorcontrollers.simulation.DCMotorSimSupplier}) and pass it to
  * {@code SmartMotorControllerConfig} via {@code withSimSupplier()}:
  * </p>
  * <pre>{@code
@@ -57,8 +57,7 @@ import edu.wpi.first.units.measure.Voltage;
  * ({@link #feedUpdateSim()}/{@link #starveUpdateSim()}).
  * </p>
  */
-public interface SimSupplier
-{
+public interface SimSupplier {
   /**
    * Update the sim state.
    */
@@ -170,11 +169,17 @@ public interface SimSupplier
   AngularVelocity getRotorVelocity();
 
   /**
-   * Get the current draw of from the sim.
+   * Get the stator current draw of from the sim.
    *
-   * @return Current draw.
+   * @return stator current draw.
    */
-  Current getCurrentDraw();
+  Current getStatorCurrent();
+
+  /**
+   * Get the supply current draw of the motor controller.
+   * @return supply current draw.
+   */
+  Current getSupplyCurrent();
 
   /**
    * Get the rotor acceleration.

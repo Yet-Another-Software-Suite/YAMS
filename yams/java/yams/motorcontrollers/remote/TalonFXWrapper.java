@@ -402,7 +402,7 @@ public class TalonFXWrapper extends SmartMotorController
         simSupplier.setMechanismStatorVoltage(motorVoltage); // dcmotorSim.setInputVoltage(motorVoltage)
         simSupplier.updateSimState(); // dcmotorSim.update(0.020)
         simSupplier.starveUpdateSim(); // clear update once atomic
-        BatterySim.calculateVoltage(m_batterySimUUID, simSupplier.getCurrentDraw());
+        BatterySim.calculateVoltage(m_batterySimUUID, simSupplier.getSupplyCurrent());
       });
 
       // apply the new rotor position and velocity to the TalonFX;

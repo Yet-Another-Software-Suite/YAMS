@@ -16,7 +16,7 @@ sourceSets {
         java {
             srcDirs 'src/main/java'
             // YAMS_TESTING
-            srcDirs '../../../yams/java'
+            srcDirs '../../yams/java'
             // END_YAMS_TESTING
         }
     }

@@ -36,7 +36,7 @@ import yams.motorcontrollers.simulation.Sensor;
 
 public class ArmSubsystem extends SubsystemBase {
   private final CANcoder cancoder = new CANcoder(2);
-  private final TalonFX armMotor = new TalonFX(1);
+  private final TalonFX armMotor = new TalonFX(15);
   //  private final SmartMotorControllerTelemetryConfig motorTelemetryConfig = new
   //  SmartMotorControllerTelemetryConfig()
   //          .withMechanismPosition()

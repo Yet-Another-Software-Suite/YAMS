@@ -4,6 +4,7 @@
 package yams.motorcontrollers.simulation;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Microsecond;
@@ -13,6 +14,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -75,6 +77,7 @@ public class ElevatorSimSupplier implements SimSupplier {
   private final Supplier<Double> pos;
   private final Supplier<Double> mps;
   private final DerivativeTimeFilter mpsps;
+  private final LinearFilter supplyCurrentFilter;
   private boolean inputFed = false;
   private boolean simUpdated = false;
 
@@ -95,6 +98,8 @@ public class ElevatorSimSupplier implements SimSupplier {
     mps = sim::getVelocityMetersPerSecond;
     mpsps = new DerivativeTimeFilter(
         pos.get(), config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20)));
+    supplyCurrentFilter = LinearFilter.singlePoleIIR(Hertz.of(1000).asPeriod().in(Seconds),
+                                                     config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Seconds));
   }
 
   @Override
@@ -194,8 +199,17 @@ public class ElevatorSimSupplier implements SimSupplier {
   }
 
   @Override
-  public Current getCurrentDraw() {
+  public Current getStatorCurrent() {
     return Amps.of(sim.getCurrentDrawAmps());
+  }
+
+  @Override
+  public Current getSupplyCurrent() {
+    // For a BLDC driven by a switching converter, power is conserved across the duty-cycle
+    // transformation: supplyVoltage * supplyCurrent = statorVoltage * statorCurrent, and
+    // statorVoltage = dutyCycle * supplyVoltage, so supplyCurrent = dutyCycle * statorCurrent.
+    double dutyCycle = motorDutyCycleSupplier.get();
+    return Amps.of(supplyCurrentFilter.calculate(dutyCycle * sim.getCurrentDrawAmps()));
   }
 
   @Override
