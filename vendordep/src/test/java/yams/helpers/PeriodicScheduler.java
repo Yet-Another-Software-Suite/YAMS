@@ -7,7 +7,6 @@ import static edu.wpi.first.units.Units.Microseconds;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.SimHooks;
 import java.util.PriorityQueue;
 
@@ -19,23 +18,32 @@ import java.util.PriorityQueue;
  * <p>
  * Unlike a real {@code Notifier} per callback, this advances a purely virtual timeline instead of
  * depending on real wall-clock time or spawning any threads — {@link #runFor(Time)} runs entirely
- * on the calling thread. It does keep WPILib's simulated FPGA clock ({@code SimHooks}/
- * {@code RobotController}'s time source) in lockstep with that virtual timeline, since some vendor
- * SDKs (e.g. CTRE's Phoenix6 SimState) treat status signals as stale until the FPGA clock actually
- * advances. That makes this well suited to unit tests that need two (or more) callbacks to run at
- * different rates against the same object — e.g. stepping simulation physics on one period while
- * publishing telemetry on another — without the flakiness of real background-thread timing under a
- * simulated clock.
+ * on the calling thread. Time is controlled via WPILib's own documented mechanism for this,
+ * {@link SimHooks#pauseTiming()}/{@link SimHooks#stepTiming(double)}, rather than a raw custom
+ * {@code RobotController} time source — the latter was found to leave some vendor simulation SDKs
+ * (whose own retry/config logic depends on the FPGA clock behaving exactly as WPILib expects) in
+ * an inconsistent state, silently dropping simulated hardware calls in a way that reproduced in CI
+ * but not always locally.
  * </p>
  */
-public class PeriodicScheduler
+public class PeriodicScheduler implements AutoCloseable
 {
   private final PriorityQueue<Callback> callbacks = new PriorityQueue<>();
   private long nowMicros = 0;
 
   public PeriodicScheduler()
   {
-    RobotController.setTimeSource(() -> nowMicros);
+    SimHooks.pauseTiming();
+  }
+
+  /**
+   * Resume normal (real-time) simulated timing. Call this once done, so this scheduler doesn't
+   * leave WPILib's simulated clock paused for whatever runs next.
+   */
+  @Override
+  public void close()
+  {
+    SimHooks.resumeTiming();
   }
 
   /**

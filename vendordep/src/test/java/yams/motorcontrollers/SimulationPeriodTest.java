@@ -128,23 +128,26 @@ public class SimulationPeriodTest
 
       int[] simIterations = {0};
       int[] telemetryIterations = {0};
-      PeriodicScheduler scheduler = new PeriodicScheduler();
-      // simIterate() at the configured 10ms simulation period.
-      scheduler.addPeriodic(() -> {
-        smc.simIterate();
-        simIterations[0]++;
-      }, Milliseconds.of(10));
-      // Re-commanding the setpoint and publishing telemetry at 20ms — a robot's normal periodic
-      // loop, decoupled from the (faster) simulation period above.
-      scheduler.addPeriodic(() -> {
-        smc.setPosition(setpoint);
-        smc.updateTelemetry();
-        telemetryIterations[0]++;
-      }, Milliseconds.of(20));
+      Angle finalPosition;
+      try (PeriodicScheduler scheduler = new PeriodicScheduler())
+      {
+        // simIterate() at the configured 10ms simulation period.
+        scheduler.addPeriodic(() -> {
+          smc.simIterate();
+          simIterations[0]++;
+        }, Milliseconds.of(10));
+        // Re-commanding the setpoint and publishing telemetry at 20ms — a robot's normal periodic
+        // loop, decoupled from the (faster) simulation period above.
+        scheduler.addPeriodic(() -> {
+          smc.setPosition(setpoint);
+          smc.updateTelemetry();
+          telemetryIterations[0]++;
+        }, Milliseconds.of(20));
 
-      scheduler.runFor(Seconds.of(3.0));
+        scheduler.runFor(Seconds.of(3.0));
 
-      Angle finalPosition = smc.getMechanismPosition();
+        finalPosition = smc.getMechanismPosition();
+      }
       System.out.println(smc.getName() + ": sim iterations=" + simIterations[0]
           + ", telemetry iterations=" + telemetryIterations[0]
           + ", final position=" + finalPosition.in(Degrees) + " deg (target " + setpoint.in(Degrees) + " deg)");
