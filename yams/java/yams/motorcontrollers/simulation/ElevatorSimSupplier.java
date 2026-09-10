@@ -13,11 +13,13 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
@@ -75,6 +77,8 @@ public class ElevatorSimSupplier implements SimSupplier {
   private final Supplier<Double> pos;
   private final Supplier<Double> mps;
   private final DerivativeTimeFilter mpsps;
+  private final LinearFilter supplyCurrentFilter;
+  private final Time simPeriod;
   private boolean inputFed = false;
   private boolean simUpdated = false;
 
@@ -93,19 +97,21 @@ public class ElevatorSimSupplier implements SimSupplier {
     motorDutyCycleSupplier = smartMotorController::getDutyCycle;
     pos = sim::getPositionMeters;
     mps = sim::getVelocityMetersPerSecond;
-    mpsps = new DerivativeTimeFilter(
-        pos.get(), config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20)));
+    simPeriod = config.getSimulationPeriod();
+    mpsps = new DerivativeTimeFilter(pos.get(), simPeriod);
+    // Based off comment from https://github.com/wpilibsuite/allwpilib/issues/8691
+    supplyCurrentFilter = LinearFilter.singlePoleIIR(Milliseconds.of(100).in(Seconds), simPeriod.in(Seconds));
   }
 
   @Override
   public void updateSimState() {
     if (!isInputFed()) {
       sim.setInputVoltage(motorDutyCycleSupplier.get() * RoboRioSim.getVInVoltage());
-      RoboRioSim.setVInVoltage(BatterySim.calculateVoltage(uuid, sim.getCurrentDrawAmps()));
+      RoboRioSim.setVInVoltage(BatterySim.calculateVoltage(uuid, getSupplyCurrent()));
     }
     if (!simUpdated) {
       starveInput();
-      sim.update(config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Seconds));
+      sim.update(simPeriod.in(Seconds));
       feedUpdateSim();
     }
   }
@@ -194,8 +200,17 @@ public class ElevatorSimSupplier implements SimSupplier {
   }
 
   @Override
-  public Current getCurrentDraw() {
+  public Current getStatorCurrent() {
     return Amps.of(sim.getCurrentDrawAmps());
+  }
+
+  @Override
+  public Current getSupplyCurrent() {
+    // For a BLDC driven by a switching converter, power is conserved across the duty-cycle
+    // transformation: supplyVoltage * supplyCurrent = statorVoltage * statorCurrent, and
+    // statorVoltage = dutyCycle * supplyVoltage, so supplyCurrent = dutyCycle * statorCurrent.
+    double dutyCycle = motorDutyCycleSupplier.get();
+    return Amps.of(supplyCurrentFilter.calculate(dutyCycle * sim.getCurrentDrawAmps()));
   }
 
   @Override

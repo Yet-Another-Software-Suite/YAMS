@@ -3,6 +3,9 @@
 
 package yams.mechanisms.config;
 
+import static edu.wpi.first.units.Units.Microsecond;
+import static edu.wpi.first.units.Units.Milliseconds;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Seconds;
@@ -17,12 +20,14 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.function.Supplier;
 
+import yams.math.DerivativeTimeFilter;
 import yams.mechanisms.swerve.SwerveDrive;
 import yams.mechanisms.swerve.SwerveModule;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
@@ -137,6 +142,17 @@ public class SwerveDriveConfig
    */
   private Optional<Supplier<AngularVelocity>> gyroAngularVelocitySupplier   = Optional.empty();
   /**
+   * Derives the gyro angular velocity from the gyro angle ({@link #getGyroAngle()}) when
+   * {@link #gyroAngularVelocitySupplier} is not configured, in both simulation and real robot code.
+   */
+  private final DerivativeTimeFilter          gyroAngularVelocityFilter    = new DerivativeTimeFilter(Milliseconds.of(20));
+  /**
+   * Alert shown once if {@link #angularVelocitySkewCorrection(ChassisSpeeds)} runs without a
+   * {@link #gyroAngularVelocitySupplier} configured, warning that the gyro angular velocity is being derived from
+   * the gyro angle instead.
+   */
+  private Alert                               noGyroAngularVelocitySupplierAlert = null;
+  /**
    * Gyro offset.
    */
   private Optional<Angle>                     gyroOffset                    = Optional.empty();
@@ -221,6 +237,44 @@ public class SwerveDriveConfig
    */
   public SwerveDriveConfig()
   {
+  }
+
+  private SwerveDriveConfig(SwerveDriveConfig cfg)
+  {
+    this.telemetryVerbosity = cfg.telemetryVerbosity;
+    this.specifiedTelemetryConfig = cfg.specifiedTelemetryConfig;
+    this.initialPose = cfg.initialPose;
+    this.maximumChassisLinearVelocity = cfg.maximumChassisLinearVelocity;
+    this.maximumChassisAngularVelocity = cfg.maximumChassisAngularVelocity;
+    this.maximumModuleLinearVelocity = cfg.maximumModuleLinearVelocity;
+    this.discretizationSeconds = cfg.discretizationSeconds;
+    this.angularVelocityScaleFactor = cfg.angularVelocityScaleFactor;
+    this.centerOfRotation = cfg.centerOfRotation;
+    this.translationController = cfg.translationController;
+    this.rotationController = cfg.rotationController;
+    this.simTranslationController = cfg.simTranslationController;
+    this.simRotationController = cfg.simRotationController;
+    this.simDiscretizationSeconds = cfg.simDiscretizationSeconds;
+    this.simAngularVelocityScaleFactor = cfg.simAngularVelocityScaleFactor;
+    // Intentionally not copying these, as they are not user-configurable.
+//    this.gyroSupplier = cfg.gyroSupplier;
+//    this.gyroAngularVelocitySupplier = cfg.gyroAngularVelocitySupplier;
+//    this.gyroOffset = cfg.gyroOffset;
+//    this.gyroInverted = cfg.gyroInverted;
+//    this.telemetryName = cfg.telemetryName;
+//    this.modules = cfg.modules;
+//    this.subsystem = cfg.subsystem;
+//    this.noGyroAngularVelocitySupplierAlert = cfg.noGyroAngularVelocitySupplierAlert;
+  }
+
+  /**
+   * Clone the {@link SwerveDriveConfig} without modules, subsystem, telemetry name, gyro supplier, gyro angular velocity supplier,
+   * gyro offset, and gyro inversion.
+   * @return New {@link SwerveDriveConfig}
+   */
+  public SwerveDriveConfig clone()
+  {
+    return new SwerveDriveConfig(this);
   }
 
   /**
@@ -627,14 +681,32 @@ public class SwerveDriveConfig
    */
   private ChassisSpeeds angularVelocitySkewCorrection(ChassisSpeeds robotRelativeVelocity)
   {
-    var angularVelocity = new Rotation2d(gyroAngularVelocitySupplier.orElseThrow().get().in(RadiansPerSecond) *
-                                         (RobotBase.isSimulation() ?
-                                          simAngularVelocityScaleFactor.orElse(angularVelocityScaleFactor.orElseThrow())
-                                                                   :
-                                          angularVelocityScaleFactor.orElseThrow()));
+    AngularVelocity gyroAngularVelocity;
+    if (gyroAngularVelocitySupplier.isPresent())
+    {
+      gyroAngularVelocity = gyroAngularVelocitySupplier.get().get();
+    }
+    else
+    {
+      if (noGyroAngularVelocitySupplierAlert == null)
+      {
+        noGyroAngularVelocitySupplierAlert = new Alert("YAMS",
+            getTelemetryName() + " has an angular velocity scale factor configured but no gyro angular velocity "
+                + "supplier (see SwerveDriveConfig#withGyroVelocity); deriving it from the gyro angle instead.",
+            Alert.AlertType.kInfo);
+        noGyroAngularVelocitySupplierAlert.set(true);
+      }
+      gyroAngularVelocity =
+          Radians.per(Microsecond).of(gyroAngularVelocityFilter.derivative(getGyroAngle().in(Radians)));
+    }
+    var angularVelocityScale = (RobotBase.isSimulation() ?
+                                simAngularVelocityScaleFactor.orElse(angularVelocityScaleFactor.orElseThrow())
+                                                         :
+                                angularVelocityScaleFactor.orElseThrow());
+    var angularVelocity = new Rotation2d(gyroAngularVelocity.in(RadiansPerSecond) * angularVelocityScale);
     if (angularVelocity.getRadians() != 0.0)
     {
-      var           gyroRotation          = new Rotation2d(gyroSupplier.orElseThrow().get());
+      var           gyroRotation          = new Rotation2d(getGyroAngle());
       ChassisSpeeds fieldRelativeVelocity = ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeVelocity, gyroRotation);
       robotRelativeVelocity = ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeVelocity,
                                                                     gyroRotation.plus(angularVelocity));

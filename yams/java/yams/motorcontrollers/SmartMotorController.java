@@ -56,6 +56,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.gearing.MechanismGearing;
 import yams.math.LQRController;
+import yams.motorcontrollers.simulation.BatterySim;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
@@ -1278,6 +1279,7 @@ public abstract class SmartMotorController
     {
       m_rioClosedLoopAlert.set(false);
     }
+    BatterySim.removeCurrent(m_batterySimUUID);
     telemetry.close();
   }
 

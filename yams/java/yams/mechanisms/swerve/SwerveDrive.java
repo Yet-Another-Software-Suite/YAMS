@@ -191,7 +191,7 @@ public class SwerveDrive {
   /**
    * Setup telemetry for the drive; the {@link SwerveDriveTelemetry} config used is either the one
    * supplied via
-   * {@link SwerveDriveConfig#withTelemetry(SwerveDriveTelemetryConfig)} or a default built from
+   * {@link SwerveDriveConfig#withTelemetry(String,SwerveDriveTelemetryConfig)} or a default built from
    * {@link SwerveDriveConfig#getTelemetryVerbosity()} (defaulting to {@link
    * TelemetryVerbosity#HIGH}).
    */
@@ -210,13 +210,11 @@ public class SwerveDrive {
     m_swerveTelemetry.setupTelemetry(this);
     m_field2d.setRobotPose(getPose());
     SmartDashboard.putData("Mechanisms/" + getName() + "/field", m_field2d);
-    SmartDashboard.putData(
-        "Mechanisms/" + getName() + "/tuning", Commands.startRun(() -> {
-          System.out.println(
-              "================= Starting SwerveDrive Tuning =================\n");
-          resetTranslationPID();
-          resetRotationPID();
-        }, () -> m_swerveTelemetry.applyTuningValues(this)));
+    SmartDashboard.putData("Mechanisms/" + getName() + "/tuning", Commands.startRun(() -> {
+      System.out.println("================= Starting SwerveDrive Tuning =================\n");
+      resetTranslationPID();
+      resetRotationPID();
+    }, () -> m_swerveTelemetry.applyTuningValues(this)));
     // Report as YAGSL bc this will become apart of YAGSL in 2027...s
     HAL.report(kResourceType_RobotDrive, kRobotDriveSwerve_YAGSL);
   }
@@ -231,8 +229,7 @@ public class SwerveDrive {
    */
   public Command drive(Supplier<ChassisSpeeds> robotRelativeChassisSpeeds) {
     return Commands
-        .run(()
-                 -> setRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds.get()),
+        .run(() -> setRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds.get()),
             m_config.getSubsystem())
         .withName("Drive");
   }
@@ -532,9 +529,8 @@ public class SwerveDrive {
     return new ChassisSpeeds(
         translationDifference.getMeasureX().per(Second).times(translationScalar),
         translationDifference.getMeasureY().per(Second).times(translationScalar),
-        RadiansPerSecond.of(rotationPID.calculate(currentPose.getRotation().getRadians(),
-                                                  targetPose.getRotation().getRadians()))
-    );
+        RadiansPerSecond.of(rotationPID.calculate(
+            currentPose.getRotation().getRadians(), targetPose.getRotation().getRadians())));
   }
 
   /**
@@ -628,14 +624,11 @@ public class SwerveDrive {
       m_simTimer.start();
     }
     Arrays.stream(m_modules).forEach(SwerveModule::simIterate);
-    ChassisSpeeds desired = m_kinematics.toChassisSpeeds(m_desiredModuleStates);
-
     var dt = m_simTimer.get();
-    Twist2d twist = new Twist2d(desired.vxMetersPerSecond * dt, desired.vyMetersPerSecond * dt,
-        desired.omegaRadiansPerSecond * dt);
+    ChassisSpeeds desired = m_kinematics.toChassisSpeeds(m_desiredModuleStates);
+    Twist2d twist = new Twist2d(desired.vxMetersPerSecond * dt, desired.vyMetersPerSecond * dt, desired.omegaRadiansPerSecond * dt);
     m_simPose = m_simPose.exp(twist);
-    m_simGyroAngle = m_simGyroAngle.plus(
-        Radians.of(m_kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond * dt));
+    m_simGyroAngle = m_simPose.getRotation().getMeasure();
     m_simTimer.reset();
   }
 

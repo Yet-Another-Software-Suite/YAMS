@@ -41,7 +41,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   private final Mass weight = Pounds.of(16);
   private final DCMotor motors = DCMotor.getNEO(1);
   private final MechanismGearing gearing = new MechanismGearing(GearBox.fromReductionStages(3, 4));
-  private final SparkMax elevatorMotor = new SparkMax(2, SparkLowLevel.MotorType.kBrushless);
+  private final SparkMax elevatorMotor = new SparkMax(13, SparkLowLevel.MotorType.kBrushless);
   //  private final SmartMotorControllerTelemetryConfig motorTelemetryConfig = new
   //  SmartMotorControllerTelemetryConfig()
   //          .withMechanismPosition()

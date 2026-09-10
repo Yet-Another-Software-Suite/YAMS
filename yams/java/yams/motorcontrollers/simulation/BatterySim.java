@@ -147,6 +147,17 @@ public class BatterySim {
   }
 
   /**
+   * Stop counting the given simulation's current draw towards the shared battery load, e.g. once
+   * its {@link yams.motorcontrollers.SmartMotorController} has been closed. Without this, a closed
+   * simulation's last-known current draw would linger in {@link #currents} indefinitely.
+   *
+   * @param id {@link UUID} of the simulation to remove.
+   */
+  public static void removeCurrent(UUID id) {
+    currents.remove(id);
+  }
+
+  /**
    * Get the simulated state of charge of the battery, from 0 (empty) to 1 (full).
    *
    * @return State of charge of the battery.
