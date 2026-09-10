@@ -81,10 +81,10 @@ loadScripts(document, 'script');</script>
 <div class="block">Swerve Module
 
  <h2>Configuration Example</h2>
- <p>
- The following example shows how to build a complete <a href="SwerveModuleConfig.html" title="class in yams.mechanisms.config"><code>SwerveModuleConfig</code></a> for a single
+
+ <p>The following example shows how to build a complete <a href="SwerveModuleConfig.html" title="class in yams.mechanisms.config"><code>SwerveModuleConfig</code></a> for a single
  swerve module using TalonFX motors and a CANcoder absolute encoder.
- </p>
+
  <pre><code>
  import static edu.wpi.first.units.Units.*;
  import com.ctre.phoenix6.hardware.TalonFX;
@@ -209,8 +209,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../../telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSwerveModuleTelemetryConfig()" class="member-name-link">getSwerveModuleTelemetryConfig</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the user specified <a href="../../telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry"><code>SwerveModuleTelemetryConfig</code></a>, if configured via
- <a href="#withTelemetry(java.lang.String,yams.telemetry.SwerveModuleTelemetryConfig)"><code>withTelemetry(String, SwerveModuleTelemetryConfig)</code></a>.</div>
+<div class="block">Get the user specified <a href="../../telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry"><code>SwerveModuleTelemetryConfig</code></a>, if configured via <a href="#withTelemetry(java.lang.String,yams.telemetry.SwerveModuleTelemetryConfig)"><code>withTelemetry(String, SwerveModuleTelemetryConfig)</code></a>.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTelemetryName()" class="member-name-link">getTelemetryName</a>()</code></div>
@@ -225,7 +224,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withAbsoluteEncoder(java.lang.Object)" class="member-name-link">withAbsoluteEncoder</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;absoluteEncoder)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the absolute encoder for the azimuth <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> if it's the SAME VENDOR, only.</div>
+<div class="block">Set the absolute encoder for the azimuth <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> if it's the SAME VENDOR,
+ only.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withAbsoluteEncoder(java.util.function.DoubleSupplier)" class="member-name-link">withAbsoluteEncoder</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;rotationSupplier)</code></div>
@@ -245,14 +245,14 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withAbsoluteEncoderOffset(edu.wpi.first.units.measure.Angle)" class="member-name-link">withAbsoluteEncoderOffset</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;offset)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the absolute encoder offset for the azimuth <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> so that the absolute encoder reads 0
- while the wheel is facing forwards and bevel to the left.</div>
+<div class="block">Set the absolute encoder offset for the azimuth <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> so that the
+ absolute encoder reads 0 while the wheel is facing forwards and bevel to the left.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withCosineCompensation(boolean)" class="member-name-link">withCosineCompensation</a><wbr>(boolean&nbsp;compensate)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Cosine compensation for the <a href="../swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a>, adjusting the velocity by the cosine of
- the (current_angle-desired_angle).</div>
+<div class="block">Cosine compensation for the <a href="../swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a>, adjusting the velocity by the cosine of the
+ (current_angle-desired_angle).</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withDistanceFromCenterOfRotation(edu.wpi.first.units.measure.Distance,edu.wpi.first.units.measure.Distance)" class="member-name-link">withDistanceFromCenterOfRotation</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;front,
@@ -285,7 +285,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withOptimization(boolean)" class="member-name-link">withOptimization</a><wbr>(boolean&nbsp;swerveModuleStateOptimization)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Use <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html#optimize(edu.wpi.first.math.geometry.Rotation2d)" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState.optimize(Rotation2d)</code></a> to optimize each state.</div>
+<div class="block">Use <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html#optimize(edu.wpi.first.math.geometry.Rotation2d)" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState.optimize(Rotation2d)</code></a> to optimize
+ each state.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSmartMotorController(yams.motorcontrollers.SmartMotorController,yams.motorcontrollers.SmartMotorController)" class="member-name-link">withSmartMotorController</a><wbr>(<a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a>&nbsp;driveMotor,
@@ -308,14 +309,14 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withWheelDiameter(edu.wpi.first.units.measure.Distance)" class="member-name-link">withWheelDiameter</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;diameter)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the wheel diameter for the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, ideally should be set inside the drive motor
- <a href="../../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+<div class="block">Set the wheel diameter for the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, ideally should be set inside the
+ drive motor <a href="../../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withWheelRadius(edu.wpi.first.units.measure.Distance)" class="member-name-link">withWheelRadius</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;radius)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the wheel radius for the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, ideally should be set inside the drive motor
- <a href="../../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
+<div class="block">Set the wheel radius for the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, ideally should be set inside the
+ drive motor <a href="../../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
 </div>
 </div>
 </div>
@@ -354,8 +355,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Create the <a href="SwerveModuleConfig.html" title="class in yams.mechanisms.config"><code>SwerveModuleConfig</code></a> for the <a href="../swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a></div>
 <dl class="notes">
 <dt>Implementation Note:</dt>
-<dd>Required to use <a href="#withSmartMotorController(yams.motorcontrollers.SmartMotorController,yams.motorcontrollers.SmartMotorController)"><code>withSmartMotorController(SmartMotorController, SmartMotorController)</code></a> BEFORE
- passed into <a href="../swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a></dd>
+<dd>Required to use <a href="#withSmartMotorController(yams.motorcontrollers.SmartMotorController,yams.motorcontrollers.SmartMotorController)"><code>withSmartMotorController(SmartMotorController, SmartMotorController)</code></a> BEFORE passed into <a href="../swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a></dd>
 </dl>
 </section>
 </li>
@@ -396,8 +396,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="withCosineCompensation(boolean)">
 <h3>withCosineCompensation</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></span>&nbsp;<span class="element-name">withCosineCompensation</span><wbr><span class="parameters">(boolean&nbsp;compensate)</span></div>
-<div class="block">Cosine compensation for the <a href="../swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a>, adjusting the velocity by the cosine of
- the (current_angle-desired_angle).</div>
+<div class="block">Cosine compensation for the <a href="../swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a>, adjusting the velocity by the cosine of the
+ (current_angle-desired_angle).</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>compensate</code> - Enable or disable cosine compensation.</dd>
@@ -410,7 +410,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="withAbsoluteEncoder(java.lang.Object)">
 <h3>withAbsoluteEncoder</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></span>&nbsp;<span class="element-name">withAbsoluteEncoder</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;absoluteEncoder)</span></div>
-<div class="block">Set the absolute encoder for the azimuth <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> if it's the SAME VENDOR, only.</div>
+<div class="block">Set the absolute encoder for the azimuth <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> if it's the SAME VENDOR,
+ only.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>absoluteEncoder</code> - Same vendor, absolute encoder for the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></dd>
@@ -427,7 +428,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the distance from the center of rotation for the <a href="../swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a>.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>front</code> - Distance from the front of the robot, will be converted to Meters. (The X location)</dd>
+<dd><code>front</code> - Distance from the front of the robot, will be converted to Meters. (The X
+     location)</dd>
 <dd><code>left</code> - Distance from the left of the robot, will be converted to Meters. (The Y location)</dd>
 <dt>Returns:</dt>
 <dd><a href="SwerveModuleConfig.html" title="class in yams.mechanisms.config"><code>SwerveModuleConfig</code></a> for chaining.</dd>
@@ -455,7 +457,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the distance from the center of rotation for the <a href="../swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a>.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>front</code> - Distance from the front of the robot, will be converted to meters. (The X location)</dd>
+<dd><code>front</code> - Distance from the front of the robot, will be converted to meters. (The X
+     location)</dd>
 <dd><code>left</code> - Distance from the left of the robot, will be converted to meters. (The Y location)</dd>
 <dt>Returns:</dt>
 <dd><a href="SwerveModuleConfig.html" title="class in yams.mechanisms.config"><code>SwerveModuleConfig</code></a> for chaining.</dd>
@@ -520,8 +523,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="withAbsoluteEncoderOffset(edu.wpi.first.units.measure.Angle)">
 <h3>withAbsoluteEncoderOffset</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></span>&nbsp;<span class="element-name">withAbsoluteEncoderOffset</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;offset)</span></div>
-<div class="block">Set the absolute encoder offset for the azimuth <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> so that the absolute encoder reads 0
- while the wheel is facing forwards and bevel to the left.</div>
+<div class="block">Set the absolute encoder offset for the azimuth <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> so that the
+ absolute encoder reads 0 while the wheel is facing forwards and bevel to the left.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>offset</code> - Offset for the absolute encoder.</dd>
@@ -534,8 +537,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="withWheelRadius(edu.wpi.first.units.measure.Distance)">
 <h3>withWheelRadius</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></span>&nbsp;<span class="element-name">withWheelRadius</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;radius)</span></div>
-<div class="block">Set the wheel radius for the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, ideally should be set inside the drive motor
- <a href="../../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
+<div class="block">Set the wheel radius for the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, ideally should be set inside the
+ drive motor <a href="../../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>radius</code> - Radius of the wheel.</dd>
@@ -548,8 +551,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="withWheelDiameter(edu.wpi.first.units.measure.Distance)">
 <h3>withWheelDiameter</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></span>&nbsp;<span class="element-name">withWheelDiameter</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;diameter)</span></div>
-<div class="block">Set the wheel diameter for the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, ideally should be set inside the drive motor
- <a href="../../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+<div class="block">Set the wheel diameter for the <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>, ideally should be set inside the
+ drive motor <a href="../../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>diameter</code> - Diameter of the wheel.</dd>
@@ -575,7 +578,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="withOptimization(boolean)">
 <h3>withOptimization</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveModuleConfig.html" title="class in yams.mechanisms.config">SwerveModuleConfig</a></span>&nbsp;<span class="element-name">withOptimization</span><wbr><span class="parameters">(boolean&nbsp;swerveModuleStateOptimization)</span></div>
-<div class="block">Use <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html#optimize(edu.wpi.first.math.geometry.Rotation2d)" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState.optimize(Rotation2d)</code></a> to optimize each state.</div>
+<div class="block">Use <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html#optimize(edu.wpi.first.math.geometry.Rotation2d)" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState.optimize(Rotation2d)</code></a> to optimize
+ each state.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>swerveModuleStateOptimization</code> - True to enable optimization, false otherwise.</dd>
@@ -618,8 +622,7 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getSwerveModuleTelemetryConfig()">
 <h3>getSwerveModuleTelemetryConfig</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../../telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a>&gt;</span>&nbsp;<span class="element-name">getSwerveModuleTelemetryConfig</span>()</div>
-<div class="block">Get the user specified <a href="../../telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry"><code>SwerveModuleTelemetryConfig</code></a>, if configured via
- <a href="#withTelemetry(java.lang.String,yams.telemetry.SwerveModuleTelemetryConfig)"><code>withTelemetry(String, SwerveModuleTelemetryConfig)</code></a>.</div>
+<div class="block">Get the user specified <a href="../../telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry"><code>SwerveModuleTelemetryConfig</code></a>, if configured via <a href="#withTelemetry(java.lang.String,yams.telemetry.SwerveModuleTelemetryConfig)"><code>withTelemetry(String, SwerveModuleTelemetryConfig)</code></a>.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd><a href="../../telemetry/SwerveModuleTelemetryConfig.html" title="class in yams.telemetry"><code>SwerveModuleTelemetryConfig</code></a> if configured.</dd>

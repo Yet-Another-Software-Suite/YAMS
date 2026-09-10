@@ -83,17 +83,19 @@ loadScripts(document, 'script');</script>
 <div class="block">TalonFX wrapper for a CTRE TalonFX motor controller.
 
  <p><b>External encoder discontinuity point support (CANcoder):</b>
+
  <ul>
-   <li><code>0.5</code> rotations — maps to <code>AbsoluteSensorDiscontinuityPoint = 0.5</code>,
-       sensor range is [-0.5, 0.5)</li>
-   <li><code>1.0</code> rotations — maps to <code>AbsoluteSensorDiscontinuityPoint = 1.0</code>,
-       sensor range is [0, 1)</li>
+   <li><code>0.5</code> rotations — maps to <code>AbsoluteSensorDiscontinuityPoint = 0.5</code>, sensor
+       range is [-0.5, 0.5)
+   <li><code>1.0</code> rotations — maps to <code>AbsoluteSensorDiscontinuityPoint = 1.0</code>, sensor
+       range is [0, 1)
  </ul>
- Configuring a discontinuity point is optional for CANcoder; when omitted the CANcoder default
- is used. Set via
- <a href="../SmartMotorControllerConfig.html#withExternalEncoderDiscontinuityPoint(edu.wpi.first.units.measure.Angle)"><code>SmartMotorControllerConfig.withExternalEncoderDiscontinuityPoint(edu.wpi.first.units.measure.Angle)</code></a>.
+
+ Configuring a discontinuity point is optional for CANcoder; when omitted the CANcoder default is
+ used. Set via <a href="../SmartMotorControllerConfig.html#withExternalEncoderDiscontinuityPoint(edu.wpi.first.units.measure.Angle)"><code>SmartMotorControllerConfig.withExternalEncoderDiscontinuityPoint(edu.wpi.first.units.measure.Angle)</code></a>.
 
  <h2>Example</h2>
+
  <pre><code>
  // Configure and create a Kraken X60 TalonFX on CAN ID 5
  SmartMotorControllerConfig config = new SmartMotorControllerConfig()
@@ -123,7 +125,7 @@ loadScripts(document, 'script');</script>
 <h2>Field Summary</h2>
 <div class="inherited-list">
 <h3 id="fields-inherited-from-class-yams.motorcontrollers.SmartMotorController">Fields inherited from class&nbsp;yams.motorcontrollers.<a href="../SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></h3>
-<code><a href="../SmartMotorController.html#m_batterySimUUID">m_batterySimUUID</a>, <a href="../SmartMotorController.html#m_closedLoopControllerThread">m_closedLoopControllerThread</a>, <a href="../SmartMotorController.html#m_config">m_config</a>, <a href="../SmartMotorController.html#m_expoProfile">m_expoProfile</a>, <a href="../SmartMotorController.html#m_expoState">m_expoState</a>, <a href="../SmartMotorController.html#m_looseFollowers">m_looseFollowers</a>, <a href="../SmartMotorController.html#m_lqr">m_lqr</a>, <a href="../SmartMotorController.html#m_pid">m_pid</a>, <a href="../SmartMotorController.html#m_simSupplier">m_simSupplier</a>, <a href="../SmartMotorController.html#m_slot">m_slot</a>, <a href="../SmartMotorController.html#m_trapezoidProfile">m_trapezoidProfile</a>, <a href="../SmartMotorController.html#m_trapState">m_trapState</a>, <a href="../SmartMotorController.html#parentTable">parentTable</a>, <a href="../SmartMotorController.html#setpointPosition">setpointPosition</a>, <a href="../SmartMotorController.html#setpointVelocity">setpointVelocity</a>, <a href="../SmartMotorController.html#telemetry">telemetry</a>, <a href="../SmartMotorController.html#telemetryConfig">telemetryConfig</a>, <a href="../SmartMotorController.html#telemetryTable">telemetryTable</a>, <a href="../SmartMotorController.html#tuningTable">tuningTable</a></code></div>
+<code><a href="../SmartMotorController.html#m_batterySimUUID">m_batterySimUUID</a>, <a href="../SmartMotorController.html#m_closedLoopControllerThread">m_closedLoopControllerThread</a>, <a href="../SmartMotorController.html#m_config">m_config</a>, <a href="../SmartMotorController.html#m_expoProfile">m_expoProfile</a>, <a href="../SmartMotorController.html#m_expoState">m_expoState</a>, <a href="../SmartMotorController.html#m_looseFollowers">m_looseFollowers</a>, <a href="../SmartMotorController.html#m_lqr">m_lqr</a>, <a href="../SmartMotorController.html#m_pid">m_pid</a>, <a href="../SmartMotorController.html#m_simSupplier">m_simSupplier</a>, <a href="../SmartMotorController.html#m_slot">m_slot</a>, <a href="../SmartMotorController.html#m_trapezoidProfile">m_trapezoidProfile</a>, <a href="../SmartMotorController.html#m_trapState">m_trapState</a>, <a href="../SmartMotorController.html#parentTable">parentTable</a>, <a href="../SmartMotorController.html#setpointFeedforwardForce">setpointFeedforwardForce</a>, <a href="../SmartMotorController.html#setpointPosition">setpointPosition</a>, <a href="../SmartMotorController.html#setpointVelocity">setpointVelocity</a>, <a href="../SmartMotorController.html#telemetry">telemetry</a>, <a href="../SmartMotorController.html#telemetryConfig">telemetryConfig</a>, <a href="../SmartMotorController.html#telemetryTable">telemetryTable</a>, <a href="../SmartMotorController.html#tuningTable">tuningTable</a></code></div>
 </section>
 </li>
 <!-- ======== CONSTRUCTOR SUMMARY ======== -->
@@ -202,38 +204,37 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearAcceleration.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearAcceleration</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMeasurementAcceleration()" class="member-name-link">getMeasurementAcceleration</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted with the
- <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
+<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted
+ with the <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMeasurementPosition()" class="member-name-link">getMeasurementPosition</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted with the
- <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted
+ with the <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearVelocity</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMeasurementVelocity()" class="member-name-link">getMeasurementVelocity</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted with the
- <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted
+ with the <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularAcceleration.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularAcceleration</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMechanismAcceleration()" class="member-name-link">getMechanismAcceleration</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularAcceleration.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularAcceleration</code></a>, calculating it on the robot controller if necessary by taking the
- derivative of the velocity.</div>
+<div class="block">Get the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularAcceleration.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularAcceleration</code></a>, calculating it on the robot controller if
+ necessary by taking the derivative of the velocity.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMechanismPosition()" class="member-name-link">getMechanismPosition</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Angle</code></a> taking the configured <a href="../../gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> from
- <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+<div class="block">Get the mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Angle</code></a> taking the configured <a href="../../gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> from <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMechanismVelocity()" class="member-name-link">getMechanismVelocity</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> taking the configured <a href="../../gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> into the measurement
- applied via the <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+<div class="block">Get the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> taking the configured <a href="../../gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> into
+ the measurement applied via the <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMotorController()" class="member-name-link">getMotorController</a>()</code></div>
@@ -249,8 +250,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRotorPosition()" class="member-name-link">getRotorPosition</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the rotations of the motor with the relative encoder since the motor controller powered on scaled to the
- mechanism rotations.</div>
+<div class="block">Get the rotations of the motor with the relative encoder since the motor controller powered on
+ scaled to the mechanism rotations.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRotorVelocity()" class="member-name-link">getRotorVelocity</a>()</code></div>
@@ -486,14 +487,25 @@ loadScripts(document, 'script');</script>
 <div class="block"><span class="deprecated-label">Deprecated.</span></div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupSimulation()" class="member-name-link">setupSimulation</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setUpdateFrequency(edu.wpi.first.units.measure.Frequency)" class="member-name-link">setUpdateFrequency</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Frequency.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Frequency</a>&nbsp;freq)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Setup the simulation for the wrapper.</div>
+<div class="block">Set the update frequency of the <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/StatusSignal.html" title="class or interface in com.ctre.phoenix6" class="external-link"><code>StatusSignal</code></a>s used by this <a href="../SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setVelocity(edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">setVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&nbsp;angularVelocity)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupSimulation()" class="member-name-link">setupSimulation</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Setup the simulation for the wrapper.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setVelocity(edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">setVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&nbsp;angularVelocity)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> using the PID and feedforward from <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setVelocity(edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.Force)" class="member-name-link">setVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&nbsp;angularVelocity,
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Force</a>&nbsp;feedforwardForce)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Set the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> using the PID and feedforward from <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>, with an additional feedforward <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Force</code></a> applied on top, e.g.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setVelocity(edu.wpi.first.units.measure.LinearVelocity)" class="member-name-link">setVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearVelocity</a>&nbsp;velocity)</code></div>
@@ -518,23 +530,19 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#useCANdiPWM1()" class="member-name-link">useCANdiPWM1</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Check if <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/hardware/CANdi.html" title="class or interface in com.ctre.phoenix6.hardware" class="external-link"><code>CANdi</code></a> PWM1 is used as the
- <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/configs/ExternalFeedbackConfigs.html#ExternalFeedbackSensorSource" title="class or interface in com.ctre.phoenix6.configs" class="external-link"><code>ExternalFeedbackConfigs.ExternalFeedbackSensorSource</code></a> in
- <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/configs/TalonFXConfiguration.html#Feedback" title="class or interface in com.ctre.phoenix6.configs" class="external-link"><code>TalonFXConfiguration.Feedback</code></a>.</div>
+<div class="block">Check if <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/hardware/CANdi.html" title="class or interface in com.ctre.phoenix6.hardware" class="external-link"><code>CANdi</code></a> PWM1 is used as the <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/configs/ExternalFeedbackConfigs.html#ExternalFeedbackSensorSource" title="class or interface in com.ctre.phoenix6.configs" class="external-link"><code>ExternalFeedbackConfigs.ExternalFeedbackSensorSource</code></a> in <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/configs/TalonFXConfiguration.html#Feedback" title="class or interface in com.ctre.phoenix6.configs" class="external-link"><code>TalonFXConfiguration.Feedback</code></a>.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#useCANdiPWM2()" class="member-name-link">useCANdiPWM2</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Check if <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/hardware/CANdi.html" title="class or interface in com.ctre.phoenix6.hardware" class="external-link"><code>CANdi</code></a> PWM1 is used as the
- <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/configs/ExternalFeedbackConfigs.html#ExternalFeedbackSensorSource" title="class or interface in com.ctre.phoenix6.configs" class="external-link"><code>ExternalFeedbackConfigs.ExternalFeedbackSensorSource</code></a> in
- <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/configs/TalonFXConfiguration.html#Feedback" title="class or interface in com.ctre.phoenix6.configs" class="external-link"><code>TalonFXConfiguration.Feedback</code></a>.</div>
+<div class="block">Check if <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/hardware/CANdi.html" title="class or interface in com.ctre.phoenix6.hardware" class="external-link"><code>CANdi</code></a> PWM1 is used as the <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/configs/ExternalFeedbackConfigs.html#ExternalFeedbackSensorSource" title="class or interface in com.ctre.phoenix6.configs" class="external-link"><code>ExternalFeedbackConfigs.ExternalFeedbackSensorSource</code></a> in <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/configs/TalonFXConfiguration.html#Feedback" title="class or interface in com.ctre.phoenix6.configs" class="external-link"><code>TalonFXConfiguration.Feedback</code></a>.</div>
 </div>
 </div>
 </div>
 </div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-yams.motorcontrollers.SmartMotorController">Methods inherited from class&nbsp;yams.motorcontrollers.<a href="../SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></h3>
-<code><a href="../SmartMotorController.html#checkConfigSafety()">checkConfigSafety</a>, <a href="../SmartMotorController.html#close()">close</a>, <a href="../SmartMotorController.html#create(java.lang.Object,edu.wpi.first.math.system.plant.DCMotor,yams.motorcontrollers.SmartMotorControllerConfig)">create</a>, <a href="../SmartMotorController.html#getClosedLoopControllerSlot()">getClosedLoopControllerSlot</a>, <a href="../SmartMotorController.html#getExponentialProfileState()">getExponentialProfileState</a>, <a href="../SmartMotorController.html#getMechanismPositionSetpoint()">getMechanismPositionSetpoint</a>, <a href="../SmartMotorController.html#getMechanismSetpointVelocity()">getMechanismSetpointVelocity</a>, <a href="../SmartMotorController.html#getName()">getName</a>, <a href="../SmartMotorController.html#getSimSupplier()">getSimSupplier</a>, <a href="../SmartMotorController.html#getTrapezoidalProfileState()">getTrapezoidalProfileState</a>, <a href="../SmartMotorController.html#isMotor(edu.wpi.first.math.system.plant.DCMotor,edu.wpi.first.math.system.plant.DCMotor)">isMotor</a>, <a href="../SmartMotorController.html#iterateClosedLoopController()">iterateClosedLoopController</a>, <a href="../SmartMotorController.html#setSimSupplier(yams.motorcontrollers.SimSupplier)">setSimSupplier</a>, <a href="../SmartMotorController.html#setupTelemetry()">setupTelemetry</a>, <a href="../SmartMotorController.html#setupTelemetry(edu.wpi.first.networktables.NetworkTable,edu.wpi.first.networktables.NetworkTable)">setupTelemetry</a>, <a href="../SmartMotorController.html#startClosedLoopController()">startClosedLoopController</a>, <a href="../SmartMotorController.html#stopClosedLoopController()">stopClosedLoopController</a>, <a href="../SmartMotorController.html#toString()">toString</a>, <a href="../SmartMotorController.html#updateTelemetry()">updateTelemetry</a></code></div>
+<code><a href="../SmartMotorController.html#checkConfigSafety()">checkConfigSafety</a>, <a href="../SmartMotorController.html#close()">close</a>, <a href="../SmartMotorController.html#create(java.lang.Object,edu.wpi.first.math.system.plant.DCMotor,yams.motorcontrollers.SmartMotorControllerConfig)">create</a>, <a href="../SmartMotorController.html#getClosedLoopControllerSlot()">getClosedLoopControllerSlot</a>, <a href="../SmartMotorController.html#getExponentialProfileState()">getExponentialProfileState</a>, <a href="../SmartMotorController.html#getMechanismPositionSetpoint()">getMechanismPositionSetpoint</a>, <a href="../SmartMotorController.html#getMechanismSetpointVelocity()">getMechanismSetpointVelocity</a>, <a href="../SmartMotorController.html#getName()">getName</a>, <a href="../SmartMotorController.html#getSetpointFeedforwardForce()">getSetpointFeedforwardForce</a>, <a href="../SmartMotorController.html#getSimSupplier()">getSimSupplier</a>, <a href="../SmartMotorController.html#getTrapezoidalProfileState()">getTrapezoidalProfileState</a>, <a href="../SmartMotorController.html#isMotor(edu.wpi.first.math.system.plant.DCMotor,edu.wpi.first.math.system.plant.DCMotor)">isMotor</a>, <a href="../SmartMotorController.html#iterateClosedLoopController()">iterateClosedLoopController</a>, <a href="../SmartMotorController.html#setSimSupplier(yams.motorcontrollers.SimSupplier)">setSimSupplier</a>, <a href="../SmartMotorController.html#setupTelemetry()">setupTelemetry</a>, <a href="../SmartMotorController.html#setupTelemetry(edu.wpi.first.networktables.NetworkTable,edu.wpi.first.networktables.NetworkTable)">setupTelemetry</a>, <a href="../SmartMotorController.html#setVelocity(edu.wpi.first.units.measure.LinearVelocity,edu.wpi.first.units.measure.Force)">setVelocity</a>, <a href="../SmartMotorController.html#startClosedLoopController()">startClosedLoopController</a>, <a href="../SmartMotorController.html#stopClosedLoopController()">stopClosedLoopController</a>, <a href="../SmartMotorController.html#toString()">toString</a>, <a href="../SmartMotorController.html#updateTelemetry()">updateTelemetry</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-java.lang.Object">Methods inherited from class&nbsp;java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></h3>
 <code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#clone()" title="class or interface in java.lang" class="external-link">clone</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" title="class or interface in java.lang" class="external-link">equals</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#finalize()" title="class or interface in java.lang" class="external-link">finalize</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#getClass()" title="class or interface in java.lang" class="external-link">getClass</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#hashCode()" title="class or interface in java.lang" class="external-link">hashCode</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#notify()" title="class or interface in java.lang" class="external-link">notify</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#notifyAll()" title="class or interface in java.lang" class="external-link">notifyAll</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait()" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait(long)" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait(long,int)" title="class or interface in java.lang" class="external-link">wait</a></code></div>
@@ -674,9 +682,7 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="useCANdiPWM1()">
 <h3>useCANdiPWM1</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">useCANdiPWM1</span>()</div>
-<div class="block">Check if <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/hardware/CANdi.html" title="class or interface in com.ctre.phoenix6.hardware" class="external-link"><code>CANdi</code></a> PWM1 is used as the
- <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/configs/ExternalFeedbackConfigs.html#ExternalFeedbackSensorSource" title="class or interface in com.ctre.phoenix6.configs" class="external-link"><code>ExternalFeedbackConfigs.ExternalFeedbackSensorSource</code></a> in
- <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/configs/TalonFXConfiguration.html#Feedback" title="class or interface in com.ctre.phoenix6.configs" class="external-link"><code>TalonFXConfiguration.Feedback</code></a>.</div>
+<div class="block">Check if <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/hardware/CANdi.html" title="class or interface in com.ctre.phoenix6.hardware" class="external-link"><code>CANdi</code></a> PWM1 is used as the <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/configs/ExternalFeedbackConfigs.html#ExternalFeedbackSensorSource" title="class or interface in com.ctre.phoenix6.configs" class="external-link"><code>ExternalFeedbackConfigs.ExternalFeedbackSensorSource</code></a> in <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/configs/TalonFXConfiguration.html#Feedback" title="class or interface in com.ctre.phoenix6.configs" class="external-link"><code>TalonFXConfiguration.Feedback</code></a>.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>True if CANdi PWM1 is used and configured.</dd>
@@ -687,9 +693,7 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="useCANdiPWM2()">
 <h3>useCANdiPWM2</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">useCANdiPWM2</span>()</div>
-<div class="block">Check if <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/hardware/CANdi.html" title="class or interface in com.ctre.phoenix6.hardware" class="external-link"><code>CANdi</code></a> PWM1 is used as the
- <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/configs/ExternalFeedbackConfigs.html#ExternalFeedbackSensorSource" title="class or interface in com.ctre.phoenix6.configs" class="external-link"><code>ExternalFeedbackConfigs.ExternalFeedbackSensorSource</code></a> in
- <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/configs/TalonFXConfiguration.html#Feedback" title="class or interface in com.ctre.phoenix6.configs" class="external-link"><code>TalonFXConfiguration.Feedback</code></a>.</div>
+<div class="block">Check if <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/hardware/CANdi.html" title="class or interface in com.ctre.phoenix6.hardware" class="external-link"><code>CANdi</code></a> PWM1 is used as the <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/configs/ExternalFeedbackConfigs.html#ExternalFeedbackSensorSource" title="class or interface in com.ctre.phoenix6.configs" class="external-link"><code>ExternalFeedbackConfigs.ExternalFeedbackSensorSource</code></a> in <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/configs/TalonFXConfiguration.html#Feedback" title="class or interface in com.ctre.phoenix6.configs" class="external-link"><code>TalonFXConfiguration.Feedback</code></a>.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>True if CANdi is used.</dd>
@@ -773,7 +777,7 @@ loadScripts(document, 'script');</script>
 <div class="block"><span class="descfrm-type-label">Description copied from class:&nbsp;<code><a href="../SmartMotorController.html#setVelocity(edu.wpi.first.units.measure.LinearVelocity)">SmartMotorController</a></code></span></div>
 <div class="block">Set the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>LinearVelocity</code></a> using the PID and feedforward from <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 <dl class="notes">
-<dt>Specified by:</dt>
+<dt>Overrides:</dt>
 <dd><code><a href="../SmartMotorController.html#setVelocity(edu.wpi.first.units.measure.LinearVelocity)">setVelocity</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>velocity</code> - Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>LinearVelocity</code></a> to target.</dd>
@@ -791,6 +795,25 @@ loadScripts(document, 'script');</script>
 <dd><code><a href="../SmartMotorController.html#setVelocity(edu.wpi.first.units.measure.AngularVelocity)">setVelocity</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>angularVelocity</code> - Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> to target.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="setVelocity(edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.Force)">
+<h3>setVelocity</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setVelocity</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&nbsp;angularVelocity,
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Force</a>&nbsp;feedforwardForce)</span></div>
+<div class="block"><span class="descfrm-type-label">Description copied from class:&nbsp;<code><a href="../SmartMotorController.html#setVelocity(edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.Force)">SmartMotorController</a></code></span></div>
+<div class="block">Set the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> using the PID and feedforward from <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>, with an additional feedforward <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Force</code></a> applied on top, e.g.
+ from a PathPlanner set-point generator. Applied whether the motor controller's native
+ closed-loop velocity control or an LQR/software motion profile loop is driving the mechanism.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="../SmartMotorController.html#setVelocity(edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.Force)">setVelocity</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>angularVelocity</code> - Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> to target.</dd>
+<dd><code>feedforwardForce</code> - Additional feedforward <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Force</code></a> applied to the mechanism, or
+     <code>null</code> for none.</dd>
 </dl>
 </section>
 </li>
@@ -835,6 +858,17 @@ loadScripts(document, 'script');</script>
 <dd><code>config</code> - <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> to use.</dd>
 <dt>Returns:</dt>
 <dd>Successful Application of the configuration.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="setUpdateFrequency(edu.wpi.first.units.measure.Frequency)">
+<h3>setUpdateFrequency</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setUpdateFrequency</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Frequency.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Frequency</a>&nbsp;freq)</span></div>
+<div class="block">Set the update frequency of the <a href="https://api.ctr-electronics.com/phoenix6/stable/java/com/ctre/phoenix6/StatusSignal.html" title="class or interface in com.ctre.phoenix6" class="external-link"><code>StatusSignal</code></a>s used by this <a href="../SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a></div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>freq</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Frequency.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Frequency</code></a> to use.</dd>
 </dl>
 </section>
 </li>
@@ -913,8 +947,8 @@ loadScripts(document, 'script');</script>
 <h3>getMeasurementVelocity</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearVelocity</a></span>&nbsp;<span class="element-name">getMeasurementVelocity</span>()</div>
 <div class="block"><span class="descfrm-type-label">Description copied from class:&nbsp;<code><a href="../SmartMotorController.html#getMeasurementVelocity()">SmartMotorController</a></code></span></div>
-<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted with the
- <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted
+ with the <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../SmartMotorController.html#getMeasurementVelocity()">getMeasurementVelocity</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></code></dd>
@@ -928,8 +962,8 @@ loadScripts(document, 'script');</script>
 <h3>getMeasurementPosition</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a></span>&nbsp;<span class="element-name">getMeasurementPosition</span>()</div>
 <div class="block"><span class="descfrm-type-label">Description copied from class:&nbsp;<code><a href="../SmartMotorController.html#getMeasurementPosition()">SmartMotorController</a></code></span></div>
-<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted with the
- <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted
+ with the <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../SmartMotorController.html#getMeasurementPosition()">getMeasurementPosition</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></code></dd>
@@ -943,8 +977,8 @@ loadScripts(document, 'script');</script>
 <h3>getMeasurementAcceleration</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearAcceleration.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearAcceleration</a></span>&nbsp;<span class="element-name">getMeasurementAcceleration</span>()</div>
 <div class="block"><span class="descfrm-type-label">Description copied from class:&nbsp;<code><a href="../SmartMotorController.html#getMeasurementAcceleration()">SmartMotorController</a></code></span></div>
-<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted with the
- <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
+<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted
+ with the <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../SmartMotorController.html#getMeasurementAcceleration()">getMeasurementAcceleration</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></code></dd>
@@ -958,8 +992,8 @@ loadScripts(document, 'script');</script>
 <h3>getMechanismVelocity</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a></span>&nbsp;<span class="element-name">getMechanismVelocity</span>()</div>
 <div class="block"><span class="descfrm-type-label">Description copied from class:&nbsp;<code><a href="../SmartMotorController.html#getMechanismVelocity()">SmartMotorController</a></code></span></div>
-<div class="block">Get the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> taking the configured <a href="../../gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> into the measurement
- applied via the <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+<div class="block">Get the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> taking the configured <a href="../../gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> into
+ the measurement applied via the <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../SmartMotorController.html#getMechanismVelocity()">getMechanismVelocity</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></code></dd>
@@ -973,8 +1007,8 @@ loadScripts(document, 'script');</script>
 <h3>getMechanismAcceleration</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularAcceleration.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularAcceleration</a></span>&nbsp;<span class="element-name">getMechanismAcceleration</span>()</div>
 <div class="block"><span class="descfrm-type-label">Description copied from class:&nbsp;<code><a href="../SmartMotorController.html#getMechanismAcceleration()">SmartMotorController</a></code></span></div>
-<div class="block">Get the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularAcceleration.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularAcceleration</code></a>, calculating it on the robot controller if necessary by taking the
- derivative of the velocity.</div>
+<div class="block">Get the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularAcceleration.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularAcceleration</code></a>, calculating it on the robot controller if
+ necessary by taking the derivative of the velocity.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../SmartMotorController.html#getMechanismAcceleration()">getMechanismAcceleration</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></code></dd>
@@ -988,8 +1022,7 @@ loadScripts(document, 'script');</script>
 <h3>getMechanismPosition</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a></span>&nbsp;<span class="element-name">getMechanismPosition</span>()</div>
 <div class="block"><span class="descfrm-type-label">Description copied from class:&nbsp;<code><a href="../SmartMotorController.html#getMechanismPosition()">SmartMotorController</a></code></span></div>
-<div class="block">Get the mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Angle</code></a> taking the configured <a href="../../gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> from
- <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+<div class="block">Get the mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Angle</code></a> taking the configured <a href="../../gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> from <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../SmartMotorController.html#getMechanismPosition()">getMechanismPosition</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></code></dd>
@@ -1017,8 +1050,8 @@ loadScripts(document, 'script');</script>
 <h3>getRotorPosition</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a></span>&nbsp;<span class="element-name">getRotorPosition</span>()</div>
 <div class="block"><span class="descfrm-type-label">Description copied from class:&nbsp;<code><a href="../SmartMotorController.html#getRotorPosition()">SmartMotorController</a></code></span></div>
-<div class="block">Get the rotations of the motor with the relative encoder since the motor controller powered on scaled to the
- mechanism rotations.</div>
+<div class="block">Get the rotations of the motor with the relative encoder since the motor controller powered on
+ scaled to the mechanism rotations.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../SmartMotorController.html#getRotorPosition()">getRotorPosition</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></code></dd>
@@ -1353,7 +1386,8 @@ loadScripts(document, 'script');</script>
 <h3>setClosedLoopRampRate</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setClosedLoopRampRate</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Time.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Time</a>&nbsp;rampRate)</span></div>
 <div class="block"><span class="descfrm-type-label">Description copied from class:&nbsp;<code><a href="../SmartMotorController.html#setClosedLoopRampRate(edu.wpi.first.units.measure.Time)">SmartMotorController</a></code></span></div>
-<div class="block">Set the closed loop ramp rate. The ramp rate is how fast the motor can go from 0-100, measured in seconds.</div>
+<div class="block">Set the closed loop ramp rate. The ramp rate is how fast the motor can go from 0-100, measured
+ in seconds.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../SmartMotorController.html#setClosedLoopRampRate(edu.wpi.first.units.measure.Time)">setClosedLoopRampRate</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></code></dd>
@@ -1367,7 +1401,8 @@ loadScripts(document, 'script');</script>
 <h3>setOpenLoopRampRate</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setOpenLoopRampRate</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Time.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Time</a>&nbsp;rampRate)</span></div>
 <div class="block"><span class="descfrm-type-label">Description copied from class:&nbsp;<code><a href="../SmartMotorController.html#setOpenLoopRampRate(edu.wpi.first.units.measure.Time)">SmartMotorController</a></code></span></div>
-<div class="block">Set the open loop ramp rate. The ramp rate is how fast the motor can go from 0 to 100, measured in Seconds.</div>
+<div class="block">Set the open loop ramp rate. The ramp rate is how fast the motor can go from 0 to 100, measured
+ in Seconds.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../SmartMotorController.html#setOpenLoopRampRate(edu.wpi.first.units.measure.Time)">setOpenLoopRampRate</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMotorController.html" title="class in yams.motorcontrollers">SmartMotorController</a></code></dd>

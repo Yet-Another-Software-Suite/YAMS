@@ -81,6 +81,7 @@ loadScripts(document, 'script');</script>
 <div class="block">FlyWheel configuration class.
 
  <h2>Configuration Example</h2>
+
  <pre><code>
  // 1. Build the motor config with kV and kS feedforward (critical for velocity mechanisms)
  SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
@@ -264,9 +265,10 @@ loadScripts(document, 'script');</script>
 <h3>withSpeedometerSimulation</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></span>&nbsp;<span class="element-name">withSpeedometerSimulation</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&nbsp;maxVelocity)</span></div>
 <div class="block">Enables the use of the speedometer simulation for the shooter.
- <p>
- The speedometer simulation is a simulation of a speedometer that is used to simulate the behavior of the shooter.
- This is useful for testing and debugging the shooter without having to physically move it.</div>
+
+ <p>The speedometer simulation is a simulation of a speedometer that is used to simulate the
+ behavior of the shooter. This is useful for testing and debugging the shooter without having to
+ physically move it.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>maxVelocity</code> - The maximum velocity of the shooter.</dd>
@@ -280,9 +282,10 @@ loadScripts(document, 'script');</script>
 <h3>withSpeedometerSimulation</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></span>&nbsp;<span class="element-name">withSpeedometerSimulation</span>()</div>
 <div class="block">Enables the use of the speedometer simulation for the shooter.
- <p>
- The speedometer simulation is a simulation of a speedometer that is used to simulate the behavior of the shooter.
- This is useful for testing and debugging the shooter without having to physically move it.</div>
+
+ <p>The speedometer simulation is a simulation of a speedometer that is used to simulate the
+ behavior of the shooter. This is useful for testing and debugging the shooter without having to
+ physically move it.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a> for chaining.</dd>
@@ -294,9 +297,10 @@ loadScripts(document, 'script');</script>
 <h3>disableSpeedometerSimulation</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config">FlyWheelConfig</a></span>&nbsp;<span class="element-name">disableSpeedometerSimulation</span>()</div>
 <div class="block">Disable the use of the speedometer simulation for the shooter.
- <p>
- The speedometer simulation is a simulation of a speedometer that is used to simulate the behavior of the shooter.
- This is useful for testing and debugging the shooter without having to physically move it.</div>
+
+ <p>The speedometer simulation is a simulation of a speedometer that is used to simulate the
+ behavior of the shooter. This is useful for testing and debugging the shooter without having to
+ physically move it.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a> for chaining.</dd>
@@ -308,9 +312,10 @@ loadScripts(document, 'script');</script>
 <h3>isUsingSpeedometerSimulation</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isUsingSpeedometerSimulation</span>()</div>
 <div class="block">Check if the shooter is using the speedometer simulation.
- <p>
- The speedometer simulation is a simulation of the speedometer that is used to simulate the behavior of the shooter.
- This is useful for testing and debugging the shooter without having to physically move it.</div>
+
+ <p>The speedometer simulation is a simulation of the speedometer that is used to simulate the
+ behavior of the shooter. This is useful for testing and debugging the shooter without having to
+ physically move it.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>True if the shooter is using the speedometer simulation.</dd>
@@ -322,12 +327,12 @@ loadScripts(document, 'script');</script>
 <h3>getSpeedometerMaxVelocity</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&gt;</span>&nbsp;<span class="element-name">getSpeedometerMaxVelocity</span>()</div>
 <div class="block">Get the maximum velocity of the speedometer simulation.
- <p>
- If the speedometer simulation is not enabled, this will return an empty Optional.</div>
+
+ <p>If the speedometer simulation is not enabled, this will return an empty Optional.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>The maximum velocity of the speedometer simulation, or an empty Optional if the speedometer simulation is
- not enabled.</dd>
+<dd>The maximum velocity of the speedometer simulation, or an empty Optional if the
+     speedometer simulation is not enabled.</dd>
 </dl>
 </section>
 </li>
@@ -436,8 +441,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Get the <a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a> associated with this <a href="FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a>.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>An <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link"><code>Optional</code></a> containing the <a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a> if present, otherwise an empty
- <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link"><code>Optional</code></a>.</dd>
+<dd>An <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link"><code>Optional</code></a> containing the <a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a> if present,
+     otherwise an empty <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link"><code>Optional</code></a>.</dd>
 </dl>
 </section>
 </li>

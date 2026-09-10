@@ -138,14 +138,19 @@ loadScripts(document, 'script');</script>
 <div class="block">Get the simulated state of charge of the battery, from 0 (empty) to 1 (full).</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#replaceSOCInterpolation(edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap)" class="member-name-link">replaceSOCInterpolation</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/interpolation/InterpolatingDoubleTreeMap.html" title="class or interface in edu.wpi.first.math.interpolation" class="external-link">InterpolatingDoubleTreeMap</a>&nbsp;socToVoltage)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#removeCurrent(java.util.UUID)" class="member-name-link">removeCurrent</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Stop counting the given simulation's current draw towards the shared battery load, e.g.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#replaceSOCInterpolation(edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap)" class="member-name-link">replaceSOCInterpolation</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/interpolation/InterpolatingDoubleTreeMap.html" title="class or interface in edu.wpi.first.math.interpolation" class="external-link">InterpolatingDoubleTreeMap</a>&nbsp;socToVoltage)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Replace the default state-of-charge &rarr; open circuit voltage interpolation table used when
  discharge simulation is enabled with <a href="#enableDischarge(double,edu.wpi.first.units.measure.Voltage,edu.wpi.first.units.measure.Resistance)"><code>enableDischarge(double, Voltage, Resistance)</code></a>.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#resetDischarge()" class="member-name-link">resetDischarge</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#resetDischarge()" class="member-name-link">resetDischarge</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Reset the simulated battery back to a full charge.</div>
 </div>
 </div>
@@ -186,14 +191,13 @@ loadScripts(document, 'script');</script>
 <div class="block">Replace the default state-of-charge &rarr; open circuit voltage interpolation table used when
  discharge simulation is enabled with <a href="#enableDischarge(double,edu.wpi.first.units.measure.Voltage,edu.wpi.first.units.measure.Resistance)"><code>enableDischarge(double, Voltage, Resistance)</code></a>.
 
- <p>
- Not every battery discharges like YAMS's built-in sealed lead-acid curve. Reach for this
+ <p>Not every battery discharges like YAMS's built-in sealed lead-acid curve. Reach for this
  method when you want to model something different, for example:
- </p>
+
  <ul>
-   <li>A well-used competition battery that sags earlier and harder than a fresh one.</li>
+   <li>A well-used competition battery that sags earlier and harder than a fresh one.
    <li>Matching a curve you measured from an actual battery on a load tester, for the most
-       accurate brownout predictions possible.</li>
+       accurate brownout predictions possible.
  </ul>
 
  <pre><code>
@@ -215,9 +219,9 @@ loadScripts(document, 'script');</script>
  </code></pre></div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>socToVoltage</code> - Interpolation table mapping state of charge <code>[0, 1]</code> to open
-                     circuit voltage. Call this before <a href="#enableDischarge(double,edu.wpi.first.units.measure.Voltage,edu.wpi.first.units.measure.Resistance)"><code>enableDischarge(double, Voltage, Resistance)</code></a> so discharge simulation uses the new curve from the
-                     start.</dd>
+<dd><code>socToVoltage</code> - Interpolation table mapping state of charge <code>[0, 1]</code> to open circuit
+     voltage. Call this before <a href="#enableDischarge(double,edu.wpi.first.units.measure.Voltage,edu.wpi.first.units.measure.Resistance)"><code>enableDischarge(double, Voltage, Resistance)</code></a> so
+     discharge simulation uses the new curve from the start.</dd>
 </dl>
 </section>
 </li>
@@ -232,8 +236,8 @@ loadScripts(document, 'script');</script>
  resistance to more realistically model a depleted battery.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>batteryCapacityAmpHours</code> - Capacity of the battery in amp-hours (Ah). A typical FRC
-                                battery is around 18 Ah.</dd>
+<dd><code>batteryCapacityAmpHours</code> - Capacity of the battery in amp-hours (Ah). A typical FRC battery
+     is around 18 Ah.</dd>
 <dd><code>nomVoltage</code> - Nominal (fully charged) open circuit voltage of the battery.</dd>
 <dd><code>nomResistance</code> - Nominal internal resistance of the battery.</dd>
 </dl>
@@ -252,6 +256,19 @@ loadScripts(document, 'script');</script>
 <h3>resetDischarge</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">resetDischarge</span>()</div>
 <div class="block">Reset the simulated battery back to a full charge.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="removeCurrent(java.util.UUID)">
+<h3>removeCurrent</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">removeCurrent</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id)</span></div>
+<div class="block">Stop counting the given simulation's current draw towards the shared battery load, e.g. once
+ its <a href="../SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> has been closed. Without this, a closed
+ simulation's last-known current draw would linger in <code>currents</code> indefinitely.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>id</code> - <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link"><code>UUID</code></a> of the simulation to remove.</dd>
+</dl>
 </section>
 </li>
 <li>

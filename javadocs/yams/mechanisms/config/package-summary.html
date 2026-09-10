@@ -69,35 +69,36 @@ loadScripts(document, 'script');</script>
 
  <p>Every YAMS mechanism requires a corresponding config object to be constructed before the
  mechanism itself is instantiated. Config classes follow a <b>fluent builder pattern</b>: each
- <code>with*()</code> setter mutates the config and returns <code>this</code>, allowing calls to be
- chained in a single expression.
+ <code>with*()</code> setter mutates the config and returns <code>this</code>, allowing calls to be chained
+ in a single expression.
 
  <h2>Available Configuration Classes</h2>
+
  <ul>
    <li><a href="ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a> — single-jointed arm with angle limits and
-       feedforward tuning</li>
+       feedforward tuning
    <li><a href="ElevatorConfig.html" title="class in yams.mechanisms.config"><code>ElevatorConfig</code></a> — linear elevator with height limits and
-       gravity compensation</li>
+       gravity compensation
    <li><a href="PivotConfig.html" title="class in yams.mechanisms.config"><code>PivotConfig</code></a> — pivot mechanism with continuous or bounded
-       rotation</li>
+       rotation
    <li><a href="FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a> — flywheel velocity mechanism with optional
-       second follower motor</li>
+       second follower motor
    <li><a href="SwerveDriveConfig.html" title="class in yams.mechanisms.config"><code>SwerveDriveConfig</code></a> — full swerve-drive chassis geometry and
-       module layout</li>
+       module layout
    <li><a href="SwerveModuleConfig.html" title="class in yams.mechanisms.config"><code>SwerveModuleConfig</code></a> — per-module drive and steer motor
-       configuration</li>
+       configuration
    <li><a href="DifferentialMechanismConfig.html" title="class in yams.mechanisms.config"><code>DifferentialMechanismConfig</code></a> — differential (tank-drive)
-       mechanism pairing two motors</li>
+       mechanism pairing two motors
    <li><a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a> — position targets and tolerance
-       settings shared across positional mechanisms</li>
+       settings shared across positional mechanisms
    <li><a href="SensorConfig.html" title="class in yams.mechanisms.config"><code>SensorConfig</code></a> — external encoder or absolute sensor
-       attachment configuration</li>
+       attachment configuration
  </ul>
 
  <h2>Motor Controller Requirement</h2>
+
  <p>A <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> must be provided before most mechanisms
- can be constructed. It may be supplied either through the config constructor or via the
- <code>withSmartMotorController()</code> setter:
+ can be constructed. It may be supplied either through the config constructor or via the <code>withSmartMotorController()</code> setter:
 
  <pre><code>
  SmartMotorController motor = new TalonFXController(new TalonFX(1));
@@ -115,6 +116,7 @@ loadScripts(document, 'script');</script>
  </code></pre>
 
  <h2>Fluent Chaining Example</h2>
+
  <pre><code>
  ArmConfig armConfig = new ArmConfig(motor)
      .withGearing(100.0)
@@ -185,8 +187,8 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config">MechanismPositionConfig</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
-<div class="block">A configuration class for specifying the position and visualization properties of a mechanism relative to a robot in
- a 3D coordinate system.</div>
+<div class="block">A configuration class for specifying the position and visualization properties of a mechanism
+ relative to a robot in a 3D coordinate system.</div>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab3"><a href="MechanismPositionConfig.Plane.html" title="enum class in yams.mechanisms.config">MechanismPositionConfig.Plane</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab3">

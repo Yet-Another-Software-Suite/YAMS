@@ -78,20 +78,23 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">GearBox</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">GearBox class to calculate input and output conversion factors and check if the current configuration is supported.
+<div class="block">GearBox class to calculate input and output conversion factors and check if the current
+ configuration is supported.
 
- <p>A <a href="GearBox.html" title="class in yams.gearing"><code>GearBox</code></a> models a multi-stage gear reduction (or increase). Each stage is defined
- by a ratio (driver teeth / driven teeth) or a plain ratio double. The overall ratio is the
- product of all individual stage ratios.</p>
+ <p>A <a href="GearBox.html" title="class in yams.gearing"><code>GearBox</code></a> models a multi-stage gear reduction (or increase). Each stage is defined by
+ a ratio (driver teeth / driven teeth) or a plain ratio double. The overall ratio is the product
+ of all individual stage ratios.
 
- <p>You can construct a <a href="GearBox.html" title="class in yams.gearing"><code>GearBox</code></a> in several ways:</p>
+ <p>You can construct a <a href="GearBox.html" title="class in yams.gearing"><code>GearBox</code></a> in several ways:
+
  <ul>
-   <li><b><code>fromTeeth(int...)</code></b> — provide alternating driver/driven tooth counts</li>
-   <li><b><code>fromStages(String...)</code></b> — provide stages as <code>"IN:OUT"</code> strings</li>
-   <li><b><code>fromReductionStages(double...)</code></b> — provide per-stage ratios directly</li>
+   <li><b><code>fromTeeth(int...)</code></b> — provide alternating driver/driven tooth counts
+   <li><b><code>fromStages(String...)</code></b> — provide stages as <code>"IN:OUT"</code> strings
+   <li><b><code>fromReductionStages(double...)</code></b> — provide per-stage ratios directly
  </ul>
 
  <h2>Example</h2>
+
  <pre><code>
  // 5:1 single-stage gearbox (12-tooth driver meshing with a 60-tooth driven gear)
  GearBox fiveToOne = GearBox.fromTeeth(12, 60);

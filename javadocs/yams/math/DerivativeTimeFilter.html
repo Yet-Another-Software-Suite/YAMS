@@ -86,13 +86,15 @@ loadScripts(document, 'script');</script>
  noise that would otherwise cause derivative kick.
 
  <p>Two <code>derivative()</code> overloads are available:
+
  <ul>
-   <li><a href="#derivative(double)"><code>derivative(double)</code></a> — uses the FPGA clock to measure elapsed time automatically.</li>
+   <li><a href="#derivative(double)"><code>derivative(double)</code></a> — uses the FPGA clock to measure elapsed time automatically.
    <li><a href="#derivative(double,edu.wpi.first.units.measure.Time)"><code>derivative(double, edu.wpi.first.units.measure.Time)</code></a> — uses a caller-supplied
-       delta-time (useful when the loop period is already known).</li>
+       delta-time (useful when the loop period is already known).
  </ul>
 
  <h2>Example</h2>
+
  <pre><code>
  import static edu.wpi.first.units.Units.Milliseconds;
 
@@ -209,9 +211,11 @@ loadScripts(document, 'script');</script>
 <dd><code>current</code> - Current value</dd>
 <dd><code>dt</code> - Delta time</dd>
 <dt>Returns:</dt>
-<dd>Derivative of the current value from the previous value over the delta time in microseconds.</dd>
+<dd>Derivative of the current value from the previous value over the delta time in
+     microseconds.</dd>
 <dt>Implementation Note:</dt>
-<dd>If this function is not called periodically at the dt specified, the derivative will be incorrect</dd>
+<dd>If this function is not called periodically at the dt specified, the derivative will
+     be incorrect</dd>
 </dl>
 </section>
 </li>
@@ -224,8 +228,8 @@ loadScripts(document, 'script');</script>
 <dt>Parameters:</dt>
 <dd><code>current</code> - Current value</dd>
 <dt>Returns:</dt>
-<dd>Derivative of the current value from the previous value over the time since the last call to this in
- microseconds.</dd>
+<dd>Derivative of the current value from the previous value over the time since the last
+     call to this in microseconds.</dd>
 </dl>
 </section>
 </li>

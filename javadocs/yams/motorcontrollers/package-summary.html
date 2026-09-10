@@ -73,22 +73,21 @@ loadScripts(document, 'script');</script>
  types.
 
  <h2>Core types</h2>
+
  <ul>
    <li><a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> — the hardware-agnostic abstract base
-       that all vendor wrappers extend. Defines the lifecycle methods (<code>configure</code>,
-       <code>periodic</code>, <code>stop</code>) and the control interface (position, velocity, voltage,
-       duty-cycle setpoints).</li>
+ that all vendor wrappers extend. Defines the lifecycle methods (<code>configure</code>, <code>periodic</code>, <code>stop</code>) and the control interface (position, velocity, voltage, duty-cycle
+       setpoints).
    <li><a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> — a fluent builder used to
        configure every aspect of a motor before it is applied. Settings include PID gains,
        feedforward constants, position and velocity software limits, ramp rates, current limits,
-       encoder resolution and offsets, and gear ratios. Call
-       <code>SmartMotorController.configure(config)</code> to push all settings to hardware.</li>
-   <li><a href="SmartMotorControllerCommandRegistry.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerCommandRegistry</code></a> — registers
-       WPILib <code>Command</code> objects that operate a specific motor so they can be
-       discovered and scheduled by a mechanism.</li>
+ encoder resolution and offsets, and gear ratios. Call <code>SmartMotorController.configure(config)</code> to push all settings to hardware.
+ <li><a href="SmartMotorControllerCommandRegistry.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerCommandRegistry</code></a> — registers WPILib <code>Command</code> objects that operate a specific motor so they can be discovered and scheduled by a
+       mechanism.
  </ul>
 
  <h2>Usage example</h2>
+
  <pre><code>
  SmartMotorControllerConfig config = new SmartMotorControllerConfig()
      .withPID(0.1, 0.0, 0.001)
@@ -101,13 +100,14 @@ loadScripts(document, 'script');</script>
  </code></pre>
 
  <h2>Sub-packages</h2>
+
  <ul>
-   <li><a href="local/package-summary.html"><code>yams.motorcontrollers.local</code></a> — REV Robotics SPARK MAX and SPARK FLEX wrappers
-       that run closed-loop control on the roboRIO.</li>
+   <li><a href="local/package-summary.html"><code>yams.motorcontrollers.local</code></a> — REV Robotics SPARK MAX and SPARK FLEX wrappers that
+       run closed-loop control on the roboRIO.
    <li><a href="remote/package-summary.html"><code>yams.motorcontrollers.remote</code></a> — CTRE TalonFX and TalonFXS wrappers that run
-       closed-loop control on the motor controller itself via the Phoenix 6 API.</li>
-   <li><code>yams.motorcontrollers.simulation</code> — simulation-only implementations used in
-       unit tests and the WPILib simulation GUI.</li>
+       closed-loop control on the motor controller itself via the Phoenix 6 API.
+   <li><code>yams.motorcontrollers.simulation</code> — simulation-only implementations used in unit
+       tests and the WPILib simulation GUI.
  </ul></div>
 </section>
 <section class="summary">

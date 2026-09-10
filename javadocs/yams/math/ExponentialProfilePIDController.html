@@ -78,21 +78,19 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">ExponentialProfilePIDController</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Exponential profile PID controller. Similar to <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/PIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>PIDController</code></a> or
- <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/ProfiledPIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>ProfiledPIDController</code></a>, but uses an <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/trajectory/ExponentialProfile.html" title="class or interface in edu.wpi.first.math.trajectory" class="external-link"><code>ExponentialProfile</code></a>
+<div class="block">Exponential profile PID controller. Similar to <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/PIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>PIDController</code></a> or <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/ProfiledPIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>ProfiledPIDController</code></a>, but uses an <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/trajectory/ExponentialProfile.html" title="class or interface in edu.wpi.first.math.trajectory" class="external-link"><code>ExponentialProfile</code></a>
 
- <p>This controller combines an <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/trajectory/ExponentialProfile.html" title="class or interface in edu.wpi.first.math.trajectory" class="external-link"><code>ExponentialProfile</code></a> motion profile with a
- <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/PIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>PIDController</code></a> to achieve smooth, continuous position control. On each iteration the
- profile generates a feasible intermediate setpoint (position + velocity) that the PID then
- tracks, preventing large step demands from commanding unreachable states. The exponential profile
- shape respects the plant's natural first-order dynamics, making it well-suited for flywheels,
- arms, and elevators.
+ <p>This controller combines an <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/trajectory/ExponentialProfile.html" title="class or interface in edu.wpi.first.math.trajectory" class="external-link"><code>ExponentialProfile</code></a> motion profile with a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/PIDController.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>PIDController</code></a> to achieve smooth, continuous position control. On each iteration the profile
+ generates a feasible intermediate setpoint (position + velocity) that the PID then tracks,
+ preventing large step demands from commanding unreachable states. The exponential profile shape
+ respects the plant's natural first-order dynamics, making it well-suited for flywheels, arms, and
+ elevators.
 
- <p>Use the static factory helpers (<a href="#createArmConstraints(edu.wpi.first.units.measure.Voltage,edu.wpi.first.math.system.plant.DCMotor,edu.wpi.first.units.measure.MomentOfInertia,yams.gearing.MechanismGearing)"><code>createArmConstraints(edu.wpi.first.units.measure.Voltage, edu.wpi.first.math.system.plant.DCMotor, edu.wpi.first.units.measure.MomentOfInertia, yams.gearing.MechanismGearing)</code></a>, <a href="#createElevatorConstraints(edu.wpi.first.units.measure.Voltage,edu.wpi.first.math.system.plant.DCMotor,edu.wpi.first.units.measure.Mass,edu.wpi.first.units.measure.Distance,yams.gearing.MechanismGearing)"><code>createElevatorConstraints(edu.wpi.first.units.measure.Voltage, edu.wpi.first.math.system.plant.DCMotor, edu.wpi.first.units.measure.Mass, edu.wpi.first.units.measure.Distance, yams.gearing.MechanismGearing)</code></a>,
- <a href="#createFlywheelConstraints(edu.wpi.first.units.measure.Voltage,edu.wpi.first.math.system.plant.DCMotor,edu.wpi.first.units.measure.MomentOfInertia,yams.gearing.MechanismGearing)"><code>createFlywheelConstraints(edu.wpi.first.units.measure.Voltage, edu.wpi.first.math.system.plant.DCMotor, edu.wpi.first.units.measure.MomentOfInertia, yams.gearing.MechanismGearing)</code></a>) to derive physically accurate
+ <p>Use the static factory helpers (<a href="#createArmConstraints(edu.wpi.first.units.measure.Voltage,edu.wpi.first.math.system.plant.DCMotor,edu.wpi.first.units.measure.MomentOfInertia,yams.gearing.MechanismGearing)"><code>createArmConstraints(edu.wpi.first.units.measure.Voltage, edu.wpi.first.math.system.plant.DCMotor, edu.wpi.first.units.measure.MomentOfInertia, yams.gearing.MechanismGearing)</code></a>, <a href="#createElevatorConstraints(edu.wpi.first.units.measure.Voltage,edu.wpi.first.math.system.plant.DCMotor,edu.wpi.first.units.measure.Mass,edu.wpi.first.units.measure.Distance,yams.gearing.MechanismGearing)"><code>createElevatorConstraints(edu.wpi.first.units.measure.Voltage, edu.wpi.first.math.system.plant.DCMotor, edu.wpi.first.units.measure.Mass, edu.wpi.first.units.measure.Distance, yams.gearing.MechanismGearing)</code></a>, <a href="#createFlywheelConstraints(edu.wpi.first.units.measure.Voltage,edu.wpi.first.math.system.plant.DCMotor,edu.wpi.first.units.measure.MomentOfInertia,yams.gearing.MechanismGearing)"><code>createFlywheelConstraints(edu.wpi.first.units.measure.Voltage, edu.wpi.first.math.system.plant.DCMotor, edu.wpi.first.units.measure.MomentOfInertia, yams.gearing.MechanismGearing)</code></a>) to derive physically accurate
  <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/trajectory/ExponentialProfile.Constraints.html" title="class or interface in edu.wpi.first.math.trajectory" class="external-link"><code>ExponentialProfile.Constraints</code></a> directly from motor and mechanism parameters.
 
  <h2>Example — arm position control</h2>
+
  <pre><code>
  import static edu.wpi.first.units.Units.*;
 
@@ -302,7 +300,8 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reset(double,double)" class="member-name-link">reset</a><wbr>(double&nbsp;position,
  double&nbsp;velocity)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Reset the PID and profile with the given position and velocity as the measured position and velocity.</div>
+<div class="block">Reset the PID and profile with the given position and velocity as the measured position and
+ velocity.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reset(edu.wpi.first.math.trajectory.ExponentialProfile.State)" class="member-name-link">reset</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/trajectory/ExponentialProfile.State.html" title="class or interface in edu.wpi.first.math.trajectory" class="external-link">ExponentialProfile.State</a>&nbsp;measurement)</code></div>
@@ -423,8 +422,7 @@ loadScripts(document, 'script');</script>
 <dd><code>maxVolts</code> - Maximum input voltage for profile generation.</dd>
 <dd><code>motor</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/system/plant/DCMotor.html" title="class or interface in edu.wpi.first.math.system.plant" class="external-link"><code>DCMotor</code></a> of the arm.</dd>
 <dd><code>moi</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/MomentOfInertia.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>MomentOfInertia</code></a> of the arm.</dd>
-<dd><code>gearing</code> - <a href="../gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> of the arm from the rotor to the drum.
-                 <code>gearing.getMechanismToRotorRatio()</code></dd>
+<dd><code>gearing</code> - <a href="../gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> of the arm from the rotor to the drum. <code>gearing.getMechanismToRotorRatio()</code></dd>
 <dt>Returns:</dt>
 <dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/trajectory/ExponentialProfile.Constraints.html" title="class or interface in edu.wpi.first.math.trajectory" class="external-link"><code>ExponentialProfile.Constraints</code></a></dd>
 </dl>
@@ -445,8 +443,7 @@ loadScripts(document, 'script');</script>
 <dd><code>motor</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/system/plant/DCMotor.html" title="class or interface in edu.wpi.first.math.system.plant" class="external-link"><code>DCMotor</code></a> of the arm.</dd>
 <dd><code>mass</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Mass</code></a> of the arm.</dd>
 <dd><code>length</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Distance</code></a> of the arm length.</dd>
-<dd><code>gearing</code> - <a href="../gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> of the arm from the rotor to the drum.
-                 <code>gearing.getMechanismToRotorRatio()</code></dd>
+<dd><code>gearing</code> - <a href="../gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> of the arm from the rotor to the drum. <code>gearing.getMechanismToRotorRatio()</code></dd>
 <dt>Returns:</dt>
 <dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/trajectory/ExponentialProfile.Constraints.html" title="class or interface in edu.wpi.first.math.trajectory" class="external-link"><code>ExponentialProfile.Constraints</code></a></dd>
 </dl>
@@ -547,7 +544,8 @@ loadScripts(document, 'script');</script>
 <h3>reset</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">reset</span><wbr><span class="parameters">(double&nbsp;position,
  double&nbsp;velocity)</span></div>
-<div class="block">Reset the PID and profile with the given position and velocity as the measured position and velocity.</div>
+<div class="block">Reset the PID and profile with the given position and velocity as the measured position and
+ velocity.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>position</code> - Measured position</dd>
@@ -592,8 +590,9 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="atSetpoint()">
 <h3>atSetpoint</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">atSetpoint</span>()</div>
-<div class="block">Returns true if the error is within the tolerance of the setpoint. The error tolerance defaults to 0.05, and the
- error derivative tolerance defaults to ∞. This will return false until at least one input value has been computed.</div>
+<div class="block">Returns true if the error is within the tolerance of the setpoint. The error tolerance defaults
+ to 0.05, and the error derivative tolerance defaults to ∞. This will return false until at
+ least one input value has been computed.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>Whether the error is within the acceptable bounds</dd>

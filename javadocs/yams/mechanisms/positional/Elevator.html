@@ -85,6 +85,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Elevator mechanism.
 
  <h2>Usage Example</h2>
+
  <pre><code>
  SmartMotorController motor = new TalonFXWrapper(
      new TalonFX(4), DCMotor.getKrakenX60(1),
@@ -170,8 +171,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Translation3d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link">Translation3d</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined in the
- <a href="../config/MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
+<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
+ in the <a href="../config/MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearVelocity</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getVelocity()" class="member-name-link">getVelocity</a>()</code></div>
@@ -203,8 +204,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/button/Trigger.html" title="class or interface in edu.wpi.first.wpilibj2.command.button" class="external-link">Trigger</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#min()" class="member-name-link">min</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Minimum angle of the <a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a> given by the soft limit or hard limit of the
- <a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a>.</div>
+<div class="block">Minimum angle of the <a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a> given by the soft limit or hard limit of
+ the <a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a>.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link">Command</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#run(edu.wpi.first.units.measure.Distance)" class="member-name-link">run</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;height)</code></div>
@@ -251,7 +252,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#visualizationUpdate()" class="member-name-link">visualizationUpdate</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Updates the length of the mechanism ligament to match the current height of the elevator in meters.</div>
+<div class="block">Updates the length of the mechanism ligament to match the current height of the elevator in
+ meters.</div>
 </div>
 </div>
 </div>
@@ -325,7 +327,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="visualizationUpdate()">
 <h3>visualizationUpdate</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">visualizationUpdate</span>()</div>
-<div class="block">Updates the length of the mechanism ligament to match the current height of the elevator in meters.</div>
+<div class="block">Updates the length of the mechanism ligament to match the current height of the elevator in
+ meters.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../SmartMechanism.html#visualizationUpdate()">visualizationUpdate</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMechanism.html" title="class in yams.mechanisms">SmartMechanism</a></code></dd>
@@ -336,8 +339,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getRelativeMechanismPosition()">
 <h3>getRelativeMechanismPosition</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Translation3d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link">Translation3d</a></span>&nbsp;<span class="element-name">getRelativeMechanismPosition</span>()</div>
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined in the
- <a href="../config/MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
+<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
+ in the <a href="../config/MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../SmartMechanism.html#getRelativeMechanismPosition()">getRelativeMechanismPosition</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMechanism.html" title="class in yams.mechanisms">SmartMechanism</a></code></dd>
@@ -369,7 +372,7 @@ loadScripts(document, 'script');</script>
 <dt>Parameters:</dt>
 <dd><code>height</code> - Height of the elevator to reach.</dd>
 <dt>Returns:</dt>
-<dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> that  sets the elevator height, stops immediately.</dd>
+<dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> that sets the elevator height, stops immediately.</dd>
 </dl>
 </section>
 </li>
@@ -382,7 +385,7 @@ loadScripts(document, 'script');</script>
 <dt>Parameters:</dt>
 <dd><code>height</code> - Height of the elevator to reach.</dd>
 <dt>Returns:</dt>
-<dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> that  sets the elevator height, stops immediately.</dd>
+<dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> that sets the elevator height, stops immediately.</dd>
 </dl>
 </section>
 </li>
@@ -395,7 +398,7 @@ loadScripts(document, 'script');</script>
 <dt>Parameters:</dt>
 <dd><code>height</code> - Height of the elevator to reach.</dd>
 <dt>Returns:</dt>
-<dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> that  sets the elevator height, does not stop.</dd>
+<dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> that sets the elevator height, does not stop.</dd>
 </dl>
 </section>
 </li>
@@ -408,7 +411,7 @@ loadScripts(document, 'script');</script>
 <dt>Parameters:</dt>
 <dd><code>height</code> - Height of the elevator to reach.</dd>
 <dt>Returns:</dt>
-<dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> that  sets the elevator height, stops immediately.</dd>
+<dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> that sets the elevator height, stops immediately.</dd>
 </dl>
 </section>
 </li>
@@ -423,10 +426,11 @@ loadScripts(document, 'script');</script>
 <dd><code>height</code> - Height to reach.</dd>
 <dd><code>tolerance</code> - The acceptable tolerance</dd>
 <dt>Returns:</dt>
-<dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> which will run the elevator to the desired height with a tolerance, then move on.</dd>
+<dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> which will run the elevator to the desired height with a tolerance,
+     then move on.</dd>
 <dt>Implementation Note:</dt>
-<dd>This should NOT be used with a default command, the mechanism will not stop running after this to allow
- for easy chaining.</dd>
+<dd>This should NOT be used with a default command, the mechanism will not stop running
+     after this to allow for easy chaining.</dd>
 </dl>
 </section>
 </li>
@@ -441,10 +445,11 @@ loadScripts(document, 'script');</script>
 <dd><code>height</code> - Height to reach.</dd>
 <dd><code>tolerance</code> - The acceptable tolerance</dd>
 <dt>Returns:</dt>
-<dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> which will run the elevator to the desired height with a tolerance, then move on.</dd>
+<dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> which will run the elevator to the desired height with a tolerance,
+     then move on.</dd>
 <dt>Implementation Note:</dt>
-<dd>This should NOT be used with a default command, the mechanism will not stop running after this to allow
- for easy chaining.</dd>
+<dd>This should NOT be used with a default command, the mechanism will not stop running
+     after this to allow for easy chaining.</dd>
 </dl>
 </section>
 </li>
@@ -505,8 +510,8 @@ loadScripts(document, 'script');</script>
 <h3>min</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/button/Trigger.html" title="class or interface in edu.wpi.first.wpilibj2.command.button" class="external-link">Trigger</a></span>&nbsp;<span class="element-name">min</span>()</div>
 <div class="block"><span class="descfrm-type-label">Description copied from class:&nbsp;<code><a href="SmartPositionalMechanism.html#min()">SmartPositionalMechanism</a></code></span></div>
-<div class="block">Minimum angle of the <a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a> given by the soft limit or hard limit of the
- <a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a>.</div>
+<div class="block">Minimum angle of the <a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a> given by the soft limit or hard limit of
+ the <a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a>.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="SmartPositionalMechanism.html#min()">min</a></code>&nbsp;in class&nbsp;<code><a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional">SmartPositionalMechanism</a></code></dd>

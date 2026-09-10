@@ -86,12 +86,10 @@ loadScripts(document, 'script');</script>
  are supported: <code>ARM</code>, <code>ELEVATOR</code>, and <code>FLYWHEEL</code>.
 
  <p>On each robot loop iteration, call the appropriate <code>calculate()</code> overload with the
- current sensor measurement and the desired setpoint. The controller internally runs a
- <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/system/LinearSystemLoop.html" title="class or interface in edu.wpi.first.math.system" class="external-link"><code>LinearSystemLoop</code></a> that fuses a
- <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/LinearQuadraticRegulator.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>LinearQuadraticRegulator</code></a> with a
- <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/KalmanFilter.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>KalmanFilter</code></a> observer.
+ current sensor measurement and the desired setpoint. The controller internally runs a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/system/LinearSystemLoop.html" title="class or interface in edu.wpi.first.math.system" class="external-link"><code>LinearSystemLoop</code></a> that fuses a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/LinearQuadraticRegulator.html" title="class or interface in edu.wpi.first.math.controller" class="external-link"><code>LinearQuadraticRegulator</code></a> with a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/estimator/KalmanFilter.html" title="class or interface in edu.wpi.first.math.estimator" class="external-link"><code>KalmanFilter</code></a> observer.
 
  <h2>Example — construct from LQRConfig and calculate arm voltage</h2>
+
  <pre><code>
  import static edu.wpi.first.units.Units.*;
 

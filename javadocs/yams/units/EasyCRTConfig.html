@@ -82,29 +82,27 @@ loadScripts(document, 'script');</script>
 
  <p><code>EasyCRTConfig</code> holds all inputs that the <a href="EasyCRT.html" title="class in yams.units"><code>EasyCRT</code></a> solver needs to estimate an
  absolute mechanism angle from two absolute encoders whose gear ratios are deliberately
- <em>non-integer</em> multiples of each other (CRT-inspired unwrapping). The fields it
- configures include:
+ <em>non-integer</em> multiples of each other (CRT-inspired unwrapping). The fields it configures
+ include:
 
  <ul>
-   <li><b>Encoder angle suppliers</b> — lambdas that return the live reading for each encoder.</li>
-   <li><b>Encoder-to-mechanism ratios</b> — either supplied directly via
-       <a href="#withEncoderRatios(double,double)"><code>withEncoderRatios(double, double)</code></a>, derived from a shared drive gear via
-       <a href="#withCommonDriveGear(double,int,int,int)"><code>withCommonDriveGear(double, int, int, int)</code></a>, or computed from explicit gear chains
-       via <a href="#withAbsoluteEncoder1Gearing(int...)"><code>withAbsoluteEncoder1Gearing(int...)</code></a> /
-       <a href="#withAbsoluteEncoder2Gearing(int...)"><code>withAbsoluteEncoder2Gearing(int...)</code></a>.</li>
-   <li><b>Per-encoder offsets</b> — zero-point corrections added before wrapping the raw
-       reading into [0, 1) rotations.</li>
-   <li><b>Mechanism travel limits</b> — the minimum and maximum mechanism angles the solver
-       is allowed to consider as solutions.</li>
-   <li><b>Match tolerance</b> — the maximum modular error (in rotations) between the predicted
-       and measured encoder 2 reading before a candidate is rejected.</li>
-   <li><b>Inversion flags</b> — flip an encoder ratio's sign when the sensor is physically
-       mounted in reverse and on-device inversion is not available.</li>
-   <li><b>Gear recommendation inputs</b> (simulation only) — tooth counts and search bounds
-       used to suggest coprime gear pairs with adequate unique coverage.</li>
+   <li><b>Encoder angle suppliers</b> — lambdas that return the live reading for each encoder.
+ <li><b>Encoder-to-mechanism ratios</b> — either supplied directly via <a href="#withEncoderRatios(double,double)"><code>withEncoderRatios(double, double)</code></a>, derived from a shared drive gear via <a href="#withCommonDriveGear(double,int,int,int)"><code>withCommonDriveGear(double, int, int, int)</code></a>, or computed from explicit gear chains via
+ <a href="#withAbsoluteEncoder1Gearing(int...)"><code>withAbsoluteEncoder1Gearing(int...)</code></a> / <a href="#withAbsoluteEncoder2Gearing(int...)"><code>withAbsoluteEncoder2Gearing(int...)</code></a>.
+   <li><b>Per-encoder offsets</b> — zero-point corrections added before wrapping the raw reading
+       into [0, 1) rotations.
+   <li><b>Mechanism travel limits</b> — the minimum and maximum mechanism angles the solver is
+       allowed to consider as solutions.
+   <li><b>Match tolerance</b> — the maximum modular error (in rotations) between the predicted and
+       measured encoder 2 reading before a candidate is rejected.
+   <li><b>Inversion flags</b> — flip an encoder ratio's sign when the sensor is physically mounted
+       in reverse and on-device inversion is not available.
+   <li><b>Gear recommendation inputs</b> (simulation only) — tooth counts and search bounds used
+       to suggest coprime gear pairs with adequate unique coverage.
  </ul>
 
  <h2>Example</h2>
+
  <pre><code>
  import static edu.wpi.first.units.Units.Rotations;
  import yams.units.EasyCRTConfig;
@@ -434,8 +432,8 @@ loadScripts(document, 'script');</script>
  <p>If the encoder gears are driven by the turret gear itself, the common ratio is 1, and the
  drive gear is the turret gear teeth.
 
- <p>Also seeds CRT gear recommendation inputs (stage1 gear teeth + stage2 ratio) so you can
- call <a href="#withCrtGearRecommendationConstraints(double,int,int,int)"><code>withCrtGearRecommendationConstraints(double, int, int, int)</code></a> afterward.</div>
+ <p>Also seeds CRT gear recommendation inputs (stage1 gear teeth + stage2 ratio) so you can call
+ <a href="#withCrtGearRecommendationConstraints(double,int,int,int)"><code>withCrtGearRecommendationConstraints(double, int, int, int)</code></a> afterward.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>commonRatio</code> - ratio between mechanism and drive gear</dd>
@@ -496,9 +494,9 @@ loadScripts(document, 'script');</script>
 
  <p>Example: mechanism backlash to the encoders is about 1 degree. commonRatio = 11,
  driveGearTeeth = 50, and encoder2PinionTeeth = 30. Ratio = 18.3333. 1 degree of mechanism
- backlash is about 0.0509 rotations of the encoder. A tolerance of 0.06 rotations corresponds
- to about 1.18 degrees at the mechanism (0.06 / 18.33333 * 360), which is only slightly higher
- than the backlash.</div>
+ backlash is about 0.0509 rotations of the encoder. A tolerance of 0.06 rotations corresponds to
+ about 1.18 degrees at the mechanism (0.06 / 18.33333 * 360), which is only slightly higher than
+ the backlash.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>tolerance</code> - allowable modular error for encoder 2</dd>
@@ -564,8 +562,7 @@ loadScripts(document, 'script');</script>
  <p>Call <a href="#withCrtGearRecommendationConstraints(double,int,int,int)"><code>withCrtGearRecommendationConstraints(double, int, int, int)</code></a> to configure
  coverage and search bounds.
 
- <p><code>stage1GearTeeth</code> is the gear that drives both encoder pinions, and <code>stage2Ratio</code>
- is the shared "common ratio" between the mechanism and that drive gear.</div>
+ <p><code>stage1GearTeeth</code> is the gear that drives both encoder pinions, and <code>stage2Ratio</code> is the shared "common ratio" between the mechanism and that drive gear.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>stage1GearTeeth</code> - tooth count on the gear that drives both encoders</dd>
@@ -624,8 +621,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Defines a meshed gear chain for encoder 2, ordered from mechanism drive gear to encoder.
 
  <p>Example: <code>withAbsoluteEncoder2Gearing(50, 20, 40)</code> means 50T drives 20T, which drives
- 40T on encoder 2, for a ratio of (50/20) * (20/40) = 50/40. A single mesh could be
- <code>withAbsoluteEncoder2Gearing(60, 20)</code> for a 3:1 reduction.
+ 40T on encoder 2, for a ratio of (50/20) * (20/40) = 50/40. A single mesh could be <code>withAbsoluteEncoder2Gearing(60, 20)</code> for a 3:1 reduction.
 
  <p>Not valid for compound same-shaft trains; use <a href="#withAbsoluteEncoder2GearingStages(int...)"><code>withAbsoluteEncoder2GearingStages(int...)</code></a> instead.</div>
 <dl class="notes">
@@ -644,8 +640,7 @@ loadScripts(document, 'script');</script>
 
  <p>Use this for compound trains or when you need same-shaft gears represented by separate
  stages. Example: <code>withAbsoluteEncoder1GearingStages(12, 36, 18, 60)</code> means 12T drives
- 36T, then 18T drives 60T. A single stage would be <code>withAbsoluteEncoder1GearingStages(12,
- 60)</code>.</div>
+ 36T, then 18T drives 60T. A single stage would be <code>withAbsoluteEncoder1GearingStages(12, 60)</code>.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>driverDrivenPairs</code> - alternating driver and driven teeth counts for each stage</dd>

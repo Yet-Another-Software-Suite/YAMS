@@ -68,13 +68,12 @@ loadScripts(document, 'script');</script>
 <div class="block">Physics-based simulation suppliers for YAMS motor controllers.
 
  <p>Simulation suppliers bridge WPILib's simulation framework and YAMS motor controller wrappers.
- Pass an instance to <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> via
- <code>withSimSupplier()</code> to enable physics-accurate simulation without changing mechanism code.
+ Pass an instance to <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> via <code>withSimSupplier()</code> to enable physics-accurate simulation without changing mechanism code.
 
  <ul>
-   <li><a href="ArmSimSupplier.html" title="class in yams.motorcontrollers.simulation"><code>ArmSimSupplier</code></a> — single-jointed arm physics</li>
-   <li><a href="DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation"><code>DCMotorSimSupplier</code></a> — generic DC motor physics</li>
-   <li><a href="Sensor.html" title="class in yams.motorcontrollers.simulation"><code>Sensor</code></a> and <a href="SensorData.html" title="class in yams.motorcontrollers.simulation"><code>SensorData</code></a> — simulated encoder/sensor state</li>
+   <li><a href="ArmSimSupplier.html" title="class in yams.motorcontrollers.simulation"><code>ArmSimSupplier</code></a> — single-jointed arm physics
+   <li><a href="DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation"><code>DCMotorSimSupplier</code></a> — generic DC motor physics
+ <li><a href="Sensor.html" title="class in yams.motorcontrollers.simulation"><code>Sensor</code></a> and <a href="SensorData.html" title="class in yams.motorcontrollers.simulation"><code>SensorData</code></a> — simulated encoder/sensor state
  </ul></div>
 </section>
 <section class="summary">
@@ -109,8 +108,7 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="ArmSimSupplier.html" title="class in yams.motorcontrollers.simulation">ArmSimSupplier</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
-<div class="block">ArmSim Supplier — simulates a single-jointed arm mechanism using WPILib's
- <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/SingleJointedArmSim.html" title="class or interface in edu.wpi.first.wpilibj.simulation" class="external-link"><code>SingleJointedArmSim</code></a>.</div>
+<div class="block">ArmSim Supplier — simulates a single-jointed arm mechanism using WPILib's <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/SingleJointedArmSim.html" title="class or interface in edu.wpi.first.wpilibj.simulation" class="external-link"><code>SingleJointedArmSim</code></a>.</div>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab2"><a href="BatterySim.html" title="class in yams.motorcontrollers.simulation">BatterySim</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab2">
@@ -119,17 +117,17 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="DCMotorSimSupplier.html" title="class in yams.motorcontrollers.simulation">DCMotorSimSupplier</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
-<div class="block">DCMotorSim Supplier — simulates a generic DC motor load (flywheel, roller, or elevator)
- using WPILib's <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/DCMotorSim.html" title="class or interface in edu.wpi.first.wpilibj.simulation" class="external-link"><code>DCMotorSim</code></a>.</div>
+<div class="block">DCMotorSim Supplier — simulates a generic DC motor load (flywheel, roller, or elevator) using
+ WPILib's <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/DCMotorSim.html" title="class or interface in edu.wpi.first.wpilibj.simulation" class="external-link"><code>DCMotorSim</code></a>.</div>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab2"><a href="ElevatorSimSupplier.html" title="class in yams.motorcontrollers.simulation">ElevatorSimSupplier</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab2">
-<div class="block">ElevatorSim Supplier — simulates an elevator mechanism using WPILib's
- <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/ElevatorSim.html" title="class or interface in edu.wpi.first.wpilibj.simulation" class="external-link"><code>ElevatorSim</code></a>.</div>
+<div class="block">ElevatorSim Supplier — simulates an elevator mechanism using WPILib's <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/ElevatorSim.html" title="class or interface in edu.wpi.first.wpilibj.simulation" class="external-link"><code>ElevatorSim</code></a>.</div>
 </div>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="Sensor.html" title="class in yams.motorcontrollers.simulation">Sensor</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
-<div class="block">Sensor class using <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/hal/SimDevice.html" title="class or interface in edu.wpi.first.hal" class="external-link"><code>SimDevice</code></a>; All fields will use the given supplier on real robots.</div>
+<div class="block">Sensor class using <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/hal/SimDevice.html" title="class or interface in edu.wpi.first.hal" class="external-link"><code>SimDevice</code></a>; All fields will use the given supplier on
+ real robots.</div>
 </div>
 <div class="col-first odd-row-color class-summary class-summary-tab2"><a href="SensorData.html" title="class in yams.motorcontrollers.simulation">SensorData</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab2">

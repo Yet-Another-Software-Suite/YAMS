@@ -85,16 +85,16 @@ loadScripts(document, 'script');</script>
 <div class="block">Smart motor controller wrapper for motor controllers.
 
  <p>This abstract class is not instantiated directly. Instantiate the appropriate vendor wrapper:
- <a href="local/SparkWrapper.html" title="class in yams.motorcontrollers.local"><code>SparkWrapper</code></a> for REV SPARK hardware, or
- <a href="remote/TalonFXWrapper.html" title="class in yams.motorcontrollers.remote"><code>TalonFXWrapper</code></a>/<a href="remote/TalonFXSWrapper.html" title="class in yams.motorcontrollers.remote"><code>TalonFXSWrapper</code></a>
+ <a href="local/SparkWrapper.html" title="class in yams.motorcontrollers.local"><code>SparkWrapper</code></a> for REV SPARK hardware, or <a href="remote/TalonFXWrapper.html" title="class in yams.motorcontrollers.remote"><code>TalonFXWrapper</code></a>/<a href="remote/TalonFXSWrapper.html" title="class in yams.motorcontrollers.remote"><code>TalonFXSWrapper</code></a>
  for CTRE hardware. Configure all three via <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.
 
  <h2>Example</h2>
+
  <pre><code>
  SmartMotorControllerConfig config = new SmartMotorControllerConfig()
-     .withClosedLoopController(0.1,0,0).withFeedforward(new SimpleMotorFeedforward(0.05,0,0)).withStatorCurrentLimit(Amps.of(40));
- SmartMotorController motor = new SparkWrapper(
-     new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), config);
+     .withClosedLoopController(0.1,0,0).withFeedforward(new
+ SimpleMotorFeedforward(0.05,0,0)).withStatorCurrentLimit(Amps.of(40)); SmartMotorController motor
+ = new SparkWrapper( new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1), config);
 
  // Use directly for duty-cycle or voltage control:
  motor.setDutyCycle(0.5);
@@ -195,34 +195,39 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">Parent table for telemetry.</div>
 </div>
-<div class="col-first odd-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&gt;</code></div>
-<div class="col-second odd-row-color"><code><a href="#setpointPosition" class="member-name-link">setpointPosition</a></code></div>
+<div class="col-first odd-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Force</a>&gt;</code></div>
+<div class="col-second odd-row-color"><code><a href="#setpointFeedforwardForce" class="member-name-link">setpointFeedforwardForce</a></code></div>
 <div class="col-last odd-row-color">
+<div class="block">Setpoint feedforward force, applied on top of the velocity setpoint, e.g.</div>
+</div>
+<div class="col-first even-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#setpointPosition" class="member-name-link">setpointPosition</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Setpoint position</div>
 </div>
-<div class="col-first even-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&gt;</code></div>
-<div class="col-second even-row-color"><code><a href="#setpointVelocity" class="member-name-link">setpointVelocity</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&gt;</code></div>
+<div class="col-second odd-row-color"><code><a href="#setpointVelocity" class="member-name-link">setpointVelocity</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Setpoint velocity.</div>
 </div>
-<div class="col-first odd-row-color"><code>protected <a href="../telemetry/SmartMotorControllerTelemetry.html" title="class in yams.telemetry">SmartMotorControllerTelemetry</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#telemetry" class="member-name-link">telemetry</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>protected <a href="../telemetry/SmartMotorControllerTelemetry.html" title="class in yams.telemetry">SmartMotorControllerTelemetry</a></code></div>
+<div class="col-second even-row-color"><code><a href="#telemetry" class="member-name-link">telemetry</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Telemetry.</div>
 </div>
-<div class="col-first even-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a>&gt;</code></div>
-<div class="col-second even-row-color"><code><a href="#telemetryConfig" class="member-name-link">telemetryConfig</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a>&gt;</code></div>
+<div class="col-second odd-row-color"><code><a href="#telemetryConfig" class="member-name-link">telemetryConfig</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Config for publishing specific telemetry.</div>
 </div>
-<div class="col-first odd-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/networktables/NetworkTable.html" title="class or interface in edu.wpi.first.networktables" class="external-link">NetworkTable</a>&gt;</code></div>
-<div class="col-second odd-row-color"><code><a href="#telemetryTable" class="member-name-link">telemetryTable</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/networktables/NetworkTable.html" title="class or interface in edu.wpi.first.networktables" class="external-link">NetworkTable</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#telemetryTable" class="member-name-link">telemetryTable</a></code></div>
+<div class="col-last even-row-color">
 <div class="block"><a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> telemetry table.</div>
 </div>
-<div class="col-first even-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/networktables/NetworkTable.html" title="class or interface in edu.wpi.first.networktables" class="external-link">NetworkTable</a>&gt;</code></div>
-<div class="col-second even-row-color"><code><a href="#tuningTable" class="member-name-link">tuningTable</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/networktables/NetworkTable.html" title="class or interface in edu.wpi.first.networktables" class="external-link">NetworkTable</a>&gt;</code></div>
+<div class="col-second odd-row-color"><code><a href="#tuningTable" class="member-name-link">tuningTable</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block"><a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> tuning table.</div>
 </div>
 </div>
@@ -312,32 +317,31 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearAcceleration.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearAcceleration</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMeasurementAcceleration()" class="member-name-link">getMeasurementAcceleration</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted with the
- <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
+<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted
+ with the <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMeasurementPosition()" class="member-name-link">getMeasurementPosition</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted with the
- <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted
+ with the <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearVelocity</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMeasurementVelocity()" class="member-name-link">getMeasurementVelocity</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted with the
- <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted
+ with the <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularAcceleration.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularAcceleration</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMechanismAcceleration()" class="member-name-link">getMechanismAcceleration</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Get the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularAcceleration.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularAcceleration</code></a>, calculating it on the robot controller if necessary by taking the
- derivative of the velocity.</div>
+<div class="block">Get the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularAcceleration.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularAcceleration</code></a>, calculating it on the robot controller if
+ necessary by taking the derivative of the velocity.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMechanismPosition()" class="member-name-link">getMechanismPosition</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Get the mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Angle</code></a> taking the configured <a href="../gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> from
- <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+<div class="block">Get the mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Angle</code></a> taking the configured <a href="../gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> from <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMechanismPositionSetpoint()" class="member-name-link">getMechanismPositionSetpoint</a>()</code></div>
@@ -352,8 +356,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMechanismVelocity()" class="member-name-link">getMechanismVelocity</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Get the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> taking the configured <a href="../gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> into the measurement
- applied via the <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+<div class="block">Get the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> taking the configured <a href="../gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> into
+ the measurement applied via the <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMotorController()" class="member-name-link">getMotorController</a>()</code></div>
@@ -374,325 +378,343 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getRotorPosition()" class="member-name-link">getRotorPosition</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Get the rotations of the motor with the relative encoder since the motor controller powered on scaled to the
- mechanism rotations.</div>
+<div class="block">Get the rotations of the motor with the relative encoder since the motor controller powered on
+ scaled to the mechanism rotations.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getRotorVelocity()" class="member-name-link">getRotorVelocity</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Gets the angular velocity of the motor.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="SimSupplier.html" title="interface in yams.motorcontrollers">SimSupplier</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSimSupplier()" class="member-name-link">getSimSupplier</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Force</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSetpointFeedforwardForce()" class="member-name-link">getSetpointFeedforwardForce</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get the feedforward <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Force</code></a> last supplied to <a href="#setVelocity(edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.Force)"><code>setVelocity(AngularVelocity, Force)</code></a>
+ or <a href="#setVelocity(edu.wpi.first.units.measure.LinearVelocity,edu.wpi.first.units.measure.Force)"><code>setVelocity(LinearVelocity, Force)</code></a>.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="SimSupplier.html" title="interface in yams.motorcontrollers">SimSupplier</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSimSupplier()" class="member-name-link">getSimSupplier</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the sim supplier.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Current.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Current</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getStatorCurrent()" class="member-name-link">getStatorCurrent</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Current.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Current</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getStatorCurrent()" class="member-name-link">getStatorCurrent</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the stator current of the motor controller.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Current.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Current</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getSupplyCurrent()" class="member-name-link">getSupplyCurrent</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Current.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Current</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getSupplyCurrent()" class="member-name-link">getSupplyCurrent</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the supply current of the motor controller.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Temperature.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Temperature</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getTemperature()" class="member-name-link">getTemperature</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Temperature.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Temperature</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getTemperature()" class="member-name-link">getTemperature</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> temperature.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/trajectory/TrapezoidProfile.State.html" title="class or interface in edu.wpi.first.math.trajectory" class="external-link">TrapezoidProfile.State</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTrapezoidalProfileState()" class="member-name-link">getTrapezoidalProfileState</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/trajectory/TrapezoidProfile.State.html" title="class or interface in edu.wpi.first.math.trajectory" class="external-link">TrapezoidProfile.State</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTrapezoidalProfileState()" class="member-name-link">getTrapezoidalProfileState</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the current encoder trapezoidal profile state for the closed loop controller.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/Pair.html" title="class or interface in edu.wpi.first.math" class="external-link">Pair</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../telemetry/SmartMotorControllerTelemetry.BooleanTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.BooleanTelemetryField</a>&gt;&gt;,<wbr><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a>&gt;&gt;&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getUnsupportedTelemetryFields()" class="member-name-link">getUnsupportedTelemetryFields</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/Pair.html" title="class or interface in edu.wpi.first.math" class="external-link">Pair</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../telemetry/SmartMotorControllerTelemetry.BooleanTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.BooleanTelemetryField</a>&gt;&gt;,<wbr><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a>&gt;&gt;&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getUnsupportedTelemetryFields()" class="member-name-link">getUnsupportedTelemetryFields</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get a list of unsupported telemetry fields if any exist.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Voltage.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Voltage</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getVoltage()" class="member-name-link">getVoltage</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Voltage.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Voltage</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getVoltage()" class="member-name-link">getVoltage</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the voltage output of the motor.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isMotor(edu.wpi.first.math.system.plant.DCMotor,edu.wpi.first.math.system.plant.DCMotor)" class="member-name-link">isMotor</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/system/plant/DCMotor.html" title="class or interface in edu.wpi.first.math.system.plant" class="external-link">DCMotor</a>&nbsp;a,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isMotor(edu.wpi.first.math.system.plant.DCMotor,edu.wpi.first.math.system.plant.DCMotor)" class="member-name-link">isMotor</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/system/plant/DCMotor.html" title="class or interface in edu.wpi.first.math.system.plant" class="external-link">DCMotor</a>&nbsp;a,
  <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/system/plant/DCMotor.html" title="class or interface in edu.wpi.first.math.system.plant" class="external-link">DCMotor</a>&nbsp;b)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Compare <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/system/plant/DCMotor.html" title="class or interface in edu.wpi.first.math.system.plant" class="external-link"><code>DCMotor</code></a>s to identify the given motor.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#iterateClosedLoopController()" class="member-name-link">iterateClosedLoopController</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#iterateClosedLoopController()" class="member-name-link">iterateClosedLoopController</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Iterate the closed loop controller.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#seedRelativeEncoder()" class="member-name-link">seedRelativeEncoder</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#seedRelativeEncoder()" class="member-name-link">seedRelativeEncoder</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Seed the relative encoder with the position from the absolute encoder.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setClosedLoopRampRate(edu.wpi.first.units.measure.Time)" class="member-name-link">setClosedLoopRampRate</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Time.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Time</a>&nbsp;rampRate)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setClosedLoopRampRate(edu.wpi.first.units.measure.Time)" class="member-name-link">setClosedLoopRampRate</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Time.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Time</a>&nbsp;rampRate)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the closed loop ramp rate.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setClosedLoopSlot(yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">setClosedLoopSlot</a><wbr>(<a href="SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a>&nbsp;slot)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setClosedLoopSlot(yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">setClosedLoopSlot</a><wbr>(<a href="SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a>&nbsp;slot)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the closed loop controller slot to use.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setDutyCycle(double)" class="member-name-link">setDutyCycle</a><wbr>(double&nbsp;dutyCycle)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setDutyCycle(double)" class="member-name-link">setDutyCycle</a><wbr>(double&nbsp;dutyCycle)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the dutycycle output of the motor controller.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setEncoderInverted(boolean)" class="member-name-link">setEncoderInverted</a><wbr>(boolean&nbsp;inverted)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setEncoderInverted(boolean)" class="member-name-link">setEncoderInverted</a><wbr>(boolean&nbsp;inverted)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the phase of the encoder attached to the brushless motor.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setEncoderPosition(edu.wpi.first.units.measure.Angle)" class="member-name-link">setEncoderPosition</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;angle)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setEncoderPosition(edu.wpi.first.units.measure.Angle)" class="member-name-link">setEncoderPosition</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;angle)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the encoder position</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setEncoderPosition(edu.wpi.first.units.measure.Distance)" class="member-name-link">setEncoderPosition</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;distance)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setEncoderPosition(edu.wpi.first.units.measure.Distance)" class="member-name-link">setEncoderPosition</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;distance)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the encoder position.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setEncoderVelocity(edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">setEncoderVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&nbsp;velocity)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setEncoderVelocity(edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">setEncoderVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&nbsp;velocity)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the encoder velocity</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setEncoderVelocity(edu.wpi.first.units.measure.LinearVelocity)" class="member-name-link">setEncoderVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearVelocity</a>&nbsp;velocity)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setEncoderVelocity(edu.wpi.first.units.measure.LinearVelocity)" class="member-name-link">setEncoderVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearVelocity</a>&nbsp;velocity)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the encoder velocity.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setExponentialProfile(java.util.OptionalDouble,java.util.OptionalDouble,java.util.Optional)" class="member-name-link">setExponentialProfile</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/OptionalDouble.html" title="class or interface in java.util" class="external-link">OptionalDouble</a>&nbsp;kV,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setExponentialProfile(java.util.OptionalDouble,java.util.OptionalDouble,java.util.Optional)" class="member-name-link">setExponentialProfile</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/OptionalDouble.html" title="class or interface in java.util" class="external-link">OptionalDouble</a>&nbsp;kV,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/OptionalDouble.html" title="class or interface in java.util" class="external-link">OptionalDouble</a>&nbsp;kA,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Voltage.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Voltage</a>&gt;&nbsp;maxInput)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the exponential profile fields.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setFeedback(double,double,double)" class="member-name-link">setFeedback</a><wbr>(double&nbsp;kP,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setFeedback(double,double,double)" class="member-name-link">setFeedback</a><wbr>(double&nbsp;kP,
  double&nbsp;kI,
  double&nbsp;kD)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the closed loop feedback controller PID.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setFeedforward(double,double,double,double)" class="member-name-link">setFeedforward</a><wbr>(double&nbsp;kS,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setFeedforward(double,double,double,double)" class="member-name-link">setFeedforward</a><wbr>(double&nbsp;kS,
  double&nbsp;kV,
  double&nbsp;kA,
  double&nbsp;kG)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the feedforward controller.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setIdleMode(yams.motorcontrollers.SmartMotorControllerConfig.MotorMode)" class="member-name-link">setIdleMode</a><wbr>(<a href="SmartMotorControllerConfig.MotorMode.html" title="enum class in yams.motorcontrollers">SmartMotorControllerConfig.MotorMode</a>&nbsp;mode)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setIdleMode(yams.motorcontrollers.SmartMotorControllerConfig.MotorMode)" class="member-name-link">setIdleMode</a><wbr>(<a href="SmartMotorControllerConfig.MotorMode.html" title="enum class in yams.motorcontrollers">SmartMotorControllerConfig.MotorMode</a>&nbsp;mode)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the motor idle mode from COAST or BRAKE.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKa(double)" class="member-name-link">setKa</a><wbr>(double&nbsp;kA)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKa(double)" class="member-name-link">setKa</a><wbr>(double&nbsp;kA)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Acceleration feedforward element.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKd(double)" class="member-name-link">setKd</a><wbr>(double&nbsp;kD)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKd(double)" class="member-name-link">setKd</a><wbr>(double&nbsp;kD)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set kD for the feedback controller PID.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKg(double)" class="member-name-link">setKg</a><wbr>(double&nbsp;kG)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKg(double)" class="member-name-link">setKg</a><wbr>(double&nbsp;kG)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">kSin feedforward element.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKi(double)" class="member-name-link">setKi</a><wbr>(double&nbsp;kI)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKi(double)" class="member-name-link">setKi</a><wbr>(double&nbsp;kI)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set kI for the feedback controller PID.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKp(double)" class="member-name-link">setKp</a><wbr>(double&nbsp;kP)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKp(double)" class="member-name-link">setKp</a><wbr>(double&nbsp;kP)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set kP for the feedback controller PID.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKs(double)" class="member-name-link">setKs</a><wbr>(double&nbsp;kS)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKs(double)" class="member-name-link">setKs</a><wbr>(double&nbsp;kS)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Static feedforward element.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKv(double)" class="member-name-link">setKv</a><wbr>(double&nbsp;kV)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKv(double)" class="member-name-link">setKv</a><wbr>(double&nbsp;kV)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Velocity feedforward element.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMeasurementLowerLimit(edu.wpi.first.units.measure.Distance)" class="member-name-link">setMeasurementLowerLimit</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;lowerLimit)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMeasurementLowerLimit(edu.wpi.first.units.measure.Distance)" class="member-name-link">setMeasurementLowerLimit</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;lowerLimit)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the measurement lower limit, only works if mechanism circumference is defined.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMeasurementUpperLimit(edu.wpi.first.units.measure.Distance)" class="member-name-link">setMeasurementUpperLimit</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;upperLimit)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMeasurementUpperLimit(edu.wpi.first.units.measure.Distance)" class="member-name-link">setMeasurementUpperLimit</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;upperLimit)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the measurement upper limit, only works if mechanism circumference is defined.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismCircumference(edu.wpi.first.units.measure.Distance)" class="member-name-link">setMechanismCircumference</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;circumference)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismCircumference(edu.wpi.first.units.measure.Distance)" class="member-name-link">setMechanismCircumference</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;circumference)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Update the mechanism circumference used for linear position/velocity conversions.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismGearing(yams.gearing.MechanismGearing)" class="member-name-link">setMechanismGearing</a><wbr>(<a href="../gearing/MechanismGearing.html" title="class in yams.gearing">MechanismGearing</a>&nbsp;gearing)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismGearing(yams.gearing.MechanismGearing)" class="member-name-link">setMechanismGearing</a><wbr>(<a href="../gearing/MechanismGearing.html" title="class in yams.gearing">MechanismGearing</a>&nbsp;gearing)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Update the mechanism gearing used for position/velocity conversions.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismLimits(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)" class="member-name-link">setMechanismLimits</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;lower,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismLimits(edu.wpi.first.units.measure.Angle,edu.wpi.first.units.measure.Angle)" class="member-name-link">setMechanismLimits</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;lower,
  <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;upper)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the Mechanism limits for the motor controller.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismLimitsEnabled(boolean)" class="member-name-link">setMechanismLimitsEnabled</a><wbr>(boolean&nbsp;enabled)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismLimitsEnabled(boolean)" class="member-name-link">setMechanismLimitsEnabled</a><wbr>(boolean&nbsp;enabled)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Enable or disable the mechanism/measurement limits in the motor controller.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismLowerLimit(edu.wpi.first.units.measure.Angle)" class="member-name-link">setMechanismLowerLimit</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;lowerLimit)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismLowerLimit(edu.wpi.first.units.measure.Angle)" class="member-name-link">setMechanismLowerLimit</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;lowerLimit)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the mechanism lower limit.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismUpperLimit(edu.wpi.first.units.measure.Angle)" class="member-name-link">setMechanismUpperLimit</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;upperLimit)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismUpperLimit(edu.wpi.first.units.measure.Angle)" class="member-name-link">setMechanismUpperLimit</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;upperLimit)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the mechanism upper limit.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMotionProfileMaxAcceleration(edu.wpi.first.units.measure.AngularAcceleration)" class="member-name-link">setMotionProfileMaxAcceleration</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularAcceleration.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularAcceleration</a>&nbsp;maxAcceleration)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMotionProfileMaxAcceleration(edu.wpi.first.units.measure.AngularAcceleration)" class="member-name-link">setMotionProfileMaxAcceleration</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularAcceleration.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularAcceleration</a>&nbsp;maxAcceleration)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the maximum acceleration for the trapezoidal profile for the feedback controller.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMotionProfileMaxAcceleration(edu.wpi.first.units.measure.LinearAcceleration)" class="member-name-link">setMotionProfileMaxAcceleration</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearAcceleration.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearAcceleration</a>&nbsp;maxAcceleration)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMotionProfileMaxAcceleration(edu.wpi.first.units.measure.LinearAcceleration)" class="member-name-link">setMotionProfileMaxAcceleration</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearAcceleration.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearAcceleration</a>&nbsp;maxAcceleration)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the maximum acceleration of the trapezoidal profile for the feedback controller.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMotionProfileMaxJerk(edu.wpi.first.units.measure.Velocity)" class="member-name-link">setMotionProfileMaxJerk</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/AngularAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">AngularAccelerationUnit</a>&gt;&nbsp;maxJerk)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMotionProfileMaxJerk(edu.wpi.first.units.measure.Velocity)" class="member-name-link">setMotionProfileMaxJerk</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Velocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Velocity</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/AngularAccelerationUnit.html" title="class or interface in edu.wpi.first.units" class="external-link">AngularAccelerationUnit</a>&gt;&nbsp;maxJerk)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the maximum jerk for the trapezoidal profile for the feedback controller.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMotionProfileMaxVelocity(edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">setMotionProfileMaxVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&nbsp;maxVelocity)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMotionProfileMaxVelocity(edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">setMotionProfileMaxVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&nbsp;maxVelocity)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the maximum velocity for the trapezoidal profile for the feedback controller.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMotionProfileMaxVelocity(edu.wpi.first.units.measure.LinearVelocity)" class="member-name-link">setMotionProfileMaxVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearVelocity</a>&nbsp;maxVelocity)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMotionProfileMaxVelocity(edu.wpi.first.units.measure.LinearVelocity)" class="member-name-link">setMotionProfileMaxVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearVelocity</a>&nbsp;maxVelocity)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the maximum velocity of the trapezoidal profile for the feedback controller.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMotorInverted(boolean)" class="member-name-link">setMotorInverted</a><wbr>(boolean&nbsp;inverted)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMotorInverted(boolean)" class="member-name-link">setMotorInverted</a><wbr>(boolean&nbsp;inverted)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the inversion state of the motor.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setOpenLoopRampRate(edu.wpi.first.units.measure.Time)" class="member-name-link">setOpenLoopRampRate</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Time.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Time</a>&nbsp;rampRate)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setOpenLoopRampRate(edu.wpi.first.units.measure.Time)" class="member-name-link">setOpenLoopRampRate</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Time.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Time</a>&nbsp;rampRate)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the open loop ramp rate.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setPosition(edu.wpi.first.units.measure.Angle)" class="member-name-link">setPosition</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;angle)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setPosition(edu.wpi.first.units.measure.Angle)" class="member-name-link">setPosition</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;angle)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Angle</code></a> using the PID and feedforward from <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setPosition(edu.wpi.first.units.measure.Distance)" class="member-name-link">setPosition</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;distance)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setPosition(edu.wpi.first.units.measure.Distance)" class="member-name-link">setPosition</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;distance)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Distance</code></a> using the PID and feedforward from <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSimSupplier(yams.motorcontrollers.SimSupplier)" class="member-name-link">setSimSupplier</a><wbr>(<a href="SimSupplier.html" title="interface in yams.motorcontrollers">SimSupplier</a>&nbsp;mechanismSupplier)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSimSupplier(yams.motorcontrollers.SimSupplier)" class="member-name-link">setSimSupplier</a><wbr>(<a href="SimSupplier.html" title="interface in yams.motorcontrollers">SimSupplier</a>&nbsp;mechanismSupplier)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the <a href="SimSupplier.html" title="interface in yams.motorcontrollers"><code>SimSupplier</code></a> Mechanism.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setStatorCurrentLimit(edu.wpi.first.units.measure.Current)" class="member-name-link">setStatorCurrentLimit</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Current.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Current</a>&nbsp;currentLimit)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setStatorCurrentLimit(edu.wpi.first.units.measure.Current)" class="member-name-link">setStatorCurrentLimit</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Current.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Current</a>&nbsp;currentLimit)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the stator current limit for the device.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setSupplyCurrentLimit(edu.wpi.first.units.measure.Current)" class="member-name-link">setSupplyCurrentLimit</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Current.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Current</a>&nbsp;currentLimit)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setSupplyCurrentLimit(edu.wpi.first.units.measure.Current)" class="member-name-link">setSupplyCurrentLimit</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Current.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Current</a>&nbsp;currentLimit)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the supply current limit.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setupSimulation()" class="member-name-link">setupSimulation</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setupSimulation()" class="member-name-link">setupSimulation</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Setup the simulation for the wrapper.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupTelemetry()" class="member-name-link">setupTelemetry</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupTelemetry()" class="member-name-link">setupTelemetry</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Setup Telemetry with default NT path</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupTelemetry(edu.wpi.first.networktables.NetworkTable,edu.wpi.first.networktables.NetworkTable)" class="member-name-link">setupTelemetry</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/networktables/NetworkTable.html" title="class or interface in edu.wpi.first.networktables" class="external-link">NetworkTable</a>&nbsp;telemetry,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupTelemetry(edu.wpi.first.networktables.NetworkTable,edu.wpi.first.networktables.NetworkTable)" class="member-name-link">setupTelemetry</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/networktables/NetworkTable.html" title="class or interface in edu.wpi.first.networktables" class="external-link">NetworkTable</a>&nbsp;telemetry,
  <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/networktables/NetworkTable.html" title="class or interface in edu.wpi.first.networktables" class="external-link">NetworkTable</a>&nbsp;tuning)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Update the telemetry under the motor name under the given <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/networktables/NetworkTable.html" title="class or interface in edu.wpi.first.networktables" class="external-link"><code>NetworkTable</code></a></div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setVelocity(edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">setVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&nbsp;angle)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setVelocity(edu.wpi.first.units.measure.AngularVelocity)" class="member-name-link">setVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&nbsp;angle)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> using the PID and feedforward from <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setVelocity(edu.wpi.first.units.measure.LinearVelocity)" class="member-name-link">setVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearVelocity</a>&nbsp;velocity)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Set the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>LinearVelocity</code></a> using the PID and feedforward from <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
-</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setVoltage(edu.wpi.first.units.measure.Voltage)" class="member-name-link">setVoltage</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Voltage.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Voltage</a>&nbsp;voltage)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setVelocity(edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.Force)" class="member-name-link">setVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&nbsp;angle,
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Force</a>&nbsp;feedforwardForce)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Set the voltage output of the motor controller.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#simIterate()" class="member-name-link">simIterate</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Simulation iteration.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startClosedLoopController()" class="member-name-link">startClosedLoopController</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Start the closed loop controller with the period.</div>
+<div class="block">Set the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> using the PID and feedforward from <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>, with an additional feedforward <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Force</code></a> applied on top, e.g.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#stopClosedLoopController()" class="member-name-link">stopClosedLoopController</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setVelocity(edu.wpi.first.units.measure.LinearVelocity)" class="member-name-link">setVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearVelocity</a>&nbsp;velocity)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Stop the closed loop controller.</div>
+<div class="block">Set the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>LinearVelocity</code></a> using the PID and feedforward from <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setVelocity(edu.wpi.first.units.measure.LinearVelocity,edu.wpi.first.units.measure.Force)" class="member-name-link">setVelocity</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearVelocity</a>&nbsp;velocity,
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Force</a>&nbsp;feedforwardForce)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Set the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>LinearVelocity</code></a> using the PID and feedforward from <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>, with an additional feedforward <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Force</code></a> applied on top, e.g.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setVoltage(edu.wpi.first.units.measure.Voltage)" class="member-name-link">setVoltage</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Voltage.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Voltage</a>&nbsp;voltage)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Set the voltage output of the motor controller.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#synchronizeRelativeEncoder()" class="member-name-link">synchronizeRelativeEncoder</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#simIterate()" class="member-name-link">simIterate</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Simulation iteration.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startClosedLoopController()" class="member-name-link">startClosedLoopController</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Start the closed loop controller with the period.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#stopClosedLoopController()" class="member-name-link">stopClosedLoopController</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Stop the closed loop controller.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#synchronizeRelativeEncoder()" class="member-name-link">synchronizeRelativeEncoder</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Check if the relative encoder is out of sync with absolute encoder within defined tolerances.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateTelemetry()" class="member-name-link">updateTelemetry</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateTelemetry()" class="member-name-link">updateTelemetry</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Update the telemetry under the motor name under the given <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/networktables/NetworkTable.html" title="class or interface in edu.wpi.first.networktables" class="external-link"><code>NetworkTable</code></a></div>
 </div>
 </div>
@@ -787,6 +809,14 @@ loadScripts(document, 'script');</script>
 <h3>setpointVelocity</h3>
 <div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&gt;</span>&nbsp;<span class="element-name">setpointVelocity</span></div>
 <div class="block">Setpoint velocity.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setpointFeedforwardForce">
+<h3>setpointFeedforwardForce</h3>
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Force</a>&gt;</span>&nbsp;<span class="element-name">setpointFeedforwardForce</span></div>
+<div class="block">Setpoint feedforward force, applied on top of the velocity setpoint, e.g. from a PathPlanner
+ set-point generator.</div>
 </section>
 </li>
 <li>
@@ -1079,7 +1109,7 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="setVelocity(edu.wpi.first.units.measure.LinearVelocity)">
 <h3>setVelocity</h3>
-<div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setVelocity</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearVelocity</a>&nbsp;velocity)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setVelocity</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearVelocity</a>&nbsp;velocity)</span></div>
 <div class="block">Set the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>LinearVelocity</code></a> using the PID and feedforward from <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -1095,6 +1125,38 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>angle</code> - Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> to target.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="setVelocity(edu.wpi.first.units.measure.LinearVelocity,edu.wpi.first.units.measure.Force)">
+<h3>setVelocity</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setVelocity</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearVelocity</a>&nbsp;velocity,
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Force</a>&nbsp;feedforwardForce)</span></div>
+<div class="block">Set the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>LinearVelocity</code></a> using the PID and feedforward from <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>, with an additional feedforward <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Force</code></a> applied on top, e.g.
+ from a PathPlanner set-point generator. Applied whether the motor controller's native
+ closed-loop velocity control or an LQR/software motion profile loop is driving the mechanism.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>velocity</code> - Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>LinearVelocity</code></a> to target.</dd>
+<dd><code>feedforwardForce</code> - Additional feedforward <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Force</code></a> applied to the mechanism, or
+     <code>null</code> for none.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="setVelocity(edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.Force)">
+<h3>setVelocity</h3>
+<div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setVelocity</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a>&nbsp;angle,
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Force</a>&nbsp;feedforwardForce)</span></div>
+<div class="block">Set the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> using the PID and feedforward from <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>, with an additional feedforward <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Force</code></a> applied on top, e.g.
+ from a PathPlanner set-point generator. Applied whether the motor controller's native
+ closed-loop velocity control or an LQR/software motion profile loop is driving the mechanism.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>angle</code> - Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> to target.</dd>
+<dd><code>feedforwardForce</code> - Additional feedforward <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Force</code></a> applied to the mechanism, or
+     <code>null</code> for none.</dd>
 </dl>
 </section>
 </li>
@@ -1192,8 +1254,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getMeasurementVelocity()">
 <h3>getMeasurementVelocity</h3>
 <div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearVelocity</a></span>&nbsp;<span class="element-name">getMeasurementVelocity</span>()</div>
-<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted with the
- <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted
+ with the <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>Measurement velocity of the mechanism post-gearing.</dd>
@@ -1204,8 +1266,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getMeasurementPosition()">
 <h3>getMeasurementPosition</h3>
 <div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a></span>&nbsp;<span class="element-name">getMeasurementPosition</span>()</div>
-<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted with the
- <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted
+ with the <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>Measurement velocity of the mechanism post-gearing.</dd>
@@ -1216,8 +1278,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getMeasurementAcceleration()">
 <h3>getMeasurementAcceleration</h3>
 <div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearAcceleration.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">LinearAcceleration</a></span>&nbsp;<span class="element-name">getMeasurementAcceleration</span>()</div>
-<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted with the
- <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
+<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted
+ with the <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>Measurement acceleration of the mechanism post-gearing.</dd>
@@ -1228,8 +1290,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getMechanismVelocity()">
 <h3>getMechanismVelocity</h3>
 <div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularVelocity</a></span>&nbsp;<span class="element-name">getMechanismVelocity</span>()</div>
-<div class="block">Get the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> taking the configured <a href="../gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> into the measurement
- applied via the <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+<div class="block">Get the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> taking the configured <a href="../gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> into
+ the measurement applied via the <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a></dd>
@@ -1240,8 +1302,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getMechanismAcceleration()">
 <h3>getMechanismAcceleration</h3>
 <div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularAcceleration.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">AngularAcceleration</a></span>&nbsp;<span class="element-name">getMechanismAcceleration</span>()</div>
-<div class="block">Get the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularAcceleration.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularAcceleration</code></a>, calculating it on the robot controller if necessary by taking the
- derivative of the velocity.</div>
+<div class="block">Get the Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularAcceleration.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularAcceleration</code></a>, calculating it on the robot controller if
+ necessary by taking the derivative of the velocity.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularAcceleration.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularAcceleration</code></a></dd>
@@ -1252,8 +1314,7 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getMechanismPosition()">
 <h3>getMechanismPosition</h3>
 <div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a></span>&nbsp;<span class="element-name">getMechanismPosition</span>()</div>
-<div class="block">Get the mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Angle</code></a> taking the configured <a href="../gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> from
- <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+<div class="block">Get the mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Angle</code></a> taking the configured <a href="../gearing/MechanismGearing.html" title="class in yams.gearing"><code>MechanismGearing</code></a> from <a href="SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Angle</code></a></dd>
@@ -1275,8 +1336,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getRotorPosition()">
 <h3>getRotorPosition</h3>
 <div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a></span>&nbsp;<span class="element-name">getRotorPosition</span>()</div>
-<div class="block">Get the rotations of the motor with the relative encoder since the motor controller powered on scaled to the
- mechanism rotations.</div>
+<div class="block">Get the rotations of the motor with the relative encoder since the motor controller powered on
+ scaled to the mechanism rotations.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Angle</code></a> of the relative encoder in the motor.</dd>
@@ -1313,10 +1374,9 @@ loadScripts(document, 'script');</script>
 <div class="block">Update the telemetry under the motor name under the given <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/networktables/NetworkTable.html" title="class or interface in edu.wpi.first.networktables" class="external-link"><code>NetworkTable</code></a></div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>telemetry</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/networktables/NetworkTable.html" title="class or interface in edu.wpi.first.networktables" class="external-link"><code>NetworkTable</code></a> to create the <a href="../telemetry/SmartMotorControllerTelemetry.html" title="class in yams.telemetry"><code>SmartMotorControllerTelemetry</code></a> subtable under based off
-                  of <a href="SmartMotorControllerConfig.html#getTelemetryName()"><code>SmartMotorControllerConfig.getTelemetryName()</code></a>.</dd>
-<dd><code>tuning</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/networktables/NetworkTable.html" title="class or interface in edu.wpi.first.networktables" class="external-link"><code>NetworkTable</code></a> to create the tunable telemetry from <a href="../telemetry/SmartMotorControllerTelemetry.html" title="class in yams.telemetry"><code>SmartMotorControllerTelemetry</code></a>
-                  subtable under. Based off of <a href="SmartMotorControllerConfig.html#getTelemetryName()"><code>SmartMotorControllerConfig.getTelemetryName()</code></a>.</dd>
+<dd><code>telemetry</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/networktables/NetworkTable.html" title="class or interface in edu.wpi.first.networktables" class="external-link"><code>NetworkTable</code></a> to create the <a href="../telemetry/SmartMotorControllerTelemetry.html" title="class in yams.telemetry"><code>SmartMotorControllerTelemetry</code></a>
+     subtable under based off of <a href="SmartMotorControllerConfig.html#getTelemetryName()"><code>SmartMotorControllerConfig.getTelemetryName()</code></a>.</dd>
+<dd><code>tuning</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/networktables/NetworkTable.html" title="class or interface in edu.wpi.first.networktables" class="external-link"><code>NetworkTable</code></a> to create the tunable telemetry from <a href="../telemetry/SmartMotorControllerTelemetry.html" title="class in yams.telemetry"><code>SmartMotorControllerTelemetry</code></a> subtable under. Based off of <a href="SmartMotorControllerConfig.html#getTelemetryName()"><code>SmartMotorControllerConfig.getTelemetryName()</code></a>.</dd>
 </dl>
 </section>
 </li>
@@ -1561,7 +1621,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="setClosedLoopRampRate(edu.wpi.first.units.measure.Time)">
 <h3>setClosedLoopRampRate</h3>
 <div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setClosedLoopRampRate</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Time.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Time</a>&nbsp;rampRate)</span></div>
-<div class="block">Set the closed loop ramp rate. The ramp rate is how fast the motor can go from 0-100, measured in seconds.</div>
+<div class="block">Set the closed loop ramp rate. The ramp rate is how fast the motor can go from 0-100, measured
+ in seconds.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>rampRate</code> - Time from 0 to 100.</dd>
@@ -1572,7 +1633,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="setOpenLoopRampRate(edu.wpi.first.units.measure.Time)">
 <h3>setOpenLoopRampRate</h3>
 <div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setOpenLoopRampRate</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Time.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Time</a>&nbsp;rampRate)</span></div>
-<div class="block">Set the open loop ramp rate. The ramp rate is how fast the motor can go from 0 to 100, measured in Seconds.</div>
+<div class="block">Set the open loop ramp rate. The ramp rate is how fast the motor can go from 0 to 100, measured
+ in Seconds.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>rampRate</code> - Time it takes to go from 0 to 100.</dd>
@@ -1744,6 +1806,18 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>Mechanism velocity setpoint.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getSetpointFeedforwardForce()">
+<h3>getSetpointFeedforwardForce</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Force</a>&gt;</span>&nbsp;<span class="element-name">getSetpointFeedforwardForce</span>()</div>
+<div class="block">Get the feedforward <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Force</code></a> last supplied to <a href="#setVelocity(edu.wpi.first.units.measure.AngularVelocity,edu.wpi.first.units.measure.Force)"><code>setVelocity(AngularVelocity, Force)</code></a>
+ or <a href="#setVelocity(edu.wpi.first.units.measure.LinearVelocity,edu.wpi.first.units.measure.Force)"><code>setVelocity(LinearVelocity, Force)</code></a>.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>Setpoint feedforward <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Force</code></a>.</dd>
 </dl>
 </section>
 </li>

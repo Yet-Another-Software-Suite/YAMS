@@ -80,11 +80,12 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
 <div class="block">Swerve module telemetry configuration.
 
- <p>Use this builder to select exactly which fields are published to NetworkTables and/or
- DataLog. Every field is disabled by default; call the individual <code>with*()</code> methods to
- opt in, or use <a href="#withTelemetryVerbosity(yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)"><code>withTelemetryVerbosity(yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)</code></a> to enable a predefined set.
+ <p>Use this builder to select exactly which fields are published to NetworkTables and/or DataLog.
+ Every field is disabled by default; call the individual <code>with*()</code> methods to opt in, or use
+ <a href="#withTelemetryVerbosity(yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)"><code>withTelemetryVerbosity(yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)</code></a> to enable a predefined set.
 
  <h2>Example</h2>
+
  <pre><code>
  SwerveModuleTelemetryConfig telemetryCfg =
      new SwerveModuleTelemetryConfig()
@@ -263,8 +264,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="withNetworkTables(boolean)">
 <h3>withNetworkTables</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveModuleTelemetryConfig.html" title="class in yams.telemetry">SwerveModuleTelemetryConfig</a></span>&nbsp;<span class="element-name">withNetworkTables</span><wbr><span class="parameters">(boolean&nbsp;NT4Telemetry)</span></div>
-<div class="block">Enable or disable NT4 Telemetry. This will not create NT4 entries and is generally only advisable during
- competition matches.</div>
+<div class="block">Enable or disable NT4 Telemetry. This will not create NT4 entries and is generally only
+ advisable during competition matches.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>NT4Telemetry</code> - NT4 Boolean</dd>

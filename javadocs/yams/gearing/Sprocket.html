@@ -80,17 +80,19 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
 <div class="block">Sprocket class to handle calculating the conversion factor of a sprocket in your mechanism.
 
- <p>A <a href="Sprocket.html" title="class in yams.gearing"><code>Sprocket</code></a> models a chain or belt drive made up of two or more sprockets/pulleys.
- The ratio for each stage is expressed as <code>driver / driven</code> (IN/OUT). A ratio less than
- 1.0 indicates a reduction (the driven sprocket has more teeth than the driver).</p>
+ <p>A <a href="Sprocket.html" title="class in yams.gearing"><code>Sprocket</code></a> models a chain or belt drive made up of two or more sprockets/pulleys. The
+ ratio for each stage is expressed as <code>driver / driven</code> (IN/OUT). A ratio less than 1.0
+ indicates a reduction (the driven sprocket has more teeth than the driver).
 
- <p>You can construct a <a href="Sprocket.html" title="class in yams.gearing"><code>Sprocket</code></a> in several ways:</p>
+ <p>You can construct a <a href="Sprocket.html" title="class in yams.gearing"><code>Sprocket</code></a> in several ways:
+
  <ul>
-   <li><b><code>new Sprocket(double...)</code></b> — provide per-stage IN/OUT ratios directly</li>
-   <li><b><code>fromStages(String...)</code></b> — provide stages as <code>"IN:OUT"</code> strings</li>
+   <li><b><code>new Sprocket(double...)</code></b> — provide per-stage IN/OUT ratios directly
+   <li><b><code>fromStages(String...)</code></b> — provide stages as <code>"IN:OUT"</code> strings
  </ul>
 
  <h2>Example</h2>
+
  <pre><code>
  // 2:1 reduction — 18-tooth driver sprocket driving a 36-tooth driven sprocket
  // The ratio passed is driver/driven = 18/36 = 0.5

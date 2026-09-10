@@ -79,8 +79,8 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">SmartMotorControllerCommandRegistry</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
 <div class="block">Registry for WPILib <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> instances associated with a
- <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>. Mechanisms register setpoint commands here
- so the scheduler can manage them.</div>
+ <a href="SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>. Mechanisms register setpoint commands here so
+ the scheduler can manage them.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -193,8 +193,8 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">removeCommands</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Subsystem.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link">Subsystem</a>&nbsp;subsystem)</span></div>
 <div class="block">Remove all commands registered for the given subsystem instance.
 
- <p>Call this when a subsystem is being torn down (e.g. between tests) so that a
- new instance with the same name can register without triggering the conflict check.</div>
+ <p>Call this when a subsystem is being torn down (e.g. between tests) so that a new instance
+ with the same name can register without triggering the conflict check.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>subsystem</code> - Subsystem whose commands should be removed.</dd>

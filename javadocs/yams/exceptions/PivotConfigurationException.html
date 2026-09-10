@@ -88,18 +88,20 @@ loadScripts(document, 'script');</script>
  when a required field in <a href="../mechanisms/config/PivotConfig.html" title="class in yams.mechanisms.config"><code>PivotConfig</code></a> is missing or invalid.
 
  <p>Common triggers include:
+
  <ul>
-   <li><code>withSmartMotorController(SmartMotorController)</code> called more than once on the same config</li>
-   <li>MOI (moment of inertia) not derivable — neither length+mass nor an explicit MOI was configured
-       on the underlying <a href="../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></li>
+   <li><code>withSmartMotorController(SmartMotorController)</code> called more than once on the same
+       config
+   <li>MOI (moment of inertia) not derivable — neither length+mass nor an explicit MOI was
+       configured on the underlying <a href="../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>
  </ul>
 
  <p><b>Resolution:</b> Ensure <code>PivotConfig.withSmartMotorController(SmartMotorController)</code>
- is called exactly once, and that the motor's <code>SmartMotorControllerConfig</code> includes
- <code>withMomentOfInertia(Distance, Mass)</code> or <code>withMomentOfInertia(MomentOfInertia)</code>
- when simulation is used.
+ is called exactly once, and that the motor's <code>SmartMotorControllerConfig</code> includes <code>withMomentOfInertia(Distance, Mass)</code> or <code>withMomentOfInertia(MomentOfInertia)</code> when
+ simulation is used.
 
  <p>Example minimal configuration:
+
  <pre><code>
  SmartMotorControllerConfig motorCfg = new SmartMotorControllerConfig()
      .withMomentOfInertia(Inches.of(10), Pounds.of(2));

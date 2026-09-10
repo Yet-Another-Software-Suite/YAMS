@@ -64,28 +64,26 @@ loadScripts(document, 'script');</script>
 <div class="block">Velocity-controlled mechanism implementations for the YAMS library.
 
  <p>This package contains concrete mechanism classes that regulate a <b>velocity setpoint</b>
- rather than a position. All classes extend
- <a href="SmartVelocityMechanism.html" title="class in yams.mechanisms.velocity"><code>SmartVelocityMechanism</code></a>, which provides closed-loop velocity
- control, feedforward integration, simulation wiring, and WPILib command/trigger support.
+ rather than a position. All classes extend <a href="SmartVelocityMechanism.html" title="class in yams.mechanisms.velocity"><code>SmartVelocityMechanism</code></a>, which provides closed-loop velocity control,
+ feedforward integration, simulation wiring, and WPILib command/trigger support.
 
  <h2>Available Mechanisms</h2>
+
  <ul>
    <li><a href="FlyWheel.html" title="class in yams.mechanisms.velocity"><code>FlyWheel</code></a> — single or dual-motor flywheel configured with
-       <a href="../config/FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a>. Accepts both
-       <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> (e.g. RPM) and
-       <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>LinearVelocity</code></a> (e.g. surface speed in m/s) setpoints
-       when a wheel radius is provided in the config.</li>
+ <a href="../config/FlyWheelConfig.html" title="class in yams.mechanisms.config"><code>FlyWheelConfig</code></a>. Accepts both <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> (e.g. RPM) and <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>LinearVelocity</code></a> (e.g. surface speed in m/s) setpoints when a
+       wheel radius is provided in the config.
  </ul>
 
  <h2>Running the Mechanism</h2>
+
  <ul>
    <li><code>run(velocity)</code> — commands the mechanism to spin at the given velocity. Accepts
-       either <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> or
-       <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>LinearVelocity</code></a> and returns a <code>Command</code> that
-       holds the setpoint until interrupted.</li>
+ either <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> or <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>LinearVelocity</code></a> and returns a <code>Command</code> that holds the
+       setpoint until interrupted.
    <li><code>runTo(velocity)</code> — like <code>run()</code>, but the returned <code>Command</code> does not
        finish until the mechanism is within the configured velocity tolerance of the setpoint.
-       Useful when downstream actions must wait for the flywheel to spin up.</li>
+       Useful when downstream actions must wait for the flywheel to spin up.
  </ul>
 
  <pre><code>
@@ -105,10 +103,9 @@ loadScripts(document, 'script');</script>
  </code></pre>
 
  <h2>Unsupported Operations</h2>
+
  <p>Because velocity mechanisms do not track an absolute position, the positional limit triggers
- <code>max()</code> and <code>min()</code> are <b>not supported</b> and will throw
- <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/UnsupportedOperationException.html" title="class or interface in java.lang" class="external-link"><code>UnsupportedOperationException</code></a> if called. Use the velocity-based triggers
- (<code>isNear()</code>, <code>gte()</code>, <code>lte()</code>) for condition-based scheduling instead.</div>
+ <code>max()</code> and <code>min()</code> are <b>not supported</b> and will throw <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/UnsupportedOperationException.html" title="class or interface in java.lang" class="external-link"><code>UnsupportedOperationException</code></a> if called. Use the velocity-based triggers (<code>isNear()</code>, <code>gte()</code>, <code>lte()</code>) for condition-based scheduling instead.</div>
 <dl class="notes">
 <dt>See Also:</dt>
 <dd>

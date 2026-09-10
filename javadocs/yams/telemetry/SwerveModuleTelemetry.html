@@ -80,14 +80,11 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
 <div class="block">Swerve module telemetry.
 
- <p>Publishes the module's raw absolute encoder angle (without offsets applied) and current
- <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState</code></a> to NetworkTables and/or a WPILib DataLog, and wires the drive/azimuth
- <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>s' own telemetry under the same module
- subtable.
+ <p>Publishes the module's raw absolute encoder angle (without offsets applied) and current <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState</code></a> to NetworkTables and/or a WPILib DataLog, and wires the drive/azimuth <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>s' own telemetry under the same module subtable.
 
- <p>This class is managed internally by <a href="../mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a>. You do not normally instantiate
- it directly; instead configure telemetry through <a href="../mechanisms/config/SwerveModuleConfig.html#withTelemetry(java.lang.String,yams.telemetry.SwerveModuleTelemetryConfig)"><code>SwerveModuleConfig.withTelemetry(String, SwerveModuleTelemetryConfig)</code></a>
- or <a href="../mechanisms/config/SwerveModuleConfig.html#withTelemetry(java.lang.String,yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)"><code>SwerveModuleConfig.withTelemetry(String, yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)</code></a> before constructing the
+ <p>This class is managed internally by <a href="../mechanisms/swerve/SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a>. You do not normally instantiate it
+ directly; instead configure telemetry through <a href="../mechanisms/config/SwerveModuleConfig.html#withTelemetry(java.lang.String,yams.telemetry.SwerveModuleTelemetryConfig)"><code>SwerveModuleConfig.withTelemetry(String, SwerveModuleTelemetryConfig)</code></a> or
+ <a href="../mechanisms/config/SwerveModuleConfig.html#withTelemetry(java.lang.String,yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)"><code>SwerveModuleConfig.withTelemetry(String, yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)</code></a> before constructing the
  module.</div>
 </section>
 <section class="summary">

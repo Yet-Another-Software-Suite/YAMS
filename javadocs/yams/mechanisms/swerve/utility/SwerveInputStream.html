@@ -84,10 +84,13 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
 implements <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">ChassisSpeeds</a>&gt;</span></div>
 <div class="block">Helper class to easily transform Controller inputs into workable Chassis speeds. Intended to
- easily create an interface that generates <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> from <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/XboxController.html" title="class or interface in edu.wpi.first.wpilibj" class="external-link"><code>XboxController</code></a> <p>
- <br/> Inspired by SciBorgs FRC 1155. <br/> Example:
- <pre>
- <code>
+ easily create an interface that generates <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> from <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/XboxController.html" title="class or interface in edu.wpi.first.wpilibj" class="external-link"><code>XboxController</code></a>
+
+ <p><br>
+ Inspired by SciBorgs FRC 1155. <br>
+ Example:
+
+ <pre><code>
    XboxController driverXbox = new XboxController(0);
 
    SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
@@ -105,21 +108,19 @@ implements <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base
                                                                                        driverXbox::getRightY)
  // Axis which give the desired heading angle using trigonometry. .headingWhile(true); // Enable
  heading based control.
- </code>
- </pre>
+ </code></pre>
 
  <h2>Joystick-to-<a href="../SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> adapter</h2>
- <p>
- <a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> acts as a bridge between raw controller axis values (in the range
+
+ <p><a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> acts as a bridge between raw controller axis values (in the range
  <code>[-1, 1]</code>) and the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a> that <a href="../SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a>
- expects.  It handles deadbands, axis scaling, non-linear (cubed) response curves, field-relative
- / alliance-relative flipping, and multiple drive modes (angular-velocity, heading-snap,
- translation-only, aim-at-target, drive-to-pose).  Because it implements
- <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link"><code>Supplier</code></a><code>&lt;</code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a><code>&gt;</code> it can be passed
- directly to a command that calls <code>swerveDrive.drive(inputStream.get())</code>.
- </p>
+ expects. It handles deadbands, axis scaling, non-linear (cubed) response curves, field-relative /
+ alliance-relative flipping, and multiple drive modes (angular-velocity, heading-snap,
+ translation-only, aim-at-target, drive-to-pose). Because it implements <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link"><code>Supplier</code></a><code>&lt;</code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/ChassisSpeeds.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>ChassisSpeeds</code></a><code>&gt;</code> it can be passed directly to
+ a command that calls <code>swerveDrive.drive(inputStream.get())</code>.
 
  <h2>Typical usage with an <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/XboxController.html" title="class or interface in edu.wpi.first.wpilibj" class="external-link"><code>XboxController</code></a></h2>
+
  <pre><code>
  XboxController driver = new XboxController(0);
 
@@ -386,10 +387,8 @@ implements <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>drive</code> - <a href="../SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> object for transformation.</dd>
-<dd><code>x</code> - <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link"><code>DoubleSupplier</code></a> of the translation X axis of the controller joystick to
-     use.</dd>
-<dd><code>y</code> - <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link"><code>DoubleSupplier</code></a> of the translation X axis of the controller joystick to
-     use.</dd>
+<dd><code>x</code> - <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link"><code>DoubleSupplier</code></a> of the translation X axis of the controller joystick to use.</dd>
+<dd><code>y</code> - <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link"><code>DoubleSupplier</code></a> of the translation X axis of the controller joystick to use.</dd>
 <dt>Returns:</dt>
 <dd><a href="SwerveInputStream.html" title="class in yams.mechanisms.swerve.utility"><code>SwerveInputStream</code></a> to use as you see fit.</dd>
 </dl>

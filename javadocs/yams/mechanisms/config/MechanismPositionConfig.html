@@ -78,28 +78,29 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">MechanismPositionConfig</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">A configuration class for specifying the position and visualization properties of a mechanism relative to a robot in
- a 3D coordinate system. This class allows setting and retrieving details such as the mechanism's position relative to
- the robot, the robot's maximum dimensions, and the plane in which the mechanism operates.
+<div class="block">A configuration class for specifying the position and visualization properties of a mechanism
+ relative to a robot in a 3D coordinate system. This class allows setting and retrieving details
+ such as the mechanism's position relative to the robot, the robot's maximum dimensions, and the
+ plane in which the mechanism operates.
 
  <p><code>MechanismPositionConfig</code> is used by <a href="../positional/SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a> to drive the
  built-in <code>Mechanism2d</code> widget in Glass/Shuffleboard. It captures three pieces of
  information:
 
  <ul>
-   <li><b>Robot-relative position</b> — a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Translation3d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link"><code>Translation3d</code></a>
-       that places the mechanism's pivot/root inside the robot frame. When set, the Mechanism2d
-       window is automatically offset so the mechanism appears in the correct position relative
-       to the robot outline.</li>
-   <li><b>Robot bounding box</b> — optional maximum length and height used to size the
-       Mechanism2d canvas. When omitted, the canvas defaults to twice the mechanism's
-       reported length.</li>
-   <li><b>Movement plane</b> — whether the mechanism moves in the XZ (default), YZ, or XY
-       plane of the robot coordinate system. This determines which Translation3d axes are
-       mapped to the 2D canvas X and Y axes.</li>
+   <li><b>Robot-relative position</b> — a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Translation3d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link"><code>Translation3d</code></a> that
+       places the mechanism's pivot/root inside the robot frame. When set, the Mechanism2d window
+       is automatically offset so the mechanism appears in the correct position relative to the
+       robot outline.
+   <li><b>Robot bounding box</b> — optional maximum length and height used to size the Mechanism2d
+       canvas. When omitted, the canvas defaults to twice the mechanism's reported length.
+   <li><b>Movement plane</b> — whether the mechanism moves in the XZ (default), YZ, or XY plane of
+       the robot coordinate system. This determines which Translation3d axes are mapped to the 2D
+       canvas X and Y axes.
  </ul>
 
  <h2>Example</h2>
+
  <pre><code>
  import static edu.wpi.first.units.Units.Meters;
  import edu.wpi.first.math.geometry.Translation3d;
@@ -190,12 +191,14 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMechanismX(edu.wpi.first.units.measure.Distance)" class="member-name-link">getMechanismX</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;length)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Converts a given distance in the x-direction to a x-coordinate appropriate for visualizing on a Mechanism2d.</div>
+<div class="block">Converts a given distance in the x-direction to a x-coordinate appropriate for visualizing on a
+ Mechanism2d.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMechanismY(edu.wpi.first.units.measure.Distance)" class="member-name-link">getMechanismY</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;y)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Gets the distance in the y-direction appropriate for visualizing on a Mechanism2d, defaults to the given distance.</div>
+<div class="block">Gets the distance in the y-direction appropriate for visualizing on a Mechanism2d, defaults to
+ the given distance.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MechanismPositionConfig.Plane.html" title="enum class in yams.mechanisms.config">MechanismPositionConfig.Plane</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMovementPlane()" class="member-name-link">getMovementPlane</a>()</code></div>
@@ -210,14 +213,14 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getWindowXDimension(edu.wpi.first.units.measure.Distance)" class="member-name-link">getWindowXDimension</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;length)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the x dimension of the window in the Mechanism2d for visualization, either the max robot length if set, or
- twice the given length.</div>
+<div class="block">Returns the x dimension of the window in the Mechanism2d for visualization, either the max
+ robot length if set, or twice the given length.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getWindowYDimension(edu.wpi.first.units.measure.Distance)" class="member-name-link">getWindowYDimension</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;length)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the y dimension of the window in the Mechanism2d for visualization, either the max robot height if set, or
- twice the given length.</div>
+<div class="block">Returns the y dimension of the window in the Mechanism2d for visualization, either the max
+ robot height if set, or twice the given length.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config">MechanismPositionConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMaxRobotHeight(edu.wpi.first.units.measure.Distance)" class="member-name-link">withMaxRobotHeight</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;robotHeight)</code></div>
@@ -313,7 +316,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the position of the <a href="../positional/SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a> relative to the robot.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>robotToMechanism</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Pose3d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link"><code>Pose3d</code></a> of the <a href="../positional/SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a> relative to the robot.</dd>
+<dd><code>robotToMechanism</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Pose3d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link"><code>Pose3d</code></a> of the <a href="../positional/SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a> relative to the
+     robot.</dd>
 <dt>Returns:</dt>
 <dd>The <a href="../positional/SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a>, for easy chaining.</dd>
 </dl>
@@ -362,7 +366,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getMechanismX(edu.wpi.first.units.measure.Distance)">
 <h3>getMechanismX</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a></span>&nbsp;<span class="element-name">getMechanismX</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;length)</span></div>
-<div class="block">Converts a given distance in the x-direction to a x-coordinate appropriate for visualizing on a Mechanism2d.</div>
+<div class="block">Converts a given distance in the x-direction to a x-coordinate appropriate for visualizing on a
+ Mechanism2d.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>length</code> - the distance in the x-direction</dd>
@@ -375,7 +380,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getMechanismY(edu.wpi.first.units.measure.Distance)">
 <h3>getMechanismY</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a></span>&nbsp;<span class="element-name">getMechanismY</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;y)</span></div>
-<div class="block">Gets the distance in the y-direction appropriate for visualizing on a Mechanism2d, defaults to the given distance.</div>
+<div class="block">Gets the distance in the y-direction appropriate for visualizing on a Mechanism2d, defaults to
+ the given distance.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>y</code> - the default distance in the y-direction</dd>
@@ -388,8 +394,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getWindowXDimension(edu.wpi.first.units.measure.Distance)">
 <h3>getWindowXDimension</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a></span>&nbsp;<span class="element-name">getWindowXDimension</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;length)</span></div>
-<div class="block">Returns the x dimension of the window in the Mechanism2d for visualization, either the max robot length if set, or
- twice the given length.</div>
+<div class="block">Returns the x dimension of the window in the Mechanism2d for visualization, either the max
+ robot length if set, or twice the given length.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>length</code> - the length of the mechanism</dd>
@@ -402,8 +408,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getWindowYDimension(edu.wpi.first.units.measure.Distance)">
 <h3>getWindowYDimension</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a></span>&nbsp;<span class="element-name">getWindowYDimension</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;length)</span></div>
-<div class="block">Returns the y dimension of the window in the Mechanism2d for visualization, either the max robot height if set, or
- twice the given length.</div>
+<div class="block">Returns the y dimension of the window in the Mechanism2d for visualization, either the max
+ robot height if set, or twice the given length.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>length</code> - the length of the mechanism</dd>
@@ -419,7 +425,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Get the relative position of the mechanism to the robot.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Translation3d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link"><code>Translation3d</code></a> representing the relative position. Defaults to a zero translation if not set.</dd>
+<dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Translation3d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link"><code>Translation3d</code></a> representing the relative position. Defaults to a zero
+     translation if not set.</dd>
 </dl>
 </section>
 </li>

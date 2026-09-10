@@ -84,13 +84,14 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
 <div class="block">Double Telemetry for SmartMotorControllers.
 
- <p>A lightweight wrapper that publishes a single <code>double</code> value to NetworkTables and/or
- a WPILib DataLog, with optional unit metadata consumed by Advantage Scope and Elastic. It is
- used internally by <a href="SmartMotorControllerTelemetry.html" title="class in yams.telemetry"><code>SmartMotorControllerTelemetry</code></a> to track numeric fields such as
- position, velocity, current, and PID gains — but it can also be constructed directly when
- you need a standalone numeric entry.
+ <p>A lightweight wrapper that publishes a single <code>double</code> value to NetworkTables and/or a
+ WPILib DataLog, with optional unit metadata consumed by Advantage Scope and Elastic. It is used
+ internally by <a href="SmartMotorControllerTelemetry.html" title="class in yams.telemetry"><code>SmartMotorControllerTelemetry</code></a> to track numeric fields such as position,
+ velocity, current, and PID gains — but it can also be constructed directly when you need a
+ standalone numeric entry.
 
  <h2>Example</h2>
+
  <pre><code>
  // Create and publish a double entry for shooter velocity under the Shooter table.
  DoubleTelemetry&amp;lt;DoubleTelemetryField&amp;gt; velocity = new DoubleTelemetry&amp;lt;&amp;gt;(
@@ -324,8 +325,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the unit.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>cfg</code> - <a href="../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> used to determine the unit. If the MechanismCircumference is set it
-            will be in meters, else it will be in degrees.</dd>
+<dd><code>cfg</code> - <a href="../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> used to determine the unit. If the
+     MechanismCircumference is set it will be in meters, else it will be in degrees.</dd>
 <dt>Returns:</dt>
 <dd><a href="DoubleTelemetry.html" title="class in yams.telemetry"><code>DoubleTelemetry</code></a> for chaining.</dd>
 </dl>

@@ -84,11 +84,12 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional">SmartPositionalMechanism</a></span></div>
 <div class="block">Pivot mechanism.
 
- <p>A Pivot is a single-jointed rotation mechanism that rotates around the vertical axis,
- such as a shooter hood or turret. It is controlled by a <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> and
- supports position control, trigger bindings, and simulation.</p>
+ <p>A Pivot is a single-jointed rotation mechanism that rotates around the vertical axis, such as
+ a shooter hood or turret. It is controlled by a <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> and supports
+ position control, trigger bindings, and simulation.
 
  <h2>Usage Example</h2>
+
  <pre><code>
  // --- Configuration ---
  SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
@@ -196,8 +197,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Translation3d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link">Translation3d</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined in the
- <a href="../config/MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
+<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
+ in the <a href="../config/MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/button/Trigger.html" title="class or interface in edu.wpi.first.wpilibj2.command.button" class="external-link">Trigger</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#gte(edu.wpi.first.units.measure.Angle)" class="member-name-link">gte</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;angle)</code></div>
@@ -224,8 +225,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/button/Trigger.html" title="class or interface in edu.wpi.first.wpilibj2.command.button" class="external-link">Trigger</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#min()" class="member-name-link">min</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Minimum angle of the <a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a> given by the soft limit or hard limit of the
- <a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a>.</div>
+<div class="block">Minimum angle of the <a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a> given by the soft limit or hard limit of
+ the <a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a>.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link">Command</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#run(edu.wpi.first.units.measure.Angle)" class="member-name-link">run</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Angle</a>&nbsp;angle)</code></div>
@@ -435,7 +436,8 @@ loadScripts(document, 'script');</script>
 <dt>Returns:</dt>
 <dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> that sets the pivot to the desired angle.</dd>
 <dt>Implementation Note:</dt>
-<dd>This command will not stop. It should NOT be used when there is a default command on the Subsystem.</dd>
+<dd>This command will not stop. It should NOT be used when there is a default command on
+     the Subsystem.</dd>
 </dl>
 </section>
 </li>
@@ -452,7 +454,8 @@ loadScripts(document, 'script');</script>
 <dt>Returns:</dt>
 <dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> that sets the pivot to the desired angle.</dd>
 <dt>Implementation Note:</dt>
-<dd>This command will not stop. It should NOT be used when there is a default command on the Subsystem.</dd>
+<dd>This command will not stop. It should NOT be used when there is a default command on
+     the Subsystem.</dd>
 </dl>
 </section>
 </li>
@@ -491,8 +494,8 @@ loadScripts(document, 'script');</script>
 <h3>min</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/button/Trigger.html" title="class or interface in edu.wpi.first.wpilibj2.command.button" class="external-link">Trigger</a></span>&nbsp;<span class="element-name">min</span>()</div>
 <div class="block"><span class="descfrm-type-label">Description copied from class:&nbsp;<code><a href="SmartPositionalMechanism.html#min()">SmartPositionalMechanism</a></code></span></div>
-<div class="block">Minimum angle of the <a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a> given by the soft limit or hard limit of the
- <a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a>.</div>
+<div class="block">Minimum angle of the <a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a> given by the soft limit or hard limit of
+ the <a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional"><code>SmartPositionalMechanism</code></a>.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="SmartPositionalMechanism.html#min()">min</a></code>&nbsp;in class&nbsp;<code><a href="SmartPositionalMechanism.html" title="class in yams.mechanisms.positional">SmartPositionalMechanism</a></code></dd>
@@ -540,8 +543,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="getRelativeMechanismPosition()">
 <h3>getRelativeMechanismPosition</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Translation3d.html" title="class or interface in edu.wpi.first.math.geometry" class="external-link">Translation3d</a></span>&nbsp;<span class="element-name">getRelativeMechanismPosition</span>()</div>
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined in the
- <a href="../config/MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
+<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
+ in the <a href="../config/MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../SmartMechanism.html#getRelativeMechanismPosition()">getRelativeMechanismPosition</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMechanism.html" title="class in yams.mechanisms">SmartMechanism</a></code></dd>

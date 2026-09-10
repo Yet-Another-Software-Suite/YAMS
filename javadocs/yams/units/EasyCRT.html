@@ -86,18 +86,16 @@ loadScripts(document, 'script');</script>
    <li>Select the best unique match within a configurable tolerance.
  </ol>
 
- <p>This is <b>not</b> a textbook Chinese Remainder Theorem solve; it is a
- "CRT-inspired" unwrapping method that is easier to keep stable with backlash and sensor
- noise.
+ <p>This is <b>not</b> a textbook Chinese Remainder Theorem solve; it is a "CRT-inspired"
+ unwrapping method that is easier to keep stable with backlash and sensor noise.
 
  <p>Created by team 6911.
 
  <h2>Usage</h2>
- <p>Construct an <code>EasyCRT</code> from a fully-configured <a href="EasyCRTConfig.html" title="class in yams.units"><code>EasyCRTConfig</code></a>, then call
- <a href="#getAngleOptional()"><code>getAngleOptional()</code></a> periodically. The return value is an <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link"><code>Optional</code></a>
- containing the resolved mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Angle</code></a> when a unique
- solution is found, or <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html#empty()" title="class or interface in java.util" class="external-link"><code>Optional.empty()</code></a> when the solve fails or is ambiguous.
- Inspect <a href="#getLastStatus()"><code>getLastStatus()</code></a> and <a href="#getLastErrorRotations()"><code>getLastErrorRotations()</code></a> for diagnostics.
+
+ <p>Construct an <code>EasyCRT</code> from a fully-configured <a href="EasyCRTConfig.html" title="class in yams.units"><code>EasyCRTConfig</code></a>, then call <a href="#getAngleOptional()"><code>getAngleOptional()</code></a> periodically. The return value is an <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link"><code>Optional</code></a> containing
+ the resolved mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Angle.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Angle</code></a> when a unique solution is found,
+ or <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html#empty()" title="class or interface in java.util" class="external-link"><code>Optional.empty()</code></a> when the solve fails or is ambiguous. Inspect <a href="#getLastStatus()"><code>getLastStatus()</code></a> and <a href="#getLastErrorRotations()"><code>getLastErrorRotations()</code></a> for diagnostics.
 
  <pre><code>
  import static edu.wpi.first.units.Units.Rotations;

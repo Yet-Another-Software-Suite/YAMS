@@ -84,31 +84,27 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
 <div class="block">Generic implementation of a mechanism with advanced telemetry.
 
- <p>
- <code>SmartMechanism</code> is the abstract root of all YAMS mechanism implementations. It combines a
- <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> with integrated telemetry, simulation support,
- and WPILib <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> / <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/button/Trigger.html" title="class or interface in edu.wpi.first.wpilibj2.command.button" class="external-link"><code>Trigger</code></a>
- integration so that every concrete mechanism (Arm, Elevator, Flywheel, etc.) shares a consistent
- API for control, feedback, and visualization.
- </p>
+ <p><code>SmartMechanism</code> is the abstract root of all YAMS mechanism implementations. It combines
+ a <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> with integrated telemetry, simulation
+ support, and WPILib <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> / <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/button/Trigger.html" title="class or interface in edu.wpi.first.wpilibj2.command.button" class="external-link"><code>Trigger</code></a> integration so that every concrete mechanism (Arm,
+ Elevator, Flywheel, etc.) shares a consistent API for control, feedback, and visualization.
 
  <h2>Mechanism Lifecycle</h2>
+
  <ol>
-   <li>Configure a motor controller: <a href="../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a></li>
-   <li>Instantiate the appropriate wrapper: <a href="../motorcontrollers/local/SparkWrapper.html" title="class in yams.motorcontrollers.local"><code>SparkWrapper</code></a> (REV), <a href="../motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.motorcontrollers.remote"><code>TalonFXWrapper</code></a> or <a href="../motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.motorcontrollers.remote"><code>TalonFXSWrapper</code></a> (CTRE)</li>
-   <li>Build a mechanism config (e.g., <a href="config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a>)</li>
-   <li>Construct the concrete mechanism (e.g., <a href="positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a>)</li>
-   <li>Schedule setpoint commands and bind triggers</li>
+   <li>Configure a motor controller: <a href="../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>
+   <li>Instantiate the appropriate wrapper: <a href="../motorcontrollers/local/SparkWrapper.html" title="class in yams.motorcontrollers.local"><code>SparkWrapper</code></a>
+ (REV), <a href="../motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.motorcontrollers.remote"><code>TalonFXWrapper</code></a> or <a href="../motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.motorcontrollers.remote"><code>TalonFXSWrapper</code></a> (CTRE)
+   <li>Build a mechanism config (e.g., <a href="config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a>)
+   <li>Construct the concrete mechanism (e.g., <a href="positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a>)
+   <li>Schedule setpoint commands and bind triggers
  </ol>
 
- <p>
- <b>Periodic calls required:</b> <a href="#simIterate()"><code>simIterate()</code></a>, <a href="#updateTelemetry()"><code>updateTelemetry()</code></a>, and
- <a href="#visualizationUpdate()"><code>visualizationUpdate()</code></a> must be called periodically — typically from
- <code>robotPeriodic()</code> — so that simulation state, telemetry, and the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/Mechanism2d.html" title="class or interface in edu.wpi.first.wpilibj.smartdashboard" class="external-link"><code>Mechanism2d</code></a>
- visualization remain up to date.
- </p>
+ <p><b>Periodic calls required:</b> <a href="#simIterate()"><code>simIterate()</code></a>, <a href="#updateTelemetry()"><code>updateTelemetry()</code></a>, and <a href="#visualizationUpdate()"><code>visualizationUpdate()</code></a> must be called periodically — typically from <code>robotPeriodic()</code> — so
+ that simulation state, telemetry, and the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/Mechanism2d.html" title="class or interface in edu.wpi.first.wpilibj.smartdashboard" class="external-link"><code>Mechanism2d</code></a> visualization remain up to date.
 
  <h2>Example</h2>
+
  <pre><code>
  // 1. Motor config
  SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
@@ -388,8 +384,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Set the voltage of the <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>volts</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Voltage.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Voltage</code></a> of the <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> to set, via a
-              <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link"><code>Supplier</code></a>.</dd>
+<dd><code>volts</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Voltage.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Voltage</code></a> of the <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> to set, via a <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link"><code>Supplier</code></a>.</dd>
 <dt>Returns:</dt>
 <dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a></dd>
 </dl>

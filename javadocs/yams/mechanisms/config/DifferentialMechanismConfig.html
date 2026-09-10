@@ -80,13 +80,14 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
 <div class="block">Configuration for a <a href="../positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a> driven by two coordinated motors working
  differentially. In a differential mechanism the sum and difference of the two motor outputs
- independently control two separate degrees of freedom — commonly referred to as <b>tilt</b>
- (the average of both motors) and <b>twist</b> (half the difference between the two motors).
+ independently control two separate degrees of freedom — commonly referred to as <b>tilt</b> (the
+ average of both motors) and <b>twist</b> (half the difference between the two motors).
 
  <p>This class is a builder that collects every setting needed before the mechanism is
- constructed. All <code>with*()</code> methods return <code>this</code> so calls can be chained.</p>
+ constructed. All <code>with*()</code> methods return <code>this</code> so calls can be chained.
 
  <h2>Builder Example</h2>
+
  <pre><code>
  // leftSMC / rightSMC are SmartMotorController instances already configured
  // with gearing from the motor to the differential bevel gears.
@@ -265,14 +266,12 @@ loadScripts(document, 'script');</script>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMOI(edu.wpi.first.units.measure.Distance,edu.wpi.first.units.measure.Mass)" class="member-name-link">withMOI</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;length,
  <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Mass</a>&nbsp;weight)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Configure the MOI directly instead of estimating it with the length and mass of the <a href="../positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a>
- for simulation.</div>
+<div class="block">Configure the MOI directly instead of estimating it with the length and mass of the <a href="../positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a> for simulation.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="DifferentialMechanismConfig.html" title="class in yams.mechanisms.config">DifferentialMechanismConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMOI(edu.wpi.first.units.measure.MomentOfInertia)" class="member-name-link">withMOI</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/MomentOfInertia.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">MomentOfInertia</a>&nbsp;MOI)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Configure the MOI directly instead of estimating it with the length and mass of the <a href="../positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a>
- for simulation.</div>
+<div class="block">Configure the MOI directly instead of estimating it with the length and mass of the <a href="../positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a> for simulation.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="DifferentialMechanismConfig.html" title="class in yams.mechanisms.config">DifferentialMechanismConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimColor(edu.wpi.first.wpilibj.util.Color8Bit)" class="member-name-link">withSimColor</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/util/Color8Bit.html" title="class or interface in edu.wpi.first.wpilibj.util" class="external-link">Color8Bit</a>&nbsp;simColor)</code></div>
@@ -332,10 +331,10 @@ loadScripts(document, 'script');</script>
 <div class="block">Differential Mechanism configuration class.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>left</code> - Left <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> configured with the gearing up to the tilt movement if
-              synchronized.</dd>
-<dd><code>right</code> - Right <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> configured with the gearing up to the tilt movement if
-              synchronized.</dd>
+<dd><code>left</code> - Left <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> configured with the gearing up to the tilt
+     movement if synchronized.</dd>
+<dd><code>right</code> - Right <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> configured with the gearing up to the tilt
+     movement if synchronized.</dd>
 </dl>
 </section>
 </li>
@@ -343,8 +342,7 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="&lt;init&gt;()">
 <h3>DifferentialMechanismConfig</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">DifferentialMechanismConfig</span>()</div>
-<div class="block">Differential Mechanism configuration class. Required call to
- <a href="#withSmartMotorControllers(yams.motorcontrollers.SmartMotorController,yams.motorcontrollers.SmartMotorController)"><code>withSmartMotorControllers(SmartMotorController, SmartMotorController)</code></a> before usage.</div>
+<div class="block">Differential Mechanism configuration class. Required call to <a href="#withSmartMotorControllers(yams.motorcontrollers.SmartMotorController,yams.motorcontrollers.SmartMotorController)"><code>withSmartMotorControllers(SmartMotorController, SmartMotorController)</code></a> before usage.</div>
 </section>
 </li>
 </ul>
@@ -457,8 +455,7 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="withMOI(edu.wpi.first.units.measure.MomentOfInertia)">
 <h3>withMOI</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="DifferentialMechanismConfig.html" title="class in yams.mechanisms.config">DifferentialMechanismConfig</a></span>&nbsp;<span class="element-name">withMOI</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/MomentOfInertia.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">MomentOfInertia</a>&nbsp;MOI)</span></div>
-<div class="block">Configure the MOI directly instead of estimating it with the length and mass of the <a href="../positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a>
- for simulation.</div>
+<div class="block">Configure the MOI directly instead of estimating it with the length and mass of the <a href="../positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a> for simulation.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>MOI</code> - Moment of Inertia of the <a href="../positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a></dd>
@@ -485,8 +482,7 @@ loadScripts(document, 'script');</script>
 <h3>withMOI</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="DifferentialMechanismConfig.html" title="class in yams.mechanisms.config">DifferentialMechanismConfig</a></span>&nbsp;<span class="element-name">withMOI</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Distance.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Distance</a>&nbsp;length,
  <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Mass.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Mass</a>&nbsp;weight)</span></div>
-<div class="block">Configure the MOI directly instead of estimating it with the length and mass of the <a href="../positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a>
- for simulation.</div>
+<div class="block">Configure the MOI directly instead of estimating it with the length and mass of the <a href="../positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a> for simulation.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>length</code> - Length of the <a href="../positional/DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a>.</dd>
@@ -528,7 +524,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="withGearing(yams.gearing.MechanismGearing)">
 <h3>withGearing</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="DifferentialMechanismConfig.html" title="class in yams.mechanisms.config">DifferentialMechanismConfig</a></span>&nbsp;<span class="element-name">withGearing</span><wbr><span class="parameters">(<a href="../../gearing/MechanismGearing.html" title="class in yams.gearing">MechanismGearing</a>&nbsp;gearing)</span></div>
-<div class="block">Set the gearing for the differential mechanism if it isn't 1:1. Separate from gearing to the bevel gears.</div>
+<div class="block">Set the gearing for the differential mechanism if it isn't 1:1. Separate from gearing to the
+ bevel gears.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>gearing</code> - Gearing for the bevel gears.</dd>
@@ -765,8 +762,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Get the <a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a> associated with this <a href="DifferentialMechanismConfig.html" title="class in yams.mechanisms.config"><code>DifferentialMechanismConfig</code></a>.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>An <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link"><code>Optional</code></a> containing the <a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a> if present, otherwise an empty
- <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link"><code>Optional</code></a>.</dd>
+<dd>An <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link"><code>Optional</code></a> containing the <a href="MechanismPositionConfig.html" title="class in yams.mechanisms.config"><code>MechanismPositionConfig</code></a> if present,
+     otherwise an empty <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link"><code>Optional</code></a>.</dd>
 </dl>
 </section>
 </li>

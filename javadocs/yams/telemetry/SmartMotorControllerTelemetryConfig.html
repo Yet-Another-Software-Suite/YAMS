@@ -80,11 +80,12 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
 <div class="block">Smart motor controller telemetry configuration.
 
- <p>Use this builder to select exactly which fields are published to NetworkTables and/or
- DataLog. Every field is disabled by default; call the individual <code>with*()</code> methods to
- opt in, or use <a href="#withTelemetryVerbosity(yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)"><code>withTelemetryVerbosity(yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)</code></a> to enable a predefined set.
+ <p>Use this builder to select exactly which fields are published to NetworkTables and/or DataLog.
+ Every field is disabled by default; call the individual <code>with*()</code> methods to opt in, or use
+ <a href="#withTelemetryVerbosity(yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)"><code>withTelemetryVerbosity(yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)</code></a> to enable a predefined set.
 
  <h2>Example</h2>
+
  <pre><code>
  SmartMotorControllerTelemetryConfig telemetryCfg =
      new SmartMotorControllerTelemetryConfig()
@@ -96,6 +97,7 @@ loadScripts(document, 'script');</script>
          .withOutputVoltage()
          .withSetpointPosition()
          .withSetpointVelocity()
+         .withSetpointForce()
          .withMechanismPosition()
          .withMechanismVelocity()
          .withRotorPosition()
@@ -261,43 +263,48 @@ loadScripts(document, 'script');</script>
 <div class="block">Enables the rotor velocity logging if available.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSetpointPosition()" class="member-name-link">withSetpointPosition</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSetpointForce()" class="member-name-link">withSetpointForce</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Enables the setpoint feedforward force logging if available.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSetpointPosition()" class="member-name-link">withSetpointPosition</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Enables the setpoint position logging if available.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSetpointVelocity()" class="member-name-link">withSetpointVelocity</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSetpointVelocity()" class="member-name-link">withSetpointVelocity</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Enables the setpoint velocity logging if available.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimpleFeedforward()" class="member-name-link">withSimpleFeedforward</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimpleFeedforward()" class="member-name-link">withSimpleFeedforward</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Enables the simple feedforward logging if available.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withStatorCurrent()" class="member-name-link">withStatorCurrent</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withStatorCurrent()" class="member-name-link">withStatorCurrent</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Enables the stator current logging if available.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTelemetryVerbosity(yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)" class="member-name-link">withTelemetryVerbosity</a><wbr>(<a href="../motorcontrollers/SmartMotorControllerConfig.TelemetryVerbosity.html" title="enum class in yams.motorcontrollers">SmartMotorControllerConfig.TelemetryVerbosity</a>&nbsp;verbosity)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTelemetryVerbosity(yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)" class="member-name-link">withTelemetryVerbosity</a><wbr>(<a href="../motorcontrollers/SmartMotorControllerConfig.TelemetryVerbosity.html" title="enum class in yams.motorcontrollers">SmartMotorControllerConfig.TelemetryVerbosity</a>&nbsp;verbosity)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Setup with <a href="../motorcontrollers/SmartMotorControllerConfig.TelemetryVerbosity.html" title="enum class in yams.motorcontrollers"><code>SmartMotorControllerConfig.TelemetryVerbosity</code></a></div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTemperature()" class="member-name-link">withTemperature</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTemperature()" class="member-name-link">withTemperature</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Enables the temperature logging if available.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTemperatureLimit()" class="member-name-link">withTemperatureLimit</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTemperatureLimit()" class="member-name-link">withTemperatureLimit</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Enables the temperature limit logging if available.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withVelocityControl()" class="member-name-link">withVelocityControl</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withVelocityControl()" class="member-name-link">withVelocityControl</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Enables the velocity control mode logging if available.</div>
 </div>
 </div>
@@ -348,8 +355,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="withNetworkTables(boolean)">
 <h3>withNetworkTables</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></span>&nbsp;<span class="element-name">withNetworkTables</span><wbr><span class="parameters">(boolean&nbsp;NT4Telemetry)</span></div>
-<div class="block">Enable or disable NT4 Telemetry. This will not create NT4 entries and is generally only advisable during
- competition matches.</div>
+<div class="block">Enable or disable NT4 Telemetry. This will not create NT4 entries and is generally only
+ advisable during competition matches.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>NT4Telemetry</code> - NT4 Boolean</dd>
@@ -411,7 +418,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Get the configured double fields.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>smc</code> - <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> used to disable unavailable telemetry for certain motor controllers.</dd>
+<dd><code>smc</code> - <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> used to disable unavailable telemetry for certain motor
+     controllers.</dd>
 <dt>Returns:</dt>
 <dd>Configured <a href="DoubleTelemetry.html" title="class in yams.telemetry"><code>DoubleTelemetry</code></a> for each <a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.telemetry"><code>SmartMotorControllerTelemetry.DoubleTelemetryField</code></a></dd>
 </dl>
@@ -424,7 +432,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Get the configured bool fields.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>smc</code> - <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> used to disable unavailable telemetry for certain motor controllers.</dd>
+<dd><code>smc</code> - <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> used to disable unavailable telemetry for certain motor
+     controllers.</dd>
 <dt>Returns:</dt>
 <dd>Configured <a href="BooleanTelemetry.html" title="class in yams.telemetry"><code>BooleanTelemetry</code></a> for each <a href="SmartMotorControllerTelemetry.BooleanTelemetryField.html" title="enum class in yams.telemetry"><code>SmartMotorControllerTelemetry.BooleanTelemetryField</code></a>.</dd>
 </dl>
@@ -534,6 +543,17 @@ loadScripts(document, 'script');</script>
 <h3>withSetpointVelocity</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></span>&nbsp;<span class="element-name">withSetpointVelocity</span>()</div>
 <div class="block">Enables the setpoint velocity logging if available.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry"><code>SmartMotorControllerTelemetryConfig</code></a> for chaining.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="withSetpointForce()">
+<h3>withSetpointForce</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry">SmartMotorControllerTelemetryConfig</a></span>&nbsp;<span class="element-name">withSetpointForce</span>()</div>
+<div class="block">Enables the setpoint feedforward force logging if available.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry"><code>SmartMotorControllerTelemetryConfig</code></a> for chaining.</dd>

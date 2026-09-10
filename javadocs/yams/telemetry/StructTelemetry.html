@@ -86,10 +86,11 @@ loadScripts(document, 'script');</script>
 
  <p>A lightweight wrapper that publishes a single struct-encoded value (e.g. <code>Pose2d</code>,
  <code>ChassisSpeeds</code>, <code>SwerveModuleState</code>) to NetworkTables and/or a WPILib DataLog. It
- mirrors <a href="DoubleTelemetry.html" title="class in yams.telemetry"><code>DoubleTelemetry</code></a> and <a href="BooleanTelemetry.html" title="class in yams.telemetry"><code>BooleanTelemetry</code></a>, but is generic over the value
- type <code>T</code> and requires a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/util/struct/Struct.html" title="class or interface in edu.wpi.first.util.struct" class="external-link"><code>Struct</code></a> implementation to (de)serialize it.
+ mirrors <a href="DoubleTelemetry.html" title="class in yams.telemetry"><code>DoubleTelemetry</code></a> and <a href="BooleanTelemetry.html" title="class in yams.telemetry"><code>BooleanTelemetry</code></a>, but is generic over the value type
+ <code>T</code> and requires a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/util/struct/Struct.html" title="class or interface in edu.wpi.first.util.struct" class="external-link"><code>Struct</code></a> implementation to (de)serialize it.
 
  <h2>Example</h2>
+
  <pre><code>
  // Create and publish a struct entry for the robot pose under the Drivetrain table.
  StructTelemetry&lt;Pose2d&gt; pose = new StructTelemetry&lt;&gt;(

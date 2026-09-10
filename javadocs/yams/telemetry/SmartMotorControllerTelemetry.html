@@ -82,14 +82,15 @@ loadScripts(document, 'script');</script>
 
  <p>Publishes motor controller state — including duty-cycle output voltage, stator/supply current,
  rotor/mechanism position and velocity, and motor temperature — to NetworkTables so that tools
- such as SmartDashboard, Elastic, and Advantage Scope can consume the data in real time.
- Tunable fields (PID gains, setpoints, motion-profile limits) are additionally exposed on a
- separate <code>Tuning</code> table so they can be adjusted without redeploying code.
+ such as SmartDashboard, Elastic, and Advantage Scope can consume the data in real time. Tunable
+ fields (PID gains, setpoints, motion-profile limits) are additionally exposed on a separate
+ <code>Tuning</code> table so they can be adjusted without redeploying code.
 
  <p>This class is managed internally by <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a>. You do not normally
  instantiate it directly; instead call the methods on the motor controller itself:
 
  <h2>Basic usage (default NetworkTable path)</h2>
+
  <pre><code>
  // In robotInit() or subsystem constructor:
  motor.setupTelemetry();   // publishes under Mechanisms/&lt;motorName&gt;
@@ -99,9 +100,11 @@ loadScripts(document, 'script');</script>
  </code></pre>
 
  <h2>Custom NetworkTable path and telemetry config</h2>
+
  <pre><code>
- NetworkTable dataTable   = NetworkTableInstance.getDefault().getTable("Mechanisms").getSubTable("Shooter");
- NetworkTable tuningTable = NetworkTableInstance.getDefault().getTable("Tuning").getSubTable("Shooter");
+ NetworkTable dataTable   =
+ NetworkTableInstance.getDefault().getTable("Mechanisms").getSubTable("Shooter"); NetworkTable
+ tuningTable = NetworkTableInstance.getDefault().getTable("Tuning").getSubTable("Shooter");
 
  motor.setupTelemetry(dataTable, tuningTable);
 
@@ -226,8 +229,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Setup Telemetry Pub/Sub fields.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>smartMotorController</code> - <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> used to determine what telemetry features can and should
-                             be disabled bc they are not available.</dd>
+<dd><code>smartMotorController</code> - <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.motorcontrollers"><code>SmartMotorController</code></a> used to determine what telemetry
+     features can and should be disabled bc they are not available.</dd>
 <dd><code>publishTable</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/networktables/NetworkTable.html" title="class or interface in edu.wpi.first.networktables" class="external-link"><code>NetworkTable</code></a> that holds all of the output fields.</dd>
 <dd><code>tuningTable</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/networktables/NetworkTable.html" title="class or interface in edu.wpi.first.networktables" class="external-link"><code>NetworkTable</code></a> that holds all of the tuning fields.</dd>
 <dd><code>config</code> - <a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry"><code>SmartMotorControllerTelemetryConfig</code></a> to apply.</dd>
@@ -270,8 +273,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Whether or not tuning is enabled.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>Checks if <a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html#TunableSetpointPosition"><code>SmartMotorControllerTelemetry.DoubleTelemetryField.TunableSetpointPosition</code></a> or
- <a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html#TunableSetpointVelocity"><code>SmartMotorControllerTelemetry.DoubleTelemetryField.TunableSetpointVelocity</code></a> are enabled.</dd>
+<dd>Checks if <a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html#TunableSetpointPosition"><code>SmartMotorControllerTelemetry.DoubleTelemetryField.TunableSetpointPosition</code></a> or <a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html#TunableSetpointVelocity"><code>SmartMotorControllerTelemetry.DoubleTelemetryField.TunableSetpointVelocity</code></a> are enabled.</dd>
 </dl>
 </section>
 </li>

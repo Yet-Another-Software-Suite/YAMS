@@ -68,25 +68,22 @@ loadScripts(document, 'script');</script>
  support, and WPILib command/trigger integration that all concrete mechanism types rely on.
 
  <h2>Mechanism Lifecycle</h2>
+
  <ol>
-   <li><b>Create a configuration object</b> — choose the appropriate config class from
-       <a href="config/package-summary.html"><code>yams.mechanisms.config</code></a> (e.g. <a href="config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a>,
-       <a href="config/ElevatorConfig.html" title="class in yams.mechanisms.config"><code>ElevatorConfig</code></a>) and populate it via the fluent
-       <code>with*()</code> API.</li>
+ <li><b>Create a configuration object</b> — choose the appropriate config class from <a href="config/package-summary.html"><code>yams.mechanisms.config</code></a> (e.g. <a href="config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a>, <a href="config/ElevatorConfig.html" title="class in yams.mechanisms.config"><code>ElevatorConfig</code></a>) and populate it via the fluent <code>with*()</code> API.
    <li><b>Construct the mechanism</b> — pass the finished config to the mechanism constructor
        (e.g. <a href="positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a>, <a href="positional/Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a>).
-       The constructor validates the config and initialises all internal controllers.</li>
-   <li><b>Command the mechanism</b> — call setpoint methods such as <code>setAngle()</code> or
-       <code>setHeight()</code>. Each method returns a WPILib <code>Command</code> that can be bound,
-       composed, or scheduled directly via the command scheduler.</li>
+       The constructor validates the config and initialises all internal controllers.
+ <li><b>Command the mechanism</b> — call setpoint methods such as <code>setAngle()</code> or <code>setHeight()</code>. Each method returns a WPILib <code>Command</code> that can be bound, composed, or
+       scheduled directly via the command scheduler.
    <li><b>React to conditions</b> — use trigger factory methods (<code>isNear()</code>, <code>max()</code>,
-       <code>min()</code>, <code>between()</code>, <code>lte()</code>, <code>gte()</code>) to obtain
-       <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/button/Trigger.html" title="class or interface in edu.wpi.first.wpilibj2.command.button" class="external-link"><code>Trigger</code></a> objects that fire when the mechanism
+ <code>min()</code>, <code>between()</code>, <code>lte()</code>, <code>gte()</code>) to obtain <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/button/Trigger.html" title="class or interface in edu.wpi.first.wpilibj2.command.button" class="external-link"><code>Trigger</code></a> objects that fire when the mechanism
        satisfies a particular condition, enabling condition-based command scheduling without
-       polling in <code>periodic()</code>.</li>
+       polling in <code>periodic()</code>.
  </ol>
 
  <h2>Typical Usage</h2>
+
  <pre><code>
  // 1. Configure
  ArmConfig config = new ArmConfig(motor)
@@ -105,12 +102,13 @@ loadScripts(document, 'script');</script>
  </code></pre>
 
  <h2>Sub-packages</h2>
+
  <ul>
-   <li><a href="positional/package-summary.html"><code>yams.mechanisms.positional</code></a> — position-controlled mechanisms (Arm, Elevator,
-       Pivot, DifferentialMechanism, DoubleJointedArm)</li>
-   <li><a href="velocity/package-summary.html"><code>yams.mechanisms.velocity</code></a> — velocity-controlled mechanisms (FlyWheel)</li>
-   <li><a href="swerve/package-summary.html"><code>yams.mechanisms.swerve</code></a> — swerve-drive mechanism and module implementations</li>
-   <li><a href="config/package-summary.html"><code>yams.mechanisms.config</code></a> — builder-style configuration classes for all mechanisms</li>
+   <li><a href="positional/package-summary.html"><code>yams.mechanisms.positional</code></a> — position-controlled mechanisms (Arm, Elevator, Pivot,
+       DifferentialMechanism, DoubleJointedArm)
+   <li><a href="velocity/package-summary.html"><code>yams.mechanisms.velocity</code></a> — velocity-controlled mechanisms (FlyWheel)
+   <li><a href="swerve/package-summary.html"><code>yams.mechanisms.swerve</code></a> — swerve-drive mechanism and module implementations
+   <li><a href="config/package-summary.html"><code>yams.mechanisms.config</code></a> — builder-style configuration classes for all mechanisms
  </ul></div>
 <dl class="notes">
 <dt>See Also:</dt>

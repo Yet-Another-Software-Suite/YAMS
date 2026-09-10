@@ -80,22 +80,19 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
 <div class="block">Swerve Module
 
- <p>
- <a href="SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a> coordinates the drive motor (velocity control) and the azimuth (steer)
- motor (position control) that make up one corner of a swerve drivetrain.  On construction it
- reads the absolute encoder and seeds the azimuth relative encoder so the wheel starts at the
- correct angle.  Each periodic cycle you call <a href="#setSwerveModuleState(edu.wpi.first.math.kinematics.SwerveModuleState)"><code>setSwerveModuleState(SwerveModuleState)</code></a> to
- command both motors, and <a href="#getState()"><code>getState()</code></a> / <a href="#getPosition()"><code>getPosition()</code></a> to read back the current
- wheel velocity and heading.
- </p>
+ <p><a href="SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a> coordinates the drive motor (velocity control) and the azimuth (steer)
+ motor (position control) that make up one corner of a swerve drivetrain. On construction it reads
+ the absolute encoder and seeds the azimuth relative encoder so the wheel starts at the correct
+ angle. Each periodic cycle you call <a href="#setSwerveModuleState(edu.wpi.first.math.kinematics.SwerveModuleState)"><code>setSwerveModuleState(SwerveModuleState)</code></a> to command
+ both motors, and <a href="#getState()"><code>getState()</code></a> / <a href="#getPosition()"><code>getPosition()</code></a> to read back the current wheel
+ velocity and heading.
 
  <h2>Typical usage</h2>
- <p>
- In almost every case you should <b>not</b> instantiate <a href="SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a> directly.  Instead,
- pass one <a href="../config/SwerveModuleConfig.html" title="class in yams.mechanisms.config"><code>SwerveModuleConfig</code></a> per corner to
- <a href="../config/SwerveDriveConfig.html" title="class in yams.mechanisms.config"><code>SwerveDriveConfig</code></a> and let
- <a href="SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a> create and manage the modules internally:
- </p>
+
+ <p>In almost every case you should <b>not</b> instantiate <a href="SwerveModule.html" title="class in yams.mechanisms.swerve"><code>SwerveModule</code></a> directly. Instead,
+ pass one <a href="../config/SwerveModuleConfig.html" title="class in yams.mechanisms.config"><code>SwerveModuleConfig</code></a> per corner to <a href="../config/SwerveDriveConfig.html" title="class in yams.mechanisms.config"><code>SwerveDriveConfig</code></a> and let <a href="SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a>
+ create and manage the modules internally:
+
  <pre><code>
  SwerveDriveConfig driveConfig = new SwerveDriveConfig()
      .withSwerveModuleConfig(frontLeft, frontRight, backLeft, backRight);
@@ -104,11 +101,10 @@ loadScripts(document, 'script');</script>
  </code></pre>
 
  <h2>Direct instantiation (advanced)</h2>
- <p>
- If you need direct access to a module — for example when writing unit tests or custom
- characterisation routines — you can construct one from a fully-configured
- <a href="../config/SwerveModuleConfig.html" title="class in yams.mechanisms.config"><code>SwerveModuleConfig</code></a>:
- </p>
+
+ <p>If you need direct access to a module — for example when writing unit tests or custom
+ characterisation routines — you can construct one from a fully-configured <a href="../config/SwerveModuleConfig.html" title="class in yams.mechanisms.config"><code>SwerveModuleConfig</code></a>:
+
  <pre><code>
  // Assumes 'frontLeftConfig' has already been built with drive/steer motors,
  // wheel radius, module location, absolute encoder offset, and telemetry name.
@@ -217,22 +213,28 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState</code></a> of the module.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupTelemetry(java.lang.String)" class="member-name-link">setupTelemetry</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;mechName)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">SwerveModuleState</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSwerveModuleState(edu.wpi.first.math.kinematics.SwerveModuleState,edu.wpi.first.units.measure.Force)" class="member-name-link">setSwerveModuleState</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">SwerveModuleState</a>&nbsp;state,
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Force</a>&nbsp;feedforwardForce)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Setup telemetry for the module; the <a href="../../telemetry/SwerveModuleTelemetry.html" title="class in yams.telemetry"><code>SwerveModuleTelemetry</code></a> config used is either the one
- supplied via <a href="../config/SwerveModuleConfig.html#withTelemetry(java.lang.String,yams.telemetry.SwerveModuleTelemetryConfig)"><code>SwerveModuleConfig.withTelemetry(String, SwerveModuleTelemetryConfig)</code></a> or a
- default built from <a href="../config/SwerveModuleConfig.html#getTelemetryVerbosity()"><code>SwerveModuleConfig.getTelemetryVerbosity()</code></a> (defaulting to
- <a href="../../motorcontrollers/SmartMotorControllerConfig.TelemetryVerbosity.html#HIGH"><code>SmartMotorControllerConfig.TelemetryVerbosity.HIGH</code></a>).</div>
+<div class="block">Set the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState</code></a> of the module with an additional drive wheel feedforward
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Force</code></a> applied on top, e.g.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#simIterate()" class="member-name-link">simIterate</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupTelemetry(java.lang.String)" class="member-name-link">setupTelemetry</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;mechName)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Update the simulation of the module.</div>
+<div class="block">Setup telemetry for the module; the <a href="../../telemetry/SwerveModuleTelemetry.html" title="class in yams.telemetry"><code>SwerveModuleTelemetry</code></a> config used is either the one
+ supplied via <a href="../config/SwerveModuleConfig.html#withTelemetry(java.lang.String,yams.telemetry.SwerveModuleTelemetryConfig)"><code>SwerveModuleConfig.withTelemetry(String, SwerveModuleTelemetryConfig)</code></a> or a
+ default built from <a href="../config/SwerveModuleConfig.html#getTelemetryVerbosity()"><code>SwerveModuleConfig.getTelemetryVerbosity()</code></a> (defaulting to <a href="../../motorcontrollers/SmartMotorControllerConfig.TelemetryVerbosity.html#HIGH"><code>SmartMotorControllerConfig.TelemetryVerbosity.HIGH</code></a>).</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateTelemetry()" class="member-name-link">updateTelemetry</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#simIterate()" class="member-name-link">simIterate</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Update the simulation of the module.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateTelemetry()" class="member-name-link">updateTelemetry</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Update the telemetry of the module.</div>
 </div>
 </div>
@@ -299,8 +301,7 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setupTelemetry</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;mechName)</span></div>
 <div class="block">Setup telemetry for the module; the <a href="../../telemetry/SwerveModuleTelemetry.html" title="class in yams.telemetry"><code>SwerveModuleTelemetry</code></a> config used is either the one
  supplied via <a href="../config/SwerveModuleConfig.html#withTelemetry(java.lang.String,yams.telemetry.SwerveModuleTelemetryConfig)"><code>SwerveModuleConfig.withTelemetry(String, SwerveModuleTelemetryConfig)</code></a> or a
- default built from <a href="../config/SwerveModuleConfig.html#getTelemetryVerbosity()"><code>SwerveModuleConfig.getTelemetryVerbosity()</code></a> (defaulting to
- <a href="../../motorcontrollers/SmartMotorControllerConfig.TelemetryVerbosity.html#HIGH"><code>SmartMotorControllerConfig.TelemetryVerbosity.HIGH</code></a>).</div>
+ default built from <a href="../config/SwerveModuleConfig.html#getTelemetryVerbosity()"><code>SwerveModuleConfig.getTelemetryVerbosity()</code></a> (defaulting to <a href="../../motorcontrollers/SmartMotorControllerConfig.TelemetryVerbosity.html#HIGH"><code>SmartMotorControllerConfig.TelemetryVerbosity.HIGH</code></a>).</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>mechName</code> - Telemetry name of the parent <a href="SwerveDrive.html" title="class in yams.mechanisms.swerve"><code>SwerveDrive</code></a>.</dd>
@@ -355,6 +356,23 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>state</code> - State to set.</dd>
+<dt>Returns:</dt>
+<dd>The optimized <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState</code></a>.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="setSwerveModuleState(edu.wpi.first.math.kinematics.SwerveModuleState,edu.wpi.first.units.measure.Force)">
+<h3>setSwerveModuleState</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">SwerveModuleState</a></span>&nbsp;<span class="element-name">setSwerveModuleState</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link">SwerveModuleState</a>&nbsp;state,
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link">Force</a>&nbsp;feedforwardForce)</span></div>
+<div class="block">Set the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState</code></a> of the module with an additional drive wheel feedforward
+ <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Force</code></a> applied on top, e.g. from a PathPlanner set-point generator.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>state</code> - State to set.</dd>
+<dd><code>feedforwardForce</code> - Feedforward <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Force</code></a> applied at the drive wheel, in the direction
+     of travel.</dd>
 <dt>Returns:</dt>
 <dd>The optimized <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/kinematics/SwerveModuleState.html" title="class or interface in edu.wpi.first.math.kinematics" class="external-link"><code>SwerveModuleState</code></a>.</dd>
 </dl>

@@ -85,12 +85,12 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
 <div class="block">Struct array Telemetry for arbitrary <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/util/struct/Struct.html" title="class or interface in edu.wpi.first.util.struct" class="external-link"><code>Struct</code></a> serializable array types.
 
- <p>A lightweight wrapper that publishes a struct-encoded array value (e.g. <code>
- SwerveModuleState[]</code>, <code>SwerveModulePosition[]</code>) to NetworkTables and/or a WPILib DataLog.
+ <p>A lightweight wrapper that publishes a struct-encoded array value (e.g. <code>SwerveModuleState[]</code>, <code>SwerveModulePosition[]</code>) to NetworkTables and/or a WPILib DataLog.
  It mirrors <a href="StructTelemetry.html" title="class in yams.telemetry"><code>StructTelemetry</code></a>, but publishes an array of struct-serializable values instead
  of a single value.
 
  <h2>Example</h2>
+
  <pre><code>
  // Create and publish a struct array entry for the current module states.
  StructArrayTelemetry&lt;SwerveModuleState, MyField&gt; states = new StructArrayTelemetry&lt;&gt;(
