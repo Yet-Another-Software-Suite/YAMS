@@ -19,17 +19,15 @@ import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 
-public class RobotContainer
-{
-  private final SwerveSubsystem   drive    = new SwerveSubsystem();
-  private final ArmSubsystem      arm      = new ArmSubsystem();
+public class RobotContainer {
+  private final SwerveSubsystem drive = new SwerveSubsystem();
+  private final ArmSubsystem arm = new ArmSubsystem();
   private final ElevatorSubsystem elevator = new ElevatorSubsystem();
-  private final ShooterSubsystem  shooter  = new ShooterSubsystem();
+  private final ShooterSubsystem shooter = new ShooterSubsystem();
 
   private final CommandXboxController xboxController = new CommandXboxController(0);
 
-  public RobotContainer()
-  {
+  public RobotContainer() {
     DriverStation.silenceJoystickConnectionWarning(true);
     drive.setDefaultCommand(drive.driveWithJoystick(xboxController));
     arm.setDefaultCommand(arm.setAngle(Degrees.of(0)));
@@ -38,8 +36,7 @@ public class RobotContainer
     configureBindings();
   }
 
-  private void configureBindings()
-  {
+  private void configureBindings() {
     xboxController.button(1).whileTrue(arm.setAngle(Degrees.of(30)));
     xboxController.button(2).whileTrue(arm.setAngle(Degrees.of(80)));
 
@@ -50,8 +47,7 @@ public class RobotContainer
     xboxController.button(6).whileTrue(shooter.setVelocity(RPM.of(2000)));
   }
 
-  public Command getAutonomousCommand()
-  {
+  public Command getAutonomousCommand() {
     return Commands.print("No autonomous command configured");
   }
 }

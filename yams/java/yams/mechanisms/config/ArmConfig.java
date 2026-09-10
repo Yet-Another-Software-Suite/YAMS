@@ -3,19 +3,14 @@
 
 package yams.mechanisms.config;
 
-import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import java.util.Optional;
-import yams.exceptions.ArmConfigurationException;
 import yams.mechanisms.positional.Arm;
 import yams.mechanisms.positional.Elevator;
 import yams.mechanisms.positional.Pivot;
-import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
@@ -23,6 +18,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  * Arm configuration class.
  *
  * <h2>Configuration Example</h2>
+ *
  * <pre>{@code
  * // Create a motor first
  * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
@@ -43,50 +39,37 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  * Arm arm = new Arm(config, motor);
  * }</pre>
  */
-public class ArmConfig
-{
-  /**
-   * Telemetry name.
-   */
-  private   Optional<String>               telemetryName           = Optional.empty();
-  /**
-   * Telemetry verbosity
-   */
-  private   Optional<TelemetryVerbosity>   telemetryVerbosity      = Optional.empty();
-  /**
-   * Lower Hard Limit for the {@link Arm} to be representing in simulation.
-   */
-  private   Optional<Angle>                lowerHardLimit          = Optional.empty();
-  /**
-   * Upper hard limit for the {@link Arm} representing in simulation.
-   */
-  private   Optional<Angle>                upperHardLimit          = Optional.empty();
-  /**
-   * {@link Arm} length for simulation.
-   */
-  private   Optional<Distance>             length                  = Optional.empty();
-  /**
-   * Sim color value
-   */
-  private   Color8Bit                      simColor                = new Color8Bit(Color.kOrange);
-  /**
-   * Mechanism position configuration for the {@link Pivot} (Optional).
-   */
-  private   MechanismPositionConfig        mechanismPositionConfig = new MechanismPositionConfig();
+public class ArmConfig {
+  /** Telemetry name. */
+  private Optional<String> telemetryName = Optional.empty();
 
-  /**
-   * Arm configuration class. Required
-   */
-  public ArmConfig()
-  {}
+  /** Telemetry verbosity */
+  private Optional<TelemetryVerbosity> telemetryVerbosity = Optional.empty();
+
+  /** Lower Hard Limit for the {@link Arm} to be representing in simulation. */
+  private Optional<Angle> lowerHardLimit = Optional.empty();
+
+  /** Upper hard limit for the {@link Arm} representing in simulation. */
+  private Optional<Angle> upperHardLimit = Optional.empty();
+
+  /** {@link Arm} length for simulation. */
+  private Optional<Distance> length = Optional.empty();
+
+  /** Sim color value */
+  private Color8Bit simColor = new Color8Bit(Color.kOrange);
+
+  /** Mechanism position configuration for the {@link Pivot} (Optional). */
+  private MechanismPositionConfig mechanismPositionConfig = new MechanismPositionConfig();
+
+  /** Arm configuration class. Required */
+  public ArmConfig() {}
 
   /**
    * Copy constructor.
    *
    * @param cfg Configuration to copy from.
    */
-  private ArmConfig(ArmConfig cfg)
-  {
+  private ArmConfig(ArmConfig cfg) {
     telemetryName = cfg.telemetryName;
     telemetryVerbosity = cfg.telemetryVerbosity;
     lowerHardLimit = cfg.lowerHardLimit;
@@ -97,11 +80,9 @@ public class ArmConfig
   }
 
   @Override
-  public ArmConfig clone()
-  {
+  public ArmConfig clone() {
     return new ArmConfig(this);
   }
-
 
   /**
    * Publish the color in sim as this.
@@ -109,8 +90,7 @@ public class ArmConfig
    * @param simColor {@link Color8Bit} to show.
    * @return {@link ArmConfig} for chaining.
    */
-  public ArmConfig withSimColor(final Color8Bit simColor)
-  {
+  public ArmConfig withSimColor(final Color8Bit simColor) {
     this.simColor = simColor;
     return this;
   }
@@ -122,8 +102,7 @@ public class ArmConfig
    * @implNote This is not used to forward the MOI to {@link SmartMotorControllerConfig}
    * @return {@link ArmConfig} for chaining.
    */
-  public ArmConfig withLength(Distance distance)
-  {
+  public ArmConfig withLength(Distance distance) {
     this.length = Optional.ofNullable(distance);
     return this;
   }
@@ -131,12 +110,11 @@ public class ArmConfig
   /**
    * Configure telemetry for the {@link Arm} mechanism.
    *
-   * @param telemetryName      Telemetry NetworkTable name to appear under "SmartDashboard/"
+   * @param telemetryName Telemetry NetworkTable name to appear under "SmartDashboard/"
    * @param telemetryVerbosity Telemetry verbosity to apply.
    * @return {@link ArmConfig} for chaining.
    */
-  public ArmConfig withTelemetry(String telemetryName, TelemetryVerbosity telemetryVerbosity)
-  {
+  public ArmConfig withTelemetry(String telemetryName, TelemetryVerbosity telemetryVerbosity) {
     this.telemetryName = Optional.ofNullable(telemetryName);
     this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
     return this;
@@ -148,8 +126,7 @@ public class ArmConfig
    * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link Elevator}
    * @return {@link PivotConfig} for chaining
    */
-  public ArmConfig withMechanismPositionConfig(MechanismPositionConfig mechanismPositionConfig)
-  {
+  public ArmConfig withMechanismPositionConfig(MechanismPositionConfig mechanismPositionConfig) {
     this.mechanismPositionConfig = mechanismPositionConfig;
     return this;
   }
@@ -161,8 +138,7 @@ public class ArmConfig
    * @param max Angle where the physical stop appears
    * @return {@link ArmConfig} for chaining.
    */
-  public ArmConfig withHardLimits(Angle min, Angle max)
-  {
+  public ArmConfig withHardLimits(Angle min, Angle max) {
     lowerHardLimit = Optional.ofNullable(min);
     upperHardLimit = Optional.ofNullable(max);
     return this;
@@ -173,8 +149,7 @@ public class ArmConfig
    *
    * @return {@link Distance} of the Arm.
    */
-  public Optional<Distance> getLength()
-  {
+  public Optional<Distance> getLength() {
     return length;
   }
 
@@ -183,8 +158,7 @@ public class ArmConfig
    *
    * @return {@link Angle} hard limit.
    */
-  public Optional<Angle> getUpperHardLimit()
-  {
+  public Optional<Angle> getUpperHardLimit() {
     return upperHardLimit;
   }
 
@@ -193,8 +167,7 @@ public class ArmConfig
    *
    * @return {@link Angle} hard limit.
    */
-  public Optional<Angle> getLowerHardLimit()
-  {
+  public Optional<Angle> getLowerHardLimit() {
     return lowerHardLimit;
   }
 
@@ -203,8 +176,7 @@ public class ArmConfig
    *
    * @return {@link TelemetryVerbosity} of the {@link Arm}
    */
-  public Optional<TelemetryVerbosity> getTelemetryVerbosity()
-  {
+  public Optional<TelemetryVerbosity> getTelemetryVerbosity() {
     return telemetryVerbosity;
   }
 
@@ -213,8 +185,7 @@ public class ArmConfig
    *
    * @return Network Tables name.
    */
-  public Optional<String> getTelemetryName()
-  {
+  public Optional<String> getTelemetryName() {
     return telemetryName;
   }
 
@@ -223,20 +194,17 @@ public class ArmConfig
    *
    * @return sim color.
    */
-  public Color8Bit getSimColor()
-  {
+  public Color8Bit getSimColor() {
     return simColor;
   }
 
   /**
    * Get the {@link MechanismPositionConfig} associated with this {@link ArmConfig}.
    *
-   * @return An {@link Optional} containing the {@link MechanismPositionConfig} if present, otherwise an empty
-   * {@link Optional}.
+   * @return An {@link Optional} containing the {@link MechanismPositionConfig} if present,
+   *     otherwise an empty {@link Optional}.
    */
-  public MechanismPositionConfig getMechanismPositionConfig()
-  {
+  public MechanismPositionConfig getMechanismPositionConfig() {
     return mechanismPositionConfig;
   }
-
 }

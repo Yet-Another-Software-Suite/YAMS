@@ -32,18 +32,15 @@ import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 
 /**
- * ElevatorSim Supplier — simulates an elevator mechanism using WPILib's
- * {@link edu.wpi.first.wpilibj.simulation.ElevatorSim}.
+ * ElevatorSim Supplier — simulates an elevator mechanism using WPILib's {@link edu.wpi.first.wpilibj.simulation.ElevatorSim}.
  *
- * <p>
- * This supplier steps WPILib's {@code ElevatorSim} physics model each control loop and exposes
- * the resulting height, linear velocity, current draw, and voltage through the
- * {@link yams.motorcontrollers.SimSupplier} interface. Because {@code ElevatorSim} operates in
- * linear units (meters), positions and velocities are converted to and from mechanism (angular)
- * units using the associated {@link yams.motorcontrollers.SmartMotorController}'s config.
- * </p>
+ * <p>This supplier steps WPILib's {@code ElevatorSim} physics model each control loop and exposes
+ * the resulting height, linear velocity, current draw, and voltage through the {@link yams.motorcontrollers.SimSupplier} interface. Because {@code ElevatorSim} operates in linear
+ * units (meters), positions and velocities are converted to and from mechanism (angular) units
+ * using the associated {@link yams.motorcontrollers.SmartMotorController}'s config.
  *
  * <h2>Example</h2>
+ *
  * <pre>{@code
  * // 1. Build the WPILib elevator physics model
  * ElevatorSim elevatorPhysics = new ElevatorSim(
@@ -85,7 +82,7 @@ public class ElevatorSimSupplier implements SimSupplier {
   /**
    * Construct the ElevatorSim supplier
    *
-   * @param simulation           Simulation instance
+   * @param simulation Simulation instance
    * @param smartMotorController SMC for the ElevatorSim.
    */
   public ElevatorSimSupplier(ElevatorSim simulation, SmartMotorController smartMotorController) {
@@ -100,7 +97,8 @@ public class ElevatorSimSupplier implements SimSupplier {
     simPeriod = config.getSimulationPeriod();
     mpsps = new DerivativeTimeFilter(pos.get(), simPeriod);
     // Based off comment from https://github.com/wpilibsuite/allwpilib/issues/8691
-    supplyCurrentFilter = LinearFilter.singlePoleIIR(Milliseconds.of(100).in(Seconds), simPeriod.in(Seconds));
+    supplyCurrentFilter =
+        LinearFilter.singlePoleIIR(Milliseconds.of(100).in(Seconds), simPeriod.in(Seconds));
   }
 
   @Override
@@ -159,8 +157,10 @@ public class ElevatorSimSupplier implements SimSupplier {
 
   @Override
   public Voltage getMechanismStatorVoltage() {
-    return Volts.of(motor.getVoltage(
-        motor.getTorque(sim.getCurrentDrawAmps()), getMechanismVelocity().in(RadiansPerSecond)));
+    return Volts.of(
+        motor.getVoltage(
+            motor.getTorque(sim.getCurrentDrawAmps()),
+            getMechanismVelocity().in(RadiansPerSecond)));
   }
 
   @Override

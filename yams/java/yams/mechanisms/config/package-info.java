@@ -6,35 +6,36 @@
  *
  * <p>Every YAMS mechanism requires a corresponding config object to be constructed before the
  * mechanism itself is instantiated. Config classes follow a <b>fluent builder pattern</b>: each
- * {@code with*()} setter mutates the config and returns {@code this}, allowing calls to be
- * chained in a single expression.
+ * {@code with*()} setter mutates the config and returns {@code this}, allowing calls to be chained
+ * in a single expression.
  *
  * <h2>Available Configuration Classes</h2>
+ *
  * <ul>
  *   <li>{@link yams.mechanisms.config.ArmConfig} — single-jointed arm with angle limits and
- *       feedforward tuning</li>
+ *       feedforward tuning
  *   <li>{@link yams.mechanisms.config.ElevatorConfig} — linear elevator with height limits and
- *       gravity compensation</li>
+ *       gravity compensation
  *   <li>{@link yams.mechanisms.config.PivotConfig} — pivot mechanism with continuous or bounded
- *       rotation</li>
+ *       rotation
  *   <li>{@link yams.mechanisms.config.FlyWheelConfig} — flywheel velocity mechanism with optional
- *       second follower motor</li>
+ *       second follower motor
  *   <li>{@link yams.mechanisms.config.SwerveDriveConfig} — full swerve-drive chassis geometry and
- *       module layout</li>
+ *       module layout
  *   <li>{@link yams.mechanisms.config.SwerveModuleConfig} — per-module drive and steer motor
- *       configuration</li>
+ *       configuration
  *   <li>{@link yams.mechanisms.config.DifferentialMechanismConfig} — differential (tank-drive)
- *       mechanism pairing two motors</li>
+ *       mechanism pairing two motors
  *   <li>{@link yams.mechanisms.config.MechanismPositionConfig} — position targets and tolerance
- *       settings shared across positional mechanisms</li>
+ *       settings shared across positional mechanisms
  *   <li>{@link yams.mechanisms.config.SensorConfig} — external encoder or absolute sensor
- *       attachment configuration</li>
+ *       attachment configuration
  * </ul>
  *
  * <h2>Motor Controller Requirement</h2>
+ *
  * <p>A {@link yams.motorcontrollers.SmartMotorController} must be provided before most mechanisms
- * can be constructed. It may be supplied either through the config constructor or via the
- * {@code withSmartMotorController()} setter:
+ * can be constructed. It may be supplied either through the config constructor or via the {@code withSmartMotorController()} setter:
  *
  * <pre>{@code
  * SmartMotorController motor = new TalonFXController(new TalonFX(1));
@@ -52,6 +53,7 @@
  * }</pre>
  *
  * <h2>Fluent Chaining Example</h2>
+ *
  * <pre>{@code
  * ArmConfig armConfig = new ArmConfig(motor)
  *     .withGearing(100.0)

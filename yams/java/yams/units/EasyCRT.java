@@ -18,18 +18,16 @@ import java.util.Optional;
  *   <li>Select the best unique match within a configurable tolerance.
  * </ol>
  *
- * <p>This is <b>not</b> a textbook Chinese Remainder Theorem solve; it is a
- * "CRT-inspired" unwrapping method that is easier to keep stable with backlash and sensor
- * noise.
+ * <p>This is <b>not</b> a textbook Chinese Remainder Theorem solve; it is a "CRT-inspired"
+ * unwrapping method that is easier to keep stable with backlash and sensor noise.
  *
  * <p>Created by team 6911.
  *
  * <h2>Usage</h2>
- * <p>Construct an {@code EasyCRT} from a fully-configured {@link EasyCRTConfig}, then call
- * {@link #getAngleOptional()} periodically. The return value is an {@link java.util.Optional}
- * containing the resolved mechanism {@link edu.wpi.first.units.measure.Angle} when a unique
- * solution is found, or {@link java.util.Optional#empty()} when the solve fails or is ambiguous.
- * Inspect {@link #getLastStatus()} and {@link #getLastErrorRotations()} for diagnostics.
+ *
+ * <p>Construct an {@code EasyCRT} from a fully-configured {@link EasyCRTConfig}, then call {@link #getAngleOptional()} periodically. The return value is an {@link java.util.Optional} containing
+ * the resolved mechanism {@link edu.wpi.first.units.measure.Angle} when a unique solution is found,
+ * or {@link java.util.Optional#empty()} when the solve fails or is ambiguous. Inspect {@link #getLastStatus()} and {@link #getLastErrorRotations()} for diagnostics.
  *
  * <pre>{@code
  * import static edu.wpi.first.units.Units.Rotations;
@@ -58,50 +56,30 @@ import java.util.Optional;
  * }</pre>
  */
 public class EasyCRT {
-  /**
-   * The list of possible statuses from the previous solve attempt.
-   */
+  /** The list of possible statuses from the previous solve attempt. */
   public enum CRTStatus {
-    /**
-     * The previous solve succeeded.
-     */
+    /** The previous solve succeeded. */
     OK,
-    /**
-     * The previous solve attempt could not find a solution.
-     */
+    /** The previous solve attempt could not find a solution. */
     NO_SOLUTION,
-    /**
-     * The previous solve attempt resulted in two nearly-equal matches within tolerance.
-     */
+    /** The previous solve attempt resulted in two nearly-equal matches within tolerance. */
     AMBIGUOUS,
-    /**
-     * No solve attempts have occurred.
-     */
+    /** No solve attempts have occurred. */
     NOT_ATTEMPTED,
-    /**
-     * A solve was not attempted, as the solver was not configured correctly.
-     */
+    /** A solve was not attempted, as the solver was not configured correctly. */
     INVALID_CONFIG
   }
 
-  /**
-   * Configuration containing ratios, limits, and encoder suppliers.
-   */
+  /** Configuration containing ratios, limits, and encoder suppliers. */
   private final EasyCRTConfig easyCrtConfig;
 
-  /**
-   * Last solve status string (e.g., OK / NO_SOLUTION / AMBIGUOUS / INVALID_CONFIG).
-   */
+  /** Last solve status string (e.g., OK / NO_SOLUTION / AMBIGUOUS / INVALID_CONFIG). */
   private CRTStatus lastStatus = CRTStatus.NOT_ATTEMPTED;
 
-  /**
-   * Last best-match modular error in rotations.
-   */
+  /** Last best-match modular error in rotations. */
   private double lastErrorRot = Double.NaN;
 
-  /**
-   * Number of candidates evaluated in the most recent solve attempt.
-   */
+  /** Number of candidates evaluated in the most recent solve attempt. */
   private int lastIterations = 0;
 
   /**
@@ -116,8 +94,7 @@ public class EasyCRT {
   /**
    * Returns the mechanism angle if a unique solution is found.
    *
-   * <p>If no unique solution is found (outside tolerance or ambiguous), returns {@link
-   * Optional#empty()}.
+   * <p>If no unique solution is found (outside tolerance or ambiguous), returns {@link Optional#empty()}.
    *
    * @return optional containing mechanism angle when uniquely resolved
    */
@@ -131,14 +108,16 @@ public class EasyCRT {
     // Read + wrap into [0, 1).
     final double abs1 =
         MathUtil.inputModulus(
-            easyCrtConfig.getAbsoluteEncoder1Angle()
+            easyCrtConfig
+                .getAbsoluteEncoder1Angle()
                 .plus(easyCrtConfig.getAbsoluteEncoder1Offset())
                 .in(Rotations),
             0.0,
             1.0);
     final double abs2 =
         MathUtil.inputModulus(
-            easyCrtConfig.getAbsoluteEncoder2Angle()
+            easyCrtConfig
+                .getAbsoluteEncoder2Angle()
                 .plus(easyCrtConfig.getAbsoluteEncoder2Offset())
                 .in(Rotations),
             0.0,

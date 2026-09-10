@@ -109,8 +109,9 @@ public class ShooterSubsystem extends SubsystemBase {
     if (motor.getMechanismSetpointVelocity().isEmpty()) {
       return false;
     }
-    return motor.getMechanismVelocity().isNear(
-        motor.getMechanismSetpointVelocity().orElseThrow(), tolerance);
+    return motor
+        .getMechanismVelocity()
+        .isNear(motor.getMechanismSetpointVelocity().orElseThrow(), tolerance);
   }
 
   public void setVelocitySetpoint(AngularVelocity speed) {

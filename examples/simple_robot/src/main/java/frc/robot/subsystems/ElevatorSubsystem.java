@@ -53,8 +53,9 @@ public class ElevatorSubsystem extends SubsystemBase {
           .withMechanismCircumference(circumference)
           //      .withFollowers(Pair.of(new SparkMax(3, SparkLowLevel.MotorType.kBrushless), true))
           .withClosedLoopController(30, 0, 0)
-          .withExponentialProfile(ExponentialProfilePIDController.createElevatorConstraints(
-              Volts.of(12), motors, weight, radius, gearing))
+          .withExponentialProfile(
+              ExponentialProfilePIDController.createElevatorConstraints(
+                  Volts.of(12), motors, weight, radius, gearing))
           //      .withClosedLoopController(4, 0, 0, MetersPerSecond.of(0.5),
           //      MetersPerSecondPerSecond.of(0.5)) // Trapezoidal Profile PID Controller
           .withSoftLimits(Meters.of(0), Meters.of(2))
@@ -80,19 +81,22 @@ public class ElevatorSubsystem extends SubsystemBase {
           .withMaxRobotHeight(Meters.of(1.5))
           .withMaxRobotLength(Meters.of(0.75))
           .withRelativePosition(new Translation3d(Meters.of(-0.25), Meters.of(0), Meters.of(0.5)));
-  private ElevatorConfig m_config = new ElevatorConfig()
-                                        .withHardLimits(Meters.of(0), Meters.of(3))
-                                        .withTelemetry("Elevator", TelemetryVerbosity.HIGH)
-                                        .withMechanismPositionConfig(m_robotToMechanism)
-                                        .withCarriageWeight(weight);
+  private ElevatorConfig m_config =
+      new ElevatorConfig()
+          .withHardLimits(Meters.of(0), Meters.of(3))
+          .withTelemetry("Elevator", TelemetryVerbosity.HIGH)
+          .withMechanismPositionConfig(m_robotToMechanism)
+          .withCarriageWeight(weight);
   private final Elevator m_elevator = new Elevator(m_config, motor);
 
   public ElevatorSubsystem() {
     new Trigger(() -> m_elevator.getHeight().lte(Meters.of(0.1)))
-        .and(()
-                 -> motor.getMechanismPositionSetpoint()
-                     .orElse(Rotations.of(1))
-                     .isEquivalent(Rotations.of(0)))
+        .and(
+            () ->
+                motor
+                    .getMechanismPositionSetpoint()
+                    .orElse(Rotations.of(1))
+                    .isEquivalent(Rotations.of(0)))
         .whileTrue(m_elevator.set(0));
   }
 

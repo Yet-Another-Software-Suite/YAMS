@@ -22,22 +22,19 @@ import java.util.UUID;
  * used currents on the robot.
  */
 public class BatterySim {
-  /**
-   * Hashmap holding all currents used by the robot.
-   */
+  /** Hashmap holding all currents used by the robot. */
   private static HashMap<UUID, Double> currents = new HashMap<>();
-  /**
-   * Battery voltage.
-   */
+
+  /** Battery voltage. */
   private static Voltage batteryVoltage = Volts.of(12);
-  /**
-   * Battery resistance.
-   */
+
+  /** Battery resistance. */
   private static Resistance batteryResistance = MilliOhms.of(20);
+
   /**
    * Open circuit voltage of the battery as a function of state of charge (0 to 1), based on a
-   * typical FRC sealed lead-acid battery discharge curve. Voltage stays relatively flat for most
-   * of the discharge before sagging quickly near depletion.
+   * typical FRC sealed lead-acid battery discharge curve. Voltage stays relatively flat for most of
+   * the discharge before sagging quickly near depletion.
    */
   private static InterpolatingDoubleTreeMap SOC_TO_VOLTAGE = new InterpolatingDoubleTreeMap();
 
@@ -53,18 +50,15 @@ public class BatterySim {
     SOC_TO_VOLTAGE.put(1.00, 12.9);
   }
 
-  /**
-   * Whether discharge simulation is enabled.
-   */
+  /** Whether discharge simulation is enabled. */
   private static boolean dischargeEnabled = false;
-  /**
-   * Capacity of the battery in amp-hours used for discharge simulation.
-   */
+
+  /** Capacity of the battery in amp-hours used for discharge simulation. */
   private static double batteryCapacityAmpHours = 18.0;
-  /**
-   * Amount of charge consumed from the battery so far, in amp-hours.
-   */
+
+  /** Amount of charge consumed from the battery so far, in amp-hours. */
   private static double ampHoursUsed = 0.0;
+
   /**
    * Timestamp of the last discharge integration step, in seconds. {@link Double#NaN} indicates no
    * previous step has been taken yet.
@@ -75,14 +69,13 @@ public class BatterySim {
    * Replace the default state-of-charge &rarr; open circuit voltage interpolation table used when
    * discharge simulation is enabled with {@link #enableDischarge(double, Voltage, Resistance)}.
    *
-   * <p>
-   * Not every battery discharges like YAMS's built-in sealed lead-acid curve. Reach for this
+   * <p>Not every battery discharges like YAMS's built-in sealed lead-acid curve. Reach for this
    * method when you want to model something different, for example:
-   * </p>
+   *
    * <ul>
-   *   <li>A well-used competition battery that sags earlier and harder than a fresh one.</li>
+   *   <li>A well-used competition battery that sags earlier and harder than a fresh one.
    *   <li>Matching a curve you measured from an actual battery on a load tester, for the most
-   *       accurate brownout predictions possible.</li>
+   *       accurate brownout predictions possible.
    * </ul>
    *
    * <pre>{@code
@@ -103,10 +96,9 @@ public class BatterySim {
    * BatterySim.enableDischarge(15.0, Volts.of(12.6), Milliohms.of(28));
    * }</pre>
    *
-   * @param socToVoltage Interpolation table mapping state of charge {@code [0, 1]} to open
-   *                     circuit voltage. Call this before {@link #enableDischarge(double,
-   *                     Voltage, Resistance)} so discharge simulation uses the new curve from the
-   *                     start.
+   * @param socToVoltage Interpolation table mapping state of charge {@code [0, 1]} to open circuit
+   *     voltage. Call this before {@link #enableDischarge(double, Voltage, Resistance)} so
+   *     discharge simulation uses the new curve from the start.
    */
   public static void replaceSOCInterpolation(InterpolatingDoubleTreeMap socToVoltage) {
     BatterySim.SOC_TO_VOLTAGE = socToVoltage;
@@ -117,10 +109,10 @@ public class BatterySim {
    * its state of charge will drop, reducing the open circuit voltage and increasing the internal
    * resistance to more realistically model a depleted battery.
    *
-   * @param batteryCapacityAmpHours Capacity of the battery in amp-hours (Ah). A typical FRC
-   *                                battery is around 18 Ah.
-   * @param nomVoltage              Nominal (fully charged) open circuit voltage of the battery.
-   * @param nomResistance           Nominal internal resistance of the battery.
+   * @param batteryCapacityAmpHours Capacity of the battery in amp-hours (Ah). A typical FRC battery
+   *     is around 18 Ah.
+   * @param nomVoltage Nominal (fully charged) open circuit voltage of the battery.
+   * @param nomResistance Nominal internal resistance of the battery.
    */
   public static void enableDischarge(
       double batteryCapacityAmpHours, Voltage nomVoltage, Resistance nomResistance) {
@@ -138,9 +130,7 @@ public class BatterySim {
     dischargeEnabled = false;
   }
 
-  /**
-   * Reset the simulated battery back to a full charge.
-   */
+  /** Reset the simulated battery back to a full charge. */
   public static void resetDischarge() {
     ampHoursUsed = 0.0;
     lastTimestampSeconds = Double.NaN;
@@ -170,8 +160,7 @@ public class BatterySim {
    * Integrate the total current draw of the robot over the elapsed time since the last call to
    * track amp-hours consumed from the battery.
    *
-   * @param totalCurrentAmps Total current drawn by the robot in {@link
-   *                         edu.wpi.first.units.Units#Amps Amps}.
+   * @param totalCurrentAmps Total current drawn by the robot in {@link edu.wpi.first.units.Units#Amps Amps}.
    */
   private static void updateDischarge(double totalCurrentAmps) {
     double now = Timer.getFPGATimestamp();
@@ -187,6 +176,7 @@ public class BatterySim {
 
   /**
    * Calculate the voltage based on the currents used by the robot.
+   *
    * @param id {@link UUID} of the simulation to calculate the voltage for.
    * @param current {@link edu.wpi.first.units.Units#Amps Amps} used by the robot.
    * @return Voltage of the robot.
@@ -216,6 +206,7 @@ public class BatterySim {
 
   /**
    * Calculate the voltage based on the currents used by the robot.
+   *
    * @param id {@link UUID} of the simulation to calculate the voltage for.
    * @param current {@link edu.wpi.first.units.Units#Amps Amps} used by the robot.
    * @return Voltage of the robot.

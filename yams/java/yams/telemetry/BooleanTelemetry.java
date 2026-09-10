@@ -16,12 +16,13 @@ import java.util.Optional;
 /**
  * Boolean Telemetry for SmartMotorControllers.
  *
- * <p>A lightweight wrapper that publishes a single {@code boolean} value to NetworkTables and/or
- * a WPILib DataLog. It is used internally by {@link SmartMotorControllerTelemetry} to track
- * flags such as limit-switch states, active feedforward type, and motor inversion — but it can
- * also be constructed directly when you need a standalone boolean entry.
+ * <p>A lightweight wrapper that publishes a single {@code boolean} value to NetworkTables and/or a
+ * WPILib DataLog. It is used internally by {@link SmartMotorControllerTelemetry} to track flags
+ * such as limit-switch states, active feedforward type, and motor inversion — but it can also be
+ * constructed directly when you need a standalone boolean entry.
  *
  * <h2>Example</h2>
+ *
  * <pre>{@code
  * // Create and publish a boolean entry for "at speed" under the Shooter table.
  * BooleanTelemetry&lt;BooleanTelemetryField&gt; atSpeed = new BooleanTelemetry&lt;&gt;(
@@ -40,96 +41,76 @@ import java.util.Optional;
  *
  * @param <F> Enum type identifying which field this telemetry entry represents.
  */
-public class BooleanTelemetry<F>
-{
-  /**
-   * Field representing.
-   */
-  private final F                           field;
-  /**
-   * Network table key.
-   */
-  private final String                      key;
-  /**
-   * Tunable?
-   */
-  private final boolean                     tunable;
-  /**
-   * Enabled?
-   */
-  protected boolean                     enabled      = false;
-  /**
-   * Default value.
-   */
-  private       boolean                     defaultValue;
-  /**
-   * Cached value.
-   */
-  private       boolean                     cachedValue;
-  /**
-   * Publisher.
-   */
-  private   BooleanPublisher            publisher    = null;
-  /**
-   * Subscriber.
-   */
-  private   Optional<BooleanSubscriber> subscriber   = Optional.empty();
-  /**
-   * Sub publisher.
-   */
-  private   BooleanPublisher            pubSub       = null;
-  /**
-   * pub or sub topic.
-   */
-  private       BooleanTopic                topic;
-  /**
-   * DataLog entry.
-   */
-  private   Optional<BooleanLogEntry>   dataLogEntry = Optional.empty();
-  /**
-   * Tuning table
-   */
-  private   Optional<NetworkTable>      tuningTable  = Optional.empty();
-  /**
-   * Data table.
-   */
-  private   Optional<NetworkTable>      dataTable    = Optional.empty();
+public class BooleanTelemetry<F> {
+  /** Field representing. */
+  private final F field;
+
+  /** Network table key. */
+  private final String key;
+
+  /** Tunable? */
+  private final boolean tunable;
+
+  /** Enabled? */
+  protected boolean enabled = false;
+
+  /** Default value. */
+  private boolean defaultValue;
+
+  /** Cached value. */
+  private boolean cachedValue;
+
+  /** Publisher. */
+  private BooleanPublisher publisher = null;
+
+  /** Subscriber. */
+  private Optional<BooleanSubscriber> subscriber = Optional.empty();
+
+  /** Sub publisher. */
+  private BooleanPublisher pubSub = null;
+
+  /** pub or sub topic. */
+  private BooleanTopic topic;
+
+  /** DataLog entry. */
+  private Optional<BooleanLogEntry> dataLogEntry = Optional.empty();
+
+  /** Tuning table */
+  private Optional<NetworkTable> tuningTable = Optional.empty();
+
+  /** Data table. */
+  private Optional<NetworkTable> dataTable = Optional.empty();
 
   /**
    * Setup boolean telemetry for a field.
    *
-   * @param keyString  Networks table key.
+   * @param keyString Networks table key.
    * @param defaultVal Default value.
-   * @param field      Field representing.
-   * @param tunable    Tunable?
+   * @param field Field representing.
+   * @param tunable Tunable?
    */
-  public BooleanTelemetry(String keyString, boolean defaultVal, F field, boolean tunable)
-  {
+  public BooleanTelemetry(String keyString, boolean defaultVal, F field, boolean tunable) {
     key = keyString;
     cachedValue = defaultValue = defaultVal;
     this.field = field;
     this.tunable = tunable;
-
   }
 
   /**
    * Setup network tables.
    *
-   * @param dataTable   Data tables.
+   * @param dataTable Data tables.
    * @param tuningTable Tuning table.
    */
-  public void setupNetworkTables(NetworkTable dataTable, NetworkTable tuningTable)
-  {
+  public void setupNetworkTables(NetworkTable dataTable, NetworkTable tuningTable) {
     this.dataTable = Optional.ofNullable(dataTable);
     this.tuningTable = Optional.ofNullable(tuningTable);
-    if (tuningTable != null && tunable)
-    {
+    if (tuningTable != null && tunable) {
       topic = tuningTable.getBooleanTopic(key);
       pubSub = topic.publish();
       pubSub.setDefault(defaultValue);
       subscriber = Optional.of(topic.subscribe(defaultValue));
-    } else
-    {
+    } else {
       topic = dataTable.getBooleanTopic(key);
       publisher = topic.publish();
       publisher.setDefault(defaultValue);
@@ -141,26 +122,24 @@ public class BooleanTelemetry<F>
    *
    * @param prefix Prefix of the entry.
    */
-  public void setupDataLog(String prefix)
-  {
-    if (!tunable)
-    {
-      if (!prefix.endsWith("/"))
-      {prefix += "/";}
-      dataLogEntry = Optional.of(new BooleanLogEntry(DataLogManager.getLog(),
-                                                     prefix + key,
-                                                     (long) Timer.getFPGATimestamp()));
+  public void setupDataLog(String prefix) {
+    if (!tunable) {
+      if (!prefix.endsWith("/")) {
+        prefix += "/";
+      }
+      dataLogEntry =
+          Optional.of(
+              new BooleanLogEntry(
+                  DataLogManager.getLog(), prefix + key, (long) Timer.getFPGATimestamp()));
     }
   }
-
 
   /**
    * Setup network tables.
    *
    * @param dataTable Data tables.
    */
-  public void setupNetworkTable(NetworkTable dataTable)
-  {
+  public void setupNetworkTable(NetworkTable dataTable) {
     setupNetworkTables(dataTable, null);
   }
 
@@ -170,20 +149,17 @@ public class BooleanTelemetry<F>
    * @param value Value to set.
    * @return True if value was able to be set.
    */
-  public boolean set(boolean value)
-  {
-    if (dataLogEntry.isPresent())
-    {dataLogEntry.get().append(value);}
-    if (subscriber.isPresent())
-    {
+  public boolean set(boolean value) {
+    if (dataLogEntry.isPresent()) {
+      dataLogEntry.get().append(value);
+    }
+    if (subscriber.isPresent()) {
       boolean tuningValue = subscriber.get().get(defaultValue);
-      if (tuningValue != value)
-      {
+      if (tuningValue != value) {
         return false;
       }
     }
-    if (publisher != null)
-    {
+    if (publisher != null) {
       publisher.accept(value);
     }
     return true;
@@ -196,12 +172,13 @@ public class BooleanTelemetry<F>
    *
    * @param value Value to force onto the tuning topic.
    */
-  public void forceSet(boolean value)
-  {
+  public void forceSet(boolean value) {
     cachedValue = value;
-    if (pubSub != null)
-    {pubSub.accept(value);} else if (publisher != null)
-    {publisher.accept(value);}
+    if (pubSub != null) {
+      pubSub.accept(value);
+    } else if (publisher != null) {
+      publisher.accept(value);
+    }
   }
 
   /**
@@ -209,10 +186,8 @@ public class BooleanTelemetry<F>
    *
    * @return Value.
    */
-  public boolean get()
-  {
-    if (subscriber.isPresent())
-    {
+  public boolean get() {
+    if (subscriber.isPresent()) {
       return subscriber.get().get(defaultValue);
     }
     throw new RuntimeException("Tuning table not configured for " + key + "!");
@@ -223,12 +198,9 @@ public class BooleanTelemetry<F>
    *
    * @return True if the value has changed.
    */
-  public boolean tunable()
-  {
-    if (subscriber.isPresent() && tunable && enabled)
-    {
-      if (subscriber.get().get(defaultValue) != cachedValue)
-      {
+  public boolean tunable() {
+    if (subscriber.isPresent() && tunable && enabled) {
+      if (subscriber.get().get(defaultValue) != cachedValue) {
         cachedValue = subscriber.get().get(defaultValue);
         return true;
       }
@@ -237,19 +209,13 @@ public class BooleanTelemetry<F>
     return false;
   }
 
-  /**
-   * Enable the telemetry.
-   */
-  public void enable()
-  {
+  /** Enable the telemetry. */
+  public void enable() {
     enabled = true;
   }
 
-  /**
-   * Disable the telemetry.
-   */
-  public void disable()
-  {
+  /** Disable the telemetry. */
+  public void disable() {
     enabled = false;
   }
 
@@ -258,8 +224,7 @@ public class BooleanTelemetry<F>
    *
    * @param state Enable or disable.
    */
-  public void display(boolean state)
-  {
+  public void display(boolean state) {
     enabled = state;
   }
 
@@ -268,8 +233,7 @@ public class BooleanTelemetry<F>
    *
    * @return field.
    */
-  public F getField()
-  {
+  public F getField() {
     return field;
   }
 
@@ -278,22 +242,20 @@ public class BooleanTelemetry<F>
    *
    * @param value Default value.
    */
-  public void setDefaultValue(boolean value)
-  {
+  public void setDefaultValue(boolean value) {
     defaultValue = value;
     cachedValue = value;
   }
 
-  /**
-   * Close the telemetry field.
-   */
-  public void close()
-  {
+  /** Close the telemetry field. */
+  public void close() {
     subscriber.ifPresent(PubSub::close);
-    if (pubSub != null)
-    {pubSub.close();}
-    if (publisher != null)
-    {publisher.close();}
+    if (pubSub != null) {
+      pubSub.close();
+    }
+    if (publisher != null) {
+      publisher.close();
+    }
     dataTable.ifPresent(table -> table.getEntry(key).unpublish());
     tuningTable.ifPresent(table -> table.getEntry(key).unpublish());
   }

@@ -21,31 +21,27 @@ import yams.telemetry.MechanismTelemetry;
 /**
  * Generic implementation of a mechanism with advanced telemetry.
  *
- * <p>
- * {@code SmartMechanism} is the abstract root of all YAMS mechanism implementations. It combines a
- * {@link yams.motorcontrollers.SmartMotorController} with integrated telemetry, simulation support,
- * and WPILib {@link edu.wpi.first.wpilibj2.command.Command} / {@link edu.wpi.first.wpilibj2.command.button.Trigger}
- * integration so that every concrete mechanism (Arm, Elevator, Flywheel, etc.) shares a consistent
- * API for control, feedback, and visualization.
- * </p>
+ * <p>{@code SmartMechanism} is the abstract root of all YAMS mechanism implementations. It combines
+ * a {@link yams.motorcontrollers.SmartMotorController} with integrated telemetry, simulation
+ * support, and WPILib {@link edu.wpi.first.wpilibj2.command.Command} / {@link edu.wpi.first.wpilibj2.command.button.Trigger} integration so that every concrete mechanism (Arm,
+ * Elevator, Flywheel, etc.) shares a consistent API for control, feedback, and visualization.
  *
  * <h2>Mechanism Lifecycle</h2>
+ *
  * <ol>
- *   <li>Configure a motor controller: {@link yams.motorcontrollers.SmartMotorControllerConfig}</li>
- *   <li>Instantiate the appropriate wrapper: {@link yams.motorcontrollers.local.SparkWrapper} (REV), {@link yams.motorcontrollers.remote.TalonFXWrapper} or {@link yams.motorcontrollers.remote.TalonFXSWrapper} (CTRE)</li>
- *   <li>Build a mechanism config (e.g., {@link yams.mechanisms.config.ArmConfig})</li>
- *   <li>Construct the concrete mechanism (e.g., {@link yams.mechanisms.positional.Arm})</li>
- *   <li>Schedule setpoint commands and bind triggers</li>
+ *   <li>Configure a motor controller: {@link yams.motorcontrollers.SmartMotorControllerConfig}
+ *   <li>Instantiate the appropriate wrapper: {@link yams.motorcontrollers.local.SparkWrapper}
+ * (REV), {@link yams.motorcontrollers.remote.TalonFXWrapper} or {@link yams.motorcontrollers.remote.TalonFXSWrapper} (CTRE)
+ *   <li>Build a mechanism config (e.g., {@link yams.mechanisms.config.ArmConfig})
+ *   <li>Construct the concrete mechanism (e.g., {@link yams.mechanisms.positional.Arm})
+ *   <li>Schedule setpoint commands and bind triggers
  * </ol>
  *
- * <p>
- * <b>Periodic calls required:</b> {@link #simIterate()}, {@link #updateTelemetry()}, and
- * {@link #visualizationUpdate()} must be called periodically — typically from
- * {@code robotPeriodic()} — so that simulation state, telemetry, and the {@link edu.wpi.first.wpilibj.smartdashboard.Mechanism2d}
- * visualization remain up to date.
- * </p>
+ * <p><b>Periodic calls required:</b> {@link #simIterate()}, {@link #updateTelemetry()}, and {@link #visualizationUpdate()} must be called periodically — typically from {@code robotPeriodic()} — so
+ * that simulation state, telemetry, and the {@link edu.wpi.first.wpilibj.smartdashboard.Mechanism2d} visualization remain up to date.
  *
  * <h2>Example</h2>
+ *
  * <pre>{@code
  * // 1. Motor config
  * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
@@ -64,23 +60,17 @@ import yams.telemetry.MechanismTelemetry;
  * arm.updateTelemetry();
  * }</pre>
  */
-public abstract class SmartMechanism
-{
-  /**
-   * Subsystem for the Mechanism.
-   */
-  protected Subsystem            m_subsystem;
-  /**
-   * Motor for the subsystem.
-   */
+public abstract class SmartMechanism {
+  /** Subsystem for the Mechanism. */
+  protected Subsystem m_subsystem;
+
+  /** Motor for the subsystem. */
   protected SmartMotorController m_smc;
-  /**
-   * Mechanism telemetry.
-   */
-  protected MechanismTelemetry   m_telemetry = new MechanismTelemetry();
-  /**
-   * Mechanism Window.
-   */
+
+  /** Mechanism telemetry. */
+  protected MechanismTelemetry m_telemetry = new MechanismTelemetry();
+
+  /** Mechanism Window. */
   protected Mechanism2d m_mechanismWindow;
 
   /**
@@ -89,11 +79,11 @@ public abstract class SmartMechanism
    * @param dutycycle [-1,1] to set.
    * @return {@link Command}
    */
-  public Command set(double dutycycle)
-  {
-    return Commands.startRun(m_smc::stopClosedLoopController, () -> m_smc.setDutyCycle(dutycycle), m_subsystem)
-                   .finallyDo(m_smc::startClosedLoopController)
-                   .withName(m_subsystem.getName() + " SetDutyCycle");
+  public Command set(double dutycycle) {
+    return Commands.startRun(
+            m_smc::stopClosedLoopController, () -> m_smc.setDutyCycle(dutycycle), m_subsystem)
+        .finallyDo(m_smc::startClosedLoopController)
+        .withName(m_subsystem.getName() + " SetDutyCycle");
   }
 
   /**
@@ -102,12 +92,11 @@ public abstract class SmartMechanism
    * @param dutycycle [-1,1] to set via an {@link Supplier}.
    * @return {@link Command}
    */
-  public Command set(Supplier<Double> dutycycle)
-  {
-    return Commands.startRun(m_smc::stopClosedLoopController,
-                             () -> m_smc.setDutyCycle(dutycycle.get()), m_subsystem)
-                   .finallyDo(m_smc::startClosedLoopController)
-                   .withName(m_subsystem.getName() + " SetDutyCycle Supplier");
+  public Command set(Supplier<Double> dutycycle) {
+    return Commands.startRun(
+            m_smc::stopClosedLoopController, () -> m_smc.setDutyCycle(dutycycle.get()), m_subsystem)
+        .finallyDo(m_smc::startClosedLoopController)
+        .withName(m_subsystem.getName() + " SetDutyCycle Supplier");
   }
 
   /**
@@ -116,25 +105,24 @@ public abstract class SmartMechanism
    * @param volts {@link Voltage} of the {@link SmartMotorController} to set.
    * @return {@link Command}
    */
-  public Command setVoltage(Voltage volts)
-  {
-    return Commands.startRun(m_smc::stopClosedLoopController, () -> m_smc.setVoltage(volts), m_subsystem)
-                   .finallyDo(m_smc::startClosedLoopController)
-                   .withName(m_subsystem.getName() + " SetVoltage");
+  public Command setVoltage(Voltage volts) {
+    return Commands.startRun(
+            m_smc::stopClosedLoopController, () -> m_smc.setVoltage(volts), m_subsystem)
+        .finallyDo(m_smc::startClosedLoopController)
+        .withName(m_subsystem.getName() + " SetVoltage");
   }
 
   /**
    * Set the voltage of the {@link SmartMotorController}.
    *
-   * @param volts {@link Voltage} of the {@link SmartMotorController} to set, via a
-   *              {@link Supplier}.
+   * @param volts {@link Voltage} of the {@link SmartMotorController} to set, via a {@link Supplier}.
    * @return {@link Command}
    */
-  public Command setVoltage(Supplier<Voltage> volts)
-  {
-    return Commands.startRun(m_smc::stopClosedLoopController, () -> m_smc.setVoltage(volts.get()), m_subsystem)
-                   .finallyDo(m_smc::startClosedLoopController)
-                   .withName(m_subsystem.getName() + " SetVoltage Supplier");
+  public Command setVoltage(Supplier<Voltage> volts) {
+    return Commands.startRun(
+            m_smc::stopClosedLoopController, () -> m_smc.setVoltage(volts.get()), m_subsystem)
+        .finallyDo(m_smc::startClosedLoopController)
+        .withName(m_subsystem.getName() + " SetVoltage Supplier");
   }
 
   /**
@@ -142,8 +130,7 @@ public abstract class SmartMechanism
    *
    * @param velocity {@link LinearVelocity} to go to.
    */
-  public void setMeasurementVelocitySetpoint(LinearVelocity velocity)
-  {
+  public void setMeasurementVelocitySetpoint(LinearVelocity velocity) {
     m_smc.startClosedLoopController();
     m_smc.setVelocity(velocity);
   }
@@ -153,8 +140,7 @@ public abstract class SmartMechanism
    *
    * @param velocity {@link AngularVelocity} to go to.
    */
-  public void setMechanismVelocitySetpoint(AngularVelocity velocity)
-  {
+  public void setMechanismVelocitySetpoint(AngularVelocity velocity) {
     m_smc.startClosedLoopController();
     m_smc.setVelocity(velocity);
   }
@@ -164,8 +150,7 @@ public abstract class SmartMechanism
    *
    * @param distance {@link Distance} to go to.
    */
-  public void setMeasurementPositionSetpoint(Distance distance)
-  {
+  public void setMeasurementPositionSetpoint(Distance distance) {
     m_smc.startClosedLoopController();
     m_smc.setPosition(distance);
   }
@@ -175,8 +160,7 @@ public abstract class SmartMechanism
    *
    * @param angle {@link Angle} to go to.
    */
-  public void setMechanismPositionSetpoint(Angle angle)
-  {
+  public void setMechanismPositionSetpoint(Angle angle) {
     m_smc.startClosedLoopController();
     m_smc.setPosition(angle);
   }
@@ -186,8 +170,7 @@ public abstract class SmartMechanism
    *
    * @param voltage {@link Voltage} to go to.
    */
-  public void setVoltageSetpoint(Voltage voltage)
-  {
+  public void setVoltageSetpoint(Voltage voltage) {
     m_smc.stopClosedLoopController();
     m_smc.setVoltage(voltage);
   }
@@ -197,8 +180,7 @@ public abstract class SmartMechanism
    *
    * @param dutycycle [-1,1] to set.
    */
-  public void setDutyCycleSetpoint(double dutycycle)
-  {
+  public void setDutyCycleSetpoint(double dutycycle) {
     m_smc.stopClosedLoopController();
     m_smc.setDutyCycle(dutycycle);
   }
@@ -208,8 +190,7 @@ public abstract class SmartMechanism
    *
    * @return {@link SmartMotorController} for the mechanism.
    */
-  public SmartMotorController getMotorController()
-  {
+  public SmartMotorController getMotorController() {
     return m_smc;
   }
 
@@ -218,19 +199,14 @@ public abstract class SmartMechanism
    *
    * @return {@link Optional} setpoint {@link Angle} of the mechanism..
    */
-  public Optional<Angle> getMechanismSetpoint()
-  {
+  public Optional<Angle> getMechanismSetpoint() {
     return m_smc.getMechanismPositionSetpoint();
   }
 
-  /**
-   * Iterate sim
-   */
+  /** Iterate sim */
   public abstract void simIterate();
 
-  /**
-   * Update the mechanism's telemetry.
-   */
+  /** Update the mechanism's telemetry. */
   public abstract void updateTelemetry();
 
   /**
@@ -238,14 +214,11 @@ public abstract class SmartMechanism
    *
    * @return {@link Mechanism2d} for the mechanism.
    */
-  public Mechanism2d getMechanismWindow()
-  {
+  public Mechanism2d getMechanismWindow() {
     return m_mechanismWindow;
   }
 
-  /**
-   * Update the mechanism's visualization state.
-   */
+  /** Update the mechanism's visualization state. */
   public abstract void visualizationUpdate();
 
   /**

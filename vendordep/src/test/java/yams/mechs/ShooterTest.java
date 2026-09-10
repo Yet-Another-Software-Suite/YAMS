@@ -36,6 +36,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
+import yams.helpers.DeviceCreator;
 import yams.helpers.MockHardwareExtension;
 import yams.helpers.SmartMotorControllerTestSubsystem;
 import yams.helpers.TestWithScheduler;
@@ -47,33 +48,29 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.helpers.DeviceCreator;
 import yams.motorcontrollers.local.SparkWrapper;
 import yams.motorcontrollers.remote.TalonFXSWrapper;
 import yams.motorcontrollers.remote.TalonFXWrapper;
 
-public class ShooterTest
-{
-  private static SmartMotorControllerConfig createSMCConfig()
-  {
+public class ShooterTest {
+  private static SmartMotorControllerConfig createSMCConfig() {
     return new SmartMotorControllerConfig()
         .withClosedLoopController(100, 0, 0)
-//        .withSoftLimits(Degrees.of(-100), Degrees.of(100))
+        //        .withSoftLimits(Degrees.of(-100), Degrees.of(100))
         .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
         .withIdleMode(MotorMode.COAST)
-//      .withSpecificTelemetry("ArmMotor", motorTelemetryConfig)
+        //      .withSpecificTelemetry("ArmMotor", motorTelemetryConfig)
         .withStatorCurrentLimit(Amps.of(40))
         .withMotorInverted(false)
         .withFeedforward(new SimpleMotorFeedforward(0, 1, 0))
         .withControlMode(ControlMode.CLOSED_LOOP);
   }
 
-  private static FlyWheel createShooter(SmartMotorController smc)
-  {
-    FlyWheelConfig cfg = new FlyWheelConfig()
-        .withDiameter(Inches.of(4));
-    FlyWheel                          shooter = new FlyWheel(cfg, smc);
-    SmartMotorControllerTestSubsystem subsys  = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
+  private static FlyWheel createShooter(SmartMotorController smc) {
+    FlyWheelConfig cfg = new FlyWheelConfig().withDiameter(Inches.of(4));
+    FlyWheel shooter = new FlyWheel(cfg, smc);
+    SmartMotorControllerTestSubsystem subsys =
+        (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.smc = smc;
     subsys.mechSimPeriodic = shooter::simIterate;
     subsys.mechUpdateTelemetry = shooter::updateTelemetry;
@@ -82,142 +79,155 @@ public class ShooterTest
 
   private static int offset = 0;
 
-  private static SmartMotorControllerConfig addExponentialProfile(SmartMotorControllerConfig cfg)
-  {
+  private static SmartMotorControllerConfig addExponentialProfile(SmartMotorControllerConfig cfg) {
     return cfg.withExponentialProfile(Volts.of(12), RPM.of(6000), RPM.per(Second).of(9000));
   }
 
-  private static SmartMotorControllerConfig addTrapezoidalProfile(SmartMotorControllerConfig cfg)
-  {
+  private static SmartMotorControllerConfig addTrapezoidalProfile(SmartMotorControllerConfig cfg) {
     return cfg.withTrapezoidalProfile(RPM.of(6000), RPM.per(Second).of(9000));
   }
 
-  private static Stream<Arguments> createConfigs()
-  {
+  private static Stream<Arguments> createConfigs() {
     ArrayList<Arguments> smcList = new ArrayList<>();
     offset += 1;
 
-    for (int i = 0; i < 4; i++)
-    {
+    for (int i = 0; i < 4; i++) {
       var smcConfig = createSMCConfig();
-      switch (i)
-      {
-        case 0: break;
-        case 1: smcConfig = addTrapezoidalProfile(smcConfig);
+      switch (i) {
+        case 0:
           break;
-        case 2: smcConfig = addExponentialProfile(smcConfig);
+        case 1:
+          smcConfig = addTrapezoidalProfile(smcConfig);
           break;
-        case 3: smcConfig.withClosedLoopController(0,0,0);
+        case 2:
+          smcConfig = addExponentialProfile(smcConfig);
+          break;
+        case 3:
+          smcConfig.withClosedLoopController(0, 0, 0);
       }
-      SparkMax  smax  = DeviceCreator.createSparkMax();
+      SparkMax smax = DeviceCreator.createSparkMax();
       SparkFlex sflex = DeviceCreator.createSparkFlex();
-//    ThriftyNova tnova = new ThriftyNova(30 + offset+i);
+      //    ThriftyNova tnova = new ThriftyNova(30 + offset+i);
       TalonFXS tfxs = DeviceCreator.createTalonFXS();
-      TalonFX  tfx  = DeviceCreator.createTalonFX();
-      smcList.add(Arguments.of(setupTestSubsystem(new SparkWrapper(smax,
-                                                                   DCMotor.getNEO(1),
-                                                                   smcConfig.clone()
-                                                                            .withSubsystem(new SmartMotorControllerTestSubsystem())
-                                                                            .withTelemetry(
-                                                                                "SparkMax(" + (10 + offset) + "[" + i +
-                                                                                "]) NEO",
-                                                                                TelemetryVerbosity.HIGH)))));
-      smcList.add(Arguments.of(setupTestSubsystem(new SparkWrapper(sflex,
-                                                                   DCMotor.getNeoVortex(1),
-                                                                   smcConfig.clone()
-                                                                            .withSubsystem(new SmartMotorControllerTestSubsystem())
-                                                                            .withTelemetry(
-                                                                                "SparkFlex(" + (20 + offset) + "[" + i +
-                                                                                "]) Vortex",
-                                                                                TelemetryVerbosity.HIGH)))));
-      smcList.add(Arguments.of(setupTestSubsystem(new TalonFXSWrapper(tfxs,
-                                                                      DCMotor.getNEO(2),
-                                                                      smcConfig.clone()
-                                                                               .withSubsystem(new SmartMotorControllerTestSubsystem())
-                                                                               .withTelemetry(
-                                                                                   "TalonFXS(" + (30 + offset) + "[" +
-                                                                                   i +
-                                                                                   "]) NEO",
-                                                                                   TelemetryVerbosity.HIGH)))));
-      smcList.add(Arguments.of(setupTestSubsystem(new TalonFXWrapper(tfx,
-                                                                     DCMotor.getKrakenX60(1),
-                                                                     smcConfig.clone()
-                                                                              .withSubsystem(new SmartMotorControllerTestSubsystem())
-                                                                              .withTelemetry(
-                                                                                  "TalonFX(" + (40 + offset) + "[" + i +
-                                                                                  "]) Kraken",
-                                                                                  TelemetryVerbosity.HIGH)))));
+      TalonFX tfx = DeviceCreator.createTalonFX();
+      smcList.add(
+          Arguments.of(
+              setupTestSubsystem(
+                  new SparkWrapper(
+                      smax,
+                      DCMotor.getNEO(1),
+                      smcConfig
+                          .clone()
+                          .withSubsystem(new SmartMotorControllerTestSubsystem())
+                          .withTelemetry(
+                              "SparkMax(" + (10 + offset) + "[" + i + "]) NEO",
+                              TelemetryVerbosity.HIGH)))));
+      smcList.add(
+          Arguments.of(
+              setupTestSubsystem(
+                  new SparkWrapper(
+                      sflex,
+                      DCMotor.getNeoVortex(1),
+                      smcConfig
+                          .clone()
+                          .withSubsystem(new SmartMotorControllerTestSubsystem())
+                          .withTelemetry(
+                              "SparkFlex(" + (20 + offset) + "[" + i + "]) Vortex",
+                              TelemetryVerbosity.HIGH)))));
+      smcList.add(
+          Arguments.of(
+              setupTestSubsystem(
+                  new TalonFXSWrapper(
+                      tfxs,
+                      DCMotor.getNEO(2),
+                      smcConfig
+                          .clone()
+                          .withSubsystem(new SmartMotorControllerTestSubsystem())
+                          .withTelemetry(
+                              "TalonFXS(" + (30 + offset) + "[" + i + "]) NEO",
+                              TelemetryVerbosity.HIGH)))));
+      smcList.add(
+          Arguments.of(
+              setupTestSubsystem(
+                  new TalonFXWrapper(
+                      tfx,
+                      DCMotor.getKrakenX60(1),
+                      smcConfig
+                          .clone()
+                          .withSubsystem(new SmartMotorControllerTestSubsystem())
+                          .withTelemetry(
+                              "TalonFX(" + (40 + offset) + "[" + i + "]) Kraken",
+                              TelemetryVerbosity.HIGH)))));
     }
 
     return smcList.stream();
   }
 
-
-  private static void closeSMC(SmartMotorController smc)
-  {
+  private static void closeSMC(SmartMotorController smc) {
     SmartMotorControllerCommandRegistry.removeCommands(smc.getConfig().getSubsystem());
-    CommandScheduler.getInstance().unregisterSubsystem((SmartMotorControllerTestSubsystem) smc.getConfig()
-                                                                                              .getSubsystem());
+    CommandScheduler.getInstance()
+        .unregisterSubsystem((SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem());
     ((SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem()).close();
 
-//    switch (smc.getMotorController())
-//    {
-//
-//    }
+    //    switch (smc.getMotorController())
+    //    {
+    //
+    //    }
     Object motorController = smc.getMotorController();
-    if (motorController instanceof SparkMax)
-    {
+    if (motorController instanceof SparkMax) {
       ((SparkMax) motorController).close();
-    } else if (motorController instanceof SparkFlex)
-    {
+    } else if (motorController instanceof SparkFlex) {
       ((SparkFlex) motorController).close();
-    } else if (motorController instanceof TalonFXS)
-    {
+    } else if (motorController instanceof TalonFXS) {
       ((TalonFXS) motorController).close();
-    } else if (motorController instanceof TalonFX)
-    {
+    } else if (motorController instanceof TalonFX) {
       ((TalonFX) motorController).close();
     }
   }
 
   private static void shooterVelocityPidTest(SmartMotorController smc, Command velocityUp)
-  throws InterruptedException
-  {
-    Angle           pre        = smc.getMechanismPosition();
-    AngularVelocity preVel     = smc.getMechanismVelocity();
-    Angle           post;
+      throws InterruptedException {
+    Angle pre = smc.getMechanismPosition();
+    AngularVelocity preVel = smc.getMechanismVelocity();
+    Angle post;
     AngularVelocity postVel;
-    AtomicBoolean   testPassed = new AtomicBoolean(false);
+    AtomicBoolean testPassed = new AtomicBoolean(false);
 
     TestWithScheduler.schedule(velocityUp);
-    if (smc instanceof TalonFXSWrapper || smc instanceof TalonFXWrapper)
-    {
-      TestWithScheduler.cycle(Seconds.of(1), () -> {
-        try
-        {
-          Thread.sleep((long) smc.getConfig().getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Millisecond));
-        } catch (Exception e) {}
-        if (smc.getDutyCycle() != 0)
-        {
-          testPassed.set(true);
-        }
-      });
+    if (smc instanceof TalonFXSWrapper || smc instanceof TalonFXWrapper) {
+      TestWithScheduler.cycle(
+          Seconds.of(1),
+          () -> {
+            try {
+              Thread.sleep(
+                  (long)
+                      smc.getConfig()
+                          .getClosedLoopControlPeriod()
+                          .orElse(Milliseconds.of(20))
+                          .in(Millisecond));
+            } catch (Exception e) {
+            }
+            if (smc.getDutyCycle() != 0) {
+              testPassed.set(true);
+            }
+          });
 
-    } else
-    {
-      TestWithScheduler.cycle(Seconds.of(2), () -> {
-//        try
-//        {
-//          Thread.sleep((long) smc.getConfig().getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Millisecond));
-//        } catch (InterruptedException e)
-//        {
-//          throw new RuntimeException(e);
-//        }
-        if (smc.getDutyCycle() != 0)
-        {
-          testPassed.set(true);
-        }
-      });
+    } else {
+      TestWithScheduler.cycle(
+          Seconds.of(2),
+          () -> {
+            //        try
+            //        {
+            //          Thread.sleep((long)
+            // smc.getConfig().getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Millisecond));
+            //        } catch (InterruptedException e)
+            //        {
+            //          throw new RuntimeException(e);
+            //        }
+            if (smc.getDutyCycle() != 0) {
+              testPassed.set(true);
+            }
+          });
     }
 
     post = smc.getMechanismPosition();
@@ -228,36 +238,35 @@ public class ShooterTest
     System.out.println("PID High PostTest Speed: " + postVel);
     assertTrue(!preVel.isNear(postVel, DegreesPerSecond.of(0.05)) || testPassed.get());
 
-//    pre = smc.getMechanismPosition();
-//    TestWithScheduler.schedule(lowPIDSetCommand);
-//    TestWithScheduler.cycle(Seconds.of(10));
-//
-//    post = smc.getMechanismPosition();
-//    System.out.println("PID Low PreTest Angle: " + pre);
-//    System.out.println("PID Low PostTest Angle: " + post);
-//    assertFalse(pre.isNear(post, Degrees.of(0.05)));
+    //    pre = smc.getMechanismPosition();
+    //    TestWithScheduler.schedule(lowPIDSetCommand);
+    //    TestWithScheduler.cycle(Seconds.of(10));
+    //
+    //    post = smc.getMechanismPosition();
+    //    System.out.println("PID Low PreTest Angle: " + pre);
+    //    System.out.println("PID Low PostTest Angle: " + post);
+    //    assertFalse(pre.isNear(post, Degrees.of(0.05)));
   }
 
-
-  private static void dutyCycleTest(SmartMotorController smc, Command dutycycleUp, Command dutyCycleDown)
-  throws InterruptedException
-  {
-    AngularVelocity pre        = smc.getMechanismVelocity();
-    Angle           preAngle   = smc.getMechanismPosition();
+  private static void dutyCycleTest(
+      SmartMotorController smc, Command dutycycleUp, Command dutyCycleDown)
+      throws InterruptedException {
+    AngularVelocity pre = smc.getMechanismVelocity();
+    Angle preAngle = smc.getMechanismPosition();
     AngularVelocity post;
-    Angle           postAngle;
-    AtomicBoolean   testPassed = new AtomicBoolean(false);
+    Angle postAngle;
+    AtomicBoolean testPassed = new AtomicBoolean(false);
 
     TestWithScheduler.schedule(dutycycleUp);
     TestWithScheduler.schedule(dutycycleUp);
-    TestWithScheduler.cycle(Seconds.of(1), () -> {
-      if (smc.getDutyCycle() != 0)
-      {
-        testPassed.set(true);
-      }
-    });
-    if (smc instanceof TalonFXSWrapper || smc instanceof TalonFXWrapper)
-    {
+    TestWithScheduler.cycle(
+        Seconds.of(1),
+        () -> {
+          if (smc.getDutyCycle() != 0) {
+            testPassed.set(true);
+          }
+        });
+    if (smc instanceof TalonFXSWrapper || smc instanceof TalonFXWrapper) {
       Thread.sleep(200);
       TestWithScheduler.cycle(Seconds.of(1));
     }
@@ -271,121 +280,106 @@ public class ShooterTest
     System.out.println("DutyCycleUp PostTest Angle: " + postAngle);
 
     boolean pass = pre.lt(post) || preAngle.lt(postAngle) || testPassed.get();
-    if ((smc instanceof TalonFXSWrapper || smc instanceof TalonFXWrapper) && !pass)
-    {
-      System.out.println("[WARNING] TalonFXS or TalonFX did not pass test, current attributing this to OS differences.");
-    } else
-    {
+    if ((smc instanceof TalonFXSWrapper || smc instanceof TalonFXWrapper) && !pass) {
+      System.out.println(
+          "[WARNING] TalonFXS or TalonFX did not pass test, current attributing this to OS differences.");
+    } else {
       assertTrue(pass);
     }
   }
 
-
-  private static SmartMotorController setupTestSubsystem(SmartMotorController smc)
-  {
-    SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
+  private static SmartMotorController setupTestSubsystem(SmartMotorController smc) {
+    SmartMotorControllerTestSubsystem subsys =
+        (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.setSMC(smc);
     return smc;
   }
 
-  private static void startTest(SmartMotorController smc)
-  {
-    SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
+  private static void startTest(SmartMotorController smc) {
+    SmartMotorControllerTestSubsystem subsys =
+        (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.testRunning = true;
   }
 
   @ParameterizedTest
   @MethodSource("createConfigs")
-  void testSMCDutyCycle(SmartMotorController smc) throws InterruptedException
-  {
-    try
-    {
+  void testSMCDutyCycle(SmartMotorController smc) throws InterruptedException {
+    try {
       startTest(smc);
       smc.setupSimulation();
-      SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
+      SmartMotorControllerTestSubsystem subsys =
+          (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
 
-      Command dutyCycleUp   = subsys.setDutyCycle(0.5);
+      Command dutyCycleUp = subsys.setDutyCycle(0.5);
       Command dutyCycleDown = subsys.setDutyCycle(-0.5);
 
       dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
-    } finally
-    {
+    } finally {
       closeSMC(smc);
     }
   }
 
-
   @ParameterizedTest
   @MethodSource("createConfigs")
-  void testSMCVelocityPID(SmartMotorController smc) throws InterruptedException
-  {
-    try
-    {
+  void testSMCVelocityPID(SmartMotorController smc) throws InterruptedException {
+    try {
       startTest(smc);
       smc.setupSimulation();
       Command highPid = Commands.run(() -> smc.setVelocity(RPM.of(2000)));
-//    Command lowPid  = Commands.run(() -> smc.setPosition(Degrees.of(-80)));
+      //    Command lowPid  = Commands.run(() -> smc.setPosition(Degrees.of(-80)));
 
       shooterVelocityPidTest(smc, highPid);
-    } finally
-    {
+    } finally {
       closeSMC(smc);
     }
   }
 
   @ParameterizedTest
   @MethodSource("createConfigs")
-  void testShooterDutyCycle(SmartMotorController smc) throws InterruptedException
-  {
-    try
-    {
-      startTest(smc);
-      FlyWheel shooter       = createShooter(smc);
-      Command  dutyCycleUp   = shooter.set(0.5);
-      Command  dutyCycleDown = shooter.set(-0.5);
-
-//    if (smc instanceof TalonFXWrapper || smc instanceof TalonFXSWrapper)
-//    {
-//      System.out.println("[WARNING] TalonFX and TalonFXS Does not work with CI on linux, skipping for now.");
-//    } else
-//    {
-      dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
-//    }
-    } finally
-    {
-      closeSMC(smc);
-    }
-  }
-
-  @ParameterizedTest
-  @MethodSource("createConfigs")
-  void testShooterVelocityPID(SmartMotorController smc) throws InterruptedException
-  {
-    try
-    {
+  void testShooterDutyCycle(SmartMotorController smc) throws InterruptedException {
+    try {
       startTest(smc);
       FlyWheel shooter = createShooter(smc);
-      Command  highPid = shooter.run(RPM.of(80));
-      Command  lowPid  = shooter.run(RPM.of(-80));
+      Command dutyCycleUp = shooter.set(0.5);
+      Command dutyCycleDown = shooter.set(-0.5);
+
+      //    if (smc instanceof TalonFXWrapper || smc instanceof TalonFXSWrapper)
+      //    {
+      //      System.out.println("[WARNING] TalonFX and TalonFXS Does not work with CI on linux,
+      // skipping for now.");
+      //    } else
+      //    {
+      dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
+      //    }
+    } finally {
+      closeSMC(smc);
+    }
+  }
+
+  @ParameterizedTest
+  @MethodSource("createConfigs")
+  void testShooterVelocityPID(SmartMotorController smc) throws InterruptedException {
+    try {
+      startTest(smc);
+      FlyWheel shooter = createShooter(smc);
+      Command highPid = shooter.run(RPM.of(80));
+      Command lowPid = shooter.run(RPM.of(-80));
 
       shooterVelocityPidTest(smc, highPid);
-    } finally
-    {
+    } finally {
       closeSMC(smc);
     }
   }
 
   @BeforeEach
-  void startTest()
-  {
+  void startTest() {
     MockHardwareExtension.beforeAll();
     TestWithScheduler.schedulerStart();
     TestWithScheduler.schedulerClear();
   }
 
   @AfterEach
-  void endTest()
-  {
+  void endTest() {
     MockHardwareExtension.afterAll();
     Preferences.removeAll();
     TestWithScheduler.schedulerClear();

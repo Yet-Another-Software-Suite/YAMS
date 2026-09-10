@@ -40,16 +40,18 @@ import yams.gearing.MechanismGearing;
  * LQR Configuration for {@link LQRController}
  *
  * <p>The LQR cost matrices determine how the regulator balances state error against control effort:
+ *
  * <ul>
  *   <li><b>Q (state cost, via qelms)</b> — penalizes deviation from the desired state (position,
  *       velocity). Smaller values tolerate larger state errors; larger values drive the controller
- *       to correct errors more aggressively.</li>
+ *       to correct errors more aggressively.
  *   <li><b>R (control effort cost, via relms)</b> — penalizes the voltage applied to the motor.
  *       Smaller values allow higher voltages (more aggressive); larger values keep the output
- *       gentler. The default of 12 V matches the approximate maximum battery voltage.</li>
+ *       gentler. The default of 12 V matches the approximate maximum battery voltage.
  * </ul>
  *
  * <h2>Example — Arm LQR configuration</h2>
+ *
  * <pre>{@code
  * import static edu.wpi.first.units.Units.*;
  *
@@ -70,15 +72,13 @@ import yams.gearing.MechanismGearing;
  * LQRController armController = new LQRController(config);
  * }</pre>
  */
-public class LQRConfig
-{
+public class LQRConfig {
   /**
    * Get the {@link LQRType} of the LQR.
    *
    * @return {@link LQRType} of the LQR.
    */
-  public LQRType getType()
-  {
+  public LQRType getType() {
     return m_type.orElseThrow();
   }
 
@@ -87,99 +87,88 @@ public class LQRConfig
    *
    * @return {@link Time} for the loop time.
    */
-  public Time getPeriod()
-  {
+  public Time getPeriod() {
     return m_period;
   }
 
-  /**
-   * LQR Type
-   */
-  public enum LQRType
-  {
-    /**
-     * Flywheel LQR
-     */
+  /** LQR Type */
+  public enum LQRType {
+    /** Flywheel LQR */
     FLYWHEEL,
-    /**
-     * Arm LQR
-     */
+    /** Arm LQR */
     ARM,
-    /**
-     * Elevator LQR
-     */
+    /** Elevator LQR */
     ELEVATOR
   }
 
-  /**
-   * LQR Type
-   */
-  private       Optional<LQRType>            m_type               = Optional.empty();
-  /**
-   * {@link DCMotor} for the {@link edu.wpi.first.math.controller.LinearQuadraticRegulator}.
-   */
-  private final DCMotor                      m_motor;
+  /** LQR Type */
+  private Optional<LQRType> m_type = Optional.empty();
+
+  /** {@link DCMotor} for the {@link edu.wpi.first.math.controller.LinearQuadraticRegulator}. */
+  private final DCMotor m_motor;
+
   /**
    * {@link MechanismGearing} for the {@link edu.wpi.first.math.controller.LinearQuadraticRegulator}.
    */
-  private final MechanismGearing             m_gearing;
+  private final MechanismGearing m_gearing;
+
   /**
    * {@link MomentOfInertia} for the {@link edu.wpi.first.math.controller.LinearQuadraticRegulator}.
    */
-  private final MomentOfInertia              m_moi;
+  private final MomentOfInertia m_moi;
+
   /**
-   * Loop time for the {@link edu.wpi.first.math.controller.LinearQuadraticRegulator}. Could be faster if using
-   * {@link edu.wpi.first.wpilibj.Notifier}s.
+   * Loop time for the {@link edu.wpi.first.math.controller.LinearQuadraticRegulator}. Could be
+   * faster if using {@link edu.wpi.first.wpilibj.Notifier}s.
    */
-  private       Time                         m_period             = Milliseconds.of(20);
+  private Time m_period = Milliseconds.of(20);
+
+  /** Maximum voltage for the {@link edu.wpi.first.math.system.LinearSystemLoop}. Default is 12v. */
+  private Voltage m_maxVoltage = Volts.of(12);
+
   /**
-   * Maximum voltage for the {@link edu.wpi.first.math.system.LinearSystemLoop}. Default is 12v.
+   * Control effort (voltage) tolerance. Decrease this to more heavily penalize control effort, or
+   * make the controller less aggressive. 12 is a good starting point because that is the
+   * (approximate) maximum voltage of a battery.
    */
-  private       Voltage                      m_maxVoltage         = Volts.of(12);
+  private Voltage m_relms = Volts.of(12);
+
   /**
-   * Control effort (voltage) tolerance. Decrease this to more heavily penalize control effort, or make the controller
-   * less aggressive. 12 is a good starting point because that is the (approximate) maximum voltage of a battery.
+   * Tolerance. Decrease this to more heavily penalize state excursion, or make the controller
+   * behave more aggressively.
    */
-  private       Voltage                      m_relms              = Volts.of(12);
-  /**
-   * Tolerance. Decrease this to more heavily penalize state excursion, or make the controller behave more
-   * aggressively.
-   */
-  private       Optional<Vector<?>>          m_qelms              = Optional.empty();
-  /**
-   * Standard deviation of the model, size of the vector depends on the model type.
-   */
-  private       Optional<Vector<?>>          m_modelStdDevs       = Optional.empty();
-  /**
-   * Standard deviation of the encoder, size of the vector depends on the model type.
-   */
-  private       Optional<Vector<?>>          m_encoderStdDevs     = Optional.empty();
+  private Optional<Vector<?>> m_qelms = Optional.empty();
+
+  /** Standard deviation of the model, size of the vector depends on the model type. */
+  private Optional<Vector<?>> m_modelStdDevs = Optional.empty();
+
+  /** Standard deviation of the encoder, size of the vector depends on the model type. */
+  private Optional<Vector<?>> m_encoderStdDevs = Optional.empty();
+
   /**
    * Elevator mass for {@link LinearSystemId#createElevatorSystem(DCMotor, double, double, double)}
    */
-  private       Optional<Mass>               m_elevatorMass       = Optional.empty();
+  private Optional<Mass> m_elevatorMass = Optional.empty();
+
   /**
    * Elevator radius for {@link LinearSystemId#createElevatorSystem(DCMotor, double, double, double)}
    */
-  private       Optional<Distance>           m_elevatorDrumRadius = Optional.empty();
-  /**
-   * Measurement delay.
-   */
-  private       Optional<Time>               m_measurementDelay   = Optional.empty();
-  /**
-   * Aggressiveness.
-   */
-  private       OptionalDouble               m_aggressiveness     = OptionalDouble.empty();
+  private Optional<Distance> m_elevatorDrumRadius = Optional.empty();
+
+  /** Measurement delay. */
+  private Optional<Time> m_measurementDelay = Optional.empty();
+
+  /** Aggressiveness. */
+  private OptionalDouble m_aggressiveness = OptionalDouble.empty();
 
   /**
    * Create a new LQR Configuration.
    *
-   * @param motor   {@link DCMotor} for the {@link edu.wpi.first.math.controller.LinearQuadraticRegulator}.
+   * @param motor {@link DCMotor} for the {@link edu.wpi.first.math.controller.LinearQuadraticRegulator}.
    * @param gearing {@link MechanismGearing} for the {@link edu.wpi.first.math.controller.LinearQuadraticRegulator}.
-   * @param moi     {@link MomentOfInertia} for the {@link edu.wpi.first.math.controller.LinearQuadraticRegulator}.
+   * @param moi {@link MomentOfInertia} for the {@link edu.wpi.first.math.controller.LinearQuadraticRegulator}.
    */
-  public LQRConfig(DCMotor motor, MechanismGearing gearing, MomentOfInertia moi)
-  {
+  public LQRConfig(DCMotor motor, MechanismGearing gearing, MomentOfInertia moi) {
     m_motor = motor;
     m_gearing = gearing;
     m_moi = moi;
@@ -188,28 +177,25 @@ public class LQRConfig
   /**
    * Set the control effort for the LQR.
    *
-   * @param relms Control effort (voltage) tolerance. Decrease this to more heavily penalize control effort, or make the
-   *              controller less aggressive. 12 is a good starting point because that is the (approximate) maximum
-   *              voltage of a battery.
+   * @param relms Control effort (voltage) tolerance. Decrease this to more heavily penalize control
+   *     effort, or make the controller less aggressive. 12 is a good starting point because that is
+   *     the (approximate) maximum voltage of a battery.
    * @return {@link LQRConfig} for chaining.
    */
-  public LQRConfig withRelms(Voltage relms)
-  {
+  public LQRConfig withRelms(Voltage relms) {
     m_relms = relms;
     return this;
   }
 
-
   /**
    * Set the control effort for the LQR.
    *
-   * @param effort Control effort (voltage) tolerance. Decrease this to more heavily penalize control effort, or make
-   *               the controller less aggressive. 12 is a good starting point because that is the (approximate) maximum
-   *               voltage of a battery.
+   * @param effort Control effort (voltage) tolerance. Decrease this to more heavily penalize
+   *     control effort, or make the controller less aggressive. 12 is a good starting point because
+   *     that is the (approximate) maximum voltage of a battery.
    * @return {@link LQRConfig} for chaining.
    */
-  public LQRConfig withControlEffort(Voltage effort)
-  {
+  public LQRConfig withControlEffort(Voltage effort) {
     return withRelms(effort);
   }
 
@@ -219,8 +205,7 @@ public class LQRConfig
    * @param voltage Maximum voltage output.
    * @return {@link LQRConfig} for chaining.
    */
-  public LQRConfig withMaxVoltage(Voltage voltage)
-  {
+  public LQRConfig withMaxVoltage(Voltage voltage) {
     m_maxVoltage = voltage;
     return this;
   }
@@ -231,8 +216,7 @@ public class LQRConfig
    * @param delay Measurement delay.
    * @return {@link LQRConfig} for chaining.
    */
-  public LQRConfig withMeasurementDelay(Time delay)
-  {
+  public LQRConfig withMeasurementDelay(Time delay) {
     m_measurementDelay = Optional.of(delay);
     return this;
   }
@@ -243,25 +227,23 @@ public class LQRConfig
    * @param aggressiveness Usually 10, arbitrary scale.
    * @return {@link LQRConfig} for chaining.
    */
-  public LQRConfig withAggressiveness(double aggressiveness)
-  {
+  public LQRConfig withAggressiveness(double aggressiveness) {
     m_aggressiveness = OptionalDouble.of(aggressiveness);
     return this;
   }
 
-
   /**
    * Construct a Flywheel LQR Configuration.
    *
-   * @param qelms        Velocity error tolerance. Decrease this to more heavily penalize state excursion, or make the
-   *                     controller behave more starting point because that is the (approximate) maximum voltage of a
-   *                     battery.
-   * @param modelTrust   Standard deviation of the model, represented in {@link AngularVelocity}.
+   * @param qelms Velocity error tolerance. Decrease this to more heavily penalize state excursion,
+   *     or make the controller behave more starting point because that is the (approximate) maximum
+   *     voltage of a battery.
+   * @param modelTrust Standard deviation of the model, represented in {@link AngularVelocity}.
    * @param encoderTrust Standard deviation of the encoder, represented in {@link AngularVelocity}.
    * @return {@link LQRConfig} for chaining.
    */
-  public LQRConfig withFlyWheel(AngularVelocity qelms, AngularVelocity modelTrust, AngularVelocity encoderTrust)
-  {
+  public LQRConfig withFlyWheel(
+      AngularVelocity qelms, AngularVelocity modelTrust, AngularVelocity encoderTrust) {
     m_type = Optional.of(LQRType.FLYWHEEL);
     m_qelms = Optional.of(VecBuilder.fill(qelms.in(RadiansPerSecond)));
     m_modelStdDevs = Optional.of(VecBuilder.fill(modelTrust.in(RadiansPerSecond)));
@@ -272,27 +254,33 @@ public class LQRConfig
   /**
    * Construct an Elevator LQR Configuration.
    *
-   * @param qelmsPosition        Position error tolerance, in meters. Decrease this to more heavily penalize state
-   *                             excursion, or make the controller behave more aggressively. This can be tuned to
-   *                             balance the position and velocity errors.
-   * @param qelmsVelocity        Velocity error tolerance, in meters per second. Decrease this to more heavily penalize
-   *                             state excursion, or make the controller behave more aggressively. This can be tuned to
-   *                             balance the position and velocity errors.
-   * @param modelPositionTrust   Standard deviation of the model position, represented in {@link Distance}.
-   * @param modelVelocityTrust   Standard deviation of the model velocity, represented in {@link LinearVelocity}.
+   * @param qelmsPosition Position error tolerance, in meters. Decrease this to more heavily
+   *     penalize state excursion, or make the controller behave more aggressively. This can be
+   *     tuned to balance the position and velocity errors.
+   * @param qelmsVelocity Velocity error tolerance, in meters per second. Decrease this to more
+   *     heavily penalize state excursion, or make the controller behave more aggressively. This can
+   *     be tuned to balance the position and velocity errors.
+   * @param modelPositionTrust Standard deviation of the model position, represented in {@link Distance}.
+   * @param modelVelocityTrust Standard deviation of the model velocity, represented in {@link LinearVelocity}.
    * @param encoderPositionTrust Standard deviation of the encoder position, represented in {@link Distance}.
-   * @param mass                 Mass of the elevator, represented in {@link Mass}.
-   * @param drumRadius           Radius of the elevator drum, represented in {@link Distance}.
+   * @param mass Mass of the elevator, represented in {@link Mass}.
+   * @param drumRadius Radius of the elevator drum, represented in {@link Distance}.
    * @return {@link LQRConfig} for chaining.
    */
-  public LQRConfig withElevator(Distance qelmsPosition, LinearVelocity qelmsVelocity, Distance modelPositionTrust,
-                                LinearVelocity modelVelocityTrust, Distance encoderPositionTrust, Mass mass,
-                                Distance drumRadius)
-  {
+  public LQRConfig withElevator(
+      Distance qelmsPosition,
+      LinearVelocity qelmsVelocity,
+      Distance modelPositionTrust,
+      LinearVelocity modelVelocityTrust,
+      Distance encoderPositionTrust,
+      Mass mass,
+      Distance drumRadius) {
     m_type = Optional.of(LQRType.ELEVATOR);
-    m_qelms = Optional.of(VecBuilder.fill(qelmsPosition.in(Meters), qelmsVelocity.in(MetersPerSecond)));
-    m_modelStdDevs = Optional.of(VecBuilder.fill(modelPositionTrust.in(Meters),
-                                                 modelVelocityTrust.in(MetersPerSecond)));
+    m_qelms =
+        Optional.of(VecBuilder.fill(qelmsPosition.in(Meters), qelmsVelocity.in(MetersPerSecond)));
+    m_modelStdDevs =
+        Optional.of(
+            VecBuilder.fill(modelPositionTrust.in(Meters), modelVelocityTrust.in(MetersPerSecond)));
     m_encoderStdDevs = Optional.of(VecBuilder.fill(encoderPositionTrust.in(Meters)));
     m_elevatorMass = Optional.of(mass);
     m_elevatorDrumRadius = Optional.of(drumRadius);
@@ -302,24 +290,30 @@ public class LQRConfig
   /**
    * Construct an Arm LQR Configuration.
    *
-   * @param qelmsPosition        Position error tolerance, in rotations. Decrease this to more heavily penalize state
-   *                             excursion, or make the controller behave more aggressively. This can be tuned to
-   *                             balance the position and velocity errors.
-   * @param qelmsVelocity        Velocity error tolerance, in rotations per second. Decrease this to more heavily
-   *                             penalize state excursion, or make the controller behave more aggressively. This can be
-   *                             tuned to balance the position and velocity errors.
-   * @param modelPositionTrust   Standard deviation of the model position, represented in {@link Angle}.
-   * @param modelVelocityTrust   Standard deviation of the model velocity, represented in {@link AngularVelocity}.
+   * @param qelmsPosition Position error tolerance, in rotations. Decrease this to more heavily
+   *     penalize state excursion, or make the controller behave more aggressively. This can be
+   *     tuned to balance the position and velocity errors.
+   * @param qelmsVelocity Velocity error tolerance, in rotations per second. Decrease this to more
+   *     heavily penalize state excursion, or make the controller behave more aggressively. This can
+   *     be tuned to balance the position and velocity errors.
+   * @param modelPositionTrust Standard deviation of the model position, represented in {@link Angle}.
+   * @param modelVelocityTrust Standard deviation of the model velocity, represented in {@link AngularVelocity}.
    * @param encoderPositionTrust Standard deviation of the encoder position, represented in {@link Angle}.
    * @return {@link LQRConfig} for chaining.
    */
-  public LQRConfig withArm(Angle qelmsPosition, AngularVelocity qelmsVelocity, Angle modelPositionTrust,
-                           AngularVelocity modelVelocityTrust, Angle encoderPositionTrust)
-  {
+  public LQRConfig withArm(
+      Angle qelmsPosition,
+      AngularVelocity qelmsVelocity,
+      Angle modelPositionTrust,
+      AngularVelocity modelVelocityTrust,
+      Angle encoderPositionTrust) {
     m_type = Optional.of(LQRType.ARM);
-    m_qelms = Optional.of(VecBuilder.fill(qelmsPosition.in(Radians), qelmsVelocity.in(RadiansPerSecond)));
-    m_modelStdDevs = Optional.of(VecBuilder.fill(modelPositionTrust.in(Radians),
-                                                 modelVelocityTrust.in(RadiansPerSecond)));
+    m_qelms =
+        Optional.of(VecBuilder.fill(qelmsPosition.in(Radians), qelmsVelocity.in(RadiansPerSecond)));
+    m_modelStdDevs =
+        Optional.of(
+            VecBuilder.fill(
+                modelPositionTrust.in(Radians), modelVelocityTrust.in(RadiansPerSecond)));
     m_encoderStdDevs = Optional.of(VecBuilder.fill(encoderPositionTrust.in(Radians)));
     return this;
   }
@@ -329,28 +323,22 @@ public class LQRConfig
    *
    * @return {@link LinearSystem} for the LQR.
    */
-  public LinearSystem<?, ?, ?> getSystem()
-  {
-    switch (m_type.orElseThrow())
-    {
-      case FLYWHEEL ->
-      {
-        return LinearSystemId.createFlywheelSystem(m_motor,
-                                                   m_moi.in(KilogramSquareMeters),
-                                                   m_gearing.getMechanismToRotorRatio());
+  public LinearSystem<?, ?, ?> getSystem() {
+    switch (m_type.orElseThrow()) {
+      case FLYWHEEL -> {
+        return LinearSystemId.createFlywheelSystem(
+            m_motor, m_moi.in(KilogramSquareMeters), m_gearing.getMechanismToRotorRatio());
       }
-      case ARM ->
-      {
-        return LinearSystemId.createSingleJointedArmSystem(m_motor,
-                                                           m_moi.in(KilogramSquareMeters),
-                                                           m_gearing.getMechanismToRotorRatio());
+      case ARM -> {
+        return LinearSystemId.createSingleJointedArmSystem(
+            m_motor, m_moi.in(KilogramSquareMeters), m_gearing.getMechanismToRotorRatio());
       }
-      case ELEVATOR ->
-      {
-        return LinearSystemId.createElevatorSystem(m_motor,
-                                                   m_elevatorMass.orElseThrow().in(Kilograms),
-                                                   m_elevatorDrumRadius.orElseThrow().in(Meters),
-                                                   m_gearing.getMechanismToRotorRatio());
+      case ELEVATOR -> {
+        return LinearSystemId.createElevatorSystem(
+            m_motor,
+            m_elevatorMass.orElseThrow().in(Kilograms),
+            m_elevatorDrumRadius.orElseThrow().in(Meters),
+            m_gearing.getMechanismToRotorRatio());
       }
     }
     throw new IllegalStateException("Invalid LQR Type");
@@ -363,27 +351,29 @@ public class LQRConfig
    * @return {@link KalmanFilter} for the LQR.
    */
   @SuppressWarnings("unchecked")
-  public KalmanFilter<?, ?, ?> getKalmanFilter(LinearSystem<?, ?, ?> plant)
-  {
-    switch (m_type.orElseThrow())
-    {
+  public KalmanFilter<?, ?, ?> getKalmanFilter(LinearSystem<?, ?, ?> plant) {
+    switch (m_type.orElseThrow()) {
       case FLYWHEEL -> /// 1 modeled state, velocity. Inputs are volts. Outputs are velocity.
       {
-        return new KalmanFilter<N1, N1, N1>(Nat.N1(),
-                                            Nat.N1(),
-                                            (LinearSystem<N1, N1, N1>) plant,
-                                            (Vector<N1>) m_modelStdDevs.orElseThrow(),
-                                            (Vector<N1>) m_encoderStdDevs.orElseThrow(),
-                                            m_period.in(Seconds));
+        return new KalmanFilter<N1, N1, N1>(
+            Nat.N1(),
+            Nat.N1(),
+            (LinearSystem<N1, N1, N1>) plant,
+            (Vector<N1>) m_modelStdDevs.orElseThrow(),
+            (Vector<N1>) m_encoderStdDevs.orElseThrow(),
+            m_period.in(Seconds));
       }
-      case ARM, ELEVATOR -> /// 2 modeled states, position and velocity. Inputs are volts. Outputs are position.
+      case ARM,
+          ELEVATOR -> /// 2 modeled states, position and velocity. Inputs are volts. Outputs are
+      // position.
       {
-        return new KalmanFilter<N2, N1, N1>(Nat.N2(),
-                                            Nat.N1(),
-                                            (LinearSystem<N2, N1, N1>) (plant.slice(0)),
-                                            (Vector<N2>) m_modelStdDevs.orElseThrow(),
-                                            (Vector<N1>) m_encoderStdDevs.orElseThrow(),
-                                            m_period.in(Seconds));
+        return new KalmanFilter<N2, N1, N1>(
+            Nat.N2(),
+            Nat.N1(),
+            (LinearSystem<N2, N1, N1>) (plant.slice(0)),
+            (Vector<N2>) m_modelStdDevs.orElseThrow(),
+            (Vector<N1>) m_encoderStdDevs.orElseThrow(),
+            m_period.in(Seconds));
       }
     }
     throw new IllegalStateException("Invalid LQR Type");
@@ -396,23 +386,25 @@ public class LQRConfig
    * @return {@link LinearQuadraticRegulator} for the LQR.
    */
   @SuppressWarnings("unchecked")
-  public LinearQuadraticRegulator<?, ?, ?> getRegulator(LinearSystem<?, ?, ?> plant)
-  {
-    switch (m_type.orElseThrow())
-    {
+  public LinearQuadraticRegulator<?, ?, ?> getRegulator(LinearSystem<?, ?, ?> plant) {
+    switch (m_type.orElseThrow()) {
       case FLYWHEEL -> /// 1 modeled state, velocity. Inputs are volts. Outputs are velocity.
       {
-        return new LinearQuadraticRegulator<N1, N1, N1>((LinearSystem<N1, N1, N1>) plant,
-                                                        (Vector<N1>) m_qelms.orElseThrow(),
-                                                        VecBuilder.fill(m_relms.in(Volts)),
-                                                        m_period.in(Seconds));
+        return new LinearQuadraticRegulator<N1, N1, N1>(
+            (LinearSystem<N1, N1, N1>) plant,
+            (Vector<N1>) m_qelms.orElseThrow(),
+            VecBuilder.fill(m_relms.in(Volts)),
+            m_period.in(Seconds));
       }
-      case ARM, ELEVATOR -> /// 2 modeled states, position and velocity. Inputs are volts. Outputs are position.
+      case ARM,
+          ELEVATOR -> /// 2 modeled states, position and velocity. Inputs are volts. Outputs are
+      // position.
       {
-        return new LinearQuadraticRegulator<N2, N1, N1>((LinearSystem<N2, N1, N1>) plant,
-                                                        (Vector<N2>) m_qelms.orElseThrow(),
-                                                        VecBuilder.fill(m_relms.in(Volts)),
-                                                        m_period.in(Seconds));
+        return new LinearQuadraticRegulator<N2, N1, N1>(
+            (LinearSystem<N2, N1, N1>) plant,
+            (Vector<N2>) m_qelms.orElseThrow(),
+            VecBuilder.fill(m_relms.in(Volts)),
+            m_period.in(Seconds));
       }
     }
     throw new IllegalStateException("Invalid LQR Type");
@@ -421,32 +413,36 @@ public class LQRConfig
   /**
    * Get the {@link LinearSystemLoop}.
    *
-   * @param plant      {@link LinearSystem} for the LQR, fetched from {@link #getSystem()}
+   * @param plant {@link LinearSystem} for the LQR, fetched from {@link #getSystem()}
    * @param controller {@link LinearQuadraticRegulator} for the LQR, fetched from {@link #getRegulator(LinearSystem)}
-   * @param observer   {@link KalmanFilter} for the LQR, fetched from {@link #getKalmanFilter(LinearSystem)}
+   * @param observer {@link KalmanFilter} for the LQR, fetched from {@link #getKalmanFilter(LinearSystem)}
    * @return {@link LinearSystemLoop} for the LQR.
    */
   @SuppressWarnings("unchecked")
-  public LinearSystemLoop<?, ?, ?> getLoop(LinearSystem<?, ?, ?> plant, LinearQuadraticRegulator<?, ?, ?> controller,
-                                           KalmanFilter<?, ?, ?> observer)
-  {
-    switch (m_type.orElseThrow())
-    {
+  public LinearSystemLoop<?, ?, ?> getLoop(
+      LinearSystem<?, ?, ?> plant,
+      LinearQuadraticRegulator<?, ?, ?> controller,
+      KalmanFilter<?, ?, ?> observer) {
+    switch (m_type.orElseThrow()) {
       case FLYWHEEL -> /// 1 modeled state, velocity. Inputs are volts. Outputs are velocity.
       {
-        return new LinearSystemLoop<N1, N1, N1>((LinearSystem<N1, N1, N1>) plant,
-                                                (LinearQuadraticRegulator<N1, N1, N1>) controller,
-                                                (KalmanFilter<N1, N1, N1>) observer,
-                                                m_maxVoltage.in(Volts),
-                                                m_period.in(Seconds));
+        return new LinearSystemLoop<N1, N1, N1>(
+            (LinearSystem<N1, N1, N1>) plant,
+            (LinearQuadraticRegulator<N1, N1, N1>) controller,
+            (KalmanFilter<N1, N1, N1>) observer,
+            m_maxVoltage.in(Volts),
+            m_period.in(Seconds));
       }
-      case ARM, ELEVATOR -> /// 2 modeled states, position and velocity. Inputs are volts. Outputs are position.
+      case ARM,
+          ELEVATOR -> /// 2 modeled states, position and velocity. Inputs are volts. Outputs are
+      // position.
       {
-        return new LinearSystemLoop<N2, N1, N1>((LinearSystem<N2, N1, N1>) plant,
-                                                (LinearQuadraticRegulator<N2, N1, N1>) controller,
-                                                (KalmanFilter<N2, N1, N1>) observer,
-                                                m_maxVoltage.in(Volts),
-                                                m_period.in(Seconds));
+        return new LinearSystemLoop<N2, N1, N1>(
+            (LinearSystem<N2, N1, N1>) plant,
+            (LinearQuadraticRegulator<N2, N1, N1>) controller,
+            (KalmanFilter<N2, N1, N1>) observer,
+            m_maxVoltage.in(Volts),
+            m_period.in(Seconds));
       }
     }
     throw new IllegalStateException("Invalid LQR Type");
@@ -458,26 +454,28 @@ public class LQRConfig
    * @return {@link LinearSystemLoop} for the LQR.
    */
   @SuppressWarnings("unchecked")
-  public LinearSystemLoop<?, ?, ?> getLoop()
-  {
+  public LinearSystemLoop<?, ?, ?> getLoop() {
     var plant = getSystem();
-    switch (m_type.orElseThrow())
-    {
+    switch (m_type.orElseThrow()) {
       case FLYWHEEL -> /// 1 modeled state, velocity. Inputs are volts. Outputs are velocity.
       {
-        return (LinearSystemLoop<N1, N1, N1>) getLoop(plant,
-                                                      (LinearQuadraticRegulator<N1, N1, N1>) getRegulator(plant),
-                                                      (KalmanFilter<N1, N1, N1>) getKalmanFilter(plant));
+        return (LinearSystemLoop<N1, N1, N1>)
+            getLoop(
+                plant,
+                (LinearQuadraticRegulator<N1, N1, N1>) getRegulator(plant),
+                (KalmanFilter<N1, N1, N1>) getKalmanFilter(plant));
       }
-      case ARM, ELEVATOR -> /// 2 modeled states, position and velocity. Inputs are volts. Outputs are position.
+      case ARM,
+          ELEVATOR -> /// 2 modeled states, position and velocity. Inputs are volts. Outputs are
+      // position.
       {
-        return (LinearSystemLoop<N2, N1, N1>) getLoop(plant,
-                                                      (LinearQuadraticRegulator<N2, N1, N1>) getRegulator(plant),
-                                                      (KalmanFilter<N2, N1, N1>) getKalmanFilter(plant));
-
+        return (LinearSystemLoop<N2, N1, N1>)
+            getLoop(
+                plant,
+                (LinearQuadraticRegulator<N2, N1, N1>) getRegulator(plant),
+                (KalmanFilter<N2, N1, N1>) getKalmanFilter(plant));
       }
     }
     throw new IllegalStateException("Invalid LQR Type");
   }
-
 }

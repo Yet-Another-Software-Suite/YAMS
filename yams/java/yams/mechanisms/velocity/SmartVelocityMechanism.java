@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 package yams.mechanisms.velocity;
+
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -11,45 +12,36 @@ import yams.motorcontrollers.SmartMotorController;
 /**
  * Abstract intermediate base class for all closed-loop velocity mechanisms in YAMS.
  *
- * <p>
- * {@code SmartVelocityMechanism} sits between {@link yams.mechanisms.SmartMechanism} and concrete
- * velocity-controlled mechanism implementations such as
- * {@link yams.mechanisms.velocity.FlyWheel}. It provides the shared infrastructure required for
+ * <p>{@code SmartVelocityMechanism} sits between {@link yams.mechanisms.SmartMechanism} and
+ * concrete velocity-controlled mechanism implementations such as {@link yams.mechanisms.velocity.FlyWheel}. It provides the shared infrastructure required for
  * closed-loop velocity control:
- * </p>
+ *
  * <ul>
- *   <li>Velocity setpoint management via
- *       {@link yams.mechanisms.SmartMechanism#setMechanismVelocitySetpoint} and
- *       {@link yams.mechanisms.SmartMechanism#setMeasurementVelocitySetpoint}</li>
- *   <li>Velocity-based {@link edu.wpi.first.wpilibj2.command.button.Trigger} factories
- *       ({@code isNear()}, {@code gte()}, {@code lte()}, {@code between()}) — defined by each
- *       concrete subclass</li>
+ * <li>Velocity setpoint management via {@link yams.mechanisms.SmartMechanism#setMechanismVelocitySetpoint} and {@link yams.mechanisms.SmartMechanism#setMeasurementVelocitySetpoint}
+ * <li>Velocity-based {@link edu.wpi.first.wpilibj2.command.button.Trigger} factories ({@code isNear()}, {@code gte()}, {@code lte()}, {@code between()}) — defined by each concrete
+ *       subclass
  *   <li>Command factories such as {@code setSpeed()} defined by each concrete subclass, which
- *       internally call the base-class velocity setpoint methods</li>
+ *       internally call the base-class velocity setpoint methods
  *   <li>A 2D visualization model via {@link edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d}
  *       and {@link edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d} fields that subclasses
- *       populate and update</li>
+ *       populate and update
  * </ul>
  *
- * <p>
- * <b>Important — {@code max()} and {@code min()} are not applicable to velocity mechanisms.</b>
+ * <p><b>Important — {@code max()} and {@code min()} are not applicable to velocity mechanisms.</b>
  * Velocity-controlled mechanisms have no meaningful upper or lower soft limit in the same sense as
  * positional mechanisms. Consequently, calling {@link #max()} or {@link #min()} on any concrete
- * subclass of {@code SmartVelocityMechanism} will throw
- * {@link java.lang.UnsupportedOperationException}. Use the following trigger factories instead:
- * </p>
+ * subclass of {@code SmartVelocityMechanism} will throw {@link java.lang.UnsupportedOperationException}. Use the following trigger factories instead:
+ *
  * <ul>
- *   <li>{@code isNear(speed, tolerance)} — true when actual velocity is within tolerance of target</li>
- *   <li>{@code gte(speed)} — true when actual velocity is greater than or equal to the given speed</li>
- *   <li>{@code lte(speed)} — true when actual velocity is less than or equal to the given speed</li>
- *   <li>{@code between(start, end)} — true when actual velocity falls within the given range</li>
+ *   <li>{@code isNear(speed, tolerance)} — true when actual velocity is within tolerance of target
+ *   <li>{@code gte(speed)} — true when actual velocity is greater than or equal to the given speed
+ *   <li>{@code lte(speed)} — true when actual velocity is less than or equal to the given speed
+ *   <li>{@code between(start, end)} — true when actual velocity falls within the given range
  * </ul>
  *
- * <p>
- * <b>Conceptual subclass pattern:</b> A concrete velocity mechanism extends
- * {@code SmartVelocityMechanism}, provides a typed command factory, and calls into the base-class
- * setpoint methods:
- * </p>
+ * <p><b>Conceptual subclass pattern:</b> A concrete velocity mechanism extends {@code SmartVelocityMechanism}, provides a typed command factory, and calls into the base-class setpoint
+ * methods:
+ *
  * <pre>{@code
  * // A concrete mechanism delegates setpoint management to this base class:
  * public Command setSpeed(AngularVelocity target) {
@@ -62,64 +54,55 @@ import yams.motorcontrollers.SmartMotorController;
  * }</pre>
  *
  * <h2>For Subclass Authors</h2>
- * <p>
- * Every concrete subclass of {@code SmartVelocityMechanism} must implement the following abstract
- * methods inherited from {@link yams.mechanisms.SmartMechanism}:
- * </p>
+ *
+ * <p>Every concrete subclass of {@code SmartVelocityMechanism} must implement the following
+ * abstract methods inherited from {@link yams.mechanisms.SmartMechanism}:
+ *
  * <ul>
- *   <li>{@link yams.mechanisms.SmartMechanism#getRelativeMechanismPosition()} — returns the
- *       current 3-D position of the mechanism end-point in
- *       {@link edu.wpi.first.wpilibj.smartdashboard.Mechanism2d} coordinates</li>
- *   <li>{@link yams.mechanisms.SmartMechanism#visualizationUpdate()} — updates
- *       {@code mechanismLigament} to reflect the current rotational state</li>
- *   <li>{@link yams.mechanisms.SmartMechanism#getName()} — returns a human-readable mechanism
- *       name used for telemetry and command names</li>
- *   <li>{@link yams.mechanisms.SmartMechanism#simIterate()} — advances the physics simulation
- *       model and writes back simulated encoder values each robot loop</li>
- *   <li>{@link yams.mechanisms.SmartMechanism#updateTelemetry()} — publishes mechanism state
- *       to {@link edu.wpi.first.wpilibj.smartdashboard.SmartDashboard} or an equivalent
- *       telemetry sink</li>
+ *   <li>{@link yams.mechanisms.SmartMechanism#getRelativeMechanismPosition()} — returns the current
+ * 3-D position of the mechanism end-point in {@link edu.wpi.first.wpilibj.smartdashboard.Mechanism2d} coordinates
+ * <li>{@link yams.mechanisms.SmartMechanism#visualizationUpdate()} — updates {@code mechanismLigament} to reflect the current rotational state
+ *   <li>{@link yams.mechanisms.SmartMechanism#getName()} — returns a human-readable mechanism name
+ *       used for telemetry and command names
+ *   <li>{@link yams.mechanisms.SmartMechanism#simIterate()} — advances the physics simulation model
+ *       and writes back simulated encoder values each robot loop
+ *   <li>{@link yams.mechanisms.SmartMechanism#updateTelemetry()} — publishes mechanism state to
+ *       {@link edu.wpi.first.wpilibj.smartdashboard.SmartDashboard} or an equivalent telemetry sink
  *   <li>{@link #max()} — must throw {@link java.lang.UnsupportedOperationException}; velocity
- *       mechanisms do not support positional limits</li>
+ *       mechanisms do not support positional limits
  *   <li>{@link #min()} — must throw {@link java.lang.UnsupportedOperationException}; velocity
- *       mechanisms do not support positional limits</li>
+ *       mechanisms do not support positional limits
  * </ul>
  */
-public abstract class SmartVelocityMechanism extends SmartMechanism
-{
-  /**
-   * The root point of the Mechanism.
-   */
-  protected MechanismRoot2d     mechanismRoot;
-  /**
-   * The ligament that is being moved.
-   */
+public abstract class SmartVelocityMechanism extends SmartMechanism {
+  /** The root point of the Mechanism. */
+  protected MechanismRoot2d mechanismRoot;
+
+  /** The ligament that is being moved. */
   protected MechanismLigament2d mechanismLigament;
 
   /**
-   * {@link SmartVelocityMechanism} is at max, defined by the soft limit or hard limit on the
-   * {@link SmartVelocityMechanism}.
+   * {@link SmartVelocityMechanism} is at max, defined by the soft limit or hard limit on the {@link SmartVelocityMechanism}.
    *
    * @return Maximum angle for the {@link SmartVelocityMechanism}.
    */
   public abstract Trigger max();
 
   /**
-   * Minimum angle of the {@link SmartVelocityMechanism} given by the soft limit or hard limit of the
-   * {@link SmartVelocityMechanism}.
+   * Minimum angle of the {@link SmartVelocityMechanism} given by the soft limit or hard limit of
+   * the {@link SmartVelocityMechanism}.
    *
    * @return {@link Trigger} on minimum of the {@link SmartVelocityMechanism}.
    */
   public abstract Trigger min();
 
   /**
-   * Get the ligament of the 2D mechanism model. Used to change the position of the mechanism model in the
-   * SmartDashboard.
+   * Get the ligament of the 2D mechanism model. Used to change the position of the mechanism model
+   * in the SmartDashboard.
    *
    * @return Ligament of the 2D mechanism model.
    */
-  public MechanismLigament2d getMechanismLigament()
-  {
+  public MechanismLigament2d getMechanismLigament() {
     return mechanismLigament;
   }
 
@@ -128,8 +111,7 @@ public abstract class SmartVelocityMechanism extends SmartMechanism
    *
    * @return Root of the 2D mechanism model.
    */
-  public MechanismRoot2d getMechanismRoot()
-  {
+  public MechanismRoot2d getMechanismRoot() {
     return mechanismRoot;
   }
 
@@ -138,8 +120,7 @@ public abstract class SmartVelocityMechanism extends SmartMechanism
    *
    * @return Motor controller which is moving the mechanism.
    */
-  public SmartMotorController getMotor()
-  {
+  public SmartMotorController getMotor() {
     return m_smc;
   }
 }

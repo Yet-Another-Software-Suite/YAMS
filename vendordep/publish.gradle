@@ -109,7 +109,8 @@ task generateDoxygen(type: Exec) {
 PROJECT_NAME           = "YAMS"
 PROJECT_BRIEF          = "Yet Another Mechanism System"
 OUTPUT_DIRECTORY       = ${doxygenOutputDir.absolutePath}
-INPUT                  = ${file("$rootDir/../yams/cpp/include").absolutePath}
+INPUT                  = ${file("$rootDir/../yams/cpp/include").absolutePath
+            }
 RECURSIVE              = YES
 GENERATE_HTML          = YES
 GENERATE_LATEX         = NO
@@ -119,21 +120,21 @@ EXTRACT_ALL            = YES
 FILE_PATTERNS          = *.h *.hpp *.dox
 QUIET                  = YES
 """
-    }
+}
 
-    commandLine 'doxygen', file("$buildDir/Doxyfile")
-    ignoreExitValue = true
+commandLine 'doxygen', file("$buildDir/Doxyfile")
+ignoreExitValue = true
 }
 
 task cppDoxygenZip(type: Zip, dependsOn: generateDoxygen) {
-    onlyIf { doxygenAvailable }
-    destinationDirectory = outputsFolder
-    archiveBaseName = zipBaseName
-    archiveClassifier = "cppapi"
+onlyIf { doxygenAvailable }
+destinationDirectory = outputsFolder
+archiveBaseName = zipBaseName
+archiveClassifier = "cppapi"
 
-    from(doxygenOutputDir) {
-        into '/'
-    }
+from(doxygenOutputDir) {
+    into '/'
+}
 }
 //
 //task cppDriverHeadersZip(type: Zip) {
@@ -151,8 +152,8 @@ task cppDoxygenZip(type: Zip, dependsOn: generateDoxygen) {
 //}
 
 if (!skipCpp) {
-    build.dependsOn cppHeadersZip
-    addTaskToCopyAllOutputs(cppHeadersZip)
+build.dependsOn cppHeadersZip
+addTaskToCopyAllOutputs(cppHeadersZip)
 //    build.dependsOn cppSourceZip
 //    addTaskToCopyAllOutputs(cppSourceZip)
 }
@@ -160,82 +161,82 @@ if (!skipCpp) {
 //addTaskToCopyAllOutputs(cppDriverHeadersZip)
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-    archiveClassifier = 'sources'
-    from sourceSets.main.allSource
+archiveClassifier = 'sources'
+from sourceSets.main.allSource
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    archiveClassifier = 'javadoc'
-    from javadoc.destinationDir
+archiveClassifier = 'javadoc'
+from javadoc.destinationDir
 }
 
 task outputJar(type: Jar, dependsOn: classes) {
-    archiveBaseName = javaBaseName
-    destinationDirectory = outputsFolder
-    from sourceSets.main.output
+archiveBaseName = javaBaseName
+destinationDirectory = outputsFolder
+from sourceSets.main.output
 }
 
 task outputSourcesJar(type: Jar, dependsOn: classes) {
-    archiveBaseName = javaBaseName
-    destinationDirectory = outputsFolder
-    archiveClassifier = 'sources'
-    from sourceSets.main.allSource
+archiveBaseName = javaBaseName
+destinationDirectory = outputsFolder
+archiveClassifier = 'sources'
+from sourceSets.main.allSource
 }
 
 task outputJavadocJar(type: Jar, dependsOn: javadoc) {
-    archiveBaseName = javaBaseName
-    destinationDirectory = outputsFolder
-    archiveClassifier = 'javadoc'
-    from javadoc.destinationDir
+archiveBaseName = javaBaseName
+destinationDirectory = outputsFolder
+archiveClassifier = 'javadoc'
+from javadoc.destinationDir
 }
 
 // Apply template variables from the vendordep file.
 // Replaces ${VARIABLE} with VARIABLE: value in expand()
 task vendordepJson() {
-    description = 'Builds the vendordep json file.'
-    group = 'Build'
-    outputs.file("$releasePath/$templateVendorFile")
+description = 'Builds the vendordep json file.'
+group = 'Build'
+outputs.file("$releasePath/$templateVendorFile")
 
-    copy {
-        from templateVendorFile
-        into "$releasePath/"
-        expand(version: pubVersion,
-                groupId: artifactGroupId,
-                artifactId: baseArtifactId)
-    }
+copy {
+    from templateVendorFile
+    into "$releasePath/"
+    expand(version: pubVersion,
+    groupId: artifactGroupId,
+    artifactId: baseArtifactId)
+}
 
-    // When C++ isn't being built, strip cppDependencies from the generated vendordep JSON by
-    // editing the parsed structure directly, rather than templating the array in/out as text.
-    if (skipCpp) {
-        def vendorFile = file("$releasePath/$templateVendorFile")
-        def vendordep = new JsonSlurper().parse(vendorFile)
-        vendordep.cppDependencies = []
-        def pretty = JsonOutput.prettyPrint(JsonOutput.toJson(vendordep))
-        // Groovy's pretty-printer spreads empty arrays/objects across three lines; collapse
-        // them back down so cppDependencies renders as a plain "[]" like the other empty fields.
-        pretty = pretty.replaceAll(/(?s)\[\s*\]/, '[]').replaceAll(/(?s)\{\s*\}/, '{}')
-        vendorFile.text = pretty
-    }
+// When C++ isn't being built, strip cppDependencies from the generated vendordep JSON by
+// editing the parsed structure directly, rather than templating the array in/out as text.
+if (skipCpp) {
+    def vendorFile = file("$releasePath/$templateVendorFile")
+    def vendordep = new JsonSlurper().parse(vendorFile)
+    vendordep.cppDependencies = []
+    def pretty = JsonOutput.prettyPrint(JsonOutput.toJson(vendordep))
+    // Groovy's pretty-printer spreads empty arrays/objects across three lines; collapse
+    // them back down so cppDependencies renders as a plain "[]" like the other empty fields.
+    pretty = pretty.replaceAll(/(?s)\[\s*\]/, '[]').replaceAll(/(?s)\{\s*\}/, '{}')
+    vendorFile.text = pretty
+}
 }
 
 task vendordepJsonZip(type: Zip) {
-    destinationDirectory = outputsFolder
-    archiveBaseName = "vendordepJson"
+destinationDirectory = outputsFolder
+archiveBaseName = "vendordepJson"
 
-    from("$releasePath/$templateVendorFile") {
-        into '/'
-    }
-    dependsOn vendordepJson
+from("$releasePath/$templateVendorFile") {
+    into '/'
+}
+dependsOn vendordepJson
 }
 
 artifacts {
-    tasks.named("assemble") {
-        archives sourcesJar
-        archives javadocJar
-        archives outputJar
-        archives outputSourcesJar
-        archives outputJavadocJar
-    }
+tasks.named("assemble") {
+    archives sourcesJar
+    archives javadocJar
+    archives outputJar
+    archives outputSourcesJar
+    archives outputJavadocJar
+}
 }
 
 addTaskToCopyAllOutputs(outputSourcesJar)
@@ -248,26 +249,26 @@ build.dependsOn outputJavadocJar
 build.dependsOn outputJar
 build.dependsOn vendordepJsonZip
 if (!skipCpp) {
-    addTaskToCopyAllOutputs(cppHeadersZip)
+addTaskToCopyAllOutputs(cppHeadersZip)
 //    addTaskToCopyAllOutputs(cppSourceZip)
-    build.dependsOn cppHeadersZip
+build.dependsOn cppHeadersZip
 //    build.dependsOn cppSourceZip
-    if (doxygenAvailable) {
-        build.dependsOn cppDoxygenZip
-        addTaskToCopyAllOutputs(cppDoxygenZip)
-    }
+if (doxygenAvailable) {
+    build.dependsOn cppDoxygenZip
+    addTaskToCopyAllOutputs(cppDoxygenZip)
+}
 }
 
 libraryBuild.dependsOn build
 
 
 publishing {
-    repositories {
-        maven {
+repositories {
+    maven {
 
-            url = releasesRepoUrl
-        }
+        url = releasesRepoUrl
     }
+}
 }
 
 //task cleanReleaseRepo(type: Delete) {
@@ -277,56 +278,56 @@ publishing {
 //tasks.matching {it != cleanReleaseRepo}.all {it.dependsOn cleanReleaseRepo}
 
 model {
-    publishing {
-        def taskList = createComponentZipTasks($.components, ['YAMS'], zipBaseName, Zip, project, includeStandardZipFormat)
-//
-//        def driverTaskList = createComponentZipTasks($.components, ['VendorDriver'], driverZipBaseName, Zip, project, includeStandardZipFormat)
-//
-        publications {
-            if (!skipCpp) {
-                cpp(MavenPublication) {
-                    taskList.each {
-                        artifact it
-                    }
-                    artifact cppHeadersZip
-//                    artifact cppSourceZip
-                    if (doxygenAvailable) {
-                        artifact cppDoxygenZip
-                    }
-
-                    artifactId = "${baseArtifactId}-cpp"
-                    groupId = artifactGroupId
-                    version = pubVersion
+publishing {
+    def taskList = createComponentZipTasks($.components, ['YAMS'], zipBaseName, Zip, project, includeStandardZipFormat)
+    //
+    //        def driverTaskList = createComponentZipTasks($.components, ['VendorDriver'], driverZipBaseName, Zip, project, includeStandardZipFormat)
+    //
+    publications {
+        if (!skipCpp) {
+            cpp(MavenPublication) {
+                taskList.each {
+                    artifact it
                 }
-            }
-//            driver(MavenPublication) {
-//                driverTaskList.each {
-//                    artifact it
-//                }
-//                artifact cppDriverHeadersZip
-//
-//                artifactId = "${baseArtifactId}-driver"
-//                groupId artifactGroupId
-//                version pubVersion
-//            }
+                artifact cppHeadersZip
+                //                    artifact cppSourceZip
+                if (doxygenAvailable) {
+                    artifact cppDoxygenZip
+                }
 
-            java(MavenPublication) {
-                artifact jar
-                artifact sourcesJar
-                artifact javadocJar
-
-                artifactId = "${baseArtifactId}-java"
-                groupId = artifactGroupId
-                version = pubVersion
-            }
-
-            vendordep(MavenPublication) {
-                artifact vendordepJsonZip
-
-                artifactId = "${baseArtifactId}-vendordep"
+                artifactId = "${baseArtifactId}-cpp"
                 groupId = artifactGroupId
                 version = pubVersion
             }
         }
+        //            driver(MavenPublication) {
+        //                driverTaskList.each {
+        //                    artifact it
+        //                }
+        //                artifact cppDriverHeadersZip
+        //
+        //                artifactId = "${baseArtifactId}-driver"
+        //                groupId artifactGroupId
+        //                version pubVersion
+        //            }
+
+        java(MavenPublication) {
+            artifact jar
+            artifact sourcesJar
+            artifact javadocJar
+
+            artifactId = "${baseArtifactId}-java"
+            groupId = artifactGroupId
+            version = pubVersion
+        }
+
+        vendordep(MavenPublication) {
+            artifact vendordepJsonZip
+
+            artifactId = "${baseArtifactId}-vendordep"
+            groupId = artifactGroupId
+            version = pubVersion
+        }
     }
+}
 }

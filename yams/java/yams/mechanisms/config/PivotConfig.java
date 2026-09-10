@@ -4,23 +4,19 @@
 package yams.mechanisms.config;
 
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import java.util.Optional;
-import yams.exceptions.PivotConfigurationException;
 import yams.mechanisms.config.MechanismPositionConfig.Plane;
 import yams.mechanisms.positional.Elevator;
 import yams.mechanisms.positional.Pivot;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
 /**
  * Pivot configuration class.
  *
  * <h2>Configuration Example</h2>
+ *
  * <pre>{@code
  * // Create the motor controller configuration with PID and feedforward gains
  * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
@@ -44,39 +40,31 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  * Pivot pivot = new Pivot(config, motor);
  * }</pre>
  */
-public class PivotConfig
-{
-  /**
-   * Telemetry name.
-   */
-  private   Optional<String>               telemetryName           = Optional.empty();
-  /**
-   * Telemetry verbosity
-   */
-  private   Optional<TelemetryVerbosity>   telemetryVerbosity      = Optional.empty();
-  /**
-   * Lower Hard Limit for the {@link Pivot} to be representing in simulation.
-   */
-  private   Optional<Angle>                lowerHardLimit          = Optional.empty();
-  /**
-   * Upper hard limit for the {@link Pivot} representing in simulation.
-   */
-  private   Optional<Angle>                upperHardLimit          = Optional.empty();
-  /**
-   * Sim color value
-   */
-  private   Color8Bit                      simColor                = new Color8Bit(Color.kOrange);
-  /**
-   * Mechanism position configuration for the {@link Pivot}
-   */
-  private   MechanismPositionConfig        mechanismPositionConfig = new MechanismPositionConfig();
+public class PivotConfig {
+  /** Telemetry name. */
+  private Optional<String> telemetryName = Optional.empty();
+
+  /** Telemetry verbosity */
+  private Optional<TelemetryVerbosity> telemetryVerbosity = Optional.empty();
+
+  /** Lower Hard Limit for the {@link Pivot} to be representing in simulation. */
+  private Optional<Angle> lowerHardLimit = Optional.empty();
+
+  /** Upper hard limit for the {@link Pivot} representing in simulation. */
+  private Optional<Angle> upperHardLimit = Optional.empty();
+
+  /** Sim color value */
+  private Color8Bit simColor = new Color8Bit(Color.kOrange);
+
+  /** Mechanism position configuration for the {@link Pivot} */
+  private MechanismPositionConfig mechanismPositionConfig = new MechanismPositionConfig();
 
   /**
    * Pivot Configuration class
+   *
    * @implNote Defaults to XY plane.
    */
-  public PivotConfig()
-  {
+  public PivotConfig() {
     mechanismPositionConfig.withMovementPlane(Plane.XY);
   }
 
@@ -85,8 +73,7 @@ public class PivotConfig
    *
    * @param cfg Config to copy.
    */
-  public PivotConfig(PivotConfig cfg)
-  {
+  public PivotConfig(PivotConfig cfg) {
     this.telemetryName = cfg.telemetryName;
     this.telemetryVerbosity = cfg.telemetryVerbosity;
     this.lowerHardLimit = cfg.lowerHardLimit;
@@ -96,8 +83,7 @@ public class PivotConfig
   }
 
   @Override
-  public PivotConfig clone()
-  {
+  public PivotConfig clone() {
     return new PivotConfig(this);
   }
 
@@ -107,8 +93,7 @@ public class PivotConfig
    * @param simColor {@link Color8Bit} to show.
    * @return {@link PivotConfig} for chaining.
    */
-  public PivotConfig withSimColor(final Color8Bit simColor)
-  {
+  public PivotConfig withSimColor(final Color8Bit simColor) {
     this.simColor = simColor;
     return this;
   }
@@ -116,12 +101,11 @@ public class PivotConfig
   /**
    * Configure telemetry for the {@link Pivot} mechanism.
    *
-   * @param telemetryName      Telemetry NetworkTable name to appear under "SmartDashboard/"
+   * @param telemetryName Telemetry NetworkTable name to appear under "SmartDashboard/"
    * @param telemetryVerbosity Telemetry verbosity to apply.
    * @return {@link PivotConfig} for chaining.
    */
-  public PivotConfig withTelemetry(String telemetryName, TelemetryVerbosity telemetryVerbosity)
-  {
+  public PivotConfig withTelemetry(String telemetryName, TelemetryVerbosity telemetryVerbosity) {
     this.telemetryName = Optional.ofNullable(telemetryName);
     this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
     return this;
@@ -133,8 +117,7 @@ public class PivotConfig
    * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link Elevator}
    * @return {@link PivotConfig} for chaining
    */
-  public PivotConfig withMechanismPositionConfig(MechanismPositionConfig mechanismPositionConfig)
-  {
+  public PivotConfig withMechanismPositionConfig(MechanismPositionConfig mechanismPositionConfig) {
     this.mechanismPositionConfig = mechanismPositionConfig;
     return this;
   }
@@ -146,8 +129,7 @@ public class PivotConfig
    * @param max Angle where the physical stop appears
    * @return {@link PivotConfig} for chaining.
    */
-  public PivotConfig withHardLimits(Angle min, Angle max)
-  {
+  public PivotConfig withHardLimits(Angle min, Angle max) {
     lowerHardLimit = Optional.ofNullable(min);
     upperHardLimit = Optional.ofNullable(max);
     return this;
@@ -158,8 +140,7 @@ public class PivotConfig
    *
    * @return {@link Angle} hard limit.
    */
-  public Optional<Angle> getUpperHardLimit()
-  {
+  public Optional<Angle> getUpperHardLimit() {
     return upperHardLimit;
   }
 
@@ -168,8 +149,7 @@ public class PivotConfig
    *
    * @return {@link Angle} hard limit.
    */
-  public Optional<Angle> getLowerHardLimit()
-  {
+  public Optional<Angle> getLowerHardLimit() {
     return lowerHardLimit;
   }
 
@@ -178,8 +158,7 @@ public class PivotConfig
    *
    * @return {@link TelemetryVerbosity} of the {@link Pivot}
    */
-  public Optional<TelemetryVerbosity> getTelemetryVerbosity()
-  {
+  public Optional<TelemetryVerbosity> getTelemetryVerbosity() {
     return telemetryVerbosity;
   }
 
@@ -188,8 +167,7 @@ public class PivotConfig
    *
    * @return Network Tables name.
    */
-  public Optional<String> getTelemetryName()
-  {
+  public Optional<String> getTelemetryName() {
     return telemetryName;
   }
 
@@ -198,21 +176,17 @@ public class PivotConfig
    *
    * @return Sim color value
    */
-  public Color8Bit getSimColor()
-  {
+  public Color8Bit getSimColor() {
     return simColor;
   }
-
 
   /**
    * Get the {@link MechanismPositionConfig} associated with this {@link PivotConfig}.
    *
-   * @return An {@link Optional} containing the {@link MechanismPositionConfig} if present, otherwise an empty
-   * {@link Optional}.
+   * @return An {@link Optional} containing the {@link MechanismPositionConfig} if present,
+   *     otherwise an empty {@link Optional}.
    */
-  public MechanismPositionConfig getMechanismPositionConfig()
-  {
+  public MechanismPositionConfig getMechanismPositionConfig() {
     return mechanismPositionConfig;
   }
-
 }

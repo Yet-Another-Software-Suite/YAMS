@@ -37,21 +37,19 @@ import java.util.Optional;
 import yams.gearing.MechanismGearing;
 
 /**
- * Exponential profile PID controller. Similar to {@link PIDController} or
- * {@link edu.wpi.first.math.controller.ProfiledPIDController}, but uses an {@link ExponentialProfile}
+ * Exponential profile PID controller. Similar to {@link PIDController} or {@link edu.wpi.first.math.controller.ProfiledPIDController}, but uses an {@link ExponentialProfile}
  *
- * <p>This controller combines an {@link ExponentialProfile} motion profile with a
- * {@link PIDController} to achieve smooth, continuous position control. On each iteration the
- * profile generates a feasible intermediate setpoint (position + velocity) that the PID then
- * tracks, preventing large step demands from commanding unreachable states. The exponential profile
- * shape respects the plant's natural first-order dynamics, making it well-suited for flywheels,
- * arms, and elevators.
+ * <p>This controller combines an {@link ExponentialProfile} motion profile with a {@link PIDController} to achieve smooth, continuous position control. On each iteration the profile
+ * generates a feasible intermediate setpoint (position + velocity) that the PID then tracks,
+ * preventing large step demands from commanding unreachable states. The exponential profile shape
+ * respects the plant's natural first-order dynamics, making it well-suited for flywheels, arms, and
+ * elevators.
  *
- * <p>Use the static factory helpers ({@link #createArmConstraints}, {@link #createElevatorConstraints},
- * {@link #createFlywheelConstraints}) to derive physically accurate
+ * <p>Use the static factory helpers ({@link #createArmConstraints}, {@link #createElevatorConstraints}, {@link #createFlywheelConstraints}) to derive physically accurate
  * {@link ExponentialProfile.Constraints} directly from motor and mechanism parameters.
  *
  * <h2>Example — arm position control</h2>
+ *
  * <pre>{@code
  * import static edu.wpi.first.units.Units.*;
  *
@@ -77,45 +75,35 @@ import yams.gearing.MechanismGearing;
  * motor.set(output);
  * }</pre>
  */
-public class ExponentialProfilePIDController
-{
-  /**
-   * Iteration timer.
-   */
-  private final Timer              timer   = new Timer();
-  /**
-   * The wrapped PID controller.
-   */
-  private final PIDController      controller;
-  /**
-   * The wrapped profile.
-   */
-  private       ExponentialProfile profile = null;
-  /**
-   * The current state from {@link ExponentialProfile}
-   */
-  private       ExponentialProfile.State           currentState = new State();
-  /**
-   * The next state from {@link ExponentialProfile}
-   */
-  private       Optional<ExponentialProfile.State> nextState    = Optional.empty();
-  /**
-   * Loop time.
-   */
-  private       Time                               loopTime     = Milliseconds.of(20);
-  /**
-   * {@link ExponentialProfile.Constraints} for the {@link ExponentialProfile}.
-   */
-  private       Constraints                        constraints  = null;
+public class ExponentialProfilePIDController {
+  /** Iteration timer. */
+  private final Timer timer = new Timer();
+
+  /** The wrapped PID controller. */
+  private final PIDController controller;
+
+  /** The wrapped profile. */
+  private ExponentialProfile profile = null;
+
+  /** The current state from {@link ExponentialProfile} */
+  private ExponentialProfile.State currentState = new State();
+
+  /** The next state from {@link ExponentialProfile} */
+  private Optional<ExponentialProfile.State> nextState = Optional.empty();
+
+  /** Loop time. */
+  private Time loopTime = Milliseconds.of(20);
+
+  /** {@link ExponentialProfile.Constraints} for the {@link ExponentialProfile}. */
+  private Constraints constraints = null;
 
   /**
    * Constructor.
    *
-   * @param controller  The wrapped PID controller.
+   * @param controller The wrapped PID controller.
    * @param constraints The wrapped profile constraints.
    */
-  public ExponentialProfilePIDController(PIDController controller, Constraints constraints)
-  {
+  public ExponentialProfilePIDController(PIDController controller, Constraints constraints) {
     this.controller = controller;
     this.constraints = constraints;
     this.profile = new ExponentialProfile(constraints);
@@ -124,103 +112,97 @@ public class ExponentialProfilePIDController
   /**
    * Constructor.
    *
-   * @param kP          kP value for the {@link PIDController}
-   * @param kI          kI value for the {@link PIDController}
-   * @param kD          kD value for the {@link PIDController}
+   * @param kP kP value for the {@link PIDController}
+   * @param kI kI value for the {@link PIDController}
+   * @param kD kD value for the {@link PIDController}
    * @param constraints {@link Constraints} for the {@link ExponentialProfile}
    */
-  public ExponentialProfilePIDController(double kP, double kI, double kD, Constraints constraints)
-  {
+  public ExponentialProfilePIDController(double kP, double kI, double kD, Constraints constraints) {
     this(new PIDController(kP, kI, kD), constraints);
   }
 
   /**
    * Get the {@link ExponentialProfile.Constraints} for an elevator.
    *
-   * @param maxVolts   Maximum input voltage for profile generation.
-   * @param motor      {@link DCMotor} of the elevator.
-   * @param mass       {@link Mass} of the elevator carriage.
+   * @param maxVolts Maximum input voltage for profile generation.
+   * @param motor {@link DCMotor} of the elevator.
+   * @param mass {@link Mass} of the elevator carriage.
    * @param drumRadius {@link Distance} of the elevator drum radius.
-   * @param gearing    {@link MechanismGearing} of the elevator from the drum to the rotor.
+   * @param gearing {@link MechanismGearing} of the elevator from the drum to the rotor.
    * @return {@link ExponentialProfile.Constraints}
    */
-  public static ExponentialProfile.Constraints createElevatorConstraints(Voltage maxVolts, DCMotor motor, Mass mass,
-                                                                         Distance drumRadius,
-                                                                         MechanismGearing gearing)
-  {
-    var sysid = LinearSystemId.createElevatorSystem(motor,
-                                                    mass.in(Kilograms),
-                                                    drumRadius.in(Meters),
-                                                    gearing.getMechanismToRotorRatio());
+  public static ExponentialProfile.Constraints createElevatorConstraints(
+      Voltage maxVolts, DCMotor motor, Mass mass, Distance drumRadius, MechanismGearing gearing) {
+    var sysid =
+        LinearSystemId.createElevatorSystem(
+            motor, mass.in(Kilograms), drumRadius.in(Meters), gearing.getMechanismToRotorRatio());
     var circumference = (2.0 * Math.PI * drumRadius.in(Meters));
 
-    var A  = sysid.getA(0, 0);
-    var B  = sysid.getB(0, 0);
+    var A = sysid.getA(0, 0);
+    var B = sysid.getB(0, 0);
     var kV = MetersPerSecond.of(-A / B);
     var kA = MetersPerSecondPerSecond.of(1.0 / B);
-    return ExponentialProfile.Constraints.fromCharacteristics(maxVolts.in(Volts),
-                                                              kV.in(MetersPerSecond) / circumference,
-                                                              kA.in(MetersPerSecondPerSecond) / circumference);
-//    return ExponentialProfile.Constraints.fromStateSpace(maxVolts.in(Volts), A, B);
+    return ExponentialProfile.Constraints.fromCharacteristics(
+        maxVolts.in(Volts),
+        kV.in(MetersPerSecond) / circumference,
+        kA.in(MetersPerSecondPerSecond) / circumference);
+    //    return ExponentialProfile.Constraints.fromStateSpace(maxVolts.in(Volts), A, B);
   }
 
   /**
    * Get the {@link ExponentialProfile.Constraints} for an arm.
    *
    * @param maxVolts Maximum input voltage for profile generation.
-   * @param motor    {@link DCMotor} of the arm.
-   * @param moi      {@link MomentOfInertia} of the arm.
-   * @param gearing  {@link MechanismGearing} of the arm from the rotor to the drum.
-   *                 {@code gearing.getMechanismToRotorRatio()}
+   * @param motor {@link DCMotor} of the arm.
+   * @param moi {@link MomentOfInertia} of the arm.
+   * @param gearing {@link MechanismGearing} of the arm from the rotor to the drum. {@code gearing.getMechanismToRotorRatio()}
    * @return {@link ExponentialProfile.Constraints}
    */
-  public static ExponentialProfile.Constraints createArmConstraints(Voltage maxVolts, DCMotor motor, MomentOfInertia moi,
-                                                                    MechanismGearing gearing)
-  {
-    var sysid = LinearSystemId.createSingleJointedArmSystem(motor,
-                                                            moi.in(KilogramSquareMeters),
-                                                            gearing.getMechanismToRotorRatio());
-    var A  = sysid.getA(0, 0); // radians
-    var B  = sysid.getB(0, 0); // radians
+  public static ExponentialProfile.Constraints createArmConstraints(
+      Voltage maxVolts, DCMotor motor, MomentOfInertia moi, MechanismGearing gearing) {
+    var sysid =
+        LinearSystemId.createSingleJointedArmSystem(
+            motor, moi.in(KilogramSquareMeters), gearing.getMechanismToRotorRatio());
+    var A = sysid.getA(0, 0); // radians
+    var B = sysid.getB(0, 0); // radians
     var kV = RadiansPerSecond.of(-A / B);
     var kA = RadiansPerSecondPerSecond.of(1.0 / B);
-//    return ExponentialProfile.Constraints.fromStateSpace(maxVolts.in(Volts), A, B);
-    return ExponentialProfile.Constraints.fromCharacteristics(maxVolts.in(Volts),
-                                                              kV.in(RotationsPerSecond),
-                                                              kA.in(RotationsPerSecondPerSecond));
+    //    return ExponentialProfile.Constraints.fromStateSpace(maxVolts.in(Volts), A, B);
+    return ExponentialProfile.Constraints.fromCharacteristics(
+        maxVolts.in(Volts), kV.in(RotationsPerSecond), kA.in(RotationsPerSecondPerSecond));
   }
 
   /**
    * Get the {@link ExponentialProfile.Constraints} for an arm.
    *
    * @param maxVolts Maximum input voltage for profile generation.
-   * @param motor    {@link DCMotor} of the arm.
-   * @param mass     {@link Mass} of the arm.
-   * @param length   {@link Distance} of the arm length.
-   * @param gearing  {@link MechanismGearing} of the arm from the rotor to the drum.
-   *                 {@code gearing.getMechanismToRotorRatio()}
+   * @param motor {@link DCMotor} of the arm.
+   * @param mass {@link Mass} of the arm.
+   * @param length {@link Distance} of the arm length.
+   * @param gearing {@link MechanismGearing} of the arm from the rotor to the drum. {@code gearing.getMechanismToRotorRatio()}
    * @return {@link ExponentialProfile.Constraints}
    */
-  public static ExponentialProfile.Constraints createArmConstraints(Voltage maxVolts, DCMotor motor, Mass mass,
-                                                                    Distance length, MechanismGearing gearing)
-  {
-    return createArmConstraints(maxVolts, motor,
-            KilogramSquareMeters.of(SingleJointedArmSim.estimateMOI(length.in(Meters), mass.in(Kilograms))),
-            gearing);
+  public static ExponentialProfile.Constraints createArmConstraints(
+      Voltage maxVolts, DCMotor motor, Mass mass, Distance length, MechanismGearing gearing) {
+    return createArmConstraints(
+        maxVolts,
+        motor,
+        KilogramSquareMeters.of(
+            SingleJointedArmSim.estimateMOI(length.in(Meters), mass.in(Kilograms))),
+        gearing);
   }
 
   /**
    * Get the {@link ExponentialProfile.Constraints} for a flywheel.
    *
    * @param maxVolts Maximum input voltage for profile generation.
-   * @param motor    {@link DCMotor} of the flywheel.
-   * @param moi      {@link MomentOfInertia} of the flywheel.
-   * @param gearing  {@link MechanismGearing} of the flywheel from the rotor to the drum.
+   * @param motor {@link DCMotor} of the flywheel.
+   * @param moi {@link MomentOfInertia} of the flywheel.
+   * @param gearing {@link MechanismGearing} of the flywheel from the rotor to the drum.
    * @return {@link ExponentialProfile.Constraints}
    */
-  public static ExponentialProfile.Constraints createFlywheelConstraints(Voltage maxVolts, DCMotor motor, MomentOfInertia moi,
-                                                                         MechanismGearing gearing)
-  {
+  public static ExponentialProfile.Constraints createFlywheelConstraints(
+      Voltage maxVolts, DCMotor motor, MomentOfInertia moi, MechanismGearing gearing) {
     return createArmConstraints(maxVolts, motor, moi, gearing);
   }
 
@@ -228,33 +210,32 @@ public class ExponentialProfilePIDController
    * Get the {@link ExponentialProfile.Constraints} for a flywheel.
    *
    * @param maxVolts Maximum input voltage for profile generation.
-   * @param motor    {@link DCMotor} of the flywheel.
-   * @param mass     {@link Mass} of the flywheel.
-   * @param radius   {@link Distance} of the flywheel radius.
-   * @param gearing  {@link MechanismGearing} of the flywheel from the rotor to the drum.
+   * @param motor {@link DCMotor} of the flywheel.
+   * @param mass {@link Mass} of the flywheel.
+   * @param radius {@link Distance} of the flywheel radius.
+   * @param gearing {@link MechanismGearing} of the flywheel from the rotor to the drum.
    * @return {@link ExponentialProfile.Constraints}
    */
-  public static ExponentialProfile.Constraints createFlywheelConstraints(Voltage maxVolts, DCMotor motor, Mass mass,
-                                                                         Distance radius, MechanismGearing gearing)
-  {
+  public static ExponentialProfile.Constraints createFlywheelConstraints(
+      Voltage maxVolts, DCMotor motor, Mass mass, Distance radius, MechanismGearing gearing) {
     return createArmConstraints(maxVolts, motor, mass, radius, gearing);
   }
 
   /**
    * Create a generic constraints object.
    *
-   * @param maxVolts        Maximum input voltage for profile generation.
-   * @param maxVelocity     Maximum velocity.
+   * @param maxVolts Maximum input voltage for profile generation.
+   * @param maxVelocity Maximum velocity.
    * @param maxAcceleration Maximum acceleration.
    * @return {@link ExponentialProfile.Constraints}
    */
-  public static Constraints createConstraints(Voltage maxVolts, AngularVelocity maxVelocity,
-                                              AngularAcceleration maxAcceleration)
-  {
+  public static Constraints createConstraints(
+      Voltage maxVolts, AngularVelocity maxVelocity, AngularAcceleration maxAcceleration) {
     var maxV = maxVolts.in(Volts);
-    return ExponentialProfile.Constraints.fromStateSpace(maxVolts.in(Volts),
-                                                         maxV / maxVelocity.in(RotationsPerSecond),
-                                                         maxV / maxAcceleration.in(RotationsPerSecondPerSecond));
+    return ExponentialProfile.Constraints.fromStateSpace(
+        maxVolts.in(Volts),
+        maxV / maxVelocity.in(RotationsPerSecond),
+        maxV / maxAcceleration.in(RotationsPerSecondPerSecond));
   }
 
   /**
@@ -262,10 +243,8 @@ public class ExponentialProfilePIDController
    *
    * @return kV with (-A/B)
    */
-  public AngularVelocity getKv()
-  {
-    if (constraints == null)
-    {
+  public AngularVelocity getKv() {
+    if (constraints == null) {
       throw new IllegalStateException("constraints must be set before getting Kv");
     }
     var A = constraints.A;
@@ -278,10 +257,8 @@ public class ExponentialProfilePIDController
    *
    * @return kA interpreted as (1.0/B)
    */
-  public AngularAcceleration getKa()
-  {
-    if (constraints == null)
-    {
+  public AngularAcceleration getKa() {
+    if (constraints == null) {
       throw new IllegalStateException("constraints must be set before getting Kv");
     }
     var A = constraints.A;
@@ -294,21 +271,20 @@ public class ExponentialProfilePIDController
    *
    * @param measurement Measurement in Rotations, and Rotations per Second.
    */
-  public void reset(State measurement)
-  {
+  public void reset(State measurement) {
     controller.reset();
     currentState = measurement;
     nextState = Optional.empty();
   }
 
   /**
-   * Reset the PID and profile with the given position and velocity as the measured position and velocity.
+   * Reset the PID and profile with the given position and velocity as the measured position and
+   * velocity.
    *
    * @param position Measured position
    * @param velocity Measured velocity.
    */
-  public void reset(double position, double velocity)
-  {
+  public void reset(double position, double velocity) {
     reset(new ExponentialProfile.State(position, velocity));
   }
 
@@ -317,8 +293,7 @@ public class ExponentialProfilePIDController
    *
    * @return {@link ExponentialProfile.Constraints}
    */
-  public Optional<Constraints> getConstraints()
-  {
+  public Optional<Constraints> getConstraints() {
     return Optional.ofNullable(constraints);
   }
 
@@ -327,8 +302,7 @@ public class ExponentialProfilePIDController
    *
    * @param constraints The constraints for the {@link ExponentialProfile}.
    */
-  public void setConstraints(Constraints constraints)
-  {
+  public void setConstraints(Constraints constraints) {
     this.constraints = constraints;
     profile = new ExponentialProfile(constraints);
   }
@@ -338,19 +312,18 @@ public class ExponentialProfilePIDController
    *
    * @param tolerance – Error which is tolerable.
    */
-  public void setTolerance(double tolerance)
-  {
+  public void setTolerance(double tolerance) {
     controller.setTolerance(tolerance);
   }
 
   /**
-   * Returns true if the error is within the tolerance of the setpoint. The error tolerance defaults to 0.05, and the
-   * error derivative tolerance defaults to ∞. This will return false until at least one input value has been computed.
+   * Returns true if the error is within the tolerance of the setpoint. The error tolerance defaults
+   * to 0.05, and the error derivative tolerance defaults to ∞. This will return false until at
+   * least one input value has been computed.
    *
    * @return Whether the error is within the acceptable bounds
    */
-  public boolean atSetpoint()
-  {
+  public boolean atSetpoint() {
     return controller.atSetpoint();
   }
 
@@ -359,8 +332,7 @@ public class ExponentialProfilePIDController
    *
    * @return setpoint.
    */
-  public double getSetpoint()
-  {
+  public double getSetpoint() {
     return controller.getSetpoint();
   }
 
@@ -369,8 +341,7 @@ public class ExponentialProfilePIDController
    *
    * @return {@link ExponentialProfile.State} given by the {@link ExponentialProfile}.
    */
-  public State getCurrentState()
-  {
+  public State getCurrentState() {
     return currentState;
   }
 
@@ -379,8 +350,7 @@ public class ExponentialProfilePIDController
    *
    * @return {@link Angle} from {@link ExponentialProfile}
    */
-  public Angle getCurrentAngle()
-  {
+  public Angle getCurrentAngle() {
     return Rotations.of(currentState.position);
   }
 
@@ -389,8 +359,7 @@ public class ExponentialProfilePIDController
    *
    * @return {@link Angle} from {@link ExponentialProfile}
    */
-  public Angle getNextAngle()
-  {
+  public Angle getNextAngle() {
     return Rotations.of(nextState.orElseThrow().position);
   }
 
@@ -399,8 +368,7 @@ public class ExponentialProfilePIDController
    *
    * @return {@link AngularVelocity} from {@link ExponentialProfile}
    */
-  public AngularVelocity getCurrentVelocitySetpoint()
-  {
+  public AngularVelocity getCurrentVelocitySetpoint() {
     return RotationsPerSecond.of(currentState.velocity);
   }
 
@@ -409,8 +377,7 @@ public class ExponentialProfilePIDController
    *
    * @return Next {@link AngularVelocity} from {@link ExponentialProfile}
    */
-  public AngularVelocity getNextVelocitySetpoint()
-  {
+  public AngularVelocity getNextVelocitySetpoint() {
     return RotationsPerSecond.of(nextState.orElseThrow().velocity);
   }
 
@@ -419,8 +386,7 @@ public class ExponentialProfilePIDController
    *
    * @return {@link ExponentialProfile.State} given by the {@link ExponentialProfile}.
    */
-  public Optional<State> getNextState()
-  {
+  public Optional<State> getNextState() {
     return nextState;
   }
 
@@ -428,23 +394,23 @@ public class ExponentialProfilePIDController
    * Calculate the feedback, assuming previous state velocity.
    *
    * @param measurementPosition Measurement position to set as the current state..
-   * @param setpointVelocity    Setpoint velocity.
-   * @param setpointPosition    Setpoint position.
+   * @param setpointVelocity Setpoint velocity.
+   * @param setpointPosition Setpoint position.
    * @return Profile calculation
    */
-  public double calculate(double measurementPosition, double setpointVelocity, double setpointPosition)
-  {
-    if (timer.isRunning())
-    {
+  public double calculate(
+      double measurementPosition, double setpointVelocity, double setpointPosition) {
+    if (timer.isRunning()) {
       loopTime = Seconds.of(timer.get());
     }
     timer.reset();
     timer.start();
     var feedback = controller.calculate(measurementPosition, currentState.position);
     nextState.ifPresent(state -> currentState = state);
-    nextState = Optional.of(profile.calculate(loopTime.in(Seconds),
-                                              currentState,
-                                              new State(setpointPosition, setpointVelocity)));
+    nextState =
+        Optional.of(
+            profile.calculate(
+                loopTime.in(Seconds), currentState, new State(setpointPosition, setpointVelocity)));
     return feedback;
   }
 
@@ -452,11 +418,10 @@ public class ExponentialProfilePIDController
    * Calculate the feedback, assuming no setpoint velocity.
    *
    * @param measurementPosition Measurement position to set as the current state.
-   * @param setpointPosition    Setpoint position.
+   * @param setpointPosition Setpoint position.
    * @return Profile calculation where setpoint velocity is 0.
    */
-  public double calculate(double measurementPosition, double setpointPosition)
-  {
+  public double calculate(double measurementPosition, double setpointPosition) {
     return calculate(measurementPosition, 0, setpointPosition);
   }
 
@@ -465,8 +430,7 @@ public class ExponentialProfilePIDController
    *
    * @return the error tolerance of the controller
    */
-  public double getPositionTolerance()
-  {
+  public double getPositionTolerance() {
     return controller.getErrorTolerance();
   }
 
@@ -475,8 +439,7 @@ public class ExponentialProfilePIDController
    *
    * @return proportional coefficient
    */
-  public double getP()
-  {
+  public double getP() {
     return controller.getP();
   }
 
@@ -485,8 +448,7 @@ public class ExponentialProfilePIDController
    *
    * @param kP The proportional coefficient. Must be &gt;= 0.
    */
-  public void setP(double kP)
-  {
+  public void setP(double kP) {
     controller.setP(kP);
   }
 
@@ -495,8 +457,7 @@ public class ExponentialProfilePIDController
    *
    * @return integral coefficient
    */
-  public double getI()
-  {
+  public double getI() {
     return controller.getI();
   }
 
@@ -505,8 +466,7 @@ public class ExponentialProfilePIDController
    *
    * @param kI The integral coefficient. Must be >= 0.
    */
-  public void setI(double kI)
-  {
+  public void setI(double kI) {
     controller.setI(kI);
   }
 
@@ -515,8 +475,7 @@ public class ExponentialProfilePIDController
    *
    * @return differential coefficient
    */
-  public double getD()
-  {
+  public double getD() {
     return controller.getD();
   }
 
@@ -525,8 +484,7 @@ public class ExponentialProfilePIDController
    *
    * @param kD The differential coefficient. Must be >= 0.
    */
-  public void setD(double kD)
-  {
+  public void setD(double kD) {
     controller.setD(kD);
   }
 
@@ -539,8 +497,7 @@ public class ExponentialProfilePIDController
    * @param minimumInput The minimum value expected from the input.
    * @param maximumInput The maximum value expected from the input.
    */
-  public void enableContinuousInput(double minimumInput, double maximumInput)
-  {
+  public void enableContinuousInput(double minimumInput, double maximumInput) {
     controller.enableContinuousInput(minimumInput, maximumInput);
   }
 }

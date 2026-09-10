@@ -8,21 +8,20 @@ package yams.exceptions;
  * lower-joint or upper-joint {@link yams.mechanisms.config.ArmConfig} is missing or invalid.
  *
  * <p>Common triggers include:
+ *
  * <ul>
- *   <li>The lower and upper joint motor controllers do not share the same WPILib
- *       {@code Subsystem} instance — both must reference the same subsystem so that a
- *       single command can require it</li>
- *   <li>Starting angle missing on either joint config — both the lower and upper
- *       {@code ArmConfig} must have a starting position set via
- *       {@code SmartMotorControllerConfig.withStartingPosition(Angle)}</li>
+ *   <li>The lower and upper joint motor controllers do not share the same WPILib {@code Subsystem}
+ *       instance — both must reference the same subsystem so that a single command can require it
+ *   <li>Starting angle missing on either joint config — both the lower and upper {@code ArmConfig}
+ * must have a starting position set via {@code SmartMotorControllerConfig.withStartingPosition(Angle)}
  * </ul>
  *
- * <p><b>Resolution:</b> Ensure both joint configs supply motors via
- * {@code ArmConfig.withSmartMotorController(SmartMotorController)}, that both motors
- * are bound to the same subsystem via {@code SmartMotorControllerConfig.withSubsystem(Subsystem)},
- * and that both configs include {@code SmartMotorControllerConfig.withStartingPosition(Angle)}.
+ * <p><b>Resolution:</b> Ensure both joint configs supply motors via {@code ArmConfig.withSmartMotorController(SmartMotorController)}, that both motors are bound to the same
+ * subsystem via {@code SmartMotorControllerConfig.withSubsystem(Subsystem)}, and that both configs
+ * include {@code SmartMotorControllerConfig.withStartingPosition(Angle)}.
  *
  * <p>Example minimal configuration:
+ *
  * <pre>{@code
  * ArmConfig lowerConfig = new ArmConfig()
  *     .withSmartMotorController(SmartMotorController.create(SPARK_MAX, DCMotor.getNEO(1), lowerMotorCfg));
@@ -34,17 +33,22 @@ package yams.exceptions;
  * @see yams.mechanisms.positional.DoubleJointedArm
  * @see yams.mechanisms.config.ArmConfig
  */
-public class DoubleJointedArmConfigurationException extends RuntimeException
-{
+public class DoubleJointedArmConfigurationException extends RuntimeException {
   /**
    * Arm configuration exception.
    *
-   * @param message        Message to display.
-   * @param result         Result of the configuration.
+   * @param message Message to display.
+   * @param result Result of the configuration.
    * @param remedyFunction Remedy function to use.
    */
-  public DoubleJointedArmConfigurationException(String message, String result, String remedyFunction)
-  {
-    super(message + "!\n" + result + "\nPlease use ArmConfig." + remedyFunction + " to fix this error.");
+  public DoubleJointedArmConfigurationException(
+      String message, String result, String remedyFunction) {
+    super(
+        message
+            + "!\n"
+            + result
+            + "\nPlease use ArmConfig."
+            + remedyFunction
+            + " to fix this error.");
   }
 }

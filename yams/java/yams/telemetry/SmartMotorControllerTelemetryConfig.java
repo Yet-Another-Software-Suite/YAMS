@@ -24,11 +24,12 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
 /**
  * Smart motor controller telemetry configuration.
  *
- * <p>Use this builder to select exactly which fields are published to NetworkTables and/or
- * DataLog. Every field is disabled by default; call the individual {@code with*()} methods to
- * opt in, or use {@link #withTelemetryVerbosity} to enable a predefined set.
+ * <p>Use this builder to select exactly which fields are published to NetworkTables and/or DataLog.
+ * Every field is disabled by default; call the individual {@code with*()} methods to opt in, or use
+ * {@link #withTelemetryVerbosity} to enable a predefined set.
  *
  * <h2>Example</h2>
+ *
  * <pre>{@code
  * SmartMotorControllerTelemetryConfig telemetryCfg =
  *     new SmartMotorControllerTelemetryConfig()
@@ -61,23 +62,18 @@ import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * }</pre>
  */
 public class SmartMotorControllerTelemetryConfig {
-  /**
-   * DataLog entry name
-   */
+  /** DataLog entry name */
   private Optional<String> dataLogName = Optional.empty();
-  /**
-   * Enable telemetry over network tables.
-   */
+
+  /** Enable telemetry over network tables. */
   private boolean NT4Telemetry = true;
-  /**
-   * {@link BooleanTelemetryField}s to enable or disable.
-   */
+
+  /** {@link BooleanTelemetryField}s to enable or disable. */
   private final Map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> boolFields =
       Arrays.stream(BooleanTelemetryField.values())
           .collect(Collectors.toMap(e -> e, BooleanTelemetryField::create));
-  /**
-   * {@link DoubleTelemetryField} to enable or disable.
-   */
+
+  /** {@link DoubleTelemetryField} to enable or disable. */
   private final Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> doubleFields =
       Arrays.stream(DoubleTelemetryField.values())
           .collect(Collectors.toMap(e -> e, DoubleTelemetryField::create));
@@ -223,16 +219,22 @@ public class SmartMotorControllerTelemetryConfig {
       SmartMotorController smc) {
     var config = smc.getConfig();
     var unsupTelemetry = smc.getUnsupportedTelemetryFields();
-    unsupTelemetry.getFirst().ifPresent(btList -> {
-      for (BooleanTelemetryField bt : btList) {
-        boolFields.get(bt).disable();
-      }
-    });
-    unsupTelemetry.getSecond().ifPresent(dtList -> {
-      for (DoubleTelemetryField dt : dtList) {
-        doubleFields.get(dt).disable();
-      }
-    });
+    unsupTelemetry
+        .getFirst()
+        .ifPresent(
+            btList -> {
+              for (BooleanTelemetryField bt : btList) {
+                boolFields.get(bt).disable();
+              }
+            });
+    unsupTelemetry
+        .getSecond()
+        .ifPresent(
+            dtList -> {
+              for (DoubleTelemetryField dt : dtList) {
+                doubleFields.get(dt).disable();
+              }
+            });
     if (smc.getSupplyCurrent().isEmpty()) {
       doubleFields.get(DoubleTelemetryField.SupplyCurrent).disable();
       doubleFields.get(DoubleTelemetryField.SupplyCurrentLimit).disable();
@@ -246,101 +248,155 @@ public class SmartMotorControllerTelemetryConfig {
       doubleFields.get(DoubleTelemetryField.MeasurementPosition).disable();
       doubleFields.get(DoubleTelemetryField.MeasurementVelocity).disable();
     } else {
-      config.getMechanismUpperLimit().ifPresent(upperLimit
-          -> doubleFields.get(DoubleTelemetryField.MeasurementUpperLimit)
-              .setDefaultValue(config.convertFromMechanism(upperLimit).in(Meters)));
-      config.getMechanismLowerLimit().ifPresent(limit
-          -> doubleFields.get(DoubleTelemetryField.MeasurementLowerLimit)
-              .setDefaultValue(config.convertFromMechanism(limit).in(Meters)));
+      config
+          .getMechanismUpperLimit()
+          .ifPresent(
+              upperLimit ->
+                  doubleFields
+                      .get(DoubleTelemetryField.MeasurementUpperLimit)
+                      .setDefaultValue(config.convertFromMechanism(upperLimit).in(Meters)));
+      config
+          .getMechanismLowerLimit()
+          .ifPresent(
+              limit ->
+                  doubleFields
+                      .get(DoubleTelemetryField.MeasurementLowerLimit)
+                      .setDefaultValue(config.convertFromMechanism(limit).in(Meters)));
     }
-    config.getMechanismUpperLimit().ifPresent(limit
-        -> doubleFields.get(DoubleTelemetryField.MechanismUpperLimit)
-            .setDefaultValue(limit.in(Degrees)));
-    config.getMechanismLowerLimit().ifPresent(limit
-        -> doubleFields.get(DoubleTelemetryField.MechanismLowerLimit)
-            .setDefaultValue(limit.in(Degrees)));
-    config.getSupplyStallCurrentLimit().ifPresent(
-        e -> doubleFields.get(DoubleTelemetryField.SupplyCurrentLimit).setDefaultValue(e));
-    config.getStatorStallCurrentLimit().ifPresent(
-        e -> doubleFields.get(DoubleTelemetryField.StatorCurrentLimit).setDefaultValue(e));
-    config.getPID(smc.getClosedLoopControllerSlot()).ifPresent(e -> {
-      doubleFields.get(DoubleTelemetryField.kP).setDefaultValue(e.getP());
-      doubleFields.get(DoubleTelemetryField.kI).setDefaultValue(e.getI());
-      doubleFields.get(DoubleTelemetryField.kD).setDefaultValue(e.getD());
-    });
-    config.getTrapezoidProfile().ifPresent(e -> {
-      doubleFields.get(DoubleTelemetryField.ExponentialProfileMaxInput).disable();
-      doubleFields.get(DoubleTelemetryField.ExponentialProfileKA).disable();
-      doubleFields.get(DoubleTelemetryField.ExponentialProfileKV).disable();
+    config
+        .getMechanismUpperLimit()
+        .ifPresent(
+            limit ->
+                doubleFields
+                    .get(DoubleTelemetryField.MechanismUpperLimit)
+                    .setDefaultValue(limit.in(Degrees)));
+    config
+        .getMechanismLowerLimit()
+        .ifPresent(
+            limit ->
+                doubleFields
+                    .get(DoubleTelemetryField.MechanismLowerLimit)
+                    .setDefaultValue(limit.in(Degrees)));
+    config
+        .getSupplyStallCurrentLimit()
+        .ifPresent(
+            e -> doubleFields.get(DoubleTelemetryField.SupplyCurrentLimit).setDefaultValue(e));
+    config
+        .getStatorStallCurrentLimit()
+        .ifPresent(
+            e -> doubleFields.get(DoubleTelemetryField.StatorCurrentLimit).setDefaultValue(e));
+    config
+        .getPID(smc.getClosedLoopControllerSlot())
+        .ifPresent(
+            e -> {
+              doubleFields.get(DoubleTelemetryField.kP).setDefaultValue(e.getP());
+              doubleFields.get(DoubleTelemetryField.kI).setDefaultValue(e.getI());
+              doubleFields.get(DoubleTelemetryField.kD).setDefaultValue(e.getD());
+            });
+    config
+        .getTrapezoidProfile()
+        .ifPresent(
+            e -> {
+              doubleFields.get(DoubleTelemetryField.ExponentialProfileMaxInput).disable();
+              doubleFields.get(DoubleTelemetryField.ExponentialProfileKA).disable();
+              doubleFields.get(DoubleTelemetryField.ExponentialProfileKV).disable();
 
-      doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxAcceleration).enable();
-      if (config.getVelocityTrapezoidalProfileInUse()) {
-        var maxJerk = RotationsPerSecondPerSecond.per(Second).of(e.maxAcceleration);
-        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxJerk)
-            .setDefaultValue(maxJerk.in(RPM.per(Second).per(Second)));
-        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxJerk).enable();
-        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxVelocity).disable();
-      } else if (config.getLinearClosedLoopControllerUse()) {
-        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxAcceleration)
-            .setDefaultValue(e.maxAcceleration);
-        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxVelocity)
-            .setDefaultValue(e.maxVelocity);
-        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxVelocity).enable();
-        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxJerk).disable();
-      } else {
-        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxAcceleration)
-            .setDefaultValue(RotationsPerSecondPerSecond.of(e.maxAcceleration).in(RPM.per(Minute)));
-        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxVelocity)
-            .setDefaultValue(RotationsPerSecond.of(e.maxVelocity).in(RPM));
-        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxVelocity).enable();
-        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxJerk).disable();
-      }
-    });
-    config.getExponentialProfile().ifPresent(e -> {
-      doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxAcceleration).disable();
-      doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxVelocity).disable();
-      doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxJerk).disable();
+              doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxAcceleration).enable();
+              if (config.getVelocityTrapezoidalProfileInUse()) {
+                var maxJerk = RotationsPerSecondPerSecond.per(Second).of(e.maxAcceleration);
+                doubleFields
+                    .get(DoubleTelemetryField.TrapezoidalProfileMaxJerk)
+                    .setDefaultValue(maxJerk.in(RPM.per(Second).per(Second)));
+                doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxJerk).enable();
+                doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxVelocity).disable();
+              } else if (config.getLinearClosedLoopControllerUse()) {
+                doubleFields
+                    .get(DoubleTelemetryField.TrapezoidalProfileMaxAcceleration)
+                    .setDefaultValue(e.maxAcceleration);
+                doubleFields
+                    .get(DoubleTelemetryField.TrapezoidalProfileMaxVelocity)
+                    .setDefaultValue(e.maxVelocity);
+                doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxVelocity).enable();
+                doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxJerk).disable();
+              } else {
+                doubleFields
+                    .get(DoubleTelemetryField.TrapezoidalProfileMaxAcceleration)
+                    .setDefaultValue(
+                        RotationsPerSecondPerSecond.of(e.maxAcceleration).in(RPM.per(Minute)));
+                doubleFields
+                    .get(DoubleTelemetryField.TrapezoidalProfileMaxVelocity)
+                    .setDefaultValue(RotationsPerSecond.of(e.maxVelocity).in(RPM));
+                doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxVelocity).enable();
+                doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxJerk).disable();
+              }
+            });
+    config
+        .getExponentialProfile()
+        .ifPresent(
+            e -> {
+              doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxAcceleration).disable();
+              doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxVelocity).disable();
+              doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxJerk).disable();
 
-      doubleFields.get(DoubleTelemetryField.ExponentialProfileKA).enable();
-      doubleFields.get(DoubleTelemetryField.ExponentialProfileKV).enable();
-      doubleFields.get(DoubleTelemetryField.ExponentialProfileMaxInput).enable();
-      var defaultkV = config.getLinearClosedLoopControllerUse()
-          ? config.convertToMechanism(Meters.of(-e.A / e.B)).in(Rotations)
-          : (-e.A / e.B);
-      var defaultkA = config.getLinearClosedLoopControllerUse()
-          ? config.convertToMechanism(Meters.of(1.0 / e.B)).in(Rotations)
-          : (1.0 / e.B);
-      var defaultMaxInput = e.maxInput;
-      doubleFields.get(DoubleTelemetryField.ExponentialProfileKA).setDefaultValue(defaultkA);
-      doubleFields.get(DoubleTelemetryField.ExponentialProfileKV).setDefaultValue(defaultkV);
-      doubleFields.get(DoubleTelemetryField.ExponentialProfileMaxInput)
-          .setDefaultValue(defaultMaxInput);
-    });
-    config.getLQRClosedLoopController().ifPresent(e -> {
-      doubleFields.get(DoubleTelemetryField.kP).disable();
-      doubleFields.get(DoubleTelemetryField.kI).disable();
-      doubleFields.get(DoubleTelemetryField.kD).disable();
-    });
-    config.getArmFeedforward(smc.getClosedLoopControllerSlot()).ifPresent(e -> {
-      doubleFields.get(DoubleTelemetryField.kG).enable();
-      doubleFields.get(DoubleTelemetryField.kS).setDefaultValue(e.getKs());
-      doubleFields.get(DoubleTelemetryField.kV).setDefaultValue(e.getKv());
-      doubleFields.get(DoubleTelemetryField.kA).setDefaultValue(e.getKa());
-      doubleFields.get(DoubleTelemetryField.kG).setDefaultValue(e.getKg());
-    });
-    config.getElevatorFeedforward(smc.getClosedLoopControllerSlot()).ifPresent(e -> {
-      doubleFields.get(DoubleTelemetryField.kG).enable();
-      doubleFields.get(DoubleTelemetryField.kS).setDefaultValue(e.getKs());
-      doubleFields.get(DoubleTelemetryField.kV).setDefaultValue(e.getKv());
-      doubleFields.get(DoubleTelemetryField.kA).setDefaultValue(e.getKa());
-      doubleFields.get(DoubleTelemetryField.kG).setDefaultValue(e.getKg());
-    });
-    config.getSimpleFeedforward(smc.getClosedLoopControllerSlot()).ifPresent(e -> {
-      doubleFields.get(DoubleTelemetryField.kG).disable();
-      doubleFields.get(DoubleTelemetryField.kS).setDefaultValue(e.getKs());
-      doubleFields.get(DoubleTelemetryField.kV).setDefaultValue(e.getKv());
-      doubleFields.get(DoubleTelemetryField.kA).setDefaultValue(e.getKa());
-    });
+              doubleFields.get(DoubleTelemetryField.ExponentialProfileKA).enable();
+              doubleFields.get(DoubleTelemetryField.ExponentialProfileKV).enable();
+              doubleFields.get(DoubleTelemetryField.ExponentialProfileMaxInput).enable();
+              var defaultkV =
+                  config.getLinearClosedLoopControllerUse()
+                      ? config.convertToMechanism(Meters.of(-e.A / e.B)).in(Rotations)
+                      : (-e.A / e.B);
+              var defaultkA =
+                  config.getLinearClosedLoopControllerUse()
+                      ? config.convertToMechanism(Meters.of(1.0 / e.B)).in(Rotations)
+                      : (1.0 / e.B);
+              var defaultMaxInput = e.maxInput;
+              doubleFields
+                  .get(DoubleTelemetryField.ExponentialProfileKA)
+                  .setDefaultValue(defaultkA);
+              doubleFields
+                  .get(DoubleTelemetryField.ExponentialProfileKV)
+                  .setDefaultValue(defaultkV);
+              doubleFields
+                  .get(DoubleTelemetryField.ExponentialProfileMaxInput)
+                  .setDefaultValue(defaultMaxInput);
+            });
+    config
+        .getLQRClosedLoopController()
+        .ifPresent(
+            e -> {
+              doubleFields.get(DoubleTelemetryField.kP).disable();
+              doubleFields.get(DoubleTelemetryField.kI).disable();
+              doubleFields.get(DoubleTelemetryField.kD).disable();
+            });
+    config
+        .getArmFeedforward(smc.getClosedLoopControllerSlot())
+        .ifPresent(
+            e -> {
+              doubleFields.get(DoubleTelemetryField.kG).enable();
+              doubleFields.get(DoubleTelemetryField.kS).setDefaultValue(e.getKs());
+              doubleFields.get(DoubleTelemetryField.kV).setDefaultValue(e.getKv());
+              doubleFields.get(DoubleTelemetryField.kA).setDefaultValue(e.getKa());
+              doubleFields.get(DoubleTelemetryField.kG).setDefaultValue(e.getKg());
+            });
+    config
+        .getElevatorFeedforward(smc.getClosedLoopControllerSlot())
+        .ifPresent(
+            e -> {
+              doubleFields.get(DoubleTelemetryField.kG).enable();
+              doubleFields.get(DoubleTelemetryField.kS).setDefaultValue(e.getKs());
+              doubleFields.get(DoubleTelemetryField.kV).setDefaultValue(e.getKv());
+              doubleFields.get(DoubleTelemetryField.kA).setDefaultValue(e.getKa());
+              doubleFields.get(DoubleTelemetryField.kG).setDefaultValue(e.getKg());
+            });
+    config
+        .getSimpleFeedforward(smc.getClosedLoopControllerSlot())
+        .ifPresent(
+            e -> {
+              doubleFields.get(DoubleTelemetryField.kG).disable();
+              doubleFields.get(DoubleTelemetryField.kS).setDefaultValue(e.getKs());
+              doubleFields.get(DoubleTelemetryField.kV).setDefaultValue(e.getKv());
+              doubleFields.get(DoubleTelemetryField.kA).setDefaultValue(e.getKa());
+            });
     if (smc.getExternalEncoderPosition().isEmpty()) {
       doubleFields.get(DoubleTelemetryField.ExternalEncoderPosition).disable();
     }
@@ -370,13 +426,15 @@ public class SmartMotorControllerTelemetryConfig {
       boolFields.get(BooleanTelemetryField.SimpleMotorFeedForward).disable();
     }
     if (config.getMotorInverted().isPresent()) {
-      boolFields.get(BooleanTelemetryField.MotorInversion)
+      boolFields
+          .get(BooleanTelemetryField.MotorInversion)
           .setDefaultValue(config.getMotorInverted().get());
     } else {
       boolFields.get(BooleanTelemetryField.MotorInversion).disable();
     }
     if (config.getEncoderInverted().isPresent()) {
-      boolFields.get(BooleanTelemetryField.EncoderInversion)
+      boolFields
+          .get(BooleanTelemetryField.EncoderInversion)
           .setDefaultValue(config.getEncoderInverted().get());
     } else {
       boolFields.get(BooleanTelemetryField.EncoderInversion).disable();
@@ -586,35 +644,34 @@ public class SmartMotorControllerTelemetryConfig {
 
   /**
    * Escape hatch for unimplemented fields which should be enabled or disabled.
+   *
    * @param field Field to configure
    * @param value Enable on true, Disable on false.
    * @return {@link SmartMotorControllerTelemetryConfig} for chaining
    */
   public SmartMotorControllerTelemetryConfig withCustom(DoubleTelemetryField field, boolean value) {
-    if (value)
-      doubleFields.get(field).enable();
-    else
-      doubleFields.get(field).disable();
+    if (value) doubleFields.get(field).enable();
+    else doubleFields.get(field).disable();
     return this;
   }
 
   /**
    * Escape hatch for unimplemented fields which should be enabled or disabled.
+   *
    * @param field Field to configure
    * @param value Enable on true, Disable on false.
    * @return {@link SmartMotorControllerTelemetryConfig} for chaining
    */
   public SmartMotorControllerTelemetryConfig withCustom(
       BooleanTelemetryField field, boolean value) {
-    if (value)
-      boolFields.get(field).enable();
-    else
-      boolFields.get(field).disable();
+    if (value) boolFields.get(field).enable();
+    else boolFields.get(field).disable();
     return this;
   }
 
   /**
    * Escape hatch for unimplemented fields which should be enabled or disabled.
+   *
    * @param field Field to configure
    * @param value Enable on true, Disable on false.
    * @return {@link SmartMotorControllerTelemetryConfig} for chaining
@@ -629,6 +686,7 @@ public class SmartMotorControllerTelemetryConfig {
 
   /**
    * Escape hatch for unimplemented fields which should be enabled or disabled.
+   *
    * @param field Field to configure
    * @param value Enable on true, Disable on false.
    * @return {@link SmartMotorControllerTelemetryConfig} for chaining

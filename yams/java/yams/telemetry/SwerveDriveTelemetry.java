@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 package yams.telemetry;
 
 import static edu.wpi.first.units.Units.Degrees;
@@ -24,15 +27,14 @@ public class SwerveDriveTelemetry {
   private NetworkTable m_dataNt;
   private NetworkTable m_tuningNt;
 
-  /**
-   * Create SwerveDrive telemetry for logging in NetworkTables and DataLog.
-   */
+  /** Create SwerveDrive telemetry for logging in NetworkTables and DataLog. */
   public SwerveDriveTelemetry(SwerveDriveTelemetryConfig config) {
     m_config = config;
   }
 
   /**
    * Setup telemetry for the drive.
+   *
    * @param drive {@link SwerveDrive} to use for telemetry.
    */
   public void setupTelemetry(SwerveDrive drive) {
@@ -69,7 +71,7 @@ public class SwerveDriveTelemetry {
       m_config.getDataLogName().ifPresent(stt::setupDataLog);
     }
     for (Map.Entry<StructArrayTelemetryField, StructArrayTelemetry<?, StructArrayTelemetryField>>
-             entry : m_structArrayTelemetry.entrySet()) {
+        entry : m_structArrayTelemetry.entrySet()) {
       var stat = entry.getValue();
       if (!stat.enabled) {
         continue;
@@ -94,6 +96,7 @@ public class SwerveDriveTelemetry {
 
   /**
    * Publish telemetry to NetworkTables and DataLog
+   *
    * @param drive {@link SwerveDrive} to publish telemetry from.
    */
   @SuppressWarnings("unchecked")
@@ -108,44 +111,44 @@ public class SwerveDriveTelemetry {
       switch (stt.getField()) {
         case Pose -> ((StructTelemetry<Pose2d, StructTelemetryField>) stt).set(drive.getPose());
         case DesiredRobotRelativeChassisSpeeds ->
-          ((StructTelemetry<ChassisSpeeds, StructTelemetryField>) stt)
-              .set(drive.getDesiredChassisSpeeds());
+            ((StructTelemetry<ChassisSpeeds, StructTelemetryField>) stt)
+                .set(drive.getDesiredChassisSpeeds());
         case CurrentRobotRelativeChassisSpeeds ->
-          ((StructTelemetry<ChassisSpeeds, StructTelemetryField>) stt)
-              .set(drive.getRobotRelativeSpeed());
+            ((StructTelemetry<ChassisSpeeds, StructTelemetryField>) stt)
+                .set(drive.getRobotRelativeSpeed());
         case FieldRelativeChassisSpeeds ->
-          ((StructTelemetry<ChassisSpeeds, StructTelemetryField>) stt)
-              .set(drive.getFieldRelativeSpeed());
+            ((StructTelemetry<ChassisSpeeds, StructTelemetryField>) stt)
+                .set(drive.getFieldRelativeSpeed());
       }
     }
     for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry :
         m_doubleTelemetry.entrySet()) {
       var dt = entry.getValue();
-      if (!dt.enabled)
-        continue;
+      if (!dt.enabled) continue;
       switch (dt.getField()) {
         case Gyro -> dt.set(drive.getGyroAngle().in(Degrees));
       }
     }
     for (Map.Entry<StructArrayTelemetryField, StructArrayTelemetry<?, StructArrayTelemetryField>>
-             entry : m_structArrayTelemetry.entrySet()) {
+        entry : m_structArrayTelemetry.entrySet()) {
       var stat = entry.getValue();
       if (!stat.enabled) {
         continue;
       }
       switch (stat.getField()) {
         case DesiredModuleStates ->
-          ((StructArrayTelemetry<SwerveModuleState, StructArrayTelemetryField>) stat)
-              .set(drive.getDesiredModuleStates());
+            ((StructArrayTelemetry<SwerveModuleState, StructArrayTelemetryField>) stat)
+                .set(drive.getDesiredModuleStates());
         case CurrentModuleStates ->
-          ((StructArrayTelemetry<SwerveModuleState, StructArrayTelemetryField>) stat)
-              .set(drive.getModuleStates());
+            ((StructArrayTelemetry<SwerveModuleState, StructArrayTelemetryField>) stat)
+                .set(drive.getModuleStates());
       }
     }
   }
 
   /**
    * Apply the tuning values from {@link NetworkTable} to the {@link SwerveDrive}
+   *
    * @param drive {@link SwerveDrive} to control.
    */
   @SuppressWarnings("unchecked")
@@ -195,8 +198,9 @@ public class SwerveDriveTelemetry {
       var modules = drive.getModules();
       var states = new SwerveModuleState[modules.length];
       if (driveTuningOn) {
-        var velocity = MetersPerSecond.of(
-            m_doubleTelemetry.get(DoubleTelemetryField.ModulesDriveVelocity).get());
+        var velocity =
+            MetersPerSecond.of(
+                m_doubleTelemetry.get(DoubleTelemetryField.ModulesDriveVelocity).get());
         for (int i = 0; i < modules.length; i++) {
           if (driveInPlaceOn) {
             // Point each module tangent to its position around the robot center so a positive
@@ -221,7 +225,8 @@ public class SwerveDriveTelemetry {
 
     if (azimuthTuningOn) {
       var angle =
-          Rotation2d.fromDegrees(m_doubleTelemetry.get(DoubleTelemetryField.ModulesAzimuthAngle).get());
+          Rotation2d.fromDegrees(
+              m_doubleTelemetry.get(DoubleTelemetryField.ModulesAzimuthAngle).get());
       var modules = drive.getModules();
       var states = new SwerveModuleState[modules.length];
       for (int i = 0; i < modules.length; i++) {
@@ -233,8 +238,7 @@ public class SwerveDriveTelemetry {
     for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry :
         m_doubleTelemetry.entrySet()) {
       var dt = entry.getValue();
-      if (!dt.tunable())
-        continue;
+      if (!dt.tunable()) continue;
       switch (dt.getField()) {
         case TranslationP -> {
           translationPID.setP(dt.get());
@@ -320,15 +324,12 @@ public class SwerveDriveTelemetry {
             module.getAzimuthMotorController().setKa(dt.get());
           }
         }
-        default -> {
-        }
+        default -> {}
       }
     }
   }
 
-  /**
-   * Close and unpublish telemetry.
-   */
+  /** Close and unpublish telemetry. */
   public void close() {
     if (m_doubleTelemetry != null) {
       for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry :
@@ -344,7 +345,7 @@ public class SwerveDriveTelemetry {
     }
     if (m_structArrayTelemetry != null) {
       for (Map.Entry<StructArrayTelemetryField, StructArrayTelemetry<?, StructArrayTelemetryField>>
-               entry : m_structArrayTelemetry.entrySet()) {
+          entry : m_structArrayTelemetry.entrySet()) {
         entry.getValue().close();
       }
     }
@@ -356,54 +357,41 @@ public class SwerveDriveTelemetry {
     }
   }
 
-  /**
-   * Struct telemetry field for {@link SwerveDrive}s.
-   */
+  /** Struct telemetry field for {@link SwerveDrive}s. */
   public enum StructTelemetryField {
     /**
      * Estimated {@link Pose2d} of the robot, as reported by the {@link edu.wpi.first.math.estimator.SwerveDrivePoseEstimator}.
      */
     Pose("pose", Pose2d.struct, new Pose2d(), false),
-    /**
-     * Last-commanded desired robot relative {@link ChassisSpeeds}.
-     */
+    /** Last-commanded desired robot relative {@link ChassisSpeeds}. */
     DesiredRobotRelativeChassisSpeeds(
         "chassis/desired", ChassisSpeeds.struct, new ChassisSpeeds(), false),
-    /**
-     * Measured robot relative {@link ChassisSpeeds}.
-     */
+    /** Measured robot relative {@link ChassisSpeeds}. */
     CurrentRobotRelativeChassisSpeeds(
         "chassis/current", ChassisSpeeds.struct, new ChassisSpeeds(), false),
-    /**
-     * Measured field relative {@link ChassisSpeeds}.
-     */
+    /** Measured field relative {@link ChassisSpeeds}. */
     FieldRelativeChassisSpeeds("chassis/field", ChassisSpeeds.struct, new ChassisSpeeds(), false);
 
-    /**
-     * Key that the telemetry is stored at.
-     */
+    /** Key that the telemetry is stored at. */
     private final String key;
-    /**
-     * {@link Struct} serializer for the field's value type.
-     */
+
+    /** {@link Struct} serializer for the field's value type. */
     private final Struct<?> struct;
-    /**
-     * Default value of the struct telemetry field.
-     */
+
+    /** Default value of the struct telemetry field. */
     private final Object defaultValue;
-    /**
-     * Tunable field?
-     */
+
+    /** Tunable field? */
     private final boolean tunable;
 
     /**
      * Create a struct telemetry field.
      *
-     * @param fieldName    Field for {@link edu.wpi.first.networktables.NetworkTable}
-     * @param struct       {@link Struct} serializer for the field's value type {@link T}.
+     * @param fieldName Field for {@link edu.wpi.first.networktables.NetworkTable}
+     * @param struct {@link Struct} serializer for the field's value type {@link T}.
      * @param defaultValue Default value in NT.
-     * @param tunable      Tunable field.
-     * @param <T>          Type of the field's value.
+     * @param tunable Tunable field.
+     * @param <T> Type of the field's value.
      */
     <T> StructTelemetryField(String fieldName, Struct<T> struct, T defaultValue, boolean tunable) {
       key = fieldName;
@@ -424,46 +412,35 @@ public class SwerveDriveTelemetry {
     }
   }
 
-  /**
-   * Struct array telemetry field for {@link SwerveDrive}s.
-   */
+  /** Struct array telemetry field for {@link SwerveDrive}s. */
   public enum StructArrayTelemetryField {
-    /**
-     * Last-commanded desired {@link SwerveModuleState}s.
-     */
+    /** Last-commanded desired {@link SwerveModuleState}s. */
     DesiredModuleStates(
         "states/desired", SwerveModuleState.struct, new SwerveModuleState[0], false),
-    /**
-     * Measured {@link SwerveModuleState}s.
-     */
+    /** Measured {@link SwerveModuleState}s. */
     CurrentModuleStates(
         "states/current", SwerveModuleState.struct, new SwerveModuleState[0], false);
 
-    /**
-     * Key that the telemetry is stored at.
-     */
+    /** Key that the telemetry is stored at. */
     private final String key;
-    /**
-     * {@link Struct} serializer for the field's array element type.
-     */
+
+    /** {@link Struct} serializer for the field's array element type. */
     private final Struct<?> struct;
-    /**
-     * Default value of the struct array telemetry field.
-     */
+
+    /** Default value of the struct array telemetry field. */
     private final Object[] defaultValue;
-    /**
-     * Tunable field?
-     */
+
+    /** Tunable field? */
     private final boolean tunable;
 
     /**
      * Create a struct array telemetry field.
      *
-     * @param fieldName    Field for {@link edu.wpi.first.networktables.NetworkTable}
-     * @param struct       {@link Struct} serializer for the field's array element type {@link T}.
+     * @param fieldName Field for {@link edu.wpi.first.networktables.NetworkTable}
+     * @param struct {@link Struct} serializer for the field's array element type {@link T}.
      * @param defaultValue Default value in NT.
-     * @param tunable      Tunable field.
-     * @param <T>          Type of the field's array elements.
+     * @param tunable Tunable field.
+     * @param <T> Type of the field's array elements.
      */
     <T> StructArrayTelemetryField(
         String fieldName, Struct<T> struct, T[] defaultValue, boolean tunable) {
@@ -486,131 +463,76 @@ public class SwerveDriveTelemetry {
     }
   }
 
-  /**
-   * Double telemetry field for {@link SwerveDrive}s.
-   */
+  /** Double telemetry field for {@link SwerveDrive}s. */
   public enum DoubleTelemetryField {
-    /**
-     * Translational proporational gain for auto-aligning the robot.
-     */
+    /** Translational proporational gain for auto-aligning the robot. */
     TranslationP("autoalign/translation/p", 0, true, "meters"),
-    /**
-     * Translational integral gain for auto-aligning the robot.
-     */
+    /** Translational integral gain for auto-aligning the robot. */
     TranslationI("autoalign/translation/i", 0, true, "meters"),
-    /**
-     * Translational derivative gain for auto-aligning the robot.
-     */
+    /** Translational derivative gain for auto-aligning the robot. */
     TranslationD("autoalign/translation/d", 0, true, "meters"),
-    /**
-     * Rotational proporational gain for auto-aligning the robot.
-     */
+    /** Rotational proporational gain for auto-aligning the robot. */
     RotationP("autoalign/rotation/p", 0, true, "radians"),
-    /**
-     * Rotational integral gain for auto-aligning the robot.
-     */
+    /** Rotational integral gain for auto-aligning the robot. */
     RotationI("autoalign/rotation/i", 0, true, "radians"),
-    /**
-     * Rotational derivative gain for auto-aligning the robot.
-     */
+    /** Rotational derivative gain for auto-aligning the robot. */
     RotationD("autoalign/rotation/d", 0, true, "radians"),
-    /**
-     * X position of the auto-align target pose, in meters.
-     */
+    /** X position of the auto-align target pose, in meters. */
     AutoAlignPoseX("autoalign/setpoint/x", 3, true, "meters"),
-    /**
-     * Y position of the auto-align target pose, in meters.
-     */
+    /** Y position of the auto-align target pose, in meters. */
     AutoAlignPoseY("autoalign/setpoint/y", 3, true, "meters"),
-    /**
-     * Rotation of the auto-align target pose, in degrees.
-     */
+    /** Rotation of the auto-align target pose, in degrees. */
     AutoAlignPoseRotation("autoalign/setpoint/rot", 0, true, "degrees"),
-    /**
-     * Proportional gain for tuning every module's drive motor closed-loop controller.
-     */
+    /** Proportional gain for tuning every module's drive motor closed-loop controller. */
     ModulesDriveP("modules/drive/feedback/p", 0, true, "none"),
-    /**
-     * Integral gain for tuning every module's drive motor closed-loop controller.
-     */
+    /** Integral gain for tuning every module's drive motor closed-loop controller. */
     ModulesDriveI("modules/drive/feedback/i", 0, true, "none"),
-    /**
-     * Derivative gain for tuning every module's drive motor closed-loop controller.
-     */
+    /** Derivative gain for tuning every module's drive motor closed-loop controller. */
     ModulesDriveD("modules/drive/feedback/d", 0, true, "none"),
-    /**
-     * Static feedforward gain for tuning every module's drive motor.
-     */
+    /** Static feedforward gain for tuning every module's drive motor. */
     ModulesDriveKs("modules/drive/feedforward/s", 0, true, "none"),
-    /**
-     * Velocity feedforward gain for tuning every module's drive motor.
-     */
+    /** Velocity feedforward gain for tuning every module's drive motor. */
     ModulesDriveKv("modules/drive/feedforward/v", 0, true, "none"),
-    /**
-     * Acceleration feedforward gain for tuning every module's drive motor.
-     */
+    /** Acceleration feedforward gain for tuning every module's drive motor. */
     ModulesDriveKa("modules/drive/feedforward/a", 0, true, "none"),
-    /**
-     * Tunable velocity setpoint applied to every module's drive motor, in meters per second.
-     */
+    /** Tunable velocity setpoint applied to every module's drive motor, in meters per second. */
     ModulesDriveVelocity("modules/drive/velocity", 0, true, "meters_per_second"),
-    /**
-     * Proportional gain for tuning every module's azimuth motor closed-loop controller.
-     */
+    /** Proportional gain for tuning every module's azimuth motor closed-loop controller. */
     ModulesAzimuthP("modules/azimuth/feedback/p", 0, true, "none"),
-    /**
-     * Integral gain for tuning every module's azimuth motor closed-loop controller.
-     */
+    /** Integral gain for tuning every module's azimuth motor closed-loop controller. */
     ModulesAzimuthI("modules/azimuth/feedback/i", 0, true, "none"),
-    /**
-     * Derivative gain for tuning every module's azimuth motor closed-loop controller.
-     */
+    /** Derivative gain for tuning every module's azimuth motor closed-loop controller. */
     ModulesAzimuthD("modules/azimuth/feedback/d", 0, true, "none"),
-    /**
-     * Static feedforward gain for tuning every module's azimuth motor.
-     */
+    /** Static feedforward gain for tuning every module's azimuth motor. */
     ModulesAzimuthKs("modules/azimuth/feedforward/s", 0, true, "none"),
-    /**
-     * Velocity feedforward gain for tuning every module's azimuth motor.
-     */
+    /** Velocity feedforward gain for tuning every module's azimuth motor. */
     ModulesAzimuthKv("modules/azimuth/feedforward/v", 0, true, "none"),
-    /**
-     * Acceleration feedforward gain for tuning every module's azimuth motor.
-     */
+    /** Acceleration feedforward gain for tuning every module's azimuth motor. */
     ModulesAzimuthKa("modules/azimuth/feedforward/a", 0, true, "none"),
-    /**
-     * Tunable angle setpoint applied to every module's azimuth motor, in degrees.
-     */
+    /** Tunable angle setpoint applied to every module's azimuth motor, in degrees. */
     ModulesAzimuthAngle("modules/azimuth/angle", 0, true, "degrees"),
-    /**
-     * Gyro angle, in degrees.
-     */
+    /** Gyro angle, in degrees. */
     Gyro("gyro", 0, false, "degrees");
 
-    /**
-     * Default value of the double telemetry field.
-     */
+    /** Default value of the double telemetry field. */
     private final double defaultVal;
-    /**
-     * Key that the telemetry is stored at.
-     */
+
+    /** Key that the telemetry is stored at. */
     private final String key;
-    /**
-     * Tunable field?
-     */
+
+    /** Tunable field? */
     private final boolean tunable;
-    /**
-     * Unit of the telemetry field.
-     */
+
+    /** Unit of the telemetry field. */
     private final String unit;
 
     /**
      * Create a double telemetry field.
      *
-     * @param fieldName    NT Field Name
+     * @param fieldName NT Field Name
      * @param defaultValue Default value
-     * @param tunable      Tunable places it only in the Tuning Table.
-     * @param unit         Unit of the telemetry field.
+     * @param tunable Tunable places it only in the Tuning Table.
+     * @param unit Unit of the telemetry field.
      */
     DoubleTelemetryField(String fieldName, double defaultValue, boolean tunable, String unit) {
       key = fieldName;
@@ -629,13 +551,9 @@ public class SwerveDriveTelemetry {
     }
   }
 
-  /**
-   * Boolean telemetry field for {@link SwerveDrive}s.
-   */
+  /** Boolean telemetry field for {@link SwerveDrive}s. */
   public enum BooleanTelemetryField {
-    /**
-     * Enables or disables driving to the auto-align target pose.
-     */
+    /** Enables or disables driving to the auto-align target pose. */
     AutoAlignEnabled("autoalign/enabled", false, true),
     /**
      * Enables or disables live tuning of every module's drive motor PID gains and velocity
@@ -643,34 +561,30 @@ public class SwerveDriveTelemetry {
      */
     ModulesDriveTuningEnabled("modules/drive/enabled", false, true),
     /**
-     * When enabled ensure drive testing is done with all modules are oriented to the swerve drive will drive counter clockwise positive.
+     * When enabled ensure drive testing is done with all modules are oriented to the swerve drive
+     * will drive counter clockwise positive.
      */
     ModulesDriveInPlace("modules/drive/inplace", false, true),
     /**
-     * Enables or disables live tuning of every module's azimuth motor PID gains and angle
-     * setpoint.
+     * Enables or disables live tuning of every module's azimuth motor PID gains and angle setpoint.
      */
     ModulesAzimuthTuningEnabled("modules/azimuth/enabled", false, true);
 
-    /**
-     * Default value of the boolean telemetry field.
-     */
+    /** Default value of the boolean telemetry field. */
     private final boolean defaultVal;
-    /**
-     * Key that the telemetry is stored at.
-     */
+
+    /** Key that the telemetry is stored at. */
     private final String key;
-    /**
-     * Tunable field?
-     */
+
+    /** Tunable field? */
     private final boolean tunable;
 
     /**
      * Create a boolean telemetry field.
      *
-     * @param fieldName    NT Field Name
+     * @param fieldName NT Field Name
      * @param defaultValue Default value
-     * @param tunable      Tunable places it only in the Tuning Table.
+     * @param tunable Tunable places it only in the Tuning Table.
      */
     BooleanTelemetryField(String fieldName, boolean defaultValue, boolean tunable) {
       key = fieldName;

@@ -1,5 +1,7 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Build &amp; Deploy Robot for Debugging" type="GradleRunConfiguration" factoryName="Gradle">
+  <configuration default="false"
+    name="Build &amp; Deploy Robot for Debugging"
+    type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />

@@ -4,12 +4,17 @@
     <option name="DEFAULT_COMPILER" value="Eclipse" />
     <annotationProcessing>
       <profile name="Gradle Imported" enabled="true">
-        <outputRelativeToContentRoot value="true" />
+        <outputRelativeToContentRoot
+          value="true" />
         <processorPath useClasspath="false">
-          <entry name="$PROJECT_DIR$/../../../../../../../Public/wpilib/2026/maven/edu/wpi/first/epilogue/epilogue-processor-java/2026.2.1/epilogue-processor-java-2026.2.1.jar" />
-          <entry name="$PROJECT_DIR$/../../../../../../../Public/wpilib/2026/maven/edu/wpi/first/epilogue/epilogue-runtime-java/2026.2.1/epilogue-runtime-java-2026.2.1.jar" />
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.littletonrobotics.akit/akit-autolog/26.0.0/397467b476e3d4614bf2da173b15c47e28ca7ed6/akit-autolog-26.0.0.jar" />
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.squareup/javapoet/1.13.0/d6562d385049f35eb50403fa86bb11cce76b866a/javapoet-1.13.0.jar" />
+          <entry
+            name="$PROJECT_DIR$/../../../../../../../Public/wpilib/2026/maven/edu/wpi/first/epilogue/epilogue-processor-java/2026.2.1/epilogue-processor-java-2026.2.1.jar" />
+          <entry
+            name="$PROJECT_DIR$/../../../../../../../Public/wpilib/2026/maven/edu/wpi/first/epilogue/epilogue-runtime-java/2026.2.1/epilogue-runtime-java-2026.2.1.jar" />
+          <entry
+            name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.littletonrobotics.akit/akit-autolog/26.0.0/397467b476e3d4614bf2da173b15c47e28ca7ed6/akit-autolog-26.0.0.jar" />
+          <entry
+            name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.squareup/javapoet/1.13.0/d6562d385049f35eb50403fa86bb11cce76b866a/javapoet-1.13.0.jar" />
         </processorPath>
         <module name="simple_robot.main" />
       </profile>
@@ -17,9 +22,11 @@
     <bytecodeTargetLevel target="17" />
   </component>
   <component name="EclipseCompilerSettings">
-    <option name="ADDITIONAL_OPTIONS_STRING" value="-XDstringConcat=inline" />
+    <option name="ADDITIONAL_OPTIONS_STRING"
+      value="-XDstringConcat=inline" />
   </component>
   <component name="JavacSettings">
-    <option name="ADDITIONAL_OPTIONS_STRING" value="-XDstringConcat=inline" />
+    <option name="ADDITIONAL_OPTIONS_STRING"
+      value="-XDstringConcat=inline" />
   </component>
 </project>

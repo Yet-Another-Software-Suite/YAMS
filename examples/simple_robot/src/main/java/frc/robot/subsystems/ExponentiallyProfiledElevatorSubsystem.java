@@ -76,9 +76,8 @@ public class ExponentiallyProfiledElevatorSubsystem extends SubsystemBase {
    * will run on the motor controller itself.
    */
   private final ElevatorFeedforward elevatorFeedforward = new ElevatorFeedforward(0, 0, 0, 0);
-  /**
-   * {@link SmartMotorControllerConfig} for the elevator motor.
-   */
+
+  /** {@link SmartMotorControllerConfig} for the elevator motor. */
   private final SmartMotorControllerConfig motorConfig =
       new SmartMotorControllerConfig(this)
           /*
@@ -89,39 +88,43 @@ public class ExponentiallyProfiledElevatorSubsystem extends SubsystemBase {
           .withControlMode(ControlMode.CLOSED_LOOP)
           .withMechanismCircumference(circumference)
           .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
-          .withStatorCurrentLimit(Amps.of(
-              40)) // Prevents our motor from continuously over-taxing itself when it is stuck.
+          .withStatorCurrentLimit(
+              Amps.of(
+                  40)) // Prevents our motor from continuously over-taxing itself when it is stuck.
           .withClosedLoopRampRate(
               Seconds.of(0.25)) // Prevents our motor from rapid demand changes that could cause
-                                // dramatic voltage drops, and current draw.
+          // dramatic voltage drops, and current draw.
           .withOpenLoopRampRate(Seconds.of(0.25)) // Same as above
-          .withTelemetry(motorTelemetryName,
+          .withTelemetry(
+              motorTelemetryName,
               TelemetryVerbosity.HIGH) // Could have more fine-grained control over what gets
-                                       // reported with SmartMotorControllerTelemetryConfig
+          // reported with SmartMotorControllerTelemetryConfig
           /*
            * Closed loop configuration options for the motor.
            */
           .withClosedLoopController(1, 0, 0)
-          .withExponentialProfile(ExponentialProfilePIDController.createElevatorConstraints(
-              Volts.of(12), dcMotor, weight, radius,
-              gearing))
+          .withExponentialProfile(
+              ExponentialProfilePIDController.createElevatorConstraints(
+                  Volts.of(12), dcMotor, weight, radius, gearing))
           .withFeedforward(elevatorFeedforward)
           .withStartingPosition(startingHeight) // The starting position should ONLY be defined if
-                                                // you are NOT using an absolute encoder.
+          // you are NOT using an absolute encoder.
           .withSoftLimits(softLowerLimit, softUpperLimit);
+
   /// Generic Smart Motor Controller with our options and vendor motor.
   private final SmartMotorController motor = new SparkWrapper(elevatorMotor, dcMotor, motorConfig);
   /// Elevator-specific options
-  private ElevatorConfig m_config = new ElevatorConfig()
-                                        /*
-                                         * Basic configuration options for the arm.
-                                         */
-                                        .withCarriageWeight(weight)
-                                        .withTelemetry(mechTelemetryName, TelemetryVerbosity.HIGH)
-                                        /*
-                                         * Simulation configuration options for the arm.
-                                         */
-                                        .withHardLimits(hardLowerLimit, hardUpperLimit);
+  private ElevatorConfig m_config =
+      new ElevatorConfig()
+          /*
+           * Basic configuration options for the arm.
+           */
+          .withCarriageWeight(weight)
+          .withTelemetry(mechTelemetryName, TelemetryVerbosity.HIGH)
+          /*
+           * Simulation configuration options for the arm.
+           */
+          .withHardLimits(hardLowerLimit, hardUpperLimit);
   // Arm mechanism
   private final Elevator m_elevator = new Elevator(m_config, motor);
 
@@ -147,22 +150,27 @@ public class ExponentiallyProfiledElevatorSubsystem extends SubsystemBase {
     Debouncer currentDebouncer =
         new Debouncer(0.4); // Current threshold is only detected if exceeded for 0.4 seconds.
     Voltage runVolts = Volts.of(-2); // Volts required to run the mechanism down. Could be positive
-                                     // if the mechanism is inverted.
+    // if the mechanism is inverted.
     Distance limitHit = hardLowerLimit; // Limit which gets hit. Could be the lower limit if the
-                                        // volts makes the arm go down.
-    AngularVelocity velocityThreshold = DegreesPerSecond.of(
-        2); // The maximum amount of movement for the arm to be considered "hitting the hard limit".
-    return Commands
-        .startRun(motor::stopClosedLoopController, // Stop the closed loop controller
+    // volts makes the arm go down.
+    AngularVelocity velocityThreshold =
+        DegreesPerSecond.of(
+            2); // The maximum amount of movement for the arm to be considered "hitting the hard
+    // limit".
+    return Commands.startRun(
+            motor::stopClosedLoopController, // Stop the closed loop controller
             () -> motor.setVoltage(runVolts)) // Set the voltage of the motor
-        .until(()
-                   -> currentDebouncer.calculate(motor.getStatorCurrent().gte(threshold)
-                       && motor.getMechanismVelocity().abs(DegreesPerSecond)
-                           <= velocityThreshold.in(DegreesPerSecond)))
-        .finallyDo(() -> {
-          motor.setEncoderPosition(limitHit);
-          motor.startClosedLoopController();
-        });
+        .until(
+            () ->
+                currentDebouncer.calculate(
+                    motor.getStatorCurrent().gte(threshold)
+                        && motor.getMechanismVelocity().abs(DegreesPerSecond)
+                            <= velocityThreshold.in(DegreesPerSecond)))
+        .finallyDo(
+            () -> {
+              motor.setEncoderPosition(limitHit);
+              motor.startClosedLoopController();
+            });
   }
 
   public Command elevCmd(double dutycycle) {

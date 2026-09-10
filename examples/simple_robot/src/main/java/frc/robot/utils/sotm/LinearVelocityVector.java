@@ -12,37 +12,29 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Time;
 
-/**
- * Linear velocity vector of the robot.
- */
-public class LinearVelocityVector
-{
-  /**
-   * Position of the robot (WPILib coordinate system).
-   */
-  public final Pose2d          position;
-  /**
-   * Target pose (WPILib coordinate system).
-   */
-  public final Pose2d          target;
-  /**
-   * Velocity of the robot.
-   */
-  public final ChassisSpeeds   velocity;
-  /**
-   * Flywheel velocity.
-   */
+/** Linear velocity vector of the robot. */
+public class LinearVelocityVector {
+  /** Position of the robot (WPILib coordinate system). */
+  public final Pose2d position;
+
+  /** Target pose (WPILib coordinate system). */
+  public final Pose2d target;
+
+  /** Velocity of the robot. */
+  public final ChassisSpeeds velocity;
+
+  /** Flywheel velocity. */
   public final AngularVelocity flywheelVelocity;
 
   /**
    * Create a new linear velocity vector.
    *
    * @param position Position of the robot.
-   * @param target   Target to shoot at.
+   * @param target Target to shoot at.
    * @param velocity Velocity of the robot.
    */
-  public LinearVelocityVector(Pose2d position, Pose2d target, ChassisSpeeds velocity, AngularVelocity flywheelVelocity)
-  {
+  public LinearVelocityVector(
+      Pose2d position, Pose2d target, ChassisSpeeds velocity, AngularVelocity flywheelVelocity) {
     this.position = position;
     this.target = target;
     this.velocity = velocity;
@@ -52,12 +44,11 @@ public class LinearVelocityVector
   /**
    * Create a new linear velocity vector with a {@link ChassisSpeeds} of zero.
    *
-   * @param position         Position of the robot.
-   * @param target           Target to shoot at.
+   * @param position Position of the robot.
+   * @param target Target to shoot at.
    * @param flywheelVelocity Velocity of the flywheel.
    */
-  public LinearVelocityVector(Pose2d position, Pose2d target, AngularVelocity flywheelVelocity)
-  {
+  public LinearVelocityVector(Pose2d position, Pose2d target, AngularVelocity flywheelVelocity) {
     this.position = position;
     this.target = target;
     this.velocity = new ChassisSpeeds();
@@ -68,11 +59,10 @@ public class LinearVelocityVector
    * Create a new linear velocity vector with a {@link AngularVelocity} of zero.
    *
    * @param position Position of the robot.
-   * @param target   Target to shoot at.
+   * @param target Target to shoot at.
    * @param velocity Velocity of the robot.
    */
-  public LinearVelocityVector(Pose2d position, Pose2d target, ChassisSpeeds velocity)
-  {
+  public LinearVelocityVector(Pose2d position, Pose2d target, ChassisSpeeds velocity) {
     this.position = position;
     this.target = target;
     this.velocity = velocity;
@@ -80,13 +70,13 @@ public class LinearVelocityVector
   }
 
   /**
-   * Create a new linear velocity vector with a {@link ChassisSpeeds} and {@link AngularVelocity} of zero.
+   * Create a new linear velocity vector with a {@link ChassisSpeeds} and {@link AngularVelocity} of
+   * zero.
    *
    * @param position Position of the robot.
-   * @param target   Target to shoot at.
+   * @param target Target to shoot at.
    */
-  public LinearVelocityVector(Pose2d position, Pose2d target)
-  {
+  public LinearVelocityVector(Pose2d position, Pose2d target) {
     this.position = position;
     this.target = target;
     this.velocity = new ChassisSpeeds();
@@ -96,10 +86,10 @@ public class LinearVelocityVector
   /**
    * Get the linear velocity of the robot from {@link ChassisSpeeds} to {@link Translation2d}.
    *
-   * @return {@link Translation2d} of the robot's linear velocity field oriented (WPILib coordinate system).
+   * @return {@link Translation2d} of the robot's linear velocity field oriented (WPILib coordinate
+   *     system).
    */
-  public Translation2d getLinearVelocity()
-  {
+  public Translation2d getLinearVelocity() {
     return new Translation2d(velocity.vxMetersPerSecond, velocity.vyMetersPerSecond);
   }
 
@@ -109,9 +99,9 @@ public class LinearVelocityVector
    * @param latencyCompensation Latency compensation in time.
    * @return Estimated pose.
    */
-  public Translation2d estimatePose(Time latencyCompensation)
-  {
-    return position.getTranslation().plus(getLinearVelocity().times(latencyCompensation.in(Seconds)));
+  public Translation2d estimatePose(Time latencyCompensation) {
+    return position
+        .getTranslation()
+        .plus(getLinearVelocity().times(latencyCompensation.in(Seconds)));
   }
-
 }

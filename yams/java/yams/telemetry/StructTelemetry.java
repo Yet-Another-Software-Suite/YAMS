@@ -19,10 +19,11 @@ import java.util.Optional;
  *
  * <p>A lightweight wrapper that publishes a single struct-encoded value (e.g. {@code Pose2d},
  * {@code ChassisSpeeds}, {@code SwerveModuleState}) to NetworkTables and/or a WPILib DataLog. It
- * mirrors {@link DoubleTelemetry} and {@link BooleanTelemetry}, but is generic over the value
- * type {@code T} and requires a {@link Struct} implementation to (de)serialize it.
+ * mirrors {@link DoubleTelemetry} and {@link BooleanTelemetry}, but is generic over the value type
+ * {@code T} and requires a {@link Struct} implementation to (de)serialize it.
  *
  * <h2>Example</h2>
+ *
  * <pre>{@code
  * // Create and publish a struct entry for the robot pose under the Drivetrain table.
  * StructTelemetry<Pose2d> pose = new StructTelemetry<>(
@@ -42,71 +43,56 @@ import java.util.Optional;
  * @param <T> Type of the value being published, must be {@link Struct} serializable.
  */
 public class StructTelemetry<T, F> {
-  /**
-   * Struct serializer for {@link T}.
-   */
+  /** Struct serializer for {@link T}. */
   private final Struct<T> struct;
-  /**
-   * Network table key.
-   */
+
+  /** Network table key. */
   private final String key;
-  /**
-   * Tunable?
-   */
+
+  /** Tunable? */
   private final boolean tunable;
-  /**
-   * Enabled?
-   */
+
+  /** Enabled? */
   protected boolean enabled = false;
-  /**
-   * Default value.
-   */
+
+  /** Default value. */
   private T defaultValue;
-  /**
-   * Cached value.
-   */
+
+  /** Cached value. */
   private T cachedValue;
-  /**
-   * Publisher.
-   */
+
+  /** Publisher. */
   private Optional<StructPublisher<T>> publisher = Optional.empty();
-  /**
-   * Subscriber.
-   */
+
+  /** Subscriber. */
   private Optional<StructSubscriber<T>> subscriber = Optional.empty();
-  /**
-   * Sub publisher.
-   */
+
+  /** Sub publisher. */
   private StructPublisher<T> subPublisher = null;
-  /**
-   * Tuning table
-   */
+
+  /** Tuning table */
   private Optional<NetworkTable> tuningTable = Optional.empty();
-  /**
-   * Data table.
-   */
+
+  /** Data table. */
   private Optional<NetworkTable> dataTable = Optional.empty();
-  /**
-   * NT4 Topic of this entry.
-   */
+
+  /** NT4 Topic of this entry. */
   private StructTopic<T> topic;
-  /**
-   * {@link StructLogEntry} representing this entry.
-   */
+
+  /** {@link StructLogEntry} representing this entry. */
   private Optional<StructLogEntry<T>> dataLogEntry = Optional.empty();
-  /**
-   * Telemetry enum field.
-   */
+
+  /** Telemetry enum field. */
   private F field;
 
   /**
    * Setup struct telemetry for a field.
    *
-   * @param keyString  Key to use.
+   * @param keyString Key to use.
    * @param defaultVal Default value.
-   * @param field      Field representing.
-   * @param struct     {@link Struct} serializer for {@link T}.
-   * @param tunable    Tunable.
+   * @param field Field representing.
+   * @param struct {@link Struct} serializer for {@link T}.
+   * @param tunable Tunable.
    */
   public StructTelemetry(
       String keyString, T defaultVal, F field, Struct<T> struct, boolean tunable) {
@@ -129,7 +115,7 @@ public class StructTelemetry<T, F> {
   /**
    * Setup network tables.
    *
-   * @param dataTable   Data tables.
+   * @param dataTable Data tables.
    * @param tuningTable Tuning table.
    */
   public void setupNetworkTables(NetworkTable dataTable, NetworkTable tuningTable) {
@@ -161,8 +147,10 @@ public class StructTelemetry<T, F> {
       if (!prefix.endsWith("/")) {
         prefix += "/";
       }
-      dataLogEntry = Optional.of(StructLogEntry.create(
-          DataLogManager.getLog(), prefix + key, struct, (long) Timer.getFPGATimestamp()));
+      dataLogEntry =
+          Optional.of(
+              StructLogEntry.create(
+                  DataLogManager.getLog(), prefix + key, struct, (long) Timer.getFPGATimestamp()));
     }
   }
 
@@ -232,16 +220,12 @@ public class StructTelemetry<T, F> {
     return false;
   }
 
-  /**
-   * Enable the telemetry.
-   */
+  /** Enable the telemetry. */
   public void enable() {
     enabled = true;
   }
 
-  /**
-   * Disable the telemetry.
-   */
+  /** Disable the telemetry. */
   public void disable() {
     enabled = false;
   }
@@ -255,9 +239,7 @@ public class StructTelemetry<T, F> {
     enabled = state;
   }
 
-  /**
-   * Close the telemetry field.
-   */
+  /** Close the telemetry field. */
   public void close() {
     subscriber.ifPresent(PubSub::close);
     if (subPublisher != null) {
@@ -267,6 +249,7 @@ public class StructTelemetry<T, F> {
     dataTable.ifPresent(table -> table.getEntry(key).unpublish());
     tuningTable.ifPresent(table -> table.getEntry(key).unpublish());
   }
+
   public F getField() {
     return field;
   }

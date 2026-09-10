@@ -20,29 +20,27 @@ import yams.gearing.MechanismGearing;
  *
  * <p>{@code EasyCRTConfig} holds all inputs that the {@link EasyCRT} solver needs to estimate an
  * absolute mechanism angle from two absolute encoders whose gear ratios are deliberately
- * <em>non-integer</em> multiples of each other (CRT-inspired unwrapping). The fields it
- * configures include:
+ * <em>non-integer</em> multiples of each other (CRT-inspired unwrapping). The fields it configures
+ * include:
  *
  * <ul>
- *   <li><b>Encoder angle suppliers</b> — lambdas that return the live reading for each encoder.</li>
- *   <li><b>Encoder-to-mechanism ratios</b> — either supplied directly via
- *       {@link #withEncoderRatios(double, double)}, derived from a shared drive gear via
- *       {@link #withCommonDriveGear(double, int, int, int)}, or computed from explicit gear chains
- *       via {@link #withAbsoluteEncoder1Gearing(int...)} /
- *       {@link #withAbsoluteEncoder2Gearing(int...)}.</li>
- *   <li><b>Per-encoder offsets</b> — zero-point corrections added before wrapping the raw
- *       reading into [0, 1) rotations.</li>
- *   <li><b>Mechanism travel limits</b> — the minimum and maximum mechanism angles the solver
- *       is allowed to consider as solutions.</li>
- *   <li><b>Match tolerance</b> — the maximum modular error (in rotations) between the predicted
- *       and measured encoder 2 reading before a candidate is rejected.</li>
- *   <li><b>Inversion flags</b> — flip an encoder ratio's sign when the sensor is physically
- *       mounted in reverse and on-device inversion is not available.</li>
- *   <li><b>Gear recommendation inputs</b> (simulation only) — tooth counts and search bounds
- *       used to suggest coprime gear pairs with adequate unique coverage.</li>
+ *   <li><b>Encoder angle suppliers</b> — lambdas that return the live reading for each encoder.
+ * <li><b>Encoder-to-mechanism ratios</b> — either supplied directly via {@link #withEncoderRatios(double, double)}, derived from a shared drive gear via {@link #withCommonDriveGear(double, int, int, int)}, or computed from explicit gear chains via
+ * {@link #withAbsoluteEncoder1Gearing(int...)} / {@link #withAbsoluteEncoder2Gearing(int...)}.
+ *   <li><b>Per-encoder offsets</b> — zero-point corrections added before wrapping the raw reading
+ *       into [0, 1) rotations.
+ *   <li><b>Mechanism travel limits</b> — the minimum and maximum mechanism angles the solver is
+ *       allowed to consider as solutions.
+ *   <li><b>Match tolerance</b> — the maximum modular error (in rotations) between the predicted and
+ *       measured encoder 2 reading before a candidate is rejected.
+ *   <li><b>Inversion flags</b> — flip an encoder ratio's sign when the sensor is physically mounted
+ *       in reverse and on-device inversion is not available.
+ *   <li><b>Gear recommendation inputs</b> (simulation only) — tooth counts and search bounds used
+ *       to suggest coprime gear pairs with adequate unique coverage.
  * </ul>
  *
  * <h2>Example</h2>
+ *
  * <pre>{@code
  * import static edu.wpi.first.units.Units.Rotations;
  * import yams.units.EasyCRTConfig;
@@ -61,124 +59,76 @@ import yams.gearing.MechanismGearing;
  * }</pre>
  */
 public class EasyCRTConfig {
-  /**
-   * Supplies the absolute angle measurement for encoder 1.
-   */
+  /** Supplies the absolute angle measurement for encoder 1. */
   private final Supplier<Angle> absoluteEncoder1AngleSupplier;
 
-  /**
-   * Supplies the absolute angle measurement for encoder 2.
-   */
+  /** Supplies the absolute angle measurement for encoder 2. */
   private final Supplier<Angle> absoluteEncoder2AngleSupplier;
 
-  /**
-   * Directly provided rotations per mechanism rotation for encoder 1.
-   */
+  /** Directly provided rotations per mechanism rotation for encoder 1. */
   private Optional<Double> encoder1RotPerMechanismRot = Optional.empty();
 
-  /**
-   * Directly provided rotations per mechanism rotation for encoder 2.
-   */
+  /** Directly provided rotations per mechanism rotation for encoder 2. */
   private Optional<Double> encoder2RotPerMechanismRot = Optional.empty();
 
-  /**
-   * Offset in rotations added to encoder 1 before wrap.
-   */
+  /** Offset in rotations added to encoder 1 before wrap. */
   private Angle absoluteEncoder1Offset = Rotations.of(0.0);
 
-  /**
-   * Offset in rotations added to encoder 2 before wrap.
-   */
+  /** Offset in rotations added to encoder 2 before wrap. */
   private Angle absoluteEncoder2Offset = Rotations.of(0.0);
 
-  /**
-   * Minimum allowed mechanism rotation.
-   */
+  /** Minimum allowed mechanism rotation. */
   private Angle minMechanismAngle = Rotations.of(0.0);
 
-  /**
-   * Maximum allowed mechanism rotation.
-   */
+  /** Maximum allowed mechanism rotation. */
   private Angle maxMechanismAngle = Rotations.of(1.0);
 
-  /**
-   * Maximum modular error allowed when matching encoder 2.
-   */
+  /** Maximum modular error allowed when matching encoder 2. */
   private Angle matchTolerance = Rotations.of(0.005);
 
-  /**
-   * Optional prime tooth count for encoder 1 gear.
-   */
+  /** Optional prime tooth count for encoder 1 gear. */
   private Optional<Integer> encoder1PrimeTeeth = Optional.empty();
 
-  /**
-   * Optional prime tooth count for encoder 2 gear.
-   */
+  /** Optional prime tooth count for encoder 2 gear. */
   private Optional<Integer> encoder2PrimeTeeth = Optional.empty();
 
-  /**
-   * Optional common scale constant k for coverage calculations.
-   */
+  /** Optional common scale constant k for coverage calculations. */
   private Optional<Double> commonScaleK = Optional.empty();
 
-  /**
-   * Optional stage 1 gear teeth for CRT recommendations.
-   */
+  /** Optional stage 1 gear teeth for CRT recommendations. */
   private Optional<Integer> gearSearchStage1GearTeeth = Optional.empty();
 
-  /**
-   * Optional stage 2 ratio for CRT recommendations.
-   */
+  /** Optional stage 2 ratio for CRT recommendations. */
   private Optional<Double> gearSearchStage2Ratio = Optional.empty();
 
-  /**
-   * Optional coverage margin for CRT recommendations.
-   */
+  /** Optional coverage margin for CRT recommendations. */
   private Optional<Double> gearSearchCoverageMargin = Optional.empty();
 
-  /**
-   * Optional minimum tooth count to search for CRT recommendations.
-   */
+  /** Optional minimum tooth count to search for CRT recommendations. */
   private Optional<Integer> gearSearchMinTeeth = Optional.empty();
 
-  /**
-   * Optional maximum tooth count to search for CRT recommendations.
-   */
+  /** Optional maximum tooth count to search for CRT recommendations. */
   private Optional<Integer> gearSearchMaxTeeth = Optional.empty();
 
-  /**
-   * Optional maximum iterations to search for CRT recommendations.
-   */
+  /** Optional maximum iterations to search for CRT recommendations. */
   private Optional<Integer> gearSearchMaxIterations = Optional.empty();
 
-  /**
-   * Optional meshed tooth chain for encoder 1 gearing.
-   */
+  /** Optional meshed tooth chain for encoder 1 gearing. */
   private Optional<int[]> absoluteEncoder1TeethChain = Optional.empty();
 
-  /**
-   * Optional meshed tooth chain for encoder 2 gearing.
-   */
+  /** Optional meshed tooth chain for encoder 2 gearing. */
   private Optional<int[]> absoluteEncoder2TeethChain = Optional.empty();
 
-  /**
-   * Optional (driver, driven) stage pairs for encoder 1 gearing.
-   */
+  /** Optional (driver, driven) stage pairs for encoder 1 gearing. */
   private Optional<int[]> absoluteEncoder1TeethStages = Optional.empty();
 
-  /**
-   * Optional (driver, driven) stage pairs for encoder 2 gearing.
-   */
+  /** Optional (driver, driven) stage pairs for encoder 2 gearing. */
   private Optional<int[]> absoluteEncoder2TeethStages = Optional.empty();
 
-  /**
-   * Whether encoder 1 output should be inverted.
-   */
+  /** Whether encoder 1 output should be inverted. */
   private boolean encoder1Inverted = false;
 
-  /**
-   * Whether encoder 2 output should be inverted.
-   */
+  /** Whether encoder 2 output should be inverted. */
   private boolean encoder2Inverted = false;
 
   /**
@@ -201,8 +151,7 @@ public class EasyCRTConfig {
    *
    * <p>Use this when you already know the ratios and do not want to describe the gear train.
    * Positive ratios mean the encoder increases with positive mechanism rotation. If an encoder is
-   * mounted in reverse, and you cannot set inversion on-device, use {@link
-   * #withAbsoluteEncoder1Inverted(boolean)} or {@link #withAbsoluteEncoder2Inverted(boolean)} to
+   * mounted in reverse, and you cannot set inversion on-device, use {@link #withAbsoluteEncoder1Inverted(boolean)} or {@link #withAbsoluteEncoder2Inverted(boolean)} to
    * flip the sign.
    *
    * @param encoder1RotPerMechanismRot rotations per mechanism rotation for encoder 1
@@ -228,8 +177,8 @@ public class EasyCRTConfig {
    * <p>If the encoder gears are driven by the turret gear itself, the common ratio is 1, and the
    * drive gear is the turret gear teeth.
    *
-   * <p>Also seeds CRT gear recommendation inputs (stage1 gear teeth + stage2 ratio) so you can
-   * call {@link #withCrtGearRecommendationConstraints(double, int, int, int)} afterward.
+   * <p>Also seeds CRT gear recommendation inputs (stage1 gear teeth + stage2 ratio) so you can call
+   * {@link #withCrtGearRecommendationConstraints(double, int, int, int)} afterward.
    *
    * @param commonRatio ratio between mechanism and drive gear
    * @param driveGearTeeth tooth count on the gear that drives both encoder pinions
@@ -269,8 +218,7 @@ public class EasyCRTConfig {
    * @param encoder2Offset offset to apply to encoder 2 reading
    * @return this configuration for chaining
    */
-  public EasyCRTConfig withAbsoluteEncoderOffsets(
-      Angle encoder1Offset, Angle encoder2Offset) {
+  public EasyCRTConfig withAbsoluteEncoderOffsets(Angle encoder1Offset, Angle encoder2Offset) {
     this.absoluteEncoder1Offset = Objects.requireNonNull(encoder1Offset, "encoder1Offset");
     this.absoluteEncoder2Offset = Objects.requireNonNull(encoder2Offset, "encoder2Offset");
     return this;
@@ -302,9 +250,9 @@ public class EasyCRTConfig {
    *
    * <p>Example: mechanism backlash to the encoders is about 1 degree. commonRatio = 11,
    * driveGearTeeth = 50, and encoder2PinionTeeth = 30. Ratio = 18.3333. 1 degree of mechanism
-   * backlash is about 0.0509 rotations of the encoder. A tolerance of 0.06 rotations corresponds
-   * to about 1.18 degrees at the mechanism (0.06 / 18.33333 * 360), which is only slightly higher
-   * than the backlash.
+   * backlash is about 0.0509 rotations of the encoder. A tolerance of 0.06 rotations corresponds to
+   * about 1.18 degrees at the mechanism (0.06 / 18.33333 * 360), which is only slightly higher than
+   * the backlash.
    *
    * @param tolerance allowable modular error for encoder 2
    * @return this configuration for chaining
@@ -362,15 +310,13 @@ public class EasyCRTConfig {
    * <p>Call {@link #withCrtGearRecommendationConstraints(double, int, int, int)} to configure
    * coverage and search bounds.
    *
-   * <p>{@code stage1GearTeeth} is the gear that drives both encoder pinions, and {@code stage2Ratio}
-   * is the shared "common ratio" between the mechanism and that drive gear.
+   * <p>{@code stage1GearTeeth} is the gear that drives both encoder pinions, and {@code stage2Ratio} is the shared "common ratio" between the mechanism and that drive gear.
    *
    * @param stage1GearTeeth tooth count on the gear that drives both encoders
    * @param stage2Ratio common ratio between mechanism and drive gear
    * @return this configuration for chaining
    */
-  public EasyCRTConfig withCrtGearRecommendationInputs(
-      int stage1GearTeeth, double stage2Ratio) {
+  public EasyCRTConfig withCrtGearRecommendationInputs(int stage1GearTeeth, double stage2Ratio) {
     requirePositiveTeeth(stage1GearTeeth, "stage1GearTeeth");
     requireNonZeroFinite(stage2Ratio, "stage2Ratio");
     this.gearSearchStage1GearTeeth = Optional.of(stage1GearTeeth);
@@ -381,8 +327,7 @@ public class EasyCRTConfig {
   /**
    * Sets CRT gear recommendation constraints (coverage margin + search bounds).
    *
-   * <p>Call this after {@link #withCommonDriveGear(double, int, int, int)} or {@link
-   * #withCrtGearRecommendationInputs(int, double)}.
+   * <p>Call this after {@link #withCommonDriveGear(double, int, int, int)} or {@link #withCrtGearRecommendationInputs(int, double)}.
    *
    * <p>No-op when not running in simulation to avoid extraneous calculations on a real robot.
    *
@@ -413,7 +358,6 @@ public class EasyCRTConfig {
     return this;
   }
 
-
   // --- Gearing helpers ---
 
   /**
@@ -423,8 +367,7 @@ public class EasyCRTConfig {
    * 40T on encoder 1, for a ratio of (50/20) * (20/40) = 50/40. A simpler one-stage chain would be
    * {@code withAbsoluteEncoder1Gearing(72, 24)} for a 3:1 reduction.
    *
-   * <p>Not valid for compound same-shaft trains; use {@link
-   * #withAbsoluteEncoder1GearingStages(int...)} instead.
+   * <p>Not valid for compound same-shaft trains; use {@link #withAbsoluteEncoder1GearingStages(int...)} instead.
    *
    * @param teethChain ordered teeth counts from mechanism gear to encoder 1 pinion
    * @return this configuration for chaining
@@ -439,11 +382,9 @@ public class EasyCRTConfig {
    * Defines a meshed gear chain for encoder 2, ordered from mechanism drive gear to encoder.
    *
    * <p>Example: {@code withAbsoluteEncoder2Gearing(50, 20, 40)} means 50T drives 20T, which drives
-   * 40T on encoder 2, for a ratio of (50/20) * (20/40) = 50/40. A single mesh could be
-   * {@code withAbsoluteEncoder2Gearing(60, 20)} for a 3:1 reduction.
+   * 40T on encoder 2, for a ratio of (50/20) * (20/40) = 50/40. A single mesh could be {@code withAbsoluteEncoder2Gearing(60, 20)} for a 3:1 reduction.
    *
-   * <p>Not valid for compound same-shaft trains; use {@link
-   * #withAbsoluteEncoder2GearingStages(int...)} instead.
+   * <p>Not valid for compound same-shaft trains; use {@link #withAbsoluteEncoder2GearingStages(int...)} instead.
    *
    * @param teethChain ordered teeth counts from mechanism gear to encoder 2 pinion
    * @return this configuration for chaining
@@ -459,8 +400,7 @@ public class EasyCRTConfig {
    *
    * <p>Use this for compound trains or when you need same-shaft gears represented by separate
    * stages. Example: {@code withAbsoluteEncoder1GearingStages(12, 36, 18, 60)} means 12T drives
-   * 36T, then 18T drives 60T. A single stage would be {@code withAbsoluteEncoder1GearingStages(12,
-   * 60)}.
+   * 36T, then 18T drives 60T. A single stage would be {@code withAbsoluteEncoder1GearingStages(12, 60)}.
    *
    * @param driverDrivenPairs alternating driver and driven teeth counts for each stage
    * @return this configuration for chaining
@@ -811,7 +751,8 @@ public class EasyCRTConfig {
       int minTeeth,
       int maxTeeth,
       int maxIterationsLimit) {
-    double maxMechanismRotations = Objects.requireNonNull(maxMechanismAngle, "maxMechanismAngle").in(Rotations);
+    double maxMechanismRotations =
+        Objects.requireNonNull(maxMechanismAngle, "maxMechanismAngle").in(Rotations);
     if (stage1GearTeeth <= 0 || stage2Ratio <= 0.0 || minTeeth < 1 || maxTeeth < minTeeth) {
       return null;
     }

@@ -4,9 +4,8 @@
 package yams.motorcontrollers.simulation;
 
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Hertz;
-import static edu.wpi.first.units.Units.Millihertz;
-import static edu.wpi.first.units.Units.Milliseconds;import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Milliseconds;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
@@ -28,25 +27,19 @@ import yams.motorcontrollers.SimSupplier;
 import yams.motorcontrollers.SmartMotorController;
 
 /**
- * DCMotorSim Supplier — simulates a generic DC motor load (flywheel, roller, or elevator)
- * using WPILib's {@link edu.wpi.first.wpilibj.simulation.DCMotorSim}.
+ * DCMotorSim Supplier — simulates a generic DC motor load (flywheel, roller, or elevator) using
+ * WPILib's {@link edu.wpi.first.wpilibj.simulation.DCMotorSim}.
  *
- * <p>
- * This supplier steps WPILib's {@code DCMotorSim} physics model each control loop and exposes the
- * resulting angular position, angular velocity, current draw, and acceleration through the
- * {@link yams.motorcontrollers.SimSupplier} interface. Unlike
- * {@link yams.motorcontrollers.simulation.ArmSimSupplier}, this model does not simulate gravity or
- * joint limits — it is suited for continuous-rotation mechanisms such as flywheels or rollers, as
- * well as linear mechanisms (elevators) when paired with appropriate gearing.
- * </p>
+ * <p>This supplier steps WPILib's {@code DCMotorSim} physics model each control loop and exposes
+ * the resulting angular position, angular velocity, current draw, and acceleration through the
+ * {@link yams.motorcontrollers.SimSupplier} interface. Unlike {@link yams.motorcontrollers.simulation.ArmSimSupplier}, this model does not simulate gravity or joint
+ * limits — it is suited for continuous-rotation mechanisms such as flywheels or rollers, as well as
+ * linear mechanisms (elevators) when paired with appropriate gearing.
  *
- * <p>
- * The gear ratio and control period are read from the associated
- * {@link yams.motorcontrollers.SmartMotorController}'s config, so they do not need to be repeated
- * here.
- * </p>
+ * <p>The gear ratio and control period are read from the associated {@link yams.motorcontrollers.SmartMotorController}'s config, so they do not need to be repeated here.
  *
  * <h2>Example</h2>
+ *
  * <pre>{@code
  * // 1. Build the WPILib DC motor physics model (e.g. a flywheel with MOI 0.001 kg·m²)
  * DCMotorSim flywheelPhysics = new DCMotorSim(
@@ -78,7 +71,7 @@ public class DCMotorSimSupplier implements SimSupplier {
   /**
    * Construct the DCMotorSim supplier
    *
-   * @param simulation           Simulatoin instance
+   * @param simulation Simulatoin instance
    * @param smartMotorController SMC for the DCMotorSim..
    */
   public DCMotorSimSupplier(DCMotorSim simulation, SmartMotorController smartMotorController) {
@@ -89,7 +82,8 @@ public class DCMotorSimSupplier implements SimSupplier {
     simPeriod = config.getSimulationPeriod();
     motor = smartMotorController.getDCMotor();
     // Based off comment from https://github.com/wpilibsuite/allwpilib/issues/8691
-    supplyCurrentFilter = LinearFilter.singlePoleIIR(Milliseconds.of(100).in(Seconds), simPeriod.in(Seconds));
+    supplyCurrentFilter =
+        LinearFilter.singlePoleIIR(Milliseconds.of(100).in(Seconds), simPeriod.in(Seconds));
     uuid = smartMotorController.m_batterySimUUID;
   }
 
@@ -171,8 +165,9 @@ public class DCMotorSimSupplier implements SimSupplier {
 
   @Override
   public void setMechanismPosition(Angle position) {
-    sim.setAngle(position.in(
-        Radians)); //.times(config.getGearing().getMechanismToRotorRatio()).in(Radians));
+    sim.setAngle(
+        position.in(
+            Radians)); // .times(config.getGearing().getMechanismToRotorRatio()).in(Radians));
   }
 
   @Override
@@ -199,6 +194,7 @@ public class DCMotorSimSupplier implements SimSupplier {
   public Current getStatorCurrent() {
     return Amps.of(sim.getCurrentDrawAmps());
   }
+
   @Override
   public Current getSupplyCurrent() {
     // For a BLDC driven by a switching converter, power is conserved across the duty-cycle

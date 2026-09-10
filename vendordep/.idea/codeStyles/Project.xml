@@ -16,7 +16,8 @@
       <option name="KEEP_LINE_BREAKS" value="true" />
       <option name="KEEP_FIRST_COLUMN_COMMENT" value="true" />
       <option name="ALIGN_MULTILINE_PARAMETERS" value="true" />
-      <option name="ALIGN_MULTILINE_PARAMETERS_IN_CALLS" value="true" />
+      <option name="ALIGN_MULTILINE_PARAMETERS_IN_CALLS"
+        value="true" />
       <option name="ALIGN_MULTILINE_METHOD_BRACKETS" value="false" />
       <option name="ALIGN_MULTILINE_BINARY_OPERATION" value="true" />
       <option name="ALIGN_MULTILINE_TERNARY_OPERATION" value="true" />

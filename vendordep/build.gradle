@@ -2,15 +2,16 @@ import edu.wpi.first.toolchain.*
 import org.gradle.nativeplatform.test.tasks.RunTestExecutable
 
 plugins {
-  id 'cpp'
-  id 'java'
-  id 'google-test'
-  id 'idea'
-  id 'edu.wpi.first.wpilib.repositories.WPILibRepositoriesPlugin' version '2025.0'
-  id 'edu.wpi.first.NativeUtils' version '2026.0.1'
-  id "edu.wpi.first.GradleRIO" version "2026.2.1" // WPILib version
-  id 'edu.wpi.first.GradleJni' version '1.1.0'
-  id 'edu.wpi.first.GradleVsCode' version '2.1.0'
+    id 'cpp'
+    id 'java'
+    id 'google-test'
+    id 'idea'
+    id 'edu.wpi.first.wpilib.repositories.WPILibRepositoriesPlugin' version '2025.0'
+    id 'edu.wpi.first.NativeUtils' version '2026.0.1'
+    id "edu.wpi.first.GradleRIO" version "2026.2.1" // WPILib version
+    id 'edu.wpi.first.GradleJni' version '1.1.0'
+    id 'edu.wpi.first.GradleVsCode' version '2.1.0'
+    id 'com.diffplug.spotless' version '8.0.0'
 }
 
 // WPILib Version
@@ -23,17 +24,17 @@ ext.skipCpp = project.hasProperty('skipCpp') && project.property('skipCpp').toSt
 
 
 repositories {
-  mavenCentral()
+    mavenCentral()
 }
 if (project.hasProperty('releaseMode')) {
-  wpilibRepositories.addAllReleaseRepositories(project)
+    wpilibRepositories.addAllReleaseRepositories(project)
 } else {
-  wpilibRepositories.addAllDevelopmentRepositories(project)
+    wpilibRepositories.addAllDevelopmentRepositories(project)
 }
 
 java {
-  sourceCompatibility = JavaVersion.VERSION_17
-  targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 sourceSets {
@@ -69,8 +70,8 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-databind:2.19.2"
     implementation 'edu.wpi.first.thirdparty.frc2025.opencv:opencv-java:4.10.0-2'
 
-//    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
-//    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    //    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
+    //    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     nativeDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.desktop)
     nativeDebug wpi.java.vendor.jniDebug(wpi.platforms.desktop)
@@ -87,7 +88,6 @@ dependencies {
     testImplementation "org.mockito:mockito-core:5.3.1"
     testImplementation "org.mockito:mockito-junit-jupiter:5.3.1"
     testImplementation wpi.java.vendor.java()
-
 }
 
 // Set up java tests
@@ -144,9 +144,9 @@ javadoc {
                 'https://api.ctr-electronics.com/phoenix6/stable/java/',
                 'https://api.ctr-electronics.com/phoenix/stable/java/'
         tags 'todo:X"',
-            'apiNote:a:API Note:',
-            'implSpec:a:Implementation Requirements:',
-            'implNote:a:Implementation Note:'
+                'apiNote:a:API Note:',
+                'implSpec:a:Implementation Requirements:',
+                'implNote:a:Implementation Note:'
         overview "$rootDir/../yams/java/overview.html"
     }
 }
@@ -157,48 +157,48 @@ ext.getCurrentArch = {
 def systemArch = getCurrentArch()
 
 model {
-  components {
-      YAMS(NativeLibrarySpec) {
-          sources {
-              cpp {
-                  source {
-                      srcDirs "$rootDir/../yams/cpp/src"
-                      include '**/*.cpp'
-                  }
-                  exportedHeaders {
-                      srcDirs "$rootDir/../yams/cpp/include"
-                  }
-              }
-          }
-          nativeUtils.useRequiredLibrary(it, 'wpilib_shared')
-          // Enable run tasks for this component
-          wpi.cpp.enableExternalTasks(it)
+    components {
+        YAMS(NativeLibrarySpec) {
+            sources {
+                cpp {
+                    source {
+                        srcDirs "$rootDir/../yams/cpp/src"
+                        include '**/*.cpp'
+                    }
+                    exportedHeaders {
+                        srcDirs "$rootDir/../yams/cpp/include"
+                    }
+                }
+            }
+            nativeUtils.useRequiredLibrary(it, 'wpilib_shared')
+            // Enable run tasks for this component
+            wpi.cpp.enableExternalTasks(it)
 
-          // Enable simulation for this component
-          wpi.sim.enable(it)
-          // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
-          wpi.cpp.vendor.cpp(it)
-          wpi.cpp.deps.wpilib(it)
+            // Enable simulation for this component
+            wpi.sim.enable(it)
+            // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
+            wpi.cpp.vendor.cpp(it)
+            wpi.cpp.deps.wpilib(it)
 
-          if (skipCpp) {
-              binaries.all { buildable = false }
-          }
-      }
-  }
-  testSuites {
-      YAMSTest {
-          binaries.all {
-              buildable = !gradle.startParameter.taskNames.contains('build')
-          }
-          sources.cpp {
-              source {
-                  srcDir 'src/test/native/cpp'
-                  include '**/*.cpp'
-              }
-              exportedHeaders {
-                  srcDirs 'src/test/native/include'
-              }
-          }
+            if (skipCpp) {
+                binaries.all { buildable = false }
+            }
+        }
+    }
+    testSuites {
+        YAMSTest {
+            binaries.all {
+                buildable = !gradle.startParameter.taskNames.contains('build')
+            }
+            sources.cpp {
+                source {
+                    srcDir 'src/test/native/cpp'
+                    include '**/*.cpp'
+                }
+                exportedHeaders {
+                    srcDirs 'src/test/native/include'
+                }
+            }
 
             // Enable run tasks for this component
             wpi.cpp.enableExternalTasks(it)
@@ -209,28 +209,72 @@ model {
             wpi.cpp.vendor.cpp(it)
             wpi.cpp.deps.wpilib(it)
 
-          /*binaries.all {
-//              lib library: 'VendorDriver', linkage: 'shared'
+            /*binaries.all {
+             //              lib library: 'VendorDriver', linkage: 'shared'
+             def arch = it.targetPlatform.name
+             if (systemArch == arch && it.buildType.name == 'debug') {
+             def filePath = it.tasks.install.installDirectory.get().toString() + File.separatorChar + 'lib'
+             test.dependsOn it.tasks.install
+             test.systemProperty 'java.library.path', filePath
+             test.environment 'LD_LIBRARY_PATH', filePath
+             test.workingDir filePath
+             }
+             }*/
 
-              def arch = it.targetPlatform.name
-              if (systemArch == arch && it.buildType.name == 'debug') {
-                  def filePath = it.tasks.install.installDirectory.get().toString() + File.separatorChar + 'lib'
-                  test.dependsOn it.tasks.install
-                  test.systemProperty 'java.library.path', filePath
-                  test.environment 'LD_LIBRARY_PATH', filePath
-                  test.workingDir filePath
-              }
-          }*/
-
-          nativeUtils.useRequiredLibrary(it, "wpilib_executable_shared", "googletest_static")
-      }
-
-  }
+            nativeUtils.useRequiredLibrary(it, "wpilib_executable_shared", "googletest_static")
+        }
+    }
 }
 
+
+spotless {
+    java {
+        target fileTree('.') {
+            include '**/*.java'
+            exclude '**/build/**', '**/build-*/**', '**/bin/**'
+        }
+        toggleOffOn()
+        googleJavaFormat().skipJavadocFormatting()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    groovyGradle {
+        target fileTree('.') {
+            include '**/*.gradle'
+            exclude '**/build/**', '**/build-*/**'
+        }
+        greclipse()
+        indentWithSpaces(4)
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    format 'xml', {
+        target fileTree('.') {
+            include '**/*.xml'
+            exclude '**/build/**', '**/build-*/**'
+        }
+        eclipseWtp('xml')
+        trimTrailingWhitespace()
+        indentWithSpaces(2)
+        endWithNewline()
+    }
+    format 'misc', {
+        target fileTree('.') {
+            include '**/*.md', '**/.gitignore'
+            exclude '**/build/**', '**/build-*/**'
+        }
+        trimTrailingWhitespace()
+        indentWithSpaces(2)
+        endWithNewline()
+    }
+}
+
+
 build.dependsOn javadoc
+build.dependsOn spotlessApply
 apply from: 'publish.gradle'
 
 wrapper {
-  gradleVersion = '8.14.3'
+    gradleVersion = '8.14.3'
 }

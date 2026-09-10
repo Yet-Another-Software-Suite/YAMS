@@ -69,6 +69,7 @@ import yams.telemetry.SmartMotorControllerTelemetryConfig;
  * Smart motor controller config.
  *
  * <h2>Example</h2>
+ *
  * <pre>{@code
  * SmartMotorControllerConfig config = new SmartMotorControllerConfig()
  *     .withMotorInverted(false)
@@ -81,129 +82,103 @@ import yams.telemetry.SmartMotorControllerTelemetryConfig;
  * }</pre>
  */
 public class SmartMotorControllerConfig {
-  /**
-   * Reset old configurations, so they are no longer persistent.
-   */
+  /** Reset old configurations, so they are no longer persistent. */
   private boolean resetPreviousConfig = true;
-  /**
-   * Vendor specific configuration for the {@link SmartMotorController}.
-   */
+
+  /** Vendor specific configuration for the {@link SmartMotorController}. */
   private Optional<Object> vendorConfig = Optional.empty();
-  /**
-   * Vendor specific control request for the {@link SmartMotorController}
-   */
+
+  /** Vendor specific control request for the {@link SmartMotorController} */
   private Optional<Object> vendorControlRequest = Optional.empty();
-  /**
-   * Subsystem that the {@link SmartMotorController} controls.
-   */
+
+  /** Subsystem that the {@link SmartMotorController} controls. */
   private Optional<Subsystem> subsystem = Optional.empty();
-  /**
-   * Missing options that would be decremented for each motor application.
-   */
+
+  /** Missing options that would be decremented for each motor application. */
   private final List<SmartMotorControllerOptions> missingOptions =
       Arrays.asList(SmartMotorControllerOptions.values());
-  /**
-   * Validation set to confirm all options have been applied to the Smart Motor Controller.
-   */
+
+  /** Validation set to confirm all options have been applied to the Smart Motor Controller. */
   private Set<BasicOptions> basicOptions = EnumSet.allOf(BasicOptions.class);
+
   /**
    * Validation set to confirm all options have been applied to the Smart Motor Controller's
    * external encoder.
    */
   private Set<ExternalEncoderOptions> externalEncoderOptions =
       EnumSet.allOf(ExternalEncoderOptions.class);
-  /**
-   * External encoder.
-   */
+
+  /** External encoder. */
   private Optional<Object> externalEncoder = Optional.empty();
-  /**
-   * External encoder inversion state.
-   */
+
+  /** External encoder inversion state. */
   private Optional<Boolean> externalEncoderInverted = Optional.empty();
-  /**
-   * Follower motors and inversion.
-   */
+
+  /** Follower motors and inversion. */
   private Optional<Pair<Object, Boolean>[]> followers = Optional.empty();
-  /**
-   * Simple feedforward for the motor controller.
-   */
+
+  /** Simple feedforward for the motor controller. */
   private EnumMap<ClosedLoopControllerSlot, SimpleMotorFeedforward> simpleFeedforward =
       new EnumMap<>(ClosedLoopControllerSlot.class);
-  /**
-   * Elevator feedforward for the motor controller.
-   */
+
+  /** Elevator feedforward for the motor controller. */
   private EnumMap<ClosedLoopControllerSlot, ElevatorFeedforward> elevatorFeedforward =
       new EnumMap<>(ClosedLoopControllerSlot.class);
-  /**
-   * Arm feedforward for the motor controller.
-   */
+
+  /** Arm feedforward for the motor controller. */
   private EnumMap<ClosedLoopControllerSlot, ArmFeedforward> armFeedforward =
       new EnumMap<>(ClosedLoopControllerSlot.class);
-  /**
-   * Simple feedforward for the motor controller.
-   */
+
+  /** Simple feedforward for the motor controller. */
   private EnumMap<ClosedLoopControllerSlot, SimpleMotorFeedforward> sim_simpleFeedforward =
       new EnumMap<>(ClosedLoopControllerSlot.class);
-  /**
-   * Elevator feedforward for the motor controller.
-   */
+
+  /** Elevator feedforward for the motor controller. */
   private EnumMap<ClosedLoopControllerSlot, ElevatorFeedforward> sim_elevatorFeedforward =
       new EnumMap<>(ClosedLoopControllerSlot.class);
-  /**
-   * Arm feedforward for the motor controller.
-   */
+
+  /** Arm feedforward for the motor controller. */
   private EnumMap<ClosedLoopControllerSlot, ArmFeedforward> sim_armFeedforward =
       new EnumMap<>(ClosedLoopControllerSlot.class);
-  /**
-   * Exponential Profile
-   */
+
+  /** Exponential Profile */
   private Optional<ExponentialProfile.Constraints> exponentialProfile = Optional.empty();
-  /**
-   * Trapezoidal Profile
-   */
+
+  /** Trapezoidal Profile */
   private Optional<TrapezoidProfile.Constraints> trapezoidProfile = Optional.empty();
-  /**
-   * Exponential Profile
-   */
+
+  /** Exponential Profile */
   private Optional<ExponentialProfile.Constraints> sim_exponentialProfile = Optional.empty();
-  /**
-   * Trapezoidal Profile
-   */
+
+  /** Trapezoidal Profile */
   private Optional<TrapezoidProfile.Constraints> sim_trapezoidProfile = Optional.empty();
-  /**
-   * Controller for the {@link SmartMotorController}.
-   */
+
+  /** Controller for the {@link SmartMotorController}. */
   private EnumMap<ClosedLoopControllerSlot, PIDController> pid =
       new EnumMap<>(ClosedLoopControllerSlot.class);
-  /**
-   * Controller for the {@link SmartMotorController}.
-   */
+
+  /** Controller for the {@link SmartMotorController}. */
   private Optional<LQRController> lqr = Optional.empty();
-  /**
-   * Controller for the {@link SmartMotorController}.
-   */
+
+  /** Controller for the {@link SmartMotorController}. */
   private Optional<LQRController> sim_lqr = Optional.empty();
-  /**
-   * Controller for the {@link SmartMotorController}.
-   */
+
+  /** Controller for the {@link SmartMotorController}. */
   private EnumMap<ClosedLoopControllerSlot, PIDController> sim_pid =
       new EnumMap<>(ClosedLoopControllerSlot.class);
-  /**
-   * Gearing for the {@link SmartMotorController}.
-   */
+
+  /** Gearing for the {@link SmartMotorController}. */
   private MechanismGearing gearing;
-  /**
-   * External encoder gearing, defaults to 1:1.
-   */
+
+  /** External encoder gearing, defaults to 1:1. */
   private Optional<MechanismGearing> externalEncoderGearing = Optional.empty();
-  /**
-   * Mechanism Circumference for distance calculations.
-   */
+
+  /** Mechanism Circumference for distance calculations. */
   private Optional<Distance> mechanismCircumference = Optional.empty();
-  /**
-   * PID Controller period for robot controller based PIDs
-   */
+
+  /** PID Controller period for robot controller based PIDs */
   private Optional<Time> controlPeriod = Optional.empty();
+
   /**
    * Simulation loop period, the rate at which {@link SmartMotorController#simIterate()} steps the
    * simulated physics forward. This is independent of {@link #controlPeriod} — a robot can run its
@@ -211,121 +186,92 @@ public class SmartMotorControllerConfig {
    * if not configured.
    */
   private Optional<Time> simulationPeriod = Optional.empty();
-  /**
-   * Open loop ramp rate, amount of time to go from 0 to 100 speed..
-   */
+
+  /** Open loop ramp rate, amount of time to go from 0 to 100 speed.. */
   private Optional<Time> openLoopRampRate = Optional.empty();
-  /**
-   * Closed loop ramp rate, amount of time to go from 0 to 100 speed.
-   */
+
+  /** Closed loop ramp rate, amount of time to go from 0 to 100 speed. */
   private Optional<Time> closeLoopRampRate = Optional.empty();
-  /**
-   * Set the stator current limit in Amps for the {@link SmartMotorController}
-   */
+
+  /** Set the stator current limit in Amps for the {@link SmartMotorController} */
   private OptionalInt statorStallCurrentLimit = OptionalInt.empty();
-  /**
-   * The supply current limit in Amps for the {@link SmartMotorController}
-   */
+
+  /** The supply current limit in Amps for the {@link SmartMotorController} */
   private OptionalInt supplyStallCurrentLimit = OptionalInt.empty();
-  /**
-   * The voltage compensation.
-   */
+
+  /** The voltage compensation. */
   private Optional<Voltage> voltageCompensation = Optional.empty();
-  /**
-   * Set the {@link MotorMode} for the {@link SmartMotorController}.
-   */
+
+  /** Set the {@link MotorMode} for the {@link SmartMotorController}. */
   private Optional<MotorMode> idleMode = Optional.empty();
-  /**
-   * Mechanism lower limit to prevent movement below.
-   */
+
+  /** Mechanism lower limit to prevent movement below. */
   private Optional<Angle> mechanismLowerLimit = Optional.empty();
-  /**
-   * High distance soft limit to prevent movement above.
-   */
+
+  /** High distance soft limit to prevent movement above. */
   private Optional<Angle> mechanismUpperLimit = Optional.empty();
-  /**
-   * Name for the {@link SmartMotorController} telemetry.
-   */
+
+  /** Name for the {@link SmartMotorController} telemetry. */
   private Optional<String> telemetryName = Optional.empty();
-  /**
-   * Telemetry verbosity setting.
-   */
+
+  /** Telemetry verbosity setting. */
   private Optional<TelemetryVerbosity> verbosity = Optional.empty();
-  /**
-   * Optional config for custom telemetry setup.
-   */
+
+  /** Optional config for custom telemetry setup. */
   private Optional<SmartMotorControllerTelemetryConfig> specifiedTelemetryConfig = Optional.empty();
-  /**
-   * Zero offset of the {@link SmartMotorController}
-   */
+
+  /** Zero offset of the {@link SmartMotorController} */
   private Optional<Angle> zeroOffset = Optional.empty();
-  /**
-   * External absolute encoder discontinuity point.
-   */
+
+  /** External absolute encoder discontinuity point. */
   private Optional<Angle> externalEncoderDiscontinuityPoint = Optional.empty();
-  /**
-   * Temperature cutoff for the {@link SmartMotorController} to prevent running if above.
-   */
+
+  /** Temperature cutoff for the {@link SmartMotorController} to prevent running if above. */
   private Optional<Temperature> temperatureCutoff = Optional.empty();
-  /**
-   * The encoder readings are inverted.
-   */
+
+  /** The encoder readings are inverted. */
   private Optional<Boolean> encoderInverted = Optional.empty();
-  /**
-   * The motor is inverted.
-   */
+
+  /** The motor is inverted. */
   private Optional<Boolean> motorInverted = Optional.empty();
-  /**
-   * Use the provided external encoder if set.
-   */
+
+  /** Use the provided external encoder if set. */
   private boolean useExternalEncoder = true;
-  /**
-   * {@link SmartMotorController} starting angle.
-   */
+
+  /** {@link SmartMotorController} starting angle. */
   private Optional<Angle> startingPosition = Optional.empty();
-  /**
-   * {@link SmartMotorController} starting angle to be used during simulation.
-   */
+
+  /** {@link SmartMotorController} starting angle to be used during simulation. */
   private Optional<Angle> sim_startingPosition = Optional.empty();
-  /**
-   * Maximum voltage output for the motor controller while using the closed loop controller.
-   */
+
+  /** Maximum voltage output for the motor controller while using the closed loop controller. */
   private Optional<Voltage> closedLoopControllerMaximumVoltage = Optional.empty();
-  /**
-   * Feedback synchronization threshold.
-   */
+
+  /** Feedback synchronization threshold. */
   private Optional<Angle> feedbackSynchronizationThreshold = Optional.empty();
-  /**
-   * The motor controller mode.
-   */
+
+  /** The motor controller mode. */
   private ControlMode motorControllerMode = ControlMode.CLOSED_LOOP;
-  /**
-   * Closed loop controller continuous wrapping point.
-   */
+
+  /** Closed loop controller continuous wrapping point. */
   private Optional<Angle> maxContinuousWrappingAngle = Optional.empty();
-  /**
-   * Closed loop controller continuous wrapping point.
-   */
+
+  /** Closed loop controller continuous wrapping point. */
   private Optional<Angle> minContinuousWrappingAngle = Optional.empty();
-  /**
-   * Closed loop controller tolerance.
-   */
+
+  /** Closed loop controller tolerance. */
   private Optional<Angle> closedLoopTolerance = Optional.empty();
-  /**
-   * Moment of inertia for DCSim
-   */
+
+  /** Moment of inertia for DCSim */
   private MomentOfInertia moi = KilogramSquareMeters.of(0.02);
-  /**
-   * Loosely coupled followers.
-   */
+
+  /** Loosely coupled followers. */
   private Optional<SmartMotorController[]> looselyCoupledFollowers = Optional.empty();
-  /**
-   * Linear or {@link Distance} based closed loop controller.
-   */
+
+  /** Linear or {@link Distance} based closed loop controller. */
   private boolean linearClosedLoopController = false;
-  /**
-   * Velocity trapezoidal profile.
-   */
+
+  /** Velocity trapezoidal profile. */
   private boolean velocityTrapezoidalProfile = false;
 
   /**
@@ -341,8 +287,7 @@ public class SmartMotorControllerConfig {
   /**
    * Construct the {@link SmartMotorControllerConfig} with a {@link Subsystem} added later.
    *
-   * @implNote You must use {@link #withSubsystem(Subsystem)} before passing off to {@link
-   * SmartMotorController}
+   * @implNote You must use {@link #withSubsystem(Subsystem)} before passing off to {@link SmartMotorController}
    */
   public SmartMotorControllerConfig() {
     HAL.report(kResourceType_YAMS, 1);
@@ -422,13 +367,11 @@ public class SmartMotorControllerConfig {
    * Set the vendor specific config for the {@link SmartMotorController} which will be used as a
    * base. Vendor configs will be overridden by the {@link SmartMotorControllerConfig} options.
    *
-   * @param vendorConfig Vendor specific config object. Must be of the correct type for the
-   *                     {@link SmartMotorController}. Only the root configuration class is
-   * accepted.
+   * @param vendorConfig Vendor specific config object. Must be of the correct type for the {@link SmartMotorController}. Only the root configuration class is accepted.
    * @return {@link SmartMotorControllerConfig} for chaining.
    * @implSpec {@link SmartMotorControllerConfig} options will always take precedence and overwrite
-   * the vendor config. Apply any changes after the {@link SmartMotorController} is created to
-   * ensure accuracy.
+   *     the vendor config. Apply any changes after the {@link SmartMotorController} is created to
+   *     ensure accuracy.
    */
   public SmartMotorControllerConfig withVendorConfig(Object vendorConfig) {
     this.vendorConfig = Optional.ofNullable(vendorConfig);
@@ -448,9 +391,7 @@ public class SmartMotorControllerConfig {
   }
 
   /**
-   * Sets the {@link Subsystem} for the {@link SmartMotorControllerConfig} to pass along to {@link
-   * SmartMotorController} and {@link yams.mechanisms.SmartMechanism}s. Must be set if a {@link
-   * Subsystem} was not defined previously.
+   * Sets the {@link Subsystem} for the {@link SmartMotorControllerConfig} to pass along to {@link SmartMotorController} and {@link yams.mechanisms.SmartMechanism}s. Must be set if a {@link Subsystem} was not defined previously.
    *
    * @param subsystem {@link Subsystem} to use.
    * @return {@link SmartMotorControllerConfig} for chaining.
@@ -458,8 +399,10 @@ public class SmartMotorControllerConfig {
    */
   public SmartMotorControllerConfig withSubsystem(Subsystem subsystem) {
     if (this.subsystem.isPresent()) {
-      throw new SmartMotorControllerConfigurationException("Subsystem has already been set",
-          "Cannot set subsystem", "withSubsystem(Subsystem subsystem) should only be called once");
+      throw new SmartMotorControllerConfigurationException(
+          "Subsystem has already been set",
+          "Cannot set subsystem",
+          "withSubsystem(Subsystem subsystem) should only be called once");
     }
     this.subsystem = Optional.of(subsystem);
     return this;
@@ -594,8 +537,7 @@ public class SmartMotorControllerConfig {
 
   /**
    * Set the {@link SmartMotorController} to reset the old configurations and only apply what is
-   * given to
-   * {@link SmartMotorControllerConfig}
+   * given to {@link SmartMotorControllerConfig}
    *
    * @param resetPreviousConfig Reset the old config?
    * @return {@link SmartMotorControllerConfig} for chaining.
@@ -624,8 +566,10 @@ public class SmartMotorControllerConfig {
    */
   public SmartMotorControllerConfig withExternalEncoderZeroOffset(Distance distance) {
     if (mechanismCircumference.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
-          "Cannot set zero offset.", "withMechanismCircumference(Distance)");
+      throw new SmartMotorControllerConfigurationException(
+          "Mechanism circumference is undefined",
+          "Cannot set zero offset.",
+          "withMechanismCircumference(Distance)");
     }
     return withExternalEncoderZeroOffset(convertToMechanism(distance));
   }
@@ -634,9 +578,8 @@ public class SmartMotorControllerConfig {
    * Set the external encoder absolute position to wrap around a defined discontinuity point.
    *
    * @param discontinuityPoint Discontinuity point of the external encoder, when provided 0.5rot the
-   *     external encoder
-   *                           will read between [-0.5, 0.5]; when provided 1rot the external
-   * encoder will read between [0, 1].
+   *     external encoder will read between [-0.5, 0.5]; when provided 1rot the external encoder
+   *     will read between [0, 1].
    * @return {@link SmartMotorControllerConfig} for chaining.
    * @implNote Only works for External Absolute Encoders.
    */
@@ -672,13 +615,14 @@ public class SmartMotorControllerConfig {
    * Set continuous wrapping for the {@link SmartMotorController}
    *
    * @param bottom Bottom value to wrap to.
-   * @param top    Top value to wrap to.
+   * @param top Top value to wrap to.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withContinuousWrapping(Angle bottom, Angle top) {
     if (mechanismUpperLimit.isPresent() || mechanismLowerLimit.isPresent()) {
       throw new SmartMotorControllerConfigurationException(
-          "Soft limits set while configuring continuous wrapping", "Cannot set continuous wrapping",
+          "Soft limits set while configuring continuous wrapping",
+          "Cannot set continuous wrapping",
           "withSoftLimits(Angle,Angle) should be removed");
     }
     if (linearClosedLoopController) {
@@ -691,8 +635,10 @@ public class SmartMotorControllerConfig {
       pidController.enableContinuousInput(bottom.in(Rotations), top.in(Rotations));
     }
     if (pid.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("No PID controller used",
-          "Cannot set continuous wrapping!", "withClosedLoopController()");
+      throw new SmartMotorControllerConfigurationException(
+          "No PID controller used",
+          "Cannot set continuous wrapping!",
+          "withClosedLoopController()");
     }
 
     maxContinuousWrappingAngle = Optional.of(top);
@@ -730,7 +676,8 @@ public class SmartMotorControllerConfig {
     if (!linearClosedLoopController) {
       throw new SmartMotorControllerConfigurationException(
           "Linear closed loop controller used with distance tolerance.",
-          "Closed loop tolerance cannot be set.", "withLinearClosedLoopController(true)");
+          "Closed loop tolerance cannot be set.",
+          "withLinearClosedLoopController(true)");
     }
     if (tolerance != null) {
       Angle toleranceAngle = convertToMechanism(tolerance);
@@ -761,7 +708,7 @@ public class SmartMotorControllerConfig {
    * Set the telemetry for the {@link SmartMotorController}
    *
    * @param telemetryName Name for the {@link SmartMotorController}
-   * @param verbosity     Verbosity of the Telemetry for the {@link SmartMotorController}
+   * @param verbosity Verbosity of the Telemetry for the {@link SmartMotorController}
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withTelemetry(
@@ -784,10 +731,9 @@ public class SmartMotorControllerConfig {
   }
 
   /**
-   * Set the telemetry for the {@link SmartMotorController} with a {@link
-   * SmartMotorControllerTelemetryConfig}
+   * Set the telemetry for the {@link SmartMotorController} with a {@link SmartMotorControllerTelemetryConfig}
    *
-   * @param telemetryName   Name for the {@link SmartMotorController}
+   * @param telemetryName Name for the {@link SmartMotorController}
    * @param telemetryConfig Config that specifies what to log.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
@@ -821,17 +767,20 @@ public class SmartMotorControllerConfig {
   /**
    * Set the distance soft limits.
    *
-   * @param low  Low distance soft limit.
+   * @param low Low distance soft limit.
    * @param high High distance soft limit.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withSoftLimits(Distance low, Distance high) {
     if (mechanismCircumference.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
-          "Cannot set soft limits.", "withMechanismCircumference(Distance)");
+      throw new SmartMotorControllerConfigurationException(
+          "Mechanism circumference is undefined",
+          "Cannot set soft limits.",
+          "withMechanismCircumference(Distance)");
     }
 
-    return withSoftLimits(Rotations.of(low.in(Meters) / mechanismCircumference.get().in(Meters)),
+    return withSoftLimits(
+        Rotations.of(low.in(Meters) / mechanismCircumference.get().in(Meters)),
         Rotations.of(high.in(Meters) / mechanismCircumference.get().in(Meters)));
   }
 
@@ -845,12 +794,14 @@ public class SmartMotorControllerConfig {
    */
   public SmartMotorControllerConfig withMomentOfInertia(Distance length, Mass weight) {
     if (length == null || weight == null) {
-      throw new SmartMotorControllerConfigurationException("Length or Weight cannot be null!",
+      throw new SmartMotorControllerConfigurationException(
+          "Length or Weight cannot be null!",
           "MOI is necessary for standalone SmartMotorController simulation!",
           "withMOI(Inches.of(4),Pounds.of(1))");
     } else {
-      moi = KilogramSquareMeters.of(
-          SingleJointedArmSim.estimateMOI(length.in(Meters), weight.in(Kilograms)));
+      moi =
+          KilogramSquareMeters.of(
+              SingleJointedArmSim.estimateMOI(length.in(Meters), weight.in(Kilograms)));
     }
     return this;
   }
@@ -870,14 +821,16 @@ public class SmartMotorControllerConfig {
   /**
    * Set the angle soft limits.
    *
-   * @param low  Low angle soft limit.
+   * @param low Low angle soft limit.
    * @param high High angle soft limit.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withSoftLimits(Angle low, Angle high) {
     if (low != null && high != null && low.gte(high)) {
-      throw new SmartMotorControllerConfigurationException("Lower limit is higher than upper limit",
-          "Cannot configure SmartMotorController", "withSoftLimit(LOW, HIGH)");
+      throw new SmartMotorControllerConfigurationException(
+          "Lower limit is higher than upper limit",
+          "Cannot configure SmartMotorController",
+          "withSoftLimit(LOW, HIGH)");
     }
     mechanismLowerLimit = Optional.ofNullable(low);
     mechanismUpperLimit = Optional.ofNullable(high);
@@ -916,8 +869,7 @@ public class SmartMotorControllerConfig {
   }
 
   /**
-   * Get the Moment of Inertia of the {@link SmartMotorController}'s mechanism for the
-   * {@link edu.wpi.first.wpilibj.simulation.DCMotorSim}.
+   * Get the Moment of Inertia of the {@link SmartMotorController}'s mechanism for the {@link edu.wpi.first.wpilibj.simulation.DCMotorSim}.
    *
    * @return Moment of Inertia in JKgMetersSquared.
    */
@@ -973,8 +925,8 @@ public class SmartMotorControllerConfig {
    * Set the follower motors of the {@link SmartMotorController}
    *
    * @param followers Base motor types (NOT {@link SmartMotorController}!) to configure as
-   *     followers, must be same brand
-   *                  as the {@link SmartMotorController} with inversion from the base motor.
+   *     followers, must be same brand as the {@link SmartMotorController} with inversion from the
+   *     base motor.
    * @return {@link SmartMotorControllerConfig} for chaining
    */
   @SafeVarargs
@@ -997,9 +949,7 @@ public class SmartMotorControllerConfig {
     return this;
   }
 
-  /**
-   * Clear the follower motors so they are not reapplied
-   */
+  /** Clear the follower motors so they are not reapplied */
   public void clearFollowers() {
     this.followers = Optional.empty();
   }
@@ -1073,8 +1023,7 @@ public class SmartMotorControllerConfig {
   }
 
   /**
-   * Set the external encoder which is attached to the motor type sent used by {@link
-   * SmartMotorController}
+   * Set the external encoder which is attached to the motor type sent used by {@link SmartMotorController}
    *
    * @param externalEncoder External encoder attached to the {@link SmartMotorController}
    * @return {@link SmartMotorControllerConfig} for chaining.
@@ -1118,8 +1067,7 @@ public class SmartMotorControllerConfig {
   }
 
   /**
-   * Set the mechanism circumference to allow distance calculations on the {@link
-   * SmartMotorController}.
+   * Set the mechanism circumference to allow distance calculations on the {@link SmartMotorController}.
    *
    * @param circumference Circumference of the actuating spool or sprocket+chain attached the
    *     mechanism actuator.
@@ -1143,19 +1091,20 @@ public class SmartMotorControllerConfig {
 
   /**
    * Set the {@link Elevator} drum radius
+   *
    * @implNote Overload for {@link #withWheelRadius(Distance)}
    * @param radius Drum radius of elevator spool.
-   * @return  {@link SmartMotorControllerConfig} for chaining
+   * @return {@link SmartMotorControllerConfig} for chaining
    */
   public SmartMotorControllerConfig withDrumRadius(Distance radius) {
     return withWheelRadius(radius);
   }
+
   /**
-   * Set the {@link Elevator} drum radius via the chain pitch (.25in or .35in) and teeth
-   * count.
+   * Set the {@link Elevator} drum radius via the chain pitch (.25in or .35in) and teeth count.
    *
    * @param chainPitch Chain pitch.
-   * @param teeth      Sprocket teeth count.
+   * @param teeth Sprocket teeth count.
    * @return {@link SmartMotorControllerConfig} for chaining.
    * @implNote Overload for {@link #withWheelRadius(Distance)}
    */
@@ -1169,7 +1118,7 @@ public class SmartMotorControllerConfig {
    *
    * @param stages Stages given
    * @implNote Alias for {@link #withGearing(MechanismGearing)} where {@link MechanismGearing#div}
-   * is applied via the stages.
+   *     is applied via the stages.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withCascadingElevatorStages(int stages) {
@@ -1243,8 +1192,7 @@ public class SmartMotorControllerConfig {
 
   /**
    * Get the simulation loop period — the rate at which {@link SmartMotorController#simIterate()}
-   * steps the simulated physics forward. Defaults to 20ms if not set via
-   * {@link #withSimulationPeriod(Time)}.
+   * steps the simulated physics forward. Defaults to 20ms if not set via {@link #withSimulationPeriod(Time)}.
    *
    * @return Simulation loop period.
    */
@@ -1269,7 +1217,7 @@ public class SmartMotorControllerConfig {
   /**
    * Configure the {@link ArmFeedforward} for the {@link SmartMotorController}.
    *
-   * @param slot           {@link ClosedLoopControllerSlot} for the {@link ArmFeedforward}.
+   * @param slot {@link ClosedLoopControllerSlot} for the {@link ArmFeedforward}.
    * @param armFeedforward Arm feedforward for the {@link SmartMotorController}
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
@@ -1298,7 +1246,7 @@ public class SmartMotorControllerConfig {
   /**
    * Configure the {@link ArmFeedforward} for the
    *
-   * @param slot           {@link ClosedLoopControllerSlot} for the {@link ArmFeedforward}.
+   * @param slot {@link ClosedLoopControllerSlot} for the {@link ArmFeedforward}.
    * @param armFeedforward Arm feedforward for the {@link SmartMotorController}
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
@@ -1341,8 +1289,7 @@ public class SmartMotorControllerConfig {
   /**
    * Configure {@link ElevatorFeedforward} for the {@link SmartMotorController}
    *
-   * @param slot                {@link ClosedLoopControllerSlot} for the {@link
-   *     ElevatorFeedforward}.
+   * @param slot {@link ClosedLoopControllerSlot} for the {@link ElevatorFeedforward}.
    * @param elevatorFeedforward {@link ElevatorFeedforward} to set.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
@@ -1372,8 +1319,7 @@ public class SmartMotorControllerConfig {
   /**
    * Configure {@link ElevatorFeedforward} for the {@link SmartMotorController}
    *
-   * @param slot                {@link ClosedLoopControllerSlot} for the {@link
-   *     ElevatorFeedforward}.
+   * @param slot {@link ClosedLoopControllerSlot} for the {@link ElevatorFeedforward}.
    * @param elevatorFeedforward {@link ElevatorFeedforward} to set.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
@@ -1419,8 +1365,7 @@ public class SmartMotorControllerConfig {
    * Rotations (or Meters if Mechanism Circumference is configured), and outputs are in Volts.
    *
    * @param controller {@link LQRController} to use, the units passed in are in Rotations (or Meters
-   *     if Mechanism
-   *                   Circumference is configured), and output is Voltage.
+   *     if Mechanism Circumference is configured), and output is Voltage.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withSimClosedLoopController(LQRController controller) {
@@ -1434,9 +1379,9 @@ public class SmartMotorControllerConfig {
    * Rotations (or Meters if Mechanism Circumference is configured).
    *
    * @param slot Closed loop controller slot.
-   * @param kP   KP scalar for the PID Controller.
-   * @param kI   KI scalar for the PID Controller.
-   * @param kD   KD scalar for the PID Controller.
+   * @param kP KP scalar for the PID Controller.
+   * @param kI KI scalar for the PID Controller.
+   * @param kD KD scalar for the PID Controller.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withSimClosedLoopController(
@@ -1463,7 +1408,7 @@ public class SmartMotorControllerConfig {
    * Set the closed loop controller for the {@link SmartMotorController}, the units passed in are in
    * Rotations (or Meters if Mechanism Circumference is configured).
    *
-   * @param slot       Closed loop controller slot.
+   * @param slot Closed loop controller slot.
    * @param controller {@link PIDController} to use.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
@@ -1489,15 +1434,16 @@ public class SmartMotorControllerConfig {
    * Set the trapezoidal motion profile for the {@link SmartMotorController}.
    *
    * @param profile {@link TrapezoidProfile}; if linear use meters/s, meters/s^2; if rotational use
-   *     rotations/s,
-   *                rotations/s^2.
+   *     rotations/s, rotations/s^2.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withProfile(TrapezoidProfile.Constraints profile) {
-    DriverStation.reportWarning("Trapezoidal profile will be given rotations/s and rotations/s^2 "
+    DriverStation.reportWarning(
+        "Trapezoidal profile will be given rotations/s and rotations/s^2 "
             + "for rotational closed loop controllers.",
         true);
-    DriverStation.reportWarning("Trapezoidal profile will be given meters/s and meters/s^2 for "
+    DriverStation.reportWarning(
+        "Trapezoidal profile will be given meters/s and meters/s^2 for "
             + "linear closed loop controllers.",
         true);
     this.exponentialProfile = Optional.empty();
@@ -1508,7 +1454,7 @@ public class SmartMotorControllerConfig {
   /**
    * Set the linear trapezoidal motion profile for the {@link SmartMotorController}.
    *
-   * @param maxVel   Max velocity for the profile.
+   * @param maxVel Max velocity for the profile.
    * @param maxAccel Max acceleration for the profile.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
@@ -1516,23 +1462,27 @@ public class SmartMotorControllerConfig {
       LinearVelocity maxVel, LinearAcceleration maxAccel) {
     linearClosedLoopController = true;
     this.exponentialProfile = Optional.empty();
-    this.trapezoidProfile = Optional.of(new TrapezoidProfile.Constraints(
-        maxVel.in(MetersPerSecond), maxAccel.in(MetersPerSecondPerSecond)));
+    this.trapezoidProfile =
+        Optional.of(
+            new TrapezoidProfile.Constraints(
+                maxVel.in(MetersPerSecond), maxAccel.in(MetersPerSecondPerSecond)));
     return this;
   }
 
   /**
    * Set the angular trapezoidal motion profile for the {@link SmartMotorController}.
    *
-   * @param maxVel   Max velocity for the profile.
+   * @param maxVel Max velocity for the profile.
    * @param maxAccel Max acceleration for the profile.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withTrapezoidalProfile(
       AngularVelocity maxVel, AngularAcceleration maxAccel) {
     this.exponentialProfile = Optional.empty();
-    this.trapezoidProfile = Optional.of(new TrapezoidProfile.Constraints(
-        maxVel.in(RotationsPerSecond), maxAccel.in(RotationsPerSecondPerSecond)));
+    this.trapezoidProfile =
+        Optional.of(
+            new TrapezoidProfile.Constraints(
+                maxVel.in(RotationsPerSecond), maxAccel.in(RotationsPerSecondPerSecond)));
     return this;
   }
 
@@ -1540,15 +1490,17 @@ public class SmartMotorControllerConfig {
    * Set the angular velocity trapezoidal profile for the {@link SmartMotorController}.
    *
    * @param maxAccel Max acceleration for the profile.
-   * @param maxJerk  Max velocity for the profile.
+   * @param maxJerk Max velocity for the profile.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withTrapezoidalProfile(
       AngularAcceleration maxAccel, Velocity<AngularAccelerationUnit> maxJerk) {
     this.exponentialProfile = Optional.empty();
     this.trapezoidProfile =
-        Optional.of(new TrapezoidProfile.Constraints(maxAccel.in(RotationsPerSecondPerSecond),
-            maxJerk.in(RotationsPerSecondPerSecond.per(Second))));
+        Optional.of(
+            new TrapezoidProfile.Constraints(
+                maxAccel.in(RotationsPerSecondPerSecond),
+                maxJerk.in(RotationsPerSecondPerSecond.per(Second))));
     velocityTrapezoidalProfile = true;
     return this;
   }
@@ -1557,14 +1509,17 @@ public class SmartMotorControllerConfig {
    * Set the linear velocity trapezoidal profile for the {@link SmartMotorController}.
    *
    * @param maxAccel Max acceleration for the profile.
-   * @param maxJerk  Max velocity for the profile.
+   * @param maxJerk Max velocity for the profile.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withTrapezoidalProfile(
       LinearAcceleration maxAccel, Velocity<LinearAccelerationUnit> maxJerk) {
     this.exponentialProfile = Optional.empty();
-    this.trapezoidProfile = Optional.of(new TrapezoidProfile.Constraints(
-        maxAccel.in(MetersPerSecondPerSecond), maxJerk.in(MetersPerSecondPerSecond.per(Second))));
+    this.trapezoidProfile =
+        Optional.of(
+            new TrapezoidProfile.Constraints(
+                maxAccel.in(MetersPerSecondPerSecond),
+                maxJerk.in(MetersPerSecondPerSecond.per(Second))));
     velocityTrapezoidalProfile = true;
     linearClosedLoopController = true;
     return this;
@@ -1574,15 +1529,16 @@ public class SmartMotorControllerConfig {
    * Set the exponential profile
    *
    * @param profile Exponential profile; meters/s, meters/s^2 for linear controllers; rotations/s,
-   *     and rotations/s^2 for
-   *                rotational controllers..
+   *     and rotations/s^2 for rotational controllers..
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withProfile(ExponentialProfile.Constraints profile) {
-    DriverStation.reportWarning("Exponential profile will be given rotations/s and rotations/s^2 "
+    DriverStation.reportWarning(
+        "Exponential profile will be given rotations/s and rotations/s^2 "
             + "for rotational closed loop controllers.",
         true);
-    DriverStation.reportWarning("Exponential profile will be given meters/s and meters/s^2 for "
+    DriverStation.reportWarning(
+        "Exponential profile will be given meters/s and meters/s^2 for "
             + "linear closed loop controllers.",
         true);
     this.exponentialProfile = Optional.ofNullable(profile);
@@ -1594,38 +1550,42 @@ public class SmartMotorControllerConfig {
    * Get the {@link ExponentialProfile.Constraints} for an arm or flywheel.
    *
    * @param maxVolts Maximum input voltage for profile generation.
-   * @param motor    {@link DCMotor} of the arm.
-   * @param moi      {@link MomentOfInertia} of the arm.
+   * @param motor {@link DCMotor} of the arm.
+   * @param moi {@link MomentOfInertia} of the arm.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withExponentialProfile(
       Voltage maxVolts, DCMotor motor, MomentOfInertia moi) {
     this.moi = moi;
-    var sysid = LinearSystemId.createSingleJointedArmSystem(
-        motor, moi.in(KilogramSquareMeters), gearing.getMechanismToRotorRatio());
+    var sysid =
+        LinearSystemId.createSingleJointedArmSystem(
+            motor, moi.in(KilogramSquareMeters), gearing.getMechanismToRotorRatio());
     var A = sysid.getA(0, 0); // radians
     var B = sysid.getB(0, 0); // radians
     var kV = RadiansPerSecond.of(-A / B);
     var kA = RadiansPerSecondPerSecond.of(1.0 / B);
     this.trapezoidProfile = Optional.empty();
-    this.exponentialProfile = Optional.of(ExponentialProfile.Constraints.fromCharacteristics(
-        maxVolts.in(Volts), kV.in(RotationsPerSecond), kA.in(RotationsPerSecondPerSecond)));
+    this.exponentialProfile =
+        Optional.of(
+            ExponentialProfile.Constraints.fromCharacteristics(
+                maxVolts.in(Volts), kV.in(RotationsPerSecond), kA.in(RotationsPerSecondPerSecond)));
     return this;
   }
 
   /**
    * Get the {@link ExponentialProfile.Constraints} for an elevator.
    *
-   * @param maxVolts   Maximum input voltage for profile generation.
-   * @param motor      {@link DCMotor} of the elevator.
-   * @param mass       {@link Mass} of the elevator carriage.
+   * @param maxVolts Maximum input voltage for profile generation.
+   * @param motor {@link DCMotor} of the elevator.
+   * @param mass {@link Mass} of the elevator carriage.
    * @param drumRadius {@link Distance} of the elevator drum radius.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withExponentialProfile(
       Voltage maxVolts, DCMotor motor, Mass mass, Distance drumRadius) {
-    var sysid = LinearSystemId.createElevatorSystem(
-        motor, mass.in(Kilograms), drumRadius.in(Meters), gearing.getMechanismToRotorRatio());
+    var sysid =
+        LinearSystemId.createElevatorSystem(
+            motor, mass.in(Kilograms), drumRadius.in(Meters), gearing.getMechanismToRotorRatio());
     var circumference = (2.0 * Math.PI * drumRadius.in(Meters));
 
     var A = sysid.getA(0, 0);
@@ -1633,8 +1593,10 @@ public class SmartMotorControllerConfig {
     var kV = MetersPerSecond.of(-A / B);
     var kA = MetersPerSecondPerSecond.of(1.0 / B);
     this.trapezoidProfile = Optional.empty();
-    this.exponentialProfile = Optional.of(ExponentialProfile.Constraints.fromCharacteristics(
-        maxVolts.in(Volts), kV.in(MetersPerSecond), kA.in(MetersPerSecondPerSecond)));
+    this.exponentialProfile =
+        Optional.of(
+            ExponentialProfile.Constraints.fromCharacteristics(
+                maxVolts.in(Volts), kV.in(MetersPerSecond), kA.in(MetersPerSecondPerSecond)));
     this.linearClosedLoopController = true;
     return this;
   }
@@ -1642,8 +1604,8 @@ public class SmartMotorControllerConfig {
   /**
    * Create a generic constraints object.
    *
-   * @param maxVolts        Maximum input voltage for profile generation.
-   * @param maxVelocity     Maximum velocity.
+   * @param maxVolts Maximum input voltage for profile generation.
+   * @param maxVelocity Maximum velocity.
    * @param maxAcceleration Maximum acceleration.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
@@ -1651,9 +1613,12 @@ public class SmartMotorControllerConfig {
       Voltage maxVolts, AngularVelocity maxVelocity, AngularAcceleration maxAcceleration) {
     var maxV = maxVolts.in(Volts);
     this.trapezoidProfile = Optional.empty();
-    this.exponentialProfile = Optional.of(ExponentialProfile.Constraints.fromStateSpace(
-        maxVolts.in(Volts), maxV / maxVelocity.in(RotationsPerSecond),
-        maxV / maxAcceleration.in(RotationsPerSecondPerSecond)));
+    this.exponentialProfile =
+        Optional.of(
+            ExponentialProfile.Constraints.fromStateSpace(
+                maxVolts.in(Volts),
+                maxV / maxVelocity.in(RotationsPerSecond),
+                maxV / maxAcceleration.in(RotationsPerSecondPerSecond)));
     return this;
   }
 
@@ -1691,15 +1656,12 @@ public class SmartMotorControllerConfig {
    * Rotations (or Meters if linear closed loop controller is configured), the outputs are in Volts.
    *
    * @param slot Closed loop controller slot.
-   * @param kP   KP scalar for the PID Controller, the units passed in are in Rotations (or Meters
-   *     if Mechanism
-   *             Circumference is configured), the outputs are in Volts.
-   * @param kI   KI scalar for the PID Controller, the units passed in are in Rotations (or Meters
-   *     if Mechanism
-   *             Circumference is configured), the outputs are in Volts.
-   * @param kD   KD scalar for the PID Controller, the units passed in are in Rotations (or Meters
-   *     if Mechanism
-   *             Circumference is configured), the outputs are in Volts.
+   * @param kP KP scalar for the PID Controller, the units passed in are in Rotations (or Meters if
+   *     Mechanism Circumference is configured), the outputs are in Volts.
+   * @param kI KI scalar for the PID Controller, the units passed in are in Rotations (or Meters if
+   *     Mechanism Circumference is configured), the outputs are in Volts.
+   * @param kD KD scalar for the PID Controller, the units passed in are in Rotations (or Meters if
+   *     Mechanism Circumference is configured), the outputs are in Volts.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withClosedLoopController(
@@ -1714,14 +1676,11 @@ public class SmartMotorControllerConfig {
    * Rotations (or Meters if linear closed loop controller is configured), the outputs are in Volts.
    *
    * @param kP KP scalar for the PID Controller, the units passed in are in Rotations (or Meters if
-   *     Mechanism
-   *           Circumference is configured), the outputs are in Volts.
+   *     Mechanism Circumference is configured), the outputs are in Volts.
    * @param kI KI scalar for the PID Controller, the units passed in are in Rotations (or Meters if
-   *     Mechanism
-   *           Circumference is configured), the outputs are in Volts.
+   *     Mechanism Circumference is configured), the outputs are in Volts.
    * @param kD KD scalar for the PID Controller, the units passed in are in Rotations (or Meters if
-   *     Mechanism
-   *           Circumference is configured), the outputs are in Volts.
+   *     Mechanism Circumference is configured), the outputs are in Volts.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withClosedLoopController(double kP, double kI, double kD) {
@@ -1732,10 +1691,9 @@ public class SmartMotorControllerConfig {
    * Set the closed loop controller for the {@link SmartMotorController}, the units passed in are in
    * Rotations (or Meters if linear closed loop controller is configured), the outputs are in Volts.
    *
-   * @param slot       Closed loop controller slot.
+   * @param slot Closed loop controller slot.
    * @param controller {@link PIDController} to use, the units passed in are in Rotations (or Meters
-   *     if Mechanism
-   *                   Circumference is configured), the outputs are in Volts.
+   *     if Mechanism Circumference is configured), the outputs are in Volts.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withClosedLoopController(
@@ -1750,8 +1708,7 @@ public class SmartMotorControllerConfig {
    * Rotations (or Meters if linear closed loop controller is configured), the outputs are in Volts.
    *
    * @param controller {@link PIDController} to use, the units passed in are in Rotations (or Meters
-   *     if Mechanism
-   *                   Circumference is configured), the outputs are in Volts.
+   *     if Mechanism Circumference is configured), the outputs are in Volts.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withClosedLoopController(PIDController controller) {
@@ -1817,7 +1774,7 @@ public class SmartMotorControllerConfig {
    * Set the {@link SimpleMotorFeedforward} for {@link SmartMotorController}, units are in
    * Rotations.
    *
-   * @param slot              Closed loop controller slot.
+   * @param slot Closed loop controller slot.
    * @param simpleFeedforward {@link SimpleMotorFeedforward}
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
@@ -1873,7 +1830,7 @@ public class SmartMotorControllerConfig {
   /**
    * Set the {@link SimpleMotorFeedforward} for {@link SmartMotorController}, units are in Rotations
    *
-   * @param slot              Closed loop controller slot.
+   * @param slot Closed loop controller slot.
    * @param simpleFeedforward {@link SimpleMotorFeedforward}
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
@@ -1910,11 +1867,9 @@ public class SmartMotorControllerConfig {
   }
 
   /**
-   * Get the gearing to convert rotor rotations to mechanisms rotations connected to the {@link
-   * SmartMotorController}
+   * Get the gearing to convert rotor rotations to mechanisms rotations connected to the {@link SmartMotorController}
    *
-   * @return {@link MechanismGearing} representing the gearbox and sprockets attached to the
-   * {@link SmartMotorController}.
+   * @return {@link MechanismGearing} representing the gearbox and sprockets attached to the {@link SmartMotorController}.
    */
   public MechanismGearing getGearing() {
     basicOptions.remove(BasicOptions.Gearing);
@@ -1983,9 +1938,8 @@ public class SmartMotorControllerConfig {
   }
 
   /**
-   * Convert {@link Velocity<LinearAccelerationUnit>} to  {@link Velocity<AngularAccelerationUnit>}
-   * using the
-   * {@link SmartMotorControllerConfig#mechanismCircumference}
+   * Convert {@link Velocity<LinearAccelerationUnit>} to {@link Velocity<AngularAccelerationUnit>}
+   * using the {@link SmartMotorControllerConfig#mechanismCircumference}
    *
    * @param jerk Linear jerk to convert.
    * @return Equivalent angular jerk.
@@ -1993,19 +1947,21 @@ public class SmartMotorControllerConfig {
   public Velocity<AngularAccelerationUnit> convertToMechanism(
       Velocity<LinearAccelerationUnit> jerk) {
     if (mechanismCircumference.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
+      throw new SmartMotorControllerConfigurationException(
+          "Mechanism circumference is undefined",
           "Cannot convert LinearVelocity to AngularVelocity.",
           "withMechanismCircumference(Distance)");
     }
 
-    return RotationsPerSecondPerSecond.per(Second).of(
-        jerk.in(MetersPerSecondPerSecond.per(Second)) / mechanismCircumference.get().in(Meters));
+    return RotationsPerSecondPerSecond.per(Second)
+        .of(
+            jerk.in(MetersPerSecondPerSecond.per(Second))
+                / mechanismCircumference.get().in(Meters));
   }
 
   /**
-   * Convert {@link Velocity<AngularAccelerationUnit>} to  {@link Velocity<LinearAccelerationUnit>}
-   * using the
-   * {@link SmartMotorControllerConfig#mechanismCircumference}
+   * Convert {@link Velocity<AngularAccelerationUnit>} to {@link Velocity<LinearAccelerationUnit>}
+   * using the {@link SmartMotorControllerConfig#mechanismCircumference}
    *
    * @param jerk Angular jerk to convert.
    * @return Equivalent angular jerk.
@@ -2013,25 +1969,28 @@ public class SmartMotorControllerConfig {
   public Velocity<LinearAccelerationUnit> convertFromMechanism(
       Velocity<AngularAccelerationUnit> jerk) {
     if (mechanismCircumference.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
+      throw new SmartMotorControllerConfigurationException(
+          "Mechanism circumference is undefined",
           "Cannot convert LinearVelocity to AngularVelocity.",
           "withMechanismCircumference(Distance)");
     }
 
-    return MetersPerSecondPerSecond.per(Second).of(
-        jerk.in(RotationsPerSecondPerSecond.per(Second)) * mechanismCircumference.get().in(Meters));
+    return MetersPerSecondPerSecond.per(Second)
+        .of(
+            jerk.in(RotationsPerSecondPerSecond.per(Second))
+                * mechanismCircumference.get().in(Meters));
   }
 
   /**
-   * Convert {@link LinearVelocity} to {@link AngularVelocity} using the
-   * {@link SmartMotorControllerConfig#mechanismCircumference}
+   * Convert {@link LinearVelocity} to {@link AngularVelocity} using the {@link SmartMotorControllerConfig#mechanismCircumference}
    *
    * @param velocity Linear velocity to convert.
    * @return Equivalent angular velocity.
    */
   public AngularVelocity convertToMechanism(LinearVelocity velocity) {
     if (mechanismCircumference.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
+      throw new SmartMotorControllerConfigurationException(
+          "Mechanism circumference is undefined",
           "Cannot convert LinearVelocity to AngularVelocity.",
           "withMechanismCircumference(Distance)");
     }
@@ -2041,15 +2000,15 @@ public class SmartMotorControllerConfig {
   }
 
   /**
-   * Convert {@link LinearAcceleration} to {@link AngularAcceleration} using the
-   * {@link SmartMotorControllerConfig#mechanismCircumference}
+   * Convert {@link LinearAcceleration} to {@link AngularAcceleration} using the {@link SmartMotorControllerConfig#mechanismCircumference}
    *
    * @param acceleration Linear acceleration to convert.
    * @return Equivalent angular acceleration.
    */
   public AngularAcceleration convertToMechanism(LinearAcceleration acceleration) {
     if (mechanismCircumference.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
+      throw new SmartMotorControllerConfigurationException(
+          "Mechanism circumference is undefined",
           "Cannot convert LinearAcceleration to AngularAcceleration.",
           "withMechanismCircumference(Distance)");
     }
@@ -2059,98 +2018,94 @@ public class SmartMotorControllerConfig {
   }
 
   /**
-   * Convert {@link Distance} to {@link Angle} using {@link
-   * SmartMotorControllerConfig#mechanismCircumference}
+   * Convert {@link Distance} to {@link Angle} using {@link SmartMotorControllerConfig#mechanismCircumference}
    *
    * @param distance {@link Distance} to convert to {@link Angle}
    * @return {@link Angle} of distance.
    */
   public Angle convertToMechanism(Distance distance) {
     if (mechanismCircumference.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
-          "Cannot convert Distance to Angle.", "withMechanismCircumference(Distance)");
+      throw new SmartMotorControllerConfigurationException(
+          "Mechanism circumference is undefined",
+          "Cannot convert Distance to Angle.",
+          "withMechanismCircumference(Distance)");
     }
     return Rotations.of(distance.in(Meters) / (mechanismCircumference.get().in(Meters)));
   }
 
   /**
-   * Convert {@link Angle} to {@link Distance} using {@link
-   * SmartMotorControllerConfig#mechanismCircumference}
+   * Convert {@link Angle} to {@link Distance} using {@link SmartMotorControllerConfig#mechanismCircumference}
    *
    * @param rotations Rotations to convert.
    * @return Distance of the mechanism.
    */
   public Distance convertFromMechanism(Angle rotations) {
     if (mechanismCircumference.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
-          "Cannot convert Angle to Distance.", "withMechanismCircumference(Distance)");
+      throw new SmartMotorControllerConfigurationException(
+          "Mechanism circumference is undefined",
+          "Cannot convert Angle to Distance.",
+          "withMechanismCircumference(Distance)");
     }
-    return Meters.of(rotations.in(Rotations) *mechanismCircumference.get().in(Meters));
+    return Meters.of(rotations.in(Rotations) * mechanismCircumference.get().in(Meters));
   }
 
   /**
-   * Convert {@link Angle} to {@link LinearVelocity} using {@link
-   * SmartMotorControllerConfig#mechanismCircumference}
+   * Convert {@link Angle} to {@link LinearVelocity} using {@link SmartMotorControllerConfig#mechanismCircumference}
    *
    * @param velocity Velocity to convert.
    * @return Velocity of the mechanism.
    */
   public LinearVelocity convertFromMechanism(AngularVelocity velocity) {
     if (mechanismCircumference.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
+      throw new SmartMotorControllerConfigurationException(
+          "Mechanism circumference is undefined",
           "Cannot convert AngularVelocity to LinearVelocity.",
           "withMechanismCircumference(Distance)");
     }
     return MetersPerSecond.of(
-        velocity.in(RotationsPerSecond) *mechanismCircumference.get().in(Meters));
+        velocity.in(RotationsPerSecond) * mechanismCircumference.get().in(Meters));
   }
 
   /**
-   * Convert {@link Angle} to {@link LinearAcceleration} using
-   * {@link SmartMotorControllerConfig#mechanismCircumference}
+   * Convert {@link Angle} to {@link LinearAcceleration} using {@link SmartMotorControllerConfig#mechanismCircumference}
    *
    * @param acceleration Rotations to convert.
    * @return Acceleration of the mechanism.
    */
   public LinearAcceleration convertFromMechanism(AngularAcceleration acceleration) {
     if (mechanismCircumference.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
+      throw new SmartMotorControllerConfigurationException(
+          "Mechanism circumference is undefined",
           "Cannot convert AngularAcceleration to LinearAcceleration.",
           "withMechanismCircumference(Distance)");
     }
     return MetersPerSecondPerSecond.of(
-        acceleration.in(RotationsPerSecondPerSecond) *mechanismCircumference.get().in(Meters));
+        acceleration.in(RotationsPerSecondPerSecond) * mechanismCircumference.get().in(Meters));
   }
 
   /**
    * Convert a feedforward {@link Force} applied at the mechanism into the equivalent motor
-   * feedforward
-   * {@link Voltage}, using {@link SmartMotorControllerConfig#gearing} and
-   * {@link SmartMotorControllerConfig#mechanismCircumference}.
+   * feedforward {@link Voltage}, using {@link SmartMotorControllerConfig#gearing} and {@link SmartMotorControllerConfig#mechanismCircumference}.
    *
-   * @param motor             {@link DCMotor} of the mechanism.
+   * @param motor {@link DCMotor} of the mechanism.
    * @param mechanismVelocity Commanded mechanism (post-gearbox) {@link AngularVelocity}.
-   * @param feedforwardForce  Feedforward {@link Force} applied to the mechanism.
+   * @param feedforwardForce Feedforward {@link Force} applied to the mechanism.
    * @return Equivalent feedforward {@link Voltage} at the motor.
    */
   public Voltage convertToVoltage(
       DCMotor motor, AngularVelocity mechanismVelocity, Force feedforwardForce) {
     double rotorAngularVelocityRadPerSec =
-        mechanismVelocity.in(RadiansPerSecond) *gearing.getMechanismToRotorRatio();
+        mechanismVelocity.in(RadiansPerSecond) * gearing.getMechanismToRotorRatio();
     return Volts.of(
         motor.getVoltage(forceToRotorTorque(feedforwardForce), rotorAngularVelocityRadPerSec));
   }
 
   /**
    * Convert a feedforward {@link Force} applied at the mechanism into the equivalent motor
-   * feedforward
-   * {@link Current}, using {@link SmartMotorControllerConfig#gearing} and
-   * {@link SmartMotorControllerConfig#mechanismCircumference}. Unlike
-   * {@link #convertToVoltage(DCMotor, AngularVelocity, Force)}, this does not depend on the
-   * commanded speed and is the correct feedforward to use for torque-current based closed-loop
-   * control (e.g. TorqueCurrentFOC).
+   * feedforward {@link Current}, using {@link SmartMotorControllerConfig#gearing} and {@link SmartMotorControllerConfig#mechanismCircumference}. Unlike {@link #convertToVoltage(DCMotor, AngularVelocity, Force)}, this does not depend on the commanded speed and is the correct
+   * feedforward to use for torque-current based closed-loop control (e.g. TorqueCurrentFOC).
    *
-   * @param motor            {@link DCMotor} of the mechanism.
+   * @param motor {@link DCMotor} of the mechanism.
    * @param feedforwardForce Feedforward {@link Force} applied to the mechanism.
    * @return Equivalent feedforward {@link Current} at the motor.
    */
@@ -2160,22 +2115,21 @@ public class SmartMotorControllerConfig {
 
   /**
    * Convert a feedforward {@link Force} applied at the mechanism into the equivalent rotor torque,
-   * using
-   * {@link SmartMotorControllerConfig#gearing} and {@link
-   * SmartMotorControllerConfig#mechanismCircumference}.
+   * using {@link SmartMotorControllerConfig#gearing} and {@link SmartMotorControllerConfig#mechanismCircumference}.
    *
    * @param feedforwardForce Feedforward {@link Force} applied to the mechanism.
    * @return Equivalent rotor torque in Newton-meters.
    */
   private double forceToRotorTorque(Force feedforwardForce) {
     if (mechanismCircumference.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
+      throw new SmartMotorControllerConfigurationException(
+          "Mechanism circumference is undefined",
           "Cannot convert feedforward Force to Voltage/Current.",
           "withMechanismCircumference(Distance)");
     }
     double gearRatio = gearing.getMechanismToRotorRatio();
     double radiusMeters = mechanismCircumference.get().in(Meters) / (2 * Math.PI);
-    return feedforwardForce.in(Newtons) *radiusMeters / gearRatio;
+    return feedforwardForce.in(Newtons) * radiusMeters / gearRatio;
   }
 
   /**
@@ -2293,7 +2247,8 @@ public class SmartMotorControllerConfig {
   public SmartMotorControllerConfig withExternalEncoderGearing(
       MechanismGearing externalEncoderGearing) {
     if (externalEncoderGearing.getRotorToMechanismRatio() > 1) {
-      DriverStation.reportWarning("[IMPORTANT] Your gearing is set in a way that the external "
+      DriverStation.reportWarning(
+          "[IMPORTANT] Your gearing is set in a way that the external "
               + "encoder will exceed the maximum reading, "
               + "this WILL result in multiple angle's being read as the same 'angle.\n\t"
               + "Ignore this warning IF your mechanism will never travel outside of the slice you "
@@ -2314,7 +2269,8 @@ public class SmartMotorControllerConfig {
    */
   public SmartMotorControllerConfig withExternalEncoderGearing(double reductionRatio) {
     if (reductionRatio > 1) {
-      DriverStation.reportWarning("[IMPORTANT] Your gearing is set in a way that the external "
+      DriverStation.reportWarning(
+          "[IMPORTANT] Your gearing is set in a way that the external "
               + "encoder will exceed the maximum reading, "
               + "this WILL result in multiple angle's being read as the same 'angle.\n\t"
               + "Ignore this warning IF your mechanism will never travel outside of the slice you "
@@ -2332,14 +2288,18 @@ public class SmartMotorControllerConfig {
    * @return {@link Angle} where the encoder wraps around.
    */
   public Optional<Angle> getContinuousWrapping() {
-    if (maxContinuousWrappingAngle.isPresent() && minContinuousWrappingAngle.isPresent()
-        && !minContinuousWrappingAngle.get().equals(
-            Rotations.of(maxContinuousWrappingAngle.get().in(Rotations) -1))) {
-      throw new SmartMotorControllerConfigurationException("Bounds are not correct!",
+    if (maxContinuousWrappingAngle.isPresent()
+        && minContinuousWrappingAngle.isPresent()
+        && !minContinuousWrappingAngle
+            .get()
+            .equals(Rotations.of(maxContinuousWrappingAngle.get().in(Rotations) - 1))) {
+      throw new SmartMotorControllerConfigurationException(
+          "Bounds are not correct!",
           "Cannot get the discontinuity point.",
           "withContinuousWrapping(Rotations.of("
-              + Rotations.of(maxContinuousWrappingAngle.get().in(Rotations) -1).in(Rotations)
-              + "),Rotations.of(" + maxContinuousWrappingAngle.get().in(Rotations)
+              + Rotations.of(maxContinuousWrappingAngle.get().in(Rotations) - 1).in(Rotations)
+              + "),Rotations.of("
+              + maxContinuousWrappingAngle.get().in(Rotations)
               + ")) instead ");
     }
     basicOptions.remove(BasicOptions.ContinuousWrapping);
@@ -2352,14 +2312,18 @@ public class SmartMotorControllerConfig {
    * @return {@link Angle} where the encoder wraps around.
    */
   public Optional<Angle> getContinuousWrappingMin() {
-    if (maxContinuousWrappingAngle.isPresent() && minContinuousWrappingAngle.isPresent()
-        && !minContinuousWrappingAngle.get().equals(
-            Rotations.of(maxContinuousWrappingAngle.get().in(Rotations) -1))) {
-      throw new SmartMotorControllerConfigurationException("Bounds are not correct!",
+    if (maxContinuousWrappingAngle.isPresent()
+        && minContinuousWrappingAngle.isPresent()
+        && !minContinuousWrappingAngle
+            .get()
+            .equals(Rotations.of(maxContinuousWrappingAngle.get().in(Rotations) - 1))) {
+      throw new SmartMotorControllerConfigurationException(
+          "Bounds are not correct!",
           "Cannot get the discontinuity point.",
           "withContinuousWrapping(Rotations.of("
-              + Rotations.of(maxContinuousWrappingAngle.get().in(Rotations) -1).in(Rotations)
-              + "),Rotations.of(" + maxContinuousWrappingAngle.get().in(Rotations)
+              + Rotations.of(maxContinuousWrappingAngle.get().in(Rotations) - 1).in(Rotations)
+              + "),Rotations.of("
+              + maxContinuousWrappingAngle.get().in(Rotations)
               + ")) instead ");
     }
     return minContinuousWrappingAngle;
@@ -2405,9 +2369,7 @@ public class SmartMotorControllerConfig {
   }
 
   /**
-   * Reset the validation checks for all required options to be applied to {@link
-   * SmartMotorController} from
-   * {@link SmartMotorController#applyConfig(SmartMotorControllerConfig)}.
+   * Reset the validation checks for all required options to be applied to {@link SmartMotorController} from {@link SmartMotorController#applyConfig(SmartMotorControllerConfig)}.
    */
   public void resetValidationCheck() {
     basicOptions = EnumSet.allOf(BasicOptions.class);
@@ -2415,8 +2377,7 @@ public class SmartMotorControllerConfig {
   }
 
   /**
-   * Validate all required options are at least fetched and handled in each {@link
-   * SmartMotorController} wrapper.
+   * Validate all required options are at least fetched and handled in each {@link SmartMotorController} wrapper.
    */
   public void validateBasicOptions() {
     if (!basicOptions.isEmpty()) {
@@ -2429,9 +2390,7 @@ public class SmartMotorControllerConfig {
     }
   }
 
-  /**
-   * Validate external encoder config options for the config.
-   */
+  /** Validate external encoder config options for the config. */
   public void validateExternalEncoderOptions() {
     if (!externalEncoderOptions.isEmpty()) {
       System.err.println("========= External Encoder Option Validation FAILED ==========");
@@ -2439,7 +2398,8 @@ public class SmartMotorControllerConfig {
         System.err.println("Missing required option: " + option);
       }
       throw new SmartMotorControllerConfigurationException(
-          "External encoder options are not applied", "Cannot validate external encoder options.",
+          "External encoder options are not applied",
+          "Cannot validate external encoder options.",
           "get");
     }
   }
@@ -2477,225 +2437,123 @@ public class SmartMotorControllerConfig {
     return externalEncoderDiscontinuityPoint;
   }
 
-  /**
-   * Basic Options that should be applied to every {@link SmartMotorController}
-   */
+  /** Basic Options that should be applied to every {@link SmartMotorController} */
   private enum BasicOptions {
-    /**
-     * Vendor specific control request for velocity or position.
-     */
+    /** Vendor specific control request for velocity or position. */
     VendorControlRequest,
-    /**
-     * Persist the old config.
-     */
+    /** Persist the old config. */
     resetPreviousConfig,
-    /**
-     * Control Mode
-     */
+    /** Control Mode */
     ControlMode,
-    /**
-     * Feedback Synchronization for encoder seeding.
-     */
+    /** Feedback Synchronization for encoder seeding. */
     FeedbackSynchronizationThreshold,
-    /**
-     * Closed loop controller maximum voltage
-     */
+    /** Closed loop controller maximum voltage */
     ClosedLoopControllerMaximumVoltage,
-    /**
-     * Starting mechanism position of the {@link SmartMotorController}
-     */
+    /** Starting mechanism position of the {@link SmartMotorController} */
     StartingPosition,
-    /**
-     * Integrated Encoder Inverted
-     */
+    /** Integrated Encoder Inverted */
     EncoderInverted,
-    /**
-     * Motor inversion state
-     */
+    /** Motor inversion state */
     MotorInverted,
-    /**
-     * Temperature Cutoff
-     */
+    /** Temperature Cutoff */
     TemperatureCutoff,
-    /**
-     * Continuous Wrapping
-     */
+    /** Continuous Wrapping */
     ContinuousWrapping,
-    /**
-     * Closed Loop Tolerance
-     */
+    /** Closed Loop Tolerance */
     ClosedLoopTolerance,
     //    Telemetry,
     //    TelemetryVerbosity,
     //    SpecifiedTelemetryConfig,
-    /**
-     * Closed loop controller upper limit.
-     */
+    /** Closed loop controller upper limit. */
     UpperLimit,
-    /**
-     * Closed loop controller lower limit.
-     */
+    /** Closed loop controller lower limit. */
     LowerLimit,
     //    MomentOfInertia,
-    /**
-     * Motor idle mode.
-     */
+    /** Motor idle mode. */
     IdleMode,
-    /**
-     * Voltage compensation.
-     */
+    /** Voltage compensation. */
     VoltageCompensation,
-    /**
-     * Follower motors
-     */
+    /** Follower motors */
     Followers,
-    /**
-     * Loosely Coupled Follower Motors
-     */
+    /** Loosely Coupled Follower Motors */
     LooselyCoupledFollowers,
-    /**
-     * Stator current limits.
-     */
+    /** Stator current limits. */
     StatorCurrentLimit,
-    /**
-     * Supply current limits.
-     */
+    /** Supply current limits. */
     SupplyCurrentLimit,
-    /**
-     * Closed loop ramp rate.
-     */
+    /** Closed loop ramp rate. */
     ClosedLoopRampRate,
-    /**
-     * Open loop ramp rate.
-     */
+    /** Open loop ramp rate. */
     OpenLoopRampRate,
-    /**
-     * External encoder used.
-     */
+    /** External encoder used. */
     ExternalEncoder,
-    /**
-     * Mechanism gearing from rotor to mechanisms.
-     */
+    /** Mechanism gearing from rotor to mechanisms. */
     Gearing,
     //    MechanismCircumference,
-    /**
-     * Closed loop control period
-     */
+    /** Closed loop control period */
     ClosedLoopControlPeriod,
-    /**
-     * Simple motor feedforward
-     */
+    /** Simple motor feedforward */
     SimpleFeedforward,
-    /**
-     * Arm feedforward.
-     */
+    /** Arm feedforward. */
     ArmFeedforward,
-    /**
-     * Elevator feedforward
-     */
+    /** Elevator feedforward */
     ElevatorFeedforward,
-    /**
-     * PID controller.
-     */
+    /** PID controller. */
     PID,
-    /**
-     * Trapezoidal profile.
-     */
+    /** Trapezoidal profile. */
     TrapezoidalProfile,
-    /**
-     * Exponentially profiled closed loop controller.
-     */
+    /** Exponentially profiled closed loop controller. */
     ExponentialProfile,
   }
 
-  /**
-   * External encoder options
-   */
+  /** External encoder options */
   private enum ExternalEncoderOptions {
-    /**
-     * External encoder offset.
-     */
+    /** External encoder offset. */
     ZeroOffset,
-    /**
-     * External encoder zero centered.
-     */
+    /** External encoder zero centered. */
     DiscontinuityPoint,
-    /**
-     * Use the encoder as a feedback device.
-     */
+    /** Use the encoder as a feedback device. */
     UseExternalFeedbackEncoder,
-    /**
-     * External gearing.
-     */
+    /** External gearing. */
     ExternalGearing,
-    /**
-     * External encoder inversion.
-     */
+    /** External encoder inversion. */
     ExternalEncoderInverted
   }
 
-  /**
-   * All possible options that must be checked and applied during motor config application.
-   */
+  /** All possible options that must be checked and applied during motor config application. */
   public enum SmartMotorControllerOptions {
-    /**
-     * Inversion state of the motor
-     */
+    /** Inversion state of the motor */
     MOTOR_INVERTED,
-    /**
-     * Supply current limit
-     */
+    /** Supply current limit */
     SUPPLY_CURRENT_LIMIT,
-    /**
-     * Stator current limit.
-     */
+    /** Stator current limit. */
     STATOR_CURRENT_LIMIT,
     // TODO: Add more
   }
 
-  /**
-   * Telemetry verbosity for the {@link SmartMotorController}
-   */
+  /** Telemetry verbosity for the {@link SmartMotorController} */
   public enum TelemetryVerbosity {
-    /**
-     * Low telemetry
-     */
+    /** Low telemetry */
     LOW,
-    /**
-     * Mid telemetry
-     */
+    /** Mid telemetry */
     MID,
-    /**
-     * High telemetry
-     */
+    /** High telemetry */
     HIGH
   }
 
-  /**
-   * Idle mode for the {@link SmartMotorController}
-   */
+  /** Idle mode for the {@link SmartMotorController} */
   public enum MotorMode {
-    /**
-     * Brake mode.
-     */
+    /** Brake mode. */
     BRAKE,
-    /**
-     * Coast mode.
-     */
+    /** Coast mode. */
     COAST
   }
 
-  /**
-   * Control mode for a motor controller.
-   */
+  /** Control mode for a motor controller. */
   public enum ControlMode {
-    /**
-     * Open loop control mode. Does not use the PID controller.
-     */
+    /** Open loop control mode. Does not use the PID controller. */
     OPEN_LOOP,
-    /**
-     * Use the PID controller.
-     */
+    /** Use the PID controller. */
     CLOSED_LOOP,
   }
 }

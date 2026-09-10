@@ -18,12 +18,12 @@ import java.util.Optional;
 /**
  * Struct array Telemetry for arbitrary {@link Struct} serializable array types.
  *
- * <p>A lightweight wrapper that publishes a struct-encoded array value (e.g. {@code
- * SwerveModuleState[]}, {@code SwerveModulePosition[]}) to NetworkTables and/or a WPILib DataLog.
+ * <p>A lightweight wrapper that publishes a struct-encoded array value (e.g. {@code SwerveModuleState[]}, {@code SwerveModulePosition[]}) to NetworkTables and/or a WPILib DataLog.
  * It mirrors {@link StructTelemetry}, but publishes an array of struct-serializable values instead
  * of a single value.
  *
  * <h2>Example</h2>
+ *
  * <pre>{@code
  * // Create and publish a struct array entry for the current module states.
  * StructArrayTelemetry<SwerveModuleState, MyField> states = new StructArrayTelemetry<>(
@@ -44,73 +44,57 @@ import java.util.Optional;
  * @param <T> Type of the array elements being published, must be {@link Struct} serializable.
  * @param <F> Enum type identifying which field this telemetry entry represents.
  */
-public class StructArrayTelemetry<T, F>
-{
-  /**
-   * Struct serializer for {@link T}.
-   */
+public class StructArrayTelemetry<T, F> {
+  /** Struct serializer for {@link T}. */
   private final Struct<T> struct;
-  /**
-   * Network table key.
-   */
+
+  /** Network table key. */
   private final String key;
-  /**
-   * Tunable?
-   */
+
+  /** Tunable? */
   private final boolean tunable;
-  /**
-   * Enabled?
-   */
+
+  /** Enabled? */
   protected boolean enabled = false;
-  /**
-   * Default value.
-   */
+
+  /** Default value. */
   private T[] defaultValue;
-  /**
-   * Cached value.
-   */
+
+  /** Cached value. */
   private T[] cachedValue;
-  /**
-   * Publisher.
-   */
+
+  /** Publisher. */
   private Optional<StructArrayPublisher<T>> publisher = Optional.empty();
-  /**
-   * Subscriber.
-   */
+
+  /** Subscriber. */
   private Optional<StructArraySubscriber<T>> subscriber = Optional.empty();
-  /**
-   * Sub publisher.
-   */
+
+  /** Sub publisher. */
   private StructArrayPublisher<T> subPublisher = null;
-  /**
-   * Tuning table
-   */
+
+  /** Tuning table */
   private Optional<NetworkTable> tuningTable = Optional.empty();
-  /**
-   * Data table.
-   */
+
+  /** Data table. */
   private Optional<NetworkTable> dataTable = Optional.empty();
-  /**
-   * NT4 Topic of this entry.
-   */
+
+  /** NT4 Topic of this entry. */
   private StructArrayTopic<T> topic;
-  /**
-   * {@link StructArrayLogEntry} representing this entry.
-   */
+
+  /** {@link StructArrayLogEntry} representing this entry. */
   private Optional<StructArrayLogEntry<T>> dataLogEntry = Optional.empty();
-  /**
-   * Telemetry enum field.
-   */
+
+  /** Telemetry enum field. */
   private F field;
 
   /**
    * Setup struct array telemetry for a field.
    *
-   * @param keyString  Key to use.
+   * @param keyString Key to use.
    * @param defaultVal Default value.
-   * @param field      Field representing.
-   * @param struct     {@link Struct} serializer for {@link T}.
-   * @param tunable    Tunable.
+   * @param field Field representing.
+   * @param struct {@link Struct} serializer for {@link T}.
+   * @param tunable Tunable.
    */
   public StructArrayTelemetry(
       String keyString, T[] defaultVal, F field, Struct<T> struct, boolean tunable) {
@@ -133,7 +117,7 @@ public class StructArrayTelemetry<T, F>
   /**
    * Setup network tables.
    *
-   * @param dataTable   Data tables.
+   * @param dataTable Data tables.
    * @param tuningTable Tuning table.
    */
   public void setupNetworkTables(NetworkTable dataTable, NetworkTable tuningTable) {
@@ -165,8 +149,10 @@ public class StructArrayTelemetry<T, F>
       if (!prefix.endsWith("/")) {
         prefix += "/";
       }
-      dataLogEntry = Optional.of(StructArrayLogEntry.create(
-          DataLogManager.getLog(), prefix + key, struct, (long) Timer.getFPGATimestamp()));
+      dataLogEntry =
+          Optional.of(
+              StructArrayLogEntry.create(
+                  DataLogManager.getLog(), prefix + key, struct, (long) Timer.getFPGATimestamp()));
     }
   }
 
@@ -236,16 +222,12 @@ public class StructArrayTelemetry<T, F>
     return false;
   }
 
-  /**
-   * Enable the telemetry.
-   */
+  /** Enable the telemetry. */
   public void enable() {
     enabled = true;
   }
 
-  /**
-   * Disable the telemetry.
-   */
+  /** Disable the telemetry. */
   public void disable() {
     enabled = false;
   }
@@ -259,9 +241,7 @@ public class StructArrayTelemetry<T, F>
     enabled = state;
   }
 
-  /**
-   * Close the telemetry field.
-   */
+  /** Close the telemetry field. */
   public void close() {
     subscriber.ifPresent(PubSub::close);
     if (subPublisher != null) {

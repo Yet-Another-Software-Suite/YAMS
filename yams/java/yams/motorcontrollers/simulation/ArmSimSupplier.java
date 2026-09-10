@@ -4,7 +4,6 @@
 package yams.motorcontrollers.simulation;
 
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Microsecond;
 import static edu.wpi.first.units.Units.Milliseconds;
 import static edu.wpi.first.units.Units.Radians;
@@ -31,18 +30,15 @@ import yams.motorcontrollers.SimSupplier;
 import yams.motorcontrollers.SmartMotorController;
 
 /**
- * ArmSim Supplier — simulates a single-jointed arm mechanism using WPILib's
- * {@link edu.wpi.first.wpilibj.simulation.SingleJointedArmSim}.
+ * ArmSim Supplier — simulates a single-jointed arm mechanism using WPILib's {@link edu.wpi.first.wpilibj.simulation.SingleJointedArmSim}.
  *
- * <p>
- * This supplier steps WPILib's {@code SingleJointedArmSim} physics model each control loop and
- * exposes the resulting angle, angular velocity, current draw, and voltage through the
- * {@link yams.motorcontrollers.SimSupplier} interface. The arm's gear ratio and control period are
- * read directly from the associated {@link yams.motorcontrollers.SmartMotorController}'s config,
- * so no duplication of parameters is required.
- * </p>
+ * <p>This supplier steps WPILib's {@code SingleJointedArmSim} physics model each control loop and
+ * exposes the resulting angle, angular velocity, current draw, and voltage through the {@link yams.motorcontrollers.SimSupplier} interface. The arm's gear ratio and control period are read
+ * directly from the associated {@link yams.motorcontrollers.SmartMotorController}'s config, so no
+ * duplication of parameters is required.
  *
  * <h2>Example</h2>
+ *
  * <pre>{@code
  * // 1. Build the WPILib arm physics model
  * SingleJointedArmSim armPhysics = new SingleJointedArmSim(
@@ -81,7 +77,7 @@ public class ArmSimSupplier implements SimSupplier {
   /**
    * Construct the ArmSim supplier
    *
-   * @param simulation           Simulatoin instance
+   * @param simulation Simulatoin instance
    * @param smartMotorController SMC for the ArmSim..
    */
   public ArmSimSupplier(SingleJointedArmSim simulation, SmartMotorController smartMotorController) {
@@ -93,7 +89,8 @@ public class ArmSimSupplier implements SimSupplier {
     motor = smartMotorController.getDCMotor();
     accel = new DerivativeTimeFilter(simPeriod);
     // Based off comment from https://github.com/wpilibsuite/allwpilib/issues/8691
-    supplyCurrentFilter = LinearFilter.singlePoleIIR(Milliseconds.of(100).in(Seconds), simPeriod.in(Seconds));
+    supplyCurrentFilter =
+        LinearFilter.singlePoleIIR(Milliseconds.of(100).in(Seconds), simPeriod.in(Seconds));
     uuid = smartMotorController.m_batterySimUUID;
   }
 
@@ -174,8 +171,10 @@ public class ArmSimSupplier implements SimSupplier {
 
   @Override
   public void setMechanismPosition(Angle position) {
-    sim.setState(position.in(Radians),
-        sim.getVelocityRadPerSec()); //.times(config.getGearing().getMechanismToRotorRatio()).in(Radians));
+    sim.setState(
+        position.in(Radians),
+        sim
+            .getVelocityRadPerSec()); // .times(config.getGearing().getMechanismToRotorRatio()).in(Radians));
   }
 
   @Override
@@ -202,6 +201,7 @@ public class ArmSimSupplier implements SimSupplier {
   public Current getStatorCurrent() {
     return Amps.of(sim.getCurrentDrawAmps());
   }
+
   @Override
   public Current getSupplyCurrent() {
     // For a BLDC driven by a switching converter, power is conserved across the duty-cycle
