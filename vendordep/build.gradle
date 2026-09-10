@@ -156,6 +156,39 @@ ext.getCurrentArch = {
 
 def systemArch = getCurrentArch()
 
+nativeUtils {
+    exportsConfigs {
+        YAMS {
+            x86ExcludeSymbols = [
+                    '_CT??_R0?AV_System_error',
+                    '_CT??_R0?AVexception',
+                    '_CT??_R0?AVfailure',
+                    '_CT??_R0?AVruntime_error',
+                    '_CT??_R0?AVsystem_error',
+                    '_CTA5?AVfailure',
+                    '_TI5?AVfailure',
+                    '_CT??_R0?AVout_of_range',
+                    '_CTA3?AVout_of_range',
+                    '_TI3?AVout_of_range',
+                    '_CT??_R0?AVbad_cast'
+            ]
+            x64ExcludeSymbols = [
+                    '_CT??_R0?AV_System_error',
+                    '_CT??_R0?AVexception',
+                    '_CT??_R0?AVfailure',
+                    '_CT??_R0?AVruntime_error',
+                    '_CT??_R0?AVsystem_error',
+                    '_CTA5?AVfailure',
+                    '_TI5?AVfailure',
+                    '_CT??_R0?AVout_of_range',
+                    '_CTA3?AVout_of_range',
+                    '_TI3?AVout_of_range',
+                    '_CT??_R0?AVbad_cast'
+            ]
+        }
+    }
+}
+
 model {
     components {
         YAMS(NativeLibrarySpec) {
@@ -170,15 +203,22 @@ model {
                     }
                 }
             }
+            // Link WPILib itself as shared; wpilib_shared (unlike wpi.cpp.deps.wpilib) pulls in
+            // only the core WPILib shared libraries, not the executable/vision/NI runtime
+            // libraries that are only needed by an actual robot executable.
             nativeUtils.useRequiredLibrary(it, 'wpilib_shared')
-            // Enable run tasks for this component
-            wpi.cpp.enableExternalTasks(it)
-
-            // Enable simulation for this component
-            wpi.sim.enable(it)
-            // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
+            // Header access + linking for CTRE Phoenix 5/6 and REVLib, driven by the
+            // sharedLibrary flag in each vendordeps/*.json cppDependency entry. CTRE and
+            // WPILibNewCommands publish shared libraries; REVLib's core API (REVLib-cpp,
+            // REVLib-driver) is static-only upstream, so that portion is still statically
+            // linked no matter what we do here, with only its BackendDriver/REVLibWpi shared.
             wpi.cpp.vendor.cpp(it)
-            wpi.cpp.deps.wpilib(it)
+
+            // wpi.sim.enable(it) and wpi.cpp.enableExternalTasks(it) are intentionally not
+            // called here: both only wire up NativeExecutableBinarySpec/NativeTestSuiteBinarySpec
+            // binaries (sim GUI runtime files / external run tasks for an actual executable), and
+            // YAMS (NativeLibrarySpec) has neither, so they'd be no-ops. The YAMSTest test suite
+            // below already calls them where they're meaningful.
 
             if (skipCpp) {
                 binaries.all { buildable = false }
