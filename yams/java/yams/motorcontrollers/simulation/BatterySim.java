@@ -50,6 +50,30 @@ public class BatterySim {
     SOC_TO_VOLTAGE.put(1.00, 12.9);
   }
 
+  /**
+   * Fraction of the nominal (20-hour rate) amp-hour capacity a sealed lead-acid battery actually
+   * delivers as a function of discharge current, keyed by current in {@link
+   * edu.wpi.first.units.Units#Amps Amps}. Lead-acid batteries are far less coulombically efficient
+   * than lithium chemistries at high discharge rates (the Peukert effect), so a battery rated for
+   * 18 Ah at a 0.9 A discharge might only deliver ~11 Ah at a sustained 54 A draw.
+   *
+   * <p>Defaults are averaged from Bill Peters/PDP (BFG) discharge testing across five FRC battery
+   * manufacturers, see <a
+   * href="https://www.chiefdelphi.com/t/detailed-frc-battery-comparison-for-2026/508077">Detailed
+   * FRC Battery Comparison for 2026</a>.
+   */
+  private static InterpolatingDoubleTreeMap CURRENT_TO_CAPACITY_FRACTION =
+      new InterpolatingDoubleTreeMap();
+
+  static {
+    CURRENT_TO_CAPACITY_FRACTION.put(0.9, 1.000);
+    CURRENT_TO_CAPACITY_FRACTION.put(18.0, 0.758);
+    CURRENT_TO_CAPACITY_FRACTION.put(27.0, 0.718);
+    CURRENT_TO_CAPACITY_FRACTION.put(36.0, 0.679);
+    CURRENT_TO_CAPACITY_FRACTION.put(45.0, 0.639);
+    CURRENT_TO_CAPACITY_FRACTION.put(54.0, 0.599);
+  }
+
   /** Whether discharge simulation is enabled. */
   private static boolean dischargeEnabled = false;
 
@@ -102,6 +126,22 @@ public class BatterySim {
    */
   public static void replaceSOCInterpolation(InterpolatingDoubleTreeMap socToVoltage) {
     BatterySim.SOC_TO_VOLTAGE = socToVoltage;
+  }
+
+  /**
+   * Replace the default discharge current &rarr; capacity fraction interpolation table used to
+   * derate the battery's usable amp-hour capacity at high discharge rates (the Peukert effect).
+   *
+   * <p>Reach for this if you have measured discharge-rate-vs-capacity data for your specific
+   * battery, for example from a load tester, rather than the averaged multi-manufacturer defaults.
+   *
+   * @param currentToCapacityFraction Interpolation table mapping discharge current in Amps to the
+   *     fraction (0 to 1) of the nominal amp-hour capacity delivered at that current. Call this
+   *     before {@link #enableDischarge(double, Voltage, Resistance)} so discharge simulation uses
+   *     the new curve from the start.
+   */
+  public static void replaceCapacityDerating(InterpolatingDoubleTreeMap currentToCapacityFraction) {
+    BatterySim.CURRENT_TO_CAPACITY_FRACTION = currentToCapacityFraction;
   }
 
   /**
@@ -158,7 +198,9 @@ public class BatterySim {
 
   /**
    * Integrate the total current draw of the robot over the elapsed time since the last call to
-   * track amp-hours consumed from the battery.
+   * track amp-hours consumed from the battery, derated by {@link #CURRENT_TO_CAPACITY_FRACTION} so
+   * that sustained high currents consume the nominal capacity faster than the raw amp-hours drawn
+   * would suggest (the Peukert effect).
    *
    * @param totalCurrentAmps Total current drawn by the robot in {@link edu.wpi.first.units.Units#Amps Amps}.
    */
@@ -167,7 +209,8 @@ public class BatterySim {
     if (!Double.isNaN(lastTimestampSeconds)) {
       double dtHours = (now - lastTimestampSeconds) / 3600.0;
       if (dtHours > 0) {
-        ampHoursUsed += totalCurrentAmps * dtHours;
+        double capacityFraction = CURRENT_TO_CAPACITY_FRACTION.get(totalCurrentAmps);
+        ampHoursUsed += (totalCurrentAmps * dtHours) / capacityFraction;
         ampHoursUsed = MathUtil.clamp(ampHoursUsed, 0.0, batteryCapacityAmpHours);
       }
     }

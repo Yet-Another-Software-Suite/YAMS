@@ -42,23 +42,45 @@ void BatterySim::ReplaceSOCInterpolation(const std::map<double, double>& socToVo
   m_socToVoltage = socToVoltage;
 }
 
+// Fraction of the nominal (20-hour rate) amp-hour capacity a sealed lead-acid battery actually
+// delivers as a function of discharge current in Amps. Lead-acid batteries are far less
+// coulombically efficient than lithium chemistries at high discharge rates (the Peukert effect),
+// so a battery rated for 18 Ah at a 0.9 A discharge might only deliver ~11 Ah at a sustained 54 A
+// draw. Defaults are averaged from Bill Peters/PDP (BFG) discharge testing across five FRC battery
+// manufacturers. Replaceable via ReplaceCapacityDerating.
+std::map<double, double> BatterySim::m_currentToCapacityFraction{
+    {0.9, 1.000},
+    {18.0, 0.758},
+    {27.0, 0.718},
+    {36.0, 0.679},
+    {45.0, 0.639},
+    {54.0, 0.599},
+};
+
+void BatterySim::ReplaceCapacityDerating(const std::map<double, double>& currentToCapacityFraction) {
+  m_currentToCapacityFraction = currentToCapacityFraction;
+}
+
+double BatterySim::Interpolate(const std::map<double, double>& table, double key) {
+  auto hi = table.lower_bound(key);
+  if (hi == table.begin()) {
+    return hi->second;
+  }
+  if (hi == table.end()) {
+    return std::prev(hi)->second;
+  }
+
+  auto lo = std::prev(hi);
+  double t = (hi->first > lo->first) ? (key - lo->first) / (hi->first - lo->first) : 0.0;
+  return lo->second + t * (hi->second - lo->second);
+}
+
 double BatterySim::InterpolateOpenCircuitVoltage(double stateOfCharge) {
   stateOfCharge = std::clamp(stateOfCharge, 0.0, 1.0);
   if (m_socToVoltage.empty()) {
     return BatteryVoltage.value();
   }
-
-  auto hi = m_socToVoltage.lower_bound(stateOfCharge);
-  if (hi == m_socToVoltage.begin()) {
-    return hi->second;
-  }
-  if (hi == m_socToVoltage.end()) {
-    return std::prev(hi)->second;
-  }
-
-  auto lo = std::prev(hi);
-  double t = (hi->first > lo->first) ? (stateOfCharge - lo->first) / (hi->first - lo->first) : 0.0;
-  return lo->second + t * (hi->second - lo->second);
+  return Interpolate(m_socToVoltage, stateOfCharge);
 }
 
 void BatterySim::EnableDischarge(double batteryCapacityAmpHours, units::volt_t nominalVoltage,
@@ -85,7 +107,8 @@ void BatterySim::UpdateDischarge(double totalCurrentAmps) {
   if (!std::isnan(m_lastTimestampSeconds)) {
     double dtHours = (now - m_lastTimestampSeconds) / 3600.0;
     if (dtHours > 0) {
-      m_ampHoursUsed += totalCurrentAmps * dtHours;
+      double capacityFraction = Interpolate(m_currentToCapacityFraction, totalCurrentAmps);
+      m_ampHoursUsed += (totalCurrentAmps * dtHours) / capacityFraction;
       m_ampHoursUsed = std::clamp(m_ampHoursUsed, 0.0, m_batteryCapacityAmpHours);
     }
   }
