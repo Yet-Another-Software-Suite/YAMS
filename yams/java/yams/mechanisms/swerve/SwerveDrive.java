@@ -5,9 +5,7 @@ package yams.mechanisms.swerve;
 
 import static edu.wpi.first.hal.FRCNetComm.tInstances.kRobotDriveSwerve_YAGSL;
 import static edu.wpi.first.hal.FRCNetComm.tResourceType.kResourceType_RobotDrive;
-import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Second;
@@ -28,6 +26,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Force;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -191,7 +190,8 @@ public class SwerveDrive {
   /**
    * Setup telemetry for the drive; the {@link SwerveDriveTelemetry} config used is either the one
    * supplied via
-   * {@link SwerveDriveConfig#withTelemetry(String,SwerveDriveTelemetryConfig)} or a default built from
+   * {@link SwerveDriveConfig#withTelemetry(String,SwerveDriveTelemetryConfig)} or a default built
+   * from
    * {@link SwerveDriveConfig#getTelemetryVerbosity()} (defaulting to {@link
    * TelemetryVerbosity#HIGH}).
    */
@@ -229,7 +229,8 @@ public class SwerveDrive {
    */
   public Command drive(Supplier<ChassisSpeeds> robotRelativeChassisSpeeds) {
     return Commands
-        .run(() -> setRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds.get()),
+        .run(()
+                 -> setRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds.get()),
             m_config.getSubsystem())
         .withName("Drive");
   }
@@ -300,6 +301,25 @@ public class SwerveDrive {
   }
 
   /**
+   * Set the {@link SwerveModuleState}s of the swerve drive directly, with an additional drive wheel
+   * feedforward
+   * {@link Force} applied per module, e.g. from a PathPlanner set-point generator.
+   *
+   * @param states             {@link SwerveModuleState}s to use, must be the same count as the
+   *     swerve drive is
+   *                           configured order is Clockwise from FL.
+   * @param feedforwardForces  Feedforward {@link Force}s to apply, one per module in the same FL,
+   *     FR, BL, BR order
+   *                           as {@code states}.
+   * @implNote Not compatible with AdvantageKit if MapleSim is defined.
+   */
+  public void setSwerveModuleStates(SwerveModuleState[] states, Force[] feedforwardForces) {
+    for (int i = 0; i < states.length; i++) {
+      m_desiredModuleStates[i] = m_modules[i].setSwerveModuleState(states[i], feedforwardForces[i]);
+    }
+  }
+
+  /**
    * Get the {@link SwerveModuleState}s of the swerve drive given a robot relative chassis speed..
    *
    * @param robotRelativeChassisSpeeds Robot relative {@link ChassisSpeeds}.
@@ -331,8 +351,32 @@ public class SwerveDrive {
    * @param robotRelativeChassisSpeeds Robot relative chassis speeds.
    */
   public void setRobotRelativeChassisSpeeds(ChassisSpeeds robotRelativeChassisSpeeds) {
+    setRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds, new Force[0]);
+  }
+
+  /**
+   * Set robot relative chassis speeds, with an additional drive wheel feedforward {@link Force}
+   * applied per module, e.g. from a PathPlanner set-point generator.
+   *
+   * @param robotRelativeChassisSpeeds Robot relative chassis speeds.
+   * @param feedforwardForces          Feedforward {@link Force}s to apply, one per module in FL,
+   *     FR, BL, BR order.
+   *                                   Pass an empty array to apply no feedforward.
+   */
+  public void setRobotRelativeChassisSpeeds(
+      ChassisSpeeds robotRelativeChassisSpeeds, Force[] feedforwardForces) {
     m_desiredChassisSpeeds = robotRelativeChassisSpeeds;
-    setSwerveModuleStates(getStateFromRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds));
+    SwerveModuleState[] states = getStateFromRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds);
+    if (feedforwardForces.length == 0) {
+      setSwerveModuleStates(states);
+      return;
+    }
+    if (feedforwardForces.length != states.length) {
+      throw new IllegalArgumentException(
+          "feedforwardForces must be empty or have one entry per module (" + states.length
+          + "), in FL, FR, BL, BR order.");
+    }
+    setSwerveModuleStates(states, feedforwardForces);
   }
 
   /**
@@ -626,7 +670,8 @@ public class SwerveDrive {
     Arrays.stream(m_modules).forEach(SwerveModule::simIterate);
     var dt = m_simTimer.get();
     ChassisSpeeds desired = m_kinematics.toChassisSpeeds(m_desiredModuleStates);
-    Twist2d twist = new Twist2d(desired.vxMetersPerSecond * dt, desired.vyMetersPerSecond * dt, desired.omegaRadiansPerSecond * dt);
+    Twist2d twist = new Twist2d(desired.vxMetersPerSecond * dt, desired.vyMetersPerSecond * dt,
+        desired.omegaRadiansPerSecond * dt);
     m_simPose = m_simPose.exp(twist);
     m_simGyroAngle = m_simPose.getRotation().getMeasure();
     m_simTimer.reset();
