@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Milliseconds;
+import static edu.wpi.first.units.Units.Newtons;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
@@ -29,7 +30,6 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.ExponentialProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.AngularAccelerationUnit;
 import edu.wpi.first.units.LinearAccelerationUnit;
 import edu.wpi.first.units.measure.Angle;
@@ -37,6 +37,7 @@ import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Force;
 import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -60,7 +61,6 @@ import java.util.Set;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.gearing.MechanismGearing;
 import yams.math.LQRController;
-import yams.mechanisms.config.ElevatorConfig;
 import yams.mechanisms.positional.Elevator;
 import yams.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
 import yams.telemetry.SmartMotorControllerTelemetryConfig;
@@ -832,7 +832,7 @@ public class SmartMotorControllerConfig {
     }
 
     return withSoftLimits(Rotations.of(low.in(Meters) / mechanismCircumference.get().in(Meters)),
-            Rotations.of(high.in(Meters) / mechanismCircumference.get().in(Meters)));
+        Rotations.of(high.in(Meters) / mechanismCircumference.get().in(Meters)));
   }
 
   /**
@@ -875,9 +875,9 @@ public class SmartMotorControllerConfig {
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public SmartMotorControllerConfig withSoftLimits(Angle low, Angle high) {
-    if(low != null && high != null && low.gte(high))
-    {
-      throw new SmartMotorControllerConfigurationException("Lower limit is higher than upper limit", "Cannot configure SmartMotorController", "withSoftLimit(LOW, HIGH)");
+    if (low != null && high != null && low.gte(high)) {
+      throw new SmartMotorControllerConfigurationException("Lower limit is higher than upper limit",
+          "Cannot configure SmartMotorController", "withSoftLimit(LOW, HIGH)");
     }
     mechanismLowerLimit = Optional.ofNullable(low);
     mechanismUpperLimit = Optional.ofNullable(high);
@@ -1141,41 +1141,40 @@ public class SmartMotorControllerConfig {
     return this;
   }
 
-    /**
-     * Set the {@link Elevator} drum radius
-     * @implNote Overload for {@link #withWheelRadius(Distance)}
-     * @param radius Drum radius of elevator spool.
-     * @return  {@link SmartMotorControllerConfig} for chaining
-     */
+  /**
+   * Set the {@link Elevator} drum radius
+   * @implNote Overload for {@link #withWheelRadius(Distance)}
+   * @param radius Drum radius of elevator spool.
+   * @return  {@link SmartMotorControllerConfig} for chaining
+   */
   public SmartMotorControllerConfig withDrumRadius(Distance radius) {
-      return withWheelRadius(radius);
+    return withWheelRadius(radius);
   }
-    /**
-     * Set the {@link Elevator} drum radius via the chain pitch (.25in or .35in) and teeth
-     * count.
-     *
-     * @param chainPitch Chain pitch.
-     * @param teeth      Sprocket teeth count.
-     * @return {@link SmartMotorControllerConfig} for chaining.
-     * @implNote Overload for {@link #withWheelRadius(Distance)}
-     */
-    public SmartMotorControllerConfig withDrumRadius(Distance chainPitch, int teeth)
-    {
-        return withWheelRadius(chainPitch.times(teeth));
-    }
+  /**
+   * Set the {@link Elevator} drum radius via the chain pitch (.25in or .35in) and teeth
+   * count.
+   *
+   * @param chainPitch Chain pitch.
+   * @param teeth      Sprocket teeth count.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   * @implNote Overload for {@link #withWheelRadius(Distance)}
+   */
+  public SmartMotorControllerConfig withDrumRadius(Distance chainPitch, int teeth) {
+    return withWheelRadius(chainPitch.times(teeth));
+  }
 
-    /**
-     * Change the {@link SmartMotorControllerConfig} gear ratio to be divided by the number of stages given, will reapply
-     * it if already done manually.
-     *
-     * @param stages Stages given
-     * @implNote Alias for {@link #withGearing(MechanismGearing)} where {@link MechanismGearing#div} is applied via the stages.
-     * @return {@link SmartMotorControllerConfig} for chaining.
-     */
-    public SmartMotorControllerConfig withCascadingElevatorStages(int stages)
-    {
-        return withGearing(gearing.div(stages));
-    }
+  /**
+   * Change the {@link SmartMotorControllerConfig} gear ratio to be divided by the number of stages
+   * given, will reapply it if already done manually.
+   *
+   * @param stages Stages given
+   * @implNote Alias for {@link #withGearing(MechanismGearing)} where {@link MechanismGearing#div}
+   * is applied via the stages.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public SmartMotorControllerConfig withCascadingElevatorStages(int stages) {
+    return withGearing(gearing.div(stages));
+  }
 
   /**
    * Set the wheel diameter for the mechanism.
@@ -1496,10 +1495,10 @@ public class SmartMotorControllerConfig {
    */
   public SmartMotorControllerConfig withProfile(TrapezoidProfile.Constraints profile) {
     DriverStation.reportWarning("Trapezoidal profile will be given rotations/s and rotations/s^2 "
-                                + "for rotational closed loop controllers.",
+            + "for rotational closed loop controllers.",
         true);
     DriverStation.reportWarning("Trapezoidal profile will be given meters/s and meters/s^2 for "
-                                + "linear closed loop controllers.",
+            + "linear closed loop controllers.",
         true);
     this.exponentialProfile = Optional.empty();
     this.trapezoidProfile = Optional.ofNullable(profile);
@@ -1581,10 +1580,10 @@ public class SmartMotorControllerConfig {
    */
   public SmartMotorControllerConfig withProfile(ExponentialProfile.Constraints profile) {
     DriverStation.reportWarning("Exponential profile will be given rotations/s and rotations/s^2 "
-                                + "for rotational closed loop controllers.",
+            + "for rotational closed loop controllers.",
         true);
     DriverStation.reportWarning("Exponential profile will be given meters/s and meters/s^2 for "
-                                + "linear closed loop controllers.",
+            + "linear closed loop controllers.",
         true);
     this.exponentialProfile = Optional.ofNullable(profile);
     this.trapezoidProfile = Optional.empty();
@@ -2124,6 +2123,62 @@ public class SmartMotorControllerConfig {
   }
 
   /**
+   * Convert a feedforward {@link Force} applied at the mechanism into the equivalent motor
+   * feedforward
+   * {@link Voltage}, using {@link SmartMotorControllerConfig#gearing} and
+   * {@link SmartMotorControllerConfig#mechanismCircumference}.
+   *
+   * @param motor             {@link DCMotor} of the mechanism.
+   * @param mechanismVelocity Commanded mechanism (post-gearbox) {@link AngularVelocity}.
+   * @param feedforwardForce  Feedforward {@link Force} applied to the mechanism.
+   * @return Equivalent feedforward {@link Voltage} at the motor.
+   */
+  public Voltage convertToVoltage(
+      DCMotor motor, AngularVelocity mechanismVelocity, Force feedforwardForce) {
+    double rotorAngularVelocityRadPerSec =
+        mechanismVelocity.in(RadiansPerSecond) *gearing.getMechanismToRotorRatio();
+    return Volts.of(
+        motor.getVoltage(forceToRotorTorque(feedforwardForce), rotorAngularVelocityRadPerSec));
+  }
+
+  /**
+   * Convert a feedforward {@link Force} applied at the mechanism into the equivalent motor
+   * feedforward
+   * {@link Current}, using {@link SmartMotorControllerConfig#gearing} and
+   * {@link SmartMotorControllerConfig#mechanismCircumference}. Unlike
+   * {@link #convertToVoltage(DCMotor, AngularVelocity, Force)}, this does not depend on the
+   * commanded speed and is the correct feedforward to use for torque-current based closed-loop
+   * control (e.g. TorqueCurrentFOC).
+   *
+   * @param motor            {@link DCMotor} of the mechanism.
+   * @param feedforwardForce Feedforward {@link Force} applied to the mechanism.
+   * @return Equivalent feedforward {@link Current} at the motor.
+   */
+  public Current convertToCurrent(DCMotor motor, Force feedforwardForce) {
+    return Amps.of(motor.getCurrent(forceToRotorTorque(feedforwardForce)));
+  }
+
+  /**
+   * Convert a feedforward {@link Force} applied at the mechanism into the equivalent rotor torque,
+   * using
+   * {@link SmartMotorControllerConfig#gearing} and {@link
+   * SmartMotorControllerConfig#mechanismCircumference}.
+   *
+   * @param feedforwardForce Feedforward {@link Force} applied to the mechanism.
+   * @return Equivalent rotor torque in Newton-meters.
+   */
+  private double forceToRotorTorque(Force feedforwardForce) {
+    if (mechanismCircumference.isEmpty()) {
+      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
+          "Cannot convert feedforward Force to Voltage/Current.",
+          "withMechanismCircumference(Distance)");
+    }
+    double gearRatio = gearing.getMechanismToRotorRatio();
+    double radiusMeters = mechanismCircumference.get().in(Meters) / (2 * Math.PI);
+    return feedforwardForce.in(Newtons) *radiusMeters / gearRatio;
+  }
+
+  /**
    * Get the zero offset for the {@link SmartMotorController}
    *
    * @return {@link Angle} offset.
@@ -2239,10 +2294,10 @@ public class SmartMotorControllerConfig {
       MechanismGearing externalEncoderGearing) {
     if (externalEncoderGearing.getRotorToMechanismRatio() > 1) {
       DriverStation.reportWarning("[IMPORTANT] Your gearing is set in a way that the external "
-                                  + "encoder will exceed the maximum reading, "
+              + "encoder will exceed the maximum reading, "
               + "this WILL result in multiple angle's being read as the same 'angle.\n\t"
               + "Ignore this warning IF your mechanism will never travel outside of the slice you "
-                + "are reading, adjust the offset accordingly.\n\t"
+              + "are reading, adjust the offset accordingly.\n\t"
               + "You have been warned! (^.^) - Rivet",
           true);
     }
@@ -2260,10 +2315,10 @@ public class SmartMotorControllerConfig {
   public SmartMotorControllerConfig withExternalEncoderGearing(double reductionRatio) {
     if (reductionRatio > 1) {
       DriverStation.reportWarning("[IMPORTANT] Your gearing is set in a way that the external "
-                                  + "encoder will exceed the maximum reading, "
+              + "encoder will exceed the maximum reading, "
               + "this WILL result in multiple angle's being read as the same 'angle.\n\t"
               + "Ignore this warning IF your mechanism will never travel outside of the slice you "
-                + "are reading, adjust the offset accordingly.\n\t"
+              + "are reading, adjust the offset accordingly.\n\t"
               + "You have been warned! (^.^) - Rivet",
           true);
     }
