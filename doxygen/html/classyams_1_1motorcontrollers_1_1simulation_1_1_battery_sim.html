@@ -92,6 +92,8 @@ Static Public Member Functions</h2></td></tr>
 <tr class="separator:acd9ab4065b3776d25e4a3c94f23db13c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5da270d74b77754e5ad176ee4e1b7622" id="r_a5da270d74b77754e5ad176ee4e1b7622"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5da270d74b77754e5ad176ee4e1b7622">ReplaceSOCInterpolation</a> (const std::map&lt; double, double &gt; &amp;socToVoltage)</td></tr>
 <tr class="separator:a5da270d74b77754e5ad176ee4e1b7622"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2d25d519e7e77c49101a9aa4f3006de" id="r_ab2d25d519e7e77c49101a9aa4f3006de"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab2d25d519e7e77c49101a9aa4f3006de">ReplaceCapacityDerating</a> (const std::map&lt; double, double &gt; &amp;currentToCapacityFraction)</td></tr>
+<tr class="separator:ab2d25d519e7e77c49101a9aa4f3006de"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8e6aefb182d39afb15a54afc4831eacb" id="r_a8e6aefb182d39afb15a54afc4831eacb"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8e6aefb182d39afb15a54afc4831eacb">EnableDischarge</a> (double batteryCapacityAmpHours, units::volt_t nominalVoltage, units::ohm_t nominalResistance)</td></tr>
 <tr class="separator:a8e6aefb182d39afb15a54afc4831eacb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ababd77a28a447b946add8c2d9204a360" id="r_ababd77a28a447b946add8c2d9204a360"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ababd77a28a447b946add8c2d9204a360">DisableDischarge</a> ()</td></tr>
@@ -243,6 +245,39 @@ Static Public Attributes</h2></td></tr>
 </div><div class="memdoc">
 <p>Get the simulated state of charge of the battery, from 0 (empty) to 1 (full).</p>
 <dl class="section return"><dt>Returns</dt><dd>State of charge of the battery. </dd></dl>
+
+</div>
+</div>
+<a id="ab2d25d519e7e77c49101a9aa4f3006de" name="ab2d25d519e7e77c49101a9aa4f3006de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab2d25d519e7e77c49101a9aa4f3006de">&#9670;&#160;</a></span>ReplaceCapacityDerating()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void yams::motorcontrollers::simulation::BatterySim::ReplaceCapacityDerating </td>
+          <td>(</td>
+          <td class="paramtype">const std::map&lt; double, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>currentToCapacityFraction</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Replace the default discharge current -&gt; capacity fraction interpolation table used to derate the battery's usable amp-hour capacity at high discharge rates (the Peukert effect).</p>
+<p>Reach for this if you have measured discharge-rate-vs-capacity data for your specific battery, for example from a load tester, rather than the averaged multi-manufacturer defaults.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">currentToCapacityFraction</td><td>Interpolation table mapping discharge current in Amps to the fraction (0 to 1) of the nominal amp-hour capacity delivered at that current. Call this before <a class="el" href="#a8e6aefb182d39afb15a54afc4831eacb">EnableDischarge()</a> so discharge simulation uses the new curve from the start. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

@@ -3218,6 +3218,11 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Stop counting the given simulation's current draw towards the shared battery load, e.g.</div>
 </dd>
+<dt><a href="yams/motorcontrollers/simulation/BatterySim.html#replaceCapacityDerating(edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap)" class="member-name-link">replaceCapacityDerating(InterpolatingDoubleTreeMap)</a> - Static method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/BatterySim.html" title="class in yams.motorcontrollers.simulation">BatterySim</a></dt>
+<dd>
+<div class="block">Replace the default discharge current &rarr; capacity fraction interpolation table used to
+ derate the battery's usable amp-hour capacity at high discharge rates (the Peukert effect).</div>
+</dd>
 <dt><a href="yams/motorcontrollers/simulation/BatterySim.html#replaceSOCInterpolation(edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap)" class="member-name-link">replaceSOCInterpolation(InterpolatingDoubleTreeMap)</a> - Static method in class yams.motorcontrollers.simulation.<a href="yams/motorcontrollers/simulation/BatterySim.html" title="class in yams.motorcontrollers.simulation">BatterySim</a></dt>
 <dd>
 <div class="block">Replace the default state-of-charge &rarr; open circuit voltage interpolation table used when

@@ -143,14 +143,20 @@ loadScripts(document, 'script');</script>
 <div class="block">Stop counting the given simulation's current draw towards the shared battery load, e.g.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#replaceSOCInterpolation(edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap)" class="member-name-link">replaceSOCInterpolation</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/interpolation/InterpolatingDoubleTreeMap.html" title="class or interface in edu.wpi.first.math.interpolation" class="external-link">InterpolatingDoubleTreeMap</a>&nbsp;socToVoltage)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#replaceCapacityDerating(edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap)" class="member-name-link">replaceCapacityDerating</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/interpolation/InterpolatingDoubleTreeMap.html" title="class or interface in edu.wpi.first.math.interpolation" class="external-link">InterpolatingDoubleTreeMap</a>&nbsp;currentToCapacityFraction)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Replace the default discharge current &rarr; capacity fraction interpolation table used to
+ derate the battery's usable amp-hour capacity at high discharge rates (the Peukert effect).</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#replaceSOCInterpolation(edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap)" class="member-name-link">replaceSOCInterpolation</a><wbr>(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/interpolation/InterpolatingDoubleTreeMap.html" title="class or interface in edu.wpi.first.math.interpolation" class="external-link">InterpolatingDoubleTreeMap</a>&nbsp;socToVoltage)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Replace the default state-of-charge &rarr; open circuit voltage interpolation table used when
  discharge simulation is enabled with <a href="#enableDischarge(double,edu.wpi.first.units.measure.Voltage,edu.wpi.first.units.measure.Resistance)"><code>enableDischarge(double, Voltage, Resistance)</code></a>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#resetDischarge()" class="member-name-link">resetDischarge</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#resetDischarge()" class="member-name-link">resetDischarge</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Reset the simulated battery back to a full charge.</div>
 </div>
 </div>
@@ -222,6 +228,24 @@ loadScripts(document, 'script');</script>
 <dd><code>socToVoltage</code> - Interpolation table mapping state of charge <code>[0, 1]</code> to open circuit
      voltage. Call this before <a href="#enableDischarge(double,edu.wpi.first.units.measure.Voltage,edu.wpi.first.units.measure.Resistance)"><code>enableDischarge(double, Voltage, Resistance)</code></a> so
      discharge simulation uses the new curve from the start.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="replaceCapacityDerating(edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap)">
+<h3>replaceCapacityDerating</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">replaceCapacityDerating</span><wbr><span class="parameters">(<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/interpolation/InterpolatingDoubleTreeMap.html" title="class or interface in edu.wpi.first.math.interpolation" class="external-link">InterpolatingDoubleTreeMap</a>&nbsp;currentToCapacityFraction)</span></div>
+<div class="block">Replace the default discharge current &rarr; capacity fraction interpolation table used to
+ derate the battery's usable amp-hour capacity at high discharge rates (the Peukert effect).
+
+ <p>Reach for this if you have measured discharge-rate-vs-capacity data for your specific
+ battery, for example from a load tester, rather than the averaged multi-manufacturer defaults.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>currentToCapacityFraction</code> - Interpolation table mapping discharge current in Amps to the
+     fraction (0 to 1) of the nominal amp-hour capacity delivered at that current. Call this
+     before <a href="#enableDischarge(double,edu.wpi.first.units.measure.Voltage,edu.wpi.first.units.measure.Resistance)"><code>enableDischarge(double, Voltage, Resistance)</code></a> so discharge simulation uses
+     the new curve from the start.</dd>
 </dl>
 </section>
 </li>
