@@ -66,6 +66,20 @@ class BatterySim {
   static void ReplaceSOCInterpolation(const std::map<double, double>& socToVoltage);
 
   /**
+   * Replace the default discharge current -> capacity fraction interpolation table used to derate
+   * the battery's usable amp-hour capacity at high discharge rates (the Peukert effect).
+   *
+   * Reach for this if you have measured discharge-rate-vs-capacity data for your specific battery,
+   * for example from a load tester, rather than the averaged multi-manufacturer defaults.
+   *
+   * @param currentToCapacityFraction Interpolation table mapping discharge current in Amps to the
+   *                                  fraction (0 to 1) of the nominal amp-hour capacity delivered
+   *                                  at that current. Call this before EnableDischarge() so
+   *                                  discharge simulation uses the new curve from the start.
+   */
+  static void ReplaceCapacityDerating(const std::map<double, double>& currentToCapacityFraction);
+
+  /**
    * Enable realistic battery discharge simulation. As current is drawn from the battery over
    * time its state of charge will drop, reducing the open circuit voltage and increasing the
    * internal resistance to more realistically model a depleted battery.
@@ -97,6 +111,7 @@ class BatterySim {
  private:
   static void UpdateDischarge(double totalCurrentAmps);
   static double InterpolateOpenCircuitVoltage(double stateOfCharge);
+  static double Interpolate(const std::map<double, double>& table, double key);
 
   static std::unordered_map<const void*, double> m_currents;
   static bool m_dischargeEnabled;
@@ -104,6 +119,7 @@ class BatterySim {
   static double m_ampHoursUsed;
   static double m_lastTimestampSeconds;
   static std::map<double, double> m_socToVoltage;
+  static std::map<double, double> m_currentToCapacityFraction;
 };
 
 }  // namespace yams::motorcontrollers::simulation

@@ -194,9 +194,18 @@ jobs:
           done
 
       - name: Create and push release tag
+        id: create_tag
         run: |
-          git tag v${{ inputs.releaseVersion }} ${{ github.sha }}
-          git push origin v${{ inputs.releaseVersion }}
+          TAG="v${{ inputs.releaseVersion }}"
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" > /dev/null 2>&1; then
+            echo "Tag $TAG already exists on origin, deleting it before re-creating."
+            git push origin ":refs/tags/$TAG"
+            echo "tag_existed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag_existed=false" >> "$GITHUB_OUTPUT"
+          fi
+          git tag -f "$TAG" ${{ github.sha }}
+          git push origin "$TAG"
 
       - name: Download cross-platform maven artifacts
         uses: actions/download-artifact@v7
@@ -275,22 +284,35 @@ jobs:
         run: find ${{ env.workingDirectory }}/build/maven/ -type f
 
       - name: Create GitHub Release
+        id: create_release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          TAG="v${{ inputs.releaseVersion }}"
           if [ "${{ inputs.publish }}" = "true" ]; then
             RELEASE_FLAGS="--latest"
           else
             RELEASE_FLAGS="--prerelease"
           fi
-          gh release create "v${{ inputs.releaseVersion }}" \
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "Release $TAG already exists, deleting it before re-creating."
+            gh release delete "$TAG" --yes
+            echo "release_existed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "release_existed=false" >> "$GITHUB_OUTPUT"
+          fi
+          gh release create "$TAG" \
             --title "YAMS v${{ inputs.releaseVersion }}" \
             --generate-notes \
             $RELEASE_FLAGS \
             release-artifacts/*
 
       - name: Create Vendor JSON Repo PR
-        if: ${{ inputs.publish == true }}
+        # Skip re-publishing to the WPILib vendor-json-repo when this run is overwriting an
+        # existing tag/release for the same version, e.g. a re-run after a failure. That repo's PR
+        # represents "this version now exists"; re-filing it for a version that already went out
+        # would just create a duplicate/no-op PR against vendor-json-repo.
+        if: ${{ inputs.publish == true && steps.create_tag.outputs.tag_existed == 'false' && steps.create_release.outputs.release_existed == 'false' }}
         uses: wpilibsuite/vendor-json-repo/.github/actions/add_vendordep@main
         with:
           repo: Yet-Another-Software-Suite/vendor-json-repo

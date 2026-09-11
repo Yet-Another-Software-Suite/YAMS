@@ -14,13 +14,16 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
+import edu.wpi.first.wpilibj.simulation.SimHooks;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -307,6 +310,107 @@ public class BatterySimTest {
     } finally {
       smcs.forEach(BatterySimTest::closeSmc);
       BatterySim.disableDischarge();
+    }
+  }
+
+  /**
+   * Restore {@link BatterySim}'s default current &rarr; capacity fraction curve after a test
+   * replaces it, so later tests in the suite (which rely on the shipped defaults) aren't affected
+   * by test execution order.
+   *
+   * @implNote These values must be kept in sync with {@code BatterySim}'s
+   *     {@code CURRENT_TO_CAPACITY_FRACTION} static initializer.
+   */
+  private static void restoreDefaultCapacityDerating() {
+    InterpolatingDoubleTreeMap defaults = new InterpolatingDoubleTreeMap();
+    defaults.put(0.9, 1.000);
+    defaults.put(18.0, 0.758);
+    defaults.put(27.0, 0.718);
+    defaults.put(36.0, 0.679);
+    defaults.put(45.0, 0.639);
+    defaults.put(54.0, 0.599);
+    BatterySim.replaceCapacityDerating(defaults);
+  }
+
+  @Test
+  void testHighCurrentDrainsCapacityFasterThanLowCurrentForSameAmpHours() {
+    // BatterySim integrates discharge using Timer.getFPGATimestamp(), which reads the HAL's actual
+    // (simulated) FPGA clock rather than RobotController's overridable time source. SimHooks.
+    // stepTiming() jumps that clock forward synchronously, letting each scenario integrate hours
+    // of simulated discharge in a single deterministic step instead of pumping the scheduler in
+    // real time.
+    UUID highCurrentId = UUID.randomUUID();
+    UUID lowCurrentId = UUID.randomUUID();
+    try {
+      // A large capacity keeps both scenarios well away from the 0%/100% clamp, so the comparison
+      // isolates the rate-derating effect rather than saturation.
+      BatterySim.enableDischarge(1000.0, Volts.of(12.0), MilliOhms.of(20));
+
+      // 54A for 0.1 hours (360s) draws the same 5.4 Ah as 0.9A for 6 hours (21600s).
+      BatterySim.calculateVoltage(highCurrentId, 54.0);
+      SimHooks.stepTiming(360.0);
+      BatterySim.calculateVoltage(highCurrentId, 54.0);
+      double highCurrentSoc = BatterySim.getStateOfCharge();
+
+      BatterySim.resetDischarge();
+      BatterySim.removeCurrent(highCurrentId);
+
+      BatterySim.calculateVoltage(lowCurrentId, 0.9);
+      SimHooks.stepTiming(21_600.0);
+      BatterySim.calculateVoltage(lowCurrentId, 0.9);
+      double lowCurrentSoc = BatterySim.getStateOfCharge();
+
+      System.out.println("State of charge after 5.4 Ah at 54A: " + highCurrentSoc);
+      System.out.println("State of charge after 5.4 Ah at 0.9A: " + lowCurrentSoc);
+      assertTrue(
+          highCurrentSoc < lowCurrentSoc,
+          "Drawing the same amp-hours at a high discharge current should drain more of the "
+              + "battery's capacity than drawing them at a low discharge current (Peukert effect).");
+    } finally {
+      BatterySim.removeCurrent(highCurrentId);
+      BatterySim.removeCurrent(lowCurrentId);
+      BatterySim.disableDischarge();
+    }
+  }
+
+  @Test
+  void testReplaceCapacityDeratingUsesCustomCurve() {
+    UUID defaultCurveId = UUID.randomUUID();
+    UUID customCurveId = UUID.randomUUID();
+    try {
+      BatterySim.enableDischarge(1000.0, Volts.of(12.0), MilliOhms.of(20));
+
+      // Draw 30A for 1 hour (30 Ah) against the shipped default derating curve.
+      BatterySim.calculateVoltage(defaultCurveId, 30.0);
+      SimHooks.stepTiming(3_600.0);
+      BatterySim.calculateVoltage(defaultCurveId, 30.0);
+      double defaultCurveSoc = BatterySim.getStateOfCharge();
+
+      BatterySim.resetDischarge();
+      BatterySim.removeCurrent(defaultCurveId);
+
+      // A single-entry table always reports the same fraction, regardless of current: a much
+      // harsher derating (0.5) than the default curve's ~0.7 fraction around 30A.
+      InterpolatingDoubleTreeMap harshDerating = new InterpolatingDoubleTreeMap();
+      harshDerating.put(0.0, 0.5);
+      BatterySim.replaceCapacityDerating(harshDerating);
+
+      BatterySim.calculateVoltage(customCurveId, 30.0);
+      SimHooks.stepTiming(3_600.0);
+      BatterySim.calculateVoltage(customCurveId, 30.0);
+      double customCurveSoc = BatterySim.getStateOfCharge();
+
+      System.out.println("State of charge with default derating curve: " + defaultCurveSoc);
+      System.out.println("State of charge with harsher custom derating curve: " + customCurveSoc);
+      assertTrue(
+          customCurveSoc < defaultCurveSoc,
+          "A custom capacity derating curve with a harsher fraction should drain more state of "
+              + "charge than the default curve for the same current and duration.");
+    } finally {
+      BatterySim.removeCurrent(defaultCurveId);
+      BatterySim.removeCurrent(customCurveId);
+      BatterySim.disableDischarge();
+      restoreDefaultCapacityDerating();
     }
   }
 
