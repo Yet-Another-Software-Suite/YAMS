@@ -4,6 +4,7 @@
     <bytecodeTargetLevel target="17" />
   </component>
   <component name="JavacSettings">
-    <option name="ADDITIONAL_OPTIONS_STRING" value="-XDstringConcat=inline" />
+    <option name="ADDITIONAL_OPTIONS_STRING"
+      value="-XDstringConcat=inline" />
   </component>
 </project>

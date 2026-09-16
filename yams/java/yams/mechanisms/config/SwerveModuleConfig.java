@@ -106,7 +106,8 @@ public class SwerveModuleConfig {
   private Optional<Angle> absoluteEncoderOffset = Optional.empty();
 
   /** Gearbox for the absolute encoder. */
-  private GearBox absoluteEncoderGearbox = new GearBox(new double[] {1});
+  private GearBox absoluteEncoderGearbox = new GearBox(new double[] {
+                                                                     1});
 
   /**
    * Swerve module state optimization using

@@ -71,7 +71,8 @@ public class DifferentialMechanismConfig {
    * Twist gearing between the twist bevel gear and the motor sprocket. Separate from Tilt gearing implemented in the
    * {@link SmartMotorControllerConfig}.
    */
-  private MechanismGearing               twistGearing            = new MechanismGearing(new GearBox(new double[] {1}));
+  private MechanismGearing               twistGearing            = new MechanismGearing(new GearBox(new double[] {
+                                                                                                                  1}));
   /**
    * Supplier of the twist angle using an absolute encoder for the {@link DifferentialMechanism}.
    */
