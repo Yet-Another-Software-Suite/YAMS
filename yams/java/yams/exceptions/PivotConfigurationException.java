@@ -8,18 +8,20 @@ package yams.exceptions;
  * when a required field in {@link yams.mechanisms.config.PivotConfig} is missing or invalid.
  *
  * <p>Common triggers include:
+ *
  * <ul>
- *   <li>{@code withSmartMotorController(SmartMotorController)} called more than once on the same config</li>
- *   <li>MOI (moment of inertia) not derivable — neither length+mass nor an explicit MOI was configured
- *       on the underlying {@link yams.motorcontrollers.SmartMotorControllerConfig}</li>
+ *   <li>{@code withSmartMotorController(SmartMotorController)} called more than once on the same
+ *       config
+ *   <li>MOI (moment of inertia) not derivable — neither length+mass nor an explicit MOI was
+ *       configured on the underlying {@link yams.motorcontrollers.SmartMotorControllerConfig}
  * </ul>
  *
  * <p><b>Resolution:</b> Ensure {@code PivotConfig.withSmartMotorController(SmartMotorController)}
- * is called exactly once, and that the motor's {@code SmartMotorControllerConfig} includes
- * {@code withMomentOfInertia(Distance, Mass)} or {@code withMomentOfInertia(MomentOfInertia)}
- * when simulation is used.
+ * is called exactly once, and that the motor's {@code SmartMotorControllerConfig} includes {@code withMomentOfInertia(Distance, Mass)} or {@code withMomentOfInertia(MomentOfInertia)} when
+ * simulation is used.
  *
  * <p>Example minimal configuration:
+ *
  * <pre>{@code
  * SmartMotorControllerConfig motorCfg = new SmartMotorControllerConfig()
  *     .withMomentOfInertia(Inches.of(10), Pounds.of(2));
@@ -31,17 +33,21 @@ package yams.exceptions;
  * @see yams.mechanisms.positional.Pivot
  * @see yams.mechanisms.config.PivotConfig
  */
-public class PivotConfigurationException extends RuntimeException
-{
+public class PivotConfigurationException extends RuntimeException {
   /**
    * Pivot configuration exception.
    *
-   * @param message        Message to display.
-   * @param result         Result of the configuration.
+   * @param message Message to display.
+   * @param result Result of the configuration.
    * @param remedyFunction Remedy function to use.
    */
-  public PivotConfigurationException(String message, String result, String remedyFunction)
-  {
-    super(message + "!\n" + result + "\nPlease use PivotConfig." + remedyFunction + " to fix this error.");
+  public PivotConfigurationException(String message, String result, String remedyFunction) {
+    super(
+        message
+            + "!\n"
+            + result
+            + "\nPlease use PivotConfig."
+            + remedyFunction
+            + " to fix this error.");
   }
 }

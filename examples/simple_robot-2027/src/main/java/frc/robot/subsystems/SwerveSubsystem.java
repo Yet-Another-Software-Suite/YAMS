@@ -3,10 +3,12 @@
 
 package frc.robot.subsystems;
 
-
 import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.DegreesPerSecond;
 import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Radians;
+import static org.wpilib.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -24,8 +26,7 @@ import org.wpilib.smartdashboard.Field2d;
 import org.wpilib.smartdashboard.SmartDashboard;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
-import org.wpilib.hardware.bus.CAN;
-
+import org.wpilib.command2.button.CommandNiDsXboxController;
 import java.util.function.Supplier;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
@@ -33,46 +34,53 @@ import yams.mechanisms.config.SwerveDriveConfig;
 import yams.mechanisms.config.SwerveModuleConfig;
 import yams.mechanisms.swerve.SwerveDrive;
 import yams.mechanisms.swerve.SwerveModule;
+import yams.mechanisms.swerve.utility.SwerveInputStream;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.local.SparkWrapper;
 
-public class SwerveSubsystem extends SubsystemBase
-{
+public class SwerveSubsystem extends SubsystemBase {
   private final SwerveDrive drive;
-  private final Field2d     field = new Field2d();
+  private final Field2d field = new Field2d();
 
-  public SwerveModule createModule(SparkMax drive, SparkMax azimuth, CANcoder absoluteEncoder, String moduleName,
-                                   Translation2d location)
-  {
-    MechanismGearing driveGearing         = new MechanismGearing(GearBox.fromStages("12:1", "2:1"));
-    MechanismGearing azimuthGearing       = new MechanismGearing(GearBox.fromStages("21:1"));
-    PIDController    azimuthPIDController = new PIDController(1, 0, 0);
-    SmartMotorControllerConfig driveCfg = new SmartMotorControllerConfig(this)
-        .withWheelDiameter(Inches.of(4))
-        .withClosedLoopController(50, 0, 4)
-        .withGearing(driveGearing)
-        .withStatorCurrentLimit(Amps.of(40))
-        .withTelemetry("driveMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
-    SmartMotorControllerConfig azimuthCfg = new SmartMotorControllerConfig(this)
-        .withClosedLoopController(50, 0, 4)
-        .withContinuousWrapping(Radians.of(-Math.PI), Radians.of(Math.PI))
-        .withGearing(azimuthGearing)
-        .withStatorCurrentLimit(Amps.of(20))
-        .withTelemetry("angleMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
-    SmartMotorController driveSMC   = new SparkWrapper(drive, DCMotor.getNEO(1), driveCfg);
+  public SwerveModule createModule(
+      SparkMax drive,
+      SparkMax azimuth,
+      CANcoder absoluteEncoder,
+      String moduleName,
+      Translation2d location) {
+    MechanismGearing driveGearing = new MechanismGearing(GearBox.fromReductionStages(6.75));
+    MechanismGearing azimuthGearing = new MechanismGearing(GearBox.fromReductionStages(12.8));
+    SmartMotorControllerConfig driveCfg =
+        new SmartMotorControllerConfig(this)
+            .withWheelDiameter(Inches.of(4))
+            .withClosedLoopController(0.4, 0, 0)
+            //            .withFeedforward(new SimpleMotorFeedforward(0, 0.7, 0.1))
+            .withGearing(driveGearing)
+            .withStatorCurrentLimit(Amps.of(40))
+            .withTelemetry("driveMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
+    SmartMotorControllerConfig azimuthCfg =
+        new SmartMotorControllerConfig(this)
+            .withClosedLoopController(3.8476, 0, 0)
+            .withContinuousWrapping(Radians.of(-Math.PI), Radians.of(Math.PI))
+            .withGearing(azimuthGearing)
+            .withStatorCurrentLimit(Amps.of(40))
+            .withTelemetry("angleMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
+    SmartMotorController driveSMC = new SparkWrapper(drive, DCMotor.getNEO(1), driveCfg);
     SmartMotorController azimuthSMC = new SparkWrapper(azimuth, DCMotor.getNEO(1), azimuthCfg);
-    SwerveModuleConfig moduleConfig = new SwerveModuleConfig(driveSMC, azimuthSMC)
-        .withAbsoluteEncoder(absoluteEncoder.getAbsolutePosition().asSupplier())
-        .withTelemetry(moduleName, SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
-        .withLocation(location)
-        .withOptimization(true);
+    SwerveModuleConfig moduleConfig =
+        new SwerveModuleConfig(driveSMC, azimuthSMC)
+            .withAbsoluteEncoder(absoluteEncoder.getAbsolutePosition().asSupplier())
+            .withTelemetry(moduleName, SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
+            .withLocation(location)
+            .withOptimization(true);
     return new SwerveModule(moduleConfig);
   }
 
+  private final Pigeon2 gyro = new Pigeon2(14, CANBus.systemcore(1));
+
   public SwerveSubsystem()
   {
-    Pigeon2 gyro = new Pigeon2(14, CANBus.systemcore(1));
     var fl = createModule(new SparkMax(1, 1, MotorType.kBrushless),
                           new SparkMax(1, 2, MotorType.kBrushless),
                           new CANcoder(3, CANBus.systemcore(1)),
@@ -95,6 +103,7 @@ public class SwerveSubsystem extends SubsystemBase
                           new Translation2d(Inches.of(-24), Inches.of(-24)));
     SwerveDriveConfig config = new SwerveDriveConfig(this, fl, fr, bl, br)
         .withGyro(gyro.getYaw().asSupplier())
+        .withMaximumChassisSpeed(MetersPerSecond.of(4), RotationsPerSecond.of(360))
         .withStartingPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)))
         .withTranslationController(new PIDController(1, 0, 0))
         .withRotationController(new PIDController(1, 0, 0));
@@ -108,8 +117,7 @@ public class SwerveSubsystem extends SubsystemBase
     return run(() -> drive.setRobotRelativeChassisSpeeds(speeds));
   }
 
-  public Command driveToPose(Pose2d pose)
-  {
+  public Command driveToPose(Pose2d pose) {
     return drive.driveToPose(pose);
   }
 
@@ -118,26 +126,44 @@ public class SwerveSubsystem extends SubsystemBase
     return drive.drive(speedsSupplier);
   }
 
-  public Command lock()
-  {
+  /**
+   * Drive the robot field-relative using a driver controller, converting joystick axes into {@link
+   * ChassisVelocities} via {@link SwerveInputStream}.
+   *
+   * @param controller Driver controller to read translation/rotation axes from.
+   * @return {@link Command} that drives the robot while scheduled.
+   */
+  public Command driveWithJoystick(CommandNiDsXboxController controller) {
+    SwerveInputStream inputStream =
+        SwerveInputStream.of(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX())
+            .withControllerRotationAxis(() -> -controller.getRightX())
+            .withMaximumLinearVelocity(MetersPerSecond.of(4))
+            .withMaximumAngularVelocity(DegreesPerSecond.of(360))
+            .withDeadband(0.05)
+            .withCubeTranslationControllerAxis()
+            .withAllianceRelativeControl();
+
+    return drive.drive(
+        () -> inputStream.get().toRobotRelative(new Rotation2d(drive.getGyroAngle())));
+  }
+
+  public Command lock() {
     return run(drive::lockPose);
   }
 
   @Override
-  public void periodic()
-  {
+  public void periodic() {
     drive.updateTelemetry();
     field.setRobotPose(drive.getPose());
   }
 
   @Override
-  public void simulationPeriodic()
-  {
+  public void simulationPeriodic() {
     drive.simIterate();
+    gyro.getSimState().setRawYaw(drive.getSimPose().getRotation().getRadians());
   }
 
-  public Pose2d getPose()
-  {
+  public Pose2d getPose() {
     return drive.getPose();
   }
 
@@ -146,8 +172,7 @@ public class SwerveSubsystem extends SubsystemBase
     return drive.getFieldRelativeSpeed();
   }
 
-  public Angle getGyroAngle()
-  {
+  public Angle getGyroAngle() {
     return drive.getGyroAngle();
   }
 }

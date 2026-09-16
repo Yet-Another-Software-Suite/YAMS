@@ -23,16 +23,15 @@ ext.skipCpp = project.hasProperty('skipCpp') && project.property('skipCpp').toSt
 
 
 repositories {
-  mavenCentral()
+    mavenCentral()
 }
 
 wpilibRepositories.use2027Repos()
 if (project.hasProperty('releaseMode')) {
-  wpilibRepositories.addAllReleaseRepositories(project)
+    wpilibRepositories.addAllReleaseRepositories(project)
 } else {
-  wpilibRepositories.addAllDevelopmentRepositories(project)
+    wpilibRepositories.addAllDevelopmentRepositories(project)
 }
-
 
 sourceSets {
     main {
@@ -129,7 +128,7 @@ tasks.whenTaskAdded { task ->
     }
 }
 
-if (project.hasProperty('onlylinuxarm32') || project.hasProperty('onlylinuxarm64') || project.hasProperty('onlywindowsarm64') || project.hasProperty('onlylinuxsystemcore')) {
+if (project.hasProperty('onlylinuxathena') || project.hasProperty('onlylinuxarm32') || project.hasProperty('onlylinuxarm64') || project.hasProperty('onlywindowsarm64') || project.hasProperty('onlylinuxsystemcore') || project.hasProperty('onlywindows64') || project.hasProperty('onlyosxuniversal') || project.hasProperty('onlylinuxx64')) {
     test.enabled = false
 }
 
@@ -150,9 +149,9 @@ javadoc {
                 'https://api.ctr-electronics.com/phoenix6/stable/java/',
                 'https://api.ctr-electronics.com/phoenix/stable/java/'
         tags 'todo:X"',
-            'apiNote:a:API Note:',
-            'implSpec:a:Implementation Requirements:',
-            'implNote:a:Implementation Note:'
+                'apiNote:a:API Note:',
+                'implSpec:a:Implementation Requirements:',
+                'implNote:a:Implementation Note:'
         overview "$rootDir/../yams/java/overview.html"
     }
 }
@@ -161,6 +160,39 @@ ext.getCurrentArch = {
 }
 
 def systemArch = getCurrentArch()
+
+nativeUtils {
+    exportsConfigs {
+        YAMS {
+            x86ExcludeSymbols = [
+                    '_CT??_R0?AV_System_error',
+                    '_CT??_R0?AVexception',
+                    '_CT??_R0?AVfailure',
+                    '_CT??_R0?AVruntime_error',
+                    '_CT??_R0?AVsystem_error',
+                    '_CTA5?AVfailure',
+                    '_TI5?AVfailure',
+                    '_CT??_R0?AVout_of_range',
+                    '_CTA3?AVout_of_range',
+                    '_TI3?AVout_of_range',
+                    '_CT??_R0?AVbad_cast'
+            ]
+            x64ExcludeSymbols = [
+                    '_CT??_R0?AV_System_error',
+                    '_CT??_R0?AVexception',
+                    '_CT??_R0?AVfailure',
+                    '_CT??_R0?AVruntime_error',
+                    '_CT??_R0?AVsystem_error',
+                    '_CTA5?AVfailure',
+                    '_TI5?AVfailure',
+                    '_CT??_R0?AVout_of_range',
+                    '_CTA3?AVout_of_range',
+                    '_TI3?AVout_of_range',
+                    '_CT??_R0?AVbad_cast'
+            ]
+        }
+    }
+}
 
 model {
   components {
@@ -178,6 +210,9 @@ model {
           }
           nativeUtils.useRequiredLibrary(it, 'wpilib_shared')
           wpi.vendor.nativeVendor.cpp(it)
+          if (skipCpp) {
+              binaries.all { buildable = false }
+          }
       }
   }
   testSuites {
@@ -214,6 +249,7 @@ model {
 
   }
 }
+
 
 build.dependsOn javadoc
 apply from: 'publish.gradle'

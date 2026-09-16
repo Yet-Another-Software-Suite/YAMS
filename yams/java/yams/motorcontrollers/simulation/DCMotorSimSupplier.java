@@ -11,6 +11,7 @@ import static org.wpilib.units.Units.RadiansPerSecondPerSecond;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
+import org.wpilib.math.filter.LinearFilter;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularAcceleration;
@@ -30,22 +31,16 @@ import yams.motorcontrollers.SmartMotorController;
  * DCMotorSim Supplier — simulates a generic DC motor load (flywheel, roller, or elevator)
  * using WPILib's {@link org.wpilib.simulation.DCMotorSim}.
  *
- * <p>
- * This supplier steps WPILib's {@code DCMotorSim} physics model each control loop and exposes the
- * resulting angular position, angular velocity, current draw, and acceleration through the
- * {@link yams.motorcontrollers.SimSupplier} interface. Unlike
- * {@link yams.motorcontrollers.simulation.ArmSimSupplier}, this model does not simulate gravity or
- * joint limits — it is suited for continuous-rotation mechanisms such as flywheels or rollers, as
- * well as linear mechanisms (elevators) when paired with appropriate gearing.
- * </p>
+ * <p>This supplier steps WPILib's {@code DCMotorSim} physics model each control loop and exposes
+ * the resulting angular position, angular velocity, current draw, and acceleration through the
+ * {@link yams.motorcontrollers.SimSupplier} interface. Unlike {@link yams.motorcontrollers.simulation.ArmSimSupplier}, this model does not simulate gravity or joint
+ * limits — it is suited for continuous-rotation mechanisms such as flywheels or rollers, as well as
+ * linear mechanisms (elevators) when paired with appropriate gearing.
  *
- * <p>
- * The gear ratio and control period are read from the associated
- * {@link yams.motorcontrollers.SmartMotorController}'s config, so they do not need to be repeated
- * here.
- * </p>
+ * <p>The gear ratio and control period are read from the associated {@link yams.motorcontrollers.SmartMotorController}'s config, so they do not need to be repeated here.
  *
  * <h2>Example</h2>
+ *
  * <pre>{@code
  * // 1. Build the WPILib DC motor physics model (e.g. a flywheel with MOI 0.001 kg·m²)
  * DCMotorSim flywheelPhysics = new DCMotorSim(
@@ -63,167 +58,154 @@ import yams.motorcontrollers.SmartMotorController;
  * motor.getConfig().withSimSupplier(sim);
  * }</pre>
  */
-public class DCMotorSimSupplier implements SimSupplier
-{
-  private boolean          inputFed   = false;
-  private       boolean          simUpdated = false;
+public class DCMotorSimSupplier implements SimSupplier {
+  private boolean inputFed = false;
+  private boolean simUpdated = false;
   private final Supplier<Double> motorDutyCycleSupplier;
-  private final DCMotorSim       sim;
+  private final LinearFilter supplyCurrentFilter;
+  private final DCMotorSim sim;
   private final MechanismGearing mechGearing;
-  private final Time             period;
-  private final DCMotor          motor;
-  private final UUID             uuid;
-
+  private final Time simPeriod;
+  private final DCMotor motor;
+  private final UUID uuid;
 
   /**
    * Construct the DCMotorSim supplier
    *
-   * @param simulation           Simulatoin instance
+   * @param simulation Simulatoin instance
    * @param smartMotorController SMC for the DCMotorSim..
    */
-  public DCMotorSimSupplier(DCMotorSim simulation, SmartMotorController smartMotorController)
-  {
+  public DCMotorSimSupplier(DCMotorSim simulation, SmartMotorController smartMotorController) {
     var config = smartMotorController.getConfig();
     sim = simulation;
     motorDutyCycleSupplier = smartMotorController::getDutyCycle;
     mechGearing = config.getGearing();
-    period = config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20));
+    simPeriod = config.getSimulationPeriod();
     motor = smartMotorController.getDCMotor();
+    // Based off comment from https://github.com/wpilibsuite/allwpilib/issues/8691
+    supplyCurrentFilter =
+        LinearFilter.singlePoleIIR(Milliseconds.of(100).in(Seconds), simPeriod.in(Seconds));
     uuid = smartMotorController.m_batterySimUUID;
   }
 
   @Override
-  public void updateSimState()
-  {
-    if (!isInputFed())
-    {
-      sim.setInputVoltage(motorDutyCycleSupplier.get() * RoboRioSim.getVInVoltage());
-      RoboRioSim.setVInVoltage(BatterySim.calculateVoltage(uuid, sim.getCurrentDraw()));
+  public void updateSimState() {
+    if (!isInputFed()) {
+      sim.setInputVoltage(
+          motorDutyCycleSupplier.get() * RoboRioSim.getVInVoltage()); // Supply voltage
+      RoboRioSim.setVInVoltage(BatterySim.calculateVoltage(uuid, getSupplyCurrent()));
     }
-    if (!simUpdated)
-    {
+    if (!simUpdated) {
       starveInput();
-      sim.update(period.in(Seconds));
-      try
-      {
-        //Thread.sleep(1);
-      } catch (Exception e)
-      {
+      sim.update(simPeriod.in(Seconds));
+      try {
+        // Thread.sleep(1);
+      } catch (Exception e) {
       }
       feedUpdateSim();
     }
-
   }
 
   @Override
-  public boolean getUpdatedSim()
-  {
+  public boolean getUpdatedSim() {
     return simUpdated;
   }
 
   @Override
-  public void feedUpdateSim()
-  {
+  public void feedUpdateSim() {
     simUpdated = true;
   }
 
   @Override
-  public void starveUpdateSim()
-  {
+  public void starveUpdateSim() {
     simUpdated = false;
   }
 
   @Override
-  public boolean isInputFed()
-  {
+  public boolean isInputFed() {
     return inputFed;
   }
 
   @Override
-  public void feedInput()
-  {
+  public void feedInput() {
     inputFed = true;
   }
 
   @Override
-  public void starveInput()
-  {
+  public void starveInput() {
     inputFed = false;
   }
 
   @Override
-  public void setMechanismStatorDutyCycle(double dutyCycle)
-  {
+  public void setMechanismStatorDutyCycle(double dutyCycle) {
     feedInput();
     sim.setInputVoltage(dutyCycle * getMechanismSupplyVoltage().in(Volts));
   }
 
   @Override
-  public Voltage getMechanismSupplyVoltage()
-  {
+  public Voltage getMechanismSupplyVoltage() {
     return Volts.of(RoboRioSim.getVInVoltage());
   }
 
   @Override
-  public Voltage getMechanismStatorVoltage()
-  {
-    return Volts.of(motor.getVoltage(sim.getTorque(),
-                                     sim.getAngularVelocity()));
+  public Voltage getMechanismStatorVoltage() {
+    return Volts.of(motor.getVoltage(sim.getTorque(), sim.getAngularVelocity()));
   }
 
   @Override
-  public void setMechanismStatorVoltage(Voltage volts)
-  {
+  public void setMechanismStatorVoltage(Voltage volts) {
     feedInput();
     sim.setInputVoltage(volts.in(Volts));
   }
 
   @Override
-  public Angle getMechanismPosition()
-  {
+  public Angle getMechanismPosition() {
     return Radians.of(sim.getAngularPosition());
   }
 
   @Override
-  public void setMechanismPosition(Angle position)
-  {
-    sim
-        .setAngle(position.in(Radians));//.times(config.getGearing().getMechanismToRotorRatio()).in(Radians));
+  public void setMechanismPosition(Angle position) {
+    sim.setAngle(
+        position.in(
+            Radians)); // .times(config.getGearing().getMechanismToRotorRatio()).in(Radians));
   }
 
   @Override
-  public Angle getRotorPosition()
-  {
+  public Angle getRotorPosition() {
     return getMechanismPosition().times(mechGearing.getMechanismToRotorRatio());
   }
 
   @Override
-  public AngularVelocity getMechanismVelocity()
-  {
+  public AngularVelocity getMechanismVelocity() {
     return RadiansPerSecond.of(sim.getAngularVelocity());
   }
 
   @Override
-  public void setMechanismVelocity(AngularVelocity velocity)
-  {
+  public void setMechanismVelocity(AngularVelocity velocity) {
     sim.setAngularVelocity(velocity.in(RadiansPerSecond));
   }
 
   @Override
-  public AngularVelocity getRotorVelocity()
-  {
+  public AngularVelocity getRotorVelocity() {
     return getMechanismVelocity().times(mechGearing.getMechanismToRotorRatio());
   }
 
   @Override
-  public Current getCurrentDraw()
-  {
+  public Current getStatorCurrent() {
     return Amps.of(sim.getCurrentDraw());
   }
 
   @Override
-  public AngularAcceleration getRotorAcceleration()
-  {
+  public Current getSupplyCurrent() {
+    // For a BLDC driven by a switching converter, power is conserved across the duty-cycle
+    // transformation: supplyVoltage * supplyCurrent = statorVoltage * statorCurrent, and
+    // statorVoltage = dutyCycle * supplyVoltage, so supplyCurrent = dutyCycle * statorCurrent.
+    double dutyCycle = motorDutyCycleSupplier.get();
+    return Amps.of(supplyCurrentFilter.calculate(dutyCycle * sim.getCurrentDraw()));
+  }
+
+  @Override
+  public AngularAcceleration getRotorAcceleration() {
     return RadiansPerSecondPerSecond.of(sim.getAngularAcceleration());
   }
 }

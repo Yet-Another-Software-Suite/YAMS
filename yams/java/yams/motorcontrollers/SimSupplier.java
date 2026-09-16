@@ -12,27 +12,19 @@ import org.wpilib.units.measure.Voltage;
 /**
  * Provides sim functions for a YAMS simulated mechanism.
  *
- * <p>
- * {@code SimSupplier} is the abstract bridge between WPILib's physics simulation models (such as
- * {@link org.wpilib.simulation.SingleJointedArmSim} and
- * {@link org.wpilib.simulation.DCMotorSim}) and YAMS
- * {@link yams.motorcontrollers.SmartMotorController} wrappers. Concrete implementations
- * translate the simulation state — position, velocity, current draw, voltage — into the
- * typed unit-safe values that YAMS motor controller wrappers consume each control loop.
- * </p>
+ * <p>{@code SimSupplier} is the abstract bridge between WPILib's physics simulation models (such as
+ * {@link org.wpilib.simulation.SingleJointedArmSim} and {@link org.wpilib.simulation.DCMotorSim})
+ * and YAMS {@link yams.motorcontrollers.SmartMotorController} wrappers. Concrete implementations
+ * translate the simulation state — position, velocity, current draw, voltage — into the typed
+ * unit-safe values that YAMS motor controller wrappers consume each control loop.
  *
- * <p>
- * On a real robot the motor controller hardware provides these values; in simulation a
- * {@code SimSupplier} steps the physics model forward and exposes the same interface so
- * that mechanism and control code requires no changes between real and simulated runs.
- * </p>
+ * <p>On a real robot the motor controller hardware provides these values; in simulation a {@code SimSupplier} steps the physics model forward and exposes the same interface so that mechanism and
+ * control code requires no changes between real and simulated runs.
  *
  * <h2>How to use</h2>
- * <p>
- * Create a concrete {@code SimSupplier} (e.g. {@link yams.motorcontrollers.simulation.ArmSimSupplier}
- * or {@link yams.motorcontrollers.simulation.DCMotorSimSupplier}) and pass it to
- * {@code SmartMotorControllerConfig} via {@code withSimSupplier()}:
- * </p>
+ *
+ * <p>Create a concrete {@code SimSupplier} (e.g. {@link yams.motorcontrollers.simulation.ArmSimSupplier} or {@link yams.motorcontrollers.simulation.DCMotorSimSupplier}) and pass it to {@code SmartMotorControllerConfig} via {@code withSimSupplier()}:
+ *
  * <pre>{@code
  * // Create the WPILib physics model
  * SingleJointedArmSim armPhysics = new SingleJointedArmSim(
@@ -51,17 +43,10 @@ import org.wpilib.units.measure.Voltage;
  *     .withSimSupplier(new ArmSimSupplier(armPhysics, motorController));
  * }</pre>
  *
- * <p>
- * Implementations must advance the physics model on each control loop tick via
- * {@link #updateSimState()}, and signal readiness through the watchdog helpers
- * ({@link #feedUpdateSim()}/{@link #starveUpdateSim()}).
- * </p>
+ * <p>Implementations must advance the physics model on each control loop tick via {@link #updateSimState()}, and signal readiness through the watchdog helpers ({@link #feedUpdateSim()}/{@link #starveUpdateSim()}).
  */
-public interface SimSupplier
-{
-  /**
-   * Update the sim state.
-   */
+public interface SimSupplier {
+  /** Update the sim state. */
   void updateSimState();
 
   /**
@@ -71,14 +56,10 @@ public interface SimSupplier
    */
   boolean getUpdatedSim();
 
-  /**
-   * Feed the update sim watch
-   */
+  /** Feed the update sim watch */
   void feedUpdateSim();
 
-  /**
-   * Starve the update sim watch.
-   */
+  /** Starve the update sim watch. */
   void starveUpdateSim();
 
   /**
@@ -88,15 +69,10 @@ public interface SimSupplier
    */
   boolean isInputFed();
 
-  /**
-   * Feed input
-   *
-   */
+  /** Feed input */
   void feedInput();
 
-  /**
-   * Starve the input.
-   */
+  /** Starve the input. */
   void starveInput();
 
   /**
@@ -170,11 +146,18 @@ public interface SimSupplier
   AngularVelocity getRotorVelocity();
 
   /**
-   * Get the current draw of from the sim.
+   * Get the stator current draw of from the sim.
    *
-   * @return Current draw.
+   * @return stator current draw.
    */
-  Current getCurrentDraw();
+  Current getStatorCurrent();
+
+  /**
+   * Get the supply current draw of the motor controller.
+   *
+   * @return supply current draw.
+   */
+  Current getSupplyCurrent();
 
   /**
    * Get the rotor acceleration.

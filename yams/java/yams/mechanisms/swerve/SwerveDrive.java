@@ -25,6 +25,7 @@ import org.wpilib.math.numbers.N1;
 import org.wpilib.math.numbers.N3;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.Force;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.system.Timer;
 import org.wpilib.smartdashboard.Field2d;
@@ -46,17 +47,17 @@ import yams.telemetry.SwerveDriveTelemetryConfig;
  * Swerve Drive mechanism
  *
  * <h2>Usage Example</h2>
- * <p>
- * The typical pattern is to wrap {@code SwerveDrive} inside a WPILib {@code SubsystemBase}.
+ *
+ * <p>The typical pattern is to wrap {@code SwerveDrive} inside a WPILib {@code SubsystemBase}.
  * Build a {@link yams.mechanisms.config.SwerveDriveConfig} (see its class-level doc for the full
  * module-construction example), then instantiate {@code SwerveDrive} once in the subsystem
  * constructor.
- * </p>
- * <p>
- * {@link yams.mechanisms.swerve.utility.SwerveInputStream} is the <b>recommended</b> way to
- * convert raw joystick axes into field-relative {@link org.wpilib.math.kinematics.ChassisVelocities}
+ *
+ * <p>{@link yams.mechanisms.swerve.utility.SwerveInputStream} is the <b>recommended</b> way to
+ * convert raw joystick axes into field-relative
+ * {@link org.wpilib.math.kinematics.ChassisVelocities}
  * before passing them to {@link #drive(java.util.function.Supplier)}.
- * </p>
+ *
  * <pre>{@code
  * public class SwerveSubsystem extends SubsystemBase {
  *
@@ -119,54 +120,43 @@ import yams.telemetry.SwerveDriveTelemetryConfig;
  * }</pre>
  */
 public class SwerveDrive {
-  /**
-   * The modules of the drive.
-   */
+  /** The modules of the drive. */
   private final SwerveModule[] m_modules;
-  /**
-   * The pose estimator for the drive.
-   */
+
+  /** The pose estimator for the drive. */
   private final SwerveDrivePoseEstimator m_poseEstimator;
-  /**
-   * The kinematics for the drive.
-   */
+
+  /** The kinematics for the drive. */
   private final SwerveDriveKinematics m_kinematics;
-  /**
-   * Timer for simulation purposes only. Not used in real robot code.
-   */
+
+  /** Timer for simulation purposes only. Not used in real robot code. */
   private final Timer m_simTimer = new Timer();
-  /**
-   * The config for the drive.
-   */
+
+  /** The config for the drive. */
   private final SwerveDriveConfig m_config;
-  /**
-   * Mechanism telemetry, used for the loop time and the {@link Field2d}.
-   */
+
+  /** Mechanism telemetry, used for the loop time and the {@link Field2d}. */
   private final MechanismTelemetry m_telemetry = new MechanismTelemetry();
-  /**
-   * Pose, chassis speeds, gyro, and auto-align tuning telemetry.
-   */
+
+  /** Pose, chassis speeds, gyro, and auto-align tuning telemetry. */
   private SwerveDriveTelemetry m_swerveTelemetry;
-  /**
-   * Simulated Gyro Angle. Used for simulation purposes only. Not used in real robot code.
-   */
+
+  /** Simulated Gyro Angle. Used for simulation purposes only. Not used in real robot code. */
   private Angle m_simGyroAngle = Rotations.of(0);
-  /**
-   * Field to display the robot's pose.
-   */
+
+  /** Field to display the robot's pose. */
   private Field2d m_field2d = new Field2d();
-  /**
-   * Last-commanded desired module states; cached and published from updateTelemetry.
-   */
+
+  /** Last-commanded desired module states; cached and published from updateTelemetry. */
   private SwerveModuleVelocity[] m_desiredModuleStates;
+
   /**
    * Last-commanded desired robot-relative chassis speeds; cached and published from
    * updateTelemetry.
    */
   private ChassisVelocities m_desiredChassisSpeeds = new ChassisVelocities();
-  /**
-   * The simulated pose of the robot if the {@link SwerveModuleVelocity}s were met perfectly.
-   */
+
+  /** The simulated pose of the robot if the {@link SwerveModuleVelocity}s were met perfectly. */
   private Pose2d m_simPose = new Pose2d();
 
   /**
@@ -181,24 +171,30 @@ public class SwerveDrive {
     m_simPose = config.getInitialPose();
     Arrays.fill(m_desiredModuleStates, new SwerveModuleVelocity());
     m_kinematics = getKinematics();
-    m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics, new Rotation2d(getGyroAngle()),
-        getModulePositions(), m_config.getInitialPose());
+    m_poseEstimator =
+        new SwerveDrivePoseEstimator(
+            m_kinematics,
+            new Rotation2d(getGyroAngle()),
+            getModulePositions(),
+            m_config.getInitialPose());
     setupTelemetry();
   }
 
   /**
    * Setup telemetry for the drive; the {@link SwerveDriveTelemetry} config used is either the one
-   * supplied via
-   * {@link SwerveDriveConfig#withTelemetry(String, SwerveDriveTelemetryConfig)} or a default built
-   * from
-   * {@link SwerveDriveConfig#getTelemetryVerbosity()} (defaulting to {@link
+   * supplied via {@link SwerveDriveConfig#withTelemetry(String, SwerveDriveTelemetryConfig)} or a
+   * default built from {@link SwerveDriveConfig#getTelemetryVerbosity()} (defaulting to {@link
    * TelemetryVerbosity#HIGH}).
    */
   private void setupTelemetry() {
-    var cfg = m_config.getSwerveDriveTelemetryConfig().orElseGet(
-        ()
-            -> new SwerveDriveTelemetryConfig().withTelemetryVerbosity(
-                m_config.getTelemetryVerbosity().orElse(TelemetryVerbosity.HIGH)));
+    var cfg =
+        m_config
+            .getSwerveDriveTelemetryConfig()
+            .orElseGet(
+                () ->
+                    new SwerveDriveTelemetryConfig()
+                        .withTelemetryVerbosity(
+                            m_config.getTelemetryVerbosity().orElse(TelemetryVerbosity.HIGH)));
     if (cfg.getDataLogName().isPresent()) {
       m_telemetry.setupTelemetry(getName(), cfg.getDataLogName().get());
     } else {
@@ -211,12 +207,15 @@ public class SwerveDrive {
     NetworkTablesBackends.ensureMechanismsTunableBackend();
     Tunables.publish("Mechanisms/" + getName() + "/field", m_field2d);
     Tunables.publish(
-        "Mechanisms/" + getName() + "/tuning/driveToPose", Commands.startRun(() -> {
-          System.out.println(
-              "================= Starting SwerveDrive.driveToPoseTuning() =================\n");
-          resetTranslationPID();
-          resetRotationPID();
-        }, () -> m_swerveTelemetry.applyTuningValues(this)));
+        "Mechanisms/" + getName() + "/tuning/driveToPose",
+        Commands.startRun(
+            () -> {
+              System.out.println(
+                  "================= Starting SwerveDrive.driveToPoseTuning() =================\n");
+              resetTranslationPID();
+              resetRotationPID();
+            },
+            () -> m_swerveTelemetry.applyTuningValues(this)));
     // Report as YAGSL bc this will become apart of YAGSL in 2027...
     HAL.reportUsage("RobotDrive", "YAGSL");
   }
@@ -230,9 +229,8 @@ public class SwerveDrive {
    * @implNote Not compatible with AdvantageKit
    */
   public Command drive(Supplier<ChassisVelocities> robotRelativeChassisSpeeds) {
-    return Commands
-        .run(()
-                 -> setRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds.get()),
+    return Commands.run(
+            () -> setRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds.get()),
             m_config.getSubsystem())
         .withName("Drive");
   }
@@ -247,7 +245,8 @@ public class SwerveDrive {
       //      if (m_config.getMapleDriveSim().isPresent())
       //      {
       //        return
-      //        m_config.getMapleDriveSim().get().getOdometryEstimatedPose().getRotation().getMeasure();
+      //
+      // m_config.getMapleDriveSim().get().getOdometryEstimatedPose().getRotation().getMeasure();
       //      }
       return m_simGyroAngle;
     }
@@ -259,8 +258,7 @@ public class SwerveDrive {
    * the modules are met perfectly. Useful for feeding a simulated vision system with ground-truth
    * poses under perfect-world conditions.
    *
-   * @return Simulated {@link Pose2d} of the robot. Only updated in simulation by {@link
-   *     #simIterate()}; on a real robot this remains the configured starting pose.
+   * @return Simulated {@link Pose2d} of the robot. Only updated in simulation by {@link #simIterate()}; on a real robot this remains the configured starting pose.
    */
   public Pose2d getSimPose() {
     return m_simPose;
@@ -303,6 +301,23 @@ public class SwerveDrive {
   }
 
   /**
+   * Set the {@link SwerveModuleVelocity}s of the swerve drive directly, with an additional drive
+   * wheel feedforward {@link Force} applied per module, e.g. from a PathPlanner set-point
+   * generator.
+   *
+   * @param states {@link SwerveModuleVelocity}s to use, must be the same count as the swerve
+   *     drive is configured order is Clockwise from FL.
+   * @param feedforwardForces Feedforward {@link Force}s to apply, one per module in the same FL,
+   *     FR, BL, BR order as {@code states}.
+   * @implNote Not compatible with AdvantageKit if MapleSim is defined.
+   */
+  public void setSwerveModuleStates(SwerveModuleVelocity[] states, Force[] feedforwardForces) {
+    for (int i = 0; i < states.length; i++) {
+      m_desiredModuleStates[i] = m_modules[i].setSwerveModuleState(states[i], feedforwardForces[i]);
+    }
+  }
+
+  /**
    * Get the {@link SwerveModuleVelocity}s of the swerve drive given a robot relative chassis
    * speed..
    *
@@ -336,8 +351,32 @@ public class SwerveDrive {
    * @param robotRelativeChassisSpeeds Robot relative chassis speeds.
    */
   public void setRobotRelativeChassisSpeeds(ChassisVelocities robotRelativeChassisSpeeds) {
+    setRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds, new Force[0]);
+  }
+
+  /**
+   * Set robot relative chassis speeds, with an additional drive wheel feedforward {@link Force}
+   * applied per module, e.g. from a PathPlanner set-point generator.
+   *
+   * @param robotRelativeChassisSpeeds Robot relative chassis speeds.
+   * @param feedforwardForces Feedforward {@link Force}s to apply, one per module in FL, FR, BL, BR
+   *     order. Pass an empty array to apply no feedforward.
+   */
+  public void setRobotRelativeChassisSpeeds(
+      ChassisVelocities robotRelativeChassisSpeeds, Force[] feedforwardForces) {
     m_desiredChassisSpeeds = robotRelativeChassisSpeeds;
-    setSwerveModuleStates(getStateFromRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds));
+    SwerveModuleVelocity[] states = getStateFromRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds);
+    if (feedforwardForces.length == 0) {
+      setSwerveModuleStates(states);
+      return;
+    }
+    if (feedforwardForces.length != states.length) {
+      throw new IllegalArgumentException(
+          "feedforwardForces must be empty or have one entry per module ("
+              + states.length
+              + "), in FL, FR, BL, BR order.");
+    }
+    setSwerveModuleStates(states, feedforwardForces);
   }
 
   /**
@@ -363,15 +402,15 @@ public class SwerveDrive {
   }
 
   /**
-   * Create the {@link SwerveDriveKinematics} so you can recreate a new {@link
-   * SwerveDrivePoseEstimator}.
+   * Create the {@link SwerveDriveKinematics} so you can recreate a new {@link SwerveDrivePoseEstimator}.
    *
    * @return {@link SwerveDriveKinematics}
    */
   public SwerveDriveKinematics getKinematics() {
-    return new SwerveDriveKinematics(Arrays.stream(m_modules)
+    return new SwerveDriveKinematics(
+        Arrays.stream(m_modules)
             .map(module -> module.getConfig().getLocation().orElseThrow())
-            .toArray(Translation2d[] ::new));
+            .toArray(Translation2d[]::new));
   }
 
   //  /**
@@ -433,22 +472,19 @@ public class SwerveDrive {
     m_simPose = pose;
   }
 
-  /**
-   * Resets the auto-align rotational PID controller.
-   */
+  /** Resets the auto-align rotational PID controller. */
   public void resetRotationPID() {
     m_config.getRotationPID().reset();
   }
 
-  /**
-   * Resets the auto-align translation PID controller.
-   */
+  /** Resets the auto-align translation PID controller. */
   public void resetTranslationPID() {
     m_config.getTranslationPID().reset();
   }
 
   /**
    * Set the auto-align rotational PID controller.
+   *
    * @param controller {@link PIDController} to use, units given is in Radians.
    */
   public void setRotationPID(PIDController controller) {
@@ -463,6 +499,7 @@ public class SwerveDrive {
 
   /**
    * Sets the auto-align translation PID controller.
+   *
    * @param controller {@link PIDController} to reset, Units given is in Meters.
    */
   public void setTranslationPID(PIDController controller) {
@@ -504,18 +541,20 @@ public class SwerveDrive {
    * @implNote Not compatible with AdvantageKit
    */
   public Command driveToPose(Pose2d pose) {
-    return Commands
-        .runOnce(() -> {
-          resetTranslationPID();
-          resetRotationPID();
-        })
-        .andThen(drive(() -> driveToPoseSetpoint(pose)))
+    return Commands.runOnce(
+            () -> {
+              resetTranslationPID();
+              resetRotationPID();
+            })
+        .andThen(
+            () -> setFieldRelativeChassisSpeeds(driveToPoseSetpoint(pose)), m_config.getSubsystem())
         .withName("Drive to Pose");
   }
 
   /**
    * Drive to the target pose, primarily for use in Live Tuning, could also be used for setpoint
    * commands.
+   *
    * @param targetPose Pose to drive towards.
    * @implNote Remember to call {@link #resetRotationPID()} and {@link #resetTranslationPID()}
    * before calling this method in a loop.
@@ -544,10 +583,10 @@ public class SwerveDrive {
    *     should be taken from
    *                                 {@link Timer#getTimestamp()} or similar sources.
    * @param visionMeasurementStdDevs Vision measurement standard deviation that will be sent to the
-   *                                 {@link SwerveDrivePoseEstimator}.The standard deviation of the
-   * vision measurement, for best accuracy calculate the standard deviation at 2 or more points and
-   * fit a line to it with the calculated optimal standard deviation. (Units should be meters per
-   * pixel). By optimizing this you can get * vision accurate to inches instead of feet.
+   *     {@link SwerveDrivePoseEstimator}.The standard deviation of the vision measurement, for best
+   *     accuracy calculate the standard deviation at 2 or more points and fit a line to it with the
+   *     calculated optimal standard deviation. (Units should be meters per pixel). By optimizing
+   *     this you can get * vision accurate to inches instead of feet.
    */
   public void addVisionMeasurement(
       Pose2d robotPose, double timestamp, Matrix<N3, N1> visionMeasurementStdDevs) {
@@ -560,9 +599,8 @@ public class SwerveDrive {
    * target increases.
    *
    * @param visionMeasurementStdDevs Standard deviations of the vision measurements. Increase these
-   *     numbers to trust
-   *                                 global measurements from vision less. This matrix is in the
-   * form [x, y, theta], with units in meters and radians.
+   *     numbers to trust global measurements from vision less. This matrix is in the form [x, y,
+   *     theta], with units in meters and radians.
    */
   public void setVisionMeasurementStdDevs(Matrix<N3, N1> visionMeasurementStdDevs) {
     m_poseEstimator.setVisionMeasurementStdDevs(visionMeasurementStdDevs);
@@ -581,16 +619,13 @@ public class SwerveDrive {
   }
 
   /**
-   * Update the {@link SwerveDrivePoseEstimator} with the current gyro angle and {@link
-   * SwerveModulePosition}
+   * Update the {@link SwerveDrivePoseEstimator} with the current gyro angle and {@link SwerveModulePosition}
    */
   private void updatePoseEstimator() {
     m_poseEstimator.update(new Rotation2d(getGyroAngle()), getModulePositions());
   }
 
-  /**
-   * Update the telemetry and {@link SwerveDrivePoseEstimator} of the drive.
-   */
+  /** Update the telemetry and {@link SwerveDrivePoseEstimator} of the drive. */
   public void updateTelemetry() {
     updatePoseEstimator();
     Pose2d robotPose = getPose();
@@ -613,9 +648,7 @@ public class SwerveDrive {
     m_field2d.getObject("modules").setPoses(modulePoses);
   }
 
-  /**
-   * Simulate the drive, updating the gyroscope based off of module states.
-   */
+  /** Simulate the drive, updating the gyroscope based off of module states. */
   public void simIterate() {
     // If MapleSim is configured, update it.
     //    if (m_config.getMapleDriveSim().isPresent())
@@ -667,7 +700,7 @@ public class SwerveDrive {
     //    }
     return Arrays.stream(m_modules)
         .map(SwerveModule::getPosition)
-        .toArray(SwerveModulePosition[] ::new);
+        .toArray(SwerveModulePosition[]::new);
   }
 
   /**
@@ -749,6 +782,7 @@ public class SwerveDrive {
 
   /**
    * Get all {@link SwerveModule}s for this {@link SwerveDrive}.
+   *
    * @return Array of {@link SwerveModule}s.
    */
   public SwerveModule[] getModules() {

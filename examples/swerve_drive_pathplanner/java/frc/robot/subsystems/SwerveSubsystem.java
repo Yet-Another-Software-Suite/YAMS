@@ -222,7 +222,11 @@ public class SwerveSubsystem extends SubsystemBase
         drive::getRobotRelativeSpeed,
         // ChassisVelocities supplier. MUST BE ROBOT RELATIVE
         (speedsRobotRelative, moduleFeedForwards) -> {
-          drive.setRobotRelativeChassisSpeeds(speedsRobotRelative);
+          // moduleFeedForwards carries the set-point generator's per-wheel force (FL, FR, BL, BR
+          // order, matching module order), converted internally by each drive motor's
+          // SmartMotorControllerConfig.convertToVoltage(...)/convertToCurrent(...) using its
+          // configured gearing and wheel radius.
+          drive.setRobotRelativeChassisSpeeds(speedsRobotRelative, moduleFeedForwards.linearForces());
         },
         // Method that will drive the robot given ROBOT RELATIVE ChassisVelocities. Also optionally outputs individual module feedforwards
         new PPHolonomicDriveController(

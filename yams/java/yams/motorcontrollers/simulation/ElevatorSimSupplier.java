@@ -13,11 +13,13 @@ import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
+import org.wpilib.math.filter.LinearFilter;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularAcceleration;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
+import org.wpilib.units.measure.Time;
 import org.wpilib.units.measure.Voltage;
 import org.wpilib.simulation.ElevatorSim;
 import org.wpilib.simulation.RoboRioSim;
@@ -33,15 +35,13 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
  * ElevatorSim Supplier — simulates an elevator mechanism using WPILib's
  * {@link org.wpilib.simulation.ElevatorSim}.
  *
- * <p>
- * This supplier steps WPILib's {@code ElevatorSim} physics model each control loop and exposes
- * the resulting height, linear velocity, current draw, and voltage through the
- * {@link yams.motorcontrollers.SimSupplier} interface. Because {@code ElevatorSim} operates in
- * linear units (meters), positions and velocities are converted to and from mechanism (angular)
- * units using the associated {@link yams.motorcontrollers.SmartMotorController}'s config.
- * </p>
+ * <p>This supplier steps WPILib's {@code ElevatorSim} physics model each control loop and exposes
+ * the resulting height, linear velocity, current draw, and voltage through the {@link yams.motorcontrollers.SimSupplier} interface. Because {@code ElevatorSim} operates in linear
+ * units (meters), positions and velocities are converted to and from mechanism (angular) units
+ * using the associated {@link yams.motorcontrollers.SmartMotorController}'s config.
  *
  * <h2>Example</h2>
+ *
  * <pre>{@code
  * // 1. Build the WPILib elevator physics model
  * ElevatorSim elevatorPhysics = new ElevatorSim(
@@ -75,13 +75,15 @@ public class ElevatorSimSupplier implements SimSupplier {
   private final Supplier<Double> pos;
   private final Supplier<Double> mps;
   private final DerivativeTimeFilter mpsps;
+  private final LinearFilter supplyCurrentFilter;
+  private final Time simPeriod;
   private boolean inputFed = false;
   private boolean simUpdated = false;
 
   /**
    * Construct the ElevatorSim supplier
    *
-   * @param simulation           Simulation instance
+   * @param simulation Simulation instance
    * @param smartMotorController SMC for the ElevatorSim.
    */
   public ElevatorSimSupplier(ElevatorSim simulation, SmartMotorController smartMotorController) {
@@ -93,19 +95,22 @@ public class ElevatorSimSupplier implements SimSupplier {
     motorDutyCycleSupplier = smartMotorController::getDutyCycle;
     pos = sim::getPosition;
     mps = sim::getVelocity;
-    mpsps = new DerivativeTimeFilter(
-        pos.get(), config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20)));
+    simPeriod = config.getSimulationPeriod();
+    mpsps = new DerivativeTimeFilter(pos.get(), simPeriod);
+    // Based off comment from https://github.com/wpilibsuite/allwpilib/issues/8691
+    supplyCurrentFilter =
+        LinearFilter.singlePoleIIR(Milliseconds.of(100).in(Seconds), simPeriod.in(Seconds));
   }
 
   @Override
   public void updateSimState() {
     if (!isInputFed()) {
       sim.setInputVoltage(motorDutyCycleSupplier.get() * RoboRioSim.getVInVoltage());
-      RoboRioSim.setVInVoltage(BatterySim.calculateVoltage(uuid, sim.getCurrentDraw()));
+      RoboRioSim.setVInVoltage(BatterySim.calculateVoltage(uuid, getSupplyCurrent()));
     }
     if (!simUpdated) {
       starveInput();
-      sim.update(config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Seconds));
+      sim.update(simPeriod.in(Seconds));
       feedUpdateSim();
     }
   }
@@ -153,8 +158,9 @@ public class ElevatorSimSupplier implements SimSupplier {
 
   @Override
   public Voltage getMechanismStatorVoltage() {
-    return Volts.of(motor.getVoltage(
-        motor.getTorque(sim.getCurrentDraw()), getMechanismVelocity().in(RadiansPerSecond)));
+    return Volts.of(
+        motor.getVoltage(
+            motor.getTorque(sim.getCurrentDraw()), getMechanismVelocity().in(RadiansPerSecond)));
   }
 
   @Override
@@ -194,8 +200,17 @@ public class ElevatorSimSupplier implements SimSupplier {
   }
 
   @Override
-  public Current getCurrentDraw() {
+  public Current getStatorCurrent() {
     return Amps.of(sim.getCurrentDraw());
+  }
+
+  @Override
+  public Current getSupplyCurrent() {
+    // For a BLDC driven by a switching converter, power is conserved across the duty-cycle
+    // transformation: supplyVoltage * supplyCurrent = statorVoltage * statorCurrent, and
+    // statorVoltage = dutyCycle * supplyVoltage, so supplyCurrent = dutyCycle * statorCurrent.
+    double dutyCycle = motorDutyCycleSupplier.get();
+    return Amps.of(supplyCurrentFilter.calculate(dutyCycle * sim.getCurrentDrawAmps()));
   }
 
   @Override

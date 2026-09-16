@@ -13,36 +13,33 @@ import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.Time;
 import java.util.List;
 
-public class InterpolatingTOFTreeMap
-{
-  public  Time                       latencyCompensation = Milliseconds.of(150);
-  private Distance                   m_flywheelCircumference;
+public class InterpolatingTOFTreeMap {
+  public Time latencyCompensation = Milliseconds.of(150);
+  private Distance m_flywheelCircumference;
   private List<LinearVelocityVector> m_measurements;
-  private InterpolatingDoubleTreeMap m_map               = new InterpolatingDoubleTreeMap();
+  private InterpolatingDoubleTreeMap m_map = new InterpolatingDoubleTreeMap();
 
-  public InterpolatingTOFTreeMap(Distance flywheelCircumference)
-  {
+  public InterpolatingTOFTreeMap(Distance flywheelCircumference) {
     m_flywheelCircumference = flywheelCircumference;
   }
 
-  public InterpolatingTOFTreeMap(List<LinearVelocityVector> measurements, Distance flywheelCircumference)
-  {
+  public InterpolatingTOFTreeMap(
+      List<LinearVelocityVector> measurements, Distance flywheelCircumference) {
     m_flywheelCircumference = flywheelCircumference;
     this.m_measurements = measurements;
-    for (var vector : measurements)
-    {
-      m_map.put(vector.target.getTranslation().getDistance(vector.position.getTranslation()),
-                vector.flywheelVelocity.in(RotationsPerSecond));
+    for (var vector : measurements) {
+      m_map.put(
+          vector.target.getTranslation().getDistance(vector.position.getTranslation()),
+          vector.flywheelVelocity.in(RotationsPerSecond));
     }
   }
 
-  public LinearVelocityVector get(LinearVelocityVector input)
-  {
+  public LinearVelocityVector get(LinearVelocityVector input) {
     var fieldOrientChassisSpeed = input.velocity;
     // 1. Latency compensation
     var estimatedPose = input.estimatePose(latencyCompensation);
     // 2. Target vector
-    var targetVector   = input.target.getTranslation().minus(estimatedPose);
+    var targetVector = input.target.getTranslation().minus(estimatedPose);
     var targetDistance = targetVector.getNorm();
     // Calculate the ideal exit velocity magnitude (based on distance)
     targetVector = targetVector.div(targetVector.getNorm()).times(m_map.get(targetDistance));

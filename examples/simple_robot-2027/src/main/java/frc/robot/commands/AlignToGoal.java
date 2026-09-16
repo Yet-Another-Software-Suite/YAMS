@@ -32,39 +32,39 @@ import frc.robot.subsystems.SwerveSubsystem;
 import java.util.List;
 import yams.mechanisms.swerve.utility.SwerveInputStream;
 
+public class AlignToGoal extends Command {
+  private final SwerveSubsystem swerveSubsystem;
+  private final ShooterSubsystem shooterSubsystem;
+  private final SwerveInputStream inputStream;
+  private final Pose2d targetPose;
 
-public class AlignToGoal extends Command
-{
-  private final SwerveSubsystem        swerveSubsystem;
-  private final ShooterSubsystem           shooterSubsystem;
-  private final SwerveInputStream      inputStream;
-  private final Pose2d                 targetPose;
   // Tuned Constants
   /**
    * Time in seconds between when the robot is told to move and when the shooter actually shoots.
    */
-  private final double                     latency             = 0.15;
-  /**
-   * Maps Distance to RPM
-   */
-  private final InterpolatingDoubleTreeMap shooterTable        = new InterpolatingDoubleTreeMap();
-  private final Angle                      setpointTolerance   = Degrees.of(1);
-  private final AngularVelocity            maxProfiledVelocity = RotationsPerSecond.of(3);
-  private final AngularAcceleration    maxProfiledAcceleration = RotationsPerSecondPerSecond.of(3);
-  private final ProfiledPIDController  pidController           = new ProfiledPIDController(1,
-                                                                                           0,
-                                                                                           0,
-                                                                                           new Constraints(
-                                                                                               maxProfiledVelocity.in(
-                                                                                                   RadiansPerSecond),
-                                                                                               maxProfiledAcceleration.in(
-                                                                                                   RadiansPerSecondPerSecond)));
-  private final SimpleMotorFeedforward feedforward             = new SimpleMotorFeedforward(0, 0, 0);
+  private final double latency = 0.15;
 
+  /** Maps Distance to RPM */
+  private final InterpolatingDoubleTreeMap shooterTable = new InterpolatingDoubleTreeMap();
 
-  public AlignToGoal(SwerveSubsystem swerveSubsystem, ShooterSubsystem shooter, SwerveInputStream inputStream,
-                     Pose2d targetPose)
-  {
+  private final Angle setpointTolerance = Degrees.of(1);
+  private final AngularVelocity maxProfiledVelocity = RotationsPerSecond.of(3);
+  private final AngularAcceleration maxProfiledAcceleration = RotationsPerSecondPerSecond.of(3);
+  private final ProfiledPIDController pidController =
+      new ProfiledPIDController(
+          1,
+          0,
+          0,
+          new Constraints(
+              maxProfiledVelocity.in(RadiansPerSecond),
+              maxProfiledAcceleration.in(RadiansPerSecondPerSecond)));
+  private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0, 0, 0);
+
+  public AlignToGoal(
+      SwerveSubsystem swerveSubsystem,
+      ShooterSubsystem shooter,
+      SwerveInputStream inputStream,
+      Pose2d targetPose) {
     this.swerveSubsystem = swerveSubsystem;
     this.shooterSubsystem = shooter;
     this.inputStream = inputStream;
@@ -74,11 +74,13 @@ public class AlignToGoal extends Command
     // addRequirements() method (which takes a vararg of Subsystem)
 
     // Test Results
-    for (var entry : List.of(Pair.of(Meters.of(1), RPM.of((1000))),
-                             Pair.of(Meters.of(2), RPM.of(2000)),
-                             Pair.of(Meters.of(3), RPM.of(3000)))
-    )
-    {shooterTable.put(entry.getFirst().in(Meters), entry.getSecond().in(RPM));}
+    for (var entry :
+        List.of(
+            Pair.of(Meters.of(1), RPM.of((1000))),
+            Pair.of(Meters.of(2), RPM.of(2000)),
+            Pair.of(Meters.of(3), RPM.of(3000)))) {
+      shooterTable.put(entry.getFirst().in(Meters), entry.getSecond().in(RPM));
+    }
 
     addRequirements(this.swerveSubsystem, this.shooterSubsystem);
   }
@@ -91,8 +93,7 @@ public class AlignToGoal extends Command
   }
 
   @Override
-  public void execute()
-  {
+  public void execute() {
     // Please look here for the original authors work!
     // https://blog.eeshwark.com/robotblog/shooting-on-the-fly
     // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -107,8 +108,8 @@ public class AlignToGoal extends Command
 
     // 2. GET TARGET VECTOR
     Translation2d goalLocation = targetPose.getTranslation();
-    Translation2d targetVec    = goalLocation.minus(futurePos);
-    double        dist         = targetVec.getNorm();
+    Translation2d targetVec = goalLocation.minus(futurePos);
+    double dist = targetVec.getNorm();
 
     // 3. CALCULATE IDEAL SHOT (Stationary)
     // Note: This returns HORIZONTAL velocity component
@@ -119,12 +120,14 @@ public class AlignToGoal extends Command
     Translation2d shotVec     = targetVec.div(dist).times(idealHorizontalSpeed).minus(robotVelVec);
 
     // 5. CONVERT TO CONTROLS
-    Angle          turretAngle        = Degrees.of(shotVec.getAngle().getDegrees());
+    Angle turretAngle = Degrees.of(shotVec.getAngle().getDegrees());
     LinearVelocity newHorizontalSpeed = MetersPerSecond.of(shotVec.getNorm());
 
     // 7. SET OUTPUTS
-    var output = pidController.calculate(swerveSubsystem.getPose().getRotation().getRadians(),
-                                         new State(turretAngle.in(Radians), 0));
+    var output =
+        pidController.calculate(
+            swerveSubsystem.getPose().getRotation().getRadians(),
+            new State(turretAngle.in(Radians), 0));
     var feedforwardOutput = feedforward.calculate(pidController.getSetpoint().velocity);
     var originalSpeed     = this.inputStream.get();
     originalSpeed.omega = output + feedforwardOutput;
@@ -133,14 +136,11 @@ public class AlignToGoal extends Command
   }
 
   @Override
-  public boolean isFinished()
-  {
+  public boolean isFinished() {
     // TODO: Make this return true when this Command no longer needs to run execute()
     return false;
   }
 
   @Override
-  public void end(boolean interrupted)
-  {
-  }
+  public void end(boolean interrupted) {}
 }

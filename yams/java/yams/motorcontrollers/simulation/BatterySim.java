@@ -21,22 +21,19 @@ import java.util.UUID;
  * used currents on the robot.
  */
 public class BatterySim {
-  /**
-   * Hashmap holding all currents used by the robot.
-   */
+  /** Hashmap holding all currents used by the robot. */
   private static HashMap<UUID, Double> currents = new HashMap<>();
-  /**
-   * Battery voltage.
-   */
+
+  /** Battery voltage. */
   private static Voltage batteryVoltage = Volts.of(12);
-  /**
-   * Battery resistance.
-   */
+
+  /** Battery resistance. */
   private static Resistance batteryResistance = MilliOhms.of(20);
+
   /**
    * Open circuit voltage of the battery as a function of state of charge (0 to 1), based on a
-   * typical FRC sealed lead-acid battery discharge curve. Voltage stays relatively flat for most
-   * of the discharge before sagging quickly near depletion.
+   * typical FRC sealed lead-acid battery discharge curve. Voltage stays relatively flat for most of
+   * the discharge before sagging quickly near depletion.
    */
   private static InterpolatingDoubleTreeMap SOC_TO_VOLTAGE = new InterpolatingDoubleTreeMap();
 
@@ -53,17 +50,38 @@ public class BatterySim {
   }
 
   /**
-   * Whether discharge simulation is enabled.
+   * Fraction of the nominal (20-hour rate) amp-hour capacity a sealed lead-acid battery actually
+   * delivers as a function of discharge current, keyed by current in {@link
+   * edu.wpi.first.units.Units#Amps Amps}. Lead-acid batteries are far less coulombically efficient
+   * than lithium chemistries at high discharge rates (the Peukert effect), so a battery rated for
+   * 18 Ah at a 0.9 A discharge might only deliver ~11 Ah at a sustained 54 A draw.
+   *
+   * <p>Defaults are averaged from Bill Peters/PDP (BFG) discharge testing across five FRC battery
+   * manufacturers, see <a
+   * href="https://www.chiefdelphi.com/t/detailed-frc-battery-comparison-for-2026/508077">Detailed
+   * FRC Battery Comparison for 2026</a>.
    */
+  private static InterpolatingDoubleTreeMap CURRENT_TO_CAPACITY_FRACTION =
+      new InterpolatingDoubleTreeMap();
+
+  static {
+    CURRENT_TO_CAPACITY_FRACTION.put(0.9, 1.000);
+    CURRENT_TO_CAPACITY_FRACTION.put(18.0, 0.758);
+    CURRENT_TO_CAPACITY_FRACTION.put(27.0, 0.718);
+    CURRENT_TO_CAPACITY_FRACTION.put(36.0, 0.679);
+    CURRENT_TO_CAPACITY_FRACTION.put(45.0, 0.639);
+    CURRENT_TO_CAPACITY_FRACTION.put(54.0, 0.599);
+  }
+
+  /** Whether discharge simulation is enabled. */
   private static boolean dischargeEnabled = false;
-  /**
-   * Capacity of the battery in amp-hours used for discharge simulation.
-   */
+
+  /** Capacity of the battery in amp-hours used for discharge simulation. */
   private static double batteryCapacityAmpHours = 18.0;
-  /**
-   * Amount of charge consumed from the battery so far, in amp-hours.
-   */
+
+  /** Amount of charge consumed from the battery so far, in amp-hours. */
   private static double ampHoursUsed = 0.0;
+
   /**
    * Timestamp of the last discharge integration step, in seconds. {@link Double#NaN} indicates no
    * previous step has been taken yet.
@@ -74,14 +92,13 @@ public class BatterySim {
    * Replace the default state-of-charge &rarr; open circuit voltage interpolation table used when
    * discharge simulation is enabled with {@link #enableDischarge(double, Voltage, Resistance)}.
    *
-   * <p>
-   * Not every battery discharges like YAMS's built-in sealed lead-acid curve. Reach for this
+   * <p>Not every battery discharges like YAMS's built-in sealed lead-acid curve. Reach for this
    * method when you want to model something different, for example:
-   * </p>
+   *
    * <ul>
-   *   <li>A well-used competition battery that sags earlier and harder than a fresh one.</li>
+   *   <li>A well-used competition battery that sags earlier and harder than a fresh one.
    *   <li>Matching a curve you measured from an actual battery on a load tester, for the most
-   *       accurate brownout predictions possible.</li>
+   *       accurate brownout predictions possible.
    * </ul>
    *
    * <pre>{@code
@@ -102,13 +119,28 @@ public class BatterySim {
    * BatterySim.enableDischarge(15.0, Volts.of(12.6), Milliohms.of(28));
    * }</pre>
    *
-   * @param socToVoltage Interpolation table mapping state of charge {@code [0, 1]} to open
-   *                     circuit voltage. Call this before {@link #enableDischarge(double,
-   *                     Voltage, Resistance)} so discharge simulation uses the new curve from the
-   *                     start.
+   * @param socToVoltage Interpolation table mapping state of charge {@code [0, 1]} to open circuit
+   *     voltage. Call this before {@link #enableDischarge(double, Voltage, Resistance)} so
+   *     discharge simulation uses the new curve from the start.
    */
   public static void replaceSOCInterpolation(InterpolatingDoubleTreeMap socToVoltage) {
     BatterySim.SOC_TO_VOLTAGE = socToVoltage;
+  }
+
+  /**
+   * Replace the default discharge current &rarr; capacity fraction interpolation table used to
+   * derate the battery's usable amp-hour capacity at high discharge rates (the Peukert effect).
+   *
+   * <p>Reach for this if you have measured discharge-rate-vs-capacity data for your specific
+   * battery, for example from a load tester, rather than the averaged multi-manufacturer defaults.
+   *
+   * @param currentToCapacityFraction Interpolation table mapping discharge current in Amps to the
+   *     fraction (0 to 1) of the nominal amp-hour capacity delivered at that current. Call this
+   *     before {@link #enableDischarge(double, Voltage, Resistance)} so discharge simulation uses
+   *     the new curve from the start.
+   */
+  public static void replaceCapacityDerating(InterpolatingDoubleTreeMap currentToCapacityFraction) {
+    BatterySim.CURRENT_TO_CAPACITY_FRACTION = currentToCapacityFraction;
   }
 
   /**
@@ -116,10 +148,10 @@ public class BatterySim {
    * its state of charge will drop, reducing the open circuit voltage and increasing the internal
    * resistance to more realistically model a depleted battery.
    *
-   * @param batteryCapacityAmpHours Capacity of the battery in amp-hours (Ah). A typical FRC
-   *                                battery is around 18 Ah.
-   * @param nomVoltage              Nominal (fully charged) open circuit voltage of the battery.
-   * @param nomResistance           Nominal internal resistance of the battery.
+   * @param batteryCapacityAmpHours Capacity of the battery in amp-hours (Ah). A typical FRC battery
+   *     is around 18 Ah.
+   * @param nomVoltage Nominal (fully charged) open circuit voltage of the battery.
+   * @param nomResistance Nominal internal resistance of the battery.
    */
   public static void enableDischarge(
       double batteryCapacityAmpHours, Voltage nomVoltage, Resistance nomResistance) {
@@ -137,12 +169,21 @@ public class BatterySim {
     dischargeEnabled = false;
   }
 
-  /**
-   * Reset the simulated battery back to a full charge.
-   */
+  /** Reset the simulated battery back to a full charge. */
   public static void resetDischarge() {
     ampHoursUsed = 0.0;
     lastTimestampSeconds = Double.NaN;
+  }
+
+  /**
+   * Stop counting the given simulation's current draw towards the shared battery load, e.g. once
+   * its {@link yams.motorcontrollers.SmartMotorController} has been closed. Without this, a closed
+   * simulation's last-known current draw would linger in {@link #currents} indefinitely.
+   *
+   * @param id {@link UUID} of the simulation to remove.
+   */
+  public static void removeCurrent(UUID id) {
+    currents.remove(id);
   }
 
   /**
@@ -156,17 +197,20 @@ public class BatterySim {
 
   /**
    * Integrate the total current draw of the robot over the elapsed time since the last call to
-   * track amp-hours consumed from the battery.
+   * track amp-hours consumed from the battery, derated by {@link #CURRENT_TO_CAPACITY_FRACTION} so
+   * that sustained high currents consume the nominal capacity faster than the raw amp-hours drawn
+   * would suggest (the Peukert effect).
    *
-   * @param totalCurrentAmps Total current drawn by the robot in {@link
-   *                         org.wpilib.units.Units#Amps Amps}.
+   * @param totalCurrentAmps Total current drawn by the robot in {@link org.wpilib.units.Units#Amps
+   *     Amps}.
    */
   private static void updateDischarge(double totalCurrentAmps) {
     double now = Timer.getTimestamp();
     if (!Double.isNaN(lastTimestampSeconds)) {
       double dtHours = (now - lastTimestampSeconds) / 3600.0;
       if (dtHours > 0) {
-        ampHoursUsed += totalCurrentAmps * dtHours;
+        double capacityFraction = CURRENT_TO_CAPACITY_FRACTION.get(totalCurrentAmps);
+        ampHoursUsed += (totalCurrentAmps * dtHours) / capacityFraction;
         ampHoursUsed = Math.clamp(ampHoursUsed, 0.0, batteryCapacityAmpHours);
       }
     }
@@ -175,6 +219,7 @@ public class BatterySim {
 
   /**
    * Calculate the voltage based on the currents used by the robot.
+   *
    * @param id {@link UUID} of the simulation to calculate the voltage for.
    * @param current {@link org.wpilib.units.Units#Amps Amps} used by the robot.
    * @return Voltage of the robot.
@@ -204,6 +249,7 @@ public class BatterySim {
 
   /**
    * Calculate the voltage based on the currents used by the robot.
+   *
    * @param id {@link UUID} of the simulation to calculate the voltage for.
    * @param current {@link org.wpilib.units.Units#Amps Amps} used by the robot.
    * @return Voltage of the robot.

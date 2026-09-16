@@ -152,15 +152,15 @@ class SmartMotorControllerTelemetryConfig {
    */
   std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>& GetDoubleFields(
       motorcontrollers::SmartMotorController& smc);
-  std::unordered_map<BooleanTelemetryField, BooleanTelemetry>& GetBoolFields(
-      motorcontrollers::SmartMotorController& smc);
+  std::unordered_map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>>&
+  GetBoolFields(motorcontrollers::SmartMotorController& smc);
 
  private:
   std::optional<std::string> m_dataLogName;
   bool m_nt4Telemetry{true};
 
   std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> m_doubleFields;
-  std::unordered_map<BooleanTelemetryField, BooleanTelemetry> m_boolFields;
+  std::unordered_map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> m_boolFields;
 };
 
 }  // namespace yams::telemetry

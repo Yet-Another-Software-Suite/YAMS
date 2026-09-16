@@ -8,21 +8,24 @@ import java.util.Optional;
 /**
  * Mechanism gearing for conversions from the motor output to the mechanism output.
  *
- * <p>{@link MechanismGearing} combines a {@link GearBox} (and an optional {@link Sprocket})
- * into a single object that describes the complete power-transmission path between the motor
- * and the mechanism. It is the primary object passed to motor-controller configuration helpers
- * (such as {@code SmartMotorControllerConfig}) so that encoder readings can be automatically
- * scaled to real-world mechanism positions or velocities.</p>
+ * <p>{@link MechanismGearing} combines a {@link GearBox} (and an optional {@link Sprocket}) into a
+ * single object that describes the complete power-transmission path between the motor and the
+ * mechanism. It is the primary object passed to motor-controller configuration helpers (such as
+ * {@code SmartMotorControllerConfig}) so that encoder readings can be automatically scaled to
+ * real-world mechanism positions or velocities.
  *
- * <p>Constructors available:</p>
+ * <p>Constructors available:
+ *
  * <ul>
- *   <li><b>{@code new MechanismGearing(double)}</b> — single overall reduction ratio</li>
- *   <li><b>{@code new MechanismGearing(double...)}</b> — one ratio per gearbox stage</li>
- *   <li><b>{@code new MechanismGearing(GearBox)}</b> — pre-built {@link GearBox}</li>
- *   <li><b>{@code new MechanismGearing(GearBox, Sprocket)}</b> — gearbox followed by a chain/belt stage</li>
+ *   <li><b>{@code new MechanismGearing(double)}</b> — single overall reduction ratio
+ *   <li><b>{@code new MechanismGearing(double...)}</b> — one ratio per gearbox stage
+ *   <li><b>{@code new MechanismGearing(GearBox)}</b> — pre-built {@link GearBox}
+ *   <li><b>{@code new MechanismGearing(GearBox, Sprocket)}</b> — gearbox followed by a chain/belt
+ *       stage
  * </ul>
  *
  * <h2>Example</h2>
+ *
  * <pre>{@code
  * // Simple 10:1 gearbox attached directly to the mechanism
  * MechanismGearing simple = new MechanismGearing(10.0);
@@ -40,59 +43,53 @@ import java.util.Optional;
  * double mechToRotor = combined.getMechanismToRotorRatio(); // mechanism rotations per motor rotation
  * }</pre>
  */
-public class MechanismGearing
-{
-  /**
-   * 1:1 Mechanism Gearing.
-   */
+public class MechanismGearing {
+  /** 1:1 Mechanism Gearing. */
   public static final MechanismGearing kOne = new MechanismGearing(1.0);
-  /**
-   * Mechanism gearbox attached to the motor.
-   */
-  private final GearBox            gearBox;
-  /**
-   * Mechanism sprockets attached to the gearbox.
-   */
-  private       Optional<Sprocket> sprockets = Optional.empty();
+
+  /** Mechanism gearbox attached to the motor. */
+  private final GearBox gearBox;
+
+  /** Mechanism sprockets attached to the gearbox. */
+  private Optional<Sprocket> sprockets = Optional.empty();
 
   /**
    * Construct a {@link MechanismGearing} with a reduction ratio.
    *
-   * @param reductionRatio Reduction ratio. For example, a reduction of "3:1" is 3.0; a reduction of "1:2" is 0.5.
+   * @param reductionRatio Reduction ratio. For example, a reduction of "3:1" is 3.0; a reduction of
+   *     "1:2" is 0.5.
    */
-  public MechanismGearing(double reductionRatio)
-  {
+  public MechanismGearing(double reductionRatio) {
     gearBox = GearBox.fromReductionStages(reductionRatio);
   }
 
   /**
    * Construct a {@link MechanismGearing} with a reduction ratios.
    *
-   * @param reductionRatios Reduction ratio. For example, a reduction of "3:1" is 3.0; a reduction of "1:2" is 0.5.
+   * @param reductionRatios Reduction ratio. For example, a reduction of "3:1" is 3.0; a reduction
+   *     of "1:2" is 0.5.
    */
-  public MechanismGearing(double... reductionRatios)
-  {
+  public MechanismGearing(double... reductionRatios) {
     gearBox = GearBox.fromReductionStages(reductionRatios);
   }
 
   /**
-   * Initialize the {@link MechanismGearing} with only a {@link GearBox} attached to the mechanism motor.
+   * Initialize the {@link MechanismGearing} with only a {@link GearBox} attached to the mechanism
+   * motor.
    *
    * @param gearBox {@link GearBox} of the Mechanism.
    */
-  public MechanismGearing(GearBox gearBox)
-  {
+  public MechanismGearing(GearBox gearBox) {
     this.gearBox = gearBox;
   }
 
   /**
    * Initialize the {@link MechanismGearing} with a {@link GearBox} and {@link Sprocket}
    *
-   * @param gearBox   {@link GearBox} attached to the motor.
+   * @param gearBox {@link GearBox} attached to the motor.
    * @param sprockets {@link Sprocket} attached to the gearbox.
    */
-  public MechanismGearing(GearBox gearBox, Sprocket sprockets)
-  {
+  public MechanismGearing(GearBox gearBox, Sprocket sprockets) {
     this.gearBox = gearBox;
     this.sprockets = Optional.of(sprockets);
   }
@@ -102,11 +99,9 @@ public class MechanismGearing
    *
    * @return OUT:IN or OUT/IN ratio to use for sensor to mechanism calculations.
    */
-  public double getRotorToMechanismRatio()
-  {
+  public double getRotorToMechanismRatio() {
     double ratio = gearBox.getInputToOutputConversionFactor();
-    if (sprockets.isPresent())
-    {
+    if (sprockets.isPresent()) {
       ratio *= sprockets.get().getInputToOutputConversionFactor();
     }
     return ratio;
@@ -117,11 +112,9 @@ public class MechanismGearing
    *
    * @return IN:OUT or IN/OUT to use for mechanism to sensor calculations.
    */
-  public double getMechanismToRotorRatio()
-  {
+  public double getMechanismToRotorRatio() {
     double ratio = gearBox.getOutputToInputConversionFactor();
-    if (sprockets.isPresent())
-    {
+    if (sprockets.isPresent()) {
       ratio *= sprockets.get().getOutputToInputConversionFactor();
     }
     return ratio;
@@ -133,8 +126,7 @@ public class MechanismGearing
    * @param i Numerator.
    * @return {@link MechanismGearing}
    */
-  public MechanismGearing div(double i)
-  {
+  public MechanismGearing div(double i) {
     gearBox.div(i);
     return this;
   }

@@ -30,15 +30,27 @@ nativeUtils.wpi.addWarningsAsErrors()
 nativeUtils.setSinglePrintPerPlatform()
 
 model {
-    // Uncomment this, and remove lines below it to enable builds for just roborio
-    // components {
-    //     all {
-    //         targetPlatform nativeUtils.wpi.platforms.systemcore
-    //     }
-    // }
     components {
         all {
-            nativeUtils.useAllPlatforms(it)
+            if (project.hasProperty('onlylinuxathena')) {
+                it.targetPlatform nativeUtils.wpi.platforms.roborio
+            } else if (project.hasProperty('onlylinuxarm32')) {
+                it.targetPlatform nativeUtils.wpi.platforms.linuxarm32
+            } else if (project.hasProperty('onlylinuxarm64')) {
+                it.targetPlatform nativeUtils.wpi.platforms.linuxarm64
+            } else if (project.hasProperty('onlywindowsarm64')) {
+                it.targetPlatform nativeUtils.wpi.platforms.windowsarm64
+            } else if (project.hasProperty('onlylinuxsystemcore')) {
+                it.targetPlatform nativeUtils.wpi.platforms.systemcore
+            } else if (project.hasProperty('onlywindows64')) {
+                it.targetPlatform nativeUtils.wpi.platforms.windowsx64
+            } else if (project.hasProperty('onlyosxuniversal')) {
+                it.targetPlatform nativeUtils.wpi.platforms.osxuniversal
+            } else if (project.hasProperty('onlylinuxx64')) {
+                it.targetPlatform nativeUtils.wpi.platforms.linuxx64
+            } else {
+                nativeUtils.useAllPlatforms(it)
+            }
         }
     }
     binaries {
@@ -92,7 +104,7 @@ ext.createComponentZipTasks = { components, names, base, type, project, func ->
         if (it in NativeLibrarySpec && stringNames.contains(it.name)) {
             it.binaries.each {
                 if (!it.buildable) return
-                def target = nativeUtils.getPublishClassifier(it)
+                    def target = nativeUtils.getPublishClassifier(it)
                 if (configMap.containsKey(target)) {
                     configMap.get(target).add(it)
                 } else {
@@ -142,7 +154,7 @@ ext.createAllCombined = { list, name, base, type, project ->
 
         list.each {
             if (it.name.endsWith('debug')) return
-            from project.zipTree(it.archiveFile)
+                from project.zipTree(it.archiveFile)
             dependsOn it
         }
     }
@@ -154,7 +166,6 @@ ext.createAllCombined = { list, name, base, type, project ->
     }
 
     return task
-
 }
 
 ext.includeStandardZipFormat = { task, value ->
@@ -162,15 +173,11 @@ ext.includeStandardZipFormat = { task, value ->
         if (binary.buildable) {
             if (binary instanceof SharedLibraryBinarySpec) {
                 task.dependsOn binary.tasks.link
-                task.from(new File(binary.sharedLibraryFile.absolutePath + ".debug")) {
-                    into nativeUtils.getPlatformPath(binary) + '/shared'
-                }
-                def sharedPath = binary.sharedLibraryFile.absolutePath
-                sharedPath = sharedPath.substring(0, sharedPath.length() - 4)
-
-                task.from(new File(sharedPath + '.pdb')) {
-                    into nativeUtils.getPlatformPath(binary) + '/shared'
-                }
+                // Deliberately not publishing the standalone debug-info file (.pdb on Windows,
+                // .so.debug on Linux) for debug binaries: it's mostly Eigen/wpimath template
+                // debug info (hundreds of MB per platform) and consumers only need it to step
+                // into YAMS's own source, not their robot code. The debug .dll/.so itself is
+                // still published so debug-mode dependency resolution/linking still works.
                 task.from(binary.sharedLibraryFile) {
                     into nativeUtils.getPlatformPath(binary) + '/shared'
                 }
