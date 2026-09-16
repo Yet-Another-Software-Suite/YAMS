@@ -88,26 +88,26 @@ loadScripts(document, 'script');</script>
  <p>At runtime the <a href="#getValue()"><code>getValue()</code></a> method applies the following priority order:
 
  <ol>
-   <li><b>Real robot</b> — always returns the live hardware supplier value immediately.
-   <li><b>Trigger override</b> — if any registered <a href="#addSimTrigger(edu.wpi.first.hal.HALValue,java.util.function.BooleanSupplier)"><code>trigger</code></a> condition is
-       currently <code>true</code>, the associated override value is returned and written to Glass.
-   <li><b>Glass value</b> — if a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/hal/SimValue.html" title="class or interface in edu.wpi.first.hal" class="external-link"><code>SimValue</code></a> exists and no trigger fired,
-       returns whatever Glass has set (including the default).
-   <li><b>Supplier fallback</b> — returns the supplier value if no Glass value is available.
+ <li><b>Real robot</b> — always returns the live hardware supplier value immediately.
+ <li><b>Trigger override</b> — if any registered <a href="#addSimTrigger(edu.wpi.first.hal.HALValue,java.util.function.BooleanSupplier)"><code>trigger</code></a> condition is
+ currently <code>true</code>, the associated override value is returned and written to Glass.
+ <li><b>Glass value</b> — if a <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/hal/SimValue.html" title="class or interface in edu.wpi.first.hal" class="external-link"><code>SimValue</code></a> exists and no trigger fired,
+ returns whatever Glass has set (including the default).
+ <li><b>Supplier fallback</b> — returns the supplier value if no Glass value is available.
  </ol>
 
  <h2>Key fields</h2>
 
  <ul>
-   <li><code>m_name</code> — the human-readable field name used as the Glass widget label.
-   <li><code>m_supplier</code> — provides the real sensor reading on a physical robot.
-   <li><code>m_type</code> (<a href="SensorData.HALValueType.html" title="enum class in yams.motorcontrollers.simulation"><code>SensorData.HALValueType</code></a>) — guards typed accessors (<a href="#getAsDouble()"><code>getAsDouble()</code></a>,
-       <a href="#getAsInt()"><code>getAsInt()</code></a>, etc.) against incorrect casts.
-   <li><code>m_defaultValue</code> — the initial value published to Glass at startup.
-   <li><code>m_triggerValues</code> — ordered list of <code>(condition, value)</code> pairs checked before
-       the Glass value each loop.
-   <li><code>m_glassValue</code> — the live <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/hal/SimValue.html" title="class or interface in edu.wpi.first.hal" class="external-link"><code>SimValue</code></a> registered with the
-       parent <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/hal/SimDevice.html" title="class or interface in edu.wpi.first.hal" class="external-link"><code>SimDevice</code></a>; empty on a real robot.
+ <li><code>m_name</code> — the human-readable field name used as the Glass widget label.
+ <li><code>m_supplier</code> — provides the real sensor reading on a physical robot.
+ <li><code>m_type</code> (<a href="SensorData.HALValueType.html" title="enum class in yams.motorcontrollers.simulation"><code>SensorData.HALValueType</code></a>) — guards typed accessors (<a href="#getAsDouble()"><code>getAsDouble()</code></a>,
+ <a href="#getAsInt()"><code>getAsInt()</code></a>, etc.) against incorrect casts.
+ <li><code>m_defaultValue</code> — the initial value published to Glass at startup.
+ <li><code>m_triggerValues</code> — ordered list of <code>(condition, value)</code> pairs checked before
+ the Glass value each loop.
+ <li><code>m_glassValue</code> — the live <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/hal/SimValue.html" title="class or interface in edu.wpi.first.hal" class="external-link"><code>SimValue</code></a> registered with the
+ parent <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/hal/SimDevice.html" title="class or interface in edu.wpi.first.hal" class="external-link"><code>SimDevice</code></a>; empty on a real robot.
  </ul>
 
  <h2>Example</h2>
@@ -344,7 +344,7 @@ loadScripts(document, 'script');</script>
 <dt>Parameters:</dt>
 <dd><code>name</code> - Name of sensor.</dd>
 <dd><code>supplier</code> - <code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;<a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/hal/HALValue.html" title="class or interface in edu.wpi.first.hal" class="external-link">HALValue</a>&gt;</code> of sensor. Use <a href="#convert(java.util.function.DoubleSupplier)"><code>convert(java.util.function.DoubleSupplier)</code></a> to convert primitive
-     suppliers.</dd>
+                     suppliers.</dd>
 <dd><code>defaultValue</code> - Default value of sensor.</dd>
 <dd><code>type</code> - <a href="SensorData.HALValueType.html" title="enum class in yams.motorcontrollers.simulation"><code>SensorData.HALValueType</code></a> of sensor.</dd>
 </dl>
@@ -587,7 +587,7 @@ loadScripts(document, 'script');</script>
 <dd><code>val</code> - Integer value to set.</dd>
 <dt>Implementation Note:</dt>
 <dd>The value is not checked for validity, ensure that this is the right data type for
-     the field.</dd>
+           the field.</dd>
 </dl>
 </section>
 </li>
@@ -601,7 +601,7 @@ loadScripts(document, 'script');</script>
 <dd><code>val</code> - Double value to set.</dd>
 <dt>Implementation Note:</dt>
 <dd>The value is not checked for validity, ensure that this is the right data type for
-     the field.</dd>
+           the field.</dd>
 </dl>
 </section>
 </li>
@@ -615,7 +615,7 @@ loadScripts(document, 'script');</script>
 <dd><code>val</code> - Long value to set.</dd>
 <dt>Implementation Note:</dt>
 <dd>The value is not checked for validity, ensure that this is the right data type for
-     the field.</dd>
+           the field.</dd>
 </dl>
 </section>
 </li>
@@ -629,7 +629,7 @@ loadScripts(document, 'script');</script>
 <dd><code>val</code> - Boolean value to set.</dd>
 <dt>Implementation Note:</dt>
 <dd>The value is not checked for validity, ensure that this is the right data type for
-     the field.</dd>
+           the field.</dd>
 </dl>
 </section>
 </li>

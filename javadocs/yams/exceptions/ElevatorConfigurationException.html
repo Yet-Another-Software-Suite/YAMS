@@ -89,10 +89,10 @@ loadScripts(document, 'script');</script>
  <p>Common triggers include:
 
  <ul>
-   <li>Carriage mass not set (<code>withMass(Mass)</code>) — required for simulation
-   <li>Hard limits (<code>withHardLimits(Distance, Distance)</code>) missing minimum or maximum height
-   <li>Starting height not configured (<code>withStartingHeight(Distance)</code>)
-   <li>No motor controller provided
+ <li>Carriage mass not set (<code>withMass(Mass)</code>) — required for simulation
+ <li>Hard limits (<code>withHardLimits(Distance, Distance)</code>) missing minimum or maximum height
+ <li>Starting height not configured (<code>withStartingHeight(Distance)</code>)
+ <li>No motor controller provided
  </ul>
 
  <p><b>Resolution:</b> Ensure <code>ElevatorConfig.withSmartMotorController(SmartMotorController)</code> is called, <code>ElevatorConfig.withHardLimits(Distance, Distance)</code> defines both the minimum and maximum travel

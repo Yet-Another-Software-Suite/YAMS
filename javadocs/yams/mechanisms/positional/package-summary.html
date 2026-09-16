@@ -72,15 +72,15 @@ loadScripts(document, 'script');</script>
  <h2>Available Mechanisms</h2>
 
  <ul>
-   <li><a href="Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a> — single-jointed arm rotating about a fixed pivot,
-       configured with <a href="../config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a>
-   <li><a href="Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> — linear-travel elevator stage, configured with
-       <a href="../config/ElevatorConfig.html" title="class in yams.mechanisms.config"><code>ElevatorConfig</code></a>
-   <li><a href="Pivot.html" title="class in yams.mechanisms.positional"><code>Pivot</code></a> — generic pivot that may rotate continuously or
-       within bounded limits, configured with <a href="../config/PivotConfig.html" title="class in yams.mechanisms.config"><code>PivotConfig</code></a>
-   <li><a href="DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a> — mechanism driven by two motors
+ <li><a href="Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a> — single-jointed arm rotating about a fixed pivot,
+ configured with <a href="../config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a>
+ <li><a href="Elevator.html" title="class in yams.mechanisms.positional"><code>Elevator</code></a> — linear-travel elevator stage, configured with
+ <a href="../config/ElevatorConfig.html" title="class in yams.mechanisms.config"><code>ElevatorConfig</code></a>
+ <li><a href="Pivot.html" title="class in yams.mechanisms.positional"><code>Pivot</code></a> — generic pivot that may rotate continuously or
+ within bounded limits, configured with <a href="../config/PivotConfig.html" title="class in yams.mechanisms.config"><code>PivotConfig</code></a>
+ <li><a href="DifferentialMechanism.html" title="class in yams.mechanisms.positional"><code>DifferentialMechanism</code></a> — mechanism driven by two motors
  in a differential arrangement (e.g. differential wrist), configured with <a href="../config/DifferentialMechanismConfig.html" title="class in yams.mechanisms.config"><code>DifferentialMechanismConfig</code></a>
-   <li><a href="DoubleJointedArm.html" title="class in yams.mechanisms.positional"><code>DoubleJointedArm</code></a> — two-segment arm whose second joint is
+ <li><a href="DoubleJointedArm.html" title="class in yams.mechanisms.positional"><code>DoubleJointedArm</code></a> — two-segment arm whose second joint is
  kinematically dependent on the first, using two underlying <a href="Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a> instances
  </ul>
 
@@ -105,15 +105,15 @@ loadScripts(document, 'script');</script>
  scheduling without manual polling in <code>periodic()</code>:
 
  <ul>
-   <li><code>isNear(setpoint, tolerance)</code> — fires while the mechanism is within <code>tolerance</code>
-       of <code>setpoint</code>
-   <li><code>max()</code> — fires while the mechanism is at or beyond its configured maximum limit
-   <li><code>min()</code> — fires while the mechanism is at or below its configured minimum limit
-   <li><code>between(lower, upper)</code> — fires while the mechanism position is within the specified
-       range
+ <li><code>isNear(setpoint, tolerance)</code> — fires while the mechanism is within <code>tolerance</code>
+ of <code>setpoint</code>
+ <li><code>max()</code> — fires while the mechanism is at or beyond its configured maximum limit
+ <li><code>min()</code> — fires while the mechanism is at or below its configured minimum limit
+ <li><code>between(lower, upper)</code> — fires while the mechanism position is within the specified
+ range
  <li><code>lte(position)</code> — fires while the mechanism position is less than or equal to <code>position</code>
-   <li><code>gte(position)</code> — fires while the mechanism position is greater than or equal to
-       <code>position</code>
+ <li><code>gte(position)</code> — fires while the mechanism position is greater than or equal to
+ <code>position</code>
  </ul>
 
  <pre><code>

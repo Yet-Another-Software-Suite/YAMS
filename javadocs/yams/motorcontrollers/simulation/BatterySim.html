@@ -201,9 +201,9 @@ loadScripts(document, 'script');</script>
  method when you want to model something different, for example:
 
  <ul>
-   <li>A well-used competition battery that sags earlier and harder than a fresh one.
-   <li>Matching a curve you measured from an actual battery on a load tester, for the most
-       accurate brownout predictions possible.
+ <li>A well-used competition battery that sags earlier and harder than a fresh one.
+ <li>Matching a curve you measured from an actual battery on a load tester, for the most
+ accurate brownout predictions possible.
  </ul>
 
  <pre><code>
@@ -226,8 +226,8 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>socToVoltage</code> - Interpolation table mapping state of charge <code>[0, 1]</code> to open circuit
-     voltage. Call this before <a href="#enableDischarge(double,edu.wpi.first.units.measure.Voltage,edu.wpi.first.units.measure.Resistance)"><code>enableDischarge(double, Voltage, Resistance)</code></a> so
-     discharge simulation uses the new curve from the start.</dd>
+                     voltage. Call this before <a href="#enableDischarge(double,edu.wpi.first.units.measure.Voltage,edu.wpi.first.units.measure.Resistance)"><code>enableDischarge(double, Voltage, Resistance)</code></a> so
+                     discharge simulation uses the new curve from the start.</dd>
 </dl>
 </section>
 </li>
@@ -243,9 +243,9 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>currentToCapacityFraction</code> - Interpolation table mapping discharge current in Amps to the
-     fraction (0 to 1) of the nominal amp-hour capacity delivered at that current. Call this
-     before <a href="#enableDischarge(double,edu.wpi.first.units.measure.Voltage,edu.wpi.first.units.measure.Resistance)"><code>enableDischarge(double, Voltage, Resistance)</code></a> so discharge simulation uses
-     the new curve from the start.</dd>
+                                  fraction (0 to 1) of the nominal amp-hour capacity delivered at that current. Call this
+                                  before <a href="#enableDischarge(double,edu.wpi.first.units.measure.Voltage,edu.wpi.first.units.measure.Resistance)"><code>enableDischarge(double, Voltage, Resistance)</code></a> so discharge simulation uses
+                                  the new curve from the start.</dd>
 </dl>
 </section>
 </li>
@@ -261,7 +261,7 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>batteryCapacityAmpHours</code> - Capacity of the battery in amp-hours (Ah). A typical FRC battery
-     is around 18 Ah.</dd>
+                                is around 18 Ah.</dd>
 <dd><code>nomVoltage</code> - Nominal (fully charged) open circuit voltage of the battery.</dd>
 <dd><code>nomResistance</code> - Nominal internal resistance of the battery.</dd>
 </dl>

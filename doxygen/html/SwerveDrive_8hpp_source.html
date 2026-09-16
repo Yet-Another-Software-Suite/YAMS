@@ -192,7 +192,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>            units::meters_per_second_t{translationDiff.Y().value() * translationScalar},</div>
 <div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>            units::radians_per_second_t{</div>
 <div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>                rotationPID.Calculate(currentPose.Rotation().Radians().value(),</div>
-<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>                                     targetPose.Rotation().Radians().value())}},</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>                                      targetPose.Rotation().Radians().value())}},</div>
 <div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>        frc::Rotation2d{units::radian_t{<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a008158e13d384390c15b8b2723464767">GetGyroAngle</a>()}});</div>
 <div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>  }</div>
 </div>
@@ -565,319 +565,338 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00675" name="l00675"></a><span class="lineno">  675</span>    m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()</div>
 <div class="line"><a id="l00676" name="l00676"></a><span class="lineno">  676</span>        .at(DoubleTelemetryField::TranslationD)</div>
 <div class="line"><a id="l00677" name="l00677"></a><span class="lineno">  677</span>        .SetDefaultValue(translationPID.GetD());</div>
-<div class="line"><a id="l00678" name="l00678"></a><span class="lineno">  678</span>    m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>().at(DoubleTelemetryField::RotationP).SetDefaultValue(rotationPID.GetP());</div>
-<div class="line"><a id="l00679" name="l00679"></a><span class="lineno">  679</span>    m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>().at(DoubleTelemetryField::RotationI).SetDefaultValue(rotationPID.GetI());</div>
-<div class="line"><a id="l00680" name="l00680"></a><span class="lineno">  680</span>    m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>().at(DoubleTelemetryField::RotationD).SetDefaultValue(rotationPID.GetD());</div>
-<div class="line"><a id="l00681" name="l00681"></a><span class="lineno">  681</span> </div>
-<div class="line"><a id="l00682" name="l00682"></a><span class="lineno">  682</span>    <span class="keyword">auto</span>&amp; modules = drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>();</div>
-<div class="line"><a id="l00683" name="l00683"></a><span class="lineno">  683</span>    <span class="keywordflow">if</span> (!modules.empty()) {</div>
-<div class="line"><a id="l00684" name="l00684"></a><span class="lineno">  684</span>      <span class="keyword">auto</span>* driveMotor = modules[0]-&gt;GetDriveMotorController();</div>
-<div class="line"><a id="l00685" name="l00685"></a><span class="lineno">  685</span>      <span class="keyword">auto</span> driveGains = driveMotor-&gt;GetConfig().GetSlotGains(driveMotor-&gt;GetClosedLoopControllerSlot());</div>
-<div class="line"><a id="l00686" name="l00686"></a><span class="lineno">  686</span>      m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>().at(DoubleTelemetryField::ModulesDriveP).SetDefaultValue(driveGains.kP);</div>
-<div class="line"><a id="l00687" name="l00687"></a><span class="lineno">  687</span>      m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>().at(DoubleTelemetryField::ModulesDriveI).SetDefaultValue(driveGains.kI);</div>
-<div class="line"><a id="l00688" name="l00688"></a><span class="lineno">  688</span>      m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>().at(DoubleTelemetryField::ModulesDriveD).SetDefaultValue(driveGains.kD);</div>
-<div class="line"><a id="l00689" name="l00689"></a><span class="lineno">  689</span> </div>
-<div class="line"><a id="l00690" name="l00690"></a><span class="lineno">  690</span>      <span class="keyword">auto</span>* azimuthMotor = modules[0]-&gt;GetAzimuthMotorController();</div>
-<div class="line"><a id="l00691" name="l00691"></a><span class="lineno">  691</span>      <span class="keyword">auto</span> azimuthGains =</div>
-<div class="line"><a id="l00692" name="l00692"></a><span class="lineno">  692</span>          azimuthMotor-&gt;GetConfig().GetSlotGains(azimuthMotor-&gt;GetClosedLoopControllerSlot());</div>
-<div class="line"><a id="l00693" name="l00693"></a><span class="lineno">  693</span>      m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>().at(DoubleTelemetryField::ModulesAzimuthP).SetDefaultValue(azimuthGains.kP);</div>
-<div class="line"><a id="l00694" name="l00694"></a><span class="lineno">  694</span>      m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>().at(DoubleTelemetryField::ModulesAzimuthI).SetDefaultValue(azimuthGains.kI);</div>
-<div class="line"><a id="l00695" name="l00695"></a><span class="lineno">  695</span>      m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>().at(DoubleTelemetryField::ModulesAzimuthD).SetDefaultValue(azimuthGains.kD);</div>
-<div class="line"><a id="l00696" name="l00696"></a><span class="lineno">  696</span> </div>
-<div class="line"><a id="l00697" name="l00697"></a><span class="lineno">  697</span>      <span class="keywordflow">if</span> (<span class="keyword">auto</span> driveFF = driveMotor-&gt;GetConfig().GetSimpleFeedforward(</div>
-<div class="line"><a id="l00698" name="l00698"></a><span class="lineno">  698</span>              driveMotor-&gt;GetClosedLoopControllerSlot())) {</div>
-<div class="line"><a id="l00699" name="l00699"></a><span class="lineno">  699</span>        m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()</div>
-<div class="line"><a id="l00700" name="l00700"></a><span class="lineno">  700</span>            .at(DoubleTelemetryField::ModulesDriveKs)</div>
-<div class="line"><a id="l00701" name="l00701"></a><span class="lineno">  701</span>            .SetDefaultValue(driveFF-&gt;GetKs().value());</div>
-<div class="line"><a id="l00702" name="l00702"></a><span class="lineno">  702</span>        m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()</div>
-<div class="line"><a id="l00703" name="l00703"></a><span class="lineno">  703</span>            .at(DoubleTelemetryField::ModulesDriveKv)</div>
-<div class="line"><a id="l00704" name="l00704"></a><span class="lineno">  704</span>            .SetDefaultValue(driveFF-&gt;GetKv().value());</div>
-<div class="line"><a id="l00705" name="l00705"></a><span class="lineno">  705</span>        m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()</div>
-<div class="line"><a id="l00706" name="l00706"></a><span class="lineno">  706</span>            .at(DoubleTelemetryField::ModulesDriveKa)</div>
-<div class="line"><a id="l00707" name="l00707"></a><span class="lineno">  707</span>            .SetDefaultValue(driveFF-&gt;GetKa().value());</div>
-<div class="line"><a id="l00708" name="l00708"></a><span class="lineno">  708</span>      }</div>
-<div class="line"><a id="l00709" name="l00709"></a><span class="lineno">  709</span>      <span class="keywordflow">if</span> (<span class="keyword">auto</span> azimuthFF = azimuthMotor-&gt;GetConfig().GetSimpleFeedforward(</div>
-<div class="line"><a id="l00710" name="l00710"></a><span class="lineno">  710</span>              azimuthMotor-&gt;GetClosedLoopControllerSlot())) {</div>
-<div class="line"><a id="l00711" name="l00711"></a><span class="lineno">  711</span>        m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()</div>
-<div class="line"><a id="l00712" name="l00712"></a><span class="lineno">  712</span>            .at(DoubleTelemetryField::ModulesAzimuthKs)</div>
-<div class="line"><a id="l00713" name="l00713"></a><span class="lineno">  713</span>            .SetDefaultValue(azimuthFF-&gt;GetKs().value());</div>
-<div class="line"><a id="l00714" name="l00714"></a><span class="lineno">  714</span>        m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()</div>
-<div class="line"><a id="l00715" name="l00715"></a><span class="lineno">  715</span>            .at(DoubleTelemetryField::ModulesAzimuthKv)</div>
-<div class="line"><a id="l00716" name="l00716"></a><span class="lineno">  716</span>            .SetDefaultValue(azimuthFF-&gt;GetKv().value());</div>
-<div class="line"><a id="l00717" name="l00717"></a><span class="lineno">  717</span>        m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()</div>
-<div class="line"><a id="l00718" name="l00718"></a><span class="lineno">  718</span>            .at(DoubleTelemetryField::ModulesAzimuthKa)</div>
-<div class="line"><a id="l00719" name="l00719"></a><span class="lineno">  719</span>            .SetDefaultValue(azimuthFF-&gt;GetKa().value());</div>
-<div class="line"><a id="l00720" name="l00720"></a><span class="lineno">  720</span>      }</div>
-<div class="line"><a id="l00721" name="l00721"></a><span class="lineno">  721</span>    }</div>
-<div class="line"><a id="l00722" name="l00722"></a><span class="lineno">  722</span>  }</div>
-<div class="line"><a id="l00723" name="l00723"></a><span class="lineno">  723</span> </div>
-<div class="line"><a id="l00724" name="l00724"></a><span class="lineno">  724</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; [field, dt] : m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()) {</div>
-<div class="line"><a id="l00725" name="l00725"></a><span class="lineno">  725</span>    <span class="keywordflow">if</span> (!dt.IsEnabled()) <span class="keywordflow">continue</span>;</div>
-<div class="line"><a id="l00726" name="l00726"></a><span class="lineno">  726</span>    <span class="keywordflow">if</span> (nt4Enabled) dt.SetupNetworkTables(m_dataTable, m_tuningTable);</div>
-<div class="line"><a id="l00727" name="l00727"></a><span class="lineno">  727</span>    <span class="keywordflow">if</span> (dataLogName) dt.SetupDataLog(*dataLogName);</div>
-<div class="line"><a id="l00728" name="l00728"></a><span class="lineno">  728</span>  }</div>
-<div class="line"><a id="l00729" name="l00729"></a><span class="lineno">  729</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; [field, bt] : m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a1c715572b5a251a4186d0cd62eb15a11">GetBoolFields</a>()) {</div>
-<div class="line"><a id="l00730" name="l00730"></a><span class="lineno">  730</span>    <span class="keywordflow">if</span> (!bt.IsEnabled()) <span class="keywordflow">continue</span>;</div>
-<div class="line"><a id="l00731" name="l00731"></a><span class="lineno">  731</span>    <span class="keywordflow">if</span> (nt4Enabled) bt.SetupNetworkTables(m_dataTable, m_tuningTable);</div>
-<div class="line"><a id="l00732" name="l00732"></a><span class="lineno">  732</span>    <span class="keywordflow">if</span> (dataLogName) bt.SetupDataLog(*dataLogName);</div>
-<div class="line"><a id="l00733" name="l00733"></a><span class="lineno">  733</span>  }</div>
-<div class="line"><a id="l00734" name="l00734"></a><span class="lineno">  734</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; [field, stt] : m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a34ad4ad70dc3560044f68e8df1677d3c">GetPoseFields</a>()) {</div>
-<div class="line"><a id="l00735" name="l00735"></a><span class="lineno">  735</span>    <span class="keywordflow">if</span> (!stt.IsEnabled()) <span class="keywordflow">continue</span>;</div>
-<div class="line"><a id="l00736" name="l00736"></a><span class="lineno">  736</span>    <span class="keywordflow">if</span> (nt4Enabled) stt.SetupNetworkTables(m_dataTable, m_tuningTable);</div>
-<div class="line"><a id="l00737" name="l00737"></a><span class="lineno">  737</span>    <span class="keywordflow">if</span> (dataLogName) stt.SetupDataLog(*dataLogName);</div>
-<div class="line"><a id="l00738" name="l00738"></a><span class="lineno">  738</span>  }</div>
-<div class="line"><a id="l00739" name="l00739"></a><span class="lineno">  739</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; [field, stt] : m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#ade0926ade9e7c5bb55a0a11ff4c93b91">GetChassisSpeedsFields</a>()) {</div>
-<div class="line"><a id="l00740" name="l00740"></a><span class="lineno">  740</span>    <span class="keywordflow">if</span> (!stt.IsEnabled()) <span class="keywordflow">continue</span>;</div>
-<div class="line"><a id="l00741" name="l00741"></a><span class="lineno">  741</span>    <span class="keywordflow">if</span> (nt4Enabled) stt.SetupNetworkTables(m_dataTable, m_tuningTable);</div>
-<div class="line"><a id="l00742" name="l00742"></a><span class="lineno">  742</span>    <span class="keywordflow">if</span> (dataLogName) stt.SetupDataLog(*dataLogName);</div>
-<div class="line"><a id="l00743" name="l00743"></a><span class="lineno">  743</span>  }</div>
-<div class="line"><a id="l00744" name="l00744"></a><span class="lineno">  744</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; [field, stat] : m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a3e05886e9239786d7e8ab2f025622095">GetModuleStatesFields</a>()) {</div>
-<div class="line"><a id="l00745" name="l00745"></a><span class="lineno">  745</span>    <span class="keywordflow">if</span> (!stat.IsEnabled()) <span class="keywordflow">continue</span>;</div>
-<div class="line"><a id="l00746" name="l00746"></a><span class="lineno">  746</span>    <span class="keywordflow">if</span> (nt4Enabled) stat.SetupNetworkTables(m_dataTable, m_tuningTable);</div>
-<div class="line"><a id="l00747" name="l00747"></a><span class="lineno">  747</span>    <span class="keywordflow">if</span> (dataLogName) stat.SetupDataLog(*dataLogName);</div>
-<div class="line"><a id="l00748" name="l00748"></a><span class="lineno">  748</span>  }</div>
-<div class="line"><a id="l00749" name="l00749"></a><span class="lineno">  749</span>}</div>
-</div>
-<div class="line"><a id="l00750" name="l00750"></a><span class="lineno">  750</span> </div>
-<div class="line"><a id="l00751" name="l00751"></a><span class="lineno">  751</span><span class="keyword">template</span> &lt;std::<span class="keywordtype">size_t</span> NumModules&gt;</div>
-<div class="foldopen" id="foldopen00752" data-start="{" data-end="}">
-<div class="line"><a id="l00752" name="l00752"></a><span class="lineno"><a class="line" href="classyams_1_1telemetry_1_1SwerveDriveTelemetry.html#a0b312f19bfe577c3d417d824c5279f13">  752</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetry.html#a0b312f19bfe577c3d417d824c5279f13">SwerveDriveTelemetry::Publish</a>(<a class="code hl_class" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html">mechanisms::swerve::SwerveDrive&lt;NumModules&gt;</a>* drive) {</div>
+<div class="line"><a id="l00678" name="l00678"></a><span class="lineno">  678</span>    m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()</div>
+<div class="line"><a id="l00679" name="l00679"></a><span class="lineno">  679</span>        .at(DoubleTelemetryField::RotationP)</div>
+<div class="line"><a id="l00680" name="l00680"></a><span class="lineno">  680</span>        .SetDefaultValue(rotationPID.GetP());</div>
+<div class="line"><a id="l00681" name="l00681"></a><span class="lineno">  681</span>    m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()</div>
+<div class="line"><a id="l00682" name="l00682"></a><span class="lineno">  682</span>        .at(DoubleTelemetryField::RotationI)</div>
+<div class="line"><a id="l00683" name="l00683"></a><span class="lineno">  683</span>        .SetDefaultValue(rotationPID.GetI());</div>
+<div class="line"><a id="l00684" name="l00684"></a><span class="lineno">  684</span>    m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()</div>
+<div class="line"><a id="l00685" name="l00685"></a><span class="lineno">  685</span>        .at(DoubleTelemetryField::RotationD)</div>
+<div class="line"><a id="l00686" name="l00686"></a><span class="lineno">  686</span>        .SetDefaultValue(rotationPID.GetD());</div>
+<div class="line"><a id="l00687" name="l00687"></a><span class="lineno">  687</span> </div>
+<div class="line"><a id="l00688" name="l00688"></a><span class="lineno">  688</span>    <span class="keyword">auto</span>&amp; modules = drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>();</div>
+<div class="line"><a id="l00689" name="l00689"></a><span class="lineno">  689</span>    <span class="keywordflow">if</span> (!modules.empty()) {</div>
+<div class="line"><a id="l00690" name="l00690"></a><span class="lineno">  690</span>      <span class="keyword">auto</span>* driveMotor = modules[0]-&gt;GetDriveMotorController();</div>
+<div class="line"><a id="l00691" name="l00691"></a><span class="lineno">  691</span>      <span class="keyword">auto</span> driveGains =</div>
+<div class="line"><a id="l00692" name="l00692"></a><span class="lineno">  692</span>          driveMotor-&gt;GetConfig().GetSlotGains(driveMotor-&gt;GetClosedLoopControllerSlot());</div>
+<div class="line"><a id="l00693" name="l00693"></a><span class="lineno">  693</span>      m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()</div>
+<div class="line"><a id="l00694" name="l00694"></a><span class="lineno">  694</span>          .at(DoubleTelemetryField::ModulesDriveP)</div>
+<div class="line"><a id="l00695" name="l00695"></a><span class="lineno">  695</span>          .SetDefaultValue(driveGains.kP);</div>
+<div class="line"><a id="l00696" name="l00696"></a><span class="lineno">  696</span>      m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()</div>
+<div class="line"><a id="l00697" name="l00697"></a><span class="lineno">  697</span>          .at(DoubleTelemetryField::ModulesDriveI)</div>
+<div class="line"><a id="l00698" name="l00698"></a><span class="lineno">  698</span>          .SetDefaultValue(driveGains.kI);</div>
+<div class="line"><a id="l00699" name="l00699"></a><span class="lineno">  699</span>      m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()</div>
+<div class="line"><a id="l00700" name="l00700"></a><span class="lineno">  700</span>          .at(DoubleTelemetryField::ModulesDriveD)</div>
+<div class="line"><a id="l00701" name="l00701"></a><span class="lineno">  701</span>          .SetDefaultValue(driveGains.kD);</div>
+<div class="line"><a id="l00702" name="l00702"></a><span class="lineno">  702</span> </div>
+<div class="line"><a id="l00703" name="l00703"></a><span class="lineno">  703</span>      <span class="keyword">auto</span>* azimuthMotor = modules[0]-&gt;GetAzimuthMotorController();</div>
+<div class="line"><a id="l00704" name="l00704"></a><span class="lineno">  704</span>      <span class="keyword">auto</span> azimuthGains =</div>
+<div class="line"><a id="l00705" name="l00705"></a><span class="lineno">  705</span>          azimuthMotor-&gt;GetConfig().GetSlotGains(azimuthMotor-&gt;GetClosedLoopControllerSlot());</div>
+<div class="line"><a id="l00706" name="l00706"></a><span class="lineno">  706</span>      m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()</div>
+<div class="line"><a id="l00707" name="l00707"></a><span class="lineno">  707</span>          .at(DoubleTelemetryField::ModulesAzimuthP)</div>
+<div class="line"><a id="l00708" name="l00708"></a><span class="lineno">  708</span>          .SetDefaultValue(azimuthGains.kP);</div>
+<div class="line"><a id="l00709" name="l00709"></a><span class="lineno">  709</span>      m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()</div>
+<div class="line"><a id="l00710" name="l00710"></a><span class="lineno">  710</span>          .at(DoubleTelemetryField::ModulesAzimuthI)</div>
+<div class="line"><a id="l00711" name="l00711"></a><span class="lineno">  711</span>          .SetDefaultValue(azimuthGains.kI);</div>
+<div class="line"><a id="l00712" name="l00712"></a><span class="lineno">  712</span>      m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()</div>
+<div class="line"><a id="l00713" name="l00713"></a><span class="lineno">  713</span>          .at(DoubleTelemetryField::ModulesAzimuthD)</div>
+<div class="line"><a id="l00714" name="l00714"></a><span class="lineno">  714</span>          .SetDefaultValue(azimuthGains.kD);</div>
+<div class="line"><a id="l00715" name="l00715"></a><span class="lineno">  715</span> </div>
+<div class="line"><a id="l00716" name="l00716"></a><span class="lineno">  716</span>      <span class="keywordflow">if</span> (<span class="keyword">auto</span> driveFF = driveMotor-&gt;GetConfig().GetSimpleFeedforward(</div>
+<div class="line"><a id="l00717" name="l00717"></a><span class="lineno">  717</span>              driveMotor-&gt;GetClosedLoopControllerSlot())) {</div>
+<div class="line"><a id="l00718" name="l00718"></a><span class="lineno">  718</span>        m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()</div>
+<div class="line"><a id="l00719" name="l00719"></a><span class="lineno">  719</span>            .at(DoubleTelemetryField::ModulesDriveKs)</div>
+<div class="line"><a id="l00720" name="l00720"></a><span class="lineno">  720</span>            .SetDefaultValue(driveFF-&gt;GetKs().value());</div>
+<div class="line"><a id="l00721" name="l00721"></a><span class="lineno">  721</span>        m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()</div>
+<div class="line"><a id="l00722" name="l00722"></a><span class="lineno">  722</span>            .at(DoubleTelemetryField::ModulesDriveKv)</div>
+<div class="line"><a id="l00723" name="l00723"></a><span class="lineno">  723</span>            .SetDefaultValue(driveFF-&gt;GetKv().value());</div>
+<div class="line"><a id="l00724" name="l00724"></a><span class="lineno">  724</span>        m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()</div>
+<div class="line"><a id="l00725" name="l00725"></a><span class="lineno">  725</span>            .at(DoubleTelemetryField::ModulesDriveKa)</div>
+<div class="line"><a id="l00726" name="l00726"></a><span class="lineno">  726</span>            .SetDefaultValue(driveFF-&gt;GetKa().value());</div>
+<div class="line"><a id="l00727" name="l00727"></a><span class="lineno">  727</span>      }</div>
+<div class="line"><a id="l00728" name="l00728"></a><span class="lineno">  728</span>      <span class="keywordflow">if</span> (<span class="keyword">auto</span> azimuthFF = azimuthMotor-&gt;GetConfig().GetSimpleFeedforward(</div>
+<div class="line"><a id="l00729" name="l00729"></a><span class="lineno">  729</span>              azimuthMotor-&gt;GetClosedLoopControllerSlot())) {</div>
+<div class="line"><a id="l00730" name="l00730"></a><span class="lineno">  730</span>        m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()</div>
+<div class="line"><a id="l00731" name="l00731"></a><span class="lineno">  731</span>            .at(DoubleTelemetryField::ModulesAzimuthKs)</div>
+<div class="line"><a id="l00732" name="l00732"></a><span class="lineno">  732</span>            .SetDefaultValue(azimuthFF-&gt;GetKs().value());</div>
+<div class="line"><a id="l00733" name="l00733"></a><span class="lineno">  733</span>        m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()</div>
+<div class="line"><a id="l00734" name="l00734"></a><span class="lineno">  734</span>            .at(DoubleTelemetryField::ModulesAzimuthKv)</div>
+<div class="line"><a id="l00735" name="l00735"></a><span class="lineno">  735</span>            .SetDefaultValue(azimuthFF-&gt;GetKv().value());</div>
+<div class="line"><a id="l00736" name="l00736"></a><span class="lineno">  736</span>        m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()</div>
+<div class="line"><a id="l00737" name="l00737"></a><span class="lineno">  737</span>            .at(DoubleTelemetryField::ModulesAzimuthKa)</div>
+<div class="line"><a id="l00738" name="l00738"></a><span class="lineno">  738</span>            .SetDefaultValue(azimuthFF-&gt;GetKa().value());</div>
+<div class="line"><a id="l00739" name="l00739"></a><span class="lineno">  739</span>      }</div>
+<div class="line"><a id="l00740" name="l00740"></a><span class="lineno">  740</span>    }</div>
+<div class="line"><a id="l00741" name="l00741"></a><span class="lineno">  741</span>  }</div>
+<div class="line"><a id="l00742" name="l00742"></a><span class="lineno">  742</span> </div>
+<div class="line"><a id="l00743" name="l00743"></a><span class="lineno">  743</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; [field, dt] : m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()) {</div>
+<div class="line"><a id="l00744" name="l00744"></a><span class="lineno">  744</span>    <span class="keywordflow">if</span> (!dt.IsEnabled()) <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00745" name="l00745"></a><span class="lineno">  745</span>    <span class="keywordflow">if</span> (nt4Enabled) dt.SetupNetworkTables(m_dataTable, m_tuningTable);</div>
+<div class="line"><a id="l00746" name="l00746"></a><span class="lineno">  746</span>    <span class="keywordflow">if</span> (dataLogName) dt.SetupDataLog(*dataLogName);</div>
+<div class="line"><a id="l00747" name="l00747"></a><span class="lineno">  747</span>  }</div>
+<div class="line"><a id="l00748" name="l00748"></a><span class="lineno">  748</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; [field, bt] : m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a1c715572b5a251a4186d0cd62eb15a11">GetBoolFields</a>()) {</div>
+<div class="line"><a id="l00749" name="l00749"></a><span class="lineno">  749</span>    <span class="keywordflow">if</span> (!bt.IsEnabled()) <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00750" name="l00750"></a><span class="lineno">  750</span>    <span class="keywordflow">if</span> (nt4Enabled) bt.SetupNetworkTables(m_dataTable, m_tuningTable);</div>
+<div class="line"><a id="l00751" name="l00751"></a><span class="lineno">  751</span>    <span class="keywordflow">if</span> (dataLogName) bt.SetupDataLog(*dataLogName);</div>
+<div class="line"><a id="l00752" name="l00752"></a><span class="lineno">  752</span>  }</div>
 <div class="line"><a id="l00753" name="l00753"></a><span class="lineno">  753</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; [field, stt] : m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a34ad4ad70dc3560044f68e8df1677d3c">GetPoseFields</a>()) {</div>
 <div class="line"><a id="l00754" name="l00754"></a><span class="lineno">  754</span>    <span class="keywordflow">if</span> (!stt.IsEnabled()) <span class="keywordflow">continue</span>;</div>
-<div class="line"><a id="l00755" name="l00755"></a><span class="lineno">  755</span>    <span class="keywordflow">switch</span> (field) {</div>
-<div class="line"><a id="l00756" name="l00756"></a><span class="lineno">  756</span>      <span class="keywordflow">case</span> StructTelemetryField::Pose:</div>
-<div class="line"><a id="l00757" name="l00757"></a><span class="lineno">  757</span>        stt.Set(drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ac1c65482bf0386e8a8ecdd680d2c9e88">GetPose</a>());</div>
-<div class="line"><a id="l00758" name="l00758"></a><span class="lineno">  758</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00759" name="l00759"></a><span class="lineno">  759</span>      <span class="keywordflow">default</span>:</div>
-<div class="line"><a id="l00760" name="l00760"></a><span class="lineno">  760</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00761" name="l00761"></a><span class="lineno">  761</span>    }</div>
+<div class="line"><a id="l00755" name="l00755"></a><span class="lineno">  755</span>    <span class="keywordflow">if</span> (nt4Enabled) stt.SetupNetworkTables(m_dataTable, m_tuningTable);</div>
+<div class="line"><a id="l00756" name="l00756"></a><span class="lineno">  756</span>    <span class="keywordflow">if</span> (dataLogName) stt.SetupDataLog(*dataLogName);</div>
+<div class="line"><a id="l00757" name="l00757"></a><span class="lineno">  757</span>  }</div>
+<div class="line"><a id="l00758" name="l00758"></a><span class="lineno">  758</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; [field, stt] : m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#ade0926ade9e7c5bb55a0a11ff4c93b91">GetChassisSpeedsFields</a>()) {</div>
+<div class="line"><a id="l00759" name="l00759"></a><span class="lineno">  759</span>    <span class="keywordflow">if</span> (!stt.IsEnabled()) <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00760" name="l00760"></a><span class="lineno">  760</span>    <span class="keywordflow">if</span> (nt4Enabled) stt.SetupNetworkTables(m_dataTable, m_tuningTable);</div>
+<div class="line"><a id="l00761" name="l00761"></a><span class="lineno">  761</span>    <span class="keywordflow">if</span> (dataLogName) stt.SetupDataLog(*dataLogName);</div>
 <div class="line"><a id="l00762" name="l00762"></a><span class="lineno">  762</span>  }</div>
-<div class="line"><a id="l00763" name="l00763"></a><span class="lineno">  763</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; [field, stt] : m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#ade0926ade9e7c5bb55a0a11ff4c93b91">GetChassisSpeedsFields</a>()) {</div>
-<div class="line"><a id="l00764" name="l00764"></a><span class="lineno">  764</span>    <span class="keywordflow">if</span> (!stt.IsEnabled()) <span class="keywordflow">continue</span>;</div>
-<div class="line"><a id="l00765" name="l00765"></a><span class="lineno">  765</span>    <span class="keywordflow">switch</span> (field) {</div>
-<div class="line"><a id="l00766" name="l00766"></a><span class="lineno">  766</span>      <span class="keywordflow">case</span> StructTelemetryField::DesiredRobotRelativeChassisSpeeds:</div>
-<div class="line"><a id="l00767" name="l00767"></a><span class="lineno">  767</span>        stt.Set(drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a00c419db374bd239a4e811c94eb1e6d8">GetDesiredChassisSpeeds</a>());</div>
-<div class="line"><a id="l00768" name="l00768"></a><span class="lineno">  768</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00769" name="l00769"></a><span class="lineno">  769</span>      <span class="keywordflow">case</span> StructTelemetryField::CurrentRobotRelativeChassisSpeeds:</div>
-<div class="line"><a id="l00770" name="l00770"></a><span class="lineno">  770</span>        stt.Set(drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a8f86e9de55a5a9a217fd480b1e3b980e">GetRobotRelativeSpeed</a>());</div>
-<div class="line"><a id="l00771" name="l00771"></a><span class="lineno">  771</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00772" name="l00772"></a><span class="lineno">  772</span>      <span class="keywordflow">case</span> StructTelemetryField::FieldRelativeChassisSpeeds:</div>
-<div class="line"><a id="l00773" name="l00773"></a><span class="lineno">  773</span>        stt.Set(drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a1c6a323cea5784905ec1fe9b35f2d856">GetFieldRelativeSpeed</a>());</div>
-<div class="line"><a id="l00774" name="l00774"></a><span class="lineno">  774</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00775" name="l00775"></a><span class="lineno">  775</span>      <span class="keywordflow">default</span>:</div>
-<div class="line"><a id="l00776" name="l00776"></a><span class="lineno">  776</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00777" name="l00777"></a><span class="lineno">  777</span>    }</div>
-<div class="line"><a id="l00778" name="l00778"></a><span class="lineno">  778</span>  }</div>
-<div class="line"><a id="l00779" name="l00779"></a><span class="lineno">  779</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; [field, dt] : m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()) {</div>
-<div class="line"><a id="l00780" name="l00780"></a><span class="lineno">  780</span>    <span class="keywordflow">if</span> (!dt.IsEnabled()) <span class="keywordflow">continue</span>;</div>
-<div class="line"><a id="l00781" name="l00781"></a><span class="lineno">  781</span>    <span class="keywordflow">switch</span> (field) {</div>
-<div class="line"><a id="l00782" name="l00782"></a><span class="lineno">  782</span>      <span class="keywordflow">case</span> DoubleTelemetryField::Gyro:</div>
-<div class="line"><a id="l00783" name="l00783"></a><span class="lineno">  783</span>        dt.Set(drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a008158e13d384390c15b8b2723464767">GetGyroAngle</a>().value());</div>
-<div class="line"><a id="l00784" name="l00784"></a><span class="lineno">  784</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00785" name="l00785"></a><span class="lineno">  785</span>      <span class="keywordflow">default</span>:</div>
-<div class="line"><a id="l00786" name="l00786"></a><span class="lineno">  786</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00787" name="l00787"></a><span class="lineno">  787</span>    }</div>
-<div class="line"><a id="l00788" name="l00788"></a><span class="lineno">  788</span>  }</div>
-<div class="line"><a id="l00789" name="l00789"></a><span class="lineno">  789</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; [field, stat] : m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a3e05886e9239786d7e8ab2f025622095">GetModuleStatesFields</a>()) {</div>
-<div class="line"><a id="l00790" name="l00790"></a><span class="lineno">  790</span>    <span class="keywordflow">if</span> (!stat.IsEnabled()) <span class="keywordflow">continue</span>;</div>
-<div class="line"><a id="l00791" name="l00791"></a><span class="lineno">  791</span>    <span class="keywordflow">switch</span> (field) {</div>
-<div class="line"><a id="l00792" name="l00792"></a><span class="lineno">  792</span>      <span class="keywordflow">case</span> StructArrayTelemetryField::DesiredModuleStates: {</div>
-<div class="line"><a id="l00793" name="l00793"></a><span class="lineno">  793</span>        <span class="keyword">auto</span> states = drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#aed9268cc93967ce18da6c34e394258b4">GetDesiredModuleStates</a>();</div>
-<div class="line"><a id="l00794" name="l00794"></a><span class="lineno">  794</span>        stat.Set(std::vector&lt;frc::SwerveModuleState&gt;(states.begin(), states.end()));</div>
+<div class="line"><a id="l00763" name="l00763"></a><span class="lineno">  763</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; [field, stat] : m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a3e05886e9239786d7e8ab2f025622095">GetModuleStatesFields</a>()) {</div>
+<div class="line"><a id="l00764" name="l00764"></a><span class="lineno">  764</span>    <span class="keywordflow">if</span> (!stat.IsEnabled()) <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00765" name="l00765"></a><span class="lineno">  765</span>    <span class="keywordflow">if</span> (nt4Enabled) stat.SetupNetworkTables(m_dataTable, m_tuningTable);</div>
+<div class="line"><a id="l00766" name="l00766"></a><span class="lineno">  766</span>    <span class="keywordflow">if</span> (dataLogName) stat.SetupDataLog(*dataLogName);</div>
+<div class="line"><a id="l00767" name="l00767"></a><span class="lineno">  767</span>  }</div>
+<div class="line"><a id="l00768" name="l00768"></a><span class="lineno">  768</span>}</div>
+</div>
+<div class="line"><a id="l00769" name="l00769"></a><span class="lineno">  769</span> </div>
+<div class="line"><a id="l00770" name="l00770"></a><span class="lineno">  770</span><span class="keyword">template</span> &lt;std::<span class="keywordtype">size_t</span> NumModules&gt;</div>
+<div class="foldopen" id="foldopen00771" data-start="{" data-end="}">
+<div class="line"><a id="l00771" name="l00771"></a><span class="lineno"><a class="line" href="classyams_1_1telemetry_1_1SwerveDriveTelemetry.html#a0b312f19bfe577c3d417d824c5279f13">  771</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetry.html#a0b312f19bfe577c3d417d824c5279f13">SwerveDriveTelemetry::Publish</a>(<a class="code hl_class" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html">mechanisms::swerve::SwerveDrive&lt;NumModules&gt;</a>* drive) {</div>
+<div class="line"><a id="l00772" name="l00772"></a><span class="lineno">  772</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; [field, stt] : m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a34ad4ad70dc3560044f68e8df1677d3c">GetPoseFields</a>()) {</div>
+<div class="line"><a id="l00773" name="l00773"></a><span class="lineno">  773</span>    <span class="keywordflow">if</span> (!stt.IsEnabled()) <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00774" name="l00774"></a><span class="lineno">  774</span>    <span class="keywordflow">switch</span> (field) {</div>
+<div class="line"><a id="l00775" name="l00775"></a><span class="lineno">  775</span>      <span class="keywordflow">case</span> StructTelemetryField::Pose:</div>
+<div class="line"><a id="l00776" name="l00776"></a><span class="lineno">  776</span>        stt.Set(drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ac1c65482bf0386e8a8ecdd680d2c9e88">GetPose</a>());</div>
+<div class="line"><a id="l00777" name="l00777"></a><span class="lineno">  777</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00778" name="l00778"></a><span class="lineno">  778</span>      <span class="keywordflow">default</span>:</div>
+<div class="line"><a id="l00779" name="l00779"></a><span class="lineno">  779</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00780" name="l00780"></a><span class="lineno">  780</span>    }</div>
+<div class="line"><a id="l00781" name="l00781"></a><span class="lineno">  781</span>  }</div>
+<div class="line"><a id="l00782" name="l00782"></a><span class="lineno">  782</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; [field, stt] : m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#ade0926ade9e7c5bb55a0a11ff4c93b91">GetChassisSpeedsFields</a>()) {</div>
+<div class="line"><a id="l00783" name="l00783"></a><span class="lineno">  783</span>    <span class="keywordflow">if</span> (!stt.IsEnabled()) <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00784" name="l00784"></a><span class="lineno">  784</span>    <span class="keywordflow">switch</span> (field) {</div>
+<div class="line"><a id="l00785" name="l00785"></a><span class="lineno">  785</span>      <span class="keywordflow">case</span> StructTelemetryField::DesiredRobotRelativeChassisSpeeds:</div>
+<div class="line"><a id="l00786" name="l00786"></a><span class="lineno">  786</span>        stt.Set(drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a00c419db374bd239a4e811c94eb1e6d8">GetDesiredChassisSpeeds</a>());</div>
+<div class="line"><a id="l00787" name="l00787"></a><span class="lineno">  787</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00788" name="l00788"></a><span class="lineno">  788</span>      <span class="keywordflow">case</span> StructTelemetryField::CurrentRobotRelativeChassisSpeeds:</div>
+<div class="line"><a id="l00789" name="l00789"></a><span class="lineno">  789</span>        stt.Set(drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a8f86e9de55a5a9a217fd480b1e3b980e">GetRobotRelativeSpeed</a>());</div>
+<div class="line"><a id="l00790" name="l00790"></a><span class="lineno">  790</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00791" name="l00791"></a><span class="lineno">  791</span>      <span class="keywordflow">case</span> StructTelemetryField::FieldRelativeChassisSpeeds:</div>
+<div class="line"><a id="l00792" name="l00792"></a><span class="lineno">  792</span>        stt.Set(drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a1c6a323cea5784905ec1fe9b35f2d856">GetFieldRelativeSpeed</a>());</div>
+<div class="line"><a id="l00793" name="l00793"></a><span class="lineno">  793</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00794" name="l00794"></a><span class="lineno">  794</span>      <span class="keywordflow">default</span>:</div>
 <div class="line"><a id="l00795" name="l00795"></a><span class="lineno">  795</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00796" name="l00796"></a><span class="lineno">  796</span>      }</div>
-<div class="line"><a id="l00797" name="l00797"></a><span class="lineno">  797</span>      <span class="keywordflow">case</span> StructArrayTelemetryField::CurrentModuleStates: {</div>
-<div class="line"><a id="l00798" name="l00798"></a><span class="lineno">  798</span>        <span class="keyword">auto</span> states = drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#aa538dc03d11fc050a6a5c1d8ab5f4211">GetModuleStates</a>();</div>
-<div class="line"><a id="l00799" name="l00799"></a><span class="lineno">  799</span>        stat.Set(std::vector&lt;frc::SwerveModuleState&gt;(states.begin(), states.end()));</div>
-<div class="line"><a id="l00800" name="l00800"></a><span class="lineno">  800</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00801" name="l00801"></a><span class="lineno">  801</span>      }</div>
-<div class="line"><a id="l00802" name="l00802"></a><span class="lineno">  802</span>      <span class="keywordflow">default</span>:</div>
+<div class="line"><a id="l00796" name="l00796"></a><span class="lineno">  796</span>    }</div>
+<div class="line"><a id="l00797" name="l00797"></a><span class="lineno">  797</span>  }</div>
+<div class="line"><a id="l00798" name="l00798"></a><span class="lineno">  798</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; [field, dt] : m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()) {</div>
+<div class="line"><a id="l00799" name="l00799"></a><span class="lineno">  799</span>    <span class="keywordflow">if</span> (!dt.IsEnabled()) <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00800" name="l00800"></a><span class="lineno">  800</span>    <span class="keywordflow">switch</span> (field) {</div>
+<div class="line"><a id="l00801" name="l00801"></a><span class="lineno">  801</span>      <span class="keywordflow">case</span> DoubleTelemetryField::Gyro:</div>
+<div class="line"><a id="l00802" name="l00802"></a><span class="lineno">  802</span>        dt.Set(drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a008158e13d384390c15b8b2723464767">GetGyroAngle</a>().value());</div>
 <div class="line"><a id="l00803" name="l00803"></a><span class="lineno">  803</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00804" name="l00804"></a><span class="lineno">  804</span>    }</div>
-<div class="line"><a id="l00805" name="l00805"></a><span class="lineno">  805</span>  }</div>
-<div class="line"><a id="l00806" name="l00806"></a><span class="lineno">  806</span>}</div>
+<div class="line"><a id="l00804" name="l00804"></a><span class="lineno">  804</span>      <span class="keywordflow">default</span>:</div>
+<div class="line"><a id="l00805" name="l00805"></a><span class="lineno">  805</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00806" name="l00806"></a><span class="lineno">  806</span>    }</div>
+<div class="line"><a id="l00807" name="l00807"></a><span class="lineno">  807</span>  }</div>
+<div class="line"><a id="l00808" name="l00808"></a><span class="lineno">  808</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; [field, stat] : m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a3e05886e9239786d7e8ab2f025622095">GetModuleStatesFields</a>()) {</div>
+<div class="line"><a id="l00809" name="l00809"></a><span class="lineno">  809</span>    <span class="keywordflow">if</span> (!stat.IsEnabled()) <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00810" name="l00810"></a><span class="lineno">  810</span>    <span class="keywordflow">switch</span> (field) {</div>
+<div class="line"><a id="l00811" name="l00811"></a><span class="lineno">  811</span>      <span class="keywordflow">case</span> StructArrayTelemetryField::DesiredModuleStates: {</div>
+<div class="line"><a id="l00812" name="l00812"></a><span class="lineno">  812</span>        <span class="keyword">auto</span> states = drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#aed9268cc93967ce18da6c34e394258b4">GetDesiredModuleStates</a>();</div>
+<div class="line"><a id="l00813" name="l00813"></a><span class="lineno">  813</span>        stat.Set(std::vector&lt;frc::SwerveModuleState&gt;(states.begin(), states.end()));</div>
+<div class="line"><a id="l00814" name="l00814"></a><span class="lineno">  814</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00815" name="l00815"></a><span class="lineno">  815</span>      }</div>
+<div class="line"><a id="l00816" name="l00816"></a><span class="lineno">  816</span>      <span class="keywordflow">case</span> StructArrayTelemetryField::CurrentModuleStates: {</div>
+<div class="line"><a id="l00817" name="l00817"></a><span class="lineno">  817</span>        <span class="keyword">auto</span> states = drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#aa538dc03d11fc050a6a5c1d8ab5f4211">GetModuleStates</a>();</div>
+<div class="line"><a id="l00818" name="l00818"></a><span class="lineno">  818</span>        stat.Set(std::vector&lt;frc::SwerveModuleState&gt;(states.begin(), states.end()));</div>
+<div class="line"><a id="l00819" name="l00819"></a><span class="lineno">  819</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00820" name="l00820"></a><span class="lineno">  820</span>      }</div>
+<div class="line"><a id="l00821" name="l00821"></a><span class="lineno">  821</span>      <span class="keywordflow">default</span>:</div>
+<div class="line"><a id="l00822" name="l00822"></a><span class="lineno">  822</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00823" name="l00823"></a><span class="lineno">  823</span>    }</div>
+<div class="line"><a id="l00824" name="l00824"></a><span class="lineno">  824</span>  }</div>
+<div class="line"><a id="l00825" name="l00825"></a><span class="lineno">  825</span>}</div>
 </div>
-<div class="line"><a id="l00807" name="l00807"></a><span class="lineno">  807</span> </div>
-<div class="line"><a id="l00808" name="l00808"></a><span class="lineno">  808</span><span class="keyword">template</span> &lt;std::<span class="keywordtype">size_t</span> NumModules&gt;</div>
-<div class="foldopen" id="foldopen00809" data-start="{" data-end="}">
-<div class="line"><a id="l00809" name="l00809"></a><span class="lineno"><a class="line" href="classyams_1_1telemetry_1_1SwerveDriveTelemetry.html#ae67f6fe766b03e093c519a2abd8ded58">  809</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetry.html#ae67f6fe766b03e093c519a2abd8ded58">SwerveDriveTelemetry::ApplyTuningValues</a>(<a class="code hl_class" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html">mechanisms::swerve::SwerveDrive&lt;NumModules&gt;</a>* drive) {</div>
-<div class="line"><a id="l00810" name="l00810"></a><span class="lineno">  810</span>  <span class="keywordtype">bool</span> nt4Enabled = m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#abd016b4572d2078d56d4614ff47d7807">GetNT4Enabled</a>();</div>
-<div class="line"><a id="l00811" name="l00811"></a><span class="lineno">  811</span> </div>
-<div class="line"><a id="l00812" name="l00812"></a><span class="lineno">  812</span>  <span class="keyword">auto</span>&amp; boolFields = m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a1c715572b5a251a4186d0cd62eb15a11">GetBoolFields</a>();</div>
-<div class="line"><a id="l00813" name="l00813"></a><span class="lineno">  813</span>  <span class="keyword">auto</span>&amp; autoAlignBt = boolFields.at(BooleanTelemetryField::AutoAlignEnabled);</div>
-<div class="line"><a id="l00814" name="l00814"></a><span class="lineno">  814</span>  <span class="keyword">auto</span>&amp; driveTuningBt = boolFields.at(BooleanTelemetryField::ModulesDriveTuningEnabled);</div>
-<div class="line"><a id="l00815" name="l00815"></a><span class="lineno">  815</span>  <span class="keyword">auto</span>&amp; azimuthTuningBt = boolFields.at(BooleanTelemetryField::ModulesAzimuthTuningEnabled);</div>
-<div class="line"><a id="l00816" name="l00816"></a><span class="lineno">  816</span>  <span class="keyword">auto</span>&amp; driveInPlaceBt = boolFields.at(BooleanTelemetryField::ModulesDriveInPlace);</div>
-<div class="line"><a id="l00817" name="l00817"></a><span class="lineno">  817</span> </div>
-<div class="line"><a id="l00818" name="l00818"></a><span class="lineno">  818</span>  <span class="keywordtype">bool</span> autoAlignOn = autoAlignBt.IsEnabled() &amp;&amp; nt4Enabled &amp;&amp; autoAlignBt.Get();</div>
-<div class="line"><a id="l00819" name="l00819"></a><span class="lineno">  819</span>  <span class="keywordtype">bool</span> driveTuningOn = driveTuningBt.IsEnabled() &amp;&amp; nt4Enabled &amp;&amp; driveTuningBt.Get();</div>
-<div class="line"><a id="l00820" name="l00820"></a><span class="lineno">  820</span>  <span class="keywordtype">bool</span> azimuthTuningOn = azimuthTuningBt.IsEnabled() &amp;&amp; nt4Enabled &amp;&amp; azimuthTuningBt.Get();</div>
-<div class="line"><a id="l00821" name="l00821"></a><span class="lineno">  821</span>  <span class="keywordtype">bool</span> driveInPlaceOn = driveInPlaceBt.IsEnabled() &amp;&amp; nt4Enabled &amp;&amp; driveInPlaceBt.Get();</div>
-<div class="line"><a id="l00822" name="l00822"></a><span class="lineno">  822</span> </div>
-<div class="line"><a id="l00823" name="l00823"></a><span class="lineno">  823</span>  <span class="comment">// Only one tuning mode may drive the chassis at a time; enforce priority order</span></div>
-<div class="line"><a id="l00824" name="l00824"></a><span class="lineno">  824</span>  <span class="comment">// (auto-align &gt; drive tuning &gt; azimuth tuning) and force the losers back off in</span></div>
-<div class="line"><a id="l00825" name="l00825"></a><span class="lineno">  825</span>  <span class="comment">// NetworkTables so the dashboard reflects what&#39;s actually happening.</span></div>
-<div class="line"><a id="l00826" name="l00826"></a><span class="lineno">  826</span>  <span class="keywordflow">if</span> (autoAlignOn) {</div>
-<div class="line"><a id="l00827" name="l00827"></a><span class="lineno">  827</span>    <span class="keywordflow">if</span> (driveTuningOn) {</div>
-<div class="line"><a id="l00828" name="l00828"></a><span class="lineno">  828</span>      driveTuningBt.ForceSet(<span class="keyword">false</span>);</div>
-<div class="line"><a id="l00829" name="l00829"></a><span class="lineno">  829</span>      driveTuningOn = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00830" name="l00830"></a><span class="lineno">  830</span>    }</div>
-<div class="line"><a id="l00831" name="l00831"></a><span class="lineno">  831</span>    <span class="keywordflow">if</span> (azimuthTuningOn) {</div>
-<div class="line"><a id="l00832" name="l00832"></a><span class="lineno">  832</span>      azimuthTuningBt.ForceSet(<span class="keyword">false</span>);</div>
-<div class="line"><a id="l00833" name="l00833"></a><span class="lineno">  833</span>      azimuthTuningOn = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00834" name="l00834"></a><span class="lineno">  834</span>    }</div>
-<div class="line"><a id="l00835" name="l00835"></a><span class="lineno">  835</span>  } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (driveTuningOn &amp;&amp; azimuthTuningOn) {</div>
-<div class="line"><a id="l00836" name="l00836"></a><span class="lineno">  836</span>    azimuthTuningBt.ForceSet(<span class="keyword">false</span>);</div>
-<div class="line"><a id="l00837" name="l00837"></a><span class="lineno">  837</span>    azimuthTuningOn = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00838" name="l00838"></a><span class="lineno">  838</span>  }</div>
-<div class="line"><a id="l00839" name="l00839"></a><span class="lineno">  839</span> </div>
-<div class="line"><a id="l00840" name="l00840"></a><span class="lineno">  840</span>  <span class="keywordflow">if</span> (autoAlignOn) {</div>
-<div class="line"><a id="l00841" name="l00841"></a><span class="lineno">  841</span>    <span class="keyword">auto</span>&amp; doubleFields = m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>();</div>
-<div class="line"><a id="l00842" name="l00842"></a><span class="lineno">  842</span>    <span class="keywordtype">double</span> x = doubleFields.at(DoubleTelemetryField::AutoAlignPoseX).Get();</div>
-<div class="line"><a id="l00843" name="l00843"></a><span class="lineno">  843</span>    <span class="keywordtype">double</span> y = doubleFields.at(DoubleTelemetryField::AutoAlignPoseY).Get();</div>
-<div class="line"><a id="l00844" name="l00844"></a><span class="lineno">  844</span>    <span class="keywordtype">double</span> rot = doubleFields.at(DoubleTelemetryField::AutoAlignPoseRotation).Get();</div>
-<div class="line"><a id="l00845" name="l00845"></a><span class="lineno">  845</span>    frc::Pose2d targetPose{units::meter_t{x}, units::meter_t{y},</div>
-<div class="line"><a id="l00846" name="l00846"></a><span class="lineno">  846</span>                           frc::Rotation2d{units::degree_t{rot}}};</div>
-<div class="line"><a id="l00847" name="l00847"></a><span class="lineno">  847</span>    drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a854d53023732eb9fe1c4b1eaceb47efd">SetRobotRelativeChassisSpeeds</a>(drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a1bbfad1bd7e1700064c8432c422bcf5f">DriveToPoseSetpoint</a>(targetPose));</div>
-<div class="line"><a id="l00848" name="l00848"></a><span class="lineno">  848</span>  }</div>
-<div class="line"><a id="l00849" name="l00849"></a><span class="lineno">  849</span> </div>
-<div class="line"><a id="l00850" name="l00850"></a><span class="lineno">  850</span>  <span class="keywordflow">if</span> (driveTuningBt.IsEnabled() &amp;&amp; nt4Enabled) {</div>
-<div class="line"><a id="l00851" name="l00851"></a><span class="lineno">  851</span>    <span class="keyword">auto</span>&amp; modules = drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>();</div>
-<div class="line"><a id="l00852" name="l00852"></a><span class="lineno">  852</span>    <span class="keywordflow">if</span> (driveTuningOn) {</div>
-<div class="line"><a id="l00853" name="l00853"></a><span class="lineno">  853</span>      units::meters_per_second_t velocity{</div>
-<div class="line"><a id="l00854" name="l00854"></a><span class="lineno">  854</span>          m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>().at(DoubleTelemetryField::ModulesDriveVelocity).Get()};</div>
-<div class="line"><a id="l00855" name="l00855"></a><span class="lineno">  855</span>      wpi::array&lt;frc::SwerveModuleState, NumModules&gt; states{wpi::empty_array};</div>
-<div class="line"><a id="l00856" name="l00856"></a><span class="lineno">  856</span>      <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; NumModules; ++i) {</div>
-<div class="line"><a id="l00857" name="l00857"></a><span class="lineno">  857</span>        <span class="keywordflow">if</span> (driveInPlaceOn) {</div>
-<div class="line"><a id="l00858" name="l00858"></a><span class="lineno">  858</span>          <span class="comment">// Point each module tangent to its position around the robot center so a positive</span></div>
-<div class="line"><a id="l00859" name="l00859"></a><span class="lineno">  859</span>          <span class="comment">// velocity spins the robot counter-clockwise (WPILib&#39;s positive rotation direction).</span></div>
-<div class="line"><a id="l00860" name="l00860"></a><span class="lineno">  860</span>          <span class="keyword">auto</span> moduleLocation = *modules[i]-&gt;GetConfig().GetLocation();</div>
-<div class="line"><a id="l00861" name="l00861"></a><span class="lineno">  861</span>          <span class="keyword">auto</span> tangentAngle = moduleLocation.Angle() + frc::Rotation2d{units::degree_t{90}};</div>
-<div class="line"><a id="l00862" name="l00862"></a><span class="lineno">  862</span>          states[i] = frc::SwerveModuleState{velocity, tangentAngle};</div>
-<div class="line"><a id="l00863" name="l00863"></a><span class="lineno">  863</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00864" name="l00864"></a><span class="lineno">  864</span>          states[i] = frc::SwerveModuleState{velocity, frc::Rotation2d{}};</div>
-<div class="line"><a id="l00865" name="l00865"></a><span class="lineno">  865</span>        }</div>
-<div class="line"><a id="l00866" name="l00866"></a><span class="lineno">  866</span>      }</div>
-<div class="line"><a id="l00867" name="l00867"></a><span class="lineno">  867</span>      drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ad6bc7535f773e372ac0a4f90e241a45b">SetSwerveModuleStates</a>(states);</div>
-<div class="line"><a id="l00868" name="l00868"></a><span class="lineno">  868</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!autoAlignOn) {</div>
-<div class="line"><a id="l00869" name="l00869"></a><span class="lineno">  869</span>      <span class="comment">// Drive tuning is off (and auto-align isn&#39;t driving the chassis instead); make sure the</span></div>
-<div class="line"><a id="l00870" name="l00870"></a><span class="lineno">  870</span>      <span class="comment">// modules don&#39;t keep spinning at whatever velocity was last commanded while it was on.</span></div>
-<div class="line"><a id="l00871" name="l00871"></a><span class="lineno">  871</span>      wpi::array&lt;frc::SwerveModuleState, NumModules&gt; states{wpi::empty_array};</div>
-<div class="line"><a id="l00872" name="l00872"></a><span class="lineno">  872</span>      <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; NumModules; ++i) {</div>
-<div class="line"><a id="l00873" name="l00873"></a><span class="lineno">  873</span>        states[i] =</div>
-<div class="line"><a id="l00874" name="l00874"></a><span class="lineno">  874</span>            frc::SwerveModuleState{units::meters_per_second_t{0}, modules[i]-&gt;GetState().angle};</div>
-<div class="line"><a id="l00875" name="l00875"></a><span class="lineno">  875</span>      }</div>
-<div class="line"><a id="l00876" name="l00876"></a><span class="lineno">  876</span>      drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ad6bc7535f773e372ac0a4f90e241a45b">SetSwerveModuleStates</a>(states);</div>
-<div class="line"><a id="l00877" name="l00877"></a><span class="lineno">  877</span>    }</div>
-<div class="line"><a id="l00878" name="l00878"></a><span class="lineno">  878</span>  }</div>
-<div class="line"><a id="l00879" name="l00879"></a><span class="lineno">  879</span> </div>
-<div class="line"><a id="l00880" name="l00880"></a><span class="lineno">  880</span>  <span class="keywordflow">if</span> (azimuthTuningOn) {</div>
-<div class="line"><a id="l00881" name="l00881"></a><span class="lineno">  881</span>    frc::Rotation2d angle{units::degree_t{</div>
-<div class="line"><a id="l00882" name="l00882"></a><span class="lineno">  882</span>        m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>().at(DoubleTelemetryField::ModulesAzimuthAngle).Get()}};</div>
-<div class="line"><a id="l00883" name="l00883"></a><span class="lineno">  883</span>    wpi::array&lt;frc::SwerveModuleState, NumModules&gt; states{wpi::empty_array};</div>
-<div class="line"><a id="l00884" name="l00884"></a><span class="lineno">  884</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; NumModules; ++i) {</div>
-<div class="line"><a id="l00885" name="l00885"></a><span class="lineno">  885</span>      states[i] = frc::SwerveModuleState{units::meters_per_second_t{0}, angle};</div>
-<div class="line"><a id="l00886" name="l00886"></a><span class="lineno">  886</span>    }</div>
-<div class="line"><a id="l00887" name="l00887"></a><span class="lineno">  887</span>    drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ad6bc7535f773e372ac0a4f90e241a45b">SetSwerveModuleStates</a>(states);</div>
-<div class="line"><a id="l00888" name="l00888"></a><span class="lineno">  888</span>  }</div>
-<div class="line"><a id="l00889" name="l00889"></a><span class="lineno">  889</span> </div>
-<div class="line"><a id="l00890" name="l00890"></a><span class="lineno">  890</span>  <span class="keyword">auto</span> translationPID = drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a22ab3edfe3fbd2ece2088977f1d124a7">GetTranslationPID</a>();</div>
-<div class="line"><a id="l00891" name="l00891"></a><span class="lineno">  891</span>  <span class="keyword">auto</span> rotationPID = drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#aa7954d59993672bec71bab3a1f1637e4">GetRotationPID</a>();</div>
-<div class="line"><a id="l00892" name="l00892"></a><span class="lineno">  892</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; [field, dt] : m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()) {</div>
-<div class="line"><a id="l00893" name="l00893"></a><span class="lineno">  893</span>    <span class="keywordflow">if</span> (!dt.IsTunable()) <span class="keywordflow">continue</span>;</div>
-<div class="line"><a id="l00894" name="l00894"></a><span class="lineno">  894</span>    <span class="keywordflow">switch</span> (field) {</div>
-<div class="line"><a id="l00895" name="l00895"></a><span class="lineno">  895</span>      <span class="keywordflow">case</span> DoubleTelemetryField::TranslationP:</div>
-<div class="line"><a id="l00896" name="l00896"></a><span class="lineno">  896</span>        translationPID.SetP(dt.Get());</div>
-<div class="line"><a id="l00897" name="l00897"></a><span class="lineno">  897</span>        drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#adc49cc20a57908c5817a22a2e4985c48">SetTranslationPID</a>(translationPID);</div>
-<div class="line"><a id="l00898" name="l00898"></a><span class="lineno">  898</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00899" name="l00899"></a><span class="lineno">  899</span>      <span class="keywordflow">case</span> DoubleTelemetryField::TranslationI:</div>
-<div class="line"><a id="l00900" name="l00900"></a><span class="lineno">  900</span>        translationPID.SetI(dt.Get());</div>
-<div class="line"><a id="l00901" name="l00901"></a><span class="lineno">  901</span>        drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#adc49cc20a57908c5817a22a2e4985c48">SetTranslationPID</a>(translationPID);</div>
-<div class="line"><a id="l00902" name="l00902"></a><span class="lineno">  902</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00903" name="l00903"></a><span class="lineno">  903</span>      <span class="keywordflow">case</span> DoubleTelemetryField::TranslationD:</div>
-<div class="line"><a id="l00904" name="l00904"></a><span class="lineno">  904</span>        translationPID.SetD(dt.Get());</div>
-<div class="line"><a id="l00905" name="l00905"></a><span class="lineno">  905</span>        drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#adc49cc20a57908c5817a22a2e4985c48">SetTranslationPID</a>(translationPID);</div>
-<div class="line"><a id="l00906" name="l00906"></a><span class="lineno">  906</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00907" name="l00907"></a><span class="lineno">  907</span>      <span class="keywordflow">case</span> DoubleTelemetryField::RotationP:</div>
-<div class="line"><a id="l00908" name="l00908"></a><span class="lineno">  908</span>        rotationPID.SetP(dt.Get());</div>
-<div class="line"><a id="l00909" name="l00909"></a><span class="lineno">  909</span>        drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ae881543e30eeb1ce4998df10ce868898">SetRotationPID</a>(rotationPID);</div>
-<div class="line"><a id="l00910" name="l00910"></a><span class="lineno">  910</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00911" name="l00911"></a><span class="lineno">  911</span>      <span class="keywordflow">case</span> DoubleTelemetryField::RotationI:</div>
-<div class="line"><a id="l00912" name="l00912"></a><span class="lineno">  912</span>        rotationPID.SetI(dt.Get());</div>
-<div class="line"><a id="l00913" name="l00913"></a><span class="lineno">  913</span>        drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ae881543e30eeb1ce4998df10ce868898">SetRotationPID</a>(rotationPID);</div>
-<div class="line"><a id="l00914" name="l00914"></a><span class="lineno">  914</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00915" name="l00915"></a><span class="lineno">  915</span>      <span class="keywordflow">case</span> DoubleTelemetryField::RotationD:</div>
-<div class="line"><a id="l00916" name="l00916"></a><span class="lineno">  916</span>        rotationPID.SetD(dt.Get());</div>
-<div class="line"><a id="l00917" name="l00917"></a><span class="lineno">  917</span>        drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ae881543e30eeb1ce4998df10ce868898">SetRotationPID</a>(rotationPID);</div>
-<div class="line"><a id="l00918" name="l00918"></a><span class="lineno">  918</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00919" name="l00919"></a><span class="lineno">  919</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesDriveP:</div>
-<div class="line"><a id="l00920" name="l00920"></a><span class="lineno">  920</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
-<div class="line"><a id="l00921" name="l00921"></a><span class="lineno">  921</span>          <span class="keyword">module</span>-&gt;GetDriveMotorController()-&gt;SetKp(dt.Get());</div>
-<div class="line"><a id="l00922" name="l00922"></a><span class="lineno">  922</span>        }</div>
-<div class="line"><a id="l00923" name="l00923"></a><span class="lineno">  923</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00924" name="l00924"></a><span class="lineno">  924</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesDriveI:</div>
-<div class="line"><a id="l00925" name="l00925"></a><span class="lineno">  925</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
-<div class="line"><a id="l00926" name="l00926"></a><span class="lineno">  926</span>          <span class="keyword">module</span>-&gt;GetDriveMotorController()-&gt;SetKi(dt.Get());</div>
-<div class="line"><a id="l00927" name="l00927"></a><span class="lineno">  927</span>        }</div>
-<div class="line"><a id="l00928" name="l00928"></a><span class="lineno">  928</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00929" name="l00929"></a><span class="lineno">  929</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesDriveD:</div>
-<div class="line"><a id="l00930" name="l00930"></a><span class="lineno">  930</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
-<div class="line"><a id="l00931" name="l00931"></a><span class="lineno">  931</span>          <span class="keyword">module</span>-&gt;GetDriveMotorController()-&gt;SetKd(dt.Get());</div>
-<div class="line"><a id="l00932" name="l00932"></a><span class="lineno">  932</span>        }</div>
+<div class="line"><a id="l00826" name="l00826"></a><span class="lineno">  826</span> </div>
+<div class="line"><a id="l00827" name="l00827"></a><span class="lineno">  827</span><span class="keyword">template</span> &lt;std::<span class="keywordtype">size_t</span> NumModules&gt;</div>
+<div class="foldopen" id="foldopen00828" data-start="{" data-end="}">
+<div class="line"><a id="l00828" name="l00828"></a><span class="lineno"><a class="line" href="classyams_1_1telemetry_1_1SwerveDriveTelemetry.html#ae67f6fe766b03e093c519a2abd8ded58">  828</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetry.html#ae67f6fe766b03e093c519a2abd8ded58">SwerveDriveTelemetry::ApplyTuningValues</a>(<a class="code hl_class" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html">mechanisms::swerve::SwerveDrive&lt;NumModules&gt;</a>* drive) {</div>
+<div class="line"><a id="l00829" name="l00829"></a><span class="lineno">  829</span>  <span class="keywordtype">bool</span> nt4Enabled = m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#abd016b4572d2078d56d4614ff47d7807">GetNT4Enabled</a>();</div>
+<div class="line"><a id="l00830" name="l00830"></a><span class="lineno">  830</span> </div>
+<div class="line"><a id="l00831" name="l00831"></a><span class="lineno">  831</span>  <span class="keyword">auto</span>&amp; boolFields = m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a1c715572b5a251a4186d0cd62eb15a11">GetBoolFields</a>();</div>
+<div class="line"><a id="l00832" name="l00832"></a><span class="lineno">  832</span>  <span class="keyword">auto</span>&amp; autoAlignBt = boolFields.at(BooleanTelemetryField::AutoAlignEnabled);</div>
+<div class="line"><a id="l00833" name="l00833"></a><span class="lineno">  833</span>  <span class="keyword">auto</span>&amp; driveTuningBt = boolFields.at(BooleanTelemetryField::ModulesDriveTuningEnabled);</div>
+<div class="line"><a id="l00834" name="l00834"></a><span class="lineno">  834</span>  <span class="keyword">auto</span>&amp; azimuthTuningBt = boolFields.at(BooleanTelemetryField::ModulesAzimuthTuningEnabled);</div>
+<div class="line"><a id="l00835" name="l00835"></a><span class="lineno">  835</span>  <span class="keyword">auto</span>&amp; driveInPlaceBt = boolFields.at(BooleanTelemetryField::ModulesDriveInPlace);</div>
+<div class="line"><a id="l00836" name="l00836"></a><span class="lineno">  836</span> </div>
+<div class="line"><a id="l00837" name="l00837"></a><span class="lineno">  837</span>  <span class="keywordtype">bool</span> autoAlignOn = autoAlignBt.IsEnabled() &amp;&amp; nt4Enabled &amp;&amp; autoAlignBt.Get();</div>
+<div class="line"><a id="l00838" name="l00838"></a><span class="lineno">  838</span>  <span class="keywordtype">bool</span> driveTuningOn = driveTuningBt.IsEnabled() &amp;&amp; nt4Enabled &amp;&amp; driveTuningBt.Get();</div>
+<div class="line"><a id="l00839" name="l00839"></a><span class="lineno">  839</span>  <span class="keywordtype">bool</span> azimuthTuningOn = azimuthTuningBt.IsEnabled() &amp;&amp; nt4Enabled &amp;&amp; azimuthTuningBt.Get();</div>
+<div class="line"><a id="l00840" name="l00840"></a><span class="lineno">  840</span>  <span class="keywordtype">bool</span> driveInPlaceOn = driveInPlaceBt.IsEnabled() &amp;&amp; nt4Enabled &amp;&amp; driveInPlaceBt.Get();</div>
+<div class="line"><a id="l00841" name="l00841"></a><span class="lineno">  841</span> </div>
+<div class="line"><a id="l00842" name="l00842"></a><span class="lineno">  842</span>  <span class="comment">// Only one tuning mode may drive the chassis at a time; enforce priority order</span></div>
+<div class="line"><a id="l00843" name="l00843"></a><span class="lineno">  843</span>  <span class="comment">// (auto-align &gt; drive tuning &gt; azimuth tuning) and force the losers back off in</span></div>
+<div class="line"><a id="l00844" name="l00844"></a><span class="lineno">  844</span>  <span class="comment">// NetworkTables so the dashboard reflects what&#39;s actually happening.</span></div>
+<div class="line"><a id="l00845" name="l00845"></a><span class="lineno">  845</span>  <span class="keywordflow">if</span> (autoAlignOn) {</div>
+<div class="line"><a id="l00846" name="l00846"></a><span class="lineno">  846</span>    <span class="keywordflow">if</span> (driveTuningOn) {</div>
+<div class="line"><a id="l00847" name="l00847"></a><span class="lineno">  847</span>      driveTuningBt.ForceSet(<span class="keyword">false</span>);</div>
+<div class="line"><a id="l00848" name="l00848"></a><span class="lineno">  848</span>      driveTuningOn = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00849" name="l00849"></a><span class="lineno">  849</span>    }</div>
+<div class="line"><a id="l00850" name="l00850"></a><span class="lineno">  850</span>    <span class="keywordflow">if</span> (azimuthTuningOn) {</div>
+<div class="line"><a id="l00851" name="l00851"></a><span class="lineno">  851</span>      azimuthTuningBt.ForceSet(<span class="keyword">false</span>);</div>
+<div class="line"><a id="l00852" name="l00852"></a><span class="lineno">  852</span>      azimuthTuningOn = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00853" name="l00853"></a><span class="lineno">  853</span>    }</div>
+<div class="line"><a id="l00854" name="l00854"></a><span class="lineno">  854</span>  } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (driveTuningOn &amp;&amp; azimuthTuningOn) {</div>
+<div class="line"><a id="l00855" name="l00855"></a><span class="lineno">  855</span>    azimuthTuningBt.ForceSet(<span class="keyword">false</span>);</div>
+<div class="line"><a id="l00856" name="l00856"></a><span class="lineno">  856</span>    azimuthTuningOn = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00857" name="l00857"></a><span class="lineno">  857</span>  }</div>
+<div class="line"><a id="l00858" name="l00858"></a><span class="lineno">  858</span> </div>
+<div class="line"><a id="l00859" name="l00859"></a><span class="lineno">  859</span>  <span class="keywordflow">if</span> (autoAlignOn) {</div>
+<div class="line"><a id="l00860" name="l00860"></a><span class="lineno">  860</span>    <span class="keyword">auto</span>&amp; doubleFields = m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>();</div>
+<div class="line"><a id="l00861" name="l00861"></a><span class="lineno">  861</span>    <span class="keywordtype">double</span> x = doubleFields.at(DoubleTelemetryField::AutoAlignPoseX).Get();</div>
+<div class="line"><a id="l00862" name="l00862"></a><span class="lineno">  862</span>    <span class="keywordtype">double</span> y = doubleFields.at(DoubleTelemetryField::AutoAlignPoseY).Get();</div>
+<div class="line"><a id="l00863" name="l00863"></a><span class="lineno">  863</span>    <span class="keywordtype">double</span> rot = doubleFields.at(DoubleTelemetryField::AutoAlignPoseRotation).Get();</div>
+<div class="line"><a id="l00864" name="l00864"></a><span class="lineno">  864</span>    frc::Pose2d targetPose{units::meter_t{x}, units::meter_t{y},</div>
+<div class="line"><a id="l00865" name="l00865"></a><span class="lineno">  865</span>                           frc::Rotation2d{units::degree_t{rot}}};</div>
+<div class="line"><a id="l00866" name="l00866"></a><span class="lineno">  866</span>    drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a854d53023732eb9fe1c4b1eaceb47efd">SetRobotRelativeChassisSpeeds</a>(drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a1bbfad1bd7e1700064c8432c422bcf5f">DriveToPoseSetpoint</a>(targetPose));</div>
+<div class="line"><a id="l00867" name="l00867"></a><span class="lineno">  867</span>  }</div>
+<div class="line"><a id="l00868" name="l00868"></a><span class="lineno">  868</span> </div>
+<div class="line"><a id="l00869" name="l00869"></a><span class="lineno">  869</span>  <span class="keywordflow">if</span> (driveTuningBt.IsEnabled() &amp;&amp; nt4Enabled) {</div>
+<div class="line"><a id="l00870" name="l00870"></a><span class="lineno">  870</span>    <span class="keyword">auto</span>&amp; modules = drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>();</div>
+<div class="line"><a id="l00871" name="l00871"></a><span class="lineno">  871</span>    <span class="keywordflow">if</span> (driveTuningOn) {</div>
+<div class="line"><a id="l00872" name="l00872"></a><span class="lineno">  872</span>      units::meters_per_second_t velocity{</div>
+<div class="line"><a id="l00873" name="l00873"></a><span class="lineno">  873</span>          m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>().at(DoubleTelemetryField::ModulesDriveVelocity).Get()};</div>
+<div class="line"><a id="l00874" name="l00874"></a><span class="lineno">  874</span>      wpi::array&lt;frc::SwerveModuleState, NumModules&gt; states{wpi::empty_array};</div>
+<div class="line"><a id="l00875" name="l00875"></a><span class="lineno">  875</span>      <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; NumModules; ++i) {</div>
+<div class="line"><a id="l00876" name="l00876"></a><span class="lineno">  876</span>        <span class="keywordflow">if</span> (driveInPlaceOn) {</div>
+<div class="line"><a id="l00877" name="l00877"></a><span class="lineno">  877</span>          <span class="comment">// Point each module tangent to its position around the robot center so a positive</span></div>
+<div class="line"><a id="l00878" name="l00878"></a><span class="lineno">  878</span>          <span class="comment">// velocity spins the robot counter-clockwise (WPILib&#39;s positive rotation direction).</span></div>
+<div class="line"><a id="l00879" name="l00879"></a><span class="lineno">  879</span>          <span class="keyword">auto</span> moduleLocation = *modules[i]-&gt;GetConfig().GetLocation();</div>
+<div class="line"><a id="l00880" name="l00880"></a><span class="lineno">  880</span>          <span class="keyword">auto</span> tangentAngle = moduleLocation.Angle() + frc::Rotation2d{units::degree_t{90}};</div>
+<div class="line"><a id="l00881" name="l00881"></a><span class="lineno">  881</span>          states[i] = frc::SwerveModuleState{velocity, tangentAngle};</div>
+<div class="line"><a id="l00882" name="l00882"></a><span class="lineno">  882</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00883" name="l00883"></a><span class="lineno">  883</span>          states[i] = frc::SwerveModuleState{velocity, frc::Rotation2d{}};</div>
+<div class="line"><a id="l00884" name="l00884"></a><span class="lineno">  884</span>        }</div>
+<div class="line"><a id="l00885" name="l00885"></a><span class="lineno">  885</span>      }</div>
+<div class="line"><a id="l00886" name="l00886"></a><span class="lineno">  886</span>      drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ad6bc7535f773e372ac0a4f90e241a45b">SetSwerveModuleStates</a>(states);</div>
+<div class="line"><a id="l00887" name="l00887"></a><span class="lineno">  887</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!autoAlignOn) {</div>
+<div class="line"><a id="l00888" name="l00888"></a><span class="lineno">  888</span>      <span class="comment">// Drive tuning is off (and auto-align isn&#39;t driving the chassis instead); make sure the</span></div>
+<div class="line"><a id="l00889" name="l00889"></a><span class="lineno">  889</span>      <span class="comment">// modules don&#39;t keep spinning at whatever velocity was last commanded while it was on.</span></div>
+<div class="line"><a id="l00890" name="l00890"></a><span class="lineno">  890</span>      wpi::array&lt;frc::SwerveModuleState, NumModules&gt; states{wpi::empty_array};</div>
+<div class="line"><a id="l00891" name="l00891"></a><span class="lineno">  891</span>      <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; NumModules; ++i) {</div>
+<div class="line"><a id="l00892" name="l00892"></a><span class="lineno">  892</span>        states[i] =</div>
+<div class="line"><a id="l00893" name="l00893"></a><span class="lineno">  893</span>            frc::SwerveModuleState{units::meters_per_second_t{0}, modules[i]-&gt;GetState().angle};</div>
+<div class="line"><a id="l00894" name="l00894"></a><span class="lineno">  894</span>      }</div>
+<div class="line"><a id="l00895" name="l00895"></a><span class="lineno">  895</span>      drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ad6bc7535f773e372ac0a4f90e241a45b">SetSwerveModuleStates</a>(states);</div>
+<div class="line"><a id="l00896" name="l00896"></a><span class="lineno">  896</span>    }</div>
+<div class="line"><a id="l00897" name="l00897"></a><span class="lineno">  897</span>  }</div>
+<div class="line"><a id="l00898" name="l00898"></a><span class="lineno">  898</span> </div>
+<div class="line"><a id="l00899" name="l00899"></a><span class="lineno">  899</span>  <span class="keywordflow">if</span> (azimuthTuningOn) {</div>
+<div class="line"><a id="l00900" name="l00900"></a><span class="lineno">  900</span>    frc::Rotation2d angle{units::degree_t{</div>
+<div class="line"><a id="l00901" name="l00901"></a><span class="lineno">  901</span>        m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>().at(DoubleTelemetryField::ModulesAzimuthAngle).Get()}};</div>
+<div class="line"><a id="l00902" name="l00902"></a><span class="lineno">  902</span>    wpi::array&lt;frc::SwerveModuleState, NumModules&gt; states{wpi::empty_array};</div>
+<div class="line"><a id="l00903" name="l00903"></a><span class="lineno">  903</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; NumModules; ++i) {</div>
+<div class="line"><a id="l00904" name="l00904"></a><span class="lineno">  904</span>      states[i] = frc::SwerveModuleState{units::meters_per_second_t{0}, angle};</div>
+<div class="line"><a id="l00905" name="l00905"></a><span class="lineno">  905</span>    }</div>
+<div class="line"><a id="l00906" name="l00906"></a><span class="lineno">  906</span>    drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ad6bc7535f773e372ac0a4f90e241a45b">SetSwerveModuleStates</a>(states);</div>
+<div class="line"><a id="l00907" name="l00907"></a><span class="lineno">  907</span>  }</div>
+<div class="line"><a id="l00908" name="l00908"></a><span class="lineno">  908</span> </div>
+<div class="line"><a id="l00909" name="l00909"></a><span class="lineno">  909</span>  <span class="keyword">auto</span> translationPID = drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a22ab3edfe3fbd2ece2088977f1d124a7">GetTranslationPID</a>();</div>
+<div class="line"><a id="l00910" name="l00910"></a><span class="lineno">  910</span>  <span class="keyword">auto</span> rotationPID = drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#aa7954d59993672bec71bab3a1f1637e4">GetRotationPID</a>();</div>
+<div class="line"><a id="l00911" name="l00911"></a><span class="lineno">  911</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; [field, dt] : m_config.<a class="code hl_function" href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">GetDoubleFields</a>()) {</div>
+<div class="line"><a id="l00912" name="l00912"></a><span class="lineno">  912</span>    <span class="keywordflow">if</span> (!dt.IsTunable()) <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00913" name="l00913"></a><span class="lineno">  913</span>    <span class="keywordflow">switch</span> (field) {</div>
+<div class="line"><a id="l00914" name="l00914"></a><span class="lineno">  914</span>      <span class="keywordflow">case</span> DoubleTelemetryField::TranslationP:</div>
+<div class="line"><a id="l00915" name="l00915"></a><span class="lineno">  915</span>        translationPID.SetP(dt.Get());</div>
+<div class="line"><a id="l00916" name="l00916"></a><span class="lineno">  916</span>        drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#adc49cc20a57908c5817a22a2e4985c48">SetTranslationPID</a>(translationPID);</div>
+<div class="line"><a id="l00917" name="l00917"></a><span class="lineno">  917</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00918" name="l00918"></a><span class="lineno">  918</span>      <span class="keywordflow">case</span> DoubleTelemetryField::TranslationI:</div>
+<div class="line"><a id="l00919" name="l00919"></a><span class="lineno">  919</span>        translationPID.SetI(dt.Get());</div>
+<div class="line"><a id="l00920" name="l00920"></a><span class="lineno">  920</span>        drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#adc49cc20a57908c5817a22a2e4985c48">SetTranslationPID</a>(translationPID);</div>
+<div class="line"><a id="l00921" name="l00921"></a><span class="lineno">  921</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00922" name="l00922"></a><span class="lineno">  922</span>      <span class="keywordflow">case</span> DoubleTelemetryField::TranslationD:</div>
+<div class="line"><a id="l00923" name="l00923"></a><span class="lineno">  923</span>        translationPID.SetD(dt.Get());</div>
+<div class="line"><a id="l00924" name="l00924"></a><span class="lineno">  924</span>        drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#adc49cc20a57908c5817a22a2e4985c48">SetTranslationPID</a>(translationPID);</div>
+<div class="line"><a id="l00925" name="l00925"></a><span class="lineno">  925</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00926" name="l00926"></a><span class="lineno">  926</span>      <span class="keywordflow">case</span> DoubleTelemetryField::RotationP:</div>
+<div class="line"><a id="l00927" name="l00927"></a><span class="lineno">  927</span>        rotationPID.SetP(dt.Get());</div>
+<div class="line"><a id="l00928" name="l00928"></a><span class="lineno">  928</span>        drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ae881543e30eeb1ce4998df10ce868898">SetRotationPID</a>(rotationPID);</div>
+<div class="line"><a id="l00929" name="l00929"></a><span class="lineno">  929</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00930" name="l00930"></a><span class="lineno">  930</span>      <span class="keywordflow">case</span> DoubleTelemetryField::RotationI:</div>
+<div class="line"><a id="l00931" name="l00931"></a><span class="lineno">  931</span>        rotationPID.SetI(dt.Get());</div>
+<div class="line"><a id="l00932" name="l00932"></a><span class="lineno">  932</span>        drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ae881543e30eeb1ce4998df10ce868898">SetRotationPID</a>(rotationPID);</div>
 <div class="line"><a id="l00933" name="l00933"></a><span class="lineno">  933</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00934" name="l00934"></a><span class="lineno">  934</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesAzimuthP:</div>
-<div class="line"><a id="l00935" name="l00935"></a><span class="lineno">  935</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
-<div class="line"><a id="l00936" name="l00936"></a><span class="lineno">  936</span>          <span class="keyword">module</span>-&gt;GetAzimuthMotorController()-&gt;SetKp(dt.Get());</div>
-<div class="line"><a id="l00937" name="l00937"></a><span class="lineno">  937</span>        }</div>
-<div class="line"><a id="l00938" name="l00938"></a><span class="lineno">  938</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00939" name="l00939"></a><span class="lineno">  939</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesAzimuthI:</div>
-<div class="line"><a id="l00940" name="l00940"></a><span class="lineno">  940</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
-<div class="line"><a id="l00941" name="l00941"></a><span class="lineno">  941</span>          <span class="keyword">module</span>-&gt;GetAzimuthMotorController()-&gt;SetKi(dt.Get());</div>
-<div class="line"><a id="l00942" name="l00942"></a><span class="lineno">  942</span>        }</div>
-<div class="line"><a id="l00943" name="l00943"></a><span class="lineno">  943</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00944" name="l00944"></a><span class="lineno">  944</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesAzimuthD:</div>
-<div class="line"><a id="l00945" name="l00945"></a><span class="lineno">  945</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
-<div class="line"><a id="l00946" name="l00946"></a><span class="lineno">  946</span>          <span class="keyword">module</span>-&gt;GetAzimuthMotorController()-&gt;SetKd(dt.Get());</div>
-<div class="line"><a id="l00947" name="l00947"></a><span class="lineno">  947</span>        }</div>
-<div class="line"><a id="l00948" name="l00948"></a><span class="lineno">  948</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00949" name="l00949"></a><span class="lineno">  949</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesDriveKs:</div>
-<div class="line"><a id="l00950" name="l00950"></a><span class="lineno">  950</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
-<div class="line"><a id="l00951" name="l00951"></a><span class="lineno">  951</span>          <span class="keyword">module</span>-&gt;GetDriveMotorController()-&gt;SetKs(dt.Get());</div>
-<div class="line"><a id="l00952" name="l00952"></a><span class="lineno">  952</span>        }</div>
-<div class="line"><a id="l00953" name="l00953"></a><span class="lineno">  953</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00954" name="l00954"></a><span class="lineno">  954</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesDriveKv:</div>
-<div class="line"><a id="l00955" name="l00955"></a><span class="lineno">  955</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
-<div class="line"><a id="l00956" name="l00956"></a><span class="lineno">  956</span>          <span class="keyword">module</span>-&gt;GetDriveMotorController()-&gt;SetKv(dt.Get());</div>
-<div class="line"><a id="l00957" name="l00957"></a><span class="lineno">  957</span>        }</div>
-<div class="line"><a id="l00958" name="l00958"></a><span class="lineno">  958</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00959" name="l00959"></a><span class="lineno">  959</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesDriveKa:</div>
-<div class="line"><a id="l00960" name="l00960"></a><span class="lineno">  960</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
-<div class="line"><a id="l00961" name="l00961"></a><span class="lineno">  961</span>          <span class="keyword">module</span>-&gt;GetDriveMotorController()-&gt;SetKa(dt.Get());</div>
-<div class="line"><a id="l00962" name="l00962"></a><span class="lineno">  962</span>        }</div>
-<div class="line"><a id="l00963" name="l00963"></a><span class="lineno">  963</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00964" name="l00964"></a><span class="lineno">  964</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesAzimuthKs:</div>
-<div class="line"><a id="l00965" name="l00965"></a><span class="lineno">  965</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
-<div class="line"><a id="l00966" name="l00966"></a><span class="lineno">  966</span>          <span class="keyword">module</span>-&gt;GetAzimuthMotorController()-&gt;SetKs(dt.Get());</div>
-<div class="line"><a id="l00967" name="l00967"></a><span class="lineno">  967</span>        }</div>
-<div class="line"><a id="l00968" name="l00968"></a><span class="lineno">  968</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00969" name="l00969"></a><span class="lineno">  969</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesAzimuthKv:</div>
-<div class="line"><a id="l00970" name="l00970"></a><span class="lineno">  970</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
-<div class="line"><a id="l00971" name="l00971"></a><span class="lineno">  971</span>          <span class="keyword">module</span>-&gt;GetAzimuthMotorController()-&gt;SetKv(dt.Get());</div>
-<div class="line"><a id="l00972" name="l00972"></a><span class="lineno">  972</span>        }</div>
-<div class="line"><a id="l00973" name="l00973"></a><span class="lineno">  973</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00974" name="l00974"></a><span class="lineno">  974</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesAzimuthKa:</div>
-<div class="line"><a id="l00975" name="l00975"></a><span class="lineno">  975</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
-<div class="line"><a id="l00976" name="l00976"></a><span class="lineno">  976</span>          <span class="keyword">module</span>-&gt;GetAzimuthMotorController()-&gt;SetKa(dt.Get());</div>
-<div class="line"><a id="l00977" name="l00977"></a><span class="lineno">  977</span>        }</div>
-<div class="line"><a id="l00978" name="l00978"></a><span class="lineno">  978</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00979" name="l00979"></a><span class="lineno">  979</span>      <span class="keywordflow">default</span>:</div>
-<div class="line"><a id="l00980" name="l00980"></a><span class="lineno">  980</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00981" name="l00981"></a><span class="lineno">  981</span>    }</div>
-<div class="line"><a id="l00982" name="l00982"></a><span class="lineno">  982</span>  }</div>
-<div class="line"><a id="l00983" name="l00983"></a><span class="lineno">  983</span>}</div>
+<div class="line"><a id="l00934" name="l00934"></a><span class="lineno">  934</span>      <span class="keywordflow">case</span> DoubleTelemetryField::RotationD:</div>
+<div class="line"><a id="l00935" name="l00935"></a><span class="lineno">  935</span>        rotationPID.SetD(dt.Get());</div>
+<div class="line"><a id="l00936" name="l00936"></a><span class="lineno">  936</span>        drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ae881543e30eeb1ce4998df10ce868898">SetRotationPID</a>(rotationPID);</div>
+<div class="line"><a id="l00937" name="l00937"></a><span class="lineno">  937</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00938" name="l00938"></a><span class="lineno">  938</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesDriveP:</div>
+<div class="line"><a id="l00939" name="l00939"></a><span class="lineno">  939</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
+<div class="line"><a id="l00940" name="l00940"></a><span class="lineno">  940</span>          <span class="keyword">module</span>-&gt;GetDriveMotorController()-&gt;SetKp(dt.Get());</div>
+<div class="line"><a id="l00941" name="l00941"></a><span class="lineno">  941</span>        }</div>
+<div class="line"><a id="l00942" name="l00942"></a><span class="lineno">  942</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00943" name="l00943"></a><span class="lineno">  943</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesDriveI:</div>
+<div class="line"><a id="l00944" name="l00944"></a><span class="lineno">  944</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
+<div class="line"><a id="l00945" name="l00945"></a><span class="lineno">  945</span>          <span class="keyword">module</span>-&gt;GetDriveMotorController()-&gt;SetKi(dt.Get());</div>
+<div class="line"><a id="l00946" name="l00946"></a><span class="lineno">  946</span>        }</div>
+<div class="line"><a id="l00947" name="l00947"></a><span class="lineno">  947</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00948" name="l00948"></a><span class="lineno">  948</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesDriveD:</div>
+<div class="line"><a id="l00949" name="l00949"></a><span class="lineno">  949</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
+<div class="line"><a id="l00950" name="l00950"></a><span class="lineno">  950</span>          <span class="keyword">module</span>-&gt;GetDriveMotorController()-&gt;SetKd(dt.Get());</div>
+<div class="line"><a id="l00951" name="l00951"></a><span class="lineno">  951</span>        }</div>
+<div class="line"><a id="l00952" name="l00952"></a><span class="lineno">  952</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00953" name="l00953"></a><span class="lineno">  953</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesAzimuthP:</div>
+<div class="line"><a id="l00954" name="l00954"></a><span class="lineno">  954</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
+<div class="line"><a id="l00955" name="l00955"></a><span class="lineno">  955</span>          <span class="keyword">module</span>-&gt;GetAzimuthMotorController()-&gt;SetKp(dt.Get());</div>
+<div class="line"><a id="l00956" name="l00956"></a><span class="lineno">  956</span>        }</div>
+<div class="line"><a id="l00957" name="l00957"></a><span class="lineno">  957</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00958" name="l00958"></a><span class="lineno">  958</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesAzimuthI:</div>
+<div class="line"><a id="l00959" name="l00959"></a><span class="lineno">  959</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
+<div class="line"><a id="l00960" name="l00960"></a><span class="lineno">  960</span>          <span class="keyword">module</span>-&gt;GetAzimuthMotorController()-&gt;SetKi(dt.Get());</div>
+<div class="line"><a id="l00961" name="l00961"></a><span class="lineno">  961</span>        }</div>
+<div class="line"><a id="l00962" name="l00962"></a><span class="lineno">  962</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00963" name="l00963"></a><span class="lineno">  963</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesAzimuthD:</div>
+<div class="line"><a id="l00964" name="l00964"></a><span class="lineno">  964</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
+<div class="line"><a id="l00965" name="l00965"></a><span class="lineno">  965</span>          <span class="keyword">module</span>-&gt;GetAzimuthMotorController()-&gt;SetKd(dt.Get());</div>
+<div class="line"><a id="l00966" name="l00966"></a><span class="lineno">  966</span>        }</div>
+<div class="line"><a id="l00967" name="l00967"></a><span class="lineno">  967</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00968" name="l00968"></a><span class="lineno">  968</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesDriveKs:</div>
+<div class="line"><a id="l00969" name="l00969"></a><span class="lineno">  969</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
+<div class="line"><a id="l00970" name="l00970"></a><span class="lineno">  970</span>          <span class="keyword">module</span>-&gt;GetDriveMotorController()-&gt;SetKs(dt.Get());</div>
+<div class="line"><a id="l00971" name="l00971"></a><span class="lineno">  971</span>        }</div>
+<div class="line"><a id="l00972" name="l00972"></a><span class="lineno">  972</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00973" name="l00973"></a><span class="lineno">  973</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesDriveKv:</div>
+<div class="line"><a id="l00974" name="l00974"></a><span class="lineno">  974</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
+<div class="line"><a id="l00975" name="l00975"></a><span class="lineno">  975</span>          <span class="keyword">module</span>-&gt;GetDriveMotorController()-&gt;SetKv(dt.Get());</div>
+<div class="line"><a id="l00976" name="l00976"></a><span class="lineno">  976</span>        }</div>
+<div class="line"><a id="l00977" name="l00977"></a><span class="lineno">  977</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00978" name="l00978"></a><span class="lineno">  978</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesDriveKa:</div>
+<div class="line"><a id="l00979" name="l00979"></a><span class="lineno">  979</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
+<div class="line"><a id="l00980" name="l00980"></a><span class="lineno">  980</span>          <span class="keyword">module</span>-&gt;GetDriveMotorController()-&gt;SetKa(dt.Get());</div>
+<div class="line"><a id="l00981" name="l00981"></a><span class="lineno">  981</span>        }</div>
+<div class="line"><a id="l00982" name="l00982"></a><span class="lineno">  982</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00983" name="l00983"></a><span class="lineno">  983</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesAzimuthKs:</div>
+<div class="line"><a id="l00984" name="l00984"></a><span class="lineno">  984</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
+<div class="line"><a id="l00985" name="l00985"></a><span class="lineno">  985</span>          <span class="keyword">module</span>-&gt;GetAzimuthMotorController()-&gt;SetKs(dt.Get());</div>
+<div class="line"><a id="l00986" name="l00986"></a><span class="lineno">  986</span>        }</div>
+<div class="line"><a id="l00987" name="l00987"></a><span class="lineno">  987</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00988" name="l00988"></a><span class="lineno">  988</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesAzimuthKv:</div>
+<div class="line"><a id="l00989" name="l00989"></a><span class="lineno">  989</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
+<div class="line"><a id="l00990" name="l00990"></a><span class="lineno">  990</span>          <span class="keyword">module</span>-&gt;GetAzimuthMotorController()-&gt;SetKv(dt.Get());</div>
+<div class="line"><a id="l00991" name="l00991"></a><span class="lineno">  991</span>        }</div>
+<div class="line"><a id="l00992" name="l00992"></a><span class="lineno">  992</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00993" name="l00993"></a><span class="lineno">  993</span>      <span class="keywordflow">case</span> DoubleTelemetryField::ModulesAzimuthKa:</div>
+<div class="line"><a id="l00994" name="l00994"></a><span class="lineno">  994</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span>* module : drive-&gt;<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ab8f579c31c5bcd8d76ddc2bdaeb9e977">GetConfig</a>().<a class="code hl_function" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDriveConfig.html#a332b8abc8746c931e23e0e4b2fdaadb4">GetModules</a>()) {</div>
+<div class="line"><a id="l00995" name="l00995"></a><span class="lineno">  995</span>          <span class="keyword">module</span>-&gt;GetAzimuthMotorController()-&gt;SetKa(dt.Get());</div>
+<div class="line"><a id="l00996" name="l00996"></a><span class="lineno">  996</span>        }</div>
+<div class="line"><a id="l00997" name="l00997"></a><span class="lineno">  997</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00998" name="l00998"></a><span class="lineno">  998</span>      <span class="keywordflow">default</span>:</div>
+<div class="line"><a id="l00999" name="l00999"></a><span class="lineno">  999</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l01000" name="l01000"></a><span class="lineno"> 1000</span>    }</div>
+<div class="line"><a id="l01001" name="l01001"></a><span class="lineno"> 1001</span>  }</div>
+<div class="line"><a id="l01002" name="l01002"></a><span class="lineno"> 1002</span>}</div>
 </div>
-<div class="line"><a id="l00984" name="l00984"></a><span class="lineno">  984</span> </div>
-<div class="line"><a id="l00985" name="l00985"></a><span class="lineno">  985</span>}  <span class="comment">// namespace yams::telemetry</span></div>
+<div class="line"><a id="l01003" name="l01003"></a><span class="lineno"> 1003</span> </div>
+<div class="line"><a id="l01004" name="l01004"></a><span class="lineno"> 1004</span>}  <span class="comment">// namespace yams::telemetry</span></div>
 </div>
 <div class="ttc" id="aMechanismTelemetry_8hpp_html"><div class="ttname"><a href="MechanismTelemetry_8hpp.html">MechanismTelemetry.hpp</a></div></div>
 <div class="ttc" id="aSwerveDriveConfig_8hpp_html"><div class="ttname"><a href="SwerveDriveConfig_8hpp.html">SwerveDriveConfig.hpp</a></div></div>
@@ -949,9 +968,9 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aclassyams_1_1telemetry_1_1SwerveDriveTelemetryConfig_html_a5b53d2bdb29d5384f7d11e5a632540f8"><div class="ttname"><a href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a5b53d2bdb29d5384f7d11e5a632540f8">yams::telemetry::SwerveDriveTelemetryConfig::GetDoubleFields</a></div><div class="ttdeci">std::unordered_map&lt; DoubleTelemetryField, DoubleTelemetry&lt; DoubleTelemetryField &gt; &gt; &amp; GetDoubleFields()</div></div>
 <div class="ttc" id="aclassyams_1_1telemetry_1_1SwerveDriveTelemetryConfig_html_abd016b4572d2078d56d4614ff47d7807"><div class="ttname"><a href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#abd016b4572d2078d56d4614ff47d7807">yams::telemetry::SwerveDriveTelemetryConfig::GetNT4Enabled</a></div><div class="ttdeci">bool GetNT4Enabled() const</div></div>
 <div class="ttc" id="aclassyams_1_1telemetry_1_1SwerveDriveTelemetryConfig_html_ade0926ade9e7c5bb55a0a11ff4c93b91"><div class="ttname"><a href="classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#ade0926ade9e7c5bb55a0a11ff4c93b91">yams::telemetry::SwerveDriveTelemetryConfig::GetChassisSpeedsFields</a></div><div class="ttdeci">std::unordered_map&lt; StructTelemetryField, StructTelemetry&lt; frc::ChassisSpeeds, StructTelemetryField &gt; &gt; &amp; GetChassisSpeedsFields()</div></div>
-<div class="ttc" id="aclassyams_1_1telemetry_1_1SwerveDriveTelemetry_html_a0b312f19bfe577c3d417d824c5279f13"><div class="ttname"><a href="classyams_1_1telemetry_1_1SwerveDriveTelemetry.html#a0b312f19bfe577c3d417d824c5279f13">yams::telemetry::SwerveDriveTelemetry::Publish</a></div><div class="ttdeci">void Publish(mechanisms::swerve::SwerveDrive&lt; NumModules &gt; *drive)</div><div class="ttdef"><b>Definition</b> SwerveDrive.hpp:752</div></div>
+<div class="ttc" id="aclassyams_1_1telemetry_1_1SwerveDriveTelemetry_html_a0b312f19bfe577c3d417d824c5279f13"><div class="ttname"><a href="classyams_1_1telemetry_1_1SwerveDriveTelemetry.html#a0b312f19bfe577c3d417d824c5279f13">yams::telemetry::SwerveDriveTelemetry::Publish</a></div><div class="ttdeci">void Publish(mechanisms::swerve::SwerveDrive&lt; NumModules &gt; *drive)</div><div class="ttdef"><b>Definition</b> SwerveDrive.hpp:771</div></div>
 <div class="ttc" id="aclassyams_1_1telemetry_1_1SwerveDriveTelemetry_html_a6a66b070215c69a440270a650c6b3915"><div class="ttname"><a href="classyams_1_1telemetry_1_1SwerveDriveTelemetry.html#a6a66b070215c69a440270a650c6b3915">yams::telemetry::SwerveDriveTelemetry::SetupTelemetry</a></div><div class="ttdeci">void SetupTelemetry(mechanisms::swerve::SwerveDrive&lt; NumModules &gt; *drive)</div><div class="ttdef"><b>Definition</b> SwerveDrive.hpp:653</div></div>
-<div class="ttc" id="aclassyams_1_1telemetry_1_1SwerveDriveTelemetry_html_ae67f6fe766b03e093c519a2abd8ded58"><div class="ttname"><a href="classyams_1_1telemetry_1_1SwerveDriveTelemetry.html#ae67f6fe766b03e093c519a2abd8ded58">yams::telemetry::SwerveDriveTelemetry::ApplyTuningValues</a></div><div class="ttdeci">void ApplyTuningValues(mechanisms::swerve::SwerveDrive&lt; NumModules &gt; *drive)</div><div class="ttdef"><b>Definition</b> SwerveDrive.hpp:809</div></div>
+<div class="ttc" id="aclassyams_1_1telemetry_1_1SwerveDriveTelemetry_html_ae67f6fe766b03e093c519a2abd8ded58"><div class="ttname"><a href="classyams_1_1telemetry_1_1SwerveDriveTelemetry.html#ae67f6fe766b03e093c519a2abd8ded58">yams::telemetry::SwerveDriveTelemetry::ApplyTuningValues</a></div><div class="ttdeci">void ApplyTuningValues(mechanisms::swerve::SwerveDrive&lt; NumModules &gt; *drive)</div><div class="ttdef"><b>Definition</b> SwerveDrive.hpp:828</div></div>
 <div class="ttc" id="anamespaceyams_1_1mechanisms_1_1swerve_html"><div class="ttname"><a href="namespaceyams_1_1mechanisms_1_1swerve.html">yams::mechanisms::swerve</a></div><div class="ttdef"><b>Definition</b> SwerveDrive.hpp:45</div></div>
 <div class="ttc" id="anamespaceyams_1_1telemetry_html"><div class="ttname"><a href="namespaceyams_1_1telemetry.html">yams::telemetry</a></div><div class="ttdef"><b>Definition</b> SwerveDrive.hpp:644</div></div>
 </div><!-- fragment --></div><!-- contents -->

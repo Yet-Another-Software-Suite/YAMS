@@ -90,18 +90,19 @@ loadScripts(document, 'script');</script>
  <p>Common triggers include:
 
  <ul>
-   <li><code>withSmartMotorControllers(SmartMotorController, SmartMotorController)</code> called more
-       than once — the left or right motor controller has already been set
-   <li>The left and right motor controllers do not share the same WPILib <code>Subsystem</code>
-       instance
-   <li>Starting tilt or twist angle not configured (<code>withTiltStartingPosition(Angle)</code> /
-       <code>withTwistStartingPosition(Angle)</code>)
-   <li>Mechanism length not set (<code>withLength(Distance)</code>) — required to compute the current
-       end-effector position
-   <li>Twist MOI not set (<code>withMOI()</code>) — required for simulation
+ <li><code>withSmartMotorControllers(SmartMotorController, SmartMotorController)</code> called more
+ than once — the left or right motor controller has already been set
+ <li>The left and right motor controllers do not share the same WPILib <code>Subsystem</code>
+ instance
+ <li>Starting tilt or twist angle not configured (<code>withTiltStartingPosition(Angle)</code> /
+ <code>withTwistStartingPosition(Angle)</code>)
+ <li>Mechanism length not set (<code>withLength(Distance)</code>) — required to compute the current
+ end-effector position
+ <li>Twist MOI not set (<code>withMOI()</code>) — required for simulation
  </ul>
 
- <p><b>Resolution:</b> Call <code>DifferentialMechanismConfig.withSmartMotorControllers(left, right)</code> exactly once, ensure both motors reference the same subsystem via <code>SmartMotorControllerConfig.withSubsystem(Subsystem)</code>, and provide all required geometry and
+ <p><b>Resolution:</b> Call <code>DifferentialMechanismConfig.withSmartMotorControllers(left, right)</code> exactly once, ensure both motors reference the same subsystem via <code>SmartMotorControllerConfig.withSubsystem(Subsystem)</code>, and provide all
+ required geometry and
  simulation parameters.
 
  <p>Example minimal configuration:

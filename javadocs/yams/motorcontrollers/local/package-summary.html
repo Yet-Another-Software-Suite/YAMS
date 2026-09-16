@@ -71,8 +71,8 @@ loadScripts(document, 'script');</script>
  <h2>Core type</h2>
 
  <ul>
-   <li><a href="SparkWrapper.html" title="class in yams.motorcontrollers.local"><code>SparkWrapper</code></a> — unified adapter for both the SPARK MAX
-       (NEO, NEO 550) and SPARK FLEX (NEO Vortex).
+ <li><a href="SparkWrapper.html" title="class in yams.motorcontrollers.local"><code>SparkWrapper</code></a> — unified adapter for both the SPARK MAX
+ (NEO, NEO 550) and SPARK FLEX (NEO Vortex).
  </ul>
 
  <h2>Absolute encoder discontinuity</h2>
@@ -82,10 +82,10 @@ loadScripts(document, 'script');</script>
  where the sensor wraps around. Set this via <a href="../SmartMotorControllerConfig.html#withExternalEncoderDiscontinuityPoint(edu.wpi.first.units.measure.Angle)"><code>SmartMotorControllerConfig.withExternalEncoderDiscontinuityPoint(edu.wpi.first.units.measure.Angle)</code></a>:
 
  <ul>
-   <li><code>0.5</code> — sensor range <code>[-0.5, 0.5)</code>: useful when the mechanism travels through
-       zero and must not have a wrap at the midpoint of travel.
-   <li><code>1.0</code> — sensor range <code>[0, 1)</code>: useful when the mechanism only moves in the
-       positive direction and zero is never crossed.
+ <li><code>0.5</code> — sensor range <code>[-0.5, 0.5)</code>: useful when the mechanism travels through
+ zero and must not have a wrap at the midpoint of travel.
+ <li><code>1.0</code> — sensor range <code>[0, 1)</code>: useful when the mechanism only moves in the
+ positive direction and zero is never crossed.
  </ul>
 
  Omitting this setting when an absolute encoder is attached will produce a configuration warning

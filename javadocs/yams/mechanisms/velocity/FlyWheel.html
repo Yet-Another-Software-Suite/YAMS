@@ -110,8 +110,8 @@ loadScripts(document, 'script');</script>
  <pre><code>
  @Override
  public void periodic() {
-     shooter.simIterate();       // advances the DCMotorSim each loop
-     shooter.updateTelemetry();  // pushes data to SmartDashboard / AdvantageScope
+ shooter.simIterate(); // advances the DCMotorSim each loop
+ shooter.updateTelemetry(); // pushes data to SmartDashboard / AdvantageScope
  }
  </code></pre></div>
 </section>
@@ -413,7 +413,7 @@ loadScripts(document, 'script');</script>
 <dd><code>velocity</code> - <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link"><code>Supplier</code></a> of <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/LinearVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>LinearVelocity</code></a> or <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a></dd>
 <dt>Returns:</dt>
 <dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/RunCommand.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>RunCommand</code></a> which runs the FlyWheel to the
-     desired velocity with the closed loop controller.</dd>
+         desired velocity with the closed loop controller.</dd>
 </dl>
 </section>
 </li>
@@ -444,7 +444,7 @@ loadScripts(document, 'script');</script>
 <dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> that runs the FlyWheel to the desired velocity then moves on.</dd>
 <dt>Implementation Note:</dt>
 <dd>If you are using this function, try not to have a default command or else the default
-     command will override the setting after this command ends.</dd>
+           command will override the setting after this command ends.</dd>
 </dl>
 </section>
 </li>
@@ -462,7 +462,7 @@ loadScripts(document, 'script');</script>
 <dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> that runs the FlyWheel to the desired velocity then moves on.</dd>
 <dt>Implementation Note:</dt>
 <dd>If you are using this function, try not to have a default command or else the default
-     command will override the setting after this command ends.</dd>
+           command will override the setting after this command ends.</dd>
 </dl>
 </section>
 </li>
@@ -480,7 +480,7 @@ loadScripts(document, 'script');</script>
 <dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> that runs the FlyWheel to the desired velocity then moves on.</dd>
 <dt>Implementation Note:</dt>
 <dd>If you are using this function, try not to have a default command or else the default
-     command will override the setting after this command ends.</dd>
+           command will override the setting after this command ends.</dd>
 </dl>
 </section>
 </li>
@@ -498,7 +498,7 @@ loadScripts(document, 'script');</script>
 <dd><a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html" title="class or interface in edu.wpi.first.wpilibj2.command" class="external-link"><code>Command</code></a> that runs the FlyWheel to the desired velocity then moves on.</dd>
 <dt>Implementation Note:</dt>
 <dd>If you are using this function, try not to have a default command or else the default
-     command will override the setting after this command ends.</dd>
+           command will override the setting after this command ends.</dd>
 </dl>
 </section>
 </li>

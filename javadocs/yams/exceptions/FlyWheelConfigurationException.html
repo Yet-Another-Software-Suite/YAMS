@@ -89,12 +89,12 @@ loadScripts(document, 'script');</script>
  <p>Common triggers include:
 
  <ul>
-   <li><code>withSmartMotorController(SmartMotorController)</code> called more than once on the same
-       config
+ <li><code>withSmartMotorController(SmartMotorController)</code> called more than once on the same
+ config
  <li>Speedometer max velocity not set when speedometer simulation is requested (<code>withSpeedometerSimulation(AngularVelocity)</code>)
  <li>Flywheel diameter not set when surface speed calculations are needed (<code>withDiameter(Distance)</code>)
-   <li>MOI (moment of inertia) not derivable — neither diameter+mass nor an explicit MOI was
-       provided
+ <li>MOI (moment of inertia) not derivable — neither diameter+mass nor an explicit MOI was
+ provided
  </ul>
 
  <p><b>Resolution:</b> Ensure <code>FlyWheelConfig.withSmartMotorController(SmartMotorController)</code> is called exactly once, <code>FlyWheelConfig.withDiameter(Distance)</code> and <code>FlyWheelConfig.withMass(Mass)</code> are set (or

@@ -132,7 +132,7 @@ $(function() { codefold.init(0); });
 <div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    std::shared_ptr&lt;wpi::log::StructLogEntry&lt;T&gt;&gt; logEntry;</div>
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    <span class="keywordflow">if</span> (m_dataLogName) {</div>
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>      logEntry = std::make_shared&lt;wpi::log::StructLogEntry&lt;T&gt;&gt;(frc::DataLogManager::GetLog(),</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>                                                                *m_dataLogName + <span class="stringliteral">&quot;/&quot;</span> + key);</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>                                                               *m_dataLogName + <span class="stringliteral">&quot;/&quot;</span> + key);</div>
 <div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    }</div>
 <div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    <span class="keywordflow">return</span> [publisher, logEntry](<span class="keyword">const</span> T&amp; value) {</div>
 <div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>      publisher-&gt;Set(value);</div>
@@ -148,8 +148,8 @@ $(function() { codefold.init(0); });
 <div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>        m_networkTable-&gt;template GetStructArrayTopic&lt;T&gt;(key).Publish());</div>
 <div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    std::shared_ptr&lt;wpi::log::StructArrayLogEntry&lt;T&gt;&gt; logEntry;</div>
 <div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <span class="keywordflow">if</span> (m_dataLogName) {</div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>      logEntry = std::make_shared&lt;wpi::log::StructArrayLogEntry&lt;T&gt;&gt;(</div>
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>          frc::DataLogManager::GetLog(), *m_dataLogName + <span class="stringliteral">&quot;/&quot;</span> + key);</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>      logEntry = std::make_shared&lt;wpi::log::StructArrayLogEntry&lt;T&gt;&gt;(frc::DataLogManager::GetLog(),</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>                                                                    *m_dataLogName + <span class="stringliteral">&quot;/&quot;</span> + key);</div>
 <div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    }</div>
 <div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    <span class="keywordflow">return</span> [publisher, logEntry](std::span&lt;const T&gt; value) {</div>
 <div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>      publisher-&gt;Set(value);</div>

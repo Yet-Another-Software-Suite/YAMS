@@ -92,12 +92,12 @@ loadScripts(document, 'script');</script>
  <h2>Mechanism Lifecycle</h2>
 
  <ol>
-   <li>Configure a motor controller: <a href="../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>
-   <li>Instantiate the appropriate wrapper: <a href="../motorcontrollers/local/SparkWrapper.html" title="class in yams.motorcontrollers.local"><code>SparkWrapper</code></a>
+ <li>Configure a motor controller: <a href="../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a>
+ <li>Instantiate the appropriate wrapper: <a href="../motorcontrollers/local/SparkWrapper.html" title="class in yams.motorcontrollers.local"><code>SparkWrapper</code></a>
  (REV), <a href="../motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.motorcontrollers.remote"><code>TalonFXWrapper</code></a> or <a href="../motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.motorcontrollers.remote"><code>TalonFXSWrapper</code></a> (CTRE)
-   <li>Build a mechanism config (e.g., <a href="config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a>)
-   <li>Construct the concrete mechanism (e.g., <a href="positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a>)
-   <li>Schedule setpoint commands and bind triggers
+ <li>Build a mechanism config (e.g., <a href="config/ArmConfig.html" title="class in yams.mechanisms.config"><code>ArmConfig</code></a>)
+ <li>Construct the concrete mechanism (e.g., <a href="positional/Arm.html" title="class in yams.mechanisms.positional"><code>Arm</code></a>)
+ <li>Schedule setpoint commands and bind triggers
  </ol>
 
  <p><b>Periodic calls required:</b> <a href="#simIterate()"><code>simIterate()</code></a>, <a href="#updateTelemetry()"><code>updateTelemetry()</code></a>, and <a href="#visualizationUpdate()"><code>visualizationUpdate()</code></a> must be called periodically — typically from <code>robotPeriodic()</code> — so

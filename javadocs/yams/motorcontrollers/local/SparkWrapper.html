@@ -85,8 +85,8 @@ loadScripts(document, 'script');</script>
  <p><b>External encoder discontinuity point support (SparkAbsoluteEncoder):</b>
 
  <ul>
-   <li><code>0.5</code> rotations — sensor range is [-0.5, 0.5), <code>zeroCentered = true</code>
-   <li><code>1.0</code> rotations — sensor range is [0, 1), <code>zeroCentered = false</code>
+ <li><code>0.5</code> rotations — sensor range is [-0.5, 0.5), <code>zeroCentered = true</code>
+ <li><code>1.0</code> rotations — sensor range is [0, 1), <code>zeroCentered = false</code>
  </ul>
 
  A discontinuity point <b>must</b> be configured via <a href="../SmartMotorControllerConfig.html#withExternalEncoderDiscontinuityPoint(edu.wpi.first.units.measure.Angle)"><code>SmartMotorControllerConfig.withExternalEncoderDiscontinuityPoint(edu.wpi.first.units.measure.Angle)</code></a> whenever
@@ -536,7 +536,7 @@ loadScripts(document, 'script');</script>
 <dt>Parameters:</dt>
 <dd><code>controller</code> - <a href="https://codedocs.revrobotics.com/java/com/revrobotics/spark/SparkMax.html" title="class or interface in com.revrobotics.spark" class="external-link"><code>SparkMax</code></a> or <a href="https://codedocs.revrobotics.com/java/com/revrobotics/spark/SparkFlex.html" title="class or interface in com.revrobotics.spark" class="external-link"><code>SparkFlex</code></a></dd>
 <dd><code>motor</code> - <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/system/plant/DCMotor.html" title="class or interface in edu.wpi.first.math.system.plant" class="external-link"><code>DCMotor</code></a> controller by the <a href="https://codedocs.revrobotics.com/java/com/revrobotics/spark/SparkFlex.html" title="class or interface in com.revrobotics.spark" class="external-link"><code>SparkFlex</code></a> or <a href="https://codedocs.revrobotics.com/java/com/revrobotics/spark/SparkMax.html" title="class or interface in com.revrobotics.spark" class="external-link"><code>SparkMax</code></a>. Must be a
-     brushless motor.</dd>
+                   brushless motor.</dd>
 <dd><code>config</code> - <a href="../SmartMotorControllerConfig.html" title="class in yams.motorcontrollers"><code>SmartMotorControllerConfig</code></a> to apply.</dd>
 </dl>
 </section>
@@ -738,7 +738,7 @@ loadScripts(document, 'script');</script>
 <dt>Parameters:</dt>
 <dd><code>angularVelocity</code> - Mechanism <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/AngularVelocity.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>AngularVelocity</code></a> to target.</dd>
 <dd><code>feedforwardForce</code> - Additional feedforward <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/Force.html" title="class or interface in edu.wpi.first.units.measure" class="external-link"><code>Force</code></a> applied to the mechanism, or
-     <code>null</code> for none.</dd>
+                         <code>null</code> for none.</dd>
 </dl>
 </section>
 </li>

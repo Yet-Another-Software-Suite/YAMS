@@ -74,28 +74,28 @@ loadScripts(document, 'script');</script>
  <h2>Mechanism telemetry</h2>
 
  <ul>
-   <li><a href="MechanismTelemetry.html" title="class in yams.telemetry"><code>MechanismTelemetry</code></a> — publishes the high-level state of a mechanism:
-       current position, active setpoint, goal, and status flags. Updated each robot periodic
-       cycle.
+ <li><a href="MechanismTelemetry.html" title="class in yams.telemetry"><code>MechanismTelemetry</code></a> — publishes the high-level state of a mechanism:
+ current position, active setpoint, goal, and status flags. Updated each robot periodic
+ cycle.
  </ul>
 
  <h2>Motor controller telemetry</h2>
 
  <ul>
-   <li><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry"><code>SmartMotorControllerTelemetryConfig</code></a> — fluent builder that selects
-       which signals to publish and under what NetworkTables keys. Signals include duty cycle,
-       applied voltage, velocity, position, supply current, stator current, and device
-       temperature.
+ <li><a href="SmartMotorControllerTelemetryConfig.html" title="class in yams.telemetry"><code>SmartMotorControllerTelemetryConfig</code></a> — fluent builder that selects
+ which signals to publish and under what NetworkTables keys. Signals include duty cycle,
+ applied voltage, velocity, position, supply current, stator current, and device
+ temperature.
  <li><a href="SmartMotorControllerTelemetry.html" title="class in yams.telemetry"><code>SmartMotorControllerTelemetry</code></a> — publisher that consumes a <code>SmartMotorControllerTelemetryConfig</code> and writes the selected signals to NetworkTables on
-       every <code>periodic()</code> call.
+ every <code>periodic()</code> call.
  </ul>
 
  <h2>Lightweight scalar publishers</h2>
 
  <ul>
  <li><a href="BooleanTelemetry.html" title="class in yams.telemetry"><code>BooleanTelemetry</code></a> — lightweight publisher for a single <code>boolean</code> value (e.g. limit switch state, at-setpoint flag).
-   <li><a href="DoubleTelemetry.html" title="class in yams.telemetry"><code>DoubleTelemetry</code></a> — lightweight publisher for a single <code>double</code>
-       value (e.g. a raw sensor reading or computed error).
+ <li><a href="DoubleTelemetry.html" title="class in yams.telemetry"><code>DoubleTelemetry</code></a> — lightweight publisher for a single <code>double</code>
+ value (e.g. a raw sensor reading or computed error).
  </ul>
 
  <h2>Enabling telemetry</h2>

@@ -88,9 +88,9 @@ loadScripts(document, 'script');</script>
  <p>Two <code>derivative()</code> overloads are available:
 
  <ul>
-   <li><a href="#derivative(double)"><code>derivative(double)</code></a> — uses the FPGA clock to measure elapsed time automatically.
-   <li><a href="#derivative(double,edu.wpi.first.units.measure.Time)"><code>derivative(double, edu.wpi.first.units.measure.Time)</code></a> — uses a caller-supplied
-       delta-time (useful when the loop period is already known).
+ <li><a href="#derivative(double)"><code>derivative(double)</code></a> — uses the FPGA clock to measure elapsed time automatically.
+ <li><a href="#derivative(double,edu.wpi.first.units.measure.Time)"><code>derivative(double, edu.wpi.first.units.measure.Time)</code></a> — uses a caller-supplied
+ delta-time (useful when the loop period is already known).
  </ul>
 
  <h2>Example</h2>
@@ -212,10 +212,10 @@ loadScripts(document, 'script');</script>
 <dd><code>dt</code> - Delta time</dd>
 <dt>Returns:</dt>
 <dd>Derivative of the current value from the previous value over the delta time in
-     microseconds.</dd>
+         microseconds.</dd>
 <dt>Implementation Note:</dt>
 <dd>If this function is not called periodically at the dt specified, the derivative will
-     be incorrect</dd>
+           be incorrect</dd>
 </dl>
 </section>
 </li>
@@ -229,7 +229,7 @@ loadScripts(document, 'script');</script>
 <dd><code>current</code> - Current value</dd>
 <dt>Returns:</dt>
 <dd>Derivative of the current value from the previous value over the time since the last
-     call to this in microseconds.</dd>
+         call to this in microseconds.</dd>
 </dl>
 </section>
 </li>
