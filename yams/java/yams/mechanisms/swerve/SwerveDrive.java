@@ -526,9 +526,12 @@ public class SwerveDrive {
     var distance = getDistanceFromPose(targetPose);
     var translationScalar = translationPID.calculate(distance.in(Meters), 0);
     var currentPose = getPose();
-    var poseDifference = currentPose.minus(targetPose);
-    return new ChassisVelocities(poseDifference.getMeasureX().per(Second).times(translationScalar), poseDifference.getMeasureY().per(Second).times(translationScalar), RadiansPerSecond.of(rotationPID.calculate(currentPose.getRotation().getRadians(),
-        targetPose.getRotation().getRadians()))).toRobotRelative(new Rotation2d(getGyroAngle()));
+    // Plain field-frame translation delta (not Pose2d.minus(), which expresses the result in
+    // targetPose's rotated frame and would skew the commanded direction whenever targetPose's
+    // heading is non-zero).
+    var translationDifference = currentPose.getTranslation().minus(targetPose.getTranslation());
+    return new ChassisVelocities(translationDifference.getMeasureX().per(Second).times(translationScalar), translationDifference.getMeasureY().per(Second).times(translationScalar), RadiansPerSecond.of(rotationPID.calculate(currentPose.getRotation()
+        .getRadians(), targetPose.getRotation().getRadians()))).toRobotRelative(new Rotation2d(getGyroAngle()));
   }
 
   /**

@@ -30,9 +30,9 @@ HoodSubsystem::HoodSubsystem() {
   // GearBox::FromReductionStages({3.0, 4.0}): two sequential reductions, 3:1 then 4:1, giving
   // a 12:1 total.  One motor turn moves the hood 1/12 of a turn (30 deg).
   //
-  // WithFeedforward(ArmFeedforward{0, 0, 0, 0}): kS, kG, kV, kA all zeroed out.  kG should be non-zero if
-  // the hood is not balanced (gravity torque changes with angle).  Set it via system ID or
-  // manual tuning: kG = voltage needed to hold the hood at 90 deg from horizontal.
+  // WithFeedforward(ArmFeedforward{0, 0, 0, 0}): kS, kG, kV, kA all zeroed out.  kG should be
+  // non-zero if the hood is not balanced (gravity torque changes with angle).  Set it via system ID
+  // or manual tuning: kG = voltage needed to hold the hood at 90 deg from horizontal.
   //
   // Ramp rates of 0.25 s prevent step-voltage surges on the NEO in both open- and closed-loop.
   m_motorConfig.WithSubsystem(this)
