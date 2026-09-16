@@ -469,7 +469,8 @@ public class SwerveModuleConfig {
       var offset =
           RobotBase.isSimulation()
               ? Rotations.zero()
-              : azimuthMotor.orElseThrow().getConfig().getZeroOffset().orElse(Rotations.zero());
+              : azimuthMotor.orElseThrow().getConfig().getExternalEncoderZeroOffset()
+                  .orElse(Rotations.zero());
       return () -> azimuthMotor.orElseThrow().getMechanismPosition().plus(offset);
     }
   }

@@ -443,7 +443,8 @@ public class TalonFXSWrapper extends SmartMotorController {
                     m_config
                         .getExternalEncoderGearing()
                         .orElse(MechanismGearing.kOne)
-                        .getMechanismToRotorRatio()));
+                        .getMechanismToRotorRatio())
+                .minus(m_config.getExternalEncoderZeroOffset().orElse(Rotations.zero())));
         cancoderSim.setMagnetHealth(MagnetHealthValue.Magnet_Green);
       }
       if (m_candi.isPresent()) {
@@ -459,7 +460,8 @@ public class TalonFXSWrapper extends SmartMotorController {
                       m_config
                           .getExternalEncoderGearing()
                           .orElse(MechanismGearing.kOne)
-                          .getMechanismToRotorRatio()));
+                          .getMechanismToRotorRatio())
+                  .minus(m_config.getExternalEncoderZeroOffset().orElse(Rotations.zero())));
           candiSim.setPwm1Velocity(
               m_simSupplier
                   .get()
@@ -479,7 +481,8 @@ public class TalonFXSWrapper extends SmartMotorController {
                       m_config
                           .getExternalEncoderGearing()
                           .orElse(MechanismGearing.kOne)
-                          .getMechanismToRotorRatio()));
+                          .getMechanismToRotorRatio())
+                  .minus(m_config.getExternalEncoderZeroOffset().orElse(Rotations.zero())));
           candiSim.setPwm2Velocity(
               m_simSupplier
                   .get()
@@ -1148,8 +1151,8 @@ public class TalonFXSWrapper extends SmartMotorController {
         m_talonConfig.ExternalFeedback.ExternalFeedbackSensorSource =
             ExternalFeedbackSensorSourceValue.FusedCANcoder;
         // Zero offset
-        if (config.getZeroOffset().isPresent()) {
-          cfg.MagnetSensor.withMagnetOffset(config.getZeroOffset().get());
+        if (config.getExternalEncoderZeroOffset().isPresent()) {
+          cfg.MagnetSensor.withMagnetOffset(config.getExternalEncoderZeroOffset().get());
           m_talonConfig.ExternalFeedback.AbsoluteSensorOffset = 0;
         }
         // Discontinuity Point
@@ -1177,8 +1180,8 @@ public class TalonFXSWrapper extends SmartMotorController {
           config.getExternalEncoderInverted().ifPresent(cfg.PWM1::withSensorDirection);
 
           // Zero offset
-          if (config.getZeroOffset().isPresent()) {
-            cfg.PWM1.withAbsoluteSensorOffset(config.getZeroOffset().get());
+          if (config.getExternalEncoderZeroOffset().isPresent()) {
+            cfg.PWM1.withAbsoluteSensorOffset(config.getExternalEncoderZeroOffset().get());
             m_talonConfig.ExternalFeedback.AbsoluteSensorOffset = 0;
           }
           // Discontinuity point
@@ -1189,8 +1192,8 @@ public class TalonFXSWrapper extends SmartMotorController {
         } else if (useCANdiPWM2()) {
           config.getExternalEncoderInverted().ifPresent(cfg.PWM2::withSensorDirection);
           // Zero offset
-          if (config.getZeroOffset().isPresent()) {
-            cfg.PWM2.withAbsoluteSensorOffset(config.getZeroOffset().get());
+          if (config.getExternalEncoderZeroOffset().isPresent()) {
+            cfg.PWM2.withAbsoluteSensorOffset(config.getExternalEncoderZeroOffset().get());
             m_talonConfig.ExternalFeedback.AbsoluteSensorOffset = 0;
           }
           // Discontinuity point
@@ -1222,7 +1225,7 @@ public class TalonFXSWrapper extends SmartMotorController {
       m_talonConfig.ExternalFeedback.SensorToMechanismRatio =
           config.getGearing().getMechanismToRotorRatio();
       // Zero offset.
-      if (config.getZeroOffset().isPresent()) {
+      if (config.getExternalEncoderZeroOffset().isPresent()) {
         DriverStation.reportWarning(
             "[WARNING] Zero offset is not supported in TalonFXS("
                 + m_talonfxs.getDeviceID()

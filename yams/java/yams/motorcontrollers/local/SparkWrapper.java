@@ -685,8 +685,9 @@ public class SparkWrapper extends SmartMotorController {
           m_sparkBaseConfig.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
         }
 
-        if (config.getZeroOffset().isPresent()) {
-          m_sparkBaseConfig.absoluteEncoder.zeroOffset(config.getZeroOffset().get().in(Rotations));
+        if (config.getExternalEncoderZeroOffset().isPresent()) {
+          m_sparkBaseConfig.absoluteEncoder.zeroOffset(
+              config.getExternalEncoderZeroOffset().get().in(Rotations));
         }
 
         if (config.getExternalEncoderDiscontinuityPoint().isPresent()) {
@@ -706,9 +707,12 @@ public class SparkWrapper extends SmartMotorController {
             m_sparkAbsoluteEncoderSim.ifPresent(
                 enc -> enc.setPosition(config.getStartingPosition().get().in(Rotations)));
           }
-          if (config.getZeroOffset().isPresent()) {
+          if (config.getExternalEncoderZeroOffset().isPresent()) {
             m_sparkAbsoluteEncoderSim.ifPresent(
-                enc -> enc.setZeroOffset(config.getZeroOffset().get().in(Rotations)));
+                enc ->
+                    enc.setZeroOffset(
+                        config.getExternalEncoderZeroOffset().get().in(Rotations)));
+            // TODO: Test if the encoder position is correct in sim.
           }
         }
       } else {
@@ -728,7 +732,7 @@ public class SparkWrapper extends SmartMotorController {
             "External encoder zero center could not be applied",
             ".withExternalEncoderZeroCenter");
       }
-      if (config.getZeroOffset().isPresent()) {
+      if (config.getExternalEncoderZeroOffset().isPresent()) {
         throw new SmartMotorControllerConfigurationException(
             "Zero offset is only available for external encoders",
             "Zero offset could not be applied",
@@ -791,7 +795,7 @@ public class SparkWrapper extends SmartMotorController {
       config.clearFollowers();
     }
 
-    if (config.getZeroOffset().isPresent()
+    if (config.getExternalEncoderZeroOffset().isPresent()
         && config.getExternalEncoder().isEmpty()
         && !useExternalEncoder) {
       throw new SmartMotorControllerConfigurationException(

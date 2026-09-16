@@ -110,7 +110,8 @@ public class Arm extends SmartPositionalMechanism {
             "Cannot create simulation.",
             "withHardLimits(Angle,Angle)");
       }
-      if (smccfg.getStartingPosition().isEmpty() && smccfg.getZeroOffset().isEmpty()) {
+      if (smccfg.getStartingPosition().isEmpty()
+          && smccfg.getExternalEncoderZeroOffset().isEmpty()) {
         throw new ArmConfigurationException(
             "Arm starting angle is empty",
             "Cannot create simulation.",
