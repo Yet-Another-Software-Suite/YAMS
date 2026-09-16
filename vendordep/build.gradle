@@ -229,10 +229,6 @@ model {
                     srcDir 'src/test/native/cpp'
                     include '**/*.cpp'
                     // CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
-                    // SwerveDriveTest.cpp is entirely CTRE (TalonFX-driven swerve modules), so it stays
-                    // excluded until one is available. The other mechanism tests have their
-                    // CTRE-specific code commented out (not deleted) instead, so their REV-only
-                    // coverage keeps running.
                     exclude "**/SwerveDriveTest.cpp"
                 }
                 exportedHeaders {
@@ -252,7 +248,7 @@ model {
              }
              }*/
 
-            nativeUtils.useRequiredLibrary(it, "wpilib_shared")
+            nativeUtils.useRequiredLibrary(it, "wpilib_shared", "catch2_static")
             wpi.vendor.nativeVendor.cpp(it)
         }
     }
@@ -277,7 +273,7 @@ spotless {
             exclude '**/build/**', '**/build-*/**'
         }
         greclipse()
-        indentWithSpaces(4)
+        leadingTabsToSpaces(4)
         trimTrailingWhitespace()
         endWithNewline()
     }
@@ -288,7 +284,7 @@ spotless {
         }
         eclipseWtp('xml')
         trimTrailingWhitespace()
-        indentWithSpaces(2)
+        leadingTabsToSpaces(2)
         endWithNewline()
     }
     format 'misc', {
@@ -297,7 +293,7 @@ spotless {
             exclude '**/build/**', '**/build-*/**'
         }
         trimTrailingWhitespace()
-        indentWithSpaces(2)
+        leadingTabsToSpaces(2)
         endWithNewline()
     }
 }

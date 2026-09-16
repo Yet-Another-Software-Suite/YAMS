@@ -1036,6 +1036,7 @@ public abstract class SmartMotorController {
    * Update the mechanism gearing used for position/velocity conversions.
    *
    * @param gearing New {@link MechanismGearing} to apply.
+   * @implNote Forwards the gearing to all loosely coupled follower motors.
    */
   public abstract void setMechanismGearing(MechanismGearing gearing);
 
