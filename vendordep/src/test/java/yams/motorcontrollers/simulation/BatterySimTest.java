@@ -3,24 +3,27 @@
 
 package yams.motorcontrollers.simulation;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.KilogramSquareMeters;
-import static edu.wpi.first.units.Units.MilliOhms;
-import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.KilogramSquareMeters;
+import static org.wpilib.units.Units.MilliOhms;
+import static org.wpilib.units.Units.Seconds;
+import static org.wpilib.units.Units.Volts;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7; re-enable once
+available.
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
+*/
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.wpilibj.Preferences;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
-import edu.wpi.first.wpilibj.simulation.SimHooks;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.wpilib.math.interpolation.InterpolatingDoubleTreeMap;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.preferences.Preferences;
+import org.wpilib.simulation.RoboRioSim;
+import org.wpilib.simulation.SimHooks;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.CommandScheduler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -40,8 +43,9 @@ import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.SparkWrapper;
-import yams.motorcontrollers.remote.TalonFXSWrapper;
+/* import yams.motorcontrollers.remote.TalonFXSWrapper;
 import yams.motorcontrollers.remote.TalonFXWrapper;
+*/
 
 /**
  * Tests that {@link BatterySim} models the shared simulated battery sagging and draining as
@@ -97,6 +101,7 @@ public class BatterySimTest {
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(
                     "BatterySim SparkFlex(" + (20 + offset) + ") Vortex", TelemetryVerbosity.LOW)));
+    /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
     smcs.add(
         new TalonFXSWrapper(
             DeviceCreator.createTalonFXS(),
@@ -115,6 +120,7 @@ public class BatterySimTest {
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(
                     "BatterySim TalonFX(" + (40 + offset) + ") Kraken", TelemetryVerbosity.LOW)));
+    */
 
     for (SmartMotorController smc : smcs) {
       SmartMotorControllerTestSubsystem subsys =
@@ -170,11 +176,16 @@ public class BatterySimTest {
       ((SparkMax) motorController).close();
     } else if (motorController instanceof SparkFlex) {
       ((SparkFlex) motorController).close();
-    } else if (motorController instanceof TalonFXS) {
+    }
+    /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
+    else if (motorController instanceof TalonFXS)
+    {
       ((TalonFXS) motorController).close();
-    } else if (motorController instanceof TalonFX) {
+    } else if (motorController instanceof TalonFX)
+    {
       ((TalonFX) motorController).close();
     }
+    */
   }
 
   /**
@@ -334,7 +345,7 @@ public class BatterySimTest {
 
   @Test
   void testHighCurrentDrainsCapacityFasterThanLowCurrentForSameAmpHours() {
-    // BatterySim integrates discharge using Timer.getFPGATimestamp(), which reads the HAL's actual
+    // BatterySim integrates discharge using Timer.getTimestamp(), which reads the HAL's actual
     // (simulated) FPGA clock rather than RobotController's overridable time source. SimHooks.
     // stepTiming() jumps that clock forward synchronously, letting each scenario integrate hours
     // of simulated discharge in a single deterministic step instead of pumping the scheduler in

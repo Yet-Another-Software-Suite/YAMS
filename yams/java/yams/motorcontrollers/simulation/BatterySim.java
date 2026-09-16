@@ -52,7 +52,7 @@ public class BatterySim {
   /**
    * Fraction of the nominal (20-hour rate) amp-hour capacity a sealed lead-acid battery actually
    * delivers as a function of discharge current, keyed by current in {@link
-   * edu.wpi.first.units.Units#Amps Amps}. Lead-acid batteries are far less coulombically efficient
+   * org.wpilib.units.Units#Amps Amps}. Lead-acid batteries are far less coulombically efficient
    * than lithium chemistries at high discharge rates (the Peukert effect), so a battery rated for
    * 18 Ah at a 0.9 A discharge might only deliver ~11 Ah at a sustained 54 A draw.
    *

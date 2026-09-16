@@ -207,7 +207,7 @@ public class ArmSimSupplier implements SimSupplier {
     // transformation: supplyVoltage * supplyCurrent = statorVoltage * statorCurrent, and
     // statorVoltage = dutyCycle * supplyVoltage, so supplyCurrent = dutyCycle * statorCurrent.
     double dutyCycle = motorDutyCycleSupplier.get();
-    return Amps.of(supplyCurrentFilter.calculate(dutyCycle * sim.getCurrentDrawAmps()));
+    return Amps.of(supplyCurrentFilter.calculate(dutyCycle * sim.getCurrentDraw()));
   }
 
   @Override

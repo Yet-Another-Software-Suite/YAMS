@@ -206,7 +206,8 @@ public class SwerveDriveTelemetry {
             // Point each module tangent to its position around the robot center so a positive
             // velocity spins the robot counter-clockwise (WPILib's positive rotation direction).
             var moduleLocation = modules[i].getConfig().getLocation().orElseThrow();
-            var tangentAngle = moduleLocation.getAngle().plus(Rotation2d.fromDegrees(90));
+            var tangentAngle =
+                moduleLocation.getAngle().orElse(new Rotation2d()).plus(Rotation2d.fromDegrees(90));
             states[i] = new SwerveModuleVelocity(velocity, tangentAngle);
           } else {
             states[i] = new SwerveModuleVelocity(velocity, Rotation2d.ZERO);

@@ -3,27 +3,30 @@
 
 package yams.motorcontrollers;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.Newtons;
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.Milliseconds;
+import static org.wpilib.units.Units.Newtons;
+import static org.wpilib.units.Units.RPM;
+import static org.wpilib.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.Seconds;
+import static org.wpilib.units.Units.Volts;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7; re-enable once
+available.
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
+*/
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Force;
-import edu.wpi.first.wpilibj.Preferences;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Force;
+import org.wpilib.preferences.Preferences;
+import org.wpilib.command2.CommandScheduler;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,12 +44,13 @@ import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.SparkWrapper;
-import yams.motorcontrollers.remote.TalonFXSWrapper;
+/* import yams.motorcontrollers.remote.TalonFXSWrapper;
 import yams.motorcontrollers.remote.TalonFXWrapper;
+*/
 
 /**
  * Tests for the drive-wheel feedforward {@link Force} added to {@link
- * SmartMotorController#setVelocity( edu.wpi.first.units.measure.AngularVelocity, Force)} (and its
+ * SmartMotorController#setVelocity( org.wpilib.units.measure.AngularVelocity, Force)} (and its
  * {@code LinearVelocity} counterpart), e.g. from a PathPlanner set-point generator.
  *
  * <p>Covers three layers: the pure physics conversion in {@link
@@ -121,7 +125,9 @@ public class ForceFeedforwardTest {
                 cfg.clone()
                     .withSubsystem(new SmartMotorControllerTestSubsystem())
                     .withTelemetry(
-                        "ForceFeedforwardTest SparkMax(" + offset + ")", TelemetryVerbosity.LOW))),
+                        "ForceFeedforwardTest SparkMax(" + offset + ")", TelemetryVerbosity.LOW)))
+        /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
+        ,
         Arguments.of(
             new TalonFXWrapper(
                 DeviceCreator.createTalonFX(),
@@ -137,7 +143,9 @@ public class ForceFeedforwardTest {
                 cfg.clone()
                     .withSubsystem(new SmartMotorControllerTestSubsystem())
                     .withTelemetry(
-                        "ForceFeedforwardTest TalonFXS(" + offset + ")", TelemetryVerbosity.LOW))));
+                        "ForceFeedforwardTest TalonFXS(" + offset + ")", TelemetryVerbosity.LOW)))
+        */
+        );
   }
 
   private static void closeSmc(SmartMotorController smc) {
@@ -152,11 +160,16 @@ public class ForceFeedforwardTest {
       ((SparkMax) motorController).close();
     } else if (motorController instanceof SparkFlex) {
       ((SparkFlex) motorController).close();
-    } else if (motorController instanceof TalonFXS) {
+    }
+    /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
+    else if (motorController instanceof TalonFXS)
+    {
       ((TalonFXS) motorController).close();
-    } else if (motorController instanceof TalonFX) {
+    } else if (motorController instanceof TalonFX)
+    {
       ((TalonFX) motorController).close();
     }
+    */
   }
 
   @ParameterizedTest

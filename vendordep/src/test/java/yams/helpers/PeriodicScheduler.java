@@ -3,15 +3,15 @@
 
 package yams.helpers;
 
-import static edu.wpi.first.units.Units.Microseconds;
-import static edu.wpi.first.units.Units.Seconds;
+import static org.wpilib.units.Units.Microseconds;
+import static org.wpilib.units.Units.Seconds;
 
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.wpilibj.simulation.SimHooks;
+import org.wpilib.units.measure.Time;
+import org.wpilib.simulation.SimHooks;
 import java.util.PriorityQueue;
 
 /**
- * Minimal, deterministic stand-in for how {@link edu.wpi.first.wpilibj.TimedRobot} runs multiple
+ * Minimal, deterministic stand-in for how {@link org.wpilib.framework.TimedRobot} runs multiple
  * callbacks at independent periods from a single loop: a {@link PriorityQueue} of callbacks ordered
  * by when they next come due, each rescheduled by its own period after it runs.
  *
@@ -60,7 +60,7 @@ public class PeriodicScheduler implements AutoCloseable {
   /**
    * Advance the virtual timeline by the given duration, running every registered callback exactly
    * as many times as its period divides into the elapsed duration, in temporal order — exactly like
-   * {@link edu.wpi.first.wpilibj.TimedRobot}'s own callback scheduler.
+   * {@link org.wpilib.framework.TimedRobot}'s own callback scheduler.
    *
    * @param duration Duration to advance the virtual timeline by.
    */

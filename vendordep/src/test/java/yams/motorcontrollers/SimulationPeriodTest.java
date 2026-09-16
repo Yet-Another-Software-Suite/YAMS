@@ -3,22 +3,25 @@
 
 package yams.motorcontrollers;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.Seconds;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.Milliseconds;
+import static org.wpilib.units.Units.Seconds;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7; re-enable once
+available.
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
+*/
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.Preferences;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.wpilib.math.controller.SimpleMotorFeedforward;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.preferences.Preferences;
+import org.wpilib.simulation.RoboRioSim;
+import org.wpilib.command2.CommandScheduler;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,15 +38,16 @@ import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.SparkWrapper;
-import yams.motorcontrollers.remote.TalonFXSWrapper;
+/* import yams.motorcontrollers.remote.TalonFXSWrapper;
 import yams.motorcontrollers.remote.TalonFXWrapper;
+*/
 
 /**
  * Tests that closed loop control has no negative effects when {@link
  * SmartMotorControllerConfig#getSimulationPeriod()} differs from the robot's own periodic cadence.
  *
  * <p>A {@link PeriodicScheduler} — a small stand-in for how {@link
- * edu.wpi.first.wpilibj.TimedRobot}'s own {@code addPeriodic()} runs multiple callbacks at
+ * org.wpilib.framework.TimedRobot}'s own {@code addPeriodic()} runs multiple callbacks at
  * independent periods from a single loop — calls {@link SmartMotorController#simIterate()} at the
  * configured 10ms simulation period and a separate callback (re-commanding the setpoint and
  * publishing telemetry) at 20ms, mirroring a robot whose periodic loop runs at 20ms while
@@ -81,7 +85,9 @@ public class SimulationPeriodTest {
                 baseConfig
                     .clone()
                     .withSubsystem(new SmartMotorControllerTestSubsystem())
-                    .withTelemetry("SimulationPeriodTest SparkFlex", TelemetryVerbosity.LOW))),
+                    .withTelemetry("SimulationPeriodTest SparkFlex", TelemetryVerbosity.LOW)))
+        /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
+        ,
         Arguments.of(
             new TalonFXSWrapper(
                 DeviceCreator.createTalonFXS(),
@@ -97,7 +103,9 @@ public class SimulationPeriodTest {
                 baseConfig
                     .clone()
                     .withSubsystem(new SmartMotorControllerTestSubsystem())
-                    .withTelemetry("SimulationPeriodTest TalonFX", TelemetryVerbosity.LOW))));
+                    .withTelemetry("SimulationPeriodTest TalonFX", TelemetryVerbosity.LOW)))
+        */
+        );
   }
 
   private static void closeSmc(SmartMotorController smc) {
@@ -112,11 +120,16 @@ public class SimulationPeriodTest {
       ((SparkMax) motorController).close();
     } else if (motorController instanceof SparkFlex) {
       ((SparkFlex) motorController).close();
-    } else if (motorController instanceof TalonFXS) {
+    }
+    /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
+    else if (motorController instanceof TalonFXS)
+    {
       ((TalonFXS) motorController).close();
-    } else if (motorController instanceof TalonFX) {
+    } else if (motorController instanceof TalonFX)
+    {
       ((TalonFX) motorController).close();
     }
+    */
   }
 
   @ParameterizedTest
