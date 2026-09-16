@@ -2137,7 +2137,7 @@ public class SmartMotorControllerConfig {
    *
    * @return {@link Angle} offset.
    */
-  public Optional<Angle> getZeroOffset() {
+  public Optional<Angle> getExternalEncoderZeroOffset() {
     externalEncoderOptions.remove(ExternalEncoderOptions.ZeroOffset);
     return zeroOffset;
   }

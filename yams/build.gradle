@@ -15,11 +15,12 @@ spotless {
             include '**/*.java'
             exclude '**/build/**', '**/build-*/**'
         }
-        toggleOffOn()
-        googleJavaFormat().skipJavadocFormatting()
-        removeUnusedImports()
-        trimTrailingWhitespace()
-        endWithNewline()
+//        toggleOffOn()
+////        googleJavaFormat().skipJavadocFormatting()
+//        removeUnusedImports()
+//        trimTrailingWhitespace()
+//        endWithNewline()
+        eclipse().configFile("config/eclipse-formatter.xml")
     }
     groovyGradle {
         target fileTree('.') {
