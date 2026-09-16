@@ -1,29 +1,22 @@
 plugins {
     id "java"
-    id "org.wpilib.GradleRIO" version "2027.0.0-alpha-6"
-    id "com.gradleup.shadow" version "9.3.0"
-    id "org.wpilib.WPILibRepositoriesPlugin" version "2027.0.0"
+    id "application"
+    id "org.wpilib.GradleRIO" version "2027.0.0-alpha-7"
 }
-
-// The GradleRIO plugin defaults wpi.versions.wpilibVersion to the exact "2027.0.0-alpha-6" tag,
-// which predates org.wpilib.util.Pair being added to wpiutil-java. Match vendordep/build.gradle's
-// use of a floating "2027.+" range against the development repositories (not just the release
-// repository the GradleRIO plugin wires up by default) so a snapshot that has it gets resolved.
-wpi.versions.wpilibVersion = "2027.+"
-wpilibRepositories.use2027Repos()
-wpilibRepositories.addAllDevelopmentRepositories(project)
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
     targetCompatibility = JavaVersion.VERSION_25
 }
 
+
 sourceSets {
     main {
         java {
             srcDirs 'src/main/java'
-            srcDirs '../../yams/java'
+            // YAMS_TESTING
             srcDirs '../../../yams/java'
+            // END_YAMS_TESTING
         }
     }
 }
@@ -50,6 +43,8 @@ deploy {
                 // getTargetTypeClass is a shortcut to get the class type using a string
 
                 wpilibJava(getArtifactTypeClass('WPILibJavaArtifact')) {
+                    // Set to true to use debug including JNI, which will drastically impact performance.
+                    debugJni = false
                 }
 
                 // Static files artifact
@@ -66,18 +61,16 @@ deploy {
 
 def deployArtifact = deploy.targets.systemcore.artifacts.wpilibJava
 
-// Set to true to use debug for all targets including JNI, which will drastically impact
-// performance.
-wpi.java.debugJni = false
+// Set to true to use debug for simulation including JNI
+wpi.java.runSimWithDebugJni = false
 
 // Set this to true to enable desktop support.
-def includeDesktopSupport = false
+def includeDesktopSupport = true
 
 // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
 // Also defines JUnit 5.
 dependencies {
     annotationProcessor wpi.java.deps.wpilibAnnotations()
-
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
 
@@ -97,9 +90,6 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit-27.0.0-alpha-4.json").text)
-    annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
 }
 
 test {
@@ -111,22 +101,17 @@ test {
 wpi.sim.addGui().defaultEnabled = true
 wpi.sim.addDriverstation()
 
-// Setting up my Jar File. In this case, adding all libraries into the main jar ('fat/shaded jar')
-// in order to make them all available at runtime and merging service files to make JSON work.
-// Also adding the manifest so WPILib knows where to look for our Robot Class.
-shadowJar {
-    mergeServiceFiles()
+application.mainClass = ROBOT_MAIN_CLASS
+
+deployArtifact.configureApplication(application)
+wpi.java.configureApplication(application)
+wpi.java.configureTestTasks(test)
+
+jar {
     from('src') { into 'backup/src' }
     from('vendordeps') { into 'backup/vendordeps' }
     from('build.gradle') { into 'backup' }
-    manifest org.wpilib.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
-
-// Configure jar and deploy tasks
-deployArtifact.jarTask = shadowJar
-wpi.java.configureExecutableTasks(shadowJar)
-wpi.java.configureTestTasks(test)
 
 // Configure string concat to always inline compile
 tasks.withType(JavaCompile) {
