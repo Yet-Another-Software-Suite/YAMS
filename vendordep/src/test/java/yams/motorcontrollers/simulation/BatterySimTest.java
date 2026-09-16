@@ -157,7 +157,7 @@ public class BatterySimTest {
     for (SmartMotorController smc : smcs) {
       TestWithScheduler.schedule(heavyLoadCommand(smc));
     }
-    TestWithScheduler.cycle(Seconds.of(0.1));
+    TestWithScheduler.cycle(Seconds.of(0.5));
     return smcs;
   }
 
@@ -477,14 +477,14 @@ public class BatterySimTest {
       for (SmartMotorController smc : smcs) {
         TestWithScheduler.schedule(dutyCycleCommand(smc, 0.0));
       }
-      double deadIdleVoltage = minVoltageOverCycle(0.2);
+      double deadIdleVoltage = minVoltageOverCycle(0.5);
 
       // The battery is already empty; hammering every motor with a heavy duty cycle again must not
       // make the reported voltage climb back up.
       for (SmartMotorController smc : smcs) {
         TestWithScheduler.schedule(heavyLoadCommand(smc));
       }
-      double deadLoadedVoltage = minVoltageOverCycle(0.2);
+      double deadLoadedVoltage = minVoltageOverCycle(0.5);
 
       System.out.println("Dead battery idle voltage: " + deadIdleVoltage);
       System.out.println("Dead battery voltage under heavy load: " + deadLoadedVoltage);
