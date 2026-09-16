@@ -3,7 +3,7 @@
 
 package yams.helpers;
 
-import edu.wpi.first.hal.simulation.NotifierDataJNI;
+import org.wpilib.hardware.hal.simulation.NotifierDataJNI;
 import org.wpilib.units.Units;
 import org.wpilib.units.measure.Time;
 import org.wpilib.simulation.SimHooks;

@@ -473,25 +473,25 @@ public class SensorData
   public enum HALValueType
   {
     /**
-     * Boolean type {@link HALValue#kBoolean}
+     * Boolean type {@link HALValue#BOOLEAN}
      */
-    kBoolean(HALValue.kBoolean),
+    kBoolean(HALValue.BOOLEAN),
     /**
-     * Double type {@link HALValue#kDouble}
+     * Double type {@link HALValue#DOUBLE}
      */
-    kDouble(HALValue.kDouble),
+    kDouble(HALValue.DOUBLE),
     /**
-     * Enum type {@link HALValue#kEnum}
+     * Enum type {@link HALValue#ENUM}
      */
-    kEnum(HALValue.kEnum),
+    kEnum(HALValue.ENUM),
     /**
-     * Int type {@link HALValue#kInt}
+     * Int type {@link HALValue#INT}
      */
-    kInt(HALValue.kInt),
+    kInt(HALValue.INT),
     /**
-     * Long type {@link HALValue#kLong}
+     * Long type {@link HALValue#LONG}
      */
-    kLong(HALValue.kLong);
+    kLong(HALValue.LONG);
 
     /**
      * {@link HALValue} type

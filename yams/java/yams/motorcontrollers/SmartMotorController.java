@@ -44,7 +44,7 @@ import org.wpilib.units.measure.Temperature;
 import org.wpilib.units.measure.Time;
 import org.wpilib.units.measure.Velocity;
 import org.wpilib.units.measure.Voltage;
-import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.tunable.Tunables;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import java.util.UUID;
@@ -53,6 +53,7 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.concurrent.atomic.AtomicReference;
 import yams.exceptions.SmartMotorControllerConfigurationException;
+import yams.telemetry.NetworkTablesBackends;
 import yams.gearing.MechanismGearing;
 import yams.math.LQRController;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
@@ -68,8 +69,9 @@ import yams.telemetry.SmartMotorControllerTelemetryConfig;
  *
  * <p>This abstract class is not instantiated directly. Instantiate the appropriate vendor wrapper:
  * {@link yams.motorcontrollers.local.SparkWrapper} for REV SPARK hardware, or
- * {@link yams.motorcontrollers.remote.TalonFXWrapper}/{@link yams.motorcontrollers.remote.TalonFXSWrapper}
- * for CTRE hardware. Configure all three via {@link yams.motorcontrollers.SmartMotorControllerConfig}.
+ * {@code yams.motorcontrollers.remote.TalonFXWrapper}/{@code yams.motorcontrollers.remote.TalonFXSWrapper}
+ * for CTRE hardware (unavailable while CTRE has no Phoenix6 build for this wpilib version).
+ * Configure all three via {@link yams.motorcontrollers.SmartMotorControllerConfig}.
  *
  * <h2>Example</h2>
  * <pre>{@code
@@ -895,7 +897,6 @@ public abstract class SmartMotorController
             setEncoderPosition(Rotations.zero());
           }, m_config.getSubsystem());
           setEncoderToZero.setName("ZeroEncoder");
-          setEncoderToZero.setSubsystem(m_config.getSubsystem().getName());
 
           Debouncer              velocityDebouncer = new Debouncer(0.5);
           AtomicReference<Angle> startingAngle     = new AtomicReference<>(Rotations.zero());
@@ -919,7 +920,6 @@ public abstract class SmartMotorController
                                             startClosedLoopController();
                                           });
           testUpCommand.setName("Up");
-          testUpCommand.setSubsystem(m_config.getSubsystem().getName());
           Command testDownCommand = Commands.startRun(() -> {
                                               System.out.println(
                                                   "=====================================================\nTEST DOWN\n=====================================================");
@@ -940,13 +940,13 @@ public abstract class SmartMotorController
                                               startClosedLoopController();
                                             });
           testDownCommand.setName("Down");
-          testDownCommand.setSubsystem(m_config.getSubsystem().getName());
-          SmartDashboard.putData(telemetryPathStr + "/ZeroEncoder", setEncoderToZero);
-          SmartMotorControllerCommandRegistry.addCommand("Live Tuning",
+          NetworkTablesBackends.ensureMechanismsTunableBackend();
+          Tunables.publish(telemetryPathStr + "/ZeroEncoder", setEncoderToZero);
+          SmartMotorControllerCommandRegistry.addCommand("live",
                                                          m_config.getSubsystem(),
                                                          () -> this.telemetry.applyTuningValues(this));
-          SmartDashboard.putData(telemetryPathStr + "/Up", testUpCommand);
-          SmartDashboard.putData(telemetryPathStr + "/Down", testDownCommand);
+          Tunables.publish(telemetryPathStr + "/Up", testUpCommand);
+          Tunables.publish(telemetryPathStr + "/Down", testDownCommand);
         }
       }
     }

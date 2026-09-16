@@ -19,7 +19,6 @@ import org.wpilib.simulation.SingleJointedArmSim;
 import org.wpilib.smartdashboard.Mechanism2d;
 import org.wpilib.smartdashboard.MechanismLigament2d;
 import org.wpilib.smartdashboard.MechanismRoot2d;
-import org.wpilib.smartdashboard.SmartDashboard;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.button.Trigger;
@@ -267,7 +266,7 @@ public class DoubleJointedArm extends SmartPositionalMechanism
                                                                    upperStartingAngle.in(Degrees),
                                                                    6,
                                                                    upperConfig.getSimColor()));
-      SmartDashboard.putData(getName() + "/mechanism", m_mechanismWindow);
+      publishMechanismWindow();
 
       m_upperSMC.setupSimulation();
       m_lowerSMC.setupSimulation();
@@ -297,7 +296,7 @@ public class DoubleJointedArm extends SmartPositionalMechanism
   {
     return getJoint(m_upperArmLength,
                     m_upperSMC.getMechanismPosition(),
-                    getJoint(m_lowerArmLength, m_lowerSMC.getMechanismPosition(), Translation2d.kZero));
+                    getJoint(m_lowerArmLength, m_lowerSMC.getMechanismPosition(), Translation2d.ZERO));
   }
 
   /**

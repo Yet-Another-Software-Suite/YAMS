@@ -548,7 +548,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>
    */
   public SwerveInputStream withAim(Supplier<Pose2d> aimTarget, BooleanSupplier trigger)
   {
-    this.aimTarget = aimTarget.equals(Pose2d.kZero) ? Optional.empty() : Optional.of(aimTarget);
+    this.aimTarget = aimTarget.equals(Pose2d.ZERO) ? Optional.empty() : Optional.of(aimTarget);
     aimEnabled = Optional.of(trigger);
     return this;
   }

@@ -11,14 +11,18 @@
  *
  * <h2>Core types</h2>
  * <ul>
- *   <li>{@link yams.motorcontrollers.remote.TalonFXWrapper} — adapter for the CTRE TalonFX
+ *   <li>{@code yams.motorcontrollers.remote.TalonFXWrapper} — adapter for the CTRE TalonFX
  *       motor controller, used in the Kraken X60 and Falcon 500 brushless motors. Supports
  *       all Phoenix 6 control modes (position, velocity, motion magic, torque current)
  *       through the {@link yams.motorcontrollers.SmartMotorController} interface.</li>
- *   <li>{@link yams.motorcontrollers.remote.TalonFXSWrapper} — adapter for the CTRE TalonFXS
+ *   <li>{@code yams.motorcontrollers.remote.TalonFXSWrapper} — adapter for the CTRE TalonFXS
  *       motor controller, used with the Minion brushless motor. Functionally equivalent to
  *       {@code TalonFXWrapper} but targets the TalonFXS CAN device type.</li>
  * </ul>
+ *
+ * <p><strong>Currently unavailable:</strong> CTRE has not published a Phoenix6 build compatible
+ * with this wpilib version, so this package's classes are excluded from compilation until one is
+ * available.
  *
  * <h2>Phoenix 6 API</h2>
  * <p>Both wrappers are built on the <a href="https://v6.docs.ctr-electronics.com/">Phoenix 6

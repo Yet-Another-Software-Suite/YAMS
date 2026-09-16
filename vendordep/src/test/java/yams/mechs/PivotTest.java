@@ -15,15 +15,18 @@ import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7; re-enable once
+   com.ctre.phoenix6 is available again.
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
+*/
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import org.wpilib.math.controller.SimpleMotorFeedforward;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
-import org.wpilib.util.Preferences;
+import org.wpilib.preferences.Preferences;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.CommandScheduler;
 import org.wpilib.command2.Commands;
@@ -50,8 +53,9 @@ import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.helpers.DeviceCreator;
 import yams.motorcontrollers.local.SparkWrapper;
-import yams.motorcontrollers.remote.TalonFXSWrapper;
+/* import yams.motorcontrollers.remote.TalonFXSWrapper;
 import yams.motorcontrollers.remote.TalonFXWrapper;
+*/
 
 public class PivotTest
 {
@@ -113,8 +117,10 @@ public class PivotTest
       SparkMax  smax  = DeviceCreator.createSparkMax();
       SparkFlex sflex = DeviceCreator.createSparkFlex();
 //    ThriftyNova tnova = new ThriftyNova(30 + offset+i);
+      /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
       TalonFXS tfxs = DeviceCreator.createTalonFXS();
       TalonFX  tfx  = DeviceCreator.createTalonFX();
+      */
       smcList.add(Arguments.of(setupTestSubsystem(new SparkWrapper(smax,
                                                                    DCMotor.getNEO(1),
                                                                    smcConfig.clone()
@@ -131,6 +137,7 @@ public class PivotTest
                                                                                 "SparkFlex(" + (20 + offset) + "[" + i +
                                                                                 "]) Vortex",
                                                                                 TelemetryVerbosity.HIGH)))));
+      /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
       smcList.add(Arguments.of(setupTestSubsystem(new TalonFXSWrapper(tfxs,
                                                                       DCMotor.getNEO(1),
                                                                       smcConfig.clone()
@@ -148,6 +155,7 @@ public class PivotTest
                                                                                   "TalonFX(" + (40 + offset) + "[" + i +
                                                                                   "]) Kraken",
                                                                                   TelemetryVerbosity.HIGH)))));
+      */
     }
 
     return smcList.stream();
@@ -172,13 +180,16 @@ public class PivotTest
     } else if (motorController instanceof SparkFlex)
     {
       ((SparkFlex) motorController).close();
-    } else if (motorController instanceof TalonFXS)
+    }
+    /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
+    else if (motorController instanceof TalonFXS)
     {
       ((TalonFXS) motorController).close();
     } else if (motorController instanceof TalonFX)
     {
       ((TalonFX) motorController).close();
     }
+    */
   }
 
   private static void positionPidTest(SmartMotorController smc, Command highPIDSetCommand, Command lowPIDSetCommand)
@@ -190,6 +201,9 @@ public class PivotTest
 
     TestWithScheduler.schedule(highPIDSetCommand);
 
+    /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7, so the
+       TalonFXSWrapper/TalonFXWrapper branch below is disabled and the else branch runs
+       unconditionally.
     if (smc instanceof TalonFXSWrapper || smc instanceof TalonFXWrapper)
     {
       TestWithScheduler.cycle(Seconds.of(1), () -> {
@@ -201,13 +215,14 @@ public class PivotTest
 
     } else
     {
+    */
       TestWithScheduler.cycle(Seconds.of(20), () -> {
         if (smc.getDutyCycle() != 0)
         {
           testPassed.set(true);
         }
       });
-    }
+//    }
 
     post = smc.getMechanismPosition();
     System.out.println("PID High PreTest Angle: " + pre);
@@ -242,11 +257,13 @@ public class PivotTest
         testPassed.set(true);
       }
     });
+    /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
     if (smc instanceof TalonFXSWrapper || smc instanceof TalonFXWrapper)
     {
       Thread.sleep(200);
       TestWithScheduler.cycle(Seconds.of(1));
     }
+    */
 
     post = smc.getMechanismVelocity();
     postAngle = smc.getMechanismPosition();
@@ -257,13 +274,17 @@ public class PivotTest
     System.out.println("DutyCycleUp PostTest Angle: " + postAngle);
 
     boolean pass = pre.lt(post) || preAngle.lt(postAngle) || testPassed.get();
+    /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7, so the
+       TalonFXSWrapper/TalonFXWrapper branch below is disabled and assertTrue(pass) runs
+       unconditionally.
     if ((smc instanceof TalonFXSWrapper || smc instanceof TalonFXWrapper) && !pass)
     {
       System.out.println("[WARNING] TalonFXS or TalonFX did not pass test, current attributing this to OS differences.");
     } else
     {
+    */
       assertTrue(pass);
-    }
+//    }
 
 //    pre = smc.getMechanismVelocity();
 //    TestWithScheduler.schedule(dutyCycleDown);

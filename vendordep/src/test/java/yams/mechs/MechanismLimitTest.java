@@ -13,8 +13,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7; re-enable once
+   com.ctre.phoenix6 is available again.
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
+*/
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import org.wpilib.math.controller.ArmFeedforward;
@@ -23,7 +26,7 @@ import org.wpilib.math.controller.SimpleMotorFeedforward;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.Distance;
-import org.wpilib.util.Preferences;
+import org.wpilib.preferences.Preferences;
 import org.wpilib.command2.CommandScheduler;
 import java.util.ArrayList;
 import java.util.stream.Stream;
@@ -55,8 +58,9 @@ import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.helpers.DeviceCreator;
 import yams.motorcontrollers.local.SparkWrapper;
-import yams.motorcontrollers.remote.TalonFXSWrapper;
+/* import yams.motorcontrollers.remote.TalonFXSWrapper;
 import yams.motorcontrollers.remote.TalonFXWrapper;
+*/
 
 /**
  * Verifies that:
@@ -192,6 +196,7 @@ public class MechanismLimitTest
                    .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
+  /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
   private static SmartMotorController makePivotTalonFXS(Angle startPos, String label)
   {
     return setupTestSubsystem(new TalonFXSWrapper(DeviceCreator.createTalonFXS(), DCMotor.getNEO(1),
@@ -207,6 +212,7 @@ public class MechanismLimitTest
                    .withSubsystem(new SmartMotorControllerTestSubsystem())
                    .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
+  */
 
   private static SmartMotorController makeArmSparkMax(Angle startPos, String label)
   {
@@ -224,6 +230,7 @@ public class MechanismLimitTest
                  .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
+  /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
   private static SmartMotorController makeArmTalonFXS(Angle startPos, String label)
   {
     return setupTestSubsystem(new TalonFXSWrapper(DeviceCreator.createTalonFXS(), DCMotor.getNEO(1),
@@ -239,6 +246,7 @@ public class MechanismLimitTest
                  .withSubsystem(new SmartMotorControllerTestSubsystem())
                  .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
+  */
 
   private static SmartMotorController makeElevSparkMax(Distance startHeight, String label)
   {
@@ -256,6 +264,7 @@ public class MechanismLimitTest
                       .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
+  /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
   private static SmartMotorController makeElevTalonFXS(Distance startHeight, String label)
   {
     return setupTestSubsystem(new TalonFXSWrapper(DeviceCreator.createTalonFXS(), DCMotor.getNEO(1),
@@ -271,6 +280,7 @@ public class MechanismLimitTest
                       .withSubsystem(new SmartMotorControllerTestSubsystem())
                       .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
+  */
 
   // ──────────────────────────────────────────────
   // Argument stream factories
@@ -295,8 +305,10 @@ public class MechanismLimitTest
       String  sfx      = (String) row[2];
       args.add(Arguments.of(makePivotSparkMax(pos, "SparkMax(pMin" + sfx + ")[" + offset + "]"), expected));
       args.add(Arguments.of(makePivotSparkFlex(pos, "SparkFlex(pMin" + sfx + ")[" + offset + "]"), expected));
+      /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
       args.add(Arguments.of(makePivotTalonFXS(pos, "TalonFXS(pMin" + sfx + ")[" + offset + "]"), expected));
       args.add(Arguments.of(makePivotTalonFX(pos, "TalonFX(pMin" + sfx + ")[" + offset + "]"), expected));
+      */
     }
     return args.stream();
   }
@@ -317,8 +329,10 @@ public class MechanismLimitTest
       String  sfx      = (String) row[2];
       args.add(Arguments.of(makePivotSparkMax(pos, "SparkMax(pMax" + sfx + ")[" + offset + "]"), expected));
       args.add(Arguments.of(makePivotSparkFlex(pos, "SparkFlex(pMax" + sfx + ")[" + offset + "]"), expected));
+      /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
       args.add(Arguments.of(makePivotTalonFXS(pos, "TalonFXS(pMax" + sfx + ")[" + offset + "]"), expected));
       args.add(Arguments.of(makePivotTalonFX(pos, "TalonFX(pMax" + sfx + ")[" + offset + "]"), expected));
+      */
     }
     return args.stream();
   }
@@ -339,8 +353,10 @@ public class MechanismLimitTest
       String  sfx      = (String) row[2];
       args.add(Arguments.of(makeArmSparkMax(pos, "SparkMax(aMin" + sfx + ")[" + offset + "]"), expected));
       args.add(Arguments.of(makeArmSparkFlex(pos, "SparkFlex(aMin" + sfx + ")[" + offset + "]"), expected));
+      /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
       args.add(Arguments.of(makeArmTalonFXS(pos, "TalonFXS(aMin" + sfx + ")[" + offset + "]"), expected));
       args.add(Arguments.of(makeArmTalonFX(pos, "TalonFX(aMin" + sfx + ")[" + offset + "]"), expected));
+      */
     }
     return args.stream();
   }
@@ -362,8 +378,10 @@ public class MechanismLimitTest
       String  sfx      = (String) row[2];
       args.add(Arguments.of(makeArmSparkMax(pos, "SparkMax(aMax" + sfx + ")[" + offset + "]"), expected));
       args.add(Arguments.of(makeArmSparkFlex(pos, "SparkFlex(aMax" + sfx + ")[" + offset + "]"), expected));
+      /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
       args.add(Arguments.of(makeArmTalonFXS(pos, "TalonFXS(aMax" + sfx + ")[" + offset + "]"), expected));
       args.add(Arguments.of(makeArmTalonFX(pos, "TalonFX(aMax" + sfx + ")[" + offset + "]"), expected));
+      */
     }
     return args.stream();
   }
@@ -384,8 +402,10 @@ public class MechanismLimitTest
       String   sfx      = (String) row[2];
       args.add(Arguments.of(makeElevSparkMax(pos, "SparkMax(eMin" + sfx + ")[" + offset + "]"), expected));
       args.add(Arguments.of(makeElevSparkFlex(pos, "SparkFlex(eMin" + sfx + ")[" + offset + "]"), expected));
+      /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
       args.add(Arguments.of(makeElevTalonFXS(pos, "TalonFXS(eMin" + sfx + ")[" + offset + "]"), expected));
       args.add(Arguments.of(makeElevTalonFX(pos, "TalonFX(eMin" + sfx + ")[" + offset + "]"), expected));
+      */
     }
     return args.stream();
   }
@@ -406,8 +426,10 @@ public class MechanismLimitTest
       String   sfx      = (String) row[2];
       args.add(Arguments.of(makeElevSparkMax(pos, "SparkMax(eMax" + sfx + ")[" + offset + "]"), expected));
       args.add(Arguments.of(makeElevSparkFlex(pos, "SparkFlex(eMax" + sfx + ")[" + offset + "]"), expected));
+      /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
       args.add(Arguments.of(makeElevTalonFXS(pos, "TalonFXS(eMax" + sfx + ")[" + offset + "]"), expected));
       args.add(Arguments.of(makeElevTalonFX(pos, "TalonFX(eMax" + sfx + ")[" + offset + "]"), expected));
+      */
     }
     return args.stream();
   }
@@ -418,8 +440,10 @@ public class MechanismLimitTest
     var args = new ArrayList<Arguments>();
     args.add(Arguments.of(makePivotSparkMax(Degrees.of(45), "SparkMax(spos)[" + offset + "]")));
     args.add(Arguments.of(makePivotSparkFlex(Degrees.of(45), "SparkFlex(spos)[" + offset + "]")));
+    /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
     args.add(Arguments.of(makePivotTalonFXS(Degrees.of(45), "TalonFXS(spos)[" + offset + "]")));
     args.add(Arguments.of(makePivotTalonFX(Degrees.of(45), "TalonFX(spos)[" + offset + "]")));
+    */
     return args.stream();
   }
 
@@ -451,13 +475,16 @@ public class MechanismLimitTest
     } else if (motor instanceof SparkFlex)
     {
       ((SparkFlex) motor).close();
-    } else if (motor instanceof TalonFXS)
+    }
+    /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
+    else if (motor instanceof TalonFXS)
     {
       ((TalonFXS) motor).close();
     } else if (motor instanceof TalonFX)
     {
       ((TalonFX) motor).close();
     }
+    */
   }
 
   // ──────────────────────────────────────────────

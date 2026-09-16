@@ -7,14 +7,14 @@ plugins {
   id 'google-test'
   id 'idea'
   id 'org.wpilib.WPILibRepositoriesPlugin' version '2027.0.0'
-  id 'org.wpilib.NativeUtils' version '2027.13.1'
+  id 'org.wpilib.NativeUtils' version '2027.14.3'
   id 'org.wpilib.GradleJni' version '2027.0.0'
   id 'org.wpilib.GradleVsCode' version '2027.0.0'
-  id 'org.wpilib.GradleRIO' version '2027.0.0-alpha-6'
+  id 'org.wpilib.GradleRIO' version '2027.0.0-alpha-7'
 }
 
 // WPILib Version
-ext.wpilibVersion = "2027.+"
+ext.wpilibVersion = "2027.0.0-alpha-7"
 ext.releasePath = "$buildDir/maven"
 ext.pubVersion = System.getenv("releaseVersion") ?: System.getenv("releaseName") ?: "test"
 // Set -PskipCpp=true to skip building/publishing the C++ library entirely. The generated
@@ -38,6 +38,16 @@ sourceSets {
     main {
         java {
             srcDir "$rootDir/../yams/java/"
+            exclude  "**/TalonFX*.java"
+        }
+    }
+    // CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7. CANcoderTest.java
+    // is entirely CTRE (CANcoder + TalonFX), so it stays excluded until one is available. The other
+    // mechanism tests have their CTRE-specific imports/cases commented out (not deleted) instead,
+    // so their REV-only coverage keeps running.
+    test {
+        java {
+            exclude "yams/motorcontrollers/CANcoderTest.java"
         }
     }
 }
@@ -61,6 +71,8 @@ dependencies {
     implementation "org.wpilib.wpiunits:wpiunits-java:$wpilibVersion"
     implementation "org.wpilib.datalog:datalog-java:$wpilibVersion"
     implementation "org.wpilib.hal:hal-java:$wpilibVersion"
+    implementation "org.wpilib.tunables:tunables-java:$wpilibVersion"
+    implementation "org.wpilib.telemetry:telemetry-java:$wpilibVersion"
     implementation "org.ejml:ejml-simple:0.44.0"
     implementation "com.fasterxml.jackson.core:jackson-annotations:2.19.2"
     implementation "com.fasterxml.jackson.core:jackson-core:2.19.2"
@@ -196,7 +208,7 @@ model {
               }
           }*/
 
-          nativeUtils.useRequiredLibrary(it, "wpilib_shared", "googletest_static")
+          nativeUtils.useRequiredLibrary(it, "wpilib_shared")
           wpi.vendor.nativeVendor.cpp(it)
       }
 

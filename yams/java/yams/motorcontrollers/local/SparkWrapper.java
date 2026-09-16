@@ -491,8 +491,9 @@ public class SparkWrapper extends SmartMotorController
     config.getOpenLoopRampRate().ifPresent(rate -> m_sparkBaseConfig.openLoopRampRate(rate.in(Seconds)));
     config.getClosedLoopRampRate().ifPresent(rate -> m_sparkBaseConfig.closedLoopRampRate(rate.in(Seconds)));
     config.getMotorInverted().ifPresent(m_sparkBaseConfig::inverted);
-    m_sparkBaseConfig.encoder.positionConversionFactor(positionConversionFactor)
-                             .velocityConversionFactor(velocityConversionFactor);
+    m_sparkBaseConfig.encoder.apply(
+        new RevEncoderConversionFactors().withPositionConversionFactor(positionConversionFactor)
+                                         .withVelocityConversionFactor(velocityConversionFactor));
 
     // Control mode is ignored
     config.getMotorControllerMode();
@@ -592,13 +593,15 @@ public class SparkWrapper extends SmartMotorController
     if (config.getContinuousWrapping().isPresent() && config.getContinuousWrappingMin().isPresent())
     {
       m_sparkBaseConfig.closedLoop
-          .positionWrappingInputRange(config.getContinuousWrappingMin().get().in(Rotations),
-                                      config.getContinuousWrapping().get().in(Rotations))
+          .apply(new RevClosedLoopPositionWrapping()
+                     .withMinInput(config.getContinuousWrappingMin().get().in(Rotations))
+                     .withMaxInput(config.getContinuousWrapping().get().in(Rotations)))
           .positionWrappingEnabled(true);
     } else if (config.getContinuousWrapping().isPresent())
     {
       m_sparkBaseConfig.closedLoop
-          .positionWrappingMaxInput(config.getContinuousWrapping().get().in(Rotations))
+          .apply(new RevClosedLoopPositionWrapping()
+                     .withMaxInput(config.getContinuousWrapping().get().in(Rotations)))
           .positionWrappingEnabled(true);
     }
 
@@ -612,8 +615,10 @@ public class SparkWrapper extends SmartMotorController
         double absoluteEncoderConversionFactor = config.getExternalEncoderGearing().orElse(MechanismGearing.kOne)
                                                        .getRotorToMechanismRatio();
         m_sparkAbsoluteEncoder = Optional.of((SparkAbsoluteEncoder) externalEncoder);
-        m_sparkBaseConfig.absoluteEncoder.positionConversionFactor(absoluteEncoderConversionFactor)
-                                         .velocityConversionFactor(absoluteEncoderConversionFactor / 60);
+        m_sparkBaseConfig.absoluteEncoder.apply(
+            new RevAbsoluteEncoderConversionFactors()
+                .withPositionConversionFactor(absoluteEncoderConversionFactor)
+                .withVelocityConversionFactor(absoluteEncoderConversionFactor / 60));
         config.getExternalEncoderInverted().ifPresent(m_sparkBaseConfig.absoluteEncoder::inverted);
         // Set the absolute encoder as the primary feedback sensor for closed loop control.
         if (useExternalEncoder)
@@ -1392,8 +1397,9 @@ public class SparkWrapper extends SmartMotorController
     m_config.withGearing(gearing);
     double positionConversionFactor = gearing.getRotorToMechanismRatio();
     double velocityConversionFactor = gearing.getRotorToMechanismRatio() / 60.0;
-    m_sparkBaseConfig.encoder.positionConversionFactor(positionConversionFactor)
-                             .velocityConversionFactor(velocityConversionFactor);
+    m_sparkBaseConfig.encoder.apply(
+        new RevEncoderConversionFactors().withPositionConversionFactor(positionConversionFactor)
+                                         .withVelocityConversionFactor(velocityConversionFactor));
     m_spark.configureAsync(m_sparkBaseConfig,
                            ResetMode.kNoResetSafeParameters,
                            DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters

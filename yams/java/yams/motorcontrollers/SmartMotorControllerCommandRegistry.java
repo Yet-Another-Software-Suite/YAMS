@@ -3,7 +3,7 @@
 
 package yams.motorcontrollers;
 
-import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.tunable.Tunables;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.Subsystem;
@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import yams.telemetry.NetworkTablesBackends;
 
 /**
  * Registry for WPILib {@link org.wpilib.command2.Command} instances associated with a
@@ -49,7 +50,8 @@ public class SmartMotorControllerCommandRegistry
       }
     }, subsystem).withName(cmdName);
     commands.put(key, cmd);
-    SmartDashboard.putData("Mechanisms/Commands/" + key, cmd);
+    NetworkTablesBackends.ensureTuningTunableBackend();
+    Tunables.publish("Tuning/" + key, cmd);
   }
 
   /**

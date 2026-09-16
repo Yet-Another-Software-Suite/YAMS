@@ -21,7 +21,6 @@ import org.wpilib.simulation.DCMotorSim;
 import org.wpilib.simulation.RoboRioSim;
 import org.wpilib.smartdashboard.Mechanism2d;
 import org.wpilib.smartdashboard.MechanismLigament2d;
-import org.wpilib.smartdashboard.SmartDashboard;
 import org.wpilib.util.Color;
 import org.wpilib.util.Color8Bit;
 import org.wpilib.command2.Command;
@@ -200,8 +199,7 @@ public class Pivot extends SmartPositionalMechanism
                                                           .in(Degrees),
                                                        4, new Color8Bit(Color.YELLOW)));
       }
-      SmartDashboard.putData(getName() + "/mechanism",
-                             m_mechanismWindow);
+      publishMechanismWindow();
     }
   }
 
@@ -305,7 +303,7 @@ public class Pivot extends SmartPositionalMechanism
   public Command runTo(Angle angle, Angle tolerance)
   {
     return Commands.runOnce(() -> m_smc.setPosition(angle), m_subsystem)
-                   .andThen(Commands.waitUntil(isNear(angle, tolerance).debounce(0.1, DebounceType.kRising)))
+                   .andThen(Commands.waitUntil(isNear(angle, tolerance).debounce(0.1, DebounceType.RISING)))
                    .withName(m_subsystem.getName() + " RunTo Angle");
   }
 
@@ -320,7 +318,7 @@ public class Pivot extends SmartPositionalMechanism
   public Command runTo(Supplier<Angle> angle, Angle tolerance)
   {
     return Commands.runOnce(() -> m_smc.setPosition(angle.get()), m_subsystem)
-                   .andThen(Commands.waitUntil(isNear(angle.get(), tolerance).debounce(0.1, DebounceType.kRising)))
+                   .andThen(Commands.waitUntil(isNear(angle.get(), tolerance).debounce(0.1, DebounceType.RISING)))
                    .withName(m_subsystem.getName() + " RunTo Angle Supplier");
   }
 

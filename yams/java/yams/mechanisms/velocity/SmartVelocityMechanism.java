@@ -77,8 +77,7 @@ import yams.motorcontrollers.SmartMotorController;
  *   <li>{@link yams.mechanisms.SmartMechanism#simIterate()} — advances the physics simulation
  *       model and writes back simulated encoder values each robot loop</li>
  *   <li>{@link yams.mechanisms.SmartMechanism#updateTelemetry()} — publishes mechanism state
- *       to {@link org.wpilib.smartdashboard.SmartDashboard} or an equivalent
- *       telemetry sink</li>
+ *       to NetworkTables or an equivalent telemetry sink</li>
  *   <li>{@link #max()} — must throw {@link java.lang.UnsupportedOperationException}; velocity
  *       mechanisms do not support positional limits</li>
  *   <li>{@link #min()} — must throw {@link java.lang.UnsupportedOperationException}; velocity

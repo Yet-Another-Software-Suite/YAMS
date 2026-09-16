@@ -73,8 +73,7 @@ import yams.motorcontrollers.SmartMotorController;
  *   <li>{@link yams.mechanisms.SmartMechanism#simIterate()} — advances the physics simulation
  *       model and writes back simulated encoder values each robot loop</li>
  *   <li>{@link yams.mechanisms.SmartMechanism#updateTelemetry()} — publishes mechanism state
- *       to {@link org.wpilib.smartdashboard.SmartDashboard} or an equivalent
- *       telemetry sink</li>
+ *       to NetworkTables or an equivalent telemetry sink</li>
  *   <li>{@link #max()} — returns a {@link org.wpilib.command2.button.Trigger} that
  *       activates when the mechanism reaches its configured maximum limit</li>
  *   <li>{@link #min()} — returns a {@link org.wpilib.command2.button.Trigger} that

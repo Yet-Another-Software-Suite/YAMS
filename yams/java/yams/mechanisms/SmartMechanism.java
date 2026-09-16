@@ -10,6 +10,7 @@ import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.LinearVelocity;
 import org.wpilib.units.measure.Voltage;
 import org.wpilib.smartdashboard.Mechanism2d;
+import org.wpilib.telemetry.Telemetry;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.Subsystem;
@@ -17,6 +18,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import yams.motorcontrollers.SmartMotorController;
 import yams.telemetry.MechanismTelemetry;
+import yams.telemetry.NetworkTablesBackends;
 
 /**
  * Generic implementation of a mechanism with advanced telemetry.
@@ -32,7 +34,9 @@ import yams.telemetry.MechanismTelemetry;
  * <h2>Mechanism Lifecycle</h2>
  * <ol>
  *   <li>Configure a motor controller: {@link yams.motorcontrollers.SmartMotorControllerConfig}</li>
- *   <li>Instantiate the appropriate wrapper: {@link yams.motorcontrollers.local.SparkWrapper} (REV), {@link yams.motorcontrollers.remote.TalonFXWrapper} or {@link yams.motorcontrollers.remote.TalonFXSWrapper} (CTRE)</li>
+ *   <li>Instantiate the appropriate wrapper: {@link yams.motorcontrollers.local.SparkWrapper} (REV), or
+ *       {@code yams.motorcontrollers.remote.TalonFXWrapper}/{@code yams.motorcontrollers.remote.TalonFXSWrapper}
+ *       (CTRE — unavailable while CTRE has no Phoenix6 build for this wpilib version)</li>
  *   <li>Build a mechanism config (e.g., {@link yams.mechanisms.config.ArmConfig})</li>
  *   <li>Construct the concrete mechanism (e.g., {@link yams.mechanisms.positional.Arm})</li>
  *   <li>Schedule setpoint commands and bind triggers</li>
@@ -241,6 +245,15 @@ public abstract class SmartMechanism
   public Mechanism2d getMechanismWindow()
   {
     return m_mechanismWindow;
+  }
+
+  /**
+   * Publish {@link #m_mechanismWindow} to NetworkTables under {@code Mechanisms/<name>/mechanism}.
+   */
+  protected void publishMechanismWindow()
+  {
+    NetworkTablesBackends.ensureMechanismsTelemetryBackend();
+    Telemetry.log("Mechanisms/" + getName() + "/mechanism", m_mechanismWindow);
   }
 
   /**

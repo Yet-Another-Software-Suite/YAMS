@@ -28,7 +28,7 @@ import org.wpilib.units.measure.Distance;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.system.Timer;
 import org.wpilib.smartdashboard.Field2d;
-import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.tunable.Tunables;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.RunCommand;
@@ -38,6 +38,7 @@ import java.util.function.Supplier;
 import yams.mechanisms.config.SwerveDriveConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.telemetry.MechanismTelemetry;
+import yams.telemetry.NetworkTablesBackends;
 import yams.telemetry.SwerveDriveTelemetry;
 import yams.telemetry.SwerveDriveTelemetryConfig;
 
@@ -207,8 +208,9 @@ public class SwerveDrive {
     m_swerveTelemetry = new SwerveDriveTelemetry(cfg);
     m_swerveTelemetry.setupTelemetry(this);
     m_field2d.setRobotPose(getPose());
-    SmartDashboard.putData("Mechanisms/" + getName() + "/field", m_field2d);
-    SmartDashboard.putData(
+    NetworkTablesBackends.ensureMechanismsTunableBackend();
+    Tunables.publish("Mechanisms/" + getName() + "/field", m_field2d);
+    Tunables.publish(
         "Mechanisms/" + getName() + "/tuning/driveToPose", Commands.startRun(() -> {
           System.out.println(
               "================= Starting SwerveDrive.driveToPoseTuning() =================\n");
@@ -398,8 +400,8 @@ public class SwerveDrive {
     // If in sim reset to the simulated drive.
     //    resetOdometry(
     //        RobotBase.isSimulation() ? getMapleSimPose() : new Pose2d(getPose().getTranslation(),
-    //        Rotation2d.kZero));
-    resetOdometry(new Pose2d(getPose().getTranslation(), Rotation2d.kZero));
+    //        Rotation2d.ZERO));
+    resetOdometry(new Pose2d(getPose().getTranslation(), Rotation2d.ZERO));
   }
 
   /**

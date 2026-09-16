@@ -21,7 +21,6 @@ import org.wpilib.simulation.DCMotorSim;
 import org.wpilib.simulation.RoboRioSim;
 import org.wpilib.smartdashboard.Mechanism2d;
 import org.wpilib.smartdashboard.MechanismLigament2d;
-import org.wpilib.smartdashboard.SmartDashboard;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.button.Trigger;
@@ -120,7 +119,7 @@ public class FlyWheel extends SmartVelocityMechanism
       mechanismLigament = mechanismRoot.append(new MechanismLigament2d(getName(),
                                                                        ShooterLength.in(Meters),
                                                                        0, 6, config.getSimColor()));
-      SmartDashboard.putData(getName() + "/mechanism", m_mechanismWindow);
+      publishMechanismWindow();
     }
   }
 
@@ -239,7 +238,7 @@ public class FlyWheel extends SmartVelocityMechanism
   {
     return Commands.runOnce(m_smc::startClosedLoopController, m_subsystem)
                    .andThen(Commands.runOnce(() -> m_smc.setVelocity(velocity.get()), m_subsystem))
-                   .andThen(Commands.waitUntil(isNear(velocity.get(), tolerance).debounce(0.1, DebounceType.kRising)))
+                   .andThen(Commands.waitUntil(isNear(velocity.get(), tolerance).debounce(0.1, DebounceType.RISING)))
                    .withName(m_subsystem.getName() + " RunToVelocity Supplier");
   }
 
@@ -256,7 +255,7 @@ public class FlyWheel extends SmartVelocityMechanism
   {
     return Commands.runOnce(m_smc::startClosedLoopController, m_subsystem)
                    .andThen(Commands.runOnce(() -> m_smc.setVelocity(velocity), m_subsystem))
-                   .andThen(Commands.waitUntil(isNear(velocity, tolerance).debounce(0.1, DebounceType.kRising)))
+                   .andThen(Commands.waitUntil(isNear(velocity, tolerance).debounce(0.1, DebounceType.RISING)))
                    .withName(m_subsystem.getName() + " RunToVelocity");
   }
 

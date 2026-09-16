@@ -21,7 +21,6 @@ import org.wpilib.simulation.ElevatorSim;
 import org.wpilib.simulation.RoboRioSim;
 import org.wpilib.smartdashboard.Mechanism2d;
 import org.wpilib.smartdashboard.MechanismLigament2d;
-import org.wpilib.smartdashboard.SmartDashboard;
 import org.wpilib.util.Color;
 import org.wpilib.util.Color8Bit;
 import org.wpilib.command2.Command;
@@ -223,7 +222,7 @@ public class Elevator extends SmartPositionalMechanism
                                                                           config.getAngle().in(Degrees),
                                                                           3,
                                                                           new Color8Bit(Color.WHITE)));
-      SmartDashboard.putData(getName() + "/mechanism", m_mechanismWindow);
+      publishMechanismWindow();
     }
   }
 
@@ -362,7 +361,7 @@ public class Elevator extends SmartPositionalMechanism
   public Command runTo(Distance height, Distance tolerance)
   {
     return Commands.runOnce(() -> m_smc.setPosition(height), m_subsystem)
-                   .andThen(Commands.waitUntil(isNear(height, tolerance).debounce(0.1, DebounceType.kRising)))
+                   .andThen(Commands.waitUntil(isNear(height, tolerance).debounce(0.1, DebounceType.RISING)))
                    .withName(m_subsystem.getName() + " Run To Height");
   }
 
@@ -378,7 +377,7 @@ public class Elevator extends SmartPositionalMechanism
   public Command runTo(Supplier<Distance> height, Distance tolerance)
   {
     return Commands.runOnce(() -> m_smc.setPosition(height.get()), m_subsystem)
-                   .andThen(Commands.waitUntil(isNear(height.get(), tolerance).debounce(0.1, DebounceType.kRising)))
+                   .andThen(Commands.waitUntil(isNear(height.get(), tolerance).debounce(0.1, DebounceType.RISING)))
                    .withName(m_subsystem.getName() + " Run To Height Supplier");
   }
 

@@ -21,7 +21,6 @@ import org.wpilib.simulation.RoboRioSim;
 import org.wpilib.smartdashboard.Mechanism2d;
 import org.wpilib.smartdashboard.MechanismLigament2d;
 import org.wpilib.smartdashboard.MechanismRoot2d;
-import org.wpilib.smartdashboard.SmartDashboard;
 import org.wpilib.util.Color;
 import org.wpilib.util.Color8Bit;
 import org.wpilib.command2.Command;
@@ -211,7 +210,7 @@ public class DifferentialMechanism extends SmartPositionalMechanism
                                                                    6,
                                                                    new Color8Bit(Color.RED)));
 
-      SmartDashboard.putData(getName() + "/mechanism", m_mechanismWindow);
+      publishMechanismWindow();
 
       m_leftSMC.setupSimulation();
       m_rightSMC.setupSimulation();
