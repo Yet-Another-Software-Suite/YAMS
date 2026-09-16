@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include <optional>
+#include <variant>
+#include <vector>
 #include <wpi/math/controller/LinearQuadraticRegulator.hpp>
 #include <wpi/math/estimator/KalmanFilter.hpp>
 #include <wpi/math/system/DCMotor.hpp>
@@ -11,10 +14,6 @@
 #include <wpi/math/system/Models.hpp>
 #include <wpi/units/time.hpp>
 #include <wpi/units/voltage.hpp>
-
-#include <optional>
-#include <variant>
-#include <vector>
 
 namespace yams::math {
 
@@ -55,7 +54,8 @@ class LQRConfig {
    * @param gearing        Gear reduction from motor to flywheel.
    * @return *this for chaining.
    */
-  LQRConfig& WithFlywheelSystem(const wpi::math::DCMotor& motor, double momentOfInertia, double gearing);
+  LQRConfig& WithFlywheelSystem(const wpi::math::DCMotor& motor, double momentOfInertia,
+                                double gearing);
 
   /**
    * Configure a single-jointed arm plant model.
@@ -158,7 +158,8 @@ class LQRConfig {
    *
    * @return Variant holding a 1-state system (flywheel) or 2-state system (arm/elevator).
    */
-  std::variant<wpi::math::LinearSystem<1, 1, 1>, wpi::math::LinearSystem<2, 1, 1>> GetSystem() const;
+  std::variant<wpi::math::LinearSystem<1, 1, 1>, wpi::math::LinearSystem<2, 1, 1>> GetSystem()
+      const;
 
   /**
    * Build and return the complete LinearSystemLoop ready for use.

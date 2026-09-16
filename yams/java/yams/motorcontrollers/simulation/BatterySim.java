@@ -61,8 +61,7 @@ public class BatterySim {
    * href="https://www.chiefdelphi.com/t/detailed-frc-battery-comparison-for-2026/508077">Detailed
    * FRC Battery Comparison for 2026</a>.
    */
-  private static InterpolatingDoubleTreeMap CURRENT_TO_CAPACITY_FRACTION =
-      new InterpolatingDoubleTreeMap();
+  private static InterpolatingDoubleTreeMap CURRENT_TO_CAPACITY_FRACTION = new InterpolatingDoubleTreeMap();
 
   static {
     CURRENT_TO_CAPACITY_FRACTION.put(0.9, 1.000);
@@ -96,9 +95,9 @@ public class BatterySim {
    * method when you want to model something different, for example:
    *
    * <ul>
-   *   <li>A well-used competition battery that sags earlier and harder than a fresh one.
-   *   <li>Matching a curve you measured from an actual battery on a load tester, for the most
-   *       accurate brownout predictions possible.
+   * <li>A well-used competition battery that sags earlier and harder than a fresh one.
+   * <li>Matching a curve you measured from an actual battery on a load tester, for the most
+   * accurate brownout predictions possible.
    * </ul>
    *
    * <pre>{@code
@@ -120,8 +119,8 @@ public class BatterySim {
    * }</pre>
    *
    * @param socToVoltage Interpolation table mapping state of charge {@code [0, 1]} to open circuit
-   *     voltage. Call this before {@link #enableDischarge(double, Voltage, Resistance)} so
-   *     discharge simulation uses the new curve from the start.
+   *                     voltage. Call this before {@link #enableDischarge(double, Voltage, Resistance)} so
+   *                     discharge simulation uses the new curve from the start.
    */
   public static void replaceSOCInterpolation(InterpolatingDoubleTreeMap socToVoltage) {
     BatterySim.SOC_TO_VOLTAGE = socToVoltage;
@@ -135,9 +134,9 @@ public class BatterySim {
    * battery, for example from a load tester, rather than the averaged multi-manufacturer defaults.
    *
    * @param currentToCapacityFraction Interpolation table mapping discharge current in Amps to the
-   *     fraction (0 to 1) of the nominal amp-hour capacity delivered at that current. Call this
-   *     before {@link #enableDischarge(double, Voltage, Resistance)} so discharge simulation uses
-   *     the new curve from the start.
+   *                                  fraction (0 to 1) of the nominal amp-hour capacity delivered at that current. Call this
+   *                                  before {@link #enableDischarge(double, Voltage, Resistance)} so discharge simulation uses
+   *                                  the new curve from the start.
    */
   public static void replaceCapacityDerating(InterpolatingDoubleTreeMap currentToCapacityFraction) {
     BatterySim.CURRENT_TO_CAPACITY_FRACTION = currentToCapacityFraction;
@@ -149,12 +148,11 @@ public class BatterySim {
    * resistance to more realistically model a depleted battery.
    *
    * @param batteryCapacityAmpHours Capacity of the battery in amp-hours (Ah). A typical FRC battery
-   *     is around 18 Ah.
-   * @param nomVoltage Nominal (fully charged) open circuit voltage of the battery.
-   * @param nomResistance Nominal internal resistance of the battery.
+   *                                is around 18 Ah.
+   * @param nomVoltage              Nominal (fully charged) open circuit voltage of the battery.
+   * @param nomResistance           Nominal internal resistance of the battery.
    */
-  public static void enableDischarge(
-      double batteryCapacityAmpHours, Voltage nomVoltage, Resistance nomResistance) {
+  public static void enableDischarge(double batteryCapacityAmpHours, Voltage nomVoltage, Resistance nomResistance) {
     dischargeEnabled = true;
     BatterySim.batteryCapacityAmpHours = batteryCapacityAmpHours;
     BatterySim.batteryResistance = nomResistance;
@@ -202,7 +200,7 @@ public class BatterySim {
    * would suggest (the Peukert effect).
    *
    * @param totalCurrentAmps Total current drawn by the robot in {@link org.wpilib.units.Units#Amps
-   *     Amps}.
+   *                         Amps}.
    */
   private static void updateDischarge(double totalCurrentAmps) {
     double now = Timer.getTimestamp();
@@ -220,7 +218,7 @@ public class BatterySim {
   /**
    * Calculate the voltage based on the currents used by the robot.
    *
-   * @param id {@link UUID} of the simulation to calculate the voltage for.
+   * @param id      {@link UUID} of the simulation to calculate the voltage for.
    * @param current {@link org.wpilib.units.Units#Amps Amps} used by the robot.
    * @return Voltage of the robot.
    */
@@ -243,14 +241,13 @@ public class BatterySim {
       internalResistance *= 1.0 + (2.0 * (1.0 - stateOfCharge));
     }
 
-    return org.wpilib.simulation.BatterySim.calculateLoadedBatteryVoltage(
-        openCircuitVoltage, internalResistance, currentDraws);
+    return org.wpilib.simulation.BatterySim.calculateLoadedBatteryVoltage(openCircuitVoltage, internalResistance, currentDraws);
   }
 
   /**
    * Calculate the voltage based on the currents used by the robot.
    *
-   * @param id {@link UUID} of the simulation to calculate the voltage for.
+   * @param id      {@link UUID} of the simulation to calculate the voltage for.
    * @param current {@link org.wpilib.units.Units#Amps Amps} used by the robot.
    * @return Voltage of the robot.
    */

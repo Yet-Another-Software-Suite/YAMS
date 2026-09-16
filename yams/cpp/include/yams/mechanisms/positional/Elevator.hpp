@@ -3,16 +3,15 @@
 
 #pragma once
 
-#include <wpi/math/geometry/Translation3d.hpp>
-#include <wpi/simulation/ElevatorSim.hpp>
-#include <wpi/smartdashboard/MechanismLigament2d.hpp>
-#include <wpi/commands2/CommandPtr.hpp>
-#include <wpi/commands2/button/Trigger.hpp>
-#include <wpi/units/length.hpp>
-
 #include <functional>
 #include <optional>
 #include <string>
+#include <wpi/commands2/CommandPtr.hpp>
+#include <wpi/commands2/button/Trigger.hpp>
+#include <wpi/math/geometry/Translation3d.hpp>
+#include <wpi/simulation/ElevatorSim.hpp>
+#include <wpi/smartdashboard/MechanismLigament2d.hpp>
+#include <wpi/units/length.hpp>
 
 #include "SmartPositionalMechanism.hpp"
 #include "yams/mechanisms/config/ElevatorConfig.hpp"
@@ -137,7 +136,8 @@ class Elevator : public SmartPositionalMechanism {
    * @param tolerance Acceptable error.
    * @return CommandPtr that ends once the elevator is near the target.
    */
-  wpi::cmd::CommandPtr RunTo(wpi::units::meter_t height, wpi::units::meter_t tolerance = wpi::units::meter_t{0.01});
+  wpi::cmd::CommandPtr RunTo(wpi::units::meter_t height,
+                             wpi::units::meter_t tolerance = wpi::units::meter_t{0.01});
 
   /**
    * Command the elevator to a height from a supplier, then end when within tolerance.
@@ -149,7 +149,7 @@ class Elevator : public SmartPositionalMechanism {
    * @return CommandPtr that ends once the elevator is near the target.
    */
   wpi::cmd::CommandPtr RunTo(std::function<wpi::units::meter_t()> height,
-                         wpi::units::meter_t tolerance = wpi::units::meter_t{0.01});
+                             wpi::units::meter_t tolerance = wpi::units::meter_t{0.01});
 
   /**
    * Get the current carriage height from the motor encoder.
@@ -190,7 +190,8 @@ class Elevator : public SmartPositionalMechanism {
    * @param within Tolerance.
    * @return Trigger for the near condition.
    */
-  wpi::cmd::Trigger IsNear(wpi::units::meter_t height, wpi::units::meter_t within = wpi::units::meter_t{0.01});
+  wpi::cmd::Trigger IsNear(wpi::units::meter_t height,
+                           wpi::units::meter_t within = wpi::units::meter_t{0.01});
 
   /**
    * Get the configuration used to construct this elevator.

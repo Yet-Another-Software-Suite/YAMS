@@ -3,22 +3,21 @@
 
 #pragma once
 
+#include <functional>
+#include <optional>
+#include <string>
+#include <vector>
+#include <wpi/commands2/SubsystemBase.hpp>
 #include <wpi/math/controller/PIDController.hpp>
 #include <wpi/math/geometry/Pose2d.hpp>
 #include <wpi/math/geometry/Rotation2d.hpp>
 #include <wpi/math/geometry/Translation2d.hpp>
 #include <wpi/math/kinematics/ChassisVelocities.hpp>
-#include <wpi/commands2/SubsystemBase.hpp>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/angular_velocity.hpp>
 #include <wpi/units/length.hpp>
 #include <wpi/units/time.hpp>
 #include <wpi/units/velocity.hpp>
-
-#include <functional>
-#include <optional>
-#include <string>
-#include <vector>
 
 #include "yams/mechanisms/swerve/SwerveModule.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
@@ -253,8 +252,9 @@ class SwerveDriveConfig {
   const std::string& GetTelemetryName() const;
   /**
    * Get the user-specified SwerveDriveTelemetryConfig, if configured via
-   * WithTelemetry(name, SwerveDriveTelemetryConfig). Moves the config out of this SwerveDriveConfig;
-   * intended to be called exactly once, when the owning SwerveDrive sets up its telemetry.
+   * WithTelemetry(name, SwerveDriveTelemetryConfig). Moves the config out of this
+   * SwerveDriveConfig; intended to be called exactly once, when the owning SwerveDrive sets up its
+   * telemetry.
    *
    * @return SwerveDriveTelemetryConfig if configured.
    */
@@ -278,7 +278,8 @@ class SwerveDriveConfig {
    * @param speeds Raw robot-relative chassis speeds.
    * @return Optimized chassis speeds.
    */
-  wpi::math::ChassisVelocities OptimizeRobotRelativeChassisSpeeds(wpi::math::ChassisVelocities speeds) const;
+  wpi::math::ChassisVelocities OptimizeRobotRelativeChassisSpeeds(
+      wpi::math::ChassisVelocities speeds) const;
 
   /**
    * Get the active translation PID controller (sim variant if in simulation and configured).
@@ -298,7 +299,8 @@ class SwerveDriveConfig {
   static wpi::math::Translation2d CubeTranslation(wpi::math::Translation2d translation);
 
   /** Scale the polar-coordinate magnitude of a Translation2d by a scalar. */
-  static wpi::math::Translation2d ScaleTranslation(wpi::math::Translation2d translation, double scalar);
+  static wpi::math::Translation2d ScaleTranslation(wpi::math::Translation2d translation,
+                                                   double scalar);
 
  private:
   std::vector<SwerveModule*> m_modules;
@@ -324,7 +326,8 @@ class SwerveDriveConfig {
   std::optional<wpi::math::PIDController> m_simTranslationController;
   std::optional<wpi::math::PIDController> m_simRotationController;
 
-  wpi::math::ChassisVelocities AngularVelocitySkewCorrection(wpi::math::ChassisVelocities robotRelativeSpeeds) const;
+  wpi::math::ChassisVelocities AngularVelocitySkewCorrection(
+      wpi::math::ChassisVelocities robotRelativeSpeeds) const;
 };
 
 }  // namespace yams::mechanisms::swerve

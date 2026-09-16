@@ -4,19 +4,19 @@
 // Mirrors Java ShooterTest — duty-cycle and velocity-PID tests for a FlyWheel
 // (shooter) mechanism across all (HardwareType × ProfileType) combinations.
 
-#include <wpi/commands2/CommandScheduler.hpp>
-#include <wpi/commands2/Commands.hpp>
 #include <gtest/gtest.h>
-#include <wpi/units/angle.hpp>
-#include <wpi/units/angular_velocity.hpp>
-#include <wpi/units/length.hpp>
-#include <wpi/units/mass.hpp>
 
 #include <chrono>
 #include <cmath>
 #include <cstdio>
 #include <string>
 #include <thread>
+#include <wpi/commands2/CommandScheduler.hpp>
+#include <wpi/commands2/Commands.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/mass.hpp>
 
 #include "helpers/MockHardware.h"
 #include "helpers/MotorControllerFactory.h"
@@ -43,7 +43,8 @@ static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, Test
       .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
       .WithFeedforward(wpi::math::SimpleMotorFeedforward<wpi::units::turns>{
-          0.0_V, wpi::units::unit_t<wpi::math::SimpleMotorFeedforward<wpi::units::turns>::kv_unit>{1.0},
+          0.0_V,
+          wpi::units::unit_t<wpi::math::SimpleMotorFeedforward<wpi::units::turns>::kv_unit>{1.0},
           wpi::units::unit_t<wpi::math::SimpleMotorFeedforward<wpi::units::turns>::ka_unit>{0.0}})
       .WithClosedLoopMode()
       .WithSubsystem(subsys)
@@ -57,8 +58,9 @@ static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, Test
       // RPM.per(Second).of(9000) ≈ 9000/60 rps² → 54000 deg/s²
       cfg.WithTrapezoidProfile(
           wpi::units::degrees_per_second_t{36000.0},
-          wpi::units::unit_t<wpi::units::compound_unit<wpi::units::angular_velocity::degrees_per_second,
-                                             wpi::units::inverse<wpi::units::seconds>>>{54000.0});
+          wpi::units::unit_t<
+              wpi::units::compound_unit<wpi::units::angular_velocity::degrees_per_second,
+                                        wpi::units::inverse<wpi::units::seconds>>>{54000.0});
       break;
     case ProfileType::Exponential:
       cfg.WithExponentialProfile(0.5, 0.05, 12.0_V);
@@ -118,7 +120,7 @@ static void VelocityPIDTestBody(SmartMotorController* smc, bool isCTRE) {
 
   // ~2000 RPM = 2000/60 rps * 360 deg/rot = 12000 deg/s
   auto cmd = wpi::cmd::Run([smc] { smc->SetVelocity(wpi::units::degrees_per_second_t{12000.0}); },
-                            {smc->GetConfig().GetSubsystem()});
+                           {smc->GetConfig().GetSubsystem()});
   wpi::cmd::CommandScheduler::GetInstance().Schedule(cmd);
 
   SchedulerHelper::RunForDuration(isCTRE ? 1.0_s : 2.0_s, [&] {

@@ -7,11 +7,11 @@
 // a SmartMotorController reference and wires up simulation/telemetry
 // periodics for use in integration tests.
 
+#include <functional>
 #include <wpi/commands2/Commands.hpp>
 #include <wpi/commands2/SubsystemBase.hpp>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/length.hpp>
-#include <functional>
 
 #include "yams/motorcontrollers/SmartMotorController.hpp"
 

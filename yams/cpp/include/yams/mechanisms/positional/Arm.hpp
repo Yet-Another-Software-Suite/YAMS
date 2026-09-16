@@ -3,16 +3,15 @@
 
 #pragma once
 
-#include <wpi/math/geometry/Translation3d.hpp>
-#include <wpi/simulation/SingleJointedArmSim.hpp>
-#include <wpi/smartdashboard/MechanismLigament2d.hpp>
-#include <wpi/commands2/CommandPtr.hpp>
-#include <wpi/commands2/button/Trigger.hpp>
-#include <wpi/units/angle.hpp>
-
 #include <functional>
 #include <optional>
 #include <string>
+#include <wpi/commands2/CommandPtr.hpp>
+#include <wpi/commands2/button/Trigger.hpp>
+#include <wpi/math/geometry/Translation3d.hpp>
+#include <wpi/simulation/SingleJointedArmSim.hpp>
+#include <wpi/smartdashboard/MechanismLigament2d.hpp>
+#include <wpi/units/angle.hpp>
 
 #include "SmartPositionalMechanism.hpp"
 #include "yams/mechanisms/config/ArmConfig.hpp"
@@ -134,7 +133,8 @@ class Arm : public SmartPositionalMechanism {
    * @param tolerance Acceptable error.
    * @return CommandPtr that ends once the arm is near the target.
    */
-  wpi::cmd::CommandPtr RunTo(wpi::units::degree_t angle, wpi::units::degree_t tolerance = wpi::units::degree_t{1.0});
+  wpi::cmd::CommandPtr RunTo(wpi::units::degree_t angle,
+                             wpi::units::degree_t tolerance = wpi::units::degree_t{1.0});
 
   /**
    * Command the arm to an angle from a supplier, then end when within tolerance.
@@ -146,7 +146,7 @@ class Arm : public SmartPositionalMechanism {
    * @return CommandPtr that ends once the arm is near the target.
    */
   wpi::cmd::CommandPtr RunTo(std::function<wpi::units::degree_t()> angle,
-                         wpi::units::degree_t tolerance = wpi::units::degree_t{1.0});
+                             wpi::units::degree_t tolerance = wpi::units::degree_t{1.0});
 
   /**
    * Get the current joint angle from the motor encoder.
@@ -187,7 +187,8 @@ class Arm : public SmartPositionalMechanism {
    * @param within Tolerance.
    * @return Trigger for the near condition.
    */
-  wpi::cmd::Trigger IsNear(wpi::units::degree_t angle, wpi::units::degree_t within = wpi::units::degree_t{1.0});
+  wpi::cmd::Trigger IsNear(wpi::units::degree_t angle,
+                           wpi::units::degree_t within = wpi::units::degree_t{1.0});
 
   /**
    * Get the configuration used to construct this arm.

@@ -3,14 +3,13 @@
 
 #include "yams/motorcontrollers/simulation/Sensor.hpp"
 
-#include <wpi/framework/RobotBase.hpp>
-#include <wpi/hal/SimDevice.hpp>
-
 #include <functional>
 #include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
+#include <wpi/framework/RobotBase.hpp>
+#include <wpi/hal/SimDevice.hpp>
 
 #include "yams/mechanisms/config/SimSensorConfig.hpp"
 

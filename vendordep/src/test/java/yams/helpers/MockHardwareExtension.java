@@ -14,23 +14,23 @@ import org.wpilib.simulation.SimHooks;
  * initialized to be able to run the scheduler.
  */
 public final class MockHardwareExtension {
-	public static void beforeAll() {
-		initializeHardware();
-	}
+  public static void beforeAll() {
+    initializeHardware();
+  }
 
-	public static void afterAll() {
-		RoboRioSim.resetData();
-		DriverStationSim.resetData();
-		DriverStationSim.notifyNewData();
-//		HAL.releaseDSMutex();
-	}
+  public static void afterAll() {
+    RoboRioSim.resetData();
+    DriverStationSim.resetData();
+    DriverStationSim.notifyNewData();
+    //		HAL.releaseDSMutex();
+  }
 
-	private static void initializeHardware() {
-		HAL.initialize();
-		DriverStationSim.setDsAttached(true);
-		DriverStationSim.setRobotMode(RobotMode.TELEOPERATED);
-		DriverStationSim.setEnabled(true);
-		DriverStationSim.notifyNewData();
-		SimHooks.stepTiming(0.0); // Wait for Notifiers
-	}
+  private static void initializeHardware() {
+    HAL.initialize();
+    DriverStationSim.setDsAttached(true);
+    DriverStationSim.setRobotMode(RobotMode.TELEOPERATED);
+    DriverStationSim.setEnabled(true);
+    DriverStationSim.notifyNewData();
+    SimHooks.stepTiming(0.0); // Wait for Notifiers
+  }
 }

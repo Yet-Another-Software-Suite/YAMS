@@ -19,16 +19,16 @@ import yams.mechanisms.positional.SmartPositionalMechanism;
  * information:
  *
  * <ul>
- *   <li><b>Robot-relative position</b> — a {@link org.wpilib.math.geometry.Translation3d}
- *       that places the mechanism's pivot/root inside the robot frame. When set, the Mechanism2d
- *       window is automatically offset so the mechanism appears in the correct position relative
- *       to the robot outline.</li>
- *   <li><b>Robot bounding box</b> — optional maximum length and height used to size the
- *       Mechanism2d canvas. When omitted, the canvas defaults to twice the mechanism's
- *       reported length.</li>
- *   <li><b>Movement plane</b> — whether the mechanism moves in the XZ (default), YZ, or XY
- *       plane of the robot coordinate system. This determines which Translation3d axes are
- *       mapped to the 2D canvas X and Y axes.</li>
+ * <li><b>Robot-relative position</b> — a {@link org.wpilib.math.geometry.Translation3d}
+ * that places the mechanism's pivot/root inside the robot frame. When set, the Mechanism2d
+ * window is automatically offset so the mechanism appears in the correct position relative
+ * to the robot outline.</li>
+ * <li><b>Robot bounding box</b> — optional maximum length and height used to size the
+ * Mechanism2d canvas. When omitted, the canvas defaults to twice the mechanism's
+ * reported length.</li>
+ * <li><b>Movement plane</b> — whether the mechanism moves in the XZ (default), YZ, or XY
+ * plane of the robot coordinate system. This determines which Translation3d axes are
+ * mapped to the 2D canvas X and Y axes.</li>
  * </ul>
  *
  * <h2>Example</h2>
@@ -44,8 +44,7 @@ import yams.mechanisms.positional.SmartPositionalMechanism;
  *     .withMovementPlane(MechanismPositionConfig.Plane.XZ);
  * }</pre>
  */
-public class MechanismPositionConfig
-{
+public class MechanismPositionConfig {
   /**
    * The translation from the robot to the mechanism (Optional)
    */
@@ -63,7 +62,7 @@ public class MechanismPositionConfig
   /**
    * The plane that the mechanism is on, used for position calculations.
    */
-  protected Plane                   plane            = Plane.XZ;
+  protected Plane plane = Plane.XZ;
 
   /**
    * Set the position of the {@link SmartPositionalMechanism} relative to the robot.
@@ -71,8 +70,7 @@ public class MechanismPositionConfig
    * @param robotToMechanism {@link Pose3d} of the {@link SmartPositionalMechanism} relative to the robot.
    * @return The {@link SmartPositionalMechanism}, for easy chaining.
    */
-  public MechanismPositionConfig withRelativePosition(Translation3d robotToMechanism)
-  {
+  public MechanismPositionConfig withRelativePosition(Translation3d robotToMechanism) {
     this.robotToMechanism = Optional.ofNullable(robotToMechanism);
     return this;
   }
@@ -83,8 +81,7 @@ public class MechanismPositionConfig
    * @param robotLength Length of the robot in meters.
    * @return The {@link SmartPositionalMechanism}, for easy chaining.
    */
-  public MechanismPositionConfig withMaxRobotLength(Distance robotLength)
-  {
+  public MechanismPositionConfig withMaxRobotLength(Distance robotLength) {
     this.maxRobotLength = Optional.ofNullable(robotLength);
     return this;
   }
@@ -95,8 +92,7 @@ public class MechanismPositionConfig
    * @param robotHeight Height of the robot in meters.
    * @return The {@link SmartPositionalMechanism}, for easy chaining.
    */
-  public MechanismPositionConfig withMaxRobotHeight(Distance robotHeight)
-  {
+  public MechanismPositionConfig withMaxRobotHeight(Distance robotHeight) {
     this.maxRobotHeight = Optional.ofNullable(robotHeight);
     return this;
   }
@@ -107,8 +103,7 @@ public class MechanismPositionConfig
    * @param plane The plane that the mechanism is on. Default is X-Z plane.
    * @return The {@link SmartPositionalMechanism}, for easy chaining.
    */
-  public MechanismPositionConfig withMovementPlane(Plane plane)
-  {
+  public MechanismPositionConfig withMovementPlane(Plane plane) {
     this.plane = plane;
     return this;
   }
@@ -119,15 +114,11 @@ public class MechanismPositionConfig
    * @param length the distance in the x-direction
    * @return the x-coordinate for visualizing on a Mechanism2d
    */
-  public Distance getMechanismX(Distance length)
-  {
-    if (plane == Plane.YZ || plane == Plane.XY)
-    {
-      return robotToMechanism.map(rtm -> rtm.getMeasureY().plus(getWindowXDimension(length).div(2.0))).orElse(
-          length);
+  public Distance getMechanismX(Distance length) {
+    if (plane == Plane.YZ || plane == Plane.XY) {
+      return robotToMechanism.map(rtm -> rtm.getMeasureY().plus(getWindowXDimension(length).div(2.0))).orElse(length);
     }
-    return robotToMechanism.map(rtm -> rtm.getMeasureX().plus(getWindowXDimension(length).div(2.0))).orElse(
-        length);
+    return robotToMechanism.map(rtm -> rtm.getMeasureX().plus(getWindowXDimension(length).div(2.0))).orElse(length);
   }
 
   /**
@@ -136,8 +127,7 @@ public class MechanismPositionConfig
    * @param y the default distance in the y-direction
    * @return the y-coordinate for visualizing on a Mechanism2d
    */
-  public Distance getMechanismY(Distance y)
-  {
+  public Distance getMechanismY(Distance y) {
     return robotToMechanism.map(it -> it.getMeasureZ()).orElse(y);
   }
 
@@ -148,8 +138,7 @@ public class MechanismPositionConfig
    * @param length the length of the mechanism
    * @return the x dimension of the window in the Mechanism2d
    */
-  public Distance getWindowXDimension(Distance length)
-  {
+  public Distance getWindowXDimension(Distance length) {
     return maxRobotLength.orElse(length.times(2));
   }
 
@@ -160,8 +149,7 @@ public class MechanismPositionConfig
    * @param length the length of the mechanism
    * @return the y dimension of the window in the Mechanism2d
    */
-  public Distance getWindowYDimension(Distance length)
-  {
+  public Distance getWindowYDimension(Distance length) {
     return maxRobotHeight.orElse(length.times(2));
   }
 
@@ -170,8 +158,7 @@ public class MechanismPositionConfig
    *
    * @return {@link Translation3d} representing the relative position. Defaults to a zero translation if not set.
    */
-  public Optional<Translation3d> getRelativePosition()
-  {
+  public Optional<Translation3d> getRelativePosition() {
     return robotToMechanism;
   }
 
@@ -180,16 +167,14 @@ public class MechanismPositionConfig
    *
    * @return The {@link Plane} that the mechanism is on.
    */
-  public Plane getMovementPlane()
-  {
+  public Plane getMovementPlane() {
     return plane;
   }
 
   /**
    * The planes that the mechanism could be on, used for position calculations.
    */
-  public enum Plane
-  {
+  public enum Plane {
     /**
      * X-Z Plane
      */

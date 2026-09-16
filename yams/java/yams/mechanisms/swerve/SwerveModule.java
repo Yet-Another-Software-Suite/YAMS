@@ -96,12 +96,8 @@ public class SwerveModule {
     if (m_config.getLocation().isEmpty()) {
       throw new IllegalArgumentException("SwerveModuleConfig must have a position!");
     }
-    if (m_azimuthMotorController.getConfig().getExternalEncoder().isPresent()
-        && !m_azimuthMotorController.getConfig().getUseExternalFeedback()) {
-      throw new SmartMotorControllerConfigurationException(
-          "External encoder cannot be used without external feedback",
-          "External encoder could not be used",
-          "withUseExternalFeedbackEncoder(true)");
+    if (m_azimuthMotorController.getConfig().getExternalEncoder().isPresent() && !m_azimuthMotorController.getConfig().getUseExternalFeedback()) {
+      throw new SmartMotorControllerConfigurationException("External encoder cannot be used without external feedback", "External encoder could not be used", "withUseExternalFeedbackEncoder(true)");
     }
     seedAzimuthEncoder();
     m_azimuthEncoderWithoutOffsets = config.getRawAbsoluteEncoderAngle();
@@ -116,14 +112,7 @@ public class SwerveModule {
    */
   public void setupTelemetry(String mechName) {
     m_telemetry.setupTelemetry(mechName + "/modules/" + getName());
-    var cfg =
-        m_config
-            .getSwerveModuleTelemetryConfig()
-            .orElseGet(
-                () ->
-                    new SwerveModuleTelemetryConfig()
-                        .withTelemetryVerbosity(
-                            m_config.getTelemetryVerbosity().orElse(TelemetryVerbosity.HIGH)));
+    var cfg = m_config.getSwerveModuleTelemetryConfig().orElseGet(() -> new SwerveModuleTelemetryConfig().withTelemetryVerbosity(m_config.getTelemetryVerbosity().orElse(TelemetryVerbosity.HIGH)));
     m_swerveModuleTelemetry = new SwerveModuleTelemetry(cfg);
     m_swerveModuleTelemetry.setupTelemetry(mechName, this);
   }
@@ -139,9 +128,7 @@ public class SwerveModule {
 
   /** Seed the azimuth encoder with the absolute encoder angle. */
   public void seedAzimuthEncoder() {
-    if (RobotBase.isReal()
-        && (m_azimuthMotorController.getConfig().getExternalEncoder().isEmpty()
-            || !m_azimuthMotorController.getConfig().getUseExternalFeedback())) {
+    if (RobotBase.isReal() && (m_azimuthMotorController.getConfig().getExternalEncoder().isEmpty() || !m_azimuthMotorController.getConfig().getUseExternalFeedback())) {
       m_azimuthMotorController.setEncoderPosition(m_config.getAbsoluteEncoderAngle());
     }
   }
@@ -170,8 +157,7 @@ public class SwerveModule {
    * @param state State to set.
    * @return The optimized {@link SwerveModuleVelocity}.
    */
-  public SwerveModuleVelocity setSwerveModuleState(SwerveModuleVelocity state)
-  {
+  public SwerveModuleVelocity setSwerveModuleState(SwerveModuleVelocity state) {
     state = m_config.getOptimizedState(state);
     m_driveMotorController.setVelocity(MetersPerSecond.of(state.velocity));
     m_azimuthMotorController.setPosition(state.angle.getMeasure());
@@ -182,9 +168,9 @@ public class SwerveModule {
    * Set the {@link SwerveModuleVelocity} of the module with an additional drive wheel feedforward
    * {@link Force} applied on top, e.g. from a PathPlanner set-point generator.
    *
-   * @param state State to set.
+   * @param state            State to set.
    * @param feedforwardForce Feedforward {@link Force} applied at the drive wheel, in the direction
-   *     of travel.
+   *                         of travel.
    * @return The optimized {@link SwerveModuleVelocity}.
    */
   public SwerveModuleVelocity setSwerveModuleState(SwerveModuleVelocity state, Force feedforwardForce) {
@@ -200,9 +186,7 @@ public class SwerveModule {
    * @return {@link SwerveModuleVelocity} of the module.
    */
   public SwerveModuleVelocity getState() {
-    return new SwerveModuleVelocity(
-        m_driveMotorController.getMeasurementVelocity(),
-        new Rotation2d(m_azimuthMotorController.getMechanismPosition()));
+    return new SwerveModuleVelocity(m_driveMotorController.getMeasurementVelocity(), new Rotation2d(m_azimuthMotorController.getMechanismPosition()));
   }
 
   /**
@@ -211,9 +195,7 @@ public class SwerveModule {
    * @return {@link SwerveModulePosition} of the module.
    */
   public SwerveModulePosition getPosition() {
-    return new SwerveModulePosition(
-        m_driveMotorController.getMeasurementPosition(),
-        new Rotation2d(m_azimuthMotorController.getMechanismPosition()));
+    return new SwerveModulePosition(m_driveMotorController.getMeasurementPosition(), new Rotation2d(m_azimuthMotorController.getMechanismPosition()));
   }
 
   /** Update the telemetry of the module. */

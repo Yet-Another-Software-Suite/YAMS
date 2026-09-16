@@ -3,12 +3,11 @@
 
 #pragma once
 
-#include <wpi/units/angle.hpp>
-
 #include <cmath>
 #include <functional>
 #include <limits>
 #include <optional>
+#include <wpi/units/angle.hpp>
 
 /**
  * @file EasyCRT.hpp
@@ -57,7 +56,7 @@
  *     }
  *
  *     // Log for tolerance tuning.
- *     wpi::SmartDashboard::PutNumber("CRT/error", m_crt->GetLastError());
+ *     wpi::telemetry::Log("CRT/error", m_crt->GetLastError());
  *   }
  *
  *  private:

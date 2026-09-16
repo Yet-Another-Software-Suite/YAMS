@@ -17,14 +17,12 @@ import org.wpilib.tunable.TunableRegistry;
  * This keeps dashboard-facing widgets ({@code Mechanism2d}, {@code Field2d}, on-dashboard
  * commands) in the same NetworkTables subtree as the rest of a mechanism's telemetry/tuning data.
  */
-public final class NetworkTablesBackends
-{
+public final class NetworkTablesBackends {
   private static boolean mechanismsTelemetryRegistered = false;
   private static boolean mechanismsTunableRegistered   = false;
   private static boolean tuningTunableRegistered       = false;
 
-  private NetworkTablesBackends()
-  {
+  private NetworkTablesBackends() {
   }
 
   /**
@@ -32,12 +30,9 @@ public final class NetworkTablesBackends
    * directly to that NetworkTables root, for {@code TelemetryLoggable} objects such as
    * {@code Mechanism2d}.
    */
-  public static synchronized void ensureMechanismsTelemetryBackend()
-  {
-    if (!mechanismsTelemetryRegistered)
-    {
-      TelemetryRegistry.registerBackend("/Mechanisms",
-                                        new NetworkTablesTelemetryBackend(NetworkTableInstance.getDefault(), ""));
+  public static synchronized void ensureMechanismsTelemetryBackend() {
+    if (!mechanismsTelemetryRegistered) {
+      TelemetryRegistry.registerBackend("/Mechanisms", new NetworkTablesTelemetryBackend(NetworkTableInstance.getDefault(), ""));
       mechanismsTelemetryRegistered = true;
     }
   }
@@ -47,12 +42,9 @@ public final class NetworkTablesBackends
    * directly to that NetworkTables root, for {@code ComplexTunable} objects such as
    * {@code Field2d} or on-dashboard {@code Command}s.
    */
-  public static synchronized void ensureMechanismsTunableBackend()
-  {
-    if (!mechanismsTunableRegistered)
-    {
-      TunableRegistry.registerBackend("/Mechanisms",
-                                      new NetworkTablesTunableBackend(NetworkTableInstance.getDefault(), ""));
+  public static synchronized void ensureMechanismsTunableBackend() {
+    if (!mechanismsTunableRegistered) {
+      TunableRegistry.registerBackend("/Mechanisms", new NetworkTablesTunableBackend(NetworkTableInstance.getDefault(), ""));
       mechanismsTunableRegistered = true;
     }
   }
@@ -62,12 +54,9 @@ public final class NetworkTablesBackends
    * directly to that NetworkTables root, for {@code ComplexTunable} on-dashboard {@code Command}s
    * such as the Live Tuning command.
    */
-  public static synchronized void ensureTuningTunableBackend()
-  {
-    if (!tuningTunableRegistered)
-    {
-      TunableRegistry.registerBackend("/Tuning",
-                                      new NetworkTablesTunableBackend(NetworkTableInstance.getDefault(), ""));
+  public static synchronized void ensureTuningTunableBackend() {
+    if (!tuningTunableRegistered) {
+      TunableRegistry.registerBackend("/Tuning", new NetworkTablesTunableBackend(NetworkTableInstance.getDefault(), ""));
       tuningTunableRegistered = true;
     }
   }

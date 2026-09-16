@@ -17,9 +17,9 @@ import yams.exceptions.NoStagesGivenException;
  * <p>You can construct a {@link GearBox} in several ways:
  *
  * <ul>
- *   <li><b>{@code fromTeeth(int...)}</b> — provide alternating driver/driven tooth counts
- *   <li><b>{@code fromStages(String...)}</b> — provide stages as {@code "IN:OUT"} strings
- *   <li><b>{@code fromReductionStages(double...)}</b> — provide per-stage ratios directly
+ * <li><b>{@code fromTeeth(int...)}</b> — provide alternating driver/driven tooth counts
+ * <li><b>{@code fromStages(String...)}</b> — provide stages as {@code "IN:OUT"} strings
+ * <li><b>{@code fromReductionStages(double...)}</b> — provide per-stage ratios directly
  * </ul>
  *
  * <h2>Example</h2>

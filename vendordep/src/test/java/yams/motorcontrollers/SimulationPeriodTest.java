@@ -3,31 +3,26 @@
 
 package yams.motorcontrollers;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Milliseconds;
 import static org.wpilib.units.Units.Seconds;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7; re-enable once
-available.
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.hardware.TalonFXS;
-*/
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
-import org.wpilib.math.controller.SimpleMotorFeedforward;
-import org.wpilib.math.system.DCMotor;
-import org.wpilib.units.measure.Angle;
-import org.wpilib.preferences.Preferences;
-import org.wpilib.simulation.RoboRioSim;
-import org.wpilib.command2.CommandScheduler;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.wpilib.command2.CommandScheduler;
+import org.wpilib.math.controller.SimpleMotorFeedforward;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.preferences.Preferences;
+import org.wpilib.simulation.RoboRioSim;
+import org.wpilib.units.measure.Angle;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.helpers.DeviceCreator;
@@ -38,7 +33,12 @@ import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.SparkWrapper;
-/* import yams.motorcontrollers.remote.TalonFXSWrapper;
+
+/* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7; re-enable once
+available.
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.hardware.TalonFXS;
+import yams.motorcontrollers.remote.TalonFXSWrapper;
 import yams.motorcontrollers.remote.TalonFXWrapper;
 */
 

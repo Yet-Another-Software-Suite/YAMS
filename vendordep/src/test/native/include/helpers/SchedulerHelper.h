@@ -7,20 +7,21 @@
 // Pumps the WPILib CommandScheduler in fixed 20 ms steps for a given
 // duration, advancing HAL simulation time each step.
 
-#include <wpi/simulation/SimHooks.hpp>
-#include <wpi/commands2/Command.hpp>
-#include <wpi/commands2/CommandScheduler.hpp>
-#include <wpi/units/time.hpp>
-
 #include <chrono>
 #include <functional>
 #include <thread>
+#include <wpi/commands2/Command.hpp>
+#include <wpi/commands2/CommandScheduler.hpp>
+#include <wpi/simulation/SimHooks.hpp>
+#include <wpi/units/time.hpp>
 
 namespace yams::test {
 
 class SchedulerHelper {
  public:
-  static void Schedule(wpi::cmd::Command* cmd) { wpi::cmd::CommandScheduler::GetInstance().Schedule(cmd); }
+  static void Schedule(wpi::cmd::Command* cmd) {
+    wpi::cmd::CommandScheduler::GetInstance().Schedule(cmd);
+  }
 
   // Run the scheduler for `duration`, calling `cycleCallback` at the end of
   // each 20 ms step.  Pass nullptr for cycleCallback to omit the callback.

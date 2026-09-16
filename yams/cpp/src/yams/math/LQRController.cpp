@@ -3,10 +3,9 @@
 
 #include "yams/math/LQRController.hpp"
 
-#include <wpi/math/linalg/EigenCore.hpp>
-
 #include <memory>
 #include <utility>
+#include <wpi/math/linalg/EigenCore.hpp>
 
 namespace yams::math {
 
@@ -15,13 +14,13 @@ namespace yams::math {
 std::unique_ptr<LQRController::FlywheelBundle> LQRController::BuildFlywheel(const LQRConfig& cfg) {
   auto plant = cfg.m_flywheelPlant.value();
   wpi::math::LinearQuadraticRegulator<1, 1> ctrl{plant,
-                                           {cfg.m_qElems.empty() ? 3.0 : cfg.m_qElems[0]},
-                                           {cfg.m_rElems.empty() ? 12.0 : cfg.m_rElems[0]},
-                                           cfg.m_period};
+                                                 {cfg.m_qElems.empty() ? 3.0 : cfg.m_qElems[0]},
+                                                 {cfg.m_rElems.empty() ? 12.0 : cfg.m_rElems[0]},
+                                                 cfg.m_period};
   wpi::math::KalmanFilter<1, 1, 1> obs{plant,
-                                 {cfg.m_stateStdDevs.empty() ? 3.0 : cfg.m_stateStdDevs[0]},
-                                 {cfg.m_measStdDevs.empty() ? 0.01 : cfg.m_measStdDevs[0]},
-                                 cfg.m_period};
+                                       {cfg.m_stateStdDevs.empty() ? 3.0 : cfg.m_stateStdDevs[0]},
+                                       {cfg.m_measStdDevs.empty() ? 0.01 : cfg.m_measStdDevs[0]},
+                                       cfg.m_period};
   return std::make_unique<FlywheelBundle>(plant, std::move(ctrl), std::move(obs), cfg.m_maxVoltage,
                                           cfg.m_period);
 }
@@ -30,15 +29,16 @@ std::unique_ptr<LQRController::ArmElevatorBundle> LQRController::BuildArmElevato
     const LQRConfig& cfg) {
   auto plant = cfg.m_armElevatorPlant.value();
   wpi::math::LinearQuadraticRegulator<2, 1> ctrl{plant,
-                                           {cfg.m_qElems.size() > 0 ? cfg.m_qElems[0] : 0.01,
-                                            cfg.m_qElems.size() > 1 ? cfg.m_qElems[1] : 0.01},
-                                           {cfg.m_rElems.empty() ? 12.0 : cfg.m_rElems[0]},
-                                           cfg.m_period};
-  wpi::math::KalmanFilter<2, 1, 1> obs{plant,
-                                 {cfg.m_stateStdDevs.size() > 0 ? cfg.m_stateStdDevs[0] : 0.01,
-                                  cfg.m_stateStdDevs.size() > 1 ? cfg.m_stateStdDevs[1] : 0.01},
-                                 {cfg.m_measStdDevs.empty() ? 0.0001 : cfg.m_measStdDevs[0]},
-                                 cfg.m_period};
+                                                 {cfg.m_qElems.size() > 0 ? cfg.m_qElems[0] : 0.01,
+                                                  cfg.m_qElems.size() > 1 ? cfg.m_qElems[1] : 0.01},
+                                                 {cfg.m_rElems.empty() ? 12.0 : cfg.m_rElems[0]},
+                                                 cfg.m_period};
+  wpi::math::KalmanFilter<2, 1, 1> obs{
+      plant,
+      {cfg.m_stateStdDevs.size() > 0 ? cfg.m_stateStdDevs[0] : 0.01,
+       cfg.m_stateStdDevs.size() > 1 ? cfg.m_stateStdDevs[1] : 0.01},
+      {cfg.m_measStdDevs.empty() ? 0.0001 : cfg.m_measStdDevs[0]},
+      cfg.m_period};
   return std::make_unique<ArmElevatorBundle>(plant, std::move(ctrl), std::move(obs),
                                              cfg.m_maxVoltage, cfg.m_period);
 }
@@ -90,8 +90,9 @@ void LQRController::Reset(wpi::units::meter_t distance, wpi::units::meters_per_s
 
 // ── Calculate ────────────────────────────────────────────────────────────────
 
-wpi::units::volt_t LQRController::Calculate(wpi::units::radian_t measured, wpi::units::radian_t position,
-                                       wpi::units::radians_per_second_t velocity) {
+wpi::units::volt_t LQRController::Calculate(wpi::units::radian_t measured,
+                                            wpi::units::radian_t position,
+                                            wpi::units::radians_per_second_t velocity) {
   auto& loop = std::get<std::unique_ptr<ArmElevatorBundle>>(m_bundle)->loop;
   wpi::math::Vectord<2> nextR;
   nextR << position.value(), velocity.value();
@@ -103,8 +104,9 @@ wpi::units::volt_t LQRController::Calculate(wpi::units::radian_t measured, wpi::
   return wpi::units::volt_t{loop.U(0)};
 }
 
-wpi::units::volt_t LQRController::Calculate(wpi::units::meter_t measured, wpi::units::meter_t position,
-                                       wpi::units::meters_per_second_t velocity) {
+wpi::units::volt_t LQRController::Calculate(wpi::units::meter_t measured,
+                                            wpi::units::meter_t position,
+                                            wpi::units::meters_per_second_t velocity) {
   auto& loop = std::get<std::unique_ptr<ArmElevatorBundle>>(m_bundle)->loop;
   wpi::math::Vectord<2> nextR;
   nextR << position.value(), velocity.value();
@@ -117,7 +119,7 @@ wpi::units::volt_t LQRController::Calculate(wpi::units::meter_t measured, wpi::u
 }
 
 wpi::units::volt_t LQRController::Calculate(wpi::units::radians_per_second_t measured,
-                                       wpi::units::radians_per_second_t velocity) {
+                                            wpi::units::radians_per_second_t velocity) {
   auto& loop = std::get<std::unique_ptr<FlywheelBundle>>(m_bundle)->loop;
   wpi::math::Vectord<1> nextR;
   nextR << velocity.value();
@@ -130,7 +132,7 @@ wpi::units::volt_t LQRController::Calculate(wpi::units::radians_per_second_t mea
 }
 
 wpi::units::volt_t LQRController::Calculate(wpi::units::meters_per_second_t measured,
-                                       wpi::units::meters_per_second_t velocity) {
+                                            wpi::units::meters_per_second_t velocity) {
   auto& loop = std::get<std::unique_ptr<FlywheelBundle>>(m_bundle)->loop;
   wpi::math::Vectord<1> nextR;
   nextR << velocity.value();

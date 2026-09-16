@@ -19,18 +19,18 @@
  * <h2>Package Overview</h2>
  *
  * <ul>
- *   <li><b>{@code yams.mechanisms}</b> — concrete mechanism implementations (arm, elevator,
- *       flywheel, pivot, swerve, differential drive, double-jointed arm) and their config classes.
- *   <li><b>{@code yams.motorcontrollers}</b> — vendor-agnostic smart motor-controller wrappers that
- *       normalize REV, CTRE, and other controllers behind a common interface.
+ * <li><b>{@code yams.mechanisms}</b> — concrete mechanism implementations (arm, elevator,
+ * flywheel, pivot, swerve, differential drive, double-jointed arm) and their config classes.
+ * <li><b>{@code yams.motorcontrollers}</b> — vendor-agnostic smart motor-controller wrappers that
+ * normalize REV, CTRE, and other controllers behind a common interface.
  * <li><b>{@code yams.gearing}</b> — gear-ratio helpers ({@link yams.gearing.GearBox}, {@link yams.gearing.Sprocket}, {@link yams.gearing.MechanismGearing}) for expressing mechanism
- *       gearing without manual ratio arithmetic.
- *   <li><b>{@code yams.telemetry}</b> — automatic publishing of mechanism state to AdvantageKit,
- *       SmartDashboard, and other telemetry back-ends.
- *   <li><b>{@code yams.math}</b> — control-theory utilities including LQR, profiled PID, and
- *       filtered derivative estimation.
- *   <li><b>{@code yams.exceptions}</b> — checked and unchecked exceptions thrown when mechanisms or
- *       motor controllers are misconfigured.
+ * gearing without manual ratio arithmetic.
+ * <li><b>{@code yams.telemetry}</b> — automatic publishing of mechanism state to AdvantageKit,
+ * SmartDashboard, and other telemetry back-ends.
+ * <li><b>{@code yams.math}</b> — control-theory utilities including LQR, profiled PID, and
+ * filtered derivative estimation.
+ * <li><b>{@code yams.exceptions}</b> — checked and unchecked exceptions thrown when mechanisms or
+ * motor controllers are misconfigured.
  * </ul>
  *
  * <h2>Typical Usage</h2>

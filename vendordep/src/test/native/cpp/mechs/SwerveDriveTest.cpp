@@ -331,9 +331,10 @@ TEST_F(SwerveDriveTest, GetStateFromSpeedsPureRotation) {
 // SetRobotRelativeChassisSpeeds does not crash for both non-zero and zero inputs.
 TEST_F(SwerveDriveTest, SetRobotRelativeSpeedsDoesNotCrash) {
   EXPECT_NO_FATAL_FAILURE(
-      m_drive->SetRobotRelativeChassisSpeeds(wpi::math::ChassisVelocities{1.0_mps, 0_mps, 0_rad_per_s}));
-  EXPECT_NO_FATAL_FAILURE(
-      m_drive->SetRobotRelativeChassisSpeeds(wpi::math::ChassisVelocities{0_mps, 0_mps, 0_rad_per_s}));
+      m_drive->SetRobotRelativeChassisSpeeds(wpi::math::ChassisVelocities{1.0_mps, 0_mps,
+0_rad_per_s})); EXPECT_NO_FATAL_FAILURE(
+      m_drive->SetRobotRelativeChassisSpeeds(wpi::math::ChassisVelocities{0_mps, 0_mps,
+0_rad_per_s}));
 }
 
 
@@ -373,8 +374,8 @@ TEST_F(SwerveDriveTest, AddVisionMeasurementDoesNotCrash) {
 
 // GetDistanceFromPose returns the Euclidean distance to a target (3-4-5 triangle).
 TEST_F(SwerveDriveTest, GetDistanceFromPose) {
-  auto dist = m_drive->GetDistanceFromPose(wpi::math::Pose2d{3.0_m, 4.0_m, wpi::math::Rotation2d{}});
-  EXPECT_NEAR(dist.value(), 5.0, 0.01);
+  auto dist = m_drive->GetDistanceFromPose(wpi::math::Pose2d{3.0_m, 4.0_m,
+wpi::math::Rotation2d{}}); EXPECT_NEAR(dist.value(), 5.0, 0.01);
 }
 
 // Drive() returns a command that runs the speed supplier each loop.

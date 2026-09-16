@@ -3,29 +3,29 @@
 
 #include "yams/mechanisms/positional/Arm.hpp"
 
+#include <cmath>
+#include <memory>
+#include <string>
+#include <wpi/commands2/Commands.hpp>
 #include <wpi/framework/RobotBase.hpp>
 #include <wpi/math/geometry/Rotation3d.hpp>
 #include <wpi/math/geometry/Translation3d.hpp>
+#include <wpi/math/system/DCMotor.hpp>
 #include <wpi/simulation/BatterySim.hpp>
 #include <wpi/simulation/RoboRioSim.hpp>
 #include <wpi/smartdashboard/Mechanism2d.hpp>
 #include <wpi/smartdashboard/MechanismLigament2d.hpp>
 #include <wpi/smartdashboard/MechanismRoot2d.hpp>
-#include <wpi/smartdashboard/SmartDashboard.hpp>
-#include <wpi/math/system/DCMotor.hpp>
-#include <wpi/util/Color.hpp>
-#include <wpi/util/Color8Bit.hpp>
-#include <wpi/commands2/Commands.hpp>
+#include <wpi/telemetry/Telemetry.hpp>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/time.hpp>
-
-#include <cmath>
-#include <memory>
-#include <string>
+#include <wpi/util/Color.hpp>
+#include <wpi/util/Color8Bit.hpp>
 
 #include "yams/exceptions.hpp"
 #include "yams/gearing/MechanismGearing.hpp"
 #include "yams/motorcontrollers/simulation/ArmSimSupplier.hpp"
+#include "yams/telemetry/NetworkTablesBackends.hpp"
 
 namespace yams::mechanisms::positional {
 
@@ -109,9 +109,9 @@ Arm::Arm(config::ArmConfig* config, motorcontrollers::SmartMotorController* smc)
         "Setpoint", armLengthM, startDeg, 3, wpi::util::Color8Bit{wpi::util::Color::WHITE});
 
     constexpr double kTickLength = 3.0 * 0.0254;  // 3 inches in metres
-    m_mechanismRoot->Append<wpi::MechanismLigament2d>("MaxHard", kTickLength,
-                                                      m_armConfig->GetMaxAngle().value(), 4,
-                                                      wpi::util::Color8Bit{wpi::util::Color::LIME_GREEN});
+    m_mechanismRoot->Append<wpi::MechanismLigament2d>(
+        "MaxHard", kTickLength, m_armConfig->GetMaxAngle().value(), 4,
+        wpi::util::Color8Bit{wpi::util::Color::LIME_GREEN});
     m_mechanismRoot->Append<wpi::MechanismLigament2d>("MinHard", kTickLength,
                                                       m_armConfig->GetMinAngle().value(), 4,
                                                       wpi::util::Color8Bit{wpi::util::Color::RED});
@@ -120,12 +120,15 @@ Arm::Arm(config::ArmConfig* config, motorcontrollers::SmartMotorController* smc)
     auto smcLowerLimit = m_smc->GetConfig().GetMechanismLowerLimit();
     if (smcUpperLimit.has_value() && smcLowerLimit.has_value()) {
       m_mechanismRoot->Append<wpi::MechanismLigament2d>(
-          "MaxSoft", kTickLength, smcUpperLimit.value(), 4, wpi::util::Color8Bit{wpi::util::Color::HOT_PINK});
+          "MaxSoft", kTickLength, smcUpperLimit.value(), 4,
+          wpi::util::Color8Bit{wpi::util::Color::HOT_PINK});
       m_mechanismRoot->Append<wpi::MechanismLigament2d>(
-          "MinSoft", kTickLength, smcLowerLimit.value(), 4, wpi::util::Color8Bit{wpi::util::Color::YELLOW});
+          "MinSoft", kTickLength, smcLowerLimit.value(), 4,
+          wpi::util::Color8Bit{wpi::util::Color::YELLOW});
     }
 
-    wpi::SmartDashboard::PutData(m_name + "/mechanism", &(*m_mechanismWindow));
+    yams::telemetry::EnsureMechanismsTelemetryBackend();
+    wpi::telemetry::Log("Mechanisms/" + m_name + "/mechanism", *m_mechanismWindow);
   }
 }
 
@@ -168,8 +171,9 @@ std::string Arm::GetName() const { return m_name; }
 // ---- SmartPositionalMechanism overrides -------------------------------------
 
 wpi::cmd::Trigger Arm::Max() {
-  return wpi::cmd::Trigger{
-      [this] { return GetAngle() >= m_armConfig->GetMaxAngle().value_or(wpi::units::degree_t{36000}); }};
+  return wpi::cmd::Trigger{[this] {
+    return GetAngle() >= m_armConfig->GetMaxAngle().value_or(wpi::units::degree_t{36000});
+  }};
 }
 
 wpi::cmd::Trigger Arm::Min() {
@@ -197,7 +201,8 @@ wpi::cmd::CommandPtr Arm::RunTo(wpi::units::degree_t angle, wpi::units::degree_t
       .WithName(m_name + " RunTo");
 }
 
-wpi::cmd::CommandPtr Arm::RunTo(std::function<wpi::units::degree_t()> angle, wpi::units::degree_t tolerance) {
+wpi::cmd::CommandPtr Arm::RunTo(std::function<wpi::units::degree_t()> angle,
+                                wpi::units::degree_t tolerance) {
   wpi::units::degree_t target = angle();
   wpi::cmd::Trigger near = IsNear(target, tolerance).Debounce(wpi::units::second_t{0.1});
   return wpi::cmd::RunOnce([this, target] { SetMechanismPositionSetpoint(target); }, {m_subsystem})
@@ -227,8 +232,9 @@ const config::ArmConfig& Arm::GetConfig() const { return *m_armConfig; }
 
 wpi::math::Translation3d Arm::GetRelativeMechanismPosition() const {
   if (m_mechanismLigament) {
-    return wpi::math::Translation3d{wpi::units::meter_t{m_mechanismLigament->GetLength()},
-                              wpi::math::Rotation3d{0_rad, 0_rad, wpi::units::radian_t{GetAngle()}}};
+    return wpi::math::Translation3d{
+        wpi::units::meter_t{m_mechanismLigament->GetLength()},
+        wpi::math::Rotation3d{0_rad, 0_rad, wpi::units::radian_t{GetAngle()}}};
   }
   return wpi::math::Translation3d{};
 }

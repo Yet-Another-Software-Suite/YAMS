@@ -16,60 +16,52 @@ import com.revrobotics.spark.config.EncoderConfig;
  * {@code putParameter} REVLib exposes to config subclasses, then get merged onto the real config
  * object via its public {@code apply(...)}.
  */
-final class RevEncoderConversionFactors extends EncoderConfig
-{
+final class RevEncoderConversionFactors extends EncoderConfig {
   private static final int POSITION_CONVERSION_FACTOR = 112;
-  private static final int VELOCITY_CONVERSION_FACTOR  = 113;
+  private static final int VELOCITY_CONVERSION_FACTOR = 113;
 
-  RevEncoderConversionFactors withPositionConversionFactor(double factor)
-  {
+  RevEncoderConversionFactors withPositionConversionFactor(double factor) {
     putParameter(POSITION_CONVERSION_FACTOR, (float) factor);
     return this;
   }
 
-  RevEncoderConversionFactors withVelocityConversionFactor(double factor)
-  {
+  RevEncoderConversionFactors withVelocityConversionFactor(double factor) {
     putParameter(VELOCITY_CONVERSION_FACTOR, (float) factor);
     return this;
   }
 }
 
-final class RevAbsoluteEncoderConversionFactors extends AbsoluteEncoderConfig
-{
-  private static final int DUTY_CYCLE_POSITION_FACTOR = 139;
-  private static final int DUTY_CYCLE_VELOCITY_FACTOR  = 140;
 
-  RevAbsoluteEncoderConversionFactors()
-  {
+final class RevAbsoluteEncoderConversionFactors extends AbsoluteEncoderConfig {
+  private static final int DUTY_CYCLE_POSITION_FACTOR = 139;
+  private static final int DUTY_CYCLE_VELOCITY_FACTOR = 140;
+
+  RevAbsoluteEncoderConversionFactors() {
     setSparkMaxDataPortConfig();
   }
 
-  RevAbsoluteEncoderConversionFactors withPositionConversionFactor(double factor)
-  {
+  RevAbsoluteEncoderConversionFactors withPositionConversionFactor(double factor) {
     putParameter(DUTY_CYCLE_POSITION_FACTOR, (float) factor);
     return this;
   }
 
-  RevAbsoluteEncoderConversionFactors withVelocityConversionFactor(double factor)
-  {
+  RevAbsoluteEncoderConversionFactors withVelocityConversionFactor(double factor) {
     putParameter(DUTY_CYCLE_VELOCITY_FACTOR, (float) factor);
     return this;
   }
 }
 
-final class RevClosedLoopPositionWrapping extends ClosedLoopConfig
-{
+
+final class RevClosedLoopPositionWrapping extends ClosedLoopConfig {
   private static final int POSITION_PID_MIN_INPUT = 150;
   private static final int POSITION_PID_MAX_INPUT = 151;
 
-  RevClosedLoopPositionWrapping withMinInput(double minInput)
-  {
+  RevClosedLoopPositionWrapping withMinInput(double minInput) {
     putParameter(POSITION_PID_MIN_INPUT, (float) minInput);
     return this;
   }
 
-  RevClosedLoopPositionWrapping withMaxInput(double maxInput)
-  {
+  RevClosedLoopPositionWrapping withMaxInput(double maxInput) {
     putParameter(POSITION_PID_MAX_INPUT, (float) maxInput);
     return this;
   }

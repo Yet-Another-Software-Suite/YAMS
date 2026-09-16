@@ -32,25 +32,25 @@ import java.util.function.Supplier;
  * At runtime the {@link #getValue()} method applies the following priority order:
  * </p>
  * <ol>
- *   <li><b>Real robot</b> — always returns the live hardware supplier value immediately.</li>
- *   <li><b>Trigger override</b> — if any registered {@link #addSimTrigger trigger} condition is
- *       currently {@code true}, the associated override value is returned and written to Glass.</li>
- *   <li><b>Glass value</b> — if a {@link org.wpilib.hardware.hal.SimValue} exists and no trigger
- *       fired, returns whatever Glass has set (including the default).</li>
- *   <li><b>Supplier fallback</b> — returns the supplier value if no Glass value is available.</li>
+ * <li><b>Real robot</b> — always returns the live hardware supplier value immediately.</li>
+ * <li><b>Trigger override</b> — if any registered {@link #addSimTrigger trigger} condition is
+ * currently {@code true}, the associated override value is returned and written to Glass.</li>
+ * <li><b>Glass value</b> — if a {@link org.wpilib.hardware.hal.SimValue} exists and no trigger
+ * fired, returns whatever Glass has set (including the default).</li>
+ * <li><b>Supplier fallback</b> — returns the supplier value if no Glass value is available.</li>
  * </ol>
  *
  * <h2>Key fields</h2>
  * <ul>
- *   <li>{@code m_name} — the human-readable field name used as the Glass widget label.</li>
- *   <li>{@code m_supplier} — provides the real sensor reading on a physical robot.</li>
- *   <li>{@code m_type} ({@link HALValueType}) — guards typed accessors
- *       ({@link #getAsDouble()}, {@link #getAsInt()}, etc.) against incorrect casts.</li>
- *   <li>{@code m_defaultValue} — the initial value published to Glass at startup.</li>
- *   <li>{@code m_triggerValues} — ordered list of {@code (condition, value)} pairs checked
- *       before the Glass value each loop.</li>
- *   <li>{@code m_glassValue} — the live {@link org.wpilib.hardware.hal.SimValue} registered with the
- *       parent {@link org.wpilib.hardware.hal.SimDevice}; empty on a real robot.</li>
+ * <li>{@code m_name} — the human-readable field name used as the Glass widget label.</li>
+ * <li>{@code m_supplier} — provides the real sensor reading on a physical robot.</li>
+ * <li>{@code m_type} ({@link HALValueType}) — guards typed accessors
+ * ({@link #getAsDouble()}, {@link #getAsInt()}, etc.) against incorrect casts.</li>
+ * <li>{@code m_defaultValue} — the initial value published to Glass at startup.</li>
+ * <li>{@code m_triggerValues} — ordered list of {@code (condition, value)} pairs checked
+ * before the Glass value each loop.</li>
+ * <li>{@code m_glassValue} — the live {@link org.wpilib.hardware.hal.SimValue} registered with the
+ * parent {@link org.wpilib.hardware.hal.SimDevice}; empty on a real robot.</li>
  * </ul>
  *
  * <h2>Example</h2>
@@ -68,36 +68,35 @@ import java.util.function.Supplier;
  * double pos = posField.getAsDouble();
  * }</pre>
  */
-public class SensorData
-{
+public class SensorData {
   /**
    * Sensor name.
    */
-  private final String                                          m_name;
+  private final String                                    m_name;
   /**
    * Sensor value supplier.
    */
-  private final Supplier<HALValue>                              m_supplier;
+  private final Supplier<HALValue>                        m_supplier;
   /**
    * {@link HALValueType} Type of data.
    */
-  private final HALValueType                                    m_type;
+  private final HALValueType                              m_type;
   /**
    * {@link HALValue} default value.
    */
-  private final HALValue                                        m_defaultValue;
+  private final HALValue                                  m_defaultValue;
   /**
    * Values, based off triggers.
    */
-  private       Optional<List<Pair<BooleanSupplier, HALValue>>> m_triggerValues = Optional.empty();
+  private Optional<List<Pair<BooleanSupplier, HALValue>>> m_triggerValues = Optional.empty();
   /**
    * Sim value from Glass.
    */
-  private       Optional<SimValue>                              m_glassValue    = Optional.empty();
+  private Optional<SimValue>                              m_glassValue    = Optional.empty();
   /**
    * Previous sensor value when override takes place.
    */
-  private       Optional<HALValue>                              m_prev          = Optional.empty();
+  private Optional<HALValue>                              m_prev          = Optional.empty();
 
   /**
    * Sensor data constructor.
@@ -107,8 +106,7 @@ public class SensorData
    * @param defaultValue Default value of sensor.
    * @param type         {@link HALValueType} of sensor.
    */
-  public SensorData(String name, Supplier<HALValue> supplier, HALValue defaultValue, HALValueType type)
-  {
+  public SensorData(String name, Supplier<HALValue> supplier, HALValue defaultValue, HALValueType type) {
     m_supplier = supplier;
     m_name = name;
     m_defaultValue = defaultValue;
@@ -122,8 +120,7 @@ public class SensorData
    * @param supplier   {@link DoubleSupplier} supplier
    * @param defaultVal Double default value.
    */
-  public SensorData(String name, DoubleSupplier supplier, double defaultVal)
-  {
+  public SensorData(String name, DoubleSupplier supplier, double defaultVal) {
     this(name, convert(supplier), convert(defaultVal), HALValueType.kDouble);
   }
 
@@ -134,8 +131,7 @@ public class SensorData
    * @param supplier   {@link IntSupplier}
    * @param defaultVal Int default value.
    */
-  public SensorData(String name, IntSupplier supplier, int defaultVal)
-  {
+  public SensorData(String name, IntSupplier supplier, int defaultVal) {
     this(name, convert(supplier), convert(defaultVal), HALValueType.kInt);
   }
 
@@ -146,8 +142,7 @@ public class SensorData
    * @param supplier   {@link BooleanSupplier}
    * @param defaultVal Boolean default value.
    */
-  public SensorData(String name, BooleanSupplier supplier, boolean defaultVal)
-  {
+  public SensorData(String name, BooleanSupplier supplier, boolean defaultVal) {
     this(name, convert(supplier), convert(defaultVal), HALValueType.kBoolean);
   }
 
@@ -158,8 +153,7 @@ public class SensorData
    * @param supplier   {@link LongSupplier}
    * @param defaultVal Long default value.
    */
-  public SensorData(String name, LongSupplier supplier, long defaultVal)
-  {
+  public SensorData(String name, LongSupplier supplier, long defaultVal) {
     this(name, convert(supplier), convert(defaultVal), HALValueType.kLong);
   }
 
@@ -169,8 +163,7 @@ public class SensorData
    * @param supplier Double supplier.
    * @return HALValue supplier.
    */
-  public static Supplier<HALValue> convert(DoubleSupplier supplier)
-  {
+  public static Supplier<HALValue> convert(DoubleSupplier supplier) {
     return () -> convert(supplier.getAsDouble());
   }
 
@@ -180,8 +173,7 @@ public class SensorData
    * @param supplier Int supplier.
    * @return HALValue supplier.
    */
-  public static Supplier<HALValue> convert(IntSupplier supplier)
-  {
+  public static Supplier<HALValue> convert(IntSupplier supplier) {
     return () -> convert(supplier.getAsInt());
   }
 
@@ -191,8 +183,7 @@ public class SensorData
    * @param supplier Boolean supplier.
    * @return HALValue supplier.
    */
-  public static Supplier<HALValue> convert(BooleanSupplier supplier)
-  {
+  public static Supplier<HALValue> convert(BooleanSupplier supplier) {
     return () -> convert(supplier.getAsBoolean());
   }
 
@@ -202,8 +193,7 @@ public class SensorData
    * @param supplier Long supplier.
    * @return {@link Supplier<HALValue>}.
    */
-  public static Supplier<HALValue> convert(LongSupplier supplier)
-  {
+  public static Supplier<HALValue> convert(LongSupplier supplier) {
     return () -> convert(supplier.getAsLong());
   }
 
@@ -213,8 +203,7 @@ public class SensorData
    * @param value Double value.
    * @return {@link HALValue}.
    */
-  public static HALValue convert(double value)
-  {
+  public static HALValue convert(double value) {
     return HALValue.makeDouble(value);
   }
 
@@ -224,8 +213,7 @@ public class SensorData
    * @param value Int value.
    * @return {@link HALValue}.
    */
-  public static HALValue convert(int value)
-  {
+  public static HALValue convert(int value) {
     return HALValue.makeInt(value);
   }
 
@@ -235,8 +223,7 @@ public class SensorData
    * @param value Boolean value.
    * @return {@link HALValue}.
    */
-  public static HALValue convert(boolean value)
-  {
+  public static HALValue convert(boolean value) {
     return HALValue.makeBoolean(value);
   }
 
@@ -246,8 +233,7 @@ public class SensorData
    * @param value Long value.
    * @return {@link HALValue}.
    */
-  public static HALValue convert(long value)
-  {
+  public static HALValue convert(long value) {
     return HALValue.makeLong(value);
   }
 
@@ -256,10 +242,8 @@ public class SensorData
    *
    * @return Sensor value.
    */
-  public double getAsDouble()
-  {
-    if (m_type != HALValueType.kDouble)
-    {
+  public double getAsDouble() {
+    if (m_type != HALValueType.kDouble) {
       throw new IllegalStateException(m_name + " HALValue is not a double!");
     }
     return getValue().getDouble();
@@ -270,10 +254,8 @@ public class SensorData
    *
    * @return Sensor value.
    */
-  public int getAsInt()
-  {
-    if (m_type != HALValueType.kInt)
-    {
+  public int getAsInt() {
+    if (m_type != HALValueType.kInt) {
       throw new IllegalStateException(m_name + " HALValue is not an int!");
     }
     return (int) getValue().getDouble();
@@ -284,10 +266,8 @@ public class SensorData
    *
    * @return Sensor value.
    */
-  public long getAsLong()
-  {
-    if (m_type != HALValueType.kLong)
-    {
+  public long getAsLong() {
+    if (m_type != HALValueType.kLong) {
       throw new IllegalStateException(m_name + " HALValue is not a long!");
     }
     return getValue().getLong();
@@ -298,10 +278,8 @@ public class SensorData
    *
    * @return Sensor value.
    */
-  public boolean getAsBoolean()
-  {
-    if (m_type != HALValueType.kBoolean)
-    {
+  public boolean getAsBoolean() {
+    if (m_type != HALValueType.kBoolean) {
       throw new IllegalStateException(m_name + " HALValue is not a boolean!");
     }
     return getValue().getBoolean();
@@ -312,10 +290,8 @@ public class SensorData
    *
    * @param val Value to set.
    */
-  public void set(HALValue val)
-  {
-    if (m_prev.isEmpty() && m_glassValue.isPresent())
-    {
+  public void set(HALValue val) {
+    if (m_prev.isEmpty() && m_glassValue.isPresent()) {
       m_prev = Optional.of(m_glassValue.get().getValue());
     }
     m_glassValue.ifPresent(simValue -> simValue.setValue(val));
@@ -327,8 +303,7 @@ public class SensorData
    * @param val Integer value to set.
    * @implNote The value is not checked for validity, ensure that this is the right data type for the field.
    */
-  public void set(int val)
-  {
+  public void set(int val) {
     set(convert(val));
   }
 
@@ -338,8 +313,7 @@ public class SensorData
    * @param val Double value to set.
    * @implNote The value is not checked for validity, ensure that this is the right data type for the field.
    */
-  public void set(double val)
-  {
+  public void set(double val) {
     set(convert(val));
   }
 
@@ -349,8 +323,7 @@ public class SensorData
    * @param val Long value to set.
    * @implNote The value is not checked for validity, ensure that this is the right data type for the field.
    */
-  public void set(long val)
-  {
+  public void set(long val) {
     set(convert(val));
   }
 
@@ -360,8 +333,7 @@ public class SensorData
    * @param val Boolean value to set.
    * @implNote The value is not checked for validity, ensure that this is the right data type for the field.
    */
-  public void set(boolean val)
-  {
+  public void set(boolean val) {
     set(convert(val));
   }
 
@@ -370,21 +342,16 @@ public class SensorData
    *
    * @return Sensor value.
    */
-  public HALValue getValue()
-  {
+  public HALValue getValue() {
     // If the robot is real return the real value ASAP.
-    if (RobotBase.isReal())
-    {
+    if (RobotBase.isReal()) {
       return m_supplier.get();
     }
 
     // Override sensor values with trigger values during a simulated match
-    if (m_triggerValues.isPresent())
-    {
-      for (var entry : m_triggerValues.get())
-      {
-        if (entry.getFirst().getAsBoolean())
-        {
+    if (m_triggerValues.isPresent()) {
+      for (var entry : m_triggerValues.get()) {
+        if (entry.getFirst().getAsBoolean()) {
           var value = entry.getSecond();
           set(value);
           return value;
@@ -393,8 +360,7 @@ public class SensorData
     }
 
     // Reset and clear previous value upon change.
-    if (m_prev.isPresent())
-    {
+    if (m_prev.isPresent()) {
       set(m_prev.get());
       m_prev = Optional.empty();
     }
@@ -409,11 +375,9 @@ public class SensorData
    * @param value   {@link HALValue} to set.
    * @param trigger {@link BooleanSupplier} when to use.
    */
-  public void addSimTrigger(HALValue value, BooleanSupplier trigger)
-  {
+  public void addSimTrigger(HALValue value, BooleanSupplier trigger) {
     var item = new Pair<>(trigger, value);
-    if (m_triggerValues.isEmpty())
-    {
+    if (m_triggerValues.isEmpty()) {
       m_triggerValues = Optional.of(new ArrayList<>());
     }
     m_triggerValues.get().add(item);
@@ -425,8 +389,7 @@ public class SensorData
    *
    * @return Sensor name.
    */
-  public String getName()
-  {
+  public String getName() {
     return m_name;
   }
 
@@ -435,8 +398,7 @@ public class SensorData
    *
    * @return {@link HALValueType}
    */
-  public HALValueType getType()
-  {
+  public HALValueType getType() {
     return m_type;
   }
 
@@ -445,8 +407,7 @@ public class SensorData
    *
    * @return {@link HALValue} default value.
    */
-  public HALValue getDefault()
-  {
+  public HALValue getDefault() {
     return m_defaultValue;
   }
 
@@ -457,11 +418,9 @@ public class SensorData
    * @param direction {@link Direction} of the {@link SimValue}.
    * @return {@link SimValue} for the sensor.
    */
-  public SimValue createValue(SimDevice device, Direction direction)
-  {
+  public SimValue createValue(SimDevice device, Direction direction) {
     var simVal = device.createValue(m_name, direction, m_defaultValue);
-    if (direction == Direction.BIDIR || direction == Direction.INPUT)
-    {
+    if (direction == Direction.BIDIR || direction == Direction.INPUT) {
       m_glassValue = Optional.of(simVal);
     }
     return simVal;
@@ -470,8 +429,7 @@ public class SensorData
   /**
    * HALValue type enum.
    */
-  public enum HALValueType
-  {
+  public enum HALValueType {
     /**
      * Boolean type {@link HALValue#BOOLEAN}
      */
@@ -503,8 +461,7 @@ public class SensorData
      *
      * @param type HALValue type.
      */
-    HALValueType(int type)
-    {
+    HALValueType(int type) {
       m_type = type;
     }
 
@@ -513,8 +470,7 @@ public class SensorData
      *
      * @return {@link HALValue}
      */
-    public int getType()
-    {
+    public int getType() {
       return m_type;
     }
   }

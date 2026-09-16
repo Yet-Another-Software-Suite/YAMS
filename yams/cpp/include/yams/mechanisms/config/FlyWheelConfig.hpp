@@ -3,12 +3,11 @@
 
 #pragma once
 
-#include <wpi/util/Color.hpp>
-#include <wpi/util/Color8Bit.hpp>
-#include <wpi/units/length.hpp>
-
 #include <optional>
 #include <string>
+#include <wpi/units/length.hpp>
+#include <wpi/util/Color.hpp>
+#include <wpi/util/Color8Bit.hpp>
 
 namespace yams::mechanisms::config {
 

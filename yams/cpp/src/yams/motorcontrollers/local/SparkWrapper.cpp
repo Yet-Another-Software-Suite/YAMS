@@ -3,13 +3,8 @@
 
 #include "yams/motorcontrollers/local/SparkWrapper.hpp"
 
-#include <wpi/util/Alert.hpp>
-#include <wpi/framework/RobotBase.hpp>
-#include <wpi/simulation/RoboRioSim.hpp>
-#include <wpi/math/system/Models.hpp>
 #include <rev/ClosedLoopTypes.h>
 #include <rev/ConfigureTypes.h>
-#include <wpi/units/moment_of_inertia.hpp>
 
 #include <cstdio>
 #include <iostream>
@@ -17,9 +12,15 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <wpi/framework/RobotBase.hpp>
+#include <wpi/math/system/Models.hpp>
+#include <wpi/simulation/RoboRioSim.hpp>
+#include <wpi/units/moment_of_inertia.hpp>
+#include <wpi/util/Alert.hpp>
 
 #include "yams/exceptions.hpp"
 #include "yams/math/LQRController.hpp"
+#include "yams/motorcontrollers/local/RevConfigCompat.hpp"
 #include "yams/motorcontrollers/simulation/BatterySim.hpp"
 #include "yams/motorcontrollers/simulation/DCMotorSimSupplier.hpp"
 
@@ -27,7 +28,8 @@ using namespace rev::spark;
 
 namespace yams::motorcontrollers::local {
 
-SparkWrapper::SparkWrapper(SparkMax* spark, wpi::math::DCMotor motor, SmartMotorControllerConfig* cfg)
+SparkWrapper::SparkWrapper(SparkMax* spark, wpi::math::DCMotor motor,
+                           SmartMotorControllerConfig* cfg)
     : SmartMotorController(), m_motor(motor) {
   m_maxConfig.emplace();
   if (auto vc = cfg->GetVendorConfig(); vc.has_value()) {
@@ -41,7 +43,8 @@ SparkWrapper::SparkWrapper(SparkMax* spark, wpi::math::DCMotor motor, SmartMotor
   Init(spark, motor, cfg);
 }
 
-SparkWrapper::SparkWrapper(SparkFlex* spark, wpi::math::DCMotor motor, SmartMotorControllerConfig* cfg)
+SparkWrapper::SparkWrapper(SparkFlex* spark, wpi::math::DCMotor motor,
+                           SmartMotorControllerConfig* cfg)
     : SmartMotorController(), m_motor(motor) {
   m_flexConfig.emplace();
   if (auto vc = cfg->GetVendorConfig(); vc.has_value()) {
@@ -55,7 +58,8 @@ SparkWrapper::SparkWrapper(SparkFlex* spark, wpi::math::DCMotor motor, SmartMoto
   Init(spark, motor, cfg);
 }
 
-void SparkWrapper::Init(SparkBase* spark, wpi::math::DCMotor motor, SmartMotorControllerConfig* cfg) {
+void SparkWrapper::Init(SparkBase* spark, wpi::math::DCMotor motor,
+                        SmartMotorControllerConfig* cfg) {
   m_spark = spark;
   m_sparkPid = &spark->GetClosedLoopController();
   m_relEncoder = &spark->GetEncoder();
@@ -101,8 +105,10 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     // Base (relative) encoder: conversion from motor rotations to mechanism turns.
     double convFactor = 1.0;
     if (auto& g = config.GetMotorGearing(); g) convFactor = g->GetRotorToMechanismRatio();
-    sparkCfg.encoder.PositionConversionFactor(convFactor);
-    sparkCfg.encoder.VelocityConversionFactor(convFactor / 60.0);
+    RevEncoderConversionFactors{}
+        .WithPositionConversionFactor(convFactor)
+        .WithVelocityConversionFactor(convFactor / 60.0)
+        .Apply(sparkCfg.encoder);
 
     using Slot = SmartMotorControllerConfig::ClosedLoopControllerSlot;
     for (auto slot : {Slot::SLOT_0, Slot::SLOT_1, Slot::SLOT_2, Slot::SLOT_3}) {
@@ -169,8 +175,10 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
                          .value_or(gearing::MechanismGearing::kOne)
                          .GetRotorToMechanismRatio();
       if (auto cf = config.GetExternalEncoderConversionFactor(); cf) absCF = *cf;
-      sparkCfg.absoluteEncoder.PositionConversionFactor(absCF).VelocityConversionFactor(absCF /
-                                                                                        60.0);
+      RevAbsoluteEncoderConversionFactors{}
+          .WithPositionConversionFactor(absCF)
+          .WithVelocityConversionFactor(absCF / 60.0)
+          .Apply(sparkCfg.absoluteEncoder);
 
       if (auto inv = config.GetExternalEncoderInverted(); inv)
         sparkCfg.absoluteEncoder.Inverted(*inv);
@@ -182,7 +190,7 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
         sparkCfg.absoluteEncoder.ZeroOffset(offset->value());
 
       if (auto dp = config.GetExternalEncoderDiscontinuityPoint(); dp)
-        sparkCfg.absoluteEncoder.ZeroCentered(*dp == wpi::units::turn_t{0.5});
+        sparkCfg.absoluteEncoder.RangeOffset(*dp == wpi::units::turn_t{0.5} ? 0.5 : 0.0);
 
     } else {
       // Validate: encoder-specific options require an encoder to be attached.
@@ -216,12 +224,15 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
       sparkCfg.softLimit.ForwardSoftLimit(upper->value()).ForwardSoftLimitEnabled(isClosedLoop);
     }
     if (auto wrapMax = config.GetContinuousWrapping(); wrapMax) {
-      if (auto wrapMin = config.GetContinuousWrappingMin(); wrapMin)
-        sparkCfg.closedLoop.PositionWrappingInputRange(wrapMin->value(), wrapMax->value())
-            .PositionWrappingEnabled(true);
-      else
-        sparkCfg.closedLoop.PositionWrappingMaxInput(wrapMax->value())
-            .PositionWrappingEnabled(true);
+      sparkCfg.closedLoop.PositionWrappingEnabled(true);
+      if (auto wrapMin = config.GetContinuousWrappingMin(); wrapMin) {
+        RevClosedLoopPositionWrapping{}
+            .WithMinInput(wrapMin->value())
+            .WithMaxInput(wrapMax->value())
+            .Apply(sparkCfg.closedLoop);
+      } else {
+        RevClosedLoopPositionWrapping{}.WithMaxInput(wrapMax->value()).Apply(sparkCfg.closedLoop);
+      }
     }
   };
 
@@ -261,7 +272,8 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
         "[YAMS] Spark(" + std::to_string(deviceId) +
         ") is running closed-loop control on the SystemCore (exponential profile or LQR active). "
         "Gains are not consistent with Spark hardware PID and control runs at a lower frequency.";
-    m_rioControllerAlert.emplace(alertText, wpi::util::Alert::Level::MEDIUM);
+    m_rioControllerAlert.emplace("Spark(" + std::to_string(deviceId) + ") RIO Controller",
+                                 alertText, wpi::util::Alert::Level::MEDIUM);
     m_rioControllerAlert->Set(true);
 
     std::fprintf(stderr, "====== Spark(%d) Using RIO Closed Loop Controller ======\n", deviceId);
@@ -334,8 +346,8 @@ void SparkWrapper::SetupSimulation() {
     auto& gearing = m_config->GetMotorGearing();
     if (!simMotor || !gearing) return;
 
-    auto plant = wpi::math::Models::SingleJointedArmFromPhysicalConstants(*simMotor, m_config->GetMOI(),
-                                                    gearing->GetMechanismToRotorRatio());
+    auto plant = wpi::math::Models::SingleJointedArmFromPhysicalConstants(
+        *simMotor, m_config->GetMOI(), gearing->GetMechanismToRotorRatio());
     m_motorSim.emplace(plant, *simMotor);
 
     auto period = m_config->GetClosedLoopControlPeriod().value_or(20_ms);
@@ -472,12 +484,13 @@ wpi::units::turns_per_second_squared_t SparkWrapper::GetMechanismAcceleration() 
 }
 wpi::units::turn_t SparkWrapper::GetRotorPosition() {
   auto& g = m_config->GetMotorGearing();
-  return wpi::units::turn_t{m_relEncoder->GetPosition().Get() * (g ? g->GetMechanismToRotorRatio() : 1.0)};
+  return wpi::units::turn_t{m_relEncoder->GetPosition().Get() *
+                            (g ? g->GetMechanismToRotorRatio() : 1.0)};
 }
 wpi::units::turns_per_second_t SparkWrapper::GetRotorVelocity() {
   auto& g = m_config->GetMotorGearing();
   return wpi::units::turns_per_second_t{m_relEncoder->GetVelocity().Get() *
-                                   (g ? g->GetMechanismToRotorRatio() : 1.0)};
+                                        (g ? g->GetMechanismToRotorRatio() : 1.0)};
 }
 
 wpi::units::meter_t SparkWrapper::GetMeasurementPosition() {
@@ -498,7 +511,8 @@ std::optional<wpi::units::degree_t> SparkWrapper::GetExternalEncoderPosition() {
   return std::nullopt;
 }
 std::optional<wpi::units::degrees_per_second_t> SparkWrapper::GetExternalEncoderVelocity() {
-  if (m_absEncoder) return wpi::units::degrees_per_second_t{m_absEncoder->GetVelocity().Get() * 360.0};
+  if (m_absEncoder)
+    return wpi::units::degrees_per_second_t{m_absEncoder->GetVelocity().Get() * 360.0};
   return std::nullopt;
 }
 
@@ -786,10 +800,12 @@ void SparkWrapper::SetMotionProfileMaxAcceleration(wpi::units::turns_per_second_
 
 void SparkWrapper::SetMotionProfileMaxAcceleration(wpi::units::meters_per_second_squared_t acc) {
   if (auto circ = m_config->GetMechanismCircumference(); circ)
-    SetMotionProfileMaxAcceleration(wpi::units::turns_per_second_squared_t{acc.value() / circ->value()});
+    SetMotionProfileMaxAcceleration(
+        wpi::units::turns_per_second_squared_t{acc.value() / circ->value()});
 }
 
-void SparkWrapper::SetMotionProfileMaxJerk(wpi::units::angular_jerk::turns_per_second_cubed_t maxJerk) {
+void SparkWrapper::SetMotionProfileMaxJerk(
+    wpi::units::angular_jerk::turns_per_second_cubed_t maxJerk) {
   auto doConfig = [&](SparkBaseConfig& cfg) {
     cfg.closedLoop.maxMotion.MaxAcceleration(maxJerk.value());
   };

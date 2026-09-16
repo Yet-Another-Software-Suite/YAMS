@@ -3,13 +3,12 @@
 
 #pragma once
 
-#include <wpi/driverstation/DriverStation.hpp>
-#include <wpi/units/time.hpp>
-
 #include <functional>
 #include <memory>
 #include <string>
 #include <vector>
+#include <wpi/driverstation/DriverStation.hpp>
+#include <wpi/units/time.hpp>
 
 #include "yams/motorcontrollers/simulation/SensorData.hpp"
 

@@ -3,9 +3,9 @@
 
 #pragma once
 
+#include <wpi/commands2/button/Trigger.hpp>
 #include <wpi/smartdashboard/MechanismLigament2d.hpp>
 #include <wpi/smartdashboard/MechanismRoot2d.hpp>
-#include <wpi/commands2/button/Trigger.hpp>
 
 #include "yams/mechanisms/SmartMechanism.hpp"
 

@@ -3,6 +3,12 @@
 
 #include "yams/mechanisms/positional/Elevator.hpp"
 
+#include <array>
+#include <cmath>
+#include <memory>
+#include <numbers>
+#include <string>
+#include <wpi/commands2/Commands.hpp>
 #include <wpi/framework/RobotBase.hpp>
 #include <wpi/math/geometry/Rotation3d.hpp>
 #include <wpi/math/geometry/Translation3d.hpp>
@@ -11,22 +17,16 @@
 #include <wpi/smartdashboard/Mechanism2d.hpp>
 #include <wpi/smartdashboard/MechanismLigament2d.hpp>
 #include <wpi/smartdashboard/MechanismRoot2d.hpp>
-#include <wpi/smartdashboard/SmartDashboard.hpp>
-#include <wpi/util/Color.hpp>
-#include <wpi/util/Color8Bit.hpp>
-#include <wpi/commands2/Commands.hpp>
+#include <wpi/telemetry/Telemetry.hpp>
 #include <wpi/units/length.hpp>
 #include <wpi/units/time.hpp>
-
-#include <array>
-#include <cmath>
-#include <memory>
-#include <numbers>
-#include <string>
+#include <wpi/util/Color.hpp>
+#include <wpi/util/Color8Bit.hpp>
 
 #include "yams/exceptions.hpp"
 #include "yams/gearing/MechanismGearing.hpp"
 #include "yams/motorcontrollers/simulation/ElevatorSimSupplier.hpp"
+#include "yams/telemetry/NetworkTablesBackends.hpp"
 
 namespace yams::mechanisms::positional {
 
@@ -73,9 +73,9 @@ Elevator::Elevator(config::ElevatorConfig* config, motorcontrollers::SmartMotorC
                                                        "WithMaximumHeight(wpi::units::meter_t)");
     }
     if (!m_smc->GetConfig().GetStartingPosition().has_value()) {
-      throw exceptions::ElevatorConfigurationException("Starting position is not configured!",
-                                                       "Cannot create simulator",
-                                                       "smc.WithStartingPosition(wpi::units::meter_t)");
+      throw exceptions::ElevatorConfigurationException(
+          "Starting position is not configured!", "Cannot create simulator",
+          "smc.WithStartingPosition(wpi::units::meter_t)");
     }
     if (!m_smc->GetConfig().GetMechanismCircumference().has_value()) {
       throw exceptions::ElevatorConfigurationException(
@@ -142,7 +142,8 @@ Elevator::Elevator(config::ElevatorConfig* config, motorcontrollers::SmartMotorC
     m_setpointLigament = m_mechanismRoot->Append<wpi::MechanismLigament2d>(
         "Setpoint", startHValue, angle, 3, wpi::util::Color8Bit{wpi::util::Color::WHITE});
 
-    wpi::SmartDashboard::PutData(m_name + "/mechanism", &(*m_mechanismWindow));
+    yams::telemetry::EnsureMechanismsTelemetryBackend();
+    wpi::telemetry::Log("Mechanisms/" + m_name + "/mechanism", *m_mechanismWindow);
   }
 }
 
@@ -209,16 +210,17 @@ wpi::cmd::CommandPtr Elevator::Run(std::function<wpi::units::meter_t()> height) 
 wpi::cmd::CommandPtr Elevator::RunTo(wpi::units::meter_t height, wpi::units::meter_t tolerance) {
   wpi::cmd::Trigger near = IsNear(height, tolerance).Debounce(wpi::units::second_t{0.1});
   return wpi::cmd::RunOnce([this, height] { SetMeasurementPositionSetpoint(height); },
-                            {m_subsystem})
+                           {m_subsystem})
       .AndThen(wpi::cmd::WaitUntil([near] { return near.Get(); }))
       .WithName(m_name + " RunTo");
 }
 
-wpi::cmd::CommandPtr Elevator::RunTo(std::function<wpi::units::meter_t()> height, wpi::units::meter_t tolerance) {
+wpi::cmd::CommandPtr Elevator::RunTo(std::function<wpi::units::meter_t()> height,
+                                     wpi::units::meter_t tolerance) {
   wpi::units::meter_t target = height();
   wpi::cmd::Trigger near = IsNear(target, tolerance).Debounce(wpi::units::second_t{0.1});
   return wpi::cmd::RunOnce([this, target] { SetMeasurementPositionSetpoint(target); },
-                            {m_subsystem})
+                           {m_subsystem})
       .AndThen(wpi::cmd::WaitUntil([near] { return near.Get(); }))
       .WithName(m_name + " RunTo Supplier");
 }
@@ -245,7 +247,8 @@ const config::ElevatorConfig& Elevator::GetConfig() const { return *m_elevatorCo
 
 wpi::math::Translation3d Elevator::GetRelativeMechanismPosition() const {
   if (m_mechanismLigament) {
-    return wpi::math::Translation3d{0_m, 0_m, wpi::units::meter_t{m_mechanismLigament->GetLength()}};
+    return wpi::math::Translation3d{0_m, 0_m,
+                                    wpi::units::meter_t{m_mechanismLigament->GetLength()}};
   }
   return wpi::math::Translation3d{};
 }

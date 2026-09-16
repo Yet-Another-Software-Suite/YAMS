@@ -6,10 +6,10 @@
 // CRT period = lcm(19, 21) / 200 = 399 / 200 = 1.995 rotations.
 
 #include <gtest/gtest.h>
-#include <wpi/units/angle.hpp>
 
 #include <cmath>
 #include <optional>
+#include <wpi/units/angle.hpp>
 
 #include "yams/units/EasyCRT.hpp"
 

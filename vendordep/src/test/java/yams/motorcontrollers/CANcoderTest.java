@@ -3,19 +3,19 @@
 
 package yams.motorcontrollers;
 
-import static org.wpilib.units.Units.Degrees;
-import static org.wpilib.units.Units.Rotations;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.Rotations;
 
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import org.wpilib.math.system.DCMotor;
-import org.wpilib.util.Preferences;
-import org.wpilib.command2.CommandScheduler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.wpilib.command2.CommandScheduler;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.util.Preferences;
 import yams.exceptions.SmartMotorControllerConfigurationException;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;

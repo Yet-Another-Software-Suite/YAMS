@@ -33,13 +33,13 @@ import yams.telemetry.NetworkTablesBackends;
  *
  * <h2>Mechanism Lifecycle</h2>
  * <ol>
- *   <li>Configure a motor controller: {@link yams.motorcontrollers.SmartMotorControllerConfig}</li>
- *   <li>Instantiate the appropriate wrapper: {@link yams.motorcontrollers.local.SparkWrapper} (REV), or
- *       {@code yams.motorcontrollers.remote.TalonFXWrapper}/{@code yams.motorcontrollers.remote.TalonFXSWrapper}
- *       (CTRE — unavailable while CTRE has no Phoenix6 build for this wpilib version)</li>
- *   <li>Build a mechanism config (e.g., {@link yams.mechanisms.config.ArmConfig})</li>
- *   <li>Construct the concrete mechanism (e.g., {@link yams.mechanisms.positional.Arm})</li>
- *   <li>Schedule setpoint commands and bind triggers</li>
+ * <li>Configure a motor controller: {@link yams.motorcontrollers.SmartMotorControllerConfig}</li>
+ * <li>Instantiate the appropriate wrapper: {@link yams.motorcontrollers.local.SparkWrapper} (REV), or
+ * {@code yams.motorcontrollers.remote.TalonFXWrapper}/{@code yams.motorcontrollers.remote.TalonFXSWrapper}
+ * (CTRE — unavailable while CTRE has no Phoenix6 build for this wpilib version)</li>
+ * <li>Build a mechanism config (e.g., {@link yams.mechanisms.config.ArmConfig})</li>
+ * <li>Construct the concrete mechanism (e.g., {@link yams.mechanisms.positional.Arm})</li>
+ * <li>Schedule setpoint commands and bind triggers</li>
  * </ol>
  *
  * <p>
@@ -68,8 +68,7 @@ import yams.telemetry.NetworkTablesBackends;
  * arm.updateTelemetry();
  * }</pre>
  */
-public abstract class SmartMechanism
-{
+public abstract class SmartMechanism {
   /**
    * Subsystem for the Mechanism.
    */
@@ -85,7 +84,7 @@ public abstract class SmartMechanism
   /**
    * Mechanism Window.
    */
-  protected Mechanism2d m_mechanismWindow;
+  protected Mechanism2d          m_mechanismWindow;
 
   /**
    * Set the DutyCycle of the {@link SmartMotorController}.
@@ -93,11 +92,8 @@ public abstract class SmartMechanism
    * @param dutycycle [-1,1] to set.
    * @return {@link Command}
    */
-  public Command set(double dutycycle)
-  {
-    return Commands.startRun(m_smc::stopClosedLoopController, () -> m_smc.setDutyCycle(dutycycle), m_subsystem)
-                   .finallyDo(m_smc::startClosedLoopController)
-                   .withName(m_subsystem.getName() + " SetDutyCycle");
+  public Command set(double dutycycle) {
+    return Commands.startRun(m_smc::stopClosedLoopController, () -> m_smc.setDutyCycle(dutycycle), m_subsystem).finallyDo(m_smc::startClosedLoopController).withName(m_subsystem.getName() + " SetDutyCycle");
   }
 
   /**
@@ -106,12 +102,8 @@ public abstract class SmartMechanism
    * @param dutycycle [-1,1] to set via an {@link Supplier}.
    * @return {@link Command}
    */
-  public Command set(Supplier<Double> dutycycle)
-  {
-    return Commands.startRun(m_smc::stopClosedLoopController,
-                             () -> m_smc.setDutyCycle(dutycycle.get()), m_subsystem)
-                   .finallyDo(m_smc::startClosedLoopController)
-                   .withName(m_subsystem.getName() + " SetDutyCycle Supplier");
+  public Command set(Supplier<Double> dutycycle) {
+    return Commands.startRun(m_smc::stopClosedLoopController, () -> m_smc.setDutyCycle(dutycycle.get()), m_subsystem).finallyDo(m_smc::startClosedLoopController).withName(m_subsystem.getName() + " SetDutyCycle Supplier");
   }
 
   /**
@@ -120,11 +112,8 @@ public abstract class SmartMechanism
    * @param volts {@link Voltage} of the {@link SmartMotorController} to set.
    * @return {@link Command}
    */
-  public Command setVoltage(Voltage volts)
-  {
-    return Commands.startRun(m_smc::stopClosedLoopController, () -> m_smc.setVoltage(volts), m_subsystem)
-                   .finallyDo(m_smc::startClosedLoopController)
-                   .withName(m_subsystem.getName() + " SetVoltage");
+  public Command setVoltage(Voltage volts) {
+    return Commands.startRun(m_smc::stopClosedLoopController, () -> m_smc.setVoltage(volts), m_subsystem).finallyDo(m_smc::startClosedLoopController).withName(m_subsystem.getName() + " SetVoltage");
   }
 
   /**
@@ -134,11 +123,8 @@ public abstract class SmartMechanism
    *              {@link Supplier}.
    * @return {@link Command}
    */
-  public Command setVoltage(Supplier<Voltage> volts)
-  {
-    return Commands.startRun(m_smc::stopClosedLoopController, () -> m_smc.setVoltage(volts.get()), m_subsystem)
-                   .finallyDo(m_smc::startClosedLoopController)
-                   .withName(m_subsystem.getName() + " SetVoltage Supplier");
+  public Command setVoltage(Supplier<Voltage> volts) {
+    return Commands.startRun(m_smc::stopClosedLoopController, () -> m_smc.setVoltage(volts.get()), m_subsystem).finallyDo(m_smc::startClosedLoopController).withName(m_subsystem.getName() + " SetVoltage Supplier");
   }
 
   /**
@@ -146,8 +132,7 @@ public abstract class SmartMechanism
    *
    * @param velocity {@link LinearVelocity} to go to.
    */
-  public void setMeasurementVelocitySetpoint(LinearVelocity velocity)
-  {
+  public void setMeasurementVelocitySetpoint(LinearVelocity velocity) {
     m_smc.startClosedLoopController();
     m_smc.setVelocity(velocity);
   }
@@ -157,8 +142,7 @@ public abstract class SmartMechanism
    *
    * @param velocity {@link AngularVelocity} to go to.
    */
-  public void setMechanismVelocitySetpoint(AngularVelocity velocity)
-  {
+  public void setMechanismVelocitySetpoint(AngularVelocity velocity) {
     m_smc.startClosedLoopController();
     m_smc.setVelocity(velocity);
   }
@@ -168,8 +152,7 @@ public abstract class SmartMechanism
    *
    * @param distance {@link Distance} to go to.
    */
-  public void setMeasurementPositionSetpoint(Distance distance)
-  {
+  public void setMeasurementPositionSetpoint(Distance distance) {
     m_smc.startClosedLoopController();
     m_smc.setPosition(distance);
   }
@@ -179,8 +162,7 @@ public abstract class SmartMechanism
    *
    * @param angle {@link Angle} to go to.
    */
-  public void setMechanismPositionSetpoint(Angle angle)
-  {
+  public void setMechanismPositionSetpoint(Angle angle) {
     m_smc.startClosedLoopController();
     m_smc.setPosition(angle);
   }
@@ -190,8 +172,7 @@ public abstract class SmartMechanism
    *
    * @param voltage {@link Voltage} to go to.
    */
-  public void setVoltageSetpoint(Voltage voltage)
-  {
+  public void setVoltageSetpoint(Voltage voltage) {
     m_smc.stopClosedLoopController();
     m_smc.setVoltage(voltage);
   }
@@ -201,8 +182,7 @@ public abstract class SmartMechanism
    *
    * @param dutycycle [-1,1] to set.
    */
-  public void setDutyCycleSetpoint(double dutycycle)
-  {
+  public void setDutyCycleSetpoint(double dutycycle) {
     m_smc.stopClosedLoopController();
     m_smc.setDutyCycle(dutycycle);
   }
@@ -212,8 +192,7 @@ public abstract class SmartMechanism
    *
    * @return {@link SmartMotorController} for the mechanism.
    */
-  public SmartMotorController getMotorController()
-  {
+  public SmartMotorController getMotorController() {
     return m_smc;
   }
 
@@ -222,8 +201,7 @@ public abstract class SmartMechanism
    *
    * @return {@link Optional} setpoint {@link Angle} of the mechanism..
    */
-  public Optional<Angle> getMechanismSetpoint()
-  {
+  public Optional<Angle> getMechanismSetpoint() {
     return m_smc.getMechanismPositionSetpoint();
   }
 
@@ -242,16 +220,14 @@ public abstract class SmartMechanism
    *
    * @return {@link Mechanism2d} for the mechanism.
    */
-  public Mechanism2d getMechanismWindow()
-  {
+  public Mechanism2d getMechanismWindow() {
     return m_mechanismWindow;
   }
 
   /**
    * Publish {@link #m_mechanismWindow} to NetworkTables under {@code Mechanisms/<name>/mechanism}.
    */
-  protected void publishMechanismWindow()
-  {
+  protected void publishMechanismWindow() {
     NetworkTablesBackends.ensureMechanismsTelemetryBackend();
     Telemetry.log("Mechanisms/" + getName() + "/mechanism", m_mechanismWindow);
   }

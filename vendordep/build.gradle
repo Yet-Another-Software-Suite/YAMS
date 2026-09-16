@@ -2,15 +2,16 @@ import org.wpilib.toolchain.*
 import org.gradle.nativeplatform.test.tasks.RunTestExecutable
 
 plugins {
-  id 'cpp'
-  id 'java'
-  id 'google-test'
-  id 'idea'
-  id 'org.wpilib.WPILibRepositoriesPlugin' version '2027.0.0'
-  id 'org.wpilib.NativeUtils' version '2027.14.3'
-  id 'org.wpilib.GradleJni' version '2027.0.0'
-  id 'org.wpilib.GradleVsCode' version '2027.0.0'
-  id 'org.wpilib.GradleRIO' version '2027.0.0-alpha-7'
+    id 'cpp'
+    id 'java'
+    id 'google-test'
+    id 'idea'
+    id 'org.wpilib.WPILibRepositoriesPlugin' version '2027.0.0'
+    id 'org.wpilib.NativeUtils' version '2027.14.3'
+    id 'org.wpilib.GradleJni' version '2027.0.0'
+    id 'org.wpilib.GradleVsCode' version '2027.0.0'
+    id 'org.wpilib.GradleRIO' version '2027.0.0-alpha-7'
+    id 'com.diffplug.spotless' version '8.0.0'
 }
 
 // WPILib Version
@@ -165,95 +166,146 @@ nativeUtils {
     exportsConfigs {
         YAMS {
             x86ExcludeSymbols = [
-                    '_CT??_R0?AV_System_error',
-                    '_CT??_R0?AVexception',
-                    '_CT??_R0?AVfailure',
-                    '_CT??_R0?AVruntime_error',
-                    '_CT??_R0?AVsystem_error',
-                    '_CTA5?AVfailure',
-                    '_TI5?AVfailure',
-                    '_CT??_R0?AVout_of_range',
-                    '_CTA3?AVout_of_range',
-                    '_TI3?AVout_of_range',
-                    '_CT??_R0?AVbad_cast'
+                '_CT??_R0?AV_System_error',
+                '_CT??_R0?AVexception',
+                '_CT??_R0?AVfailure',
+                '_CT??_R0?AVruntime_error',
+                '_CT??_R0?AVsystem_error',
+                '_CTA5?AVfailure',
+                '_TI5?AVfailure',
+                '_CT??_R0?AVout_of_range',
+                '_CTA3?AVout_of_range',
+                '_TI3?AVout_of_range',
+                '_CT??_R0?AVbad_cast'
             ]
             x64ExcludeSymbols = [
-                    '_CT??_R0?AV_System_error',
-                    '_CT??_R0?AVexception',
-                    '_CT??_R0?AVfailure',
-                    '_CT??_R0?AVruntime_error',
-                    '_CT??_R0?AVsystem_error',
-                    '_CTA5?AVfailure',
-                    '_TI5?AVfailure',
-                    '_CT??_R0?AVout_of_range',
-                    '_CTA3?AVout_of_range',
-                    '_TI3?AVout_of_range',
-                    '_CT??_R0?AVbad_cast'
+                '_CT??_R0?AV_System_error',
+                '_CT??_R0?AVexception',
+                '_CT??_R0?AVfailure',
+                '_CT??_R0?AVruntime_error',
+                '_CT??_R0?AVsystem_error',
+                '_CTA5?AVfailure',
+                '_TI5?AVfailure',
+                '_CT??_R0?AVout_of_range',
+                '_CTA3?AVout_of_range',
+                '_TI3?AVout_of_range',
+                '_CT??_R0?AVbad_cast'
             ]
         }
     }
 }
 
 model {
-  components {
-      YAMS(NativeLibrarySpec) {
-          sources {
-              cpp {
-                  source {
-                      srcDirs "$rootDir/../yams/cpp/src"
-                      include '**/*.cpp'
-                  }
-                  exportedHeaders {
-                      srcDirs "$rootDir/../yams/cpp/include"
-                  }
-              }
-          }
-          nativeUtils.useRequiredLibrary(it, 'wpilib_shared')
-          wpi.vendor.nativeVendor.cpp(it)
-          if (skipCpp) {
-              binaries.all { buildable = false }
-          }
-      }
-  }
-  testSuites {
-      YAMSTest {
-          binaries.all {
-              buildable = !gradle.startParameter.taskNames.contains('build')
-          }
-          sources.cpp {
-              source {
-                  srcDir 'src/test/native/cpp'
-                  include '**/*.cpp'
-              }
-              exportedHeaders {
-                  srcDirs 'src/test/native/include'
-              }
-          }
+    components {
+        YAMS(NativeLibrarySpec) {
+            sources {
+                cpp {
+                    source {
+                        srcDirs "$rootDir/../yams/cpp/src"
+                        include '**/*.cpp'
+                        // CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7,
+                        // so the TalonFX/TalonFXS wrappers stay excluded until one is available.
+                        exclude "**/TalonFX*.cpp"
+                    }
+                    exportedHeaders {
+                        srcDirs "$rootDir/../yams/cpp/include"
+                    }
+                }
+            }
+            nativeUtils.useRequiredLibrary(it, 'wpilib_shared')
+            wpi.vendor.nativeVendor.cpp(it)
+            if (skipCpp) {
+                binaries.all { buildable = false }
+            }
+        }
+    }
+    testSuites {
+        YAMSTest {
+            binaries.all {
+                buildable = !gradle.startParameter.taskNames.contains('build')
+            }
+            sources.cpp {
+                source {
+                    srcDir 'src/test/native/cpp'
+                    include '**/*.cpp'
+                    // CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
+                    // SwerveDriveTest.cpp is entirely CTRE (TalonFX-driven swerve modules), so it stays
+                    // excluded until one is available. The other mechanism tests have their
+                    // CTRE-specific code commented out (not deleted) instead, so their REV-only
+                    // coverage keeps running.
+                    exclude "**/SwerveDriveTest.cpp"
+                }
+                exportedHeaders {
+                    srcDirs 'src/test/native/include'
+                }
+            }
 
-          /*binaries.all {
-//              lib library: 'VendorDriver', linkage: 'shared'
+            /*binaries.all {
+             //              lib library: 'VendorDriver', linkage: 'shared'
+             def arch = it.targetPlatform.name
+             if (systemArch == arch && it.buildType.name == 'debug') {
+             def filePath = it.tasks.install.installDirectory.get().toString() + File.separatorChar + 'lib'
+             test.dependsOn it.tasks.install
+             test.systemProperty 'java.library.path', filePath
+             test.environment 'LD_LIBRARY_PATH', filePath
+             test.workingDir filePath
+             }
+             }*/
 
-              def arch = it.targetPlatform.name
-              if (systemArch == arch && it.buildType.name == 'debug') {
-                  def filePath = it.tasks.install.installDirectory.get().toString() + File.separatorChar + 'lib'
-                  test.dependsOn it.tasks.install
-                  test.systemProperty 'java.library.path', filePath
-                  test.environment 'LD_LIBRARY_PATH', filePath
-                  test.workingDir filePath
-              }
-          }*/
-
-          nativeUtils.useRequiredLibrary(it, "wpilib_shared")
-          wpi.vendor.nativeVendor.cpp(it)
-      }
-
-  }
+            nativeUtils.useRequiredLibrary(it, "wpilib_shared")
+            wpi.vendor.nativeVendor.cpp(it)
+        }
+    }
 }
 
 
+spotless {
+    java {
+        target fileTree('.') {
+            include '**/*.java'
+            exclude '**/build/**', '**/build-*/**', '**/bin/**'
+        }
+        toggleOffOn()
+        googleJavaFormat().skipJavadocFormatting()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    groovyGradle {
+        target fileTree('.') {
+            include '**/*.gradle'
+            exclude '**/build/**', '**/build-*/**'
+        }
+        greclipse()
+        indentWithSpaces(4)
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    format 'xml', {
+        target fileTree('.') {
+            include '**/*.xml'
+            exclude '**/build/**', '**/build-*/**'
+        }
+        eclipseWtp('xml')
+        trimTrailingWhitespace()
+        indentWithSpaces(2)
+        endWithNewline()
+    }
+    format 'misc', {
+        target fileTree('.') {
+            include '**/*.md', '**/.gitignore'
+            exclude '**/build/**', '**/build-*/**'
+        }
+        trimTrailingWhitespace()
+        indentWithSpaces(2)
+        endWithNewline()
+    }
+}
+
 build.dependsOn javadoc
+build.dependsOn spotlessApply
 apply from: 'publish.gradle'
 
 wrapper {
-  gradleVersion = '9.4.1'
+    gradleVersion = '9.4.1'
 }

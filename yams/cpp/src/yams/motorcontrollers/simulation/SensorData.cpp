@@ -3,8 +3,6 @@
 
 #include "yams/motorcontrollers/simulation/SensorData.hpp"
 
-#include <wpi/framework/RobotBase.hpp>
-#include <wpi/hal/SimDevice.hpp>
 #include <wpi/hal/Value.h>
 
 #include <functional>
@@ -13,6 +11,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <wpi/framework/RobotBase.hpp>
+#include <wpi/hal/SimDevice.hpp>
 
 namespace yams::motorcontrollers::simulation {
 

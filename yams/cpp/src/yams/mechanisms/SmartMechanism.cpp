@@ -11,28 +11,28 @@ namespace yams::mechanisms {
 
 wpi::cmd::CommandPtr SmartMechanism::Set(double dutycycle) {
   return wpi::cmd::StartRun([this] { m_smc->StopClosedLoopController(); },
-                             [this, dutycycle] { m_smc->SetDutyCycle(dutycycle); }, {m_subsystem})
+                            [this, dutycycle] { m_smc->SetDutyCycle(dutycycle); }, {m_subsystem})
       .FinallyDo([this](bool) { m_smc->StartClosedLoopController(); })
       .WithName(m_subsystem->GetName() + " SetDutyCycle");
 }
 
 wpi::cmd::CommandPtr SmartMechanism::Set(std::function<double()> dutycycle) {
   return wpi::cmd::StartRun([this] { m_smc->StopClosedLoopController(); },
-                             [this, dutycycle] { m_smc->SetDutyCycle(dutycycle()); }, {m_subsystem})
+                            [this, dutycycle] { m_smc->SetDutyCycle(dutycycle()); }, {m_subsystem})
       .FinallyDo([this](bool) { m_smc->StartClosedLoopController(); })
       .WithName(m_subsystem->GetName() + " SetDutyCycle Supplier");
 }
 
 wpi::cmd::CommandPtr SmartMechanism::SetVoltage(wpi::units::volt_t volts) {
   return wpi::cmd::StartRun([this] { m_smc->StopClosedLoopController(); },
-                             [this, volts] { m_smc->SetVoltage(volts); }, {m_subsystem})
+                            [this, volts] { m_smc->SetVoltage(volts); }, {m_subsystem})
       .FinallyDo([this](bool) { m_smc->StartClosedLoopController(); })
       .WithName(m_subsystem->GetName() + " SetVoltage");
 }
 
 wpi::cmd::CommandPtr SmartMechanism::SetVoltage(std::function<wpi::units::volt_t()> volts) {
   return wpi::cmd::StartRun([this] { m_smc->StopClosedLoopController(); },
-                             [this, volts] { m_smc->SetVoltage(volts()); }, {m_subsystem})
+                            [this, volts] { m_smc->SetVoltage(volts()); }, {m_subsystem})
       .FinallyDo([this](bool) { m_smc->StartClosedLoopController(); })
       .WithName(m_subsystem->GetName() + " SetVoltage Supplier");
 }

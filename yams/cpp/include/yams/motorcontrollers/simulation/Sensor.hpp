@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include <wpi/hal/SimDevice.hpp>
 #include <wpi/hal/Value.h>
 
 #include <functional>
@@ -11,6 +10,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <wpi/hal/SimDevice.hpp>
 
 #include "yams/motorcontrollers/simulation/SensorData.hpp"
 

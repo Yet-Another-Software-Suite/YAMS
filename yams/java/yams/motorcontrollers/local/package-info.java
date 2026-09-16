@@ -12,8 +12,8 @@
  * <h2>Core type</h2>
  *
  * <ul>
- *   <li>{@link yams.motorcontrollers.local.SparkWrapper} — unified adapter for both the SPARK MAX
- *       (NEO, NEO 550) and SPARK FLEX (NEO Vortex).
+ * <li>{@link yams.motorcontrollers.local.SparkWrapper} — unified adapter for both the SPARK MAX
+ * (NEO, NEO 550) and SPARK FLEX (NEO Vortex).
  * </ul>
  *
  * <h2>Absolute encoder discontinuity</h2>
@@ -23,10 +23,10 @@
  * where the sensor wraps around. Set this via {@link yams.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint}:
  *
  * <ul>
- *   <li>{@code 0.5} — sensor range {@code [-0.5, 0.5)}: useful when the mechanism travels through
- *       zero and must not have a wrap at the midpoint of travel.
- *   <li>{@code 1.0} — sensor range {@code [0, 1)}: useful when the mechanism only moves in the
- *       positive direction and zero is never crossed.
+ * <li>{@code 0.5} — sensor range {@code [-0.5, 0.5)}: useful when the mechanism travels through
+ * zero and must not have a wrap at the midpoint of travel.
+ * <li>{@code 1.0} — sensor range {@code [0, 1)}: useful when the mechanism only moves in the
+ * positive direction and zero is never crossed.
  * </ul>
  *
  * Omitting this setting when an absolute encoder is attached will produce a configuration warning

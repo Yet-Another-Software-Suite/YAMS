@@ -3,19 +3,18 @@
 
 #pragma once
 
-#include <wpi/smartdashboard/Mechanism2d.hpp>
+#include <functional>
+#include <optional>
+#include <string>
 #include <wpi/commands2/CommandPtr.hpp>
 #include <wpi/commands2/Commands.hpp>
 #include <wpi/commands2/SubsystemBase.hpp>
+#include <wpi/smartdashboard/Mechanism2d.hpp>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/angular_velocity.hpp>
 #include <wpi/units/length.hpp>
 #include <wpi/units/velocity.hpp>
 #include <wpi/units/voltage.hpp>
-
-#include <functional>
-#include <optional>
-#include <string>
 
 #include "yams/motorcontrollers/SmartMotorController.hpp"
 

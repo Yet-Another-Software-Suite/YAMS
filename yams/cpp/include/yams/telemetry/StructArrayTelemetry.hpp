@@ -3,12 +3,6 @@
 
 #pragma once
 
-#include <wpi/datalog/DataLog.hpp>
-#include <wpi/nt/NetworkTable.hpp>
-#include <wpi/nt/StructArrayTopic.hpp>
-#include <wpi/system/DataLogManager.hpp>
-#include <wpi/util/struct/Struct.hpp>
-
 #include <algorithm>
 #include <memory>
 #include <optional>
@@ -17,6 +11,11 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <wpi/datalog/DataLog.hpp>
+#include <wpi/nt/NetworkTable.hpp>
+#include <wpi/nt/StructArrayTopic.hpp>
+#include <wpi/system/DataLogManager.hpp>
+#include <wpi/util/struct/Struct.hpp>
 
 namespace yams::telemetry {
 
@@ -52,9 +51,7 @@ class StructArrayTelemetry {
    *
    * @param value New default value.
    */
-  void SetDefaultValue(std::vector<T> value) {
-    m_cachedValue = m_defaultValue = std::move(value);
-  }
+  void SetDefaultValue(std::vector<T> value) { m_cachedValue = m_defaultValue = std::move(value); }
 
   /**
    * Create the NT4 publisher (and subscriber if tunable) under the given tables.

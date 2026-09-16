@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <functional>
 #include <wpi/simulation/ElevatorSim.hpp>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/angular_acceleration.hpp>
@@ -11,8 +12,6 @@
 #include <wpi/units/time.hpp>
 #include <wpi/units/velocity.hpp>
 #include <wpi/units/voltage.hpp>
-
-#include <functional>
 
 #include "yams/gearing/MechanismGearing.hpp"
 #include "yams/motorcontrollers/SimSupplier.hpp"
@@ -78,9 +77,11 @@ class ElevatorSimSupplier : public SimSupplier {
   wpi::units::volt_t m_lastInputVoltage{0};
 
   wpi::units::turn_t LinearToMechanismAngle(wpi::units::meter_t position) const;
-  wpi::units::turns_per_second_t LinearToMechanismVelocity(wpi::units::meters_per_second_t velocity) const;
+  wpi::units::turns_per_second_t LinearToMechanismVelocity(
+      wpi::units::meters_per_second_t velocity) const;
   wpi::units::meter_t MechanismAngleToLinear(wpi::units::turn_t angle) const;
-  wpi::units::meters_per_second_t MechanismVelocityToLinear(wpi::units::turns_per_second_t velocity) const;
+  wpi::units::meters_per_second_t MechanismVelocityToLinear(
+      wpi::units::turns_per_second_t velocity) const;
 };
 
 }  // namespace yams::motorcontrollers::simulation

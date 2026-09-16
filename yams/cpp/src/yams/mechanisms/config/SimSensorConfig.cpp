@@ -3,16 +3,14 @@
 
 #include "yams/mechanisms/config/SimSensorConfig.hpp"
 
-#include <wpi/driverstation/MatchState.hpp>
-
-#include <wpi/driverstation/DriverStation.hpp>
-#include <wpi/units/time.hpp>
-
 #include <functional>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
+#include <wpi/driverstation/DriverStation.hpp>
+#include <wpi/driverstation/MatchState.hpp>
+#include <wpi/units/time.hpp>
 
 #include "yams/motorcontrollers/simulation/Sensor.hpp"
 #include "yams/motorcontrollers/simulation/SensorData.hpp"
@@ -61,26 +59,26 @@ std::function<bool()> MatchTimeTrigger(wpi::units::second_t start, wpi::units::s
 }  // namespace
 
 SimSensorConfig& SimSensorConfig::WithSimulatedValue(const std::string& fieldName,
-                                                     wpi::units::second_t start, wpi::units::second_t end,
-                                                     double value) {
+                                                     wpi::units::second_t start,
+                                                     wpi::units::second_t end, double value) {
   return WithSimulatedValue(fieldName, MatchTimeTrigger(start, end), value);
 }
 
 SimSensorConfig& SimSensorConfig::WithSimulatedValue(const std::string& fieldName,
-                                                     wpi::units::second_t start, wpi::units::second_t end,
-                                                     int value) {
+                                                     wpi::units::second_t start,
+                                                     wpi::units::second_t end, int value) {
   return WithSimulatedValue(fieldName, MatchTimeTrigger(start, end), value);
 }
 
 SimSensorConfig& SimSensorConfig::WithSimulatedValue(const std::string& fieldName,
-                                                     wpi::units::second_t start, wpi::units::second_t end,
-                                                     int64_t value) {
+                                                     wpi::units::second_t start,
+                                                     wpi::units::second_t end, int64_t value) {
   return WithSimulatedValue(fieldName, MatchTimeTrigger(start, end), value);
 }
 
 SimSensorConfig& SimSensorConfig::WithSimulatedValue(const std::string& fieldName,
-                                                     wpi::units::second_t start, wpi::units::second_t end,
-                                                     bool value) {
+                                                     wpi::units::second_t start,
+                                                     wpi::units::second_t end, bool value) {
   return WithSimulatedValue(fieldName, MatchTimeTrigger(start, end), value);
 }
 

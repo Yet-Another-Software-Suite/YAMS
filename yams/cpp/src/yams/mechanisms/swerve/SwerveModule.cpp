@@ -3,13 +3,12 @@
 
 #include "yams/mechanisms/swerve/SwerveModule.hpp"
 
-#include <wpi/framework/RobotBase.hpp>
-#include <wpi/math/geometry/Rotation2d.hpp>
-#include <wpi/units/angle.hpp>
-
 #include <stdexcept>
 #include <string>
 #include <utility>
+#include <wpi/framework/RobotBase.hpp>
+#include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/units/angle.hpp>
 
 #include "yams/exceptions.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
@@ -82,15 +81,15 @@ void SwerveModule::SetSwerveModuleState(wpi::math::SwerveModuleVelocity state) {
 }
 
 wpi::math::SwerveModuleVelocity SwerveModule::GetState() const {
-  return wpi::math::SwerveModuleVelocity{
-      m_driveMotorController->GetMeasurementVelocity(),
-      wpi::math::Rotation2d{wpi::units::radian_t{m_azimuthMotorController->GetMechanismPosition()}}};
+  return wpi::math::SwerveModuleVelocity{m_driveMotorController->GetMeasurementVelocity(),
+                                         wpi::math::Rotation2d{wpi::units::radian_t{
+                                             m_azimuthMotorController->GetMechanismPosition()}}};
 }
 
 wpi::math::SwerveModulePosition SwerveModule::GetPosition() const {
-  return wpi::math::SwerveModulePosition{
-      m_driveMotorController->GetMeasurementPosition(),
-      wpi::math::Rotation2d{wpi::units::radian_t{m_azimuthMotorController->GetMechanismPosition()}}};
+  return wpi::math::SwerveModulePosition{m_driveMotorController->GetMeasurementPosition(),
+                                         wpi::math::Rotation2d{wpi::units::radian_t{
+                                             m_azimuthMotorController->GetMechanismPosition()}}};
 }
 
 wpi::units::degree_t SwerveModule::GetRawAbsoluteEncoderAngle() const {

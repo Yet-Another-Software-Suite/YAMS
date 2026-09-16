@@ -3,13 +3,12 @@
 
 #pragma once
 
-#include <wpi/commands2/CommandPtr.hpp>
-#include <wpi/commands2/SubsystemBase.hpp>
-
 #include <functional>
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <wpi/commands2/CommandPtr.hpp>
+#include <wpi/commands2/SubsystemBase.hpp>
 
 namespace yams::motorcontrollers {
 

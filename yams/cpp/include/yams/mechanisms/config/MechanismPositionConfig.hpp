@@ -3,11 +3,10 @@
 
 #pragma once
 
-#include <wpi/units/angle.hpp>
-#include <wpi/units/length.hpp>
-
 #include <optional>
 #include <string>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/length.hpp>
 
 namespace yams::mechanisms::config {
 

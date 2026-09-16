@@ -25,7 +25,9 @@ FlyWheelConfig& FlyWheelConfig::WithSimColor(const wpi::util::Color8Bit& color) 
 
 std::string FlyWheelConfig::GetTelemetryName() const { return m_telemetryName; }
 
-std::optional<wpi::units::meter_t> FlyWheelConfig::GetRollerDiameter() const { return m_rollerDiameter; }
+std::optional<wpi::units::meter_t> FlyWheelConfig::GetRollerDiameter() const {
+  return m_rollerDiameter;
+}
 
 wpi::util::Color8Bit FlyWheelConfig::GetSimColor() const { return m_simColor; }
 

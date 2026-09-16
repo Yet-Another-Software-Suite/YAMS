@@ -3,9 +3,8 @@
 
 #include "yams/motorcontrollers/simulation/DCMotorSimSupplier.hpp"
 
-#include <wpi/simulation/RoboRioSim.hpp>
-
 #include <utility>
+#include <wpi/simulation/RoboRioSim.hpp>
 
 #include "yams/motorcontrollers/simulation/BatterySim.hpp"
 
@@ -22,7 +21,8 @@ DCMotorSimSupplier::DCMotorSimSupplier(wpi::sim::DCMotorSim& sim,
 
 void DCMotorSimSupplier::UpdateSim() {
   if (!m_inputFed) {
-    m_lastInputVoltage = wpi::units::volt_t{m_dutyCycleSupplier() * GetMechanismSupplyVoltage().value()};
+    m_lastInputVoltage =
+        wpi::units::volt_t{m_dutyCycleSupplier() * GetMechanismSupplyVoltage().value()};
     m_sim.SetInputVoltage(m_lastInputVoltage);
     wpi::sim::RoboRioSim::SetVInVoltage(BatterySim::CalculateVoltage(this, m_sim.GetCurrentDraw()));
   }
@@ -88,6 +88,8 @@ wpi::units::volt_t DCMotorSimSupplier::GetMechanismSupplyVoltage() {
 
 wpi::units::volt_t DCMotorSimSupplier::GetMechanismStatorVoltage() { return m_lastInputVoltage; }
 
-void DCMotorSimSupplier::SetMechanismStatorVoltage(wpi::units::volt_t volts) { SetInputVoltage(volts); }
+void DCMotorSimSupplier::SetMechanismStatorVoltage(wpi::units::volt_t volts) {
+  SetInputVoltage(volts);
+}
 
 }  // namespace yams::motorcontrollers::simulation

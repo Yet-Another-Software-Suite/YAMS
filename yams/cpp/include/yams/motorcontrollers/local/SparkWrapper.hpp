@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include <wpi/util/Alert.hpp>
-#include <wpi/simulation/DCMotorSim.hpp>
 #include <rev/SparkAbsoluteEncoder.h>
 #include <rev/SparkClosedLoopController.h>
 #include <rev/SparkFlex.h>
@@ -19,6 +17,8 @@
 #include <memory>
 #include <optional>
 #include <variant>
+#include <wpi/simulation/DCMotorSim.hpp>
+#include <wpi/util/Alert.hpp>
 
 #include "yams/math/DerivativeTimeFilter.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
@@ -80,7 +80,8 @@ class SparkWrapper : public SmartMotorController {
    * @param motor  DC motor model used for simulation.
    * @param config Pointer to the SmartMotorControllerConfig (must outlive this wrapper).
    */
-  SparkWrapper(rev::spark::SparkMax* spark, wpi::math::DCMotor motor, SmartMotorControllerConfig* config);
+  SparkWrapper(rev::spark::SparkMax* spark, wpi::math::DCMotor motor,
+               SmartMotorControllerConfig* config);
 
   /**
    * Construct a SparkWrapper around a SPARK Flex.
@@ -268,7 +269,8 @@ class SparkWrapper : public SmartMotorController {
    */
   void SetMotionProfileMaxVelocity(wpi::units::meters_per_second_t maxVelocity) override;
   /** @copydoc
-   * SmartMotorController::SetMotionProfileMaxAcceleration(wpi::units::turns_per_second_squared_t) */
+   * SmartMotorController::SetMotionProfileMaxAcceleration(wpi::units::turns_per_second_squared_t)
+   */
   void SetMotionProfileMaxAcceleration(wpi::units::turns_per_second_squared_t maxAcc) override;
   /**
    * Set the maximum linear acceleration for the motion profile.
@@ -329,7 +331,8 @@ class SparkWrapper : public SmartMotorController {
 
   std::optional<wpi::util::Alert> m_rioControllerAlert;
 
-  void Init(rev::spark::SparkBase* spark, wpi::math::DCMotor motor, SmartMotorControllerConfig* config);
+  void Init(rev::spark::SparkBase* spark, wpi::math::DCMotor motor,
+            SmartMotorControllerConfig* config);
   void ApplyBaseConfig();
   void CommitConfig();
 };

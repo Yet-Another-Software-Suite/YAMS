@@ -3,12 +3,11 @@
 
 #include "yams/mechanisms/config/ElevatorConfig.hpp"
 
-#include <wpi/util/Color8Bit.hpp>
+#include <string>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/length.hpp>
 #include <wpi/units/mass.hpp>
-
-#include <string>
+#include <wpi/util/Color8Bit.hpp>
 
 namespace yams::mechanisms::config {
 
@@ -53,7 +52,9 @@ std::optional<wpi::units::meter_t> ElevatorConfig::GetMinHeight() const { return
 
 std::optional<wpi::units::meter_t> ElevatorConfig::GetMaxHeight() const { return m_maxHeight; }
 
-std::optional<wpi::units::kilogram_t> ElevatorConfig::GetCarriageMass() const { return m_carriageMass; }
+std::optional<wpi::units::kilogram_t> ElevatorConfig::GetCarriageMass() const {
+  return m_carriageMass;
+}
 
 bool ElevatorConfig::IsHorizontal() const { return m_isHorizontal; }
 

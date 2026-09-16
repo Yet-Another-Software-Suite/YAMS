@@ -3,12 +3,11 @@
 
 #include "yams/telemetry/MechanismTelemetry.hpp"
 
-#include <wpi/system/Timer.hpp>
-#include <wpi/nt/NetworkTableInstance.hpp>
-#include <wpi/util/json.hpp>
-
 #include <memory>
 #include <string>
+#include <wpi/nt/NetworkTableInstance.hpp>
+#include <wpi/system/Timer.hpp>
+#include <wpi/util/json.hpp>
 
 #include "yams/motorcontrollers/SmartMotorController.hpp"
 
@@ -49,7 +48,7 @@ void MechanismTelemetry::AddMotorController(
 }
 
 std::function<void(double)> MechanismTelemetry::PublishDouble(const std::string& key,
-                                                               const std::string& unit) {
+                                                              const std::string& unit) {
   auto topic = m_networkTable->GetDoubleTopic(key);
   if (!unit.empty()) {
     topic.SetProperties(wpi::util::json{{"units", unit}});
@@ -57,8 +56,8 @@ std::function<void(double)> MechanismTelemetry::PublishDouble(const std::string&
   auto publisher = std::make_shared<wpi::nt::DoublePublisher>(topic.Publish());
   std::shared_ptr<wpi::log::DoubleLogEntry> logEntry;
   if (m_dataLogName) {
-    logEntry =
-        std::make_shared<wpi::log::DoubleLogEntry>(wpi::DataLogManager::GetLog(), *m_dataLogName + "/" + key);
+    logEntry = std::make_shared<wpi::log::DoubleLogEntry>(wpi::DataLogManager::GetLog(),
+                                                          *m_dataLogName + "/" + key);
   }
   return [publisher, logEntry](double value) {
     publisher->Set(value);

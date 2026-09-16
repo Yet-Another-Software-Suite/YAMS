@@ -10,10 +10,10 @@ package yams.exceptions;
  * <p>Common triggers include:
  *
  * <ul>
- *   <li>{@code withSmartMotorController(SmartMotorController)} called more than once on the same
- *       config
- *   <li>MOI (moment of inertia) not derivable — neither length+mass nor an explicit MOI was
- *       configured on the underlying {@link yams.motorcontrollers.SmartMotorControllerConfig}
+ * <li>{@code withSmartMotorController(SmartMotorController)} called more than once on the same
+ * config
+ * <li>MOI (moment of inertia) not derivable — neither length+mass nor an explicit MOI was
+ * configured on the underlying {@link yams.motorcontrollers.SmartMotorControllerConfig}
  * </ul>
  *
  * <p><b>Resolution:</b> Ensure {@code PivotConfig.withSmartMotorController(SmartMotorController)}
@@ -37,17 +37,11 @@ public class PivotConfigurationException extends RuntimeException {
   /**
    * Pivot configuration exception.
    *
-   * @param message Message to display.
-   * @param result Result of the configuration.
+   * @param message        Message to display.
+   * @param result         Result of the configuration.
    * @param remedyFunction Remedy function to use.
    */
   public PivotConfigurationException(String message, String result, String remedyFunction) {
-    super(
-        message
-            + "!\n"
-            + result
-            + "\nPlease use PivotConfig."
-            + remedyFunction
-            + " to fix this error.");
+    super(message + "!\n" + result + "\nPlease use PivotConfig." + remedyFunction + " to fix this error.");
   }
 }

@@ -3,12 +3,11 @@
 
 #pragma once
 
+#include <map>
+#include <unordered_map>
 #include <wpi/units/current.hpp>
 #include <wpi/units/impedance.hpp>
 #include <wpi/units/voltage.hpp>
-
-#include <map>
-#include <unordered_map>
 
 namespace yams::motorcontrollers::simulation {
 

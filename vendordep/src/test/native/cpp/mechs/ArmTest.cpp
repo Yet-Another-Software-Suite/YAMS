@@ -4,20 +4,20 @@
 // Mirrors Java ArmTest — duty-cycle and position-PID tests for a single-jointed
 // arm across all (HardwareType × ProfileType) combinations.
 
-#include <wpi/math/system/DCMotor.hpp>
-#include <wpi/commands2/CommandScheduler.hpp>
-#include <wpi/commands2/Commands.hpp>
 #include <gtest/gtest.h>
-#include <wpi/units/angle.hpp>
-#include <wpi/units/angular_velocity.hpp>
-#include <wpi/units/length.hpp>
-#include <wpi/units/mass.hpp>
 
 #include <chrono>
 #include <cmath>
 #include <cstdio>
 #include <string>
 #include <thread>
+#include <wpi/commands2/CommandScheduler.hpp>
+#include <wpi/commands2/Commands.hpp>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/mass.hpp>
 
 #include "helpers/MockHardware.h"
 #include "helpers/MotorControllerFactory.h"

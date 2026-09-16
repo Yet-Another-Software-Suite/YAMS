@@ -6,13 +6,16 @@
 // Factory helpers used by all mechanism tests to create SmartMotorController
 // instances for each (HardwareType × ProfileType) combination.
 
-#include <wpi/math/system/DCMotor.hpp>
 #include <rev/SparkFlex.h>
 #include <rev/SparkMax.h>
 
 #include <atomic>
+#include <wpi/math/system/DCMotor.hpp>
+/* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7; re-enable once
+   com.ctre.phoenix6 / ctre::phoenix6 is available again.
 #include <ctre/phoenix6/TalonFX.hpp>
 #include <ctre/phoenix6/TalonFXS.hpp>
+*/
 #include <memory>
 #include <ostream>
 #include <string>
@@ -24,8 +27,10 @@
 #include "yams/motorcontrollers/SmartMotorControllerCommandRegistry.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 #include "yams/motorcontrollers/local/SparkWrapper.hpp"
+/* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
 #include "yams/motorcontrollers/remote/TalonFXSWrapper.hpp"
 #include "yams/motorcontrollers/remote/TalonFXWrapper.hpp"
+*/
 
 namespace yams::test {
 
@@ -55,8 +60,10 @@ struct HardwareBundle {
   // Only one of these is non-null per bundle.
   std::unique_ptr<rev::spark::SparkMax> sparkMax;
   std::unique_ptr<rev::spark::SparkFlex> sparkFlex;
+  /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
   std::unique_ptr<ctre::phoenix6::hardware::TalonFXS> talonFXS;
   std::unique_ptr<ctre::phoenix6::hardware::TalonFX> talonFX;
+  */
 
   // Config must outlive the wrapper; stored here so its address stays stable.
   SmartMotorControllerConfig cfg;
@@ -124,6 +131,7 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
                                            &bundle.cfg);
       break;
     }
+    /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
     case HardwareType::TalonFXS: {
       bundle.talonFXS = std::make_unique<ctre::phoenix6::hardware::TalonFXS>(
           canId, ctre::phoenix6::CANBus{});
@@ -139,6 +147,12 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
                                               MotorForHardware(param.hardware), &bundle.cfg);
       break;
     }
+    */
+    case HardwareType::TalonFXS:
+    case HardwareType::TalonFX:
+      // CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7;
+      // AllMotorParams() no longer generates these cases, so this is unreachable.
+      break;
   }
 
   bundle.subsystem->SetSMC(bundle.smc);
@@ -146,8 +160,12 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
 }
 
 // True if the bundle wraps a CTRE TalonFX or TalonFXS.
+// CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7, so the
+// talonFX/talonFXS HardwareBundle fields are currently commented out and no bundle can be CTRE;
+// this always returns false until CTRE is available again.
 inline bool IsCTRE(const HardwareBundle& b) {
-  return b.talonFX != nullptr || b.talonFXS != nullptr;
+  (void)b;
+  return false;
 }
 
 // Standard teardown: unregister subsystem, close SMC, delete wrapper.
@@ -162,8 +180,12 @@ inline void CloseBundle(HardwareBundle& b) {
 // All (hardware × profile) combinations used by each mechanism test suite.
 inline std::vector<MotorTestParam> AllMotorParams() {
   std::vector<MotorTestParam> params;
-  for (auto hw : {HardwareType::SparkMax, HardwareType::SparkFlex, HardwareType::TalonFXS,
-                  HardwareType::TalonFX}) {
+  for (auto hw : {
+           HardwareType::SparkMax, HardwareType::SparkFlex
+           /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
+           , HardwareType::TalonFXS, HardwareType::TalonFX
+           */
+       }) {
     for (auto prof : {ProfileType::None, ProfileType::Trapezoid, ProfileType::Exponential}) {
       std::string hwName;
       switch (hw) {

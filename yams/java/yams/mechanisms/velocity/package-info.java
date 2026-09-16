@@ -11,22 +11,22 @@
  *
  * <h2>Available Mechanisms</h2>
  * <ul>
- *   <li>{@link yams.mechanisms.velocity.FlyWheel} — single or dual-motor flywheel configured with
- *       {@link yams.mechanisms.config.FlyWheelConfig}. Accepts both
- *       {@link org.wpilib.units.measure.AngularVelocity} (e.g. RPM) and
- *       {@link org.wpilib.units.measure.LinearVelocity} (e.g. surface speed in m/s) setpoints
- *       when a wheel radius is provided in the config.</li>
+ * <li>{@link yams.mechanisms.velocity.FlyWheel} — single or dual-motor flywheel configured with
+ * {@link yams.mechanisms.config.FlyWheelConfig}. Accepts both
+ * {@link org.wpilib.units.measure.AngularVelocity} (e.g. RPM) and
+ * {@link org.wpilib.units.measure.LinearVelocity} (e.g. surface speed in m/s) setpoints
+ * when a wheel radius is provided in the config.</li>
  * </ul>
  *
  * <h2>Running the Mechanism</h2>
  * <ul>
- *   <li>{@code run(velocity)} — commands the mechanism to spin at the given velocity. Accepts
- *       either {@link org.wpilib.units.measure.AngularVelocity} or
- *       {@link org.wpilib.units.measure.LinearVelocity} and returns a {@code Command} that
- *       holds the setpoint until interrupted.</li>
- *   <li>{@code runTo(velocity)} — like {@code run()}, but the returned {@code Command} does not
- *       finish until the mechanism is within the configured velocity tolerance of the setpoint.
- *       Useful when downstream actions must wait for the flywheel to spin up.</li>
+ * <li>{@code run(velocity)} — commands the mechanism to spin at the given velocity. Accepts
+ * either {@link org.wpilib.units.measure.AngularVelocity} or
+ * {@link org.wpilib.units.measure.LinearVelocity} and returns a {@code Command} that
+ * holds the setpoint until interrupted.</li>
+ * <li>{@code runTo(velocity)} — like {@code run()}, but the returned {@code Command} does not
+ * finish until the mechanism is within the configured velocity tolerance of the setpoint.
+ * Useful when downstream actions must wait for the flywheel to spin up.</li>
  * </ul>
  *
  * <pre>{@code

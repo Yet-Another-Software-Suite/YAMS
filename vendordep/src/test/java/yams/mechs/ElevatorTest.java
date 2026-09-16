@@ -3,6 +3,7 @@
 
 package yams.mechs;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Inches;
 import static org.wpilib.units.Units.Meters;
@@ -13,23 +14,9 @@ import static org.wpilib.units.Units.Milliseconds;
 import static org.wpilib.units.Units.Pounds;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7; re-enable once
-   com.ctre.phoenix6 is available again.
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.hardware.TalonFXS;
-*/
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
-import org.wpilib.math.controller.ElevatorFeedforward;
-import org.wpilib.math.system.DCMotor;
-import org.wpilib.units.measure.Distance;
-import org.wpilib.units.measure.LinearVelocity;
-import org.wpilib.preferences.Preferences;
-import org.wpilib.command2.Command;
-import org.wpilib.command2.CommandScheduler;
-import org.wpilib.command2.Commands;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
@@ -38,8 +25,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.CommandScheduler;
+import org.wpilib.command2.Commands;
+import org.wpilib.math.controller.ElevatorFeedforward;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.preferences.Preferences;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.LinearVelocity;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
+import yams.helpers.DeviceCreator;
 import yams.helpers.MockHardwareExtension;
 import yams.helpers.SmartMotorControllerTestSubsystem;
 import yams.helpers.TestWithScheduler;
@@ -51,16 +47,18 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.helpers.DeviceCreator;
 import yams.motorcontrollers.local.SparkWrapper;
-/* import yams.motorcontrollers.remote.TalonFXSWrapper;
+
+/* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7; re-enable once
+   com.ctre.phoenix6 is available again.
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.hardware.TalonFXS;
+import yams.motorcontrollers.remote.TalonFXSWrapper;
 import yams.motorcontrollers.remote.TalonFXWrapper;
 */
 
-public class ElevatorTest
-{
-  private static SmartMotorControllerConfig createSMCConfig()
-  {
+public class ElevatorTest {
+  private static SmartMotorControllerConfig createSMCConfig() {
     return new SmartMotorControllerConfig()
         .withMechanismCircumference(Meters.of(Inches.of(0.25).in(Meters) * 22))
         .withClosedLoopController(4, 0, 0)
@@ -68,24 +66,25 @@ public class ElevatorTest
         .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
         .withIdleMode(MotorMode.BRAKE)
         .withStartingPosition(Meters.of(0))
-//        .withTelemetry("ElevatorMotor", TelemetryVerbosity.HIGH)
+        //        .withTelemetry("ElevatorMotor", TelemetryVerbosity.HIGH)
         .withStatorCurrentLimit(Amps.of(40))
-//      .withVoltageCompensation(Volts.of(12))
+        //      .withVoltageCompensation(Volts.of(12))
         .withMotorInverted(false)
-//      .withClosedLoopRampRate(Seconds.of(0.25))
-//      .withOpenLoopRampRate(Seconds.of(0.25))
+        //      .withClosedLoopRampRate(Seconds.of(0.25))
+        //      .withOpenLoopRampRate(Seconds.of(0.25))
         .withFeedforward(new ElevatorFeedforward(0, 0, 0, 0))
         .withControlMode(ControlMode.CLOSED_LOOP);
   }
 
-  private static Elevator createElevator(SmartMotorController smc)
-  {
-    ElevatorConfig config = new ElevatorConfig()
-        .withHardLimits(Meters.of(0), Meters.of(3))
-//      .withTelemetry("Elevator", TelemetryVerbosity.HIGH)
-        .withCarriageWeight(Pounds.of(16));
-    Elevator                          elevator = new Elevator(config, smc);
-    SmartMotorControllerTestSubsystem subsys   = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
+  private static Elevator createElevator(SmartMotorController smc) {
+    ElevatorConfig config =
+        new ElevatorConfig()
+            .withHardLimits(Meters.of(0), Meters.of(3))
+            //      .withTelemetry("Elevator", TelemetryVerbosity.HIGH)
+            .withCarriageWeight(Pounds.of(16));
+    Elevator elevator = new Elevator(config, smc);
+    SmartMotorControllerTestSubsystem subsys =
+        (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.smc = smc;
     subsys.mechSimPeriodic = elevator::simIterate;
     subsys.mechUpdateTelemetry = elevator::updateTelemetry;
@@ -94,59 +93,66 @@ public class ElevatorTest
 
   private static int offset = 0;
 
-  private static SmartMotorControllerConfig addExponentialProfile(SmartMotorControllerConfig cfg)
-  {
+  private static SmartMotorControllerConfig addExponentialProfile(SmartMotorControllerConfig cfg) {
     var dcMotor = DCMotor.getNEO(1);
-    return cfg.withExponentialProfile(Volts.of(12),
-                                      dcMotor,
-                                      Pounds.of(16),
-                                      cfg.getMechanismCircumference().get().div(2 * Math.PI));
+    return cfg.withExponentialProfile(
+        Volts.of(12),
+        dcMotor,
+        Pounds.of(16),
+        cfg.getMechanismCircumference().get().div(2 * Math.PI));
   }
 
-  private static SmartMotorControllerConfig addTrapezoidalProfile(SmartMotorControllerConfig cfg)
-  {
+  private static SmartMotorControllerConfig addTrapezoidalProfile(SmartMotorControllerConfig cfg) {
     return cfg.withTrapezoidalProfile(MetersPerSecond.of(0.1), MetersPerSecondPerSecond.of(0.5));
   }
 
-  private static Stream<Arguments> createConfigs()
-  {
+  private static Stream<Arguments> createConfigs() {
     ArrayList<Arguments> smcList = new ArrayList<>();
     offset += 1;
 
-    for (int i = 0; i < 3; i++)
-    {
+    for (int i = 0; i < 3; i++) {
       var smcConfig = createSMCConfig();
-      switch (i)
-      {
-        case 0: break;
-        case 1: smcConfig = addTrapezoidalProfile(smcConfig);
+      switch (i) {
+        case 0:
           break;
-        case 2: smcConfig = addExponentialProfile(smcConfig);
+        case 1:
+          smcConfig = addTrapezoidalProfile(smcConfig);
+          break;
+        case 2:
+          smcConfig = addExponentialProfile(smcConfig);
           break;
       }
-      SparkMax  smax  = DeviceCreator.createSparkMax();
+      SparkMax smax = DeviceCreator.createSparkMax();
       SparkFlex sflex = DeviceCreator.createSparkFlex();
-//    ThriftyNova tnova = new ThriftyNova(30 + offset+i);
+      //    ThriftyNova tnova = new ThriftyNova(30 + offset+i);
       /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
       TalonFXS tfxs = DeviceCreator.createTalonFXS();
       TalonFX  tfx  = DeviceCreator.createTalonFX();
       */
-      smcList.add(Arguments.of(setupTestSubsystem(new SparkWrapper(smax,
-                                                                   DCMotor.getNEO(1),
-                                                                   smcConfig.clone()
-                                                                            .withSubsystem(new SmartMotorControllerTestSubsystem())
-                                                                            .withTelemetry(
-                                                                                "SparkMax(" + (10 + offset) + "[" + i +
-                                                                                "]) NEO",
-                                                                                TelemetryVerbosity.HIGH)))));
-      smcList.add(Arguments.of(setupTestSubsystem(new SparkWrapper(sflex,
-                                                                   DCMotor.getNeoVortex(1),
-                                                                   smcConfig.clone()
-                                                                            .withSubsystem(new SmartMotorControllerTestSubsystem())
-                                                                            .withTelemetry(
-                                                                                "SparkFlex(" + (20 + offset) + "[" + i +
-                                                                                "]) Vortex",
-                                                                                TelemetryVerbosity.HIGH)))));
+      smcList.add(
+          Arguments.of(
+              setupTestSubsystem(
+                  new SparkWrapper(
+                      smax,
+                      DCMotor.getNEO(1),
+                      smcConfig
+                          .clone()
+                          .withSubsystem(new SmartMotorControllerTestSubsystem())
+                          .withTelemetry(
+                              "SparkMax(" + (10 + offset) + "[" + i + "]) NEO",
+                              TelemetryVerbosity.HIGH)))));
+      smcList.add(
+          Arguments.of(
+              setupTestSubsystem(
+                  new SparkWrapper(
+                      sflex,
+                      DCMotor.getNeoVortex(1),
+                      smcConfig
+                          .clone()
+                          .withSubsystem(new SmartMotorControllerTestSubsystem())
+                          .withTelemetry(
+                              "SparkFlex(" + (20 + offset) + "[" + i + "]) Vortex",
+                              TelemetryVerbosity.HIGH)))));
       /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
       smcList.add(Arguments.of(setupTestSubsystem(new TalonFXSWrapper(tfxs,
                                                                       DCMotor.getNEO(1),
@@ -171,24 +177,20 @@ public class ElevatorTest
     return smcList.stream();
   }
 
-
-  private static void closeSMC(SmartMotorController smc)
-  {
+  private static void closeSMC(SmartMotorController smc) {
     SmartMotorControllerCommandRegistry.removeCommands(smc.getConfig().getSubsystem());
-    CommandScheduler.getInstance().unregisterSubsystem((SmartMotorControllerTestSubsystem) smc.getConfig()
-                                                                                              .getSubsystem());
+    CommandScheduler.getInstance()
+        .unregisterSubsystem((SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem());
     ((SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem()).close();
 
-//    switch (smc.getMotorController())
-//    {
-//
-//    }
+    //    switch (smc.getMotorController())
+    //    {
+    //
+    //    }
     Object motorController = smc.getMotorController();
-    if (motorController instanceof SparkMax)
-    {
+    if (motorController instanceof SparkMax) {
       ((SparkMax) motorController).close();
-    } else if (motorController instanceof SparkFlex)
-    {
+    } else if (motorController instanceof SparkFlex) {
       ((SparkFlex) motorController).close();
     }
     /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
@@ -202,11 +204,11 @@ public class ElevatorTest
     */
   }
 
-  private static void positionPidTest(SmartMotorController smc, Command highPIDSetCommand, Command lowPIDSetCommand)
-  throws InterruptedException
-  {
-    Distance      pre        = smc.getMeasurementPosition();
-    Distance      post;
+  private static void positionPidTest(
+      SmartMotorController smc, Command highPIDSetCommand, Command lowPIDSetCommand)
+      throws InterruptedException {
+    Distance pre = smc.getMeasurementPosition();
+    Distance post;
     AtomicBoolean testPassed = new AtomicBoolean(false);
     TestWithScheduler.schedule(highPIDSetCommand);
 
@@ -225,18 +227,24 @@ public class ElevatorTest
     } else
     {
     */
-      TestWithScheduler.cycle(Seconds.of(1), () -> {
-        try
-        {
-          Thread.sleep((long) smc.getConfig().getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Millisecond));
-        } catch (Exception e) {}
+    TestWithScheduler.cycle(
+        Seconds.of(1),
+        () -> {
+          try {
+            Thread.sleep(
+                (long)
+                    smc.getConfig()
+                        .getClosedLoopControlPeriod()
+                        .orElse(Milliseconds.of(20))
+                        .in(Millisecond));
+          } catch (Exception e) {
+          }
 
-        if (smc.getDutyCycle() != 0)
-        {
-          testPassed.set(true);
-        }
-      });
-//    }
+          if (smc.getDutyCycle() != 0) {
+            testPassed.set(true);
+          }
+        });
+    //    }
 
     post = smc.getMeasurementPosition();
     System.out.println("PID High PreTest Height: " + pre);
@@ -244,32 +252,33 @@ public class ElevatorTest
 
     assertTrue(!pre.isNear(post, Meters.of(0.005)) || testPassed.get());
 
-//    pre = smc.getMeasurementPosition();
-//    TestWithScheduler.schedule(lowPIDSetCommand);
-//    TestWithScheduler.cycle(Seconds.of(30));
+    //    pre = smc.getMeasurementPosition();
+    //    TestWithScheduler.schedule(lowPIDSetCommand);
+    //    TestWithScheduler.cycle(Seconds.of(30));
 
-//    post = smc.getMeasurementPosition();
-//    System.out.println("PID Low PreTest Height: " + pre);
-//    System.out.println("PID Low PostTest Height: " + post);
-//    assertFalse(pre.isNear(post, Meters.of(0.05)));
+    //    post = smc.getMeasurementPosition();
+    //    System.out.println("PID Low PreTest Height: " + pre);
+    //    System.out.println("PID Low PostTest Height: " + post);
+    //    assertFalse(pre.isNear(post, Meters.of(0.05)));
   }
 
-  private static void dutyCycleTest(SmartMotorController smc, Command dutycycleUp, Command dutyCycleDown)
-  throws InterruptedException
-  {
-    Distance       preDist    = smc.getMeasurementPosition();
-    LinearVelocity pre        = smc.getMeasurementVelocity();
+  private static void dutyCycleTest(
+      SmartMotorController smc, Command dutycycleUp, Command dutyCycleDown)
+      throws InterruptedException {
+    Distance preDist = smc.getMeasurementPosition();
+    LinearVelocity pre = smc.getMeasurementVelocity();
     LinearVelocity post;
-    Distance       postDist;
-    AtomicBoolean  testPassed = new AtomicBoolean(false);
+    Distance postDist;
+    AtomicBoolean testPassed = new AtomicBoolean(false);
 
     TestWithScheduler.schedule(dutycycleUp);
-    TestWithScheduler.cycle(Seconds.of(1), () -> {
-      if (smc.getDutyCycle() != 0)
-      {
-        testPassed.set(true);
-      }
-    });
+    TestWithScheduler.cycle(
+        Seconds.of(1),
+        () -> {
+          if (smc.getDutyCycle() != 0) {
+            testPassed.set(true);
+          }
+        });
     /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
     if (smc instanceof TalonFXSWrapper || smc instanceof TalonFXWrapper)
     {
@@ -295,140 +304,125 @@ public class ElevatorTest
     } else
     {
     */
-      assertTrue(pass);
-//    }
-//    assertTrue(pre.lt(post));
+    assertTrue(pass);
+    //    }
+    //    assertTrue(pre.lt(post));
 
-//    pre = smc.getMeasurementVelocity();
-//    TestWithScheduler.schedule(dutyCycleDown);
-//    TestWithScheduler.cycle(Seconds.of(2));
-//
-//    post = smc.getMeasurementVelocity();
-//    System.out.println("DutyCycleDown PreTest Speed: " + pre);
-//    System.out.println("DutyCycleDown PostTest Speed: " + post);
-//    assertTrue(pre.gt(post));
+    //    pre = smc.getMeasurementVelocity();
+    //    TestWithScheduler.schedule(dutyCycleDown);
+    //    TestWithScheduler.cycle(Seconds.of(2));
+    //
+    //    post = smc.getMeasurementVelocity();
+    //    System.out.println("DutyCycleDown PreTest Speed: " + pre);
+    //    System.out.println("DutyCycleDown PostTest Speed: " + post);
+    //    assertTrue(pre.gt(post));
   }
 
-  private static SmartMotorController setupTestSubsystem(SmartMotorController smc)
-  {
-    SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
+  private static SmartMotorController setupTestSubsystem(SmartMotorController smc) {
+    SmartMotorControllerTestSubsystem subsys =
+        (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.setSMC(smc);
     return smc;
   }
 
-  private static void startTest(SmartMotorController smc)
-  {
-    SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
+  private static void startTest(SmartMotorController smc) {
+    SmartMotorControllerTestSubsystem subsys =
+        (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
     subsys.testRunning = true;
   }
 
   @ParameterizedTest
   @MethodSource("createConfigs")
-  void testSMCDutyCycle(SmartMotorController smc) throws InterruptedException
-  {
-    try
-    {
+  void testSMCDutyCycle(SmartMotorController smc) throws InterruptedException {
+    try {
       startTest(smc);
       smc.setupSimulation();
-      SmartMotorControllerTestSubsystem subsys = (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
+      SmartMotorControllerTestSubsystem subsys =
+          (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
 
-      Command dutyCycleUp   = subsys.setDutyCycle(1);
+      Command dutyCycleUp = subsys.setDutyCycle(1);
       Command dutyCycleDown = subsys.setDutyCycle(-1);
 
       dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
-    } finally
-    {
+    } finally {
       closeSMC(smc);
     }
   }
 
-
   @ParameterizedTest
   @MethodSource("createConfigs")
-  void testSMCPositionPID(SmartMotorController smc) throws InterruptedException
-  {
-    try
-    {
+  void testSMCPositionPID(SmartMotorController smc) throws InterruptedException {
+    try {
       /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
-      if (smc instanceof TalonFXSWrapper)
-      {
-//      smc.applyConfig(smc.getConfig()
-//                         .withClosedLoopController(0.2,
-//                                                   0,
-//                                                   0,
-//                                                   MetersPerSecond.of(0.1),
-//                                                   MetersPerSecondPerSecond.of(0.5)));
-      }
-      if (smc instanceof TalonFXWrapper)
-      {
-//      smc.applyConfig(smc.getConfig()
-//                         .withClosedLoopController(0.02,
-//                                                   0,
-//                                                   0,
-//                                                   MetersPerSecond.of(0.1),
-//                                                   MetersPerSecondPerSecond.of(0.5)));
-      }
-      */
+            if (smc instanceof TalonFXSWrapper)
+            {
+      //      smc.applyConfig(smc.getConfig()
+      //                         .withClosedLoopController(0.2,
+      //                                                   0,
+      //                                                   0,
+      //                                                   MetersPerSecond.of(0.1),
+      //                                                   MetersPerSecondPerSecond.of(0.5)));
+            }
+            if (smc instanceof TalonFXWrapper)
+            {
+      //      smc.applyConfig(smc.getConfig()
+      //                         .withClosedLoopController(0.02,
+      //                                                   0,
+      //                                                   0,
+      //                                                   MetersPerSecond.of(0.1),
+      //                                                   MetersPerSecondPerSecond.of(0.5)));
+            }
+            */
       startTest(smc);
       smc.setupSimulation();
       Command highPid = Commands.run(() -> smc.setPosition(Meters.of(2)));
-      Command lowPid  = Commands.run(() -> smc.setPosition(Meters.of(0)));
+      Command lowPid = Commands.run(() -> smc.setPosition(Meters.of(0)));
 
       positionPidTest(smc, highPid, lowPid);
-    } finally
-    {
+    } finally {
       closeSMC(smc);
     }
   }
 
   @ParameterizedTest
   @MethodSource("createConfigs")
-  void testElevatorDutyCycle(SmartMotorController smc) throws InterruptedException
-  {
-    try
-    {
-      startTest(smc);
-      Elevator elevator      = createElevator(smc);
-      Command  dutyCycleUp   = elevator.set(1);
-      Command  dutyCycleDown = elevator.set(-0.5);
-
-      dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
-    } finally
-    {
-      closeSMC(smc);
-    }
-  }
-
-
-  @ParameterizedTest
-  @MethodSource("createConfigs")
-  void testElevatorPositionPID(SmartMotorController smc) throws InterruptedException
-  {
-    try
-    {
+  void testElevatorDutyCycle(SmartMotorController smc) throws InterruptedException {
+    try {
       startTest(smc);
       Elevator elevator = createElevator(smc);
-      Command  highPid  = elevator.setHeight(Meters.of(2));
-      Command  lowPid   = elevator.setHeight(Meters.of(0.5));
+      Command dutyCycleUp = elevator.set(1);
+      Command dutyCycleDown = elevator.set(-0.5);
+
+      dutyCycleTest(smc, dutyCycleUp, dutyCycleDown);
+    } finally {
+      closeSMC(smc);
+    }
+  }
+
+  @ParameterizedTest
+  @MethodSource("createConfigs")
+  void testElevatorPositionPID(SmartMotorController smc) throws InterruptedException {
+    try {
+      startTest(smc);
+      Elevator elevator = createElevator(smc);
+      Command highPid = elevator.setHeight(Meters.of(2));
+      Command lowPid = elevator.setHeight(Meters.of(0.5));
 
       positionPidTest(smc, highPid, lowPid);
-    } finally
-    {
+    } finally {
       closeSMC(smc);
     }
   }
 
   @BeforeEach
-  void startTest()
-  {
+  void startTest() {
     MockHardwareExtension.beforeAll();
     TestWithScheduler.schedulerStart();
     TestWithScheduler.schedulerClear();
   }
 
   @AfterEach
-  void endTest()
-  {
+  void endTest() {
     MockHardwareExtension.afterAll();
     Preferences.removeAll();
     TestWithScheduler.schedulerClear();

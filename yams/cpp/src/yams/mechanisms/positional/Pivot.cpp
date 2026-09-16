@@ -3,29 +3,29 @@
 
 #include "yams/mechanisms/positional/Pivot.hpp"
 
+#include <cmath>
+#include <memory>
+#include <string>
+#include <wpi/commands2/Commands.hpp>
 #include <wpi/framework/RobotBase.hpp>
 #include <wpi/math/geometry/Rotation3d.hpp>
 #include <wpi/math/geometry/Translation3d.hpp>
+#include <wpi/math/system/Models.hpp>
 #include <wpi/simulation/BatterySim.hpp>
 #include <wpi/simulation/RoboRioSim.hpp>
 #include <wpi/smartdashboard/Mechanism2d.hpp>
 #include <wpi/smartdashboard/MechanismLigament2d.hpp>
 #include <wpi/smartdashboard/MechanismRoot2d.hpp>
-#include <wpi/smartdashboard/SmartDashboard.hpp>
-#include <wpi/math/system/Models.hpp>
-#include <wpi/util/Color.hpp>
-#include <wpi/util/Color8Bit.hpp>
-#include <wpi/commands2/Commands.hpp>
+#include <wpi/telemetry/Telemetry.hpp>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/time.hpp>
-
-#include <cmath>
-#include <memory>
-#include <string>
+#include <wpi/util/Color.hpp>
+#include <wpi/util/Color8Bit.hpp>
 
 #include "yams/exceptions.hpp"
 #include "yams/gearing/MechanismGearing.hpp"
 #include "yams/motorcontrollers/simulation/DCMotorSimSupplier.hpp"
+#include "yams/telemetry/NetworkTablesBackends.hpp"
 
 namespace yams::mechanisms::positional {
 
@@ -67,9 +67,9 @@ Pivot::Pivot(config::PivotConfig* config, motorcontrollers::SmartMotorController
                                                     "WithMaxAngle(wpi::units::degree_t)");
     }
     if (!m_smc->GetConfig().GetStartingPosition().has_value()) {
-      throw exceptions::PivotConfigurationException("Pivot starting angle is empty",
-                                                    "Cannot create simulation.",
-                                                    "smc.WithStartingPosition(wpi::units::degree_t)");
+      throw exceptions::PivotConfigurationException(
+          "Pivot starting angle is empty", "Cannot create simulation.",
+          "smc.WithStartingPosition(wpi::units::degree_t)");
     }
     if (!m_smc->GetConfig().GetMOI()) {
       throw exceptions::PivotConfigurationException("Pivot MOI is empty",
@@ -82,8 +82,8 @@ Pivot::Pivot(config::PivotConfig* config, motorcontrollers::SmartMotorController
     auto& gearingOpt = m_smc->GetConfig().GetMotorGearing();
     gearing::MechanismGearing gearing = gearingOpt.value_or(gearing::MechanismGearing::kOne);
 
-    auto plant = wpi::math::Models::SingleJointedArmFromPhysicalConstants(dcMotor, m_smc->GetConfig().GetMOI(),
-                                                    gearing.GetMechanismToRotorRatio());
+    auto plant = wpi::math::Models::SingleJointedArmFromPhysicalConstants(
+        dcMotor, m_smc->GetConfig().GetMOI(), gearing.GetMechanismToRotorRatio());
     m_dcMotorSim.emplace(plant, dcMotor);
 
     wpi::units::second_t period = m_smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms);
@@ -102,9 +102,9 @@ Pivot::Pivot(config::PivotConfig* config, motorcontrollers::SmartMotorController
         "Setpoint", kPivotLen, startDeg, 3, wpi::util::Color8Bit{wpi::util::Color::WHITE});
 
     constexpr double kTickLen = 3.0 * 0.0254;  // 3 inches in metres
-    m_mechanismRoot->Append<wpi::MechanismLigament2d>("MaxHard", kTickLen,
-                                                      m_pivotConfig->GetMaxAngle().value(), 4,
-                                                      wpi::util::Color8Bit{wpi::util::Color::LIME_GREEN});
+    m_mechanismRoot->Append<wpi::MechanismLigament2d>(
+        "MaxHard", kTickLen, m_pivotConfig->GetMaxAngle().value(), 4,
+        wpi::util::Color8Bit{wpi::util::Color::LIME_GREEN});
     m_mechanismRoot->Append<wpi::MechanismLigament2d>("MinHard", kTickLen,
                                                       m_pivotConfig->GetMinAngle().value(), 4,
                                                       wpi::util::Color8Bit{wpi::util::Color::RED});
@@ -112,13 +112,16 @@ Pivot::Pivot(config::PivotConfig* config, motorcontrollers::SmartMotorController
     auto smcUpperLimit = m_smc->GetConfig().GetMechanismUpperLimit();
     auto smcLowerLimit = m_smc->GetConfig().GetMechanismLowerLimit();
     if (smcUpperLimit.has_value() && smcLowerLimit.has_value()) {
-      m_mechanismRoot->Append<wpi::MechanismLigament2d>("MaxSoft", kTickLen, smcUpperLimit.value(),
-                                                        4, wpi::util::Color8Bit{wpi::util::Color::HOT_PINK});
-      m_mechanismRoot->Append<wpi::MechanismLigament2d>("MinSoft", kTickLen, smcLowerLimit.value(),
-                                                        4, wpi::util::Color8Bit{wpi::util::Color::YELLOW});
+      m_mechanismRoot->Append<wpi::MechanismLigament2d>(
+          "MaxSoft", kTickLen, smcUpperLimit.value(), 4,
+          wpi::util::Color8Bit{wpi::util::Color::HOT_PINK});
+      m_mechanismRoot->Append<wpi::MechanismLigament2d>(
+          "MinSoft", kTickLen, smcLowerLimit.value(), 4,
+          wpi::util::Color8Bit{wpi::util::Color::YELLOW});
     }
 
-    wpi::SmartDashboard::PutData(m_name + "/mechanism", &(*m_mechanismWindow));
+    yams::telemetry::EnsureMechanismsTelemetryBackend();
+    wpi::telemetry::Log("Mechanisms/" + m_name + "/mechanism", *m_mechanismWindow);
   }
 }
 
@@ -192,7 +195,8 @@ wpi::cmd::CommandPtr Pivot::RunTo(wpi::units::degree_t angle, wpi::units::degree
       .WithName(m_name + " RunTo");
 }
 
-wpi::cmd::CommandPtr Pivot::RunTo(std::function<wpi::units::degree_t()> angle, wpi::units::degree_t tolerance) {
+wpi::cmd::CommandPtr Pivot::RunTo(std::function<wpi::units::degree_t()> angle,
+                                  wpi::units::degree_t tolerance) {
   wpi::units::degree_t target = angle();
   wpi::cmd::Trigger near = IsNear(target, tolerance).Debounce(wpi::units::second_t{0.1});
   return wpi::cmd::RunOnce([this, target] { SetMechanismPositionSetpoint(target); }, {m_subsystem})
@@ -222,8 +226,9 @@ const config::PivotConfig& Pivot::GetConfig() const { return *m_pivotConfig; }
 
 wpi::math::Translation3d Pivot::GetRelativeMechanismPosition() const {
   if (m_mechanismLigament) {
-    return wpi::math::Translation3d{wpi::units::meter_t{m_mechanismLigament->GetLength()},
-                              wpi::math::Rotation3d{0_rad, 0_rad, wpi::units::radian_t{GetAngle()}}};
+    return wpi::math::Translation3d{
+        wpi::units::meter_t{m_mechanismLigament->GetLength()},
+        wpi::math::Rotation3d{0_rad, 0_rad, wpi::units::radian_t{GetAngle()}}};
   }
   return wpi::math::Translation3d{};
 }

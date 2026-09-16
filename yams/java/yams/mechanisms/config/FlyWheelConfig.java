@@ -51,46 +51,44 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  * FlyWheel flywheel = new FlyWheel(config, motor);
  * }</pre>
  */
-public class FlyWheelConfig
-{
+public class FlyWheelConfig {
   /**
    * Telemetry name.
    */
-  private   Optional<String>               telemetryName           = Optional.empty();
+  private Optional<String>             telemetryName           = Optional.empty();
   /**
    * Telemetry verbosity
    */
-  private Optional<TelemetryVerbosity> telemetryVerbosity = Optional.empty();
+  private Optional<TelemetryVerbosity> telemetryVerbosity      = Optional.empty();
   /**
    * {@link FlyWheel} length for simulation.
    */
-  private Optional<Distance>           diameter           = Optional.empty();
+  private Optional<Distance>           diameter                = Optional.empty();
   /**
    * Sim color value
    */
-  private   Color8Bit                      simColor                = new Color8Bit(Color.ORANGE);
+  private Color8Bit                    simColor                = new Color8Bit(Color.ORANGE);
   /**
    * Mechanism position configuration for the {@link Pivot} (Optional).
    */
-  private   MechanismPositionConfig        mechanismPositionConfig = new MechanismPositionConfig();
+  private MechanismPositionConfig      mechanismPositionConfig = new MechanismPositionConfig();
   /**
    * Use speedometer simulation for the shooter.
    */
-  private   boolean                        useSpeedometer          = false;
+  private boolean                      useSpeedometer          = false;
   /**
    * Max velocity of the speedometer simulation (Optional).
    */
-  private   Optional<AngularVelocity>      speedometerMaxVelocity  = Optional.empty();
+  private Optional<AngularVelocity>    speedometerMaxVelocity  = Optional.empty();
 
   /**
    * FlyWheel Configuration class
    *
    */
-  public FlyWheelConfig()
-  {}
+  public FlyWheelConfig() {
+  }
 
-  private FlyWheelConfig(FlyWheelConfig cfg)
-  {
+  private FlyWheelConfig(FlyWheelConfig cfg) {
     this.telemetryName = cfg.telemetryName;
     this.telemetryVerbosity = cfg.telemetryVerbosity;
     this.diameter = cfg.diameter;
@@ -101,8 +99,7 @@ public class FlyWheelConfig
   }
 
   @Override
-  public FlyWheelConfig clone()
-  {
+  public FlyWheelConfig clone() {
     return new FlyWheelConfig(this);
   }
 
@@ -115,8 +112,7 @@ public class FlyWheelConfig
    * @param maxVelocity The maximum velocity of the shooter.
    * @return {@link FlyWheelConfig} for chaining.
    */
-  public FlyWheelConfig withSpeedometerSimulation(AngularVelocity maxVelocity)
-  {
+  public FlyWheelConfig withSpeedometerSimulation(AngularVelocity maxVelocity) {
     this.useSpeedometer = true;
     this.speedometerMaxVelocity = Optional.ofNullable(maxVelocity);
     return this;
@@ -130,13 +126,9 @@ public class FlyWheelConfig
    *
    * @return {@link FlyWheelConfig} for chaining.
    */
-  public FlyWheelConfig withSpeedometerSimulation()
-  {
-    if (!speedometerMaxVelocity.isPresent())
-    {
-      throw new FlyWheelConfigurationException("Speedometer max velocity is not set.",
-                                               "Cannot use speedometer simulation!",
-                                               "Set it with withSpeedometerSimulation(AngularVelocity)");
+  public FlyWheelConfig withSpeedometerSimulation() {
+    if (!speedometerMaxVelocity.isPresent()) {
+      throw new FlyWheelConfigurationException("Speedometer max velocity is not set.", "Cannot use speedometer simulation!", "Set it with withSpeedometerSimulation(AngularVelocity)");
     }
     this.useSpeedometer = true;
     return this;
@@ -150,8 +142,7 @@ public class FlyWheelConfig
    *
    * @return {@link FlyWheelConfig} for chaining.
    */
-  public FlyWheelConfig disableSpeedometerSimulation()
-  {
+  public FlyWheelConfig disableSpeedometerSimulation() {
     this.useSpeedometer = false;
     return this;
   }
@@ -164,8 +155,7 @@ public class FlyWheelConfig
    *
    * @return True if the shooter is using the speedometer simulation.
    */
-  public boolean isUsingSpeedometerSimulation()
-  {
+  public boolean isUsingSpeedometerSimulation() {
     return useSpeedometer;
   }
 
@@ -176,10 +166,9 @@ public class FlyWheelConfig
    * If the speedometer simulation is not enabled, this will return an empty Optional.
    *
    * @return The maximum velocity of the speedometer simulation, or an empty Optional if the speedometer simulation is
-   * not enabled.
+   *         not enabled.
    */
-  public Optional<AngularVelocity> getSpeedometerMaxVelocity()
-  {
+  public Optional<AngularVelocity> getSpeedometerMaxVelocity() {
     return speedometerMaxVelocity;
   }
 
@@ -189,8 +178,7 @@ public class FlyWheelConfig
    * @param simColor {@link Color8Bit} to show.
    * @return {@link FlyWheelConfig} for chaining.
    */
-  public FlyWheelConfig withSimColor(final Color8Bit simColor)
-  {
+  public FlyWheelConfig withSimColor(final Color8Bit simColor) {
     this.simColor = simColor;
     return this;
   }
@@ -201,8 +189,7 @@ public class FlyWheelConfig
    * @param distance Length of the {@link FlyWheel}.
    * @return {@link FlyWheelConfig} for chaining.
    */
-  public FlyWheelConfig withDiameter(Distance distance)
-  {
+  public FlyWheelConfig withDiameter(Distance distance) {
     this.diameter = Optional.ofNullable(distance);
     return this;
   }
@@ -213,8 +200,7 @@ public class FlyWheelConfig
    * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link FlyWheel}
    * @return {@link FlyWheelConfig} for chaining
    */
-  public FlyWheelConfig withMechanismPositionConfig(MechanismPositionConfig mechanismPositionConfig)
-  {
+  public FlyWheelConfig withMechanismPositionConfig(MechanismPositionConfig mechanismPositionConfig) {
     this.mechanismPositionConfig = mechanismPositionConfig;
     return this;
   }
@@ -226,19 +212,18 @@ public class FlyWheelConfig
    * @param telemetryVerbosity Telemetry verbosity to apply.
    * @return {@link FlyWheelConfig} for chaining.
    */
-  public FlyWheelConfig withTelemetry(String telemetryName, TelemetryVerbosity telemetryVerbosity)
-  {
+  public FlyWheelConfig withTelemetry(String telemetryName, TelemetryVerbosity telemetryVerbosity) {
     this.telemetryName = Optional.ofNullable(telemetryName);
     this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
     return this;
   }
+
   /**
    * Get the Length of the {@link FlyWheel}
    *
    * @return {@link Distance} of the {@link FlyWheel} or an empty {@link Optional} if not set.
    */
-  public Optional<Distance> getDiameter()
-  {
+  public Optional<Distance> getDiameter() {
     return diameter;
   }
 
@@ -247,8 +232,7 @@ public class FlyWheelConfig
    *
    * @return {@link TelemetryVerbosity} of the {@link FlyWheel}
    */
-  public Optional<TelemetryVerbosity> getTelemetryVerbosity()
-  {
+  public Optional<TelemetryVerbosity> getTelemetryVerbosity() {
     return telemetryVerbosity;
   }
 
@@ -257,8 +241,7 @@ public class FlyWheelConfig
    *
    * @return Network Tables name.
    */
-  public Optional<String> getTelemetryName()
-  {
+  public Optional<String> getTelemetryName() {
     return telemetryName;
   }
 
@@ -267,8 +250,7 @@ public class FlyWheelConfig
    *
    * @return sim color.
    */
-  public Color8Bit getSimColor()
-  {
+  public Color8Bit getSimColor() {
     return simColor;
   }
 
@@ -276,10 +258,9 @@ public class FlyWheelConfig
    * Get the {@link MechanismPositionConfig} associated with this {@link FlyWheelConfig}.
    *
    * @return An {@link Optional} containing the {@link MechanismPositionConfig} if present, otherwise an empty
-   * {@link Optional}.
+   *         {@link Optional}.
    */
-  public MechanismPositionConfig getMechanismPositionConfig()
-  {
+  public MechanismPositionConfig getMechanismPositionConfig() {
     return mechanismPositionConfig;
   }
 
@@ -288,13 +269,9 @@ public class FlyWheelConfig
    *
    * @return {@link Distance} representing the circumference of the FlyWheel.
    */
-  public Distance getCircumference()
-  {
-    if (diameter.isEmpty())
-    {
-      throw new FlyWheelConfigurationException("FlyWheel diameter is empty",
-                                               "Cannot run speed without diameter.",
-                                               "withDiameter(Distance)");
+  public Distance getCircumference() {
+    if (diameter.isEmpty()) {
+      throw new FlyWheelConfigurationException("FlyWheel diameter is empty", "Cannot run speed without diameter.", "withDiameter(Distance)");
     }
     return diameter.orElseThrow().times(Math.PI);
   }
@@ -305,8 +282,7 @@ public class FlyWheelConfig
    * @param velocity {@link AngularVelocity} to convert to {@link LinearVelocity}
    * @return {@link LinearVelocity} of the {@link FlyWheel}
    */
-  public LinearVelocity getLinearVelocity(AngularVelocity velocity)
-  {
+  public LinearVelocity getLinearVelocity(AngularVelocity velocity) {
     return getCircumference().per(Second).times(velocity.in(RotationsPerSecond));
   }
 
@@ -316,8 +292,7 @@ public class FlyWheelConfig
    * @param velocity {@link LinearVelocity} to convert to {@link AngularVelocity}
    * @return {@link AngularVelocity} of the {@link FlyWheel}
    */
-  public AngularVelocity getAngularVelocity(LinearVelocity velocity)
-  {
+  public AngularVelocity getAngularVelocity(LinearVelocity velocity) {
     return RotationsPerSecond.of(velocity.in(MetersPerSecond) / getCircumference().in(Meters));
   }
 }

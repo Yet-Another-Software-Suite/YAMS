@@ -3,21 +3,24 @@
 
 #include "yams/motorcontrollers/SmartMotorControllerCommandRegistry.hpp"
 
-#include <wpi/smartdashboard/SmartDashboard.hpp>
-#include <wpi/commands2/Commands.hpp>
-
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <wpi/commands2/Commands.hpp>
+#include <wpi/tunables/Tunables.hpp>
+
+#include "yams/telemetry/NetworkTablesBackends.hpp"
 
 namespace yams::motorcontrollers {
 
-std::unordered_map<std::string, wpi::cmd::CommandPtr> SmartMotorControllerCommandRegistry::s_commands;
+std::unordered_map<std::string, wpi::cmd::CommandPtr>
+    SmartMotorControllerCommandRegistry::s_commands;
 std::unordered_map<std::string, std::vector<std::function<void()>>>
     SmartMotorControllerCommandRegistry::s_callbacks;
-std::unordered_map<std::string, wpi::cmd::SubsystemBase*> SmartMotorControllerCommandRegistry::s_owners;
+std::unordered_map<std::string, wpi::cmd::SubsystemBase*>
+    SmartMotorControllerCommandRegistry::s_owners;
 
 std::string SmartMotorControllerCommandRegistry::MakeKey(const std::string& cmdName,
                                                          wpi::cmd::SubsystemBase* subsystem) {
@@ -33,7 +36,8 @@ void SmartMotorControllerCommandRegistry::PublishToNT(const std::string& cmdName
                                        },
                                        {subsystem})
                                        .WithName(cmdName));
-  wpi::SmartDashboard::PutData("Mechanisms/Commands/" + key, s_commands.at(key).get());
+  yams::telemetry::EnsureTuningTunableBackend();
+  wpi::tunables::Publish("Tuning/" + key, *s_commands.at(key).get());
 }
 
 void SmartMotorControllerCommandRegistry::AddCommand(const std::string& cmdName,

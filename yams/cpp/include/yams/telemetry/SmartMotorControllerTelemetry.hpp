@@ -3,19 +3,18 @@
 
 #pragma once
 
-#include <wpi/nt/BooleanTopic.hpp>
-#include <wpi/nt/DoubleTopic.hpp>
-#include <wpi/nt/NetworkTable.hpp>
-#include <wpi/datalog/DataLog.hpp>
-#include <wpi/system/DataLogManager.hpp>
-#include <wpi/util/json.hpp>
-
 #include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <wpi/datalog/DataLog.hpp>
+#include <wpi/nt/BooleanTopic.hpp>
+#include <wpi/nt/DoubleTopic.hpp>
+#include <wpi/nt/NetworkTable.hpp>
+#include <wpi/system/DataLogManager.hpp>
+#include <wpi/util/json.hpp>
 
 // DoubleTelemetry<F>::TransformUnit() calls SmartMotorControllerConfig methods directly in its
 // (header-only, template) body; since SmartMotorControllerConfig is not a dependent type there,
@@ -320,7 +319,15 @@ class DoubleTelemetry {
 
 /**
  * NT4 pub/sub wrapper for a single boolean-valued telemetry field.
+ *
+ * Generic over the enum type F identifying which field this entry represents, so the same
+ * wrapper can be reused across unrelated telemetry coordinators (e.g. SmartMotorControllerTelemetry
+ * uses BooleanTelemetry<BooleanTelemetryField>, while SwerveDriveTelemetry uses its own field
+ * enum).
+ *
+ * @tparam F Enum type identifying which field this telemetry entry represents.
  */
+template <typename F>
 class BooleanTelemetry {
  public:
   /**
@@ -328,17 +335,22 @@ class BooleanTelemetry {
    *
    * @param key        NT4 table key for this field.
    * @param defaultVal Default boolean value published on startup.
-   * @param field      BooleanTelemetryField identifier.
+   * @param field      Field identifier.
    * @param tunable    true if the field should be placed in the tuning table with a subscriber.
    */
-  BooleanTelemetry(std::string key, bool defaultVal, BooleanTelemetryField field, bool tunable);
+  BooleanTelemetry(std::string key, bool defaultVal, F field, bool tunable)
+      : m_field{field},
+        m_key{std::move(key)},
+        m_tunable{tunable},
+        m_defaultValue{defaultVal},
+        m_cachedValue{defaultVal} {}
 
   /**
    * Override the default published value.
    *
    * @param value New default value.
    */
-  void SetDefaultValue(bool value);
+  void SetDefaultValue(bool value) { m_cachedValue = m_defaultValue = value; }
 
   /**
    * Create the NT4 publisher (and subscriber if tunable) under the given tables.
@@ -347,43 +359,110 @@ class BooleanTelemetry {
    * @param tuningTable NT4 table for live-tunable fields.
    */
   void SetupNetworkTables(std::shared_ptr<wpi::nt::NetworkTable> dataTable,
-                          std::shared_ptr<wpi::nt::NetworkTable> tuningTable);
+                          std::shared_ptr<wpi::nt::NetworkTable> tuningTable) {
+    m_dataTable = dataTable;
+    m_tuningTable = tuningTable;
+    if (!m_enabled) return;
+
+    if (tuningTable && m_tunable) {
+      auto topic = tuningTable->GetBooleanTopic(m_key);
+      m_pubSub = topic.Publish();
+      m_pubSub->SetDefault(m_defaultValue);
+      m_subscriber = topic.Subscribe(m_defaultValue);
+    } else if (dataTable) {
+      auto topic = dataTable->GetBooleanTopic(m_key);
+      m_publisher = topic.Publish();
+      m_publisher->SetDefault(m_defaultValue);
+    }
+  }
 
   /**
    * Create a read-only NT4 publisher under the data table (no tuning table).
    *
    * @param dataTable NT4 table for status data.
    */
-  void SetupNetworkTable(std::shared_ptr<wpi::nt::NetworkTable> dataTable);
+  void SetupNetworkTable(std::shared_ptr<wpi::nt::NetworkTable> dataTable) {
+    SetupNetworkTables(dataTable, nullptr);
+  }
 
   /**
    * Create a DataLog entry under the given prefix path.
    *
    * @param prefix DataLog path prefix (a trailing "/" is added if missing).
    */
-  void SetupDataLog(const std::string& prefix);
+  void SetupDataLog(const std::string& prefix) {
+    if (m_tunable) return;
+    std::string path = prefix;
+    if (!path.empty() && path.back() != '/') path += '/';
+    path += m_key;
+    m_dataLogEntry = wpi::log::BooleanLogEntry{wpi::DataLogManager::GetLog(), path};
+  }
 
   /**
-   * Publish a value; returns false if a tunable subscriber disagrees.
+   * Publish a value; returns false if the field is disabled or a tunable subscriber disagrees.
    *
    * @param value Value to publish.
    * @return true if the value was accepted and published.
    */
-  bool Set(bool value);
+  bool Set(bool value) {
+    if (!m_enabled) return false;
+    if (m_dataLogEntry) {
+      m_dataLogEntry->Append(value);
+    }
+    if (m_subscriber) {
+      bool tuningValue = m_subscriber->Get(m_defaultValue);
+      if (tuningValue != value) return false;
+    }
+    if (m_publisher) {
+      m_publisher->Set(value);
+    }
+    return true;
+  }
 
   /**
    * Read the current value from the subscriber (tunable) or return the default.
    *
    * @return Current field value.
    */
-  bool Get() const;
+  bool Get() const {
+    if (!m_enabled) return m_defaultValue;
+    if (m_subscriber) {
+      return m_subscriber->Get(m_defaultValue);
+    }
+    throw std::runtime_error("Tuning table not configured for " + m_key + "!");
+  }
+
+  /**
+   * Forcibly overwrite the tunable value in NetworkTables, bypassing the subscriber-must-match
+   * guard in Set(bool). Used to enforce mutual exclusion between tunable modes that share the
+   * same underlying drive/mechanism.
+   *
+   * @param value Value to force.
+   */
+  void ForceSet(bool value) {
+    m_cachedValue = value;
+    if (m_pubSub) {
+      m_pubSub->Set(value);
+    } else if (m_publisher) {
+      m_publisher->Set(value);
+    }
+  }
 
   /**
    * Return true if a tunable subscriber is active and the value has changed since the last call.
    *
    * @return true when the NT4 subscriber holds a value different from the cached value.
    */
-  bool IsTunable();
+  bool IsTunable() {
+    if (m_subscriber && m_tunable && m_enabled) {
+      bool current = m_subscriber->Get(m_defaultValue);
+      if (current != m_cachedValue) {
+        m_cachedValue = current;
+        return true;
+      }
+    }
+    return false;
+  }
 
   /** Enable this field so it is published / read each loop. */
   void Enable() { m_enabled = true; }
@@ -395,16 +474,26 @@ class BooleanTelemetry {
    * @param state true to enable.
    */
   void Display(bool state) { m_enabled = state; }
-  /** @return The BooleanTelemetryField identifier for this entry. */
-  BooleanTelemetryField GetField() const { return m_field; }
+  /** @return The field identifier for this entry. */
+  F GetField() const { return m_field; }
   /** @return true if this field is currently enabled. */
   bool IsEnabled() const { return m_enabled; }
 
   /** Release all NT4 publishers/subscribers and DataLog entries. */
-  void Close();
+  void Close() {
+    m_subscriber.reset();
+    m_pubSub.reset();
+    m_publisher.reset();
+    if (m_dataTable) {
+      m_dataTable->GetEntry(m_key).Unpublish();
+    }
+    if (m_tuningTable) {
+      m_tuningTable->GetEntry(m_key).Unpublish();
+    }
+  }
 
  private:
-  BooleanTelemetryField m_field;
+  F m_field;
   std::string m_key;
   bool m_tunable;
   bool m_enabled{false};
@@ -443,12 +532,13 @@ class SmartMotorControllerTelemetry {
    * @param dataLogName  Optional DataLog prefix.
    */
   void SetupTelemetry(
-      motorcontrollers::SmartMotorController& smc, std::shared_ptr<wpi::nt::NetworkTable> publishTable,
+      motorcontrollers::SmartMotorController& smc,
+      std::shared_ptr<wpi::nt::NetworkTable> publishTable,
       std::shared_ptr<wpi::nt::NetworkTable> tuningTable,
-      std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>&
-          doubleFields,
-      std::unordered_map<BooleanTelemetryField, BooleanTelemetry>& boolFields, bool nt4Enabled,
-      std::optional<std::string> dataLogName);
+      std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>& doubleFields,
+      std::unordered_map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>>&
+          boolFields,
+      bool nt4Enabled, std::optional<std::string> dataLogName);
 
   /**
    * Publish current motor controller state to NetworkTables / DataLog.
@@ -474,9 +564,10 @@ class SmartMotorControllerTelemetry {
   std::shared_ptr<wpi::nt::NetworkTable> m_dataTable;
   std::shared_ptr<wpi::nt::NetworkTable> m_tuningTable;
 
-  std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>*
-      m_doubleFields{nullptr};
-  std::unordered_map<BooleanTelemetryField, BooleanTelemetry>* m_boolFields{nullptr};
+  std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>* m_doubleFields{
+      nullptr};
+  std::unordered_map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>>* m_boolFields{
+      nullptr};
 };
 
 }  // namespace yams::telemetry

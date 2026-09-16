@@ -4,20 +4,20 @@
 // Mirrors Java PivotTest — duty-cycle and position-PID tests for a rotary
 // pivot mechanism across all (HardwareType × ProfileType) combinations.
 
-#include <wpi/math/system/DCMotor.hpp>
-#include <wpi/commands2/CommandScheduler.hpp>
-#include <wpi/commands2/Commands.hpp>
 #include <gtest/gtest.h>
-#include <wpi/units/angle.hpp>
-#include <wpi/units/angular_acceleration.hpp>
-#include <wpi/units/angular_velocity.hpp>
-#include <wpi/units/moment_of_inertia.hpp>
 
 #include <chrono>
 #include <cmath>
 #include <cstdio>
 #include <string>
 #include <thread>
+#include <wpi/commands2/CommandScheduler.hpp>
+#include <wpi/commands2/Commands.hpp>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/angular_acceleration.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/moment_of_inertia.hpp>
 
 #include "helpers/MockHardware.h"
 #include "helpers/MotorControllerFactory.h"
@@ -45,7 +45,8 @@ static SmartMotorControllerConfig MakePivotSMCConfig(ProfileType profile, Hardwa
       .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
       .WithFeedforward(wpi::math::SimpleMotorFeedforward<wpi::units::turns>{
-          1.0_V, wpi::units::unit_t<wpi::math::SimpleMotorFeedforward<wpi::units::turns>::kv_unit>{0.0},
+          1.0_V,
+          wpi::units::unit_t<wpi::math::SimpleMotorFeedforward<wpi::units::turns>::kv_unit>{0.0},
           wpi::units::unit_t<wpi::math::SimpleMotorFeedforward<wpi::units::turns>::ka_unit>{0.0}})
       .WithClosedLoopMode()
       .WithMOI(12_in, 1_lb)

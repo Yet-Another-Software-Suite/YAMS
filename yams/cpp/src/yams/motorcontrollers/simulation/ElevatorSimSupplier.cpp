@@ -3,9 +3,8 @@
 
 #include "yams/motorcontrollers/simulation/ElevatorSimSupplier.hpp"
 
-#include <wpi/simulation/RoboRioSim.hpp>
-
 #include <utility>
+#include <wpi/simulation/RoboRioSim.hpp>
 
 #include "yams/motorcontrollers/simulation/BatterySim.hpp"
 
@@ -14,7 +13,8 @@ namespace yams::motorcontrollers::simulation {
 ElevatorSimSupplier::ElevatorSimSupplier(wpi::sim::ElevatorSim& sim,
                                          std::function<double()> dutyCycleSupplier,
                                          const gearing::MechanismGearing& gearing,
-                                         wpi::units::meter_t circumference, wpi::units::second_t period)
+                                         wpi::units::meter_t circumference,
+                                         wpi::units::second_t period)
     : m_sim(sim),
       m_dutyCycleSupplier(std::move(dutyCycleSupplier)),
       m_gearing(gearing),
@@ -23,7 +23,8 @@ ElevatorSimSupplier::ElevatorSimSupplier(wpi::sim::ElevatorSim& sim,
 
 void ElevatorSimSupplier::UpdateSim() {
   if (!m_inputFed) {
-    m_lastInputVoltage = wpi::units::volt_t{m_dutyCycleSupplier() * GetMechanismSupplyVoltage().value()};
+    m_lastInputVoltage =
+        wpi::units::volt_t{m_dutyCycleSupplier() * GetMechanismSupplyVoltage().value()};
     m_sim.SetInputVoltage(m_lastInputVoltage);
     wpi::sim::RoboRioSim::SetVInVoltage(BatterySim::CalculateVoltage(this, m_sim.GetCurrentDraw()));
   }
@@ -93,7 +94,9 @@ wpi::units::volt_t ElevatorSimSupplier::GetMechanismSupplyVoltage() {
 
 wpi::units::volt_t ElevatorSimSupplier::GetMechanismStatorVoltage() { return m_lastInputVoltage; }
 
-void ElevatorSimSupplier::SetMechanismStatorVoltage(wpi::units::volt_t volts) { SetInputVoltage(volts); }
+void ElevatorSimSupplier::SetMechanismStatorVoltage(wpi::units::volt_t volts) {
+  SetInputVoltage(volts);
+}
 
 // ---- Private helpers --------------------------------------------------------
 

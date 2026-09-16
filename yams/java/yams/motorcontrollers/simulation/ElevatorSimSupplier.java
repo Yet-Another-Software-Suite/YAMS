@@ -66,24 +66,24 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
  * }</pre>
  */
 public class ElevatorSimSupplier implements SimSupplier {
-  private final ElevatorSim sim;
+  private final ElevatorSim                sim;
   private final SmartMotorControllerConfig config;
-  private final MechanismGearing mechGearing;
-  private final DCMotor motor;
-  private final UUID uuid;
-  private final Supplier<Double> motorDutyCycleSupplier;
-  private final Supplier<Double> pos;
-  private final Supplier<Double> mps;
-  private final DerivativeTimeFilter mpsps;
-  private final LinearFilter supplyCurrentFilter;
-  private final Time simPeriod;
-  private boolean inputFed = false;
-  private boolean simUpdated = false;
+  private final MechanismGearing           mechGearing;
+  private final DCMotor                    motor;
+  private final UUID                       uuid;
+  private final Supplier<Double>           motorDutyCycleSupplier;
+  private final Supplier<Double>           pos;
+  private final Supplier<Double>           mps;
+  private final DerivativeTimeFilter       mpsps;
+  private final LinearFilter               supplyCurrentFilter;
+  private final Time                       simPeriod;
+  private boolean                          inputFed   = false;
+  private boolean                          simUpdated = false;
 
   /**
    * Construct the ElevatorSim supplier
    *
-   * @param simulation Simulation instance
+   * @param simulation           Simulation instance
    * @param smartMotorController SMC for the ElevatorSim.
    */
   public ElevatorSimSupplier(ElevatorSim simulation, SmartMotorController smartMotorController) {
@@ -98,8 +98,7 @@ public class ElevatorSimSupplier implements SimSupplier {
     simPeriod = config.getSimulationPeriod();
     mpsps = new DerivativeTimeFilter(pos.get(), simPeriod);
     // Based off comment from https://github.com/wpilibsuite/allwpilib/issues/8691
-    supplyCurrentFilter =
-        LinearFilter.singlePoleIIR(Milliseconds.of(100).in(Seconds), simPeriod.in(Seconds));
+    supplyCurrentFilter = LinearFilter.singlePoleIIR(Milliseconds.of(100).in(Seconds), simPeriod.in(Seconds));
   }
 
   @Override
@@ -158,9 +157,7 @@ public class ElevatorSimSupplier implements SimSupplier {
 
   @Override
   public Voltage getMechanismStatorVoltage() {
-    return Volts.of(
-        motor.getVoltage(
-            motor.getTorque(sim.getCurrentDraw()), getMechanismVelocity().in(RadiansPerSecond)));
+    return Volts.of(motor.getVoltage(motor.getTorque(sim.getCurrentDraw()), getMechanismVelocity().in(RadiansPerSecond)));
   }
 
   @Override
@@ -215,7 +212,6 @@ public class ElevatorSimSupplier implements SimSupplier {
 
   @Override
   public AngularAcceleration getRotorAcceleration() {
-    return RotationsPerSecond.per(Microsecond)
-        .of(mpsps.derivative(getRotorVelocity().in(RotationsPerSecond)));
+    return RotationsPerSecond.per(Microsecond).of(mpsps.derivative(getRotorVelocity().in(RotationsPerSecond)));
   }
 }

@@ -3,13 +3,12 @@
 
 #pragma once
 
-#include <wpi/math/kinematics/SwerveModuleVelocity.hpp>
-#include <wpi/math/kinematics/struct/SwerveModuleVelocityStruct.hpp>
-
 #include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <wpi/math/kinematics/SwerveModuleVelocity.hpp>
+#include <wpi/math/kinematics/struct/SwerveModuleVelocityStruct.hpp>
 
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 #include "yams/telemetry/SmartMotorControllerTelemetry.hpp"

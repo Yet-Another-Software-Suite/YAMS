@@ -3,13 +3,20 @@
 
 #pragma once
 
+#include <any>
+#include <optional>
+#include <set>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
+#include <wpi/commands2/SubsystemBase.hpp>
 #include <wpi/math/controller/ArmFeedforward.hpp>
 #include <wpi/math/controller/ElevatorFeedforward.hpp>
 #include <wpi/math/controller/SimpleMotorFeedforward.hpp>
 #include <wpi/math/system/DCMotor.hpp>
 #include <wpi/math/trajectory/ExponentialProfile.hpp>
 #include <wpi/math/trajectory/TrapezoidProfile.hpp>
-#include <wpi/commands2/SubsystemBase.hpp>
 #include <wpi/units/acceleration.hpp>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/angular_acceleration.hpp>
@@ -22,14 +29,6 @@
 #include <wpi/units/time.hpp>
 #include <wpi/units/velocity.hpp>
 #include <wpi/units/voltage.hpp>
-
-#include <any>
-#include <optional>
-#include <set>
-#include <string>
-#include <string_view>
-#include <utility>
-#include <vector>
 
 #include "yams/gearing/MechanismGearing.hpp"
 #include "yams/math/LQRConfig.hpp"
@@ -118,7 +117,8 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithTrapezoidProfile(
-      wpi::units::turns_per_second_t maxVelocity, wpi::units::turns_per_second_squared_t maxAcceleration);
+      wpi::units::turns_per_second_t maxVelocity,
+      wpi::units::turns_per_second_squared_t maxAcceleration);
 
   /**
    * Enable a trapezoidal motion profile for linear position control.
@@ -128,7 +128,8 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithLinearTrapezoidProfile(
-      wpi::units::meters_per_second_t maxVelocity, wpi::units::meters_per_second_squared_t maxAcceleration);
+      wpi::units::meters_per_second_t maxVelocity,
+      wpi::units::meters_per_second_squared_t maxAcceleration);
 
   /**
    * Enable a trapezoidal motion profile for velocity control.
@@ -138,7 +139,8 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithVelocityTrapezoidProfile(
-      wpi::units::turns_per_second_t maxVelocity, wpi::units::turns_per_second_squared_t maxAcceleration);
+      wpi::units::turns_per_second_t maxVelocity,
+      wpi::units::turns_per_second_squared_t maxAcceleration);
 
   /**
    * Enable an exponential motion profile for position control.
@@ -148,7 +150,8 @@ class SmartMotorControllerConfig {
    * @param maxInput Maximum voltage input.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithExponentialProfile(double kV, double kA, wpi::units::volt_t maxInput);
+  SmartMotorControllerConfig& WithExponentialProfile(double kV, double kA,
+                                                     wpi::units::volt_t maxInput);
 
   /**
    * Derive an exponential motion profile from arm/flywheel system characteristics.
@@ -162,7 +165,8 @@ class SmartMotorControllerConfig {
    * @param moi      Moment of inertia of the mechanism.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithExponentialProfile(wpi::units::volt_t maxVolts, wpi::math::DCMotor motor,
+  SmartMotorControllerConfig& WithExponentialProfile(wpi::units::volt_t maxVolts,
+                                                     wpi::math::DCMotor motor,
                                                      wpi::units::kilogram_square_meter_t moi);
 
   /**
@@ -178,7 +182,8 @@ class SmartMotorControllerConfig {
    * @param drumRadius Radius of the elevator drum.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithExponentialProfile(wpi::units::volt_t maxVolts, wpi::math::DCMotor motor,
+  SmartMotorControllerConfig& WithExponentialProfile(wpi::units::volt_t maxVolts,
+                                                     wpi::math::DCMotor motor,
                                                      wpi::units::kilogram_t mass,
                                                      wpi::units::meter_t drumRadius);
 
@@ -274,7 +279,8 @@ class SmartMotorControllerConfig {
    * @param upper Upper angle limit (in turns; accepts any angular unit via implicit conversion).
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithMechanismLimits(wpi::units::turn_t lower, wpi::units::turn_t upper);
+  SmartMotorControllerConfig& WithMechanismLimits(wpi::units::turn_t lower,
+                                                  wpi::units::turn_t upper);
 
   /**
    * Set linear soft limits for the mechanism.
@@ -283,7 +289,8 @@ class SmartMotorControllerConfig {
    * @param upper Upper distance limit.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithMeasurementLimits(wpi::units::meter_t lower, wpi::units::meter_t upper);
+  SmartMotorControllerConfig& WithMeasurementLimits(wpi::units::meter_t lower,
+                                                    wpi::units::meter_t upper);
 
   /**
    * Set the stator (output) current limit.
@@ -485,7 +492,8 @@ class SmartMotorControllerConfig {
    * @param max Top of the wrapping range (turns).
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithContinuousWrapping(wpi::units::turn_t min, wpi::units::turn_t max);
+  SmartMotorControllerConfig& WithContinuousWrapping(wpi::units::turn_t min,
+                                                     wpi::units::turn_t max);
 
   // ---- Telemetry ----------------------------------------------------------
 
@@ -596,7 +604,8 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithSimTrapezoidProfile(
-      wpi::units::turns_per_second_t maxVelocity, wpi::units::turns_per_second_squared_t maxAcceleration);
+      wpi::units::turns_per_second_t maxVelocity,
+      wpi::units::turns_per_second_squared_t maxAcceleration);
 
   /**
    * Override the linear trapezoidal motion profile used in simulation.
@@ -606,7 +615,8 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithSimTrapezoidProfile(
-      wpi::units::meters_per_second_t maxVelocity, wpi::units::meters_per_second_squared_t maxAcceleration);
+      wpi::units::meters_per_second_t maxVelocity,
+      wpi::units::meters_per_second_squared_t maxAcceleration);
 
   /**
    * Override the angular exponential motion profile used in simulation.
@@ -944,10 +954,11 @@ class SmartMotorControllerConfig {
   /** @return Optional linear trapezoidal profile. */
   std::optional<wpi::math::TrapezoidProfile<wpi::units::meters>> GetLinearTrapezoidProfile() const;
   /** @return Optional angular exponential profile. */
-  std::optional<wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>> GetExponentialProfile() const;
+  std::optional<wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>>
+  GetExponentialProfile() const;
   /** @return Optional linear (meters-based) exponential profile. */
-  std::optional<wpi::math::ExponentialProfile<wpi::units::meters, wpi::units::volts>> GetLinearExponentialProfile()
-      const;
+  std::optional<wpi::math::ExponentialProfile<wpi::units::meters, wpi::units::volts>>
+  GetLinearExponentialProfile() const;
 
   /** @return Optional max angular velocity constraint for hardware configuration. */
   std::optional<wpi::units::turns_per_second_t> GetTrapMaxVelocityTurns() const;
@@ -1036,7 +1047,8 @@ class SmartMotorControllerConfig {
   std::optional<wpi::math::TrapezoidProfile<wpi::units::turns>> m_trapProfile;
   std::optional<wpi::math::TrapezoidProfile<wpi::units::meters>> m_linearTrapProfile;
   std::optional<wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>> m_expoProfile;
-  std::optional<wpi::math::ExponentialProfile<wpi::units::meters, wpi::units::volts>> m_linearExpoProfile;
+  std::optional<wpi::math::ExponentialProfile<wpi::units::meters, wpi::units::volts>>
+      m_linearExpoProfile;
   bool m_velocityTrapProfile{false};
   // Stored constraint values for hardware motor controller configuration
   std::optional<wpi::units::turns_per_second_t> m_trapMaxVelTurns;
@@ -1098,7 +1110,8 @@ class SmartMotorControllerConfig {
   std::optional<wpi::units::turn_t> m_simStartingPosition;
   std::optional<wpi::math::TrapezoidProfile<wpi::units::turns>> m_simTrapProfile;
   std::optional<wpi::math::TrapezoidProfile<wpi::units::meters>> m_simLinearTrapProfile;
-  std::optional<wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>> m_simExpoProfile;
+  std::optional<wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>>
+      m_simExpoProfile;
 
   std::optional<std::any> m_vendorConfig;
   std::optional<std::any> m_vendorControlRequest;

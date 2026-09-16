@@ -3,15 +3,6 @@
 
 #include "yams/motorcontrollers/SmartMotorController.hpp"
 
-#include <wpi/driverstation/DriverStation.hpp>
-#include <wpi/math/util/MathUtil.hpp>
-#include <wpi/math/filter/Debouncer.hpp>
-#include <wpi/smartdashboard/SmartDashboard.hpp>
-#include <wpi/commands2/Commands.hpp>
-#include <wpi/nt/NetworkTableInstance.hpp>
-#include <wpi/units/angular_velocity.hpp>
-#include <wpi/units/time.hpp>
-
 #include <algorithm>
 #include <atomic>
 #include <cmath>
@@ -21,6 +12,13 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <wpi/commands2/Commands.hpp>
+#include <wpi/driverstation/DriverStation.hpp>
+#include <wpi/math/filter/Debouncer.hpp>
+#include <wpi/math/util/MathUtil.hpp>
+#include <wpi/nt/NetworkTableInstance.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/time.hpp>
 
 #include "yams/exceptions.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerCommandRegistry.hpp"
@@ -36,7 +34,8 @@ SmartMotorController::GetTrapezoidalProfileState() {
     return std::nullopt;  // linear profiles handled separately
   }
   return wpi::math::TrapezoidProfile<wpi::units::turns>::State{
-      wpi::units::turn_t{GetMechanismPosition()}, wpi::units::turns_per_second_t{GetMechanismVelocity()}};
+      wpi::units::turn_t{GetMechanismPosition()},
+      wpi::units::turns_per_second_t{GetMechanismVelocity()}};
 }
 
 std::optional<wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>::State>
@@ -44,7 +43,8 @@ SmartMotorController::GetExponentialProfileState() {
   if (!m_config.GetExponentialProfile()) return std::nullopt;
   if (m_config.GetLinearClosedLoopControllerUse()) return std::nullopt;
   return wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>::State{
-      wpi::units::turn_t{GetMechanismPosition()}, wpi::units::turns_per_second_t{GetMechanismVelocity()}};
+      wpi::units::turn_t{GetMechanismPosition()},
+      wpi::units::turns_per_second_t{GetMechanismVelocity()}};
 }
 
 void SmartMotorController::StopClosedLoopController() {
@@ -111,12 +111,13 @@ void SmartMotorController::IterateClosedLoopController() {
 
       if (auto expoP = m_config.GetExponentialProfile(); expoP) {
         auto curState = m_expoState.value_or(
-            wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>::State{curPos, curVel});
+            wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>::State{curPos,
+                                                                                       curVel});
         nextExpoState = expoP->Calculate(loopTime, curState, {setTurns, {}});
         m_expoState = nextExpoState;
       } else if (auto trapP = m_config.GetTrapezoidProfile(); trapP) {
-        auto curState =
-            m_trapState.value_or(wpi::math::TrapezoidProfile<wpi::units::turns>::State{curPos, curVel});
+        auto curState = m_trapState.value_or(
+            wpi::math::TrapezoidProfile<wpi::units::turns>::State{curPos, curVel});
         nextTrapState = trapP->Calculate(loopTime, curState, {setTurns, {}});
         m_trapState = nextTrapState;
       }
@@ -137,9 +138,10 @@ void SmartMotorController::IterateClosedLoopController() {
         trapP && m_config.GetVelocityTrapezoidalProfileInUse()) {
       auto setTurns = wpi::units::turns_per_second_t{*m_setpointVelocity};
       auto curTurns = wpi::units::turns_per_second_t{GetMechanismVelocity()};
-      auto curState = m_trapState.value_or(
-          wpi::math::TrapezoidProfile<wpi::units::turns>::State{wpi::units::turn_t{curTurns.value()}, {}});
-      nextTrapState = trapP->Calculate(loopTime, curState, {wpi::units::turn_t{setTurns.value()}, {}});
+      auto curState = m_trapState.value_or(wpi::math::TrapezoidProfile<wpi::units::turns>::State{
+          wpi::units::turn_t{curTurns.value()}, {}});
+      nextTrapState =
+          trapP->Calculate(loopTime, curState, {wpi::units::turn_t{setTurns.value()}, {}});
       m_trapState = nextTrapState;
       velocityTrapProfile = true;
     }
@@ -197,18 +199,22 @@ void SmartMotorController::IterateClosedLoopController() {
         double nxtVelRad = m_config.GetTrapezoidProfile()
                                ? nextTrapState.velocity.value() * (2.0 * std::numbers::pi)
                                : nextExpoState.velocity.value() * (2.0 * std::numbers::pi);
-        ffOutput = armFF
-                       ->Calculate(wpi::units::radian_t{wpi::units::radian_t{GetMechanismPosition()}.value()},
-                                   wpi::units::radians_per_second_t{curVelRad},
-                                   wpi::units::radians_per_second_t{nxtVelRad})
-                       .value();
+        ffOutput =
+            armFF
+                ->Calculate(
+                    wpi::units::radian_t{wpi::units::radian_t{GetMechanismPosition()}.value()},
+                    wpi::units::radians_per_second_t{curVelRad},
+                    wpi::units::radians_per_second_t{nxtVelRad})
+                .value();
       } else {
         auto setV = m_setpointVelocity.value_or(wpi::units::turns_per_second_t{0});
-        ffOutput = armFF
-                       ->Calculate(wpi::units::radian_t{wpi::units::radian_t{GetMechanismPosition()}.value()},
-                                   wpi::units::radians_per_second_t{GetMechanismVelocity()},
-                                   wpi::units::radians_per_second_t{setV})
-                       .value();
+        ffOutput =
+            armFF
+                ->Calculate(
+                    wpi::units::radian_t{wpi::units::radian_t{GetMechanismPosition()}.value()},
+                    wpi::units::radians_per_second_t{GetMechanismVelocity()},
+                    wpi::units::radians_per_second_t{setV})
+                .value();
       }
     }
 
@@ -236,9 +242,10 @@ void SmartMotorController::IterateClosedLoopController() {
                                   : (m_expoState ? m_expoState->velocity.value() : 0.0);
         double nxtV = m_config.GetTrapezoidProfile() ? nextTrapState.velocity.value()
                                                      : nextExpoState.velocity.value();
-        ffOutput =
-            simFF->Calculate(wpi::units::turns_per_second_t{curV}, wpi::units::turns_per_second_t{nxtV})
-                .value();
+        ffOutput = simFF
+                       ->Calculate(wpi::units::turns_per_second_t{curV},
+                                   wpi::units::turns_per_second_t{nxtV})
+                       .value();
       } else {
         auto nxtV = m_setpointVelocity.value_or(wpi::units::turns_per_second_t{0});
         ffOutput = simFF
@@ -274,8 +281,9 @@ void SmartMotorController::IterateClosedLoopController() {
       }
     }
     if (auto simFF = m_config.GetSimpleFeedforward(m_slot); simFF) {
-      double nxtV = velocityTrapProfile ? nextTrapState.position.value()
-                                        : wpi::units::turns_per_second_t{*m_setpointVelocity}.value();
+      double nxtV = velocityTrapProfile
+                        ? nextTrapState.position.value()
+                        : wpi::units::turns_per_second_t{*m_setpointVelocity}.value();
       ffOutput = simFF
                      ->Calculate(wpi::units::turns_per_second_t{GetMechanismVelocity()},
                                  wpi::units::turns_per_second_t{nxtV})
@@ -403,8 +411,8 @@ std::optional<wpi::units::meter_t> SmartMotorController::GetMeasurementPositionS
   return m_config.ConvertFromMechanism(*m_setpointPosition);
 }
 
-std::optional<wpi::units::meters_per_second_t> SmartMotorController::GetMeasurementSetpointVelocity()
-    const {
+std::optional<wpi::units::meters_per_second_t>
+SmartMotorController::GetMeasurementSetpointVelocity() const {
   if (!m_setpointVelocity) return std::nullopt;
   if (!m_config.GetMechanismCircumference()) return std::nullopt;
   return m_config.ConvertFromMechanism(*m_setpointVelocity);

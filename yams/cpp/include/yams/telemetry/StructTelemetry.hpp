@@ -3,17 +3,16 @@
 
 #pragma once
 
-#include <wpi/datalog/DataLog.hpp>
-#include <wpi/nt/NetworkTable.hpp>
-#include <wpi/nt/StructTopic.hpp>
-#include <wpi/system/DataLogManager.hpp>
-#include <wpi/util/struct/Struct.hpp>
-
 #include <memory>
 #include <optional>
 #include <stdexcept>
 #include <string>
 #include <utility>
+#include <wpi/datalog/DataLog.hpp>
+#include <wpi/nt/NetworkTable.hpp>
+#include <wpi/nt/StructTopic.hpp>
+#include <wpi/system/DataLogManager.hpp>
+#include <wpi/util/struct/Struct.hpp>
 
 namespace yams::telemetry {
 

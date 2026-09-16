@@ -3,17 +3,17 @@
 
 // Unit tests for LQRConfig and LQRController — pure math, no hardware required.
 
-#include <wpi/math/system/DCMotor.hpp>
 #include <gtest/gtest.h>
+
+#include <cmath>
+#include <variant>
+#include <wpi/math/system/DCMotor.hpp>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/angular_velocity.hpp>
 #include <wpi/units/length.hpp>
 #include <wpi/units/time.hpp>
 #include <wpi/units/velocity.hpp>
 #include <wpi/units/voltage.hpp>
-
-#include <cmath>
-#include <variant>
 
 #include "yams/math/LQRConfig.hpp"
 #include "yams/math/LQRController.hpp"

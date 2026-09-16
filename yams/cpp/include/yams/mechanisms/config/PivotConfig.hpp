@@ -3,14 +3,13 @@
 
 #pragma once
 
-#include <wpi/util/Color.hpp>
-#include <wpi/util/Color8Bit.hpp>
+#include <optional>
+#include <string>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/angular_velocity.hpp>
 #include <wpi/units/moment_of_inertia.hpp>
-
-#include <optional>
-#include <string>
+#include <wpi/util/Color.hpp>
+#include <wpi/util/Color8Bit.hpp>
 
 namespace yams::mechanisms::config {
 

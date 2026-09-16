@@ -3,6 +3,10 @@
 
 #pragma once
 
+#include <memory>
+#include <optional>
+#include <utility>
+#include <variant>
 #include <wpi/math/controller/LinearQuadraticRegulator.hpp>
 #include <wpi/math/estimator/KalmanFilter.hpp>
 #include <wpi/math/system/LinearSystem.hpp>
@@ -12,11 +16,6 @@
 #include <wpi/units/time.hpp>
 #include <wpi/units/velocity.hpp>
 #include <wpi/units/voltage.hpp>
-
-#include <memory>
-#include <optional>
-#include <utility>
-#include <variant>
 
 #include "LQRConfig.hpp"
 
@@ -55,7 +54,7 @@ class LQRController {
    * @param angle    Current mechanism angle.
    * @param velocity Current mechanism velocity.
    */
-  void Reset(wpi::units::radian_t angle, wpi::units::radians_per_second_t  velocity);
+  void Reset(wpi::units::radian_t angle, wpi::units::radians_per_second_t velocity);
 
   /**
    * Reset the linear position+velocity state of the controller (elevator).
@@ -74,7 +73,7 @@ class LQRController {
    * @return Voltage to apply to the motor.
    */
   wpi::units::volt_t Calculate(wpi::units::radian_t measured, wpi::units::radian_t position,
-                          wpi::units::radians_per_second_t velocity);
+                               wpi::units::radians_per_second_t velocity);
 
   /**
    * Calculate the next voltage output for a linear positional mechanism (elevator).
@@ -85,7 +84,7 @@ class LQRController {
    * @return Voltage to apply to the motor.
    */
   wpi::units::volt_t Calculate(wpi::units::meter_t measured, wpi::units::meter_t position,
-                          wpi::units::meters_per_second_t velocity);
+                               wpi::units::meters_per_second_t velocity);
 
   /**
    * Calculate the next voltage output for an angular velocity mechanism (flywheel).
@@ -95,7 +94,7 @@ class LQRController {
    * @return Voltage to apply to the motor.
    */
   wpi::units::volt_t Calculate(wpi::units::radians_per_second_t measured,
-                          wpi::units::radians_per_second_t velocity);
+                               wpi::units::radians_per_second_t velocity);
 
   /**
    * Calculate the next voltage output for a linear velocity mechanism.
@@ -104,7 +103,8 @@ class LQRController {
    * @param velocity  Target linear velocity setpoint.
    * @return Voltage to apply to the motor.
    */
-  wpi::units::volt_t Calculate(wpi::units::meters_per_second_t measured, wpi::units::meters_per_second_t velocity);
+  wpi::units::volt_t Calculate(wpi::units::meters_per_second_t measured,
+                               wpi::units::meters_per_second_t velocity);
 
   /**
    * Get the configured LQR plant type.
@@ -128,8 +128,10 @@ class LQRController {
     wpi::math::KalmanFilter<1, 1, 1> observer;
     LQRConfig::Loop1 loop;
 
-    FlywheelBundle(wpi::math::LinearSystem<1, 1, 1> plant, wpi::math::LinearQuadraticRegulator<1, 1> ctrl,
-                   wpi::math::KalmanFilter<1, 1, 1> obs, wpi::units::volt_t maxV, wpi::units::second_t dt)
+    FlywheelBundle(wpi::math::LinearSystem<1, 1, 1> plant,
+                   wpi::math::LinearQuadraticRegulator<1, 1> ctrl,
+                   wpi::math::KalmanFilter<1, 1, 1> obs, wpi::units::volt_t maxV,
+                   wpi::units::second_t dt)
         : controller{std::move(ctrl)},
           observer{std::move(obs)},
           loop{plant, controller, observer, maxV, dt} {}
@@ -145,8 +147,10 @@ class LQRController {
     wpi::math::KalmanFilter<2, 1, 1> observer;
     LQRConfig::Loop2 loop;
 
-    ArmElevatorBundle(wpi::math::LinearSystem<2, 1, 1> plant, wpi::math::LinearQuadraticRegulator<2, 1> ctrl,
-                      wpi::math::KalmanFilter<2, 1, 1> obs, wpi::units::volt_t maxV, wpi::units::second_t dt)
+    ArmElevatorBundle(wpi::math::LinearSystem<2, 1, 1> plant,
+                      wpi::math::LinearQuadraticRegulator<2, 1> ctrl,
+                      wpi::math::KalmanFilter<2, 1, 1> obs, wpi::units::volt_t maxV,
+                      wpi::units::second_t dt)
         : controller{std::move(ctrl)},
           observer{std::move(obs)},
           loop{plant, controller, observer, maxV, dt} {}

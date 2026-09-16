@@ -20,9 +20,9 @@ import org.wpilib.units.measure.Time;
  *
  * <p>Two {@code derivative()} overloads are available:
  * <ul>
- *   <li>{@link #derivative(double)} — uses the FPGA clock to measure elapsed time automatically.</li>
- *   <li>{@link #derivative(double, org.wpilib.units.measure.Time)} — uses a caller-supplied
- *       delta-time (useful when the loop period is already known).</li>
+ * <li>{@link #derivative(double)} — uses the FPGA clock to measure elapsed time automatically.</li>
+ * <li>{@link #derivative(double, org.wpilib.units.measure.Time)} — uses a caller-supplied
+ * delta-time (useful when the loop period is already known).</li>
  * </ul>
  *
  * <h2>Example</h2>
@@ -36,8 +36,7 @@ import org.wpilib.units.measure.Time;
  * double velocity = filter.derivative(encoder.getPosition());
  * }</pre>
  */
-public class DerivativeTimeFilter
-{
+public class DerivativeTimeFilter {
   /**
    * Last value to derive from.
    */
@@ -66,8 +65,7 @@ public class DerivativeTimeFilter
    * @param debouncerPeriod Period to debounce the filter.
    * @implNote This value is timestamped at the time of construction.
    */
-  public DerivativeTimeFilter(double initial, Time debouncerPeriod)
-  {
+  public DerivativeTimeFilter(double initial, Time debouncerPeriod) {
     last = initial;
     lastFpgaTime_us = RobotController.getTime();
     debouncer = new Timer();
@@ -80,8 +78,7 @@ public class DerivativeTimeFilter
    *
    * @param debouncerPeriod Period to debounce the filter.
    */
-  public DerivativeTimeFilter(Time debouncerPeriod)
-  {
+  public DerivativeTimeFilter(Time debouncerPeriod) {
     last = 0;
     lastFpgaTime_us = 0;
     debouncer = new Timer();
@@ -97,10 +94,8 @@ public class DerivativeTimeFilter
    * @return Derivative of the current value from the previous value over the delta time in microseconds.
    * @implNote If this function is not called periodically at the dt specified, the derivative will be incorrect
    */
-  public double derivative(double current, Time dt)
-  {
-    if (debouncer.advanceIfElapsed(debouncePeriod.in(Seconds)))
-    {
+  public double derivative(double current, Time dt) {
+    if (debouncer.advanceIfElapsed(debouncePeriod.in(Seconds))) {
       double derivative = (current - last) / dt.in(Microseconds);
       last = current;
       value = derivative;
@@ -114,14 +109,12 @@ public class DerivativeTimeFilter
    *
    * @param current Current value
    * @return Derivative of the current value from the previous value over the time since the last call to this in
-   * microseconds.
+   *         microseconds.
    */
-  public double derivative(double current)
-  {
-    if (debouncer.hasElapsed(debouncePeriod))
-    {
-      long   currentFpgaTime_us = RobotController.getTime();
-      double derivative         = derivative(current, Microseconds.of(currentFpgaTime_us - lastFpgaTime_us));
+  public double derivative(double current) {
+    if (debouncer.hasElapsed(debouncePeriod)) {
+      long currentFpgaTime_us = RobotController.getTime();
+      double derivative = derivative(current, Microseconds.of(currentFpgaTime_us - lastFpgaTime_us));
       lastFpgaTime_us = currentFpgaTime_us;
       return derivative;
     }

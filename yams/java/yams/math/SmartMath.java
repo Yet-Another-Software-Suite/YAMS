@@ -11,10 +11,10 @@ import yams.exceptions.NoStagesGivenException;
  * <p>Provides static utility methods for common FRC drivetrain and gearing calculations:
  *
  * <ul>
- *   <li><b>sensorToMechanismRatio</b> — multiplies a chain of gear-stage ratios to produce the
- *       overall sensor-to-mechanism ratio used by motor controller configuration.
- *   <li><b>gearBox</b> — multiplies a chain of gear-stage ratios to produce the rotor-to-mechanism
- *       gear ratio (MECHANISM_ROTATIONS / ROTOR_ROTATIONS).
+ * <li><b>sensorToMechanismRatio</b> — multiplies a chain of gear-stage ratios to produce the
+ * overall sensor-to-mechanism ratio used by motor controller configuration.
+ * <li><b>gearBox</b> — multiplies a chain of gear-stage ratios to produce the rotor-to-mechanism
+ * gear ratio (MECHANISM_ROTATIONS / ROTOR_ROTATIONS).
  * </ul>
  *
  * <h2>Example</h2>
@@ -53,7 +53,7 @@ public class SmartMath {
    *
    * @param stages stages between the motor and output shaft.
    * @return rotor rotations to mechanism ratio in the form of MECHANISM_ROTATIONS/ROTOR_ROTATIONS
-   *     or ROTOR_ROTATIONS:MECHANISM_ROTATIONS
+   *         or ROTOR_ROTATIONS:MECHANISM_ROTATIONS
    */
   public static double gearBox(double... stages) {
     if (stages.length == 0) {

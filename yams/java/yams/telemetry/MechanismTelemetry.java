@@ -54,16 +54,15 @@ import yams.motorcontrollers.SmartMotorController;
  * Elevator elevator = new Elevator(elevatorConfig);
  * }</pre>
  */
-public class MechanismTelemetry
-{
+public class MechanismTelemetry {
   /**
    * Telemetry NetworkTable.
    */
-  private NetworkTable networkTable;
+  private NetworkTable              networkTable;
   /**
    * Tuning NetworkTable.
    */
-  private NetworkTable tuningNetworkTable;
+  private NetworkTable              tuningNetworkTable;
   /**
    * Loop time publisher.
    */
@@ -71,20 +70,19 @@ public class MechanismTelemetry
   /**
    * Loop time timer.
    */
-  private double prevTimestamp = 0;
+  private double                    prevTimestamp     = 0;
   /**
    * DataLog entry name prefix for this mechanism's fields, if configured via {@link #setupTelemetry(String, String)}.
    * Must be set before {@link #publishDouble(String, String)}, {@link #publishStruct(String, Struct)}, or
    * {@link #publishStructArray(String, Struct)} are called, since each of those decides once, at the time it's
    * called, whether to also create a DataLog entry.
    */
-  private Optional<String> dataLogName = Optional.empty();
+  private Optional<String>          dataLogName       = Optional.empty();
 
   /**
    * Setup loop time publisher.
    */
-  public void setupLoopTime()
-  {
+  public void setupLoopTime() {
     var loopTimePublisherTopic = networkTable.getDoubleTopic("loopTime");
     loopTimePublisherTopic.setProperties("{\"units\": \"second\"}");
     loopTimePublisher = Optional.of(loopTimePublisherTopic.publish());
@@ -96,12 +94,9 @@ public class MechanismTelemetry
    * @param mechanismTelemetryName Mechanism Telemetry Name.
    * @param motorController        {@link SmartMotorController} to setup telemetry for.
    */
-  public void setupTelemetry(String mechanismTelemetryName, SmartMotorController motorController)
-  {
-    tuningNetworkTable = NetworkTableInstance.getDefault().getTable("Tuning")
-                                             .getSubTable(mechanismTelemetryName);
-    networkTable = NetworkTableInstance.getDefault().getTable("Mechanisms")
-                                       .getSubTable(mechanismTelemetryName);
+  public void setupTelemetry(String mechanismTelemetryName, SmartMotorController motorController) {
+    tuningNetworkTable = NetworkTableInstance.getDefault().getTable("Tuning").getSubTable(mechanismTelemetryName);
+    networkTable = NetworkTableInstance.getDefault().getTable("Mechanisms").getSubTable(mechanismTelemetryName);
     motorController.setupTelemetry(networkTable, tuningNetworkTable);
     setupLoopTime();
   }
@@ -111,12 +106,9 @@ public class MechanismTelemetry
    *
    * @param mechanismTelemetryName Mechanism Telemetry Name.
    */
-  public void setupTelemetry(String mechanismTelemetryName)
-  {
-    tuningNetworkTable = NetworkTableInstance.getDefault().getTable("Tuning")
-                                             .getSubTable(mechanismTelemetryName);
-    networkTable = NetworkTableInstance.getDefault().getTable("Mechanisms")
-                                       .getSubTable(mechanismTelemetryName);
+  public void setupTelemetry(String mechanismTelemetryName) {
+    tuningNetworkTable = NetworkTableInstance.getDefault().getTable("Tuning").getSubTable(mechanismTelemetryName);
+    networkTable = NetworkTableInstance.getDefault().getTable("Mechanisms").getSubTable(mechanismTelemetryName);
     setupLoopTime();
   }
 
@@ -128,8 +120,7 @@ public class MechanismTelemetry
    * @param mechanismTelemetryName Mechanism Telemetry Name.
    * @param dataLogName            DataLog entry name prefix for this mechanism's fields.
    */
-  public void setupTelemetry(String mechanismTelemetryName, String dataLogName)
-  {
+  public void setupTelemetry(String mechanismTelemetryName, String dataLogName) {
     setupTelemetry(mechanismTelemetryName);
     this.dataLogName = Optional.ofNullable(dataLogName);
   }
@@ -147,8 +138,7 @@ public class MechanismTelemetry
    *                        data and tuning tables.
    * @param motorController {@link SmartMotorController} to set up telemetry for.
    */
-  public void addMotorController(String subTableName, SmartMotorController motorController)
-  {
+  public void addMotorController(String subTableName, SmartMotorController motorController) {
     motorController.setupTelemetry(networkTable.getSubTable(subTableName), tuningNetworkTable.getSubTable(subTableName));
   }
 
@@ -162,16 +152,13 @@ public class MechanismTelemetry
    * @param unit Unit metadata for the field (consumed by Advantage Scope/Elastic), or {@code null} for none.
    * @return {@link DoubleConsumer} to push values to.
    */
-  public DoubleConsumer publishDouble(String key, String unit)
-  {
+  public DoubleConsumer publishDouble(String key, String unit) {
     var topic = networkTable.getDoubleTopic(key);
-    if (unit != null)
-    {
+    if (unit != null) {
       topic.setProperties("{\"units\": \"" + unit + "\"}");
     }
     DoublePublisher publisher = topic.publish();
-    Optional<DoubleLogEntry> logEntry = dataLogName.map(
-        prefix -> new DoubleLogEntry(DataLogManager.getLog(), prefix + "/" + key, (long) Timer.getTimestamp()));
+    Optional<DoubleLogEntry> logEntry = dataLogName.map(prefix -> new DoubleLogEntry(DataLogManager.getLog(), prefix + "/" + key, (long) Timer.getTimestamp()));
     return value -> {
       publisher.accept(value);
       logEntry.ifPresent(entry -> entry.append(value, (long) Timer.getTimestamp()));
@@ -187,11 +174,9 @@ public class MechanismTelemetry
    * @param <T>    Type of the published value.
    * @return {@link Consumer} to push values to.
    */
-  public <T> Consumer<T> publishStruct(String key, Struct<T> struct)
-  {
+  public <T> Consumer<T> publishStruct(String key, Struct<T> struct) {
     StructPublisher<T> publisher = networkTable.getStructTopic(key, struct).publish();
-    Optional<StructLogEntry<T>> logEntry = dataLogName.map(
-        prefix -> StructLogEntry.create(DataLogManager.getLog(), prefix + "/" + key, struct));
+    Optional<StructLogEntry<T>> logEntry = dataLogName.map(prefix -> StructLogEntry.create(DataLogManager.getLog(), prefix + "/" + key, struct));
     return value -> {
       publisher.accept(value);
       logEntry.ifPresent(entry -> entry.append(value));
@@ -207,11 +192,9 @@ public class MechanismTelemetry
    * @param <T>    Type of the published array elements.
    * @return {@link Consumer} to push values to.
    */
-  public <T> Consumer<T[]> publishStructArray(String key, Struct<T> struct)
-  {
+  public <T> Consumer<T[]> publishStructArray(String key, Struct<T> struct) {
     StructArrayPublisher<T> publisher = networkTable.getStructArrayTopic(key, struct).publish();
-    Optional<StructArrayLogEntry<T>> logEntry = dataLogName.map(
-        prefix -> StructArrayLogEntry.create(DataLogManager.getLog(), prefix + "/" + key, struct));
+    Optional<StructArrayLogEntry<T>> logEntry = dataLogName.map(prefix -> StructArrayLogEntry.create(DataLogManager.getLog(), prefix + "/" + key, struct));
     return value -> {
       publisher.accept(value);
       logEntry.ifPresent(entry -> entry.append(value));
@@ -223,8 +206,7 @@ public class MechanismTelemetry
    *
    * @return Telemetry NetworkTable.
    */
-  public NetworkTable getDataTable()
-  {
+  public NetworkTable getDataTable() {
     return networkTable;
   }
 
@@ -233,19 +215,16 @@ public class MechanismTelemetry
    *
    * @return Tuning NetworkTable.
    */
-  public NetworkTable getTuningTable()
-  {
+  public NetworkTable getTuningTable() {
     return tuningNetworkTable;
   }
 
   /**
    * Update the loop time.
    */
-  public void updateLoopTime()
-  {
+  public void updateLoopTime() {
     loopTimePublisher.ifPresent(publisher -> {
-      if (prevTimestamp != 0)
-      {
+      if (prevTimestamp != 0) {
         publisher.set(Timer.getTimestamp() - prevTimestamp);
       }
       prevTimestamp = Timer.getTimestamp();

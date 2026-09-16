@@ -12,18 +12,18 @@
  *
  * <h2>Available Mechanisms</h2>
  * <ul>
- *   <li>{@link yams.mechanisms.positional.Arm} — single-jointed arm rotating about a fixed pivot,
- *       configured with {@link yams.mechanisms.config.ArmConfig}</li>
- *   <li>{@link yams.mechanisms.positional.Elevator} — linear-travel elevator stage, configured
- *       with {@link yams.mechanisms.config.ElevatorConfig}</li>
- *   <li>{@link yams.mechanisms.positional.Pivot} — generic pivot that may rotate continuously or
- *       within bounded limits, configured with {@link yams.mechanisms.config.PivotConfig}</li>
- *   <li>{@link yams.mechanisms.positional.DifferentialMechanism} — mechanism driven by two motors
- *       in a differential arrangement (e.g. differential wrist), configured with
- *       {@link yams.mechanisms.config.DifferentialMechanismConfig}</li>
- *   <li>{@link yams.mechanisms.positional.DoubleJointedArm} — two-segment arm whose second joint
- *       is kinematically dependent on the first, using two underlying
- *       {@link yams.mechanisms.positional.Arm} instances</li>
+ * <li>{@link yams.mechanisms.positional.Arm} — single-jointed arm rotating about a fixed pivot,
+ * configured with {@link yams.mechanisms.config.ArmConfig}</li>
+ * <li>{@link yams.mechanisms.positional.Elevator} — linear-travel elevator stage, configured
+ * with {@link yams.mechanisms.config.ElevatorConfig}</li>
+ * <li>{@link yams.mechanisms.positional.Pivot} — generic pivot that may rotate continuously or
+ * within bounded limits, configured with {@link yams.mechanisms.config.PivotConfig}</li>
+ * <li>{@link yams.mechanisms.positional.DifferentialMechanism} — mechanism driven by two motors
+ * in a differential arrangement (e.g. differential wrist), configured with
+ * {@link yams.mechanisms.config.DifferentialMechanismConfig}</li>
+ * <li>{@link yams.mechanisms.positional.DoubleJointedArm} — two-segment arm whose second joint
+ * is kinematically dependent on the first, using two underlying
+ * {@link yams.mechanisms.positional.Arm} instances</li>
  * </ul>
  *
  * <h2>Setpoint Commands</h2>
@@ -45,18 +45,18 @@
  * {@link org.wpilib.command2.button.Trigger} objects. These allow condition-based
  * command scheduling without manual polling in {@code periodic()}:
  * <ul>
- *   <li>{@code isNear(setpoint, tolerance)} — fires while the mechanism is within
- *       {@code tolerance} of {@code setpoint}</li>
- *   <li>{@code max()} — fires while the mechanism is at or beyond its configured maximum
- *       limit</li>
- *   <li>{@code min()} — fires while the mechanism is at or below its configured minimum
- *       limit</li>
- *   <li>{@code between(lower, upper)} — fires while the mechanism position is within the
- *       specified range</li>
- *   <li>{@code lte(position)} — fires while the mechanism position is less than or equal to
- *       {@code position}</li>
- *   <li>{@code gte(position)} — fires while the mechanism position is greater than or equal
- *       to {@code position}</li>
+ * <li>{@code isNear(setpoint, tolerance)} — fires while the mechanism is within
+ * {@code tolerance} of {@code setpoint}</li>
+ * <li>{@code max()} — fires while the mechanism is at or beyond its configured maximum
+ * limit</li>
+ * <li>{@code min()} — fires while the mechanism is at or below its configured minimum
+ * limit</li>
+ * <li>{@code between(lower, upper)} — fires while the mechanism position is within the
+ * specified range</li>
+ * <li>{@code lte(position)} — fires while the mechanism position is less than or equal to
+ * {@code position}</li>
+ * <li>{@code gte(position)} — fires while the mechanism position is greater than or equal
+ * to {@code position}</li>
  * </ul>
  *
  * <pre>{@code

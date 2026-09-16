@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 package yams.mechanisms.velocity;
+
 import org.wpilib.smartdashboard.MechanismLigament2d;
 import org.wpilib.smartdashboard.MechanismRoot2d;
 import org.wpilib.command2.button.Trigger;
@@ -18,17 +19,17 @@ import yams.motorcontrollers.SmartMotorController;
  * closed-loop velocity control:
  * </p>
  * <ul>
- *   <li>Velocity setpoint management via
- *       {@link yams.mechanisms.SmartMechanism#setMechanismVelocitySetpoint} and
- *       {@link yams.mechanisms.SmartMechanism#setMeasurementVelocitySetpoint}</li>
- *   <li>Velocity-based {@link org.wpilib.command2.button.Trigger} factories
- *       ({@code isNear()}, {@code gte()}, {@code lte()}, {@code between()}) — defined by each
- *       concrete subclass</li>
- *   <li>Command factories such as {@code setSpeed()} defined by each concrete subclass, which
- *       internally call the base-class velocity setpoint methods</li>
- *   <li>A 2D visualization model via {@link org.wpilib.smartdashboard.MechanismRoot2d}
- *       and {@link org.wpilib.smartdashboard.MechanismLigament2d} fields that subclasses
- *       populate and update</li>
+ * <li>Velocity setpoint management via
+ * {@link yams.mechanisms.SmartMechanism#setMechanismVelocitySetpoint} and
+ * {@link yams.mechanisms.SmartMechanism#setMeasurementVelocitySetpoint}</li>
+ * <li>Velocity-based {@link org.wpilib.command2.button.Trigger} factories
+ * ({@code isNear()}, {@code gte()}, {@code lte()}, {@code between()}) — defined by each
+ * concrete subclass</li>
+ * <li>Command factories such as {@code setSpeed()} defined by each concrete subclass, which
+ * internally call the base-class velocity setpoint methods</li>
+ * <li>A 2D visualization model via {@link org.wpilib.smartdashboard.MechanismRoot2d}
+ * and {@link org.wpilib.smartdashboard.MechanismLigament2d} fields that subclasses
+ * populate and update</li>
  * </ul>
  *
  * <p>
@@ -39,10 +40,10 @@ import yams.motorcontrollers.SmartMotorController;
  * {@link java.lang.UnsupportedOperationException}. Use the following trigger factories instead:
  * </p>
  * <ul>
- *   <li>{@code isNear(speed, tolerance)} — true when actual velocity is within tolerance of target</li>
- *   <li>{@code gte(speed)} — true when actual velocity is greater than or equal to the given speed</li>
- *   <li>{@code lte(speed)} — true when actual velocity is less than or equal to the given speed</li>
- *   <li>{@code between(start, end)} — true when actual velocity falls within the given range</li>
+ * <li>{@code isNear(speed, tolerance)} — true when actual velocity is within tolerance of target</li>
+ * <li>{@code gte(speed)} — true when actual velocity is greater than or equal to the given speed</li>
+ * <li>{@code lte(speed)} — true when actual velocity is less than or equal to the given speed</li>
+ * <li>{@code between(start, end)} — true when actual velocity falls within the given range</li>
  * </ul>
  *
  * <p>
@@ -67,25 +68,24 @@ import yams.motorcontrollers.SmartMotorController;
  * methods inherited from {@link yams.mechanisms.SmartMechanism}:
  * </p>
  * <ul>
- *   <li>{@link yams.mechanisms.SmartMechanism#getRelativeMechanismPosition()} — returns the
- *       current 3-D position of the mechanism end-point in
- *       {@link org.wpilib.smartdashboard.Mechanism2d} coordinates</li>
- *   <li>{@link yams.mechanisms.SmartMechanism#visualizationUpdate()} — updates
- *       {@code mechanismLigament} to reflect the current rotational state</li>
- *   <li>{@link yams.mechanisms.SmartMechanism#getName()} — returns a human-readable mechanism
- *       name used for telemetry and command names</li>
- *   <li>{@link yams.mechanisms.SmartMechanism#simIterate()} — advances the physics simulation
- *       model and writes back simulated encoder values each robot loop</li>
- *   <li>{@link yams.mechanisms.SmartMechanism#updateTelemetry()} — publishes mechanism state
- *       to NetworkTables or an equivalent telemetry sink</li>
- *   <li>{@link #max()} — must throw {@link java.lang.UnsupportedOperationException}; velocity
- *       mechanisms do not support positional limits</li>
- *   <li>{@link #min()} — must throw {@link java.lang.UnsupportedOperationException}; velocity
- *       mechanisms do not support positional limits</li>
+ * <li>{@link yams.mechanisms.SmartMechanism#getRelativeMechanismPosition()} — returns the
+ * current 3-D position of the mechanism end-point in
+ * {@link org.wpilib.smartdashboard.Mechanism2d} coordinates</li>
+ * <li>{@link yams.mechanisms.SmartMechanism#visualizationUpdate()} — updates
+ * {@code mechanismLigament} to reflect the current rotational state</li>
+ * <li>{@link yams.mechanisms.SmartMechanism#getName()} — returns a human-readable mechanism
+ * name used for telemetry and command names</li>
+ * <li>{@link yams.mechanisms.SmartMechanism#simIterate()} — advances the physics simulation
+ * model and writes back simulated encoder values each robot loop</li>
+ * <li>{@link yams.mechanisms.SmartMechanism#updateTelemetry()} — publishes mechanism state
+ * to NetworkTables or an equivalent telemetry sink</li>
+ * <li>{@link #max()} — must throw {@link java.lang.UnsupportedOperationException}; velocity
+ * mechanisms do not support positional limits</li>
+ * <li>{@link #min()} — must throw {@link java.lang.UnsupportedOperationException}; velocity
+ * mechanisms do not support positional limits</li>
  * </ul>
  */
-public abstract class SmartVelocityMechanism extends SmartMechanism
-{
+public abstract class SmartVelocityMechanism extends SmartMechanism {
   /**
    * The root point of the Mechanism.
    */
@@ -117,8 +117,7 @@ public abstract class SmartVelocityMechanism extends SmartMechanism
    *
    * @return Ligament of the 2D mechanism model.
    */
-  public MechanismLigament2d getMechanismLigament()
-  {
+  public MechanismLigament2d getMechanismLigament() {
     return mechanismLigament;
   }
 
@@ -127,8 +126,7 @@ public abstract class SmartVelocityMechanism extends SmartMechanism
    *
    * @return Root of the 2D mechanism model.
    */
-  public MechanismRoot2d getMechanismRoot()
-  {
+  public MechanismRoot2d getMechanismRoot() {
     return mechanismRoot;
   }
 
@@ -137,8 +135,7 @@ public abstract class SmartVelocityMechanism extends SmartMechanism
    *
    * @return Motor controller which is moving the mechanism.
    */
-  public SmartMotorController getMotor()
-  {
+  public SmartMotorController getMotor() {
     return m_smc;
   }
 }

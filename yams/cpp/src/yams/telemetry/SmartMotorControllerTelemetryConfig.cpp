@@ -3,11 +3,10 @@
 
 #include "yams/telemetry/SmartMotorControllerTelemetryConfig.hpp"
 
-#include <wpi/units/angle.hpp>
-#include <wpi/units/length.hpp>
-
 #include <string>
 #include <unordered_map>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/length.hpp>
 
 #include "yams/motorcontrollers/SmartMotorController.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"

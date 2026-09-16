@@ -3,13 +3,12 @@
 
 #pragma once
 
-#include <wpi/math/kinematics/SwerveModulePosition.hpp>
-#include <wpi/math/kinematics/SwerveModuleVelocity.hpp>
-#include <wpi/units/angle.hpp>
-
 #include <functional>
 #include <optional>
 #include <string>
+#include <wpi/math/kinematics/SwerveModulePosition.hpp>
+#include <wpi/math/kinematics/SwerveModuleVelocity.hpp>
+#include <wpi/units/angle.hpp>
 
 #include "yams/mechanisms/config/SwerveModuleConfig.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
@@ -141,7 +140,8 @@ class SwerveModule {
 
  private:
   config::SwerveModuleConfig* m_config{nullptr};
-  /** Used for the loop time only; module state/encoder telemetry lives in m_swerveModuleTelemetry. */
+  /** Used for the loop time only; module state/encoder telemetry lives in m_swerveModuleTelemetry.
+   */
   telemetry::MechanismTelemetry m_telemetry;
   std::optional<telemetry::SwerveModuleTelemetry> m_swerveModuleTelemetry;
   std::function<wpi::units::degree_t()> m_azimuthEncoderWithoutOffsets;

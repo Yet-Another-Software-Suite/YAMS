@@ -3,9 +3,6 @@
 
 #pragma once
 
-#include <wpi/util/Alert.hpp>
-#include <wpi/simulation/DCMotorSim.hpp>
-
 #include <any>
 #include <ctre/phoenix6/CANcoder.hpp>
 #include <ctre/phoenix6/CANdi.hpp>
@@ -30,6 +27,8 @@
 #include <memory>
 #include <optional>
 #include <variant>
+#include <wpi/simulation/DCMotorSim.hpp>
+#include <wpi/util/Alert.hpp>
 
 #include "yams/math/DerivativeTimeFilter.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
@@ -247,7 +246,8 @@ class TalonFXWrapper : public SmartMotorController {
    */
   void SetMotionProfileMaxVelocity(wpi::units::meters_per_second_t maxVelocity) override;
   /** @copydoc
-   * SmartMotorController::SetMotionProfileMaxAcceleration(wpi::units::turns_per_second_squared_t) */
+   * SmartMotorController::SetMotionProfileMaxAcceleration(wpi::units::turns_per_second_squared_t)
+   */
   void SetMotionProfileMaxAcceleration(wpi::units::turns_per_second_squared_t maxAcc) override;
   /**
    * Set the maximum linear acceleration for the motion profile.

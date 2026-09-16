@@ -7,10 +7,11 @@
 // simulation environment so that motor-controller and command-scheduler code
 // can run inside Google Test.
 
+#include <wpi/hal/HAL.h>
+
 #include <wpi/simulation/DriverStationSim.hpp>
 #include <wpi/simulation/RoboRioSim.hpp>
 #include <wpi/simulation/SimHooks.hpp>
-#include <wpi/hal/HAL.h>
 
 namespace yams::test {
 

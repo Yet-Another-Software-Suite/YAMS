@@ -3,9 +3,8 @@
 
 #include "yams/telemetry/SwerveModuleTelemetry.hpp"
 
-#include <wpi/nt/NetworkTableInstance.hpp>
-
 #include <utility>
+#include <wpi/nt/NetworkTableInstance.hpp>
 
 #include "yams/mechanisms/swerve/SwerveModule.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
@@ -22,10 +21,9 @@ void SwerveModuleTelemetry::SetupTelemetry(const std::string& mechName,
                     ->GetSubTable(mechName)
                     ->GetSubTable("modules")
                     ->GetSubTable(module.GetName());
-  m_tuningTable = inst.GetTable("Tuning")
-                      ->GetSubTable(mechName)
-                      ->GetSubTable("modules")
-                      ->GetSubTable(module.GetName());
+  m_tuningTable =
+      inst.GetTable("Tuning")->GetSubTable(mechName)->GetSubTable("modules")->GetSubTable(
+          module.GetName());
 
   bool nt4Enabled = m_config.GetNT4Enabled();
   auto dataLogName = m_config.GetDataLogName();

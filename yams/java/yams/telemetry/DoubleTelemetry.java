@@ -43,64 +43,63 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
  *
  * @param <F> Enum type identifying which field this telemetry entry represents.
  */
-public class DoubleTelemetry<F>
-{
+public class DoubleTelemetry<F> {
   /**
    * Field representing.
    */
-  private final F                          field;
+  private final F                    field;
   /**
    * Network table key.
    */
-  private final String                     key;
+  private final String               key;
   /**
    * Tunable?
    */
-  private final boolean                    tunable;
+  private final boolean              tunable;
   /**
    * Enabled?
    */
-  protected     boolean                    enabled      = false;
+  protected boolean                  enabled      = false;
   /**
    * Unit to display.
    */
-  private       String                     unit;
+  private String                     unit;
   /**
    * Default value.
    */
-  private       double                     defaultValue;
+  private double                     defaultValue;
   /**
    * Cached value.
    */
-  private       double                     cachedValue;
+  private double                     cachedValue;
   /**
    * Publisher.
    */
-  private       Optional<DoublePublisher>  publisher    = Optional.empty();
+  private Optional<DoublePublisher>  publisher    = Optional.empty();
   /**
    * Subscriber.
    */
-  private       Optional<DoubleSubscriber> subscriber   = Optional.empty();
+  private Optional<DoubleSubscriber> subscriber   = Optional.empty();
   /**
    * Sub publisher.
    */
-  private       DoublePublisher            subPublisher = null;
+  private DoublePublisher            subPublisher = null;
   /**
    * Tuning table
    */
-  private       Optional<NetworkTable>     tuningTable  = Optional.empty();
+  private Optional<NetworkTable>     tuningTable  = Optional.empty();
   /**
    * Data table.
    */
-  private       Optional<NetworkTable>     dataTable    = Optional.empty();
+  private Optional<NetworkTable>     dataTable    = Optional.empty();
   /**
    * NT4 Topic of this entry.
    */
-  private       DoubleTopic                topic;
+  private DoubleTopic                topic;
   /**
    * {@link DoubleLogEntry} representing this entry.
    */
-  private       Optional<DoubleLogEntry>   dataLogEntry = Optional.empty();
+  private Optional<DoubleLogEntry>   dataLogEntry = Optional.empty();
 
 
   /**
@@ -112,8 +111,7 @@ public class DoubleTelemetry<F>
    * @param tunable    Tunable.
    * @param unit       Unit to display.
    */
-  public DoubleTelemetry(String keyString, double defaultVal, F field, boolean tunable, String unit)
-  {
+  public DoubleTelemetry(String keyString, double defaultVal, F field, boolean tunable, String unit) {
     key = keyString;
     cachedValue = defaultValue = defaultVal;
     this.field = field;
@@ -126,8 +124,7 @@ public class DoubleTelemetry<F>
    *
    * @param defaultValue Default for the entry.
    */
-  public void setDefaultValue(double defaultValue)
-  {
+  public void setDefaultValue(double defaultValue) {
     cachedValue = this.defaultValue = defaultValue;
   }
 
@@ -137,27 +134,21 @@ public class DoubleTelemetry<F>
    * @param dataTable   Data tables.
    * @param tuningTable Tuning table.
    */
-  public void setupNetworkTables(NetworkTable dataTable, NetworkTable tuningTable)
-  {
+  public void setupNetworkTables(NetworkTable dataTable, NetworkTable tuningTable) {
     this.tuningTable = Optional.ofNullable(tuningTable);
     this.dataTable = Optional.ofNullable(dataTable);
-    if (!enabled)
-    {return;}
-    if (tuningTable != null && tunable)
-    {
+    if (!enabled) {
+      return;
+    }
+    if (tuningTable != null && tunable) {
       topic = tuningTable.getDoubleTopic(key);
-      subPublisher = !unit.equals("none") ?
-                     topic.publishEx("double", "{\"units\": \"" + unit + "\"}") :
-                     topic.publish();
+      subPublisher = !unit.equals("none") ? topic.publishEx("double", "{\"units\": \"" + unit + "\"}") : topic.publish();
       subscriber = Optional.of(topic.subscribe(defaultValue));
       subPublisher.setDefault(defaultValue);
-    } else
-    {
+    } else {
       assert dataTable != null;
       topic = dataTable.getDoubleTopic(key);
-      publisher = Optional.of(!unit.equals("none") ?
-                              topic.publishEx("double", "{\"units\": \"" + unit + "\"}") :
-                              topic.publish());
+      publisher = Optional.of(!unit.equals("none") ? topic.publishEx("double", "{\"units\": \"" + unit + "\"}") : topic.publish());
       publisher.get().setDefault(defaultValue);
     }
   }
@@ -167,16 +158,13 @@ public class DoubleTelemetry<F>
    *
    * @param prefix The prefix to this entry in {@link org.wpilib.datalog.DataLog}
    */
-  public void setupDataLog(String prefix)
-  {
-    if (!tunable)
-    {
-      if (!prefix.endsWith("/"))
-      {prefix += "/";}
+  public void setupDataLog(String prefix) {
+    if (!tunable) {
+      if (!prefix.endsWith("/")) {
+        prefix += "/";
+      }
       prefix += unit + "/";
-      dataLogEntry = Optional.of(new DoubleLogEntry(DataLogManager.getLog(),
-                                                    prefix + key,
-                                                    (long) Timer.getTimestamp()));
+      dataLogEntry = Optional.of(new DoubleLogEntry(DataLogManager.getLog(), prefix + key, (long) Timer.getTimestamp()));
     }
   }
 
@@ -187,10 +175,8 @@ public class DoubleTelemetry<F>
    *            will be in meters, else it will be in degrees.
    * @return {@link DoubleTelemetry} for chaining.
    */
-  public DoubleTelemetry transformUnit(SmartMotorControllerConfig cfg)
-  {
-    switch (unit)
-    {
+  public DoubleTelemetry transformUnit(SmartMotorControllerConfig cfg) {
+    switch (unit) {
       case "tunable_position":
         unit = cfg.getLinearClosedLoopControllerUse() ? "meter" : "degrees";
         break;
@@ -198,20 +184,16 @@ public class DoubleTelemetry<F>
         unit = cfg.getLinearClosedLoopControllerUse() ? "meter" : "rotations";
         break;
       case "tunable_velocity":
-        unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second"
-                                                      : "rotations_per_minute";
+        unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second" : "rotations_per_minute";
         break;
       case "velocity":
-        unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second"
-                                                      : "rotation_per_second";
+        unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second" : "rotation_per_second";
         break;
       case "tunable_acceleration":
-        unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second_per_second"
-                                                      : "rotations_per_minute_per_second";
+        unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second_per_second" : "rotations_per_minute_per_second";
         break;
       case "acceleration":
-        unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second_per_second"
-                                                      : "rotation_per_second_per_second";
+        unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second_per_second" : "rotation_per_second_per_second";
         break;
     }
     return this;
@@ -223,8 +205,7 @@ public class DoubleTelemetry<F>
    *
    * @param dataTable Data tables.
    */
-  public void setupNetworkTable(NetworkTable dataTable)
-  {
+  public void setupNetworkTable(NetworkTable dataTable) {
     setupNetworkTables(dataTable, null);
   }
 
@@ -234,24 +215,20 @@ public class DoubleTelemetry<F>
    * @param value Value to set.
    * @return True if value was able to be set.
    */
-  public boolean set(double value)
-  {
-    if (!enabled)
-    {return false;}
-    if (dataLogEntry.isPresent())
-    {
+  public boolean set(double value) {
+    if (!enabled) {
+      return false;
+    }
+    if (dataLogEntry.isPresent()) {
       dataLogEntry.get().append(value, (long) Timer.getTimestamp());
     }
-    if (subscriber.isPresent())
-    {
+    if (subscriber.isPresent()) {
       double tuningValue = subscriber.get().get(defaultValue);
-      if (tuningValue != value)
-      {
+      if (tuningValue != value) {
         return false;
       }
     }
-    if (publisher.isPresent())
-    {
+    if (publisher.isPresent()) {
       publisher.get().accept(value);
     }
     return true;
@@ -262,12 +239,11 @@ public class DoubleTelemetry<F>
    *
    * @return value of telemetry.
    */
-  public double get()
-  {
-    if (!enabled)
-    {return defaultValue;}
-    if (subscriber.isPresent())
-    {
+  public double get() {
+    if (!enabled) {
+      return defaultValue;
+    }
+    if (subscriber.isPresent()) {
       return subscriber.get().get(defaultValue);
     }
     throw new RuntimeException("Tuning table not configured for " + key + "!");
@@ -278,12 +254,9 @@ public class DoubleTelemetry<F>
    *
    * @return True if the value has changed.
    */
-  public boolean tunable()
-  {
-    if (subscriber.isPresent() && tunable && enabled)
-    {
-      if (subscriber.get().get(defaultValue) != cachedValue)
-      {
+  public boolean tunable() {
+    if (subscriber.isPresent() && tunable && enabled) {
+      if (subscriber.get().get(defaultValue) != cachedValue) {
         cachedValue = subscriber.get().get(defaultValue);
         return true;
       }
@@ -295,18 +268,16 @@ public class DoubleTelemetry<F>
   /**
    * Enable the telemetry.
    */
-  public void enable()
-  {
+  public void enable() {
     enabled = true;
-//    if ((publisher.isEmpty() || subscriber.isEmpty()) && (tuningTable.isPresent() || dataTable.isPresent()))
-//    {setupNetworkTables(dataTable.get(), tuningTable.get());}
+    //    if ((publisher.isEmpty() || subscriber.isEmpty()) && (tuningTable.isPresent() || dataTable.isPresent()))
+    //    {setupNetworkTables(dataTable.get(), tuningTable.get());}
   }
 
   /**
    * Disable the telemetry.
    */
-  public void disable()
-  {
+  public void disable() {
     enabled = false;
   }
 
@@ -315,8 +286,7 @@ public class DoubleTelemetry<F>
    *
    * @param state Enable or disable.
    */
-  public void display(boolean state)
-  {
+  public void display(boolean state) {
     enabled = state;
   }
 
@@ -325,19 +295,18 @@ public class DoubleTelemetry<F>
    *
    * @return field.
    */
-  public F getField()
-  {
+  public F getField() {
     return field;
   }
 
   /**
    * Close the telemetry field.
    */
-  public void close()
-  {
+  public void close() {
     subscriber.ifPresent(PubSub::close);
-    if (subPublisher != null)
-    {subPublisher.close();}
+    if (subPublisher != null) {
+      subPublisher.close();
+    }
     publisher.ifPresent(PubSub::close);
     dataTable.ifPresent(table -> table.getEntry(key).unpublish());
     tuningTable.ifPresent(table -> table.getEntry(key).unpublish());

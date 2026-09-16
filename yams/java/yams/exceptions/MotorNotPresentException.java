@@ -17,7 +17,7 @@ import yams.mechanisms.SmartMechanism;
  *
  * <ul>
  * <li>Constructing or activating a mechanism without calling the appropriate {@code withSmartMotorController()} builder method on its config
- *   <li>Passing {@code null} as the motor argument to {@code setMotor()} or the config builder
+ * <li>Passing {@code null} as the motor argument to {@code setMotor()} or the config builder
  * </ul>
  *
  * <p><b>Resolution:</b> Provide a valid motor controller before constructing the mechanism:
@@ -39,8 +39,6 @@ public class MotorNotPresentException extends RuntimeException {
    * @param mechanismType Name of the mechanism
    */
   public MotorNotPresentException(String mechanismType) {
-    super(
-        mechanismType
-            + " primary motor not present! Please set one using `setMotor(SmartMotorController.create(MOTOR_CONTROLLER, DCMotor.getNEO(1))`");
+    super(mechanismType + " primary motor not present! Please set one using `setMotor(SmartMotorController.create(MOTOR_CONTROLLER, DCMotor.getNEO(1))`");
   }
 }

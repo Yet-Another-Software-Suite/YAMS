@@ -27,32 +27,28 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>CTRE device factories (TalonFX, TalonFXS, CANcoder) are commented out until CTRE publishes
  * a Phoenix6 build compatible with wpilib 2027-alpha-7.
  */
-public class DeviceCreator
-{
+public class DeviceCreator {
   private static final int MAX_REV_ID = 85;
   // private static final int MAX_CTRE_ID = 61;
 
   private static final AtomicInteger revId = new AtomicInteger(1);
+
   // private static final AtomicInteger ctreId = new AtomicInteger(1);
 
-  public static SparkMax createSparkMax()
-  {
+  public static SparkMax createSparkMax() {
     int id = revId.getAndIncrement();
-    if (id > MAX_REV_ID)
-    {
-        revId.setRelease(1);
-        System.err.println("Warning: used maximum device IDs, resetting to 0");
+    if (id > MAX_REV_ID) {
+      revId.setRelease(1);
+      System.err.println("Warning: used maximum device IDs, resetting to 0");
     }
     return new SparkMax(CANPorts.fromBusId(1), id, MotorType.kBrushless);
   }
 
-  public static SparkFlex createSparkFlex()
-  {
+  public static SparkFlex createSparkFlex() {
     int id = revId.getAndIncrement();
-    if (id > MAX_REV_ID)
-    {
-        revId.setRelease(1);
-        System.err.println("Warning: used maximum device IDs, resetting to 0");
+    if (id > MAX_REV_ID) {
+      revId.setRelease(1);
+      System.err.println("Warning: used maximum device IDs, resetting to 0");
     }
     return new SparkFlex(CANPorts.fromBusId(1), id, MotorType.kBrushless);
   }

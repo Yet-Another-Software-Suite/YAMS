@@ -17,15 +17,15 @@
  * are absent or logically inconsistent:
  *
  * <ul>
- *   <li>{@link yams.exceptions.ArmConfigurationException} — single-jointed arm config errors
- *   <li>{@link yams.exceptions.ElevatorConfigurationException} — elevator config errors
- *   <li>{@link yams.exceptions.FlyWheelConfigurationException} — flywheel config errors
- *   <li>{@link yams.exceptions.PivotConfigurationException} — pivot config errors
- *   <li>{@link yams.exceptions.SwerveDriveConfigurationException} — swerve drive config errors
- *   <li>{@link yams.exceptions.DifferentialMechanismConfigurationException} — differential drive
- *       config errors
- *   <li>{@link yams.exceptions.DoubleJointedArmConfigurationException} — double-jointed arm config
- *       errors
+ * <li>{@link yams.exceptions.ArmConfigurationException} — single-jointed arm config errors
+ * <li>{@link yams.exceptions.ElevatorConfigurationException} — elevator config errors
+ * <li>{@link yams.exceptions.FlyWheelConfigurationException} — flywheel config errors
+ * <li>{@link yams.exceptions.PivotConfigurationException} — pivot config errors
+ * <li>{@link yams.exceptions.SwerveDriveConfigurationException} — swerve drive config errors
+ * <li>{@link yams.exceptions.DifferentialMechanismConfigurationException} — differential drive
+ * config errors
+ * <li>{@link yams.exceptions.DoubleJointedArmConfigurationException} — double-jointed arm config
+ * errors
  * </ul>
  *
  * <h2>Motor Controller Exceptions</h2>
@@ -33,10 +33,10 @@
  * <p>Thrown when a motor controller is missing or its configuration is invalid:
  *
  * <ul>
- *   <li>{@link yams.exceptions.SmartMotorControllerConfigurationException} — the motor controller
- *       wrapper itself has an invalid or incomplete configuration
- *   <li>{@link yams.exceptions.MotorNotPresentException} — a required motor controller could not be
- *       found on the CAN bus or is otherwise unavailable
+ * <li>{@link yams.exceptions.SmartMotorControllerConfigurationException} — the motor controller
+ * wrapper itself has an invalid or incomplete configuration
+ * <li>{@link yams.exceptions.MotorNotPresentException} — a required motor controller could not be
+ * found on the CAN bus or is otherwise unavailable
  * </ul>
  *
  * <h2>Gear Stage Exceptions</h2>
@@ -44,8 +44,8 @@
  * <p>Thrown by {@link yams.gearing.GearBox} when its list of stages is malformed:
  *
  * <ul>
- *   <li>{@link yams.exceptions.NoStagesGivenException} — a {@code GearBox} was constructed with an
- *       empty stage list
+ * <li>{@link yams.exceptions.NoStagesGivenException} — a {@code GearBox} was constructed with an
+ * empty stage list
  * <li>{@link yams.exceptions.InvalidStageGivenException} — one or more stages in a {@code GearBox} have an illegal value (e.g., zero or negative tooth counts)
  * </ul>
  */

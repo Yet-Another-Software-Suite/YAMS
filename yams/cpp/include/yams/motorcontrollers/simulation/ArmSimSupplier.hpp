@@ -3,14 +3,13 @@
 
 #pragma once
 
+#include <functional>
 #include <wpi/simulation/SingleJointedArmSim.hpp>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/angular_acceleration.hpp>
 #include <wpi/units/angular_velocity.hpp>
 #include <wpi/units/time.hpp>
 #include <wpi/units/voltage.hpp>
-
-#include <functional>
 
 #include "yams/gearing/MechanismGearing.hpp"
 #include "yams/motorcontrollers/SimSupplier.hpp"

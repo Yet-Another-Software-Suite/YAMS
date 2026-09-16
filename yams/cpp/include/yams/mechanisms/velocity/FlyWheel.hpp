@@ -3,18 +3,17 @@
 
 #pragma once
 
-#include <wpi/math/geometry/Translation3d.hpp>
-#include <wpi/simulation/DCMotorSim.hpp>
+#include <functional>
+#include <optional>
+#include <string>
 #include <wpi/commands2/CommandPtr.hpp>
 #include <wpi/commands2/button/Trigger.hpp>
+#include <wpi/math/geometry/Translation3d.hpp>
+#include <wpi/simulation/DCMotorSim.hpp>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/angular_velocity.hpp>
 #include <wpi/units/length.hpp>
 #include <wpi/units/velocity.hpp>
-
-#include <functional>
-#include <optional>
-#include <string>
 
 #include "SmartVelocityMechanism.hpp"
 #include "yams/mechanisms/config/FlyWheelConfig.hpp"
@@ -50,7 +49,8 @@ namespace yams::mechanisms::velocity {
  *         .WithStatorCurrentLimit(60.0_A)
  *         .WithMotorInverted(false)
  *         .WithFeedforward(wpi::math::SimpleMotorFeedforward<wpi::units::turns>{
- *             0.0_V, wpi::units::unit_t<wpi::math::SimpleMotorFeedforward<wpi::units::turns>::kv_unit>{1.0},
+ *             0.0_V,
+ * wpi::units::unit_t<wpi::math::SimpleMotorFeedforward<wpi::units::turns>::kv_unit>{1.0},
  *             wpi::units::unit_t<wpi::math::SimpleMotorFeedforward<wpi::units::turns>::ka_unit>{0.0}})
  *         .WithClosedLoopMode()
  *         .WithTelemetry("ShooterMotor", Cfg::TelemetryVerbosity::HIGH);
@@ -167,8 +167,9 @@ class FlyWheel : public SmartVelocityMechanism {
    * @note Do not use with a default command on the subsystem, as it will override the setting after
    * this ends.
    */
-  wpi::cmd::CommandPtr RunTo(wpi::units::degrees_per_second_t velocity,
-                         wpi::units::degrees_per_second_t tolerance = wpi::units::degrees_per_second_t{5.0});
+  wpi::cmd::CommandPtr RunTo(
+      wpi::units::degrees_per_second_t velocity,
+      wpi::units::degrees_per_second_t tolerance = wpi::units::degrees_per_second_t{5.0});
 
   /**
    * Run the flywheel to a supplier-provided angular velocity within a tolerance, then end the
@@ -182,8 +183,9 @@ class FlyWheel : public SmartVelocityMechanism {
    * @note Do not use with a default command on the subsystem, as it will override the setting after
    * this ends.
    */
-  wpi::cmd::CommandPtr RunTo(std::function<wpi::units::degrees_per_second_t()> velocity,
-                         wpi::units::degrees_per_second_t tolerance = wpi::units::degrees_per_second_t{5.0});
+  wpi::cmd::CommandPtr RunTo(
+      std::function<wpi::units::degrees_per_second_t()> velocity,
+      wpi::units::degrees_per_second_t tolerance = wpi::units::degrees_per_second_t{5.0});
 
   /**
    * Run the flywheel to a surface speed within a tolerance, then end the command.
@@ -196,7 +198,8 @@ class FlyWheel : public SmartVelocityMechanism {
    * @note Do not use with a default command on the subsystem, as it will override the setting after
    * this ends.
    */
-  wpi::cmd::CommandPtr RunTo(wpi::units::meters_per_second_t velocity, wpi::units::meters_per_second_t tolerance);
+  wpi::cmd::CommandPtr RunTo(wpi::units::meters_per_second_t velocity,
+                             wpi::units::meters_per_second_t tolerance);
 
   /**
    * Run the flywheel to a supplier-provided surface speed within a tolerance, then end the command.
@@ -210,7 +213,7 @@ class FlyWheel : public SmartVelocityMechanism {
    * this ends.
    */
   wpi::cmd::CommandPtr RunTo(std::function<wpi::units::meters_per_second_t()> velocity,
-                         wpi::units::meters_per_second_t tolerance);
+                             wpi::units::meters_per_second_t tolerance);
 
   // ---- Comparison triggers ---------------------------------------------------
 
@@ -237,7 +240,8 @@ class FlyWheel : public SmartVelocityMechanism {
    * @param end   Upper bound.
    * @return Trigger for the range condition.
    */
-  wpi::cmd::Trigger Between(wpi::units::degrees_per_second_t start, wpi::units::degrees_per_second_t end);
+  wpi::cmd::Trigger Between(wpi::units::degrees_per_second_t start,
+                            wpi::units::degrees_per_second_t end);
 
   /**
    * Trigger that fires while the flywheel is within tolerance of a velocity.
@@ -246,8 +250,9 @@ class FlyWheel : public SmartVelocityMechanism {
    * @param within   Tolerance.
    * @return Trigger for the near condition.
    */
-  wpi::cmd::Trigger IsNear(wpi::units::degrees_per_second_t velocity,
-                       wpi::units::degrees_per_second_t within = wpi::units::degrees_per_second_t{5.0}) const;
+  wpi::cmd::Trigger IsNear(
+      wpi::units::degrees_per_second_t velocity,
+      wpi::units::degrees_per_second_t within = wpi::units::degrees_per_second_t{5.0}) const;
 
   // ---- Direct setpoint setters -----------------------------------------------
 

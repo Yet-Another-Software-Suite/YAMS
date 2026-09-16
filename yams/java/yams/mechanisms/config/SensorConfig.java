@@ -55,8 +55,7 @@ import yams.motorcontrollers.simulation.SensorData;
  *     .withSimulatedValue("positionRotations", () -> Robot.isInTest(), 2.5);
  * }</pre>
  */
-public class SensorConfig
-{
+public class SensorConfig {
   /**
    * Sensor name to display in the simulation window.
    */
@@ -64,19 +63,18 @@ public class SensorConfig
   /**
    * List of {@link SensorData} to display in the simulation window.
    */
-  private final List<SensorData> data = new ArrayList<>();
+  private final List<SensorData> data   = new ArrayList<>();
   /**
    * Sensor
    */
-  private       Optional<Sensor> sensor = Optional.empty();
+  private Optional<Sensor>       sensor = Optional.empty();
 
   /**
    * Sensor configuration.
    *
    * @param name Name of sensor to display in the simulation window.
    */
-  public SensorConfig(String name)
-  {
+  public SensorConfig(String name) {
     this.name = name;
   }
 
@@ -88,8 +86,7 @@ public class SensorConfig
    * @param defaultVal Default value of the field.
    * @return {@link SensorConfig}
    */
-  public SensorConfig withField(String name, DoubleSupplier supplier, double defaultVal)
-  {
+  public SensorConfig withField(String name, DoubleSupplier supplier, double defaultVal) {
     data.add(new SensorData(name, supplier, defaultVal));
     return this;
   }
@@ -102,8 +99,7 @@ public class SensorConfig
    * @param defaultVal Default value of the field.
    * @return {@link SensorConfig}
    */
-  public SensorConfig withField(String name, IntSupplier supplier, int defaultVal)
-  {
+  public SensorConfig withField(String name, IntSupplier supplier, int defaultVal) {
     data.add(new SensorData(name, supplier, defaultVal));
     return this;
   }
@@ -116,8 +112,7 @@ public class SensorConfig
    * @param defaultVal Default value of the field.
    * @return {@link SensorConfig}
    */
-  public SensorConfig withField(String name, BooleanSupplier supplier, boolean defaultVal)
-  {
+  public SensorConfig withField(String name, BooleanSupplier supplier, boolean defaultVal) {
     data.add(new SensorData(name, supplier, defaultVal));
     return this;
   }
@@ -130,8 +125,7 @@ public class SensorConfig
    * @param defaultVal Default value of the field.
    * @return {@link SensorConfig}
    */
-  public SensorConfig withField(String name, LongSupplier supplier, long defaultVal)
-  {
+  public SensorConfig withField(String name, LongSupplier supplier, long defaultVal) {
     data.add(new SensorData(name, supplier, defaultVal));
     return this;
   }
@@ -145,14 +139,10 @@ public class SensorConfig
    * @param value     Value to simulate.
    * @return {@link SensorConfig}
    */
-  public SensorConfig withSimulatedValue(String fieldName, Time start, Time end, double value)
-  {
-    for (var field : data)
-    {
-      if (field.getName().equals(fieldName))
-      {
-        field.addSimTrigger(SensorData.convert(value), () -> Timer.getMatchTime() >= start.in(Seconds) &&
-                                                             Timer.getMatchTime() <= end.in(Seconds));
+  public SensorConfig withSimulatedValue(String fieldName, Time start, Time end, double value) {
+    for (var field : data) {
+      if (field.getName().equals(fieldName)) {
+        field.addSimTrigger(SensorData.convert(value), () -> Timer.getMatchTime() >= start.in(Seconds) && Timer.getMatchTime() <= end.in(Seconds));
       }
     }
     return this;
@@ -167,14 +157,10 @@ public class SensorConfig
    * @param value     Value to simulate.
    * @return {@link SensorConfig}
    */
-  public SensorConfig withSimulatedValue(String fieldName, Time start, Time end, int value)
-  {
-    for (var field : data)
-    {
-      if (field.getName().equals(fieldName))
-      {
-        field.addSimTrigger(SensorData.convert(value), () -> Timer.getMatchTime() >= start.in(Seconds) &&
-                                                             Timer.getMatchTime() <= end.in(Seconds));
+  public SensorConfig withSimulatedValue(String fieldName, Time start, Time end, int value) {
+    for (var field : data) {
+      if (field.getName().equals(fieldName)) {
+        field.addSimTrigger(SensorData.convert(value), () -> Timer.getMatchTime() >= start.in(Seconds) && Timer.getMatchTime() <= end.in(Seconds));
       }
     }
     return this;
@@ -189,14 +175,10 @@ public class SensorConfig
    * @param value     Value to simulate.
    * @return {@link SensorConfig}
    */
-  public SensorConfig withSimulatedValue(String fieldName, Time start, Time end, long value)
-  {
-    for (var field : data)
-    {
-      if (field.getName().equals(fieldName))
-      {
-        field.addSimTrigger(SensorData.convert(value), () -> Timer.getMatchTime() >= start.in(Seconds) &&
-                                                             Timer.getMatchTime() <= end.in(Seconds));
+  public SensorConfig withSimulatedValue(String fieldName, Time start, Time end, long value) {
+    for (var field : data) {
+      if (field.getName().equals(fieldName)) {
+        field.addSimTrigger(SensorData.convert(value), () -> Timer.getMatchTime() >= start.in(Seconds) && Timer.getMatchTime() <= end.in(Seconds));
       }
     }
     return this;
@@ -211,14 +193,10 @@ public class SensorConfig
    * @param value     Value to simulate.
    * @return {@link SensorConfig}
    */
-  public SensorConfig withSimulatedValue(String fieldName, Time start, Time end, boolean value)
-  {
-    for (var field : data)
-    {
-      if (field.getName().equals(fieldName))
-      {
-        field.addSimTrigger(SensorData.convert(value), () -> Timer.getMatchTime() >= start.in(Seconds) &&
-                                                             Timer.getMatchTime() <= end.in(Seconds));
+  public SensorConfig withSimulatedValue(String fieldName, Time start, Time end, boolean value) {
+    for (var field : data) {
+      if (field.getName().equals(fieldName)) {
+        field.addSimTrigger(SensorData.convert(value), () -> Timer.getMatchTime() >= start.in(Seconds) && Timer.getMatchTime() <= end.in(Seconds));
       }
     }
     return this;
@@ -232,12 +210,9 @@ public class SensorConfig
    * @param value     Value to simulate.
    * @return {@link SensorConfig}
    */
-  public SensorConfig withSimulatedValue(String fieldName, BooleanSupplier trigger, double value)
-  {
-    for (var field : data)
-    {
-      if (field.getName().equals(fieldName))
-      {
+  public SensorConfig withSimulatedValue(String fieldName, BooleanSupplier trigger, double value) {
+    for (var field : data) {
+      if (field.getName().equals(fieldName)) {
         field.addSimTrigger(SensorData.convert(value), trigger);
       }
     }
@@ -252,12 +227,9 @@ public class SensorConfig
    * @param value     Value to simulate.
    * @return {@link SensorConfig}
    */
-  public SensorConfig withSimulatedValue(String fieldName, BooleanSupplier trigger, int value)
-  {
-    for (var field : data)
-    {
-      if (field.getName().equals(fieldName))
-      {
+  public SensorConfig withSimulatedValue(String fieldName, BooleanSupplier trigger, int value) {
+    for (var field : data) {
+      if (field.getName().equals(fieldName)) {
         field.addSimTrigger(SensorData.convert(value), trigger);
       }
     }
@@ -272,12 +244,9 @@ public class SensorConfig
    * @param value     Value to simulate.
    * @return {@link SensorConfig}
    */
-  public SensorConfig withSimulatedValue(String fieldName, BooleanSupplier trigger, long value)
-  {
-    for (var field : data)
-    {
-      if (field.getName().equals(fieldName))
-      {
+  public SensorConfig withSimulatedValue(String fieldName, BooleanSupplier trigger, long value) {
+    for (var field : data) {
+      if (field.getName().equals(fieldName)) {
         field.addSimTrigger(SensorData.convert(value), trigger);
       }
     }
@@ -292,12 +261,9 @@ public class SensorConfig
    * @param value     Value to simulate.
    * @return {@link SensorConfig}
    */
-  public SensorConfig withSimulatedValue(String fieldName, BooleanSupplier trigger, boolean value)
-  {
-    for (var field : data)
-    {
-      if (field.getName().equals(fieldName))
-      {
+  public SensorConfig withSimulatedValue(String fieldName, BooleanSupplier trigger, boolean value) {
+    for (var field : data) {
+      if (field.getName().equals(fieldName)) {
         field.addSimTrigger(SensorData.convert(value), trigger);
       }
     }
@@ -309,10 +275,8 @@ public class SensorConfig
    *
    * @return {@link Sensor} for fetching real and simulated values.
    */
-  public Sensor getSensor()
-  {
-    if (sensor.isEmpty())
-    {
+  public Sensor getSensor() {
+    if (sensor.isEmpty()) {
       sensor = Optional.of(new Sensor(name, data));
     }
     return sensor.get();
@@ -323,8 +287,7 @@ public class SensorConfig
    *
    * @return Name of the sensor.
    */
-  public String getName()
-  {
+  public String getName() {
     return name;
   }
 
@@ -333,8 +296,7 @@ public class SensorConfig
    *
    * @return list of {@link SensorData} for this sensor
    */
-  public List<SensorData> getFields()
-  {
+  public List<SensorData> getFields() {
     return data;
   }
 

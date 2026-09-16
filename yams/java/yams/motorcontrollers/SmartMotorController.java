@@ -16,6 +16,13 @@ import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.Commands;
 import org.wpilib.driverstation.internal.DriverStationBackend;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.math.controller.ArmFeedforward;
@@ -27,11 +34,10 @@ import org.wpilib.math.system.DCMotor;
 import org.wpilib.math.trajectory.ExponentialProfile;
 import org.wpilib.math.trajectory.TrapezoidProfile;
 import org.wpilib.math.trajectory.TrapezoidProfile.State;
-import org.wpilib.util.Alert;
-import org.wpilib.util.Pair;
 import org.wpilib.networktables.NetworkTable;
 import org.wpilib.networktables.NetworkTableInstance;
 import org.wpilib.system.Notifier;
+import org.wpilib.tunable.Tunables;
 import org.wpilib.units.AngularAccelerationUnit;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularAcceleration;
@@ -45,22 +51,16 @@ import org.wpilib.units.measure.Temperature;
 import org.wpilib.units.measure.Time;
 import org.wpilib.units.measure.Velocity;
 import org.wpilib.units.measure.Voltage;
-import org.wpilib.tunable.Tunables;
-import org.wpilib.command2.Command;
-import org.wpilib.command2.Commands;
-import java.util.List;
-import java.util.Optional;
-import java.util.OptionalDouble;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
+import org.wpilib.util.Alert;
+import org.wpilib.util.Pair;
 import yams.exceptions.SmartMotorControllerConfigurationException;
-import yams.telemetry.NetworkTablesBackends;
 import yams.gearing.MechanismGearing;
 import yams.math.LQRController;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.simulation.BatterySim;
+import yams.telemetry.NetworkTablesBackends;
 import yams.telemetry.SmartMotorControllerTelemetry;
 import yams.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
 import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
@@ -71,9 +71,10 @@ import yams.telemetry.SmartMotorControllerTelemetryConfig;
  *
  * <p>This abstract class is not instantiated directly. Instantiate the appropriate vendor wrapper:
  * {@link yams.motorcontrollers.local.SparkWrapper} for REV SPARK hardware, or
- * {@code yams.motorcontrollers.remote.TalonFXWrapper}/{@code yams.motorcontrollers.remote.TalonFXSWrapper}
- * for CTRE hardware (unavailable while CTRE has no Phoenix6 build for this wpilib version).
- * Configure all three via {@link yams.motorcontrollers.SmartMotorControllerConfig}.
+ * {@code yams.motorcontrollers.remote.TalonFXWrapper}/{@code
+ * yams.motorcontrollers.remote.TalonFXSWrapper} for CTRE hardware (unavailable while CTRE has no
+ * Phoenix6 build for this wpilib version). Configure all three via {@link
+ * yams.motorcontrollers.SmartMotorControllerConfig}.
  *
  * <h2>Example</h2>
  *
@@ -163,12 +164,11 @@ public abstract class SmartMotorController {
    * Create a {@link SmartMotorController} wrapper from the provided motor controller object.
    *
    * @param motorController Motor controller object.
-   * @param motorSim {@link DCMotor} which the motor controller is connected too.
-   * @param cfg {@link SmartMotorControllerConfig} for the {@link SmartMotorController}
+   * @param motorSim        {@link DCMotor} which the motor controller is connected too.
+   * @param cfg             {@link SmartMotorControllerConfig} for the {@link SmartMotorController}
    * @return {@link SmartMotorController}.
    */
-  public static SmartMotorController create(
-      Object motorController, DCMotor motorSim, SmartMotorControllerConfig cfg) {
+  public static SmartMotorController create(Object motorController, DCMotor motorSim, SmartMotorControllerConfig cfg) {
     return null;
   }
 
@@ -180,28 +180,16 @@ public abstract class SmartMotorController {
    * @return True if same DC motor.
    */
   public boolean isMotor(DCMotor a, DCMotor b) {
-    return a.stallTorque == b.stallTorque
-        && a.stallCurrent == b.stallCurrent
-        && a.freeCurrent == b.freeCurrent
-        && a.freeSpeed == b.freeSpeed
-        && a.Kt == b.Kt
-        && a.Kv == b.Kv
-        && a.nominalVoltage == b.nominalVoltage;
+    return a.stallTorque == b.stallTorque && a.stallCurrent == b.stallCurrent && a.freeCurrent == b.freeCurrent && a.freeSpeed == b.freeSpeed && a.Kt == b.Kt && a.Kv == b.Kv && a.nominalVoltage == b.nominalVoltage;
   }
 
   /** Check config for safe values. */
   public void checkConfigSafety() {
     if (isMotor(getDCMotor(), DCMotor.getNeo550(1))) {
       if (m_config.getStatorStallCurrentLimit().isEmpty()) {
-        throw new SmartMotorControllerConfigurationException(
-            "Stator current limit is not defined for NEO550!",
-            "Safety check failed.",
-            "withStatorCurrentLimit(Current)");
+        throw new SmartMotorControllerConfigurationException("Stator current limit is not defined for NEO550!", "Safety check failed.", "withStatorCurrentLimit(Current)");
       } else if (m_config.getStatorStallCurrentLimit().getAsInt() > 40) {
-        throw new SmartMotorControllerConfigurationException(
-            "Stator current limit is too high for NEO550!",
-            "Safety check failed.",
-            "withStatorCurrentLimit(Current) where the Current is under 40A");
+        throw new SmartMotorControllerConfigurationException("Stator current limit is too high for NEO550!", "Safety check failed.", "withStatorCurrentLimit(Current) where the Current is under 40A");
       }
     }
   }
@@ -234,13 +222,9 @@ public abstract class SmartMotorController {
       return Optional.empty();
     }
     if (m_config.getLinearClosedLoopControllerUse()) {
-      return Optional.of(
-          new State(
-              getMeasurementPosition().in(Meters), getMeasurementVelocity().in(MetersPerSecond)));
+      return Optional.of(new State(getMeasurementPosition().in(Meters), getMeasurementVelocity().in(MetersPerSecond)));
     }
-    return Optional.of(
-        new State(
-            getMechanismPosition().in(Rotations), getMechanismVelocity().in(RotationsPerSecond)));
+    return Optional.of(new State(getMechanismPosition().in(Rotations), getMechanismVelocity().in(RotationsPerSecond)));
   }
 
   /**
@@ -253,13 +237,9 @@ public abstract class SmartMotorController {
       return Optional.empty();
     }
     if (m_config.getLinearClosedLoopControllerUse()) {
-      return Optional.of(
-          new ExponentialProfile.State(
-              getMeasurementPosition().in(Meters), getMeasurementVelocity().in(MetersPerSecond)));
+      return Optional.of(new ExponentialProfile.State(getMeasurementPosition().in(Meters), getMeasurementVelocity().in(MetersPerSecond)));
     }
-    return Optional.of(
-        new ExponentialProfile.State(
-            getMechanismPosition().in(Rotations), getMechanismVelocity().in(RotationsPerSecond)));
+    return Optional.of(new ExponentialProfile.State(getMechanismPosition().in(Rotations), getMechanismVelocity().in(RotationsPerSecond)));
   }
 
   /** Stop the closed loop controller. */
@@ -275,8 +255,7 @@ public abstract class SmartMotorController {
 
   /** Start the closed loop controller with the period. */
   public void startClosedLoopController() {
-    if (m_closedLoopControllerThread != null
-        && m_config.getMotorControllerMode() == ControlMode.CLOSED_LOOP) {
+    if (m_closedLoopControllerThread != null && m_config.getMotorControllerMode() == ControlMode.CLOSED_LOOP) {
       m_pid.ifPresent(PIDController::reset);
       m_trapState = getTrapezoidalProfileState();
       m_expoState = getExponentialProfileState();
@@ -285,16 +264,11 @@ public abstract class SmartMotorController {
         m_lqr.ifPresent(lqr -> lqr.reset(getMeasurementPosition(), getMeasurementVelocity()));
       }
       m_closedLoopControllerThread.stop();
-      m_closedLoopControllerThread.startPeriodic(
-          m_config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Seconds));
+      m_closedLoopControllerThread.startPeriodic(m_config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Seconds));
       m_closedLoopControllerRunning = true;
       if (RobotBase.isReal()) {
         if (m_rioClosedLoopAlert == null) {
-          m_rioClosedLoopAlert =
-              new Alert(
-                  "YAMS",
-                  getName() + " closed loop controller is running on the RIO.",
-                  Alert.Level.MEDIUM);
+          m_rioClosedLoopAlert = new Alert("YAMS", getName() + " closed loop controller is running on the RIO.", Alert.Level.MEDIUM);
         }
         m_rioClosedLoopAlert.set(true);
       }
@@ -306,10 +280,8 @@ public abstract class SmartMotorController {
    */
   public void iterateClosedLoopController() {
     AtomicReference<Boolean> velocityTrapezoidalProfile = new AtomicReference<>(false);
-    AtomicReference<ExponentialProfile.State> nextExpoState =
-        new AtomicReference<>(new ExponentialProfile.State(0.0, 0.0));
-    AtomicReference<TrapezoidProfile.State> nextTrapState =
-        new AtomicReference<>(new TrapezoidProfile.State(0.0, 0.0));
+    AtomicReference<ExponentialProfile.State> nextExpoState = new AtomicReference<>(new ExponentialProfile.State(0.0, 0.0));
+    AtomicReference<TrapezoidProfile.State> nextTrapState = new AtomicReference<>(new TrapezoidProfile.State(0.0, 0.0));
     AtomicReference<Double> pidOutputVoltage = new AtomicReference<>((double) 0);
     AtomicReference<Double> feedforward = new AtomicReference<>(0.0);
     Optional<Angle> mechLowerLimit = m_config.getMechanismLowerLimit();
@@ -328,23 +300,14 @@ public abstract class SmartMotorController {
     if (setpointPosition.isPresent()) {
       if (mechLowerLimit.isPresent()) {
         if (setpointPosition.get().lt(mechLowerLimit.get())) {
-          DriverStationBackend.reportWarning(
-              "[WARNING] Setpoint is lower than Mechanism "
-                  + (m_config.getTelemetryName().isPresent()
-                      ? m_config.getTelemetryName().get()
-                      : "Unnamed smart motor")
-                  + " lower limit, changing setpoint to lower limit.",
+          DriverStationBackend.reportWarning("[WARNING] Setpoint is lower than Mechanism " + (m_config.getTelemetryName().isPresent() ? m_config.getTelemetryName().get() : "Unnamed smart motor") + " lower limit, changing setpoint to lower limit.",
               false);
           setpointPosition = mechLowerLimit;
         }
       }
       if (mechUpperLimit.isPresent()) {
         if (setpointPosition.get().gt(mechUpperLimit.get())) {
-          DriverStationBackend.reportWarning(
-              "[WARNING] Setpoint is higher than Mechanism "
-                  + (m_config.getTelemetryName().isPresent() ? getName() : "Unnamed smart motor")
-                  + " upper limit, changing setpoint to upper limit.",
-              false);
+          DriverStationBackend.reportWarning("[WARNING] Setpoint is higher than Mechanism " + (m_config.getTelemetryName().isPresent() ? getName() : "Unnamed smart motor") + " upper limit, changing setpoint to upper limit.", false);
           setpointPosition = mechUpperLimit;
         }
       }
@@ -365,21 +328,9 @@ public abstract class SmartMotorController {
       }
 
       if (m_expoProfile.isPresent()) {
-        nextExpoState.set(
-            m_expoProfile
-                .get()
-                .calculate(
-                    loopTime,
-                    m_expoState.orElse(new ExponentialProfile.State(position, velocity)),
-                    new ExponentialProfile.State(setpoint, 0)));
+        nextExpoState.set(m_expoProfile.get().calculate(loopTime, m_expoState.orElse(new ExponentialProfile.State(position, velocity)), new ExponentialProfile.State(setpoint, 0)));
       } else if (m_trapezoidProfile.isPresent()) {
-        nextTrapState.set(
-            m_trapezoidProfile
-                .get()
-                .calculate(
-                    loopTime,
-                    m_trapState.orElse(new TrapezoidProfile.State(position, velocity)),
-                    new TrapezoidProfile.State(setpoint, 0)));
+        nextTrapState.set(m_trapezoidProfile.get().calculate(loopTime, m_trapState.orElse(new TrapezoidProfile.State(position, velocity)), new TrapezoidProfile.State(setpoint, 0)));
       }
     } else if (setpointVelocity.isPresent()) {
       var setpoint = setpointVelocity.get().in(RotationsPerSecond);
@@ -389,19 +340,12 @@ public abstract class SmartMotorController {
       // Change position and velocity to Meters and Meters per Second
       if (m_config.getLinearClosedLoopControllerUse()) {
         velocity = getMeasurementVelocity().in(MetersPerSecond);
-        setpoint =
-            m_config.convertFromMechanism(setpointVelocity.orElseThrow()).in(MetersPerSecond);
+        setpoint = m_config.convertFromMechanism(setpointVelocity.orElseThrow()).in(MetersPerSecond);
       }
 
       if (m_trapezoidProfile.isPresent()) {
         // TODO: 2027, Derive acceleration from SMCs
-        nextTrapState.set(
-            m_trapezoidProfile
-                .get()
-                .calculate(
-                    loopTime,
-                    m_trapState.orElse(new TrapezoidProfile.State(velocity, 0)),
-                    new TrapezoidProfile.State(setpoint, 0)));
+        nextTrapState.set(m_trapezoidProfile.get().calculate(loopTime, m_trapState.orElse(new TrapezoidProfile.State(velocity, 0)), new TrapezoidProfile.State(setpoint, 0)));
         velocityTrapezoidalProfile.set(true);
       }
     }
@@ -415,51 +359,29 @@ public abstract class SmartMotorController {
       // Set the measured value and setpoint to Meters, if linear
       if (m_config.getLinearClosedLoopControllerUse()) {
         measured = getMeasurementPosition().in(Meters);
-        setpoint =
-            m_config
-                .convertFromMechanism(setpointPosition.get())
-                .in(Meters); // Convert setpoint to Meters
+        setpoint = m_config.convertFromMechanism(setpointPosition.get()).in(Meters); // Convert setpoint to Meters
       }
 
       if (m_expoProfile.isPresent()) {
         setpoint = nextExpoState.get().position; // Rotations or Meters; depending on config
-        velocityProfile =
-            nextExpoState.get()
-                .velocity; // RotationsPerSecond or MetersPerSecond; depending on config
+        velocityProfile = nextExpoState.get().velocity; // RotationsPerSecond or MetersPerSecond; depending on config
       } else if (m_trapezoidProfile.isPresent() && !m_config.getVelocityTrapezoidalProfileInUse()) {
         setpoint = nextTrapState.get().position; // Rotations or Meters; depending on config
-        velocityProfile =
-            nextTrapState.get()
-                .velocity; // RotationsPerSecond or MetersPerSecond; depending on config
+        velocityProfile = nextTrapState.get().velocity; // RotationsPerSecond or MetersPerSecond; depending on config
       }
 
       // Set the controller
       double finalMeasured = measured;
       double finalSetpoint = setpoint;
       double finalVelocityProfile = velocityProfile;
-      m_pid.ifPresent(
-          pidController ->
-              pidOutputVoltage.set(pidController.calculate(finalMeasured, finalSetpoint)));
-      m_lqr.ifPresent(
-          lqrController -> {
-            if (m_config.getLinearClosedLoopControllerUse()) {
-              pidOutputVoltage.set(
-                  lqrController
-                      .calculate(
-                          Meters.of(finalMeasured),
-                          Meters.of(finalSetpoint),
-                          MetersPerSecond.of(finalVelocityProfile))
-                      .in(Volts));
-            } else {
-              pidOutputVoltage.set(
-                  lqrController
-                      .calculate(
-                          Rotations.of(finalMeasured),
-                          Rotations.of(finalSetpoint),
-                          RotationsPerSecond.of(finalVelocityProfile))
-                      .in(Volts));
-            }
-          });
+      m_pid.ifPresent(pidController -> pidOutputVoltage.set(pidController.calculate(finalMeasured, finalSetpoint)));
+      m_lqr.ifPresent(lqrController -> {
+        if (m_config.getLinearClosedLoopControllerUse()) {
+          pidOutputVoltage.set(lqrController.calculate(Meters.of(finalMeasured), Meters.of(finalSetpoint), MetersPerSecond.of(finalVelocityProfile)).in(Volts));
+        } else {
+          pidOutputVoltage.set(lqrController.calculate(Rotations.of(finalMeasured), Rotations.of(finalSetpoint), RotationsPerSecond.of(finalVelocityProfile)).in(Volts));
+        }
+      });
 
     } else if (setpointVelocity.isPresent()) {
       var setpoint = setpointVelocity.get().in(RotationsPerSecond);
@@ -468,134 +390,68 @@ public abstract class SmartMotorController {
       // Set the measured value and setpoint to Meters, if linear
       if (m_config.getLinearClosedLoopControllerUse()) {
         velocity = getMeasurementVelocity().in(MetersPerSecond);
-        setpoint =
-            m_config
-                .convertFromMechanism(setpointVelocity.get())
-                .in(MetersPerSecond); // Convert setpoint to Meters
+        setpoint = m_config.convertFromMechanism(setpointVelocity.get()).in(MetersPerSecond); // Convert setpoint to Meters
       }
 
       if (m_trapezoidProfile.isPresent() && m_config.getVelocityTrapezoidalProfileInUse()) {
         setpoint = nextTrapState.get().position; // Poorly named, in a velocity control loop, this
         // is the setpoint velocity.
-        var acceleration =
-            nextTrapState.get().velocity; // Again poorly named, this is the setpoint acceleration.
+        var acceleration = nextTrapState.get().velocity; // Again poorly named, this is the setpoint acceleration.
       }
 
       double finalVelocity = velocity;
       double finalSetpoint = setpoint;
-      m_pid.ifPresent(
-          pidController ->
-              pidOutputVoltage.set(pidController.calculate(finalVelocity, finalSetpoint)));
-      m_lqr.ifPresent(
-          lqrController -> {
-            if (m_config.getLinearClosedLoopControllerUse()) {
-              pidOutputVoltage.set(
-                  lqrController
-                      .calculate(
-                          MetersPerSecond.of(finalVelocity), MetersPerSecond.of(finalSetpoint))
-                      .in(Volts));
-            } else {
-              pidOutputVoltage.set(
-                  lqrController
-                      .calculate(
-                          RotationsPerSecond.of(finalVelocity),
-                          RotationsPerSecond.of(finalSetpoint))
-                      .in(Volts));
-            }
-          });
+      m_pid.ifPresent(pidController -> pidOutputVoltage.set(pidController.calculate(finalVelocity, finalSetpoint)));
+      m_lqr.ifPresent(lqrController -> {
+        if (m_config.getLinearClosedLoopControllerUse()) {
+          pidOutputVoltage.set(lqrController.calculate(MetersPerSecond.of(finalVelocity), MetersPerSecond.of(finalSetpoint)).in(Volts));
+        } else {
+          pidOutputVoltage.set(lqrController.calculate(RotationsPerSecond.of(finalVelocity), RotationsPerSecond.of(finalSetpoint)).in(Volts));
+        }
+      });
     }
 
-    armFeedforward.ifPresent(
-        ff -> {
-          var profiled = (m_expoProfile.isPresent() || m_trapezoidProfile.isPresent());
-          if (profiled && !velocityTrapezoidalProfile.get()) {
-            var currentVelocitySetpoint =
-                RotationsPerSecond.of(
-                    m_trapState.isPresent()
-                        ? m_trapState.get().velocity
-                        : (m_expoState.isPresent() ? m_expoState.get().velocity : 0.0));
-            var nextVelocitySetpoint =
-                RotationsPerSecond.of(
-                    m_trapezoidProfile.isPresent()
-                        ? nextTrapState.get().velocity
-                        : (m_expoProfile.isPresent() ? nextExpoState.get().velocity : 0.0));
-            feedforward.set(
-                ff.calculate(
-                    getMechanismPosition().in(Radians),
-                    currentVelocitySetpoint.in(RadiansPerSecond),
-                    nextVelocitySetpoint.in(RadiansPerSecond)));
-          } else {
-            // When using a velocity profile the next velocity is the "position" (poorly named)
-            var nextVelocitySetpoint =
-                velocityTrapezoidalProfile.get()
-                    ? nextTrapState.get().position
-                    : setpointVelocity.orElse(RotationsPerSecond.zero()).in(RotationsPerSecond);
-            // Not profiled, so using current velocity or setpoint velocity.
-            ff.calculate(
-                getMechanismPosition().in(Radians),
-                getMechanismVelocity().in(RadiansPerSecond),
-                nextVelocitySetpoint);
-          }
-        });
+    armFeedforward.ifPresent(ff -> {
+      var profiled = (m_expoProfile.isPresent() || m_trapezoidProfile.isPresent());
+      if (profiled && !velocityTrapezoidalProfile.get()) {
+        var currentVelocitySetpoint = RotationsPerSecond.of(m_trapState.isPresent() ? m_trapState.get().velocity : (m_expoState.isPresent() ? m_expoState.get().velocity : 0.0));
+        var nextVelocitySetpoint = RotationsPerSecond.of(m_trapezoidProfile.isPresent() ? nextTrapState.get().velocity : (m_expoProfile.isPresent() ? nextExpoState.get().velocity : 0.0));
+        feedforward.set(ff.calculate(getMechanismPosition().in(Radians), currentVelocitySetpoint.in(RadiansPerSecond), nextVelocitySetpoint.in(RadiansPerSecond)));
+      } else {
+        // When using a velocity profile the next velocity is the "position" (poorly named)
+        var nextVelocitySetpoint = velocityTrapezoidalProfile.get() ? nextTrapState.get().position : setpointVelocity.orElse(RotationsPerSecond.zero()).in(RotationsPerSecond);
+        // Not profiled, so using current velocity or setpoint velocity.
+        ff.calculate(getMechanismPosition().in(Radians), getMechanismVelocity().in(RadiansPerSecond), nextVelocitySetpoint);
+      }
+    });
 
-    elevatorFeedforward.ifPresent(
-        ff -> {
-          var profiled =
-              (m_expoProfile.isPresent() || m_trapezoidProfile.isPresent())
-                  && setpointPosition.isPresent();
-          if (profiled && !velocityTrapezoidalProfile.get()) {
-            var currentVelocitySetpoint =
-                MetersPerSecond.of(
-                    m_trapState.isPresent()
-                        ? m_trapState.get().velocity
-                        : (m_expoState.isPresent() ? m_expoState.get().velocity : 0.0));
-            var nextVelocitySetpoint =
-                MetersPerSecond.of(
-                    m_trapezoidProfile.isPresent()
-                        ? nextTrapState.get().velocity
-                        : (m_expoProfile.isPresent() ? nextExpoState.get().velocity : 0.0));
+    elevatorFeedforward.ifPresent(ff -> {
+      var profiled = (m_expoProfile.isPresent() || m_trapezoidProfile.isPresent()) && setpointPosition.isPresent();
+      if (profiled && !velocityTrapezoidalProfile.get()) {
+        var currentVelocitySetpoint = MetersPerSecond.of(m_trapState.isPresent() ? m_trapState.get().velocity : (m_expoState.isPresent() ? m_expoState.get().velocity : 0.0));
+        var nextVelocitySetpoint = MetersPerSecond.of(m_trapezoidProfile.isPresent() ? nextTrapState.get().velocity : (m_expoProfile.isPresent() ? nextExpoState.get().velocity : 0.0));
 
-            feedforward.set(
-                ff.calculate(
-                    currentVelocitySetpoint.in(MetersPerSecond),
-                    nextVelocitySetpoint.in(MetersPerSecond)));
-          } else {
-            // Not profiled, so using current velocity or setpoint velocity.
-            feedforward.set(ff.calculate(getMeasurementVelocity().in(MetersPerSecond), 0));
-          }
-        });
+        feedforward.set(ff.calculate(currentVelocitySetpoint.in(MetersPerSecond), nextVelocitySetpoint.in(MetersPerSecond)));
+      } else {
+        // Not profiled, so using current velocity or setpoint velocity.
+        feedforward.set(ff.calculate(getMeasurementVelocity().in(MetersPerSecond), 0));
+      }
+    });
 
-    simpleMotorFeedforward.ifPresent(
-        ff -> {
-          var profiled = (m_expoProfile.isPresent() || m_trapezoidProfile.isPresent());
-          if (profiled && !velocityTrapezoidalProfile.get()) {
-            var currentVelocitySetpoint =
-                RotationsPerSecond.of(
-                    m_trapState.isPresent()
-                        ? m_trapState.get().velocity
-                        : (m_expoState.isPresent() ? m_expoState.get().velocity : 0.0));
-            var nextVelocitySetpoint =
-                RotationsPerSecond.of(
-                    m_trapezoidProfile.isPresent()
-                        ? nextTrapState.get().velocity
-                        : (m_expoProfile.isPresent() ? nextExpoState.get().velocity : 0.0));
-            feedforward.set(
-                ff.calculate(
-                    currentVelocitySetpoint.in(RotationsPerSecond),
-                    nextVelocitySetpoint.in(RotationsPerSecond)));
+    simpleMotorFeedforward.ifPresent(ff -> {
+      var profiled = (m_expoProfile.isPresent() || m_trapezoidProfile.isPresent());
+      if (profiled && !velocityTrapezoidalProfile.get()) {
+        var currentVelocitySetpoint = RotationsPerSecond.of(m_trapState.isPresent() ? m_trapState.get().velocity : (m_expoState.isPresent() ? m_expoState.get().velocity : 0.0));
+        var nextVelocitySetpoint = RotationsPerSecond.of(m_trapezoidProfile.isPresent() ? nextTrapState.get().velocity : (m_expoProfile.isPresent() ? nextExpoState.get().velocity : 0.0));
+        feedforward.set(ff.calculate(currentVelocitySetpoint.in(RotationsPerSecond), nextVelocitySetpoint.in(RotationsPerSecond)));
 
-          } else {
-            // When using a velocity profile the next velocity is the "position" (poorly named)
-            var nextVelocitySetpoint =
-                velocityTrapezoidalProfile.get()
-                    ? nextTrapState.get().position
-                    : setpointVelocity.orElse(RotationsPerSecond.zero()).in(RotationsPerSecond);
-            // Not profiled, so using current velocity, or setpoint velocity.
-            feedforward.set(
-                ff.calculate(
-                    getMechanismVelocity().in(RotationsPerSecond), nextVelocitySetpoint));
-          }
-        });
+      } else {
+        // When using a velocity profile the next velocity is the "position" (poorly named)
+        var nextVelocitySetpoint = velocityTrapezoidalProfile.get() ? nextTrapState.get().position : setpointVelocity.orElse(RotationsPerSecond.zero()).in(RotationsPerSecond);
+        // Not profiled, so using current velocity, or setpoint velocity.
+        feedforward.set(ff.calculate(getMechanismVelocity().in(RotationsPerSecond), nextVelocitySetpoint));
+      }
+    });
 
     // Set the current states in the class.
     if (m_expoProfile.isPresent()) {
@@ -608,25 +464,18 @@ public abstract class SmartMotorController {
     // Apply the feedforward Force supplied to setVelocity(..., Force), e.g. from a PathPlanner
     // set-point generator.
     if (setpointVelocity.isPresent() && setpointFeedforwardForce.isPresent()) {
-      feedforward.set(
-          feedforward.get()
-              + m_config
-                  .convertToVoltage(
-                      getDCMotor(), setpointVelocity.get(), setpointFeedforwardForce.get())
-                  .in(Volts));
+      feedforward.set(feedforward.get() + m_config.convertToVoltage(getDCMotor(), setpointVelocity.get(), setpointFeedforwardForce.get()).in(Volts));
     }
 
     // Boundary check.
     if (mechUpperLimit.isPresent()) {
-      if (getMechanismPosition().gt(mechUpperLimit.get())
-          && (pidOutputVoltage.get() + feedforward.get()) > 0) {
+      if (getMechanismPosition().gt(mechUpperLimit.get()) && (pidOutputVoltage.get() + feedforward.get()) > 0) {
         feedforward.set(0.0);
         pidOutputVoltage.set(0.0);
       }
     }
     if (mechLowerLimit.isPresent()) {
-      if (getMechanismPosition().lt(mechLowerLimit.get())
-          && (pidOutputVoltage.get() + feedforward.get()) < 0) {
+      if (getMechanismPosition().lt(mechLowerLimit.get()) && (pidOutputVoltage.get() + feedforward.get()) < 0) {
         feedforward.set(0.0);
         pidOutputVoltage.set(0.0);
       }
@@ -695,21 +544,24 @@ public abstract class SmartMotorController {
   public abstract void setEncoderPosition(Distance distance);
 
   /**
-   * Set the Mechanism {@link Angle} using the PID and feedforward from {@link SmartMotorControllerConfig}.
+   * Set the Mechanism {@link Angle} using the PID and feedforward from {@link
+   * SmartMotorControllerConfig}.
    *
    * @param angle Mechanism angle to set.
    */
   public abstract void setPosition(Angle angle);
 
   /**
-   * Set the Mechanism {@link Distance} using the PID and feedforward from {@link SmartMotorControllerConfig}.
+   * Set the Mechanism {@link Distance} using the PID and feedforward from {@link
+   * SmartMotorControllerConfig}.
    *
    * @param distance Mechanism {@link Distance} to set.
    */
   public abstract void setPosition(Distance distance);
 
   /**
-   * Set the Mechanism {@link LinearVelocity} using the PID and feedforward from {@link SmartMotorControllerConfig}.
+   * Set the Mechanism {@link LinearVelocity} using the PID and feedforward from {@link
+   * SmartMotorControllerConfig}.
    *
    * @param velocity Mechanism {@link LinearVelocity} to target.
    */
@@ -718,33 +570,36 @@ public abstract class SmartMotorController {
   }
 
   /**
-   * Set the Mechanism {@link AngularVelocity} using the PID and feedforward from {@link SmartMotorControllerConfig}.
+   * Set the Mechanism {@link AngularVelocity} using the PID and feedforward from {@link
+   * SmartMotorControllerConfig}.
    *
    * @param angle Mechanism {@link AngularVelocity} to target.
    */
   public abstract void setVelocity(AngularVelocity angle);
 
   /**
-   * Set the Mechanism {@link LinearVelocity} using the PID and feedforward from {@link SmartMotorControllerConfig}, with an additional feedforward {@link Force} applied on top, e.g.
+   * Set the Mechanism {@link LinearVelocity} using the PID and feedforward from {@link
+   * SmartMotorControllerConfig}, with an additional feedforward {@link Force} applied on top, e.g.
    * from a PathPlanner set-point generator. Applied whether the motor controller's native
    * closed-loop velocity control or an LQR/software motion profile loop is driving the mechanism.
    *
-   * @param velocity Mechanism {@link LinearVelocity} to target.
+   * @param velocity         Mechanism {@link LinearVelocity} to target.
    * @param feedforwardForce Additional feedforward {@link Force} applied to the mechanism, or
-   *     {@code null} for none.
+   *                         {@code null} for none.
    */
   public void setVelocity(LinearVelocity velocity, Force feedforwardForce) {
     setVelocity(m_config.convertToMechanism(velocity), feedforwardForce);
   }
 
   /**
-   * Set the Mechanism {@link AngularVelocity} using the PID and feedforward from {@link SmartMotorControllerConfig}, with an additional feedforward {@link Force} applied on top, e.g.
+   * Set the Mechanism {@link AngularVelocity} using the PID and feedforward from {@link
+   * SmartMotorControllerConfig}, with an additional feedforward {@link Force} applied on top, e.g.
    * from a PathPlanner set-point generator. Applied whether the motor controller's native
    * closed-loop velocity control or an LQR/software motion profile loop is driving the mechanism.
    *
-   * @param angle Mechanism {@link AngularVelocity} to target.
+   * @param angle            Mechanism {@link AngularVelocity} to target.
    * @param feedforwardForce Additional feedforward {@link Force} applied to the mechanism, or
-   *     {@code null} for none.
+   *                         {@code null} for none.
    */
   public abstract void setVelocity(AngularVelocity angle, Force feedforwardForce);
 
@@ -846,7 +701,8 @@ public abstract class SmartMotorController {
   public abstract AngularAcceleration getMechanismAcceleration();
 
   /**
-   * Get the mechanism {@link Angle} taking the configured {@link MechanismGearing} from {@link SmartMotorControllerConfig}.
+   * Get the mechanism {@link Angle} taking the configured {@link MechanismGearing} from {@link
+   * SmartMotorControllerConfig}.
    *
    * @return Mechanism {@link Angle}
    */
@@ -885,8 +741,10 @@ public abstract class SmartMotorController {
    * Update the telemetry under the motor name under the given {@link NetworkTable}
    *
    * @param telemetry {@link NetworkTable} to create the {@link SmartMotorControllerTelemetry}
-   *     subtable under based off of {@link SmartMotorControllerConfig#getTelemetryName()}.
-   * @param tuning {@link NetworkTable} to create the tunable telemetry from {@link SmartMotorControllerTelemetry} subtable under. Based off of {@link SmartMotorControllerConfig#getTelemetryName()}.
+   *                  subtable under based off of {@link SmartMotorControllerConfig#getTelemetryName()}.
+   * @param tuning    {@link NetworkTable} to create the tunable telemetry from {@link
+   *                  SmartMotorControllerTelemetry} subtable under. Based off of {@link
+   *                  SmartMotorControllerConfig#getTelemetryName()}.
    */
   public void setupTelemetry(NetworkTable telemetry, NetworkTable tuning) {
     //    System.out.println(
@@ -898,102 +756,58 @@ public abstract class SmartMotorController {
         telemetryTable = Optional.of(telemetry.getSubTable(getName()));
         tuningTable = Optional.of(tuning.getSubTable(getName()));
         if (m_config.getSmartControllerTelemetryConfig().isPresent()) {
-          this.telemetry.setupTelemetry(
-              this,
-              telemetryTable.get(),
-              tuningTable.get(),
-              m_config.getSmartControllerTelemetryConfig().get());
+          this.telemetry.setupTelemetry(this, telemetryTable.get(), tuningTable.get(), m_config.getSmartControllerTelemetryConfig().get());
         } else {
-          this.telemetry.setupTelemetry(
-              this,
-              telemetryTable.get(),
-              tuningTable.get(),
-              new SmartMotorControllerTelemetryConfig()
-                  .withTelemetryVerbosity(m_config.getVerbosity().orElse(TelemetryVerbosity.HIGH)));
+          this.telemetry.setupTelemetry(this, telemetryTable.get(), tuningTable.get(), new SmartMotorControllerTelemetryConfig().withTelemetryVerbosity(m_config.getVerbosity().orElse(TelemetryVerbosity.HIGH)));
         }
         updateTelemetry();
         if (this.telemetry.tuningEnabled()) {
           var telemetryPath = telemetryTable.get().getPath().substring(1).split("/");
-          var telemetryPathStr =
-              telemetryPath[0] + "/Commands/" + telemetryPath[telemetryPath.length - 1];
-          Command setEncoderToZero =
-              Commands.runOnce(
-                  () -> {
-                    System.out.println(
-                        "=====================================================\nSET ENCODER "
-                            + "TO ZERO\n=====================================================");
-                    System.out.println(
-                        "Current Mechanism Position: "
-                            + getMechanismPosition().in(Degrees)
-                            + "° Current Velocity: "
-                            + getMechanismVelocity().in(DegreesPerSecond));
-                    setEncoderPosition(Rotations.zero());
-                  },
-                  m_config.getSubsystem());
+          var telemetryPathStr = telemetryPath[0] + "/Commands/" + telemetryPath[telemetryPath.length - 1];
+          Command setEncoderToZero = Commands.runOnce(() -> {
+            System.out.println("=====================================================\nSET ENCODER " + "TO ZERO\n=====================================================");
+            System.out.println("Current Mechanism Position: " + getMechanismPosition().in(Degrees) + "° Current Velocity: " + getMechanismVelocity().in(DegreesPerSecond));
+            setEncoderPosition(Rotations.zero());
+          }, m_config.getSubsystem());
           setEncoderToZero.setName("ZeroEncoder");
 
           Debouncer velocityDebouncer = new Debouncer(0.5);
           AtomicReference<Angle> startingAngle = new AtomicReference<>(Rotations.zero());
-          Command testUpCommand =
-              Commands.startRun(
-                      () -> {
-                        System.out.println(
-                            "=====================================================\nTEST "
-                                + "UP\n=====================================================");
-                        System.out.println(
-                            "Test will end when Mechanism Velocity exceeds or "
-                                + "equals 10RPM after 30seconds");
-                        stopClosedLoopController();
-                        setDutyCycle(0);
-                        startingAngle.set(getMechanismPosition());
-                      },
-                      () -> {
-                        setDutyCycle(getDutyCycle() + 0.001);
-                      },
-                      m_config.getSubsystem())
-                  .until(() -> velocityDebouncer.calculate(getMechanismVelocity().abs(RPM) >= 10))
-                  .withTimeout(Seconds.of(30))
-                  .finallyDo(
-                      () -> {
-                        setDutyCycle(0);
-                        if (getMechanismPosition().lte(startingAngle.get())) {
-                          System.out.println(getName() + " needs to be inverted");
-                        }
-                        startClosedLoopController();
-                      });
+          Command testUpCommand = Commands.startRun(() -> {
+            System.out.println("=====================================================\nTEST " + "UP\n=====================================================");
+            System.out.println("Test will end when Mechanism Velocity exceeds or " + "equals 10RPM after 30seconds");
+            stopClosedLoopController();
+            setDutyCycle(0);
+            startingAngle.set(getMechanismPosition());
+          }, () -> {
+            setDutyCycle(getDutyCycle() + 0.001);
+          }, m_config.getSubsystem()).until(() -> velocityDebouncer.calculate(getMechanismVelocity().abs(RPM) >= 10)).withTimeout(Seconds.of(30)).finallyDo(() -> {
+            setDutyCycle(0);
+            if (getMechanismPosition().lte(startingAngle.get())) {
+              System.out.println(getName() + " needs to be inverted");
+            }
+            startClosedLoopController();
+          });
           testUpCommand.setName("Up");
-          Command testDownCommand =
-              Commands.startRun(
-                      () -> {
-                        System.out.println(
-                            "=====================================================\nTEST "
-                                + "DOWN\n=====================================================");
-                        System.out.println(
-                            "Test will end when Mechanism Velocity exceeds or "
-                                + "equals 10RPM after 30seconds");
-                        stopClosedLoopController();
-                        setDutyCycle(0);
-                        startingAngle.set(getMechanismPosition());
-                      },
-                      () -> {
-                        setDutyCycle(getDutyCycle() - 0.001);
-                      },
-                      m_config.getSubsystem())
-                  .until(() -> velocityDebouncer.calculate(getMechanismVelocity().abs(RPM) >= 10))
-                  .withTimeout(Seconds.of(30))
-                  .finallyDo(
-                      () -> {
-                        setDutyCycle(0);
-                        if (getMechanismPosition().gte(startingAngle.get())) {
-                          System.out.println(getName() + " needs to be inverted");
-                        }
-                        startClosedLoopController();
-                      });
+          Command testDownCommand = Commands.startRun(() -> {
+            System.out.println("=====================================================\nTEST " + "DOWN\n=====================================================");
+            System.out.println("Test will end when Mechanism Velocity exceeds or " + "equals 10RPM after 30seconds");
+            stopClosedLoopController();
+            setDutyCycle(0);
+            startingAngle.set(getMechanismPosition());
+          }, () -> {
+            setDutyCycle(getDutyCycle() - 0.001);
+          }, m_config.getSubsystem()).until(() -> velocityDebouncer.calculate(getMechanismVelocity().abs(RPM) >= 10)).withTimeout(Seconds.of(30)).finallyDo(() -> {
+            setDutyCycle(0);
+            if (getMechanismPosition().gte(startingAngle.get())) {
+              System.out.println(getName() + " needs to be inverted");
+            }
+            startClosedLoopController();
+          });
           testDownCommand.setName("Down");
           NetworkTablesBackends.ensureMechanismsTunableBackend();
           Tunables.publish(telemetryPathStr + "/ZeroEncoder", setEncoderToZero);
-          SmartMotorControllerCommandRegistry.addCommand(
-              "live", m_config.getSubsystem(), () -> this.telemetry.applyTuningValues(this));
+          SmartMotorControllerCommandRegistry.addCommand("live", m_config.getSubsystem(), () -> this.telemetry.applyTuningValues(this));
           Tunables.publish(telemetryPathStr + "/Up", testUpCommand);
           Tunables.publish(telemetryPathStr + "/Down", testDownCommand);
         }
@@ -1071,12 +885,11 @@ public abstract class SmartMotorController {
   /**
    * Set the exponential profile fields.
    *
-   * @param kV kV for the exponential profile.
-   * @param kA kA for the exponential profile.
+   * @param kV       kV for the exponential profile.
+   * @param kA       kA for the exponential profile.
    * @param maxInput Maximum input for the exponential profile.
    */
-  public abstract void setExponentialProfile(
-      OptionalDouble kV, OptionalDouble kA, Optional<Voltage> maxInput);
+  public abstract void setExponentialProfile(OptionalDouble kV, OptionalDouble kA, Optional<Voltage> maxInput);
 
   /**
    * Set kP for the feedback controller PID.
@@ -1302,8 +1115,7 @@ public abstract class SmartMotorController {
    *
    * @return Optional list of unsupported telemetry fields.
    */
-  public abstract Pair<Optional<List<BooleanTelemetryField>>, Optional<List<DoubleTelemetryField>>>
-      getUnsupportedTelemetryFields();
+  public abstract Pair<Optional<List<BooleanTelemetryField>>, Optional<List<DoubleTelemetryField>>> getUnsupportedTelemetryFields();
 
   /**
    * Get the name of the {@link SmartMotorController}

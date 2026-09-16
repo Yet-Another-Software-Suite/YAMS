@@ -9,12 +9,12 @@ package yams.exceptions;
  * <p>Common triggers include:
  *
  * <ul>
- *   <li>No motor controller provided (motor is absent from the config)
- *   <li>Arm length not set (needed for simulation)
- *   <li>Hard limits ({@code withHardLimits(Angle, Angle)}) missing or inconsistent
- *   <li>Starting angle not configured when no zero-offset is present on the motor
- *   <li>MOI (moment of inertia) not derivable from length/mass and not explicitly set
- *   <li>{@code withSmartMotorController()} called twice on the same config object
+ * <li>No motor controller provided (motor is absent from the config)
+ * <li>Arm length not set (needed for simulation)
+ * <li>Hard limits ({@code withHardLimits(Angle, Angle)}) missing or inconsistent
+ * <li>Starting angle not configured when no zero-offset is present on the motor
+ * <li>MOI (moment of inertia) not derivable from length/mass and not explicitly set
+ * <li>{@code withSmartMotorController()} called twice on the same config object
  * </ul>
  *
  * <p><b>Resolution:</b> Ensure {@code ArmConfig.withSmartMotorController(SmartMotorController)} is
@@ -40,17 +40,11 @@ public class ArmConfigurationException extends RuntimeException {
   /**
    * Arm configuration exception.
    *
-   * @param message Message to display.
-   * @param result Result of the configuration.
+   * @param message        Message to display.
+   * @param result         Result of the configuration.
    * @param remedyFunction Remedy function to use.
    */
   public ArmConfigurationException(String message, String result, String remedyFunction) {
-    super(
-        message
-            + "!\n"
-            + result
-            + "\nPlease use ArmConfig."
-            + remedyFunction
-            + " to fix this error.");
+    super(message + "!\n" + result + "\nPlease use ArmConfig." + remedyFunction + " to fix this error.");
   }
 }

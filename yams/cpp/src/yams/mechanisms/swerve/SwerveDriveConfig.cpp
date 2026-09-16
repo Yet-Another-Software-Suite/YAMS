@@ -3,14 +3,13 @@
 
 #include "yams/mechanisms/swerve/SwerveDriveConfig.hpp"
 
-#include <wpi/framework/RobotBase.hpp>
-#include <wpi/units/math.hpp>
-
 #include <cmath>
 #include <numbers>
 #include <stdexcept>
 #include <utility>
 #include <vector>
+#include <wpi/framework/RobotBase.hpp>
+#include <wpi/units/math.hpp>
 
 namespace yams::mechanisms::swerve {
 
@@ -59,7 +58,8 @@ SwerveDriveConfig& SwerveDriveConfig::WithMaximumChassisSpeed(
   return *this;
 }
 
-SwerveDriveConfig& SwerveDriveConfig::WithMaximumModuleSpeed(wpi::units::meters_per_second_t speed) {
+SwerveDriveConfig& SwerveDriveConfig::WithMaximumModuleSpeed(
+    wpi::units::meters_per_second_t speed) {
   m_maximumModuleLinearVelocity = speed;
   return *this;
 }
@@ -95,7 +95,8 @@ SwerveDriveConfig& SwerveDriveConfig::WithSimGyroAngularVelocityScaleFactor(doub
   return *this;
 }
 
-SwerveDriveConfig& SwerveDriveConfig::WithTranslationController(wpi::math::PIDController controller) {
+SwerveDriveConfig& SwerveDriveConfig::WithTranslationController(
+    wpi::math::PIDController controller) {
   m_translationController = std::move(controller);
   return *this;
 }
@@ -106,19 +107,21 @@ SwerveDriveConfig& SwerveDriveConfig::WithRotationController(wpi::math::PIDContr
   return *this;
 }
 
-SwerveDriveConfig& SwerveDriveConfig::WithSimTranslationController(wpi::math::PIDController controller) {
+SwerveDriveConfig& SwerveDriveConfig::WithSimTranslationController(
+    wpi::math::PIDController controller) {
   m_simTranslationController = std::move(controller);
   return *this;
 }
 
-SwerveDriveConfig& SwerveDriveConfig::WithSimRotationController(wpi::math::PIDController controller) {
+SwerveDriveConfig& SwerveDriveConfig::WithSimRotationController(
+    wpi::math::PIDController controller) {
   controller.EnableContinuousInput(-std::numbers::pi, std::numbers::pi);
   m_simRotationController = std::move(controller);
   return *this;
 }
 
 SwerveDriveConfig& SwerveDriveConfig::WithTelemetry(const std::string& name,
-                                                     TelemetryVerbosity verbosity) {
+                                                    TelemetryVerbosity verbosity) {
   m_telemetryName = name;
   m_telemetryVerbosity = verbosity;
   return *this;
@@ -145,8 +148,8 @@ std::optional<wpi::units::meters_per_second_t> SwerveDriveConfig::GetMaximumChas
   return m_maximumChassisLinearVelocity;
 }
 
-std::optional<wpi::units::degrees_per_second_t> SwerveDriveConfig::GetMaximumChassisAngularVelocity()
-    const {
+std::optional<wpi::units::degrees_per_second_t>
+SwerveDriveConfig::GetMaximumChassisAngularVelocity() const {
   return m_maximumChassisAngularVelocity;
 }
 
@@ -204,8 +207,7 @@ wpi::math::ChassisVelocities SwerveDriveConfig::AngularVelocitySkewCorrection(
   }
 
   auto gyroRotation = wpi::math::Rotation2d{wpi::units::radian_t{GetGyroAngle()}};
-  auto fieldRelativeVelocity =
-      (robotRelativeVelocity).ToFieldRelative(gyroRotation);
+  auto fieldRelativeVelocity = (robotRelativeVelocity).ToFieldRelative(gyroRotation);
   return (fieldRelativeVelocity).ToRobotRelative(gyroRotation + angularVelocityRotation);
 }
 
@@ -244,15 +246,15 @@ wpi::math::Translation2d SwerveDriveConfig::CubeTranslation(wpi::math::Translati
     return translation;
   }
   return wpi::math::Translation2d{wpi::units::meter_t{std::pow(translation.Norm().value(), 3)},
-                            translation.Angle()};
+                                  translation.Angle().value()};
 }
 
 wpi::math::Translation2d SwerveDriveConfig::ScaleTranslation(wpi::math::Translation2d translation,
-                                                       double scalar) {
+                                                             double scalar) {
   if (std::hypot(translation.X().value(), translation.Y().value()) <= 1.0e-6) {
     return translation;
   }
-  return wpi::math::Translation2d{translation.Norm() * scalar, translation.Angle()};
+  return wpi::math::Translation2d{translation.Norm() * scalar, translation.Angle().value()};
 }
 
 }  // namespace yams::mechanisms::swerve

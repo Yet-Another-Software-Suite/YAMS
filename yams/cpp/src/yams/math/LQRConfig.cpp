@@ -3,14 +3,13 @@
 
 #include "yams/math/LQRConfig.hpp"
 
+#include <stdexcept>
+#include <vector>
 #include <wpi/math/linalg/EigenCore.hpp>
 #include <wpi/math/system/Models.hpp>
 #include <wpi/units/length.hpp>
 #include <wpi/units/mass.hpp>
 #include <wpi/units/moment_of_inertia.hpp>
-
-#include <stdexcept>
-#include <vector>
 
 namespace yams::math {
 
@@ -40,8 +39,8 @@ LQRConfig& LQRConfig::WithArmSystem(const wpi::math::DCMotor& motor, double mome
   return *this;
 }
 
-LQRConfig& LQRConfig::WithElevatorSystem(const wpi::math::DCMotor& motor, double mass, double drumRadius,
-                                         double gearing) {
+LQRConfig& LQRConfig::WithElevatorSystem(const wpi::math::DCMotor& motor, double mass,
+                                         double drumRadius, double gearing) {
   // Same reduction to position-only output.
   auto full = wpi::math::Models::ElevatorFromPhysicalConstants(
       motor, wpi::units::kilogram_t{mass}, wpi::units::meter_t{drumRadius}, gearing);
@@ -92,13 +91,13 @@ std::variant<LQRConfig::Loop1, LQRConfig::Loop2> LQRConfig::GetLoop() const {
   if (type == LQRType::FLYWHEEL) {
     auto plant = m_flywheelPlant.value();
     wpi::math::LinearQuadraticRegulator<1, 1> controller{plant,
-                                                   {m_qElems.empty() ? 3.0 : m_qElems[0]},
-                                                   {m_rElems.empty() ? 12.0 : m_rElems[0]},
-                                                   m_period};
+                                                         {m_qElems.empty() ? 3.0 : m_qElems[0]},
+                                                         {m_rElems.empty() ? 12.0 : m_rElems[0]},
+                                                         m_period};
     wpi::math::KalmanFilter<1, 1, 1> observer{plant,
-                                        {m_stateStdDevs.empty() ? 3.0 : m_stateStdDevs[0]},
-                                        {m_measStdDevs.empty() ? 0.01 : m_measStdDevs[0]},
-                                        m_period};
+                                              {m_stateStdDevs.empty() ? 3.0 : m_stateStdDevs[0]},
+                                              {m_measStdDevs.empty() ? 0.01 : m_measStdDevs[0]},
+                                              m_period};
     return Loop1{plant, controller, observer, m_maxVoltage, m_period};
   } else {
     auto plant = m_armElevatorPlant.value();
@@ -107,11 +106,12 @@ std::variant<LQRConfig::Loop1, LQRConfig::Loop2> LQRConfig::GetLoop() const {
         {m_qElems.size() > 0 ? m_qElems[0] : 0.01, m_qElems.size() > 1 ? m_qElems[1] : 0.01},
         {m_rElems.empty() ? 12.0 : m_rElems[0]},
         m_period};
-    wpi::math::KalmanFilter<2, 1, 1> observer{plant,
-                                        {m_stateStdDevs.size() > 0 ? m_stateStdDevs[0] : 0.01,
-                                         m_stateStdDevs.size() > 1 ? m_stateStdDevs[1] : 0.01},
-                                        {m_measStdDevs.empty() ? 0.0001 : m_measStdDevs[0]},
-                                        m_period};
+    wpi::math::KalmanFilter<2, 1, 1> observer{
+        plant,
+        {m_stateStdDevs.size() > 0 ? m_stateStdDevs[0] : 0.01,
+         m_stateStdDevs.size() > 1 ? m_stateStdDevs[1] : 0.01},
+        {m_measStdDevs.empty() ? 0.0001 : m_measStdDevs[0]},
+        m_period};
     return Loop2{plant, controller, observer, m_maxVoltage, m_period};
   }
 }

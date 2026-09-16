@@ -3,17 +3,6 @@
 
 #pragma once
 
-#include <wpi/driverstation/DriverStation.hpp>
-#include <wpi/math/util/MathUtil.hpp>
-#include <wpi/math/geometry/Pose2d.hpp>
-#include <wpi/math/geometry/Rotation2d.hpp>
-#include <wpi/math/geometry/Translation2d.hpp>
-#include <wpi/math/kinematics/ChassisVelocities.hpp>
-#include <wpi/units/angle.hpp>
-#include <wpi/units/angular_velocity.hpp>
-#include <wpi/units/length.hpp>
-#include <wpi/units/velocity.hpp>
-
 #include <cmath>
 #include <functional>
 #include <iostream>
@@ -21,6 +10,16 @@
 #include <optional>
 #include <stdexcept>
 #include <utility>
+#include <wpi/driverstation/DriverStation.hpp>
+#include <wpi/math/geometry/Pose2d.hpp>
+#include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/math/geometry/Translation2d.hpp>
+#include <wpi/math/kinematics/ChassisVelocities.hpp>
+#include <wpi/math/util/MathUtil.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/velocity.hpp>
 
 #include "yams/mechanisms/swerve/SwerveDrive.hpp"
 #include "yams/mechanisms/swerve/SwerveDriveConfig.hpp"
@@ -379,8 +378,8 @@ class SwerveInputStream {
         auto& pid = m_swerveDrive->GetConfig().GetRotationPID();
         double headingTarget =
             std::atan2(m_controllerHeadingX.value()(), m_controllerHeadingY.value()());
-        omega =
-            pid.Calculate(wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}.value(), headingTarget);
+        omega = pid.Calculate(wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}.value(),
+                              headingTarget);
         if (m_axisDeadband.has_value() &&
             std::abs(m_controllerHeadingX.value()()) + std::abs(m_controllerHeadingY.value()()) <
                 m_axisDeadband.value()) {
@@ -390,17 +389,19 @@ class SwerveInputStream {
       }
       case SwerveInputMode::AIM: {
         auto& pid = m_swerveDrive->GetConfig().GetRotationPID();
-        auto currentHeading = wpi::math::Rotation2d{wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}};
+        auto currentHeading =
+            wpi::math::Rotation2d{wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}};
         auto relativeTrl = m_aimTarget.value()().RelativeTo(m_swerveDrive->GetPose()).Translation();
-        auto target = relativeTrl.Angle() + currentHeading;
+        auto target = relativeTrl.Angle().value_or(wpi::math::Rotation2d{}) + currentHeading;
         omega = pid.Calculate(currentHeading.Radians().value(), target.Radians().value());
         break;
       }
     }
 
     m_currentMode = newMode;
-    speeds = wpi::math::ChassisVelocities{wpi::units::meters_per_second_t{vx}, wpi::units::meters_per_second_t{vy},
-                                wpi::units::radians_per_second_t{omega}};
+    speeds = wpi::math::ChassisVelocities{wpi::units::meters_per_second_t{vx},
+                                          wpi::units::meters_per_second_t{vy},
+                                          wpi::units::radians_per_second_t{omega}};
     return ApplyTranslationHeadingOffset(ApplyRobotRelativeTranslation(speeds));
   }
 
@@ -502,7 +503,8 @@ class SwerveInputStream {
     // Enter new mode
     switch (newMode) {
       case SwerveInputMode::TRANSLATION_ONLY:
-        m_lockedHeading = wpi::math::Rotation2d{wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}};
+        m_lockedHeading =
+            wpi::math::Rotation2d{wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}};
         m_swerveDrive->ResetRotationPID();
         break;
       case SwerveInputMode::HEADING:
@@ -546,7 +548,8 @@ class SwerveInputStream {
 
   wpi::math::ChassisVelocities ApplyRobotRelativeTranslation(wpi::math::ChassisVelocities speeds) {
     if (m_robotRelative.has_value() && m_robotRelative.value()()) {
-      return (speeds).ToFieldRelative(wpi::math::Rotation2d{wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}});
+      return (speeds).ToFieldRelative(
+          wpi::math::Rotation2d{wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}});
     }
     return speeds;
   }
@@ -567,10 +570,12 @@ class SwerveInputStream {
   wpi::math::ChassisVelocities ApplyTranslationHeadingOffset(wpi::math::ChassisVelocities speeds) {
     if (m_translationHeadingOffsetEnabled.has_value() &&
         m_translationHeadingOffsetEnabled.value()() && m_translationHeadingOffset.has_value()) {
-      wpi::math::Translation2d vec{wpi::units::meter_t{speeds.vx.value()}, wpi::units::meter_t{speeds.vy.value()}};
+      wpi::math::Translation2d vec{wpi::units::meter_t{speeds.vx.value()},
+                                   wpi::units::meter_t{speeds.vy.value()}};
       auto rotated = vec.RotateBy(m_translationHeadingOffset.value());
       return wpi::math::ChassisVelocities{wpi::units::meters_per_second_t{rotated.X().value()},
-                                wpi::units::meters_per_second_t{rotated.Y().value()}, speeds.omega};
+                                          wpi::units::meters_per_second_t{rotated.Y().value()},
+                                          speeds.omega};
     }
     return speeds;
   }

@@ -77,9 +77,9 @@ SwerveModuleTelemetryConfig::GetDoubleFields() {
   return m_doubleFields;
 }
 
-std::unordered_map<
-    SwerveModuleTelemetryConfig::StructTelemetryField,
-    StructTelemetry<wpi::math::SwerveModuleVelocity, SwerveModuleTelemetryConfig::StructTelemetryField>>&
+std::unordered_map<SwerveModuleTelemetryConfig::StructTelemetryField,
+                   StructTelemetry<wpi::math::SwerveModuleVelocity,
+                                   SwerveModuleTelemetryConfig::StructTelemetryField>>&
 SwerveModuleTelemetryConfig::GetStructFields() {
   return m_structFields;
 }

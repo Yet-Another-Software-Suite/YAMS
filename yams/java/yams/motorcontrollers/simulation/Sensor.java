@@ -39,14 +39,14 @@ import yams.mechanisms.config.SensorConfig;
  *
  * <h2>Key fields and methods</h2>
  * <ul>
- *   <li>{@link #getField(String)} — retrieve a {@link SensorData} field by name.</li>
- *   <li>{@link #getAsDouble(String)}, {@link #getAsInt(String)}, {@link #getAsBoolean(String)},
- *       {@link #getAsLong(String)} — typed convenience accessors that call through to
- *       the underlying field.</li>
- *   <li>{@link #addSimTrigger(String, org.wpilib.hardware.hal.HALValue, java.util.function.BooleanSupplier)}
- *       — inject a simulated override value whenever a condition is true.</li>
- *   <li>{@link #getDevice()} — returns the underlying {@link org.wpilib.hardware.hal.SimDevice}
- *       (empty when running on a real robot).</li>
+ * <li>{@link #getField(String)} — retrieve a {@link SensorData} field by name.</li>
+ * <li>{@link #getAsDouble(String)}, {@link #getAsInt(String)}, {@link #getAsBoolean(String)},
+ * {@link #getAsLong(String)} — typed convenience accessors that call through to
+ * the underlying field.</li>
+ * <li>{@link #addSimTrigger(String, org.wpilib.hardware.hal.HALValue, java.util.function.BooleanSupplier)}
+ * — inject a simulated override value whenever a condition is true.</li>
+ * <li>{@link #getDevice()} — returns the underlying {@link org.wpilib.hardware.hal.SimDevice}
+ * (empty when running on a real robot).</li>
  * </ul>
  *
  * <h2>Example</h2>
@@ -64,8 +64,7 @@ import yams.mechanisms.config.SensorConfig;
  *     () -> DriverStation.isAutonomous());
  * }</pre>
  */
-public class Sensor
-{
+public class Sensor {
   /**
    * Simulated device.
    */
@@ -86,19 +85,15 @@ public class Sensor
    * @param sensorName   Name of the sensor.
    * @param sensorFields List of sensor fields. See {@link SensorData}.
    */
-  public Sensor(String sensorName, List<SensorData> sensorFields)
-  {
+  public Sensor(String sensorName, List<SensorData> sensorFields) {
     m_sensorName = sensorName;
     m_simData = sensorFields.stream().collect(Collectors.toMap(SensorData::getName, entry -> entry));
-    if (RobotBase.isSimulation())
-    {
+    if (RobotBase.isSimulation()) {
       m_simDevice = Optional.of(SimDevice.create("Sensor[" + sensorName + "]"));
-      for (var field : sensorFields)
-      {
+      for (var field : sensorFields) {
         field.createValue(m_simDevice.get(), Direction.BIDIR);
       }
-    } else
-    {
+    } else {
       m_simDevice = Optional.empty();
     }
   }
@@ -108,8 +103,7 @@ public class Sensor
    *
    * @param cfg {@link SensorConfig} class
    */
-  public Sensor(SensorConfig cfg)
-  {
+  public Sensor(SensorConfig cfg) {
     this(cfg.getName(), cfg.getFields());
   }
 
@@ -119,10 +113,8 @@ public class Sensor
    * @param name Name of the field
    * @return {@link SensorData} of the field.
    */
-  public SensorData getField(String name)
-  {
-    if (!m_simData.containsKey(name))
-    {
+  public SensorData getField(String name) {
+    if (!m_simData.containsKey(name)) {
       throw new IllegalArgumentException("Sensor[" + m_sensorName + "." + name + "] does not exist!");
     }
     return m_simData.get(name);
@@ -134,8 +126,7 @@ public class Sensor
    * @param name Name of the field
    * @return Value of the field as a double.
    */
-  public double getAsDouble(String name)
-  {
+  public double getAsDouble(String name) {
     return getField(name).getAsDouble();
   }
 
@@ -145,8 +136,7 @@ public class Sensor
    * @param name Name of the field
    * @return Value of the field as an int.
    */
-  public int getAsInt(String name)
-  {
+  public int getAsInt(String name) {
     return getField(name).getAsInt();
   }
 
@@ -156,8 +146,7 @@ public class Sensor
    * @param name Name of the field
    * @return Value of the field as a boolean.
    */
-  public boolean getAsBoolean(String name)
-  {
+  public boolean getAsBoolean(String name) {
     return getField(name).getAsBoolean();
   }
 
@@ -167,8 +156,7 @@ public class Sensor
    * @param name Name of the field
    * @return Value of the field as a long.
    */
-  public long getAsLong(String name)
-  {
+  public long getAsLong(String name) {
     return getField(name).getAsLong();
   }
 
@@ -177,8 +165,7 @@ public class Sensor
    *
    * @return Simulated device.
    */
-  public Optional<SimDevice> getDevice()
-  {
+  public Optional<SimDevice> getDevice() {
     return m_simDevice;
   }
 
@@ -189,8 +176,7 @@ public class Sensor
    * @param value   {@link HALValue} to set.
    * @param trigger {@link BooleanSupplier} when to use.
    */
-  public void addSimTrigger(String field, HALValue value, BooleanSupplier trigger)
-  {
+  public void addSimTrigger(String field, HALValue value, BooleanSupplier trigger) {
     getField(field).addSimTrigger(value, trigger);
   }
 

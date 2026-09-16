@@ -3,13 +3,13 @@
 
 package yams;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Rotations;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.Test;
 import org.wpilib.math.util.MathUtil;
 import org.wpilib.units.measure.Angle;
-import org.junit.jupiter.api.Test;
 import yams.gearing.MechanismGearing;
 import yams.units.EasyCRT;
 import yams.units.EasyCRTConfig;

@@ -3,9 +3,8 @@
 
 #include "yams/motorcontrollers/simulation/ArmSimSupplier.hpp"
 
-#include <wpi/simulation/RoboRioSim.hpp>
-
 #include <utility>
+#include <wpi/simulation/RoboRioSim.hpp>
 
 #include "yams/motorcontrollers/simulation/BatterySim.hpp"
 
@@ -13,7 +12,8 @@ namespace yams::motorcontrollers::simulation {
 
 ArmSimSupplier::ArmSimSupplier(wpi::sim::SingleJointedArmSim& sim,
                                std::function<double()> dutyCycleSupplier,
-                               const gearing::MechanismGearing& gearing, wpi::units::second_t period)
+                               const gearing::MechanismGearing& gearing,
+                               wpi::units::second_t period)
     : m_sim(sim),
       m_dutyCycleSupplier(std::move(dutyCycleSupplier)),
       m_gearing(gearing),
@@ -21,7 +21,8 @@ ArmSimSupplier::ArmSimSupplier(wpi::sim::SingleJointedArmSim& sim,
 
 void ArmSimSupplier::UpdateSim() {
   if (!m_inputFed) {
-    m_lastInputVoltage = wpi::units::volt_t{m_dutyCycleSupplier() * GetMechanismSupplyVoltage().value()};
+    m_lastInputVoltage =
+        wpi::units::volt_t{m_dutyCycleSupplier() * GetMechanismSupplyVoltage().value()};
     m_sim.SetInputVoltage(m_lastInputVoltage);
     wpi::sim::RoboRioSim::SetVInVoltage(BatterySim::CalculateVoltage(this, m_sim.GetCurrentDraw()));
   }
@@ -32,7 +33,9 @@ void ArmSimSupplier::UpdateSim() {
 
 wpi::units::turn_t ArmSimSupplier::GetMechanismPosition() { return m_sim.GetAngle(); }
 
-wpi::units::turns_per_second_t ArmSimSupplier::GetMechanismVelocity() { return m_sim.GetVelocity(); }
+wpi::units::turns_per_second_t ArmSimSupplier::GetMechanismVelocity() {
+  return m_sim.GetVelocity();
+}
 
 wpi::units::turns_per_second_squared_t ArmSimSupplier::GetMechanismAcceleration() {
   return wpi::units::turns_per_second_squared_t{0.0};

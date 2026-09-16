@@ -6,9 +6,9 @@ package yams.helpers;
 import static org.wpilib.units.Units.Microseconds;
 import static org.wpilib.units.Units.Seconds;
 
-import org.wpilib.units.measure.Time;
-import org.wpilib.simulation.SimHooks;
 import java.util.PriorityQueue;
+import org.wpilib.simulation.SimHooks;
+import org.wpilib.units.measure.Time;
 
 /**
  * Minimal, deterministic stand-in for how {@link org.wpilib.framework.TimedRobot} runs multiple

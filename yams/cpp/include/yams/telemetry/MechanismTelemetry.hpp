@@ -3,6 +3,11 @@
 
 #pragma once
 
+#include <functional>
+#include <memory>
+#include <optional>
+#include <span>
+#include <string>
 #include <wpi/datalog/DataLog.hpp>
 #include <wpi/nt/DoubleTopic.hpp>
 #include <wpi/nt/NetworkTable.hpp>
@@ -10,12 +15,6 @@
 #include <wpi/nt/StructTopic.hpp>
 #include <wpi/system/DataLogManager.hpp>
 #include <wpi/util/json.hpp>
-
-#include <functional>
-#include <memory>
-#include <optional>
-#include <span>
-#include <string>
 
 namespace yams::motorcontrollers {
 class SmartMotorController;
@@ -107,7 +106,7 @@ class MechanismTelemetry {
     std::shared_ptr<wpi::log::StructLogEntry<T>> logEntry;
     if (m_dataLogName) {
       logEntry = std::make_shared<wpi::log::StructLogEntry<T>>(wpi::DataLogManager::GetLog(),
-                                                                *m_dataLogName + "/" + key);
+                                                               *m_dataLogName + "/" + key);
     }
     return [publisher, logEntry](const T& value) {
       publisher->Set(value);
@@ -130,8 +129,8 @@ class MechanismTelemetry {
         m_networkTable->template GetStructArrayTopic<T>(key).Publish());
     std::shared_ptr<wpi::log::StructArrayLogEntry<T>> logEntry;
     if (m_dataLogName) {
-      logEntry = std::make_shared<wpi::log::StructArrayLogEntry<T>>(
-          wpi::DataLogManager::GetLog(), *m_dataLogName + "/" + key);
+      logEntry = std::make_shared<wpi::log::StructArrayLogEntry<T>>(wpi::DataLogManager::GetLog(),
+                                                                    *m_dataLogName + "/" + key);
     }
     return [publisher, logEntry](std::span<const T> value) {
       publisher->Set(value);

@@ -3,12 +3,11 @@
 
 #include "yams/units/EasyCRT.hpp"
 
-#include <wpi/math/util/MathUtil.hpp>
-
 #include <cmath>
 #include <cstdint>
 #include <limits>
 #include <utility>
+#include <wpi/math/util/MathUtil.hpp>
 
 namespace yams::units {
 

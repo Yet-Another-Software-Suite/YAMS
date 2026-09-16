@@ -20,18 +20,18 @@ import yams.motorcontrollers.SmartMotorController;
  * required for closed-loop position control:
  * </p>
  * <ul>
- *   <li>Setpoint management via {@link yams.mechanisms.SmartMechanism#setMechanismPositionSetpoint}
- *       and {@link yams.mechanisms.SmartMechanism#setMeasurementPositionSetpoint}</li>
- *   <li>Position-based {@link org.wpilib.command2.button.Trigger} factories
- *       ({@code isNear()}, {@code gte()}, {@code lte()}, {@code between()}, {@code max()},
- *       {@code min()}) — defined by each concrete subclass</li>
- *   <li>Command factories such as {@code setAngle()} and {@code setHeight()} defined by each
- *       concrete subclass, which internally call
- *       {@link yams.mechanisms.SmartMechanism#setMechanismPositionSetpoint} or
- *       {@link yams.mechanisms.SmartMechanism#setMeasurementPositionSetpoint}</li>
- *   <li>A 2D visualization model via {@link org.wpilib.smartdashboard.MechanismRoot2d}
- *       and {@link org.wpilib.smartdashboard.MechanismLigament2d} fields that subclasses
- *       populate and update</li>
+ * <li>Setpoint management via {@link yams.mechanisms.SmartMechanism#setMechanismPositionSetpoint}
+ * and {@link yams.mechanisms.SmartMechanism#setMeasurementPositionSetpoint}</li>
+ * <li>Position-based {@link org.wpilib.command2.button.Trigger} factories
+ * ({@code isNear()}, {@code gte()}, {@code lte()}, {@code between()}, {@code max()},
+ * {@code min()}) — defined by each concrete subclass</li>
+ * <li>Command factories such as {@code setAngle()} and {@code setHeight()} defined by each
+ * concrete subclass, which internally call
+ * {@link yams.mechanisms.SmartMechanism#setMechanismPositionSetpoint} or
+ * {@link yams.mechanisms.SmartMechanism#setMeasurementPositionSetpoint}</li>
+ * <li>A 2D visualization model via {@link org.wpilib.smartdashboard.MechanismRoot2d}
+ * and {@link org.wpilib.smartdashboard.MechanismLigament2d} fields that subclasses
+ * populate and update</li>
  * </ul>
  *
  * <p>
@@ -63,25 +63,24 @@ import yams.motorcontrollers.SmartMotorController;
  * abstract methods inherited from {@link yams.mechanisms.SmartMechanism}:
  * </p>
  * <ul>
- *   <li>{@link yams.mechanisms.SmartMechanism#getRelativeMechanismPosition()} — returns the
- *       current 3-D position of the mechanism end-point in {@link org.wpilib.smartdashboard.Mechanism2d}
- *       coordinates</li>
- *   <li>{@link yams.mechanisms.SmartMechanism#visualizationUpdate()} — updates
- *       {@code m_mechanismLigament} (and any setpoint ligament) to reflect the current state</li>
- *   <li>{@link yams.mechanisms.SmartMechanism#getName()} — returns a human-readable mechanism
- *       name used for telemetry and command names</li>
- *   <li>{@link yams.mechanisms.SmartMechanism#simIterate()} — advances the physics simulation
- *       model and writes back simulated encoder values each robot loop</li>
- *   <li>{@link yams.mechanisms.SmartMechanism#updateTelemetry()} — publishes mechanism state
- *       to NetworkTables or an equivalent telemetry sink</li>
- *   <li>{@link #max()} — returns a {@link org.wpilib.command2.button.Trigger} that
- *       activates when the mechanism reaches its configured maximum limit</li>
- *   <li>{@link #min()} — returns a {@link org.wpilib.command2.button.Trigger} that
- *       activates when the mechanism reaches its configured minimum limit</li>
+ * <li>{@link yams.mechanisms.SmartMechanism#getRelativeMechanismPosition()} — returns the
+ * current 3-D position of the mechanism end-point in {@link org.wpilib.smartdashboard.Mechanism2d}
+ * coordinates</li>
+ * <li>{@link yams.mechanisms.SmartMechanism#visualizationUpdate()} — updates
+ * {@code m_mechanismLigament} (and any setpoint ligament) to reflect the current state</li>
+ * <li>{@link yams.mechanisms.SmartMechanism#getName()} — returns a human-readable mechanism
+ * name used for telemetry and command names</li>
+ * <li>{@link yams.mechanisms.SmartMechanism#simIterate()} — advances the physics simulation
+ * model and writes back simulated encoder values each robot loop</li>
+ * <li>{@link yams.mechanisms.SmartMechanism#updateTelemetry()} — publishes mechanism state
+ * to NetworkTables or an equivalent telemetry sink</li>
+ * <li>{@link #max()} — returns a {@link org.wpilib.command2.button.Trigger} that
+ * activates when the mechanism reaches its configured maximum limit</li>
+ * <li>{@link #min()} — returns a {@link org.wpilib.command2.button.Trigger} that
+ * activates when the mechanism reaches its configured minimum limit</li>
  * </ul>
  */
-public abstract class SmartPositionalMechanism extends SmartMechanism
-{
+public abstract class SmartPositionalMechanism extends SmartMechanism {
   /**
    * The root point of the Mechanism.
    */
@@ -113,8 +112,7 @@ public abstract class SmartPositionalMechanism extends SmartMechanism
    *
    * @return Ligament of the 2D mechanism model.
    */
-  public MechanismLigament2d getMechanismLigament()
-  {
+  public MechanismLigament2d getMechanismLigament() {
     return m_mechanismLigament;
   }
 
@@ -123,8 +121,7 @@ public abstract class SmartPositionalMechanism extends SmartMechanism
    *
    * @return Root of the 2D mechanism model.
    */
-  public MechanismRoot2d getMechanismRoot()
-  {
+  public MechanismRoot2d getMechanismRoot() {
     return m_mechanismRoot;
   }
 
@@ -133,8 +130,7 @@ public abstract class SmartPositionalMechanism extends SmartMechanism
    *
    * @return Motor controller which is moving the mechanism.
    */
-  public SmartMotorController getMotor()
-  {
+  public SmartMotorController getMotor() {
     return m_smc;
   }
 }

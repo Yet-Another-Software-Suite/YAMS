@@ -3,16 +3,15 @@
 
 #pragma once
 
+#include <functional>
+#include <optional>
+#include <string>
 #include <wpi/math/geometry/Rotation2d.hpp>
 #include <wpi/math/geometry/Translation2d.hpp>
 #include <wpi/math/kinematics/SwerveModuleVelocity.hpp>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/length.hpp>
 #include <wpi/units/velocity.hpp>
-
-#include <functional>
-#include <optional>
-#include <string>
 
 #include "yams/gearing/GearBox.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
@@ -210,7 +209,6 @@ class SwerveModuleConfig {
   /** Get the absolute encoder supplier, if configured via WithAbsoluteEncoder(). */
   std::optional<std::function<wpi::units::degree_t()>> GetAbsoluteEncoderSupplier() const;
 
-
   /**
    * Get the user-specified SwerveModuleTelemetryConfig, if configured via
    * WithTelemetry(name, SwerveModuleTelemetryConfig). Moves the config out of this
@@ -254,7 +252,7 @@ class SwerveModuleConfig {
    *                     (e.g. for optimization).
    */
   double GetCosineCompensatedVelocity(const wpi::math::SwerveModuleVelocity& desiredState,
-                                       const wpi::math::Rotation2d& currentAngle) const;
+                                      const wpi::math::Rotation2d& currentAngle) const;
 };
 
 }  // namespace yams::mechanisms::config

@@ -3,15 +3,14 @@
 
 #include "yams/mechanisms/config/SwerveModuleConfig.hpp"
 
-#include <wpi/framework/RobotBase.hpp>
-#include <wpi/math/geometry/Rotation2d.hpp>
-#include <wpi/units/math.hpp>
-
 #include <cmath>
 #include <numbers>
 #include <stdexcept>
 #include <string>
 #include <utility>
+#include <wpi/framework/RobotBase.hpp>
+#include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/units/math.hpp>
 
 namespace yams::mechanisms::config {
 
@@ -62,7 +61,8 @@ SwerveModuleConfig& SwerveModuleConfig::WithLocation(wpi::math::Translation2d lo
   return *this;
 }
 
-SwerveModuleConfig& SwerveModuleConfig::WithLocation(wpi::units::meter_t front, wpi::units::meter_t left) {
+SwerveModuleConfig& SwerveModuleConfig::WithLocation(wpi::units::meter_t front,
+                                                     wpi::units::meter_t left) {
   m_location = wpi::math::Translation2d{front, left};
   return *this;
 }
@@ -133,7 +133,9 @@ std::optional<SwerveModuleConfig::TelemetryVerbosity> SwerveModuleConfig::GetTel
   return m_telemetryVerbosity;
 }
 
-std::optional<wpi::math::Translation2d> SwerveModuleConfig::GetLocation() const { return m_location; }
+std::optional<wpi::math::Translation2d> SwerveModuleConfig::GetLocation() const {
+  return m_location;
+}
 
 bool SwerveModuleConfig::GetStateOptimization() const { return m_stateOptimization; }
 
@@ -155,15 +157,16 @@ std::function<wpi::units::degree_t()> SwerveModuleConfig::GetRawAbsoluteEncoderA
   auto* azimuth = m_azimuthMotor;
   wpi::units::degree_t offset{0};
   if (!wpi::RobotBase::IsSimulation() && azimuth) {
-    offset = wpi::units::degree_t{azimuth->GetConfig().GetExternalEncoderZeroOffset().value_or(wpi::units::turn_t{0})};
+    offset = wpi::units::degree_t{
+        azimuth->GetConfig().GetExternalEncoderZeroOffset().value_or(wpi::units::turn_t{0})};
   }
   return [azimuth, offset]() -> wpi::units::degree_t {
     return wpi::units::degree_t{azimuth->GetMechanismPosition()} + offset;
   };
 }
 
-std::optional<std::function<wpi::units::degree_t()>> SwerveModuleConfig::GetAbsoluteEncoderSupplier()
-    const {
+std::optional<std::function<wpi::units::degree_t()>>
+SwerveModuleConfig::GetAbsoluteEncoderSupplier() const {
   return m_absoluteEncoderSupplier;
 }
 
@@ -176,13 +179,15 @@ SwerveModuleConfig::GetSwerveModuleTelemetryConfig() {
 }
 
 double SwerveModuleConfig::GetCosineCompensatedVelocity(
-    const wpi::math::SwerveModuleVelocity& desiredState, const wpi::math::Rotation2d& currentAngle) const {
+    const wpi::math::SwerveModuleVelocity& desiredState,
+    const wpi::math::Rotation2d& currentAngle) const {
   // Taken from the CTRE SwerveModule class.
   // https://api.ctr-electronics.com/phoenix6/release/java/src-html/com/ctre/phoenix6/mechanisms/swerve/SwerveModule.html#line.46
   /* From FRC 900's whitepaper, we add a cosine compensator to the applied drive velocity */
   /* To reduce the "skew" that occurs when changing direction */
   /* If error is close to 0 rotations, we're already there, so apply full power */
-  /* If the error is close to 0.25 rotations, then we're 90 degrees, so movement doesn't help us at all */
+  /* If the error is close to 0.25 rotations, then we're 90 degrees, so movement doesn't help us at
+   * all */
   // The azimuth is only meaningful modulo 180 degrees (0 == 180) since the drive motor can spin
   // either direction. Using the SIGNED cosine of the (correctly wrapped) angle difference
   // handles that on its own: near 0 degrees it scales close to +1 (drive forward as
@@ -194,7 +199,8 @@ double SwerveModuleConfig::GetCosineCompensatedVelocity(
   return desiredState.velocity.value() * cosineScalar;
 }
 
-wpi::math::SwerveModuleVelocity SwerveModuleConfig::GetOptimizedState(wpi::math::SwerveModuleVelocity state) const {
+wpi::math::SwerveModuleVelocity SwerveModuleConfig::GetOptimizedState(
+    wpi::math::SwerveModuleVelocity state) const {
   wpi::math::Rotation2d currentAngle{wpi::units::radian_t{GetAbsoluteEncoderAngle()}};
   if (m_minimumVelocity) {
     if (wpi::units::math::abs(state.velocity) <= *m_minimumVelocity) {
@@ -205,8 +211,10 @@ wpi::math::SwerveModuleVelocity SwerveModuleConfig::GetOptimizedState(wpi::math:
     state = state.Optimize(currentAngle);
   }
   if (m_cosineCompensation) {
-    wpi::math::Rotation2d azimuthAngle{wpi::units::radian_t{m_azimuthMotor->GetMechanismPosition()}};
-    state.velocity = wpi::units::meters_per_second_t{GetCosineCompensatedVelocity(state, azimuthAngle)};
+    wpi::math::Rotation2d azimuthAngle{
+        wpi::units::radian_t{m_azimuthMotor->GetMechanismPosition()}};
+    state.velocity =
+        wpi::units::meters_per_second_t{GetCosineCompensatedVelocity(state, azimuthAngle)};
   }
   return state;
 }

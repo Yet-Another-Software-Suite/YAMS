@@ -12,24 +12,24 @@
  * <h2>Available Configuration Classes</h2>
  *
  * <ul>
- *   <li>{@link yams.mechanisms.config.ArmConfig} — single-jointed arm with angle limits and
- *       feedforward tuning
- *   <li>{@link yams.mechanisms.config.ElevatorConfig} — linear elevator with height limits and
- *       gravity compensation
- *   <li>{@link yams.mechanisms.config.PivotConfig} — pivot mechanism with continuous or bounded
- *       rotation
- *   <li>{@link yams.mechanisms.config.FlyWheelConfig} — flywheel velocity mechanism with optional
- *       second follower motor
- *   <li>{@link yams.mechanisms.config.SwerveDriveConfig} — full swerve-drive chassis geometry and
- *       module layout
- *   <li>{@link yams.mechanisms.config.SwerveModuleConfig} — per-module drive and steer motor
- *       configuration
- *   <li>{@link yams.mechanisms.config.DifferentialMechanismConfig} — differential (tank-drive)
- *       mechanism pairing two motors
- *   <li>{@link yams.mechanisms.config.MechanismPositionConfig} — position targets and tolerance
- *       settings shared across positional mechanisms
- *   <li>{@link yams.mechanisms.config.SensorConfig} — external encoder or absolute sensor
- *       attachment configuration
+ * <li>{@link yams.mechanisms.config.ArmConfig} — single-jointed arm with angle limits and
+ * feedforward tuning
+ * <li>{@link yams.mechanisms.config.ElevatorConfig} — linear elevator with height limits and
+ * gravity compensation
+ * <li>{@link yams.mechanisms.config.PivotConfig} — pivot mechanism with continuous or bounded
+ * rotation
+ * <li>{@link yams.mechanisms.config.FlyWheelConfig} — flywheel velocity mechanism with optional
+ * second follower motor
+ * <li>{@link yams.mechanisms.config.SwerveDriveConfig} — full swerve-drive chassis geometry and
+ * module layout
+ * <li>{@link yams.mechanisms.config.SwerveModuleConfig} — per-module drive and steer motor
+ * configuration
+ * <li>{@link yams.mechanisms.config.DifferentialMechanismConfig} — differential (tank-drive)
+ * mechanism pairing two motors
+ * <li>{@link yams.mechanisms.config.MechanismPositionConfig} — position targets and tolerance
+ * settings shared across positional mechanisms
+ * <li>{@link yams.mechanisms.config.SensorConfig} — external encoder or absolute sensor
+ * attachment configuration
  * </ul>
  *
  * <h2>Motor Controller Requirement</h2>

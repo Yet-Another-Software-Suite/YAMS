@@ -3,7 +3,11 @@
 
 #pragma once
 
-#include <wpi/system/Notifier.hpp>
+#include <functional>
+#include <memory>
+#include <optional>
+#include <string>
+#include <vector>
 #include <wpi/math/controller/ArmFeedforward.hpp>
 #include <wpi/math/controller/ElevatorFeedforward.hpp>
 #include <wpi/math/controller/PIDController.hpp>
@@ -12,6 +16,7 @@
 #include <wpi/math/trajectory/ExponentialProfile.hpp>
 #include <wpi/math/trajectory/TrapezoidProfile.hpp>
 #include <wpi/nt/NetworkTable.hpp>
+#include <wpi/system/Notifier.hpp>
 #include <wpi/units/acceleration.hpp>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/angular_acceleration.hpp>
@@ -23,12 +28,6 @@
 #include <wpi/units/time.hpp>
 #include <wpi/units/velocity.hpp>
 #include <wpi/units/voltage.hpp>
-
-#include <functional>
-#include <memory>
-#include <optional>
-#include <string>
-#include <vector>
 
 #include "SimSupplier.hpp"
 #include "SmartMotorControllerConfig.hpp"
@@ -482,7 +481,8 @@ class SmartMotorController {
    *
    * @param maxJerk Maximum angular jerk (degrees/s²/s).
    */
-  virtual void SetMotionProfileMaxJerk(wpi::units::angular_jerk::turns_per_second_cubed_t maxJerk) = 0;
+  virtual void SetMotionProfileMaxJerk(
+      wpi::units::angular_jerk::turns_per_second_cubed_t maxJerk) = 0;
 
   /**
    * Configure or update the exponential motion profile parameters.
@@ -677,7 +677,8 @@ class SmartMotorController {
 
   // Angular motion profile state
   std::optional<wpi::math::TrapezoidProfile<wpi::units::turns>::State> m_trapState;
-  std::optional<wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>::State> m_expoState;
+  std::optional<wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>::State>
+      m_expoState;
 
   // Linear motion profile state
   std::optional<wpi::math::TrapezoidProfile<wpi::units::meters>::State> m_linearTrapState;

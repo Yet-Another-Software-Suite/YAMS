@@ -3,9 +3,9 @@
 
 #pragma once
 
+#include <cstdint>
 #include <wpi/system/Timer.hpp>
 #include <wpi/units/time.hpp>
-#include <cstdint>
 
 namespace yams::math {
 

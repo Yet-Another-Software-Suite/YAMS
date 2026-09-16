@@ -10,21 +10,21 @@
  *
  * <h2>Mechanism Lifecycle</h2>
  * <ol>
- *   <li><b>Create a configuration object</b> — choose the appropriate config class from
- *       {@link yams.mechanisms.config} (e.g. {@link yams.mechanisms.config.ArmConfig},
- *       {@link yams.mechanisms.config.ElevatorConfig}) and populate it via the fluent
- *       {@code with*()} API.</li>
- *   <li><b>Construct the mechanism</b> — pass the finished config to the mechanism constructor
- *       (e.g. {@link yams.mechanisms.positional.Arm}, {@link yams.mechanisms.positional.Elevator}).
- *       The constructor validates the config and initialises all internal controllers.</li>
- *   <li><b>Command the mechanism</b> — call setpoint methods such as {@code setAngle()} or
- *       {@code setHeight()}. Each method returns a WPILib {@code Command} that can be bound,
- *       composed, or scheduled directly via the command scheduler.</li>
- *   <li><b>React to conditions</b> — use trigger factory methods ({@code isNear()}, {@code max()},
- *       {@code min()}, {@code between()}, {@code lte()}, {@code gte()}) to obtain
- *       {@link org.wpilib.command2.button.Trigger} objects that fire when the mechanism
- *       satisfies a particular condition, enabling condition-based command scheduling without
- *       polling in {@code periodic()}.</li>
+ * <li><b>Create a configuration object</b> — choose the appropriate config class from
+ * {@link yams.mechanisms.config} (e.g. {@link yams.mechanisms.config.ArmConfig},
+ * {@link yams.mechanisms.config.ElevatorConfig}) and populate it via the fluent
+ * {@code with*()} API.</li>
+ * <li><b>Construct the mechanism</b> — pass the finished config to the mechanism constructor
+ * (e.g. {@link yams.mechanisms.positional.Arm}, {@link yams.mechanisms.positional.Elevator}).
+ * The constructor validates the config and initialises all internal controllers.</li>
+ * <li><b>Command the mechanism</b> — call setpoint methods such as {@code setAngle()} or
+ * {@code setHeight()}. Each method returns a WPILib {@code Command} that can be bound,
+ * composed, or scheduled directly via the command scheduler.</li>
+ * <li><b>React to conditions</b> — use trigger factory methods ({@code isNear()}, {@code max()},
+ * {@code min()}, {@code between()}, {@code lte()}, {@code gte()}) to obtain
+ * {@link org.wpilib.command2.button.Trigger} objects that fire when the mechanism
+ * satisfies a particular condition, enabling condition-based command scheduling without
+ * polling in {@code periodic()}.</li>
  * </ol>
  *
  * <h2>Typical Usage</h2>
@@ -47,11 +47,11 @@
  *
  * <h2>Sub-packages</h2>
  * <ul>
- *   <li>{@link yams.mechanisms.positional} — position-controlled mechanisms (Arm, Elevator,
- *       Pivot, DifferentialMechanism, DoubleJointedArm)</li>
- *   <li>{@link yams.mechanisms.velocity} — velocity-controlled mechanisms (FlyWheel)</li>
- *   <li>{@link yams.mechanisms.swerve} — swerve-drive mechanism and module implementations</li>
- *   <li>{@link yams.mechanisms.config} — builder-style configuration classes for all mechanisms</li>
+ * <li>{@link yams.mechanisms.positional} — position-controlled mechanisms (Arm, Elevator,
+ * Pivot, DifferentialMechanism, DoubleJointedArm)</li>
+ * <li>{@link yams.mechanisms.velocity} — velocity-controlled mechanisms (FlyWheel)</li>
+ * <li>{@link yams.mechanisms.swerve} — swerve-drive mechanism and module implementations</li>
+ * <li>{@link yams.mechanisms.config} — builder-style configuration classes for all mechanisms</li>
  * </ul>
  *
  * @see yams.mechanisms.SmartMechanism

@@ -4,14 +4,7 @@
 // Mirrors Java ElevatorTest — exercises duty-cycle and position-PID control
 // for each (HardwareType × ProfileType) combination using WPILib simulation.
 
-#include <wpi/math/system/DCMotor.hpp>
-#include <wpi/commands2/CommandScheduler.hpp>
-#include <wpi/commands2/Commands.hpp>
 #include <gtest/gtest.h>
-#include <wpi/units/acceleration.hpp>
-#include <wpi/units/length.hpp>
-#include <wpi/units/mass.hpp>
-#include <wpi/units/velocity.hpp>
 
 #include <chrono>
 #include <cmath>
@@ -19,6 +12,13 @@
 #include <memory>
 #include <string>
 #include <thread>
+#include <wpi/commands2/CommandScheduler.hpp>
+#include <wpi/commands2/Commands.hpp>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/units/acceleration.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/mass.hpp>
+#include <wpi/units/velocity.hpp>
 
 #include "helpers/MockHardware.h"
 #include "helpers/MotorControllerFactory.h"

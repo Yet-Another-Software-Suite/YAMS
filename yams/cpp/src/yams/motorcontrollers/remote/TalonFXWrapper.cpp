@@ -4,14 +4,6 @@
 #include "yams/motorcontrollers/remote/TalonFXWrapper.hpp"
 
 #include <ctre/unit/pid_ff.h>
-#include <wpi/driverstation/DriverStation.hpp>
-#include <wpi/system/Errors.hpp>
-#include <wpi/framework/RobotBase.hpp>
-#include <wpi/simulation/RoboRioSim.hpp>
-#include <wpi/math/system/Models.hpp>
-#include <wpi/units/angular_jerk.hpp>
-#include <wpi/units/dimensionless.hpp>
-#include <wpi/units/moment_of_inertia.hpp>
 
 #include <cmath>
 #include <cstdio>
@@ -19,6 +11,14 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <wpi/driverstation/DriverStation.hpp>
+#include <wpi/framework/RobotBase.hpp>
+#include <wpi/math/system/Models.hpp>
+#include <wpi/simulation/RoboRioSim.hpp>
+#include <wpi/system/Errors.hpp>
+#include <wpi/units/angular_jerk.hpp>
+#include <wpi/units/dimensionless.hpp>
+#include <wpi/units/moment_of_inertia.hpp>
 
 #include "yams/exceptions.hpp"
 #include "yams/math/LQRController.hpp"
@@ -435,8 +435,8 @@ void TalonFXWrapper::SetupSimulation() {
   auto& gearing = m_config->GetMotorGearing();
   if (!simMotor || !gearing) return;
 
-  auto plant = wpi::math::Models::SingleJointedArmFromPhysicalConstants(*simMotor, m_config->GetMOI(),
-                                                  gearing->GetMechanismToRotorRatio());
+  auto plant = wpi::math::Models::SingleJointedArmFromPhysicalConstants(
+      *simMotor, m_config->GetMOI(), gearing->GetMechanismToRotorRatio());
   m_motorSim.emplace(plant, *simMotor);
   //  m_motorSim.SetMotorType(ctre::phoenix6::sim::TalonFXSimState::MotorType::KrakenX40);
 
@@ -547,7 +547,9 @@ void TalonFXWrapper::SetEncoderVelocity(wpi::units::meters_per_second_t velocity
 
 // ---- Encoder reads ----------------------------------------------------------
 
-wpi::units::turn_t TalonFXWrapper::GetMechanismPosition() { return m_talon->GetPosition().GetValue(); }
+wpi::units::turn_t TalonFXWrapper::GetMechanismPosition() {
+  return m_talon->GetPosition().GetValue();
+}
 
 wpi::units::turns_per_second_t TalonFXWrapper::GetMechanismVelocity() {
   return m_talon->GetVelocity().GetValue();
@@ -557,7 +559,9 @@ wpi::units::turns_per_second_squared_t TalonFXWrapper::GetMechanismAcceleration(
   return m_talon->GetAcceleration().GetValue();
 }
 
-wpi::units::turn_t TalonFXWrapper::GetRotorPosition() { return m_talon->GetRotorPosition().GetValue(); }
+wpi::units::turn_t TalonFXWrapper::GetRotorPosition() {
+  return m_talon->GetRotorPosition().GetValue();
+}
 
 wpi::units::turns_per_second_t TalonFXWrapper::GetRotorVelocity() {
   return m_talon->GetRotorVelocity().GetValue();
@@ -584,7 +588,8 @@ std::optional<wpi::units::degree_t> TalonFXWrapper::GetExternalEncoderPosition()
 }
 
 std::optional<wpi::units::degrees_per_second_t> TalonFXWrapper::GetExternalEncoderVelocity() {
-  if (m_cancoder) return wpi::units::degrees_per_second_t{m_cancoder->get().GetVelocity().GetValue()};
+  if (m_cancoder)
+    return wpi::units::degrees_per_second_t{m_cancoder->get().GetVelocity().GetValue()};
   return std::nullopt;
 }
 
@@ -843,10 +848,12 @@ void TalonFXWrapper::SetMotionProfileMaxAcceleration(wpi::units::turns_per_secon
 
 void TalonFXWrapper::SetMotionProfileMaxAcceleration(wpi::units::meters_per_second_squared_t acc) {
   if (auto circ = m_config->GetMechanismCircumference(); circ)
-    SetMotionProfileMaxAcceleration(wpi::units::turns_per_second_squared_t{acc.value() / circ->value()});
+    SetMotionProfileMaxAcceleration(
+        wpi::units::turns_per_second_squared_t{acc.value() / circ->value()});
 }
 
-void TalonFXWrapper::SetMotionProfileMaxJerk(wpi::units::angular_jerk::turns_per_second_cubed_t jerk) {
+void TalonFXWrapper::SetMotionProfileMaxJerk(
+    wpi::units::angular_jerk::turns_per_second_cubed_t jerk) {
   m_talonConfig.MotionMagic.MotionMagicJerk = jerk;
   m_talon->GetConfigurator().Apply(m_talonConfig.MotionMagic);
 }

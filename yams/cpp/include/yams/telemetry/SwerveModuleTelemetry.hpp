@@ -3,10 +3,9 @@
 
 #pragma once
 
-#include <wpi/nt/NetworkTable.hpp>
-
 #include <memory>
 #include <string>
+#include <wpi/nt/NetworkTable.hpp>
 
 #include "yams/telemetry/SwerveModuleTelemetryConfig.hpp"
 

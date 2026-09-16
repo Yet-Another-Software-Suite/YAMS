@@ -64,21 +64,21 @@ import yams.motorcontrollers.SmartMotorController;
  * }</pre>
  */
 public class ArmSimSupplier implements SimSupplier {
-  private boolean inputFed = false;
-  private boolean simUpdated = false;
-  private final Supplier<Double> motorDutyCycleSupplier;
+  private boolean                    inputFed   = false;
+  private boolean                    simUpdated = false;
+  private final Supplier<Double>     motorDutyCycleSupplier;
   private final DerivativeTimeFilter accel;
-  private final LinearFilter supplyCurrentFilter;
-  private final SingleJointedArmSim sim;
-  private final MechanismGearing mechGearing;
-  private final Time simPeriod;
-  private final DCMotor motor;
-  private final UUID uuid;
+  private final LinearFilter         supplyCurrentFilter;
+  private final SingleJointedArmSim  sim;
+  private final MechanismGearing     mechGearing;
+  private final Time                 simPeriod;
+  private final DCMotor              motor;
+  private final UUID                 uuid;
 
   /**
    * Construct the ArmSim supplier
    *
-   * @param simulation Simulatoin instance
+   * @param simulation           Simulatoin instance
    * @param smartMotorController SMC for the ArmSim..
    */
   public ArmSimSupplier(SingleJointedArmSim simulation, SmartMotorController smartMotorController) {
@@ -90,8 +90,7 @@ public class ArmSimSupplier implements SimSupplier {
     motor = smartMotorController.getDCMotor();
     accel = new DerivativeTimeFilter(simPeriod);
     // Based off comment from https://github.com/wpilibsuite/allwpilib/issues/8691
-    supplyCurrentFilter =
-        LinearFilter.singlePoleIIR(Milliseconds.of(100).in(Seconds), simPeriod.in(Seconds));
+    supplyCurrentFilter = LinearFilter.singlePoleIIR(Milliseconds.of(100).in(Seconds), simPeriod.in(Seconds));
     uuid = smartMotorController.m_batterySimUUID;
   }
 
@@ -171,9 +170,7 @@ public class ArmSimSupplier implements SimSupplier {
 
   @Override
   public void setMechanismPosition(Angle position) {
-    sim.setState(
-        position.in(Radians),
-        sim.getVelocity()); // .times(config.getGearing().getMechanismToRotorRatio()).in(Radians));
+    sim.setState(position.in(Radians), sim.getVelocity()); // .times(config.getGearing().getMechanismToRotorRatio()).in(Radians));
   }
 
   @Override
@@ -212,7 +209,6 @@ public class ArmSimSupplier implements SimSupplier {
 
   @Override
   public AngularAcceleration getRotorAcceleration() {
-    return RotationsPerSecond.per(Microsecond)
-        .of(accel.derivative(getRotorVelocity().in(RotationsPerSecond)));
+    return RotationsPerSecond.per(Microsecond).of(accel.derivative(getRotorVelocity().in(RotationsPerSecond)));
   }
 }
