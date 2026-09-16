@@ -167,6 +167,7 @@ public class ShooterTest {
     CommandScheduler.getInstance()
         .unregisterSubsystem((SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem());
     ((SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem()).close();
+    smc.close();
 
     //    switch (smc.getMotorController())
     //    {

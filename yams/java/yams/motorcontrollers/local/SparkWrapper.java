@@ -222,6 +222,7 @@ public class SparkWrapper extends SmartMotorController {
       m_config.getStartingPosition().ifPresent(startingPos -> {
         sparkSim.get().setPosition(startingPos.in(Rotations));
         sparkRelativeEncoderSim.get().setPosition(startingPos.in(Rotations));
+        m_simSupplier.ifPresent(sim -> sim.setMechanismPosition(startingPos));
       });
     }
   }
@@ -255,9 +256,10 @@ public class SparkWrapper extends SmartMotorController {
       }
       Time simLoop = m_config.getSimulationPeriod();
       m_simSupplier.ifPresent(mSimSupplier -> {
-        sparkSim.ifPresent(sim -> sim.iterate(mSimSupplier.getMechanismVelocity().in(RotationsPerSecond), mSimSupplier.getMechanismSupplyVoltage().in(Volts), simLoop.in(Second)));
-        sparkRelativeEncoderSim.ifPresent(sim -> sim.iterate(mSimSupplier.getMechanismVelocity().in(RotationsPerSecond), simLoop.in(Seconds)));
-        m_sparkAbsoluteEncoderSim.ifPresent(absoluteEncoderSim -> absoluteEncoderSim.iterate(mSimSupplier.getMechanismVelocity().in(RotationsPerSecond), simLoop.in(Seconds)));
+        // iterate() expects RPM here; may need revisiting once conversion factors are added back.
+        sparkSim.ifPresent(sim -> sim.iterate(mSimSupplier.getMechanismVelocity().in(RPM), mSimSupplier.getMechanismSupplyVoltage().in(Volts), simLoop.in(Second)));
+        sparkRelativeEncoderSim.ifPresent(sim -> sim.iterate(mSimSupplier.getMechanismVelocity().in(RPM), simLoop.in(Seconds)));
+        m_sparkAbsoluteEncoderSim.ifPresent(absoluteEncoderSim -> absoluteEncoderSim.iterate(mSimSupplier.getMechanismVelocity().in(RPM), simLoop.in(Seconds)));
       });
       // TODO: Uncomment after the 2026 season
       //      m_looseFollowers.ifPresent(smcs -> {for(var f : smcs){f.simIterate();}});

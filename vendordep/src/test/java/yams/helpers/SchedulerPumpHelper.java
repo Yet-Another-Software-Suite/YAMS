@@ -3,6 +3,8 @@
 
 package yams.helpers;
 
+import static org.wpilib.units.Units.Milliseconds;
+
 import java.util.concurrent.atomic.AtomicLong;
 import org.wpilib.command2.CommandScheduler;
 import org.wpilib.hardware.hal.simulation.NotifierDataJNI;
@@ -86,21 +88,26 @@ public final class SchedulerPumpHelper {
    *                              20ms default unless changed.
    * @throws InterruptedException Thrown if sleeping interrupted
    */
-  public static synchronized void runForDuration(
-      Runnable cycleRunnable, Time durationInMs, int... optionalHeartbeatInMs)
-      throws InterruptedException {
+  public static synchronized void runForDuration(Runnable cycleRunnable, Time durationInMs,
+      int... optionalHeartbeatInMs) throws InterruptedException {
     int heartbeatToUseInMs = getHeartbeatToUse(optionalHeartbeatInMs);
     long start = System.currentTimeMillis();
     AtomicLong time = new AtomicLong();
     RobotController.setTimeSource(time::get);
 
-    for (int i = 0; i < durationInMs.in(Units.Milliseconds) / heartbeatToUseInMs; i++) {
-      long nowMicros = (long) i * 20 * 1_000; // 20,000 microseconds = 20ms time step
-      time.set(nowMicros);
-      CommandScheduler.getInstance().run();
-      SimHooks.stepTimingAsync(heartbeatToUseInMs);
-      awaitNotifierSettle(nowMicros + heartbeatToUseInMs * 1_000L);
-      if (cycleRunnable != null) cycleRunnable.run();
+    try {
+      for (int i = 0; i < durationInMs.in(Milliseconds) / heartbeatToUseInMs; i++) {
+        Time now = Milliseconds.of(heartbeatToUseInMs).times(i);
+        time.set((long) now.in(Units.Nanoseconds));
+        CommandScheduler.getInstance().run();
+        SimHooks.stepTimingAsync(heartbeatToUseInMs);
+        awaitNotifierSettle((long) now.in(Units.Microseconds));
+        if (cycleRunnable != null)
+          cycleRunnable.run();
+      }
+    } finally {
+      // Otherwise this override leaks into every later test in the same JVM.
+      RobotController.setTimeSource(RobotController::getMonotonicTime);
     }
     //		while (System.currentTimeMillis() < (start + durationInMs.in(Units.Milliseconds))) {
     //			CommandScheduler.getInstance().run();

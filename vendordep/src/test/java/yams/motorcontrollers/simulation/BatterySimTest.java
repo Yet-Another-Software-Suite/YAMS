@@ -170,6 +170,7 @@ public class BatterySimTest {
     CommandScheduler.getInstance()
         .unregisterSubsystem((SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem());
     ((SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem()).close();
+    smc.close();
 
     Object motorController = smc.getMotorController();
     if (motorController instanceof SparkMax) {
