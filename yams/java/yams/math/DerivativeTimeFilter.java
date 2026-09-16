@@ -21,9 +21,9 @@ import edu.wpi.first.wpilibj.Timer;
  * <p>Two {@code derivative()} overloads are available:
  *
  * <ul>
- *   <li>{@link #derivative(double)} — uses the FPGA clock to measure elapsed time automatically.
- *   <li>{@link #derivative(double, edu.wpi.first.units.measure.Time)} — uses a caller-supplied
- *       delta-time (useful when the loop period is already known).
+ * <li>{@link #derivative(double)} — uses the FPGA clock to measure elapsed time automatically.
+ * <li>{@link #derivative(double, edu.wpi.first.units.measure.Time)} — uses a caller-supplied
+ * delta-time (useful when the loop period is already known).
  * </ul>
  *
  * <h2>Example</h2>
@@ -57,7 +57,7 @@ public class DerivativeTimeFilter {
   /**
    * Create a derivative filter with an initial value
    *
-   * @param initial Initial value
+   * @param initial         Initial value
    * @param debouncerPeriod Period to debounce the filter.
    * @implNote This value is timestamped at the time of construction.
    */
@@ -86,11 +86,11 @@ public class DerivativeTimeFilter {
    * Get the derivative of the current value over the specified delta.
    *
    * @param current Current value
-   * @param dt Delta time
+   * @param dt      Delta time
    * @return Derivative of the current value from the previous value over the delta time in
-   *     microseconds.
+   *         microseconds.
    * @implNote If this function is not called periodically at the dt specified, the derivative will
-   *     be incorrect
+   *           be incorrect
    */
   public double derivative(double current, Time dt) {
     if (debouncer.advanceIfElapsed(debouncePeriod.in(Seconds))) {
@@ -107,13 +107,12 @@ public class DerivativeTimeFilter {
    *
    * @param current Current value
    * @return Derivative of the current value from the previous value over the time since the last
-   *     call to this in microseconds.
+   *         call to this in microseconds.
    */
   public double derivative(double current) {
     if (debouncer.hasElapsed(debouncePeriod)) {
       long currentFpgaTime_us = RobotController.getFPGATime();
-      double derivative =
-          derivative(current, Microseconds.of(currentFpgaTime_us - lastFpgaTime_us));
+      double derivative = derivative(current, Microseconds.of(currentFpgaTime_us - lastFpgaTime_us));
       lastFpgaTime_us = currentFpgaTime_us;
       return derivative;
     }

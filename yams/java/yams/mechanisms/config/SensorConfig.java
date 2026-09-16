@@ -78,8 +78,8 @@ public class SensorConfig {
   /**
    * Add a field to the sensor.
    *
-   * @param name Name of the field to add.
-   * @param supplier Supplier of the real field value.
+   * @param name       Name of the field to add.
+   * @param supplier   Supplier of the real field value.
    * @param defaultVal Default value of the field.
    * @return {@link SensorConfig}
    */
@@ -91,8 +91,8 @@ public class SensorConfig {
   /**
    * Add a field to the sensor.
    *
-   * @param name Name of the field to add.
-   * @param supplier Supplier of the real field value.
+   * @param name       Name of the field to add.
+   * @param supplier   Supplier of the real field value.
    * @param defaultVal Default value of the field.
    * @return {@link SensorConfig}
    */
@@ -104,8 +104,8 @@ public class SensorConfig {
   /**
    * Add a field to the sensor.
    *
-   * @param name Name of the field to add.
-   * @param supplier Supplier of the real field value.
+   * @param name       Name of the field to add.
+   * @param supplier   Supplier of the real field value.
    * @param defaultVal Default value of the field.
    * @return {@link SensorConfig}
    */
@@ -117,8 +117,8 @@ public class SensorConfig {
   /**
    * Add a field to the sensor.
    *
-   * @param name Name of the field to add.
-   * @param supplier Supplier of the real field value.
+   * @param name       Name of the field to add.
+   * @param supplier   Supplier of the real field value.
    * @param defaultVal Default value of the field.
    * @return {@link SensorConfig}
    */
@@ -131,19 +131,15 @@ public class SensorConfig {
    * Add a simulated value to the sensor at a given match time.
    *
    * @param fieldName Name of the field to change.
-   * @param start {@link Time} at which to start the data simulation.
-   * @param end {@link Time} at which to end the data simulation.
-   * @param value Value to simulate.
+   * @param start     {@link Time} at which to start the data simulation.
+   * @param end       {@link Time} at which to end the data simulation.
+   * @param value     Value to simulate.
    * @return {@link SensorConfig}
    */
   public SensorConfig withSimulatedValue(String fieldName, Time start, Time end, double value) {
     for (var field : data) {
       if (field.getName().equals(fieldName)) {
-        field.addSimTrigger(
-            SensorData.convert(value),
-            () ->
-                DriverStation.getMatchTime() >= start.in(Seconds)
-                    && DriverStation.getMatchTime() <= end.in(Seconds));
+        field.addSimTrigger(SensorData.convert(value), () -> DriverStation.getMatchTime() >= start.in(Seconds) && DriverStation.getMatchTime() <= end.in(Seconds));
       }
     }
     return this;
@@ -153,19 +149,15 @@ public class SensorConfig {
    * Add a simulated value to the sensor at a given match time.
    *
    * @param fieldName Name of the field to change.
-   * @param start {@link Time} at which to start the data simulation.
-   * @param end {@link Time} at which to end the data simulation.
-   * @param value Value to simulate.
+   * @param start     {@link Time} at which to start the data simulation.
+   * @param end       {@link Time} at which to end the data simulation.
+   * @param value     Value to simulate.
    * @return {@link SensorConfig}
    */
   public SensorConfig withSimulatedValue(String fieldName, Time start, Time end, int value) {
     for (var field : data) {
       if (field.getName().equals(fieldName)) {
-        field.addSimTrigger(
-            SensorData.convert(value),
-            () ->
-                DriverStation.getMatchTime() >= start.in(Seconds)
-                    && DriverStation.getMatchTime() <= end.in(Seconds));
+        field.addSimTrigger(SensorData.convert(value), () -> DriverStation.getMatchTime() >= start.in(Seconds) && DriverStation.getMatchTime() <= end.in(Seconds));
       }
     }
     return this;
@@ -175,19 +167,15 @@ public class SensorConfig {
    * Add a simulated value to the sensor at a given match time.
    *
    * @param fieldName Name of the field to change.
-   * @param start {@link Time} at which to start the data simulation.
-   * @param end {@link Time} at which to end the data simulation.
-   * @param value Value to simulate.
+   * @param start     {@link Time} at which to start the data simulation.
+   * @param end       {@link Time} at which to end the data simulation.
+   * @param value     Value to simulate.
    * @return {@link SensorConfig}
    */
   public SensorConfig withSimulatedValue(String fieldName, Time start, Time end, long value) {
     for (var field : data) {
       if (field.getName().equals(fieldName)) {
-        field.addSimTrigger(
-            SensorData.convert(value),
-            () ->
-                DriverStation.getMatchTime() >= start.in(Seconds)
-                    && DriverStation.getMatchTime() <= end.in(Seconds));
+        field.addSimTrigger(SensorData.convert(value), () -> DriverStation.getMatchTime() >= start.in(Seconds) && DriverStation.getMatchTime() <= end.in(Seconds));
       }
     }
     return this;
@@ -197,19 +185,15 @@ public class SensorConfig {
    * Add a simulated value to the sensor at a given match time.
    *
    * @param fieldName Name of the field to change.
-   * @param start {@link Time} at which to start the data simulation.
-   * @param end {@link Time} at which to end the data simulation.
-   * @param value Value to simulate.
+   * @param start     {@link Time} at which to start the data simulation.
+   * @param end       {@link Time} at which to end the data simulation.
+   * @param value     Value to simulate.
    * @return {@link SensorConfig}
    */
   public SensorConfig withSimulatedValue(String fieldName, Time start, Time end, boolean value) {
     for (var field : data) {
       if (field.getName().equals(fieldName)) {
-        field.addSimTrigger(
-            SensorData.convert(value),
-            () ->
-                DriverStation.getMatchTime() >= start.in(Seconds)
-                    && DriverStation.getMatchTime() <= end.in(Seconds));
+        field.addSimTrigger(SensorData.convert(value), () -> DriverStation.getMatchTime() >= start.in(Seconds) && DriverStation.getMatchTime() <= end.in(Seconds));
       }
     }
     return this;
@@ -219,8 +203,8 @@ public class SensorConfig {
    * Add a simulated value to the sensor at a given trigger.
    *
    * @param fieldName Name of the field to change.
-   * @param trigger {@link BooleanSupplier} for when data should be simulated.
-   * @param value Value to simulate.
+   * @param trigger   {@link BooleanSupplier} for when data should be simulated.
+   * @param value     Value to simulate.
    * @return {@link SensorConfig}
    */
   public SensorConfig withSimulatedValue(String fieldName, BooleanSupplier trigger, double value) {
@@ -236,8 +220,8 @@ public class SensorConfig {
    * Add a simulated value to the sensor at a given trigger.
    *
    * @param fieldName Name of the field to change.
-   * @param trigger {@link BooleanSupplier} for when data should be simulated.
-   * @param value Value to simulate.
+   * @param trigger   {@link BooleanSupplier} for when data should be simulated.
+   * @param value     Value to simulate.
    * @return {@link SensorConfig}
    */
   public SensorConfig withSimulatedValue(String fieldName, BooleanSupplier trigger, int value) {
@@ -253,8 +237,8 @@ public class SensorConfig {
    * Add a simulated value to the sensor at a given trigger.
    *
    * @param fieldName Name of the field to change.
-   * @param trigger {@link BooleanSupplier} for when data should be simulated.
-   * @param value Value to simulate.
+   * @param trigger   {@link BooleanSupplier} for when data should be simulated.
+   * @param value     Value to simulate.
    * @return {@link SensorConfig}
    */
   public SensorConfig withSimulatedValue(String fieldName, BooleanSupplier trigger, long value) {
@@ -270,8 +254,8 @@ public class SensorConfig {
    * Add a simulated value to the sensor at a given trigger.
    *
    * @param fieldName Name of the field to change.
-   * @param trigger {@link BooleanSupplier} for when data should be simulated.
-   * @param value Value to simulate.
+   * @param trigger   {@link BooleanSupplier} for when data should be simulated.
+   * @param value     Value to simulate.
    * @return {@link SensorConfig}
    */
   public SensorConfig withSimulatedValue(String fieldName, BooleanSupplier trigger, boolean value) {

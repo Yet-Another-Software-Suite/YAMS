@@ -49,7 +49,7 @@ void MechanismTelemetry::AddMotorController(
 }
 
 std::function<void(double)> MechanismTelemetry::PublishDouble(const std::string& key,
-                                                               const std::string& unit) {
+                                                              const std::string& unit) {
   auto topic = m_networkTable->GetDoubleTopic(key);
   if (!unit.empty()) {
     topic.SetProperties(wpi::json{{"units", unit}});
@@ -57,8 +57,8 @@ std::function<void(double)> MechanismTelemetry::PublishDouble(const std::string&
   auto publisher = std::make_shared<nt::DoublePublisher>(topic.Publish());
   std::shared_ptr<wpi::log::DoubleLogEntry> logEntry;
   if (m_dataLogName) {
-    logEntry =
-        std::make_shared<wpi::log::DoubleLogEntry>(frc::DataLogManager::GetLog(), *m_dataLogName + "/" + key);
+    logEntry = std::make_shared<wpi::log::DoubleLogEntry>(frc::DataLogManager::GetLog(),
+                                                          *m_dataLogName + "/" + key);
   }
   return [publisher, logEntry](double value) {
     publisher->Set(value);

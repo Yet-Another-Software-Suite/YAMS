@@ -12,16 +12,16 @@
  * <h2>Core Classes</h2>
  *
  * <ul>
- *   <li><b>{@link yams.gearing.GearBox}</b> — chains one or more gear stages together and computes
- *       the overall reduction ratio. Each stage is expressed as a pair of tooth counts (driver :
- *       driven). Multiple stages are multiplied automatically.
- *   <li><b>{@link yams.gearing.Sprocket}</b> — models a chain or belt drive between two sprockets,
- *       computing the linear or rotational ratio from sprocket tooth counts and, for linear drives,
- *       the pitch diameter.
- *   <li><b>{@link yams.gearing.MechanismGearing}</b> — ties a {@link yams.gearing.GearBox} to the
- *       physical output dimensions of a mechanism (e.g., spool radius for an elevator, arm length
- *       for a rotary mechanism) so that motor-side units can be converted directly to real-world
- *       position and velocity.
+ * <li><b>{@link yams.gearing.GearBox}</b> — chains one or more gear stages together and computes
+ * the overall reduction ratio. Each stage is expressed as a pair of tooth counts (driver :
+ * driven). Multiple stages are multiplied automatically.
+ * <li><b>{@link yams.gearing.Sprocket}</b> — models a chain or belt drive between two sprockets,
+ * computing the linear or rotational ratio from sprocket tooth counts and, for linear drives,
+ * the pitch diameter.
+ * <li><b>{@link yams.gearing.MechanismGearing}</b> — ties a {@link yams.gearing.GearBox} to the
+ * physical output dimensions of a mechanism (e.g., spool radius for an elevator, arm length
+ * for a rotary mechanism) so that motor-side units can be converted directly to real-world
+ * position and velocity.
  * </ul>
  *
  * <h2>Example — Single-Stage 5:1 Reduction</h2>

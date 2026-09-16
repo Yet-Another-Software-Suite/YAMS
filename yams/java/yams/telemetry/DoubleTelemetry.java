@@ -90,14 +90,13 @@ public class DoubleTelemetry<F> {
   /**
    * Setup double telemetry for a field.
    *
-   * @param keyString Key to use.
+   * @param keyString  Key to use.
    * @param defaultVal Default value.
-   * @param field Field representing.
-   * @param tunable Tunable.
-   * @param unit Unit to display.
+   * @param field      Field representing.
+   * @param tunable    Tunable.
+   * @param unit       Unit to display.
    */
-  public DoubleTelemetry(
-      String keyString, double defaultVal, F field, boolean tunable, String unit) {
+  public DoubleTelemetry(String keyString, double defaultVal, F field, boolean tunable, String unit) {
     key = keyString;
     cachedValue = defaultValue = defaultVal;
     this.field = field;
@@ -117,7 +116,7 @@ public class DoubleTelemetry<F> {
   /**
    * Setup network tables.
    *
-   * @param dataTable Data tables.
+   * @param dataTable   Data tables.
    * @param tuningTable Tuning table.
    */
   public void setupNetworkTables(NetworkTable dataTable, NetworkTable tuningTable) {
@@ -128,20 +127,13 @@ public class DoubleTelemetry<F> {
     }
     if (tuningTable != null && tunable) {
       topic = tuningTable.getDoubleTopic(key);
-      subPublisher =
-          !unit.equals("none")
-              ? topic.publishEx("double", "{\"units\": \"" + unit + "\"}")
-              : topic.publish();
+      subPublisher = !unit.equals("none") ? topic.publishEx("double", "{\"units\": \"" + unit + "\"}") : topic.publish();
       subscriber = Optional.of(topic.subscribe(defaultValue));
       subPublisher.setDefault(defaultValue);
     } else {
       assert dataTable != null;
       topic = dataTable.getDoubleTopic(key);
-      publisher =
-          Optional.of(
-              !unit.equals("none")
-                  ? topic.publishEx("double", "{\"units\": \"" + unit + "\"}")
-                  : topic.publish());
+      publisher = Optional.of(!unit.equals("none") ? topic.publishEx("double", "{\"units\": \"" + unit + "\"}") : topic.publish());
       publisher.get().setDefault(defaultValue);
     }
   }
@@ -157,10 +149,7 @@ public class DoubleTelemetry<F> {
         prefix += "/";
       }
       prefix += unit + "/";
-      dataLogEntry =
-          Optional.of(
-              new DoubleLogEntry(
-                  DataLogManager.getLog(), prefix + key, (long) Timer.getFPGATimestamp()));
+      dataLogEntry = Optional.of(new DoubleLogEntry(DataLogManager.getLog(), prefix + key, (long) Timer.getFPGATimestamp()));
     }
   }
 
@@ -168,7 +157,7 @@ public class DoubleTelemetry<F> {
    * Set the unit.
    *
    * @param cfg {@link SmartMotorControllerConfig} used to determine the unit. If the
-   *     MechanismCircumference is set it will be in meters, else it will be in degrees.
+   *            MechanismCircumference is set it will be in meters, else it will be in degrees.
    * @return {@link DoubleTelemetry} for chaining.
    */
   public DoubleTelemetry transformUnit(SmartMotorControllerConfig cfg) {
@@ -186,16 +175,10 @@ public class DoubleTelemetry<F> {
         unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second" : "rotation_per_second";
         break;
       case "tunable_acceleration":
-        unit =
-            cfg.getLinearClosedLoopControllerUse()
-                ? "meter_per_second_per_second"
-                : "rotations_per_minute_per_second";
+        unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second_per_second" : "rotations_per_minute_per_second";
         break;
       case "acceleration":
-        unit =
-            cfg.getLinearClosedLoopControllerUse()
-                ? "meter_per_second_per_second"
-                : "rotation_per_second_per_second";
+        unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second_per_second" : "rotation_per_second_per_second";
         break;
     }
     return this;

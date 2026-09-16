@@ -66,7 +66,8 @@ public class FlyWheelConfig {
   private Optional<AngularVelocity> speedometerMaxVelocity = Optional.empty();
 
   /** FlyWheel Configuration class */
-  public FlyWheelConfig() {}
+  public FlyWheelConfig() {
+  }
 
   private FlyWheelConfig(FlyWheelConfig cfg) {
     this.telemetryName = cfg.telemetryName;
@@ -110,10 +111,7 @@ public class FlyWheelConfig {
    */
   public FlyWheelConfig withSpeedometerSimulation() {
     if (!speedometerMaxVelocity.isPresent()) {
-      throw new FlyWheelConfigurationException(
-          "Speedometer max velocity is not set.",
-          "Cannot use speedometer simulation!",
-          "Set it with withSpeedometerSimulation(AngularVelocity)");
+      throw new FlyWheelConfigurationException("Speedometer max velocity is not set.", "Cannot use speedometer simulation!", "Set it with withSpeedometerSimulation(AngularVelocity)");
     }
     this.useSpeedometer = true;
     return this;
@@ -152,7 +150,7 @@ public class FlyWheelConfig {
    * <p>If the speedometer simulation is not enabled, this will return an empty Optional.
    *
    * @return The maximum velocity of the speedometer simulation, or an empty Optional if the
-   *     speedometer simulation is not enabled.
+   *         speedometer simulation is not enabled.
    */
   public Optional<AngularVelocity> getSpeedometerMaxVelocity() {
     return speedometerMaxVelocity;
@@ -186,8 +184,7 @@ public class FlyWheelConfig {
    * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link FlyWheel}
    * @return {@link FlyWheelConfig} for chaining
    */
-  public FlyWheelConfig withMechanismPositionConfig(
-      MechanismPositionConfig mechanismPositionConfig) {
+  public FlyWheelConfig withMechanismPositionConfig(MechanismPositionConfig mechanismPositionConfig) {
     this.mechanismPositionConfig = mechanismPositionConfig;
     return this;
   }
@@ -195,7 +192,7 @@ public class FlyWheelConfig {
   /**
    * Configure telemetry for the {@link FlyWheel} mechanism.
    *
-   * @param telemetryName Telemetry NetworkTable name to appear under "SmartDashboard/"
+   * @param telemetryName      Telemetry NetworkTable name to appear under "SmartDashboard/"
    * @param telemetryVerbosity Telemetry verbosity to apply.
    * @return {@link FlyWheelConfig} for chaining.
    */
@@ -245,7 +242,7 @@ public class FlyWheelConfig {
    * Get the {@link MechanismPositionConfig} associated with this {@link FlyWheelConfig}.
    *
    * @return An {@link Optional} containing the {@link MechanismPositionConfig} if present,
-   *     otherwise an empty {@link Optional}.
+   *         otherwise an empty {@link Optional}.
    */
   public MechanismPositionConfig getMechanismPositionConfig() {
     return mechanismPositionConfig;
@@ -258,10 +255,7 @@ public class FlyWheelConfig {
    */
   public Distance getCircumference() {
     if (diameter.isEmpty()) {
-      throw new FlyWheelConfigurationException(
-          "FlyWheel diameter is empty",
-          "Cannot run speed without diameter.",
-          "withDiameter(Distance)");
+      throw new FlyWheelConfigurationException("FlyWheel diameter is empty", "Cannot run speed without diameter.", "withDiameter(Distance)");
     }
     return diameter.orElseThrow().times(Math.PI);
   }

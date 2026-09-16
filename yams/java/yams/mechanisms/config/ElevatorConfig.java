@@ -75,7 +75,8 @@ public class ElevatorConfig {
   private boolean isElevatorHorizontal = false;
 
   /** Elevator Configuration class */
-  public ElevatorConfig() {}
+  public ElevatorConfig() {
+  }
 
   /**
    * Copy constructor.
@@ -137,7 +138,7 @@ public class ElevatorConfig {
   /**
    * Configure telemetry for the {@link Elevator} mechanism.
    *
-   * @param telemetryName Telemetry NetworkTable name to appear under "SmartDashboard/"
+   * @param telemetryName      Telemetry NetworkTable name to appear under "SmartDashboard/"
    * @param telemetryVerbosity Telemetry verbosity to apply.
    * @return {@link ElevatorConfig} for chaining.
    */
@@ -153,8 +154,7 @@ public class ElevatorConfig {
    * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link Elevator}
    * @return {@link ElevatorConfig} for chaining
    */
-  public ElevatorConfig withMechanismPositionConfig(
-      MechanismPositionConfig mechanismPositionConfig) {
+  public ElevatorConfig withMechanismPositionConfig(MechanismPositionConfig mechanismPositionConfig) {
     this.mechanismPositionConfig = mechanismPositionConfig;
     return this;
   }
@@ -258,7 +258,7 @@ public class ElevatorConfig {
    * Get the mechanism position configuration of the elevator.
    *
    * @return Optional containing the mechanism position configuration if set, otherwise an empty
-   *     Optional.
+   *         Optional.
    */
   public MechanismPositionConfig getMechanismPositionConfig() {
     return mechanismPositionConfig;

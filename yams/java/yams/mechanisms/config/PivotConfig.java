@@ -101,7 +101,7 @@ public class PivotConfig {
   /**
    * Configure telemetry for the {@link Pivot} mechanism.
    *
-   * @param telemetryName Telemetry NetworkTable name to appear under "SmartDashboard/"
+   * @param telemetryName      Telemetry NetworkTable name to appear under "SmartDashboard/"
    * @param telemetryVerbosity Telemetry verbosity to apply.
    * @return {@link PivotConfig} for chaining.
    */
@@ -184,7 +184,7 @@ public class PivotConfig {
    * Get the {@link MechanismPositionConfig} associated with this {@link PivotConfig}.
    *
    * @return An {@link Optional} containing the {@link MechanismPositionConfig} if present,
-   *     otherwise an empty {@link Optional}.
+   *         otherwise an empty {@link Optional}.
    */
   public MechanismPositionConfig getMechanismPositionConfig() {
     return mechanismPositionConfig;

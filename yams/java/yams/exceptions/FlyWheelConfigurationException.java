@@ -9,12 +9,12 @@ package yams.exceptions;
  * <p>Common triggers include:
  *
  * <ul>
- *   <li>{@code withSmartMotorController(SmartMotorController)} called more than once on the same
- *       config
+ * <li>{@code withSmartMotorController(SmartMotorController)} called more than once on the same
+ * config
  * <li>Speedometer max velocity not set when speedometer simulation is requested ({@code withSpeedometerSimulation(AngularVelocity)})
  * <li>Flywheel diameter not set when surface speed calculations are needed ({@code withDiameter(Distance)})
- *   <li>MOI (moment of inertia) not derivable — neither diameter+mass nor an explicit MOI was
- *       provided
+ * <li>MOI (moment of inertia) not derivable — neither diameter+mass nor an explicit MOI was
+ * provided
  * </ul>
  *
  * <p><b>Resolution:</b> Ensure {@code FlyWheelConfig.withSmartMotorController(SmartMotorController)} is called exactly once, {@code FlyWheelConfig.withDiameter(Distance)} and {@code FlyWheelConfig.withMass(Mass)} are set (or
@@ -39,17 +39,11 @@ public class FlyWheelConfigurationException extends RuntimeException {
   /**
    * FlyWheel configuration exception.
    *
-   * @param message Message to display.
-   * @param result Result of the configuration.
+   * @param message        Message to display.
+   * @param result         Result of the configuration.
    * @param remedyFunction Remedy function to use.
    */
   public FlyWheelConfigurationException(String message, String result, String remedyFunction) {
-    super(
-        message
-            + "!\n"
-            + result
-            + "\nPlease use FlyWheelConfig."
-            + remedyFunction
-            + " to fix this error.");
+    super(message + "!\n" + result + "\nPlease use FlyWheelConfig." + remedyFunction + " to fix this error.");
   }
 }

@@ -33,7 +33,8 @@ import yams.math.LQRConfig.LQRType;
  * are supported: {@code ARM}, {@code ELEVATOR}, and {@code FLYWHEEL}.
  *
  * <p>On each robot loop iteration, call the appropriate {@code calculate()} overload with the
- * current sensor measurement and the desired setpoint. The controller internally runs a {@link edu.wpi.first.math.system.LinearSystemLoop} that fuses a {@link edu.wpi.first.math.controller.LinearQuadraticRegulator} with a {@link edu.wpi.first.math.estimator.KalmanFilter} observer.
+ * current sensor measurement and the desired setpoint. The controller internally runs a {@link edu.wpi.first.math.system.LinearSystemLoop} that fuses a {@link edu.wpi.first.math.controller.LinearQuadraticRegulator} with a
+ * {@link edu.wpi.first.math.estimator.KalmanFilter} observer.
  *
  * <h2>Example — construct from LQRConfig and calculate arm voltage</h2>
  *
@@ -66,16 +67,16 @@ import yams.math.LQRConfig.LQRType;
  * }</pre>
  */
 public class LQRController {
-  private Optional<LQRConfig> m_config = Optional.empty();
-  private LQRType m_type;
+  private Optional<LQRConfig>       m_config = Optional.empty();
+  private LQRType                   m_type;
   private LinearSystemLoop<?, ?, ?> m_loop;
-  private Time m_period;
+  private Time                      m_period;
 
   /**
    * Create a LQR Controller.
    *
-   * @param type LQR Type.
-   * @param loop {@link LinearSystemLoop} which can be derived from {@link LQRConfig}
+   * @param type   LQR Type.
+   * @param loop   {@link LinearSystemLoop} which can be derived from {@link LQRConfig}
    * @param period Loop time.
    */
   public LQRController(LQRType type, LinearSystemLoop<?, ?, ?> loop, Time period) {
@@ -111,18 +112,16 @@ public class LQRController {
   /**
    * Reset the Arm or Flywheel LQR.
    *
-   * @param angle Current angle.
+   * @param angle    Current angle.
    * @param velocity Current velocity.
    */
   public void reset(Angle angle, AngularVelocity velocity) {
     switch (m_type) {
       case FLYWHEEL -> {
-        ((LinearSystemLoop<N1, N1, N1>) m_loop)
-            .reset(VecBuilder.fill(velocity.in(RadiansPerSecond)));
+        ((LinearSystemLoop<N1, N1, N1>) m_loop).reset(VecBuilder.fill(velocity.in(RadiansPerSecond)));
       }
       case ARM -> {
-        ((LinearSystemLoop<N2, N1, N1>) m_loop)
-            .reset(VecBuilder.fill(angle.in(Radians), velocity.in(RadiansPerSecond)));
+        ((LinearSystemLoop<N2, N1, N1>) m_loop).reset(VecBuilder.fill(angle.in(Radians), velocity.in(RadiansPerSecond)));
       }
     }
   }
@@ -135,8 +134,7 @@ public class LQRController {
    */
   public void reset(Distance distance, LinearVelocity velocity) {
     if (Objects.requireNonNull(m_type) == LQRType.ELEVATOR) {
-      ((LinearSystemLoop<N2, N1, N1>) m_loop)
-          .reset(VecBuilder.fill(distance.in(Meters), velocity.in(MetersPerSecond)));
+      ((LinearSystemLoop<N2, N1, N1>) m_loop).reset(VecBuilder.fill(distance.in(Meters), velocity.in(MetersPerSecond)));
     }
   }
 

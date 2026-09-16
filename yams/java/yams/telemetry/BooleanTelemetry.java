@@ -84,10 +84,10 @@ public class BooleanTelemetry<F> {
   /**
    * Setup boolean telemetry for a field.
    *
-   * @param keyString Networks table key.
+   * @param keyString  Networks table key.
    * @param defaultVal Default value.
-   * @param field Field representing.
-   * @param tunable Tunable?
+   * @param field      Field representing.
+   * @param tunable    Tunable?
    */
   public BooleanTelemetry(String keyString, boolean defaultVal, F field, boolean tunable) {
     key = keyString;
@@ -99,7 +99,7 @@ public class BooleanTelemetry<F> {
   /**
    * Setup network tables.
    *
-   * @param dataTable Data tables.
+   * @param dataTable   Data tables.
    * @param tuningTable Tuning table.
    */
   public void setupNetworkTables(NetworkTable dataTable, NetworkTable tuningTable) {
@@ -127,10 +127,7 @@ public class BooleanTelemetry<F> {
       if (!prefix.endsWith("/")) {
         prefix += "/";
       }
-      dataLogEntry =
-          Optional.of(
-              new BooleanLogEntry(
-                  DataLogManager.getLog(), prefix + key, (long) Timer.getFPGATimestamp()));
+      dataLogEntry = Optional.of(new BooleanLogEntry(DataLogManager.getLog(), prefix + key, (long) Timer.getFPGATimestamp()));
     }
   }
 

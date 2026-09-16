@@ -41,17 +41,14 @@ public class SwerveModuleTelemetryConfig {
   private boolean NT4Telemetry = true;
 
   /** {@link StructTelemetryField}s to enable or disable. */
-  private final Map<StructTelemetryField, StructTelemetry<?, StructTelemetryField>> structFields =
-      Arrays.stream(StructTelemetryField.values())
-          .collect(Collectors.toMap(e -> e, StructTelemetryField::create));
+  private final Map<StructTelemetryField, StructTelemetry<?, StructTelemetryField>> structFields = Arrays.stream(StructTelemetryField.values()).collect(Collectors.toMap(e -> e, StructTelemetryField::create));
 
   /** {@link DoubleTelemetryField}s to enable or disable. */
-  private final Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> doubleFields =
-      Arrays.stream(DoubleTelemetryField.values())
-          .collect(Collectors.toMap(e -> e, DoubleTelemetryField::create));
+  private final Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> doubleFields = Arrays.stream(DoubleTelemetryField.values()).collect(Collectors.toMap(e -> e, DoubleTelemetryField::create));
 
   /** Default constructor. */
-  public SwerveModuleTelemetryConfig() {}
+  public SwerveModuleTelemetryConfig() {
+  }
 
   /**
    * Constructor with verbosity preset.

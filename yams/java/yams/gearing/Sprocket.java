@@ -16,8 +16,8 @@ import yams.exceptions.NoStagesGivenException;
  * <p>You can construct a {@link Sprocket} in several ways:
  *
  * <ul>
- *   <li><b>{@code new Sprocket(double...)}</b> — provide per-stage IN/OUT ratios directly
- *   <li><b>{@code fromStages(String...)}</b> — provide stages as {@code "IN:OUT"} strings
+ * <li><b>{@code new Sprocket(double...)}</b> — provide per-stage IN/OUT ratios directly
+ * <li><b>{@code fromStages(String...)}</b> — provide stages as {@code "IN:OUT"} strings
  * </ul>
  *
  * <h2>Example</h2>

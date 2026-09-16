@@ -121,15 +121,11 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
    * Constructor for the Arm mechanism.
    *
    * @param lowerConfig Lower {@link ArmConfig} to use.
-   * @param lowerSMC {@link SmartMotorController} driving the lower joint.
+   * @param lowerSMC    {@link SmartMotorController} driving the lower joint.
    * @param upperConfig Upper {@link ArmConfig} to use.
-   * @param upperSMC {@link SmartMotorController} driving the upper joint.
+   * @param upperSMC    {@link SmartMotorController} driving the upper joint.
    */
-  public DoubleJointedArm(
-      ArmConfig lowerConfig,
-      SmartMotorController lowerSMC,
-      ArmConfig upperConfig,
-      SmartMotorController upperSMC) {
+  public DoubleJointedArm(ArmConfig lowerConfig, SmartMotorController lowerSMC, ArmConfig upperConfig, SmartMotorController upperSMC) {
     m_lowerArmConfig = lowerConfig;
     m_upperArmConfig = upperConfig;
     m_lowerSMC = lowerSMC;
@@ -138,28 +134,18 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
     SmartMotorControllerConfig upperSMCConfig = upperSMC.getConfig();
 
     if (lowerSMCConfig.getSubsystem() != upperSMCConfig.getSubsystem()) {
-      throw new DoubleJointedArmConfigurationException(
-          "SmartMotorControllers do not have the same subsystem!",
-          "Cannot create commands for single subsystem.",
-          "withSubsystem(this)");
+      throw new DoubleJointedArmConfigurationException("SmartMotorControllers do not have the same subsystem!", "Cannot create commands for single subsystem.", "withSubsystem(this)");
     }
     m_subsystem = lowerSMCConfig.getSubsystem();
 
     // Check that the starting angle is defined
-    if (lowerSMCConfig.getStartingPosition().isEmpty()
-        || upperSMCConfig.getStartingPosition().isEmpty()) {
-      throw new DoubleJointedArmConfigurationException(
-          "Arm starting angle is empty",
-          "Cannot create simulation.",
-          "SmartMotorControllerConfig.withStartingPosition(Angle)");
+    if (lowerSMCConfig.getStartingPosition().isEmpty() || upperSMCConfig.getStartingPosition().isEmpty()) {
+      throw new DoubleJointedArmConfigurationException("Arm starting angle is empty", "Cannot create simulation.", "SmartMotorControllerConfig.withStartingPosition(Angle)");
     }
 
     // Check that the arm lengths are defined
     if (lowerConfig.getLength().isEmpty() || upperConfig.getLength().isEmpty()) {
-      throw new DoubleJointedArmConfigurationException(
-          "Arm lengths must be defined to calculate current end position of the Double Jointed Arm!",
-          "Cannot create mechanism",
-          "withLength(Distance)");
+      throw new DoubleJointedArmConfigurationException("Arm lengths must be defined to calculate current end position of the Double Jointed Arm!", "Cannot create mechanism", "withLength(Distance)");
     }
     m_lowerArmLength = lowerConfig.getLength().get();
     m_upperArmLength = upperConfig.getLength().get();
@@ -170,80 +156,38 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
     m_lowerArmRootPos = new Translation2d(m_lowerArmLength.plus(m_upperArmLength).in(Meters), 0);
 
     // Seed the relative encoder
-    m_lowerSMC
-        .getConfig()
-        .getExternalEncoder()
-        .ifPresent(
-            encoder -> {
-              m_lowerSMC.seedRelativeEncoder();
-            });
-    m_upperSMC
-        .getConfig()
-        .getExternalEncoder()
-        .ifPresent(
-            encoder -> {
-              m_upperSMC.seedRelativeEncoder();
-            });
+    m_lowerSMC.getConfig().getExternalEncoder().ifPresent(encoder -> {
+      m_lowerSMC.seedRelativeEncoder();
+    });
+    m_upperSMC.getConfig().getExternalEncoder().ifPresent(encoder -> {
+      m_upperSMC.seedRelativeEncoder();
+    });
 
     // Setup telemetry
     if (lowerConfig.getTelemetryName().isPresent() || upperConfig.getTelemetryName().isPresent()) {
       m_telemetry.setupTelemetry(getName());
     }
-    lowerConfig
-        .getTelemetryName()
-        .ifPresent(
-            name -> {
-              m_telemetry.addMotorController("lower", m_lowerSMC);
-            });
-    upperConfig
-        .getTelemetryName()
-        .ifPresent(
-            name -> {
-              m_telemetry.addMotorController("upper", m_upperSMC);
-            });
+    lowerConfig.getTelemetryName().ifPresent(name -> {
+      m_telemetry.addMotorController("lower", m_lowerSMC);
+    });
+    upperConfig.getTelemetryName().ifPresent(name -> {
+      m_telemetry.addMotorController("upper", m_upperSMC);
+    });
 
     if (RobotBase.isSimulation()) {
       if (lowerConfig.getLowerHardLimit().isEmpty() || upperConfig.getLowerHardLimit().isEmpty()) {
-        throw new DoubleJointedArmConfigurationException(
-            "Arm lower hard limit is empty",
-            "Cannot create simulation.",
-            "withHardLimits(Angle,Angle)");
+        throw new DoubleJointedArmConfigurationException("Arm lower hard limit is empty", "Cannot create simulation.", "withHardLimits(Angle,Angle)");
       }
       if (lowerConfig.getUpperHardLimit().isEmpty() || upperConfig.getUpperHardLimit().isEmpty()) {
-        throw new DoubleJointedArmConfigurationException(
-            "Arm upper hard limit is empty",
-            "Cannot create simulation.",
-            "withHardLimits(Angle,Angle)");
+        throw new DoubleJointedArmConfigurationException("Arm upper hard limit is empty", "Cannot create simulation.", "withHardLimits(Angle,Angle)");
       }
 
       // Setup Sim
-      m_lowerArmSim =
-          Optional.of(
-              new SingleJointedArmSim(
-                  m_lowerSMC.getDCMotor(),
-                  m_lowerSMC.getConfig().getGearing().getMechanismToRotorRatio(),
-                  lowerSMCConfig.getMOI(),
-                  lowerConfig.getLength().get().in(Meters),
-                  lowerConfig.getLowerHardLimit().get().in(Radians),
-                  lowerConfig.getUpperHardLimit().get().in(Radians),
-                  true,
-                  lowerSMCConfig.getStartingPosition().get().in(Radians),
-                  0.002 / 4096.0,
-                  0.0)); // Add noise with a std-dev of 1 tick
+      m_lowerArmSim = Optional.of(new SingleJointedArmSim(m_lowerSMC.getDCMotor(), m_lowerSMC.getConfig().getGearing().getMechanismToRotorRatio(), lowerSMCConfig.getMOI(), lowerConfig.getLength().get().in(Meters), lowerConfig.getLowerHardLimit()
+          .get().in(Radians), lowerConfig.getUpperHardLimit().get().in(Radians), true, lowerSMCConfig.getStartingPosition().get().in(Radians), 0.002 / 4096.0, 0.0)); // Add noise with a std-dev of 1 tick
       m_lowerSMC.setSimSupplier(new ArmSimSupplier(m_lowerArmSim.get(), m_lowerSMC));
-      m_upperArmSim =
-          Optional.of(
-              new SingleJointedArmSim(
-                  m_upperSMC.getDCMotor(),
-                  m_upperSMC.getConfig().getGearing().getMechanismToRotorRatio(),
-                  upperSMCConfig.getMOI(),
-                  m_upperArmLength.in(Meters),
-                  upperConfig.getLowerHardLimit().get().in(Radians),
-                  upperConfig.getUpperHardLimit().get().in(Radians),
-                  true,
-                  upperSMCConfig.getStartingPosition().get().in(Radians),
-                  0.002 / 4096.0,
-                  0.0)); // Add noise with a std-dev of 1 tick
+      m_upperArmSim = Optional.of(new SingleJointedArmSim(m_upperSMC.getDCMotor(), m_upperSMC.getConfig().getGearing().getMechanismToRotorRatio(), upperSMCConfig.getMOI(), m_upperArmLength.in(Meters), upperConfig.getLowerHardLimit().get().in(
+          Radians), upperConfig.getUpperHardLimit().get().in(Radians), true, upperSMCConfig.getStartingPosition().get().in(Radians), 0.002 / 4096.0, 0.0)); // Add noise with a std-dev of 1 tick
       m_upperSMC.setSimSupplier(new ArmSimSupplier(m_upperArmSim.get(), m_upperSMC));
 
       var lowerStartingAngle = lowerSMCConfig.getStartingPosition().get();
@@ -251,36 +195,14 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
 
       var upperArmRootPos = getJoint(m_lowerArmLength, lowerStartingAngle, m_lowerArmRootPos);
 
-      var windowX =
-          lowerMechPosCfg.getWindowXDimension(m_lowerArmLength).in(Meters)
-              + upperMechPosCfg.getWindowXDimension(m_upperArmLength).in(Meters);
-      var windowY =
-          lowerMechPosCfg.getWindowYDimension(m_lowerArmLength).in(Meters)
-              + upperMechPosCfg.getWindowYDimension(m_upperArmLength).in(Meters);
+      var windowX = lowerMechPosCfg.getWindowXDimension(m_lowerArmLength).in(Meters) + upperMechPosCfg.getWindowXDimension(m_upperArmLength).in(Meters);
+      var windowY = lowerMechPosCfg.getWindowYDimension(m_lowerArmLength).in(Meters) + upperMechPosCfg.getWindowYDimension(m_upperArmLength).in(Meters);
 
       m_mechanismWindow = new Mechanism2d(windowX, windowY);
-      m_mechanismRoot =
-          m_mechanismWindow.getRoot(
-              "Lower Root", m_lowerArmRootPos.getX(), m_lowerArmRootPos.getY());
-      m_lowerLigament =
-          m_mechanismLigament =
-              m_mechanismRoot.append(
-                  new MechanismLigament2d(
-                      " lower",
-                      m_lowerArmLength.in(Meters),
-                      lowerStartingAngle.in(Degrees),
-                      7,
-                      lowerConfig.getSimColor()));
-      m_upperRoot =
-          m_mechanismWindow.getRoot("Upper Root", upperArmRootPos.getX(), upperArmRootPos.getY());
-      m_upperLigament =
-          m_upperRoot.append(
-              new MechanismLigament2d(
-                  "upper",
-                  m_upperArmLength.in(Meters),
-                  upperStartingAngle.in(Degrees),
-                  6,
-                  upperConfig.getSimColor()));
+      m_mechanismRoot = m_mechanismWindow.getRoot("Lower Root", m_lowerArmRootPos.getX(), m_lowerArmRootPos.getY());
+      m_lowerLigament = m_mechanismLigament = m_mechanismRoot.append(new MechanismLigament2d(" lower", m_lowerArmLength.in(Meters), lowerStartingAngle.in(Degrees), 7, lowerConfig.getSimColor()));
+      m_upperRoot = m_mechanismWindow.getRoot("Upper Root", upperArmRootPos.getX(), upperArmRootPos.getY());
+      m_upperLigament = m_upperRoot.append(new MechanismLigament2d("upper", m_upperArmLength.in(Meters), upperStartingAngle.in(Degrees), 6, upperConfig.getSimColor()));
       SmartDashboard.putData(getName() + "/mechanism", m_mechanismWindow);
 
       m_upperSMC.setupSimulation();
@@ -291,16 +213,13 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
   /**
    * Get the joint {@link Translation2d} of the arm in Meters.
    *
-   * @param armLen {@link Distance} length of the arm.
+   * @param armLen   {@link Distance} length of the arm.
    * @param armAngle {@link Angle} angle of the arm.
-   * @param offset {@link Translation2d} root position to offset by.
+   * @param offset   {@link Translation2d} root position to offset by.
    * @return {@link Translation2d} of the joint.
    */
   private Translation2d getJoint(Distance armLen, Angle armAngle, Translation2d offset) {
-    return new Translation2d(
-            armLen.times(Math.cos(armAngle.in(Radians))).in(Meters),
-            armLen.times(Math.sin(armAngle.in(Radians))).in(Meters))
-        .plus(offset);
+    return new Translation2d(armLen.times(Math.cos(armAngle.in(Radians))).in(Meters), armLen.times(Math.sin(armAngle.in(Radians))).in(Meters)).plus(offset);
   }
 
   /**
@@ -309,17 +228,14 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
    * @return {@link Translation2d} of the double jointed arm.
    */
   public Translation2d getPosition() {
-    return getJoint(
-        m_upperArmLength,
-        m_upperSMC.getMechanismPosition(),
-        getJoint(m_lowerArmLength, m_lowerSMC.getMechanismPosition(), Translation2d.kZero));
+    return getJoint(m_upperArmLength, m_upperSMC.getMechanismPosition(), getJoint(m_lowerArmLength, m_lowerSMC.getMechanismPosition(), Translation2d.kZero));
   }
 
   /**
    * Inverse Kinematics for a DoubleJointedArm
    *
    * @param translation Translations from root in Meters.
-   * @param invert Invert the elbow.
+   * @param invert      Invert the elbow.
    * @return {@link Pair} with the shoulder angle then elbow angle.
    */
   public Pair<Angle, Angle> getAnglesForPosition(Translation2d translation, boolean invert) {
@@ -341,22 +257,21 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
    * Set the position of the DoubleJointedArm to be at pose in meters.
    *
    * @param translation {@link Translation2d} where X is away from root, and Y is up.
-   * @param invert Invert the eblow.
+   * @param invert      Invert the eblow.
    * @return {@link Command} that will reach the specified goal.
    */
   public Command setPosition(Translation2d translation, boolean invert) {
-    return Commands.deferredProxy(
-        () -> {
-          var thetas = getAnglesForPosition(translation, invert);
-          return setAngle(thetas.getFirst(), thetas.getSecond());
-        });
+    return Commands.deferredProxy(() -> {
+      var thetas = getAnglesForPosition(translation, invert);
+      return setAngle(thetas.getFirst(), thetas.getSecond());
+    });
   }
 
   /**
    * Set the position of the DoubleJointedArm to be at pose in meters.
    *
    * @param translation2d {@link Translation2d} where X is away from root, and Y is up.
-   * @param invert Invert the eblow.
+   * @param invert        Invert the eblow.
    * @return {@link Command} that will reach the specified goal.
    */
   public Command run(Translation2d translation2d, boolean invert) {
@@ -367,19 +282,17 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
    * Set the position of the DoubleJointedArm to be at pose in meters.
    *
    * @param translation {@link Supplier<Translation2d>} where X is away from root, and Y is up.
-   * @param invert {@link Supplier<Boolean>} Invert the eblow.
+   * @param invert      {@link Supplier<Boolean>} Invert the eblow.
    * @return {@link Command} that will reach the specified goal.
    */
   public Command run(Supplier<Translation2d> translation, Supplier<Boolean> invert) {
-    return Commands.run(
-        () -> {
-          var thetas = getAnglesForPosition(translation.get(), invert.get());
-          var lowerAngle = thetas.getFirst();
-          var upperAngle = thetas.getSecond();
-          m_lowerSMC.setPosition(lowerAngle);
-          m_upperSMC.setPosition(upperAngle);
-        },
-        m_subsystem);
+    return Commands.run(() -> {
+      var thetas = getAnglesForPosition(translation.get(), invert.get());
+      var lowerAngle = thetas.getFirst();
+      var upperAngle = thetas.getSecond();
+      m_lowerSMC.setPosition(lowerAngle);
+      m_upperSMC.setPosition(upperAngle);
+    }, m_subsystem);
   }
 
   /**
@@ -387,8 +300,8 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
    * take over.
    *
    * @param translation2d Target position
-   * @param invert Invert the elbow direction.
-   * @param tolerance Tolerance
+   * @param invert        Invert the elbow direction.
+   * @param tolerance     Tolerance
    * @return {@link Command} that will reach the specified goal.
    */
   public Command runTo(Translation2d translation2d, boolean invert, Distance tolerance) {
@@ -400,28 +313,24 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
    * take over.
    *
    * @param translation Target position
-   * @param invert Invert the elbow direction.
-   * @param tolerance Tolerance
+   * @param invert      Invert the elbow direction.
+   * @param tolerance   Tolerance
    * @return {@link Command} that will reach the specified goal.
    */
-  public Command runTo(
-      Supplier<Translation2d> translation, Supplier<Boolean> invert, Distance tolerance) {
-    return Commands.run(
-            () -> {
-              var thetas = getAnglesForPosition(translation.get(), invert.get());
-              var lowerAngle = thetas.getFirst();
-              var upperAngle = thetas.getSecond();
-              m_lowerSMC.setPosition(lowerAngle);
-              m_upperSMC.setPosition(upperAngle);
-            },
-            m_subsystem)
-        .until(() -> isNear(translation.get(), tolerance));
+  public Command runTo(Supplier<Translation2d> translation, Supplier<Boolean> invert, Distance tolerance) {
+    return Commands.run(() -> {
+      var thetas = getAnglesForPosition(translation.get(), invert.get());
+      var lowerAngle = thetas.getFirst();
+      var upperAngle = thetas.getSecond();
+      m_lowerSMC.setPosition(lowerAngle);
+      m_upperSMC.setPosition(upperAngle);
+    }, m_subsystem).until(() -> isNear(translation.get(), tolerance));
   }
 
   /**
    * Is near the target within tolerance
    *
-   * @param target Target to check
+   * @param target    Target to check
    * @param tolerance Tolerance
    * @return Boolean
    */
@@ -452,10 +361,7 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
 
   @Override
   public void simIterate() {
-    if (m_lowerArmSim.isPresent()
-        && m_lowerSMC.getSimSupplier().isPresent()
-        && m_upperArmSim.isPresent()
-        && m_upperSMC.getSimSupplier().isPresent()) {
+    if (m_lowerArmSim.isPresent() && m_lowerSMC.getSimSupplier().isPresent() && m_upperArmSim.isPresent() && m_upperSMC.getSimSupplier().isPresent()) {
       m_lowerSMC.getSimSupplier().get().updateSimState();
       m_lowerSMC.simIterate();
       m_lowerSMC.getSimSupplier().get().starveUpdateSim();
@@ -497,10 +403,7 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
 
   @Override
   public String getName() {
-    return "DoubleJointedArm_"
-        + m_lowerArmConfig.getTelemetryName().orElse("Lower")
-        + "_"
-        + m_upperArmConfig.getTelemetryName().orElse("Upper");
+    return "DoubleJointedArm_" + m_lowerArmConfig.getTelemetryName().orElse("Lower") + "_" + m_upperArmConfig.getTelemetryName().orElse("Upper");
   }
 
   /**
@@ -529,17 +432,14 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
    * @return {@link Command} that will set the angles.
    */
   public Command setAngle(Angle lowerAngle, Angle upperAngle) {
-    return Commands.run(
-            () -> {
-              if (lowerAngle != null) {
-                m_lowerSMC.setPosition(lowerAngle);
-              }
-              if (upperAngle != null) {
-                m_upperSMC.setPosition(upperAngle);
-              }
-            },
-            m_subsystem)
-        .withName(m_subsystem.getName() + " SetAngle");
+    return Commands.run(() -> {
+      if (lowerAngle != null) {
+        m_lowerSMC.setPosition(lowerAngle);
+      }
+      if (upperAngle != null) {
+        m_upperSMC.setPosition(upperAngle);
+      }
+    }, m_subsystem).withName(m_subsystem.getName() + " SetAngle");
   }
 
   /**
@@ -550,34 +450,28 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
    * @return {@link Command} to set the DutyCycle.
    */
   public Command set(Double lowerDutycycle, Double upperDutycycle) {
-    return Commands.startRun(
-            () -> {
-              if (lowerDutycycle != null) {
-                m_lowerSMC.stopClosedLoopController();
-              }
-              if (upperDutycycle != null) {
-                m_upperSMC.stopClosedLoopController();
-              }
-            },
-            () -> {
-              if (lowerDutycycle != null) {
-                m_lowerSMC.setDutyCycle(lowerDutycycle);
-              }
-              if (upperDutycycle != null) {
-                m_upperSMC.setDutyCycle(upperDutycycle);
-              }
-            },
-            m_subsystem)
-        .finallyDo(
-            () -> {
-              if (lowerDutycycle != null) {
-                m_lowerSMC.startClosedLoopController();
-              }
-              if (upperDutycycle != null) {
-                m_upperSMC.startClosedLoopController();
-              }
-            })
-        .withName(m_subsystem.getName() + " SetDutyCycle");
+    return Commands.startRun(() -> {
+      if (lowerDutycycle != null) {
+        m_lowerSMC.stopClosedLoopController();
+      }
+      if (upperDutycycle != null) {
+        m_upperSMC.stopClosedLoopController();
+      }
+    }, () -> {
+      if (lowerDutycycle != null) {
+        m_lowerSMC.setDutyCycle(lowerDutycycle);
+      }
+      if (upperDutycycle != null) {
+        m_upperSMC.setDutyCycle(upperDutycycle);
+      }
+    }, m_subsystem).finallyDo(() -> {
+      if (lowerDutycycle != null) {
+        m_lowerSMC.startClosedLoopController();
+      }
+      if (upperDutycycle != null) {
+        m_upperSMC.startClosedLoopController();
+      }
+    }).withName(m_subsystem.getName() + " SetDutyCycle");
   }
 
   @Override

@@ -52,9 +52,7 @@ class StructArrayTelemetry {
    *
    * @param value New default value.
    */
-  void SetDefaultValue(std::vector<T> value) {
-    m_cachedValue = m_defaultValue = std::move(value);
-  }
+  void SetDefaultValue(std::vector<T> value) { m_cachedValue = m_defaultValue = std::move(value); }
 
   /**
    * Create the NT4 publisher (and subscriber if tunable) under the given tables.

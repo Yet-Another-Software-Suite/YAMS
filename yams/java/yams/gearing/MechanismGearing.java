@@ -17,11 +17,11 @@ import java.util.Optional;
  * <p>Constructors available:
  *
  * <ul>
- *   <li><b>{@code new MechanismGearing(double)}</b> — single overall reduction ratio
- *   <li><b>{@code new MechanismGearing(double...)}</b> — one ratio per gearbox stage
- *   <li><b>{@code new MechanismGearing(GearBox)}</b> — pre-built {@link GearBox}
- *   <li><b>{@code new MechanismGearing(GearBox, Sprocket)}</b> — gearbox followed by a chain/belt
- *       stage
+ * <li><b>{@code new MechanismGearing(double)}</b> — single overall reduction ratio
+ * <li><b>{@code new MechanismGearing(double...)}</b> — one ratio per gearbox stage
+ * <li><b>{@code new MechanismGearing(GearBox)}</b> — pre-built {@link GearBox}
+ * <li><b>{@code new MechanismGearing(GearBox, Sprocket)}</b> — gearbox followed by a chain/belt
+ * stage
  * </ul>
  *
  * <h2>Example</h2>
@@ -57,7 +57,7 @@ public class MechanismGearing {
    * Construct a {@link MechanismGearing} with a reduction ratio.
    *
    * @param reductionRatio Reduction ratio. For example, a reduction of "3:1" is 3.0; a reduction of
-   *     "1:2" is 0.5.
+   *                       "1:2" is 0.5.
    */
   public MechanismGearing(double reductionRatio) {
     gearBox = GearBox.fromReductionStages(reductionRatio);
@@ -67,7 +67,7 @@ public class MechanismGearing {
    * Construct a {@link MechanismGearing} with a reduction ratios.
    *
    * @param reductionRatios Reduction ratio. For example, a reduction of "3:1" is 3.0; a reduction
-   *     of "1:2" is 0.5.
+   *                        of "1:2" is 0.5.
    */
   public MechanismGearing(double... reductionRatios) {
     gearBox = GearBox.fromReductionStages(reductionRatios);
@@ -86,7 +86,7 @@ public class MechanismGearing {
   /**
    * Initialize the {@link MechanismGearing} with a {@link GearBox} and {@link Sprocket}
    *
-   * @param gearBox {@link GearBox} attached to the motor.
+   * @param gearBox   {@link GearBox} attached to the motor.
    * @param sprockets {@link Sprocket} attached to the gearbox.
    */
   public MechanismGearing(GearBox gearBox, Sprocket sprockets) {

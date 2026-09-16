@@ -100,7 +100,7 @@ public class ExponentialProfilePIDController {
   /**
    * Constructor.
    *
-   * @param controller The wrapped PID controller.
+   * @param controller  The wrapped PID controller.
    * @param constraints The wrapped profile constraints.
    */
   public ExponentialProfilePIDController(PIDController controller, Constraints constraints) {
@@ -112,9 +112,9 @@ public class ExponentialProfilePIDController {
   /**
    * Constructor.
    *
-   * @param kP kP value for the {@link PIDController}
-   * @param kI kI value for the {@link PIDController}
-   * @param kD kD value for the {@link PIDController}
+   * @param kP          kP value for the {@link PIDController}
+   * @param kI          kI value for the {@link PIDController}
+   * @param kD          kD value for the {@link PIDController}
    * @param constraints {@link Constraints} for the {@link ExponentialProfile}
    */
   public ExponentialProfilePIDController(double kP, double kI, double kD, Constraints constraints) {
@@ -124,28 +124,22 @@ public class ExponentialProfilePIDController {
   /**
    * Get the {@link ExponentialProfile.Constraints} for an elevator.
    *
-   * @param maxVolts Maximum input voltage for profile generation.
-   * @param motor {@link DCMotor} of the elevator.
-   * @param mass {@link Mass} of the elevator carriage.
+   * @param maxVolts   Maximum input voltage for profile generation.
+   * @param motor      {@link DCMotor} of the elevator.
+   * @param mass       {@link Mass} of the elevator carriage.
    * @param drumRadius {@link Distance} of the elevator drum radius.
-   * @param gearing {@link MechanismGearing} of the elevator from the drum to the rotor.
+   * @param gearing    {@link MechanismGearing} of the elevator from the drum to the rotor.
    * @return {@link ExponentialProfile.Constraints}
    */
-  public static ExponentialProfile.Constraints createElevatorConstraints(
-      Voltage maxVolts, DCMotor motor, Mass mass, Distance drumRadius, MechanismGearing gearing) {
-    var sysid =
-        LinearSystemId.createElevatorSystem(
-            motor, mass.in(Kilograms), drumRadius.in(Meters), gearing.getMechanismToRotorRatio());
+  public static ExponentialProfile.Constraints createElevatorConstraints(Voltage maxVolts, DCMotor motor, Mass mass, Distance drumRadius, MechanismGearing gearing) {
+    var sysid = LinearSystemId.createElevatorSystem(motor, mass.in(Kilograms), drumRadius.in(Meters), gearing.getMechanismToRotorRatio());
     var circumference = (2.0 * Math.PI * drumRadius.in(Meters));
 
     var A = sysid.getA(0, 0);
     var B = sysid.getB(0, 0);
     var kV = MetersPerSecond.of(-A / B);
     var kA = MetersPerSecondPerSecond.of(1.0 / B);
-    return ExponentialProfile.Constraints.fromCharacteristics(
-        maxVolts.in(Volts),
-        kV.in(MetersPerSecond) / circumference,
-        kA.in(MetersPerSecondPerSecond) / circumference);
+    return ExponentialProfile.Constraints.fromCharacteristics(maxVolts.in(Volts), kV.in(MetersPerSecond) / circumference, kA.in(MetersPerSecondPerSecond) / circumference);
     //    return ExponentialProfile.Constraints.fromStateSpace(maxVolts.in(Volts), A, B);
   }
 
@@ -153,56 +147,45 @@ public class ExponentialProfilePIDController {
    * Get the {@link ExponentialProfile.Constraints} for an arm.
    *
    * @param maxVolts Maximum input voltage for profile generation.
-   * @param motor {@link DCMotor} of the arm.
-   * @param moi {@link MomentOfInertia} of the arm.
-   * @param gearing {@link MechanismGearing} of the arm from the rotor to the drum. {@code gearing.getMechanismToRotorRatio()}
+   * @param motor    {@link DCMotor} of the arm.
+   * @param moi      {@link MomentOfInertia} of the arm.
+   * @param gearing  {@link MechanismGearing} of the arm from the rotor to the drum. {@code gearing.getMechanismToRotorRatio()}
    * @return {@link ExponentialProfile.Constraints}
    */
-  public static ExponentialProfile.Constraints createArmConstraints(
-      Voltage maxVolts, DCMotor motor, MomentOfInertia moi, MechanismGearing gearing) {
-    var sysid =
-        LinearSystemId.createSingleJointedArmSystem(
-            motor, moi.in(KilogramSquareMeters), gearing.getMechanismToRotorRatio());
+  public static ExponentialProfile.Constraints createArmConstraints(Voltage maxVolts, DCMotor motor, MomentOfInertia moi, MechanismGearing gearing) {
+    var sysid = LinearSystemId.createSingleJointedArmSystem(motor, moi.in(KilogramSquareMeters), gearing.getMechanismToRotorRatio());
     var A = sysid.getA(0, 0); // radians
     var B = sysid.getB(0, 0); // radians
     var kV = RadiansPerSecond.of(-A / B);
     var kA = RadiansPerSecondPerSecond.of(1.0 / B);
     //    return ExponentialProfile.Constraints.fromStateSpace(maxVolts.in(Volts), A, B);
-    return ExponentialProfile.Constraints.fromCharacteristics(
-        maxVolts.in(Volts), kV.in(RotationsPerSecond), kA.in(RotationsPerSecondPerSecond));
+    return ExponentialProfile.Constraints.fromCharacteristics(maxVolts.in(Volts), kV.in(RotationsPerSecond), kA.in(RotationsPerSecondPerSecond));
   }
 
   /**
    * Get the {@link ExponentialProfile.Constraints} for an arm.
    *
    * @param maxVolts Maximum input voltage for profile generation.
-   * @param motor {@link DCMotor} of the arm.
-   * @param mass {@link Mass} of the arm.
-   * @param length {@link Distance} of the arm length.
-   * @param gearing {@link MechanismGearing} of the arm from the rotor to the drum. {@code gearing.getMechanismToRotorRatio()}
+   * @param motor    {@link DCMotor} of the arm.
+   * @param mass     {@link Mass} of the arm.
+   * @param length   {@link Distance} of the arm length.
+   * @param gearing  {@link MechanismGearing} of the arm from the rotor to the drum. {@code gearing.getMechanismToRotorRatio()}
    * @return {@link ExponentialProfile.Constraints}
    */
-  public static ExponentialProfile.Constraints createArmConstraints(
-      Voltage maxVolts, DCMotor motor, Mass mass, Distance length, MechanismGearing gearing) {
-    return createArmConstraints(
-        maxVolts,
-        motor,
-        KilogramSquareMeters.of(
-            SingleJointedArmSim.estimateMOI(length.in(Meters), mass.in(Kilograms))),
-        gearing);
+  public static ExponentialProfile.Constraints createArmConstraints(Voltage maxVolts, DCMotor motor, Mass mass, Distance length, MechanismGearing gearing) {
+    return createArmConstraints(maxVolts, motor, KilogramSquareMeters.of(SingleJointedArmSim.estimateMOI(length.in(Meters), mass.in(Kilograms))), gearing);
   }
 
   /**
    * Get the {@link ExponentialProfile.Constraints} for a flywheel.
    *
    * @param maxVolts Maximum input voltage for profile generation.
-   * @param motor {@link DCMotor} of the flywheel.
-   * @param moi {@link MomentOfInertia} of the flywheel.
-   * @param gearing {@link MechanismGearing} of the flywheel from the rotor to the drum.
+   * @param motor    {@link DCMotor} of the flywheel.
+   * @param moi      {@link MomentOfInertia} of the flywheel.
+   * @param gearing  {@link MechanismGearing} of the flywheel from the rotor to the drum.
    * @return {@link ExponentialProfile.Constraints}
    */
-  public static ExponentialProfile.Constraints createFlywheelConstraints(
-      Voltage maxVolts, DCMotor motor, MomentOfInertia moi, MechanismGearing gearing) {
+  public static ExponentialProfile.Constraints createFlywheelConstraints(Voltage maxVolts, DCMotor motor, MomentOfInertia moi, MechanismGearing gearing) {
     return createArmConstraints(maxVolts, motor, moi, gearing);
   }
 
@@ -210,32 +193,27 @@ public class ExponentialProfilePIDController {
    * Get the {@link ExponentialProfile.Constraints} for a flywheel.
    *
    * @param maxVolts Maximum input voltage for profile generation.
-   * @param motor {@link DCMotor} of the flywheel.
-   * @param mass {@link Mass} of the flywheel.
-   * @param radius {@link Distance} of the flywheel radius.
-   * @param gearing {@link MechanismGearing} of the flywheel from the rotor to the drum.
+   * @param motor    {@link DCMotor} of the flywheel.
+   * @param mass     {@link Mass} of the flywheel.
+   * @param radius   {@link Distance} of the flywheel radius.
+   * @param gearing  {@link MechanismGearing} of the flywheel from the rotor to the drum.
    * @return {@link ExponentialProfile.Constraints}
    */
-  public static ExponentialProfile.Constraints createFlywheelConstraints(
-      Voltage maxVolts, DCMotor motor, Mass mass, Distance radius, MechanismGearing gearing) {
+  public static ExponentialProfile.Constraints createFlywheelConstraints(Voltage maxVolts, DCMotor motor, Mass mass, Distance radius, MechanismGearing gearing) {
     return createArmConstraints(maxVolts, motor, mass, radius, gearing);
   }
 
   /**
    * Create a generic constraints object.
    *
-   * @param maxVolts Maximum input voltage for profile generation.
-   * @param maxVelocity Maximum velocity.
+   * @param maxVolts        Maximum input voltage for profile generation.
+   * @param maxVelocity     Maximum velocity.
    * @param maxAcceleration Maximum acceleration.
    * @return {@link ExponentialProfile.Constraints}
    */
-  public static Constraints createConstraints(
-      Voltage maxVolts, AngularVelocity maxVelocity, AngularAcceleration maxAcceleration) {
+  public static Constraints createConstraints(Voltage maxVolts, AngularVelocity maxVelocity, AngularAcceleration maxAcceleration) {
     var maxV = maxVolts.in(Volts);
-    return ExponentialProfile.Constraints.fromStateSpace(
-        maxVolts.in(Volts),
-        maxV / maxVelocity.in(RotationsPerSecond),
-        maxV / maxAcceleration.in(RotationsPerSecondPerSecond));
+    return ExponentialProfile.Constraints.fromStateSpace(maxVolts.in(Volts), maxV / maxVelocity.in(RotationsPerSecond), maxV / maxAcceleration.in(RotationsPerSecondPerSecond));
   }
 
   /**
@@ -394,12 +372,11 @@ public class ExponentialProfilePIDController {
    * Calculate the feedback, assuming previous state velocity.
    *
    * @param measurementPosition Measurement position to set as the current state..
-   * @param setpointVelocity Setpoint velocity.
-   * @param setpointPosition Setpoint position.
+   * @param setpointVelocity    Setpoint velocity.
+   * @param setpointPosition    Setpoint position.
    * @return Profile calculation
    */
-  public double calculate(
-      double measurementPosition, double setpointVelocity, double setpointPosition) {
+  public double calculate(double measurementPosition, double setpointVelocity, double setpointPosition) {
     if (timer.isRunning()) {
       loopTime = Seconds.of(timer.get());
     }
@@ -407,10 +384,7 @@ public class ExponentialProfilePIDController {
     timer.start();
     var feedback = controller.calculate(measurementPosition, currentState.position);
     nextState.ifPresent(state -> currentState = state);
-    nextState =
-        Optional.of(
-            profile.calculate(
-                loopTime.in(Seconds), currentState, new State(setpointPosition, setpointVelocity)));
+    nextState = Optional.of(profile.calculate(loopTime.in(Seconds), currentState, new State(setpointPosition, setpointVelocity)));
     return feedback;
   }
 
@@ -418,7 +392,7 @@ public class ExponentialProfilePIDController {
    * Calculate the feedback, assuming no setpoint velocity.
    *
    * @param measurementPosition Measurement position to set as the current state.
-   * @param setpointPosition Setpoint position.
+   * @param setpointPosition    Setpoint position.
    * @return Profile calculation where setpoint velocity is 0.
    */
   public double calculate(double measurementPosition, double setpointPosition) {

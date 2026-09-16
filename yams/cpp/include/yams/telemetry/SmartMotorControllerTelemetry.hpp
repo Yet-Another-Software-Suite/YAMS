@@ -323,7 +323,8 @@ class DoubleTelemetry {
  *
  * Generic over the enum type F identifying which field this entry represents, so the same
  * wrapper can be reused across unrelated telemetry coordinators (e.g. SmartMotorControllerTelemetry
- * uses BooleanTelemetry<BooleanTelemetryField>, while SwerveDriveTelemetry uses its own field enum).
+ * uses BooleanTelemetry<BooleanTelemetryField>, while SwerveDriveTelemetry uses its own field
+ * enum).
  *
  * @tparam F Enum type identifying which field this telemetry entry represents.
  */
@@ -534,8 +535,7 @@ class SmartMotorControllerTelemetry {
   void SetupTelemetry(
       motorcontrollers::SmartMotorController& smc, std::shared_ptr<nt::NetworkTable> publishTable,
       std::shared_ptr<nt::NetworkTable> tuningTable,
-      std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>&
-          doubleFields,
+      std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>& doubleFields,
       std::unordered_map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>>&
           boolFields,
       bool nt4Enabled, std::optional<std::string> dataLogName);
@@ -564,10 +564,10 @@ class SmartMotorControllerTelemetry {
   std::shared_ptr<nt::NetworkTable> m_dataTable;
   std::shared_ptr<nt::NetworkTable> m_tuningTable;
 
-  std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>*
-      m_doubleFields{nullptr};
-  std::unordered_map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>>*
-      m_boolFields{nullptr};
+  std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>* m_doubleFields{
+      nullptr};
+  std::unordered_map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>>* m_boolFields{
+      nullptr};
 };
 
 }  // namespace yams::telemetry

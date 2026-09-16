@@ -43,10 +43,10 @@ import yams.motorcontrollers.simulation.DCMotorSimSupplier;
  *
  * <ul>
  * <li><b>Tilt</b> — controlled by the <em>sum</em> of the left and right motor positions ({@code (left + right) / 2}). When both motors turn in the same direction the mechanism tilts up or
- *       down.
- *   <li><b>Twist</b> — controlled by the <em>difference</em> of the left and right motor positions
- *       ({@code (left - right) / 2}). When the motors turn in opposite directions the mechanism
- *       rotates about its longitudinal axis.
+ * down.
+ * <li><b>Twist</b> — controlled by the <em>difference</em> of the left and right motor positions
+ * ({@code (left - right) / 2}). When the motors turn in opposite directions the mechanism
+ * rotates about its longitudinal axis.
  * </ul>
  *
  * <p>A common FRC use-case is a differential wrist at the end of an arm where one motor controls
@@ -117,27 +117,18 @@ public class DifferentialMechanism extends SmartPositionalMechanism {
     m_rightSMC = diffConfig.getRightMotorController();
 
     if (m_leftSMC.getConfig().getSubsystem() != m_rightSMC.getConfig().getSubsystem()) {
-      throw new DifferentialMechanismConfigurationException(
-          "SmartMotorControllers do not have the same subsystem!",
-          "Cannot create commands for single subsystem.",
-          "withSubsystem(this)");
+      throw new DifferentialMechanismConfigurationException("SmartMotorControllers do not have the same subsystem!", "Cannot create commands for single subsystem.", "withSubsystem(this)");
     }
     m_subsystem = m_leftSMC.getConfig().getSubsystem();
 
     // Check that the starting angle is defined
     if (m_config.getStartingTiltAngle().isEmpty() || m_config.getStartingTwistAngle().isEmpty()) {
-      throw new DifferentialMechanismConfigurationException(
-          "Starting angle is empty",
-          "Cannot create simulation.",
-          "withTwistStartingPosition(Angle) OR DifferentialMechanismConfig.withTiltStartingPosition(Angle)");
+      throw new DifferentialMechanismConfigurationException("Starting angle is empty", "Cannot create simulation.", "withTwistStartingPosition(Angle) OR DifferentialMechanismConfig.withTiltStartingPosition(Angle)");
     }
 
     // Check that the arm lengths are defined
     if (m_config.getLength().isEmpty()) {
-      throw new DifferentialMechanismConfigurationException(
-          "Lengths must be defined to calculate current end position of the DifferentialMechanism!",
-          "Cannot create mechanism",
-          "withLength(Distance)");
+      throw new DifferentialMechanismConfigurationException("Lengths must be defined to calculate current end position of the DifferentialMechanism!", "Cannot create mechanism", "withLength(Distance)");
     }
     m_armLength = m_config.getLength().get();
 
@@ -145,30 +136,19 @@ public class DifferentialMechanism extends SmartPositionalMechanism {
     var mechPosCfg = m_config.getMechanismPositionConfig();
 
     // Seed the relative encoder
-    m_leftSMC
-        .getConfig()
-        .getExternalEncoder()
-        .ifPresent(
-            encoder -> {
-              m_leftSMC.seedRelativeEncoder();
-            });
-    m_rightSMC
-        .getConfig()
-        .getExternalEncoder()
-        .ifPresent(
-            encoder -> {
-              m_rightSMC.seedRelativeEncoder();
-            });
+    m_leftSMC.getConfig().getExternalEncoder().ifPresent(encoder -> {
+      m_leftSMC.seedRelativeEncoder();
+    });
+    m_rightSMC.getConfig().getExternalEncoder().ifPresent(encoder -> {
+      m_rightSMC.seedRelativeEncoder();
+    });
 
     // Setup telemetry
-    m_config
-        .getTelemetryName()
-        .ifPresent(
-            name -> {
-              m_telemetry.setupTelemetry(getName());
-              m_telemetry.addMotorController("left", m_leftSMC);
-              m_telemetry.addMotorController("right", m_rightSMC);
-            });
+    m_config.getTelemetryName().ifPresent(name -> {
+      m_telemetry.setupTelemetry(getName());
+      m_telemetry.addMotorController("left", m_leftSMC);
+      m_telemetry.addMotorController("right", m_rightSMC);
+    });
 
     if (RobotBase.isSimulation()) {
       var startingtilt = m_config.getStartingTiltAngle().get();
@@ -178,48 +158,16 @@ public class DifferentialMechanism extends SmartPositionalMechanism {
       m_tiltRoot = new Translation2d(m_armLength.in(Meters), 0);
 
       // Setup Sim
-      m_leftSim =
-          Optional.of(
-              new DCMotorSim(
-                  LinearSystemId.createDCMotorSystem(
-                      m_leftSMC.getDCMotor(),
-                      m_config.getMOI(),
-                      m_leftSMC.getConfig().getGearing().getMechanismToRotorRatio()),
-                  m_leftSMC.getDCMotor()));
-      m_rightSim =
-          Optional.of(
-              new DCMotorSim(
-                  LinearSystemId.createDCMotorSystem(
-                      m_rightSMC.getDCMotor(),
-                      m_config.getMOI(),
-                      m_rightSMC.getConfig().getGearing().getMechanismToRotorRatio()),
-                  m_rightSMC.getDCMotor()));
+      m_leftSim = Optional.of(new DCMotorSim(LinearSystemId.createDCMotorSystem(m_leftSMC.getDCMotor(), m_config.getMOI(), m_leftSMC.getConfig().getGearing().getMechanismToRotorRatio()), m_leftSMC.getDCMotor()));
+      m_rightSim = Optional.of(new DCMotorSim(LinearSystemId.createDCMotorSystem(m_rightSMC.getDCMotor(), m_config.getMOI(), m_rightSMC.getConfig().getGearing().getMechanismToRotorRatio()), m_rightSMC.getDCMotor()));
       m_leftSMC.setSimSupplier(new DCMotorSimSupplier(m_leftSim.get(), m_leftSMC));
       m_rightSMC.setSimSupplier(new DCMotorSimSupplier(m_rightSim.get(), m_rightSMC));
 
-      m_mechanismWindow =
-          new Mechanism2d(
-              mechPosCfg.getWindowXDimension(m_armLength).plus(Inches.of(4)).in(Meters),
-              mechPosCfg.getWindowYDimension(m_armLength.plus(Inches.of(4))).in(Meters));
+      m_mechanismWindow = new Mechanism2d(mechPosCfg.getWindowXDimension(m_armLength).plus(Inches.of(4)).in(Meters), mechPosCfg.getWindowYDimension(m_armLength.plus(Inches.of(4))).in(Meters));
       m_mechanismRoot = m_mechanismWindow.getRoot("Root", m_tiltRoot.getX(), m_tiltRoot.getY());
-      m_mechanismLigament =
-          m_mechanismRoot.append(
-              new MechanismLigament2d(
-                  " tilt",
-                  m_armLength.in(Meters),
-                  startingtilt.in(Degrees),
-                  7,
-                  m_config.getSimColor()));
-      m_twistRoot =
-          m_mechanismWindow.getRoot("Twist Root", m_armLength.in(Meters), m_armLength.in(Meters));
-      m_twistLigament =
-          m_twistRoot.append(
-              new MechanismLigament2d(
-                  " twist",
-                  Inches.of(4).in(Meters),
-                  startingtwist.in(Degrees),
-                  6,
-                  new Color8Bit(Color.kRed)));
+      m_mechanismLigament = m_mechanismRoot.append(new MechanismLigament2d(" tilt", m_armLength.in(Meters), startingtilt.in(Degrees), 7, m_config.getSimColor()));
+      m_twistRoot = m_mechanismWindow.getRoot("Twist Root", m_armLength.in(Meters), m_armLength.in(Meters));
+      m_twistLigament = m_twistRoot.append(new MechanismLigament2d(" twist", Inches.of(4).in(Meters), startingtwist.in(Degrees), 6, new Color8Bit(Color.kRed)));
 
       SmartDashboard.putData(getName() + "/mechanism", m_mechanismWindow);
 
@@ -243,8 +191,7 @@ public class DifferentialMechanism extends SmartPositionalMechanism {
     if (m_config.getTwistAngleSupplier().isPresent()) {
       return m_config.getTwistAngleSupplier().get().get();
     }
-    return m_config.getTwistAngle(
-        m_leftSMC.getMechanismPosition(), m_rightSMC.getMechanismPosition());
+    return m_config.getTwistAngle(m_leftSMC.getMechanismPosition(), m_rightSMC.getMechanismPosition());
   }
 
   /**
@@ -256,114 +203,95 @@ public class DifferentialMechanism extends SmartPositionalMechanism {
     if (m_config.getTiltAngleSupplier().isPresent()) {
       return m_config.getTiltAngleSupplier().get().get();
     }
-    return m_config.getTiltAngle(
-        m_leftSMC.getMechanismPosition(), m_rightSMC.getMechanismPosition());
+    return m_config.getTiltAngle(m_leftSMC.getMechanismPosition(), m_rightSMC.getMechanismPosition());
   }
 
   /**
    * Set the position of the differential mechanism using suppliers.
    *
-   * @param tilt Tilt of the Differential Mechanism.
+   * @param tilt  Tilt of the Differential Mechanism.
    * @param twist Twist of the Differential Mechanism.
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand} to set the position.
    */
   public Command setPosition(Supplier<Angle> tilt, Supplier<Angle> twist) {
-    return Commands.run(
-            () -> {
-              var left = m_config.getLeftMechanismPosition(tilt.get(), twist.get());
-              var right = m_config.getRightMechanismPosition(tilt.get(), twist.get());
-              m_leftSMC.setPosition(left);
-              m_rightSMC.setPosition(right);
-            },
-            m_subsystem)
-        .withName(getName() + " set position");
+    return Commands.run(() -> {
+      var left = m_config.getLeftMechanismPosition(tilt.get(), twist.get());
+      var right = m_config.getRightMechanismPosition(tilt.get(), twist.get());
+      m_leftSMC.setPosition(left);
+      m_rightSMC.setPosition(right);
+    }, m_subsystem).withName(getName() + " set position");
   }
 
   /**
    * Set the dutycycle of the differential mechanism.
    *
    * @param twist Twist dutycycle.
-   * @param tilt Tilt dutycycle.
+   * @param tilt  Tilt dutycycle.
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand} to set the differential mechanism
-   *     duty cycle.
+   *         duty cycle.
    */
   public Command set(double twist, double tilt) {
-    return Commands.startRun(
-            () -> {
-              m_leftSMC.stopClosedLoopController();
-              m_rightSMC.stopClosedLoopController();
-            },
-            () -> {
-              var left = tilt - twist;
-              var right = tilt + twist;
-              m_leftSMC.setDutyCycle(left);
-              m_rightSMC.setDutyCycle(right);
-            },
-            m_subsystem)
-        .finallyDo(
-            () -> {
-              m_leftSMC.startClosedLoopController();
-              m_rightSMC.startClosedLoopController();
-            })
-        .withName(getName() + " set dutycycle");
+    return Commands.startRun(() -> {
+      m_leftSMC.stopClosedLoopController();
+      m_rightSMC.stopClosedLoopController();
+    }, () -> {
+      var left = tilt - twist;
+      var right = tilt + twist;
+      m_leftSMC.setDutyCycle(left);
+      m_rightSMC.setDutyCycle(right);
+    }, m_subsystem).finallyDo(() -> {
+      m_leftSMC.startClosedLoopController();
+      m_rightSMC.startClosedLoopController();
+    }).withName(getName() + " set dutycycle");
   }
 
   /**
    * Set the position of the differential mechanism.
    *
-   * @param tilt Tilt of the differential mechanism.
+   * @param tilt  Tilt of the differential mechanism.
    * @param twist Twist of the differential mechanism.
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand} to set the position.
    */
   public Command setPosition(Angle tilt, Angle twist) {
-    return Commands.run(
-            () -> {
-              var left = m_config.getLeftMechanismPosition(tilt, twist);
-              var right = m_config.getRightMechanismPosition(tilt, twist);
-              m_leftSMC.setPosition(left);
-              m_rightSMC.setPosition(right);
-            },
-            m_subsystem)
-        .withName(getName() + " set position");
+    return Commands.run(() -> {
+      var left = m_config.getLeftMechanismPosition(tilt, twist);
+      var right = m_config.getRightMechanismPosition(tilt, twist);
+      m_leftSMC.setPosition(left);
+      m_rightSMC.setPosition(right);
+    }, m_subsystem).withName(getName() + " set position");
   }
 
   /**
    * Set the position of the differential mechanism.
    *
-   * @param tilt Tilt of the differential mechanism.
+   * @param tilt  Tilt of the differential mechanism.
    * @param twist Twist of the differential mechanism.
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand} to set the position.
    */
   public Command run(Angle tilt, Angle twist) {
-    return Commands.run(
-            () -> {
-              var left = m_config.getLeftMechanismPosition(tilt, twist);
-              var right = m_config.getRightMechanismPosition(tilt, twist);
-              m_leftSMC.setPosition(left);
-              m_rightSMC.setPosition(right);
-            },
-            m_subsystem)
-        .withName(getName() + " set position");
+    return Commands.run(() -> {
+      var left = m_config.getLeftMechanismPosition(tilt, twist);
+      var right = m_config.getRightMechanismPosition(tilt, twist);
+      m_leftSMC.setPosition(left);
+      m_rightSMC.setPosition(right);
+    }, m_subsystem).withName(getName() + " set position");
   }
 
   /**
    * Run the differential mechanism to a position.
    *
-   * @param tilt Supplier of the tilt angle.
+   * @param tilt  Supplier of the tilt angle.
    * @param twist Supplier of the twist angle.
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand} to run the differential mechanism to
-   *     the position.
+   *         the position.
    */
   public Command run(Supplier<Angle> tilt, Supplier<Angle> twist) {
-    return Commands.run(
-            () -> {
-              var left = m_config.getLeftMechanismPosition(tilt.get(), twist.get());
-              var right = m_config.getRightMechanismPosition(tilt.get(), twist.get());
-              m_leftSMC.setPosition(left);
-              m_rightSMC.setPosition(right);
-            },
-            m_subsystem)
-        .withName(getName() + " set position");
+    return Commands.run(() -> {
+      var left = m_config.getLeftMechanismPosition(tilt.get(), twist.get());
+      var right = m_config.getRightMechanismPosition(tilt.get(), twist.get());
+      m_leftSMC.setPosition(left);
+      m_rightSMC.setPosition(right);
+    }, m_subsystem).withName(getName() + " set position");
   }
 
   @Override
@@ -375,10 +303,7 @@ public class DifferentialMechanism extends SmartPositionalMechanism {
 
   @Override
   public void simIterate() {
-    if (m_leftSim.isPresent()
-        && m_leftSMC.getSimSupplier().isPresent()
-        && m_rightSim.isPresent()
-        && m_rightSMC.getSimSupplier().isPresent()) {
+    if (m_leftSim.isPresent() && m_leftSMC.getSimSupplier().isPresent() && m_rightSim.isPresent() && m_rightSMC.getSimSupplier().isPresent()) {
       m_leftSMC.getSimSupplier().get().updateSimState();
       m_leftSMC.simIterate();
       m_leftSMC.getSimSupplier().get().starveUpdateSim();
@@ -396,13 +321,9 @@ public class DifferentialMechanism extends SmartPositionalMechanism {
    */
   @Override
   public void visualizationUpdate() {
-    var twistAngle =
-        m_config.getTwistAngle(m_leftSMC.getMechanismPosition(), m_rightSMC.getMechanismPosition());
-    var tiltAngle =
-        m_config.getTiltAngle(m_leftSMC.getMechanismPosition(), m_rightSMC.getMechanismPosition());
-    var twistRoot =
-        new Translation2d(m_armLength.in(Meters), Rotation2d.fromDegrees(tiltAngle.in(Degrees)))
-            .plus(m_tiltRoot);
+    var twistAngle = m_config.getTwistAngle(m_leftSMC.getMechanismPosition(), m_rightSMC.getMechanismPosition());
+    var tiltAngle = m_config.getTiltAngle(m_leftSMC.getMechanismPosition(), m_rightSMC.getMechanismPosition());
+    var twistRoot = new Translation2d(m_armLength.in(Meters), Rotation2d.fromDegrees(tiltAngle.in(Degrees))).plus(m_tiltRoot);
     m_mechanismLigament.setAngle(tiltAngle.in(Degrees));
 
     m_twistRoot.setPosition(twistRoot.getX(), twistRoot.getY());
@@ -417,8 +338,7 @@ public class DifferentialMechanism extends SmartPositionalMechanism {
    */
   @Override
   public Translation3d getRelativeMechanismPosition() {
-    return new Translation3d(
-        m_armLength.in(Meters), new Rotation3d(Degrees.of(0), getTiltPosition(), Degrees.of(0)));
+    return new Translation3d(m_armLength.in(Meters), new Rotation3d(Degrees.of(0), getTiltPosition(), Degrees.of(0)));
   }
 
   @Override

@@ -29,26 +29,26 @@ import java.util.function.Supplier;
  * <p>At runtime the {@link #getValue()} method applies the following priority order:
  *
  * <ol>
- *   <li><b>Real robot</b> — always returns the live hardware supplier value immediately.
- *   <li><b>Trigger override</b> — if any registered {@link #addSimTrigger trigger} condition is
- *       currently {@code true}, the associated override value is returned and written to Glass.
- *   <li><b>Glass value</b> — if a {@link edu.wpi.first.hal.SimValue} exists and no trigger fired,
- *       returns whatever Glass has set (including the default).
- *   <li><b>Supplier fallback</b> — returns the supplier value if no Glass value is available.
+ * <li><b>Real robot</b> — always returns the live hardware supplier value immediately.
+ * <li><b>Trigger override</b> — if any registered {@link #addSimTrigger trigger} condition is
+ * currently {@code true}, the associated override value is returned and written to Glass.
+ * <li><b>Glass value</b> — if a {@link edu.wpi.first.hal.SimValue} exists and no trigger fired,
+ * returns whatever Glass has set (including the default).
+ * <li><b>Supplier fallback</b> — returns the supplier value if no Glass value is available.
  * </ol>
  *
  * <h2>Key fields</h2>
  *
  * <ul>
- *   <li>{@code m_name} — the human-readable field name used as the Glass widget label.
- *   <li>{@code m_supplier} — provides the real sensor reading on a physical robot.
- *   <li>{@code m_type} ({@link HALValueType}) — guards typed accessors ({@link #getAsDouble()},
- *       {@link #getAsInt()}, etc.) against incorrect casts.
- *   <li>{@code m_defaultValue} — the initial value published to Glass at startup.
- *   <li>{@code m_triggerValues} — ordered list of {@code (condition, value)} pairs checked before
- *       the Glass value each loop.
- *   <li>{@code m_glassValue} — the live {@link edu.wpi.first.hal.SimValue} registered with the
- *       parent {@link edu.wpi.first.hal.SimDevice}; empty on a real robot.
+ * <li>{@code m_name} — the human-readable field name used as the Glass widget label.
+ * <li>{@code m_supplier} — provides the real sensor reading on a physical robot.
+ * <li>{@code m_type} ({@link HALValueType}) — guards typed accessors ({@link #getAsDouble()},
+ * {@link #getAsInt()}, etc.) against incorrect casts.
+ * <li>{@code m_defaultValue} — the initial value published to Glass at startup.
+ * <li>{@code m_triggerValues} — ordered list of {@code (condition, value)} pairs checked before
+ * the Glass value each loop.
+ * <li>{@code m_glassValue} — the live {@link edu.wpi.first.hal.SimValue} registered with the
+ * parent {@link edu.wpi.first.hal.SimDevice}; empty on a real robot.
  * </ul>
  *
  * <h2>Example</h2>
@@ -92,14 +92,13 @@ public class SensorData {
   /**
    * Sensor data constructor.
    *
-   * @param name Name of sensor.
-   * @param supplier {@link Supplier<HALValue>} of sensor. Use {@link #convert} to convert primitive
-   *     suppliers.
+   * @param name         Name of sensor.
+   * @param supplier     {@link Supplier<HALValue>} of sensor. Use {@link #convert} to convert primitive
+   *                     suppliers.
    * @param defaultValue Default value of sensor.
-   * @param type {@link HALValueType} of sensor.
+   * @param type         {@link HALValueType} of sensor.
    */
-  public SensorData(
-      String name, Supplier<HALValue> supplier, HALValue defaultValue, HALValueType type) {
+  public SensorData(String name, Supplier<HALValue> supplier, HALValue defaultValue, HALValueType type) {
     m_supplier = supplier;
     m_name = name;
     m_defaultValue = defaultValue;
@@ -109,8 +108,8 @@ public class SensorData {
   /**
    * Sensor data constructor.
    *
-   * @param name Name of sensor.
-   * @param supplier {@link DoubleSupplier} supplier
+   * @param name       Name of sensor.
+   * @param supplier   {@link DoubleSupplier} supplier
    * @param defaultVal Double default value.
    */
   public SensorData(String name, DoubleSupplier supplier, double defaultVal) {
@@ -120,8 +119,8 @@ public class SensorData {
   /**
    * Sensor data constructor.
    *
-   * @param name Name of sensor.
-   * @param supplier {@link IntSupplier}
+   * @param name       Name of sensor.
+   * @param supplier   {@link IntSupplier}
    * @param defaultVal Int default value.
    */
   public SensorData(String name, IntSupplier supplier, int defaultVal) {
@@ -131,8 +130,8 @@ public class SensorData {
   /**
    * Sensor data constructor.
    *
-   * @param name Name of sensor.
-   * @param supplier {@link BooleanSupplier}
+   * @param name       Name of sensor.
+   * @param supplier   {@link BooleanSupplier}
    * @param defaultVal Boolean default value.
    */
   public SensorData(String name, BooleanSupplier supplier, boolean defaultVal) {
@@ -142,8 +141,8 @@ public class SensorData {
   /**
    * Sensor data constructor.
    *
-   * @param name Name of sensor.
-   * @param supplier {@link LongSupplier}
+   * @param name       Name of sensor.
+   * @param supplier   {@link LongSupplier}
    * @param defaultVal Long default value.
    */
   public SensorData(String name, LongSupplier supplier, long defaultVal) {
@@ -295,7 +294,7 @@ public class SensorData {
    *
    * @param val Integer value to set.
    * @implNote The value is not checked for validity, ensure that this is the right data type for
-   *     the field.
+   *           the field.
    */
   public void set(int val) {
     set(convert(val));
@@ -306,7 +305,7 @@ public class SensorData {
    *
    * @param val Double value to set.
    * @implNote The value is not checked for validity, ensure that this is the right data type for
-   *     the field.
+   *           the field.
    */
   public void set(double val) {
     set(convert(val));
@@ -317,7 +316,7 @@ public class SensorData {
    *
    * @param val Long value to set.
    * @implNote The value is not checked for validity, ensure that this is the right data type for
-   *     the field.
+   *           the field.
    */
   public void set(long val) {
     set(convert(val));
@@ -328,7 +327,7 @@ public class SensorData {
    *
    * @param val Boolean value to set.
    * @implNote The value is not checked for validity, ensure that this is the right data type for
-   *     the field.
+   *           the field.
    */
   public void set(boolean val) {
     set(convert(val));
@@ -369,7 +368,7 @@ public class SensorData {
   /**
    * Add a value set based on a trigger.
    *
-   * @param value {@link HALValue} to set.
+   * @param value   {@link HALValue} to set.
    * @param trigger {@link BooleanSupplier} when to use.
    */
   public void addSimTrigger(HALValue value, BooleanSupplier trigger) {
@@ -410,7 +409,7 @@ public class SensorData {
   /**
    * Get the {@link SimValue} for the sensor.
    *
-   * @param device {@link SimDevice} to create the {@link SimValue} for.
+   * @param device    {@link SimDevice} to create the {@link SimValue} for.
    * @param direction {@link Direction} of the {@link SimValue}.
    * @return {@link SimValue} for the sensor.
    */

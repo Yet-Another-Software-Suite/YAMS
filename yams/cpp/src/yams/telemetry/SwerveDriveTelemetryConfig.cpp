@@ -10,10 +10,9 @@
 namespace yams::telemetry {
 
 SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig() {
-  m_poseFields.emplace(
-      StructTelemetryField::Pose,
-      StructTelemetry<frc::Pose2d, StructTelemetryField>{
-          "pose", frc::Pose2d{}, StructTelemetryField::Pose, false});
+  m_poseFields.emplace(StructTelemetryField::Pose,
+                       StructTelemetry<frc::Pose2d, StructTelemetryField>{
+                           "pose", frc::Pose2d{}, StructTelemetryField::Pose, false});
 
   m_chassisSpeedsFields.emplace(
       StructTelemetryField::DesiredRobotRelativeChassisSpeeds,
@@ -25,11 +24,10 @@ SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig() {
       StructTelemetry<frc::ChassisSpeeds, StructTelemetryField>{
           "chassis/current", frc::ChassisSpeeds{},
           StructTelemetryField::CurrentRobotRelativeChassisSpeeds, false});
-  m_chassisSpeedsFields.emplace(
-      StructTelemetryField::FieldRelativeChassisSpeeds,
-      StructTelemetry<frc::ChassisSpeeds, StructTelemetryField>{
-          "chassis/field", frc::ChassisSpeeds{},
-          StructTelemetryField::FieldRelativeChassisSpeeds, false});
+  m_chassisSpeedsFields.emplace(StructTelemetryField::FieldRelativeChassisSpeeds,
+                                StructTelemetry<frc::ChassisSpeeds, StructTelemetryField>{
+                                    "chassis/field", frc::ChassisSpeeds{},
+                                    StructTelemetryField::FieldRelativeChassisSpeeds, false});
 
   m_moduleStatesFields.emplace(
       StructArrayTelemetryField::DesiredModuleStates,
@@ -49,16 +47,16 @@ SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig() {
         std::tuple{DoubleTelemetryField::RotationP, "autoalign/rotation/p", "radians"},
         std::tuple{DoubleTelemetryField::RotationI, "autoalign/rotation/i", "radians"},
         std::tuple{DoubleTelemetryField::RotationD, "autoalign/rotation/d", "radians"}}) {
-    m_doubleFields.emplace(field, DoubleTelemetry<DoubleTelemetryField>{key, 0.0, field, true,
-                                                                        unit});
+    m_doubleFields.emplace(field,
+                           DoubleTelemetry<DoubleTelemetryField>{key, 0.0, field, true, unit});
   }
   for (auto [field, key, unit, defaultVal] :
        {std::tuple{DoubleTelemetryField::AutoAlignPoseX, "autoalign/setpoint/x", "meters", 3.0},
         std::tuple{DoubleTelemetryField::AutoAlignPoseY, "autoalign/setpoint/y", "meters", 3.0},
-        std::tuple{DoubleTelemetryField::AutoAlignPoseRotation, "autoalign/setpoint/rot",
-                   "degrees", 0.0}}) {
-    m_doubleFields.emplace(field, DoubleTelemetry<DoubleTelemetryField>{key, defaultVal, field,
-                                                                        true, unit});
+        std::tuple{DoubleTelemetryField::AutoAlignPoseRotation, "autoalign/setpoint/rot", "degrees",
+                   0.0}}) {
+    m_doubleFields.emplace(
+        field, DoubleTelemetry<DoubleTelemetryField>{key, defaultVal, field, true, unit});
   }
   for (auto [field, key] :
        {std::tuple{DoubleTelemetryField::ModulesDriveP, "modules/drive/feedback/p"},
@@ -73,23 +71,21 @@ SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig() {
         std::tuple{DoubleTelemetryField::ModulesAzimuthKs, "modules/azimuth/feedforward/s"},
         std::tuple{DoubleTelemetryField::ModulesAzimuthKv, "modules/azimuth/feedforward/v"},
         std::tuple{DoubleTelemetryField::ModulesAzimuthKa, "modules/azimuth/feedforward/a"}}) {
-    m_doubleFields.emplace(field, DoubleTelemetry<DoubleTelemetryField>{key, 0.0, field, true,
-                                                                        "none"});
+    m_doubleFields.emplace(field,
+                           DoubleTelemetry<DoubleTelemetryField>{key, 0.0, field, true, "none"});
   }
   m_doubleFields.emplace(
       DoubleTelemetryField::ModulesDriveVelocity,
       DoubleTelemetry<DoubleTelemetryField>{"modules/drive/velocity", 0.0,
                                             DoubleTelemetryField::ModulesDriveVelocity, true,
                                             "meters_per_second"});
-  m_doubleFields.emplace(
-      DoubleTelemetryField::ModulesAzimuthAngle,
-      DoubleTelemetry<DoubleTelemetryField>{"modules/azimuth/angle", 0.0,
-                                            DoubleTelemetryField::ModulesAzimuthAngle, true,
-                                            "degrees"});
+  m_doubleFields.emplace(DoubleTelemetryField::ModulesAzimuthAngle,
+                         DoubleTelemetry<DoubleTelemetryField>{
+                             "modules/azimuth/angle", 0.0,
+                             DoubleTelemetryField::ModulesAzimuthAngle, true, "degrees"});
   m_doubleFields.emplace(DoubleTelemetryField::Gyro,
-                         DoubleTelemetry<DoubleTelemetryField>{"gyro", 0.0,
-                                                               DoubleTelemetryField::Gyro, false,
-                                                               "degrees"});
+                         DoubleTelemetry<DoubleTelemetryField>{
+                             "gyro", 0.0, DoubleTelemetryField::Gyro, false, "degrees"});
 
   m_boolFields.emplace(
       BooleanTelemetryField::AutoAlignEnabled,
@@ -97,18 +93,16 @@ SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig() {
                                               BooleanTelemetryField::AutoAlignEnabled, true});
   m_boolFields.emplace(
       BooleanTelemetryField::ModulesDriveTuningEnabled,
-      BooleanTelemetry<BooleanTelemetryField>{"modules/drive/enabled", false,
-                                              BooleanTelemetryField::ModulesDriveTuningEnabled,
-                                              true});
+      BooleanTelemetry<BooleanTelemetryField>{
+          "modules/drive/enabled", false, BooleanTelemetryField::ModulesDriveTuningEnabled, true});
   m_boolFields.emplace(
       BooleanTelemetryField::ModulesDriveInPlace,
       BooleanTelemetry<BooleanTelemetryField>{"modules/drive/inplace", false,
                                               BooleanTelemetryField::ModulesDriveInPlace, true});
-  m_boolFields.emplace(
-      BooleanTelemetryField::ModulesAzimuthTuningEnabled,
-      BooleanTelemetry<BooleanTelemetryField>{"modules/azimuth/enabled", false,
-                                              BooleanTelemetryField::ModulesAzimuthTuningEnabled,
-                                              true});
+  m_boolFields.emplace(BooleanTelemetryField::ModulesAzimuthTuningEnabled,
+                       BooleanTelemetry<BooleanTelemetryField>{
+                           "modules/azimuth/enabled", false,
+                           BooleanTelemetryField::ModulesAzimuthTuningEnabled, true});
 }
 
 SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig(TelemetryVerbosity verbosity)
@@ -234,9 +228,8 @@ SwerveDriveTelemetryConfig::GetBoolFields() {
   return m_boolFields;
 }
 
-std::unordered_map<
-    SwerveDriveTelemetryConfig::StructTelemetryField,
-    StructTelemetry<frc::Pose2d, SwerveDriveTelemetryConfig::StructTelemetryField>>&
+std::unordered_map<SwerveDriveTelemetryConfig::StructTelemetryField,
+                   StructTelemetry<frc::Pose2d, SwerveDriveTelemetryConfig::StructTelemetryField>>&
 SwerveDriveTelemetryConfig::GetPoseFields() {
   return m_poseFields;
 }
@@ -248,10 +241,9 @@ SwerveDriveTelemetryConfig::GetChassisSpeedsFields() {
   return m_chassisSpeedsFields;
 }
 
-std::unordered_map<
-    SwerveDriveTelemetryConfig::StructArrayTelemetryField,
-    StructArrayTelemetry<frc::SwerveModuleState,
-                         SwerveDriveTelemetryConfig::StructArrayTelemetryField>>&
+std::unordered_map<SwerveDriveTelemetryConfig::StructArrayTelemetryField,
+                   StructArrayTelemetry<frc::SwerveModuleState,
+                                        SwerveDriveTelemetryConfig::StructArrayTelemetryField>>&
 SwerveDriveTelemetryConfig::GetModuleStatesFields() {
   return m_moduleStatesFields;
 }
@@ -275,8 +267,8 @@ SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithCustom(StructTelemet
   return *this;
 }
 
-SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithCustom(
-    StructArrayTelemetryField field, bool value) {
+SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithCustom(StructArrayTelemetryField field,
+                                                                   bool value) {
   auto& stat = m_moduleStatesFields.at(field);
   value ? stat.Enable() : stat.Disable();
   return *this;

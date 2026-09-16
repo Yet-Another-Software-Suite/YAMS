@@ -39,8 +39,7 @@ void SmartMotorControllerTelemetry::SetupTelemetry(
     SmartMotorController& smc, std::shared_ptr<nt::NetworkTable> publishTable,
     std::shared_ptr<nt::NetworkTable> tuningTable,
     std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>& doubleFields,
-    std::unordered_map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>>&
-        boolFields,
+    std::unordered_map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>>& boolFields,
     bool nt4Enabled, std::optional<std::string> dataLogName) {
   if (m_dataTable && m_dataTable == publishTable) return;  // already set up
 

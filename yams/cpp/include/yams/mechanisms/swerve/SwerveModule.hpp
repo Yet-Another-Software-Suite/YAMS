@@ -141,7 +141,8 @@ class SwerveModule {
 
  private:
   config::SwerveModuleConfig* m_config{nullptr};
-  /** Used for the loop time only; module state/encoder telemetry lives in m_swerveModuleTelemetry. */
+  /** Used for the loop time only; module state/encoder telemetry lives in m_swerveModuleTelemetry.
+   */
   telemetry::MechanismTelemetry m_telemetry;
   std::optional<telemetry::SwerveModuleTelemetry> m_swerveModuleTelemetry;
   std::function<units::degree_t()> m_azimuthEncoderWithoutOffsets;

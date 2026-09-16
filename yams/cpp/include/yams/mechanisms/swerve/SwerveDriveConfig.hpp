@@ -253,8 +253,9 @@ class SwerveDriveConfig {
   const std::string& GetTelemetryName() const;
   /**
    * Get the user-specified SwerveDriveTelemetryConfig, if configured via
-   * WithTelemetry(name, SwerveDriveTelemetryConfig). Moves the config out of this SwerveDriveConfig;
-   * intended to be called exactly once, when the owning SwerveDrive sets up its telemetry.
+   * WithTelemetry(name, SwerveDriveTelemetryConfig). Moves the config out of this
+   * SwerveDriveConfig; intended to be called exactly once, when the owning SwerveDrive sets up its
+   * telemetry.
    *
    * @return SwerveDriveTelemetryConfig if configured.
    */

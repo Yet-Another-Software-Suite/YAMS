@@ -15,7 +15,8 @@ import yams.mechanisms.swerve.SwerveModule;
 /**
  * Swerve module telemetry.
  *
- * <p>Publishes the module's raw absolute encoder angle (without offsets applied) and current {@link SwerveModuleState} to NetworkTables and/or a WPILib DataLog, and wires the drive/azimuth {@link yams.motorcontrollers.SmartMotorController}s' own telemetry under the same module subtable.
+ * <p>Publishes the module's raw absolute encoder angle (without offsets applied) and current {@link SwerveModuleState} to NetworkTables and/or a WPILib DataLog, and wires the drive/azimuth {@link yams.motorcontrollers.SmartMotorController}s' own
+ * telemetry under the same module subtable.
  *
  * <p>This class is managed internally by {@link SwerveModule}. You do not normally instantiate it
  * directly; instead configure telemetry through {@link yams.mechanisms.config.SwerveModuleConfig#withTelemetry(String, SwerveModuleTelemetryConfig)} or
@@ -23,11 +24,11 @@ import yams.mechanisms.swerve.SwerveModule;
  * module.
  */
 public class SwerveModuleTelemetry {
-  private final SwerveModuleTelemetryConfig m_config;
-  private Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> m_doubleTelemetry;
+  private final SwerveModuleTelemetryConfig                                   m_config;
+  private Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>    m_doubleTelemetry;
   private Map<StructTelemetryField, StructTelemetry<?, StructTelemetryField>> m_structTelemetry;
-  private NetworkTable m_dataNt;
-  private NetworkTable m_tuningNt;
+  private NetworkTable                                                        m_dataNt;
+  private NetworkTable                                                        m_tuningNt;
 
   /**
    * Create SwerveModule telemetry for logging in NetworkTables and DataLog.
@@ -42,25 +43,14 @@ public class SwerveModuleTelemetry {
    * Setup telemetry for the module.
    *
    * @param mechName Telemetry name of the parent {@link yams.mechanisms.swerve.SwerveDrive}.
-   * @param module {@link SwerveModule} to use for telemetry.
+   * @param module   {@link SwerveModule} to use for telemetry.
    */
   public void setupTelemetry(String mechName, SwerveModule module) {
-    m_dataNt =
-        NetworkTableInstance.getDefault()
-            .getTable("Mechanisms")
-            .getSubTable(mechName)
-            .getSubTable("modules")
-            .getSubTable(module.getName());
-    m_tuningNt =
-        NetworkTableInstance.getDefault()
-            .getTable("Tuning")
-            .getSubTable(mechName)
-            .getSubTable("modules")
-            .getSubTable(module.getName());
+    m_dataNt = NetworkTableInstance.getDefault().getTable("Mechanisms").getSubTable(mechName).getSubTable("modules").getSubTable(module.getName());
+    m_tuningNt = NetworkTableInstance.getDefault().getTable("Tuning").getSubTable(mechName).getSubTable("modules").getSubTable(module.getName());
     m_doubleTelemetry = m_config.getDoubleFields();
     m_structTelemetry = m_config.getStructFields();
-    for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry :
-        m_doubleTelemetry.entrySet()) {
+    for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : m_doubleTelemetry.entrySet()) {
       var dt = entry.getValue();
       if (!dt.enabled) {
         continue;
@@ -70,8 +60,7 @@ public class SwerveModuleTelemetry {
       }
       m_config.getDataLogName().ifPresent(dt::setupDataLog);
     }
-    for (Map.Entry<StructTelemetryField, StructTelemetry<?, StructTelemetryField>> entry :
-        m_structTelemetry.entrySet()) {
+    for (Map.Entry<StructTelemetryField, StructTelemetry<?, StructTelemetryField>> entry : m_structTelemetry.entrySet()) {
       var stt = entry.getValue();
       if (!stt.enabled) {
         continue;
@@ -92,8 +81,7 @@ public class SwerveModuleTelemetry {
    */
   @SuppressWarnings("unchecked")
   public void publish(SwerveModule module) {
-    for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry :
-        m_doubleTelemetry.entrySet()) {
+    for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : m_doubleTelemetry.entrySet()) {
       var dt = entry.getValue();
       if (!dt.enabled) {
         continue;
@@ -102,15 +90,13 @@ public class SwerveModuleTelemetry {
         case AbsoluteEncoder -> dt.set(module.getRawAbsoluteEncoderAngle().in(Degrees));
       }
     }
-    for (Map.Entry<StructTelemetryField, StructTelemetry<?, StructTelemetryField>> entry :
-        m_structTelemetry.entrySet()) {
+    for (Map.Entry<StructTelemetryField, StructTelemetry<?, StructTelemetryField>> entry : m_structTelemetry.entrySet()) {
       var stt = entry.getValue();
       if (!stt.enabled) {
         continue;
       }
       switch (stt.getField()) {
-        case State ->
-            ((StructTelemetry<SwerveModuleState, StructTelemetryField>) stt).set(module.getState());
+        case State -> ((StructTelemetry<SwerveModuleState, StructTelemetryField>) stt).set(module.getState());
       }
     }
   }
@@ -118,14 +104,12 @@ public class SwerveModuleTelemetry {
   /** Close and unpublish telemetry. */
   public void close() {
     if (m_doubleTelemetry != null) {
-      for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry :
-          m_doubleTelemetry.entrySet()) {
+      for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : m_doubleTelemetry.entrySet()) {
         entry.getValue().close();
       }
     }
     if (m_structTelemetry != null) {
-      for (Map.Entry<StructTelemetryField, StructTelemetry<?, StructTelemetryField>> entry :
-          m_structTelemetry.entrySet()) {
+      for (Map.Entry<StructTelemetryField, StructTelemetry<?, StructTelemetryField>> entry : m_structTelemetry.entrySet()) {
         entry.getValue().close();
       }
     }
@@ -151,10 +135,10 @@ public class SwerveModuleTelemetry {
     /**
      * Create a double telemetry field.
      *
-     * @param fieldName NT Field Name
+     * @param fieldName    NT Field Name
      * @param defaultValue Default value
-     * @param tunable Tunable places it only in the Tuning Table.
-     * @param unit Unit of the telemetry field.
+     * @param tunable      Tunable places it only in the Tuning Table.
+     * @param unit         Unit of the telemetry field.
      */
     DoubleTelemetryField(String fieldName, double defaultValue, boolean tunable, String unit) {
       key = fieldName;
@@ -172,6 +156,7 @@ public class SwerveModuleTelemetry {
       return new DoubleTelemetry<>(key, defaultVal, this, tunable, unit);
     }
   }
+
 
   /** Struct telemetry field for {@link SwerveModule}s. */
   public enum StructTelemetryField {
@@ -193,11 +178,11 @@ public class SwerveModuleTelemetry {
     /**
      * Create a struct telemetry field.
      *
-     * @param fieldName Field for {@link edu.wpi.first.networktables.NetworkTable}
-     * @param struct {@link Struct} serializer for the field's value type {@link T}.
+     * @param fieldName    Field for {@link edu.wpi.first.networktables.NetworkTable}
+     * @param struct       {@link Struct} serializer for the field's value type {@link T}.
      * @param defaultValue Default value in NT.
-     * @param tunable Tunable field.
-     * @param <T> Type of the field's value.
+     * @param tunable      Tunable field.
+     * @param <T>          Type of the field's value.
      */
     <T> StructTelemetryField(String fieldName, Struct<T> struct, T defaultValue, boolean tunable) {
       key = fieldName;

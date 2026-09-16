@@ -39,20 +39,16 @@ public class SmartMotorControllerCommandRegistry {
   /**
    * Create the {@link Command} and publish it to NetworkTables.
    *
-   * @param cmdName Command name to publish to NetworkTables.
+   * @param cmdName   Command name to publish to NetworkTables.
    * @param subsystem Subsystem to create the command for.
    */
   private static void addCommandToNT(String cmdName, Subsystem subsystem) {
     var key = subsystem.getName() + "/" + cmdName;
-    Command cmd =
-        Commands.run(
-                () -> {
-                  for (var callback : commandCallbacks.get(key)) {
-                    callback.run();
-                  }
-                },
-                subsystem)
-            .withName(cmdName);
+    Command cmd = Commands.run(() -> {
+      for (var callback : commandCallbacks.get(key)) {
+        callback.run();
+      }
+    }, subsystem).withName(cmdName);
     commands.put(key, cmd);
     SmartDashboard.putData("Mechanisms/Commands/" + key, cmd);
   }
@@ -60,19 +56,16 @@ public class SmartMotorControllerCommandRegistry {
   /**
    * Add a command to the registry.
    *
-   * @param cmdName Command name to publish to NetworkTables.
+   * @param cmdName   Command name to publish to NetworkTables.
    * @param subsystem Subsystem to create the command for.
-   * @param callback Runnable to be added to the shared command.
+   * @param callback  Runnable to be added to the shared command.
    */
   public static void addCommand(String cmdName, Subsystem subsystem, Runnable callback) {
     var key = subsystem.getName() + "/" + cmdName;
     var owner = commandOwners.get(key);
     if (owner != null && owner != subsystem) {
-      throw new IllegalStateException(
-          "SmartMotorControllerCommandRegistry: subsystem name conflict — \""
-              + subsystem.getName()
-              + "\" is already registered by a different subsystem instance. "
-              + "Use unique subsystem names for each subsystem instance (e.g. \"LeftTurret\", \"RightTurret\").");
+      throw new IllegalStateException("SmartMotorControllerCommandRegistry: subsystem name conflict — \"" + subsystem
+          .getName() + "\" is already registered by a different subsystem instance. " + "Use unique subsystem names for each subsystem instance (e.g. \"LeftTurret\", \"RightTurret\").");
     }
     commandOwners.put(key, subsystem);
     commandCallbacks.computeIfAbsent(key, k -> new ArrayList<>()).add(callback);
@@ -85,7 +78,7 @@ public class SmartMotorControllerCommandRegistry {
   /**
    * Check if a command exists.
    *
-   * @param cmdName Command name.
+   * @param cmdName   Command name.
    * @param subsystem Subsystem.
    * @return True if command exists.
    */
@@ -103,16 +96,13 @@ public class SmartMotorControllerCommandRegistry {
    * @param subsystem Subsystem whose commands should be removed.
    */
   public static void removeCommands(Subsystem subsystem) {
-    commandOwners
-        .entrySet()
-        .removeIf(
-            e -> {
-              if (e.getValue() == subsystem) {
-                commandCallbacks.remove(e.getKey());
-                commands.remove(e.getKey());
-                return true;
-              }
-              return false;
-            });
+    commandOwners.entrySet().removeIf(e -> {
+      if (e.getValue() == subsystem) {
+        commandCallbacks.remove(e.getKey());
+        commands.remove(e.getKey());
+        return true;
+      }
+      return false;
+    });
   }
 }

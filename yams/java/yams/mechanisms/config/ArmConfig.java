@@ -62,7 +62,8 @@ public class ArmConfig {
   private MechanismPositionConfig mechanismPositionConfig = new MechanismPositionConfig();
 
   /** Arm configuration class. Required */
-  public ArmConfig() {}
+  public ArmConfig() {
+  }
 
   /**
    * Copy constructor.
@@ -110,7 +111,7 @@ public class ArmConfig {
   /**
    * Configure telemetry for the {@link Arm} mechanism.
    *
-   * @param telemetryName Telemetry NetworkTable name to appear under "SmartDashboard/"
+   * @param telemetryName      Telemetry NetworkTable name to appear under "SmartDashboard/"
    * @param telemetryVerbosity Telemetry verbosity to apply.
    * @return {@link ArmConfig} for chaining.
    */
@@ -202,7 +203,7 @@ public class ArmConfig {
    * Get the {@link MechanismPositionConfig} associated with this {@link ArmConfig}.
    *
    * @return An {@link Optional} containing the {@link MechanismPositionConfig} if present,
-   *     otherwise an empty {@link Optional}.
+   *         otherwise an empty {@link Optional}.
    */
   public MechanismPositionConfig getMechanismPositionConfig() {
     return mechanismPositionConfig;

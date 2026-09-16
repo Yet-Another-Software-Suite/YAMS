@@ -68,7 +68,8 @@ public class DifferentialMechanismConfig {
    * Twist gearing between the twist bevel gear and the motor sprocket. Separate from Tilt gearing
    * implemented in the {@link SmartMotorControllerConfig}.
    */
-  private MechanismGearing twistGearing = new MechanismGearing(new GearBox(new double[] {1}));
+  private MechanismGearing twistGearing = new MechanismGearing(new GearBox(new double[] {
+                                                                                         1}));
 
   /**
    * Supplier of the twist angle using an absolute encoder for the {@link DifferentialMechanism}.
@@ -102,10 +103,10 @@ public class DifferentialMechanismConfig {
   /**
    * Differential Mechanism configuration class.
    *
-   * @param left Left {@link SmartMotorController} configured with the gearing up to the tilt
-   *     movement if synchronized.
+   * @param left  Left {@link SmartMotorController} configured with the gearing up to the tilt
+   *              movement if synchronized.
    * @param right Right {@link SmartMotorController} configured with the gearing up to the tilt
-   *     movement if synchronized.
+   *              movement if synchronized.
    */
   public DifferentialMechanismConfig(SmartMotorController left, SmartMotorController right) {
     leftMotorController = Optional.ofNullable(left);
@@ -149,22 +150,15 @@ public class DifferentialMechanismConfig {
   /**
    * Add the smart motor controllers to the configuration.
    *
-   * @param left Left {@link SmartMotorController}
+   * @param left  Left {@link SmartMotorController}
    * @param right Right {@link SmartMotorController}
    * @return {@link DifferentialMechanismConfig} for chaining.
    */
-  public DifferentialMechanismConfig withSmartMotorControllers(
-      SmartMotorController left, SmartMotorController right) {
+  public DifferentialMechanismConfig withSmartMotorControllers(SmartMotorController left, SmartMotorController right) {
     if (leftMotorController.isPresent())
-      throw new DifferentialMechanismConfigurationException(
-          "Left motor controller already defined.",
-          "Cannot redefine left motor controller!",
-          ".withSmartMotorControllers");
+      throw new DifferentialMechanismConfigurationException("Left motor controller already defined.", "Cannot redefine left motor controller!", ".withSmartMotorControllers");
     if (rightMotorController.isPresent())
-      throw new DifferentialMechanismConfigurationException(
-          "Right motor controller already defined.",
-          "Cannot redefine right motor controller!",
-          ".withSmartMotorControllers");
+      throw new DifferentialMechanismConfigurationException("Right motor controller already defined.", "Cannot redefine right motor controller!", ".withSmartMotorControllers");
     leftMotorController = Optional.ofNullable(left);
     rightMotorController = Optional.ofNullable(right);
     setStartingEncoderPositions();
@@ -174,7 +168,7 @@ public class DifferentialMechanismConfig {
   /**
    * Get the twist angle of the {@link DifferentialMechanism} with any additional twist gearing.
    *
-   * @param leftMechPos Left {@link SmartMotorController} Mechanism Position
+   * @param leftMechPos  Left {@link SmartMotorController} Mechanism Position
    * @param rightMechPos Right {@link SmartMotorController} Mechanism Position
    * @return Twist {@link Angle}
    */
@@ -185,7 +179,7 @@ public class DifferentialMechanismConfig {
   /**
    * Get the tilt angle of the {@link DifferentialMechanism}.
    *
-   * @param leftMechPos Left {@link SmartMotorController} Mechanism Position
+   * @param leftMechPos  Left {@link SmartMotorController} Mechanism Position
    * @param rightMechPos Right {@link SmartMotorController} Mechanism Position
    * @return Tilt {@link Angle}
    */
@@ -196,7 +190,7 @@ public class DifferentialMechanismConfig {
   /**
    * The left {@link SmartMotorController} mechanism position.
    *
-   * @param tilt {@link Angle} of the Tilt.
+   * @param tilt  {@link Angle} of the Tilt.
    * @param twist {@link Angle} of the twist.
    * @return Left mechanism position {@link Angle}
    */
@@ -207,7 +201,7 @@ public class DifferentialMechanismConfig {
   /**
    * The right {@link SmartMotorController} mechanism position.
    *
-   * @param tilt {@link Angle} of the Tilt.
+   * @param tilt  {@link Angle} of the Tilt.
    * @param twist {@link Angle} of the Twist.
    * @return Right mechanism position {@link Angle}
    */
@@ -222,10 +216,8 @@ public class DifferentialMechanismConfig {
       var tilt = startingTiltAngle.get();
       var left = getLeftMechanismPosition(tilt, twist);
       var right = getRightMechanismPosition(tilt, twist);
-      leftMotorController.ifPresent(
-          leftMotorController -> leftMotorController.getConfig().withStartingPosition(left));
-      rightMotorController.ifPresent(
-          rightMotorController -> rightMotorController.getConfig().withStartingPosition(right));
+      leftMotorController.ifPresent(leftMotorController -> leftMotorController.getConfig().withStartingPosition(left));
+      rightMotorController.ifPresent(rightMotorController -> rightMotorController.getConfig().withStartingPosition(right));
     }
   }
 
@@ -271,20 +263,18 @@ public class DifferentialMechanismConfig {
    */
   public DifferentialMechanismConfig withMOI(Distance length, Mass weight) {
     this.length = Optional.ofNullable(length);
-    this.MOI =
-        OptionalDouble.of(SingleJointedArmSim.estimateMOI(length.in(Meters), weight.in(Kilograms)));
+    this.MOI = OptionalDouble.of(SingleJointedArmSim.estimateMOI(length.in(Meters), weight.in(Kilograms)));
     return this;
   }
 
   /**
    * Configure telemetry for the {@link Pivot} mechanism.
    *
-   * @param telemetryName Telemetry NetworkTable name to appear under "SmartDashboard/"
+   * @param telemetryName      Telemetry NetworkTable name to appear under "SmartDashboard/"
    * @param telemetryVerbosity Telemetry verbosity to apply.
    * @return {@link DifferentialMechanismConfig} for chaining.
    */
-  public DifferentialMechanismConfig withTelemetry(
-      String telemetryName, TelemetryVerbosity telemetryVerbosity) {
+  public DifferentialMechanismConfig withTelemetry(String telemetryName, TelemetryVerbosity telemetryVerbosity) {
     this.telemetryName = Optional.ofNullable(telemetryName);
     this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
     return this;
@@ -296,8 +286,7 @@ public class DifferentialMechanismConfig {
    * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link DifferentialMechanism}
    * @return {@link DifferentialMechanismConfig} for chaining
    */
-  public DifferentialMechanismConfig withMechanismPositionConfig(
-      MechanismPositionConfig mechanismPositionConfig) {
+  public DifferentialMechanismConfig withMechanismPositionConfig(MechanismPositionConfig mechanismPositionConfig) {
     this.mechanismPositionConfig = mechanismPositionConfig;
     return this;
   }
@@ -330,11 +319,10 @@ public class DifferentialMechanismConfig {
    * Setup suppliers for absolute encoders on the {@link DifferentialMechanism}
    *
    * @param twistSupplier {@link Supplier<Angle>} for the twist.
-   * @param tiltSupplier {@link Supplier<Angle>} for the tilt.
+   * @param tiltSupplier  {@link Supplier<Angle>} for the tilt.
    * @return {@link DifferentialMechanismConfig} for chaining.
    */
-  public DifferentialMechanismConfig withAngleSuppliers(
-      Supplier<Angle> twistSupplier, Supplier<Angle> tiltSupplier) {
+  public DifferentialMechanismConfig withAngleSuppliers(Supplier<Angle> twistSupplier, Supplier<Angle> tiltSupplier) {
     this.twistAngle = Optional.ofNullable(twistSupplier);
     this.tiltAngle = Optional.ofNullable(tiltSupplier);
     return this;
@@ -343,7 +331,7 @@ public class DifferentialMechanismConfig {
   /**
    * Set the {@link DifferentialMechanism} starting positions.
    *
-   * @param tilt {@link Angle} of the tilt.
+   * @param tilt  {@link Angle} of the tilt.
    * @param twist {@link Angle} of the twist.
    * @return {@link DifferentialMechanismConfig} for chaining.
    */
@@ -372,12 +360,7 @@ public class DifferentialMechanismConfig {
    * @return {@link SmartMotorController#applyConfig(SmartMotorControllerConfig)} result.
    */
   public boolean applyConfig() {
-    return leftMotorController
-            .orElseThrow()
-            .applyConfig(leftMotorController.orElseThrow().getConfig())
-        && rightMotorController
-            .orElseThrow()
-            .applyConfig(rightMotorController.orElseThrow().getConfig());
+    return leftMotorController.orElseThrow().applyConfig(leftMotorController.orElseThrow().getConfig()) && rightMotorController.orElseThrow().applyConfig(rightMotorController.orElseThrow().getConfig());
   }
 
   /**
@@ -389,8 +372,7 @@ public class DifferentialMechanismConfig {
     if (MOI.isPresent()) {
       return MOI.getAsDouble();
     }
-    throw new DifferentialMechanismConfigurationException(
-        "Differential Mechanism Twist MOI must be set!", "Cannot get the MOI!", ".withMOI()");
+    throw new DifferentialMechanismConfigurationException("Differential Mechanism Twist MOI must be set!", "Cannot get the MOI!", ".withMOI()");
   }
 
   /**
@@ -514,7 +496,7 @@ public class DifferentialMechanismConfig {
    * Get the {@link MechanismPositionConfig} associated with this {@link DifferentialMechanismConfig}.
    *
    * @return An {@link Optional} containing the {@link MechanismPositionConfig} if present,
-   *     otherwise an empty {@link Optional}.
+   *         otherwise an empty {@link Optional}.
    */
   public MechanismPositionConfig getMechanismPositionConfig() {
     return mechanismPositionConfig;

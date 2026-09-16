@@ -107,7 +107,7 @@ class MechanismTelemetry {
     std::shared_ptr<wpi::log::StructLogEntry<T>> logEntry;
     if (m_dataLogName) {
       logEntry = std::make_shared<wpi::log::StructLogEntry<T>>(frc::DataLogManager::GetLog(),
-                                                                *m_dataLogName + "/" + key);
+                                                               *m_dataLogName + "/" + key);
     }
     return [publisher, logEntry](const T& value) {
       publisher->Set(value);
@@ -130,8 +130,8 @@ class MechanismTelemetry {
         m_networkTable->template GetStructArrayTopic<T>(key).Publish());
     std::shared_ptr<wpi::log::StructArrayLogEntry<T>> logEntry;
     if (m_dataLogName) {
-      logEntry = std::make_shared<wpi::log::StructArrayLogEntry<T>>(
-          frc::DataLogManager::GetLog(), *m_dataLogName + "/" + key);
+      logEntry = std::make_shared<wpi::log::StructArrayLogEntry<T>>(frc::DataLogManager::GetLog(),
+                                                                    *m_dataLogName + "/" + key);
     }
     return [publisher, logEntry](std::span<const T> value) {
       publisher->Set(value);

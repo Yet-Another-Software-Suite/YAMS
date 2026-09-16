@@ -23,10 +23,9 @@ void SwerveModuleTelemetry::SetupTelemetry(const std::string& mechName,
                     ->GetSubTable(mechName)
                     ->GetSubTable("modules")
                     ->GetSubTable(module.GetName());
-  m_tuningTable = inst.GetTable("Tuning")
-                      ->GetSubTable(mechName)
-                      ->GetSubTable("modules")
-                      ->GetSubTable(module.GetName());
+  m_tuningTable =
+      inst.GetTable("Tuning")->GetSubTable(mechName)->GetSubTable("modules")->GetSubTable(
+          module.GetName());
 
   bool nt4Enabled = m_config.GetNT4Enabled();
   auto dataLogName = m_config.GetDataLogName();

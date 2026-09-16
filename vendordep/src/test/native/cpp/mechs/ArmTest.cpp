@@ -42,9 +42,9 @@ static SmartMotorControllerConfig MakeArmSMCConfig(ProfileType profile, Hardware
       .WithIdleMode(SmartMotorControllerConfig::MotorMode::BRAKE)
       .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
-      .WithFeedforward(frc::ArmFeedforward{
-          0.0_V, 0.0_V, units::unit_t<frc::ArmFeedforward::kv_unit>{1.0},
-          units::unit_t<frc::ArmFeedforward::ka_unit>{0.0}})
+      .WithFeedforward(frc::ArmFeedforward{0.0_V, 0.0_V,
+                                           units::unit_t<frc::ArmFeedforward::kv_unit>{1.0},
+                                           units::unit_t<frc::ArmFeedforward::ka_unit>{0.0}})
       .WithClosedLoopMode()
       .WithMOI(4_in, 1_lb)
       .WithStartingPosition(0.0_deg)

@@ -27,15 +27,8 @@ double BatterySim::m_lastTimestampSeconds = std::numeric_limits<double>::quiet_N
 // typical FRC sealed lead-acid battery discharge curve. Voltage stays relatively flat for most
 // of the discharge before sagging quickly near depletion. Replaceable via ReplaceSOCInterpolation.
 std::map<double, double> BatterySim::m_socToVoltage{
-    {0.00, 9.0},
-    {0.05, 10.5},
-    {0.10, 11.5},
-    {0.20, 12.0},
-    {0.40, 12.3},
-    {0.60, 12.5},
-    {0.80, 12.7},
-    {0.90, 12.8},
-    {1.00, 12.9},
+    {0.00, 9.0},  {0.05, 10.5}, {0.10, 11.5}, {0.20, 12.0}, {0.40, 12.3},
+    {0.60, 12.5}, {0.80, 12.7}, {0.90, 12.8}, {1.00, 12.9},
 };
 
 void BatterySim::ReplaceSOCInterpolation(const std::map<double, double>& socToVoltage) {
@@ -49,15 +42,11 @@ void BatterySim::ReplaceSOCInterpolation(const std::map<double, double>& socToVo
 // draw. Defaults are averaged from Bill Peters/PDP (BFG) discharge testing across five FRC battery
 // manufacturers. Replaceable via ReplaceCapacityDerating.
 std::map<double, double> BatterySim::m_currentToCapacityFraction{
-    {0.9, 1.000},
-    {18.0, 0.758},
-    {27.0, 0.718},
-    {36.0, 0.679},
-    {45.0, 0.639},
-    {54.0, 0.599},
+    {0.9, 1.000}, {18.0, 0.758}, {27.0, 0.718}, {36.0, 0.679}, {45.0, 0.639}, {54.0, 0.599},
 };
 
-void BatterySim::ReplaceCapacityDerating(const std::map<double, double>& currentToCapacityFraction) {
+void BatterySim::ReplaceCapacityDerating(
+    const std::map<double, double>& currentToCapacityFraction) {
   m_currentToCapacityFraction = currentToCapacityFraction;
 }
 

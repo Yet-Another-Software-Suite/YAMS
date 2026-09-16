@@ -34,14 +34,14 @@ import yams.mechanisms.config.SensorConfig;
  * <h2>Key fields and methods</h2>
  *
  * <ul>
- *   <li>{@link #getField(String)} — retrieve a {@link SensorData} field by name.
- *   <li>{@link #getAsDouble(String)}, {@link #getAsInt(String)}, {@link #getAsBoolean(String)},
- *       {@link #getAsLong(String)} — typed convenience accessors that call through to the
- *       underlying field.
+ * <li>{@link #getField(String)} — retrieve a {@link SensorData} field by name.
+ * <li>{@link #getAsDouble(String)}, {@link #getAsInt(String)}, {@link #getAsBoolean(String)},
+ * {@link #getAsLong(String)} — typed convenience accessors that call through to the
+ * underlying field.
  * <li>{@link #addSimTrigger(String, edu.wpi.first.hal.HALValue, java.util.function.BooleanSupplier)} — inject a simulated override value whenever a
- *       condition is true.
- *   <li>{@link #getDevice()} — returns the underlying {@link edu.wpi.first.hal.SimDevice} (empty
- *       when running on a real robot).
+ * condition is true.
+ * <li>{@link #getDevice()} — returns the underlying {@link edu.wpi.first.hal.SimDevice} (empty
+ * when running on a real robot).
  * </ul>
  *
  * <h2>Example</h2>
@@ -74,13 +74,12 @@ public class Sensor {
    * Sensor constructor, for a sensor that will report the real data when connected to the robot or
    * Simulation GUI data when connected to Sim.
    *
-   * @param sensorName Name of the sensor.
+   * @param sensorName   Name of the sensor.
    * @param sensorFields List of sensor fields. See {@link SensorData}.
    */
   public Sensor(String sensorName, List<SensorData> sensorFields) {
     m_sensorName = sensorName;
-    m_simData =
-        sensorFields.stream().collect(Collectors.toMap(SensorData::getName, entry -> entry));
+    m_simData = sensorFields.stream().collect(Collectors.toMap(SensorData::getName, entry -> entry));
     if (RobotBase.isSimulation()) {
       m_simDevice = Optional.of(SimDevice.create("Sensor[" + sensorName + "]"));
       for (var field : sensorFields) {
@@ -108,8 +107,7 @@ public class Sensor {
    */
   public SensorData getField(String name) {
     if (!m_simData.containsKey(name)) {
-      throw new IllegalArgumentException(
-          "Sensor[" + m_sensorName + "." + name + "] does not exist!");
+      throw new IllegalArgumentException("Sensor[" + m_sensorName + "." + name + "] does not exist!");
     }
     return m_simData.get(name);
   }
@@ -166,8 +164,8 @@ public class Sensor {
   /**
    * Set a simulated value based on a trigger.
    *
-   * @param field Field name to set.
-   * @param value {@link HALValue} to set.
+   * @param field   Field name to set.
+   * @param value   {@link HALValue} to set.
    * @param trigger {@link BooleanSupplier} when to use.
    */
   public void addSimTrigger(String field, HALValue value, BooleanSupplier trigger) {

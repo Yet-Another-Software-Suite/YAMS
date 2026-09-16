@@ -118,7 +118,7 @@ SwerveDriveConfig& SwerveDriveConfig::WithSimRotationController(frc::PIDControll
 }
 
 SwerveDriveConfig& SwerveDriveConfig::WithTelemetry(const std::string& name,
-                                                     TelemetryVerbosity verbosity) {
+                                                    TelemetryVerbosity verbosity) {
   m_telemetryName = name;
   m_telemetryVerbosity = verbosity;
   return *this;

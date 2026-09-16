@@ -8,8 +8,8 @@
  * Pass an instance to {@link yams.motorcontrollers.SmartMotorControllerConfig} via {@code withSimSupplier()} to enable physics-accurate simulation without changing mechanism code.
  *
  * <ul>
- *   <li>{@link yams.motorcontrollers.simulation.ArmSimSupplier} — single-jointed arm physics
- *   <li>{@link yams.motorcontrollers.simulation.DCMotorSimSupplier} — generic DC motor physics
+ * <li>{@link yams.motorcontrollers.simulation.ArmSimSupplier} — single-jointed arm physics
+ * <li>{@link yams.motorcontrollers.simulation.DCMotorSimSupplier} — generic DC motor physics
  * <li>{@link yams.motorcontrollers.simulation.Sensor} and {@link yams.motorcontrollers.simulation.SensorData} — simulated encoder/sensor state
  * </ul>
  */

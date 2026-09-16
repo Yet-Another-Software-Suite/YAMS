@@ -11,20 +11,20 @@
  * <h2>Available Mechanisms</h2>
  *
  * <ul>
- *   <li>{@link yams.mechanisms.velocity.FlyWheel} — single or dual-motor flywheel configured with
+ * <li>{@link yams.mechanisms.velocity.FlyWheel} — single or dual-motor flywheel configured with
  * {@link yams.mechanisms.config.FlyWheelConfig}. Accepts both {@link edu.wpi.first.units.measure.AngularVelocity} (e.g. RPM) and {@link edu.wpi.first.units.measure.LinearVelocity} (e.g. surface speed in m/s) setpoints when a
- *       wheel radius is provided in the config.
+ * wheel radius is provided in the config.
  * </ul>
  *
  * <h2>Running the Mechanism</h2>
  *
  * <ul>
- *   <li>{@code run(velocity)} — commands the mechanism to spin at the given velocity. Accepts
+ * <li>{@code run(velocity)} — commands the mechanism to spin at the given velocity. Accepts
  * either {@link edu.wpi.first.units.measure.AngularVelocity} or {@link edu.wpi.first.units.measure.LinearVelocity} and returns a {@code Command} that holds the
- *       setpoint until interrupted.
- *   <li>{@code runTo(velocity)} — like {@code run()}, but the returned {@code Command} does not
- *       finish until the mechanism is within the configured velocity tolerance of the setpoint.
- *       Useful when downstream actions must wait for the flywheel to spin up.
+ * setpoint until interrupted.
+ * <li>{@code runTo(velocity)} — like {@code run()}, but the returned {@code Command} does not
+ * finish until the mechanism is within the configured velocity tolerance of the setpoint.
+ * Useful when downstream actions must wait for the flywheel to spin up.
  * </ul>
  *
  * <pre>{@code
@@ -46,7 +46,8 @@
  * <h2>Unsupported Operations</h2>
  *
  * <p>Because velocity mechanisms do not track an absolute position, the positional limit triggers
- * {@code max()} and {@code min()} are <b>not supported</b> and will throw {@link java.lang.UnsupportedOperationException} if called. Use the velocity-based triggers ({@code isNear()}, {@code gte()}, {@code lte()}) for condition-based scheduling instead.
+ * {@code max()} and {@code min()} are <b>not supported</b> and will throw {@link java.lang.UnsupportedOperationException} if called. Use the velocity-based triggers ({@code isNear()}, {@code gte()}, {@code lte()}) for condition-based scheduling
+ * instead.
  *
  * @see yams.mechanisms.velocity.SmartVelocityMechanism
  * @see yams.mechanisms.SmartMechanism

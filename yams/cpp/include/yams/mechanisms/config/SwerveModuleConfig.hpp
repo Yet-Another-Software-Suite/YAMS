@@ -210,7 +210,6 @@ class SwerveModuleConfig {
   /** Get the absolute encoder supplier, if configured via WithAbsoluteEncoder(). */
   std::optional<std::function<units::degree_t()>> GetAbsoluteEncoderSupplier() const;
 
-
   /**
    * Get the user-specified SwerveModuleTelemetryConfig, if configured via
    * WithTelemetry(name, SwerveModuleTelemetryConfig). Moves the config out of this
@@ -254,7 +253,7 @@ class SwerveModuleConfig {
    *                     (e.g. for optimization).
    */
   double GetCosineCompensatedVelocity(const frc::SwerveModuleState& desiredState,
-                                       const frc::Rotation2d& currentAngle) const;
+                                      const frc::Rotation2d& currentAngle) const;
 };
 
 }  // namespace yams::mechanisms::config

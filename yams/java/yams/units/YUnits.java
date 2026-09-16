@@ -32,14 +32,14 @@ import edu.wpi.first.units.TimeUnit;
  *
  * <ul>
  * <li><b>Imperial distance units</b> — {@link #Hands}, {@link #Yards}, {@link #Cubits}, {@link #Fathoms}, {@link #Chains}, {@link #Furlongs}, {@link #Miles}, {@link #Leagues}, and even a
- *       {@link #FootlongSandwich}.
+ * {@link #FootlongSandwich}.
  * <li><b>Extended time units</b> — {@link #Hours}, {@link #Days}, {@link #Weeks}, {@link #Fortnight}, and {@link #Years}.
- *   <li><b>Derived velocity units</b> — {@link #MilesPerHour} (MPH), {@link #FurlongsPerFortnight}
- *       (FPF), and {@link #SandwichPerSecond} for all your footlong-based kinematics.
+ * <li><b>Derived velocity units</b> — {@link #MilesPerHour} (MPH), {@link #FurlongsPerFortnight}
+ * (FPF), and {@link #SandwichPerSecond} for all your footlong-based kinematics.
  * <li><b>Angular velocity and acceleration</b> — {@link #RotationsPerYear} (RPY) and {@link #RPMPerSecond} for angular acceleration in RPM/s.
  * <li><b>Linear and angular momentum units</b> — {@link #PoundFeetPerSecond}, {@link #PoundInchesPerSecond}, {@link #PoundFeetSquaredPerSecond}, and {@link #PoundInchesSquaredPerSecond}.
- *   <li><b>Moment of inertia units</b> — {@link #PoundSquareFeet} and {@link #PoundSquareInches}
- *       for imperial rotational inertia calculations.
+ * <li><b>Moment of inertia units</b> — {@link #PoundSquareFeet} and {@link #PoundSquareInches}
+ * for imperial rotational inertia calculations.
  * </ul>
  *
  * <h2>Example</h2>
@@ -72,23 +72,19 @@ public class YUnits {
   public static final AngularMomentumUnit PoundFeetSquaredPerSecond = PoundFeetPerSecond.mult(Feet);
 
   /** Pounds * Inches^2/Second */
-  public static final AngularMomentumUnit PoundInchesSquaredPerSecond =
-      PoundInchesPerSecond.mult(Inches);
+  public static final AngularMomentumUnit PoundInchesSquaredPerSecond = PoundInchesPerSecond.mult(Inches);
 
   // Moment of Inertia Units
   /** Pounds^2 * Inches * Radians/Second */
-  public static final MomentOfInertiaUnit PoundSquareFeet =
-      MomentOfInertiaUnit.combine(PoundFeetSquaredPerSecond, RadiansPerSecond);
+  public static final MomentOfInertiaUnit PoundSquareFeet = MomentOfInertiaUnit.combine(PoundFeetSquaredPerSecond, RadiansPerSecond);
 
   /** Pounds^2 * Inches *Radians/Second */
-  public static final MomentOfInertiaUnit PoundSquareInches =
-      MomentOfInertiaUnit.combine(PoundInchesSquaredPerSecond, RadiansPerSecond);
+  public static final MomentOfInertiaUnit PoundSquareInches = MomentOfInertiaUnit.combine(PoundInchesSquaredPerSecond, RadiansPerSecond);
 
   /**
    * 101.6/1000 of a {@link edu.wpi.first.units.Units#Meters}, or 4 {@link edu.wpi.first.units.Units#Inches}.
    */
-  public static final DistanceUnit Hands =
-      derive(Inches).aggregate(4).named("Hand").symbol("hand").make();
+  public static final DistanceUnit Hands = derive(Inches).aggregate(4).named("Hand").symbol("hand").make();
 
   /**
    * 101.6/1000 of a {@link edu.wpi.first.units.Units#Meters}, or 4 {@link edu.wpi.first.units.Units#Inches}.
@@ -98,8 +94,7 @@ public class YUnits {
   /**
    * 914.4/1000 of a {@link edu.wpi.first.units.Units#Meters}, or 3 {@link edu.wpi.first.units.Units#Feet}.
    */
-  public static final DistanceUnit Yards =
-      derive(Feet).aggregate(3).named("Yard").symbol("yd").make();
+  public static final DistanceUnit Yards = derive(Feet).aggregate(3).named("Yard").symbol("yd").make();
 
   /**
    * 914.4/1000 of a {@link edu.wpi.first.units.Units#Meters}, or 3 {@link edu.wpi.first.units.Units#Feet}.
@@ -109,8 +104,7 @@ public class YUnits {
   /**
    * 457.2/1000 of a {@link edu.wpi.first.units.Units#Meters}, or 18 {@link edu.wpi.first.units.Units#Inches}.
    */
-  public static final DistanceUnit Cubits =
-      derive(Inches).aggregate(18).named("Cubit").symbol("cbt").make();
+  public static final DistanceUnit Cubits = derive(Inches).aggregate(18).named("Cubit").symbol("cbt").make();
 
   /**
    * 457.2/1000 of a {@link edu.wpi.first.units.Units#Meters}, or 18 {@link edu.wpi.first.units.Units#Inches}.
@@ -120,15 +114,13 @@ public class YUnits {
   /**
    * 1.8288 {@link edu.wpi.first.units.Units#Meters}s, or 6 {@link edu.wpi.first.units.Units#Feet}.
    */
-  public static final DistanceUnit Fathoms =
-      derive(Feet).aggregate(6).named("Fathom").symbol("ftm").make();
+  public static final DistanceUnit Fathoms = derive(Feet).aggregate(6).named("Fathom").symbol("ftm").make();
 
   /**
    * 1 {@link edu.wpi.first.units.Units#Feet}, or <a
    * href="https://myginosdeli.com/ginos-deli-menu/">Sandwich</a>
    */
-  public static final DistanceUnit FootlongSandwich =
-      derive(Feet).named("FootlongSandwich").symbol("1ftsub").make();
+  public static final DistanceUnit FootlongSandwich = derive(Feet).named("FootlongSandwich").symbol("1ftsub").make();
 
   /**
    * 1.8288 {@link edu.wpi.first.units.Units#Meters}s, or 6 {@link edu.wpi.first.units.Units#Feet}.
@@ -139,8 +131,7 @@ public class YUnits {
    * 20.1168 (Except in India, where it is 20 meters) {@link edu.wpi.first.units.Units#Meters}s, or
    * 66 {@link edu.wpi.first.units.Units#Feet}.
    */
-  public static final DistanceUnit Chains =
-      derive(Feet).aggregate(66).named("Chain").symbol("ch").make();
+  public static final DistanceUnit Chains = derive(Feet).aggregate(66).named("Chain").symbol("ch").make();
 
   /**
    * 20.1168 (Except in India, where it is 20 meters) {@link edu.wpi.first.units.Units#Meters}s, or
@@ -149,8 +140,7 @@ public class YUnits {
   public static final DistanceUnit Chain = Chains; // alias
 
   /** 201.168 {@link edu.wpi.first.units.Units#Meters}s, or 10 {@link #Chains}. */
-  public static final DistanceUnit Furlongs =
-      derive(Chain).aggregate(10).named("Furlong").symbol("fur").make();
+  public static final DistanceUnit Furlongs = derive(Chain).aggregate(10).named("Furlong").symbol("fur").make();
 
   /** 201.168 {@link edu.wpi.first.units.Units#Meters}s, or 10 {@link #Chains}. */
   public static final DistanceUnit Furlong = Furlongs; // alias
@@ -158,8 +148,7 @@ public class YUnits {
   /**
    * 1609.344 {@link edu.wpi.first.units.Units#Meters}s, or 5280 {@link edu.wpi.first.units.Units#Feet}.
    */
-  public static final DistanceUnit Miles =
-      derive(Feet).aggregate(5280).named("Mile").symbol("mi").make();
+  public static final DistanceUnit Miles = derive(Feet).aggregate(5280).named("Mile").symbol("mi").make();
 
   /**
    * 1609.344 {@link edu.wpi.first.units.Units#Meters}s, or 5280 {@link edu.wpi.first.units.Units#Feet}.
@@ -167,19 +156,16 @@ public class YUnits {
   public static final DistanceUnit Mile = Miles; // alias
 
   /** 4828.032 {@link edu.wpi.first.units.Units#Meters}s, or 3 {@link #Miles}. */
-  public static final DistanceUnit Leagues =
-      derive(Mile).aggregate(3).named("League").symbol("lea").make();
+  public static final DistanceUnit Leagues = derive(Mile).aggregate(3).named("League").symbol("lea").make();
 
   /** 4828.032 {@link edu.wpi.first.units.Units#Meters}s, or 3 {@link #Miles}. */
   public static final DistanceUnit League = Leagues; // alias
 
   /** 60 {@link edu.wpi.first.units.Units#Minutes}. */
-  public static final TimeUnit Hours =
-      derive(Minutes).aggregate(60).named("Hour").symbol("hr").make();
+  public static final TimeUnit Hours = derive(Minutes).aggregate(60).named("Hour").symbol("hr").make();
 
   /** 525600 {@link edu.wpi.first.units.Units#Minutes}. */
-  public static final TimeUnit Years =
-      derive(Minutes).aggregate(525600).named("Year").symbol("yr").make();
+  public static final TimeUnit Years = derive(Minutes).aggregate(525600).named("Year").symbol("yr").make();
 
   /** Alias for {@link #Hours} to make combined unit definitions read more smoothly. */
   public static final TimeUnit Hour = Hours; // singularized alias
@@ -200,16 +186,13 @@ public class YUnits {
   public static final AngularVelocityUnit RPY = RotationsPerYear;
 
   /** 24 {@link #Hours}. */
-  public static final TimeUnit Days =
-      derive(Hours).aggregate(24).named("Days").symbol("days").make();
+  public static final TimeUnit Days = derive(Hours).aggregate(24).named("Days").symbol("days").make();
 
   /** 7 {@link #Days}. */
-  public static final TimeUnit Weeks =
-      derive(Days).aggregate(7).named("Weeks").symbol("weeks").make();
+  public static final TimeUnit Weeks = derive(Days).aggregate(7).named("Weeks").symbol("weeks").make();
 
   /** 2 {@link #Weeks}. */
-  public static final TimeUnit Fortnight =
-      derive(Weeks).aggregate(2).named("Fortnights").symbol("fortnights").make();
+  public static final TimeUnit Fortnight = derive(Weeks).aggregate(2).named("Fortnights").symbol("fortnights").make();
 
   /** 1 {@link #Furlongs} per {@link #Fortnight}. */
   public static final LinearVelocityUnit FurlongsPerFortnight = Furlongs.per(Fortnight);

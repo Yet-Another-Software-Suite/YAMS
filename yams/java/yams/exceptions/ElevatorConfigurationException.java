@@ -9,10 +9,10 @@ package yams.exceptions;
  * <p>Common triggers include:
  *
  * <ul>
- *   <li>Carriage mass not set ({@code withMass(Mass)}) — required for simulation
- *   <li>Hard limits ({@code withHardLimits(Distance, Distance)}) missing minimum or maximum height
- *   <li>Starting height not configured ({@code withStartingHeight(Distance)})
- *   <li>No motor controller provided
+ * <li>Carriage mass not set ({@code withMass(Mass)}) — required for simulation
+ * <li>Hard limits ({@code withHardLimits(Distance, Distance)}) missing minimum or maximum height
+ * <li>Starting height not configured ({@code withStartingHeight(Distance)})
+ * <li>No motor controller provided
  * </ul>
  *
  * <p><b>Resolution:</b> Ensure {@code ElevatorConfig.withSmartMotorController(SmartMotorController)} is called, {@code ElevatorConfig.withHardLimits(Distance, Distance)} defines both the minimum and maximum travel
@@ -36,17 +36,11 @@ public class ElevatorConfigurationException extends RuntimeException {
   /**
    * Elevator configuration exception.
    *
-   * @param message Message to display.
-   * @param result Result of the configuration.
+   * @param message        Message to display.
+   * @param result         Result of the configuration.
    * @param remedyFunction Remedy function to use.
    */
   public ElevatorConfigurationException(String message, String result, String remedyFunction) {
-    super(
-        message
-            + "!\n"
-            + result
-            + "\nPlease use ElevatorConfig."
-            + remedyFunction
-            + " to fix this error.");
+    super(message + "!\n" + result + "\nPlease use ElevatorConfig." + remedyFunction + " to fix this error.");
   }
 }

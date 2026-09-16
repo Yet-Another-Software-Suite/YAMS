@@ -75,7 +75,7 @@ public class Arm extends SmartPositionalMechanism {
    * Constructor for the Arm mechanism.
    *
    * @param config {@link ArmConfig} to use.
-   * @param smc {@link SmartMotorController} for the Arm.
+   * @param smc    {@link SmartMotorController} for the Arm.
    */
   public Arm(ArmConfig config, SmartMotorController smc) {
     this.m_config = config;
@@ -95,123 +95,35 @@ public class Arm extends SmartPositionalMechanism {
 
     if (RobotBase.isSimulation()) {
       if (config.getLength().isEmpty()) {
-        throw new ArmConfigurationException(
-            "Arm Length is empty", "Cannot create simulation.", "withLength(Distance)");
+        throw new ArmConfigurationException("Arm Length is empty", "Cannot create simulation.", "withLength(Distance)");
       }
       if (config.getLowerHardLimit().isEmpty()) {
-        throw new ArmConfigurationException(
-            "Arm lower hard limit is empty",
-            "Cannot create simulation.",
-            "withHardLimits(Angle,Angle)");
+        throw new ArmConfigurationException("Arm lower hard limit is empty", "Cannot create simulation.", "withHardLimits(Angle,Angle)");
       }
       if (config.getUpperHardLimit().isEmpty()) {
-        throw new ArmConfigurationException(
-            "Arm upper hard limit is empty",
-            "Cannot create simulation.",
-            "withHardLimits(Angle,Angle)");
+        throw new ArmConfigurationException("Arm upper hard limit is empty", "Cannot create simulation.", "withHardLimits(Angle,Angle)");
       }
-      if (smccfg.getStartingPosition().isEmpty()
-          && smccfg.getExternalEncoderZeroOffset().isEmpty()) {
-        throw new ArmConfigurationException(
-            "Arm starting angle is empty",
-            "Cannot create simulation.",
-            "SmartMotorControllerConfig.withStartingPosition(Angle)");
+      if (smccfg.getStartingPosition().isEmpty() && smccfg.getExternalEncoderZeroOffset().isEmpty()) {
+        throw new ArmConfigurationException("Arm starting angle is empty", "Cannot create simulation.", "SmartMotorControllerConfig.withStartingPosition(Angle)");
       }
-      if (smccfg.getStartingPosition().isPresent()
-          && (smccfg.getStartingPosition().get().lt(config.getLowerHardLimit().get())
-              || smccfg.getStartingPosition().get().gt(config.getUpperHardLimit().get()))) {
-        throw new ArmConfigurationException(
-            "Arm starting angle is outside hard limits",
-            "Cannot create simulation.",
-            "SmartMotorControllerConfig.withStartingPosition(Angle)");
+      if (smccfg.getStartingPosition().isPresent() && (smccfg.getStartingPosition().get().lt(config.getLowerHardLimit().get()) || smccfg.getStartingPosition().get().gt(config.getUpperHardLimit().get()))) {
+        throw new ArmConfigurationException("Arm starting angle is outside hard limits", "Cannot create simulation.", "SmartMotorControllerConfig.withStartingPosition(Angle)");
       }
-      m_sim =
-          Optional.of(
-              new SingleJointedArmSim(
-                  smc.getDCMotor(),
-                  smccfg.getGearing().getMechanismToRotorRatio(),
-                  smccfg.getMOI(),
-                  config.getLength().get().in(Meters),
-                  config.getLowerHardLimit().get().in(Radians),
-                  config.getUpperHardLimit().get().in(Radians),
-                  true,
-                  smccfg.getStartingPosition().orElse(Rotations.zero()).in(Radians),
-                  0.002 / 4096.0,
-                  0.0)); // Add noise with a std-dev of 1 tick
+      m_sim = Optional.of(new SingleJointedArmSim(smc.getDCMotor(), smccfg.getGearing().getMechanismToRotorRatio(), smccfg.getMOI(), config.getLength().get().in(Meters), config.getLowerHardLimit().get().in(Radians), config.getUpperHardLimit().get()
+          .in(Radians), true, smccfg.getStartingPosition().orElse(Rotations.zero()).in(Radians), 0.002 / 4096.0, 0.0)); // Add noise with a std-dev of 1 tick
       m_smc.setSimSupplier(new ArmSimSupplier(m_sim.get(), m_smc));
 
-      m_mechanismWindow =
-          new Mechanism2d(
-              config
-                  .getMechanismPositionConfig()
-                  .getWindowXDimension(config.getLength().get())
-                  .in(Meters),
-              config
-                  .getMechanismPositionConfig()
-                  .getWindowYDimension(config.getLength().get())
-                  .in(Meters));
-      m_mechanismRoot =
-          m_mechanismWindow.getRoot(
-              getName() + "Root",
-              config.getMechanismPositionConfig().getMechanismX(config.getLength().get()).in(Meters)
-                  + config
-                      .getMechanismPositionConfig()
-                      .getRelativePosition()
-                      .orElse(new Translation3d())
-                      .getX(),
-              config.getMechanismPositionConfig().getMechanismY(config.getLength().get()).in(Meters)
-                  + config
-                      .getMechanismPositionConfig()
-                      .getRelativePosition()
-                      .orElse(new Translation3d())
-                      .getZ());
+      m_mechanismWindow = new Mechanism2d(config.getMechanismPositionConfig().getWindowXDimension(config.getLength().get()).in(Meters), config.getMechanismPositionConfig().getWindowYDimension(config.getLength().get()).in(Meters));
+      m_mechanismRoot = m_mechanismWindow.getRoot(getName() + "Root", config.getMechanismPositionConfig().getMechanismX(config.getLength().get()).in(Meters) + config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d())
+          .getX(), config.getMechanismPositionConfig().getMechanismY(config.getLength().get()).in(Meters) + config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d()).getZ());
 
-      m_mechanismLigament =
-          m_mechanismRoot.append(
-              new MechanismLigament2d(
-                  getName(),
-                  config.getLength().get().in(Meters),
-                  smccfg.getStartingPosition().orElse(Rotations.zero()).in(Degrees),
-                  6,
-                  config.getSimColor()));
-      m_setpointLigament =
-          m_mechanismRoot.append(
-              new MechanismLigament2d(
-                  "Setpoint",
-                  config.getLength().get().in(Meters),
-                  smccfg.getStartingPosition().orElse(Rotations.zero()).in(Degrees),
-                  3,
-                  new Color8Bit(Color.kWhite)));
-      m_mechanismRoot.append(
-          new MechanismLigament2d(
-              "MaxHard",
-              Inch.of(3).in(Meters),
-              config.getUpperHardLimit().get().in(Degrees),
-              4,
-              new Color8Bit(Color.kLimeGreen)));
-      m_mechanismRoot.append(
-          new MechanismLigament2d(
-              "MinHard",
-              Inch.of(3).in(Meters),
-              config.getLowerHardLimit().get().in(Degrees),
-              4,
-              new Color8Bit(Color.kRed)));
-      if (smccfg.getMechanismLowerLimit().isPresent()
-          && smccfg.getMechanismUpperLimit().isPresent()) {
-        m_mechanismRoot.append(
-            new MechanismLigament2d(
-                "MaxSoft",
-                Inch.of(3).in(Meters),
-                smccfg.getMechanismUpperLimit().get().in(Degrees),
-                4,
-                new Color8Bit(Color.kHotPink)));
-        m_mechanismRoot.append(
-            new MechanismLigament2d(
-                "MinSoft",
-                Inch.of(3).in(Meters),
-                smccfg.getMechanismLowerLimit().get().in(Degrees),
-                4,
-                new Color8Bit(Color.kYellow)));
+      m_mechanismLigament = m_mechanismRoot.append(new MechanismLigament2d(getName(), config.getLength().get().in(Meters), smccfg.getStartingPosition().orElse(Rotations.zero()).in(Degrees), 6, config.getSimColor()));
+      m_setpointLigament = m_mechanismRoot.append(new MechanismLigament2d("Setpoint", config.getLength().get().in(Meters), smccfg.getStartingPosition().orElse(Rotations.zero()).in(Degrees), 3, new Color8Bit(Color.kWhite)));
+      m_mechanismRoot.append(new MechanismLigament2d("MaxHard", Inch.of(3).in(Meters), config.getUpperHardLimit().get().in(Degrees), 4, new Color8Bit(Color.kLimeGreen)));
+      m_mechanismRoot.append(new MechanismLigament2d("MinHard", Inch.of(3).in(Meters), config.getLowerHardLimit().get().in(Degrees), 4, new Color8Bit(Color.kRed)));
+      if (smccfg.getMechanismLowerLimit().isPresent() && smccfg.getMechanismUpperLimit().isPresent()) {
+        m_mechanismRoot.append(new MechanismLigament2d("MaxSoft", Inch.of(3).in(Meters), smccfg.getMechanismUpperLimit().get().in(Degrees), 4, new Color8Bit(Color.kHotPink)));
+        m_mechanismRoot.append(new MechanismLigament2d("MinSoft", Inch.of(3).in(Meters), smccfg.getMechanismLowerLimit().get().in(Degrees), 4, new Color8Bit(Color.kYellow)));
       }
       SmartDashboard.putData(getName() + "/mechanism", m_mechanismWindow);
       m_smc.setupSimulation();
@@ -233,14 +145,10 @@ public class Arm extends SmartPositionalMechanism {
       m_smc.getSimSupplier().get().updateSimState();
       m_smc.simIterate();
       m_smc.getSimSupplier().get().starveUpdateSim();
-      if (m_config.getLowerHardLimit().isPresent()
-          && m_sim.get().getVelocityRadPerSec() < 0
-          && m_smc.getMechanismPosition().lt(m_config.getLowerHardLimit().get())) {
+      if (m_config.getLowerHardLimit().isPresent() && m_sim.get().getVelocityRadPerSec() < 0 && m_smc.getMechanismPosition().lt(m_config.getLowerHardLimit().get())) {
         m_smc.setEncoderPosition(m_config.getLowerHardLimit().get());
       }
-      if (m_config.getUpperHardLimit().isPresent()
-          && m_sim.get().getVelocityRadPerSec() > 0
-          && m_smc.getMechanismPosition().gt(m_config.getUpperHardLimit().get())) {
+      if (m_config.getUpperHardLimit().isPresent() && m_sim.get().getVelocityRadPerSec() > 0 && m_smc.getMechanismPosition().gt(m_config.getUpperHardLimit().get())) {
         m_smc.setEncoderPosition(m_config.getUpperHardLimit().get());
       }
       visualizationUpdate();
@@ -255,8 +163,7 @@ public class Arm extends SmartPositionalMechanism {
   @Override
   public void visualizationUpdate() {
     m_mechanismLigament.setAngle(getAngle().in(Degrees));
-    m_setpointLigament.setAngle(
-        m_smc.getMechanismPositionSetpoint().orElse(getAngle()).in(Degrees));
+    m_setpointLigament.setAngle(m_smc.getMechanismPositionSetpoint().orElse(getAngle()).in(Degrees));
   }
 
   /**
@@ -268,19 +175,9 @@ public class Arm extends SmartPositionalMechanism {
   @Override
   public Translation3d getRelativeMechanismPosition() {
     Plane movementPlane = m_config.getMechanismPositionConfig().getMovementPlane();
-    Translation3d mechanismTranslation =
-        new Translation3d(
-            m_mechanismLigament.getLength(),
-            new Rotation3d(
-                Plane.YZ == movementPlane ? m_mechanismLigament.getAngle() : 0,
-                Plane.XZ == movementPlane ? m_mechanismLigament.getAngle() : 0,
-                0));
+    Translation3d mechanismTranslation = new Translation3d(m_mechanismLigament.getLength(), new Rotation3d(Plane.YZ == movementPlane ? m_mechanismLigament.getAngle() : 0, Plane.XZ == movementPlane ? m_mechanismLigament.getAngle() : 0, 0));
     if (m_config.getMechanismPositionConfig().getRelativePosition().isPresent()) {
-      return m_config
-          .getMechanismPositionConfig()
-          .getRelativePosition()
-          .get()
-          .plus(mechanismTranslation);
+      return m_config.getMechanismPositionConfig().getRelativePosition().get().plus(mechanismTranslation);
     }
     return mechanismTranslation;
   }
@@ -326,8 +223,7 @@ public class Arm extends SmartPositionalMechanism {
    * @return {@link Command} that sets the arm to the desired angle.
    */
   public Command run(Angle angle) {
-    return Commands.run(() -> m_smc.setPosition(angle), m_subsystem)
-        .withName(m_subsystem.getName() + " SetAngle");
+    return Commands.run(() -> m_smc.setPosition(angle), m_subsystem).withName(m_subsystem.getName() + " SetAngle");
   }
 
   /**
@@ -337,45 +233,39 @@ public class Arm extends SmartPositionalMechanism {
    * @return {@link Command} that sets the arm to the desired angle.
    */
   public Command run(Supplier<Angle> angle) {
-    return Commands.run(() -> m_smc.setPosition(angle.get()), m_subsystem)
-        .withName(m_subsystem.getName() + " RunAngle Supplier");
+    return Commands.run(() -> m_smc.setPosition(angle.get()), m_subsystem).withName(m_subsystem.getName() + " RunAngle Supplier");
   }
 
   /**
    * Set the arm to the given angle then end the command.
    *
-   * @param angle {@link Angle} to go to.
+   * @param angle     {@link Angle} to go to.
    * @param tolerance Tolerance {@link Angle}
    * @return {@link Command} that sets the arm to the desired angle.
    * @implNote This command will not stop. It should NOT be used when there is a default command on
-   *     the Subsystem.
+   *           the Subsystem.
    */
   public Command runTo(Angle angle, Angle tolerance) {
-    return Commands.runOnce(() -> m_smc.setPosition(angle), m_subsystem)
-        .andThen(Commands.waitUntil(isNear(angle, tolerance).debounce(0.1, DebounceType.kRising)))
-        .withName(m_subsystem.getName() + " RunTo Angle");
+    return Commands.runOnce(() -> m_smc.setPosition(angle), m_subsystem).andThen(Commands.waitUntil(isNear(angle, tolerance).debounce(0.1, DebounceType.kRising))).withName(m_subsystem.getName() + " RunTo Angle");
   }
 
   /**
    * Set the arm to the given angle then end the command.
    *
-   * @param angle {@link Angle} to go to.
+   * @param angle     {@link Angle} to go to.
    * @param tolerance Tolerance {@link Angle}
    * @return {@link Command} that sets the arm to the desired angle.
    * @implNote This command will stop, but the last control request to the motor controller will
-   *     continue. It should NOT be used when there is a default command on the Subsystem.
+   *           continue. It should NOT be used when there is a default command on the Subsystem.
    */
   public Command runTo(Supplier<Angle> angle, Angle tolerance) {
-    return Commands.runOnce(() -> m_smc.setPosition(angle.get()), m_subsystem)
-        .andThen(
-            Commands.waitUntil(isNear(angle.get(), tolerance).debounce(0.1, DebounceType.kRising)))
-        .withName(m_subsystem.getName() + " RunTo Angle Supplier");
+    return Commands.runOnce(() -> m_smc.setPosition(angle.get()), m_subsystem).andThen(Commands.waitUntil(isNear(angle.get(), tolerance).debounce(0.1, DebounceType.kRising))).withName(m_subsystem.getName() + " RunTo Angle Supplier");
   }
 
   /**
    * Arm is near an angle.
    *
-   * @param angle {@link Angle} to be near.
+   * @param angle  {@link Angle} to be near.
    * @param within {@link Angle} within.
    * @return {@link Trigger} on when the arm is near another angle.
    */
@@ -391,10 +281,7 @@ public class Arm extends SmartPositionalMechanism {
     if (m_config.getUpperHardLimit().isPresent()) {
       return gte(m_config.getUpperHardLimit().get());
     }
-    throw new ArmConfigurationException(
-        "Arm upper hard and motor controller soft limit is empty",
-        "Cannot create max trigger.",
-        "withHardLimits(Angle,Angle)");
+    throw new ArmConfigurationException("Arm upper hard and motor controller soft limit is empty", "Cannot create max trigger.", "withHardLimits(Angle,Angle)");
   }
 
   @Override
@@ -405,17 +292,14 @@ public class Arm extends SmartPositionalMechanism {
     if (m_config.getLowerHardLimit().isPresent()) {
       return lte(m_config.getLowerHardLimit().get());
     }
-    throw new ArmConfigurationException(
-        "Arm lower hard and motor controller soft limit is empty",
-        "Cannot create min trigger.",
-        "withHardLimits(Angle,Angle)");
+    throw new ArmConfigurationException("Arm lower hard and motor controller soft limit is empty", "Cannot create min trigger.", "withHardLimits(Angle,Angle)");
   }
 
   /**
    * Between two angles.
    *
    * @param start Start angle.
-   * @param end End angle
+   * @param end   End angle
    * @return {@link Trigger}
    */
   public Trigger between(Angle start, Angle end) {

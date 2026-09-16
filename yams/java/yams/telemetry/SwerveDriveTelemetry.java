@@ -18,14 +18,13 @@ import yams.mechanisms.swerve.SwerveDrive;
 import yams.mechanisms.swerve.SwerveModule;
 
 public class SwerveDriveTelemetry {
-  private final SwerveDriveTelemetryConfig m_config;
-  private Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> m_doubleTelemetry;
-  private Map<StructTelemetryField, StructTelemetry<?, StructTelemetryField>> m_structTelemetry;
-  private Map<StructArrayTelemetryField, StructArrayTelemetry<?, StructArrayTelemetryField>>
-      m_structArrayTelemetry;
-  private Map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> m_boolTelemetry;
-  private NetworkTable m_dataNt;
-  private NetworkTable m_tuningNt;
+  private final SwerveDriveTelemetryConfig                                                   m_config;
+  private Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>                   m_doubleTelemetry;
+  private Map<StructTelemetryField, StructTelemetry<?, StructTelemetryField>>                m_structTelemetry;
+  private Map<StructArrayTelemetryField, StructArrayTelemetry<?, StructArrayTelemetryField>> m_structArrayTelemetry;
+  private Map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>>                m_boolTelemetry;
+  private NetworkTable                                                                       m_dataNt;
+  private NetworkTable                                                                       m_tuningNt;
 
   /** Create SwerveDrive telemetry for logging in NetworkTables and DataLog. */
   public SwerveDriveTelemetry(SwerveDriveTelemetryConfig config) {
@@ -48,8 +47,7 @@ public class SwerveDriveTelemetry {
     m_structTelemetry = m_config.getStructFields();
     m_structArrayTelemetry = m_config.getStructArrayFields();
     m_boolTelemetry = m_config.getBoolFields();
-    for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry :
-        m_doubleTelemetry.entrySet()) {
+    for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : m_doubleTelemetry.entrySet()) {
       var dt = entry.getValue();
       if (!dt.enabled) {
         continue;
@@ -59,8 +57,7 @@ public class SwerveDriveTelemetry {
       }
       m_config.getDataLogName().ifPresent(dt::setupDataLog);
     }
-    for (Map.Entry<StructTelemetryField, StructTelemetry<?, StructTelemetryField>> entry :
-        m_structTelemetry.entrySet()) {
+    for (Map.Entry<StructTelemetryField, StructTelemetry<?, StructTelemetryField>> entry : m_structTelemetry.entrySet()) {
       var stt = entry.getValue();
       if (!stt.enabled) {
         continue;
@@ -70,8 +67,7 @@ public class SwerveDriveTelemetry {
       }
       m_config.getDataLogName().ifPresent(stt::setupDataLog);
     }
-    for (Map.Entry<StructArrayTelemetryField, StructArrayTelemetry<?, StructArrayTelemetryField>>
-        entry : m_structArrayTelemetry.entrySet()) {
+    for (Map.Entry<StructArrayTelemetryField, StructArrayTelemetry<?, StructArrayTelemetryField>> entry : m_structArrayTelemetry.entrySet()) {
       var stat = entry.getValue();
       if (!stat.enabled) {
         continue;
@@ -81,8 +77,7 @@ public class SwerveDriveTelemetry {
       }
       m_config.getDataLogName().ifPresent(stat::setupDataLog);
     }
-    for (Map.Entry<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> entry :
-        m_boolTelemetry.entrySet()) {
+    for (Map.Entry<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> entry : m_boolTelemetry.entrySet()) {
       var bt = entry.getValue();
       if (!bt.enabled) {
         continue;
@@ -102,46 +97,34 @@ public class SwerveDriveTelemetry {
   @SuppressWarnings("unchecked")
   public void publish(SwerveDrive drive) {
     var cfg = drive.getConfig();
-    for (Map.Entry<StructTelemetryField, StructTelemetry<?, StructTelemetryField>> entry :
-        m_structTelemetry.entrySet()) {
+    for (Map.Entry<StructTelemetryField, StructTelemetry<?, StructTelemetryField>> entry : m_structTelemetry.entrySet()) {
       var stt = entry.getValue();
       if (!stt.enabled) {
         continue;
       }
       switch (stt.getField()) {
         case Pose -> ((StructTelemetry<Pose2d, StructTelemetryField>) stt).set(drive.getPose());
-        case DesiredRobotRelativeChassisSpeeds ->
-            ((StructTelemetry<ChassisSpeeds, StructTelemetryField>) stt)
-                .set(drive.getDesiredChassisSpeeds());
-        case CurrentRobotRelativeChassisSpeeds ->
-            ((StructTelemetry<ChassisSpeeds, StructTelemetryField>) stt)
-                .set(drive.getRobotRelativeSpeed());
-        case FieldRelativeChassisSpeeds ->
-            ((StructTelemetry<ChassisSpeeds, StructTelemetryField>) stt)
-                .set(drive.getFieldRelativeSpeed());
+        case DesiredRobotRelativeChassisSpeeds -> ((StructTelemetry<ChassisSpeeds, StructTelemetryField>) stt).set(drive.getDesiredChassisSpeeds());
+        case CurrentRobotRelativeChassisSpeeds -> ((StructTelemetry<ChassisSpeeds, StructTelemetryField>) stt).set(drive.getRobotRelativeSpeed());
+        case FieldRelativeChassisSpeeds -> ((StructTelemetry<ChassisSpeeds, StructTelemetryField>) stt).set(drive.getFieldRelativeSpeed());
       }
     }
-    for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry :
-        m_doubleTelemetry.entrySet()) {
+    for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : m_doubleTelemetry.entrySet()) {
       var dt = entry.getValue();
-      if (!dt.enabled) continue;
+      if (!dt.enabled)
+        continue;
       switch (dt.getField()) {
         case Gyro -> dt.set(drive.getGyroAngle().in(Degrees));
       }
     }
-    for (Map.Entry<StructArrayTelemetryField, StructArrayTelemetry<?, StructArrayTelemetryField>>
-        entry : m_structArrayTelemetry.entrySet()) {
+    for (Map.Entry<StructArrayTelemetryField, StructArrayTelemetry<?, StructArrayTelemetryField>> entry : m_structArrayTelemetry.entrySet()) {
       var stat = entry.getValue();
       if (!stat.enabled) {
         continue;
       }
       switch (stat.getField()) {
-        case DesiredModuleStates ->
-            ((StructArrayTelemetry<SwerveModuleState, StructArrayTelemetryField>) stat)
-                .set(drive.getDesiredModuleStates());
-        case CurrentModuleStates ->
-            ((StructArrayTelemetry<SwerveModuleState, StructArrayTelemetryField>) stat)
-                .set(drive.getModuleStates());
+        case DesiredModuleStates -> ((StructArrayTelemetry<SwerveModuleState, StructArrayTelemetryField>) stat).set(drive.getDesiredModuleStates());
+        case CurrentModuleStates -> ((StructArrayTelemetry<SwerveModuleState, StructArrayTelemetryField>) stat).set(drive.getModuleStates());
       }
     }
   }
@@ -189,8 +172,7 @@ public class SwerveDriveTelemetry {
       var poseX = m_doubleTelemetry.get(DoubleTelemetryField.AutoAlignPoseX);
       var poseY = m_doubleTelemetry.get(DoubleTelemetryField.AutoAlignPoseY);
       var poseRotation = m_doubleTelemetry.get(DoubleTelemetryField.AutoAlignPoseRotation);
-      var targetPose =
-          new Pose2d(poseX.get(), poseY.get(), Rotation2d.fromDegrees(poseRotation.get()));
+      var targetPose = new Pose2d(poseX.get(), poseY.get(), Rotation2d.fromDegrees(poseRotation.get()));
       drive.setFieldRelativeChassisSpeeds(drive.driveToPoseSetpoint(targetPose));
     }
 
@@ -198,9 +180,7 @@ public class SwerveDriveTelemetry {
       var modules = drive.getModules();
       var states = new SwerveModuleState[modules.length];
       if (driveTuningOn) {
-        var velocity =
-            MetersPerSecond.of(
-                m_doubleTelemetry.get(DoubleTelemetryField.ModulesDriveVelocity).get());
+        var velocity = MetersPerSecond.of(m_doubleTelemetry.get(DoubleTelemetryField.ModulesDriveVelocity).get());
         for (int i = 0; i < modules.length; i++) {
           if (driveInPlaceOn) {
             // Point each module tangent to its position around the robot center so a positive
@@ -224,9 +204,7 @@ public class SwerveDriveTelemetry {
     }
 
     if (azimuthTuningOn) {
-      var angle =
-          Rotation2d.fromDegrees(
-              m_doubleTelemetry.get(DoubleTelemetryField.ModulesAzimuthAngle).get());
+      var angle = Rotation2d.fromDegrees(m_doubleTelemetry.get(DoubleTelemetryField.ModulesAzimuthAngle).get());
       var modules = drive.getModules();
       var states = new SwerveModuleState[modules.length];
       for (int i = 0; i < modules.length; i++) {
@@ -235,10 +213,10 @@ public class SwerveDriveTelemetry {
       drive.setSwerveModuleStates(states);
     }
 
-    for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry :
-        m_doubleTelemetry.entrySet()) {
+    for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : m_doubleTelemetry.entrySet()) {
       var dt = entry.getValue();
-      if (!dt.tunable()) continue;
+      if (!dt.tunable())
+        continue;
       switch (dt.getField()) {
         case TranslationP -> {
           translationPID.setP(dt.get());
@@ -324,7 +302,8 @@ public class SwerveDriveTelemetry {
             module.getAzimuthMotorController().setKa(dt.get());
           }
         }
-        default -> {}
+        default -> {
+        }
       }
     }
   }
@@ -332,26 +311,22 @@ public class SwerveDriveTelemetry {
   /** Close and unpublish telemetry. */
   public void close() {
     if (m_doubleTelemetry != null) {
-      for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry :
-          m_doubleTelemetry.entrySet()) {
+      for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : m_doubleTelemetry.entrySet()) {
         entry.getValue().close();
       }
     }
     if (m_structTelemetry != null) {
-      for (Map.Entry<StructTelemetryField, StructTelemetry<?, StructTelemetryField>> entry :
-          m_structTelemetry.entrySet()) {
+      for (Map.Entry<StructTelemetryField, StructTelemetry<?, StructTelemetryField>> entry : m_structTelemetry.entrySet()) {
         entry.getValue().close();
       }
     }
     if (m_structArrayTelemetry != null) {
-      for (Map.Entry<StructArrayTelemetryField, StructArrayTelemetry<?, StructArrayTelemetryField>>
-          entry : m_structArrayTelemetry.entrySet()) {
+      for (Map.Entry<StructArrayTelemetryField, StructArrayTelemetry<?, StructArrayTelemetryField>> entry : m_structArrayTelemetry.entrySet()) {
         entry.getValue().close();
       }
     }
     if (m_boolTelemetry != null) {
-      for (Map.Entry<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> entry :
-          m_boolTelemetry.entrySet()) {
+      for (Map.Entry<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> entry : m_boolTelemetry.entrySet()) {
         entry.getValue().close();
       }
     }
@@ -364,11 +339,9 @@ public class SwerveDriveTelemetry {
      */
     Pose("pose", Pose2d.struct, new Pose2d(), false),
     /** Last-commanded desired robot relative {@link ChassisSpeeds}. */
-    DesiredRobotRelativeChassisSpeeds(
-        "chassis/desired", ChassisSpeeds.struct, new ChassisSpeeds(), false),
+    DesiredRobotRelativeChassisSpeeds("chassis/desired", ChassisSpeeds.struct, new ChassisSpeeds(), false),
     /** Measured robot relative {@link ChassisSpeeds}. */
-    CurrentRobotRelativeChassisSpeeds(
-        "chassis/current", ChassisSpeeds.struct, new ChassisSpeeds(), false),
+    CurrentRobotRelativeChassisSpeeds("chassis/current", ChassisSpeeds.struct, new ChassisSpeeds(), false),
     /** Measured field relative {@link ChassisSpeeds}. */
     FieldRelativeChassisSpeeds("chassis/field", ChassisSpeeds.struct, new ChassisSpeeds(), false);
 
@@ -387,11 +360,11 @@ public class SwerveDriveTelemetry {
     /**
      * Create a struct telemetry field.
      *
-     * @param fieldName Field for {@link edu.wpi.first.networktables.NetworkTable}
-     * @param struct {@link Struct} serializer for the field's value type {@link T}.
+     * @param fieldName    Field for {@link edu.wpi.first.networktables.NetworkTable}
+     * @param struct       {@link Struct} serializer for the field's value type {@link T}.
      * @param defaultValue Default value in NT.
-     * @param tunable Tunable field.
-     * @param <T> Type of the field's value.
+     * @param tunable      Tunable field.
+     * @param <T>          Type of the field's value.
      */
     <T> StructTelemetryField(String fieldName, Struct<T> struct, T defaultValue, boolean tunable) {
       key = fieldName;
@@ -412,14 +385,13 @@ public class SwerveDriveTelemetry {
     }
   }
 
+
   /** Struct array telemetry field for {@link SwerveDrive}s. */
   public enum StructArrayTelemetryField {
     /** Last-commanded desired {@link SwerveModuleState}s. */
-    DesiredModuleStates(
-        "states/desired", SwerveModuleState.struct, new SwerveModuleState[0], false),
+    DesiredModuleStates("states/desired", SwerveModuleState.struct, new SwerveModuleState[0], false),
     /** Measured {@link SwerveModuleState}s. */
-    CurrentModuleStates(
-        "states/current", SwerveModuleState.struct, new SwerveModuleState[0], false);
+    CurrentModuleStates("states/current", SwerveModuleState.struct, new SwerveModuleState[0], false);
 
     /** Key that the telemetry is stored at. */
     private final String key;
@@ -436,14 +408,13 @@ public class SwerveDriveTelemetry {
     /**
      * Create a struct array telemetry field.
      *
-     * @param fieldName Field for {@link edu.wpi.first.networktables.NetworkTable}
-     * @param struct {@link Struct} serializer for the field's array element type {@link T}.
+     * @param fieldName    Field for {@link edu.wpi.first.networktables.NetworkTable}
+     * @param struct       {@link Struct} serializer for the field's array element type {@link T}.
      * @param defaultValue Default value in NT.
-     * @param tunable Tunable field.
-     * @param <T> Type of the field's array elements.
+     * @param tunable      Tunable field.
+     * @param <T>          Type of the field's array elements.
      */
-    <T> StructArrayTelemetryField(
-        String fieldName, Struct<T> struct, T[] defaultValue, boolean tunable) {
+    <T> StructArrayTelemetryField(String fieldName, Struct<T> struct, T[] defaultValue, boolean tunable) {
       key = fieldName;
       this.struct = struct;
       this.defaultValue = defaultValue;
@@ -454,7 +425,7 @@ public class SwerveDriveTelemetry {
      * Create a {@link StructArrayTelemetry} object for non-static usage.
      *
      * @param <T> Type of the field's array elements, must match the type this field was declared
-     *     with.
+     *            with.
      * @return {@link StructArrayTelemetry}
      */
     @SuppressWarnings("unchecked")
@@ -462,6 +433,7 @@ public class SwerveDriveTelemetry {
       return new StructArrayTelemetry<>(key, (T[]) defaultValue, this, (Struct<T>) struct, tunable);
     }
   }
+
 
   /** Double telemetry field for {@link SwerveDrive}s. */
   public enum DoubleTelemetryField {
@@ -529,10 +501,10 @@ public class SwerveDriveTelemetry {
     /**
      * Create a double telemetry field.
      *
-     * @param fieldName NT Field Name
+     * @param fieldName    NT Field Name
      * @param defaultValue Default value
-     * @param tunable Tunable places it only in the Tuning Table.
-     * @param unit Unit of the telemetry field.
+     * @param tunable      Tunable places it only in the Tuning Table.
+     * @param unit         Unit of the telemetry field.
      */
     DoubleTelemetryField(String fieldName, double defaultValue, boolean tunable, String unit) {
       key = fieldName;
@@ -550,6 +522,7 @@ public class SwerveDriveTelemetry {
       return new DoubleTelemetry<>(key, defaultVal, this, tunable, unit);
     }
   }
+
 
   /** Boolean telemetry field for {@link SwerveDrive}s. */
   public enum BooleanTelemetryField {
@@ -582,9 +555,9 @@ public class SwerveDriveTelemetry {
     /**
      * Create a boolean telemetry field.
      *
-     * @param fieldName NT Field Name
+     * @param fieldName    NT Field Name
      * @param defaultValue Default value
-     * @param tunable Tunable places it only in the Tuning Table.
+     * @param tunable      Tunable places it only in the Tuning Table.
      */
     BooleanTelemetryField(String fieldName, boolean defaultValue, boolean tunable) {
       key = fieldName;

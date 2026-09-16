@@ -10,10 +10,10 @@ package yams.exceptions;
  * <p>Common triggers include:
  *
  * <ul>
- *   <li>Module configurations (drive and steer motors) not provided for one or more swerve modules
- *   <li>Gyro sensor not configured — required for field-relative driving and odometry
- *   <li>Kinematic parameters missing (e.g., track width or wheelbase not set)
- *   <li>A {@code SwerveDriveConfig} method called in an incompatible sequence or called twice
+ * <li>Module configurations (drive and steer motors) not provided for one or more swerve modules
+ * <li>Gyro sensor not configured — required for field-relative driving and odometry
+ * <li>Kinematic parameters missing (e.g., track width or wheelbase not set)
+ * <li>A {@code SwerveDriveConfig} method called in an incompatible sequence or called twice
  * </ul>
  *
  * <p><b>Resolution:</b> Ensure {@code SwerveDriveConfig} is fully populated with all swerve module
@@ -38,17 +38,11 @@ public class SwerveDriveConfigurationException extends RuntimeException {
   /**
    * SwerveDrive configuration exception.
    *
-   * @param message Message to display.
-   * @param result Result of the configuration.
+   * @param message        Message to display.
+   * @param result         Result of the configuration.
    * @param remedyFunction Remedy function to use.
    */
   public SwerveDriveConfigurationException(String message, String result, String remedyFunction) {
-    super(
-        message
-            + "!\n"
-            + result
-            + "\nPlease use SwerveDriveConfig."
-            + remedyFunction
-            + " to fix this error.");
+    super(message + "!\n" + result + "\nPlease use SwerveDriveConfig." + remedyFunction + " to fix this error.");
   }
 }

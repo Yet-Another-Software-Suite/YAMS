@@ -19,12 +19,12 @@ import yams.motorcontrollers.SmartMotorController;
  * <ul>
  * <li>Velocity setpoint management via {@link yams.mechanisms.SmartMechanism#setMechanismVelocitySetpoint} and {@link yams.mechanisms.SmartMechanism#setMeasurementVelocitySetpoint}
  * <li>Velocity-based {@link edu.wpi.first.wpilibj2.command.button.Trigger} factories ({@code isNear()}, {@code gte()}, {@code lte()}, {@code between()}) — defined by each concrete
- *       subclass
- *   <li>Command factories such as {@code setSpeed()} defined by each concrete subclass, which
- *       internally call the base-class velocity setpoint methods
- *   <li>A 2D visualization model via {@link edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d}
- *       and {@link edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d} fields that subclasses
- *       populate and update
+ * subclass
+ * <li>Command factories such as {@code setSpeed()} defined by each concrete subclass, which
+ * internally call the base-class velocity setpoint methods
+ * <li>A 2D visualization model via {@link edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d}
+ * and {@link edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d} fields that subclasses
+ * populate and update
  * </ul>
  *
  * <p><b>Important — {@code max()} and {@code min()} are not applicable to velocity mechanisms.</b>
@@ -33,10 +33,10 @@ import yams.motorcontrollers.SmartMotorController;
  * subclass of {@code SmartVelocityMechanism} will throw {@link java.lang.UnsupportedOperationException}. Use the following trigger factories instead:
  *
  * <ul>
- *   <li>{@code isNear(speed, tolerance)} — true when actual velocity is within tolerance of target
- *   <li>{@code gte(speed)} — true when actual velocity is greater than or equal to the given speed
- *   <li>{@code lte(speed)} — true when actual velocity is less than or equal to the given speed
- *   <li>{@code between(start, end)} — true when actual velocity falls within the given range
+ * <li>{@code isNear(speed, tolerance)} — true when actual velocity is within tolerance of target
+ * <li>{@code gte(speed)} — true when actual velocity is greater than or equal to the given speed
+ * <li>{@code lte(speed)} — true when actual velocity is less than or equal to the given speed
+ * <li>{@code between(start, end)} — true when actual velocity falls within the given range
  * </ul>
  *
  * <p><b>Conceptual subclass pattern:</b> A concrete velocity mechanism extends {@code SmartVelocityMechanism}, provides a typed command factory, and calls into the base-class setpoint
@@ -59,19 +59,19 @@ import yams.motorcontrollers.SmartMotorController;
  * abstract methods inherited from {@link yams.mechanisms.SmartMechanism}:
  *
  * <ul>
- *   <li>{@link yams.mechanisms.SmartMechanism#getRelativeMechanismPosition()} — returns the current
+ * <li>{@link yams.mechanisms.SmartMechanism#getRelativeMechanismPosition()} — returns the current
  * 3-D position of the mechanism end-point in {@link edu.wpi.first.wpilibj.smartdashboard.Mechanism2d} coordinates
  * <li>{@link yams.mechanisms.SmartMechanism#visualizationUpdate()} — updates {@code mechanismLigament} to reflect the current rotational state
- *   <li>{@link yams.mechanisms.SmartMechanism#getName()} — returns a human-readable mechanism name
- *       used for telemetry and command names
- *   <li>{@link yams.mechanisms.SmartMechanism#simIterate()} — advances the physics simulation model
- *       and writes back simulated encoder values each robot loop
- *   <li>{@link yams.mechanisms.SmartMechanism#updateTelemetry()} — publishes mechanism state to
- *       {@link edu.wpi.first.wpilibj.smartdashboard.SmartDashboard} or an equivalent telemetry sink
- *   <li>{@link #max()} — must throw {@link java.lang.UnsupportedOperationException}; velocity
- *       mechanisms do not support positional limits
- *   <li>{@link #min()} — must throw {@link java.lang.UnsupportedOperationException}; velocity
- *       mechanisms do not support positional limits
+ * <li>{@link yams.mechanisms.SmartMechanism#getName()} — returns a human-readable mechanism name
+ * used for telemetry and command names
+ * <li>{@link yams.mechanisms.SmartMechanism#simIterate()} — advances the physics simulation model
+ * and writes back simulated encoder values each robot loop
+ * <li>{@link yams.mechanisms.SmartMechanism#updateTelemetry()} — publishes mechanism state to
+ * {@link edu.wpi.first.wpilibj.smartdashboard.SmartDashboard} or an equivalent telemetry sink
+ * <li>{@link #max()} — must throw {@link java.lang.UnsupportedOperationException}; velocity
+ * mechanisms do not support positional limits
+ * <li>{@link #min()} — must throw {@link java.lang.UnsupportedOperationException}; velocity
+ * mechanisms do not support positional limits
  * </ul>
  */
 public abstract class SmartVelocityMechanism extends SmartMechanism {

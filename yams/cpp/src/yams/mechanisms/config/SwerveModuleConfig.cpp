@@ -155,7 +155,8 @@ std::function<units::degree_t()> SwerveModuleConfig::GetRawAbsoluteEncoderAngle(
   auto* azimuth = m_azimuthMotor;
   units::degree_t offset{0};
   if (!frc::RobotBase::IsSimulation() && azimuth) {
-    offset = units::degree_t{azimuth->GetConfig().GetExternalEncoderZeroOffset().value_or(units::turn_t{0})};
+    offset = units::degree_t{
+        azimuth->GetConfig().GetExternalEncoderZeroOffset().value_or(units::turn_t{0})};
   }
   return [azimuth, offset]() -> units::degree_t {
     return units::degree_t{azimuth->GetMechanismPosition()} + offset;
@@ -175,14 +176,15 @@ SwerveModuleConfig::GetSwerveModuleTelemetryConfig() {
   return result;
 }
 
-double SwerveModuleConfig::GetCosineCompensatedVelocity(
-    const frc::SwerveModuleState& desiredState, const frc::Rotation2d& currentAngle) const {
+double SwerveModuleConfig::GetCosineCompensatedVelocity(const frc::SwerveModuleState& desiredState,
+                                                        const frc::Rotation2d& currentAngle) const {
   // Taken from the CTRE SwerveModule class.
   // https://api.ctr-electronics.com/phoenix6/release/java/src-html/com/ctre/phoenix6/mechanisms/swerve/SwerveModule.html#line.46
   /* From FRC 900's whitepaper, we add a cosine compensator to the applied drive velocity */
   /* To reduce the "skew" that occurs when changing direction */
   /* If error is close to 0 rotations, we're already there, so apply full power */
-  /* If the error is close to 0.25 rotations, then we're 90 degrees, so movement doesn't help us at all */
+  /* If the error is close to 0.25 rotations, then we're 90 degrees, so movement doesn't help us at
+   * all */
   // The azimuth is only meaningful modulo 180 degrees (0 == 180) since the drive motor can spin
   // either direction. Using the SIGNED cosine of the (correctly wrapped) angle difference
   // handles that on its own: near 0 degrees it scales close to +1 (drive forward as

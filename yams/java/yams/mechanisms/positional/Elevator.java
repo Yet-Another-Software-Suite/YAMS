@@ -73,7 +73,7 @@ public class Elevator extends SmartPositionalMechanism {
    * Construct the {@link Elevator} class for easy manipulation of an elevator.
    *
    * @param config {@link ElevatorConfig} to set.
-   * @param smc {@link SmartMotorController} to use for the Elevator
+   * @param smc    {@link SmartMotorController} to use for the Elevator
    */
   public Elevator(ElevatorConfig config, SmartMotorController smc) {
     m_config = config;
@@ -89,196 +89,48 @@ public class Elevator extends SmartPositionalMechanism {
     if (RobotBase.isSimulation()) {
       smc.setupSimulation();
       if (config.getCarriageMass().isEmpty()) {
-        throw new ElevatorConfigurationException(
-            "Mass is not configured!", "Cannot create simulator", "withCarriageWeight(Mass)");
+        throw new ElevatorConfigurationException("Mass is not configured!", "Cannot create simulator", "withCarriageWeight(Mass)");
       }
       if (config.getMinimumHeight().isEmpty()) {
-        throw new ElevatorConfigurationException(
-            "Minimum height is not configured!",
-            "Cannot create simulator",
-            "withHardLimits(Distance,Distance)");
+        throw new ElevatorConfigurationException("Minimum height is not configured!", "Cannot create simulator", "withHardLimits(Distance,Distance)");
       }
       if (config.getMaximumHeight().isEmpty()) {
-        throw new ElevatorConfigurationException(
-            "Maximum height is not configured!",
-            "Cannot create simulator",
-            "withHardLimits(Distance,Distance)");
+        throw new ElevatorConfigurationException("Maximum height is not configured!", "Cannot create simulator", "withHardLimits(Distance,Distance)");
       }
       if (smcConfig.getStartingPosition().isEmpty()) {
-        throw new SmartMotorControllerConfigurationException(
-            "Starting height is not configured!",
-            "Cannot create simulator",
-            "withStartingPosition(Distance)");
+        throw new SmartMotorControllerConfigurationException("Starting height is not configured!", "Cannot create simulator", "withStartingPosition(Distance)");
       }
-      if (smcConfig
-              .convertFromMechanism(smcConfig.getStartingPosition().orElseThrow())
-              .lt(config.getMinimumHeight().get())
-          || smcConfig
-              .convertFromMechanism(smcConfig.getStartingPosition().orElseThrow())
-              .gt(config.getMaximumHeight().get())) {
-        throw new SmartMotorControllerConfigurationException(
-            "Elevator starting height is outside hard limits",
-            "Cannot create simulator",
-            "withStartingPosition(Distance)");
+      if (smcConfig.convertFromMechanism(smcConfig.getStartingPosition().orElseThrow()).lt(config.getMinimumHeight().get()) || smcConfig.convertFromMechanism(smcConfig.getStartingPosition().orElseThrow()).gt(config.getMaximumHeight().get())) {
+        throw new SmartMotorControllerConfigurationException("Elevator starting height is outside hard limits", "Cannot create simulator", "withStartingPosition(Distance)");
       }
 
       boolean simulateGravity = !config.getIsElevatorHorizontal();
 
-      m_sim =
-          Optional.of(
-              new ElevatorSim(
-                  smc.getDCMotor(),
-                  smcConfig.getGearing().getMechanismToRotorRatio(),
-                  config.getCarriageMass().get().in(Kilograms),
-                  smcCfg.getMechanismCircumference().orElseThrow().div(2).div(Math.PI).in(Meters),
-                  config.getMinimumHeight().get().in(Meters),
-                  config.getMaximumHeight().get().in(Meters),
-                  simulateGravity,
-                  smcConfig
-                      .convertFromMechanism(smcConfig.getStartingPosition().orElseThrow())
-                      .in(Meters),
-                  0.01 / 4096,
-                  0.01 / 4096));
+      m_sim = Optional.of(new ElevatorSim(smc.getDCMotor(), smcConfig.getGearing().getMechanismToRotorRatio(), config.getCarriageMass().get().in(Kilograms), smcCfg.getMechanismCircumference().orElseThrow().div(2).div(Math.PI).in(Meters), config
+          .getMinimumHeight().get().in(Meters), config.getMaximumHeight().get().in(Meters), simulateGravity, smcConfig.convertFromMechanism(smcConfig.getStartingPosition().orElseThrow()).in(Meters), 0.01 / 4096, 0.01 / 4096));
       m_smc.setSimSupplier(new ElevatorSimSupplier(m_sim.get(), m_smc));
-      m_mechanismWindow =
-          new Mechanism2d(
-              config.getMaximumHeight().get().in(Meters) * 2,
-              config.getMaximumHeight().get().in(Meters) * 2);
+      m_mechanismWindow = new Mechanism2d(config.getMaximumHeight().get().in(Meters) * 2, config.getMaximumHeight().get().in(Meters) * 2);
 
-      m_mechanismRoot =
-          m_mechanismWindow.getRoot(
-              getName() + "Root",
-              config.getMaximumHeight().get().in(Meters)
-                  - config
-                      .getMechanismPositionConfig()
-                      .getRelativePosition()
-                      .orElse(new Translation3d())
-                      .getX(),
-              config
-                  .getMechanismPositionConfig()
-                  .getRelativePosition()
-                  .orElse(new Translation3d())
-                  .getZ());
+      m_mechanismRoot = m_mechanismWindow.getRoot(getName() + "Root", config.getMaximumHeight().get().in(Meters) - config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d()).getX(), config.getMechanismPositionConfig()
+          .getRelativePosition().orElse(new Translation3d()).getZ());
 
       if (m_smc.getConfig().getMechanismLowerLimit().isPresent()) {
-        m_mechanismWindow
-            .getRoot(
-                "MinSoft",
-                config.getMaximumHeight().get().in(Meters)
-                    + config
-                        .getMechanismPositionConfig()
-                        .getRelativePosition()
-                        .orElse(new Translation3d())
-                        .getX()
-                    - Inches.of(6).in(Meters),
-                config
-                    .getMechanismPositionConfig()
-                    .getRelativePosition()
-                    .orElse(new Translation3d())
-                    .getZ())
-            .append(
-                new MechanismLigament2d(
-                    "Limit",
-                    m_smc
-                        .getConfig()
-                        .convertFromMechanism(m_smc.getConfig().getMechanismLowerLimit().get())
-                        .in(Meters),
-                    config.getAngle().in(Degrees),
-                    3,
-                    new Color8Bit(Color.kYellow)));
+        m_mechanismWindow.getRoot("MinSoft", config.getMaximumHeight().get().in(Meters) + config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d()).getX() - Inches.of(6).in(Meters), config.getMechanismPositionConfig()
+            .getRelativePosition().orElse(new Translation3d()).getZ()).append(new MechanismLigament2d("Limit", m_smc.getConfig().convertFromMechanism(m_smc.getConfig().getMechanismLowerLimit().get()).in(Meters), config.getAngle().in(Degrees), 3,
+                new Color8Bit(Color.kYellow)));
       }
       if (m_smc.getConfig().getMechanismUpperLimit().isPresent()) {
-        m_mechanismWindow
-            .getRoot(
-                "MaxSoft",
-                config.getMaximumHeight().get().in(Meters)
-                    + config
-                        .getMechanismPositionConfig()
-                        .getRelativePosition()
-                        .orElse(new Translation3d())
-                        .getX()
-                    - Inches.of(6).in(Meters),
-                config
-                    .getMechanismPositionConfig()
-                    .getRelativePosition()
-                    .orElse(new Translation3d())
-                    .getZ())
-            .append(
-                new MechanismLigament2d(
-                    "Limit",
-                    m_smc
-                        .getConfig()
-                        .convertFromMechanism(m_smc.getConfig().getMechanismUpperLimit().get())
-                        .in(Meters),
-                    config.getAngle().in(Degrees),
-                    3,
-                    new Color8Bit(Color.kHotPink)));
+        m_mechanismWindow.getRoot("MaxSoft", config.getMaximumHeight().get().in(Meters) + config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d()).getX() - Inches.of(6).in(Meters), config.getMechanismPositionConfig()
+            .getRelativePosition().orElse(new Translation3d()).getZ()).append(new MechanismLigament2d("Limit", m_smc.getConfig().convertFromMechanism(m_smc.getConfig().getMechanismUpperLimit().get()).in(Meters), config.getAngle().in(Degrees), 3,
+                new Color8Bit(Color.kHotPink)));
       }
-      m_mechanismWindow
-          .getRoot(
-              "MinHard",
-              config.getMaximumHeight().get().in(Meters)
-                  + config
-                      .getMechanismPositionConfig()
-                      .getRelativePosition()
-                      .orElse(new Translation3d())
-                      .getX()
-                  - Inches.of(8).in(Meters),
-              config
-                  .getMechanismPositionConfig()
-                  .getRelativePosition()
-                  .orElse(new Translation3d())
-                  .getZ())
-          .append(
-              new MechanismLigament2d(
-                  "Limit",
-                  config.getMinimumHeight().get().in(Meters),
-                  config.getAngle().in(Degrees),
-                  3,
-                  new Color8Bit(Color.kRed)));
-      m_mechanismWindow
-          .getRoot(
-              "MaxHard",
-              config.getMaximumHeight().get().in(Meters)
-                  + config
-                      .getMechanismPositionConfig()
-                      .getRelativePosition()
-                      .orElse(new Translation3d())
-                      .getX()
-                  - Inches.of(8).in(Meters),
-              config
-                  .getMechanismPositionConfig()
-                  .getRelativePosition()
-                  .orElse(new Translation3d())
-                  .getZ())
-          .append(
-              new MechanismLigament2d(
-                  "Limit",
-                  config.getMaximumHeight().get().in(Meters),
-                  config.getAngle().in(Degrees),
-                  3,
-                  new Color8Bit(Color.kLimeGreen)));
+      m_mechanismWindow.getRoot("MinHard", config.getMaximumHeight().get().in(Meters) + config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d()).getX() - Inches.of(8).in(Meters), config.getMechanismPositionConfig()
+          .getRelativePosition().orElse(new Translation3d()).getZ()).append(new MechanismLigament2d("Limit", config.getMinimumHeight().get().in(Meters), config.getAngle().in(Degrees), 3, new Color8Bit(Color.kRed)));
+      m_mechanismWindow.getRoot("MaxHard", config.getMaximumHeight().get().in(Meters) + config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d()).getX() - Inches.of(8).in(Meters), config.getMechanismPositionConfig()
+          .getRelativePosition().orElse(new Translation3d()).getZ()).append(new MechanismLigament2d("Limit", config.getMaximumHeight().get().in(Meters), config.getAngle().in(Degrees), 3, new Color8Bit(Color.kLimeGreen)));
 
-      m_mechanismLigament =
-          m_mechanismRoot.append(
-              new MechanismLigament2d(
-                  getName(),
-                  smcConfig
-                      .convertFromMechanism(smcConfig.getStartingPosition().orElseThrow())
-                      .in(Meters),
-                  config.getAngle().in(Degrees),
-                  6,
-                  config.getSimColor()));
-      m_setpointLigament =
-          m_mechanismRoot.append(
-              new MechanismLigament2d(
-                  "Setpoint",
-                  smcConfig
-                      .convertFromMechanism(smcConfig.getStartingPosition().orElseThrow())
-                      .in(Meters),
-                  config.getAngle().in(Degrees),
-                  3,
-                  new Color8Bit(Color.kWhite)));
+      m_mechanismLigament = m_mechanismRoot.append(new MechanismLigament2d(getName(), smcConfig.convertFromMechanism(smcConfig.getStartingPosition().orElseThrow()).in(Meters), config.getAngle().in(Degrees), 6, config.getSimColor()));
+      m_setpointLigament = m_mechanismRoot.append(new MechanismLigament2d("Setpoint", smcConfig.convertFromMechanism(smcConfig.getStartingPosition().orElseThrow()).in(Meters), config.getAngle().in(Degrees), 3, new Color8Bit(Color.kWhite)));
       SmartDashboard.putData(getName() + "/mechanism", m_mechanismWindow);
     }
   }
@@ -299,8 +151,7 @@ public class Elevator extends SmartPositionalMechanism {
       m_smc.simIterate();
       m_smc.getSimSupplier().get().starveUpdateSim();
       // It is impossible for an elevator to go below the minimum height, it would break...
-      if (m_config.getMinimumHeight().isPresent()
-          && getHeight().lt(m_config.getMinimumHeight().get())) {
+      if (m_config.getMinimumHeight().isPresent() && getHeight().lt(m_config.getMinimumHeight().get())) {
         //        m_motor.simIterate(RotationsPerSecond.of(0));
         //        m_motor.setEncoderPosition(m_config.getMinimumHeight().get());
       }
@@ -316,11 +167,7 @@ public class Elevator extends SmartPositionalMechanism {
   public void visualizationUpdate() {
     m_mechanismLigament.setLength(getHeight().in(Meters));
     if (getMotor().getMechanismPositionSetpoint().isPresent()) {
-      m_setpointLigament.setLength(
-          m_smc
-              .getConfig()
-              .convertFromMechanism(getMotor().getMechanismPositionSetpoint().get())
-              .in(Meters));
+      m_setpointLigament.setLength(m_smc.getConfig().convertFromMechanism(getMotor().getMechanismPositionSetpoint().get()).in(Meters));
     }
   }
 
@@ -333,19 +180,9 @@ public class Elevator extends SmartPositionalMechanism {
   @Override
   public Translation3d getRelativeMechanismPosition() {
     Plane movementPlane = m_config.getMechanismPositionConfig().getMovementPlane();
-    Translation3d mechanismTranslation =
-        new Translation3d(
-            m_mechanismLigament.getLength(),
-            new Rotation3d(
-                Plane.YZ == movementPlane ? m_mechanismLigament.getAngle() : 0,
-                Plane.XZ == movementPlane ? m_mechanismLigament.getAngle() : 0,
-                0));
+    Translation3d mechanismTranslation = new Translation3d(m_mechanismLigament.getLength(), new Rotation3d(Plane.YZ == movementPlane ? m_mechanismLigament.getAngle() : 0, Plane.XZ == movementPlane ? m_mechanismLigament.getAngle() : 0, 0));
     if (m_config.getMechanismPositionConfig().getRelativePosition().isPresent()) {
-      return m_config
-          .getMechanismPositionConfig()
-          .getRelativePosition()
-          .get()
-          .plus(mechanismTranslation);
+      return m_config.getMechanismPositionConfig().getRelativePosition().get().plus(mechanismTranslation);
     }
     return mechanismTranslation;
   }
@@ -382,8 +219,7 @@ public class Elevator extends SmartPositionalMechanism {
    * @return {@link Command} that sets the elevator height, does not stop.
    */
   public Command run(Distance height) {
-    return Commands.run(() -> m_smc.setPosition(height), m_subsystem)
-        .withName(m_subsystem.getName() + " Run Height");
+    return Commands.run(() -> m_smc.setPosition(height), m_subsystem).withName(m_subsystem.getName() + " Run Height");
   }
 
   /**
@@ -393,41 +229,35 @@ public class Elevator extends SmartPositionalMechanism {
    * @return {@link Command} that sets the elevator height, stops immediately.
    */
   public Command run(Supplier<Distance> height) {
-    return Commands.run(() -> m_smc.setPosition(height.get()), m_subsystem)
-        .withName(m_subsystem.getName() + " Run Height Supplier");
+    return Commands.run(() -> m_smc.setPosition(height.get()), m_subsystem).withName(m_subsystem.getName() + " Run Height Supplier");
   }
 
   /**
    * Run the elevator to the desired height with a tolerance, then move on.
    *
-   * @param height Height to reach.
+   * @param height    Height to reach.
    * @param tolerance The acceptable tolerance
    * @return {@link Command} which will run the elevator to the desired height with a tolerance,
-   *     then move on.
+   *         then move on.
    * @implNote This should NOT be used with a default command, the mechanism will not stop running
-   *     after this to allow for easy chaining.
+   *           after this to allow for easy chaining.
    */
   public Command runTo(Distance height, Distance tolerance) {
-    return Commands.runOnce(() -> m_smc.setPosition(height), m_subsystem)
-        .andThen(Commands.waitUntil(isNear(height, tolerance).debounce(0.1, DebounceType.kRising)))
-        .withName(m_subsystem.getName() + " Run To Height");
+    return Commands.runOnce(() -> m_smc.setPosition(height), m_subsystem).andThen(Commands.waitUntil(isNear(height, tolerance).debounce(0.1, DebounceType.kRising))).withName(m_subsystem.getName() + " Run To Height");
   }
 
   /**
    * Run the elevator to the desired height with a tolerance, then move on.
    *
-   * @param height Height to reach.
+   * @param height    Height to reach.
    * @param tolerance The acceptable tolerance
    * @return {@link Command} which will run the elevator to the desired height with a tolerance,
-   *     then move on.
+   *         then move on.
    * @implNote This should NOT be used with a default command, the mechanism will not stop running
-   *     after this to allow for easy chaining.
+   *           after this to allow for easy chaining.
    */
   public Command runTo(Supplier<Distance> height, Distance tolerance) {
-    return Commands.runOnce(() -> m_smc.setPosition(height.get()), m_subsystem)
-        .andThen(
-            Commands.waitUntil(isNear(height.get(), tolerance).debounce(0.1, DebounceType.kRising)))
-        .withName(m_subsystem.getName() + " Run To Height Supplier");
+    return Commands.runOnce(() -> m_smc.setPosition(height.get()), m_subsystem).andThen(Commands.waitUntil(isNear(height.get(), tolerance).debounce(0.1, DebounceType.kRising))).withName(m_subsystem.getName() + " Run To Height Supplier");
   }
 
   /**
@@ -462,44 +292,30 @@ public class Elevator extends SmartPositionalMechanism {
   @Override
   public Trigger max() {
     if (m_smc.getConfig().getMechanismUpperLimit().isPresent()) {
-      return new Trigger(
-          gte(
-              m_smc
-                  .getConfig()
-                  .convertFromMechanism(m_smc.getConfig().getMechanismUpperLimit().get())));
+      return new Trigger(gte(m_smc.getConfig().convertFromMechanism(m_smc.getConfig().getMechanismUpperLimit().get())));
     }
     if (m_config.getMaximumHeight().isPresent()) {
       return gte(m_config.getMaximumHeight().get());
     }
-    throw new ElevatorConfigurationException(
-        "Maximum height is not configured!",
-        "Cannot create max trigger.",
-        "withHardLimits(Distance,Distance)");
+    throw new ElevatorConfigurationException("Maximum height is not configured!", "Cannot create max trigger.", "withHardLimits(Distance,Distance)");
   }
 
   @Override
   public Trigger min() {
     if (m_smc.getConfig().getMechanismLowerLimit().isPresent()) {
-      return new Trigger(
-          lte(
-              m_smc
-                  .getConfig()
-                  .convertFromMechanism(m_smc.getConfig().getMechanismLowerLimit().get())));
+      return new Trigger(lte(m_smc.getConfig().convertFromMechanism(m_smc.getConfig().getMechanismLowerLimit().get())));
     }
     if (m_config.getMinimumHeight().isPresent()) {
       return lte(m_config.getMinimumHeight().get());
     }
-    throw new ElevatorConfigurationException(
-        "Minimum height is not configured!",
-        "Cannot create min trigger.",
-        "withHardLimits(Distance,Distance)");
+    throw new ElevatorConfigurationException("Minimum height is not configured!", "Cannot create min trigger.", "withHardLimits(Distance,Distance)");
   }
 
   /**
    * Between two heights.
    *
    * @param start Start height.
-   * @param end End height.
+   * @param end   End height.
    * @return {@link Trigger}
    */
   public Trigger between(Distance start, Distance end) {

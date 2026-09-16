@@ -29,12 +29,12 @@ import yams.telemetry.MechanismTelemetry;
  * <h2>Mechanism Lifecycle</h2>
  *
  * <ol>
- *   <li>Configure a motor controller: {@link yams.motorcontrollers.SmartMotorControllerConfig}
- *   <li>Instantiate the appropriate wrapper: {@link yams.motorcontrollers.local.SparkWrapper}
+ * <li>Configure a motor controller: {@link yams.motorcontrollers.SmartMotorControllerConfig}
+ * <li>Instantiate the appropriate wrapper: {@link yams.motorcontrollers.local.SparkWrapper}
  * (REV), {@link yams.motorcontrollers.remote.TalonFXWrapper} or {@link yams.motorcontrollers.remote.TalonFXSWrapper} (CTRE)
- *   <li>Build a mechanism config (e.g., {@link yams.mechanisms.config.ArmConfig})
- *   <li>Construct the concrete mechanism (e.g., {@link yams.mechanisms.positional.Arm})
- *   <li>Schedule setpoint commands and bind triggers
+ * <li>Build a mechanism config (e.g., {@link yams.mechanisms.config.ArmConfig})
+ * <li>Construct the concrete mechanism (e.g., {@link yams.mechanisms.positional.Arm})
+ * <li>Schedule setpoint commands and bind triggers
  * </ol>
  *
  * <p><b>Periodic calls required:</b> {@link #simIterate()}, {@link #updateTelemetry()}, and {@link #visualizationUpdate()} must be called periodically — typically from {@code robotPeriodic()} — so
@@ -80,10 +80,7 @@ public abstract class SmartMechanism {
    * @return {@link Command}
    */
   public Command set(double dutycycle) {
-    return Commands.startRun(
-            m_smc::stopClosedLoopController, () -> m_smc.setDutyCycle(dutycycle), m_subsystem)
-        .finallyDo(m_smc::startClosedLoopController)
-        .withName(m_subsystem.getName() + " SetDutyCycle");
+    return Commands.startRun(m_smc::stopClosedLoopController, () -> m_smc.setDutyCycle(dutycycle), m_subsystem).finallyDo(m_smc::startClosedLoopController).withName(m_subsystem.getName() + " SetDutyCycle");
   }
 
   /**
@@ -93,10 +90,7 @@ public abstract class SmartMechanism {
    * @return {@link Command}
    */
   public Command set(Supplier<Double> dutycycle) {
-    return Commands.startRun(
-            m_smc::stopClosedLoopController, () -> m_smc.setDutyCycle(dutycycle.get()), m_subsystem)
-        .finallyDo(m_smc::startClosedLoopController)
-        .withName(m_subsystem.getName() + " SetDutyCycle Supplier");
+    return Commands.startRun(m_smc::stopClosedLoopController, () -> m_smc.setDutyCycle(dutycycle.get()), m_subsystem).finallyDo(m_smc::startClosedLoopController).withName(m_subsystem.getName() + " SetDutyCycle Supplier");
   }
 
   /**
@@ -106,10 +100,7 @@ public abstract class SmartMechanism {
    * @return {@link Command}
    */
   public Command setVoltage(Voltage volts) {
-    return Commands.startRun(
-            m_smc::stopClosedLoopController, () -> m_smc.setVoltage(volts), m_subsystem)
-        .finallyDo(m_smc::startClosedLoopController)
-        .withName(m_subsystem.getName() + " SetVoltage");
+    return Commands.startRun(m_smc::stopClosedLoopController, () -> m_smc.setVoltage(volts), m_subsystem).finallyDo(m_smc::startClosedLoopController).withName(m_subsystem.getName() + " SetVoltage");
   }
 
   /**
@@ -119,10 +110,7 @@ public abstract class SmartMechanism {
    * @return {@link Command}
    */
   public Command setVoltage(Supplier<Voltage> volts) {
-    return Commands.startRun(
-            m_smc::stopClosedLoopController, () -> m_smc.setVoltage(volts.get()), m_subsystem)
-        .finallyDo(m_smc::startClosedLoopController)
-        .withName(m_subsystem.getName() + " SetVoltage Supplier");
+    return Commands.startRun(m_smc::stopClosedLoopController, () -> m_smc.setVoltage(volts.get()), m_subsystem).finallyDo(m_smc::startClosedLoopController).withName(m_subsystem.getName() + " SetVoltage Supplier");
   }
 
   /**

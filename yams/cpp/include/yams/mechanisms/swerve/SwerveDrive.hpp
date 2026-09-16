@@ -211,7 +211,7 @@ class SwerveDrive {
             units::meters_per_second_t{translationDiff.Y().value() * translationScalar},
             units::radians_per_second_t{
                 rotationPID.Calculate(currentPose.Rotation().Radians().value(),
-                                     targetPose.Rotation().Radians().value())}},
+                                      targetPose.Rotation().Radians().value())}},
         frc::Rotation2d{units::radian_t{GetGyroAngle()}});
   }
 
@@ -675,24 +675,43 @@ void SwerveDriveTelemetry::SetupTelemetry(mechanisms::swerve::SwerveDrive<NumMod
     m_config.GetDoubleFields()
         .at(DoubleTelemetryField::TranslationD)
         .SetDefaultValue(translationPID.GetD());
-    m_config.GetDoubleFields().at(DoubleTelemetryField::RotationP).SetDefaultValue(rotationPID.GetP());
-    m_config.GetDoubleFields().at(DoubleTelemetryField::RotationI).SetDefaultValue(rotationPID.GetI());
-    m_config.GetDoubleFields().at(DoubleTelemetryField::RotationD).SetDefaultValue(rotationPID.GetD());
+    m_config.GetDoubleFields()
+        .at(DoubleTelemetryField::RotationP)
+        .SetDefaultValue(rotationPID.GetP());
+    m_config.GetDoubleFields()
+        .at(DoubleTelemetryField::RotationI)
+        .SetDefaultValue(rotationPID.GetI());
+    m_config.GetDoubleFields()
+        .at(DoubleTelemetryField::RotationD)
+        .SetDefaultValue(rotationPID.GetD());
 
     auto& modules = drive->GetConfig().GetModules();
     if (!modules.empty()) {
       auto* driveMotor = modules[0]->GetDriveMotorController();
-      auto driveGains = driveMotor->GetConfig().GetSlotGains(driveMotor->GetClosedLoopControllerSlot());
-      m_config.GetDoubleFields().at(DoubleTelemetryField::ModulesDriveP).SetDefaultValue(driveGains.kP);
-      m_config.GetDoubleFields().at(DoubleTelemetryField::ModulesDriveI).SetDefaultValue(driveGains.kI);
-      m_config.GetDoubleFields().at(DoubleTelemetryField::ModulesDriveD).SetDefaultValue(driveGains.kD);
+      auto driveGains =
+          driveMotor->GetConfig().GetSlotGains(driveMotor->GetClosedLoopControllerSlot());
+      m_config.GetDoubleFields()
+          .at(DoubleTelemetryField::ModulesDriveP)
+          .SetDefaultValue(driveGains.kP);
+      m_config.GetDoubleFields()
+          .at(DoubleTelemetryField::ModulesDriveI)
+          .SetDefaultValue(driveGains.kI);
+      m_config.GetDoubleFields()
+          .at(DoubleTelemetryField::ModulesDriveD)
+          .SetDefaultValue(driveGains.kD);
 
       auto* azimuthMotor = modules[0]->GetAzimuthMotorController();
       auto azimuthGains =
           azimuthMotor->GetConfig().GetSlotGains(azimuthMotor->GetClosedLoopControllerSlot());
-      m_config.GetDoubleFields().at(DoubleTelemetryField::ModulesAzimuthP).SetDefaultValue(azimuthGains.kP);
-      m_config.GetDoubleFields().at(DoubleTelemetryField::ModulesAzimuthI).SetDefaultValue(azimuthGains.kI);
-      m_config.GetDoubleFields().at(DoubleTelemetryField::ModulesAzimuthD).SetDefaultValue(azimuthGains.kD);
+      m_config.GetDoubleFields()
+          .at(DoubleTelemetryField::ModulesAzimuthP)
+          .SetDefaultValue(azimuthGains.kP);
+      m_config.GetDoubleFields()
+          .at(DoubleTelemetryField::ModulesAzimuthI)
+          .SetDefaultValue(azimuthGains.kI);
+      m_config.GetDoubleFields()
+          .at(DoubleTelemetryField::ModulesAzimuthD)
+          .SetDefaultValue(azimuthGains.kD);
 
       if (auto driveFF = driveMotor->GetConfig().GetSimpleFeedforward(
               driveMotor->GetClosedLoopControllerSlot())) {

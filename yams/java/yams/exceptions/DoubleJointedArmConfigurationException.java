@@ -10,9 +10,9 @@ package yams.exceptions;
  * <p>Common triggers include:
  *
  * <ul>
- *   <li>The lower and upper joint motor controllers do not share the same WPILib {@code Subsystem}
- *       instance — both must reference the same subsystem so that a single command can require it
- *   <li>Starting angle missing on either joint config — both the lower and upper {@code ArmConfig}
+ * <li>The lower and upper joint motor controllers do not share the same WPILib {@code Subsystem}
+ * instance — both must reference the same subsystem so that a single command can require it
+ * <li>Starting angle missing on either joint config — both the lower and upper {@code ArmConfig}
  * must have a starting position set via {@code SmartMotorControllerConfig.withStartingPosition(Angle)}
  * </ul>
  *
@@ -37,18 +37,11 @@ public class DoubleJointedArmConfigurationException extends RuntimeException {
   /**
    * Arm configuration exception.
    *
-   * @param message Message to display.
-   * @param result Result of the configuration.
+   * @param message        Message to display.
+   * @param result         Result of the configuration.
    * @param remedyFunction Remedy function to use.
    */
-  public DoubleJointedArmConfigurationException(
-      String message, String result, String remedyFunction) {
-    super(
-        message
-            + "!\n"
-            + result
-            + "\nPlease use ArmConfig."
-            + remedyFunction
-            + " to fix this error.");
+  public DoubleJointedArmConfigurationException(String message, String result, String remedyFunction) {
+    super(message + "!\n" + result + "\nPlease use ArmConfig." + remedyFunction + " to fix this error.");
   }
 }

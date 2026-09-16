@@ -90,14 +90,13 @@ public class StructArrayTelemetry<T, F> {
   /**
    * Setup struct array telemetry for a field.
    *
-   * @param keyString Key to use.
+   * @param keyString  Key to use.
    * @param defaultVal Default value.
-   * @param field Field representing.
-   * @param struct {@link Struct} serializer for {@link T}.
-   * @param tunable Tunable.
+   * @param field      Field representing.
+   * @param struct     {@link Struct} serializer for {@link T}.
+   * @param tunable    Tunable.
    */
-  public StructArrayTelemetry(
-      String keyString, T[] defaultVal, F field, Struct<T> struct, boolean tunable) {
+  public StructArrayTelemetry(String keyString, T[] defaultVal, F field, Struct<T> struct, boolean tunable) {
     key = keyString;
     cachedValue = defaultValue = defaultVal;
     this.field = field;
@@ -117,7 +116,7 @@ public class StructArrayTelemetry<T, F> {
   /**
    * Setup network tables.
    *
-   * @param dataTable Data tables.
+   * @param dataTable   Data tables.
    * @param tuningTable Tuning table.
    */
   public void setupNetworkTables(NetworkTable dataTable, NetworkTable tuningTable) {
@@ -149,10 +148,7 @@ public class StructArrayTelemetry<T, F> {
       if (!prefix.endsWith("/")) {
         prefix += "/";
       }
-      dataLogEntry =
-          Optional.of(
-              StructArrayLogEntry.create(
-                  DataLogManager.getLog(), prefix + key, struct, (long) Timer.getFPGATimestamp()));
+      dataLogEntry = Optional.of(StructArrayLogEntry.create(DataLogManager.getLog(), prefix + key, struct, (long) Timer.getFPGATimestamp()));
     }
   }
 
