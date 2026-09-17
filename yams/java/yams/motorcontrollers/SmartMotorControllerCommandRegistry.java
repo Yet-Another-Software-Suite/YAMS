@@ -98,6 +98,7 @@ public class SmartMotorControllerCommandRegistry {
       if (e.getValue() == subsystem) {
         commandCallbacks.remove(e.getKey());
         commands.remove(e.getKey());
+        Tunables.remove("Tuning/" + e.getKey());
         return true;
       }
       return false;
