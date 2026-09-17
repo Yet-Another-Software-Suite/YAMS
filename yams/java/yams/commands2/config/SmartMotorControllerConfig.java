@@ -23,12 +23,6 @@ import yams.core.motorcontrollers.SmartMotorController;
  * config.setupLiveTuning();
  * }</pre>
  *
- * @implNote Because {@code with...} methods inherited from {@link
- *     yams.core.motorcontrollers.SmartMotorControllerConfig} return the core type, calling
- *     {@link #withSubsystem(Subsystem)} or {@link #setupLiveTuning()} mid-chain will "decay" the
- *     expression's static type back to core. Declare the config as this type and call
- *     {@link #withSubsystem(Subsystem)}/{@link #setupLiveTuning()} as their own statements on that
- *     variable rather than relying on chained inherited calls to preserve this type.
  */
 public class SmartMotorControllerConfig
     extends yams.core.motorcontrollers.SmartMotorControllerConfig {

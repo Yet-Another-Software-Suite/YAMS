@@ -27,7 +27,7 @@ import yams.core.motorcontrollers.SmartMotorController;
  * Command stowPivot = pivot.runTo(Degrees.of(0), Degrees.of(1));
  *
  * // --- Trigger bindings ---
- * pivot.isNear(Degrees.of(45), Degrees.of(2)).onTrue(shooter.runShooter());
+ * pivot.near(Degrees.of(45), Degrees.of(2)).onTrue(shooter.runShooter());
  * pivot.gte(Degrees.of(55)).onTrue(Commands.print("Approaching upper limit!"));
  * pivot.lte(Degrees.of(5)).onTrue(Commands.print("Pivot near stow position."));
  * }</pre>
@@ -73,7 +73,7 @@ public class Pivot extends yams.core.mechanisms.positional.Pivot implements Comm
    * @return {@link Trigger} for Pivot.
    */
   public Trigger gte(Angle angle) {
-    return new Trigger(() -> gteBoolean(angle));
+    return new Trigger(() -> isGte(angle));
   }
 
   /**
@@ -83,7 +83,7 @@ public class Pivot extends yams.core.mechanisms.positional.Pivot implements Comm
    * @return {@link Trigger}
    */
   public Trigger lte(Angle angle) {
-    return new Trigger(() -> lteBoolean(angle));
+    return new Trigger(() -> isLte(angle));
   }
 
   /**
@@ -139,7 +139,7 @@ public class Pivot extends yams.core.mechanisms.positional.Pivot implements Comm
    */
   public Command runTo(Angle angle, Angle tolerance) {
     return Commands.runOnce(() -> getMotorController().setPosition(angle), subsystem)
-        .andThen(Commands.waitUntil(isNear(angle, tolerance).debounce(0.1, DebounceType.RISING)))
+        .andThen(Commands.waitUntil(near(angle, tolerance).debounce(0.1, DebounceType.RISING)))
         .withName(subsystem.getName() + " RunTo Angle");
   }
 
@@ -155,7 +155,7 @@ public class Pivot extends yams.core.mechanisms.positional.Pivot implements Comm
   public Command runTo(Supplier<Angle> angle, Angle tolerance) {
     return Commands.runOnce(() -> getMotorController().setPosition(angle.get()), subsystem)
         .andThen(
-            Commands.waitUntil(isNear(angle.get(), tolerance).debounce(0.1, DebounceType.RISING)))
+            Commands.waitUntil(near(angle.get(), tolerance).debounce(0.1, DebounceType.RISING)))
         .withName(subsystem.getName() + " RunTo Angle Supplier");
   }
 
@@ -166,8 +166,8 @@ public class Pivot extends yams.core.mechanisms.positional.Pivot implements Comm
    * @param within {@link Angle} within.
    * @return {@link Trigger} on when the pivot is near another angle.
    */
-  public Trigger isNear(Angle angle, Angle within) {
-    return new Trigger(() -> isNearBoolean(angle, within));
+  public Trigger near(Angle angle, Angle within) {
+    return new Trigger(() -> isNear(angle, within));
   }
 
   /**

@@ -30,7 +30,7 @@ import yams.core.motorcontrollers.SmartMotorController;
  * Command toLow  = elevator.runTo(Meters.of(0.05), Meters.of(0.01));
  *
  * // Trigger bindings
- * elevator.isNear(Meters.of(1.2), Meters.of(0.02)).onTrue(shooter.shoot());
+ * elevator.near(Meters.of(1.2), Meters.of(0.02)).onTrue(shooter.shoot());
  * elevator.max().onTrue(Commands.print("Elevator at max"));
  *
  * // In periodic():
@@ -116,7 +116,7 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator
    */
   public Command runTo(Distance height, Distance tolerance) {
     return Commands.runOnce(() -> getMotorController().setPosition(height), subsystem)
-        .andThen(Commands.waitUntil(isNear(height, tolerance).debounce(0.1, DebounceType.RISING)))
+        .andThen(Commands.waitUntil(near(height, tolerance).debounce(0.1, DebounceType.RISING)))
         .withName(subsystem.getName() + " Run To Height");
   }
 
@@ -133,7 +133,7 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator
   public Command runTo(Supplier<Distance> height, Distance tolerance) {
     return Commands.runOnce(() -> getMotorController().setPosition(height.get()), subsystem)
         .andThen(
-            Commands.waitUntil(isNear(height.get(), tolerance).debounce(0.1, DebounceType.RISING)))
+            Commands.waitUntil(near(height.get(), tolerance).debounce(0.1, DebounceType.RISING)))
         .withName(subsystem.getName() + " Run To Height Supplier");
   }
 
@@ -144,8 +144,8 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator
    * @param within {@link Distance} within.
    * @return Trigger on when the elevator is near another height.
    */
-  public Trigger isNear(Distance height, Distance within) {
-    return new Trigger(() -> isNearBoolean(height, within));
+  public Trigger near(Distance height, Distance within) {
+    return new Trigger(() -> isNear(height, within));
   }
 
   /**
@@ -185,7 +185,7 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator
    * @return {@link Trigger}
    */
   public Trigger lte(Distance height) {
-    return new Trigger(() -> lteBoolean(height));
+    return new Trigger(() -> isLte(height));
   }
 
   /**
@@ -195,6 +195,6 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator
    * @return {@link Trigger} for elevator.
    */
   public Trigger gte(Distance height) {
-    return new Trigger(() -> gteBoolean(height));
+    return new Trigger(() -> isGte(height));
   }
 }

@@ -33,7 +33,7 @@ import yams.core.motorcontrollers.SmartMotorController;
  * Command holdAtZero = arm.runTo(Degrees.of(0), Degrees.of(2));
  *
  * // Bind triggers
- * arm.isNear(Degrees.of(80), Degrees.of(2)).onTrue(indexer.run());
+ * arm.near(Degrees.of(80), Degrees.of(2)).onTrue(indexer.run());
  * arm.max().onTrue(Commands.print("Arm at max!"));
  *
  * // Call in robotPeriodic() or a subsystem's periodic():
@@ -117,7 +117,7 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    */
   public Command runTo(Angle angle, Angle tolerance) {
     return Commands.runOnce(() -> getMotorController().setPosition(angle), subsystem)
-        .andThen(Commands.waitUntil(isNear(angle, tolerance).debounce(0.1, DebounceType.RISING)))
+        .andThen(Commands.waitUntil(near(angle, tolerance).debounce(0.1, DebounceType.RISING)))
         .withName(subsystem.getName() + " RunTo Angle");
   }
 
@@ -133,7 +133,7 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
   public Command runTo(Supplier<Angle> angle, Angle tolerance) {
     return Commands.runOnce(() -> getMotorController().setPosition(angle.get()), subsystem)
         .andThen(
-            Commands.waitUntil(isNear(angle.get(), tolerance).debounce(0.1, DebounceType.RISING)))
+            Commands.waitUntil(near(angle.get(), tolerance).debounce(0.1, DebounceType.RISING)))
         .withName(subsystem.getName() + " RunTo Angle Supplier");
   }
 
@@ -144,8 +144,8 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    * @param within {@link Angle} within.
    * @return {@link Trigger} on when the arm is near another angle.
    */
-  public Trigger isNear(Angle angle, Angle within) {
-    return new Trigger(() -> isNearBoolean(angle, within));
+  public Trigger near(Angle angle, Angle within) {
+    return new Trigger(() -> isNear(angle, within));
   }
 
   /**
@@ -185,7 +185,7 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    * @return {@link Trigger}
    */
   public Trigger lte(Angle angle) {
-    return new Trigger(() -> lteBoolean(angle));
+    return new Trigger(() -> isLte(angle));
   }
 
   /**
@@ -195,6 +195,6 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    * @return {@link Trigger} for Arm.
    */
   public Trigger gte(Angle angle) {
-    return new Trigger(() -> gteBoolean(angle));
+    return new Trigger(() -> isGte(angle));
   }
 }

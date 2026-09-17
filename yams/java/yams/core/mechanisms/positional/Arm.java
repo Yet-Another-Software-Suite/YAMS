@@ -35,7 +35,7 @@ import yams.core.motorcontrollers.simulation.ArmSimSupplier;
  * Arm mechanism.
  *
  * <p>This core class holds arm state, physics simulation, and measurement/predicate logic only.
- * Command and Trigger factories ({@code setAngle}, {@code run}, {@code runTo}, {@code isNear},
+ * Command and Trigger factories ({@code setAngle}, {@code run}, {@code runTo}, {@code near},
  * {@code max}, {@code min}, ...) live on {@link yams.commands2.mechanisms.Arm}, which extends this
  * class.
  *
@@ -55,7 +55,7 @@ import yams.core.motorcontrollers.simulation.ArmSimSupplier;
  * Command holdAtZero = arm.runTo(Degrees.of(0), Degrees.of(2));
  *
  * // Bind triggers
- * arm.isNear(Degrees.of(80), Degrees.of(2)).onTrue(indexer.run());
+ * arm.near(Degrees.of(80), Degrees.of(2)).onTrue(indexer.run());
  * arm.max().onTrue(Commands.print("Arm at max!"));
  *
  * // Call in robotPeriodic() or a subsystem's periodic():
@@ -249,17 +249,17 @@ public class Arm extends SmartPositionalMechanism {
    * @param within {@link Angle} within.
    * @return True if the arm is near the given angle.
    */
-  public boolean isNearBoolean(Angle angle, Angle within) {
+  public boolean isNear(Angle angle, Angle within) {
     return getAngle().isNear(angle, within);
   }
 
   @Override
   public boolean isAtMax() {
     if (m_smc.getConfig().getMechanismUpperLimit().isPresent()) {
-      return gteBoolean(m_smc.getConfig().getMechanismUpperLimit().get());
+      return isGte(m_smc.getConfig().getMechanismUpperLimit().get());
     }
     if (m_config.getUpperHardLimit().isPresent()) {
-      return gteBoolean(m_config.getUpperHardLimit().get());
+      return isGte(m_config.getUpperHardLimit().get());
     }
     throw new ArmConfigurationException("Arm upper hard and motor controller soft limit is empty",
         "Cannot create max trigger.", "withHardLimits(Angle,Angle)");
@@ -268,10 +268,10 @@ public class Arm extends SmartPositionalMechanism {
   @Override
   public boolean isAtMin() {
     if (m_smc.getConfig().getMechanismLowerLimit().isPresent()) {
-      return lteBoolean(m_smc.getConfig().getMechanismLowerLimit().get());
+      return isLte(m_smc.getConfig().getMechanismLowerLimit().get());
     }
     if (m_config.getLowerHardLimit().isPresent()) {
-      return lteBoolean(m_config.getLowerHardLimit().get());
+      return isLte(m_config.getLowerHardLimit().get());
     }
     throw new ArmConfigurationException("Arm lower hard and motor controller soft limit is empty",
         "Cannot create min trigger.", "withHardLimits(Angle,Angle)");
@@ -284,8 +284,8 @@ public class Arm extends SmartPositionalMechanism {
    * @param end   End angle
    * @return True if the arm is between the given angles.
    */
-  public boolean betweenBoolean(Angle start, Angle end) {
-    return gteBoolean(start) && lteBoolean(end);
+  public boolean isBetween(Angle start, Angle end) {
+    return isGte(start) && isLte(end);
   }
 
   /**
@@ -294,7 +294,7 @@ public class Arm extends SmartPositionalMechanism {
    * @param angle {@link Angle} to check against
    * @return True if the arm's angle is less than or equal to the given angle.
    */
-  public boolean lteBoolean(Angle angle) {
+  public boolean isLte(Angle angle) {
     return getAngle().lte(angle);
   }
 
@@ -304,7 +304,7 @@ public class Arm extends SmartPositionalMechanism {
    * @param angle Angle to check against.
    * @return True if the arm's angle is greater than or equal to the given angle.
    */
-  public boolean gteBoolean(Angle angle) {
+  public boolean isGte(Angle angle) {
     return getAngle().gte(angle);
   }
 

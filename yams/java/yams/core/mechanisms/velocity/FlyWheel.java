@@ -43,7 +43,7 @@ import yams.core.motorcontrollers.simulation.DCMotorSimSupplier;
  * Command spinToSpeed = shooter.runTo(RPM.of(3000), RPM.of(50));
  *
  * // Trigger that is true whenever the wheel is within ±50 RPM of target
- * Trigger atSpeed = shooter.isNear(RPM.of(3000), RPM.of(50));
+ * Trigger atSpeed = shooter.near(RPM.of(3000), RPM.of(50));
  * atSpeed.onTrue(Commands.print("Shooter at speed!"));
  * }</pre>
  *
@@ -117,8 +117,8 @@ public class FlyWheel extends SmartVelocityMechanism {
    * @param end   End velocity
    * @return True if the FlyWheel's speed is between the given velocities.
    */
-  public boolean betweenBoolean(AngularVelocity start, AngularVelocity end) {
-    return gteBoolean(start) && lteBoolean(end);
+  public boolean isBetween(AngularVelocity start, AngularVelocity end) {
+    return isGte(start) && isLte(end);
   }
 
   /**
@@ -127,7 +127,7 @@ public class FlyWheel extends SmartVelocityMechanism {
    * @param speed {@link AngularVelocity} to check against.
    * @return True if the FlyWheel's speed is greater than or equal to the given speed.
    */
-  public boolean gteBoolean(AngularVelocity speed) {
+  public boolean isGte(AngularVelocity speed) {
     return getSpeed().gte(speed);
   }
 
@@ -137,7 +137,7 @@ public class FlyWheel extends SmartVelocityMechanism {
    * @param speed {@link AngularVelocity} to check against
    * @return True if the FlyWheel's speed is less than or equal to the given speed.
    */
-  public boolean lteBoolean(AngularVelocity speed) {
+  public boolean isLte(AngularVelocity speed) {
     return getSpeed().lte(speed);
   }
 
@@ -166,7 +166,7 @@ public class FlyWheel extends SmartVelocityMechanism {
    * @param within {@link AngularVelocity} within.
    * @return True if the FlyWheel is near another speed.
    */
-  public boolean isNearBoolean(AngularVelocity speed, AngularVelocity within) {
+  public boolean isNear(AngularVelocity speed, AngularVelocity within) {
     return getSpeed().isNear(speed, within);
   }
 

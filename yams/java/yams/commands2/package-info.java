@@ -22,7 +22,7 @@
  * {@code setAngle()} or
  * {@code setHeight()}. Each method returns a WPILib {@code Command} that can be bound,
  * composed, or scheduled directly via the command scheduler.</li>
- * <li><b>React to conditions</b> — use trigger factory methods ({@code isNear()}, {@code max()},
+ * <li><b>React to conditions</b> — use trigger factory methods ({@code near()}, {@code max()},
  * {@code min()}, {@code between()}, {@code lte()}, {@code gte()}) to obtain
  * {@link org.wpilib.command2.button.Trigger} objects that fire when the mechanism
  * satisfies a particular condition, enabling condition-based command scheduling without
@@ -43,7 +43,7 @@
  * arm.setAngle(Rotation2d.fromDegrees(45));
  *
  * // 4. Bind a trigger
- * arm.isNear(Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(2))
+ * arm.near(Rotation2d.fromDegrees(45), Rotation2d.fromDegrees(2))
  *    .onTrue(Commands.print("Arm at target"));
  * }</pre>
  *

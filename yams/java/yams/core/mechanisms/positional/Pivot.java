@@ -70,7 +70,7 @@ import yams.core.motorcontrollers.simulation.DCMotorSimSupplier;
  *
  * // --- Trigger bindings ---
  * // Fire when the pivot is within 2 degrees of the shooting angle
- * pivot.isNear(Degrees.of(45), Degrees.of(2)).onTrue(shooter.runShooter());
+ * pivot.near(Degrees.of(45), Degrees.of(2)).onTrue(shooter.runShooter());
  *
  * // Bind on boundary conditions
  * pivot.gte(Degrees.of(55)).onTrue(Commands.print("Approaching upper limit!"));
@@ -173,8 +173,8 @@ public class Pivot extends SmartPositionalMechanism {
    * @param end   End angle
    * @return True if the pivot is between the given angles.
    */
-  public boolean betweenBoolean(Angle start, Angle end) {
-    return gteBoolean(start) && lteBoolean(end);
+  public boolean isBetween(Angle start, Angle end) {
+    return isGte(start) && isLte(end);
   }
 
   /**
@@ -183,7 +183,7 @@ public class Pivot extends SmartPositionalMechanism {
    * @param angle Angle to check against.
    * @return True if the pivot's angle is greater than or equal to the given angle.
    */
-  public boolean gteBoolean(Angle angle) {
+  public boolean isGte(Angle angle) {
     return getAngle().gte(angle);
   }
 
@@ -193,7 +193,7 @@ public class Pivot extends SmartPositionalMechanism {
    * @param angle {@link Angle} to check against
    * @return True if the pivot's angle is less than or equal to the given angle.
    */
-  public boolean lteBoolean(Angle angle) {
+  public boolean isLte(Angle angle) {
     return getAngle().lte(angle);
   }
 
@@ -213,17 +213,17 @@ public class Pivot extends SmartPositionalMechanism {
    * @param within {@link Angle} within.
    * @return True if the pivot is near another angle.
    */
-  public boolean isNearBoolean(Angle angle, Angle within) {
+  public boolean isNear(Angle angle, Angle within) {
     return getAngle().isNear(angle, within);
   }
 
   @Override
   public boolean isAtMax() {
     if (m_smc.getConfig().getMechanismUpperLimit().isPresent()) {
-      return gteBoolean(m_smc.getConfig().getMechanismUpperLimit().get());
+      return isGte(m_smc.getConfig().getMechanismUpperLimit().get());
     }
     if (m_config.getUpperHardLimit().isPresent()) {
-      return gteBoolean(m_config.getUpperHardLimit().get());
+      return isGte(m_config.getUpperHardLimit().get());
     }
     throw new PivotConfigurationException(
         "Pivot upper hard and motor controller soft limit is empty", "Cannot create max trigger.",
@@ -233,10 +233,10 @@ public class Pivot extends SmartPositionalMechanism {
   @Override
   public boolean isAtMin() {
     if (m_smc.getConfig().getMechanismLowerLimit().isPresent()) {
-      return lteBoolean(m_smc.getConfig().getMechanismLowerLimit().get());
+      return isLte(m_smc.getConfig().getMechanismLowerLimit().get());
     }
     if (m_config.getLowerHardLimit().isPresent()) {
-      return lteBoolean(m_config.getLowerHardLimit().get());
+      return isLte(m_config.getLowerHardLimit().get());
     }
     throw new PivotConfigurationException(
         "Pivot lower hard and motor controller soft limit is empty", "Cannot create min trigger.",

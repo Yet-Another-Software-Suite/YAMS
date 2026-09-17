@@ -30,7 +30,7 @@ import yams.core.motorcontrollers.SmartMotorController;
  * Command spinToSpeed = shooter.runTo(RPM.of(3000), RPM.of(50));
  *
  * // Trigger that is true whenever the wheel is within ±50 RPM of target
- * Trigger atSpeed = shooter.isNear(RPM.of(3000), RPM.of(50));
+ * Trigger atSpeed = shooter.near(RPM.of(3000), RPM.of(50));
  * atSpeed.onTrue(Commands.print("Shooter at speed!"));
  * }</pre>
  *
@@ -79,7 +79,7 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel
    * @return {@link Trigger} for FlyWheel.
    */
   public Trigger gte(AngularVelocity speed) {
-    return new Trigger(() -> gteBoolean(speed));
+    return new Trigger(() -> isGte(speed));
   }
 
   /**
@@ -89,7 +89,7 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel
    * @return {@link Trigger}
    */
   public Trigger lte(AngularVelocity speed) {
-    return new Trigger(() -> lteBoolean(speed));
+    return new Trigger(() -> isLte(speed));
   }
 
   /**
@@ -99,8 +99,8 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel
    * @param within {@link AngularVelocity} within.
    * @return Trigger on when the FlyWheel is near another speed.
    */
-  public Trigger isNear(AngularVelocity speed, AngularVelocity within) {
-    return new Trigger(() -> isNearBoolean(speed, within));
+  public Trigger near(AngularVelocity speed, AngularVelocity within) {
+    return new Trigger(() -> isNear(speed, within));
   }
 
   /**
@@ -157,7 +157,7 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel
     return Commands.runOnce(smc::startClosedLoopController, subsystem)
         .andThen(Commands.runOnce(() -> smc.setVelocity(velocity.get()), subsystem))
         .andThen(Commands.waitUntil(
-            isNear(velocity.get(), tolerance).debounce(0.1, DebounceType.RISING)))
+            near(velocity.get(), tolerance).debounce(0.1, DebounceType.RISING)))
         .withName(subsystem.getName() + " RunToVelocity Supplier");
   }
 
@@ -174,7 +174,7 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel
     SmartMotorController smc = getMotorController();
     return Commands.runOnce(smc::startClosedLoopController, subsystem)
         .andThen(Commands.runOnce(() -> smc.setVelocity(velocity), subsystem))
-        .andThen(Commands.waitUntil(isNear(velocity, tolerance).debounce(0.1, DebounceType.RISING)))
+        .andThen(Commands.waitUntil(near(velocity, tolerance).debounce(0.1, DebounceType.RISING)))
         .withName(subsystem.getName() + " RunToVelocity");
   }
 

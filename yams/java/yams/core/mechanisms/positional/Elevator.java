@@ -46,7 +46,7 @@ import yams.core.motorcontrollers.simulation.ElevatorSimSupplier;
  * Command toLow  = elevator.runTo(Meters.of(0.05), Meters.of(0.01));
  *
  * // Trigger bindings
- * elevator.isNear(Meters.of(1.2), Meters.of(0.02)).onTrue(shooter.shoot());
+ * elevator.near(Meters.of(1.2), Meters.of(0.02)).onTrue(shooter.shoot());
  * elevator.max().onTrue(Commands.print("Elevator at max"));
  *
  * // In periodic():
@@ -306,18 +306,18 @@ public class Elevator extends SmartPositionalMechanism {
    * @param within {@link Distance} within.
    * @return True if the elevator is near another height.
    */
-  public boolean isNearBoolean(Distance height, Distance within) {
+  public boolean isNear(Distance height, Distance within) {
     return getHeight().isNear(height, within);
   }
 
   @Override
   public boolean isAtMax() {
     if (m_smc.getConfig().getMechanismUpperLimit().isPresent()) {
-      return gteBoolean(m_smc.getConfig().convertFromMechanism(
+      return isGte(m_smc.getConfig().convertFromMechanism(
           m_smc.getConfig().getMechanismUpperLimit().get()));
     }
     if (m_config.getMaximumHeight().isPresent()) {
-      return gteBoolean(m_config.getMaximumHeight().get());
+      return isGte(m_config.getMaximumHeight().get());
     }
     throw new ElevatorConfigurationException("Maximum height is not configured!",
         "Cannot create max trigger.", "withHardLimits(Distance,Distance)");
@@ -326,11 +326,11 @@ public class Elevator extends SmartPositionalMechanism {
   @Override
   public boolean isAtMin() {
     if (m_smc.getConfig().getMechanismLowerLimit().isPresent()) {
-      return lteBoolean(m_smc.getConfig().convertFromMechanism(
+      return isLte(m_smc.getConfig().convertFromMechanism(
           m_smc.getConfig().getMechanismLowerLimit().get()));
     }
     if (m_config.getMinimumHeight().isPresent()) {
-      return lteBoolean(m_config.getMinimumHeight().get());
+      return isLte(m_config.getMinimumHeight().get());
     }
     throw new ElevatorConfigurationException("Minimum height is not configured!",
         "Cannot create min trigger.", "withHardLimits(Distance,Distance)");
@@ -343,8 +343,8 @@ public class Elevator extends SmartPositionalMechanism {
    * @param end   End height.
    * @return True if the elevator is between the given heights.
    */
-  public boolean betweenBoolean(Distance start, Distance end) {
-    return gteBoolean(start) && lteBoolean(end);
+  public boolean isBetween(Distance start, Distance end) {
+    return isGte(start) && isLte(end);
   }
 
   /**
@@ -353,7 +353,7 @@ public class Elevator extends SmartPositionalMechanism {
    * @param height {@link Distance} to check against
    * @return True if the elevator's height is less than or equal to the given height.
    */
-  public boolean lteBoolean(Distance height) {
+  public boolean isLte(Distance height) {
     return getHeight().lte(height);
   }
 
@@ -363,7 +363,7 @@ public class Elevator extends SmartPositionalMechanism {
    * @param height Height to check against.
    * @return True if the elevator's height is greater than or equal to the given height.
    */
-  public boolean gteBoolean(Distance height) {
+  public boolean isGte(Distance height) {
     return getHeight().gte(height);
   }
 

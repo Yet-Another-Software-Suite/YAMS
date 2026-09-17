@@ -280,10 +280,8 @@ public class DifferentialMechanism extends SmartPositionalMechanism {
    */
   @Override
   public void visualizationUpdate() {
-    var twistAngle =
-        m_config.getTwistAngle(m_leftSMC.getMechanismPosition(), m_rightSMC.getMechanismPosition());
-    var tiltAngle =
-        m_config.getTiltAngle(m_leftSMC.getMechanismPosition(), m_rightSMC.getMechanismPosition());
+    var twistAngle = getTwistPosition();
+    var tiltAngle = getTiltPosition();
     var twistRoot =
         new Translation2d(m_armLength.in(Meters), Rotation2d.fromDegrees(tiltAngle.in(Degrees)))
             .plus(m_tiltRoot);
