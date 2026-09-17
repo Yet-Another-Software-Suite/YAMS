@@ -473,17 +473,24 @@ public class BatterySimTest {
     try {
       assertTrue(BatterySim.getStateOfCharge() == 0.0, "Battery should be fully depleted.");
 
-      // Let the depleted battery idle and record its baseline voltage.
+      // Let the depleted battery idle and record its baseline voltage. getSupplyCurrent() runs
+      // its raw dutyCycle*statorCurrent product through a 100ms single-pole low-pass filter, so
+      // switching straight from the heavy load above to idle leaves that filter's output sagging
+      // for a moment even though the new commanded duty cycle is already 0 — settle past that
+      // filter lag (~3 time constants) before starting the window that measures the steady idle
+      // voltage, so this doesn't measure the tail of the previous heavy-load transient instead.
       for (SmartMotorController smc : smcs) {
         TestWithScheduler.schedule(dutyCycleCommand(smc, 0.0));
       }
+      TestWithScheduler.cycle(Seconds.of(0.3));
       double deadIdleVoltage = minVoltageOverCycle(0.5);
 
       // The battery is already empty; hammering every motor with a heavy duty cycle again must not
-      // make the reported voltage climb back up.
+      // make the reported voltage climb back up. Same filter-settle reasoning as above, in reverse.
       for (SmartMotorController smc : smcs) {
         TestWithScheduler.schedule(heavyLoadCommand(smc));
       }
+      TestWithScheduler.cycle(Seconds.of(0.3));
       double deadLoadedVoltage = minVoltageOverCycle(0.5);
 
       System.out.println("Dead battery idle voltage: " + deadIdleVoltage);
