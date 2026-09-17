@@ -8,6 +8,7 @@ import org.wpilib.hardware.hal.RobotMode;
 import org.wpilib.simulation.DriverStationSim;
 import org.wpilib.simulation.RoboRioSim;
 import org.wpilib.simulation.SimHooks;
+import yams.motorcontrollers.simulation.BatterySim;
 
 /**
  * JUnit 5 testing extension which ensures all WPILib foundational bits are
@@ -22,6 +23,10 @@ public final class MockHardwareExtension {
     RoboRioSim.resetData();
     DriverStationSim.resetData();
     DriverStationSim.notifyNewData();
+    // Without this, a SmartMotorController that wasn't (or couldn't be) closed by an earlier
+    // test leaves its last-known current draw permanently counted towards every later test's
+    // shared battery voltage calculation for the rest of the JVM's lifetime.
+    BatterySim.reset();
     //		HAL.releaseDSMutex();
   }
 

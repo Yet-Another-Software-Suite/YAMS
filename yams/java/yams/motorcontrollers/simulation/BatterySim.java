@@ -185,6 +185,17 @@ public class BatterySim {
   }
 
   /**
+   * Clear every tracked per-consumer current draw and reset discharge simulation to a fresh,
+   * fully-charged, disabled state.
+   */
+  public static void reset() {
+    currents.clear();
+    dischargeEnabled = false;
+    ampHoursUsed = 0.0;
+    lastTimestampSeconds = Double.NaN;
+  }
+
+  /**
    * Get the simulated state of charge of the battery, from 0 (empty) to 1 (full).
    *
    * @return State of charge of the battery.
