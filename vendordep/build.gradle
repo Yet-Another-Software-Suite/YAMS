@@ -47,7 +47,7 @@ sourceSets {
     // so their REV-only coverage keeps running.
     test {
         java {
-            exclude "yams/motorcontrollers/CANcoderTest.java"
+            exclude "yams/core/motorcontrollers/CANcoderTest.java"
         }
     }
 }

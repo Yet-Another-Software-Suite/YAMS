@@ -10,9 +10,9 @@ import static org.wpilib.units.Units.Rotations;
 import org.junit.jupiter.api.Test;
 import org.wpilib.math.util.MathUtil;
 import org.wpilib.units.measure.Angle;
-import yams.gearing.MechanismGearing;
-import yams.units.EasyCRT;
-import yams.units.EasyCRTConfig;
+import yams.core.gearing.MechanismGearing;
+import yams.core.units.EasyCRT;
+import yams.core.units.EasyCRTConfig;
 
 public class ChineseRemainderTheoremTest {
   private Angle readingTolerance = Degrees.of(0.001);
@@ -51,16 +51,10 @@ public class ChineseRemainderTheoremTest {
         new EasyCRTConfig(this::getAbs1, this::getAbs2)
             .withCommonDriveGear(commonRatio, driveGearTeeth, encoder1Pinion, encoder2Pinion);
 
-    assertTrue(
-        MathUtil.isNear(
-            absoluteEncoder1Gearing.getMechanismToRotorRatio(),
-            config.getEncoder1RotationsPerMechanismRotation(),
-            0.0000001));
-    assertTrue(
-        MathUtil.isNear(
-            absoluteEncoder2Gearing.getMechanismToRotorRatio(),
-            config.getEncoder2RotationsPerMechanismRotation(),
-            0.0000001));
+    assertTrue(MathUtil.isNear(absoluteEncoder1Gearing.getMechanismToRotorRatio(),
+        config.getEncoder1RotationsPerMechanismRotation(), 0.0000001));
+    assertTrue(MathUtil.isNear(absoluteEncoder2Gearing.getMechanismToRotorRatio(),
+        config.getEncoder2RotationsPerMechanismRotation(), 0.0000001));
   }
 
   /**
@@ -84,9 +78,8 @@ public class ChineseRemainderTheoremTest {
         new EasyCRTConfig(this::getAbs1, this::getAbs2)
             .withCommonDriveGear(commonRatio, driveGearTeeth, encoder1Pinion, encoder2Pinion);
 
-    config
-        .getUniqueCoverage()
-        .ifPresent(angle -> System.out.println("Unique Coverage(rots): " + angle.in(Rotations)));
+    config.getUniqueCoverage().ifPresent(
+        angle -> System.out.println("Unique Coverage(rots): " + angle.in(Rotations)));
 
     // Limit the sweep to the unique coverage
     double coverageRotations =
@@ -117,7 +110,6 @@ public class ChineseRemainderTheoremTest {
       }
       assertTrue(testing);
       //      System.out.println("CRT Angle(rots): " + encoder.getAngleOptional());
-
     }
   }
 }

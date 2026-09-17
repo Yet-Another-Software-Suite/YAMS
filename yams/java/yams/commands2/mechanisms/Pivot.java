@@ -1,0 +1,191 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
+package yams.commands2.mechanisms;
+
+import java.util.function.Supplier;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.Commands;
+import org.wpilib.command2.Subsystem;
+import org.wpilib.command2.button.Trigger;
+import org.wpilib.math.filter.Debouncer.DebounceType;
+import org.wpilib.units.measure.Angle;
+import yams.core.mechanisms.config.PivotConfig;
+import yams.core.motorcontrollers.SmartMotorController;
+
+/**
+ * Command-based extension of {@link yams.core.mechanisms.positional.Pivot} that adds the
+ * {@link Subsystem} binding and {@link Command}/{@link Trigger} factories.
+ *
+ * <h2>Usage Example</h2>
+ * <pre>{@code
+ * // --- Instantiation ---
+ * Pivot pivot = new Pivot(pivotConfig, motor);
+ *
+ * // --- Commands ---
+ * Command aimHigh = pivot.setAngle(Degrees.of(45));
+ * Command stowPivot = pivot.runTo(Degrees.of(0), Degrees.of(1));
+ *
+ * // --- Trigger bindings ---
+ * pivot.isNear(Degrees.of(45), Degrees.of(2)).onTrue(shooter.runShooter());
+ * pivot.gte(Degrees.of(55)).onTrue(Commands.print("Approaching upper limit!"));
+ * pivot.lte(Degrees.of(5)).onTrue(Commands.print("Pivot near stow position."));
+ * }</pre>
+ */
+public class Pivot extends yams.core.mechanisms.positional.Pivot implements CommandMechanism {
+  /** Subsystem the pivot's commands should require. */
+  private final Subsystem subsystem;
+
+  /**
+   * Construct the Pivot class
+   *
+   * @param config Pivot configuration.
+   * @param smc    {@link SmartMotorController} driving the pivot.
+   * @implNote {@code smc}'s config must be a {@link yams.commands2.config.SmartMotorControllerConfig}
+   *           with a {@link Subsystem} set via {@code withSubsystem(Subsystem)}.
+   */
+  public Pivot(PivotConfig config, SmartMotorController smc) {
+    super(config, smc);
+    this.subsystem =
+        ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
+  }
+
+  @Override
+  public Subsystem getSubsystem() {
+    return subsystem;
+  }
+
+  /**
+   * Between two angles.
+   *
+   * @param start Start angle.
+   * @param end   End angle
+   * @return {@link Trigger}
+   */
+  public Trigger between(Angle start, Angle end) {
+    return gte(start).and(lte(end));
+  }
+
+  /**
+   * Greater than or equal to angle.
+   *
+   * @param angle Angle to check against.
+   * @return {@link Trigger} for Pivot.
+   */
+  public Trigger gte(Angle angle) {
+    return new Trigger(() -> gteBoolean(angle));
+  }
+
+  /**
+   * Less than or equal to angle
+   *
+   * @param angle {@link Angle} to check against
+   * @return {@link Trigger}
+   */
+  public Trigger lte(Angle angle) {
+    return new Trigger(() -> lteBoolean(angle));
+  }
+
+  /**
+   * Set the pivot to the given angle.
+   *
+   * @param angle Pivot angle to go to.
+   * @return {@link Command} that sets the pivot to the desired angle.
+   */
+  public Command setAngle(Angle angle) {
+    return run(angle).withName(subsystem.getName() + " SetAngle");
+  }
+
+  /**
+   * Set the pivot to the given angle.
+   *
+   * @param angle Pivot angle to go to.
+   * @return {@link Command} that sets the pivot to the desired angle.
+   */
+  public Command setAngle(Supplier<Angle> angle) {
+    return run(angle).withName(subsystem.getName() + " SetAngle Supplier");
+  }
+
+  /**
+   * Set the pivot to the given angle.
+   *
+   * @param angle Pivot angle to go to.
+   * @return {@link Command} that sets the pivot to the desired angle.
+   */
+  public Command run(Angle angle) {
+    return Commands.run(() -> getMotorController().setPosition(angle), subsystem)
+        .withName(subsystem.getName() + " SetAngle");
+  }
+
+  /**
+   * Set the pivot to the given angle via a supplier.
+   *
+   * @param angle Supplier for the pivot angle to go to.
+   * @return {@link Command} that sets the pivot to the desired angle.
+   */
+  public Command run(Supplier<Angle> angle) {
+    return Commands.run(() -> getMotorController().setPosition(angle.get()), subsystem)
+        .withName(subsystem.getName() + " RunAngle Supplier");
+  }
+
+  /**
+   * Set the pivot to the given {@link Angle} then end the command.
+   *
+   * @param angle     {@link Angle} to go to.
+   * @param tolerance Tolerance {@link Angle}
+   * @return {@link Command} that sets the pivot to the desired angle.
+   * @implNote This command will not stop. It should NOT be used when there is a default command on
+   * the Subsystem.
+   */
+  public Command runTo(Angle angle, Angle tolerance) {
+    return Commands.runOnce(() -> getMotorController().setPosition(angle), subsystem)
+        .andThen(Commands.waitUntil(isNear(angle, tolerance).debounce(0.1, DebounceType.RISING)))
+        .withName(subsystem.getName() + " RunTo Angle");
+  }
+
+  /**
+   * Set the pivot to the given angle then end the command.
+   *
+   * @param angle     {@link Angle} to go to.
+   * @param tolerance Tolerance {@link Angle}
+   * @return {@link Command} that sets the pivot to the desired angle.
+   * @implNote This command will not stop. It should NOT be used when there is a default command on
+   * the Subsystem.
+   */
+  public Command runTo(Supplier<Angle> angle, Angle tolerance) {
+    return Commands.runOnce(() -> getMotorController().setPosition(angle.get()), subsystem)
+        .andThen(
+            Commands.waitUntil(isNear(angle.get(), tolerance).debounce(0.1, DebounceType.RISING)))
+        .withName(subsystem.getName() + " RunTo Angle Supplier");
+  }
+
+  /**
+   * Pivot is near an angle.
+   *
+   * @param angle  {@link Angle} to be near.
+   * @param within {@link Angle} within.
+   * @return {@link Trigger} on when the pivot is near another angle.
+   */
+  public Trigger isNear(Angle angle, Angle within) {
+    return new Trigger(() -> isNearBoolean(angle, within));
+  }
+
+  /**
+   * {@link yams.core.mechanisms.positional.Pivot} is at max, defined by the soft limit or hard
+   * limit on the pivot.
+   *
+   * @return {@link Trigger} on maximum of the pivot.
+   */
+  public Trigger max() {
+    return new Trigger(this::isAtMax);
+  }
+
+  /**
+   * Minimum angle of the pivot given by the soft limit or hard limit of the pivot.
+   *
+   * @return {@link Trigger} on minimum of the pivot.
+   */
+  public Trigger min() {
+    return new Trigger(this::isAtMin);
+  }
+}

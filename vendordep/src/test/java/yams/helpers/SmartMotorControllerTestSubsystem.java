@@ -7,7 +7,7 @@ import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.Distance;
-import yams.motorcontrollers.SmartMotorController;
+import yams.core.motorcontrollers.SmartMotorController;
 
 public class SmartMotorControllerTestSubsystem extends SubsystemBase {
   public SmartMotorController smc;
@@ -18,12 +18,9 @@ public class SmartMotorControllerTestSubsystem extends SubsystemBase {
   public SmartMotorControllerTestSubsystem() {}
 
   public Command setDutyCycle(double dutyCycle) {
-    return startRun(
-            smc::stopClosedLoopController,
-            () -> {
-              smc.setDutyCycle(dutyCycle);
-            })
-        .finallyDo(smc::startClosedLoopController);
+    return startRun(smc::stopClosedLoopController, () -> {
+      smc.setDutyCycle(dutyCycle);
+    }).finallyDo(smc::startClosedLoopController);
   }
 
   public Command setPositionSetpoint(Angle position) {

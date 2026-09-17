@@ -8,7 +8,7 @@ import org.wpilib.hardware.hal.RobotMode;
 import org.wpilib.simulation.DriverStationSim;
 import org.wpilib.simulation.RoboRioSim;
 import org.wpilib.simulation.SimHooks;
-import yams.motorcontrollers.simulation.BatterySim;
+import yams.core.motorcontrollers.simulation.BatterySim;
 
 /**
  * JUnit 5 testing extension which ensures all WPILib foundational bits are
