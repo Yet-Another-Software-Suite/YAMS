@@ -88,8 +88,9 @@ public final class SchedulerPumpHelper {
    *                              20ms default unless changed.
    * @throws InterruptedException Thrown if sleeping interrupted
    */
-  public static synchronized void runForDuration(Runnable cycleRunnable, Time durationInMs,
-      int... optionalHeartbeatInMs) throws InterruptedException {
+  public static synchronized void runForDuration(
+      Runnable cycleRunnable, Time durationInMs, int... optionalHeartbeatInMs)
+      throws InterruptedException {
     int heartbeatToUseInMs = getHeartbeatToUse(optionalHeartbeatInMs);
     long start = System.currentTimeMillis();
     AtomicLong time = new AtomicLong();
@@ -102,8 +103,7 @@ public final class SchedulerPumpHelper {
         CommandScheduler.getInstance().run();
         SimHooks.stepTimingAsync(heartbeatToUseInMs);
         awaitNotifierSettle((long) now.in(Units.Microseconds));
-        if (cycleRunnable != null)
-          cycleRunnable.run();
+        if (cycleRunnable != null) cycleRunnable.run();
       }
     } finally {
       // Otherwise this override leaks into every later test in the same JVM.

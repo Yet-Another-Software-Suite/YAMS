@@ -3,12 +3,9 @@
 
 package yams.motorcontrollers;
 
-import static org.wpilib.units.Units.Degrees;
-import static org.wpilib.units.Units.DegreesPerSecond;
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Milliseconds;
-import static org.wpilib.units.Units.RPM;
 import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.RadiansPerSecond;
 import static org.wpilib.units.Units.Rotations;
@@ -21,15 +18,12 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
-import org.wpilib.command2.Command;
-import org.wpilib.command2.Commands;
 import org.wpilib.driverstation.internal.DriverStationBackend;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.math.controller.ArmFeedforward;
 import org.wpilib.math.controller.ElevatorFeedforward;
 import org.wpilib.math.controller.PIDController;
 import org.wpilib.math.controller.SimpleMotorFeedforward;
-import org.wpilib.math.filter.Debouncer;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.math.trajectory.ExponentialProfile;
 import org.wpilib.math.trajectory.TrapezoidProfile;
@@ -37,7 +31,6 @@ import org.wpilib.math.trajectory.TrapezoidProfile.State;
 import org.wpilib.networktables.NetworkTable;
 import org.wpilib.networktables.NetworkTableInstance;
 import org.wpilib.system.Notifier;
-import org.wpilib.tunable.Tunables;
 import org.wpilib.units.AngularAccelerationUnit;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularAcceleration;
@@ -60,7 +53,6 @@ import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.simulation.BatterySim;
-import yams.telemetry.NetworkTablesBackends;
 import yams.telemetry.SmartMotorControllerTelemetry;
 import yams.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
 import yams.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
@@ -762,54 +754,7 @@ public abstract class SmartMotorController {
         }
         updateTelemetry();
         if (this.telemetry.tuningEnabled()) {
-          var telemetryPath = telemetryTable.get().getPath().substring(1).split("/");
-          var telemetryPathStr = telemetryPath[0] + "/Commands/" + telemetryPath[telemetryPath.length - 1];
-          Command setEncoderToZero = Commands.runOnce(() -> {
-            System.out.println("=====================================================\nSET ENCODER " + "TO ZERO\n=====================================================");
-            System.out.println("Current Mechanism Position: " + getMechanismPosition().in(Degrees) + "° Current Velocity: " + getMechanismVelocity().in(DegreesPerSecond));
-            setEncoderPosition(Rotations.zero());
-          }, m_config.getSubsystem());
-          setEncoderToZero.setName("ZeroEncoder");
-
-          Debouncer velocityDebouncer = new Debouncer(0.5);
-          AtomicReference<Angle> startingAngle = new AtomicReference<>(Rotations.zero());
-          Command testUpCommand = Commands.startRun(() -> {
-            System.out.println("=====================================================\nTEST " + "UP\n=====================================================");
-            System.out.println("Test will end when Mechanism Velocity exceeds or " + "equals 10RPM after 30seconds");
-            stopClosedLoopController();
-            setDutyCycle(0);
-            startingAngle.set(getMechanismPosition());
-          }, () -> {
-            setDutyCycle(getDutyCycle() + 0.001);
-          }, m_config.getSubsystem()).until(() -> velocityDebouncer.calculate(getMechanismVelocity().abs(RPM) >= 10)).withTimeout(Seconds.of(30)).finallyDo(() -> {
-            setDutyCycle(0);
-            if (getMechanismPosition().lte(startingAngle.get())) {
-              System.out.println(getName() + " needs to be inverted");
-            }
-            startClosedLoopController();
-          });
-          testUpCommand.setName("Up");
-          Command testDownCommand = Commands.startRun(() -> {
-            System.out.println("=====================================================\nTEST " + "DOWN\n=====================================================");
-            System.out.println("Test will end when Mechanism Velocity exceeds or " + "equals 10RPM after 30seconds");
-            stopClosedLoopController();
-            setDutyCycle(0);
-            startingAngle.set(getMechanismPosition());
-          }, () -> {
-            setDutyCycle(getDutyCycle() - 0.001);
-          }, m_config.getSubsystem()).until(() -> velocityDebouncer.calculate(getMechanismVelocity().abs(RPM) >= 10)).withTimeout(Seconds.of(30)).finallyDo(() -> {
-            setDutyCycle(0);
-            if (getMechanismPosition().gte(startingAngle.get())) {
-              System.out.println(getName() + " needs to be inverted");
-            }
-            startClosedLoopController();
-          });
-          testDownCommand.setName("Down");
-          NetworkTablesBackends.ensureMechanismsTunableBackend();
-          Tunables.publish(telemetryPathStr + "/ZeroEncoder", setEncoderToZero);
           SmartMotorControllerCommandRegistry.addCommand("live", m_config.getSubsystem(), () -> this.telemetry.applyTuningValues(this));
-          Tunables.publish(telemetryPathStr + "/Up", testUpCommand);
-          Tunables.publish(telemetryPathStr + "/Down", testDownCommand);
         }
       }
     }
@@ -1139,6 +1084,7 @@ public abstract class SmartMotorController {
     }
     BatterySim.removeCurrent(m_batterySimUUID);
     telemetry.close();
+    SmartMotorControllerCommandRegistry.removeCommands(m_config.getSubsystem());
   }
 
   @Override

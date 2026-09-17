@@ -5,7 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/../yams/cpp/include",
                 "${workspaceFolder}/src/test/native/include",
-                "~/wpilib/2027_alpha5/native-headers"
+                "~/wpilib/2027_alpha7/native-headers"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",
@@ -33,7 +33,7 @@
             "includePath": [
                 "${workspaceFolder}/../yams/cpp/include",
                 "${workspaceFolder}/src/test/native/include",
-                "%PUBLIC%/wpilib/2027_alpha5/native-headers"
+                "%PUBLIC%/wpilib/2027_alpha7/native-headers"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
