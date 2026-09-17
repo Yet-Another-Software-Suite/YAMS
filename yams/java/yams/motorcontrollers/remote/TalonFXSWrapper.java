@@ -54,7 +54,6 @@ import com.ctre.phoenix6.signals.SensorPhaseValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.math.system.Models;
-import org.wpilib.driverstation.internal.DriverStationBackend;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.math.controller.ArmFeedforward;
 import org.wpilib.math.controller.ElevatorFeedforward;
@@ -62,6 +61,7 @@ import org.wpilib.math.controller.SimpleMotorFeedforward;
 import org.wpilib.math.trajectory.ExponentialProfile;
 import org.wpilib.math.trajectory.TrapezoidProfile;
 import org.wpilib.math.trajectory.TrapezoidProfile.Constraints;
+import org.wpilib.util.Alert;
 import org.wpilib.util.Pair;
 import org.wpilib.units.AngularAccelerationUnit;
 import org.wpilib.units.measure.Angle;
@@ -201,6 +201,15 @@ public class TalonFXSWrapper extends SmartMotorController {
   /** {@link DCMotorSim} for the {@link TalonFXS}. */
   private Optional<DCMotorSim> m_dcmotorSim = Optional.empty();
 
+  /** Alert shown when the starting position is not applied because an external encoder is used. */
+  private Alert m_startingPositionExternalEncoderAlert;
+
+  /** Alert shown when a zero offset is set without an external encoder present. */
+  private Alert m_zeroOffsetNoExternalEncoderAlert;
+
+  /** Alert shown when a discontinuity point is set without an external encoder present. */
+  private Alert m_discontinuityPointNoExternalEncoderAlert;
+
   /**
    * Create the {@link TalonFXS} wrapper
    *
@@ -212,6 +221,10 @@ public class TalonFXSWrapper extends SmartMotorController {
     this.m_talonfxs = controller;
     this.m_dcmotor = motor;
     this.m_config = smartConfig;
+    m_systemCoreClosedLoopAlert = Optional.of(new Alert("YAMS", buildAlertId("TalonFXS", m_talonfxs.getDeviceID(), "ClosedLoop"), getName() + " closed loop controller is running on the RIO.", Alert.Level.MEDIUM));
+    m_startingPositionExternalEncoderAlert = new Alert("YAMS", buildAlertId("TalonFXS", m_talonfxs.getDeviceID(), "StartingPosition"), getName() + " starting position is not applied because an external encoder is used!", Alert.Level.HIGH);
+    m_zeroOffsetNoExternalEncoderAlert = new Alert("YAMS", buildAlertId("TalonFXS", m_talonfxs.getDeviceID(), "ZeroOffset"), getName() + " zero offset is not supported without an external encoder.", Alert.Level.HIGH);
+    m_discontinuityPointNoExternalEncoderAlert = new Alert("YAMS", buildAlertId("TalonFXS", m_talonfxs.getDeviceID(), "DiscontinuityPoint"), getName() + " discontinuity point is not supported without an external encoder.", Alert.Level.HIGH);
     m_configurator = m_talonfxs.getConfigurator();
     if (smartConfig.getVendorConfig().isPresent()) {
       var genCfg = smartConfig.getVendorConfig().get();
@@ -669,10 +682,14 @@ public class TalonFXSWrapper extends SmartMotorController {
   @Override
   public boolean applyConfig(SmartMotorControllerConfig config) {
     config.resetValidationCheck();
+    this.m_config = config;
     if (!m_config.getResetPreviousConfig()) {
       m_configurator.refresh(m_talonConfig);
     }
-    this.m_config = config;
+    m_systemCoreClosedLoopAlert.ifPresent(alert -> alert.set(false));
+    m_startingPositionExternalEncoderAlert.set(false);
+    m_zeroOffsetNoExternalEncoderAlert.set(false);
+    m_discontinuityPointNoExternalEncoderAlert.set(false);
     m_lqr = config.getLQRClosedLoopController();
     this.m_looseFollowers = config.getLooselyCoupledFollowers();
 
@@ -718,7 +735,7 @@ public class TalonFXSWrapper extends SmartMotorController {
       if (m_config.getClosedLoopTolerance().isPresent()) {
         throw new IllegalArgumentException("[ERROR] Cannot set closed-loop controller error tolerance on " + (config.getTelemetryName().isPresent() ? getName() : "TalonFX(" + m_talonfxs.getDeviceID() + ")"));
       }
-      System.err.println("====== TalonFXS(" + m_talonfxs.getDeviceID() + ")Using RIO Closed Loop Controller ======");
+      m_systemCoreClosedLoopAlert.ifPresent(alert -> alert.set(true));
 
       iterateClosedLoopController();
 
@@ -839,7 +856,7 @@ public class TalonFXSWrapper extends SmartMotorController {
     if (config.getExternalEncoder().isPresent() && useExternalEncoder) {
       // Starting position
       if (config.getStartingPosition().isPresent()) {
-        DriverStationBackend.reportWarning("[WARNING] Starting position is not applied to " + (config.getTelemetryName().isPresent() ? getName() : ("TalonFXS(" + m_talonfxs.getDeviceID() + ")")) + " because an external encoder is used!", false);
+        m_startingPositionExternalEncoderAlert.set(true);
       }
       // Set the gear ratio for external encoders.
       m_talonConfig.ExternalFeedback.RotorToSensorRatio = config.getGearing().getMechanismToRotorRatio() * config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getRotorToMechanismRatio();
@@ -920,7 +937,7 @@ public class TalonFXSWrapper extends SmartMotorController {
       m_talonConfig.ExternalFeedback.SensorToMechanismRatio = config.getGearing().getMechanismToRotorRatio();
       // Zero offset.
       if (config.getExternalEncoderZeroOffset().isPresent()) {
-        DriverStationBackend.reportWarning("[WARNING] Zero offset is not supported in TalonFXS(" + m_talonfxs.getDeviceID() + ") without external encoder.", false);
+        m_zeroOffsetNoExternalEncoderAlert.set(true);
       }
       // Starting position
       if (config.getStartingPosition().isPresent()) {
@@ -936,7 +953,7 @@ public class TalonFXSWrapper extends SmartMotorController {
       }
 
       if (config.getExternalEncoderDiscontinuityPoint().isPresent()) {
-        DriverStationBackend.reportWarning("[WARNING] Discontinuity point is not supported in TalonFXS(" + m_talonfxs.getDeviceID() + ") without external encoder.", false);
+        m_discontinuityPointNoExternalEncoderAlert.set(true);
       }
     }
 
@@ -1732,5 +1749,13 @@ public class TalonFXSWrapper extends SmartMotorController {
   @Override
   public Pair<Optional<List<BooleanTelemetryField>>, Optional<List<DoubleTelemetryField>>> getUnsupportedTelemetryFields() {
     return Pair.of(Optional.empty(), Optional.empty());
+  }
+
+  @Override
+  public void close() {
+    super.close();
+    m_startingPositionExternalEncoderAlert.close();
+    m_zeroOffsetNoExternalEncoderAlert.close();
+    m_discontinuityPointNoExternalEncoderAlert.close();
   }
 }

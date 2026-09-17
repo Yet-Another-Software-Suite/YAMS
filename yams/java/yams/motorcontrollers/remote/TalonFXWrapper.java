@@ -72,12 +72,12 @@ import org.wpilib.units.measure.Temperature;
 import org.wpilib.units.measure.Time;
 import org.wpilib.units.measure.Velocity;
 import org.wpilib.units.measure.Voltage;
-import org.wpilib.driverstation.DriverStationErrors;
 import org.wpilib.system.Notifier;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.system.Timer;
 import org.wpilib.simulation.DCMotorSim;
 import org.wpilib.simulation.RoboRioSim;
+import org.wpilib.util.Alert;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -201,6 +201,15 @@ public class TalonFXWrapper extends SmartMotorController {
   /** {@link DCMotorSim} for the {@link TalonFX}. */
   private Optional<DCMotorSim> m_dcmotorSim = Optional.empty();
 
+  /** Alert shown when the starting position is not applied because an external encoder is used. */
+  private Alert m_startingPositionExternalEncoderAlert;
+
+  /** Alert shown when a zero offset is set without an external encoder present. */
+  private Alert m_zeroOffsetNoExternalEncoderAlert;
+
+  /** Alert shown when a discontinuity point is set without an external encoder present. */
+  private Alert m_discontinuityPointNoExternalEncoderAlert;
+
   /**
    * Create the {@link TalonFX} wrapper
    *
@@ -212,6 +221,10 @@ public class TalonFXWrapper extends SmartMotorController {
     this.m_talonfx = controller;
     this.m_dcmotor = motor;
     this.m_config = smartConfig;
+    m_systemCoreClosedLoopAlert = Optional.of(new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "ClosedLoop"), getName() + " closed loop controller is running on the RIO.", Alert.Level.MEDIUM));
+    m_startingPositionExternalEncoderAlert = new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "StartingPosition"), getName() + " starting position is not applied because an external encoder is used!", Alert.Level.HIGH);
+    m_zeroOffsetNoExternalEncoderAlert = new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "ZeroOffset"), getName() + " zero offset is not supported without an external encoder.", Alert.Level.HIGH);
+    m_discontinuityPointNoExternalEncoderAlert = new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "DiscontinuityPoint"), getName() + " discontinuity point is not supported without an external encoder.", Alert.Level.HIGH);
     m_configurator = m_talonfx.getConfigurator();
     if (smartConfig.getVendorConfig().isPresent()) {
       var genCfg = smartConfig.getVendorConfig().get();
@@ -650,10 +663,14 @@ public class TalonFXWrapper extends SmartMotorController {
   @Override
   public boolean applyConfig(SmartMotorControllerConfig config) {
     config.resetValidationCheck();
+    this.m_config = config;
     if (!m_config.getResetPreviousConfig()) {
       m_configurator.refresh(m_talonConfig);
     }
-    this.m_config = config;
+    m_systemCoreClosedLoopAlert.ifPresent(alert -> alert.set(false));
+    m_startingPositionExternalEncoderAlert.set(false);
+    m_zeroOffsetNoExternalEncoderAlert.set(false);
+    m_discontinuityPointNoExternalEncoderAlert.set(false);
     this.m_looseFollowers = config.getLooselyCoupledFollowers();
     m_lqr = config.getLQRClosedLoopController();
 
@@ -700,7 +717,7 @@ public class TalonFXWrapper extends SmartMotorController {
       if (m_config.getClosedLoopTolerance().isPresent()) {
         throw new IllegalArgumentException("[ERROR] Cannot set closed-loop controller error tolerance on " + (config.getTelemetryName().isPresent() ? getName() : "TalonFX(" + m_talonfx.getDeviceID() + ")"));
       }
-      System.err.println("====== TalonFX(" + m_talonfx.getDeviceID() + ")Using RIO Closed Loop Controller ======");
+      m_systemCoreClosedLoopAlert.ifPresent(alert -> alert.set(true));
 
       iterateClosedLoopController();
 
@@ -819,7 +836,7 @@ public class TalonFXWrapper extends SmartMotorController {
     if (config.getExternalEncoder().isPresent() && useExternalEncoder) {
       // Starting position
       if (config.getStartingPosition().isPresent()) {
-        DriverStationErrors.reportWarning("[WARNING] Starting position is not applied to " + (config.getTelemetryName().isPresent() ? getName() : ("TalonFX(" + m_talonfx.getDeviceID() + ")")) + " because an external encoder is used!", false);
+        m_startingPositionExternalEncoderAlert.set(true);
       }
       // Set the gear ratio for external encoders.
       m_talonConfig.Feedback.RotorToSensorRatio = config.getGearing().getMechanismToRotorRatio() * config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getRotorToMechanismRatio();
@@ -897,7 +914,7 @@ public class TalonFXWrapper extends SmartMotorController {
 
       // Zero offset.
       if (config.getExternalEncoderZeroOffset().isPresent()) {
-        DriverStationErrors.reportWarning("[WARNING] Zero offset is not supported in TalonFX(" + m_talonfx.getDeviceID() + ") without external encoder.", false);
+        m_zeroOffsetNoExternalEncoderAlert.set(true);
       }
 
       m_talonConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
@@ -923,7 +940,7 @@ public class TalonFXWrapper extends SmartMotorController {
       }
       // Discontinuity point
       if (config.getExternalEncoderDiscontinuityPoint().isPresent()) {
-        DriverStationErrors.reportWarning("[WARNING] Discontinuity point is not supported in TalonFX(" + m_talonfx.getDeviceID() + ") without external encoder.", false);
+        m_discontinuityPointNoExternalEncoderAlert.set(true);
       }
     }
 
@@ -1745,5 +1762,13 @@ public class TalonFXWrapper extends SmartMotorController {
   @Override
   public Pair<Optional<List<BooleanTelemetryField>>, Optional<List<DoubleTelemetryField>>> getUnsupportedTelemetryFields() {
     return Pair.of(Optional.empty(), Optional.empty());
+  }
+
+  @Override
+  public void close() {
+    super.close();
+    m_startingPositionExternalEncoderAlert.close();
+    m_zeroOffsetNoExternalEncoderAlert.close();
+    m_discontinuityPointNoExternalEncoderAlert.close();
   }
 }

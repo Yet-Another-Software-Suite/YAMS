@@ -3,14 +3,12 @@
 
 package yams.helpers;
 
-import static org.wpilib.units.Units.Milliseconds;
-
 import java.util.concurrent.atomic.AtomicLong;
 import org.wpilib.command2.CommandScheduler;
 import org.wpilib.hardware.hal.simulation.NotifierDataJNI;
 import org.wpilib.simulation.SimHooks;
 import org.wpilib.system.RobotController;
-import org.wpilib.units.Units;
+import static org.wpilib.units.Units.*;
 import org.wpilib.units.measure.Time;
 
 /**
@@ -99,10 +97,10 @@ public final class SchedulerPumpHelper {
     try {
       for (int i = 0; i < durationInMs.in(Milliseconds) / heartbeatToUseInMs; i++) {
         Time now = Milliseconds.of(heartbeatToUseInMs).times(i);
-        time.set((long) now.in(Units.Nanoseconds));
+        time.set((long) now.in(Nanoseconds));
         CommandScheduler.getInstance().run();
-        SimHooks.stepTimingAsync(heartbeatToUseInMs);
-        awaitNotifierSettle((long) now.in(Units.Microseconds));
+        SimHooks.stepTimingAsync(Milliseconds.of(heartbeatToUseInMs).in(Seconds));
+        awaitNotifierSettle((long) now.in(Microseconds));
         if (cycleRunnable != null) cycleRunnable.run();
       }
     } finally {

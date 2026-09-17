@@ -152,6 +152,9 @@ public class SparkWrapper extends SmartMotorController {
   /** Acceleration filter. */
   private DerivativeTimeFilter m_accelerationFilter = new DerivativeTimeFilter(Milliseconds.of(20));
 
+  /** Alert shown when external encoder gearing is set alongside an external encoder discontinuity point. */
+  private Alert m_externalEncoderGearingDiscontinuityAlert;
+
   /**
    * Create a {@link SmartMotorController} from {@link SparkMax} or {@link SparkFlex}
    *
@@ -189,6 +192,8 @@ public class SparkWrapper extends SmartMotorController {
     m_spark = controller;
     m_sparkPidController = m_spark.getClosedLoopController();
     this.m_config = config;
+    m_systemCoreClosedLoopAlert = Optional.of(new Alert("YAMS", buildAlertId("Spark", m_spark.getDeviceId(), "ClosedLoop"), getName() + " closed loop controller is running on the RIO.", Alert.Level.MEDIUM));
+    m_externalEncoderGearingDiscontinuityAlert = new Alert("YAMS", buildAlertId("Spark", m_spark.getDeviceId(), "ExternalEncoderGearingDiscontinuity"), getName() + " external encoder gearing set while ExternalEncoderDiscontinuityPoint is also set; the discontinuity point will NOT be moved by the gearing, wrapping will occur non-uniformly", Level.HIGH);
     m_sparkRelativeEncoder = controller.getEncoder();
     setupSimulation();
     applyConfig(config);
@@ -313,7 +318,7 @@ public class SparkWrapper extends SmartMotorController {
     setpointFeedforwardForce = Optional.empty();
     setpointPosition = Optional.ofNullable(angle);
     if (m_expoProfile.isEmpty() && m_lqr.isEmpty() && angle != null) {
-      configureSpark(() -> m_sparkPidController.setSetpoint(angle.in(Rotations), m_positionControlType, m_closedLoopSlot));
+      configureSpark(() -> m_sparkPidController.setSetpoint(angle.times(m_config.getGearing().getMechanismToRotorRatio()).in(Rotations), m_positionControlType, m_closedLoopSlot));
     }
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
@@ -338,7 +343,7 @@ public class SparkWrapper extends SmartMotorController {
     setpointVelocity = Optional.ofNullable(angularVelocity);
     setpointFeedforwardForce = Optional.empty();
     if (m_lqr.isEmpty() && angularVelocity != null) {
-      configureSpark(() -> m_sparkPidController.setSetpoint(setpointVelocity.orElse(RPM.of(0)).in(RotationsPerSecond), m_velocityControlType, m_closedLoopSlot));
+      configureSpark(() -> m_sparkPidController.setSetpoint(setpointVelocity.orElse(RPM.of(0)).times(m_config.getGearing().getMechanismToRotorRatio()).in(RotationsPerSecond), m_velocityControlType, m_closedLoopSlot));
     }
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
@@ -354,7 +359,7 @@ public class SparkWrapper extends SmartMotorController {
     setpointFeedforwardForce = Optional.ofNullable(feedforwardForce);
     if (m_lqr.isEmpty() && angularVelocity != null && setpointFeedforwardForce.isPresent()) {
       Voltage feedforwardVoltage = m_config.convertToVoltage(getDCMotor(), angularVelocity, feedforwardForce);
-      configureSpark(() -> m_sparkPidController.setSetpoint(setpointVelocity.orElse(RPM.of(0)).in(RotationsPerSecond), m_velocityControlType, m_closedLoopSlot, feedforwardVoltage.in(Volts), ArbFFUnits.kVoltage));
+      configureSpark(() -> m_sparkPidController.setSetpoint(setpointVelocity.orElse(RPM.of(0)).times(m_config.getGearing().getMechanismToRotorRatio()).in(RotationsPerSecond), m_velocityControlType, m_closedLoopSlot, feedforwardVoltage.in(Volts), ArbFFUnits.kVoltage));
       m_looseFollowers.ifPresent(smcs -> {
         for (var f : smcs) {
           f.setVelocity(angularVelocity, feedforwardForce);
@@ -367,7 +372,10 @@ public class SparkWrapper extends SmartMotorController {
 
   @Override
   public boolean applyConfig(SmartMotorControllerConfig config) {
+    m_config = config;
     config.resetValidationCheck();
+    m_systemCoreClosedLoopAlert.ifPresent(alert -> alert.set(false));
+    m_externalEncoderGearingDiscontinuityAlert.set(false);
     var mechToRotorRatio = config.getGearing().getMechanismToRotorRatio();
 
     for (int i = 0; i < 4; i++) {
@@ -405,7 +413,7 @@ public class SparkWrapper extends SmartMotorController {
 
     // Handle closed loop controller thread
     if (m_expoProfile.isPresent() || m_lqr.isPresent()) {
-      System.err.println("====== Spark(" + m_spark.getDeviceId() + ") Using RIO Closed Loop Controller ======");
+      m_systemCoreClosedLoopAlert.ifPresent(alert -> alert.set(true));
       iterateClosedLoopController();
 
       if (m_closedLoopControllerThread == null) {
@@ -529,12 +537,8 @@ public class SparkWrapper extends SmartMotorController {
         }
 
         if (config.getExternalEncoderDiscontinuityPoint().isPresent()) {
-          if(config.getExternalEncoderGearing().isPresent())
-          {
-            try{
-            new Alert("YAMS","Spark","External Encoder Gearing set while ExternalEncoderDiscontinuityPoint is also set; the discontinuity point will NOT be moved by the gearing, wrapping will occur non-uniformly", Level.HIGH).set(true);
-            }catch(Exception ignored){}
-            //throw new SmartMotorControllerConfigurationException("External encoder gearing is not supported when using external encoder discontinuity point", "External encoder gearing could not be set", ".withExternalEncoderGearing");
+          if (config.getExternalEncoderGearing().isPresent()) {
+            m_externalEncoderGearingDiscontinuityAlert.set(true);
           }
           m_sparkBaseConfig.absoluteEncoder.rangeOffset(config.getExternalEncoderDiscontinuityPoint().get().in(Rotations));
         }
@@ -1243,5 +1247,11 @@ public class SparkWrapper extends SmartMotorController {
   @Override
   public Pair<Optional<List<BooleanTelemetryField>>, Optional<List<DoubleTelemetryField>>> getUnsupportedTelemetryFields() {
     return Pair.of(Optional.empty(), Optional.of(List.of(DoubleTelemetryField.SupplyCurrent, DoubleTelemetryField.SupplyCurrentLimit)));
+  }
+
+  @Override
+  public void close() {
+    super.close();
+    m_externalEncoderGearingDiscontinuityAlert.close();
   }
 }

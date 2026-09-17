@@ -128,7 +128,10 @@ public class MechanismLimitTest {
   // ──────────────────────────────────────────────
 
   private static Pivot createPivot(SmartMotorController smc) {
-    PivotConfig config = new PivotConfig().withHardLimits(Degrees.of(-100), Degrees.of(150));
+    // Hard limit is 5° wider at the bottom than the soft limit so that a "true at min"
+    // starting position (-101°) can clear the constructor's bounds check while still
+    // being below the -100° soft limit.
+    PivotConfig config = new PivotConfig().withHardLimits(Degrees.of(-105), Degrees.of(150));
     Pivot pivot = new Pivot(config, smc);
     smc.setupSimulation();
     SmartMotorControllerTestSubsystem subsys =
@@ -311,7 +314,9 @@ public class MechanismLimitTest {
     for (Object[] row :
         new Object[][] {
           {Degrees.of(0), false, ""},
-          {Degrees.of(-100), true, "-atMin"},
+          // -101° is 1° past the -100° soft limit; DCMotorSim has no gravity so the
+          // position stays near -101° after the physics step, well below -100°.
+          {Degrees.of(-101), true, "-atMin"},
         }) {
       Angle pos = (Angle) row[0];
       boolean expected = (boolean) row[1];

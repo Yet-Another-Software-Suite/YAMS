@@ -19,7 +19,6 @@ import java.util.OptionalDouble;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import org.wpilib.driverstation.internal.DriverStationBackend;
-import org.wpilib.framework.RobotBase;
 import org.wpilib.math.controller.ArmFeedforward;
 import org.wpilib.math.controller.ElevatorFeedforward;
 import org.wpilib.math.controller.PIDController;
@@ -146,8 +145,12 @@ public abstract class SmartMotorController {
   /** Running status of the closed loop controller. */
   private boolean m_closedLoopControllerRunning = false;
 
-  /** Alert shown when the closed loop controller is running on the RIO. */
-  private Alert m_rioClosedLoopAlert = null;
+  /**
+   * Alert shown when the closed loop controller is running on the RIO. Empty until constructed by
+   * the {@link SmartMotorController} implementation once its telemetry name (or a generated
+   * fallback identifier) is known.
+   */
+  protected Optional<Alert> m_systemCoreClosedLoopAlert = Optional.empty();
 
   /** Battery simulation UUID used when standalone simulation. */
   public final UUID m_batterySimUUID = UUID.randomUUID();
@@ -239,9 +242,6 @@ public abstract class SmartMotorController {
     if (m_closedLoopControllerThread != null) {
       m_closedLoopControllerThread.stop();
       m_closedLoopControllerRunning = false;
-      if (m_rioClosedLoopAlert != null) {
-        m_rioClosedLoopAlert.set(false);
-      }
     }
   }
 
@@ -258,15 +258,8 @@ public abstract class SmartMotorController {
       m_closedLoopControllerThread.stop();
       m_closedLoopControllerThread.startPeriodic(m_config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Seconds));
       m_closedLoopControllerRunning = true;
-      if (RobotBase.isReal()) {
-        if (m_rioClosedLoopAlert == null) {
-          m_rioClosedLoopAlert = new Alert("YAMS", getName() + " closed loop controller is running on the RIO.", Alert.Level.MEDIUM);
-        }
-        m_rioClosedLoopAlert.set(true);
-      }
     }
   }
-
   /**
    * Iterate the closed loop controller. Feedforward are only applied with profiled pid controllers.
    */
@@ -1072,6 +1065,29 @@ public abstract class SmartMotorController {
     return m_config.getTelemetryName().orElse("SmartMotorController");
   }
 
+  /**
+   * Build a unique {@link Alert} identifier for this motor controller, for use once
+   * {@link #m_config} has been assigned by the implementing constructor.
+   *
+   * <p>The motor controller type and device ID are always included as a prefix, matching how
+   * {@link yams.exceptions.SmartMotorControllerConfigurationException} messages identify the
+   * device, e.g. {@code "TalonFX(3)"}. If a telemetry name is configured, the identifier is
+   * {@code motorControllerType(deviceId) + alertType + telemetryName}. Otherwise a random UUID is
+   * used in place of the telemetry name so alerts from different motor controllers never collide:
+   * {@code motorControllerType(deviceId) + UUID + alertType}.
+   *
+   * @param motorControllerType Motor controller implementation type, e.g. {@code "TalonFX"}.
+   * @param deviceId            CAN device ID of the motor controller.
+   * @param alertType           Alert type/qualifier, e.g. {@code "ClosedLoop"}.
+   * @return Unique {@link Alert} identifier.
+   */
+  protected String buildAlertId(String motorControllerType, int deviceId, String alertType) {
+    String prefix = motorControllerType + "(" + deviceId + ")";
+    return m_config.getTelemetryName()
+        .map(name -> prefix + "_" + alertType + "_" + name)
+        .orElseGet(() -> prefix + "_" + UUID.randomUUID() + "_" + alertType);
+  }
+
   /** Close the SMC for unit testing. */
   public void close() {
     if (m_closedLoopControllerThread != null) {
@@ -1079,9 +1095,7 @@ public abstract class SmartMotorController {
       m_closedLoopControllerThread.close();
       m_closedLoopControllerThread = null;
     }
-    if (m_rioClosedLoopAlert != null) {
-      m_rioClosedLoopAlert.set(false);
-    }
+    m_systemCoreClosedLoopAlert.ifPresent(Alert::close);
     BatterySim.removeCurrent(m_batterySimUUID);
     telemetry.close();
     SmartMotorControllerCommandRegistry.removeCommands(m_config.getSubsystem());
