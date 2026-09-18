@@ -44,8 +44,7 @@ public class DifferentialMechanism extends yams.core.mechanisms.positional.Diffe
    * Constructor for the Differential mechanism.
    *
    * @param diffConfig Lower {@link DifferentialMechanismConfig} to use.
-   * @implNote Both motor controllers' configs must be {@link
-   *           yams.commands2.config.SmartMotorControllerConfig}s that share the same
+   * @implNote Both motor controllers' configs must be {@link yams.commands2.config.SmartMotorControllerConfig}s that share the same
    *           {@link Subsystem} set via {@code withSubsystem(Subsystem)}.
    */
   public DifferentialMechanism(DifferentialMechanismConfig diffConfig) {
@@ -139,27 +138,5 @@ public class DifferentialMechanism extends yams.core.mechanisms.positional.Diffe
    */
   public Command run(Supplier<Angle> tilt, Supplier<Angle> twist) {
     return setPosition(tilt, twist);
-  }
-
-  /**
-   * {@link yams.core.mechanisms.positional.DifferentialMechanism} does not support positional
-   * limits.
-   *
-   * @return Never returns.
-   * @throws RuntimeException Always.
-   */
-  public Trigger max() {
-    throw new RuntimeException("Unsupported operation");
-  }
-
-  /**
-   * {@link yams.core.mechanisms.positional.DifferentialMechanism} does not support positional
-   * limits.
-   *
-   * @return Never returns.
-   * @throws RuntimeException Always.
-   */
-  public Trigger min() {
-    throw new RuntimeException("Unsupported operation");
   }
 }

@@ -188,24 +188,4 @@ public class DoubleJointedArm extends yams.core.mechanisms.positional.DoubleJoin
       }
     }).withName(subsystem.getName() + " SetDutyCycle");
   }
-
-  /**
-   * {@link yams.core.mechanisms.positional.DoubleJointedArm} does not support positional limits.
-   *
-   * @return Never returns.
-   * @throws RuntimeException Always.
-   */
-  public Trigger max() {
-    throw new RuntimeException("Unsupported operation");
-  }
-
-  /**
-   * {@link yams.core.mechanisms.positional.DoubleJointedArm} does not support positional limits.
-   *
-   * @return Never returns.
-   * @throws RuntimeException Always.
-   */
-  public Trigger min() {
-    throw new RuntimeException("Unsupported operation");
-  }
 }

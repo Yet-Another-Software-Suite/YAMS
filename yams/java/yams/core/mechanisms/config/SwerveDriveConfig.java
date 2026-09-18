@@ -39,33 +39,36 @@ import yams.core.telemetry.SwerveDriveTelemetryConfig;
  * Subsystem-bound subclass and a full construction example.
  */
 public class SwerveDriveConfig {
-  /** {@link SwerveModule}s for the {@link SwerveDrive}. */
+  /**
+   * {@link SwerveModule}s for the {@link SwerveDrive}.
+   */
   private SwerveModule[] modules;
-
-  /** Telemetry name for the {@link SwerveDrive}. */
+  /**
+   * Telemetry name for the {@link SwerveDrive}.
+   */
   private String telemetryName = "swerve";
-
-  /** Telemetry verbosity */
+  /**
+   * Telemetry verbosity
+   */
   private Optional<TelemetryVerbosity> telemetryVerbosity = Optional.empty();
-
   /**
    * User specified {@link SwerveDriveTelemetryConfig}, takes precedence over {@link
    * #telemetryVerbosity} if present.
    */
   private Optional<SwerveDriveTelemetryConfig> specifiedTelemetryConfig = Optional.empty();
-
-  /** Gyro supplier. */
+  /**
+   * Gyro supplier.
+   */
   private Optional<Supplier<Angle>> gyroSupplier = Optional.empty();
-
-  /** Gyro angular velocity supplier. */
+  /**
+   * Gyro angular velocity supplier.
+   */
   private Optional<Supplier<AngularVelocity>> gyroAngularVelocitySupplier = Optional.empty();
-
   /**
    * Derives the gyro angular velocity from the gyro angle ({@link #getGyroAngle()}) when {@link
    * #gyroAngularVelocitySupplier} is not configured, in both simulation and real robot code.
    */
   private final DerivativeTimeFilter gyroAngularVelocityFilter = new DerivativeTimeFilter(Milliseconds.of(20));
-
   /**
    * Alert shown once if {@link #angularVelocitySkewCorrection(ChassisVelocities)} runs without a
    * {@link #gyroAngularVelocitySupplier} configured, warning that the gyro angular velocity is
@@ -73,50 +76,65 @@ public class SwerveDriveConfig {
    * derived from the gyro angle instead.
    */
   private Alert noGyroAngularVelocitySupplierAlert = null;
-
-  /** Gyro offset. */
+  /**
+   * Gyro offset.
+   */
   private Optional<Angle> gyroOffset = Optional.empty();
-
-  /** Gyro inverted. */
+  /**
+   * Gyro inverted.
+   */
   private boolean gyroInverted = false;
-
-  /** Starting pose on the field. */
+  /**
+   * Starting pose on the field.
+   */
   private Pose2d initialPose = new Pose2d();
-
-  /** Maximum speed of the chassis. */
+  /**
+   * Maximum speed of the chassis.
+   */
   private Optional<LinearVelocity> maximumChassisLinearVelocity = Optional.empty();
-
-  /** Maximum angular speed of the chassis. */
+  /**
+   * Maximum angular speed of the chassis.
+   */
   private Optional<AngularVelocity> maximumChassisAngularVelocity = Optional.empty();
-
-  /** Maximum speed of the modules. */
+  /**
+   * Maximum speed of the modules.
+   */
   private Optional<LinearVelocity> maximumModuleLinearVelocity = Optional.empty();
-
-  /** Discretization time for the pose estimation. */
+  /**
+   * Discretization time for the pose estimation.
+   */
   private Optional<Time> discretizationSeconds = Optional.empty();
-
-  /** Angular velocity scale factor. */
+  /**
+   * Angular velocity scale factor.
+   */
   private OptionalDouble angularVelocityScaleFactor = OptionalDouble.empty();
-
-  /** Center of Rotation */
+  /**
+   * Center of Rotation
+   */
   private Optional<Translation2d> centerOfRotation = Optional.empty();
-
-  /** Translation PID controller. */
+  /**
+   * Translation PID controller.
+   */
   private Optional<PIDController> translationController = Optional.empty();
-
-  /** Rotation PID controller. */
+  /**
+   * Rotation PID controller.
+   */
   private Optional<PIDController> rotationController = Optional.empty();
-
-  /** Simulated translation PID controller. */
+  /**
+   * Simulated translation PID controller.
+   */
   private Optional<PIDController> simTranslationController = Optional.empty();
-
-  /** Simulated rotation PID controller. */
+  /**
+   * Simulated rotation PID controller.
+   */
   private Optional<PIDController> simRotationController = Optional.empty();
-
-  /** Discretization time for the pose estimation. */
+  /**
+   * Discretization time for the pose estimation.
+   */
   private Optional<Time> simDiscretizationSeconds = Optional.empty();
-
-  /** Angular velocity scale factor. */
+  /**
+   * Angular velocity scale factor.
+   */
   private OptionalDouble simAngularVelocityScaleFactor = OptionalDouble.empty();
 
   /**

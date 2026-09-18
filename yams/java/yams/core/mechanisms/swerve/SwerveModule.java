@@ -64,22 +64,29 @@ import yams.core.telemetry.SwerveModuleTelemetryConfig;
  * }</pre>
  */
 public class SwerveModule {
-  /** Drive motor controller. */
+  /**
+   * Drive motor controller.
+   */
   protected final SmartMotorController m_driveMotorController;
-
-  /** Azimuth motor controller. */
+  /**
+   * Azimuth motor controller.
+   */
   protected final SmartMotorController m_azimuthMotorController;
-
-  /** Swerve module configuration. */
+  /**
+   * Swerve module configuration.
+   */
   private final SwerveModuleConfig m_config;
-
-  /** Mechanism Telemetry, used for the loop time. */
+  /**
+   * Mechanism Telemetry, used for the loop time.
+   */
   private final MechanismTelemetry m_telemetry = new MechanismTelemetry();
-
-  /** Absolute encoder angle, and drive/azimuth motor controller telemetry. */
+  /**
+   * Absolute encoder angle, and drive/azimuth motor controller telemetry.
+   */
   private SwerveModuleTelemetry m_swerveModuleTelemetry;
-
-  /** Absolute encoder angle without any offsets applied. */
+  /**
+   * Absolute encoder angle without any offsets applied.
+   */
   private final Supplier<Angle> m_azimuthEncoderWithoutOffsets;
 
   /**

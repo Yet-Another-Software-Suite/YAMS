@@ -40,13 +40,18 @@ import yams.core.motorcontrollers.simulation.ArmSimSupplier;
  * class and has a full usage example in its Javadoc.
  */
 public class Arm extends SmartPositionalMechanism {
-  /** Arm config. */
+  /**
+   * Arm config.
+   */
   private final ArmConfig m_config;
-
-  /** Simulation for the arm. */
+  /**
+   * Simulation for the arm.
+   */
   private Optional<SingleJointedArmSim> m_sim = Optional.empty();
 
-  /** Mechanism ligament for the setpoint. */
+  /**
+   * Mechanism ligament for the setpoint.
+   */
   private MechanismLigament2d m_setpointLigament = null;
 
   /**

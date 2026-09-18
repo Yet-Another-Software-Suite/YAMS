@@ -92,8 +92,7 @@ import yams.core.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * <li>{@code 1.0} rotations — sensor range is [0, 1), {@code zeroCentered = false}
  * </ul>
  *
- * A discontinuity point <b>must</b> be configured via {@link
- * yams.core.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint}
+ * A discontinuity point <b>must</b> be configured via {@link yams.core.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint}
  * whenever a {@link com.revrobotics.spark.SparkAbsoluteEncoder} is used as the external encoder.
  *
  * <h2>Example</h2>
@@ -113,46 +112,32 @@ import yams.core.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
 public class SparkWrapper extends SmartMotorController {
   /** Spark motor controller */
   private final SparkBase m_spark;
-
   /** Spark Closed loop controller. */
   private final SparkClosedLoopController m_sparkPidController;
-
   /** Motor type. */
   private final DCMotor m_motor;
-
   /** Spark base configuration. */
   private final SparkBaseConfig m_sparkBaseConfig;
-
   /** Spark relative encoder. */
   private final RelativeEncoder m_sparkRelativeEncoder;
-
   /** Spark relative encoder sim object. */
   private Optional<SparkRelativeEncoderSim> sparkRelativeEncoderSim = Optional.empty();
-
   /** Spark simulation. */
   private Optional<SparkSim> sparkSim = Optional.empty();
-
   /** Spark absolute encoder. */
   private Optional<AbsoluteEncoder> m_sparkAbsoluteEncoder = Optional.empty();
-
   /** Spark absolute encoder sim object */
   private Optional<SparkAbsoluteEncoderSim> m_sparkAbsoluteEncoderSim = Optional.empty();
-
   /** DC Motor Sim. */
   private Optional<DCMotorSim> m_dcMotorSim = Optional.empty();
-
   /** REV Control type to use for position control. */
   private ControlType m_positionControlType = ControlType.kPosition;
-
   /** REV Control type to use for velocity control. */
   private ControlType m_velocityControlType = ControlType.kVelocity;
-
   /** REV Closed loop slot. */
   private ClosedLoopSlot m_closedLoopSlot = ClosedLoopSlot.kSlot0;
-
   /** Acceleration filter. */
   private DerivativeTimeFilter m_accelerationFilter = new DerivativeTimeFilter(Milliseconds.of(20));
-
   /**
    * Alert shown when external encoder gearing is set alongside an external encoder discontinuity
    * point.

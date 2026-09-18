@@ -80,71 +80,72 @@ import yams.core.telemetry.SwerveModuleTelemetryConfig;
  * }</pre>
  */
 public class SwerveModuleConfig {
-  /** {@link SmartMotorController} for the {@link SwerveModule} */
+  /**
+   * {@link SmartMotorController} for the {@link SwerveModule}
+   */
   private Optional<SmartMotorController> driveMotor = Optional.empty();
-
-  /** {@link SmartMotorController} for the {@link SwerveModule} */
+  /**
+   * {@link SmartMotorController} for the {@link SwerveModule}
+   */
   private Optional<SmartMotorController> azimuthMotor = Optional.empty();
-
-  /** Telemetry name. */
+  /**
+   * Telemetry name.
+   */
   private Optional<String> telemetryName = Optional.empty();
-
-  /** Telemetry verbosity */
+  /**
+   * Telemetry verbosity
+   */
   private Optional<TelemetryVerbosity> telemetryVerbosity = Optional.empty();
-
   /**
    * User specified {@link SwerveModuleTelemetryConfig}, takes precedence over {@link
    * #telemetryVerbosity} if present.
    */
   private Optional<SwerveModuleTelemetryConfig> specifiedTelemetryConfig = Optional.empty();
-
-  /** Absolute encoder supplier for the azimuth {@link SmartMotorController}. */
+  /**
+   * Absolute encoder supplier for the azimuth {@link SmartMotorController}.
+   */
   private Optional<Supplier<Angle>> absoluteEncoderSupplier = Optional.empty();
-
   /**
    * Absolute encoder offset for the azimuth {@link SmartMotorController} to 0 with the bevel facing
    * left.
    */
   private Optional<Angle> absoluteEncoderOffset = Optional.empty();
-
-  /** Gearbox for the absolute encoder. */
-  private GearBox absoluteEncoderGearbox = new GearBox(new double[] {
-                                                                     1});
-
+  /**
+   * Gearbox for the absolute encoder.
+   */
+  private GearBox absoluteEncoderGearbox = new GearBox(new double[] {1});
   /**
    * Swerve module state optimization using
    * {@link org.wpilib.math.kinematics.SwerveModuleVelocity#optimize(Rotation2d)}.
    */
   private boolean swerveModuleStateOptimization = true;
-
-  /** Swerve module cosine compensation. */
+  /**
+   * Swerve module cosine compensation.
+   */
   private boolean cosineCompensation = false;
-
-  /** Coupling ratio for the {@link SwerveModule}. */
+  /**
+   * Coupling ratio for the {@link SwerveModule}.
+   */
   private GearBox couplingRatio;
-
-  /** Swerve module minimum velocity. */
+  /**
+   * Swerve module minimum velocity.
+   */
   private Optional<LinearVelocity> minimumVelocity = Optional.empty();
-
-  /** Distance from the center of rotation for the {@link SwerveModule}. */
+  /**
+   * Distance from the center of rotation for the {@link SwerveModule}.
+   */
   private Optional<Translation2d> distanceFromCenterOfRotation = Optional.empty();
-
   /**
    * Absolute encoder for the azimuth {@link SmartMotorController}, must be of the same vendor as
    * the azimuth motor.
    */
   private Optional<Object> absoluteEncoder = Optional.empty();
-
-  /** Wheel circumference for the drive {@link SmartMotorController}. */
+  /**
+   * Wheel circumference for the drive {@link SmartMotorController}.
+   */
   private Optional<Distance> wheelCircumference = Optional.empty();
-
   /**
    * Last angle this config actually commanded via {@link #getOptimizedState(SwerveModuleVelocity)}.
-   * The flip decision is made against this, not the live absolute encoder reading: kinematics
-   * recomputes the raw desired angle every loop with no memory of a prior flip, so if the decision
-   * were re-derived from the encoder, holding the raw state while a flip is debouncing would drive
-   * the wheel toward the raw angle, pulling the encoder (and thus the error that triggered the
-   * flip) back down before the debounce could ever confirm it.
    */
   private Rotation2d lastCommandedAngle;
 

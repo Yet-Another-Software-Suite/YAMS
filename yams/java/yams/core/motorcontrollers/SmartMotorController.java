@@ -771,9 +771,7 @@ public abstract class SmartMotorController {
   }
 
   /**
-   * Apply the live-tuned values (from NetworkTables) to this {@link SmartMotorController}. Intended
-   * to be wired into a periodic/scheduled callback by the command layer, e.g. via
-   * {@code SmartMotorControllerConfig.setupLiveTuning()}.
+   * Apply the live-tuned values (from the Tuning NetworkTable) to this {@link SmartMotorController}.
    */
   public void applyTuningValues() {
     telemetry.applyTuningValues(this);
@@ -795,6 +793,9 @@ public abstract class SmartMotorController {
     var tuningNetworkTable = NetworkTableInstance.getDefault().getTable("Tuning");
     var networkTable = NetworkTableInstance.getDefault().getTable("Mechanisms");
     setupTelemetry(networkTable, tuningNetworkTable);
+    if(m_config.getVerbosity().orElse(TelemetryVerbosity.LOW).equals(TelemetryVerbosity.HIGH)) {
+      m_config.setupLiveTuning();
+    }
   }
 
   /** Update the telemetry under the motor name under the given {@link NetworkTable} */

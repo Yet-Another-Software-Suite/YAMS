@@ -47,34 +47,45 @@ import yams.core.telemetry.SwerveDriveTelemetryConfig;
  * extends this class. See that class's Javadoc for a full usage example.
  */
 public class SwerveDrive {
-  /** The modules of the drive. */
+  /**
+   * The modules of the drive.
+   */
   private final SwerveModule[] m_modules;
-
-  /** The pose estimator for the drive. */
+  /**
+   * The pose estimator for the drive.
+   */
   private final SwerveDrivePoseEstimator m_poseEstimator;
-
-  /** The kinematics for the drive. */
+  /**
+   * The kinematics for the drive.
+   */
   private final SwerveDriveKinematics m_kinematics;
-
-  /** Timer for simulation purposes only. Not used in real robot code. */
+  /**
+   * Timer for simulation purposes only. Not used in real robot code.
+   */
   private final Timer m_simTimer = new Timer();
-
-  /** The config for the drive. */
+  /**
+   * The config for the drive.
+   */
   private final SwerveDriveConfig m_config;
-
-  /** Mechanism telemetry, used for the loop time and the {@link Field2d}. */
+  /**
+   * Mechanism telemetry, used for the loop time and the {@link Field2d}.
+   */
   private final MechanismTelemetry m_telemetry = new MechanismTelemetry();
-
-  /** Pose, chassis speeds, gyro, and auto-align tuning telemetry. */
+  /**
+   * Pose, chassis speeds, gyro, and auto-align tuning telemetry.
+   */
   private SwerveDriveTelemetry m_swerveTelemetry;
-
-  /** Simulated Gyro Angle. Used for simulation purposes only. Not used in real robot code. */
+  /**
+   * Simulated Gyro Angle. Used for simulation purposes only. Not used in real robot code.
+   */
   private Angle m_simGyroAngle = Rotations.of(0);
-
-  /** Field to display the robot's pose. */
+  /**
+   * Field to display the robot's pose.
+   */
   private Field2d m_field2d = new Field2d();
-
-  /** Last-commanded desired module states; cached and published from updateTelemetry. */
+  /**
+   * Last-commanded desired module states; cached and published from updateTelemetry.
+   */
   private SwerveModuleVelocity[] m_desiredModuleStates;
 
   /**

@@ -23,10 +23,8 @@ import org.wpilib.units.measure.Voltage;
 public class BatterySim {
   /** Hashmap holding all currents used by the robot. */
   private static HashMap<UUID, Double> currents = new HashMap<>();
-
   /** Battery voltage. */
   private static Voltage batteryVoltage = Volts.of(12);
-
   /** Battery resistance. */
   private static Resistance batteryResistance = MilliOhms.of(20);
 

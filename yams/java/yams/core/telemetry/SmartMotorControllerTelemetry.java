@@ -65,16 +65,12 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig;
 public class SmartMotorControllerTelemetry {
   /** Double telemetry fields that will be outputted. */
   private Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> doubleFields;
-
   /** Boolean telemetry fields that will be outputted. */
   private Map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> boolFields;
-
   /** Network table to publish to. */
   private NetworkTable dataNetworkTable;
-
   /** Network table for tuning. */
   private NetworkTable tuningNetworkTable;
-
   /** Telemetry config */
   private SmartMotorControllerTelemetryConfig config;
 

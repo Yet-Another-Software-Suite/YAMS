@@ -44,40 +44,28 @@ import org.wpilib.system.Timer;
 public class BooleanTelemetry<F> {
   /** Field representing. */
   private final F field;
-
   /** Network table key. */
   private final String key;
-
   /** Tunable? */
   private final boolean tunable;
-
   /** Enabled? */
   protected boolean enabled = false;
-
   /** Default value. */
   private boolean defaultValue;
-
   /** Cached value. */
   private boolean cachedValue;
-
   /** Publisher. */
   private BooleanPublisher publisher = null;
-
   /** Subscriber. */
   private Optional<BooleanSubscriber> subscriber = Optional.empty();
-
   /** Sub publisher. */
   private BooleanPublisher pubSub = null;
-
   /** pub or sub topic. */
   private BooleanTopic topic;
-
   /** DataLog entry. */
   private Optional<BooleanLogEntry> dataLogEntry = Optional.empty();
-
   /** Tuning table */
   private Optional<NetworkTable> tuningTable = Optional.empty();
-
   /** Data table. */
   private Optional<NetworkTable> dataTable = Optional.empty();
 

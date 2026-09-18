@@ -64,13 +64,10 @@ import yams.core.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
 public class SmartMotorControllerTelemetryConfig {
   /** DataLog entry name */
   private Optional<String> dataLogName = Optional.empty();
-
   /** Enable telemetry over network tables. */
   private boolean NT4Telemetry = true;
-
   /** {@link BooleanTelemetryField}s to enable or disable. */
   private final Map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> boolFields = Arrays.stream(BooleanTelemetryField.values()).collect(Collectors.toMap(e -> e, BooleanTelemetryField::create));
-
   /** {@link DoubleTelemetryField} to enable or disable. */
   private final Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> doubleFields = Arrays.stream(DoubleTelemetryField.values()).collect(Collectors.toMap(e -> e, DoubleTelemetryField::create));
 

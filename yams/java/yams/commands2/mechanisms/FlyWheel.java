@@ -33,9 +33,6 @@ import yams.core.motorcontrollers.SmartMotorController;
  * Trigger atSpeed = shooter.near(RPM.of(3000), RPM.of(50));
  * atSpeed.onTrue(Commands.print("Shooter at speed!"));
  * }</pre>
- *
- * <p><b>Unsupported operations:</b> {@link #max()} and {@link #min()} are not supported for
- * velocity mechanisms and will throw {@link java.lang.UnsupportedOperationException} if called.
  */
 public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel implements CommandMechanism {
   /** Subsystem the FlyWheel's commands should require. */
@@ -197,25 +194,5 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel implements 
    */
   public Command run(LinearVelocity speed) {
     return run(getShooterConfig().getAngularVelocity(speed)).withName(subsystem.getName() + " RunSpeed");
-  }
-
-  /**
-   * {@link yams.core.mechanisms.velocity.FlyWheel} does not support positional limits.
-   *
-   * @return Never returns.
-   * @throws UnsupportedOperationException Always.
-   */
-  public Trigger max() {
-    throw new UnsupportedOperationException("Velocity soft limits have been removed from FlyWheel.");
-  }
-
-  /**
-   * {@link yams.core.mechanisms.velocity.FlyWheel} does not support positional limits.
-   *
-   * @return Never returns.
-   * @throws UnsupportedOperationException Always.
-   */
-  public Trigger min() {
-    throw new UnsupportedOperationException("Velocity soft limits have been removed from FlyWheel.");
   }
 }

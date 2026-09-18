@@ -80,93 +80,119 @@ import yams.core.telemetry.SmartMotorControllerTelemetryConfig;
  * }</pre>
  */
 public class SmartMotorControllerConfig {
-  /** Reset old configurations, so they are no longer persistent. */
+  /**
+   * Reset old configurations, so they are no longer persistent.
+   */
   private boolean resetPreviousConfig = true;
-
-  /** Vendor specific configuration for the {@link SmartMotorController}. */
+  /**
+   * Vendor specific configuration for the {@link SmartMotorController}.
+   */
   private Optional<Object> vendorConfig = Optional.empty();
-
-  /** Vendor specific control request for the {@link SmartMotorController} */
+  /**
+   * Vendor specific control request for the {@link SmartMotorController}
+   */
   private Optional<Object> vendorControlRequest = Optional.empty();
-
-  /** {@link SmartMotorController} this config has been attached to, if any. */
+  /**
+   * {@link SmartMotorController} this config has been attached to, if any.
+   */
   private SmartMotorController attachedController;
-
-  /** Missing options that would be decremented for each motor application. */
+  /**
+   * Missing options that would be decremented for each motor application.
+   */
   private final List<SmartMotorControllerOptions> missingOptions = Arrays.asList(SmartMotorControllerOptions.values());
-
-  /** Validation set to confirm all options have been applied to the Smart Motor Controller. */
+  /**
+   * Validation set to confirm all options have been applied to the Smart Motor Controller.
+   */
   private Set<BasicOptions> basicOptions = EnumSet.allOf(BasicOptions.class);
-
   /**
    * Validation set to confirm all options have been applied to the Smart Motor Controller's
    * external encoder.
    */
   private Set<ExternalEncoderOptions> externalEncoderOptions = EnumSet.allOf(ExternalEncoderOptions.class);
-
-  /** External encoder. */
+  /**
+   * External encoder.
+   */
   private Optional<Object> externalEncoder = Optional.empty();
-
-  /** External encoder inversion state. */
+  /**
+   * External encoder inversion state.
+   */
   private Optional<Boolean> externalEncoderInverted = Optional.empty();
-
-  /** Follower motors and inversion. */
+  /**
+   * Follower motors and inversion.
+   */
   private Optional<Pair<Object, Boolean>[]> followers = Optional.empty();
-
-  /** Simple feedforward for the motor controller. */
+  /**
+   * Simple feedforward for the motor controller.
+   */
   private EnumMap<ClosedLoopControllerSlot, SimpleMotorFeedforward> simpleFeedforward = new EnumMap<>(ClosedLoopControllerSlot.class);
-
-  /** Elevator feedforward for the motor controller. */
+  /**
+   * Elevator feedforward for the motor controller.
+   */
   private EnumMap<ClosedLoopControllerSlot, ElevatorFeedforward> elevatorFeedforward = new EnumMap<>(ClosedLoopControllerSlot.class);
-
-  /** Arm feedforward for the motor controller. */
+  /**
+   * Arm feedforward for the motor controller.
+   */
   private EnumMap<ClosedLoopControllerSlot, ArmFeedforward> armFeedforward = new EnumMap<>(ClosedLoopControllerSlot.class);
-
-  /** Simple feedforward for the motor controller. */
+  /**
+   * Simple feedforward for the motor controller.
+   */
   private EnumMap<ClosedLoopControllerSlot, SimpleMotorFeedforward> sim_simpleFeedforward = new EnumMap<>(ClosedLoopControllerSlot.class);
-
-  /** Elevator feedforward for the motor controller. */
+  /**
+   * Elevator feedforward for the motor controller.
+   */
   private EnumMap<ClosedLoopControllerSlot, ElevatorFeedforward> sim_elevatorFeedforward = new EnumMap<>(ClosedLoopControllerSlot.class);
-
-  /** Arm feedforward for the motor controller. */
+  /**
+   * Arm feedforward for the motor controller.
+   */
   private EnumMap<ClosedLoopControllerSlot, ArmFeedforward> sim_armFeedforward = new EnumMap<>(ClosedLoopControllerSlot.class);
-
-  /** Exponential Profile */
+  /**
+   * Exponential Profile
+   */
   private Optional<ExponentialProfile.Constraints> exponentialProfile = Optional.empty();
-
-  /** Trapezoidal Profile */
+  /**
+   * Trapezoidal Profile
+   */
   private Optional<TrapezoidProfile.Constraints> trapezoidProfile = Optional.empty();
-
-  /** Exponential Profile */
+  /**
+   * Exponential Profile
+   */
   private Optional<ExponentialProfile.Constraints> sim_exponentialProfile = Optional.empty();
-
-  /** Trapezoidal Profile */
+  /**
+   * Trapezoidal Profile
+   */
   private Optional<TrapezoidProfile.Constraints> sim_trapezoidProfile = Optional.empty();
-
-  /** Controller for the {@link SmartMotorController}. */
+  /**
+   * Controller for the {@link SmartMotorController}.
+   */
   private EnumMap<ClosedLoopControllerSlot, PIDController> pid = new EnumMap<>(ClosedLoopControllerSlot.class);
-
-  /** Controller for the {@link SmartMotorController}. */
+  /**
+   * Controller for the {@link SmartMotorController}.
+   */
   private Optional<LQRController> lqr = Optional.empty();
-
-  /** Controller for the {@link SmartMotorController}. */
+  /**
+   * Controller for the {@link SmartMotorController}.
+   */
   private Optional<LQRController> sim_lqr = Optional.empty();
-
-  /** Controller for the {@link SmartMotorController}. */
+  /**
+   * Controller for the {@link SmartMotorController}.
+   */
   private EnumMap<ClosedLoopControllerSlot, PIDController> sim_pid = new EnumMap<>(ClosedLoopControllerSlot.class);
-
-  /** Gearing for the {@link SmartMotorController}. */
+  /**
+   * Gearing for the {@link SmartMotorController}.
+   */
   private MechanismGearing gearing;
-
-  /** External encoder gearing, defaults to 1:1. */
+  /**
+   * External encoder gearing,
+   defaults to 1:1. */
   private Optional<MechanismGearing> externalEncoderGearing = Optional.empty();
-
-  /** Mechanism Circumference for distance calculations. */
+  /**
+   * Mechanism Circumference for distance calculations.
+   */
   private Optional<Distance> mechanismCircumference = Optional.empty();
-
-  /** PID Controller period for robot controller based PIDs */
+  /**
+   * PID Controller period for robot controller based PIDs
+   */
   private Optional<Time> controlPeriod = Optional.empty();
-
   /**
    * Simulation loop period, the rate at which {@link SmartMotorController#simIterate()} steps the
    * simulated physics forward. This is independent of {@link #controlPeriod} — a robot can run its
@@ -174,92 +200,121 @@ public class SmartMotorControllerConfig {
    * if not configured.
    */
   private Optional<Time> simulationPeriod = Optional.empty();
-
-  /** Open loop ramp rate, amount of time to go from 0 to 100 speed.. */
+  /**
+   * Open loop ramp rate, amount of time to go from 0 to 100 speed.
+   */
   private Optional<Time> openLoopRampRate = Optional.empty();
-
-  /** Closed loop ramp rate, amount of time to go from 0 to 100 speed. */
+  /**
+   * Closed loop ramp rate, amount of time to go from 0 to
+   100 speed. */
   private Optional<Time> closeLoopRampRate = Optional.empty();
-
-  /** Set the stator current limit in Amps for the {@link SmartMotorController} */
+  /**
+   * Set the stator current limit in Amps for the {@link
+   SmartMotorController} */
   private OptionalInt statorStallCurrentLimit = OptionalInt.empty();
-
-  /** The supply current limit in Amps for the {@link SmartMotorController} */
+  /**
+   * The supply current limit in Amps for the {@link
+   SmartMotorController} */
   private OptionalInt supplyStallCurrentLimit = OptionalInt.empty();
-
-  /** The voltage compensation. */
+  /**
+   * The voltage compensation.
+   */
   private Optional<Voltage> voltageCompensation = Optional.empty();
-
-  /** Set the {@link MotorMode} for the {@link SmartMotorController}. */
+  /**
+   * Set the {@link MotorMode} for the {@link
+   SmartMotorController}. */
   private Optional<MotorMode> idleMode = Optional.empty();
-
-  /** Mechanism lower limit to prevent movement below. */
+  /**
+   * Mechanism lower limit to prevent movement below.
+   */
   private Optional<Angle> mechanismLowerLimit = Optional.empty();
-
-  /** High distance soft limit to prevent movement above. */
+  /**
+   * High distance soft limit to prevent movement above.
+   */
   private Optional<Angle> mechanismUpperLimit = Optional.empty();
-
-  /** Name for the {@link SmartMotorController} telemetry. */
+  /**
+   * Name for the {@link SmartMotorController} telemetry.
+   */
   private Optional<String> telemetryName = Optional.empty();
-
-  /** Telemetry verbosity setting. */
+  /**
+   * Telemetry verbosity setting.
+   */
   private Optional<TelemetryVerbosity> verbosity = Optional.empty();
-
-  /** Optional config for custom telemetry setup. */
+  /**
+   * Optional config for custom telemetry setup.
+   */
   private Optional<SmartMotorControllerTelemetryConfig> specifiedTelemetryConfig = Optional.empty();
-
-  /** Zero offset of the {@link SmartMotorController} */
+  /**
+   * Zero offset of the {@link SmartMotorController}
+   */
   private Optional<Angle> zeroOffset = Optional.empty();
-
-  /** External absolute encoder discontinuity point. */
+  /**
+   * External absolute encoder discontinuity point.
+   */
   private Optional<Angle> externalEncoderDiscontinuityPoint = Optional.empty();
-
-  /** Temperature cutoff for the {@link SmartMotorController} to prevent running if above. */
+  /**
+   * Temperature cutoff for the {@link SmartMotorController} to prevent
+   running if above. */
   private Optional<Temperature> temperatureCutoff = Optional.empty();
-
-  /** The encoder readings are inverted. */
+  /**
+   * The encoder readings are inverted.
+   */
   private Optional<Boolean> encoderInverted = Optional.empty();
-
-  /** The motor is inverted. */
+  /**
+   * The motor is inverted.
+   */
   private Optional<Boolean> motorInverted = Optional.empty();
-
-  /** Use the provided external encoder if set. */
+  /**
+   * Use the provided external encoder if set.
+   */
   private boolean useExternalEncoder = true;
-
-  /** {@link SmartMotorController} starting angle. */
+  /**
+   * {@link SmartMotorController}
+   starting angle. */
   private Optional<Angle> startingPosition = Optional.empty();
-
-  /** {@link SmartMotorController} starting angle to be used during simulation. */
+  /**
+   * {@link SmartMotorController} starting angle to be used
+   during simulation. */
   private Optional<Angle> sim_startingPosition = Optional.empty();
-
-  /** Maximum voltage output for the motor controller while using the closed loop controller. */
+  /**
+   * Maximum voltage output for the motor controller while
+   using the closed loop controller. */
   private Optional<Voltage> closedLoopControllerMaximumVoltage = Optional.empty();
-
-  /** Feedback synchronization threshold. */
+  /**
+   * Feedback synchronization threshold.
+   */
   private Optional<Angle> feedbackSynchronizationThreshold = Optional.empty();
-
-  /** The motor controller mode. */
+  /**
+   * The motor controller mode.
+   */
   private ControlMode motorControllerMode = ControlMode.CLOSED_LOOP;
-
-  /** Closed loop controller continuous wrapping point. */
+  /**
+   * Closed loop controller continuous wrapping point.
+   */
   private Optional<Angle> maxContinuousWrappingAngle = Optional.empty();
-
-  /** Closed loop controller continuous wrapping point. */
+  /**
+   * Closed loop controller continuous wrapping point.
+   */
   private Optional<Angle> minContinuousWrappingAngle = Optional.empty();
-
-  /** Closed loop controller tolerance. */
+  /**
+   * Closed loop controller tolerance.
+   */
   private Optional<Angle> closedLoopTolerance = Optional.empty();
-
-  /** Moment of inertia for DCSim */
+  /**
+   * Moment of inertia for DCSim
+   */
   private MomentOfInertia moi = KilogramSquareMeters.of(0.02);
-
-  /** Loosely coupled followers. */
+  /**
+   * Loosely coupled followers.
+   */
   private Optional<SmartMotorController[]> looselyCoupledFollowers = Optional.empty();
-
-  /** Linear or {@link Distance} based closed loop controller. */
+  /**
+   * Linear or {@link Distance} based closed loop controller.
+   */
   private boolean linearClosedLoopController = false;
-
-  /** Velocity trapezoidal profile. */
+  /**
+   * Velocity trapezoidal profile.
+   */
   private boolean velocityTrapezoidalProfile = false;
 
   /**
@@ -2245,6 +2300,14 @@ public class SmartMotorControllerConfig {
   public Optional<Angle> getExternalEncoderDiscontinuityPoint() {
     externalEncoderOptions.remove(ExternalEncoderOptions.DiscontinuityPoint);
     return externalEncoderDiscontinuityPoint;
+  }
+
+  /**
+   * Setup live tuning for the {@link SmartMotorController}
+   */
+  public void setupLiveTuning()
+  {
+    // Intentionally empty
   }
 
   /** Basic Options that should be applied to every {@link SmartMotorController} */

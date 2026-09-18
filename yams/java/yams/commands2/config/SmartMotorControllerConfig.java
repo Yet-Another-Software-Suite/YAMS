@@ -97,11 +97,8 @@ public class SmartMotorControllerConfig extends yams.core.motorcontrollers.Smart
    * a shared "Live Tuning" {@link org.wpilib.command2.Command} on {@link #getSubsystem()} via
    * {@link SmartMotorControllerCommandRegistry} that pulls tuned values from NetworkTables each
    * loop, and registers cleanup so the registration is removed when the controller is closed.
-   *
-   * <p>No-ops if the subsystem has not been set, or if this config has not yet been attached to a
-   * {@link SmartMotorController} (i.e. {@code setupTelemetry()} has not been called on the
-   * controller yet).
    */
+  @Override
   public void setupLiveTuning() {
     if (subsystem.isEmpty()) {
       return;
