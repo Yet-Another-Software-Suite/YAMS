@@ -37,31 +37,7 @@ import yams.core.motorcontrollers.simulation.ArmSimSupplier;
  * <p>This core class holds arm state, physics simulation, and measurement/predicate logic only.
  * Command and Trigger factories ({@code setAngle}, {@code run}, {@code runTo}, {@code near},
  * {@code max}, {@code min}, ...) live on {@link yams.commands2.mechanisms.Arm}, which extends this
- * class.
- *
- * <h2>Usage Example</h2>
- *
- * <pre>{@code
- * // Build and construct
- * SmartMotorController motor = new SparkWrapper(
- *     new SparkMax(1, MotorType.kBrushless), DCMotor.getNEO(1),
- *     new
- * SmartMotorControllerConfig(this).withClosedLoopController(0.2,0,0).withStatorCurrentLimit(Amps.of(40)));
- * ArmConfig armConfig = new ArmConfig().withLength(Meters.of(0.5));
- * yams.commands2.mechanisms.Arm arm = new yams.commands2.mechanisms.Arm(armConfig, motor);
- *
- * // Schedule a setpoint command
- * Command moveToScore = arm.setAngle(Degrees.of(80));
- * Command holdAtZero = arm.runTo(Degrees.of(0), Degrees.of(2));
- *
- * // Bind triggers
- * arm.near(Degrees.of(80), Degrees.of(2)).onTrue(indexer.run());
- * arm.max().onTrue(Commands.print("Arm at max!"));
- *
- * // Call in robotPeriodic() or a subsystem's periodic():
- * arm.simIterate();
- * arm.updateTelemetry();
- * }</pre>
+ * class and has a full usage example in its Javadoc.
  */
 public class Arm extends SmartPositionalMechanism {
   /** Arm config. */

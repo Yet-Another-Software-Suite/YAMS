@@ -8,7 +8,19 @@ import yams.core.mechanisms.swerve.SwerveModule;
 
 /**
  * Command-based extension of {@link yams.core.mechanisms.config.SwerveDriveConfig} that adds the
- * {@link Subsystem} binding that core must not depend on.
+ * {@link Subsystem} binding.
+ *
+ * <h2>Usage Example</h2>
+ * <pre>{@code
+ * // Build each SwerveModule (see SwerveModuleConfig for per-module setup), then:
+ * SwerveDriveConfig config = new SwerveDriveConfig(this, fl, fr, bl, br)
+ *     .withGyro(gyro.getYaw().asSupplier())
+ *     .withMaximumChassisSpeed(MetersPerSecond.of(4.5), DegreesPerSecond.of(360))
+ *     .withTranslationController(new PIDController(1.0, 0, 0))
+ *     .withRotationController(new PIDController(1.0, 0, 0))
+ *     .withStartingPose(new Pose2d());
+ * SwerveDrive drive = new SwerveDrive(config);
+ * }</pre>
  */
 public class SwerveDriveConfig extends yams.core.mechanisms.config.SwerveDriveConfig {
   /** Swerve drive subsystem. */

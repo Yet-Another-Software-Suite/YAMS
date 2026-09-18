@@ -12,10 +12,6 @@ import yams.core.motorcontrollers.SmartMotorController;
 
 /**
  * Shared duty-cycle/voltage {@link Command} factories for command-layer mechanisms.
- *
- * <p>Implemented by every concrete commands2 mechanism (each of which extends the corresponding
- * {@code yams.core.mechanisms} class and supplies its own {@link Subsystem}) so that generic
- * open-loop control commands don't need to be duplicated per mechanism.
  */
 public interface CommandMechanism {
   /**

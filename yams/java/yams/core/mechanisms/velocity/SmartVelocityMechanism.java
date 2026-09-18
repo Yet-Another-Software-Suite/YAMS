@@ -11,77 +11,24 @@ import yams.core.motorcontrollers.SmartMotorController;
 /**
  * Abstract intermediate base class for all closed-loop velocity mechanisms in YAMS.
  *
- * <p>
- * {@code SmartVelocityMechanism} sits between {@link yams.core.mechanisms.SmartMechanism} and
- * concrete velocity-controlled mechanism implementations such as
- * {@link yams.core.mechanisms.velocity.FlyWheel}. It provides the shared infrastructure required
- * for closed-loop velocity control:
- * </p>
- * <ul>
- * <li>Velocity setpoint management via
- * {@link yams.core.mechanisms.SmartMechanism#setMechanismVelocitySetpoint} and
- * {@link yams.core.mechanisms.SmartMechanism#setMeasurementVelocitySetpoint}</li>
- * <li>Velocity-based {@link org.wpilib.command2.button.Trigger} factories
- * ({@code near()}, {@code gte()}, {@code lte()}, {@code between()}) — defined by each
- * concrete subclass</li>
- * <li>Command factories such as {@code setSpeed()} defined by each concrete subclass, which
- * internally call the base-class velocity setpoint methods</li>
- * <li>A 2D visualization model via {@link org.wpilib.smartdashboard.MechanismRoot2d}
- * and {@link org.wpilib.smartdashboard.MechanismLigament2d} fields that subclasses
- * populate and update</li>
- * </ul>
+ * <p>Sits between {@link yams.core.mechanisms.SmartMechanism} and concrete velocity mechanisms
+ * such as {@link yams.core.mechanisms.velocity.FlyWheel}. Provides velocity setpoint management
+ * ({@link yams.core.mechanisms.SmartMechanism#setMechanismVelocitySetpoint} and
+ * {@link yams.core.mechanisms.SmartMechanism#setMeasurementVelocitySetpoint}) and a 2D
+ * visualization model that subclasses populate and update.
  *
- * <p>
- * <b>Important — {@code max()} and {@code min()} are not applicable to velocity mechanisms.</b>
- * Velocity-controlled mechanisms have no meaningful upper or lower soft limit in the same sense as
- * positional mechanisms. Consequently, calling {@link #max()} or {@link #min()} on any concrete
- * subclass of {@code SmartVelocityMechanism} will throw
- * {@link java.lang.UnsupportedOperationException}. Use the following trigger factories instead:
- * </p>
- * <ul>
- * <li>{@code near(speed, tolerance)} — true when actual velocity is within tolerance of
- * target</li> <li>{@code gte(speed)} — true when actual velocity is greater than or equal to the
- * given speed</li> <li>{@code lte(speed)} — true when actual velocity is less than or equal to the
- * given speed</li> <li>{@code between(start, end)} — true when actual velocity falls within the
- * given range</li>
- * </ul>
- *
- * <p>
- * <b>Conceptual subclass pattern:</b> A concrete velocity mechanism extends
- * {@code SmartVelocityMechanism}, provides a typed command factory, and calls into the base-class
- * setpoint methods:
- * </p>
- * <pre>{@code
- * // A concrete mechanism delegates setpoint management to this base class:
- * public Command setSpeed(AngularVelocity target) {
- *     return Commands.startRun(
- *         () -> setMechanismVelocitySetpoint(target),
- *         () -> {},
- *         m_subsystem
- *     ).withName(getName() + " SetSpeed");
- * }
- * }</pre>
+ * <p>Command and Trigger factories live on the corresponding {@code yams.commands2.mechanisms}
+ * subclass, not here. Velocity mechanisms have no {@code max()}/{@code min()} concept.
  *
  * <h2>For Subclass Authors</h2>
- * <p>
- * Every concrete subclass of {@code SmartVelocityMechanism} must implement the following abstract
- * methods inherited from {@link yams.core.mechanisms.SmartMechanism}:
- * </p>
+ * <p>Every concrete subclass must implement these abstract methods inherited from
+ * {@link yams.core.mechanisms.SmartMechanism}:
  * <ul>
- * <li>{@link yams.core.mechanisms.SmartMechanism#getRelativeMechanismPosition()} — returns the
- * current 3-D position of the mechanism end-point in
- * {@link org.wpilib.smartdashboard.Mechanism2d} coordinates</li>
- * <li>{@link yams.core.mechanisms.SmartMechanism#visualizationUpdate()} — updates
- * {@code mechanismLigament} to reflect the current rotational state</li>
- * <li>{@link yams.core.mechanisms.SmartMechanism#getName()} — returns a human-readable mechanism
- * name used for telemetry and command names</li>
- * <li>{@link yams.core.mechanisms.SmartMechanism#simIterate()} — advances the physics simulation
- * model and writes back simulated encoder values each robot loop</li>
- * <li>{@link yams.core.mechanisms.SmartMechanism#updateTelemetry()} — publishes mechanism state
- * to NetworkTables or an equivalent telemetry sink</li>
- * <li>{@code max()}/{@code min()} (command-layer only) — should throw
- * {@link java.lang.UnsupportedOperationException}; velocity mechanisms do not support
- * positional limits</li>
+ * <li>{@link yams.core.mechanisms.SmartMechanism#getRelativeMechanismPosition()}</li>
+ * <li>{@link yams.core.mechanisms.SmartMechanism#visualizationUpdate()}</li>
+ * <li>{@link yams.core.mechanisms.SmartMechanism#getName()}</li>
+ * <li>{@link yams.core.mechanisms.SmartMechanism#simIterate()}</li>
+ * <li>{@link yams.core.mechanisms.SmartMechanism#updateTelemetry()}</li>
  * </ul>
  */
 public abstract class SmartVelocityMechanism extends SmartMechanism {

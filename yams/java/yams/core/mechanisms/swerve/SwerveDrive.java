@@ -40,80 +40,11 @@ import yams.core.telemetry.SwerveDriveTelemetry;
 import yams.core.telemetry.SwerveDriveTelemetryConfig;
 
 /**
- * Swerve Drive mechanism
+ * Swerve Drive mechanism.
  *
- * <h2>Usage Example</h2>
- *
- * <p>The typical pattern is to wrap {@code SwerveDrive} inside a WPILib {@code SubsystemBase}.
- * Build a {@link yams.core.mechanisms.config.SwerveDriveConfig} (see its class-level doc for the
- * full module-construction example), then instantiate {@code SwerveDrive} once in the subsystem
- * constructor.
- *
- * <p>{@link yams.core.mechanisms.swerve.utility.SwerveInputStream} is the <b>recommended</b> way to
- * convert raw joystick axes into field-relative
- * {@link org.wpilib.math.kinematics.ChassisVelocities}
- * before passing them to {@link #drive(java.util.function.Supplier)}.
- *
- * <pre>{@code
- * public class SwerveSubsystem extends SubsystemBase {
- *
- *     private final SwerveDrive drive;
- *
- *     public SwerveSubsystem() {
- *         // Build SwerveDriveConfig — see SwerveDriveConfig class doc for the full example.
- *         Pigeon2 gyro = new Pigeon2(14);
- *         SwerveDriveConfig config = new SwerveDriveConfig(this, fl, fr, bl, br)
- *             .withGyro(gyro.getYaw().asSupplier())
- *             .withMaximumChassisSpeed(MetersPerSecond.of(4.5), DegreesPerSecond.of(360))
- *             .withTranslationController(new PIDController(1.0, 0, 0))
- *             .withRotationController(new PIDController(1.0, 0, 0))
- *             .withStartingPose(new Pose2d());
- *
- *         drive = new SwerveDrive(config);
- *     }
- *
- *     // Convert joystick input to a field-relative drive command using SwerveInputStream.
- *     public Command driveWithJoystick(CommandXboxController controller) {
- *         SwerveInputStream inputStream = new SwerveInputStream(
- *                 drive,
- *                 controller::getLeftX,
- *                 controller::getLeftY,
- *                 controller::getRightX)
- *             .withMaximumLinearVelocity(MetersPerSecond.of(4.5))
- *             .withMaximumAngularVelocity(DegreesPerSecond.of(360))
- *             .withDeadband(0.05)
- *             .withCubeTranslationControllerAxis()
- *             .withAllianceRelativeControl();
- *
- *         // drive() accepts a robot-relative ChassisVelocities supplier; SwerveInputStream handles
- *         // the field-to-robot conversion internally when alliance-relative control is enabled.
- *         return drive.drive(inputStream);
- *     }
- *
- *     // Alternatively, pass field-relative speeds directly.
- *     public Command driveFieldRelative(Supplier<ChassisVelocities> speedsSupplier) {
- *         return run(() -> drive.setFieldRelativeChassisSpeeds(speedsSupplier.get()))
- *             .withName("Field Oriented Drive");
- *     }
- *
- *     // Read the fused odometry pose at any time.
- *     public Pose2d getRobotPose() {
- *         return drive.getPose();
- *     }
- *
- *     // Update odometry and publish telemetry every robot loop (20 ms).
- *     {@literal @}Override
- *     public void periodic() {
- *         drive.updateTelemetry();
- *     }
- *
- *     // Advance the simulated gyro and modules every simulation loop.
- *     {@literal @}Override
- *     public void simulationPeriodic() {
- *         drive.simIterate();
- *     }
- * }
- * }</pre>
+ * <p>This core class holds swerve state, odometry, and physics simulation only. Command
+ * factories such as {@code drive()} live on {@link yams.commands2.swerve.SwerveDrive}, which
+ * extends this class. See that class's Javadoc for a full usage example.
  */
 public class SwerveDrive {
   /** The modules of the drive. */
@@ -716,8 +647,8 @@ public class SwerveDrive {
    * Get the last-commanded desired robot-relative {@link ChassisVelocities} of the drive. This is
    * the value cached by {@link #setRobotRelativeChassisSpeeds(ChassisVelocities)} (which
    * {@link #setFieldRelativeChassisSpeeds(ChassisVelocities)} and
-   * {@link #drive(java.util.function.Supplier)} funnel through) and published on every
-   * {@link #updateTelemetry()} call.
+   * {@link yams.commands2.swerve.SwerveDrive#drive(java.util.function.Supplier)} funnel through)
+   * and published on every {@link #updateTelemetry()} call.
    *
    * @implNote It is a setpoint, not a measurement of actual robot motion.
    *           Use {@link #getRobotRelativeSpeed()} or {@link #getFieldRelativeSpeed()} instead if

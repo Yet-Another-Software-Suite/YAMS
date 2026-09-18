@@ -59,21 +59,9 @@ import yams.core.motorcontrollers.simulation.ArmSimSupplier;
  * DoubleJointedArm arm = new DoubleJointedArm(lowerConfig, upperConfig);
  * }</pre>
  *
- * <h2>Control Examples</h2>
- * <pre>{@code
- * // Set explicit joint angles: shoulder at 45°, elbow at 90°.
- * Command positionCommand = arm.setAngle(Degrees.of(45), Degrees.of(90));
- *
- * // Move to a Cartesian target (0.4 m forward, 0.6 m up) using inverse kinematics.
- * Command ikCommand = arm.setPosition(new Translation2d(0.4, 0.6), false);
- *
- * // Continuously track a target while within 5 cm tolerance, then finish.
- * Command trackCommand = arm.runTo(new Translation2d(0.5, 0.7), false, Centimeters.of(5));
- *
- * // Read current joint angles.
- * Angle shoulder = arm.getLowerAngle();
- * Angle elbow    = arm.getUpperAngle();
- * }</pre>
+ * <p>This core class holds arm state, kinematics, and physics simulation only. Command and
+ * Trigger factories live on {@link yams.commands2.mechanisms.DoubleJointedArm}, which extends
+ * this class and has control examples in its Javadoc.
  */
 public class DoubleJointedArm extends SmartPositionalMechanism {
   /**

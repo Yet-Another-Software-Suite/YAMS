@@ -33,26 +33,9 @@ import yams.core.motorcontrollers.simulation.ElevatorSimSupplier;
 /**
  * Elevator mechanism.
  *
- * <h2>Usage Example</h2>
- * <pre>{@code
- * SmartMotorController motor = new TalonFXWrapper(
- *     new TalonFX(4), DCMotor.getKrakenX60(1),
- *     new SmartMotorControllerConfig().withClosedLoopController(0.5,0,0).withFeedforward(new
- * ElevatorFeedforward(0.4,0,0)); Elevator elevator = new Elevator( new
- * ElevatorConfig(motor).withDrumRadius(Inches.of(1.0)));
- *
- * // Move to heights
- * Command toHigh = elevator.setHeight(Meters.of(1.2));
- * Command toLow  = elevator.runTo(Meters.of(0.05), Meters.of(0.01));
- *
- * // Trigger bindings
- * elevator.near(Meters.of(1.2), Meters.of(0.02)).onTrue(shooter.shoot());
- * elevator.max().onTrue(Commands.print("Elevator at max"));
- *
- * // In periodic():
- * elevator.simIterate();
- * elevator.updateTelemetry();
- * }</pre>
+ * <p>This core class holds elevator state, physics simulation, and measurement/predicate logic
+ * only. Command and Trigger factories live on {@link yams.commands2.mechanisms.Elevator}, which
+ * extends this class and has a full usage example in its Javadoc.
  */
 public class Elevator extends SmartPositionalMechanism {
   /**

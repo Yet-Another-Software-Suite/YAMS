@@ -31,36 +31,14 @@ import yams.core.motorcontrollers.simulation.DCMotorSimSupplier;
 /**
  * FlyWheel mechanism.
  *
- * <h2>Usage Example</h2>
- * <pre>{@code
- * // Construct using a fully configured FlyWheelConfig
- * FlyWheel shooter = new FlyWheel(config);
+ * <p>This core class holds flywheel state, physics simulation, and measurement/predicate logic
+ * only. Command and Trigger factories live on {@link yams.commands2.mechanisms.FlyWheel}, which
+ * extends this class and has a full usage example in its Javadoc.
  *
- * // Spin at a fixed target RPM (runs continuously as a RunCommand)
- * Command spinUp = shooter.run(RPM.of(3000));
- *
- * // Block until the wheel reaches 3000 RPM within ±50 RPM, then finish
- * Command spinToSpeed = shooter.runTo(RPM.of(3000), RPM.of(50));
- *
- * // Trigger that is true whenever the wheel is within ±50 RPM of target
- * Trigger atSpeed = shooter.near(RPM.of(3000), RPM.of(50));
- * atSpeed.onTrue(Commands.print("Shooter at speed!"));
- * }</pre>
- *
- * <p><b>Unsupported operations:</b> {@link #max()} and {@link #min()} are not supported for
- * velocity mechanisms and will throw {@link java.lang.UnsupportedOperationException} if called.
- * Use {@link #isNear(org.wpilib.units.measure.AngularVelocity,
- * org.wpilib.units.measure.AngularVelocity)} or {@link #gte}/{@link #lte} triggers instead.</p>
- *
- * <p>Call {@link #simIterate()} and {@link #updateTelemetry()} inside your subsystem's
- * {@code periodic()} method to keep simulation state and NetworkTables up to date:</p>
- * <pre>{@code
- * @Override
- * public void periodic() {
- * shooter.simIterate(); // advances the DCMotorSim each loop
- * shooter.updateTelemetry(); // pushes data to SmartDashboard / AdvantageScope
- * }
- * }</pre>
+ * <p>Velocity mechanisms have no {@code max()}/{@code min()} concept; use
+ * {@link #isNear(org.wpilib.units.measure.AngularVelocity, org.wpilib.units.measure.AngularVelocity)},
+ * {@link #isGte(org.wpilib.units.measure.AngularVelocity)}, or
+ * {@link #isLte(org.wpilib.units.measure.AngularVelocity)} instead.
  */
 public class FlyWheel extends SmartVelocityMechanism {
   /**

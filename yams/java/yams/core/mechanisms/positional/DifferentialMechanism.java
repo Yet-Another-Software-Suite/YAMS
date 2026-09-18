@@ -38,10 +38,10 @@ import yams.core.motorcontrollers.simulation.DCMotorSimSupplier;
  * <p>In a differential drive mechanism the two motors do <b>not</b> independently move two
  * separate joints. Instead, their outputs are mixed mathematically:</p>
  * <ul>
- * <li><b>Tilt</b> — controlled by the <em>sum</em> of the left and right motor positions
+ * <li><b>Tilt</b>: controlled by the <em>sum</em> of the left and right motor positions
  * ({@code (left + right) / 2}). When both motors turn in the same direction the mechanism
  * tilts up or down.</li>
- * <li><b>Twist</b> — controlled by the <em>difference</em> of the left and right motor
+ * <li><b>Twist</b>: controlled by the <em>difference</em> of the left and right motor
  * positions ({@code (left - right) / 2}). When the motors turn in opposite directions the
  * mechanism rotates about its longitudinal axis.</li>
  * </ul>
@@ -50,29 +50,9 @@ import yams.core.motorcontrollers.simulation.DCMotorSimSupplier;
  * pitch while the other controls roll, allowing the intake or end-effector to be positioned in
  * two degrees of freedom with fewer motors than a traditional two-joint wrist.</p>
  *
- * <h2>Usage Example</h2>
- * <pre>{@code
- * // Build the config (leftSMC / rightSMC already configured with tilt gearing).
- * DifferentialMechanismConfig config = new DifferentialMechanismConfig(leftSMC, rightSMC)
- *     .withStartingPosition(Degrees.of(30), Degrees.of(0))  // tilt=30°, twist=0°
- *     .withLength(Inches.of(14))
- *     .withMOI(Inches.of(14), Pounds.of(2))
- *     .withTelemetry("DifferentialWrist", TelemetryVerbosity.HIGH);
- *
- * DifferentialMechanism wrist = new DifferentialMechanism(config);
- *
- * // Command: tilt to 60° and twist to 45°.
- * Command scoreCommand = wrist.setPosition(Degrees.of(60), Degrees.of(45));
- *
- * // Command: continuously follow a joystick (suppliers).
- * Command manualCommand = wrist.run(
- *     () -> Degrees.of(driverController.getLeftY() * 90),
- *     () -> Degrees.of(driverController.getRightX() * 90));
- *
- * // Read current positions.
- * Angle tilt  = wrist.getTiltPosition();
- * Angle twist = wrist.getTwistPosition();
- * }</pre>
+ * <p>This core class holds mechanism state, physics simulation, and measurement logic only.
+ * Command factories live on {@link yams.commands2.mechanisms.DifferentialMechanism}, which
+ * extends this class and has a full usage example in its Javadoc.
  */
 public class DifferentialMechanism extends SmartPositionalMechanism {
   /**

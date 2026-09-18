@@ -361,7 +361,10 @@ public class SwerveDriveTelemetry {
 
   /** Struct telemetry field for {@link SwerveDrive}s. */
   public enum StructTelemetryField {
-    /** Target {@link Pose2d} for the robot driven using {@link SwerveDrive#driveToPose(Pose2d)}. */
+    /**
+     * Target {@link Pose2d} for the robot driven using
+     * {@link yams.commands2.swerve.SwerveDrive#driveToPose(Pose2d)}.
+     */
     TargetPose("tuning/driveToPose", Pose2d.struct, new Pose2d(), true),
     /**
      * Estimated {@link Pose2d} of the robot, as reported by the {@link

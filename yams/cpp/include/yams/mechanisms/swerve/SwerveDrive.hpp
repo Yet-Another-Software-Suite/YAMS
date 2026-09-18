@@ -193,7 +193,7 @@ class SwerveDrive {
    *
    * @param targetPose Pose to drive towards.
    * @return robot-relative ChassisSpeeds to drive the robot to the given pose.
-   * @implNote Remember to call ResetTranslationPID() and ResetRotationPID() before calling this
+   * @note Remember to call ResetTranslationPID() and ResetRotationPID() before calling this
    *     method in a loop.
    */
   wpi::math::ChassisVelocities DriveToPoseSetpoint(wpi::math::Pose2d targetPose) {

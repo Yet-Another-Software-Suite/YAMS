@@ -34,52 +34,11 @@ import yams.core.motorcontrollers.simulation.DCMotorSimSupplier;
 /**
  * Pivot mechanism.
  *
- * <p>A Pivot is a single-jointed rotation mechanism that rotates around the vertical axis,
- * such as a shooter hood or turret. It is controlled by a {@link SmartMotorController} and
- * supports position control, trigger bindings, and simulation.</p>
- *
- * <h2>Usage Example</h2>
- * <pre>{@code
- * // --- Configuration ---
- * SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig()
- *     .withClosedLoopController(0.15,0,0.004)
- *     .withFeedforward(new SimpleMotorFeedforward(0.05,0,0)
- *     .withStatorCurrentLimit(Amps.of(40))
- *     .withMechanismUpperLimit(Degrees.of(60))
- *     .withMechanismLowerLimit(Degrees.of(0))
- *     .withStartingPosition(Degrees.of(0));
- *
- * SmartMotorController motor = new TalonFXWrapper(
- *     new TalonFX(3),
- *     DCMotor.getKrakenX60(1),
- *     motorConfig);
- *
- * PivotConfig pivotConfig = new PivotConfig()
- *     .withHardLimits(Degrees.of(0), Degrees.of(60))
- *     .withTelemetry("ShooterHood", TelemetryVerbosity.HIGH);
- *
- * // --- Instantiation ---
- * Pivot pivot = new Pivot(pivotConfig, motor);
- *
- * // --- Commands ---
- * // setAngle() returns a Command that continuously drives the pivot to the target angle
- * Command aimHigh = pivot.setAngle(Degrees.of(45));
- *
- * // runTo() drives to the angle and ends once the pivot is within tolerance
- * Command stowPivot = pivot.runTo(Degrees.of(0), Degrees.of(1));
- *
- * // --- Trigger bindings ---
- * // Fire when the pivot is within 2 degrees of the shooting angle
- * pivot.near(Degrees.of(45), Degrees.of(2)).onTrue(shooter.runShooter());
- *
- * // Bind on boundary conditions
- * pivot.gte(Degrees.of(55)).onTrue(Commands.print("Approaching upper limit!"));
- * pivot.lte(Degrees.of(5)).onTrue(Commands.print("Pivot near stow position."));
- *
- * // --- Periodic callbacks (robotPeriodic or subsystem periodic) ---
- * pivot.simIterate();      // advances simulation state each loop
- * pivot.updateTelemetry(); // publishes data to NetworkTables/SmartDashboard
- * }</pre>
+ * <p>A Pivot is a single-jointed rotation mechanism that rotates around the vertical axis, such
+ * as a shooter hood or turret. This core class holds pivot state, physics simulation, and
+ * measurement/predicate logic only. Command and Trigger factories live on
+ * {@link yams.commands2.mechanisms.Pivot}, which extends this class and has a full usage example
+ * in its Javadoc.
  */
 public class Pivot extends SmartPositionalMechanism {
   /**

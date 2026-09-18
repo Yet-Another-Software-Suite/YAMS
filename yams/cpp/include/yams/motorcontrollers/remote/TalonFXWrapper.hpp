@@ -245,9 +245,7 @@ class TalonFXWrapper : public SmartMotorController {
    * @param maxVelocity Maximum linear velocity.
    */
   void SetMotionProfileMaxVelocity(wpi::units::meters_per_second_t maxVelocity) override;
-  /** @copydoc
-   * SmartMotorController::SetMotionProfileMaxAcceleration(wpi::units::turns_per_second_squared_t)
-   */
+  /** @copydoc SmartMotorController::SetMotionProfileMaxAcceleration(wpi::units::turns_per_second_squared_t) */
   void SetMotionProfileMaxAcceleration(wpi::units::turns_per_second_squared_t maxAcc) override;
   /**
    * Set the maximum linear acceleration for the motion profile.
