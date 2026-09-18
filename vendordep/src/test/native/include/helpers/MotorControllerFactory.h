@@ -10,6 +10,7 @@
 #include <rev/SparkMax.h>
 
 #include <atomic>
+#include <wpi/hardware/bus/CANPort.hpp>
 #include <wpi/math/system/DCMotor.hpp>
 /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7; re-enable once
    com.ctre.phoenix6 / ctre::phoenix6 is available again.
@@ -17,7 +18,6 @@
 #include <ctre/phoenix6/TalonFXS.hpp>
 */
 #include <memory>
-#include <ostream>
 #include <string>
 #include <vector>
 
@@ -50,10 +50,6 @@ struct MotorTestParam {
   ProfileType profile;
   std::string name;
 };
-
-// Lets gtest print human-readable param info in failure messages instead of a
-// raw hex dump.
-inline void PrintTo(const MotorTestParam& p, std::ostream* os) { *os << p.name; }
 
 // Concrete hardware objects that must outlive the wrapper.
 struct HardwareBundle {
@@ -119,14 +115,14 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
   switch (param.hardware) {
     case HardwareType::SparkMax: {
       bundle.sparkMax = std::make_unique<rev::spark::SparkMax>(
-          0, canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
+          wpi::CANPort::CAN_S0, canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
       bundle.smc = new local::SparkWrapper(bundle.sparkMax.get(), MotorForHardware(param.hardware),
                                            &bundle.cfg);
       break;
     }
     case HardwareType::SparkFlex: {
       bundle.sparkFlex = std::make_unique<rev::spark::SparkFlex>(
-          0, canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
+          wpi::CANPort::CAN_S0, canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
       bundle.smc = new local::SparkWrapper(bundle.sparkFlex.get(), MotorForHardware(param.hardware),
                                            &bundle.cfg);
       break;

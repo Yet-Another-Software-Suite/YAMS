@@ -5,8 +5,9 @@
 
 // Mirrors Java MockHardwareExtension — initialises the WPILib HAL and
 // simulation environment so that motor-controller and command-scheduler code
-// can run inside Google Test.
+// can run inside a Catch2 test case.
 
+#include <wpi/hal/DriverStationTypes.hpp>
 #include <wpi/hal/HAL.h>
 
 #include <wpi/simulation/DriverStationSim.hpp>
@@ -16,9 +17,9 @@
 namespace yams::test {
 
 inline void InitializeHardware() {
-  HAL_Initialize(500, 0);
+  HAL_Initialize();
   wpi::sim::DriverStationSim::SetDsAttached(true);
-  wpi::sim::DriverStationSim::SetRobotMode(HAL_ROBOT_MODE_TELEOPERATED);
+  wpi::sim::DriverStationSim::SetRobotMode(wpi::hal::RobotMode::TELEOPERATED);
   wpi::sim::DriverStationSim::SetEnabled(true);
   wpi::sim::DriverStationSim::NotifyNewData();
   wpi::sim::StepTiming(0.0_s);

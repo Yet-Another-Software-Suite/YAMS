@@ -108,7 +108,7 @@ jobs:
           name: maven-linux
           path: vendordep/build/maven/
       - name: C++ unit tests
-        run: ./gradlew googleTest
+        run: ./gradlew catchTests
         continue-on-error: true
 
   test-java:

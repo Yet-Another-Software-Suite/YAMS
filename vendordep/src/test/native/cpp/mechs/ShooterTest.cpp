@@ -4,7 +4,7 @@
 // Mirrors Java ShooterTest — duty-cycle and velocity-PID tests for a FlyWheel
 // (shooter) mechanism across all (HardwareType × ProfileType) combinations.
 
-#include <gtest/gtest.h>
+#include <catch2/catch_test_macros.hpp>
 
 #include <chrono>
 #include <cmath>
@@ -108,9 +108,10 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
   if (isCTRE && !moved) {
     std::printf("[WARNING] TalonFX/TalonFXS shooter duty-cycle inconclusive.\n");
   } else {
-    EXPECT_TRUE(moved) << "Shooter did not spin during duty-cycle test"
-                       << " preVel=" << preVel.value() << " preAngle=" << preAngle.value()
-                       << " postVel=" << postVel.value() << " postAngle=" << postAngle.value();
+    INFO("Shooter did not spin during duty-cycle test"
+         << " preVel=" << preVel.value() << " preAngle=" << preAngle.value()
+         << " postVel=" << postVel.value() << " postAngle=" << postAngle.value());
+    CHECK(moved);
   }
 }
 
@@ -129,90 +130,94 @@ static void VelocityPIDTestBody(SmartMotorController* smc, bool isCTRE) {
 
   auto postVel = smc->GetMechanismVelocity();
 
-  EXPECT_TRUE(std::abs(postVel.value() - preVel.value()) > 0.05 || passed)
-      << "Shooter velocity did not change toward PID setpoint"
-      << " preVel=" << preVel.value() << " postVel=" << postVel.value();
+  INFO("Shooter velocity did not change toward PID setpoint"
+       << " preVel=" << preVel.value() << " postVel=" << postVel.value());
+  CHECK((std::abs(postVel.value() - preVel.value()) > 0.05 || passed));
 }
 
 // ---- Fixture ----------------------------------------------------------------
 
-class ShooterTest : public ::testing::TestWithParam<MotorTestParam> {
- protected:
-  void SetUp() override {
+namespace {
+struct ShooterTestFixture {
+  ShooterTestFixture() {
     InitializeHardware();
     SchedulerHelper::Enable();
     SchedulerHelper::CancelAll();
   }
-  void TearDown() override {
+  ~ShooterTestFixture() {
     TeardownHardware();
     SchedulerHelper::CancelAll();
   }
 };
+}  // namespace
 
 // ---- Tests ------------------------------------------------------------------
 
-TEST_P(ShooterTest, SMCDutyCycle) {
-  auto& param = GetParam();
-  SCOPED_TRACE(param.name);
-  auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
-  auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
-  bundle.subsystem->m_testRunning = true;
+TEST_CASE_METHOD(ShooterTestFixture, "ShooterTest.SMCDutyCycle", "[ShooterTest]") {
+  for (auto& param : AllMotorParams()) {
+    DYNAMIC_SECTION(param.name) {
+      auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
+      auto bundle = MakeBundle(param, cfg);
+      bundle.smc->SetupSimulation();
+      bundle.subsystem->m_testRunning = true;
 
-  DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
-  CloseBundle(bundle);
+      DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
+      CloseBundle(bundle);
+    }
+  }
 }
 
-TEST_P(ShooterTest, SMCVelocityPID) {
-  auto& param = GetParam();
-  SCOPED_TRACE(param.name);
-  auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
-  auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
-  bundle.subsystem->m_testRunning = true;
+TEST_CASE_METHOD(ShooterTestFixture, "ShooterTest.SMCVelocityPID", "[ShooterTest]") {
+  for (auto& param : AllMotorParams()) {
+    DYNAMIC_SECTION(param.name) {
+      auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
+      auto bundle = MakeBundle(param, cfg);
+      bundle.smc->SetupSimulation();
+      bundle.subsystem->m_testRunning = true;
 
-  VelocityPIDTestBody(bundle.smc, IsCTRE(bundle));
-  CloseBundle(bundle);
+      VelocityPIDTestBody(bundle.smc, IsCTRE(bundle));
+      CloseBundle(bundle);
+    }
+  }
 }
 
-TEST_P(ShooterTest, ShooterDutyCycle) {
-  auto& param = GetParam();
-  SCOPED_TRACE(param.name);
-  auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
-  auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
-  bundle.subsystem->m_testRunning = true;
+TEST_CASE_METHOD(ShooterTestFixture, "ShooterTest.ShooterDutyCycle", "[ShooterTest]") {
+  for (auto& param : AllMotorParams()) {
+    DYNAMIC_SECTION(param.name) {
+      auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
+      auto bundle = MakeBundle(param, cfg);
+      bundle.smc->SetupSimulation();
+      bundle.subsystem->m_testRunning = true;
 
-  auto shooter = CreateShooter(bundle.smc, bundle.subsystem.get());
-  auto upCmd = shooter->Set(0.5);
-  wpi::cmd::CommandScheduler::GetInstance().Schedule(upCmd);
+      auto shooter = CreateShooter(bundle.smc, bundle.subsystem.get());
+      auto upCmd = shooter->Set(0.5);
+      wpi::cmd::CommandScheduler::GetInstance().Schedule(upCmd);
 
-  DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
-  CloseBundle(bundle);
-  delete shooter;
+      DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
+      CloseBundle(bundle);
+      delete shooter;
+    }
+  }
 }
 
-TEST_P(ShooterTest, ShooterVelocityPID) {
-  auto& param = GetParam();
-  SCOPED_TRACE(param.name);
-  auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
-  auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
-  bundle.subsystem->m_testRunning = true;
+TEST_CASE_METHOD(ShooterTestFixture, "ShooterTest.ShooterVelocityPID", "[ShooterTest]") {
+  for (auto& param : AllMotorParams()) {
+    DYNAMIC_SECTION(param.name) {
+      auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
+      auto bundle = MakeBundle(param, cfg);
+      bundle.smc->SetupSimulation();
+      bundle.subsystem->m_testRunning = true;
 
-  // ~80 RPM = 80/60 * 360 ≈ 480 deg/s
-  auto shooter = CreateShooter(bundle.smc, bundle.subsystem.get());
-  auto highPid = shooter->RunTo(wpi::units::degrees_per_second_t{480.0});
-  wpi::cmd::CommandScheduler::GetInstance().Schedule(highPid);
+      // ~80 RPM = 80/60 * 360 ≈ 480 deg/s
+      auto shooter = CreateShooter(bundle.smc, bundle.subsystem.get());
+      auto highPid = shooter->RunTo(wpi::units::degrees_per_second_t{480.0});
+      wpi::cmd::CommandScheduler::GetInstance().Schedule(highPid);
 
-  VelocityPIDTestBody(bundle.smc, IsCTRE(bundle));
-  CloseBundle(bundle);
-  delete shooter;
+      VelocityPIDTestBody(bundle.smc, IsCTRE(bundle));
+      CloseBundle(bundle);
+      delete shooter;
+    }
+  }
 }
-
-INSTANTIATE_TEST_SUITE_P(AllControllersTests, ShooterTest, ::testing::ValuesIn(AllMotorParams()),
-                         [](const ::testing::TestParamInfo<MotorTestParam>& info) {
-                           return info.param.name;
-                         });
 
 }  // namespace yams::test

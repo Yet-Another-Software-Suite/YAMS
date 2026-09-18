@@ -115,8 +115,8 @@ tasks.test {
     enabled = !gradle.startParameter.taskNames.contains('build')
 }
 
-task googleTest {
-    description = 'Runs the Google Test C++ unit tests for the current platform'
+task catchTests {
+    description = 'Runs the Catch2 C++ unit tests for the current platform'
     group = 'Verification'
 }
 
@@ -124,7 +124,7 @@ tasks.whenTaskAdded { task ->
     if (task instanceof RunTestExecutable) {
         task.enabled = !gradle.startParameter.taskNames.contains('build')
         if (task.name.contains(NativePlatforms.desktop.capitalize()) && task.name.contains('Debug')) {
-            googleTest.dependsOn task
+            catchTests.dependsOn task
         }
     }
 }
