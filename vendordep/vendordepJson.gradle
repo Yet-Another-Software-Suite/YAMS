@@ -70,31 +70,17 @@ ext.createVendordepJsonTask = { variant ->
     }
 }
 
-def commands2VendordepJson = createVendordepJsonTask(vendordepVariants.commands2)
-def commands3VendordepJson = createVendordepJsonTask(vendordepVariants.commands3)
+vendordepVariants.each { name, variant ->
+    def jsonTask = createVendordepJsonTask(variant)
+    def zipTask = tasks.create("${name}VendordepJsonZip", Zip) {
+        destinationDirectory = outputsFolder
+        archiveBaseName = "vendordepJson${variant.taskSuffix}"
 
-task commands2VendordepJsonZip(type: Zip) {
-    destinationDirectory = outputsFolder
-    archiveBaseName = "vendordepJsonCommands2"
-
-    from("$releasePath/${vendordepVariants.commands2.fileName}") {
-        into '/'
+        from("$releasePath/${variant.fileName}") {
+            into '/'
+        }
+        dependsOn jsonTask
     }
-    dependsOn commands2VendordepJson
+    addTaskToCopyAllOutputs(zipTask)
+    build.dependsOn zipTask
 }
-
-task commands3VendordepJsonZip(type: Zip) {
-    destinationDirectory = outputsFolder
-    archiveBaseName = "vendordepJsonCommands3"
-
-    from("$releasePath/${vendordepVariants.commands3.fileName}") {
-        into '/'
-    }
-    dependsOn commands3VendordepJson
-}
-
-addTaskToCopyAllOutputs(commands2VendordepJsonZip)
-addTaskToCopyAllOutputs(commands3VendordepJsonZip)
-
-build.dependsOn commands2VendordepJsonZip
-build.dependsOn commands3VendordepJsonZip
