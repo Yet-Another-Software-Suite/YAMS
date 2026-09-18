@@ -82,8 +82,8 @@ arm.near(Degrees.of(80), Degrees.of(2)).onTrue(indexer.run());
 
 ## Live Tuning is now explicit
 
-Previously, enabling tunable telemetry fields automatically registered a "Live Tuning" command
-against whatever Subsystem the config held. That is now an explicit opt-in call:
+Enables tunable telemetry fields automatically registers a "Live Tuning" command
+against whatever Subsystem the config held and TelemetryVerbosity is HIGH. There is now an explicit opt-in call for other circumstances.
 
 ```java
 SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
