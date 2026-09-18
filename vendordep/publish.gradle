@@ -251,21 +251,6 @@ model {
                     groupId = artifactGroupId
                     version = pubVersion
 
-                    // "core" has no dependency of its own; every other variant depends on it.
-                    // Note: appendNode(...) is called with an explicit receiver (not via .with{})
-                    // because groovy.util.Node's dynamic property lookup (for GPath-style child
-                    // queries) silently returns an empty list for unrecognized properties instead
-                    // of throwing, which would swallow the fallback to the outer artifactGroupId/
-                    // baseArtifactId/pubVersion variables that .with{}'s delegate-first
-                    // resolution normally provides.
-                    if (name != 'core') {
-                        pom.withXml {
-                            def dependency = asNode().appendNode('dependencies').appendNode('dependency')
-                            dependency.appendNode('groupId', artifactGroupId)
-                            dependency.appendNode('artifactId', "${baseArtifactId}-core")
-                            dependency.appendNode('version', pubVersion)
-                        }
-                    }
                 }
 
                 // Only non-core variants ship their own vendordep JSON.
