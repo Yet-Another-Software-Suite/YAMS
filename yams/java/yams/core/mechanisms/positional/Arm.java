@@ -48,7 +48,6 @@ public class Arm extends SmartPositionalMechanism {
    * Simulation for the arm.
    */
   private Optional<SingleJointedArmSim> m_sim = Optional.empty();
-
   /**
    * Mechanism ligament for the setpoint.
    */
