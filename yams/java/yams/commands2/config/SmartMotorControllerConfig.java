@@ -20,7 +20,6 @@ import yams.core.motorcontrollers.SmartMotorController;
  * SmartMotorControllerConfig config = new SmartMotorControllerConfig(this)
  *     .withMotorInverted(false)
  *     .withStatorCurrentLimit(Amps.of(40));
- * config.setupLiveTuning();
  * }</pre>
  *
  */
