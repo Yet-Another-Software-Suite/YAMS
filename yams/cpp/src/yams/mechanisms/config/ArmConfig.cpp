@@ -12,34 +12,34 @@ ArmConfig& ArmConfig::WithTelemetryName(const std::string& name) {
   return *this;
 }
 
-ArmConfig& ArmConfig::WithMinAngle(units::degree_t angle) {
+ArmConfig& ArmConfig::WithMinAngle(wpi::units::degree_t angle) {
   m_minAngle = angle;
   return *this;
 }
 
-ArmConfig& ArmConfig::WithMaxAngle(units::degree_t angle) {
+ArmConfig& ArmConfig::WithMaxAngle(wpi::units::degree_t angle) {
   m_maxAngle = angle;
   return *this;
 }
 
-ArmConfig& ArmConfig::WithArmLength(units::meter_t length) {
+ArmConfig& ArmConfig::WithArmLength(wpi::units::meter_t length) {
   m_armLength = length;
   return *this;
 }
 
-ArmConfig& ArmConfig::WithSimColor(const frc::Color8Bit& color) {
+ArmConfig& ArmConfig::WithSimColor(const wpi::util::Color8Bit& color) {
   m_simColor = color;
   return *this;
 }
 
 std::string ArmConfig::GetTelemetryName() const { return m_telemetryName; }
 
-std::optional<units::degree_t> ArmConfig::GetMinAngle() const { return m_minAngle; }
+std::optional<wpi::units::degree_t> ArmConfig::GetMinAngle() const { return m_minAngle; }
 
-std::optional<units::degree_t> ArmConfig::GetMaxAngle() const { return m_maxAngle; }
+std::optional<wpi::units::degree_t> ArmConfig::GetMaxAngle() const { return m_maxAngle; }
 
-std::optional<units::meter_t> ArmConfig::GetArmLength() const { return m_armLength; }
+std::optional<wpi::units::meter_t> ArmConfig::GetArmLength() const { return m_armLength; }
 
-frc::Color8Bit ArmConfig::GetSimColor() const { return m_simColor; }
+wpi::util::Color8Bit ArmConfig::GetSimColor() const { return m_simColor; }
 
 }  // namespace yams::mechanisms::config

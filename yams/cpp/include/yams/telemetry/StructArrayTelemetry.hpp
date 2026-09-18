@@ -3,12 +3,6 @@
 
 #pragma once
 
-#include <frc/DataLogManager.h>
-#include <networktables/NetworkTable.h>
-#include <networktables/StructArrayTopic.h>
-#include <wpi/DataLog.h>
-#include <wpi/struct/Struct.h>
-
 #include <algorithm>
 #include <memory>
 #include <optional>
@@ -17,6 +11,11 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <wpi/datalog/DataLog.hpp>
+#include <wpi/nt/NetworkTable.hpp>
+#include <wpi/nt/StructArrayTopic.hpp>
+#include <wpi/system/DataLogManager.hpp>
+#include <wpi/util/struct/Struct.hpp>
 
 namespace yams::telemetry {
 
@@ -60,8 +59,8 @@ class StructArrayTelemetry {
    * @param dataTable   NT4 table for read-only sensor data.
    * @param tuningTable NT4 table for live-tunable fields.
    */
-  void SetupNetworkTables(std::shared_ptr<nt::NetworkTable> dataTable,
-                          std::shared_ptr<nt::NetworkTable> tuningTable) {
+  void SetupNetworkTables(std::shared_ptr<wpi::nt::NetworkTable> dataTable,
+                          std::shared_ptr<wpi::nt::NetworkTable> tuningTable) {
     m_dataTable = dataTable;
     m_tuningTable = tuningTable;
     if (!m_enabled) return;
@@ -83,7 +82,7 @@ class StructArrayTelemetry {
    *
    * @param dataTable NT4 table for sensor data.
    */
-  void SetupNetworkTable(std::shared_ptr<nt::NetworkTable> dataTable) {
+  void SetupNetworkTable(std::shared_ptr<wpi::nt::NetworkTable> dataTable) {
     SetupNetworkTables(dataTable, nullptr);
   }
 
@@ -97,7 +96,7 @@ class StructArrayTelemetry {
     std::string path = prefix;
     if (!path.empty() && path.back() != '/') path += '/';
     path += m_key;
-    m_dataLogEntry = wpi::log::StructArrayLogEntry<T>{frc::DataLogManager::GetLog(), path};
+    m_dataLogEntry = wpi::log::StructArrayLogEntry<T>{wpi::DataLogManager::GetLog(), path};
   }
 
   /**
@@ -189,13 +188,13 @@ class StructArrayTelemetry {
   std::vector<T> m_defaultValue;
   std::vector<T> m_cachedValue;
 
-  std::optional<nt::StructArrayPublisher<T>> m_publisher;
-  std::optional<nt::StructArraySubscriber<T>> m_subscriber;
-  std::optional<nt::StructArrayPublisher<T>> m_subPublisher;  // tunable: publish + subscribe
+  std::optional<wpi::nt::StructArrayPublisher<T>> m_publisher;
+  std::optional<wpi::nt::StructArraySubscriber<T>> m_subscriber;
+  std::optional<wpi::nt::StructArrayPublisher<T>> m_subPublisher;  // tunable: publish + subscribe
   std::optional<wpi::log::StructArrayLogEntry<T>> m_dataLogEntry;
 
-  std::shared_ptr<nt::NetworkTable> m_tuningTable;
-  std::shared_ptr<nt::NetworkTable> m_dataTable;
+  std::shared_ptr<wpi::nt::NetworkTable> m_tuningTable;
+  std::shared_ptr<wpi::nt::NetworkTable> m_dataTable;
 };
 
 }  // namespace yams::telemetry

@@ -1,0 +1,313 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
+package yams.core.telemetry;
+
+import java.util.Optional;
+import org.wpilib.datalog.DoubleLogEntry;
+import org.wpilib.networktables.DoublePublisher;
+import org.wpilib.networktables.DoubleSubscriber;
+import org.wpilib.networktables.DoubleTopic;
+import org.wpilib.networktables.NetworkTable;
+import org.wpilib.networktables.PubSub;
+import org.wpilib.system.DataLogManager;
+import org.wpilib.system.Timer;
+import yams.core.motorcontrollers.SmartMotorControllerConfig;
+
+/**
+ * Double Telemetry for SmartMotorControllers.
+ *
+ * <p>A lightweight wrapper that publishes a single {@code double} value to NetworkTables and/or
+ * a WPILib DataLog, with optional unit metadata consumed by Advantage Scope and Elastic. It is
+ * used internally by {@link SmartMotorControllerTelemetry} to track numeric fields such as
+ * position, velocity, current, and PID gains but it can also be constructed directly when
+ * you need a standalone numeric entry.
+ *
+ * <h2>Example</h2>
+ * <pre>{@code
+ * // Create and publish a double entry for shooter velocity under the Shooter table.
+ * DoubleTelemetry&lt;DoubleTelemetryField&gt; velocity = new DoubleTelemetry&lt;&gt;(
+ *     "velocity",                                       // NetworkTables key
+ *     0.0,                                              // default value
+ *     SmartMotorControllerTelemetry.DoubleTelemetryField.MechanismVelocity,
+ *     false,                                            // not tunable
+ *     "rotations_per_second");                          // unit label
+ *
+ * NetworkTable shooterTable = NetworkTableInstance.getDefault().getTable("Shooter");
+ * velocity.enable();
+ * velocity.setupNetworkTable(shooterTable);
+ *
+ * // In periodic:
+ * velocity.set(shooter.getVelocityRPS());
+ * }</pre>
+ *
+ * @param <F> Enum type identifying which field this telemetry entry represents.
+ */
+public class DoubleTelemetry<F> {
+  /**
+   * Field representing.
+   */
+  private final F                    field;
+  /**
+   * Network table key.
+   */
+  private final String               key;
+  /**
+   * Tunable?
+   */
+  private final boolean              tunable;
+  /**
+   * Enabled?
+   */
+  protected boolean                  enabled      = false;
+  /**
+   * Unit to display.
+   */
+  private String                     unit;
+  /**
+   * Default value.
+   */
+  private double                     defaultValue;
+  /**
+   * Cached value.
+   */
+  private double                     cachedValue;
+  /**
+   * Publisher.
+   */
+  private Optional<DoublePublisher>  publisher    = Optional.empty();
+  /**
+   * Subscriber.
+   */
+  private Optional<DoubleSubscriber> subscriber   = Optional.empty();
+  /**
+   * Sub publisher.
+   */
+  private DoublePublisher            subPublisher = null;
+  /**
+   * Tuning table
+   */
+  private Optional<NetworkTable>     tuningTable  = Optional.empty();
+  /**
+   * Data table.
+   */
+  private Optional<NetworkTable>     dataTable    = Optional.empty();
+  /**
+   * NT4 Topic of this entry.
+   */
+  private DoubleTopic                topic;
+  /**
+   * {@link DoubleLogEntry} representing this entry.
+   */
+  private Optional<DoubleLogEntry>   dataLogEntry = Optional.empty();
+
+  /**
+   * Setup double telemetry for a field.
+   *
+   * @param keyString  Key to use.
+   * @param defaultVal Default value.
+   * @param field      Field representing.
+   * @param tunable    Tunable.
+   * @param unit       Unit to display.
+   */
+  public DoubleTelemetry(String keyString, double defaultVal, F field, boolean tunable, String unit) {
+    key = keyString;
+    cachedValue = defaultValue = defaultVal;
+    this.field = field;
+    this.tunable = tunable;
+    this.unit = unit;
+  }
+
+  /**
+   * Set default values.
+   *
+   * @param defaultValue Default for the entry.
+   */
+  public void setDefaultValue(double defaultValue) {
+    cachedValue = this.defaultValue = defaultValue;
+  }
+
+  /**
+   * Setup network tables.
+   *
+   * @param dataTable   Data tables.
+   * @param tuningTable Tuning table.
+   */
+  public void setupNetworkTables(NetworkTable dataTable, NetworkTable tuningTable) {
+    this.tuningTable = Optional.ofNullable(tuningTable);
+    this.dataTable = Optional.ofNullable(dataTable);
+    if (!enabled) {
+      return;
+    }
+    if (tuningTable != null && tunable) {
+      topic = tuningTable.getDoubleTopic(key);
+      subPublisher = !unit.equals("none") ? topic.publishEx("double", "{\"units\": \"" + unit + "\"}") : topic.publish();
+      subscriber = Optional.of(topic.subscribe(defaultValue));
+      subPublisher.setDefault(defaultValue);
+    } else {
+      assert dataTable != null;
+      topic = dataTable.getDoubleTopic(key);
+      publisher = Optional.of(!unit.equals("none") ? topic.publishEx("double", "{\"units\": \"" + unit + "\"}") : topic.publish());
+      publisher.get().setDefault(defaultValue);
+    }
+  }
+
+  /**
+   * Setup the {@link org.wpilib.datalog.DataLog} with this entry.
+   *
+   * @param prefix The prefix to this entry in {@link org.wpilib.datalog.DataLog}
+   */
+  public void setupDataLog(String prefix) {
+    if (!tunable) {
+      if (!prefix.endsWith("/")) {
+        prefix += "/";
+      }
+      prefix += unit + "/";
+      dataLogEntry = Optional.of(new DoubleLogEntry(DataLogManager.getLog(), prefix + key, (long) Timer.getTimestamp()));
+    }
+  }
+
+  /**
+   * Set the unit.
+   *
+   * @param cfg {@link SmartMotorControllerConfig} used to determine the unit. If the
+   *            MechanismCircumference is set it
+   *            will be in meters, else it will be in degrees.
+   * @return {@link DoubleTelemetry} for chaining.
+   */
+  public DoubleTelemetry transformUnit(SmartMotorControllerConfig cfg) {
+    switch (unit) {
+      case "tunable_position":
+        unit = cfg.getLinearClosedLoopControllerUse() ? "meter" : "degrees";
+        break;
+      case "position":
+        unit = cfg.getLinearClosedLoopControllerUse() ? "meter" : "rotations";
+        break;
+      case "tunable_velocity":
+        unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second" : "rotations_per_minute";
+        break;
+      case "velocity":
+        unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second" : "rotation_per_second";
+        break;
+      case "tunable_acceleration":
+        unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second_per_second" : "rotations_per_minute_per_second";
+        break;
+      case "acceleration":
+        unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second_per_second" : "rotation_per_second_per_second";
+        break;
+    }
+    return this;
+  }
+
+  /**
+   * Setup network tables.
+   *
+   * @param dataTable Data tables.
+   */
+  public void setupNetworkTable(NetworkTable dataTable) {
+    setupNetworkTables(dataTable, null);
+  }
+
+  /**
+   * Set the value of the publisher, checking to see if the value is the same as the subscriber.
+   *
+   * @param value Value to set.
+   * @return True if value was able to be set.
+   */
+  public boolean set(double value) {
+    if (!enabled) {
+      return false;
+    }
+    if (dataLogEntry.isPresent()) {
+      dataLogEntry.get().append(value, (long) Timer.getTimestamp());
+    }
+    if (subscriber.isPresent()) {
+      double tuningValue = subscriber.get().get(defaultValue);
+      if (tuningValue != value) {
+        return false;
+      }
+    }
+    if (publisher.isPresent()) {
+      publisher.get().accept(value);
+    }
+    return true;
+  }
+
+  /**
+   * Get the value.
+   *
+   * @return value of telemetry.
+   */
+  public double get() {
+    if (!enabled) {
+      return defaultValue;
+    }
+    if (subscriber.isPresent()) {
+      return subscriber.get().get(defaultValue);
+    }
+    throw new RuntimeException("Tuning table not configured for " + key + "!");
+  }
+
+  /**
+   * Check to see if the value has changed.
+   *
+   * @return True if the value has changed.
+   */
+  public boolean tunable() {
+    if (subscriber.isPresent() && tunable && enabled) {
+      if (subscriber.get().get(defaultValue) != cachedValue) {
+        cachedValue = subscriber.get().get(defaultValue);
+        return true;
+      }
+      return false;
+    }
+    return false;
+  }
+
+  /**
+   * Enable the telemetry.
+   */
+  public void enable() {
+    enabled = true;
+    //    if ((publisher.isEmpty() || subscriber.isEmpty()) && (tuningTable.isPresent() ||
+    //    dataTable.isPresent())) {setupNetworkTables(dataTable.get(), tuningTable.get());}
+  }
+
+  /**
+   * Disable the telemetry.
+   */
+  public void disable() {
+    enabled = false;
+  }
+
+  /**
+   * Display the telemetry.
+   *
+   * @param state Enable or disable.
+   */
+  public void display(boolean state) {
+    enabled = state;
+  }
+
+  /**
+   * Get the field.
+   *
+   * @return field.
+   */
+  public F getField() {
+    return field;
+  }
+
+  /**
+   * Close the telemetry field.
+   */
+  public void close() {
+    subscriber.ifPresent(PubSub::close);
+    if (subPublisher != null) {
+      subPublisher.close();
+    }
+    publisher.ifPresent(PubSub::close);
+    dataTable.ifPresent(table -> table.getEntry(key).unpublish());
+    tuningTable.ifPresent(table -> table.getEntry(key).unpublish());
+  }
+}

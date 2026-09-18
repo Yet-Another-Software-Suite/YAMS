@@ -3,23 +3,23 @@
 
 package yams.helpers;
 
-import static edu.wpi.first.units.Units.Microseconds;
-import static edu.wpi.first.units.Units.Seconds;
+import static org.wpilib.units.Units.Microseconds;
+import static org.wpilib.units.Units.Seconds;
 
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.wpilibj.simulation.SimHooks;
 import java.util.PriorityQueue;
+import org.wpilib.simulation.SimHooks;
+import org.wpilib.units.measure.Time;
 
 /**
- * Minimal, deterministic stand-in for how {@link edu.wpi.first.wpilibj.TimedRobot} runs multiple
+ * Minimal, deterministic stand-in for how {@link org.wpilib.framework.TimedRobot} runs multiple
  * callbacks at independent periods from a single loop: a {@link PriorityQueue} of callbacks ordered
  * by when they next come due, each rescheduled by its own period after it runs.
  *
  * <p>Unlike a real {@code Notifier} per callback, this advances a purely virtual timeline instead
- * of depending on real wall-clock time or spawning any threads — {@link #runFor(Time)} runs
+ * of depending on real wall-clock time or spawning any threads {@link #runFor(Time)} runs
  * entirely on the calling thread. Time is controlled via WPILib's own documented mechanism for
  * this, {@link SimHooks#pauseTiming()}/{@link SimHooks#stepTiming(double)}, rather than a raw
- * custom {@code RobotController} time source — the latter was found to leave some vendor simulation
+ * custom {@code RobotController} time source the latter was found to leave some vendor simulation
  * SDKs (whose own retry/config logic depends on the FPGA clock behaving exactly as WPILib expects)
  * in an inconsistent state, silently dropping simulated hardware calls in a way that reproduced in
  * CI but not always locally.
@@ -59,8 +59,8 @@ public class PeriodicScheduler implements AutoCloseable {
 
   /**
    * Advance the virtual timeline by the given duration, running every registered callback exactly
-   * as many times as its period divides into the elapsed duration, in temporal order — exactly like
-   * {@link edu.wpi.first.wpilibj.TimedRobot}'s own callback scheduler.
+   * as many times as its period divides into the elapsed duration, in temporal order exactly like
+   * {@link org.wpilib.framework.TimedRobot}'s own callback scheduler.
    *
    * @param duration Duration to advance the virtual timeline by.
    */

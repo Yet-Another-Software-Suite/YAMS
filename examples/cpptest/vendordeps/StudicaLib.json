@@ -2,7 +2,7 @@
     "fileName": "StudicaLib.json",
     "name": "StudicaLib",
     "version": "2026.0.2",
-    "frcYear": "2026",
+    "wpilibYear": "2027_alpha5",
     "uuid": "963ef341-8abd-4981-a969-c8ae3f592e82",
     "mavenUrls": [
         "https://dev.studica.com/maven/release/2026/"

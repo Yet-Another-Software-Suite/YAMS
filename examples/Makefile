@@ -1,5 +1,5 @@
 EXAMPLES_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
-SKELETON_DIR := $(EXAMPLES_DIR)/simple_robot
+SKELETON_DIR := $(EXAMPLES_DIR)/simple_robot-2027
 GENERATED_DIR := $(EXAMPLES_DIR)/generated
 
 EXAMPLE_PROJECTS := $(shell find $(EXAMPLES_DIR) -maxdepth 1 -mindepth 1 -type d \

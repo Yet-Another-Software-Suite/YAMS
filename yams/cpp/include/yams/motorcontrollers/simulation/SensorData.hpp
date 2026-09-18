@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include <hal/SimDevice.h>
-#include <hal/Value.h>
+#include <wpi/hal/Value.h>
 
 #include <functional>
 #include <optional>
 #include <string>
 #include <utility>
 #include <vector>
+#include <wpi/hal/SimDevice.hpp>
 
 namespace yams::motorcontrollers::simulation {
 
@@ -85,7 +85,7 @@ class SensorData {
   HALValueType m_type;
   HAL_Value m_defaultValue;
   std::optional<std::vector<std::pair<std::function<bool()>, HAL_Value>>> m_triggerValues;
-  HAL_SimValueHandle m_glassValue{HAL_kInvalidHandle};
+  HAL_SimValueHandle m_glassValue{HAL_INVALID_HANDLE};
   std::optional<HAL_Value> m_prev;
 };
 

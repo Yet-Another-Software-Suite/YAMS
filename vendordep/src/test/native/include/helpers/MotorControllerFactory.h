@@ -6,15 +6,18 @@
 // Factory helpers used by all mechanism tests to create SmartMotorController
 // instances for each (HardwareType × ProfileType) combination.
 
-#include <frc/system/plant/DCMotor.h>
 #include <rev/SparkFlex.h>
 #include <rev/SparkMax.h>
 
 #include <atomic>
+#include <wpi/hardware/bus/CANPort.hpp>
+#include <wpi/math/system/DCMotor.hpp>
+/* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7; re-enable once
+   com.ctre.phoenix6 / ctre::phoenix6 is available again.
 #include <ctre/phoenix6/TalonFX.hpp>
 #include <ctre/phoenix6/TalonFXS.hpp>
+*/
 #include <memory>
-#include <ostream>
 #include <string>
 #include <vector>
 
@@ -24,8 +27,10 @@
 #include "yams/motorcontrollers/SmartMotorControllerCommandRegistry.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 #include "yams/motorcontrollers/local/SparkWrapper.hpp"
+/* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
 #include "yams/motorcontrollers/remote/TalonFXSWrapper.hpp"
 #include "yams/motorcontrollers/remote/TalonFXWrapper.hpp"
+*/
 
 namespace yams::test {
 
@@ -46,17 +51,15 @@ struct MotorTestParam {
   std::string name;
 };
 
-// Lets gtest print human-readable param info in failure messages instead of a
-// raw hex dump.
-inline void PrintTo(const MotorTestParam& p, std::ostream* os) { *os << p.name; }
-
 // Concrete hardware objects that must outlive the wrapper.
 struct HardwareBundle {
   // Only one of these is non-null per bundle.
   std::unique_ptr<rev::spark::SparkMax> sparkMax;
   std::unique_ptr<rev::spark::SparkFlex> sparkFlex;
+  /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
   std::unique_ptr<ctre::phoenix6::hardware::TalonFXS> talonFXS;
   std::unique_ptr<ctre::phoenix6::hardware::TalonFX> talonFX;
+  */
 
   // Config must outlive the wrapper; stored here so its address stays stable.
   SmartMotorControllerConfig cfg;
@@ -82,18 +85,18 @@ inline SmartMotorControllerConfig MakeBaseConfig(ProfileType profile, double kP,
 }
 
 // Return the canonical DCMotor model for a given hardware type.
-inline frc::DCMotor MotorForHardware(HardwareType hw) {
+inline wpi::math::DCMotor MotorForHardware(HardwareType hw) {
   switch (hw) {
     case HardwareType::SparkMax:
-      return frc::DCMotor::NEO(1);
+      return wpi::math::DCMotor::NEO(1);
     case HardwareType::SparkFlex:
-      return frc::DCMotor::NeoVortex(1);
+      return wpi::math::DCMotor::NeoVortex(1);
     case HardwareType::TalonFXS:
-      return frc::DCMotor::NEO(2);
+      return wpi::math::DCMotor::NEO(2);
     case HardwareType::TalonFX:
-      return frc::DCMotor::KrakenX60(1);
+      return wpi::math::DCMotor::KrakenX60(1);
   }
-  return frc::DCMotor::NEO(1);
+  return wpi::math::DCMotor::NEO(1);
 }
 
 // Create a bundle (hardware + subsystem + wrapper) for a given parameter set.
@@ -112,31 +115,40 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
   switch (param.hardware) {
     case HardwareType::SparkMax: {
       bundle.sparkMax = std::make_unique<rev::spark::SparkMax>(
-          canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
+          wpi::CANPort::CAN_S0, canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
       bundle.smc = new local::SparkWrapper(bundle.sparkMax.get(), MotorForHardware(param.hardware),
                                            &bundle.cfg);
       break;
     }
     case HardwareType::SparkFlex: {
       bundle.sparkFlex = std::make_unique<rev::spark::SparkFlex>(
-          canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
+          wpi::CANPort::CAN_S0, canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
       bundle.smc = new local::SparkWrapper(bundle.sparkFlex.get(), MotorForHardware(param.hardware),
                                            &bundle.cfg);
       break;
     }
+    /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
     case HardwareType::TalonFXS: {
-      bundle.talonFXS = std::make_unique<ctre::phoenix6::hardware::TalonFXS>(canId);
+      bundle.talonFXS = std::make_unique<ctre::phoenix6::hardware::TalonFXS>(
+          canId, ctre::phoenix6::CANBus{});
       bundle.smc =
           new remote::TalonFXSWrapper(bundle.talonFXS.get(), MotorForHardware(param.hardware),
                                       remote::TalonFXSWrapper::MotorArrangement::NEO, &bundle.cfg);
       break;
     }
     case HardwareType::TalonFX: {
-      bundle.talonFX = std::make_unique<ctre::phoenix6::hardware::TalonFX>(canId);
+      bundle.talonFX = std::make_unique<ctre::phoenix6::hardware::TalonFX>(
+          canId, ctre::phoenix6::CANBus{});
       bundle.smc = new remote::TalonFXWrapper(bundle.talonFX.get(),
                                               MotorForHardware(param.hardware), &bundle.cfg);
       break;
     }
+    */
+    case HardwareType::TalonFXS:
+    case HardwareType::TalonFX:
+      // CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7;
+      // AllMotorParams() no longer generates these cases, so this is unreachable.
+      break;
   }
 
   bundle.subsystem->SetSMC(bundle.smc);
@@ -144,14 +156,18 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
 }
 
 // True if the bundle wraps a CTRE TalonFX or TalonFXS.
+// CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7, so the
+// talonFX/talonFXS HardwareBundle fields are currently commented out and no bundle can be CTRE;
+// this always returns false until CTRE is available again.
 inline bool IsCTRE(const HardwareBundle& b) {
-  return b.talonFX != nullptr || b.talonFXS != nullptr;
+  (void)b;
+  return false;
 }
 
 // Standard teardown: unregister subsystem, close SMC, delete wrapper.
 inline void CloseBundle(HardwareBundle& b) {
   motorcontrollers::SmartMotorControllerCommandRegistry::RemoveCommands(b.subsystem.get());
-  frc2::CommandScheduler::GetInstance().UnregisterSubsystem(b.subsystem.get());
+  wpi::cmd::CommandScheduler::GetInstance().UnregisterSubsystem(b.subsystem.get());
   b.subsystem->Close();
   delete b.smc;
   b.smc = nullptr;
@@ -160,8 +176,12 @@ inline void CloseBundle(HardwareBundle& b) {
 // All (hardware × profile) combinations used by each mechanism test suite.
 inline std::vector<MotorTestParam> AllMotorParams() {
   std::vector<MotorTestParam> params;
-  for (auto hw : {HardwareType::SparkMax, HardwareType::SparkFlex, HardwareType::TalonFXS,
-                  HardwareType::TalonFX}) {
+  for (auto hw : {
+           HardwareType::SparkMax, HardwareType::SparkFlex
+           /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
+           , HardwareType::TalonFXS, HardwareType::TalonFX
+           */
+       }) {
     for (auto prof : {ProfileType::None, ProfileType::Trapezoid, ProfileType::Exponential}) {
       std::string hwName;
       switch (hw) {

@@ -1,0 +1,241 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
+package yams.core.mechanisms.swerve;
+
+import static org.wpilib.units.Units.MetersPerSecond;
+
+import java.util.function.Supplier;
+import org.wpilib.framework.RobotBase;
+import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.kinematics.SwerveModulePosition;
+import org.wpilib.math.kinematics.SwerveModuleVelocity;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.Force;
+import yams.core.exceptions.SmartMotorControllerConfigurationException;
+import yams.core.mechanisms.config.SwerveModuleConfig;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.telemetry.MechanismTelemetry;
+import yams.core.telemetry.SwerveModuleTelemetry;
+import yams.core.telemetry.SwerveModuleTelemetryConfig;
+
+/**
+ * Swerve Module
+ *
+ * <p>{@link SwerveModule} coordinates the drive motor (velocity control) and the azimuth (steer)
+ * motor (position control) that make up one corner of a swerve drivetrain. On construction it reads
+ * the absolute encoder and seeds the azimuth relative encoder so the wheel starts at the correct
+ * angle. Each periodic cycle you call {@link #setSwerveModuleState(SwerveModuleVelocity)} to
+ * command both motors, and {@link #getState()} / {@link #getPosition()} to read back the current
+ * wheel velocity and heading.
+ *
+ * <h2>Typical usage</h2>
+ *
+ * <p>In almost every case you should <b>not</b> instantiate {@link SwerveModule} directly. Instead,
+ * pass one {@link yams.core.mechanisms.config.SwerveModuleConfig} per corner to {@link
+ * yams.core.mechanisms.config.SwerveDriveConfig} and let {@link
+ * yams.core.mechanisms.swerve.SwerveDrive} create and manage the modules internally:
+ *
+ * <pre>{@code
+ * SwerveDriveConfig driveConfig = new SwerveDriveConfig()
+ *     .withSwerveModuleConfig(frontLeft, frontRight, backLeft, backRight);
+ *
+ * SwerveDrive swerveDrive = new SwerveDrive(driveConfig);
+ * }</pre>
+ *
+ * <h2>Direct instantiation (advanced)</h2>
+ *
+ * <p>If you need direct access to a module for example when writing unit tests or custom
+ * characterisation routines you can construct one from a fully-configured {@link
+ * yams.core.mechanisms.config.SwerveModuleConfig}:
+ *
+ * <pre>{@code
+ * // Assumes 'frontLeftConfig' has already been built with drive/steer motors,
+ * // wheel radius, module location, absolute encoder offset, and telemetry name.
+ * SwerveModule frontLeft = new SwerveModule(frontLeftConfig);
+ *
+ * // Command a specific state (angle + speed)
+ * SwerveModuleVelocity desiredState = new SwerveModuleVelocity(1.5, Rotation2d.fromDegrees(45));
+ * frontLeft.setSwerveModuleState(desiredState);
+ *
+ * // Read back current state
+ * SwerveModuleVelocity current = frontLeft.getState();
+ * }</pre>
+ */
+public class SwerveModule {
+  /**
+   * Drive motor controller.
+   */
+  protected final SmartMotorController m_driveMotorController;
+  /**
+   * Azimuth motor controller.
+   */
+  protected final SmartMotorController m_azimuthMotorController;
+  /**
+   * Swerve module configuration.
+   */
+  private final SwerveModuleConfig m_config;
+  /**
+   * Mechanism Telemetry, used for the loop time.
+   */
+  private final MechanismTelemetry m_telemetry = new MechanismTelemetry();
+  /**
+   * Absolute encoder angle, and drive/azimuth motor controller telemetry.
+   */
+  private SwerveModuleTelemetry m_swerveModuleTelemetry;
+  /**
+   * Absolute encoder angle without any offsets applied.
+   */
+  private final Supplier<Angle> m_azimuthEncoderWithoutOffsets;
+
+  /**
+   * Create a SwerveModule.
+   *
+   * @param config {@link SwerveModuleConfig} for the module.
+   */
+  public SwerveModule(SwerveModuleConfig config) {
+    m_config = config;
+    m_driveMotorController = config.getDriveMotor();
+    m_azimuthMotorController = config.getAzimuthMotor();
+    if (m_config.getTelemetryName().isEmpty()) {
+      throw new IllegalArgumentException("SwerveModuleConfig must have a telemetry name!");
+    }
+    if (m_config.getLocation().isEmpty()) {
+      throw new IllegalArgumentException("SwerveModuleConfig must have a position!");
+    }
+    if (m_azimuthMotorController.getConfig().getExternalEncoder().isPresent() && !m_azimuthMotorController.getConfig().getUseExternalFeedback()) {
+      throw new SmartMotorControllerConfigurationException("External encoder cannot be used without external feedback", "External encoder could not be used", "withUseExternalFeedbackEncoder(true)");
+    }
+    seedAzimuthEncoder();
+    m_azimuthEncoderWithoutOffsets = config.getRawAbsoluteEncoderAngle();
+  }
+
+  /**
+   * Setup telemetry for the module; the {@link SwerveModuleTelemetry} config used is either the one
+   * supplied via {@link SwerveModuleConfig#withTelemetry(String, SwerveModuleTelemetryConfig)} or a
+   * default built from {@link SwerveModuleConfig#getTelemetryVerbosity()} (defaulting to {@link
+   * TelemetryVerbosity#HIGH}).
+   *
+   * @param mechName Telemetry name of the parent {@link SwerveDrive}.
+   */
+  public void setupTelemetry(String mechName) {
+    m_telemetry.setupTelemetry(mechName + "/modules/" + getName());
+    var cfg = m_config.getSwerveModuleTelemetryConfig().orElseGet(() -> new SwerveModuleTelemetryConfig().withTelemetryVerbosity(m_config.getTelemetryVerbosity().orElse(TelemetryVerbosity.HIGH)));
+    m_swerveModuleTelemetry = new SwerveModuleTelemetry(cfg);
+    m_swerveModuleTelemetry.setupTelemetry(mechName, this);
+  }
+
+  /**
+   * Get the absolute encoder angle without any offsets applied.
+   *
+   * @return {@link Angle} of the absolute encoder without offsets.
+   */
+  public Angle getRawAbsoluteEncoderAngle() {
+    return m_azimuthEncoderWithoutOffsets.get();
+  }
+
+  /** Seed the azimuth encoder with the absolute encoder angle. */
+  public void seedAzimuthEncoder() {
+    if (RobotBase.isReal() && (m_azimuthMotorController.getConfig().getExternalEncoder().isEmpty() || !m_azimuthMotorController.getConfig().getUseExternalFeedback())) {
+      m_azimuthMotorController.setEncoderPosition(m_config.getAbsoluteEncoderAngle());
+    }
+  }
+
+  /**
+   * Get the name of the module.
+   *
+   * @return Name of the module.
+   */
+  public String getName() {
+    return m_config.getTelemetryName().orElseThrow();
+  }
+
+  /**
+   * Get the {@link SwerveModuleConfig} for the module.
+   *
+   * @return {@link SwerveModuleConfig} for the module.
+   */
+  public SwerveModuleConfig getConfig() {
+    return m_config;
+  }
+
+  /**
+   * Set the {@link SwerveModuleVelocity} of the module.
+   *
+   * @param state State to set.
+   * @return The optimized {@link SwerveModuleVelocity}.
+   */
+  public SwerveModuleVelocity setSwerveModuleState(SwerveModuleVelocity state) {
+    state = m_config.getOptimizedState(state);
+    m_driveMotorController.setVelocity(MetersPerSecond.of(state.velocity));
+    m_azimuthMotorController.setPosition(state.angle.getMeasure());
+    return state;
+  }
+
+  /**
+   * Set the {@link SwerveModuleVelocity} of the module with an additional drive wheel feedforward
+   * {@link Force} applied on top, e.g. from a PathPlanner set-point generator.
+   *
+   * @param state            State to set.
+   * @param feedforwardForce Feedforward {@link Force} applied at the drive wheel, in the direction
+   *                         of travel.
+   * @return The optimized {@link SwerveModuleVelocity}.
+   */
+  public SwerveModuleVelocity setSwerveModuleState(SwerveModuleVelocity state, Force feedforwardForce) {
+    state = m_config.getOptimizedState(state);
+    m_driveMotorController.setVelocity(MetersPerSecond.of(state.velocity), feedforwardForce);
+    m_azimuthMotorController.setPosition(state.angle.getMeasure());
+    return state;
+  }
+
+  /**
+   * Get the {@link SwerveModuleVelocity} of the module.
+   *
+   * @return {@link SwerveModuleVelocity} of the module.
+   */
+  public SwerveModuleVelocity getState() {
+    return new SwerveModuleVelocity(m_driveMotorController.getMeasurementVelocity(), new Rotation2d(m_azimuthMotorController.getMechanismPosition()));
+  }
+
+  /**
+   * Get the {@link SwerveModulePosition} of the module.
+   *
+   * @return {@link SwerveModulePosition} of the module.
+   */
+  public SwerveModulePosition getPosition() {
+    return new SwerveModulePosition(m_driveMotorController.getMeasurementPosition(), new Rotation2d(m_azimuthMotorController.getMechanismPosition()));
+  }
+
+  /** Update the telemetry of the module. */
+  public void updateTelemetry() {
+    m_driveMotorController.updateTelemetry();
+    m_azimuthMotorController.updateTelemetry();
+    m_swerveModuleTelemetry.publish(this);
+    m_telemetry.updateLoopTime();
+  }
+
+  /** Update the simulation of the module. */
+  public void simIterate() {
+    m_driveMotorController.simIterate();
+    m_azimuthMotorController.simIterate();
+  }
+
+  /**
+   * Get the azimuth {@link SmartMotorController}.
+   *
+   * @return Azimuth {@link SmartMotorController}.
+   */
+  public SmartMotorController getAzimuthMotorController() {
+    return m_azimuthMotorController;
+  }
+
+  /**
+   * Get the drive {@link SmartMotorController}.
+   *
+   * @return Drive {@link SmartMotorController}.
+   */
+  public SmartMotorController getDriveMotorController() {
+    return m_driveMotorController;
+  }
+}

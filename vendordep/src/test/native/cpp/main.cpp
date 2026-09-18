@@ -3,14 +3,15 @@
 
 #include <cxxabi.h>
 #include <execinfo.h>
-#include <hal/HAL.h>
+#include <wpi/hal/HAL.h>
+
+#include <catch2/catch_session.hpp>
 
 #include <csignal>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 
-#include "gtest/gtest.h"
 #include "helpers/ExceptionTracer.h"
 #include "yams/motorcontrollers/SmartMotorControllerCommandRegistry.hpp"
 
@@ -19,7 +20,7 @@ static void SigsegvHandler(int /*sig*/) {
   int count = backtrace(frames, 64);
   char** symbols = backtrace_symbols(frames, count);
 
-  std::fprintf(stderr, "\n[YAMS] Caught SIGSEGV after tests — stack trace:\n");
+  std::fprintf(stderr, "\n[YAMS] Caught SIGSEGV after tests stack trace:\n");
 
   for (int i = 0; i < count; ++i) {
     // backtrace_symbols format: "module(mangled+offset) [address]"
@@ -55,10 +56,8 @@ static void SigsegvHandler(int /*sig*/) {
 
 int main(int argc, char** argv) {
   std::signal(SIGSEGV, SigsegvHandler);
-  ::testing::InitGoogleTest(&argc, argv);
-  // Print demangled stack traces whenever a test fails due to an exception.
-  ::testing::UnitTest::GetInstance()->listeners().Append(new yams::test::ExceptionTracerListener{});
-  int result = RUN_ALL_TESTS();
+  // ExceptionTracerListener registers itself with Catch2 via CATCH_REGISTER_LISTENER.
+  int result = Catch::Session().run(argc, argv);
   // Destroy CommandPtrs while SendableRegistry is still alive; avoids a
   // SIGSEGV from static-destructor ordering (s_commands outlives the registry mutex).
   yams::motorcontrollers::SmartMotorControllerCommandRegistry::Clear();

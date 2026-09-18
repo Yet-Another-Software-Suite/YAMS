@@ -1,16 +1,10 @@
 // Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-// Mirrors Java ElevatorTest — exercises duty-cycle and position-PID control
+// Mirrors Java ElevatorTest exercises duty-cycle and position-PID control
 // for each (HardwareType × ProfileType) combination using WPILib simulation.
 
-#include <frc/system/plant/DCMotor.h>
-#include <frc2/command/Commands.h>
-#include <gtest/gtest.h>
-#include <units/acceleration.h>
-#include <units/length.h>
-#include <units/mass.h>
-#include <units/velocity.h>
+#include <catch2/catch_test_macros.hpp>
 
 #include <chrono>
 #include <cmath>
@@ -18,6 +12,13 @@
 #include <memory>
 #include <string>
 #include <thread>
+#include <wpi/commands2/CommandScheduler.hpp>
+#include <wpi/commands2/Commands.hpp>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/units/acceleration.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/mass.hpp>
+#include <wpi/units/velocity.hpp>
 
 #include "helpers/MockHardware.h"
 #include "helpers/MotorControllerFactory.h"
@@ -48,9 +49,9 @@ static SmartMotorControllerConfig MakeElevatorSMCConfig(ProfileType profile, Har
       .WithIdleMode(SmartMotorControllerConfig::MotorMode::BRAKE)
       .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
-      .WithFeedforward(frc::ElevatorFeedforward{
-          1.0_V, 0.0_V, units::unit_t<frc::ElevatorFeedforward::kv_unit>{0.0},
-          units::unit_t<frc::ElevatorFeedforward::ka_unit>{0.0}})
+      .WithFeedforward(wpi::math::ElevatorFeedforward{
+          1.0_V, 0.0_V, wpi::units::unit_t<wpi::math::ElevatorFeedforward::kv_unit>{0.0},
+          wpi::units::unit_t<wpi::math::ElevatorFeedforward::ka_unit>{0.0}})
       .WithClosedLoopMode()
       .WithSubsystem(subsys)
       .WithTelemetry(name);
@@ -86,7 +87,7 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
 
   auto* subsys = static_cast<TestSubsystem*>(smc->GetConfig().GetSubsystem());
   auto cmd = subsys->SetDutyCycle(1.0);
-  frc2::CommandScheduler::GetInstance().Schedule(cmd);
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(cmd);
 
   SchedulerHelper::RunForDuration(1.0_s, [&] {
     if (smc->GetDutyCycle() != 0.0) passed = true;
@@ -104,9 +105,10 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
   if (isCTRE && !moved) {
     std::printf("[WARNING] TalonFX/TalonFXS duty-cycle test inconclusive on this OS.\n");
   } else {
-    EXPECT_TRUE(moved) << "Motor did not move during duty-cycle test"
-                       << " preVel=" << preVel.value() << " preDist=" << preDist.value()
-                       << " postVel=" << postVel.value() << " postDist=" << postDist.value();
+    INFO("Motor did not move during duty-cycle test"
+         << " preVel=" << preVel.value() << " preDist=" << preDist.value()
+         << " postVel=" << postVel.value() << " postDist=" << postDist.value());
+    CHECK(moved);
   }
 }
 
@@ -114,10 +116,10 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE, bool deb
   auto preDist = smc->GetMeasurementPosition();
   bool passed = false;
 
-  auto cmd = frc2::cmd::Run([smc] { smc->SetPosition(2.0_m); }, {smc->GetConfig().GetSubsystem()});
-  frc2::CommandScheduler::GetInstance().Schedule(cmd);
+  auto cmd = wpi::cmd::Run([smc] { smc->SetPosition(2.0_m); }, {smc->GetConfig().GetSubsystem()});
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(cmd);
 
-  units::millisecond_t period{
+  wpi::units::millisecond_t period{
       smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms).value() * 1000.0};
 
   SchedulerHelper::RunForDuration(isCTRE ? 1.0_s : 20.0_s, [&] {
@@ -132,91 +134,95 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE, bool deb
   });
 
   auto postDist = smc->GetMeasurementPosition();
-  EXPECT_TRUE(std::abs(postDist.value() - preDist.value()) > 0.005 || passed)
-      << "Elevator did not move toward PID setpoint"
-      << " preDist=" << preDist.value() << " postDist=" << postDist.value();
+  INFO("Elevator did not move toward PID setpoint"
+       << " preDist=" << preDist.value() << " postDist=" << postDist.value());
+  CHECK((std::abs(postDist.value() - preDist.value()) > 0.005 || passed));
 }
 
-// ---- Parameterised fixture --------------------------------------------------
+// ---- Fixture ----------------------------------------------------------------
 
-class ElevatorTest : public ::testing::TestWithParam<MotorTestParam> {
- protected:
-  void SetUp() override {
+namespace {
+struct ElevatorTestFixture {
+  ElevatorTestFixture() {
     InitializeHardware();
     SchedulerHelper::Enable();
     SchedulerHelper::CancelAll();
   }
-  void TearDown() override {
+  ~ElevatorTestFixture() {
     TeardownHardware();
     SchedulerHelper::CancelAll();
   }
 };
+}  // namespace
 
 // ---- Tests ------------------------------------------------------------------
 
-TEST_P(ElevatorTest, SMCDutyCycle) {
-  auto& param = GetParam();
-  SCOPED_TRACE(param.name);
-  auto cfg = MakeElevatorSMCConfig(param.profile, param.hardware, nullptr, param.name);
-  auto subsys = std::make_unique<TestSubsystem>();
-  cfg.WithSubsystem(subsys.get());
-  auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
-  bundle.subsystem->m_testRunning = true;
+TEST_CASE_METHOD(ElevatorTestFixture, "ElevatorTest.SMCDutyCycle", "[ElevatorTest]") {
+  for (auto& param : AllMotorParams()) {
+    DYNAMIC_SECTION(param.name) {
+      auto cfg = MakeElevatorSMCConfig(param.profile, param.hardware, nullptr, param.name);
+      auto subsys = std::make_unique<TestSubsystem>();
+      cfg.WithSubsystem(subsys.get());
+      auto bundle = MakeBundle(param, cfg);
+      bundle.smc->SetupSimulation();
+      bundle.subsystem->m_testRunning = true;
 
-  DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
-  CloseBundle(bundle);
+      DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
+      CloseBundle(bundle);
+    }
+  }
 }
 
-TEST_P(ElevatorTest, SMCPositionPID) {
-  auto& param = GetParam();
-  SCOPED_TRACE(param.name);
-  auto cfg = MakeElevatorSMCConfig(param.profile, param.hardware, nullptr, param.name);
-  auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
-  bundle.subsystem->m_testRunning = true;
+TEST_CASE_METHOD(ElevatorTestFixture, "ElevatorTest.SMCPositionPID", "[ElevatorTest]") {
+  for (auto& param : AllMotorParams()) {
+    DYNAMIC_SECTION(param.name) {
+      auto cfg = MakeElevatorSMCConfig(param.profile, param.hardware, nullptr, param.name);
+      auto bundle = MakeBundle(param, cfg);
+      bundle.smc->SetupSimulation();
+      bundle.subsystem->m_testRunning = true;
 
-  PositionPIDTestBody(bundle.smc, IsCTRE(bundle));
-  CloseBundle(bundle);
+      PositionPIDTestBody(bundle.smc, IsCTRE(bundle));
+      CloseBundle(bundle);
+    }
+  }
 }
 
-TEST_P(ElevatorTest, ElevatorDutyCycle) {
-  auto& param = GetParam();
-  SCOPED_TRACE(param.name);
-  auto cfg = MakeElevatorSMCConfig(param.profile, param.hardware, nullptr, param.name);
-  auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
-  bundle.subsystem->m_testRunning = true;
+TEST_CASE_METHOD(ElevatorTestFixture, "ElevatorTest.ElevatorDutyCycle", "[ElevatorTest]") {
+  for (auto& param : AllMotorParams()) {
+    DYNAMIC_SECTION(param.name) {
+      auto cfg = MakeElevatorSMCConfig(param.profile, param.hardware, nullptr, param.name);
+      auto bundle = MakeBundle(param, cfg);
+      bundle.smc->SetupSimulation();
+      bundle.subsystem->m_testRunning = true;
 
-  auto elevator = CreateElevator(bundle.smc, bundle.subsystem.get());
-  auto upCmd = elevator->Set(1.0);
-  frc2::CommandScheduler::GetInstance().Schedule(upCmd);
+      auto elevator = CreateElevator(bundle.smc, bundle.subsystem.get());
+      auto upCmd = elevator->Set(1.0);
+      wpi::cmd::CommandScheduler::GetInstance().Schedule(upCmd);
 
-  DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
-  CloseBundle(bundle);
-  delete elevator;
+      DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
+      CloseBundle(bundle);
+      delete elevator;
+    }
+  }
 }
 
-TEST_P(ElevatorTest, ElevatorPositionPID) {
-  auto& param = GetParam();
-  SCOPED_TRACE(param.name);
-  auto cfg = MakeElevatorSMCConfig(param.profile, param.hardware, nullptr, param.name);
-  auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
-  bundle.subsystem->m_testRunning = true;
+TEST_CASE_METHOD(ElevatorTestFixture, "ElevatorTest.ElevatorPositionPID", "[ElevatorTest]") {
+  for (auto& param : AllMotorParams()) {
+    DYNAMIC_SECTION(param.name) {
+      auto cfg = MakeElevatorSMCConfig(param.profile, param.hardware, nullptr, param.name);
+      auto bundle = MakeBundle(param, cfg);
+      bundle.smc->SetupSimulation();
+      bundle.subsystem->m_testRunning = true;
 
-  auto elevator = CreateElevator(bundle.smc, bundle.subsystem.get());
-  auto highPid = elevator->RunTo(2.0_m);
-  frc2::CommandScheduler::GetInstance().Schedule(highPid);
+      auto elevator = CreateElevator(bundle.smc, bundle.subsystem.get());
+      auto highPid = elevator->RunTo(2.0_m);
+      wpi::cmd::CommandScheduler::GetInstance().Schedule(highPid);
 
-  PositionPIDTestBody(bundle.smc, IsCTRE(bundle), param.name == "TalonFXS_NoPro");
-  CloseBundle(bundle);
-  delete elevator;
+      PositionPIDTestBody(bundle.smc, IsCTRE(bundle), param.name == "TalonFXS_NoPro");
+      CloseBundle(bundle);
+      delete elevator;
+    }
+  }
 }
-
-INSTANTIATE_TEST_SUITE_P(AllControllersTests, ElevatorTest, ::testing::ValuesIn(AllMotorParams()),
-                         [](const ::testing::TestParamInfo<MotorTestParam>& info) {
-                           return info.param.name;
-                         });
 
 }  // namespace yams::test

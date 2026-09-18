@@ -5,11 +5,11 @@
 
 namespace yams::mechanisms::velocity {
 
-frc::MechanismLigament2d* SmartVelocityMechanism::GetMechanismLigament() {
+wpi::MechanismLigament2d* SmartVelocityMechanism::GetMechanismLigament() {
   return m_mechanismLigament;
 }
 
-frc::MechanismRoot2d* SmartVelocityMechanism::GetMechanismRoot() { return m_mechanismRoot; }
+wpi::MechanismRoot2d* SmartVelocityMechanism::GetMechanismRoot() { return m_mechanismRoot; }
 
 motorcontrollers::SmartMotorController* SmartVelocityMechanism::GetMotor() {
   return GetMotorController();

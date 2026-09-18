@@ -6,9 +6,9 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.wpilib.framework.RobotBase;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.CommandScheduler;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -112,15 +112,15 @@ public class Robot extends LoggedRobot {
   }
 
   @Override
-  public void testInit() {
+  public void utilityInit() {
     CommandScheduler.getInstance().cancelAll();
   }
 
   @Override
-  public void testPeriodic() {
+  public void utilityPeriodic() {
   }
 
   @Override
-  public void testExit() {
+  public void utilityExit() {
   }
 }

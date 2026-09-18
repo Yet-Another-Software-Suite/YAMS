@@ -1,0 +1,117 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
+package frc.robot.subsystems;
+
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Pounds;
+
+import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.hardware.TalonFX;
+import org.wpilib.math.controller.SimpleMotorFeedforward;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.LinearVelocity;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.SubsystemBase;
+import java.util.function.Supplier;
+import yams.gearing.GearBox;
+import yams.gearing.MechanismGearing;
+import yams.mechanisms.config.FlyWheelConfig;
+import yams.mechanisms.velocity.FlyWheel;
+import yams.motorcontrollers.SmartMotorController;
+import yams.motorcontrollers.SmartMotorControllerConfig;
+import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
+import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.motorcontrollers.remote.TalonFXWrapper;
+
+public class ShooterSubsystem extends SubsystemBase
+{
+  private final TalonFX                    flywheelMotor1         = new TalonFX(1, CANBus.systemcore(1));
+  private final TalonFX                    flywheelMotor2         = new TalonFX(2, CANBus.systemcore(1));
+  private final boolean                    flywheelMotor2Inverted = true;
+  private final SmartMotorControllerConfig motorConfig            = new SmartMotorControllerConfig(this)
+      .withClosedLoopController(1, 0, 0)
+      .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
+      .withIdleMode(MotorMode.COAST)
+      .withTelemetry("ShooterMotor", TelemetryVerbosity.HIGH)
+//      .withStatorCurrentLimit(Amps.of(40))
+      .withMotorInverted(false)
+      .withFeedforward(new SimpleMotorFeedforward(0, 0, 0))
+//      .withVendorConfig(new TalonFXConfiguration().withVoltage(new VoltageConfigs().withPeakReverseVoltage(0)))
+//      .withFollowers(Pair.of(flywheelMotor2, flywheelMotor2Inverted))
+      .withControlMode(ControlMode.CLOSED_LOOP);
+  private final SmartMotorController       motor                  = new TalonFXWrapper(flywheelMotor1,
+                                                                                       DCMotor.getNEO(2),
+                                                                                       motorConfig);
+  private final FlyWheelConfig             shooterConfig          = new FlyWheelConfig()
+      // Diameter of the flywheel.
+      .withDiameter(Inches.of(4))
+      .withTelemetry("ShooterMech", TelemetryVerbosity.HIGH);
+  private final FlyWheel                   shooter                = new FlyWheel(shooterConfig, motor);
+
+  public ShooterSubsystem() {}
+
+  /**
+   * Gets the current velocity of the shooter.
+   *
+   * @return FlyWheel velocity.
+   */
+  public AngularVelocity getVelocity() {return shooter.getSpeed();}
+
+  /**
+   * Set the shooter velocity.
+   *
+   * @param speed Speed to set.
+   * @return {@link org.wpilib.command2.RunCommand}
+   */
+  public Command setVelocity(AngularVelocity speed) {return shooter.run(speed);}
+
+  /**
+   * Set the dutycycle of the shooter.
+   *
+   * @param dutyCycle DutyCycle to set.
+   * @return {@link org.wpilib.command2.RunCommand}
+   */
+  public Command set(double dutyCycle) {return shooter.set(dutyCycle);}
+
+
+  public Command setDutyCycle(Supplier<Double> dutyCycle) {return shooter.set(dutyCycle);}
+
+  public Command setVelocity(Supplier<AngularVelocity> speed) {return shooter.run(speed);}
+
+  @Override
+  public void simulationPeriodic()
+  {
+    shooter.simIterate();
+  }
+
+  @Override
+  public void periodic()
+  {
+    shooter.updateTelemetry();
+  }
+
+  public void setRPM(LinearVelocity newHorizontalSpeed)
+  {
+    shooter.setMeasurementVelocitySetpoint(newHorizontalSpeed);
+  }
+
+  public boolean readyToShoot(AngularVelocity tolerance)
+  {
+    if (motor.getMechanismSetpointVelocity().isEmpty())
+    {return false;}
+    return motor.getMechanismVelocity().isNear(motor.getMechanismSetpointVelocity().orElseThrow(), tolerance);
+  }
+
+  public void setVelocitySetpoint(AngularVelocity speed)
+  {
+    shooter.setMechanismVelocitySetpoint(speed);
+  }
+
+  public void setDutyCycleSetpoint(double dutyCycle)
+  {
+    shooter.setDutyCycleSetpoint(dutyCycle);
+  }
+}

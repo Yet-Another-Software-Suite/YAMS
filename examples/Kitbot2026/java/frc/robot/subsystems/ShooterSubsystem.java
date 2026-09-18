@@ -3,19 +3,19 @@
 
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Pounds;
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Seconds;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Pounds;
+import static org.wpilib.units.Units.RPM;
+import static org.wpilib.units.Units.Seconds;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.wpilib.math.controller.SimpleMotorFeedforward;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.SubsystemBase;
 import java.util.function.Supplier;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
@@ -42,7 +42,7 @@ import yams.motorcontrollers.local.SparkWrapper;
 public class ShooterSubsystem extends SubsystemBase
 {
   // CAN ID 10. Single NEO in brushless mode.
-  private final SparkMax                   ShooterMotor    = new SparkMax(10, MotorType.kBrushless);
+  private final SparkMax                   ShooterMotor    = new SparkMax(1, 10, MotorType.kBrushless);
 
   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       // kP=1, kI=0, kD=0. See class javadoc for the tradeoff vs a tuned feedforward.
@@ -95,7 +95,7 @@ public class ShooterSubsystem extends SubsystemBase
    * Set the shooter velocity.
    *
    * @param speed Speed to set.
-   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
+   * @return {@link org.wpilib.command2.RunCommand}
    */
   public Command setVelocity(AngularVelocity speed) {return shooter.run(speed);}
 
@@ -103,7 +103,7 @@ public class ShooterSubsystem extends SubsystemBase
    * Set the dutycycle of the shooter.
    *
    * @param dutyCycle DutyCycle to set.
-   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
+   * @return {@link org.wpilib.command2.RunCommand}
    */
   public Command set(double dutyCycle) {return shooter.set(dutyCycle);}
 

@@ -25,15 +25,15 @@ package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.util.Color8Bit;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.wpilib.math.controller.ArmFeedforward;
+import org.wpilib.math.geometry.Translation2d;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.util.Color;
+import org.wpilib.util.Color8Bit;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.SubsystemBase;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.ArmConfig;
@@ -42,7 +42,7 @@ import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.local.SparkWrapper;
 
-import static edu.wpi.first.units.Units.*;
+import static org.wpilib.units.Units.*;
 
 public class DoubleJointedArmSubsystem extends SubsystemBase
 {
@@ -52,7 +52,7 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
   // attached to it. Motor is on CAN ID 1.
   // -------------------------------------------------------------------------
 
-  private final SparkMax                   lowerMotor  = new SparkMax(1, SparkLowLevel.MotorType.kBrushless);
+  private final SparkMax                   lowerMotor  = new SparkMax(1, 1, SparkLowLevel.MotorType.kBrushless);
 
   private final SmartMotorControllerConfig lowerConfig = new SmartMotorControllerConfig(this)
           // kP=16 produces roughly 16 volts of correction per radian of error.
@@ -104,7 +104,7 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
   // than the proximal joint. Motor is on CAN ID 2.
   // -------------------------------------------------------------------------
 
-  private final SparkMax                   upperMotor  = new SparkMax(2, SparkLowLevel.MotorType.kBrushless);
+  private final SparkMax                   upperMotor  = new SparkMax(1, 2, SparkLowLevel.MotorType.kBrushless);
 
   private final SmartMotorControllerConfig upperConfig = new SmartMotorControllerConfig(this)
           // Same kP as lower joint for this template. In practice the distal joint
@@ -138,7 +138,7 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
       .withLength(Feet.of(2.5))
       .withHardLimits(Degrees.of(-720), Degrees.of(720)) // Widen or tighten to match physical stops
       .withTelemetry("UpperArm", SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
-      .withSimColor(new Color8Bit(Color.kDarkRed)); // Dark red distinguishes the upper segment in simulation
+      .withSimColor(new Color8Bit(Color.DARK_RED)); // Dark red distinguishes the upper segment in simulation
 
   // DoubleJointedArm wires both joints together. It exposes angle, duty-cycle,
   // and Cartesian (x, y) setpoint commands.

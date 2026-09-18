@@ -6,23 +6,23 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import org.wpilib.driverstation.internal.DriverStationBackend;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.Commands;
+import org.wpilib.command2.button.CommandNiDsXboxController;
 import frc.robot.subsystems.ArmSubsystem;
 
-import static edu.wpi.first.units.Units.Degrees;
+import static org.wpilib.units.Units.Degrees;
 
 
 public class RobotContainer
 {
   private ArmSubsystem arm = new ArmSubsystem();
-  public CommandXboxController xboxController = new CommandXboxController(0);
+  public CommandNiDsXboxController xboxController = new CommandNiDsXboxController(0);
 
   public RobotContainer()
   {
-    DriverStation.silenceJoystickConnectionWarning(true);
+    DriverStationBackend.silenceJoystickConnectionWarning(true);
     arm.setDefaultCommand(arm.armCmd(0));
 //    arm.setDefaultCommand(arm.setAngle(Degrees.of(0)));
     configureBindings();

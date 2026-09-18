@@ -12,15 +12,15 @@ import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.wpilib.vision.apriltag.AprilTagFieldLayout;
+import org.wpilib.vision.apriltag.AprilTagFields;
+import org.wpilib.math.geometry.Pose2d;
+import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Rotation3d;
+import org.wpilib.math.geometry.Transform3d;
+import org.wpilib.math.geometry.Translation3d;
+import org.wpilib.framework.RobotBase;
+import org.wpilib.command2.SubsystemBase;
 
 public class VisionSubsystem extends SubsystemBase {
     PhotonCamera camera;
@@ -87,11 +87,15 @@ public class VisionSubsystem extends SubsystemBase {
 
     public Optional<PhotonTrackedTarget> getClosestTag() {
         if (!photonAvailable || camera == null) return Optional.empty();
-        return camera.getLatestResult().hasTargets()
-                ? camera.getLatestResult().getTargets().stream()
+        for(var results : camera.getAllUnreadResults()
+        ){
+            return results.hasTargets()
+                ? results.getTargets().stream()
                         .filter(t -> t.getFiducialId() > 0) // AprilTags only
                         .min(Comparator.comparingDouble(
                                 t -> t.getBestCameraToTarget().getTranslation().getNorm()))
                 : Optional.empty();
+        }
+        return Optional.empty();
     }
 }

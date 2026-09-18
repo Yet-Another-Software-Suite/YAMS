@@ -4,17 +4,17 @@
 package frc.robot.subsystems;
 
 
-import static edu.wpi.first.units.Units.*;
+import static org.wpilib.units.Units.*;
 
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.*;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.wpilib.math.controller.ElevatorFeedforward;
+import org.wpilib.math.filter.Debouncer;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.measure.*;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.Commands;
+import org.wpilib.command2.SubsystemBase;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.ElevatorConfig;
@@ -42,7 +42,7 @@ public class ExponentiallyProfiledElevatorSubsystem extends SubsystemBase
   private final String           motorTelemetryName = "ExponentiallyProfiledElevatorMotor";
   private final String           mechTelemetryName  = "ExponentiallyProfiledElevator";
   // CAN ID 2 -- change to match your robot's CAN bus assignment.
-  private final SparkMax         elevatorMotor      = new SparkMax(2, SparkLowLevel.MotorType.kBrushless);
+  private final SparkMax         elevatorMotor      = new SparkMax(1, 2, SparkLowLevel.MotorType.kBrushless);
   ///  Configuration Options
   // NEO rated at 5880 RPM free speed and 2.6 N*m stall torque; matches most FRC elevator designs.
   private final DCMotor          dcMotor            = DCMotor.getNEO(1);

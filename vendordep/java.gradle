@@ -1,0 +1,111 @@
+// Java build configuration: sourceSets, dependencies, tests, and javadoc.
+// Applied from build.gradle.
+
+sourceSets {
+    main {
+        java {
+            srcDir "$rootDir/../yams/java/"
+            exclude  "**/TalonFX*.java"
+        }
+    }
+    // CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7. CANcoderTest.java
+    // is entirely CTRE (CANcoder + TalonFX), so it stays excluded until one is available. The other
+    // mechanism tests have their CTRE-specific imports/cases commented out (not deleted) instead,
+    // so their REV-only coverage keeps running.
+    test {
+        java {
+            exclude "yams/core/motorcontrollers/CANcoderTest.java"
+        }
+    }
+}
+
+var javaVersion = "25"
+
+dependencies {
+    implementation wpi.java.deps.wpilib()
+    implementation wpi.java.vendor.java()
+
+    implementation "org.wpilib.cscore:cscore-java:$wpilibVersion"
+    implementation "org.wpilib.cameraserver:cameraserver-java:$wpilibVersion"
+    implementation "org.wpilib.ntcore:ntcore-java:$wpilibVersion"
+    implementation "org.wpilib.wpilibj:wpilibj-java:$wpilibVersion"
+    implementation "org.wpilib.wpiutil:wpiutil-java:$wpilibVersion"
+    implementation "org.wpilib.wpimath:wpimath-java:$wpilibVersion"
+    implementation "org.wpilib.wpiunits:wpiunits-java:$wpilibVersion"
+    implementation "org.wpilib.datalog:datalog-java:$wpilibVersion"
+    implementation "org.wpilib.hal:hal-java:$wpilibVersion"
+    implementation "org.wpilib.tunables:tunables-java:$wpilibVersion"
+    implementation "org.wpilib.telemetry:telemetry-java:$wpilibVersion"
+    implementation "org.ejml:ejml-simple:0.44.0"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:2.19.2"
+    implementation "com.fasterxml.jackson.core:jackson-core:2.19.2"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.19.2"
+    implementation 'org.wpilib.thirdparty.opencv:opencv-java:2027-4.13.0-3'
+
+    // Native JNI libraries needed to run/simulate the Java side (HAL sim, driverstation sim, etc.),
+    // not related to building YAMS's own C++ library. See cpp.gradle for that.
+    nativeDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.desktop)
+    nativeDebug wpi.java.vendor.jniDebug(wpi.platforms.desktop)
+    simulationDebug wpi.sim.enableDebug()
+
+    nativeRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.desktop)
+    nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
+    simulationRelease wpi.sim.enableRelease()
+
+    testImplementation platform("org.junit:junit-bom:5.11.4")
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testImplementation "org.junit.jupiter:junit-jupiter-params"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+    testImplementation "org.mockito:mockito-core:5.3.1"
+    testImplementation "org.mockito:mockito-junit-jupiter:5.3.1"
+}
+
+// Set up java tests
+test {
+    useJUnitPlatform()
+    systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+    testLogging {
+        events "failed"
+        exceptionFormat = "full"
+    }
+}
+
+wpi.sim.addGui().defaultEnabled = true
+wpi.sim.addDriverstation()
+wpi.java.configureTestTasks(test)
+
+tasks.test {
+    // Disable test when running 'build' task, but enable when running 'test' task directly
+    enabled = !gradle.startParameter.taskNames.contains('build')
+}
+
+if (project.hasProperty('onlylinuxathena') || project.hasProperty('onlylinuxarm32') || project.hasProperty('onlylinuxarm64') || project.hasProperty('onlywindowsarm64') || project.hasProperty('onlylinuxsystemcore') || project.hasProperty('onlywindows64') || project.hasProperty('onlyosxuniversal') || project.hasProperty('onlylinuxx64')) {
+    test.enabled = false
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs.add '-XDstringConcat=inline'
+    options.encoding = 'UTF-8'
+}
+
+javadoc {
+    title = "Yet Another Mechanism System API"
+    destinationDir = file("$releasePath/javadocs")
+    options {
+        encoding = 'UTF-8'
+        charSet = 'UTF-8'
+        links "https://docs.oracle.com/en/java/javase/$javaVersion/docs/api/",
+                'https://github.wpilib.org/allwpilib/docs/release/java/',
+                'https://codedocs.revrobotics.com/java/',
+                'https://api.ctr-electronics.com/phoenix6/stable/java/',
+                'https://api.ctr-electronics.com/phoenix/stable/java/'
+        tags 'todo:X"',
+                'apiNote:a:API Note:',
+                'implSpec:a:Implementation Requirements:',
+                'implNote:a:Implementation Note:'
+        overview "$rootDir/../yams/java/overview.html"
+    }
+}
+
+build.dependsOn javadoc

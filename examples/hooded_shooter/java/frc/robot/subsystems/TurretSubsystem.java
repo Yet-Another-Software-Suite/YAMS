@@ -3,22 +3,23 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.TalonFXS;
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Pounds;
-import static edu.wpi.first.units.Units.Seconds;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.DegreesPerSecond;
+import static org.wpilib.units.Units.DegreesPerSecondPerSecond;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.Pounds;
+import static org.wpilib.units.Units.Seconds;
 
 import java.util.function.Supplier;
 
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.SubsystemBase;
 import yams.motorcontrollers.SmartMotorControllerConfig;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.Angle;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.measure.Angle;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.PivotConfig;
@@ -30,7 +31,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.remote.TalonFXSWrapper;
 
 public class TurretSubsystem extends SubsystemBase {
-        private final TalonFXS turretMotor = new TalonFXS(1);
+        private final TalonFXS turretMotor = new TalonFXS(1, CANBus.systemcore(1));
         private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
                         .withControlMode(ControlMode.CLOSED_LOOP)
                         .withClosedLoopController(4, 0, 0)

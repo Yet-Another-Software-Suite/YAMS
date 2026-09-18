@@ -3,13 +3,12 @@
 
 #pragma once
 
-#include <frc/kinematics/SwerveModuleState.h>
-#include <frc/kinematics/struct/SwerveModuleStateStruct.h>
-
 #include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <wpi/math/kinematics/SwerveModuleVelocity.hpp>
+#include <wpi/math/kinematics/struct/SwerveModuleVelocityStruct.hpp>
 
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 #include "yams/telemetry/SmartMotorControllerTelemetry.hpp"
@@ -45,7 +44,7 @@ class SwerveModuleTelemetryConfig {
     AbsoluteEncoder,
   };
 
-  /** Struct telemetry field for a SwerveModule, backed by frc::SwerveModuleState. */
+  /** Struct telemetry field for a SwerveModule, backed by wpi::math::SwerveModuleVelocity. */
   enum class StructTelemetryField {
     /** Measured SwerveModuleState of the module. */
     State,
@@ -104,7 +103,7 @@ class SwerveModuleTelemetryConfig {
 
   /** @return Configured StructTelemetry<SwerveModuleState> for each StructTelemetryField. */
   std::unordered_map<StructTelemetryField,
-                     StructTelemetry<frc::SwerveModuleState, StructTelemetryField>>&
+                     StructTelemetry<wpi::math::SwerveModuleVelocity, StructTelemetryField>>&
   GetStructFields();
 
   /**
@@ -130,7 +129,7 @@ class SwerveModuleTelemetryConfig {
 
   std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> m_doubleFields;
   std::unordered_map<StructTelemetryField,
-                     StructTelemetry<frc::SwerveModuleState, StructTelemetryField>>
+                     StructTelemetry<wpi::math::SwerveModuleVelocity, StructTelemetryField>>
       m_structFields;
 };
 

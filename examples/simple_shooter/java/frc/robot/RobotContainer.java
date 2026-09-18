@@ -6,22 +6,22 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.RPM;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import static org.wpilib.units.Units.RPM;
+import org.wpilib.driverstation.internal.DriverStationBackend;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.Commands;
+import org.wpilib.command2.button.CommandNiDsXboxController;
 import frc.robot.subsystems.ShooterSubsystem;
 
 
 public class RobotContainer
 {
   private ShooterSubsystem shooter = new ShooterSubsystem();
-  public CommandXboxController xboxController = new CommandXboxController(0);
+  public CommandNiDsXboxController xboxController = new CommandNiDsXboxController(0);
 
   public RobotContainer()
   {
-    DriverStation.silenceJoystickConnectionWarning(true);
+    DriverStationBackend.silenceJoystickConnectionWarning(true);
     shooter.setDefaultCommand(shooter.setDutyCycle(0));
     configureBindings();
   }

@@ -2,8 +2,8 @@
   "fileName": "yams.json",
   "name": "Yet Another Mechanism System",
   "version": "${version}",
-  "frcYear": "2026",
-  "uuid": "a1051e86-a979-4880-a28b-a0d5362d1d96",
+  "frcYear": "2027_alpha7",
+  "uuid": "${uuid}",
   "mavenUrls": [
     "https://yet-another-software-suite.github.io/YAMS/releases/"
   ],
@@ -11,7 +11,7 @@
   "javaDependencies": [
     {
       "groupId": "${groupId}",
-      "artifactId": "${artifactId}-java",
+      "artifactId": "${artifactId}-core",
       "version": "${version}"
     }
   ],

@@ -1,22 +1,23 @@
 // Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-// Mirrors Java ArmTest — duty-cycle and position-PID tests for a single-jointed
+// Mirrors Java ArmTest duty-cycle and position-PID tests for a single-jointed
 // arm across all (HardwareType × ProfileType) combinations.
 
-#include <frc/system/plant/DCMotor.h>
-#include <frc2/command/Commands.h>
-#include <gtest/gtest.h>
-#include <units/angle.h>
-#include <units/angular_velocity.h>
-#include <units/length.h>
-#include <units/mass.h>
+#include <catch2/catch_test_macros.hpp>
 
 #include <chrono>
 #include <cmath>
 #include <cstdio>
 #include <string>
 #include <thread>
+#include <wpi/commands2/CommandScheduler.hpp>
+#include <wpi/commands2/Commands.hpp>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/mass.hpp>
 
 #include "helpers/MockHardware.h"
 #include "helpers/MotorControllerFactory.h"
@@ -42,9 +43,9 @@ static SmartMotorControllerConfig MakeArmSMCConfig(ProfileType profile, Hardware
       .WithIdleMode(SmartMotorControllerConfig::MotorMode::BRAKE)
       .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
-      .WithFeedforward(frc::ArmFeedforward{0.0_V, 0.0_V,
-                                           units::unit_t<frc::ArmFeedforward::kv_unit>{1.0},
-                                           units::unit_t<frc::ArmFeedforward::ka_unit>{0.0}})
+      .WithFeedforward(wpi::math::ArmFeedforward{
+          0.0_V, 0.0_V, wpi::units::unit_t<wpi::math::ArmFeedforward::kv_unit>{1.0},
+          wpi::units::unit_t<wpi::math::ArmFeedforward::ka_unit>{0.0}})
       .WithClosedLoopMode()
       .WithMOI(4_in, 1_lb)
       .WithStartingPosition(0.0_deg)
@@ -82,8 +83,8 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
 
   auto* subsys = static_cast<TestSubsystem*>(smc->GetConfig().GetSubsystem());
   auto cmd = subsys->SetDutyCycle(0.5);
-  frc2::CommandScheduler::GetInstance().Schedule(cmd);
-  frc2::CommandScheduler::GetInstance().Schedule(cmd);
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(cmd);
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(cmd);
 
   SchedulerHelper::RunForDuration(1.5_s, [&] {
     if (smc->GetDutyCycle() != 0.0) passed = true;
@@ -101,9 +102,10 @@ static void DutyCycleTestBody(SmartMotorController* smc, bool isCTRE) {
   if (isCTRE && !moved) {
     std::printf("[WARNING] TalonFX/TalonFXS arm duty-cycle inconclusive.\n");
   } else {
-    EXPECT_TRUE(moved) << "Arm did not move during duty-cycle test"
-                       << " preVel=" << preVel.value() << " preAngle=" << preAngle.value()
-                       << " postVel=" << postVel.value() << " postAngle=" << postAngle.value();
+    INFO("Arm did not move during duty-cycle test"
+         << " preVel=" << preVel.value() << " preAngle=" << preAngle.value()
+         << " postVel=" << postVel.value() << " postAngle=" << postAngle.value());
+    CHECK(moved);
   }
 }
 
@@ -112,8 +114,8 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   bool passed = false;
 
   auto cmd =
-      frc2::cmd::Run([smc] { smc->SetPosition(80.0_deg); }, {smc->GetConfig().GetSubsystem()});
-  frc2::CommandScheduler::GetInstance().Schedule(cmd);
+      wpi::cmd::Run([smc] { smc->SetPosition(80.0_deg); }, {smc->GetConfig().GetSubsystem()});
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(cmd);
 
   SchedulerHelper::RunForDuration(1.0_s, [&] {
     std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(
@@ -122,89 +124,93 @@ static void PositionPIDTestBody(SmartMotorController* smc, bool isCTRE) {
   });
 
   auto postAngle = smc->GetMechanismPosition();
-  EXPECT_TRUE(std::abs(postAngle.value() - preAngle.value()) > 0.05 || passed)
-      << "Arm did not move toward PID setpoint"
-      << " preAngle=" << preAngle.value() << " postAngle=" << postAngle.value();
+  INFO("Arm did not move toward PID setpoint"
+       << " preAngle=" << preAngle.value() << " postAngle=" << postAngle.value());
+  CHECK((std::abs(postAngle.value() - preAngle.value()) > 0.05 || passed));
 }
 
 // ---- Fixture ----------------------------------------------------------------
 
-class ArmTest : public ::testing::TestWithParam<MotorTestParam> {
- protected:
-  void SetUp() override {
+namespace {
+struct ArmTestFixture {
+  ArmTestFixture() {
     InitializeHardware();
     SchedulerHelper::Enable();
     SchedulerHelper::CancelAll();
   }
-  void TearDown() override {
+  ~ArmTestFixture() {
     TeardownHardware();
     SchedulerHelper::CancelAll();
   }
 };
+}  // namespace
 
 // ---- Tests ------------------------------------------------------------------
 
-TEST_P(ArmTest, SMCDutyCycle) {
-  auto& param = GetParam();
-  SCOPED_TRACE(param.name);
-  auto cfg = MakeArmSMCConfig(param.profile, param.hardware, nullptr, param.name);
-  auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
-  bundle.subsystem->m_testRunning = true;
+TEST_CASE_METHOD(ArmTestFixture, "ArmTest.SMCDutyCycle", "[ArmTest]") {
+  for (auto& param : AllMotorParams()) {
+    DYNAMIC_SECTION(param.name) {
+      auto cfg = MakeArmSMCConfig(param.profile, param.hardware, nullptr, param.name);
+      auto bundle = MakeBundle(param, cfg);
+      bundle.smc->SetupSimulation();
+      bundle.subsystem->m_testRunning = true;
 
-  DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
-  CloseBundle(bundle);
+      DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
+      CloseBundle(bundle);
+    }
+  }
 }
 
-TEST_P(ArmTest, SMCPositionPID) {
-  auto& param = GetParam();
-  SCOPED_TRACE(param.name);
-  auto cfg = MakeArmSMCConfig(param.profile, param.hardware, nullptr, param.name);
-  auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
-  bundle.subsystem->m_testRunning = true;
+TEST_CASE_METHOD(ArmTestFixture, "ArmTest.SMCPositionPID", "[ArmTest]") {
+  for (auto& param : AllMotorParams()) {
+    DYNAMIC_SECTION(param.name) {
+      auto cfg = MakeArmSMCConfig(param.profile, param.hardware, nullptr, param.name);
+      auto bundle = MakeBundle(param, cfg);
+      bundle.smc->SetupSimulation();
+      bundle.subsystem->m_testRunning = true;
 
-  PositionPIDTestBody(bundle.smc, IsCTRE(bundle));
-  CloseBundle(bundle);
+      PositionPIDTestBody(bundle.smc, IsCTRE(bundle));
+      CloseBundle(bundle);
+    }
+  }
 }
 
-TEST_P(ArmTest, ArmDutyCycle) {
-  auto& param = GetParam();
-  SCOPED_TRACE(param.name);
-  auto cfg = MakeArmSMCConfig(param.profile, param.hardware, nullptr, param.name);
-  auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
-  bundle.subsystem->m_testRunning = true;
+TEST_CASE_METHOD(ArmTestFixture, "ArmTest.ArmDutyCycle", "[ArmTest]") {
+  for (auto& param : AllMotorParams()) {
+    DYNAMIC_SECTION(param.name) {
+      auto cfg = MakeArmSMCConfig(param.profile, param.hardware, nullptr, param.name);
+      auto bundle = MakeBundle(param, cfg);
+      bundle.smc->SetupSimulation();
+      bundle.subsystem->m_testRunning = true;
 
-  auto arm = CreateArm(bundle.smc, bundle.subsystem.get(), IsCTRE(bundle));
-  auto upCmd = arm->Set(0.5);
-  frc2::CommandScheduler::GetInstance().Schedule(upCmd);
+      auto arm = CreateArm(bundle.smc, bundle.subsystem.get(), IsCTRE(bundle));
+      auto upCmd = arm->Set(0.5);
+      wpi::cmd::CommandScheduler::GetInstance().Schedule(upCmd);
 
-  DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
-  CloseBundle(bundle);
-  delete arm;
+      DutyCycleTestBody(bundle.smc, IsCTRE(bundle));
+      CloseBundle(bundle);
+      delete arm;
+    }
+  }
 }
 
-TEST_P(ArmTest, ArmPositionPID) {
-  auto& param = GetParam();
-  SCOPED_TRACE(param.name);
-  auto cfg = MakeArmSMCConfig(param.profile, param.hardware, nullptr, param.name);
-  auto bundle = MakeBundle(param, cfg);
-  bundle.smc->SetupSimulation();
-  bundle.subsystem->m_testRunning = true;
+TEST_CASE_METHOD(ArmTestFixture, "ArmTest.ArmPositionPID", "[ArmTest]") {
+  for (auto& param : AllMotorParams()) {
+    DYNAMIC_SECTION(param.name) {
+      auto cfg = MakeArmSMCConfig(param.profile, param.hardware, nullptr, param.name);
+      auto bundle = MakeBundle(param, cfg);
+      bundle.smc->SetupSimulation();
+      bundle.subsystem->m_testRunning = true;
 
-  auto arm = CreateArm(bundle.smc, bundle.subsystem.get(), IsCTRE(bundle));
-  auto highPid = arm->RunTo(80.0_deg);
-  frc2::CommandScheduler::GetInstance().Schedule(highPid);
+      auto arm = CreateArm(bundle.smc, bundle.subsystem.get(), IsCTRE(bundle));
+      auto highPid = arm->RunTo(80.0_deg);
+      wpi::cmd::CommandScheduler::GetInstance().Schedule(highPid);
 
-  PositionPIDTestBody(bundle.smc, IsCTRE(bundle));
-  CloseBundle(bundle);
-  delete arm;
+      PositionPIDTestBody(bundle.smc, IsCTRE(bundle));
+      CloseBundle(bundle);
+      delete arm;
+    }
+  }
 }
-
-INSTANTIATE_TEST_SUITE_P(AllControllersTests, ArmTest, ::testing::ValuesIn(AllMotorParams()),
-                         [](const ::testing::TestParamInfo<MotorTestParam>& info) {
-                           return info.param.name;
-                         });
 
 }  // namespace yams::test

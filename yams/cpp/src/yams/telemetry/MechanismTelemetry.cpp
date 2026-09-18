@@ -3,12 +3,11 @@
 
 #include "yams/telemetry/MechanismTelemetry.hpp"
 
-#include <frc/Timer.h>
-#include <networktables/NetworkTableInstance.h>
-#include <wpi/json.h>
-
 #include <memory>
 #include <string>
+#include <wpi/nt/NetworkTableInstance.hpp>
+#include <wpi/system/Timer.hpp>
+#include <wpi/util/json.hpp>
 
 #include "yams/motorcontrollers/SmartMotorController.hpp"
 
@@ -16,13 +15,13 @@ namespace yams::telemetry {
 
 void MechanismTelemetry::SetupLoopTime() {
   auto topic = m_networkTable->GetDoubleTopic("loopTime");
-  topic.SetProperties(wpi::json{{"unit", "second"}});
+  topic.SetProperties(wpi::util::json::object("unit", "second"));
   m_loopTimePublisher = topic.Publish();
 }
 
 void MechanismTelemetry::SetupTelemetry(const std::string& mechanismName,
                                         motorcontrollers::SmartMotorController& motorController) {
-  auto inst = nt::NetworkTableInstance::GetDefault();
+  auto inst = wpi::nt::NetworkTableInstance::GetDefault();
   m_tuningNetworkTable = inst.GetTable("Tuning")->GetSubTable(mechanismName);
   m_networkTable = inst.GetTable("Mechanisms")->GetSubTable(mechanismName);
   motorController.SetupTelemetry(m_networkTable, m_tuningNetworkTable);
@@ -30,7 +29,7 @@ void MechanismTelemetry::SetupTelemetry(const std::string& mechanismName,
 }
 
 void MechanismTelemetry::SetupTelemetry(const std::string& mechanismName) {
-  auto inst = nt::NetworkTableInstance::GetDefault();
+  auto inst = wpi::nt::NetworkTableInstance::GetDefault();
   m_tuningNetworkTable = inst.GetTable("Tuning")->GetSubTable(mechanismName);
   m_networkTable = inst.GetTable("Mechanisms")->GetSubTable(mechanismName);
   SetupLoopTime();
@@ -52,12 +51,12 @@ std::function<void(double)> MechanismTelemetry::PublishDouble(const std::string&
                                                               const std::string& unit) {
   auto topic = m_networkTable->GetDoubleTopic(key);
   if (!unit.empty()) {
-    topic.SetProperties(wpi::json{{"units", unit}});
+    topic.SetProperties(wpi::util::json{{"units", unit}});
   }
-  auto publisher = std::make_shared<nt::DoublePublisher>(topic.Publish());
+  auto publisher = std::make_shared<wpi::nt::DoublePublisher>(topic.Publish());
   std::shared_ptr<wpi::log::DoubleLogEntry> logEntry;
   if (m_dataLogName) {
-    logEntry = std::make_shared<wpi::log::DoubleLogEntry>(frc::DataLogManager::GetLog(),
+    logEntry = std::make_shared<wpi::log::DoubleLogEntry>(wpi::DataLogManager::GetLog(),
                                                           *m_dataLogName + "/" + key);
   }
   return [publisher, logEntry](double value) {
@@ -68,18 +67,18 @@ std::function<void(double)> MechanismTelemetry::PublishDouble(const std::string&
 
 void MechanismTelemetry::UpdateLoopTime() {
   if (!m_loopTimePublisher) return;
-  double now = frc::Timer::GetFPGATimestamp().value();
+  double now = wpi::Timer::GetTimestamp().value();
   if (m_prevTimestamp != 0.0) {
     m_loopTimePublisher->Set(now - m_prevTimestamp);
   }
   m_prevTimestamp = now;
 }
 
-std::shared_ptr<nt::NetworkTable> MechanismTelemetry::GetDataTable() const {
+std::shared_ptr<wpi::nt::NetworkTable> MechanismTelemetry::GetDataTable() const {
   return m_networkTable;
 }
 
-std::shared_ptr<nt::NetworkTable> MechanismTelemetry::GetTuningTable() const {
+std::shared_ptr<wpi::nt::NetworkTable> MechanismTelemetry::GetTuningTable() const {
   return m_tuningNetworkTable;
 }
 

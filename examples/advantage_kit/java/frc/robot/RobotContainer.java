@@ -6,15 +6,15 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.RPM;
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.RPM;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import org.wpilib.math.geometry.Pose2d;
+import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.driverstation.internal.DriverStationBackend;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.button.CommandNiDsXboxController;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -27,11 +27,11 @@ public class RobotContainer
   private final ElevatorSubsystem elevator = new ElevatorSubsystem();
   private final ShooterSubsystem  shooter  = new ShooterSubsystem();
 
-  private final CommandXboxController xboxController = new CommandXboxController(0);
+  private final CommandNiDsXboxController xboxController = new CommandNiDsXboxController(0);
 
   public RobotContainer()
   {
-    DriverStation.silenceJoystickConnectionWarning(true);
+    DriverStationBackend.silenceJoystickConnectionWarning(true);
     drive.setDefaultCommand(drive.setRobotRelativeChassisSpeeds(drive.getChassisSpeedsSupplier(xboxController::getLeftY,
                                                                                                xboxController::getLeftX,
                                                                                                xboxController::getRightX)));
