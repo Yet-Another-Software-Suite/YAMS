@@ -52,7 +52,8 @@ def artifactGroupId = 'yams'
 def baseArtifactId = 'YAMS'
 //def driverZipBaseName = "_GROUP_com_vendor_frc_ID_${baseArtifactId}-driver_CLS"
 def zipBaseName = "_GROUP_yam_ID_${baseArtifactId}-cpp_CLS"
-def javaBaseName = "_GROUP_yams_ID_${baseArtifactId}-java_CLS"
+def javaCoreBaseName = "_GROUP_yams_ID_${baseArtifactId}-core_CLS"
+def javaCommands2BaseName = "_GROUP_yams_ID_${baseArtifactId}-commands2_CLS"
 
 task cppHeadersZip(type: Zip) {
     destinationDirectory = outputsFolder
@@ -160,9 +161,32 @@ addTaskToCopyAllOutputs(cppHeadersZip)
 //build.dependsOn cppDriverHeadersZip
 //addTaskToCopyAllOutputs(cppDriverHeadersZip)
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-archiveClassifier = 'sources'
-from sourceSets.main.allSource
+task coreJar(type: Jar, dependsOn: classes) {
+archiveClassifier = 'core'
+from(sourceSets.main.output) {
+    include 'yams/core/**'
+}
+}
+
+task coreSourcesJar(type: Jar, dependsOn: classes) {
+archiveClassifier = 'core-sources'
+from(sourceSets.main.allSource) {
+    include 'yams/core/**'
+}
+}
+
+task commands2Jar(type: Jar, dependsOn: classes) {
+archiveClassifier = 'commands2'
+from(sourceSets.main.output) {
+    include 'yams/commands2/**'
+}
+}
+
+task commands2SourcesJar(type: Jar, dependsOn: classes) {
+archiveClassifier = 'commands2-sources'
+from(sourceSets.main.allSource) {
+    include 'yams/commands2/**'
+}
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
@@ -170,21 +194,49 @@ archiveClassifier = 'javadoc'
 from javadoc.destinationDir
 }
 
-task outputJar(type: Jar, dependsOn: classes) {
-archiveBaseName = javaBaseName
+task outputCoreJar(type: Jar, dependsOn: classes) {
+archiveBaseName = javaCoreBaseName
 destinationDirectory = outputsFolder
-from sourceSets.main.output
+from(sourceSets.main.output) {
+    include 'yams/core/**'
+}
 }
 
-task outputSourcesJar(type: Jar, dependsOn: classes) {
-archiveBaseName = javaBaseName
+task outputCoreSourcesJar(type: Jar, dependsOn: classes) {
+archiveBaseName = javaCoreBaseName
 destinationDirectory = outputsFolder
 archiveClassifier = 'sources'
-from sourceSets.main.allSource
+from(sourceSets.main.allSource) {
+    include 'yams/core/**'
+}
 }
 
-task outputJavadocJar(type: Jar, dependsOn: javadoc) {
-archiveBaseName = javaBaseName
+task outputCoreJavadocJar(type: Jar, dependsOn: javadoc) {
+archiveBaseName = javaCoreBaseName
+destinationDirectory = outputsFolder
+archiveClassifier = 'javadoc'
+from javadoc.destinationDir
+}
+
+task outputCommands2Jar(type: Jar, dependsOn: classes) {
+archiveBaseName = javaCommands2BaseName
+destinationDirectory = outputsFolder
+from(sourceSets.main.output) {
+    include 'yams/commands2/**'
+}
+}
+
+task outputCommands2SourcesJar(type: Jar, dependsOn: classes) {
+archiveBaseName = javaCommands2BaseName
+destinationDirectory = outputsFolder
+archiveClassifier = 'sources'
+from(sourceSets.main.allSource) {
+    include 'yams/commands2/**'
+}
+}
+
+task outputCommands2JavadocJar(type: Jar, dependsOn: javadoc) {
+archiveBaseName = javaCommands2BaseName
 destinationDirectory = outputsFolder
 archiveClassifier = 'javadoc'
 from javadoc.destinationDir
@@ -231,22 +283,34 @@ dependsOn vendordepJson
 
 artifacts {
 tasks.named("assemble") {
-    archives sourcesJar
+    archives coreJar
+    archives coreSourcesJar
+    archives commands2Jar
+    archives commands2SourcesJar
     archives javadocJar
-    archives outputJar
-    archives outputSourcesJar
-    archives outputJavadocJar
+    archives outputCoreJar
+    archives outputCoreSourcesJar
+    archives outputCoreJavadocJar
+    archives outputCommands2Jar
+    archives outputCommands2SourcesJar
+    archives outputCommands2JavadocJar
 }
 }
 
-addTaskToCopyAllOutputs(outputSourcesJar)
-addTaskToCopyAllOutputs(outputJavadocJar)
-addTaskToCopyAllOutputs(outputJar)
+addTaskToCopyAllOutputs(outputCoreSourcesJar)
+addTaskToCopyAllOutputs(outputCoreJavadocJar)
+addTaskToCopyAllOutputs(outputCoreJar)
+addTaskToCopyAllOutputs(outputCommands2SourcesJar)
+addTaskToCopyAllOutputs(outputCommands2JavadocJar)
+addTaskToCopyAllOutputs(outputCommands2Jar)
 addTaskToCopyAllOutputs(vendordepJsonZip)
 
-build.dependsOn outputSourcesJar
-build.dependsOn outputJavadocJar
-build.dependsOn outputJar
+build.dependsOn outputCoreSourcesJar
+build.dependsOn outputCoreJavadocJar
+build.dependsOn outputCoreJar
+build.dependsOn outputCommands2SourcesJar
+build.dependsOn outputCommands2JavadocJar
+build.dependsOn outputCommands2Jar
 build.dependsOn vendordepJsonZip
 if (!skipCpp) {
 addTaskToCopyAllOutputs(cppHeadersZip)
@@ -311,14 +375,32 @@ publishing {
         //                version pubVersion
         //            }
 
-        java(MavenPublication) {
-            artifact jar
-            artifact sourcesJar
+        core(MavenPublication) {
+            artifact coreJar
+            artifact coreSourcesJar
             artifact javadocJar
 
-            artifactId = "${baseArtifactId}-java"
+            artifactId = "${baseArtifactId}-core"
             groupId = artifactGroupId
             version = pubVersion
+        }
+
+        commands2(MavenPublication) {
+            artifact commands2Jar
+            artifact commands2SourcesJar
+            artifact javadocJar
+
+            artifactId = "${baseArtifactId}-commands2"
+            groupId = artifactGroupId
+            version = pubVersion
+
+            pom.withXml {
+                asNode().appendNode('dependencies').appendNode('dependency').with {
+                    appendNode('groupId', artifactGroupId)
+                    appendNode('artifactId', "${baseArtifactId}-core")
+                    appendNode('version', pubVersion)
+                }
+            }
         }
 
         vendordep(MavenPublication) {

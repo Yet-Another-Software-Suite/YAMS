@@ -11,7 +11,12 @@
   "javaDependencies": [
     {
       "groupId": "${groupId}",
-      "artifactId": "${artifactId}-java",
+      "artifactId": "${artifactId}-core",
+      "version": "${version}"
+    },
+    {
+      "groupId": "${groupId}",
+      "artifactId": "${artifactId}-commands2",
       "version": "${version}"
     }
   ],
