@@ -22,13 +22,17 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>Each device type (SparkMax, SparkFlex, TalonFX, TalonFXS) maintains its own monotonic
  * counter so that every call produces a device with an ID unique within that type. IDs are
  * shared across device types and vendors — a SparkMax(3) and a TalonFX(3) are allowed to
- * coexist. IDs are capped at {@value #MAX_REV_ID} to stay within the CAN bus limit.
+ * coexist. The counter is a single JVM-wide counter shared across every test class in the
+ * suite (not reset per class), so {@value #MAX_REV_ID} is set well above the total number of
+ * devices the whole suite creates in one run — if it wraps mid-suite, a later test can reuse
+ * the CAN ID of an earlier test's still-registered simulated device, corrupting that test's
+ * results in a way that only reproduces when the full suite runs (not in isolation).
  *
  * <p>CTRE device factories (TalonFX, TalonFXS, CANcoder) are commented out until CTRE publishes
  * a Phoenix6 build compatible with wpilib 2027-alpha-7.
  */
 public class DeviceCreator {
-  private static final int MAX_REV_ID = 85;
+  private static final int MAX_REV_ID = 10000;
   // private static final int MAX_CTRE_ID = 61;
 
   private static final AtomicInteger revId = new AtomicInteger(1);

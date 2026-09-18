@@ -25,7 +25,7 @@ import yams.core.motorcontrollers.SmartMotorController;
  * yams.core.mechanisms.SmartMechanism#setMechanismPositionSetpoint} and {@link
  * yams.core.mechanisms.SmartMechanism#setMeasurementPositionSetpoint}</li> <li>Position-based
  * {@link org.wpilib.command2.button.Trigger} factories
- * ({@code isNear()}, {@code gte()}, {@code lte()}, {@code between()}, {@code max()},
+ * ({@code near()}, {@code gte()}, {@code lte()}, {@code between()}, {@code max()},
  * {@code min()}) — defined by each concrete subclass</li>
  * <li>Command factories such as {@code setAngle()} and {@code setHeight()} defined by each
  * concrete subclass, which internally call

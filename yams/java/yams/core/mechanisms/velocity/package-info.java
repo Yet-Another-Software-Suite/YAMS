@@ -50,7 +50,7 @@
  * <p>Because velocity mechanisms do not track an absolute position, the positional limit triggers
  * {@code max()} and {@code min()} are <b>not supported</b> and will throw
  * {@link java.lang.UnsupportedOperationException} if called. Use the velocity-based triggers
- * ({@code isNear()}, {@code gte()}, {@code lte()}) for condition-based scheduling instead.
+ * ({@code near()}, {@code gte()}, {@code lte()}) for condition-based scheduling instead.
  *
  * @see yams.core.mechanisms.velocity.SmartVelocityMechanism
  * @see yams.core.mechanisms.SmartMechanism

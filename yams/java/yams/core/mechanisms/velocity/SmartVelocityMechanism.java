@@ -22,7 +22,7 @@ import yams.core.motorcontrollers.SmartMotorController;
  * {@link yams.core.mechanisms.SmartMechanism#setMechanismVelocitySetpoint} and
  * {@link yams.core.mechanisms.SmartMechanism#setMeasurementVelocitySetpoint}</li>
  * <li>Velocity-based {@link org.wpilib.command2.button.Trigger} factories
- * ({@code isNear()}, {@code gte()}, {@code lte()}, {@code between()}) — defined by each
+ * ({@code near()}, {@code gte()}, {@code lte()}, {@code between()}) — defined by each
  * concrete subclass</li>
  * <li>Command factories such as {@code setSpeed()} defined by each concrete subclass, which
  * internally call the base-class velocity setpoint methods</li>
@@ -39,7 +39,7 @@ import yams.core.motorcontrollers.SmartMotorController;
  * {@link java.lang.UnsupportedOperationException}. Use the following trigger factories instead:
  * </p>
  * <ul>
- * <li>{@code isNear(speed, tolerance)} — true when actual velocity is within tolerance of
+ * <li>{@code near(speed, tolerance)} — true when actual velocity is within tolerance of
  * target</li> <li>{@code gte(speed)} — true when actual velocity is greater than or equal to the
  * given speed</li> <li>{@code lte(speed)} — true when actual velocity is less than or equal to the
  * given speed</li> <li>{@code between(start, end)} — true when actual velocity falls within the
