@@ -13,11 +13,6 @@
       "groupId": "${groupId}",
       "artifactId": "${artifactId}-core",
       "version": "${version}"
-    },
-    {
-      "groupId": "${groupId}",
-      "artifactId": "${artifactId}-commands2",
-      "version": "${version}"
     }
   ],
   "cppDependencies": [

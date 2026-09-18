@@ -1,15 +1,11 @@
 import org.apache.tools.ant.filters.FixCrLfFilter
 import org.apache.tools.ant.filters.ReplaceTokens
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
 
 apply plugin: 'maven-publish'
 
 ext.licenseFile = files("$rootDir/../../LICENSE.txt")
 
-def templateVendorFile = "yams.json"
-
-def outputsFolder = file("$buildDir/outputs")
+ext.outputsFolder = file("$buildDir/outputs")
 
 def versionFile = file("$outputsFolder/version.txt")
 def releasesRepoUrl = "$releasePath/releases"
@@ -48,12 +44,13 @@ ext.addTaskToCopyAllOutputs = { task ->
     copyAllOutputs.from task.archiveFile
 }
 
-def artifactGroupId = 'yams'
-def baseArtifactId = 'YAMS'
+ext.artifactGroupId = 'yams'
+ext.baseArtifactId = 'YAMS'
 //def driverZipBaseName = "_GROUP_com_vendor_frc_ID_${baseArtifactId}-driver_CLS"
 def zipBaseName = "_GROUP_yam_ID_${baseArtifactId}-cpp_CLS"
 def javaCoreBaseName = "_GROUP_yams_ID_${baseArtifactId}-core_CLS"
 def javaCommands2BaseName = "_GROUP_yams_ID_${baseArtifactId}-commands2_CLS"
+def javaCommands3BaseName = "_GROUP_yams_ID_${baseArtifactId}-commands3_CLS"
 
 task cppHeadersZip(type: Zip) {
     destinationDirectory = outputsFolder
@@ -189,6 +186,20 @@ from(sourceSets.main.allSource) {
 }
 }
 
+task commands3Jar(type: Jar, dependsOn: classes) {
+archiveClassifier = 'commands3'
+from(sourceSets.main.output) {
+    include 'yams/commands3/**'
+}
+}
+
+task commands3SourcesJar(type: Jar, dependsOn: classes) {
+archiveClassifier = 'commands3-sources'
+from(sourceSets.main.allSource) {
+    include 'yams/commands3/**'
+}
+}
+
 task javadocJar(type: Jar, dependsOn: javadoc) {
 archiveClassifier = 'javadoc'
 from javadoc.destinationDir
@@ -242,44 +253,33 @@ archiveClassifier = 'javadoc'
 from javadoc.destinationDir
 }
 
-// Apply template variables from the vendordep file.
-// Replaces ${VARIABLE} with VARIABLE: value in expand()
-task vendordepJson() {
-description = 'Builds the vendordep json file.'
-group = 'Build'
-outputs.file("$releasePath/$templateVendorFile")
-
-copy {
-    from templateVendorFile
-    into "$releasePath/"
-    expand(version: pubVersion,
-    groupId: artifactGroupId,
-    artifactId: baseArtifactId)
-}
-
-// When C++ isn't being built, strip cppDependencies from the generated vendordep JSON by
-// editing the parsed structure directly, rather than templating the array in/out as text.
-if (skipCpp) {
-    def vendorFile = file("$releasePath/$templateVendorFile")
-    def vendordep = new JsonSlurper().parse(vendorFile)
-    vendordep.cppDependencies = []
-    def pretty = JsonOutput.prettyPrint(JsonOutput.toJson(vendordep))
-    // Groovy's pretty-printer spreads empty arrays/objects across three lines; collapse
-    // them back down so cppDependencies renders as a plain "[]" like the other empty fields.
-    pretty = pretty.replaceAll(/(?s)\[\s*\]/, '[]').replaceAll(/(?s)\{\s*\}/, '{}')
-    vendorFile.text = pretty
-}
-}
-
-task vendordepJsonZip(type: Zip) {
+task outputCommands3Jar(type: Jar, dependsOn: classes) {
+archiveBaseName = javaCommands3BaseName
 destinationDirectory = outputsFolder
-archiveBaseName = "vendordepJson"
+from(sourceSets.main.output) {
+    include 'yams/commands3/**'
+}
+}
 
-from("$releasePath/$templateVendorFile") {
-    into '/'
+task outputCommands3SourcesJar(type: Jar, dependsOn: classes) {
+archiveBaseName = javaCommands3BaseName
+destinationDirectory = outputsFolder
+archiveClassifier = 'sources'
+from(sourceSets.main.allSource) {
+    include 'yams/commands3/**'
 }
-dependsOn vendordepJson
 }
+
+task outputCommands3JavadocJar(type: Jar, dependsOn: javadoc) {
+archiveBaseName = javaCommands3BaseName
+destinationDirectory = outputsFolder
+archiveClassifier = 'javadoc'
+from javadoc.destinationDir
+}
+
+// Builds yams_commands2.json/yams_commands3.json from yams.json and wires up their zip tasks
+// (commands2VendordepJsonZip/commands3VendordepJsonZip) and build/copyAllOutputs dependencies.
+apply from: 'vendordepJson.gradle'
 
 artifacts {
 tasks.named("assemble") {
@@ -287,6 +287,8 @@ tasks.named("assemble") {
     archives coreSourcesJar
     archives commands2Jar
     archives commands2SourcesJar
+    archives commands3Jar
+    archives commands3SourcesJar
     archives javadocJar
     archives outputCoreJar
     archives outputCoreSourcesJar
@@ -294,6 +296,9 @@ tasks.named("assemble") {
     archives outputCommands2Jar
     archives outputCommands2SourcesJar
     archives outputCommands2JavadocJar
+    archives outputCommands3Jar
+    archives outputCommands3SourcesJar
+    archives outputCommands3JavadocJar
 }
 }
 
@@ -303,7 +308,9 @@ addTaskToCopyAllOutputs(outputCoreJar)
 addTaskToCopyAllOutputs(outputCommands2SourcesJar)
 addTaskToCopyAllOutputs(outputCommands2JavadocJar)
 addTaskToCopyAllOutputs(outputCommands2Jar)
-addTaskToCopyAllOutputs(vendordepJsonZip)
+addTaskToCopyAllOutputs(outputCommands3SourcesJar)
+addTaskToCopyAllOutputs(outputCommands3JavadocJar)
+addTaskToCopyAllOutputs(outputCommands3Jar)
 
 build.dependsOn outputCoreSourcesJar
 build.dependsOn outputCoreJavadocJar
@@ -311,7 +318,9 @@ build.dependsOn outputCoreJar
 build.dependsOn outputCommands2SourcesJar
 build.dependsOn outputCommands2JavadocJar
 build.dependsOn outputCommands2Jar
-build.dependsOn vendordepJsonZip
+build.dependsOn outputCommands3SourcesJar
+build.dependsOn outputCommands3JavadocJar
+build.dependsOn outputCommands3Jar
 if (!skipCpp) {
 addTaskToCopyAllOutputs(cppHeadersZip)
 //    addTaskToCopyAllOutputs(cppSourceZip)
@@ -403,10 +412,36 @@ publishing {
             }
         }
 
-        vendordep(MavenPublication) {
-            artifact vendordepJsonZip
+        commands3(MavenPublication) {
+            artifact commands3Jar
+            artifact commands3SourcesJar
+            artifact javadocJar
 
-            artifactId = "${baseArtifactId}-vendordep"
+            artifactId = "${baseArtifactId}-commands3"
+            groupId = artifactGroupId
+            version = pubVersion
+
+            pom.withXml {
+                asNode().appendNode('dependencies').appendNode('dependency').with {
+                    appendNode('groupId', artifactGroupId)
+                    appendNode('artifactId', "${baseArtifactId}-core")
+                    appendNode('version', pubVersion)
+                }
+            }
+        }
+
+        commands2Vendordep(MavenPublication) {
+            artifact commands2VendordepJsonZip
+
+            artifactId = "${baseArtifactId}-commands2-vendordep"
+            groupId = artifactGroupId
+            version = pubVersion
+        }
+
+        commands3Vendordep(MavenPublication) {
+            artifact commands3VendordepJsonZip
+
+            artifactId = "${baseArtifactId}-commands3-vendordep"
             groupId = artifactGroupId
             version = pubVersion
         }
