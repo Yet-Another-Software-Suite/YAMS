@@ -13,7 +13,7 @@ import org.wpilib.tunable.TunableRegistry;
  * Registers {@link TelemetryRegistry} and {@link TunableRegistry} backends that publish directly
  * under the {@code Mechanisms} and {@code Tuning} NetworkTables roots so the same roots
  * {@link MechanismTelemetry} and {@link SmartMotorControllerTelemetry} already publish raw
- * NetworkTables data to — instead of the default {@code /Telemetry} and {@code /Tunables} roots.
+ * NetworkTables data to instead of the default {@code /Telemetry} and {@code /Tunables} roots.
  * This keeps dashboard-facing widgets ({@code Mechanism2d}, {@code Field2d}, on-dashboard
  * commands) in the same NetworkTables subtree as the rest of a mechanism's telemetry/tuning data.
  */

@@ -24,20 +24,20 @@ import yams.core.gearing.MechanismGearing;
  * include:
  *
  * <ul>
- * <li><b>Encoder angle suppliers</b> — lambdas that return the live reading for each encoder.
- * <li><b>Encoder-to-mechanism ratios</b> — either supplied directly via {@link
+ * <li><b>Encoder angle suppliers</b> lambdas that return the live reading for each encoder.
+ * <li><b>Encoder-to-mechanism ratios</b> either supplied directly via {@link
  * #withEncoderRatios(double, double)}, derived from a shared drive gear via {@link
  * #withCommonDriveGear(double, int, int, int)}, or computed from explicit gear chains via
  * {@link #withAbsoluteEncoder1Gearing(int...)} / {@link #withAbsoluteEncoder2Gearing(int...)}.
- * <li><b>Per-encoder offsets</b> — zero-point corrections added before wrapping the raw reading
+ * <li><b>Per-encoder offsets</b> zero-point corrections added before wrapping the raw reading
  * into [0, 1) rotations.
- * <li><b>Mechanism travel limits</b> — the minimum and maximum mechanism angles the solver is
+ * <li><b>Mechanism travel limits</b> the minimum and maximum mechanism angles the solver is
  * allowed to consider as solutions.
- * <li><b>Match tolerance</b> — the maximum modular error (in rotations) between the predicted and
+ * <li><b>Match tolerance</b> the maximum modular error (in rotations) between the predicted and
  * measured encoder 2 reading before a candidate is rejected.
- * <li><b>Inversion flags</b> — flip an encoder ratio's sign when the sensor is physically mounted
+ * <li><b>Inversion flags</b> flip an encoder ratio's sign when the sensor is physically mounted
  * in reverse and on-device inversion is not available.
- * <li><b>Gear recommendation inputs</b> (simulation only) — tooth counts and search bounds used
+ * <li><b>Gear recommendation inputs</b> (simulation only) tooth counts and search bounds used
  * to suggest coprime gear pairs with adequate unique coverage.
  * </ul>
  *

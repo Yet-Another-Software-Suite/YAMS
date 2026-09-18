@@ -101,7 +101,7 @@ extern "C" void __cxa_throw(void* obj, std::type_info* tinfo, void (*dest)(void*
   using Fn = void (*)(void*, void*, void (*)(void*));
   static Fn real = reinterpret_cast<Fn>(dlsym(RTLD_NEXT, "__cxa_throw"));
   real(obj, tinfo, dest);
-  // Never reached — the real __cxa_throw unwinds the stack.
+  // Never reached the real __cxa_throw unwinds the stack.
   // std::terminate() gives the compiler a visible noreturn path so it does not
   // emit a "control reaches end of function" diagnostic.
   std::terminate();

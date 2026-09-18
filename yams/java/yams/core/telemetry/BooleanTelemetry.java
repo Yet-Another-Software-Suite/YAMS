@@ -18,7 +18,7 @@ import org.wpilib.system.Timer;
  *
  * <p>A lightweight wrapper that publishes a single {@code boolean} value to NetworkTables and/or a
  * WPILib DataLog. It is used internally by {@link SmartMotorControllerTelemetry} to track flags
- * such as limit-switch states, active feedforward type, and motor inversion — but it can also be
+ * such as limit-switch states, active feedforward type, and motor inversion but it can also be
  * constructed directly when you need a standalone boolean entry.
  *
  * <h2>Example</h2>

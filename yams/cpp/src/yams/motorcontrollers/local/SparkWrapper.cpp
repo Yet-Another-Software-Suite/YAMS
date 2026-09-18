@@ -156,7 +156,7 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     }
 
     // Exponential profiles are not natively supported by SPARK hardware; the option is consumed
-    // here to satisfy validation tracking — actual profile execution uses the software controller
+    // here to satisfy validation tracking actual profile execution uses the software controller
     // started below.
     config.HasExponentialProfile();
 
@@ -303,7 +303,7 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     m_relEncoder->SetPosition(m_absEncoder->GetPosition().Get());
   }
 
-  // Tightly coupled followers — accept SparkMax and SparkFlex only
+  // Tightly coupled followers accept SparkMax and SparkFlex only
   for (auto& [hw, inverted] : config.GetFollowers()) {
     if (auto* mx = std::any_cast<rev::spark::SparkMax*>(&hw)) {
       SparkMaxConfig followCfg;

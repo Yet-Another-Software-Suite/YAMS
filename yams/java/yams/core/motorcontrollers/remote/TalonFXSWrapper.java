@@ -102,9 +102,9 @@ import yams.core.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * <p><b>External encoder discontinuity point support (CANcoder):</b>
  *
  * <ul>
- * <li>{@code 0.5} rotations — maps to {@code AbsoluteSensorDiscontinuityPoint = 0.5}, sensor
+ * <li>{@code 0.5} rotations maps to {@code AbsoluteSensorDiscontinuityPoint = 0.5}, sensor
  * range is [-0.5, 0.5)
- * <li>{@code 1.0} rotations — maps to {@code AbsoluteSensorDiscontinuityPoint = 1.0}, sensor
+ * <li>{@code 1.0} rotations maps to {@code AbsoluteSensorDiscontinuityPoint = 1.0}, sensor
  * range is [0, 1)
  * </ul>
  *

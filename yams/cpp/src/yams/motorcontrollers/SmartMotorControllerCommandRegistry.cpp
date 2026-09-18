@@ -46,7 +46,7 @@ void SmartMotorControllerCommandRegistry::AddCommand(const std::string& cmdName,
   auto key = MakeKey(cmdName, subsystem);
   auto ownerIt = s_owners.find(key);
   if (ownerIt != s_owners.end() && ownerIt->second != subsystem) {
-    throw std::runtime_error("SmartMotorControllerCommandRegistry: subsystem name conflict — \"" +
+    throw std::runtime_error("SmartMotorControllerCommandRegistry: subsystem name conflict \"" +
                              subsystem->GetName() +
                              "\" is already registered by a different subsystem instance. "
                              "Use unique subsystem names for each subsystem instance (e.g. "

@@ -295,7 +295,7 @@ bool TalonFXSWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
       m_talon->SetPosition(*startPos);
     }
   }
-  // Tightly coupled followers — accept TalonFXS and TalonFX (same Phoenix 6 vendor)
+  // Tightly coupled followers accept TalonFXS and TalonFX (same Phoenix 6 vendor)
   for (auto& [hw, inverted] : config.GetFollowers()) {
     if (auto* fxs = std::any_cast<hardware::TalonFXS*>(&hw)) {
       (*fxs)->SetControl(controls::Follower{m_talon->GetDeviceID(), inverted});

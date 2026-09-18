@@ -26,7 +26,7 @@ import yams.core.motorcontrollers.SmartMotorController;
  * yams.core.mechanisms.SmartMechanism#setMeasurementPositionSetpoint}</li> <li>Position-based
  * {@link org.wpilib.command2.button.Trigger} factories
  * ({@code near()}, {@code gte()}, {@code lte()}, {@code between()}, {@code max()},
- * {@code min()}) — defined by each concrete subclass</li>
+ * {@code min()}) defined by each concrete subclass</li>
  * <li>Command factories such as {@code setAngle()} and {@code setHeight()} defined by each
  * concrete subclass, which internally call
  * {@link yams.core.mechanisms.SmartMechanism#setMechanismPositionSetpoint} or
@@ -65,19 +65,19 @@ import yams.core.motorcontrollers.SmartMotorController;
  * abstract methods inherited from {@link yams.core.mechanisms.SmartMechanism}:
  * </p>
  * <ul>
- * <li>{@link yams.core.mechanisms.SmartMechanism#getRelativeMechanismPosition()} — returns the
+ * <li>{@link yams.core.mechanisms.SmartMechanism#getRelativeMechanismPosition()} returns the
  * current 3-D position of the mechanism end-point in {@link org.wpilib.smartdashboard.Mechanism2d}
  * coordinates</li>
- * <li>{@link yams.core.mechanisms.SmartMechanism#visualizationUpdate()} — updates
+ * <li>{@link yams.core.mechanisms.SmartMechanism#visualizationUpdate()} updates
  * {@code m_mechanismLigament} (and any setpoint ligament) to reflect the current state</li>
- * <li>{@link yams.core.mechanisms.SmartMechanism#getName()} — returns a human-readable mechanism
+ * <li>{@link yams.core.mechanisms.SmartMechanism#getName()} returns a human-readable mechanism
  * name used for telemetry and command names</li>
- * <li>{@link yams.core.mechanisms.SmartMechanism#simIterate()} — advances the physics simulation
+ * <li>{@link yams.core.mechanisms.SmartMechanism#simIterate()} advances the physics simulation
  * model and writes back simulated encoder values each robot loop</li>
- * <li>{@link yams.core.mechanisms.SmartMechanism#updateTelemetry()} — publishes mechanism state
+ * <li>{@link yams.core.mechanisms.SmartMechanism#updateTelemetry()} publishes mechanism state
  * to NetworkTables or an equivalent telemetry sink</li>
- * <li>{@link #isAtMax()} — true when the mechanism reaches its configured maximum limit</li>
- * <li>{@link #isAtMin()} — true when the mechanism reaches its configured minimum limit</li>
+ * <li>{@link #isAtMax()} true when the mechanism reaches its configured maximum limit</li>
+ * <li>{@link #isAtMin()} true when the mechanism reaches its configured minimum limit</li>
  * </ul>
  */
 public abstract class SmartPositionalMechanism extends SmartMechanism {

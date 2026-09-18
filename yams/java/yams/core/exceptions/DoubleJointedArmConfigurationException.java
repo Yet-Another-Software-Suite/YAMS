@@ -11,8 +11,8 @@ package yams.core.exceptions;
  *
  * <ul>
  * <li>The lower and upper joint motor controllers do not share the same WPILib {@code Subsystem}
- * instance — both must reference the same subsystem so that a single command can require it
- * <li>Starting angle missing on either joint config — both the lower and upper {@code ArmConfig}
+ * instance both must reference the same subsystem so that a single command can require it
+ * <li>Starting angle missing on either joint config both the lower and upper {@code ArmConfig}
  * must have a starting position set via {@code
  * SmartMotorControllerConfig.withStartingPosition(Angle)}
  * </ul>

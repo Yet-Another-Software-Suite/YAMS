@@ -32,19 +32,19 @@ import org.wpilib.units.TimeUnit;
  * YUnits} adds:
  *
  * <ul>
- * <li><b>Imperial distance units</b> — {@link #Hands}, {@link #Yards}, {@link #Cubits},
+ * <li><b>Imperial distance units</b> {@link #Hands}, {@link #Yards}, {@link #Cubits},
  * {@link #Fathoms}, {@link #Chains}, {@link #Furlongs}, {@link #Miles}, {@link #Leagues},
  * and even a {@link #FootlongSandwich}.</li>
- * <li><b>Extended time units</b> — {@link #Hours}, {@link #Days}, {@link #Weeks},
+ * <li><b>Extended time units</b> {@link #Hours}, {@link #Days}, {@link #Weeks},
  * {@link #Fortnight}, and {@link #Years}.</li>
- * <li><b>Derived velocity units</b> — {@link #MilesPerHour} (MPH), {@link #FurlongsPerFortnight}
+ * <li><b>Derived velocity units</b> {@link #MilesPerHour} (MPH), {@link #FurlongsPerFortnight}
  * (FPF), and {@link #SandwichPerSecond} for all your footlong-based kinematics.</li>
- * <li><b>Angular velocity and acceleration</b> — {@link #RotationsPerYear} (RPY) and
+ * <li><b>Angular velocity and acceleration</b> {@link #RotationsPerYear} (RPY) and
  * {@link #RPMPerSecond} for angular acceleration in RPM/s.</li>
- * <li><b>Linear and angular momentum units</b> — {@link #PoundFeetPerSecond},
+ * <li><b>Linear and angular momentum units</b> {@link #PoundFeetPerSecond},
  * {@link #PoundInchesPerSecond}, {@link #PoundFeetSquaredPerSecond}, and
  * {@link #PoundInchesSquaredPerSecond}.</li>
- * <li><b>Moment of inertia units</b> — {@link #PoundSquareFeet} and {@link #PoundSquareInches}
+ * <li><b>Moment of inertia units</b> {@link #PoundSquareFeet} and {@link #PoundSquareInches}
  * for imperial rotational inertia calculations.</li>
  * </ul>
  *

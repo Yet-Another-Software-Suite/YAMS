@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 /**
- * Yet Another Mechanism System (YAMS) — the root package of the YAMS WPILib 2026 Java library.
+ * Yet Another Mechanism System (YAMS) the root package of the YAMS WPILib 2026 Java library.
  *
  * <p>YAMS abstracts common FRC robot mechanisms (arms, elevators, flywheels, swerve drives, and
  * more) behind a consistent configuration-driven API. Rather than hand-rolling PID loops,
@@ -20,18 +20,18 @@
  * <h2>Package Overview</h2>
  *
  * <ul>
- * <li><b>{@code yams.core.mechanisms}</b> — concrete mechanism implementations (arm, elevator,
+ * <li><b>{@code yams.core.mechanisms}</b> concrete mechanism implementations (arm, elevator,
  * flywheel, pivot, swerve, differential drive, double-jointed arm) and their config classes.
- * <li><b>{@code yams.core.motorcontrollers}</b> — vendor-agnostic smart motor-controller wrappers that
+ * <li><b>{@code yams.core.motorcontrollers}</b> vendor-agnostic smart motor-controller wrappers that
  * normalize REV, CTRE, and other controllers behind a common interface.
- * <li><b>{@code yams.core.gearing}</b> — gear-ratio helpers ({@link yams.core.gearing.GearBox}, {@link
+ * <li><b>{@code yams.core.gearing}</b> gear-ratio helpers ({@link yams.core.gearing.GearBox}, {@link
  * yams.core.gearing.Sprocket}, {@link yams.core.gearing.MechanismGearing}) for expressing mechanism
  * gearing without manual ratio arithmetic.
- * <li><b>{@code yams.core.telemetry}</b> — automatic publishing of mechanism state to AdvantageKit,
+ * <li><b>{@code yams.core.telemetry}</b> automatic publishing of mechanism state to AdvantageKit,
  * SmartDashboard, and other telemetry back-ends.
- * <li><b>{@code yams.core.math}</b> — control-theory utilities including LQR, profiled PID, and
+ * <li><b>{@code yams.core.math}</b> control-theory utilities including LQR, profiled PID, and
  * filtered derivative estimation.
- * <li><b>{@code yams.core.exceptions}</b> — checked and unchecked exceptions thrown when mechanisms or
+ * <li><b>{@code yams.core.exceptions}</b> checked and unchecked exceptions thrown when mechanisms or
  * motor controllers are misconfigured.
  * </ul>
  *
@@ -44,7 +44,7 @@
  *     .withGearing(new GearBox(12.0, 60.0))
  *     .withSoftLimits(Rotation2d.fromDegrees(-90), Rotation2d.fromDegrees(90));
  *
- * // 2. Construct the mechanism — exceptions are thrown here if config is invalid.
+ * // 2. Construct the mechanism exceptions are thrown here if config is invalid.
  * SmartArm arm = new SmartArm(config);
  *
  * // 3. Command the mechanism from periodic or command-based code.

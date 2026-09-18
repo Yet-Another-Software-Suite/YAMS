@@ -32,24 +32,24 @@ import org.wpilib.util.Pair;
  * At runtime the {@link #getValue()} method applies the following priority order:
  * </p>
  * <ol>
- * <li><b>Real robot</b> — always returns the live hardware supplier value immediately.</li>
- * <li><b>Trigger override</b> — if any registered {@link #addSimTrigger trigger} condition is
+ * <li><b>Real robot</b> always returns the live hardware supplier value immediately.</li>
+ * <li><b>Trigger override</b> if any registered {@link #addSimTrigger trigger} condition is
  * currently {@code true}, the associated override value is returned and written to Glass.</li>
- * <li><b>Glass value</b> — if a {@link org.wpilib.hardware.hal.SimValue} exists and no trigger
+ * <li><b>Glass value</b> if a {@link org.wpilib.hardware.hal.SimValue} exists and no trigger
  * fired, returns whatever Glass has set (including the default).</li>
- * <li><b>Supplier fallback</b> — returns the supplier value if no Glass value is available.</li>
+ * <li><b>Supplier fallback</b> returns the supplier value if no Glass value is available.</li>
  * </ol>
  *
  * <h2>Key fields</h2>
  * <ul>
- * <li>{@code m_name} — the human-readable field name used as the Glass widget label.</li>
- * <li>{@code m_supplier} — provides the real sensor reading on a physical robot.</li>
- * <li>{@code m_type} ({@link HALValueType}) — guards typed accessors
+ * <li>{@code m_name} the human-readable field name used as the Glass widget label.</li>
+ * <li>{@code m_supplier} provides the real sensor reading on a physical robot.</li>
+ * <li>{@code m_type} ({@link HALValueType}) guards typed accessors
  * ({@link #getAsDouble()}, {@link #getAsInt()}, etc.) against incorrect casts.</li>
- * <li>{@code m_defaultValue} — the initial value published to Glass at startup.</li>
- * <li>{@code m_triggerValues} — ordered list of {@code (condition, value)} pairs checked
+ * <li>{@code m_defaultValue} the initial value published to Glass at startup.</li>
+ * <li>{@code m_triggerValues} ordered list of {@code (condition, value)} pairs checked
  * before the Glass value each loop.</li>
- * <li>{@code m_glassValue} — the live {@link org.wpilib.hardware.hal.SimValue} registered with the
+ * <li>{@code m_glassValue} the live {@link org.wpilib.hardware.hal.SimValue} registered with the
  * parent {@link org.wpilib.hardware.hal.SimDevice}; empty on a real robot.</li>
  * </ul>
  *

@@ -3,7 +3,7 @@
 
 #pragma once
 
-// Mirrors Java SmartMotorControllerTestSubsystem — a SubsystemBase that owns
+// Mirrors Java SmartMotorControllerTestSubsystem a SubsystemBase that owns
 // a SmartMotorController reference and wires up simulation/telemetry
 // periodics for use in integration tests.
 

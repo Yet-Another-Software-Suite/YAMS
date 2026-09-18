@@ -273,7 +273,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
   double gearing = m_motorGearing ? m_motorGearing->GetMechanismToRotorRatio() : 1.0;
   auto sys = wpi::math::Models::ElevatorFromPhysicalConstants(motor, mass, drumRadius, gearing);
   // Extract velocity-row coefficients from the 2-state [position, velocity] system.
-  // A[1][1] is [1/s], B[1][0] is [(m/s²)/V] — already in meters, no conversion needed.
+  // A[1][1] is [1/s], B[1][0] is [(m/s²)/V] already in meters, no conversion needed.
   double A = sys.A()(1, 1);
   double B = sys.B()(1, 0);
   double kV = -A / B;   // [V·s/m = V/(m/s)]

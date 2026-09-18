@@ -90,7 +90,7 @@ Pivot::Pivot(config::PivotConfig* config, motorcontrollers::SmartMotorController
     m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::DCMotorSimSupplier>(
         *m_dcMotorSim, [this]() { return m_smc->GetDutyCycle(); }, gearing, period));
 
-    // Build Mechanism2d — fixed 36-inch ligament length like Java.
+    // Build Mechanism2d fixed 36-inch ligament length like Java.
     constexpr double kPivotLen = 36.0 * 0.0254;  // 36 inches in metres
     m_mechanismWindow.emplace(kPivotLen * 2.0, kPivotLen * 2.0);
     m_mechanismRoot = m_mechanismWindow->GetRoot(m_name + "Root", kPivotLen, kPivotLen);

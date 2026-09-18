@@ -13,7 +13,7 @@ package yams.core.exceptions;
  * <ul>
  * <li>{@code withSmartMotorController(SmartMotorController)} called more than once on the same
  * config
- * <li>MOI (moment of inertia) not derivable — neither length+mass nor an explicit MOI was
+ * <li>MOI (moment of inertia) not derivable neither length+mass nor an explicit MOI was
  * configured on the underlying {@link yams.core.motorcontrollers.SmartMotorControllerConfig}
  * </ul>
  *

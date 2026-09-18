@@ -41,15 +41,15 @@ import yams.core.gearing.MechanismGearing;
  *
  * <p>The LQR cost matrices determine how the regulator balances state error against control effort:
  * <ul>
- * <li><b>Q (state cost, via qelms)</b> — penalizes deviation from the desired state (position,
+ * <li><b>Q (state cost, via qelms)</b> penalizes deviation from the desired state (position,
  * velocity). Smaller values tolerate larger state errors; larger values drive the controller
  * to correct errors more aggressively.</li>
- * <li><b>R (control effort cost, via relms)</b> — penalizes the voltage applied to the motor.
+ * <li><b>R (control effort cost, via relms)</b> penalizes the voltage applied to the motor.
  * Smaller values allow higher voltages (more aggressive); larger values keep the output
  * gentler. The default of 12 V matches the approximate maximum battery voltage.</li>
  * </ul>
  *
- * <h2>Example — Arm LQR configuration</h2>
+ * <h2>Example Arm LQR configuration</h2>
  * <pre>{@code
  * import static org.wpilib.units.Units.*;
  *

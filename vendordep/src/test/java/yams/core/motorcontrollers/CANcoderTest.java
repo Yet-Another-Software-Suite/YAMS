@@ -136,7 +136,7 @@ public class CANcoderTest {
 
   /**
    * Test 5: Verify that constructing a TalonFXWrapper with a CANcoder but no discontinuity point
-   * does NOT throw — TalonFX handles this differently from SparkAbsoluteEncoder.
+   * does NOT throw TalonFX handles this differently from SparkAbsoluteEncoder.
    */
   @Test
   void testCANcoderConfiguredWithoutDiscontinuityPoint() {

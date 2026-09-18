@@ -58,7 +58,7 @@ import yams.core.motorcontrollers.remote.TalonFXWrapper;
  * SmartMotorControllerConfig#convertToVoltage} / {@link
  * SmartMotorControllerConfig#convertToCurrent} against WPILib's own {@link DCMotor} model, the
  * {@code setpointFeedforwardForce} bookkeeping used for telemetry, and (across every vendor
- * wrapper) that a feedforward Force alone — with the closed-loop gains zeroed out — actually
+ * wrapper) that a feedforward Force alone with the closed-loop gains zeroed out actually
  * commands real motor output in simulation.
  */
 public class ForceFeedforwardTest {

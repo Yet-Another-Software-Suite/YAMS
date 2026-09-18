@@ -22,8 +22,8 @@ import yams.core.motorcontrollers.SmartMotorController;
 /**
  * Mechanism telemetry.
  *
- * <p>Publishes mechanism state — setpoint position/velocity, current mechanism position, loop
- * time, and motor controller data — to NetworkTables under the {@code Mechanisms/<name>} and
+ * <p>Publishes mechanism state setpoint position/velocity, current mechanism position, loop
+ * time, and motor controller data to NetworkTables under the {@code Mechanisms/<name>} and
  * {@code Tuning/<name>} tables. Data is visible in SmartDashboard, Elastic, and Advantage Scope.
  *
  * <p>This class is managed internally by mechanism classes such as {@link
@@ -150,8 +150,8 @@ public class MechanismTelemetry {
   }
 
   /**
-   * Publish a mechanism-level {@code double} field under this mechanism's data table, and — if this
-   * mechanism was set up with a DataLog name via {@link #setupTelemetry(String, String)} — to the
+   * Publish a mechanism-level {@code double} field under this mechanism's data table, and if this
+   * mechanism was set up with a DataLog name via {@link #setupTelemetry(String, String)} to the
    * DataLog as well. For fields tied to a {@link SmartMotorController} use {@link
    * #setupTelemetry(String, SmartMotorController)} or
    * {@link #addMotorController(String, SmartMotorController)} instead.
@@ -175,8 +175,8 @@ public class MechanismTelemetry {
   }
 
   /**
-   * Publish a mechanism-level struct field under this mechanism's data table, and — if this
-   * mechanism was set up with a DataLog name via {@link #setupTelemetry(String, String)} — to the
+   * Publish a mechanism-level struct field under this mechanism's data table, and if this
+   * mechanism was set up with a DataLog name via {@link #setupTelemetry(String, String)} to the
    * DataLog as well.
    *
    * @param key    NetworkTables key, relative to this mechanism's data table.
@@ -194,8 +194,8 @@ public class MechanismTelemetry {
   }
 
   /**
-   * Publish a mechanism-level struct array field under this mechanism's data table, and — if this
-   * mechanism was set up with a DataLog name via {@link #setupTelemetry(String, String)} — to the
+   * Publish a mechanism-level struct array field under this mechanism's data table, and if this
+   * mechanism was set up with a DataLog name via {@link #setupTelemetry(String, String)} to the
    * DataLog as well.
    *
    * @param key    NetworkTables key, relative to this mechanism's data table.

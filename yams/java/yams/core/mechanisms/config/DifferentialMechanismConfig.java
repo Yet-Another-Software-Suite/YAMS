@@ -30,7 +30,7 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 /**
  * Configuration for a {@link DifferentialMechanism} driven by two coordinated motors working
  * differentially. In a differential mechanism the sum and difference of the two motor outputs
- * independently control two separate degrees of freedom — commonly referred to as <b>tilt</b>
+ * independently control two separate degrees of freedom commonly referred to as <b>tilt</b>
  * (the average of both motors) and <b>twist</b> (half the difference between the two motors).
  *
  * <p>This class is a builder that collects every setting needed before the mechanism is

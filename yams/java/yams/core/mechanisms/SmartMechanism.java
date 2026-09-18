@@ -33,7 +33,7 @@ import yams.core.telemetry.NetworkTablesBackends;
  * yams.core.motorcontrollers.SmartMotorControllerConfig}</li> <li>Instantiate the appropriate
  * wrapper: {@link yams.core.motorcontrollers.local.SparkWrapper} (REV), or
  * {@code yams.core.motorcontrollers.remote.TalonFXWrapper}/{@code
- * yams.motorcontrollers.remote.TalonFXSWrapper} (CTRE — unavailable while CTRE has no Phoenix6
+ * yams.motorcontrollers.remote.TalonFXSWrapper} (CTRE unavailable while CTRE has no Phoenix6
  * build for this wpilib version)</li> <li>Build a mechanism config (e.g., {@link
  * yams.core.mechanisms.config.ArmConfig})</li> <li>Construct the concrete mechanism (e.g., {@link
  * yams.core.mechanisms.positional.Arm})</li> <li>Schedule setpoint commands and bind triggers</li>
@@ -41,8 +41,8 @@ import yams.core.telemetry.NetworkTablesBackends;
  *
  * <p>
  * <b>Periodic calls required:</b> {@link #simIterate()}, {@link #updateTelemetry()}, and
- * {@link #visualizationUpdate()} must be called periodically — typically from
- * {@code robotPeriodic()} — so that simulation state, telemetry, and the {@link
+ * {@link #visualizationUpdate()} must be called periodically typically from
+ * {@code robotPeriodic()} so that simulation state, telemetry, and the {@link
  * org.wpilib.smartdashboard.Mechanism2d} visualization remain up to date.
  * </p>
  *

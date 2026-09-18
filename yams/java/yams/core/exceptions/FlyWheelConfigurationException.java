@@ -16,14 +16,14 @@ package yams.core.exceptions;
  * <li>Speedometer max velocity not set when speedometer simulation is requested ({@code
  * withSpeedometerSimulation(AngularVelocity)}) <li>Flywheel diameter not set when surface speed
  * calculations are needed ({@code withDiameter(Distance)}) <li>MOI (moment of inertia) not
- * derivable — neither diameter+mass nor an explicit MOI was provided
+ * derivable neither diameter+mass nor an explicit MOI was provided
  * </ul>
  *
  * <p><b>Resolution:</b> Ensure {@code
  * FlyWheelConfig.withSmartMotorController(SmartMotorController)} is called exactly once, {@code
  * FlyWheelConfig.withDiameter(Distance)} and {@code FlyWheelConfig.withMass(Mass)} are set (or
- * provide an explicit MOI via {@code FlyWheelConfig.withMOI()}), and — when using speedometer
- * simulation — {@code FlyWheelConfig.withSpeedometerSimulation(AngularVelocity)} is called with a
+ * provide an explicit MOI via {@code FlyWheelConfig.withMOI()}), and when using speedometer
+ * simulation {@code FlyWheelConfig.withSpeedometerSimulation(AngularVelocity)} is called with a
  * nonzero max velocity.
  *
  * <p>Example minimal configuration:

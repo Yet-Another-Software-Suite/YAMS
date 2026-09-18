@@ -12,21 +12,21 @@
  * <h2>Available Configuration Classes</h2>
  *
  * <ul>
- * <li>{@link yams.core.mechanisms.config.ArmConfig} — single-jointed arm with angle limits and
+ * <li>{@link yams.core.mechanisms.config.ArmConfig} single-jointed arm with angle limits and
  * feedforward tuning
- * <li>{@link yams.core.mechanisms.config.ElevatorConfig} — linear elevator with height limits and
+ * <li>{@link yams.core.mechanisms.config.ElevatorConfig} linear elevator with height limits and
  * gravity compensation
- * <li>{@link yams.core.mechanisms.config.PivotConfig} — pivot mechanism with continuous or bounded
+ * <li>{@link yams.core.mechanisms.config.PivotConfig} pivot mechanism with continuous or bounded
  * rotation
- * <li>{@link yams.core.mechanisms.config.FlyWheelConfig} — flywheel velocity mechanism with
- * optional second follower motor <li>{@link yams.core.mechanisms.config.SwerveDriveConfig} — full
+ * <li>{@link yams.core.mechanisms.config.FlyWheelConfig} flywheel velocity mechanism with
+ * optional second follower motor <li>{@link yams.core.mechanisms.config.SwerveDriveConfig} full
  * swerve-drive chassis geometry and module layout <li>{@link
- * yams.core.mechanisms.config.SwerveModuleConfig} — per-module drive and steer motor configuration
- * <li>{@link yams.core.mechanisms.config.DifferentialMechanismConfig} — differential (tank-drive)
+ * yams.core.mechanisms.config.SwerveModuleConfig} per-module drive and steer motor configuration
+ * <li>{@link yams.core.mechanisms.config.DifferentialMechanismConfig} differential (tank-drive)
  * mechanism pairing two motors
- * <li>{@link yams.core.mechanisms.config.MechanismPositionConfig} — position targets and tolerance
+ * <li>{@link yams.core.mechanisms.config.MechanismPositionConfig} position targets and tolerance
  * settings shared across positional mechanisms
- * <li>{@link yams.core.mechanisms.config.SensorConfig} — external encoder or absolute sensor
+ * <li>{@link yams.core.mechanisms.config.SensorConfig} external encoder or absolute sensor
  * attachment configuration
  * </ul>
  *

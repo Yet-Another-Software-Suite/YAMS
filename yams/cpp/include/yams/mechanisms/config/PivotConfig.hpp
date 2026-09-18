@@ -17,7 +17,7 @@ namespace yams::mechanisms::config {
  * Configuration class for a Pivot mechanism.
  *
  * Pivots are similar to Arms but do not necessarily have a meaningful arm
- * length — they typically rotate a mechanism around a fixed axis.  Uses a
+ * length they typically rotate a mechanism around a fixed axis.  Uses a
  * fluent builder pattern; all With* methods return *this for chaining.
  */
 class PivotConfig {

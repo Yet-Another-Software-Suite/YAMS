@@ -9,10 +9,10 @@
  * withSimSupplier()} to enable physics-accurate simulation without changing mechanism code.
  *
  * <ul>
- * <li>{@link yams.core.motorcontrollers.simulation.ArmSimSupplier} — single-jointed arm physics
- * <li>{@link yams.core.motorcontrollers.simulation.DCMotorSimSupplier} — generic DC motor physics
+ * <li>{@link yams.core.motorcontrollers.simulation.ArmSimSupplier} single-jointed arm physics
+ * <li>{@link yams.core.motorcontrollers.simulation.DCMotorSimSupplier} generic DC motor physics
  * <li>{@link yams.core.motorcontrollers.simulation.Sensor} and {@link
- * yams.core.motorcontrollers.simulation.SensorData} — simulated encoder/sensor state
+ * yams.core.motorcontrollers.simulation.SensorData} simulated encoder/sensor state
  * </ul>
  */
 package yams.core.motorcontrollers.simulation;

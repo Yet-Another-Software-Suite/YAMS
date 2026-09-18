@@ -197,7 +197,7 @@ bool TalonFXWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     cfg.CurrentLimits.SupplyCurrentLimit = *supply;
   }
 
-  // Vendor control request — overrides the default profile-driven request
+  // Vendor control request overrides the default profile-driven request
   if (auto req = config.GetVendorControlRequest()) {
     auto& r = *req;
     if (auto* p = std::any_cast<controls::PositionVoltage>(&r))
@@ -287,7 +287,7 @@ bool TalonFXWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
       m_talon->SetPosition(*startPos);
     }
   }
-  // Tightly coupled followers — accept TalonFX and TalonFXS (same Phoenix 6 vendor)
+  // Tightly coupled followers accept TalonFX and TalonFXS (same Phoenix 6 vendor)
   for (auto& [hw, inverted] : config.GetFollowers()) {
     if (auto* fx = std::any_cast<hardware::TalonFX*>(&hw)) {
       (*fx)->SetControl(controls::Follower{m_talon->GetDeviceID(), inverted});

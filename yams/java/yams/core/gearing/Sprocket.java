@@ -16,14 +16,14 @@ import yams.core.exceptions.NoStagesGivenException;
  * <p>You can construct a {@link Sprocket} in several ways:
  *
  * <ul>
- * <li><b>{@code new Sprocket(double...)}</b> — provide per-stage IN/OUT ratios directly
- * <li><b>{@code fromStages(String...)}</b> — provide stages as {@code "IN:OUT"} strings
+ * <li><b>{@code new Sprocket(double...)}</b> provide per-stage IN/OUT ratios directly
+ * <li><b>{@code fromStages(String...)}</b> provide stages as {@code "IN:OUT"} strings
  * </ul>
  *
  * <h2>Example</h2>
  *
  * <pre>{@code
- * // 2:1 reduction — 18-tooth driver sprocket driving a 36-tooth driven sprocket
+ * // 2:1 reduction 18-tooth driver sprocket driving a 36-tooth driven sprocket
  * // The ratio passed is driver/driven = 18/36 = 0.5
  * Sprocket twoToOne = new Sprocket(18.0 / 36.0);
  *

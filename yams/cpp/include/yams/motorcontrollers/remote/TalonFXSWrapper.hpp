@@ -292,7 +292,7 @@ class TalonFXSWrapper : public SmartMotorController {
   MotorArrangement m_arrangement;
   ctre::phoenix6::configs::TalonFXSConfiguration m_talonConfig;
 
-  // Active closed-loop control requests — variant selects the active request type
+  // Active closed-loop control requests variant selects the active request type
   using PositionControlRequest = std::variant<
       ctre::phoenix6::controls::PositionVoltage, ctre::phoenix6::controls::PositionDutyCycle,
       ctre::phoenix6::controls::PositionTorqueCurrentFOC,

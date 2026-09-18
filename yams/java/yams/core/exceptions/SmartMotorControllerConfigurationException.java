@@ -13,9 +13,9 @@ package yams.core.exceptions;
  * <ul>
  * <li>{@code withSubsystem(Subsystem)} called more than once on the same config
  * <li>Auto-synchronization threshold set while a distance-based (linear) mechanism circumference
- * is configured — the two options are mutually exclusive
+ * is configured the two options are mutually exclusive
  * <li>Mechanism circumference undefined when a conversion method (e.g., {@code withZeroOffset()},
- * {@code withSoftLimits()}, or linear unit conversions) requires it — fix with {@code
+ * {@code withSoftLimits()}, or linear unit conversions) requires it fix with {@code
  * withMechanismCircumference(Distance)} <li>External encoder discontinuity point outside the
  * allowed values (must be {@code Rotations.of(0.5)} or {@code Rotations.of(1)}) <li>Continuous
  * wrapping requested while soft limits are also set, or while a distance-based (linear) mechanism
@@ -27,7 +27,7 @@ package yams.core.exceptions;
  * request type incompatible with the underlying motor controller (e.g., a TalonFXS control request
  * not supported by the configured motor type) <li>Required basic or external-encoder options not
  * all provided before calling {@code get()} <li>Live tuning requested while the control mode is
- * {@code OPEN_LOOP} — requires {@code withControlMode(ControlMode.CLOSED_LOOP)}
+ * {@code OPEN_LOOP} requires {@code withControlMode(ControlMode.CLOSED_LOOP)}
  * </ul>
  *
  * <p><b>Resolution:</b> Read the exception message; it always names the specific {@code
@@ -36,12 +36,12 @@ package yams.core.exceptions;
  * <p>Example triggering continuous-wrapping conflict:
  *
  * <pre>{@code
- * // WRONG — soft limits and continuous wrapping cannot coexist
+ * // WRONG soft limits and continuous wrapping cannot coexist
  * SmartMotorControllerConfig config = new SmartMotorControllerConfig()
  *     .withSoftLimits(Degrees.of(-90), Degrees.of(90))
  *     .withContinuousWrapping(Rotations.of(0), Rotations.of(1)); // throws
  *
- * // CORRECT — remove withSoftLimits() when using continuous wrapping
+ * // CORRECT remove withSoftLimits() when using continuous wrapping
  * SmartMotorControllerConfig config = new SmartMotorControllerConfig()
  *     .withContinuousWrapping(Rotations.of(0), Rotations.of(1));
  * }</pre>

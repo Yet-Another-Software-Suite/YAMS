@@ -88,8 +88,8 @@ import yams.core.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * <p><b>External encoder discontinuity point support (SparkAbsoluteEncoder):</b>
  *
  * <ul>
- * <li>{@code 0.5} rotations — sensor range is [-0.5, 0.5), {@code zeroCentered = true}
- * <li>{@code 1.0} rotations — sensor range is [0, 1), {@code zeroCentered = false}
+ * <li>{@code 0.5} rotations sensor range is [-0.5, 0.5), {@code zeroCentered = true}
+ * <li>{@code 1.0} rotations sensor range is [0, 1), {@code zeroCentered = false}
  * </ul>
  *
  * A discontinuity point <b>must</b> be configured via {@link yams.core.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint}

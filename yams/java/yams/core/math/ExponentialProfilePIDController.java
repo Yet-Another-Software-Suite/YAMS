@@ -52,7 +52,7 @@ import yams.core.gearing.MechanismGearing;
  * {@link #createFlywheelConstraints}) to derive physically accurate
  * {@link ExponentialProfile.Constraints} directly from motor and mechanism parameters.
  *
- * <h2>Example — arm position control</h2>
+ * <h2>Example arm position control</h2>
  * <pre>{@code
  * import static org.wpilib.units.Units.*;
  *
@@ -64,7 +64,7 @@ import yams.core.gearing.MechanismGearing;
  *         KilogramSquareMeters.of(0.25),
  *         MechanismGearing.ofReduction(60.0));
  *
- * // kP=1.0, kI=0.0, kD=0.0 — tune these for your mechanism
+ * // kP=1.0, kI=0.0, kD=0.0 tune these for your mechanism
  * ExponentialProfilePIDController armPID =
  *     new ExponentialProfilePIDController(1.0, 0.0, 0.0, armConstraints);
  *

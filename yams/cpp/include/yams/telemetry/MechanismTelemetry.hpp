@@ -78,8 +78,8 @@ class MechanismTelemetry {
                           motorcontrollers::SmartMotorController& motorController);
 
   /**
-   * Publish a mechanism-level double field under this mechanism's data table, and — if this
-   * mechanism was set up with a DataLog name via SetupTelemetry(name, dataLogName) — to the
+   * Publish a mechanism-level double field under this mechanism's data table, and if this
+   * mechanism was set up with a DataLog name via SetupTelemetry(name, dataLogName) to the
    * DataLog as well. For fields tied to a SmartMotorController use SetupTelemetry(name, smc)
    * or AddMotorController() instead.
    *
@@ -91,8 +91,8 @@ class MechanismTelemetry {
   std::function<void(double)> PublishDouble(const std::string& key, const std::string& unit = "");
 
   /**
-   * Publish a mechanism-level struct field under this mechanism's data table, and — if this
-   * mechanism was set up with a DataLog name via SetupTelemetry(name, dataLogName) — to the
+   * Publish a mechanism-level struct field under this mechanism's data table, and if this
+   * mechanism was set up with a DataLog name via SetupTelemetry(name, dataLogName) to the
    * DataLog as well.
    *
    * @tparam T    Type of the published value.
@@ -115,8 +115,8 @@ class MechanismTelemetry {
   }
 
   /**
-   * Publish a mechanism-level struct array field under this mechanism's data table, and — if
-   * this mechanism was set up with a DataLog name via SetupTelemetry(name, dataLogName) — to
+   * Publish a mechanism-level struct array field under this mechanism's data table, and if
+   * this mechanism was set up with a DataLog name via SetupTelemetry(name, dataLogName) to
    * the DataLog as well.
    *
    * @tparam T    Type of the published array elements.

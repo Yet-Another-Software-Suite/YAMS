@@ -30,8 +30,8 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig;
 /**
  * Smart motor controller telemetry.
  *
- * <p>Publishes motor controller state — including duty-cycle output voltage, stator/supply current,
- * rotor/mechanism position and velocity, and motor temperature — to NetworkTables so that tools
+ * <p>Publishes motor controller state including duty-cycle output voltage, stator/supply current,
+ * rotor/mechanism position and velocity, and motor temperature to NetworkTables so that tools
  * such as SmartDashboard, Elastic, and Advantage Scope can consume the data in real time. Tunable
  * fields (PID gains, setpoints, motion-profile limits) are additionally exposed on a separate
  * {@code Tuning} table so they can be adjusted without redeploying code.

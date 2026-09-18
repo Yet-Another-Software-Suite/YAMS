@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-// Unit tests for EasyCRT — pure math, no hardware required.
+// Unit tests for EasyCRT pure math, no hardware required.
 // Reference geometry: 200T mechanism with 19T and 21T encoder gears (coprime).
 // CRT period = lcm(19, 21) / 200 = 399 / 200 = 1.995 rotations.
 

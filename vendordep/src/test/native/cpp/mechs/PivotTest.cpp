@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-// Mirrors Java PivotTest — duty-cycle and position-PID tests for a rotary
+// Mirrors Java PivotTest duty-cycle and position-PID tests for a rotary
 // pivot mechanism across all (HardwareType × ProfileType) combinations.
 
 #include <catch2/catch_test_macros.hpp>

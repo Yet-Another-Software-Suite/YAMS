@@ -18,7 +18,7 @@ package yams.core.exceptions;
  * <p>Example correct usage:
  *
  * <pre>{@code
- * // WRONG — missing colon separator
+ * // WRONG missing colon separator
  * GearBox bad = new GearBox("1260");  // throws InvalidStageGivenException
  *
  * // CORRECT

@@ -20,7 +20,7 @@ static void SigsegvHandler(int /*sig*/) {
   int count = backtrace(frames, 64);
   char** symbols = backtrace_symbols(frames, count);
 
-  std::fprintf(stderr, "\n[YAMS] Caught SIGSEGV after tests — stack trace:\n");
+  std::fprintf(stderr, "\n[YAMS] Caught SIGSEGV after tests stack trace:\n");
 
   for (int i = 0; i < count; ++i) {
     // backtrace_symbols format: "module(mangled+offset) [address]"

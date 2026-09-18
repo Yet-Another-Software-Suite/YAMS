@@ -7,7 +7,7 @@
  * <p>This package contains the checked and unchecked exceptions thrown by YAMS when mechanisms or
  * motor controllers are misconfigured. All exceptions include a human-readable message that
  * identifies the missing or invalid field and, where possible, suggests the corrective action. They
- * are typically thrown during mechanism construction — before any control loop begins — so
+ * are typically thrown during mechanism construction before any control loop begins so
  * configuration errors surface immediately at robot startup rather than silently producing
  * unexpected behavior at match time.
  *
@@ -17,14 +17,14 @@
  * are absent or logically inconsistent:
  *
  * <ul>
- * <li>{@link yams.core.exceptions.ArmConfigurationException} — single-jointed arm config errors
- * <li>{@link yams.core.exceptions.ElevatorConfigurationException} — elevator config errors
- * <li>{@link yams.core.exceptions.FlyWheelConfigurationException} — flywheel config errors
- * <li>{@link yams.core.exceptions.PivotConfigurationException} — pivot config errors
- * <li>{@link yams.core.exceptions.SwerveDriveConfigurationException} — swerve drive config errors
- * <li>{@link yams.core.exceptions.DifferentialMechanismConfigurationException} — differential drive
+ * <li>{@link yams.core.exceptions.ArmConfigurationException} single-jointed arm config errors
+ * <li>{@link yams.core.exceptions.ElevatorConfigurationException} elevator config errors
+ * <li>{@link yams.core.exceptions.FlyWheelConfigurationException} flywheel config errors
+ * <li>{@link yams.core.exceptions.PivotConfigurationException} pivot config errors
+ * <li>{@link yams.core.exceptions.SwerveDriveConfigurationException} swerve drive config errors
+ * <li>{@link yams.core.exceptions.DifferentialMechanismConfigurationException} differential drive
  * config errors
- * <li>{@link yams.core.exceptions.DoubleJointedArmConfigurationException} — double-jointed arm
+ * <li>{@link yams.core.exceptions.DoubleJointedArmConfigurationException} double-jointed arm
  * config errors
  * </ul>
  *
@@ -33,9 +33,9 @@
  * <p>Thrown when a motor controller is missing or its configuration is invalid:
  *
  * <ul>
- * <li>{@link yams.core.exceptions.SmartMotorControllerConfigurationException} — the motor
+ * <li>{@link yams.core.exceptions.SmartMotorControllerConfigurationException} the motor
  * controller wrapper itself has an invalid or incomplete configuration <li>{@link
- * yams.core.exceptions.MotorNotPresentException} — a required motor controller could not be found
+ * yams.core.exceptions.MotorNotPresentException} a required motor controller could not be found
  * on the CAN bus or is otherwise unavailable
  * </ul>
  *
@@ -44,8 +44,8 @@
  * <p>Thrown by {@link yams.core.gearing.GearBox} when its list of stages is malformed:
  *
  * <ul>
- * <li>{@link yams.core.exceptions.NoStagesGivenException} — a {@code GearBox} was constructed with
- * an empty stage list <li>{@link yams.core.exceptions.InvalidStageGivenException} — one or more
+ * <li>{@link yams.core.exceptions.NoStagesGivenException} a {@code GearBox} was constructed with
+ * an empty stage list <li>{@link yams.core.exceptions.InvalidStageGivenException} one or more
  * stages in a {@code GearBox} have an illegal value (e.g., zero or negative tooth counts)
  * </ul>
  */

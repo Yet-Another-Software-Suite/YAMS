@@ -11,16 +11,16 @@ import yams.core.exceptions.NoStagesGivenException;
  * <p>Provides static utility methods for common FRC drivetrain and gearing calculations:
  *
  * <ul>
- * <li><b>sensorToMechanismRatio</b> — multiplies a chain of gear-stage ratios to produce the
+ * <li><b>sensorToMechanismRatio</b> multiplies a chain of gear-stage ratios to produce the
  * overall sensor-to-mechanism ratio used by motor controller configuration.
- * <li><b>gearBox</b> — multiplies a chain of gear-stage ratios to produce the rotor-to-mechanism
+ * <li><b>gearBox</b> multiplies a chain of gear-stage ratios to produce the rotor-to-mechanism
  * gear ratio (MECHANISM_ROTATIONS / ROTOR_ROTATIONS).
  * </ul>
  *
  * <h2>Example</h2>
  *
  * <pre>{@code
- * // Single-stage 10:1 reduction — sensor on motor shaft
+ * // Single-stage 10:1 reduction sensor on motor shaft
  * double sensorRatio = SmartMath.sensorToMechanismRatio(10.0);
  *
  * // Two-stage gearbox: 5:1 first stage, 4:1 second stage → overall 20:1

@@ -38,7 +38,7 @@ import yams.core.math.LQRConfig.LQRType;
  * {@link org.wpilib.math.controller.LinearQuadraticRegulator} with a
  * {@link org.wpilib.math.estimator.KalmanFilter} observer.
  *
- * <h2>Example — construct from LQRConfig and calculate arm voltage</h2>
+ * <h2>Example construct from LQRConfig and calculate arm voltage</h2>
  * <pre>{@code
  * import static org.wpilib.units.Units.*;
  *

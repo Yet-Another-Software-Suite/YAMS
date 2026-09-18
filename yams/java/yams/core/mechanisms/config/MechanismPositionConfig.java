@@ -20,14 +20,14 @@ import yams.core.mechanisms.positional.SmartPositionalMechanism;
  * information:
  *
  * <ul>
- * <li><b>Robot-relative position</b> — a {@link org.wpilib.math.geometry.Translation3d}
+ * <li><b>Robot-relative position</b> a {@link org.wpilib.math.geometry.Translation3d}
  * that places the mechanism's pivot/root inside the robot frame. When set, the Mechanism2d
  * window is automatically offset so the mechanism appears in the correct position relative
  * to the robot outline.</li>
- * <li><b>Robot bounding box</b> — optional maximum length and height used to size the
+ * <li><b>Robot bounding box</b> optional maximum length and height used to size the
  * Mechanism2d canvas. When omitted, the canvas defaults to twice the mechanism's
  * reported length.</li>
- * <li><b>Movement plane</b> — whether the mechanism moves in the XZ (default), YZ, or XY
+ * <li><b>Movement plane</b> whether the mechanism moves in the XZ (default), YZ, or XY
  * plane of the robot coordinate system. This determines which Translation3d axes are
  * mapped to the 2D canvas X and Y axes.</li>
  * </ul>

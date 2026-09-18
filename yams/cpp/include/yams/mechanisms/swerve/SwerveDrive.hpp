@@ -651,7 +651,7 @@ namespace yams::telemetry {
 
 // SwerveDriveTelemetry::SetupTelemetry()/Publish()/ApplyTuningValues() are templated on the
 // SwerveDrive's module count so that SwerveDriveTelemetry itself need not be a template. Their
-// bodies live here — after SwerveDrive<NumModules> is fully defined above — because this is the
+// bodies live here after SwerveDrive<NumModules> is fully defined above because this is the
 // only place both SwerveDriveTelemetry's private members and SwerveDrive<NumModules>'s interface
 // are simultaneously visible.
 

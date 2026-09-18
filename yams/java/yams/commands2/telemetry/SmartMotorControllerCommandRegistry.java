@@ -64,7 +64,7 @@ public class SmartMotorControllerCommandRegistry {
     var key = subsystem.getName() + "/" + cmdName;
     var owner = commandOwners.get(key);
     if (owner != null && owner != subsystem) {
-      throw new IllegalStateException("SmartMotorControllerCommandRegistry: subsystem name conflict — \"" + subsystem
+      throw new IllegalStateException("SmartMotorControllerCommandRegistry: subsystem name conflict \"" + subsystem
           .getName() + "\" is already registered by a different subsystem instance. " + ("Use unique subsystem names for each subsystem instance (e.g. \"LeftTurret\", " + "\"RightTurret\")."));
     }
     commandOwners.put(key, subsystem);

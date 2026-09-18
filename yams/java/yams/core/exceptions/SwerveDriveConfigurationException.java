@@ -12,7 +12,7 @@ package yams.core.exceptions;
  *
  * <ul>
  * <li>Module configurations (drive and steer motors) not provided for one or more swerve modules
- * <li>Gyro sensor not configured — required for field-relative driving and odometry
+ * <li>Gyro sensor not configured required for field-relative driving and odometry
  * <li>Kinematic parameters missing (e.g., track width or wheelbase not set)
  * <li>A {@code SwerveDriveConfig} method called in an incompatible sequence or called twice
  * </ul>

@@ -17,10 +17,10 @@ import java.util.Optional;
  * <p>Constructors available:
  *
  * <ul>
- * <li><b>{@code new MechanismGearing(double)}</b> — single overall reduction ratio
- * <li><b>{@code new MechanismGearing(double...)}</b> — one ratio per gearbox stage
- * <li><b>{@code new MechanismGearing(GearBox)}</b> — pre-built {@link GearBox}
- * <li><b>{@code new MechanismGearing(GearBox, Sprocket)}</b> — gearbox followed by a chain/belt
+ * <li><b>{@code new MechanismGearing(double)}</b> single overall reduction ratio
+ * <li><b>{@code new MechanismGearing(double...)}</b> one ratio per gearbox stage
+ * <li><b>{@code new MechanismGearing(GearBox)}</b> pre-built {@link GearBox}
+ * <li><b>{@code new MechanismGearing(GearBox, Sprocket)}</b> gearbox followed by a chain/belt
  * stage
  * </ul>
  *

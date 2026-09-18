@@ -34,10 +34,10 @@ enum class DoubleTelemetryField {
   ExponentialProfileKV,               ///< Exponential profile kV constant (tunable).
   ExponentialProfileKA,               ///< Exponential profile kA constant (tunable).
   ExponentialProfileMaxInput,         ///< Exponential profile maximum input voltage (tunable).
-  TrapezoidalProfileMaxVelocity,      ///< Trapezoidal profile max velocity — RPM or m/s (tunable).
-  TrapezoidalProfileMaxAcceleration,  ///< Trapezoidal profile max acceleration — RPM/s or m/s²
+  TrapezoidalProfileMaxVelocity,      ///< Trapezoidal profile max velocity RPM or m/s (tunable).
+  TrapezoidalProfileMaxAcceleration,  ///< Trapezoidal profile max acceleration RPM/s or m/s²
                                       ///< (tunable).
-  TrapezoidalProfileMaxJerk,          ///< Trapezoidal profile max jerk — RPM/s² (tunable).
+  TrapezoidalProfileMaxJerk,          ///< Trapezoidal profile max jerk RPM/s² (tunable).
   TunableClosedLoopControllerSlot,    ///< Live-tunable closed-loop gain slot selector.
   ActiveClosedLoopControllerSlot,     ///< Currently active closed-loop gain slot (read-only).
   kS,                                 ///< Static friction feedforward gain kS (tunable).
@@ -47,10 +47,10 @@ enum class DoubleTelemetryField {
   kP,                                 ///< Proportional feedback gain kP (tunable).
   kI,                                 ///< Integral feedback gain kI (tunable).
   kD,                                 ///< Derivative feedback gain kD (tunable).
-  TunableSetpointPosition,            ///< Live-tunable position setpoint — degrees or meters.
-  SetpointPosition,                   ///< Read-only position setpoint — rotations or meters.
-  TunableSetpointVelocity,            ///< Live-tunable velocity setpoint — RPM or m/s.
-  SetpointVelocity,                   ///< Read-only velocity setpoint — RPS or m/s.
+  TunableSetpointPosition,            ///< Live-tunable position setpoint degrees or meters.
+  SetpointPosition,                   ///< Read-only position setpoint rotations or meters.
+  TunableSetpointVelocity,            ///< Live-tunable velocity setpoint RPM or m/s.
+  SetpointVelocity,                   ///< Read-only velocity setpoint RPS or m/s.
   OutputVoltage,                      ///< Voltage currently applied to the motor (V).
   StatorCurrent,                      ///< Stator (output) current draw (A).
   StatorCurrentLimit,                 ///< Configured stator current limit (A, tunable).

@@ -15,7 +15,7 @@ import org.wpilib.units.measure.Voltage;
  * <p>{@code SimSupplier} is the abstract bridge between WPILib's physics simulation models (such as
  * {@link org.wpilib.simulation.SingleJointedArmSim} and {@link org.wpilib.simulation.DCMotorSim})
  * and YAMS {@link yams.core.motorcontrollers.SmartMotorController} wrappers. Concrete
- * implementations translate the simulation state — position, velocity, current draw, voltage — into
+ * implementations translate the simulation state position, velocity, current draw, voltage into
  * the typed unit-safe values that YAMS motor controller wrappers consume each control loop.
  *
  * <p>On a real robot the motor controller hardware provides these values; in simulation a {@code

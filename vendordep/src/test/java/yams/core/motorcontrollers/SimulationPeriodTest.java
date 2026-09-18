@@ -47,13 +47,13 @@ import yams.core.motorcontrollers.remote.TalonFXWrapper;
  * Tests that closed loop control has no negative effects when {@link
  * SmartMotorControllerConfig#getSimulationPeriod()} differs from the robot's own periodic cadence.
  *
- * <p>A {@link PeriodicScheduler} — a small stand-in for how {@link
+ * <p>A {@link PeriodicScheduler} a small stand-in for how {@link
  * org.wpilib.framework.TimedRobot}'s own {@code addPeriodic()} runs multiple callbacks at
- * independent periods from a single loop — calls {@link SmartMotorController#simIterate()} at the
+ * independent periods from a single loop calls {@link SmartMotorController#simIterate()} at the
  * configured 10ms simulation period and a separate callback (re-commanding the setpoint and
  * publishing telemetry) at 20ms, mirroring a robot whose periodic loop runs at 20ms while
  * simulation physics steps at 10ms. This runs entirely on the calling thread against a virtual
- * timeline — no real-time Notifier, no WPILib simulation timing hooks — so it is fully
+ * timeline no real-time Notifier, no WPILib simulation timing hooks so it is fully
  * deterministic. The test runs across every vendor wrapper (Spark, TalonFXS, TalonFX) so a
  * regression in any one wrapper's {@code simIterate()} would be caught.
  */
@@ -151,7 +151,7 @@ public class SimulationPeriodTest {
           smc.simIterate();
           simIterations[0]++;
         }, Milliseconds.of(10));
-        // Re-commanding the setpoint and publishing telemetry at 20ms — a robot's normal periodic
+        // Re-commanding the setpoint and publishing telemetry at 20ms a robot's normal periodic
         // loop, decoupled from the (faster) simulation period above.
         scheduler.addPeriodic(() -> {
           smc.setPosition(setpoint);
@@ -167,8 +167,8 @@ public class SimulationPeriodTest {
           + ", telemetry iterations=" + telemetryIterations[0] + ", final position="
           + finalPosition.in(Degrees) + " deg (target " + setpoint.in(Degrees) + " deg)");
 
-      // Over 1.5s, a 10ms period should fire ~150 times and a 20ms period ~75 times — roughly twice
-      // as often — confirming simIterate() genuinely ran at the configured simulation period rather
+      // Over 1.5s, a 10ms period should fire ~150 times and a 20ms period ~75 times roughly twice
+      // as often confirming simIterate() genuinely ran at the configured simulation period rather
       // than some other period.
       assertTrue(simIterations[0] > telemetryIterations[0],
           smc.getName()

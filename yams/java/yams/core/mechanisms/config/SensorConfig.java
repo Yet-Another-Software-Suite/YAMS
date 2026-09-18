@@ -22,7 +22,7 @@ import yams.core.motorcontrollers.simulation.SensorData;
  *
  * <p>{@code SensorConfig} describes a named sensor that can expose one or more typed fields
  * (double, int, boolean, long) to both the real robot and the simulation environment. It is
- * used to wire hardware sensors — such as limit switches, encoders, or custom I/O devices —
+ * used to wire hardware sensors such as limit switches, encoders, or custom I/O devices —
  * into YAMS's simulation framework so that the same code path runs identically in simulation
  * and on a real robot.
  *

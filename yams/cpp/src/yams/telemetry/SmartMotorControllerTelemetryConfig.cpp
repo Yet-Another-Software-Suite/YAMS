@@ -483,7 +483,7 @@ SmartMotorControllerTelemetryConfig::GetDoubleFields(SmartMotorController& smc) 
     m_doubleFields.at(DoubleTelemetryField::kD).Disable();
   }
 
-  // Feedforward defaults — getters return units types, use .value() for raw doubles
+  // Feedforward defaults getters return units types, use .value() for raw doubles
   if (auto ff = cfg.GetArmFeedforward(slot)) {
     m_doubleFields.at(DoubleTelemetryField::kG).Enable();
     m_doubleFields.at(DoubleTelemetryField::kS).SetDefaultValue(ff->GetKs().value());

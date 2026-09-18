@@ -11,18 +11,18 @@
  *
  * <h2>Mechanism Lifecycle</h2>
  * <ol>
- * <li><b>Create a configuration object</b> — choose the appropriate config class from
+ * <li><b>Create a configuration object</b> choose the appropriate config class from
  * {@link yams.core.mechanisms.config} (e.g. {@link yams.core.mechanisms.config.ArmConfig},
  * {@link yams.core.mechanisms.config.ElevatorConfig}) and populate it via the fluent
  * {@code with*()} API.</li>
- * <li><b>Construct the mechanism</b> — pass the finished config to the mechanism constructor
+ * <li><b>Construct the mechanism</b> pass the finished config to the mechanism constructor
  * (e.g. {@link yams.core.mechanisms.positional.Arm}, {@link
  * yams.core.mechanisms.positional.Elevator}). The constructor validates the config and initialises
- * all internal controllers.</li> <li><b>Command the mechanism</b> — call setpoint methods such as
+ * all internal controllers.</li> <li><b>Command the mechanism</b> call setpoint methods such as
  * {@code setAngle()} or
  * {@code setHeight()}. Each method returns a WPILib {@code Command} that can be bound,
  * composed, or scheduled directly via the command scheduler.</li>
- * <li><b>React to conditions</b> — use trigger factory methods ({@code near()}, {@code max()},
+ * <li><b>React to conditions</b> use trigger factory methods ({@code near()}, {@code max()},
  * {@code min()}, {@code between()}, {@code lte()}, {@code gte()}) to obtain
  * {@link org.wpilib.command2.button.Trigger} objects that fire when the mechanism
  * satisfies a particular condition, enabling condition-based command scheduling without
@@ -49,11 +49,11 @@
  *
  * <h2>Sub-packages</h2>
  * <ul>
- * <li>{@link yams.core.mechanisms.positional} — position-controlled mechanisms (Arm, Elevator,
+ * <li>{@link yams.core.mechanisms.positional} position-controlled mechanisms (Arm, Elevator,
  * Pivot, DifferentialMechanism, DoubleJointedArm)</li>
- * <li>{@link yams.core.mechanisms.velocity} — velocity-controlled mechanisms (FlyWheel)</li>
- * <li>{@link yams.core.mechanisms.swerve} — swerve-drive mechanism and module implementations</li>
- * <li>{@link yams.core.mechanisms.config} — builder-style configuration classes for all
+ * <li>{@link yams.core.mechanisms.velocity} velocity-controlled mechanisms (FlyWheel)</li>
+ * <li>{@link yams.core.mechanisms.swerve} swerve-drive mechanism and module implementations</li>
+ * <li>{@link yams.core.mechanisms.config} builder-style configuration classes for all
  * mechanisms</li>
  * </ul>
  *

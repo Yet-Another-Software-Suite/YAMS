@@ -20,7 +20,7 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig;
  * <p>A lightweight wrapper that publishes a single {@code double} value to NetworkTables and/or
  * a WPILib DataLog, with optional unit metadata consumed by Advantage Scope and Elastic. It is
  * used internally by {@link SmartMotorControllerTelemetry} to track numeric fields such as
- * position, velocity, current, and PID gains — but it can also be constructed directly when
+ * position, velocity, current, and PID gains but it can also be constructed directly when
  * you need a standalone numeric entry.
  *
  * <h2>Example</h2>

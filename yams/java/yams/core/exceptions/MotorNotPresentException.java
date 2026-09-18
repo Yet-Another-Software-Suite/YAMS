@@ -10,7 +10,7 @@ import yams.core.mechanisms.SmartMechanism;
  * yams.core.motorcontrollers.SmartMotorController} has not been set before the mechanism attempts
  * to use it.
  *
- * <p>This exception signals that the mechanism's motor slot is {@code null} — either because no
+ * <p>This exception signals that the mechanism's motor slot is {@code null} either because no
  * motor was ever assigned, or because the mechanism was constructed before the motor was
  * initialized.
  *

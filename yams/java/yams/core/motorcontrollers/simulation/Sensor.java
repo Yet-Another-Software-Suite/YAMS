@@ -39,13 +39,13 @@ import yams.core.mechanisms.config.SensorConfig;
  *
  * <h2>Key fields and methods</h2>
  * <ul>
- * <li>{@link #getField(String)} — retrieve a {@link SensorData} field by name.</li>
+ * <li>{@link #getField(String)} retrieve a {@link SensorData} field by name.</li>
  * <li>{@link #getAsDouble(String)}, {@link #getAsInt(String)}, {@link #getAsBoolean(String)},
- * {@link #getAsLong(String)} — typed convenience accessors that call through to
+ * {@link #getAsLong(String)} typed convenience accessors that call through to
  * the underlying field.</li>
  * <li>{@link #addSimTrigger(String, org.wpilib.hardware.hal.HALValue,
- * java.util.function.BooleanSupplier)} — inject a simulated override value whenever a condition is
- * true.</li> <li>{@link #getDevice()} — returns the underlying {@link
+ * java.util.function.BooleanSupplier)} inject a simulated override value whenever a condition is
+ * true.</li> <li>{@link #getDevice()} returns the underlying {@link
  * org.wpilib.hardware.hal.SimDevice} (empty when running on a real robot).</li>
  * </ul>
  *

@@ -68,7 +68,7 @@ import yams.core.motorcontrollers.remote.TalonFXWrapper;
  * <ol>
  *   <li>min()/max() Triggers fire in the correct direction for Pivot, Arm, and Elevator. Starting
  *       positions are configured in SmartMotorControllerConfig so the mechanism sim is seeded via
- *       the normal construction path — not via setEncoderPosition.
+ *       the normal construction path not via setEncoderPosition.
  *   <li>A configured starting position is reflected in getMechanismPosition() after setupSimulation
  *       + one scheduler cycle.
  *   <li>Constructors throw when the starting position exceeds the mechanism's hard limits.
@@ -157,7 +157,7 @@ public class MechanismLimitTest {
 
   /**
    * Creates an Elevator from {@code smc}. Starting height comes from the starting position
-   * already configured in the SMC config by the factory method — do NOT call
+   * already configured in the SMC config by the factory method do NOT call
    * {@code withStartingHeight} here, or it would overwrite the factory-supplied seed.
    * Hard limits extend 0.1 m below 0 so that a "true at min" starting position
    * (-0.01 m) clears the bounds check while remaining below the 0 m soft limit.

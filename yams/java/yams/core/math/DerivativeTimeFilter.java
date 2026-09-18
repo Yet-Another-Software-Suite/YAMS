@@ -20,8 +20,8 @@ import org.wpilib.units.measure.Time;
  *
  * <p>Two {@code derivative()} overloads are available:
  * <ul>
- * <li>{@link #derivative(double)} — uses the FPGA clock to measure elapsed time automatically.</li>
- * <li>{@link #derivative(double, org.wpilib.units.measure.Time)} — uses a caller-supplied
+ * <li>{@link #derivative(double)} uses the FPGA clock to measure elapsed time automatically.</li>
+ * <li>{@link #derivative(double, org.wpilib.units.measure.Time)} uses a caller-supplied
  * delta-time (useful when the loop period is already known).</li>
  * </ul>
  *

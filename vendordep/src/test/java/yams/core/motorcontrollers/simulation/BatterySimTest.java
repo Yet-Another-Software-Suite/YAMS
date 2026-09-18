@@ -78,7 +78,7 @@ public class BatterySimTest {
             // A heavy load (well above the 0.02 kgm^2 default) keeps the motor accelerating slowly,
             // so
             // it stays near its high-current stall region for the whole test window instead of
-            // quickly spinning up towards free speed and current dropping off — a stable, heavily
+            // quickly spinning up towards free speed and current dropping off a stable, heavily
             // loaded mechanism rather than a fast, lightly loaded one.
             .withMomentOfInertia(KilogramSquareMeters.of(2.0));
 
@@ -139,7 +139,7 @@ public class BatterySimTest {
 
   /**
    * Force the simulated battery to a fully depleted state by enabling discharge with a vanishingly
-   * small capacity and running a brief heavy load — any nonzero current instantly exhausts it.
+   * small capacity and running a brief heavy load any nonzero current instantly exhausts it.
    * Returns the {@link SmartMotorController}s used to do it, still under heavy load, so the caller
    * can drive further scenarios (e.g. idling or continuing to load a dead battery).
    */
@@ -187,7 +187,7 @@ public class BatterySimTest {
    * battery voltage sequentially within a tick, so a single instantaneous read after the fact is
    * noisy; the minimum over the whole window reliably captures the worst-case sag instead.
    *
-   * @implNote Seeded with {@link Double#POSITIVE_INFINITY}, not the pre-cycle voltage — the latter
+   * @implNote Seeded with {@link Double#POSITIVE_INFINITY}, not the pre-cycle voltage the latter
    *     can be a stale reading from before this window's simulation ticks ran (e.g. the raw HAL
    *     default of 12V, which is below a fully-charged battery's true ~12.9V open circuit voltage),
    *     which would otherwise mask the real value for this window and make a later window look like
@@ -418,7 +418,7 @@ public class BatterySimTest {
     // fresh battery. (Incrementally adding motors one at a time across staggered time windows was
     // tried first and is not a reliable comparison: motor stall current decays as it spins up, so
     // the worst instantaneous demand doesn't necessarily grow in lockstep with motor count over
-    // time — that's a real transient-dynamics property, not something worth asserting on.)
+    // time that's a real transient-dynamics property, not something worth asserting on.)
     BatterySim.enableDischarge(2.0, Volts.of(12.0), MilliOhms.of(20));
     List<SmartMotorController> soloSmcs = createHeavyLoadSmcs();
     double soloVoltage;
@@ -426,7 +426,7 @@ public class BatterySimTest {
       TestWithScheduler.schedule(heavyLoadCommand(soloSmcs.get(0)));
       soloVoltage = minVoltageOverCycle(0.3);
     } finally {
-      // Cancel the still-running heavy-load command before closing its device — otherwise the
+      // Cancel the still-running heavy-load command before closing its device otherwise the
       // scheduler tries to execute it against an already-closed SMC on the next cycle.
       TestWithScheduler.schedulerClear();
       soloSmcs.forEach(BatterySimTest::closeSmc);
@@ -461,7 +461,7 @@ public class BatterySimTest {
       // Let the depleted battery idle and record its baseline voltage. getSupplyCurrent() runs
       // its raw dutyCycle*statorCurrent product through a 100ms single-pole low-pass filter, so
       // switching straight from the heavy load above to idle leaves that filter's output sagging
-      // for a moment even though the new commanded duty cycle is already 0 — settle past that
+      // for a moment even though the new commanded duty cycle is already 0 settle past that
       // filter lag (~3 time constants) before starting the window that measures the steady idle
       // voltage, so this doesn't measure the tail of the previous heavy-load transient instead.
       for (SmartMotorController smc : smcs) {

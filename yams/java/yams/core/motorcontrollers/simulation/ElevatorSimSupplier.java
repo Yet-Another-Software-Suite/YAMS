@@ -32,7 +32,7 @@ import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
 
 /**
- * ElevatorSim Supplier — simulates an elevator mechanism using WPILib's
+ * ElevatorSim Supplier simulates an elevator mechanism using WPILib's
  * {@link org.wpilib.simulation.ElevatorSim}.
  *
  * <p>This supplier steps WPILib's {@code ElevatorSim} physics model each control loop and exposes

@@ -11,11 +11,11 @@
  *
  * <h2>Core types</h2>
  * <ul>
- * <li>{@code yams.core.motorcontrollers.remote.TalonFXWrapper} — adapter for the CTRE TalonFX
+ * <li>{@code yams.core.motorcontrollers.remote.TalonFXWrapper} adapter for the CTRE TalonFX
  * motor controller, used in the Kraken X60 and Falcon 500 brushless motors. Supports
  * all Phoenix 6 control modes (position, velocity, motion magic, torque current)
  * through the {@link yams.core.motorcontrollers.SmartMotorController} interface.</li>
- * <li>{@code yams.core.motorcontrollers.remote.TalonFXSWrapper} — adapter for the CTRE TalonFXS
+ * <li>{@code yams.core.motorcontrollers.remote.TalonFXSWrapper} adapter for the CTRE TalonFXS
  * motor controller, used with the Minion brushless motor. Functionally equivalent to
  * {@code TalonFXWrapper} but targets the TalonFXS CAN device type.</li>
  * </ul>

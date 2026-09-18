@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-// Mirrors Java ElevatorTest — exercises duty-cycle and position-PID control
+// Mirrors Java ElevatorTest exercises duty-cycle and position-PID control
 // for each (HardwareType × ProfileType) combination using WPILib simulation.
 
 #include <catch2/catch_test_macros.hpp>

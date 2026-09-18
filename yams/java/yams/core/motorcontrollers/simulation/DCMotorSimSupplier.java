@@ -28,14 +28,14 @@ import yams.core.motorcontrollers.SimSupplier;
 import yams.core.motorcontrollers.SmartMotorController;
 
 /**
- * DCMotorSim Supplier — simulates a generic DC motor load (flywheel, roller, or elevator)
+ * DCMotorSim Supplier simulates a generic DC motor load (flywheel, roller, or elevator)
  * using WPILib's {@link org.wpilib.simulation.DCMotorSim}.
  *
  * <p>This supplier steps WPILib's {@code DCMotorSim} physics model each control loop and exposes
  * the resulting angular position, angular velocity, current draw, and acceleration through the
  * {@link yams.core.motorcontrollers.SimSupplier} interface. Unlike {@link
  * yams.core.motorcontrollers.simulation.ArmSimSupplier}, this model does not simulate gravity or
- * joint limits — it is suited for continuous-rotation mechanisms such as flywheels or rollers, as
+ * joint limits it is suited for continuous-rotation mechanisms such as flywheels or rollers, as
  * well as linear mechanisms (elevators) when paired with appropriate gearing.
  *
  * <p>The gear ratio and control period are read from the associated {@link

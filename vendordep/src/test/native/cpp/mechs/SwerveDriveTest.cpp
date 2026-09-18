@@ -239,7 +239,7 @@ struct SwerveDriveTestFixture {
 
   SwerveTestSubsystem* Subsystem() { return Hardware().sub; }
 
-  // Simulated gyro angle — tests can mutate this to fake heading.
+  // Simulated gyro angle tests can mutate this to fake heading.
   wpi::units::degree_t m_simGyro{0};
 
   std::optional<SwerveModule> m_fl;

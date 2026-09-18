@@ -30,7 +30,7 @@ import yams.core.motorcontrollers.SimSupplier;
 import yams.core.motorcontrollers.SmartMotorController;
 
 /**
- * ArmSim Supplier — simulates a single-jointed arm mechanism using WPILib's
+ * ArmSim Supplier simulates a single-jointed arm mechanism using WPILib's
  * {@link org.wpilib.simulation.SingleJointedArmSim}.
  *
  * <p>This supplier steps WPILib's {@code SingleJointedArmSim} physics model each control loop and

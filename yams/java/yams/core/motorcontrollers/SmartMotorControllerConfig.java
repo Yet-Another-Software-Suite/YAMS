@@ -195,7 +195,7 @@ public class SmartMotorControllerConfig {
   private Optional<Time> controlPeriod = Optional.empty();
   /**
    * Simulation loop period, the rate at which {@link SmartMotorController#simIterate()} steps the
-   * simulated physics forward. This is independent of {@link #controlPeriod} — a robot can run its
+   * simulated physics forward. This is independent of {@link #controlPeriod} a robot can run its
    * periodic loop at 20ms while stepping simulation physics at 5ms, for example. Defaults to 20ms
    * if not configured.
    */
@@ -1161,7 +1161,7 @@ public class SmartMotorControllerConfig {
   }
 
   /**
-   * Set the simulation loop period — the rate at which {@link SmartMotorController#simIterate()}
+   * Set the simulation loop period the rate at which {@link SmartMotorController#simIterate()}
    * steps the simulated physics forward. Independent of {@link #withClosedLoopControlPeriod(Time)};
    * a robot can run its periodic loop at 20ms while stepping simulation physics at 5ms, for
    * example. Defaults to 20ms if not set.
@@ -1175,7 +1175,7 @@ public class SmartMotorControllerConfig {
   }
 
   /**
-   * Get the simulation loop period — the rate at which {@link SmartMotorController#simIterate()}
+   * Get the simulation loop period the rate at which {@link SmartMotorController#simIterate()}
    * steps the simulated physics forward. Defaults to 20ms if not set via {@link
    * #withSimulationPeriod(Time)}.
    *

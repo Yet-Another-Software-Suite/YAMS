@@ -74,7 +74,7 @@ std::optional<wpi::units::turn_t> EasyCRT::GetAngle() {
           (static_cast<int64_t>(a1) * m_crtW1 + static_cast<int64_t>(a2) * m_crtW2) % m_crtMod;
       double mechRot = residue / k;
 
-      // Shift into [minRot, maxRot] — valid when range ≤ period.
+      // Shift into [minRot, maxRot] valid when range ≤ period.
       const double shifts = std::ceil((m_cfg.minRot - mechRot) / period);
       if (shifts > 0.0) mechRot += shifts * period;
       if (mechRot < m_cfg.minRot - 1e-6 || mechRot > m_cfg.maxRot + 1e-6) continue;

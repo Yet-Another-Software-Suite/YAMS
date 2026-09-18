@@ -54,7 +54,7 @@ Arm::Arm(config::ArmConfig* config, motorcontrollers::SmartMotorController* smc)
     m_smc->SetEncoderPosition(*startA);
   }
   if (wpi::RobotBase::IsSimulation()) {
-    // Configuration checks — throw descriptive exceptions like Java does.
+    // Configuration checks throw descriptive exceptions like Java does.
     if (!m_armConfig->GetArmLength().has_value()) {
       throw exceptions::ArmConfigurationException(
           "Arm Length is empty", "Cannot create simulation.", "WithArmLength(wpi::units::meter_t)");

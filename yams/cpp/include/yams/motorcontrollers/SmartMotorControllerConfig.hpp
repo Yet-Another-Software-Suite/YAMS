@@ -999,7 +999,7 @@ class SmartMotorControllerConfig {
   PIDGains m_slots[kNumSlots];
   int SlotIndex(ClosedLoopControllerSlot slot) const;
 
-  // Validation tracking — options that every ApplyConfig implementation must access
+  // Validation tracking options that every ApplyConfig implementation must access
   enum class BasicOptions {
     VendorControlRequest,
     ControlMode,
@@ -1079,7 +1079,7 @@ class SmartMotorControllerConfig {
   std::optional<wpi::units::second_t> m_openLoopRampRate;
   std::optional<wpi::units::second_t> m_closedLoopRampRate;
 
-  // Inversion — empty means the user never called WithMotorInverted / WithEncoderInverted.
+  // Inversion empty means the user never called WithMotorInverted / WithEncoderInverted.
   std::optional<bool> m_motorInverted;
   std::optional<bool> m_encoderInverted;
 

@@ -46,8 +46,8 @@ import yams.core.telemetry.SwerveModuleTelemetryConfig;
  *
  * <h2>Direct instantiation (advanced)</h2>
  *
- * <p>If you need direct access to a module — for example when writing unit tests or custom
- * characterisation routines — you can construct one from a fully-configured {@link
+ * <p>If you need direct access to a module for example when writing unit tests or custom
+ * characterisation routines you can construct one from a fully-configured {@link
  * yams.core.mechanisms.config.SwerveModuleConfig}:
  *
  * <pre>{@code

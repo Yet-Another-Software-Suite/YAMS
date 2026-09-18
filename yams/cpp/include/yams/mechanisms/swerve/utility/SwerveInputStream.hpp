@@ -419,7 +419,7 @@ class SwerveInputStream {
     AIM,
   };
 
-  // Base private constructor — requires a rotation source to be added via WithController* methods.
+  // Base private constructor requires a rotation source to be added via WithController* methods.
   SwerveInputStream(SwerveDrive<NumModules>& drive, std::function<double()> x,
                     std::function<double()> y)
       : m_swerveDrive{&drive},

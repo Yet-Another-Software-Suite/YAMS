@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-// Unit tests for LQRConfig and LQRController — pure math, no hardware required.
+// Unit tests for LQRConfig and LQRController pure math, no hardware required.
 
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>

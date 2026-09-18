@@ -12,14 +12,14 @@ package yams.core.exceptions;
  *
  * <ul>
  * <li>{@code withSmartMotorControllers(SmartMotorController, SmartMotorController)} called more
- * than once — the left or right motor controller has already been set
+ * than once the left or right motor controller has already been set
  * <li>The left and right motor controllers do not share the same WPILib {@code Subsystem}
  * instance
  * <li>Starting tilt or twist angle not configured ({@code withTiltStartingPosition(Angle)} /
  * {@code withTwistStartingPosition(Angle)})
- * <li>Mechanism length not set ({@code withLength(Distance)}) — required to compute the current
+ * <li>Mechanism length not set ({@code withLength(Distance)}) required to compute the current
  * end-effector position
- * <li>Twist MOI not set ({@code withMOI()}) — required for simulation
+ * <li>Twist MOI not set ({@code withMOI()}) required for simulation
  * </ul>
  *
  * <p><b>Resolution:</b> Call {@code DifferentialMechanismConfig.withSmartMotorControllers(left,

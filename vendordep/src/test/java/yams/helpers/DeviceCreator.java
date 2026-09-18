@@ -21,10 +21,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * <p>Each device type (SparkMax, SparkFlex, TalonFX, TalonFXS) maintains its own monotonic
  * counter so that every call produces a device with an ID unique within that type. IDs are
- * shared across device types and vendors — a SparkMax(3) and a TalonFX(3) are allowed to
+ * shared across device types and vendors a SparkMax(3) and a TalonFX(3) are allowed to
  * coexist. The counter is a single JVM-wide counter shared across every test class in the
  * suite (not reset per class), so {@value #MAX_REV_ID} is set well above the total number of
- * devices the whole suite creates in one run — if it wraps mid-suite, a later test can reuse
+ * devices the whole suite creates in one run if it wraps mid-suite, a later test can reuse
  * the CAN ID of an earlier test's still-registered simulated device, corrupting that test's
  * results in a way that only reproduces when the full suite runs (not in isolation).
  *

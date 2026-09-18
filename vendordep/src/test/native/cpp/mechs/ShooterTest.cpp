@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-// Mirrors Java ShooterTest — duty-cycle and velocity-PID tests for a FlyWheel
+// Mirrors Java ShooterTest duty-cycle and velocity-PID tests for a FlyWheel
 // (shooter) mechanism across all (HardwareType × ProfileType) combinations.
 
 #include <catch2/catch_test_macros.hpp>
@@ -50,7 +50,7 @@ static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, Test
       .WithSubsystem(subsys)
       .WithTelemetry(name);
 
-  // ShooterTest also tests case 3: PID gains zeroed — cover this by repeating
+  // ShooterTest also tests case 3: PID gains zeroed cover this by repeating
   // with the given profile.
   switch (profile) {
     case ProfileType::Trapezoid:

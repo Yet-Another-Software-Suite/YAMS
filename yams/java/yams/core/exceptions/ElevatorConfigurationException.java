@@ -10,7 +10,7 @@ package yams.core.exceptions;
  * <p>Common triggers include:
  *
  * <ul>
- * <li>Carriage mass not set ({@code withMass(Mass)}) — required for simulation
+ * <li>Carriage mass not set ({@code withMass(Mass)}) required for simulation
  * <li>Hard limits ({@code withHardLimits(Distance, Distance)}) missing minimum or maximum height
  * <li>Starting height not configured ({@code withStartingHeight(Distance)})
  * <li>No motor controller provided

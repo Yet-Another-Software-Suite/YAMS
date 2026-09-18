@@ -32,7 +32,7 @@ namespace yams::motorcontrollers::local {
  * Wraps REV SparkBase, SparkClosedLoopController, and encoder objects to satisfy the
  * SmartMotorController contract.
  *
- * ### Example usage — SPARK Max (inside a subsystem constructor)
+ * ### Example usage SPARK Max (inside a subsystem constructor)
  * @code{.cpp}
  * using namespace yams::motorcontrollers;
  * using namespace yams::motorcontrollers::local;
@@ -61,7 +61,7 @@ namespace yams::motorcontrollers::local {
  * m_smc.emplace(&m_sparkMax, wpi::math::DCMotor::NEO(1), &cfg);
  * @endcode
  *
- * ### Example usage — SPARK Flex
+ * ### Example usage SPARK Flex
  * @code{.cpp}
  * // Declare as subsystem members:
  * //   rev::spark::SparkFlex        m_sparkFlex{4,

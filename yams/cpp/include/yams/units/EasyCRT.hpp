@@ -16,7 +16,7 @@
  * Provides the EasyCRT solver and its configuration, plus free inline utilities
  * for gear-ratio arithmetic and coprimality checks. Created by team 6911.
  *
- * @par Full example — turret with 200T gear, 19T and 21T encoder pinions
+ * @par Full example turret with 200T gear, 19T and 21T encoder pinions
  * @code{.cpp}
  * #include "yams/units/EasyCRT.hpp"
  * #include <ctre/phoenix6/CANcoder.hpp>
@@ -29,7 +29,7 @@
  *   Turret() {
  *     // enc1Teeth=19, enc2Teeth=21 are coprime.
  *     // commonK = 1.0 (no intermediate gearbox) * 200T (turret gear) = 200.
- *     // CRT period = lcm(19,21)/200 = 399/200 = 1.995 rot — covers full travel.
+ *     // CRT period = lcm(19,21)/200 = 399/200 = 1.995 rot covers full travel.
  *     m_crt = std::make_unique<EasyCRT>(
  *         EasyCRTConfig{}
  *             .WithTeeth(19, 21, CrtCommonK(1.0, 200))
@@ -52,7 +52,7 @@
  *       // Resolved: seed or correct the motor controller position.
  *       m_motor.SetEncoderPosition(*angle);
  *     } else if (m_crt->GetStatus() == EasyCRT::Status::InvalidConfig) {
- *       // Sensor read failed (NaN) — flag for diagnostics.
+ *       // Sensor read failed (NaN) flag for diagnostics.
  *     }
  *
  *     // Log for tolerance tuning.
@@ -174,8 +174,8 @@ struct EasyCRTConfig {
   std::function<wpi::units::turn_t()> enc1; /**< Supplier for absolute encoder 1. */
   std::function<wpi::units::turn_t()> enc2; /**< Supplier for absolute encoder 2. */
 
-  int enc1Teeth = 19; /**< Tooth count of encoder 1 gear — must be coprime with enc2Teeth. */
-  int enc2Teeth = 21; /**< Tooth count of encoder 2 gear — must be coprime with enc1Teeth. */
+  int enc1Teeth = 19; /**< Tooth count of encoder 1 gear must be coprime with enc2Teeth. */
+  int enc2Teeth = 21; /**< Tooth count of encoder 2 gear must be coprime with enc1Teeth. */
   double commonK =
       1.0; /**< Mechanism-to-encoder scale: ratio = commonK / encTeeth. See CrtCommonK(). */
   double offset1 = 0.0; /**< Offset (turns) added to enc1 reading before wrap. */

@@ -12,7 +12,7 @@
  * <h2>Core type</h2>
  *
  * <ul>
- * <li>{@link yams.core.motorcontrollers.local.SparkWrapper} — unified adapter for both the SPARK
+ * <li>{@link yams.core.motorcontrollers.local.SparkWrapper} unified adapter for both the SPARK
  * MAX (NEO, NEO 550) and SPARK FLEX (NEO Vortex).
  * </ul>
  *
@@ -24,9 +24,9 @@
  * yams.core.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint}:
  *
  * <ul>
- * <li>{@code 0.5} — sensor range {@code [-0.5, 0.5)}: useful when the mechanism travels through
+ * <li>{@code 0.5} sensor range {@code [-0.5, 0.5)}: useful when the mechanism travels through
  * zero and must not have a wrap at the midpoint of travel.
- * <li>{@code 1.0} — sensor range {@code [0, 1)}: useful when the mechanism only moves in the
+ * <li>{@code 1.0} sensor range {@code [0, 1)}: useful when the mechanism only moves in the
  * positive direction and zero is never crossed.
  * </ul>
  *

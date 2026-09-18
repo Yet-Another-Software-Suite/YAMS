@@ -11,7 +11,7 @@
  * <h2>Mechanism telemetry</h2>
  *
  * <ul>
- * <li>{@link yams.core.telemetry.MechanismTelemetry} — publishes the high-level state of a
+ * <li>{@link yams.core.telemetry.MechanismTelemetry} publishes the high-level state of a
  * mechanism: current position, active setpoint, goal, and status flags. Updated each robot periodic
  * cycle.
  * </ul>
@@ -19,11 +19,11 @@
  * <h2>Motor controller telemetry</h2>
  *
  * <ul>
- * <li>{@link yams.core.telemetry.SmartMotorControllerTelemetryConfig} — fluent builder that selects
+ * <li>{@link yams.core.telemetry.SmartMotorControllerTelemetryConfig} fluent builder that selects
  * which signals to publish and under what NetworkTables keys. Signals include duty cycle,
  * applied voltage, velocity, position, supply current, stator current, and device
  * temperature.
- * <li>{@link yams.core.telemetry.SmartMotorControllerTelemetry} — publisher that consumes a {@code
+ * <li>{@link yams.core.telemetry.SmartMotorControllerTelemetry} publisher that consumes a {@code
  * SmartMotorControllerTelemetryConfig} and writes the selected signals to NetworkTables on every
  * {@code periodic()} call.
  * </ul>
@@ -31,9 +31,9 @@
  * <h2>Lightweight scalar publishers</h2>
  *
  * <ul>
- * <li>{@link yams.core.telemetry.BooleanTelemetry} — lightweight publisher for a single {@code
+ * <li>{@link yams.core.telemetry.BooleanTelemetry} lightweight publisher for a single {@code
  * boolean} value (e.g. limit switch state, at-setpoint flag). <li>{@link
- * yams.core.telemetry.DoubleTelemetry} — lightweight publisher for a single {@code double} value
+ * yams.core.telemetry.DoubleTelemetry} lightweight publisher for a single {@code double} value
  * (e.g. a raw sensor reading or computed error).
  * </ul>
  *

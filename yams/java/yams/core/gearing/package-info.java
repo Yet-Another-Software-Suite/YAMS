@@ -12,18 +12,18 @@
  * <h2>Core Classes</h2>
  *
  * <ul>
- * <li><b>{@link yams.core.gearing.GearBox}</b> — chains one or more gear stages together and
+ * <li><b>{@link yams.core.gearing.GearBox}</b> chains one or more gear stages together and
  * computes the overall reduction ratio. Each stage is expressed as a pair of tooth counts (driver :
  * driven). Multiple stages are multiplied automatically.
- * <li><b>{@link yams.core.gearing.Sprocket}</b> — models a chain or belt drive between two
+ * <li><b>{@link yams.core.gearing.Sprocket}</b> models a chain or belt drive between two
  * sprockets, computing the linear or rotational ratio from sprocket tooth counts and, for linear
- * drives, the pitch diameter. <li><b>{@link yams.core.gearing.MechanismGearing}</b> — ties a {@link
+ * drives, the pitch diameter. <li><b>{@link yams.core.gearing.MechanismGearing}</b> ties a {@link
  * yams.core.gearing.GearBox} to the physical output dimensions of a mechanism (e.g., spool radius
  * for an elevator, arm length for a rotary mechanism) so that motor-side units can be converted
  * directly to real-world position and velocity.
  * </ul>
  *
- * <h2>Example — Single-Stage 5:1 Reduction</h2>
+ * <h2>Example Single-Stage 5:1 Reduction</h2>
  *
  * <p>Pass the driver tooth count first, then the driven tooth count. The ratio is {@code driven /
  * driver}, so {@code 12} driver teeth and {@code 60} driven teeth produces a 5:1 reduction:
@@ -34,7 +34,7 @@
  * double ratio = gearbox.getRatio(); // 5.0
  * }</pre>
  *
- * <h2>Example — Multi-Stage Gearbox</h2>
+ * <h2>Example Multi-Stage Gearbox</h2>
  *
  * <pre>{@code
  * // Two stages: 12:60 then 14:50 → overall ratio = 5.0 × 3.571... ≈ 17.857:1

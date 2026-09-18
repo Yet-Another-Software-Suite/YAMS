@@ -3,7 +3,7 @@
 
 #pragma once
 
-// Mirrors Java MockHardwareExtension — initialises the WPILib HAL and
+// Mirrors Java MockHardwareExtension initialises the WPILib HAL and
 // simulation environment so that motor-controller and command-scheduler code
 // can run inside a Catch2 test case.
 
