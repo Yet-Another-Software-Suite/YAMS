@@ -99,8 +99,7 @@ public class SwerveDrive {
     m_simPose = config.getInitialPose();
     Arrays.fill(m_desiredModuleStates, new SwerveModuleVelocity());
     m_kinematics = getKinematics();
-    m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics, new Rotation2d(getGyroAngle()),
-        getModulePositions(), m_config.getInitialPose());
+    m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics, new Rotation2d(getGyroAngle()), getModulePositions(), m_config.getInitialPose());
     setupTelemetry();
   }
 
@@ -111,10 +110,7 @@ public class SwerveDrive {
    * TelemetryVerbosity#HIGH}).
    */
   private void setupTelemetry() {
-    var cfg = m_config.getSwerveDriveTelemetryConfig().orElseGet(
-        ()
-            -> new SwerveDriveTelemetryConfig().withTelemetryVerbosity(
-                m_config.getTelemetryVerbosity().orElse(TelemetryVerbosity.HIGH)));
+    var cfg = m_config.getSwerveDriveTelemetryConfig().orElseGet(() -> new SwerveDriveTelemetryConfig().withTelemetryVerbosity(m_config.getTelemetryVerbosity().orElse(TelemetryVerbosity.HIGH)));
     if (cfg.getDataLogName().isPresent()) {
       m_telemetry.setupTelemetry(getName(), cfg.getDataLogName().get());
     } else {
@@ -173,7 +169,7 @@ public class SwerveDrive {
    * poses under perfect-world conditions.
    *
    * @return Simulated {@link Pose2d} of the robot. Only updated in simulation by {@link
-   *     #simIterate()}; on a real robot this remains the configured starting pose.
+   *         #simIterate()}; on a real robot this remains the configured starting pose.
    */
   public Pose2d getSimPose() {
     return m_simPose;
@@ -189,8 +185,7 @@ public class SwerveDrive {
     // Sets states
     SwerveModuleVelocity[] desiredStates = new SwerveModuleVelocity[m_modules.length];
     for (int i = 0; i < m_modules.length; i++) {
-      desiredStates[i] = new SwerveModuleVelocity(0,
-          m_modules[i].getConfig().getLocation().orElseThrow().getAngle().orElse(new Rotation2d()));
+      desiredStates[i] = new SwerveModuleVelocity(0, m_modules[i].getConfig().getLocation().orElseThrow().getAngle().orElse(new Rotation2d()));
     }
     setSwerveModuleStates(desiredStates);
     m_desiredChassisSpeeds = new ChassisVelocities();
@@ -221,7 +216,7 @@ public class SwerveDrive {
    * generator.
    *
    * @param states            {@link SwerveModuleVelocity}s to use, must be the same count as the
-   *     swerve
+   *                          swerve
    *                          drive is configured order is Clockwise from FL.
    * @param feedforwardForces Feedforward {@link Force}s to apply, one per module in the same FL,
    *                          FR, BL, BR order as {@code states}.
@@ -240,14 +235,9 @@ public class SwerveDrive {
    * @param robotRelativeChassisSpeeds Robot relative {@link ChassisVelocities}.
    * @return {@link SwerveModuleVelocity}s of the swerve drive.
    */
-  public SwerveModuleVelocity[] getStateFromRobotRelativeChassisSpeeds(
-      ChassisVelocities robotRelativeChassisSpeeds) {
-    robotRelativeChassisSpeeds =
-        m_config.optimizeRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds);
-    return m_config.getCenterOfRotation().isPresent()
-        ? m_kinematics.toSwerveModuleVelocities(
-              robotRelativeChassisSpeeds, m_config.getCenterOfRotation().get())
-        : m_kinematics.toSwerveModuleVelocities(robotRelativeChassisSpeeds);
+  public SwerveModuleVelocity[] getStateFromRobotRelativeChassisSpeeds(ChassisVelocities robotRelativeChassisSpeeds) {
+    robotRelativeChassisSpeeds = m_config.optimizeRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds);
+    return m_config.getCenterOfRotation().isPresent() ? m_kinematics.toSwerveModuleVelocities(robotRelativeChassisSpeeds, m_config.getCenterOfRotation().get()) : m_kinematics.toSwerveModuleVelocities(robotRelativeChassisSpeeds);
   }
 
   /**
@@ -277,22 +267,18 @@ public class SwerveDrive {
    *
    * @param robotRelativeChassisSpeeds Robot relative chassis speeds.
    * @param feedforwardForces          Feedforward {@link Force}s to apply, one per module in FL,
-   *     FR, BL, BR
+   *                                   FR, BL, BR
    *                                   order. Pass an empty array to apply no feedforward.
    */
-  public void setRobotRelativeChassisSpeeds(
-      ChassisVelocities robotRelativeChassisSpeeds, Force[] feedforwardForces) {
+  public void setRobotRelativeChassisSpeeds(ChassisVelocities robotRelativeChassisSpeeds, Force[] feedforwardForces) {
     m_desiredChassisSpeeds = robotRelativeChassisSpeeds;
-    SwerveModuleVelocity[] states =
-        getStateFromRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds);
+    SwerveModuleVelocity[] states = getStateFromRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds);
     if (feedforwardForces.length == 0) {
       setSwerveModuleStates(states);
       return;
     }
     if (feedforwardForces.length != states.length) {
-      throw new IllegalArgumentException(
-          "feedforwardForces must be empty or have one entry per module (" + states.length
-          + "), in FL, FR, BL, BR order.");
+      throw new IllegalArgumentException("feedforwardForces must be empty or have one entry per module (" + states.length + "), in FL, FR, BL, BR order.");
     }
     setSwerveModuleStates(states, feedforwardForces);
   }
@@ -303,8 +289,7 @@ public class SwerveDrive {
    * @param fieldRelativeChassisSpeeds Field relative chassis speeds.
    */
   public void setFieldRelativeChassisSpeeds(ChassisVelocities fieldRelativeChassisSpeeds) {
-    setRobotRelativeChassisSpeeds(
-        fieldRelativeChassisSpeeds.toRobotRelative(new Rotation2d(getGyroAngle())));
+    setRobotRelativeChassisSpeeds(fieldRelativeChassisSpeeds.toRobotRelative(new Rotation2d(getGyroAngle())));
   }
 
   /**
@@ -327,9 +312,7 @@ public class SwerveDrive {
    * @return {@link SwerveDriveKinematics}
    */
   public SwerveDriveKinematics getKinematics() {
-    return new SwerveDriveKinematics(Arrays.stream(m_modules)
-            .map(module -> module.getConfig().getLocation().orElseThrow())
-            .toArray(Translation2d[] ::new));
+    return new SwerveDriveKinematics(Arrays.stream(m_modules).map(module -> module.getConfig().getLocation().orElseThrow()).toArray(Translation2d[]::new));
   }
 
   //  /**
@@ -408,9 +391,7 @@ public class SwerveDrive {
    */
   public void setRotationPID(PIDController controller) {
     var currentRotationPID = m_config.getRotationPID();
-    if (currentRotationPID.getP() != controller.getP()
-        || currentRotationPID.getI() != controller.getI()
-        || currentRotationPID.getD() != controller.getD()) {
+    if (currentRotationPID.getP() != controller.getP() || currentRotationPID.getI() != controller.getI() || currentRotationPID.getD() != controller.getD()) {
       controller.reset();
       m_config.withRotationController(controller);
     }
@@ -423,9 +404,7 @@ public class SwerveDrive {
    */
   public void setTranslationPID(PIDController controller) {
     var currentTranslationPID = m_config.getTranslationPID();
-    if (currentTranslationPID.getP() != controller.getP()
-        || currentTranslationPID.getI() != controller.getI()
-        || currentTranslationPID.getD() != controller.getD()) {
+    if (currentTranslationPID.getP() != controller.getP() || currentTranslationPID.getI() != controller.getI() || currentTranslationPID.getD() != controller.getD()) {
       controller.reset();
       m_config.withTranslationController(controller);
     }
@@ -470,12 +449,8 @@ public class SwerveDrive {
     // targetPose's rotated frame and would skew the commanded direction whenever targetPose's
     // heading is non-zero).
     var translationDifference = currentPose.getTranslation().minus(targetPose.getTranslation());
-    return new ChassisVelocities(
-        translationDifference.getMeasureX().per(Second).times(translationScalar),
-        translationDifference.getMeasureY().per(Second).times(translationScalar),
-        RadiansPerSecond.of(rotationPID.calculate(
-            currentPose.getRotation().getRadians(), targetPose.getRotation().getRadians())))
-        .toRobotRelative(new Rotation2d(getGyroAngle()));
+    return new ChassisVelocities(translationDifference.getMeasureX().per(Second).times(translationScalar), translationDifference.getMeasureY().per(Second).times(translationScalar), RadiansPerSecond.of(rotationPID.calculate(currentPose.getRotation()
+        .getRadians(), targetPose.getRotation().getRadians()))).toRobotRelative(new Rotation2d(getGyroAngle()));
   }
 
   /**
@@ -488,12 +463,11 @@ public class SwerveDrive {
    *                                 {@link Timer#getTimestamp()} or similar sources.
    * @param visionMeasurementStdDevs Vision measurement standard deviation that will be sent to the
    *                                 {@link SwerveDrivePoseEstimator}.The standard deviation of the
-   * vision measurement, for best accuracy calculate the standard deviation at 2 or more points and
-   * fit a line to it with the calculated optimal standard deviation. (Units should be meters per
-   * pixel). By optimizing this you can get * vision accurate to inches instead of feet.
+   *                                 vision measurement, for best accuracy calculate the standard deviation at 2 or more points and
+   *                                 fit a line to it with the calculated optimal standard deviation. (Units should be meters per
+   *                                 pixel). By optimizing this you can get * vision accurate to inches instead of feet.
    */
-  public void addVisionMeasurement(
-      Pose2d robotPose, double timestamp, Matrix<N3, N1> visionMeasurementStdDevs) {
+  public void addVisionMeasurement(Pose2d robotPose, double timestamp, Matrix<N3, N1> visionMeasurementStdDevs) {
     m_poseEstimator.addVisionMeasurement(robotPose, timestamp, visionMeasurementStdDevs);
   }
 
@@ -504,7 +478,7 @@ public class SwerveDrive {
    *
    * @param visionMeasurementStdDevs Standard deviations of the vision measurements. Increase these
    *                                 numbers to trust global measurements from vision less. This
-   * matrix is in the form [x, y, theta], with units in meters and radians.
+   *                                 matrix is in the form [x, y, theta], with units in meters and radians.
    */
   public void setVisionMeasurementStdDevs(Matrix<N3, N1> visionMeasurementStdDevs) {
     m_poseEstimator.setVisionMeasurementStdDevs(visionMeasurementStdDevs);
@@ -569,8 +543,7 @@ public class SwerveDrive {
     var dt = m_simTimer.get();
     Twist2d twist = new Twist2d(desired.vx * dt, desired.vy * dt, desired.omega * dt);
     m_simPose = m_simPose.plus(twist.exp());
-    m_simGyroAngle = m_simGyroAngle.plus(
-        Radians.of(m_kinematics.toChassisVelocities(getModuleStates()).omega * dt));
+    m_simGyroAngle = m_simGyroAngle.plus(Radians.of(m_kinematics.toChassisVelocities(getModuleStates()).omega * dt));
     m_simTimer.reset();
   }
 
@@ -603,9 +576,7 @@ public class SwerveDrive {
     //    {
     //      return m_config.getMapleDriveSim().get().getLatestModulePositions();
     //    }
-    return Arrays.stream(m_modules)
-        .map(SwerveModule::getPosition)
-        .toArray(SwerveModulePosition[] ::new);
+    return Arrays.stream(m_modules).map(SwerveModule::getPosition).toArray(SwerveModulePosition[]::new);
   }
 
   /**
@@ -619,9 +590,7 @@ public class SwerveDrive {
     //    {
     //      return m_config.getMapleDriveSim().get().getMeasuredStates();
     //    }
-    return Arrays.stream(m_modules)
-        .map(SwerveModule::getState)
-        .toArray(SwerveModuleVelocity[] ::new);
+    return Arrays.stream(m_modules).map(SwerveModule::getState).toArray(SwerveModuleVelocity[]::new);
   }
 
   /**
@@ -653,7 +622,7 @@ public class SwerveDrive {
    *
    * @implNote It is a setpoint, not a measurement of actual robot motion.
    *           Use {@link #getRobotRelativeSpeed()} or {@link #getFieldRelativeSpeed()} instead if
-   * you need the drive's actual measured speed.
+   *           you need the drive's actual measured speed.
    *
    * @return Robot-relative {@link ChassisVelocities} last commanded to the drive. Defaults to a
    *         zeroed {@link ChassisVelocities} if the drive has never been commanded.

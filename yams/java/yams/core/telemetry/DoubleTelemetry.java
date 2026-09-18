@@ -47,59 +47,59 @@ public class DoubleTelemetry<F> {
   /**
    * Field representing.
    */
-  private final F field;
+  private final F                    field;
   /**
    * Network table key.
    */
-  private final String key;
+  private final String               key;
   /**
    * Tunable?
    */
-  private final boolean tunable;
+  private final boolean              tunable;
   /**
    * Enabled?
    */
-  protected boolean enabled = false;
+  protected boolean                  enabled      = false;
   /**
    * Unit to display.
    */
-  private String unit;
+  private String                     unit;
   /**
    * Default value.
    */
-  private double defaultValue;
+  private double                     defaultValue;
   /**
    * Cached value.
    */
-  private double cachedValue;
+  private double                     cachedValue;
   /**
    * Publisher.
    */
-  private Optional<DoublePublisher> publisher = Optional.empty();
+  private Optional<DoublePublisher>  publisher    = Optional.empty();
   /**
    * Subscriber.
    */
-  private Optional<DoubleSubscriber> subscriber = Optional.empty();
+  private Optional<DoubleSubscriber> subscriber   = Optional.empty();
   /**
    * Sub publisher.
    */
-  private DoublePublisher subPublisher = null;
+  private DoublePublisher            subPublisher = null;
   /**
    * Tuning table
    */
-  private Optional<NetworkTable> tuningTable = Optional.empty();
+  private Optional<NetworkTable>     tuningTable  = Optional.empty();
   /**
    * Data table.
    */
-  private Optional<NetworkTable> dataTable = Optional.empty();
+  private Optional<NetworkTable>     dataTable    = Optional.empty();
   /**
    * NT4 Topic of this entry.
    */
-  private DoubleTopic topic;
+  private DoubleTopic                topic;
   /**
    * {@link DoubleLogEntry} representing this entry.
    */
-  private Optional<DoubleLogEntry> dataLogEntry = Optional.empty();
+  private Optional<DoubleLogEntry>   dataLogEntry = Optional.empty();
 
   /**
    * Setup double telemetry for a field.
@@ -110,8 +110,7 @@ public class DoubleTelemetry<F> {
    * @param tunable    Tunable.
    * @param unit       Unit to display.
    */
-  public DoubleTelemetry(
-      String keyString, double defaultVal, F field, boolean tunable, String unit) {
+  public DoubleTelemetry(String keyString, double defaultVal, F field, boolean tunable, String unit) {
     key = keyString;
     cachedValue = defaultValue = defaultVal;
     this.field = field;
@@ -142,17 +141,13 @@ public class DoubleTelemetry<F> {
     }
     if (tuningTable != null && tunable) {
       topic = tuningTable.getDoubleTopic(key);
-      subPublisher = !unit.equals("none")
-          ? topic.publishEx("double", "{\"units\": \"" + unit + "\"}")
-          : topic.publish();
+      subPublisher = !unit.equals("none") ? topic.publishEx("double", "{\"units\": \"" + unit + "\"}") : topic.publish();
       subscriber = Optional.of(topic.subscribe(defaultValue));
       subPublisher.setDefault(defaultValue);
     } else {
       assert dataTable != null;
       topic = dataTable.getDoubleTopic(key);
-      publisher = Optional.of(!unit.equals("none")
-              ? topic.publishEx("double", "{\"units\": \"" + unit + "\"}")
-              : topic.publish());
+      publisher = Optional.of(!unit.equals("none") ? topic.publishEx("double", "{\"units\": \"" + unit + "\"}") : topic.publish());
       publisher.get().setDefault(defaultValue);
     }
   }
@@ -168,8 +163,7 @@ public class DoubleTelemetry<F> {
         prefix += "/";
       }
       prefix += unit + "/";
-      dataLogEntry = Optional.of(
-          new DoubleLogEntry(DataLogManager.getLog(), prefix + key, (long) Timer.getTimestamp()));
+      dataLogEntry = Optional.of(new DoubleLogEntry(DataLogManager.getLog(), prefix + key, (long) Timer.getTimestamp()));
     }
   }
 
@@ -177,7 +171,7 @@ public class DoubleTelemetry<F> {
    * Set the unit.
    *
    * @param cfg {@link SmartMotorControllerConfig} used to determine the unit. If the
-   *     MechanismCircumference is set it
+   *            MechanismCircumference is set it
    *            will be in meters, else it will be in degrees.
    * @return {@link DoubleTelemetry} for chaining.
    */
@@ -196,12 +190,10 @@ public class DoubleTelemetry<F> {
         unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second" : "rotation_per_second";
         break;
       case "tunable_acceleration":
-        unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second_per_second"
-                                                      : "rotations_per_minute_per_second";
+        unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second_per_second" : "rotations_per_minute_per_second";
         break;
       case "acceleration":
-        unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second_per_second"
-                                                      : "rotation_per_second_per_second";
+        unit = cfg.getLinearClosedLoopControllerUse() ? "meter_per_second_per_second" : "rotation_per_second_per_second";
         break;
     }
     return this;

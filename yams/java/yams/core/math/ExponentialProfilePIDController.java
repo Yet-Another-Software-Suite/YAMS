@@ -82,31 +82,31 @@ public class ExponentialProfilePIDController {
   /**
    * Iteration timer.
    */
-  private final Timer timer = new Timer();
+  private final Timer                        timer        = new Timer();
   /**
    * The wrapped PID controller.
    */
-  private final PIDController controller;
+  private final PIDController                controller;
   /**
    * The wrapped profile.
    */
-  private ExponentialProfile profile = null;
+  private ExponentialProfile                 profile      = null;
   /**
    * The current state from {@link ExponentialProfile}
    */
-  private ExponentialProfile.State currentState = new State();
+  private ExponentialProfile.State           currentState = new State();
   /**
    * The next state from {@link ExponentialProfile}
    */
-  private Optional<ExponentialProfile.State> nextState = Optional.empty();
+  private Optional<ExponentialProfile.State> nextState    = Optional.empty();
   /**
    * Loop time.
    */
-  private Time loopTime = Milliseconds.of(20);
+  private Time                               loopTime     = Milliseconds.of(20);
   /**
    * {@link ExponentialProfile.Constraints} for the {@link ExponentialProfile}.
    */
-  private Constraints constraints = null;
+  private Constraints                        constraints  = null;
 
   /**
    * Constructor.
@@ -142,18 +142,15 @@ public class ExponentialProfilePIDController {
    * @param gearing    {@link MechanismGearing} of the elevator from the drum to the rotor.
    * @return {@link ExponentialProfile.Constraints}
    */
-  public static ExponentialProfile.Constraints createElevatorConstraints(
-      Voltage maxVolts, DCMotor motor, Mass mass, Distance drumRadius, MechanismGearing gearing) {
-    var sysid = Models.elevatorFromPhysicalConstants(
-        motor, mass.in(Kilograms), drumRadius.in(Meters), gearing.getMechanismToRotorRatio());
+  public static ExponentialProfile.Constraints createElevatorConstraints(Voltage maxVolts, DCMotor motor, Mass mass, Distance drumRadius, MechanismGearing gearing) {
+    var sysid = Models.elevatorFromPhysicalConstants(motor, mass.in(Kilograms), drumRadius.in(Meters), gearing.getMechanismToRotorRatio());
     var circumference = (2.0 * Math.PI * drumRadius.in(Meters));
 
     var A = sysid.getA(0, 0);
     var B = sysid.getB(0, 0);
     var kV = MetersPerSecond.of(-A / B);
     var kA = MetersPerSecondPerSecond.of(1.0 / B);
-    return ExponentialProfile.Constraints.fromCharacteristics(maxVolts.in(Volts),
-        kV.in(MetersPerSecond) / circumference, kA.in(MetersPerSecondPerSecond) / circumference);
+    return ExponentialProfile.Constraints.fromCharacteristics(maxVolts.in(Volts), kV.in(MetersPerSecond) / circumference, kA.in(MetersPerSecondPerSecond) / circumference);
     //    return ExponentialProfile.Constraints.fromStateSpace(maxVolts.in(Volts), A, B);
   }
 
@@ -167,17 +164,14 @@ public class ExponentialProfilePIDController {
    *                 {@code gearing.getMechanismToRotorRatio()}
    * @return {@link ExponentialProfile.Constraints}
    */
-  public static ExponentialProfile.Constraints createArmConstraints(
-      Voltage maxVolts, DCMotor motor, MomentOfInertia moi, MechanismGearing gearing) {
-    var sysid = Models.singleJointedArmFromPhysicalConstants(
-        motor, moi.in(KilogramSquareMeters), gearing.getMechanismToRotorRatio());
+  public static ExponentialProfile.Constraints createArmConstraints(Voltage maxVolts, DCMotor motor, MomentOfInertia moi, MechanismGearing gearing) {
+    var sysid = Models.singleJointedArmFromPhysicalConstants(motor, moi.in(KilogramSquareMeters), gearing.getMechanismToRotorRatio());
     var A = sysid.getA(0, 0); // radians
     var B = sysid.getB(0, 0); // radians
     var kV = RadiansPerSecond.of(-A / B);
     var kA = RadiansPerSecondPerSecond.of(1.0 / B);
     //    return ExponentialProfile.Constraints.fromStateSpace(maxVolts.in(Volts), A, B);
-    return ExponentialProfile.Constraints.fromCharacteristics(
-        maxVolts.in(Volts), kV.in(RotationsPerSecond), kA.in(RotationsPerSecondPerSecond));
+    return ExponentialProfile.Constraints.fromCharacteristics(maxVolts.in(Volts), kV.in(RotationsPerSecond), kA.in(RotationsPerSecondPerSecond));
   }
 
   /**
@@ -191,12 +185,8 @@ public class ExponentialProfilePIDController {
    *                 {@code gearing.getMechanismToRotorRatio()}
    * @return {@link ExponentialProfile.Constraints}
    */
-  public static ExponentialProfile.Constraints createArmConstraints(
-      Voltage maxVolts, DCMotor motor, Mass mass, Distance length, MechanismGearing gearing) {
-    return createArmConstraints(maxVolts, motor,
-        KilogramSquareMeters.of(
-            SingleJointedArmSim.estimateMOI(length.in(Meters), mass.in(Kilograms))),
-        gearing);
+  public static ExponentialProfile.Constraints createArmConstraints(Voltage maxVolts, DCMotor motor, Mass mass, Distance length, MechanismGearing gearing) {
+    return createArmConstraints(maxVolts, motor, KilogramSquareMeters.of(SingleJointedArmSim.estimateMOI(length.in(Meters), mass.in(Kilograms))), gearing);
   }
 
   /**
@@ -208,8 +198,7 @@ public class ExponentialProfilePIDController {
    * @param gearing  {@link MechanismGearing} of the flywheel from the rotor to the drum.
    * @return {@link ExponentialProfile.Constraints}
    */
-  public static ExponentialProfile.Constraints createFlywheelConstraints(
-      Voltage maxVolts, DCMotor motor, MomentOfInertia moi, MechanismGearing gearing) {
+  public static ExponentialProfile.Constraints createFlywheelConstraints(Voltage maxVolts, DCMotor motor, MomentOfInertia moi, MechanismGearing gearing) {
     return createArmConstraints(maxVolts, motor, moi, gearing);
   }
 
@@ -223,8 +212,7 @@ public class ExponentialProfilePIDController {
    * @param gearing  {@link MechanismGearing} of the flywheel from the rotor to the drum.
    * @return {@link ExponentialProfile.Constraints}
    */
-  public static ExponentialProfile.Constraints createFlywheelConstraints(
-      Voltage maxVolts, DCMotor motor, Mass mass, Distance radius, MechanismGearing gearing) {
+  public static ExponentialProfile.Constraints createFlywheelConstraints(Voltage maxVolts, DCMotor motor, Mass mass, Distance radius, MechanismGearing gearing) {
     return createArmConstraints(maxVolts, motor, mass, radius, gearing);
   }
 
@@ -236,12 +224,9 @@ public class ExponentialProfilePIDController {
    * @param maxAcceleration Maximum acceleration.
    * @return {@link ExponentialProfile.Constraints}
    */
-  public static Constraints createConstraints(
-      Voltage maxVolts, AngularVelocity maxVelocity, AngularAcceleration maxAcceleration) {
+  public static Constraints createConstraints(Voltage maxVolts, AngularVelocity maxVelocity, AngularAcceleration maxAcceleration) {
     var maxV = maxVolts.in(Volts);
-    return ExponentialProfile.Constraints.fromStateSpace(maxVolts.in(Volts),
-        maxV / maxVelocity.in(RotationsPerSecond),
-        maxV / maxAcceleration.in(RotationsPerSecondPerSecond));
+    return ExponentialProfile.Constraints.fromStateSpace(maxVolts.in(Volts), maxV / maxVelocity.in(RotationsPerSecond), maxV / maxAcceleration.in(RotationsPerSecondPerSecond));
   }
 
   /**
@@ -404,8 +389,7 @@ public class ExponentialProfilePIDController {
    * @param setpointPosition    Setpoint position.
    * @return Profile calculation
    */
-  public double calculate(
-      double measurementPosition, double setpointVelocity, double setpointPosition) {
+  public double calculate(double measurementPosition, double setpointVelocity, double setpointPosition) {
     if (timer.isRunning()) {
       loopTime = Seconds.of(timer.get());
     }
@@ -413,8 +397,7 @@ public class ExponentialProfilePIDController {
     timer.start();
     var feedback = controller.calculate(measurementPosition, currentState.position);
     nextState.ifPresent(state -> currentState = state);
-    nextState = Optional.of(profile.calculate(
-        loopTime.in(Seconds), currentState, new State(setpointPosition, setpointVelocity)));
+    nextState = Optional.of(profile.calculate(loopTime.in(Seconds), currentState, new State(setpointPosition, setpointVelocity)));
     return feedback;
   }
 

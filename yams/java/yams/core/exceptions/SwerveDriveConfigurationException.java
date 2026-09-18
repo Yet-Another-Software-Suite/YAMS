@@ -45,7 +45,6 @@ public class SwerveDriveConfigurationException extends RuntimeException {
    * @param remedyFunction Remedy function to use.
    */
   public SwerveDriveConfigurationException(String message, String result, String remedyFunction) {
-    super(message + "!\n" + result + "\nPlease use SwerveDriveConfig." + remedyFunction
-        + " to fix this error.");
+    super(message + "!\n" + result + "\nPlease use SwerveDriveConfig." + remedyFunction + " to fix this error.");
   }
 }

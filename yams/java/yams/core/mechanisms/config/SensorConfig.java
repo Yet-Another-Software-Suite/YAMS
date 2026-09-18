@@ -60,15 +60,15 @@ public class SensorConfig {
   /**
    * Sensor name to display in the simulation window.
    */
-  private final String name;
+  private final String           name;
   /**
    * List of {@link SensorData} to display in the simulation window.
    */
-  private final List<SensorData> data = new ArrayList<>();
+  private final List<SensorData> data   = new ArrayList<>();
   /**
    * Sensor
    */
-  private Optional<Sensor> sensor = Optional.empty();
+  private Optional<Sensor>       sensor = Optional.empty();
 
   /**
    * Sensor configuration.
@@ -143,10 +143,7 @@ public class SensorConfig {
   public SensorConfig withSimulatedValue(String fieldName, Time start, Time end, double value) {
     for (var field : data) {
       if (field.getName().equals(fieldName)) {
-        field.addSimTrigger(SensorData.convert(value),
-            ()
-                -> Timer.getMatchTime() >= start.in(Seconds)
-                && Timer.getMatchTime() <= end.in(Seconds));
+        field.addSimTrigger(SensorData.convert(value), () -> Timer.getMatchTime() >= start.in(Seconds) && Timer.getMatchTime() <= end.in(Seconds));
       }
     }
     return this;
@@ -164,10 +161,7 @@ public class SensorConfig {
   public SensorConfig withSimulatedValue(String fieldName, Time start, Time end, int value) {
     for (var field : data) {
       if (field.getName().equals(fieldName)) {
-        field.addSimTrigger(SensorData.convert(value),
-            ()
-                -> Timer.getMatchTime() >= start.in(Seconds)
-                && Timer.getMatchTime() <= end.in(Seconds));
+        field.addSimTrigger(SensorData.convert(value), () -> Timer.getMatchTime() >= start.in(Seconds) && Timer.getMatchTime() <= end.in(Seconds));
       }
     }
     return this;
@@ -185,10 +179,7 @@ public class SensorConfig {
   public SensorConfig withSimulatedValue(String fieldName, Time start, Time end, long value) {
     for (var field : data) {
       if (field.getName().equals(fieldName)) {
-        field.addSimTrigger(SensorData.convert(value),
-            ()
-                -> Timer.getMatchTime() >= start.in(Seconds)
-                && Timer.getMatchTime() <= end.in(Seconds));
+        field.addSimTrigger(SensorData.convert(value), () -> Timer.getMatchTime() >= start.in(Seconds) && Timer.getMatchTime() <= end.in(Seconds));
       }
     }
     return this;
@@ -206,10 +197,7 @@ public class SensorConfig {
   public SensorConfig withSimulatedValue(String fieldName, Time start, Time end, boolean value) {
     for (var field : data) {
       if (field.getName().equals(fieldName)) {
-        field.addSimTrigger(SensorData.convert(value),
-            ()
-                -> Timer.getMatchTime() >= start.in(Seconds)
-                && Timer.getMatchTime() <= end.in(Seconds));
+        field.addSimTrigger(SensorData.convert(value), () -> Timer.getMatchTime() >= start.in(Seconds) && Timer.getMatchTime() <= end.in(Seconds));
       }
     }
     return this;

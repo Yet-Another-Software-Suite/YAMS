@@ -23,7 +23,7 @@ public class SmartMotorControllerCommandRegistry {
    * HashMap with the Subsystem name as the key and the shared command which runs all runnables
    * added to the subsystem.
    */
-  private static Map<String, Command> commands = new HashMap<>();
+  private static Map<String, Command>        commands         = new HashMap<>();
   /**
    * HashMap with the Subsystem name as the key and a list of runnables to be added to the shared
    * command.
@@ -33,7 +33,7 @@ public class SmartMotorControllerCommandRegistry {
    * HashMap tracking which subsystem instance owns each command key.
    * Used to detect when two different subsystem instances share the same name.
    */
-  private static Map<String, Subsystem> commandOwners = new HashMap<>();
+  private static Map<String, Subsystem>      commandOwners    = new HashMap<>();
 
   /**
    * Create the {@link Command} and publish it to NetworkTables.
@@ -43,16 +43,11 @@ public class SmartMotorControllerCommandRegistry {
    */
   private static void addCommandToNT(String cmdName, Subsystem subsystem) {
     var key = subsystem.getName() + "/" + cmdName;
-    Command cmd = Commands
-                      .run(
-                          ()
-                              -> {
-                            for (var callback : commandCallbacks.get(key)) {
-                              callback.run();
-                            }
-                          },
-                          subsystem)
-                      .withName(cmdName);
+    Command cmd = Commands.run(() -> {
+      for (var callback : commandCallbacks.get(key)) {
+        callback.run();
+      }
+    }, subsystem).withName(cmdName);
     commands.put(key, cmd);
     NetworkTablesBackends.ensureTuningTunableBackend();
     Tunables.publish("Tuning/" + key, cmd);
@@ -69,11 +64,8 @@ public class SmartMotorControllerCommandRegistry {
     var key = subsystem.getName() + "/" + cmdName;
     var owner = commandOwners.get(key);
     if (owner != null && owner != subsystem) {
-      throw new IllegalStateException(
-          "SmartMotorControllerCommandRegistry: subsystem name conflict — \"" + subsystem.getName()
-          + "\" is already registered by a different subsystem instance. "
-          + ("Use unique subsystem names for each subsystem instance (e.g. \"LeftTurret\", "
-              + "\"RightTurret\")."));
+      throw new IllegalStateException("SmartMotorControllerCommandRegistry: subsystem name conflict — \"" + subsystem
+          .getName() + "\" is already registered by a different subsystem instance. " + ("Use unique subsystem names for each subsystem instance (e.g. \"LeftTurret\", " + "\"RightTurret\")."));
     }
     commandOwners.put(key, subsystem);
     commandCallbacks.computeIfAbsent(key, k -> new ArrayList<>()).add(callback);

@@ -47,37 +47,38 @@ public class FlyWheelConfig {
   /**
    * Telemetry name.
    */
-  private Optional<String> telemetryName = Optional.empty();
+  private Optional<String>             telemetryName           = Optional.empty();
   /**
    * Telemetry verbosity
    */
-  private Optional<TelemetryVerbosity> telemetryVerbosity = Optional.empty();
+  private Optional<TelemetryVerbosity> telemetryVerbosity      = Optional.empty();
   /**
    * {@link FlyWheel} length for simulation.
    */
-  private Optional<Distance> diameter = Optional.empty();
+  private Optional<Distance>           diameter                = Optional.empty();
   /**
    * Sim color value
    */
-  private Color8Bit simColor = new Color8Bit(Color.ORANGE);
+  private Color8Bit                    simColor                = new Color8Bit(Color.ORANGE);
   /**
    * Mechanism position configuration for the {@link Pivot} (Optional).
    */
-  private MechanismPositionConfig mechanismPositionConfig = new MechanismPositionConfig();
+  private MechanismPositionConfig      mechanismPositionConfig = new MechanismPositionConfig();
   /**
    * Use speedometer simulation for the shooter.
    */
-  private boolean useSpeedometer = false;
+  private boolean                      useSpeedometer          = false;
   /**
    * Max velocity of the speedometer simulation (Optional).
    */
-  private Optional<AngularVelocity> speedometerMaxVelocity = Optional.empty();
+  private Optional<AngularVelocity>    speedometerMaxVelocity  = Optional.empty();
 
   /**
    * FlyWheel Configuration class
    *
    */
-  public FlyWheelConfig() {}
+  public FlyWheelConfig() {
+  }
 
   private FlyWheelConfig(FlyWheelConfig cfg) {
     this.telemetryName = cfg.telemetryName;
@@ -121,9 +122,7 @@ public class FlyWheelConfig {
    */
   public FlyWheelConfig withSpeedometerSimulation() {
     if (!speedometerMaxVelocity.isPresent()) {
-      throw new FlyWheelConfigurationException("Speedometer max velocity is not set.",
-          "Cannot use speedometer simulation!",
-          "Set it with withSpeedometerSimulation(AngularVelocity)");
+      throw new FlyWheelConfigurationException("Speedometer max velocity is not set.", "Cannot use speedometer simulation!", "Set it with withSpeedometerSimulation(AngularVelocity)");
     }
     this.useSpeedometer = true;
     return this;
@@ -162,7 +161,7 @@ public class FlyWheelConfig {
    * If the speedometer simulation is not enabled, this will return an empty Optional.
    *
    * @return The maximum velocity of the speedometer simulation, or an empty Optional if the
-   *     speedometer simulation is
+   *         speedometer simulation is
    *         not enabled.
    */
   public Optional<AngularVelocity> getSpeedometerMaxVelocity() {
@@ -197,8 +196,7 @@ public class FlyWheelConfig {
    * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link FlyWheel}
    * @return {@link FlyWheelConfig} for chaining
    */
-  public FlyWheelConfig withMechanismPositionConfig(
-      MechanismPositionConfig mechanismPositionConfig) {
+  public FlyWheelConfig withMechanismPositionConfig(MechanismPositionConfig mechanismPositionConfig) {
     this.mechanismPositionConfig = mechanismPositionConfig;
     return this;
   }
@@ -256,7 +254,7 @@ public class FlyWheelConfig {
    * Get the {@link MechanismPositionConfig} associated with this {@link FlyWheelConfig}.
    *
    * @return An {@link Optional} containing the {@link MechanismPositionConfig} if present,
-   *     otherwise an empty
+   *         otherwise an empty
    *         {@link Optional}.
    */
   public MechanismPositionConfig getMechanismPositionConfig() {
@@ -270,8 +268,7 @@ public class FlyWheelConfig {
    */
   public Distance getCircumference() {
     if (diameter.isEmpty()) {
-      throw new FlyWheelConfigurationException("FlyWheel diameter is empty",
-          "Cannot run speed without diameter.", "withDiameter(Distance)");
+      throw new FlyWheelConfigurationException("FlyWheel diameter is empty", "Cannot run speed without diameter.", "withDiameter(Distance)");
     }
     return diameter.orElseThrow().times(Math.PI);
   }

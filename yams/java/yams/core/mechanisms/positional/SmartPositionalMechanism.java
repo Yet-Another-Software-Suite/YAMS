@@ -84,7 +84,7 @@ public abstract class SmartPositionalMechanism extends SmartMechanism {
   /**
    * The root point of the Mechanism.
    */
-  protected MechanismRoot2d m_mechanismRoot;
+  protected MechanismRoot2d     m_mechanismRoot;
   /**
    * The ligament that is being moved.
    */

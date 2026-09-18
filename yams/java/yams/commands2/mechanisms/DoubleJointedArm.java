@@ -31,8 +31,7 @@ import yams.core.motorcontrollers.SmartMotorController;
  * Command trackCommand = arm.runTo(new Translation2d(0.5, 0.7), false, Centimeters.of(5));
  * }</pre>
  */
-public class DoubleJointedArm extends yams.core.mechanisms.positional.DoubleJointedArm
-    implements CommandMechanism {
+public class DoubleJointedArm extends yams.core.mechanisms.positional.DoubleJointedArm implements CommandMechanism {
   /** Subsystem the arm's commands should require. */
   private final Subsystem subsystem;
 
@@ -47,17 +46,12 @@ public class DoubleJointedArm extends yams.core.mechanisms.positional.DoubleJoin
    *           yams.commands2.config.SmartMotorControllerConfig}s that share the same
    *           {@link Subsystem} set via {@code withSubsystem(Subsystem)}.
    */
-  public DoubleJointedArm(ArmConfig lowerConfig, SmartMotorController lowerSMC,
-      ArmConfig upperConfig, SmartMotorController upperSMC) {
+  public DoubleJointedArm(ArmConfig lowerConfig, SmartMotorController lowerSMC, ArmConfig upperConfig, SmartMotorController upperSMC) {
     super(lowerConfig, lowerSMC, upperConfig, upperSMC);
-    yams.commands2.config.SmartMotorControllerConfig lowerCfg =
-        (yams.commands2.config.SmartMotorControllerConfig) lowerSMC.getConfig();
-    yams.commands2.config.SmartMotorControllerConfig upperCfg =
-        (yams.commands2.config.SmartMotorControllerConfig) upperSMC.getConfig();
+    yams.commands2.config.SmartMotorControllerConfig lowerCfg = (yams.commands2.config.SmartMotorControllerConfig) lowerSMC.getConfig();
+    yams.commands2.config.SmartMotorControllerConfig upperCfg = (yams.commands2.config.SmartMotorControllerConfig) upperSMC.getConfig();
     if (lowerCfg.getSubsystem() != upperCfg.getSubsystem()) {
-      throw new DoubleJointedArmConfigurationException(
-          "SmartMotorControllers do not have the same subsystem!",
-          "Cannot create commands for single subsystem.", "withSubsystem(this)");
+      throw new DoubleJointedArmConfigurationException("SmartMotorControllers do not have the same subsystem!", "Cannot create commands for single subsystem.", "withSubsystem(this)");
     }
     this.subsystem = lowerCfg.getSubsystem();
   }
@@ -131,20 +125,14 @@ public class DoubleJointedArm extends yams.core.mechanisms.positional.DoubleJoin
    * @param tolerance   Tolerance
    * @return {@link Command} that will reach the specified goal.
    */
-  public Command runTo(
-      Supplier<Translation2d> translation, Supplier<Boolean> invert, Distance tolerance) {
+  public Command runTo(Supplier<Translation2d> translation, Supplier<Boolean> invert, Distance tolerance) {
     SmartMotorController lower = getLowerMotorController();
     SmartMotorController upper = getUpperMotorController();
-    return Commands
-        .run(
-            ()
-                -> {
-              var thetas = getAnglesForPosition(translation.get(), invert.get());
-              lower.setPosition(thetas.getFirst());
-              upper.setPosition(thetas.getSecond());
-            },
-            subsystem)
-        .until(() -> isNear(translation.get(), tolerance));
+    return Commands.run(() -> {
+      var thetas = getAnglesForPosition(translation.get(), invert.get());
+      lower.setPosition(thetas.getFirst());
+      upper.setPosition(thetas.getSecond());
+    }, subsystem).until(() -> isNear(translation.get(), tolerance));
   }
 
   /**
@@ -157,19 +145,14 @@ public class DoubleJointedArm extends yams.core.mechanisms.positional.DoubleJoin
   public Command setAngle(Angle lowerAngle, Angle upperAngle) {
     SmartMotorController lower = getLowerMotorController();
     SmartMotorController upper = getUpperMotorController();
-    return Commands
-        .run(
-            ()
-                -> {
-              if (lowerAngle != null) {
-                lower.setPosition(lowerAngle);
-              }
-              if (upperAngle != null) {
-                upper.setPosition(upperAngle);
-              }
-            },
-            subsystem)
-        .withName(subsystem.getName() + " SetAngle");
+    return Commands.run(() -> {
+      if (lowerAngle != null) {
+        lower.setPosition(lowerAngle);
+      }
+      if (upperAngle != null) {
+        upper.setPosition(upperAngle);
+      }
+    }, subsystem).withName(subsystem.getName() + " SetAngle");
   }
 
   /**
@@ -182,36 +165,28 @@ public class DoubleJointedArm extends yams.core.mechanisms.positional.DoubleJoin
   public Command set(Double lowerDutycycle, Double upperDutycycle) {
     SmartMotorController lower = getLowerMotorController();
     SmartMotorController upper = getUpperMotorController();
-    return Commands
-        .startRun(
-            ()
-                -> {
-              if (lowerDutycycle != null) {
-                lower.stopClosedLoopController();
-              }
-              if (upperDutycycle != null) {
-                upper.stopClosedLoopController();
-              }
-            },
-            ()
-                -> {
-              if (lowerDutycycle != null) {
-                lower.setDutyCycle(lowerDutycycle);
-              }
-              if (upperDutycycle != null) {
-                upper.setDutyCycle(upperDutycycle);
-              }
-            },
-            subsystem)
-        .finallyDo(() -> {
-          if (lowerDutycycle != null) {
-            lower.startClosedLoopController();
-          }
-          if (upperDutycycle != null) {
-            upper.startClosedLoopController();
-          }
-        })
-        .withName(subsystem.getName() + " SetDutyCycle");
+    return Commands.startRun(() -> {
+      if (lowerDutycycle != null) {
+        lower.stopClosedLoopController();
+      }
+      if (upperDutycycle != null) {
+        upper.stopClosedLoopController();
+      }
+    }, () -> {
+      if (lowerDutycycle != null) {
+        lower.setDutyCycle(lowerDutycycle);
+      }
+      if (upperDutycycle != null) {
+        upper.setDutyCycle(upperDutycycle);
+      }
+    }, subsystem).finallyDo(() -> {
+      if (lowerDutycycle != null) {
+        lower.startClosedLoopController();
+      }
+      if (upperDutycycle != null) {
+        upper.startClosedLoopController();
+      }
+    }).withName(subsystem.getName() + " SetDutyCycle");
   }
 
   /**

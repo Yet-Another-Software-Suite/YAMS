@@ -24,8 +24,7 @@ import yams.core.motorcontrollers.SmartMotorController;
  * }</pre>
  *
  */
-public class SmartMotorControllerConfig
-    extends yams.core.motorcontrollers.SmartMotorControllerConfig {
+public class SmartMotorControllerConfig extends yams.core.motorcontrollers.SmartMotorControllerConfig {
   /** Subsystem that the {@link SmartMotorController} controls. */
   private Optional<Subsystem> subsystem = Optional.empty();
 
@@ -43,7 +42,7 @@ public class SmartMotorControllerConfig
    * Construct the {@link SmartMotorControllerConfig} with a {@link Subsystem} added later.
    *
    * @implNote You must use {@link #withSubsystem(Subsystem)} before passing off to {@link
-   * SmartMotorController}
+   *           SmartMotorController}
    */
   public SmartMotorControllerConfig() {
     super();
@@ -75,8 +74,7 @@ public class SmartMotorControllerConfig
    */
   public SmartMotorControllerConfig withSubsystem(Subsystem subsystem) {
     if (this.subsystem.isPresent()) {
-      throw new SmartMotorControllerConfigurationException("Subsystem has already been set",
-          "Cannot set subsystem", "withSubsystem(Subsystem subsystem) should only be called once");
+      throw new SmartMotorControllerConfigurationException("Subsystem has already been set", "Cannot set subsystem", "withSubsystem(Subsystem subsystem) should only be called once");
     }
     this.subsystem = Optional.of(subsystem);
     return this;
@@ -89,8 +87,7 @@ public class SmartMotorControllerConfig
    */
   public Subsystem getSubsystem() {
     if (subsystem.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException(
-          "Subsystem is undefined", "Subsystem cannot be created.", "withSubsystem(Subsystem)");
+      throw new SmartMotorControllerConfigurationException("Subsystem is undefined", "Subsystem cannot be created.", "withSubsystem(Subsystem)");
     }
     return subsystem.orElseThrow();
   }
@@ -111,8 +108,7 @@ public class SmartMotorControllerConfig
     }
     getAttachedController().ifPresent(controller -> {
       Subsystem sub = subsystem.get();
-      SmartMotorControllerCommandRegistry.addCommand(
-          "Live Tuning", sub, controller::applyTuningValues);
+      SmartMotorControllerCommandRegistry.addCommand("Live Tuning", sub, controller::applyTuningValues);
       controller.addCloseHook(() -> SmartMotorControllerCommandRegistry.removeCommands(sub));
     });
   }

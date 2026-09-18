@@ -48,59 +48,59 @@ public class StructArrayTelemetry<T, F> {
   /**
    * Struct serializer for {@link T}.
    */
-  private final Struct<T> struct;
+  private final Struct<T>                    struct;
   /**
    * Network table key.
    */
-  private final String key;
+  private final String                       key;
   /**
    * Tunable?
    */
-  private final boolean tunable;
+  private final boolean                      tunable;
   /**
    * Enabled?
    */
-  protected boolean enabled = false;
+  protected boolean                          enabled      = false;
   /**
    * Default value.
    */
-  private T[] defaultValue;
+  private T[]                                defaultValue;
   /**
    * Cached value.
    */
-  private T[] cachedValue;
+  private T[]                                cachedValue;
   /**
    * Publisher.
    */
-  private Optional<StructArrayPublisher<T>> publisher = Optional.empty();
+  private Optional<StructArrayPublisher<T>>  publisher    = Optional.empty();
   /**
    * Subscriber.
    */
-  private Optional<StructArraySubscriber<T>> subscriber = Optional.empty();
+  private Optional<StructArraySubscriber<T>> subscriber   = Optional.empty();
   /**
    * Sub publisher.
    */
-  private StructArrayPublisher<T> subPublisher = null;
+  private StructArrayPublisher<T>            subPublisher = null;
   /**
    * Tuning table
    */
-  private Optional<NetworkTable> tuningTable = Optional.empty();
+  private Optional<NetworkTable>             tuningTable  = Optional.empty();
   /**
    * Data table.
    */
-  private Optional<NetworkTable> dataTable = Optional.empty();
+  private Optional<NetworkTable>             dataTable    = Optional.empty();
   /**
    * NT4 Topic of this entry.
    */
-  private StructArrayTopic<T> topic;
+  private StructArrayTopic<T>                topic;
   /**
    * {@link StructArrayLogEntry} representing this entry.
    */
-  private Optional<StructArrayLogEntry<T>> dataLogEntry = Optional.empty();
+  private Optional<StructArrayLogEntry<T>>   dataLogEntry = Optional.empty();
   /**
    * Telemetry enum field.
    */
-  private F field;
+  private F                                  field;
 
   /**
    * Setup struct array telemetry for a field.
@@ -111,8 +111,7 @@ public class StructArrayTelemetry<T, F> {
    * @param struct     {@link Struct} serializer for {@link T}.
    * @param tunable    Tunable.
    */
-  public StructArrayTelemetry(
-      String keyString, T[] defaultVal, F field, Struct<T> struct, boolean tunable) {
+  public StructArrayTelemetry(String keyString, T[] defaultVal, F field, Struct<T> struct, boolean tunable) {
     key = keyString;
     cachedValue = defaultValue = defaultVal;
     this.field = field;
@@ -164,8 +163,7 @@ public class StructArrayTelemetry<T, F> {
       if (!prefix.endsWith("/")) {
         prefix += "/";
       }
-      dataLogEntry = Optional.of(StructArrayLogEntry.create(
-          DataLogManager.getLog(), prefix + key, struct, (long) Timer.getTimestamp()));
+      dataLogEntry = Optional.of(StructArrayLogEntry.create(DataLogManager.getLog(), prefix + key, struct, (long) Timer.getTimestamp()));
     }
   }
 

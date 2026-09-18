@@ -139,12 +139,9 @@ public class EasyCRTConfig {
    * @param absoluteEncoder1AngleSupplier supplier that returns the angle for encoder 1
    * @param absoluteEncoder2AngleSupplier supplier that returns the angle for encoder 2
    */
-  public EasyCRTConfig(Supplier<Angle> absoluteEncoder1AngleSupplier,
-      Supplier<Angle> absoluteEncoder2AngleSupplier) {
-    this.absoluteEncoder1AngleSupplier =
-        Objects.requireNonNull(absoluteEncoder1AngleSupplier, "absoluteEncoder1AngleSupplier");
-    this.absoluteEncoder2AngleSupplier =
-        Objects.requireNonNull(absoluteEncoder2AngleSupplier, "absoluteEncoder2AngleSupplier");
+  public EasyCRTConfig(Supplier<Angle> absoluteEncoder1AngleSupplier, Supplier<Angle> absoluteEncoder2AngleSupplier) {
+    this.absoluteEncoder1AngleSupplier = Objects.requireNonNull(absoluteEncoder1AngleSupplier, "absoluteEncoder1AngleSupplier");
+    this.absoluteEncoder2AngleSupplier = Objects.requireNonNull(absoluteEncoder2AngleSupplier, "absoluteEncoder2AngleSupplier");
   }
 
   /**
@@ -160,8 +157,7 @@ public class EasyCRTConfig {
    * @param encoder2RotPerMechanismRot rotations per mechanism rotation for encoder 2
    * @return this configuration for chaining
    */
-  public EasyCRTConfig withEncoderRatios(
-      double encoder1RotPerMechanismRot, double encoder2RotPerMechanismRot) {
+  public EasyCRTConfig withEncoderRatios(double encoder1RotPerMechanismRot, double encoder2RotPerMechanismRot) {
     this.encoder1RotPerMechanismRot = Optional.of(encoder1RotPerMechanismRot);
     this.encoder2RotPerMechanismRot = Optional.of(encoder2RotPerMechanismRot);
     return this;
@@ -188,8 +184,7 @@ public class EasyCRTConfig {
    * @param absoluteEncoder2PinionTeeth tooth count on encoder 2 pinion
    * @return this configuration for chaining
    */
-  public EasyCRTConfig withCommonDriveGear(double commonRatio, int driveGearTeeth,
-      int absoluteEncoder1PinionTeeth, int absoluteEncoder2PinionTeeth) {
+  public EasyCRTConfig withCommonDriveGear(double commonRatio, int driveGearTeeth, int absoluteEncoder1PinionTeeth, int absoluteEncoder2PinionTeeth) {
     requireNonZeroFinite(commonRatio, "commonRatio");
     requirePositiveTeeth(driveGearTeeth, "EncoderDriveGearTeeth");
     requirePositiveTeeth(absoluteEncoder1PinionTeeth, "Encoder1GearTeeth");
@@ -296,8 +291,7 @@ public class EasyCRTConfig {
    * @param encoder2Inverted whether encoder 2 should be inverted
    * @return this configuration for chaining
    */
-  public EasyCRTConfig withAbsoluteEncoderInversions(
-      boolean encoder1Inverted, boolean encoder2Inverted) {
+  public EasyCRTConfig withAbsoluteEncoderInversions(boolean encoder1Inverted, boolean encoder2Inverted) {
     this.encoder1Inverted = encoder1Inverted;
     this.encoder2Inverted = encoder2Inverted;
     return this;
@@ -338,8 +332,7 @@ public class EasyCRTConfig {
    * @param maxIterationsLimit maximum iterations per gear to consider valid
    * @return this configuration for chaining
    */
-  public EasyCRTConfig withCrtGearRecommendationConstraints(
-      double coverageMargin, int minTeeth, int maxTeeth, int maxIterationsLimit) {
+  public EasyCRTConfig withCrtGearRecommendationConstraints(double coverageMargin, int minTeeth, int maxTeeth, int maxIterationsLimit) {
     if (!RobotBase.isSimulation()) {
       return this;
     }
@@ -375,8 +368,7 @@ public class EasyCRTConfig {
    * @return this configuration for chaining
    */
   public EasyCRTConfig withAbsoluteEncoder1Gearing(int... teethChain) {
-    this.absoluteEncoder1TeethChain =
-        Optional.of(copyTeeth(teethChain, "absoluteEncoder1TeethChain"));
+    this.absoluteEncoder1TeethChain = Optional.of(copyTeeth(teethChain, "absoluteEncoder1TeethChain"));
     return this;
   }
 
@@ -394,8 +386,7 @@ public class EasyCRTConfig {
    * @return this configuration for chaining
    */
   public EasyCRTConfig withAbsoluteEncoder2Gearing(int... teethChain) {
-    this.absoluteEncoder2TeethChain =
-        Optional.of(copyTeeth(teethChain, "absoluteEncoder2TeethChain"));
+    this.absoluteEncoder2TeethChain = Optional.of(copyTeeth(teethChain, "absoluteEncoder2TeethChain"));
     return this;
   }
 
@@ -411,8 +402,7 @@ public class EasyCRTConfig {
    * @return this configuration for chaining
    */
   public EasyCRTConfig withAbsoluteEncoder1GearingStages(int... driverDrivenPairs) {
-    this.absoluteEncoder1TeethStages =
-        Optional.of(copyTeeth(driverDrivenPairs, "absoluteEncoder1TeethStages"));
+    this.absoluteEncoder1TeethStages = Optional.of(copyTeeth(driverDrivenPairs, "absoluteEncoder1TeethStages"));
     return this;
   }
 
@@ -427,8 +417,7 @@ public class EasyCRTConfig {
    * @return this configuration for chaining
    */
   public EasyCRTConfig withAbsoluteEncoder2GearingStages(int... driverDrivenPairs) {
-    this.absoluteEncoder2TeethStages =
-        Optional.of(copyTeeth(driverDrivenPairs, "absoluteEncoder2TeethStages"));
+    this.absoluteEncoder2TeethStages = Optional.of(copyTeeth(driverDrivenPairs, "absoluteEncoder2TeethStages"));
     return this;
   }
 
@@ -457,16 +446,13 @@ public class EasyCRTConfig {
    * @return gearing representation based on provided configuration
    */
   private MechanismGearing buildMechanismGearingForEncoder(int encoderIndex) {
-    Optional<int[]> chain =
-        (encoderIndex == 1) ? absoluteEncoder1TeethChain : absoluteEncoder2TeethChain;
-    Optional<int[]> pairs =
-        (encoderIndex == 1) ? absoluteEncoder1TeethStages : absoluteEncoder2TeethStages;
+    Optional<int[]> chain = (encoderIndex == 1) ? absoluteEncoder1TeethChain : absoluteEncoder2TeethChain;
+    Optional<int[]> pairs = (encoderIndex == 1) ? absoluteEncoder1TeethStages : absoluteEncoder2TeethStages;
 
     if (pairs.isPresent()) {
       int[] p = pairs.get();
       if (p.length < 2 || (p.length % 2) != 0) {
-        throw new IllegalStateException("Encoder " + encoderIndex
-            + " gear stages must be (driver,driven) pairs (even length >= 2).");
+        throw new IllegalStateException("Encoder " + encoderIndex + " gear stages must be (driver,driven) pairs (even length >= 2).");
       }
       validatePositiveTeeth(p, "encoder " + encoderIndex + " gear stages");
       return new MechanismGearing(GearBox.fromStages(buildStagesFromDriverDrivenPairs(p)));
@@ -475,8 +461,7 @@ public class EasyCRTConfig {
     if (chain.isPresent()) {
       int[] t = chain.get();
       if (t.length < 2) {
-        throw new IllegalStateException(
-            "Encoder " + encoderIndex + " gear chain must have >= 2 tooth counts.");
+        throw new IllegalStateException("Encoder " + encoderIndex + " gear chain must have >= 2 tooth counts.");
       }
       validatePositiveTeeth(t, "encoder " + encoderIndex + " gear chain");
       return new MechanismGearing(GearBox.fromStages(buildStagesFromChain(t)));
@@ -595,10 +580,8 @@ public class EasyCRTConfig {
       return encoder2RotPerMechanismRot.get();
     }
 
-    Optional<int[]> pairs =
-        (encoderIndex == 1) ? absoluteEncoder1TeethStages : absoluteEncoder2TeethStages;
-    Optional<int[]> chain =
-        (encoderIndex == 1) ? absoluteEncoder1TeethChain : absoluteEncoder2TeethChain;
+    Optional<int[]> pairs = (encoderIndex == 1) ? absoluteEncoder1TeethStages : absoluteEncoder2TeethStages;
+    Optional<int[]> chain = (encoderIndex == 1) ? absoluteEncoder1TeethChain : absoluteEncoder2TeethChain;
     if (pairs.isPresent()) {
       return ratioFromDriverDrivenPairs(pairs.get());
     }
@@ -606,8 +589,7 @@ public class EasyCRTConfig {
       return ratioFromChain(chain.get());
     }
 
-    throw new IllegalStateException(
-        "Encoder ratios not configured. Use withEncoderRatios(...) or provide gearing.");
+    throw new IllegalStateException("Encoder ratios not configured. Use withEncoderRatios(...) or provide gearing.");
   }
 
   /**
@@ -646,8 +628,7 @@ public class EasyCRTConfig {
    * @param encoderTeeth   tooth count on the encoder pinion
    * @return encoder rotations per mechanism rotation
    */
-  public static double ratioFromCommonDrive(
-      double commonRatio, int driveGearTeeth, int encoderTeeth) {
+  public static double ratioFromCommonDrive(double commonRatio, int driveGearTeeth, int encoderTeeth) {
     requireNonZeroFinite(commonRatio, "commonRatio");
     requirePositiveTeeth(driveGearTeeth, "driveGearTeeth");
     requirePositiveTeeth(encoderTeeth, "encoderTeeth");
@@ -708,9 +689,7 @@ public class EasyCRTConfig {
    * @return optional gear pair recommendation
    */
   public Optional<CrtGearPair> getRecommendedCrtGearPair() {
-    if (gearSearchStage1GearTeeth.isEmpty() || gearSearchStage2Ratio.isEmpty()
-        || gearSearchCoverageMargin.isEmpty() || gearSearchMinTeeth.isEmpty()
-        || gearSearchMaxTeeth.isEmpty() || gearSearchMaxIterations.isEmpty()) {
+    if (gearSearchStage1GearTeeth.isEmpty() || gearSearchStage2Ratio.isEmpty() || gearSearchCoverageMargin.isEmpty() || gearSearchMinTeeth.isEmpty() || gearSearchMaxTeeth.isEmpty() || gearSearchMaxIterations.isEmpty()) {
       return Optional.empty();
     }
 
@@ -719,9 +698,7 @@ public class EasyCRTConfig {
       return Optional.empty();
     }
 
-    CrtGearPair pair = findSmallestCrtGearPair(gearSearchStage1GearTeeth.get(),
-        gearSearchStage2Ratio.get(), maxMechanismAngle, gearSearchCoverageMargin.get(),
-        gearSearchMinTeeth.get(), gearSearchMaxTeeth.get(), gearSearchMaxIterations.get());
+    CrtGearPair pair = findSmallestCrtGearPair(gearSearchStage1GearTeeth.get(), gearSearchStage2Ratio.get(), maxMechanismAngle, gearSearchCoverageMargin.get(), gearSearchMinTeeth.get(), gearSearchMaxTeeth.get(), gearSearchMaxIterations.get());
     return Optional.ofNullable(pair);
   }
 
@@ -737,11 +714,8 @@ public class EasyCRTConfig {
    * @param maxIterationsLimit maximum iterations allowed for a gear
    * @return gear pair that meets the criteria, or null if none found
    */
-  public static CrtGearPair findSmallestCrtGearPair(int stage1GearTeeth, double stage2Ratio,
-      Angle maxMechanismAngle, double coverageMargin, int minTeeth, int maxTeeth,
-      int maxIterationsLimit) {
-    double maxMechanismRotations =
-        Objects.requireNonNull(maxMechanismAngle, "maxMechanismAngle").in(Rotations);
+  public static CrtGearPair findSmallestCrtGearPair(int stage1GearTeeth, double stage2Ratio, Angle maxMechanismAngle, double coverageMargin, int minTeeth, int maxTeeth, int maxIterationsLimit) {
+    double maxMechanismRotations = Objects.requireNonNull(maxMechanismAngle, "maxMechanismAngle").in(Rotations);
     if (stage1GearTeeth <= 0 || stage2Ratio <= 0.0 || minTeeth < 1 || maxTeeth < minTeeth) {
       return null;
     }
@@ -759,10 +733,8 @@ public class EasyCRTConfig {
         if (lcm < requiredLcm) {
           continue;
         }
-        int iterationsA =
-            theoreticalIterationsForGear(a, stage1GearTeeth, stage2Ratio, maxMechanismAngle);
-        int iterationsB =
-            theoreticalIterationsForGear(b, stage1GearTeeth, stage2Ratio, maxMechanismAngle);
+        int iterationsA = theoreticalIterationsForGear(a, stage1GearTeeth, stage2Ratio, maxMechanismAngle);
+        int iterationsB = theoreticalIterationsForGear(b, stage1GearTeeth, stage2Ratio, maxMechanismAngle);
         boolean aOk = iterationsA <= maxIterationsLimit;
         boolean bOk = iterationsB <= maxIterationsLimit;
         if (!aOk && !bOk) {
@@ -778,15 +750,12 @@ public class EasyCRTConfig {
         }
         int candidateMaxTeeth = b;
         int sumTeeth = a + b;
-        if (candidateMaxTeeth < bestMaxTeeth
-            || (candidateMaxTeeth == bestMaxTeeth && sumTeeth < bestSumTeeth)
-            || (candidateMaxTeeth == bestMaxTeeth && sumTeeth == bestSumTeeth && lcm < bestLcm)) {
+        if (candidateMaxTeeth < bestMaxTeeth || (candidateMaxTeeth == bestMaxTeeth && sumTeeth < bestSumTeeth) || (candidateMaxTeeth == bestMaxTeeth && sumTeeth == bestSumTeeth && lcm < bestLcm)) {
           double coverageRot = lcm / (stage2Ratio * stage1GearTeeth);
           bestMaxTeeth = candidateMaxTeeth;
           bestSumTeeth = sumTeeth;
           bestLcm = lcm;
-          best = new CrtGearPair(
-              assignedA, assignedB, lcm, Rotations.of(coverageRot), gcd(a, b), assignedIterations);
+          best = new CrtGearPair(assignedA, assignedB, lcm, Rotations.of(coverageRot), gcd(a, b), assignedIterations);
         }
       }
     }
@@ -803,8 +772,7 @@ public class EasyCRTConfig {
    * @param maxMechanismAngle maximum mechanism travel to cover
    * @return theoretical iteration count
    */
-  private static int theoreticalIterationsForGear(
-      int gearTeeth, int stage1GearTeeth, double stage2Ratio, Angle maxMechanismAngle) {
+  private static int theoreticalIterationsForGear(int gearTeeth, int stage1GearTeeth, double stage2Ratio, Angle maxMechanismAngle) {
     double ratioA = stage2Ratio * ((double) stage1GearTeeth / gearTeeth);
     return (int) Math.ceil(ratioA * maxMechanismAngle.in(Rotations)) + 3;
   }
@@ -954,6 +922,6 @@ public class EasyCRTConfig {
    * @param gcd                   greatest common divisor of the two gears
    * @param theoreticalIterations predicted iterations required
    */
-  public static record CrtGearPair(
-      int gearA, int gearB, int lcm, Angle coverage, int gcd, int theoreticalIterations) {}
+  public static record CrtGearPair(int gearA, int gearB, int lcm, Angle coverage, int gcd, int theoreticalIterations) {
+  }
 }

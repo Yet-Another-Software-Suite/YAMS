@@ -41,8 +41,6 @@ public class MotorNotPresentException extends RuntimeException {
    * @param mechanismType Name of the mechanism
    */
   public MotorNotPresentException(String mechanismType) {
-    super(mechanismType
-        + (" primary motor not present! Please set one using "
-            + "`setMotor(SmartMotorController.create(MOTOR_CONTROLLER, DCMotor.getNEO(1))`"));
+    super(mechanismType + (" primary motor not present! Please set one using " + "`setMotor(SmartMotorController.create(MOTOR_CONTROLLER, DCMotor.getNEO(1))`"));
   }
 }

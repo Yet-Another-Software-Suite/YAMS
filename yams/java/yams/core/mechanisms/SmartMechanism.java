@@ -74,11 +74,11 @@ public abstract class SmartMechanism {
   /**
    * Mechanism telemetry.
    */
-  protected MechanismTelemetry m_telemetry = new MechanismTelemetry();
+  protected MechanismTelemetry   m_telemetry = new MechanismTelemetry();
   /**
    * Mechanism Window.
    */
-  protected Mechanism2d m_mechanismWindow;
+  protected Mechanism2d          m_mechanismWindow;
 
   /**
    * Set the {@link SmartMotorController} to the given speed.

@@ -43,27 +43,27 @@ public class PivotConfig {
   /**
    * Telemetry name.
    */
-  private Optional<String> telemetryName = Optional.empty();
+  private Optional<String>             telemetryName           = Optional.empty();
   /**
    * Telemetry verbosity
    */
-  private Optional<TelemetryVerbosity> telemetryVerbosity = Optional.empty();
+  private Optional<TelemetryVerbosity> telemetryVerbosity      = Optional.empty();
   /**
    * Lower Hard Limit for the {@link Pivot} to be representing in simulation.
    */
-  private Optional<Angle> lowerHardLimit = Optional.empty();
+  private Optional<Angle>              lowerHardLimit          = Optional.empty();
   /**
    * Upper hard limit for the {@link Pivot} representing in simulation.
    */
-  private Optional<Angle> upperHardLimit = Optional.empty();
+  private Optional<Angle>              upperHardLimit          = Optional.empty();
   /**
    * Sim color value
    */
-  private Color8Bit simColor = new Color8Bit(Color.ORANGE);
+  private Color8Bit                    simColor                = new Color8Bit(Color.ORANGE);
   /**
    * Mechanism position configuration for the {@link Pivot}
    */
-  private MechanismPositionConfig mechanismPositionConfig = new MechanismPositionConfig();
+  private MechanismPositionConfig      mechanismPositionConfig = new MechanismPositionConfig();
 
   /**
    * Pivot Configuration class
@@ -190,7 +190,7 @@ public class PivotConfig {
    * Get the {@link MechanismPositionConfig} associated with this {@link PivotConfig}.
    *
    * @return An {@link Optional} containing the {@link MechanismPositionConfig} if present,
-   *     otherwise an empty
+   *         otherwise an empty
    *         {@link Optional}.
    */
   public MechanismPositionConfig getMechanismPositionConfig() {

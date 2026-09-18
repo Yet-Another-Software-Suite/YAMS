@@ -120,7 +120,8 @@ public class GearBox {
       reductionRatio *= (double) teeth[i + 1] / teeth[i];
     }
 
-    return new GearBox(new double[] {reductionRatio});
+    return new GearBox(new double[] {
+                                     reductionRatio});
   }
 
   /**

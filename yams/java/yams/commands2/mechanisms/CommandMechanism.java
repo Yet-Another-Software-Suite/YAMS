@@ -37,10 +37,7 @@ public interface CommandMechanism {
   default Command set(double dutycycle) {
     SmartMotorController smc = getMotorController();
     Subsystem subsystem = getSubsystem();
-    return Commands
-        .startRun(smc::stopClosedLoopController, () -> smc.setDutyCycle(dutycycle), subsystem)
-        .finallyDo(smc::startClosedLoopController)
-        .withName(subsystem.getName() + " SetDutyCycle");
+    return Commands.startRun(smc::stopClosedLoopController, () -> smc.setDutyCycle(dutycycle), subsystem).finallyDo(smc::startClosedLoopController).withName(subsystem.getName() + " SetDutyCycle");
   }
 
   /**
@@ -52,11 +49,7 @@ public interface CommandMechanism {
   default Command set(Supplier<Double> dutycycle) {
     SmartMotorController smc = getMotorController();
     Subsystem subsystem = getSubsystem();
-    return Commands
-        .startRun(
-            smc::stopClosedLoopController, () -> smc.setDutyCycle(dutycycle.get()), subsystem)
-        .finallyDo(smc::startClosedLoopController)
-        .withName(subsystem.getName() + " SetDutyCycle Supplier");
+    return Commands.startRun(smc::stopClosedLoopController, () -> smc.setDutyCycle(dutycycle.get()), subsystem).finallyDo(smc::startClosedLoopController).withName(subsystem.getName() + " SetDutyCycle Supplier");
   }
 
   /**
@@ -68,9 +61,7 @@ public interface CommandMechanism {
   default Command setVoltage(Voltage volts) {
     SmartMotorController smc = getMotorController();
     Subsystem subsystem = getSubsystem();
-    return Commands.startRun(smc::stopClosedLoopController, () -> smc.setVoltage(volts), subsystem)
-        .finallyDo(smc::startClosedLoopController)
-        .withName(subsystem.getName() + " SetVoltage");
+    return Commands.startRun(smc::stopClosedLoopController, () -> smc.setVoltage(volts), subsystem).finallyDo(smc::startClosedLoopController).withName(subsystem.getName() + " SetVoltage");
   }
 
   /**
@@ -83,9 +74,6 @@ public interface CommandMechanism {
   default Command setVoltage(Supplier<Voltage> volts) {
     SmartMotorController smc = getMotorController();
     Subsystem subsystem = getSubsystem();
-    return Commands
-        .startRun(smc::stopClosedLoopController, () -> smc.setVoltage(volts.get()), subsystem)
-        .finallyDo(smc::startClosedLoopController)
-        .withName(subsystem.getName() + " SetVoltage Supplier");
+    return Commands.startRun(smc::stopClosedLoopController, () -> smc.setVoltage(volts.get()), subsystem).finallyDo(smc::startClosedLoopController).withName(subsystem.getName() + " SetVoltage Supplier");
   }
 }

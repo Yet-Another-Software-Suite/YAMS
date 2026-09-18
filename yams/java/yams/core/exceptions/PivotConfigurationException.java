@@ -44,7 +44,6 @@ public class PivotConfigurationException extends RuntimeException {
    * @param remedyFunction Remedy function to use.
    */
   public PivotConfigurationException(String message, String result, String remedyFunction) {
-    super(message + "!\n" + result + "\nPlease use PivotConfig." + remedyFunction
-        + " to fix this error.");
+    super(message + "!\n" + result + "\nPlease use PivotConfig." + remedyFunction + " to fix this error.");
   }
 }

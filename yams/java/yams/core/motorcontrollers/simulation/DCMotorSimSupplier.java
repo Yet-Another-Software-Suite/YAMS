@@ -62,15 +62,15 @@ import yams.core.motorcontrollers.SmartMotorController;
  * }</pre>
  */
 public class DCMotorSimSupplier implements SimSupplier {
-  private boolean inputFed = false;
-  private boolean simUpdated = false;
+  private boolean                inputFed   = false;
+  private boolean                simUpdated = false;
   private final Supplier<Double> motorDutyCycleSupplier;
-  private final LinearFilter supplyCurrentFilter;
-  private final DCMotorSim sim;
+  private final LinearFilter     supplyCurrentFilter;
+  private final DCMotorSim       sim;
   private final MechanismGearing mechGearing;
-  private final Time simPeriod;
-  private final DCMotor motor;
-  private final UUID uuid;
+  private final Time             simPeriod;
+  private final DCMotor          motor;
+  private final UUID             uuid;
 
   /**
    * Construct the DCMotorSim supplier
@@ -86,16 +86,14 @@ public class DCMotorSimSupplier implements SimSupplier {
     simPeriod = config.getSimulationPeriod();
     motor = smartMotorController.getDCMotor();
     // Based off comment from https://github.com/wpilibsuite/allwpilib/issues/8691
-    supplyCurrentFilter =
-        LinearFilter.singlePoleIIR(Milliseconds.of(100).in(Seconds), simPeriod.in(Seconds));
+    supplyCurrentFilter = LinearFilter.singlePoleIIR(Milliseconds.of(100).in(Seconds), simPeriod.in(Seconds));
     uuid = smartMotorController.m_batterySimUUID;
   }
 
   @Override
   public void updateSimState() {
     if (!isInputFed()) {
-      sim.setInputVoltage(
-          motorDutyCycleSupplier.get() * RoboRioSim.getVInVoltage()); // Supply voltage
+      sim.setInputVoltage(motorDutyCycleSupplier.get() * RoboRioSim.getVInVoltage()); // Supply voltage
       RoboRioSim.setVInVoltage(BatterySim.calculateVoltage(uuid, getSupplyCurrent()));
     }
     if (!simUpdated) {
@@ -168,8 +166,7 @@ public class DCMotorSimSupplier implements SimSupplier {
 
   @Override
   public void setMechanismPosition(Angle position) {
-    sim.setAngle(position.in(
-        Radians)); // .times(config.getGearing().getMechanismToRotorRatio()).in(Radians));
+    sim.setAngle(position.in(Radians)); // .times(config.getGearing().getMechanismToRotorRatio()).in(Radians));
   }
 
   @Override

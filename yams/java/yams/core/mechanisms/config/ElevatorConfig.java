@@ -40,54 +40,55 @@ public class ElevatorConfig {
   /**
    * Telemetry name.
    */
-  private Optional<String> telemetryName = Optional.empty();
+  private Optional<String>             telemetryName           = Optional.empty();
   /**
    * Telemetry verbosity
    */
-  private Optional<TelemetryVerbosity> telemetryVerbosity = Optional.empty();
+  private Optional<TelemetryVerbosity> telemetryVerbosity      = Optional.empty();
   /**
    * Lower Hard Limit for the {@link Elevator} to be representing in simulation.
    */
-  private Optional<Distance> lowerHardLimit = Optional.empty();
+  private Optional<Distance>           lowerHardLimit          = Optional.empty();
   /**
    * Upper hard limit for the {@link Elevator} representing in simulation.
    */
-  private Optional<Distance> upperHardLimit = Optional.empty();
+  private Optional<Distance>           upperHardLimit          = Optional.empty();
   /**
    * {@link Elevator} angle for simulation.
    */
-  private Angle angle = Degrees.of(90);
+  private Angle                        angle                   = Degrees.of(90);
   /**
    * {@link Elevator} carriage mass for simulation.
    */
-  private Optional<Mass> carriageWeight = Optional.empty();
+  private Optional<Mass>               carriageWeight          = Optional.empty();
   /**
    * Sim color value
    */
-  private Color8Bit simColor = new Color8Bit(Color.ORANGE);
+  private Color8Bit                    simColor                = new Color8Bit(Color.ORANGE);
   /**
    * Mechanism position configuration for the {@link Pivot} (Optional).
    */
-  private MechanismPositionConfig mechanismPositionConfig = new MechanismPositionConfig();
+  private MechanismPositionConfig      mechanismPositionConfig = new MechanismPositionConfig();
   /**
    * Drum radius of the elevator spool, or the sprocket pitch * teeth.
    */
-  private Optional<Distance> drumCircumference = Optional.empty();
+  private Optional<Distance>           drumCircumference       = Optional.empty();
   /**
    * Elevator stages, applied to the motor controller config gearing by dividing it by the number of
    * stages given.
    */
-  private OptionalInt stages = OptionalInt.empty();
+  private OptionalInt                  stages                  = OptionalInt.empty();
   /**
    * Disable gravity on the elevator simulation.
    */
-  private boolean isElevatorHorizontal = false;
+  private boolean                      isElevatorHorizontal    = false;
 
   /**
    * Elevator Configuration class
    *
    */
-  public ElevatorConfig() {}
+  public ElevatorConfig() {
+  }
 
   /**
    * Copy constructor.
@@ -165,8 +166,7 @@ public class ElevatorConfig {
    * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link Elevator}
    * @return {@link ElevatorConfig} for chaining
    */
-  public ElevatorConfig withMechanismPositionConfig(
-      MechanismPositionConfig mechanismPositionConfig) {
+  public ElevatorConfig withMechanismPositionConfig(MechanismPositionConfig mechanismPositionConfig) {
     this.mechanismPositionConfig = mechanismPositionConfig;
     return this;
   }
@@ -270,7 +270,7 @@ public class ElevatorConfig {
    * Get the mechanism position configuration of the elevator.
    *
    * @return Optional containing the mechanism position configuration if set, otherwise an empty
-   *     Optional.
+   *         Optional.
    */
   public MechanismPositionConfig getMechanismPositionConfig() {
     return mechanismPositionConfig;

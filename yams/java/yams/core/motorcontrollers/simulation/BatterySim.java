@@ -61,8 +61,7 @@ public class BatterySim {
    * href="https://www.chiefdelphi.com/t/detailed-frc-battery-comparison-for-2026/508077">Detailed
    * FRC Battery Comparison for 2026</a>.
    */
-  private static InterpolatingDoubleTreeMap CURRENT_TO_CAPACITY_FRACTION =
-      new InterpolatingDoubleTreeMap();
+  private static InterpolatingDoubleTreeMap CURRENT_TO_CAPACITY_FRACTION = new InterpolatingDoubleTreeMap();
 
   static {
     CURRENT_TO_CAPACITY_FRACTION.put(0.9, 1.000);
@@ -121,7 +120,7 @@ public class BatterySim {
    *
    * @param socToVoltage Interpolation table mapping state of charge {@code [0, 1]} to open circuit
    *                     voltage. Call this before {@link #enableDischarge(double, Voltage,
-   * Resistance)} so discharge simulation uses the new curve from the start.
+   *                     Resistance)} so discharge simulation uses the new curve from the start.
    */
   public static void replaceSOCInterpolation(InterpolatingDoubleTreeMap socToVoltage) {
     BatterySim.SOC_TO_VOLTAGE = socToVoltage;
@@ -136,8 +135,8 @@ public class BatterySim {
    *
    * @param currentToCapacityFraction Interpolation table mapping discharge current in Amps to the
    *                                  fraction (0 to 1) of the nominal amp-hour capacity delivered
-   * at that current. Call this before {@link #enableDischarge(double, Voltage, Resistance)} so
-   * discharge simulation uses the new curve from the start.
+   *                                  at that current. Call this before {@link #enableDischarge(double, Voltage, Resistance)} so
+   *                                  discharge simulation uses the new curve from the start.
    */
   public static void replaceCapacityDerating(InterpolatingDoubleTreeMap currentToCapacityFraction) {
     BatterySim.CURRENT_TO_CAPACITY_FRACTION = currentToCapacityFraction;
@@ -153,8 +152,7 @@ public class BatterySim {
    * @param nomVoltage              Nominal (fully charged) open circuit voltage of the battery.
    * @param nomResistance           Nominal internal resistance of the battery.
    */
-  public static void enableDischarge(
-      double batteryCapacityAmpHours, Voltage nomVoltage, Resistance nomResistance) {
+  public static void enableDischarge(double batteryCapacityAmpHours, Voltage nomVoltage, Resistance nomResistance) {
     dischargeEnabled = true;
     BatterySim.batteryCapacityAmpHours = batteryCapacityAmpHours;
     BatterySim.batteryResistance = nomResistance;
@@ -254,8 +252,7 @@ public class BatterySim {
       internalResistance *= 1.0 + (2.0 * (1.0 - stateOfCharge));
     }
 
-    return org.wpilib.simulation.BatterySim.calculateLoadedBatteryVoltage(
-        openCircuitVoltage, internalResistance, currentDraws);
+    return org.wpilib.simulation.BatterySim.calculateLoadedBatteryVoltage(openCircuitVoltage, internalResistance, currentDraws);
   }
 
   /**

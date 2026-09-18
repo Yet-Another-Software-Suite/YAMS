@@ -35,7 +35,7 @@ public abstract class SmartVelocityMechanism extends SmartMechanism {
   /**
    * The root point of the Mechanism.
    */
-  protected MechanismRoot2d mechanismRoot;
+  protected MechanismRoot2d     mechanismRoot;
   /**
    * The ligament that is being moved.
    */

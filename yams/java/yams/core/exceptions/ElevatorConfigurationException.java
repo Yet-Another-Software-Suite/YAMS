@@ -45,7 +45,6 @@ public class ElevatorConfigurationException extends RuntimeException {
    * @param remedyFunction Remedy function to use.
    */
   public ElevatorConfigurationException(String message, String result, String remedyFunction) {
-    super(message + "!\n" + result + "\nPlease use ElevatorConfig." + remedyFunction
-        + " to fix this error.");
+    super(message + "!\n" + result + "\nPlease use ElevatorConfig." + remedyFunction + " to fix this error.");
   }
 }

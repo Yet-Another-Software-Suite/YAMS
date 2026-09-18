@@ -64,8 +64,7 @@ public class SwerveDriveConfig {
    * Derives the gyro angular velocity from the gyro angle ({@link #getGyroAngle()}) when {@link
    * #gyroAngularVelocitySupplier} is not configured, in both simulation and real robot code.
    */
-  private final DerivativeTimeFilter gyroAngularVelocityFilter =
-      new DerivativeTimeFilter(Milliseconds.of(20));
+  private final DerivativeTimeFilter gyroAngularVelocityFilter = new DerivativeTimeFilter(Milliseconds.of(20));
 
   /**
    * Alert shown once if {@link #angularVelocitySkewCorrection(ChassisVelocities)} runs without a
@@ -125,7 +124,7 @@ public class SwerveDriveConfig {
    *
    * @param modules {@link SwerveModule}s for the {@link SwerveDrive}
    * @implNote Protected so only {@link yams.commands2.config.SwerveDriveConfig} can construct
-   *     this.
+   *           this.
    */
   protected SwerveDriveConfig(SwerveModule... modules) {
     this.modules = modules;
@@ -135,9 +134,10 @@ public class SwerveDriveConfig {
    * Create the {@link SwerveDriveConfig} for the {@link SwerveDrive}
    *
    * @implNote Must define modules with {@link #withModules(SwerveModule...)}. Protected so only
-   *     {@link yams.commands2.config.SwerveDriveConfig} can construct this.
+   *           {@link yams.commands2.config.SwerveDriveConfig} can construct this.
    */
-  protected SwerveDriveConfig() {}
+  protected SwerveDriveConfig() {
+  }
 
   protected SwerveDriveConfig(SwerveDriveConfig cfg) {
     this.telemetryVerbosity = cfg.telemetryVerbosity;
@@ -356,8 +356,7 @@ public class SwerveDriveConfig {
    * @param angularVelocity Angular velocity of the Chassis.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withMaximumChassisSpeed(
-      LinearVelocity speed, AngularVelocity angularVelocity) {
+  public SwerveDriveConfig withMaximumChassisSpeed(LinearVelocity speed, AngularVelocity angularVelocity) {
     maximumChassisLinearVelocity = Optional.ofNullable(speed);
     maximumChassisAngularVelocity = Optional.ofNullable(angularVelocity);
     return this;
@@ -495,11 +494,9 @@ public class SwerveDriveConfig {
    */
   public Angle getGyroAngle() {
     if (gyroSupplier.isEmpty()) {
-      throw new IllegalStateException(
-          "Gyro supplier is not set! Please use .withGyro() to set the gyro supplier!");
+      throw new IllegalStateException("Gyro supplier is not set! Please use .withGyro() to set the gyro supplier!");
     }
-    return (gyroInverted ? gyroSupplier.get().get().unaryMinus() : gyroSupplier.get().get())
-        .minus(gyroOffset.orElse(Rotations.of(0)));
+    return (gyroInverted ? gyroSupplier.get().get().unaryMinus() : gyroSupplier.get().get()).minus(gyroOffset.orElse(Rotations.of(0)));
   }
 
   /**
@@ -551,27 +548,17 @@ public class SwerveDriveConfig {
     } else {
       if (noGyroAngularVelocitySupplierAlert == null) {
         noGyroAngularVelocitySupplierAlert = new Alert("YAMS",
-            getTelemetryName()
-                + " has an angular velocity scale factor configured but no gyro angular velocity "
-                + ("supplier (see SwerveDriveConfig#withGyroVelocity); deriving it from the gyro "
-                    + "angle instead."),
-            Alert.Level.LOW);
+            getTelemetryName() + " has an angular velocity scale factor configured but no gyro angular velocity " + ("supplier (see SwerveDriveConfig#withGyroVelocity); deriving it from the gyro " + "angle instead."), Alert.Level.LOW);
         noGyroAngularVelocitySupplierAlert.set(true);
       }
-      gyroAngularVelocity =
-          Radians.per(Microsecond)
-              .of(gyroAngularVelocityFilter.derivative(getGyroAngle().in(Radians)));
+      gyroAngularVelocity = Radians.per(Microsecond).of(gyroAngularVelocityFilter.derivative(getGyroAngle().in(Radians)));
     }
-    var angularVelocityScale = (RobotBase.isSimulation()
-            ? simAngularVelocityScaleFactor.orElse(angularVelocityScaleFactor.orElseThrow())
-            : angularVelocityScaleFactor.orElseThrow());
-    var angularVelocity =
-        new Rotation2d(gyroAngularVelocity.in(RadiansPerSecond) *angularVelocityScale);
+    var angularVelocityScale = (RobotBase.isSimulation() ? simAngularVelocityScaleFactor.orElse(angularVelocityScaleFactor.orElseThrow()) : angularVelocityScaleFactor.orElseThrow());
+    var angularVelocity = new Rotation2d(gyroAngularVelocity.in(RadiansPerSecond) * angularVelocityScale);
     if (angularVelocity.getRadians() != 0.0) {
       var gyroRotation = new Rotation2d(getGyroAngle());
       ChassisVelocities fieldRelativeVelocity = robotRelativeVelocity.toFieldRelative(gyroRotation);
-      robotRelativeVelocity =
-          fieldRelativeVelocity.toRobotRelative(gyroRotation.plus(angularVelocity));
+      robotRelativeVelocity = fieldRelativeVelocity.toRobotRelative(gyroRotation.plus(angularVelocity));
     }
     return robotRelativeVelocity;
   }
@@ -587,10 +574,7 @@ public class SwerveDriveConfig {
       speeds = angularVelocitySkewCorrection(speeds);
     }
     if (discretizationSeconds.isPresent()) {
-      speeds = speeds.discretize(
-          (RobotBase.isSimulation() ? simDiscretizationSeconds.orElse(discretizationSeconds.get())
-                                    : discretizationSeconds.get())
-              .in(Seconds));
+      speeds = speeds.discretize((RobotBase.isSimulation() ? simDiscretizationSeconds.orElse(discretizationSeconds.get()) : discretizationSeconds.get()).in(Seconds));
     }
     return speeds;
   }
@@ -610,9 +594,7 @@ public class SwerveDriveConfig {
    * @return Translation PID controller.
    */
   public PIDController getTranslationPID() {
-    return (RobotBase.isSimulation()
-            ? simTranslationController.orElse(translationController.orElseThrow())
-            : translationController.orElseThrow());
+    return (RobotBase.isSimulation() ? simTranslationController.orElse(translationController.orElseThrow()) : translationController.orElseThrow());
   }
 
   /**
@@ -621,9 +603,7 @@ public class SwerveDriveConfig {
    * @return Rotation PID controller.
    */
   public PIDController getRotationPID() {
-    return (RobotBase.isSimulation()
-            ? simRotationController.orElse(rotationController.orElseThrow())
-            : rotationController.orElseThrow());
+    return (RobotBase.isSimulation() ? simRotationController.orElse(rotationController.orElseThrow()) : rotationController.orElseThrow());
   }
 
   /**
@@ -636,8 +616,7 @@ public class SwerveDriveConfig {
     if (Math.hypot(translation.getX(), translation.getY()) <= 1.0E-6) {
       return translation;
     }
-    return new Translation2d(
-        Math.pow(translation.getNorm(), 3), translation.getAngle().orElse(new Rotation2d()));
+    return new Translation2d(Math.pow(translation.getNorm(), 3), translation.getAngle().orElse(new Rotation2d()));
   }
 
   /**
@@ -651,8 +630,7 @@ public class SwerveDriveConfig {
     if (Math.hypot(translation.getX(), translation.getY()) <= 1.0E-6) {
       return translation;
     }
-    return new Translation2d(
-        translation.getNorm() * scalar, translation.getAngle().orElse(new Rotation2d()));
+    return new Translation2d(translation.getNorm() * scalar, translation.getAngle().orElse(new Rotation2d()));
   }
 
   /**

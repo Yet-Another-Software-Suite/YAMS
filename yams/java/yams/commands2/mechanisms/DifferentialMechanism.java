@@ -36,8 +36,7 @@ import yams.core.motorcontrollers.SmartMotorController;
  *     () -> Degrees.of(driverController.getRightX() * 90));
  * }</pre>
  */
-public class DifferentialMechanism extends yams.core.mechanisms.positional.DifferentialMechanism
-    implements CommandMechanism {
+public class DifferentialMechanism extends yams.core.mechanisms.positional.DifferentialMechanism implements CommandMechanism {
   /** Subsystem the mechanism's commands should require. */
   private final Subsystem subsystem;
 
@@ -51,14 +50,10 @@ public class DifferentialMechanism extends yams.core.mechanisms.positional.Diffe
    */
   public DifferentialMechanism(DifferentialMechanismConfig diffConfig) {
     super(diffConfig);
-    yams.commands2.config.SmartMotorControllerConfig leftConfig =
-        (yams.commands2.config.SmartMotorControllerConfig) getLeftMotorController().getConfig();
-    yams.commands2.config.SmartMotorControllerConfig rightConfig =
-        (yams.commands2.config.SmartMotorControllerConfig) getRightMotorController().getConfig();
+    yams.commands2.config.SmartMotorControllerConfig leftConfig = (yams.commands2.config.SmartMotorControllerConfig) getLeftMotorController().getConfig();
+    yams.commands2.config.SmartMotorControllerConfig rightConfig = (yams.commands2.config.SmartMotorControllerConfig) getRightMotorController().getConfig();
     if (leftConfig.getSubsystem() != rightConfig.getSubsystem()) {
-      throw new DifferentialMechanismConfigurationException(
-          "SmartMotorControllers do not have the same subsystem!",
-          "Cannot create commands for single subsystem.", "withSubsystem(this)");
+      throw new DifferentialMechanismConfigurationException("SmartMotorControllers do not have the same subsystem!", "Cannot create commands for single subsystem.", "withSubsystem(this)");
     }
     this.subsystem = leftConfig.getSubsystem();
   }
@@ -79,15 +74,10 @@ public class DifferentialMechanism extends yams.core.mechanisms.positional.Diffe
     SmartMotorController left = getLeftMotorController();
     SmartMotorController right = getRightMotorController();
     var config = getDifferentialMechanismConfig();
-    return Commands
-        .run(
-            ()
-                -> {
-              left.setPosition(config.getLeftMechanismPosition(tilt.get(), twist.get()));
-              right.setPosition(config.getRightMechanismPosition(tilt.get(), twist.get()));
-            },
-            subsystem)
-        .withName(getName() + " set position");
+    return Commands.run(() -> {
+      left.setPosition(config.getLeftMechanismPosition(tilt.get(), twist.get()));
+      right.setPosition(config.getRightMechanismPosition(tilt.get(), twist.get()));
+    }, subsystem).withName(getName() + " set position");
   }
 
   /**
@@ -100,24 +90,16 @@ public class DifferentialMechanism extends yams.core.mechanisms.positional.Diffe
   public Command set(double twist, double tilt) {
     SmartMotorController left = getLeftMotorController();
     SmartMotorController right = getRightMotorController();
-    return Commands
-        .startRun(
-            ()
-                -> {
-              left.stopClosedLoopController();
-              right.stopClosedLoopController();
-            },
-            ()
-                -> {
-              left.setDutyCycle(tilt - twist);
-              right.setDutyCycle(tilt + twist);
-            },
-            subsystem)
-        .finallyDo(() -> {
-          left.startClosedLoopController();
-          right.startClosedLoopController();
-        })
-        .withName(getName() + " set dutycycle");
+    return Commands.startRun(() -> {
+      left.stopClosedLoopController();
+      right.stopClosedLoopController();
+    }, () -> {
+      left.setDutyCycle(tilt - twist);
+      right.setDutyCycle(tilt + twist);
+    }, subsystem).finallyDo(() -> {
+      left.startClosedLoopController();
+      right.startClosedLoopController();
+    }).withName(getName() + " set dutycycle");
   }
 
   /**
@@ -131,15 +113,10 @@ public class DifferentialMechanism extends yams.core.mechanisms.positional.Diffe
     SmartMotorController left = getLeftMotorController();
     SmartMotorController right = getRightMotorController();
     var config = getDifferentialMechanismConfig();
-    return Commands
-        .run(
-            ()
-                -> {
-              left.setPosition(config.getLeftMechanismPosition(tilt, twist));
-              right.setPosition(config.getRightMechanismPosition(tilt, twist));
-            },
-            subsystem)
-        .withName(getName() + " set position");
+    return Commands.run(() -> {
+      left.setPosition(config.getLeftMechanismPosition(tilt, twist));
+      right.setPosition(config.getRightMechanismPosition(tilt, twist));
+    }, subsystem).withName(getName() + " set position");
   }
 
   /**

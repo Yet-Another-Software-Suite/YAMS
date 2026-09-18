@@ -127,8 +127,7 @@ public class BooleanTelemetry<F> {
       if (!prefix.endsWith("/")) {
         prefix += "/";
       }
-      dataLogEntry = Optional.of(
-          new BooleanLogEntry(DataLogManager.getLog(), prefix + key, (long) Timer.getTimestamp()));
+      dataLogEntry = Optional.of(new BooleanLogEntry(DataLogManager.getLog(), prefix + key, (long) Timer.getTimestamp()));
     }
   }
 

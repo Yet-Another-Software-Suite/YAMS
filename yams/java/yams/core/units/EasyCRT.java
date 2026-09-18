@@ -129,17 +129,10 @@ public class EasyCRT {
     final double tolRot = easyCrtConfig.getMatchTolerance().in(Rotations);
 
     // Read + wrap into [0, 1).
-    final double abs1 = MathUtil.inputModulus(easyCrtConfig.getAbsoluteEncoder1Angle()
-                                                  .plus(easyCrtConfig.getAbsoluteEncoder1Offset())
-                                                  .in(Rotations),
-        0.0, 1.0);
-    final double abs2 = MathUtil.inputModulus(easyCrtConfig.getAbsoluteEncoder2Angle()
-                                                  .plus(easyCrtConfig.getAbsoluteEncoder2Offset())
-                                                  .in(Rotations),
-        0.0, 1.0);
+    final double abs1 = MathUtil.inputModulus(easyCrtConfig.getAbsoluteEncoder1Angle().plus(easyCrtConfig.getAbsoluteEncoder1Offset()).in(Rotations), 0.0, 1.0);
+    final double abs2 = MathUtil.inputModulus(easyCrtConfig.getAbsoluteEncoder2Angle().plus(easyCrtConfig.getAbsoluteEncoder2Offset()).in(Rotations), 0.0, 1.0);
 
-    CrtSolution sol =
-        resolveFromSensors(abs1, abs2, ratio1, ratio2, minMechRot, maxMechRot, tolRot);
+    CrtSolution sol = resolveFromSensors(abs1, abs2, ratio1, ratio2, minMechRot, maxMechRot, tolRot);
 
     if (sol == null) {
       return Optional.empty();
@@ -186,16 +179,12 @@ public class EasyCRT {
    * @param matchTolerance        maximum allowed modular error to accept a solution
    * @return solution containing mechanism rotations and error, or null when not found or ambiguous
    */
-  private CrtSolution resolveFromSensors(double abs1, double abs2, double ratio1, double ratio2,
-      double minMechanismRotations, double maxMechanismRotations, double matchTolerance) {
+  private CrtSolution resolveFromSensors(double abs1, double abs2, double ratio1, double ratio2, double minMechanismRotations, double maxMechanismRotations, double matchTolerance) {
     lastIterations = 0;
     lastErrorRot = Double.NaN;
 
-    if (!Double.isFinite(abs1) || !Double.isFinite(abs2) || !Double.isFinite(ratio1)
-        || !Double.isFinite(ratio2) || Math.abs(ratio1) < 1e-12
-        || !Double.isFinite(minMechanismRotations) || !Double.isFinite(maxMechanismRotations)
-        || minMechanismRotations > maxMechanismRotations || !Double.isFinite(matchTolerance)
-        || matchTolerance < 0.0) {
+    if (!Double.isFinite(abs1) || !Double.isFinite(abs2) || !Double.isFinite(ratio1) || !Double.isFinite(ratio2) || Math.abs(ratio1) < 1e-12 || !Double.isFinite(minMechanismRotations) || !Double.isFinite(
+        maxMechanismRotations) || minMechanismRotations > maxMechanismRotations || !Double.isFinite(matchTolerance) || matchTolerance < 0.0) {
       lastStatus = CRTStatus.INVALID_CONFIG;
       return null;
     }
@@ -273,5 +262,6 @@ public class EasyCRT {
    * @param mechanismRotations solved mechanism rotations
    * @param errorRotations     modular error associated with the solution
    */
-  private static record CrtSolution(double mechanismRotations, double errorRotations) {}
+  private static record CrtSolution(double mechanismRotations, double errorRotations) {
+  }
 }

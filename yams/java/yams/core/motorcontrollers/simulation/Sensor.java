@@ -68,11 +68,11 @@ public class Sensor {
   /**
    * Simulated device.
    */
-  private final Optional<SimDevice> m_simDevice;
+  private final Optional<SimDevice>     m_simDevice;
   /**
    * Sensor name.
    */
-  private final String m_sensorName;
+  private final String                  m_sensorName;
   /**
    * Simulated data.
    */
@@ -87,8 +87,7 @@ public class Sensor {
    */
   public Sensor(String sensorName, List<SensorData> sensorFields) {
     m_sensorName = sensorName;
-    m_simData =
-        sensorFields.stream().collect(Collectors.toMap(SensorData::getName, entry -> entry));
+    m_simData = sensorFields.stream().collect(Collectors.toMap(SensorData::getName, entry -> entry));
     if (RobotBase.isSimulation()) {
       m_simDevice = Optional.of(SimDevice.create("Sensor[" + sensorName + "]"));
       for (var field : sensorFields) {
@@ -116,8 +115,7 @@ public class Sensor {
    */
   public SensorData getField(String name) {
     if (!m_simData.containsKey(name)) {
-      throw new IllegalArgumentException(
-          "Sensor[" + m_sensorName + "." + name + "] does not exist!");
+      throw new IllegalArgumentException("Sensor[" + m_sensorName + "." + name + "] does not exist!");
     }
     return m_simData.get(name);
   }

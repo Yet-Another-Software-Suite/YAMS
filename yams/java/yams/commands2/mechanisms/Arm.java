@@ -55,8 +55,7 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    */
   public Arm(ArmConfig config, SmartMotorController smc) {
     super(config, smc);
-    this.subsystem =
-        ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
+    this.subsystem = ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
   }
 
   @Override
@@ -91,8 +90,7 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    * @return {@link Command} that sets the arm to the desired angle.
    */
   public Command run(Angle angle) {
-    return Commands.run(() -> getMotorController().setPosition(angle), subsystem)
-        .withName(subsystem.getName() + " SetAngle");
+    return Commands.run(() -> getMotorController().setPosition(angle), subsystem).withName(subsystem.getName() + " SetAngle");
   }
 
   /**
@@ -102,8 +100,7 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    * @return {@link Command} that sets the arm to the desired angle.
    */
   public Command run(Supplier<Angle> angle) {
-    return Commands.run(() -> getMotorController().setPosition(angle.get()), subsystem)
-        .withName(subsystem.getName() + " RunAngle Supplier");
+    return Commands.run(() -> getMotorController().setPosition(angle.get()), subsystem).withName(subsystem.getName() + " RunAngle Supplier");
   }
 
   /**
@@ -116,9 +113,7 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    *           the Subsystem.
    */
   public Command runTo(Angle angle, Angle tolerance) {
-    return Commands.runOnce(() -> getMotorController().setPosition(angle), subsystem)
-        .andThen(Commands.waitUntil(near(angle, tolerance).debounce(0.1, DebounceType.RISING)))
-        .withName(subsystem.getName() + " RunTo Angle");
+    return Commands.runOnce(() -> getMotorController().setPosition(angle), subsystem).andThen(Commands.waitUntil(near(angle, tolerance).debounce(0.1, DebounceType.RISING))).withName(subsystem.getName() + " RunTo Angle");
   }
 
   /**
@@ -131,10 +126,7 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    *           continue. It should NOT be used when there is a default command on the Subsystem.
    */
   public Command runTo(Supplier<Angle> angle, Angle tolerance) {
-    return Commands.runOnce(() -> getMotorController().setPosition(angle.get()), subsystem)
-        .andThen(
-            Commands.waitUntil(near(angle.get(), tolerance).debounce(0.1, DebounceType.RISING)))
-        .withName(subsystem.getName() + " RunTo Angle Supplier");
+    return Commands.runOnce(() -> getMotorController().setPosition(angle.get()), subsystem).andThen(Commands.waitUntil(near(angle.get(), tolerance).debounce(0.1, DebounceType.RISING))).withName(subsystem.getName() + " RunTo Angle Supplier");
   }
 
   /**

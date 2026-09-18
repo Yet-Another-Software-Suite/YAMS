@@ -49,9 +49,7 @@ public class DifferentialMechanismConfigurationException extends RuntimeExceptio
    * @param result         Result of the configuration.
    * @param remedyFunction Remedy function to use.
    */
-  public DifferentialMechanismConfigurationException(
-      String message, String result, String remedyFunction) {
-    super(message + "!\n" + result + "\nPlease use DifferentialMechanism." + remedyFunction
-        + " to fix this error.");
+  public DifferentialMechanismConfigurationException(String message, String result, String remedyFunction) {
+    super(message + "!\n" + result + "\nPlease use DifferentialMechanism." + remedyFunction + " to fix this error.");
   }
 }

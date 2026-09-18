@@ -48,7 +48,6 @@ public class FlyWheelConfigurationException extends RuntimeException {
    * @param remedyFunction Remedy function to use.
    */
   public FlyWheelConfigurationException(String message, String result, String remedyFunction) {
-    super(message + "!\n" + result + "\nPlease use FlyWheelConfig." + remedyFunction
-        + " to fix this error.");
+    super(message + "!\n" + result + "\nPlease use FlyWheelConfig." + remedyFunction + " to fix this error.");
   }
 }

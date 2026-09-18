@@ -68,10 +68,10 @@ import yams.core.math.LQRConfig.LQRType;
  * }</pre>
  */
 public class LQRController {
-  private Optional<LQRConfig> m_config = Optional.empty();
-  private LQRType m_type;
+  private Optional<LQRConfig>       m_config = Optional.empty();
+  private LQRType                   m_type;
   private LinearSystemLoop<?, ?, ?> m_loop;
-  private Time m_period;
+  private Time                      m_period;
 
   /**
    * Create a LQR Controller.
@@ -119,12 +119,10 @@ public class LQRController {
   public void reset(Angle angle, AngularVelocity velocity) {
     switch (m_type) {
       case FLYWHEEL -> {
-        ((LinearSystemLoop<N1, N1, N1>) m_loop)
-            .reset(VecBuilder.fill(velocity.in(RadiansPerSecond)));
+        ((LinearSystemLoop<N1, N1, N1>) m_loop).reset(VecBuilder.fill(velocity.in(RadiansPerSecond)));
       }
       case ARM -> {
-        ((LinearSystemLoop<N2, N1, N1>) m_loop)
-            .reset(VecBuilder.fill(angle.in(Radians), velocity.in(RadiansPerSecond)));
+        ((LinearSystemLoop<N2, N1, N1>) m_loop).reset(VecBuilder.fill(angle.in(Radians), velocity.in(RadiansPerSecond)));
       }
     }
   }
@@ -137,8 +135,7 @@ public class LQRController {
    */
   public void reset(Distance distance, LinearVelocity velocity) {
     if (Objects.requireNonNull(m_type) == LQRType.ELEVATOR) {
-      ((LinearSystemLoop<N2, N1, N1>) m_loop)
-          .reset(VecBuilder.fill(distance.in(Meters), velocity.in(MetersPerSecond)));
+      ((LinearSystemLoop<N2, N1, N1>) m_loop).reset(VecBuilder.fill(distance.in(Meters), velocity.in(MetersPerSecond)));
     }
   }
 

@@ -37,8 +37,7 @@ import yams.core.motorcontrollers.SmartMotorController;
  * <p><b>Unsupported operations:</b> {@link #max()} and {@link #min()} are not supported for
  * velocity mechanisms and will throw {@link java.lang.UnsupportedOperationException} if called.
  */
-public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel
-    implements CommandMechanism {
+public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel implements CommandMechanism {
   /** Subsystem the FlyWheel's commands should require. */
   private final Subsystem subsystem;
 
@@ -52,8 +51,7 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel
    */
   public FlyWheel(FlyWheelConfig config, SmartMotorController smc) {
     super(config, smc);
-    this.subsystem =
-        ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
+    this.subsystem = ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
   }
 
   @Override
@@ -115,19 +113,10 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel
     SmartMotorController smc = getMotorController();
     var cmdName = subsystem.getName() + " RunSpeed Supplier";
     if (velocity.get() instanceof AngularVelocity) {
-      return Commands
-          .startRun(smc::startClosedLoopController,
-              () -> smc.setVelocity((AngularVelocity) velocity.get()), subsystem)
-          .withName(cmdName);
+      return Commands.startRun(smc::startClosedLoopController, () -> smc.setVelocity((AngularVelocity) velocity.get()), subsystem).withName(cmdName);
     } else if (velocity.get() instanceof LinearVelocity) {
       getShooterConfig().getCircumference(); // Circumference check
-      return Commands
-          .startRun(smc::startClosedLoopController,
-              ()
-                  -> smc.setVelocity(
-                      getShooterConfig().getAngularVelocity((LinearVelocity) velocity.get())),
-              subsystem)
-          .withName(cmdName);
+      return Commands.startRun(smc::startClosedLoopController, () -> smc.setVelocity(getShooterConfig().getAngularVelocity((LinearVelocity) velocity.get())), subsystem).withName(cmdName);
     }
     throw new IllegalArgumentException("Velocity must be an AngularVelocity or LinearVelocity");
   }
@@ -139,8 +128,7 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel
    * @return {@link Command} that sets the FlyWheel to the desired speed.
    */
   public Command run(AngularVelocity velocity) {
-    return Commands.run(() -> getMotorController().setVelocity(velocity), subsystem)
-        .withName(subsystem.getName() + " " + getName() + " SetSpeed");
+    return Commands.run(() -> getMotorController().setVelocity(velocity), subsystem).withName(subsystem.getName() + " " + getName() + " SetSpeed");
   }
 
   /**
@@ -150,14 +138,11 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel
    * @param tolerance {@link AngularVelocity} tolerance
    * @return {@link Command} that runs the FlyWheel to the desired velocity then moves on.
    * @implNote If you are using this function, try not to have a default command or else the default
-   * command will override the setting after this command ends.
+   *           command will override the setting after this command ends.
    */
   public Command runTo(Supplier<AngularVelocity> velocity, AngularVelocity tolerance) {
     SmartMotorController smc = getMotorController();
-    return Commands.runOnce(smc::startClosedLoopController, subsystem)
-        .andThen(Commands.runOnce(() -> smc.setVelocity(velocity.get()), subsystem))
-        .andThen(Commands.waitUntil(
-            near(velocity.get(), tolerance).debounce(0.1, DebounceType.RISING)))
+    return Commands.runOnce(smc::startClosedLoopController, subsystem).andThen(Commands.runOnce(() -> smc.setVelocity(velocity.get()), subsystem)).andThen(Commands.waitUntil(near(velocity.get(), tolerance).debounce(0.1, DebounceType.RISING)))
         .withName(subsystem.getName() + " RunToVelocity Supplier");
   }
 
@@ -168,14 +153,12 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel
    * @param tolerance {@link AngularVelocity} tolerance
    * @return {@link Command} that runs the FlyWheel to the desired velocity then moves on.
    * @implNote If you are using this function, try not to have a default command or else the default
-   * command will override the setting after this command ends.
+   *           command will override the setting after this command ends.
    */
   public Command runTo(AngularVelocity velocity, AngularVelocity tolerance) {
     SmartMotorController smc = getMotorController();
-    return Commands.runOnce(smc::startClosedLoopController, subsystem)
-        .andThen(Commands.runOnce(() -> smc.setVelocity(velocity), subsystem))
-        .andThen(Commands.waitUntil(near(velocity, tolerance).debounce(0.1, DebounceType.RISING)))
-        .withName(subsystem.getName() + " RunToVelocity");
+    return Commands.runOnce(smc::startClosedLoopController, subsystem).andThen(Commands.runOnce(() -> smc.setVelocity(velocity), subsystem)).andThen(Commands.waitUntil(near(velocity, tolerance).debounce(0.1, DebounceType.RISING))).withName(subsystem
+        .getName() + " RunToVelocity");
   }
 
   /**
@@ -185,12 +168,11 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel
    * @param tolerance {@link LinearVelocity} tolerance
    * @return {@link Command} that runs the FlyWheel to the desired velocity then moves on.
    * @implNote If you are using this function, try not to have a default command or else the default
-   * command will override the setting after this command ends.
+   *           command will override the setting after this command ends.
    */
   public Command runTo(LinearVelocity velocity, LinearVelocity tolerance) {
     getShooterConfig().getCircumference(); // Circumference check
-    return runTo(getShooterConfig().getAngularVelocity(velocity),
-        getShooterConfig().getAngularVelocity(tolerance));
+    return runTo(getShooterConfig().getAngularVelocity(velocity), getShooterConfig().getAngularVelocity(tolerance));
   }
 
   /**
@@ -200,12 +182,11 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel
    * @param tolerance {@link LinearVelocity} tolerance
    * @return {@link Command} that runs the FlyWheel to the desired velocity then moves on.
    * @implNote If you are using this function, try not to have a default command or else the default
-   * command will override the setting after this command ends.
+   *           command will override the setting after this command ends.
    */
   public Command runTo(Supplier<LinearVelocity> velocity, LinearVelocity tolerance) {
     getShooterConfig().getCircumference(); // Circumference check
-    return runTo(() -> getShooterConfig().getAngularVelocity(velocity.get()),
-        getShooterConfig().getAngularVelocity(tolerance));
+    return runTo(() -> getShooterConfig().getAngularVelocity(velocity.get()), getShooterConfig().getAngularVelocity(tolerance));
   }
 
   /**
@@ -215,8 +196,7 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel
    * @return {@link Command} that sets the FlyWheel to the desired speed.
    */
   public Command run(LinearVelocity speed) {
-    return run(getShooterConfig().getAngularVelocity(speed))
-        .withName(subsystem.getName() + " RunSpeed");
+    return run(getShooterConfig().getAngularVelocity(speed)).withName(subsystem.getName() + " RunSpeed");
   }
 
   /**
@@ -226,8 +206,7 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel
    * @throws UnsupportedOperationException Always.
    */
   public Trigger max() {
-    throw new UnsupportedOperationException(
-        "Velocity soft limits have been removed from FlyWheel.");
+    throw new UnsupportedOperationException("Velocity soft limits have been removed from FlyWheel.");
   }
 
   /**
@@ -237,7 +216,6 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel
    * @throws UnsupportedOperationException Always.
    */
   public Trigger min() {
-    throw new UnsupportedOperationException(
-        "Velocity soft limits have been removed from FlyWheel.");
+    throw new UnsupportedOperationException("Velocity soft limits have been removed from FlyWheel.");
   }
 }

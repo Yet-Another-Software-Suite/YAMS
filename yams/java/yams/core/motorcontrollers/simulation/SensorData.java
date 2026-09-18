@@ -72,19 +72,19 @@ public class SensorData {
   /**
    * Sensor name.
    */
-  private final String m_name;
+  private final String                                    m_name;
   /**
    * Sensor value supplier.
    */
-  private final Supplier<HALValue> m_supplier;
+  private final Supplier<HALValue>                        m_supplier;
   /**
    * {@link HALValueType} Type of data.
    */
-  private final HALValueType m_type;
+  private final HALValueType                              m_type;
   /**
    * {@link HALValue} default value.
    */
-  private final HALValue m_defaultValue;
+  private final HALValue                                  m_defaultValue;
   /**
    * Values, based off triggers.
    */
@@ -92,23 +92,22 @@ public class SensorData {
   /**
    * Sim value from Glass.
    */
-  private Optional<SimValue> m_glassValue = Optional.empty();
+  private Optional<SimValue>                              m_glassValue    = Optional.empty();
   /**
    * Previous sensor value when override takes place.
    */
-  private Optional<HALValue> m_prev = Optional.empty();
+  private Optional<HALValue>                              m_prev          = Optional.empty();
 
   /**
    * Sensor data constructor.
    *
    * @param name         Name of sensor.
    * @param supplier     {@link Supplier<HALValue>} of sensor. Use {@link #convert} to convert
-   *     primitive suppliers.
+   *                     primitive suppliers.
    * @param defaultValue Default value of sensor.
    * @param type         {@link HALValueType} of sensor.
    */
-  public SensorData(
-      String name, Supplier<HALValue> supplier, HALValue defaultValue, HALValueType type) {
+  public SensorData(String name, Supplier<HALValue> supplier, HALValue defaultValue, HALValueType type) {
     m_supplier = supplier;
     m_name = name;
     m_defaultValue = defaultValue;
@@ -304,7 +303,7 @@ public class SensorData {
    *
    * @param val Integer value to set.
    * @implNote The value is not checked for validity, ensure that this is the right data type for
-   * the field.
+   *           the field.
    */
   public void set(int val) {
     set(convert(val));
@@ -315,7 +314,7 @@ public class SensorData {
    *
    * @param val Double value to set.
    * @implNote The value is not checked for validity, ensure that this is the right data type for
-   * the field.
+   *           the field.
    */
   public void set(double val) {
     set(convert(val));
@@ -326,7 +325,7 @@ public class SensorData {
    *
    * @param val Long value to set.
    * @implNote The value is not checked for validity, ensure that this is the right data type for
-   * the field.
+   *           the field.
    */
   public void set(long val) {
     set(convert(val));
@@ -337,7 +336,7 @@ public class SensorData {
    *
    * @param val Boolean value to set.
    * @implNote The value is not checked for validity, ensure that this is the right data type for
-   * the field.
+   *           the field.
    */
   public void set(boolean val) {
     set(convert(val));

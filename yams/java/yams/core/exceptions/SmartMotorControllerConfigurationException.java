@@ -57,9 +57,7 @@ public class SmartMotorControllerConfigurationException extends RuntimeException
    * @param result         Result of the configuration.
    * @param remedyFunction Remedy function to use.
    */
-  public SmartMotorControllerConfigurationException(
-      String message, String result, String remedyFunction) {
-    super(message + "!\n" + result + "\nPlease use SmartMotorControllerConfig." + remedyFunction
-        + " to fix this error.");
+  public SmartMotorControllerConfigurationException(String message, String result, String remedyFunction) {
+    super(message + "!\n" + result + "\nPlease use SmartMotorControllerConfig." + remedyFunction + " to fix this error.");
   }
 }

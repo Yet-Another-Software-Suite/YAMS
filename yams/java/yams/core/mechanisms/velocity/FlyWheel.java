@@ -72,19 +72,13 @@ public class FlyWheel extends SmartVelocityMechanism {
     }
 
     if (RobotBase.isSimulation()) {
-      m_dcmotorSim = Optional.of(
-          new DCMotorSim(Models.singleJointedArmFromPhysicalConstants(dcMotor, smcCfg.getMOI(),
-                             smcCfg.getGearing().getMechanismToRotorRatio()),
-              dcMotor));
+      m_dcmotorSim = Optional.of(new DCMotorSim(Models.singleJointedArmFromPhysicalConstants(dcMotor, smcCfg.getMOI(), smcCfg.getGearing().getMechanismToRotorRatio()), dcMotor));
 
       m_smc.setSimSupplier(new DCMotorSimSupplier(m_dcmotorSim.get(), m_smc));
       Distance ShooterLength = config.getDiameter().orElse(Inches.of(36));
-      m_mechanismWindow =
-          new Mechanism2d(ShooterLength.in(Meters) * 2, ShooterLength.in(Meters) * 2);
-      mechanismRoot = m_mechanismWindow.getRoot(
-          getName() + "Root", ShooterLength.in(Meters), ShooterLength.in(Meters));
-      mechanismLigament = mechanismRoot.append(
-          new MechanismLigament2d(getName(), ShooterLength.in(Meters), 0, 6, config.getSimColor()));
+      m_mechanismWindow = new Mechanism2d(ShooterLength.in(Meters) * 2, ShooterLength.in(Meters) * 2);
+      mechanismRoot = m_mechanismWindow.getRoot(getName() + "Root", ShooterLength.in(Meters), ShooterLength.in(Meters));
+      mechanismLigament = mechanismRoot.append(new MechanismLigament2d(getName(), ShooterLength.in(Meters), 0, 6, config.getSimColor()));
       publishMechanismWindow();
     }
   }
@@ -176,8 +170,7 @@ public class FlyWheel extends SmartVelocityMechanism {
       m_smc.simIterate();
       m_smc.getSimSupplier().get().starveUpdateSim();
 
-      RoboRioSim.setVInVoltage(
-          BatterySim.calculateDefaultBatteryLoadedVoltage(m_dcmotorSim.get().getCurrentDraw()));
+      RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_dcmotorSim.get().getCurrentDraw()));
       visualizationUpdate();
     }
   }
@@ -196,11 +189,8 @@ public class FlyWheel extends SmartVelocityMechanism {
    */
   @Override
   public void visualizationUpdate() {
-    if (m_config.isUsingSpeedometerSimulation()
-        && m_config.getSpeedometerMaxVelocity().isPresent()) {
-      mechanismLigament.setAngle(270
-          - m_smc.getMechanismVelocity().in(RPM)
-              / m_config.getSpeedometerMaxVelocity().get().in(RPM) * 180);
+    if (m_config.isUsingSpeedometerSimulation() && m_config.getSpeedometerMaxVelocity().isPresent()) {
+      mechanismLigament.setAngle(270 - m_smc.getMechanismVelocity().in(RPM) / m_config.getSpeedometerMaxVelocity().get().in(RPM) * 180);
     } else {
       mechanismLigament.setAngle(m_smc.getMechanismPosition().in(Degrees));
     }
@@ -215,11 +205,9 @@ public class FlyWheel extends SmartVelocityMechanism {
    */
   @Override
   public Translation3d getRelativeMechanismPosition() {
-    Translation3d mechanismTranslation = new Translation3d(
-        mechanismLigament.getLength(), new Rotation3d(0, 0, mechanismLigament.getAngle()));
+    Translation3d mechanismTranslation = new Translation3d(mechanismLigament.getLength(), new Rotation3d(0, 0, mechanismLigament.getAngle()));
     if (m_config.getMechanismPositionConfig().getRelativePosition().isPresent()) {
-      return m_config.getMechanismPositionConfig().getRelativePosition().get().plus(
-          mechanismTranslation);
+      return m_config.getMechanismPositionConfig().getRelativePosition().get().plus(mechanismTranslation);
     }
     return mechanismTranslation;
   }

@@ -50,8 +50,7 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
   public SwerveDrive(SwerveDriveConfig config) {
     super(config);
     this.subsystem = config.getSubsystem();
-    Tunables.publish("Mechanisms/" + getName() + "/tuning/driveToPose",
-        Commands.startRun(this::startDriveToPoseTuning, this::applyDriveToPoseTuningValues));
+    Tunables.publish("Mechanisms/" + getName() + "/tuning/driveToPose", Commands.startRun(this::startDriveToPoseTuning, this::applyDriveToPoseTuningValues));
   }
 
   /**
@@ -68,14 +67,12 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
    *
    * @param robotRelativeChassisSpeeds {@link Supplier} of {@link ChassisVelocities} for the robot
    *                                   relative chassis speeds. Could also use {@link
-   * yams.core.mechanisms.swerve.utility.SwerveInputStream}
+   *                                   yams.core.mechanisms.swerve.utility.SwerveInputStream}
    * @return {@link Command} to drive the swerve drive.
    * @implNote Not compatible with AdvantageKit
    */
   public Command drive(Supplier<ChassisVelocities> robotRelativeChassisSpeeds) {
-    return Commands
-        .run(() -> setRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds.get()), subsystem)
-        .withName("Drive");
+    return Commands.run(() -> setRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds.get()), subsystem).withName("Drive");
   }
 
   /**
@@ -87,8 +84,6 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
    * @implNote Not compatible with AdvantageKit
    */
   public Command driveToPose(Pose2d pose) {
-    return Commands.runOnce(this::startDriveToPoseTuning)
-        .andThen(() -> setFieldRelativeChassisSpeeds(driveToPoseSetpoint(pose)), subsystem)
-        .withName("Drive to Pose");
+    return Commands.runOnce(this::startDriveToPoseTuning).andThen(() -> setFieldRelativeChassisSpeeds(driveToPoseSetpoint(pose)), subsystem).withName("Drive to Pose");
   }
 }

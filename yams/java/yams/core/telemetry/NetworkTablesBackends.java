@@ -19,10 +19,11 @@ import org.wpilib.tunable.TunableRegistry;
  */
 public final class NetworkTablesBackends {
   private static boolean mechanismsTelemetryRegistered = false;
-  private static boolean mechanismsTunableRegistered = false;
-  private static boolean tuningTunableRegistered = false;
+  private static boolean mechanismsTunableRegistered   = false;
+  private static boolean tuningTunableRegistered       = false;
 
-  private NetworkTablesBackends() {}
+  private NetworkTablesBackends() {
+  }
 
   /**
    * Ensure a {@link TelemetryRegistry} backend is registered at {@code /Mechanisms} that publishes
@@ -31,8 +32,7 @@ public final class NetworkTablesBackends {
    */
   public static synchronized void ensureMechanismsTelemetryBackend() {
     if (!mechanismsTelemetryRegistered) {
-      TelemetryRegistry.registerBackend(
-          "/Mechanisms", new NetworkTablesTelemetryBackend(NetworkTableInstance.getDefault(), ""));
+      TelemetryRegistry.registerBackend("/Mechanisms", new NetworkTablesTelemetryBackend(NetworkTableInstance.getDefault(), ""));
       mechanismsTelemetryRegistered = true;
     }
   }
@@ -44,8 +44,7 @@ public final class NetworkTablesBackends {
    */
   public static synchronized void ensureMechanismsTunableBackend() {
     if (!mechanismsTunableRegistered) {
-      TunableRegistry.registerBackend(
-          "/Mechanisms", new NetworkTablesTunableBackend(NetworkTableInstance.getDefault(), ""));
+      TunableRegistry.registerBackend("/Mechanisms", new NetworkTablesTunableBackend(NetworkTableInstance.getDefault(), ""));
       mechanismsTunableRegistered = true;
     }
   }
@@ -57,8 +56,7 @@ public final class NetworkTablesBackends {
    */
   public static synchronized void ensureTuningTunableBackend() {
     if (!tuningTunableRegistered) {
-      TunableRegistry.registerBackend(
-          "/Tuning", new NetworkTablesTunableBackend(NetworkTableInstance.getDefault(), ""));
+      TunableRegistry.registerBackend("/Tuning", new NetworkTablesTunableBackend(NetworkTableInstance.getDefault(), ""));
       tuningTunableRegistered = true;
     }
   }

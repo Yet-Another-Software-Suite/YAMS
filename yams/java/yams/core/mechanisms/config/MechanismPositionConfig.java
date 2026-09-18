@@ -53,11 +53,11 @@ public class MechanismPositionConfig {
   /**
    * The length of the robot in meters.
    */
-  protected Optional<Distance> maxRobotLength = Optional.empty();
+  protected Optional<Distance>      maxRobotLength   = Optional.empty();
   /**
    * The height of the robot in meters.
    */
-  protected Optional<Distance> maxRobotHeight = Optional.empty();
+  protected Optional<Distance>      maxRobotHeight   = Optional.empty();
   // TODO: Add soft limits display config.
   // TODO: Add hard limits display config.
   /**
@@ -69,7 +69,7 @@ public class MechanismPositionConfig {
    * Set the position of the {@link SmartPositionalMechanism} relative to the robot.
    *
    * @param robotToMechanism {@link Pose3d} of the {@link SmartPositionalMechanism} relative to the
-   *     robot.
+   *                         robot.
    * @return The {@link SmartPositionalMechanism}, for easy chaining.
    */
   public MechanismPositionConfig withRelativePosition(Translation3d robotToMechanism) {
@@ -119,12 +119,9 @@ public class MechanismPositionConfig {
    */
   public Distance getMechanismX(Distance length) {
     if (plane == Plane.YZ || plane == Plane.XY) {
-      return robotToMechanism
-          .map(rtm -> rtm.getMeasureY().plus(getWindowXDimension(length).div(2.0)))
-          .orElse(length);
+      return robotToMechanism.map(rtm -> rtm.getMeasureY().plus(getWindowXDimension(length).div(2.0))).orElse(length);
     }
-    return robotToMechanism.map(rtm -> rtm.getMeasureX().plus(getWindowXDimension(length).div(2.0)))
-        .orElse(length);
+    return robotToMechanism.map(rtm -> rtm.getMeasureX().plus(getWindowXDimension(length).div(2.0))).orElse(length);
   }
 
   /**
@@ -164,7 +161,7 @@ public class MechanismPositionConfig {
    * Get the relative position of the mechanism to the robot.
    *
    * @return {@link Translation3d} representing the relative position. Defaults to a zero
-   *     translation if not set.
+   *         translation if not set.
    */
   public Optional<Translation3d> getRelativePosition() {
     return robotToMechanism;

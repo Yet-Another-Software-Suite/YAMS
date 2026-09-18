@@ -42,36 +42,37 @@ public class ArmConfig {
   /**
    * Telemetry name.
    */
-  private Optional<String> telemetryName = Optional.empty();
+  private Optional<String>             telemetryName           = Optional.empty();
   /**
    * Telemetry verbosity
    */
-  private Optional<TelemetryVerbosity> telemetryVerbosity = Optional.empty();
+  private Optional<TelemetryVerbosity> telemetryVerbosity      = Optional.empty();
   /**
    * Lower Hard Limit for the {@link Arm} to be representing in simulation.
    */
-  private Optional<Angle> lowerHardLimit = Optional.empty();
+  private Optional<Angle>              lowerHardLimit          = Optional.empty();
   /**
    * Upper hard limit for the {@link Arm} representing in simulation.
    */
-  private Optional<Angle> upperHardLimit = Optional.empty();
+  private Optional<Angle>              upperHardLimit          = Optional.empty();
   /**
    * {@link Arm} length for simulation.
    */
-  private Optional<Distance> length = Optional.empty();
+  private Optional<Distance>           length                  = Optional.empty();
   /**
    * Sim color value
    */
-  private Color8Bit simColor = new Color8Bit(Color.ORANGE);
+  private Color8Bit                    simColor                = new Color8Bit(Color.ORANGE);
   /**
    * Mechanism position configuration for the {@link Pivot} (Optional).
    */
-  private MechanismPositionConfig mechanismPositionConfig = new MechanismPositionConfig();
+  private MechanismPositionConfig      mechanismPositionConfig = new MechanismPositionConfig();
 
   /**
    * Arm configuration class. Required
    */
-  public ArmConfig() {}
+  public ArmConfig() {
+  }
 
   /**
    * Copy constructor.
@@ -211,7 +212,7 @@ public class ArmConfig {
    * Get the {@link MechanismPositionConfig} associated with this {@link ArmConfig}.
    *
    * @return An {@link Optional} containing the {@link MechanismPositionConfig} if present,
-   *     otherwise an empty
+   *         otherwise an empty
    *         {@link Optional}.
    */
   public MechanismPositionConfig getMechanismPositionConfig() {

@@ -46,7 +46,6 @@ public class ArmConfigurationException extends RuntimeException {
    * @param remedyFunction Remedy function to use.
    */
   public ArmConfigurationException(String message, String result, String remedyFunction) {
-    super(message + "!\n" + result + "\nPlease use ArmConfig." + remedyFunction
-        + " to fix this error.");
+    super(message + "!\n" + result + "\nPlease use ArmConfig." + remedyFunction + " to fix this error.");
   }
 }

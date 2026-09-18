@@ -38,8 +38,7 @@ import yams.core.motorcontrollers.SmartMotorController;
  * elevator.updateTelemetry();
  * }</pre>
  */
-public class Elevator extends yams.core.mechanisms.positional.Elevator
-    implements CommandMechanism {
+public class Elevator extends yams.core.mechanisms.positional.Elevator implements CommandMechanism {
   /** Subsystem the elevator's commands should require. */
   private final Subsystem subsystem;
 
@@ -53,8 +52,7 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator
    */
   public Elevator(ElevatorConfig config, SmartMotorController smc) {
     super(config, smc);
-    this.subsystem =
-        ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
+    this.subsystem = ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
   }
 
   @Override
@@ -89,8 +87,7 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator
    * @return {@link Command} that sets the elevator height, does not stop.
    */
   public Command run(Distance height) {
-    return Commands.run(() -> getMotorController().setPosition(height), subsystem)
-        .withName(subsystem.getName() + " Run Height");
+    return Commands.run(() -> getMotorController().setPosition(height), subsystem).withName(subsystem.getName() + " Run Height");
   }
 
   /**
@@ -100,8 +97,7 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator
    * @return {@link Command} that sets the elevator height, stops immediately.
    */
   public Command run(Supplier<Distance> height) {
-    return Commands.run(() -> getMotorController().setPosition(height.get()), subsystem)
-        .withName(subsystem.getName() + " Run Height Supplier");
+    return Commands.run(() -> getMotorController().setPosition(height.get()), subsystem).withName(subsystem.getName() + " Run Height Supplier");
   }
 
   /**
@@ -110,14 +106,12 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator
    * @param height    Height to reach.
    * @param tolerance The acceptable tolerance
    * @return {@link Command} which will run the elevator to the desired height with a tolerance,
-   *     then move on.
+   *         then move on.
    * @implNote This should NOT be used with a default command, the mechanism will not stop running
-   * after this to allow for easy chaining.
+   *           after this to allow for easy chaining.
    */
   public Command runTo(Distance height, Distance tolerance) {
-    return Commands.runOnce(() -> getMotorController().setPosition(height), subsystem)
-        .andThen(Commands.waitUntil(near(height, tolerance).debounce(0.1, DebounceType.RISING)))
-        .withName(subsystem.getName() + " Run To Height");
+    return Commands.runOnce(() -> getMotorController().setPosition(height), subsystem).andThen(Commands.waitUntil(near(height, tolerance).debounce(0.1, DebounceType.RISING))).withName(subsystem.getName() + " Run To Height");
   }
 
   /**
@@ -126,15 +120,12 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator
    * @param height    Height to reach.
    * @param tolerance The acceptable tolerance
    * @return {@link Command} which will run the elevator to the desired height with a tolerance,
-   *     then move on.
+   *         then move on.
    * @implNote This should NOT be used with a default command, the mechanism will not stop running
-   * after this to allow for easy chaining.
+   *           after this to allow for easy chaining.
    */
   public Command runTo(Supplier<Distance> height, Distance tolerance) {
-    return Commands.runOnce(() -> getMotorController().setPosition(height.get()), subsystem)
-        .andThen(
-            Commands.waitUntil(near(height.get(), tolerance).debounce(0.1, DebounceType.RISING)))
-        .withName(subsystem.getName() + " Run To Height Supplier");
+    return Commands.runOnce(() -> getMotorController().setPosition(height.get()), subsystem).andThen(Commands.waitUntil(near(height.get(), tolerance).debounce(0.1, DebounceType.RISING))).withName(subsystem.getName() + " Run To Height Supplier");
   }
 
   /**
