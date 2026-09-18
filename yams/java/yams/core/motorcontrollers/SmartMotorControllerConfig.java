@@ -274,8 +274,11 @@ public class SmartMotorControllerConfig {
 
   /**
    * Construct the {@link SmartMotorControllerConfig}.
+   *
+   * @implNote Protected so only {@link yams.commands2.config.SmartMotorControllerConfig} can
+   *     construct this.
    */
-  public SmartMotorControllerConfig() {
+  protected SmartMotorControllerConfig() {
     HAL.reportUsage(null, null);
   }
 

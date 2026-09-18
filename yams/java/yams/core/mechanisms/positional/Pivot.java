@@ -59,8 +59,9 @@ public class Pivot extends SmartPositionalMechanism {
    *
    * @param config Pivot configuration.
    * @param smc    {@link SmartMotorController} driving the pivot.
+   * @implNote Protected so only {@link yams.commands2.mechanisms.Pivot} can construct this.
    */
-  public Pivot(PivotConfig config, SmartMotorController smc) {
+  protected Pivot(PivotConfig config, SmartMotorController smc) {
     m_config = config;
     m_smc = smc;
     SmartMotorControllerConfig motorConfig = m_smc.getConfig();

@@ -90,8 +90,9 @@ public class SwerveDrive {
    * Create a SwerveDrive.
    *
    * @param config {@link SwerveDriveConfig} for the drive.
+   * @implNote Protected so only {@link yams.commands2.swerve.SwerveDrive} can construct this.
    */
-  public SwerveDrive(SwerveDriveConfig config) {
+  protected SwerveDrive(SwerveDriveConfig config) {
     m_config = config;
     m_modules = config.getModules();
     m_desiredModuleStates = new SwerveModuleVelocity[m_modules.length];

@@ -55,8 +55,9 @@ public class FlyWheel extends SmartVelocityMechanism {
    *
    * @param config FlyWheel configuration.
    * @param smc    {@link SmartMotorController} for the Mechanism
+   * @implNote Protected so only {@link yams.commands2.mechanisms.FlyWheel} can construct this.
    */
-  public FlyWheel(FlyWheelConfig config, SmartMotorController smc) {
+  protected FlyWheel(FlyWheelConfig config, SmartMotorController smc) {
     m_config = config;
     m_smc = smc;
     SmartMotorControllerConfig smcCfg = smc.getConfig();

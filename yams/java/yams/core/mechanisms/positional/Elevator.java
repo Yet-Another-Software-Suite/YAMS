@@ -56,8 +56,9 @@ public class Elevator extends SmartPositionalMechanism {
    *
    * @param config {@link ElevatorConfig} to set.
    * @param smc    {@link SmartMotorController} to use for the Elevator
+   * @implNote Protected so only {@link yams.commands2.mechanisms.Elevator} can construct this.
    */
-  public Elevator(ElevatorConfig config, SmartMotorController smc) {
+  protected Elevator(ElevatorConfig config, SmartMotorController smc) {
     m_config = config;
     m_smc = smc;
     SmartMotorControllerConfig smcCfg = smc.getConfig();

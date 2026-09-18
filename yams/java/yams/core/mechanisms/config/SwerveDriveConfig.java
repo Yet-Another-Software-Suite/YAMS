@@ -124,17 +124,20 @@ public class SwerveDriveConfig {
    * Create the {@link SwerveDriveConfig} for the {@link SwerveDrive}
    *
    * @param modules {@link SwerveModule}s for the {@link SwerveDrive}
+   * @implNote Protected so only {@link yams.commands2.config.SwerveDriveConfig} can construct
+   *     this.
    */
-  public SwerveDriveConfig(SwerveModule... modules) {
+  protected SwerveDriveConfig(SwerveModule... modules) {
     this.modules = modules;
   }
 
   /**
    * Create the {@link SwerveDriveConfig} for the {@link SwerveDrive}
    *
-   * @implNote Must define modules with {@link #withModules(SwerveModule...)}
+   * @implNote Must define modules with {@link #withModules(SwerveModule...)}. Protected so only
+   *     {@link yams.commands2.config.SwerveDriveConfig} can construct this.
    */
-  public SwerveDriveConfig() {}
+  protected SwerveDriveConfig() {}
 
   protected SwerveDriveConfig(SwerveDriveConfig cfg) {
     this.telemetryVerbosity = cfg.telemetryVerbosity;

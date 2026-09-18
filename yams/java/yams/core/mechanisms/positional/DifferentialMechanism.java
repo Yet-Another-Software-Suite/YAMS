@@ -96,8 +96,10 @@ public class DifferentialMechanism extends SmartPositionalMechanism {
    * Constructor for the Differential mechanism.
    *
    * @param diffConfig Lower {@link DifferentialMechanismConfig} to use.
+   * @implNote Protected so only {@link yams.commands2.mechanisms.DifferentialMechanism} can
+   *     construct this.
    */
-  public DifferentialMechanism(DifferentialMechanismConfig diffConfig) {
+  protected DifferentialMechanism(DifferentialMechanismConfig diffConfig) {
     m_config = diffConfig;
     m_leftSMC = diffConfig.getLeftMotorController();
     m_rightSMC = diffConfig.getRightMotorController();

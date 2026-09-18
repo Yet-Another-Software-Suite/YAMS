@@ -120,8 +120,10 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
    * @param lowerSMC    {@link SmartMotorController} driving the lower joint.
    * @param upperConfig Upper {@link ArmConfig} to use.
    * @param upperSMC    {@link SmartMotorController} driving the upper joint.
+   * @implNote Protected so only {@link yams.commands2.mechanisms.DoubleJointedArm} can construct
+   *     this.
    */
-  public DoubleJointedArm(ArmConfig lowerConfig, SmartMotorController lowerSMC,
+  protected DoubleJointedArm(ArmConfig lowerConfig, SmartMotorController lowerSMC,
       ArmConfig upperConfig, SmartMotorController upperSMC) {
     m_lowerArmConfig = lowerConfig;
     m_upperArmConfig = upperConfig;

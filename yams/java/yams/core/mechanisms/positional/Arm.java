@@ -54,8 +54,9 @@ public class Arm extends SmartPositionalMechanism {
    *
    * @param config {@link ArmConfig} to use.
    * @param smc    {@link SmartMotorController} for the Arm.
+   * @implNote Protected so only {@link yams.commands2.mechanisms.Arm} can construct this.
    */
-  public Arm(ArmConfig config, SmartMotorController smc) {
+  protected Arm(ArmConfig config, SmartMotorController smc) {
     this.m_config = config;
     m_smc = smc;
     SmartMotorControllerConfig smccfg = smc.getConfig();
