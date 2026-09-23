@@ -605,7 +605,7 @@ public class TalonFXSWrapper extends SmartMotorController {
       Current feedforwardCurrent = m_config.convertToCurrent(m_dcmotor, feedforwardForce);
       switch (m_velocityReq.getName()) {
         case "MotionMagicVelocityDutyCycle":
-          ensureRequest(() -> m_talonfxs.setControl(((MotionMagicVelocityDutyCycle) m_velocityReq).withVelocity(angularVelocity).withFeedForward(feedforwardVoltage.in(Volts) / m_dcmotor.nominalVoltageVolts)));
+          ensureRequest(() -> m_talonfxs.setControl(((MotionMagicVelocityDutyCycle) m_velocityReq).withVelocity(angularVelocity).withFeedForward(feedforwardVoltage.in(Volts) / m_dcmotor.nominalVoltage)));
           break;
         case "MotionMagicVelocityTorqueCurrentFOC":
           ensureRequest(() -> m_talonfxs.setControl(((MotionMagicVelocityTorqueCurrentFOC) m_velocityReq).withVelocity(angularVelocity).withFeedForward(feedforwardCurrent)));
@@ -614,7 +614,7 @@ public class TalonFXSWrapper extends SmartMotorController {
           ensureRequest(() -> m_talonfxs.setControl(((MotionMagicVelocityVoltage) m_velocityReq).withVelocity(angularVelocity).withFeedForward(feedforwardVoltage)));
           break;
         case "VelocityDutyCycle":
-          ensureRequest(() -> m_talonfxs.setControl(((VelocityDutyCycle) m_velocityReq).withVelocity(angularVelocity).withFeedForward(feedforwardVoltage.in(Volts) / m_dcmotor.nominalVoltageVolts)));
+          ensureRequest(() -> m_talonfxs.setControl(((VelocityDutyCycle) m_velocityReq).withVelocity(angularVelocity).withFeedForward(feedforwardVoltage.in(Volts) / m_dcmotor.nominalVoltage)));
           break;
         case "VelocityTorqueCurrentFOC":
           ensureRequest(() -> m_talonfxs.setControl(((VelocityTorqueCurrentFOC) m_velocityReq).withVelocity(angularVelocity).withFeedForward(feedforwardCurrent)));
@@ -949,11 +949,11 @@ public class TalonFXSWrapper extends SmartMotorController {
         StatusCode applied;
         do {
           if (follower.getFirst() instanceof TalonFXS) {
-            config.getIdleMode().ifPresent(mode -> ((TalonFXS) follower.getFirst()).setNeutralMode(mode == MotorMode.BRAKE ? NeutralModeValue.Brake : NeutralModeValue.Coast));
+            config.getIdleMode().ifPresent(mode -> ((TalonFXS) follower.getFirst()).configNeutralMode(mode == MotorMode.BRAKE ? NeutralModeValue.Brake : NeutralModeValue.Coast));
             applied = ((TalonFXS) follower.getFirst()).setControl(new Follower(m_talonfxs.getDeviceID(), follower.getSecond() ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned));
 
           } else if (follower.getFirst() instanceof TalonFX) {
-            config.getIdleMode().ifPresent(mode -> ((TalonFX) follower.getFirst()).setNeutralMode(mode == MotorMode.BRAKE ? NeutralModeValue.Brake : NeutralModeValue.Coast));
+            config.getIdleMode().ifPresent(mode -> ((TalonFX) follower.getFirst()).configNeutralMode(mode == MotorMode.BRAKE ? NeutralModeValue.Brake : NeutralModeValue.Coast));
             applied = ((TalonFX) follower.getFirst()).setControl(new Follower(m_talonfxs.getDeviceID(), follower.getSecond() ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned));
           } else {
             throw new IllegalArgumentException("[ERROR] Unknown follower type: " + follower.getFirst().getClass().getSimpleName());

@@ -61,9 +61,6 @@ model {
                     source {
                         srcDirs "$rootDir/../yams/cpp/src"
                         include '**/*.cpp'
-                        // CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7,
-                        // so the TalonFX/TalonFXS wrappers stay excluded until one is available.
-                        exclude "**/TalonFX*.cpp"
                     }
                     exportedHeaders {
                         srcDirs "$rootDir/../yams/cpp/include"

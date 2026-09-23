@@ -5,16 +5,6 @@ sourceSets {
     main {
         java {
             srcDir "$rootDir/../yams/java/"
-            exclude  "**/TalonFX*.java"
-        }
-    }
-    // CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7. CANcoderTest.java
-    // is entirely CTRE (CANcoder + TalonFX), so it stays excluded until one is available. The other
-    // mechanism tests have their CTRE-specific imports/cases commented out (not deleted) instead,
-    // so their REV-only coverage keeps running.
-    test {
-        java {
-            exclude "yams/core/motorcontrollers/CANcoderTest.java"
         }
     }
 }
