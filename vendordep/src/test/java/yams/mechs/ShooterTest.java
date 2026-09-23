@@ -70,9 +70,8 @@ public class ShooterTest {
     FlyWheelConfig cfg = new FlyWheelConfig().withDiameter(Inches.of(4));
     FlyWheel shooter = new FlyWheel(cfg, smc);
     SmartMotorControllerTestSubsystem subsys =
-        (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig)
-                                                 smc.getConfig())
-            .getSubsystem();
+        (SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
     subsys.smc = smc;
     subsys.mechSimPeriodic = shooter::simIterate;
     subsys.mechUpdateTelemetry = shooter::updateTelemetry;
@@ -112,26 +111,50 @@ public class ShooterTest {
       //    ThriftyNova tnova = new ThriftyNova(30 + offset+i);
       TalonFXS tfxs = DeviceCreator.createTalonFXS();
       TalonFX tfx = DeviceCreator.createTalonFX();
-      smcList.add(Arguments.of(setupTestSubsystem(new SparkWrapper(smax, DCMotor.getNEO(1),
-          ((yams.commands2.config.SmartMotorControllerConfig) smcConfig.clone())
-              .withSubsystem(new SmartMotorControllerTestSubsystem())
-              .withTelemetry(
-                  "SparkMax(" + (10 + offset) + "[" + i + "]) NEO", TelemetryVerbosity.HIGH)))));
-      smcList.add(Arguments.of(setupTestSubsystem(new SparkWrapper(sflex, DCMotor.getNeoVortex(1),
-          ((yams.commands2.config.SmartMotorControllerConfig) smcConfig.clone())
-              .withSubsystem(new SmartMotorControllerTestSubsystem())
-              .withTelemetry("SparkFlex(" + (20 + offset) + "[" + i + "]) Vortex",
-                  TelemetryVerbosity.HIGH)))));
-      smcList.add(Arguments.of(setupTestSubsystem(new TalonFXSWrapper(tfxs, DCMotor.getNEO(2),
-          ((yams.commands2.config.SmartMotorControllerConfig) smcConfig.clone())
-              .withSubsystem(new SmartMotorControllerTestSubsystem())
-              .withTelemetry(
-                  "TalonFXS(" + (30 + offset) + "[" + i + "]) NEO", TelemetryVerbosity.HIGH)))));
-      smcList.add(Arguments.of(setupTestSubsystem(new TalonFXWrapper(tfx, DCMotor.getKrakenX60(1),
-          ((yams.commands2.config.SmartMotorControllerConfig) smcConfig.clone())
-              .withSubsystem(new SmartMotorControllerTestSubsystem())
-              .withTelemetry(
-                  "TalonFX(" + (40 + offset) + "[" + i + "]) Kraken", TelemetryVerbosity.HIGH)))));
+      smcList.add(
+          Arguments.of(
+              setupTestSubsystem(
+                  new SparkWrapper(
+                      smax,
+                      DCMotor.getNEO(1),
+                      ((yams.commands2.config.SmartMotorControllerConfig) smcConfig.clone())
+                          .withSubsystem(new SmartMotorControllerTestSubsystem())
+                          .withTelemetry(
+                              "SparkMax(" + (10 + offset) + "[" + i + "]) NEO",
+                              TelemetryVerbosity.HIGH)))));
+      smcList.add(
+          Arguments.of(
+              setupTestSubsystem(
+                  new SparkWrapper(
+                      sflex,
+                      DCMotor.getNeoVortex(1),
+                      ((yams.commands2.config.SmartMotorControllerConfig) smcConfig.clone())
+                          .withSubsystem(new SmartMotorControllerTestSubsystem())
+                          .withTelemetry(
+                              "SparkFlex(" + (20 + offset) + "[" + i + "]) Vortex",
+                              TelemetryVerbosity.HIGH)))));
+      smcList.add(
+          Arguments.of(
+              setupTestSubsystem(
+                  new TalonFXSWrapper(
+                      tfxs,
+                      DCMotor.getNEO(2),
+                      ((yams.commands2.config.SmartMotorControllerConfig) smcConfig.clone())
+                          .withSubsystem(new SmartMotorControllerTestSubsystem())
+                          .withTelemetry(
+                              "TalonFXS(" + (30 + offset) + "[" + i + "]) NEO",
+                              TelemetryVerbosity.HIGH)))));
+      smcList.add(
+          Arguments.of(
+              setupTestSubsystem(
+                  new TalonFXWrapper(
+                      tfx,
+                      DCMotor.getKrakenX60(1),
+                      ((yams.commands2.config.SmartMotorControllerConfig) smcConfig.clone())
+                          .withSubsystem(new SmartMotorControllerTestSubsystem())
+                          .withTelemetry(
+                              "TalonFX(" + (40 + offset) + "[" + i + "]) Kraken",
+                              TelemetryVerbosity.HIGH)))));
     }
 
     return smcList.stream();
@@ -140,13 +163,13 @@ public class ShooterTest {
   private static void closeSMC(SmartMotorController smc) {
     SmartMotorControllerCommandRegistry.removeCommands(
         ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem());
-    CommandScheduler.getInstance().unregisterSubsystem(
-        (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig)
-                                                 smc.getConfig())
-            .getSubsystem());
-    ((SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig)
-                                              smc.getConfig())
-            .getSubsystem())
+    CommandScheduler.getInstance()
+        .unregisterSubsystem(
+            (SmartMotorControllerTestSubsystem)
+                ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig())
+                    .getSubsystem());
+    ((SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
         .close();
     smc.close();
 
@@ -176,33 +199,39 @@ public class ShooterTest {
 
     TestWithScheduler.schedule(velocityUp);
     if (smc instanceof TalonFXSWrapper || smc instanceof TalonFXWrapper) {
-      TestWithScheduler.cycle(Seconds.of(1), () -> {
-        try {
-          Thread.sleep((long) smc.getConfig()
-                  .getClosedLoopControlPeriod()
-                  .orElse(Milliseconds.of(20))
-                  .in(Millisecond));
-        } catch (Exception e) {
-        }
-        if (smc.getDutyCycle() != 0) {
-          testPassed.set(true);
-        }
-      });
+      TestWithScheduler.cycle(
+          Seconds.of(1),
+          () -> {
+            try {
+              Thread.sleep(
+                  (long)
+                      smc.getConfig()
+                          .getClosedLoopControlPeriod()
+                          .orElse(Milliseconds.of(20))
+                          .in(Millisecond));
+            } catch (Exception e) {
+            }
+            if (smc.getDutyCycle() != 0) {
+              testPassed.set(true);
+            }
+          });
 
     } else {
-      TestWithScheduler.cycle(Seconds.of(2), () -> {
-        //        try
-        //        {
-        //          Thread.sleep((long)
-        // smc.getConfig().getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Millisecond));
-        //        } catch (InterruptedException e)
-        //        {
-        //          throw new RuntimeException(e);
-        //        }
-        if (smc.getDutyCycle() != 0) {
-          testPassed.set(true);
-        }
-      });
+      TestWithScheduler.cycle(
+          Seconds.of(2),
+          () -> {
+            //        try
+            //        {
+            //          Thread.sleep((long)
+            // smc.getConfig().getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Millisecond));
+            //        } catch (InterruptedException e)
+            //        {
+            //          throw new RuntimeException(e);
+            //        }
+            if (smc.getDutyCycle() != 0) {
+              testPassed.set(true);
+            }
+          });
     }
 
     post = smc.getMechanismPosition();
@@ -223,8 +252,9 @@ public class ShooterTest {
     //    assertFalse(pre.isNear(post, Degrees.of(0.05)));
   }
 
-  private static void dutyCycleTest(SmartMotorController smc, Command dutycycleUp,
-      Command dutyCycleDown) throws InterruptedException {
+  private static void dutyCycleTest(
+      SmartMotorController smc, Command dutycycleUp, Command dutyCycleDown)
+      throws InterruptedException {
     AngularVelocity pre = smc.getMechanismVelocity();
     Angle preAngle = smc.getMechanismPosition();
     AngularVelocity post;
@@ -233,11 +263,13 @@ public class ShooterTest {
 
     TestWithScheduler.schedule(dutycycleUp);
     TestWithScheduler.schedule(dutycycleUp);
-    TestWithScheduler.cycle(Seconds.of(1), () -> {
-      if (smc.getDutyCycle() != 0) {
-        testPassed.set(true);
-      }
-    });
+    TestWithScheduler.cycle(
+        Seconds.of(1),
+        () -> {
+          if (smc.getDutyCycle() != 0) {
+            testPassed.set(true);
+          }
+        });
     if (smc instanceof TalonFXSWrapper || smc instanceof TalonFXWrapper) {
       Thread.sleep(200);
       TestWithScheduler.cycle(Seconds.of(1));
@@ -257,18 +289,16 @@ public class ShooterTest {
 
   private static SmartMotorController setupTestSubsystem(SmartMotorController smc) {
     SmartMotorControllerTestSubsystem subsys =
-        (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig)
-                                                 smc.getConfig())
-            .getSubsystem();
+        (SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
     subsys.setSMC(smc);
     return smc;
   }
 
   private static void startTest(SmartMotorController smc) {
     SmartMotorControllerTestSubsystem subsys =
-        (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig)
-                                                 smc.getConfig())
-            .getSubsystem();
+        (SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
     subsys.testRunning = true;
   }
 
@@ -279,9 +309,8 @@ public class ShooterTest {
       startTest(smc);
       smc.setupSimulation();
       SmartMotorControllerTestSubsystem subsys =
-          (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig)
-                                                   smc.getConfig())
-              .getSubsystem();
+          (SmartMotorControllerTestSubsystem)
+              ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
 
       Command dutyCycleUp = subsys.setDutyCycle(0.5);
       Command dutyCycleDown = subsys.setDutyCycle(-0.5);

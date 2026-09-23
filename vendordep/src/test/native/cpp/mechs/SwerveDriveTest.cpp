@@ -228,20 +228,23 @@ struct SwerveDriveTestFixture {
       return cfg;
     };
 
-    m_fl.emplace(makeModuleCfg(hw.flDriveSMC, hw.flAzimuthSMC, kModuleX, kModuleY, "FL"));
-    m_fr.emplace(makeModuleCfg(hw.frDriveSMC, hw.frAzimuthSMC, kModuleX, -kModuleY, "FR"));
-    m_bl.emplace(makeModuleCfg(hw.blDriveSMC, hw.blAzimuthSMC, -kModuleX, kModuleY, "BL"));
-    m_br.emplace(makeModuleCfg(hw.brDriveSMC, hw.brAzimuthSMC, -kModuleX, -kModuleY, "BR"));
+    m_flCfg = makeModuleCfg(hw.flDriveSMC, hw.flAzimuthSMC, kModuleX, kModuleY, "FL");
+    m_frCfg = makeModuleCfg(hw.frDriveSMC, hw.frAzimuthSMC, kModuleX, -kModuleY, "FR");
+    m_blCfg = makeModuleCfg(hw.blDriveSMC, hw.blAzimuthSMC, -kModuleX, kModuleY, "BL");
+    m_brCfg = makeModuleCfg(hw.brDriveSMC, hw.brAzimuthSMC, -kModuleX, -kModuleY, "BR");
+    m_fl.emplace(&m_flCfg);
+    m_fr.emplace(&m_frCfg);
+    m_bl.emplace(&m_blCfg);
+    m_br.emplace(&m_brCfg);
 
-    SwerveDriveConfig driveCfg;
-    driveCfg.WithSubsystem(hw.sub)
+    m_driveCfg.WithSubsystem(hw.sub)
         .WithModules({&m_fl.value(), &m_fr.value(), &m_bl.value(), &m_br.value()})
         .WithGyro([this] { return m_simGyro; })
         .WithStartingPose(wpi::math::Pose2d{})
         .WithMaximumChassisSpeed(4.5_mps, wpi::units::degrees_per_second_t{540})
         .WithTranslationController(wpi::math::PIDController{2.0, 0.0, 0.0})
         .WithRotationController(wpi::math::PIDController{4.0, 0.0, 0.0});
-    m_drive.emplace(std::move(driveCfg));
+    m_drive.emplace(&m_driveCfg);
 
     hw.sub->m_drive = &m_drive.value();
   }
@@ -260,6 +263,13 @@ struct SwerveDriveTestFixture {
 
   // Simulated gyro angle tests can mutate this to fake heading.
   wpi::units::degree_t m_simGyro{0};
+
+  // Configs must outlive the module/drive objects that hold pointers to them.
+  SwerveModuleConfig m_flCfg;
+  SwerveModuleConfig m_frCfg;
+  SwerveModuleConfig m_blCfg;
+  SwerveModuleConfig m_brCfg;
+  SwerveDriveConfig m_driveCfg;
 
   std::optional<SwerveModule> m_fl;
   std::optional<SwerveModule> m_fr;
