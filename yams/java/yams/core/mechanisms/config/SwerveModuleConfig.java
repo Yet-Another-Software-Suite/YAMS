@@ -538,7 +538,7 @@ public class SwerveModuleConfig {
    * @return {@link SwerveModuleVelocity} optimized.
    */
   public SwerveModuleVelocity getOptimizedState(SwerveModuleVelocity state) {
-    Rotation2d currentAngle = new Rotation2d(getAbsoluteEncoderAngle());
+    Rotation2d currentAngle = new Rotation2d(azimuthMotor.orElseThrow().getMechanismPosition());
     if (minimumVelocity.isPresent()) {
       if (MetersPerSecond.of(Math.abs(state.velocity)).lte(minimumVelocity.get())) {
         //        state = new SwerveModuleVelocity(0, state.angle);
@@ -549,11 +549,11 @@ public class SwerveModuleConfig {
       if (lastCommandedAngle == null) {
         lastCommandedAngle = currentAngle;
       }
-      state = state.optimize(lastCommandedAngle);
+      state = state.optimize(currentAngle);
       lastCommandedAngle = state.angle;
     }
     if (cosineCompensation) {
-      state.velocity = getCosineCompensatedVelocity(state, new Rotation2d(azimuthMotor.orElseThrow().getMechanismPosition()));
+      state.velocity = getCosineCompensatedVelocity(state, currentAngle);
     }
     return state;
   }
