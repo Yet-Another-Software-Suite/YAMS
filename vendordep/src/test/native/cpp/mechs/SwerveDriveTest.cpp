@@ -10,7 +10,6 @@
 // simulation background thread from accessing freed TalonFXSimState, which
 // would otherwise cause a SIGSEGV if TalonFX objects were rebuilt per-test.
 
-/*
 #include <wpi/math/controller/PIDController.hpp>
 #include <wpi/math/geometry/Pose2d.hpp>
 #include <wpi/math/geometry/Rotation2d.hpp>
@@ -20,6 +19,7 @@
 #include <wpi/commands2/CommandScheduler.hpp>
 #include <wpi/commands2/CommandScheduler.hpp>
 #include <wpi/commands2/SubsystemBase.hpp>
+#include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/length.hpp>
@@ -129,38 +129,57 @@ struct SwerveSuiteHardware {
   remote::TalonFXWrapper* blAzimuthSMC{nullptr};
   remote::TalonFXWrapper* brAzimuthSMC{nullptr};
 
+  // Configs must outlive their wrappers; stored here so their addresses stay stable.
+  SmartMotorControllerConfig flDriveCfg;
+  SmartMotorControllerConfig frDriveCfg;
+  SmartMotorControllerConfig blDriveCfg;
+  SmartMotorControllerConfig brDriveCfg;
+  SmartMotorControllerConfig flAzimuthCfg;
+  SmartMotorControllerConfig frAzimuthCfg;
+  SmartMotorControllerConfig blAzimuthCfg;
+  SmartMotorControllerConfig brAzimuthCfg;
+
   SwerveSuiteHardware() {
     InitializeHardware();
     SchedulerHelper::Enable();
 
     sub = new SwerveTestSubsystem();
 
-    flDriveTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId());
-    frDriveTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId());
-    blDriveTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId());
-    brDriveTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId());
-    flAzimuthTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId());
-    frAzimuthTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId());
-    blAzimuthTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId());
-    brAzimuthTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId());
+    flDriveTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId(), ctre::phoenix6::CANBus{});
+    frDriveTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId(), ctre::phoenix6::CANBus{});
+    blDriveTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId(), ctre::phoenix6::CANBus{});
+    brDriveTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId(), ctre::phoenix6::CANBus{});
+    flAzimuthTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId(), ctre::phoenix6::CANBus{});
+    frAzimuthTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId(), ctre::phoenix6::CANBus{});
+    blAzimuthTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId(), ctre::phoenix6::CANBus{});
+    brAzimuthTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId(), ctre::phoenix6::CANBus{});
+
+    flDriveCfg = MakeDriveConfig("FL_Drive", sub);
+    frDriveCfg = MakeDriveConfig("FR_Drive", sub);
+    blDriveCfg = MakeDriveConfig("BL_Drive", sub);
+    brDriveCfg = MakeDriveConfig("BR_Drive", sub);
+    flAzimuthCfg = MakeAzimuthConfig("FL_Azimuth", sub);
+    frAzimuthCfg = MakeAzimuthConfig("FR_Azimuth", sub);
+    blAzimuthCfg = MakeAzimuthConfig("BL_Azimuth", sub);
+    brAzimuthCfg = MakeAzimuthConfig("BR_Azimuth", sub);
 
     // TalonFXWrapper constructor calls SetupSimulation() automatically.
-    flDriveSMC = new remote::TalonFXWrapper(*flDriveTalon, wpi::math::DCMotor::KrakenX60(1),
-                                            MakeDriveConfig("FL_Drive", sub));
-    frDriveSMC = new remote::TalonFXWrapper(*frDriveTalon, wpi::math::DCMotor::KrakenX60(1),
-                                            MakeDriveConfig("FR_Drive", sub));
-    blDriveSMC = new remote::TalonFXWrapper(*blDriveTalon, wpi::math::DCMotor::KrakenX60(1),
-                                            MakeDriveConfig("BL_Drive", sub));
-    brDriveSMC = new remote::TalonFXWrapper(*brDriveTalon, wpi::math::DCMotor::KrakenX60(1),
-                                            MakeDriveConfig("BR_Drive", sub));
-    flAzimuthSMC = new remote::TalonFXWrapper(*flAzimuthTalon, wpi::math::DCMotor::KrakenX60(1),
-                                              MakeAzimuthConfig("FL_Azimuth", sub));
-    frAzimuthSMC = new remote::TalonFXWrapper(*frAzimuthTalon, wpi::math::DCMotor::KrakenX60(1),
-                                              MakeAzimuthConfig("FR_Azimuth", sub));
-    blAzimuthSMC = new remote::TalonFXWrapper(*blAzimuthTalon, wpi::math::DCMotor::KrakenX60(1),
-                                              MakeAzimuthConfig("BL_Azimuth", sub));
-    brAzimuthSMC = new remote::TalonFXWrapper(*brAzimuthTalon, wpi::math::DCMotor::KrakenX60(1),
-                                              MakeAzimuthConfig("BR_Azimuth", sub));
+    flDriveSMC = new remote::TalonFXWrapper(flDriveTalon, wpi::math::DCMotor::KrakenX60(1),
+                                            &flDriveCfg);
+    frDriveSMC = new remote::TalonFXWrapper(frDriveTalon, wpi::math::DCMotor::KrakenX60(1),
+                                            &frDriveCfg);
+    blDriveSMC = new remote::TalonFXWrapper(blDriveTalon, wpi::math::DCMotor::KrakenX60(1),
+                                            &blDriveCfg);
+    brDriveSMC = new remote::TalonFXWrapper(brDriveTalon, wpi::math::DCMotor::KrakenX60(1),
+                                            &brDriveCfg);
+    flAzimuthSMC = new remote::TalonFXWrapper(flAzimuthTalon, wpi::math::DCMotor::KrakenX60(1),
+                                              &flAzimuthCfg);
+    frAzimuthSMC = new remote::TalonFXWrapper(frAzimuthTalon, wpi::math::DCMotor::KrakenX60(1),
+                                              &frAzimuthCfg);
+    blAzimuthSMC = new remote::TalonFXWrapper(blAzimuthTalon, wpi::math::DCMotor::KrakenX60(1),
+                                              &blAzimuthCfg);
+    brAzimuthSMC = new remote::TalonFXWrapper(brAzimuthTalon, wpi::math::DCMotor::KrakenX60(1),
+                                              &brAzimuthCfg);
   }
 
   ~SwerveSuiteHardware() {
@@ -293,7 +312,7 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.GetStateFromSpeedsForw
 
   for (size_t i = 0; i < 4; ++i) {
     INFO("Module " << i << " speed should equal commanded speed");
-    CHECK(states[i].speed.value() == Catch::Approx(1.0).margin(0.01));
+    CHECK(states[i].velocity.value() == Catch::Approx(1.0).margin(0.01));
     INFO("Module " << i << " angle should be 0° for pure forward drive");
     CHECK(states[i].angle.Degrees().value() == Catch::Approx(0.0).margin(1.0));
   }
@@ -307,7 +326,7 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.GetStateFromSpeedsPure
 
   for (size_t i = 0; i < 4; ++i) {
     INFO("Module " << i << " should have non-zero speed for rotation command");
-    CHECK(std::abs(states[i].speed.value()) > 0.0);
+    CHECK(std::abs(states[i].velocity.value()) > 0.0);
     INFO("Module " << i << " should not point forward during pure rotation");
     CHECK(std::abs(states[i].angle.Degrees().value()) > 1.0);
   }
@@ -338,7 +357,7 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.LockPoseSetsXPattern",
   SchedulerHelper::RunForDuration(0.5_s);
   auto modules = m_drive->GetConfig().GetModules();
   for (size_t i = 0; i < 4; ++i) {
-    double expected = modules[i]->GetConfig().GetLocation()->Angle().Degrees().value();
+    double expected = modules[i]->GetConfig().GetLocation()->Angle()->Degrees().value();
     double actual = modules[i]->GetState().angle.Degrees().value();
     INFO("Module " << i << " angle should converge toward lock angle " << expected << "°");
     CHECK(actual == Catch::Approx(expected).margin(180.0));
@@ -419,4 +438,3 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.SecondDriveCommandInte
 }
 
 }  // namespace yams::test
-*/

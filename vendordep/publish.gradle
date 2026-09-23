@@ -89,7 +89,8 @@ task generateDoxygen(type: Exec) {
 PROJECT_NAME           = "YAMS"
 PROJECT_BRIEF          = "Yet Another Mechanism System"
 OUTPUT_DIRECTORY       = ${doxygenOutputDir.absolutePath}
-INPUT                  = ${file("$rootDir/../yams/cpp/include").absolutePath}
+INPUT                  = ${file("$rootDir/../yams/cpp/include").absolutePath
+            }
 RECURSIVE              = YES
 GENERATE_HTML          = YES
 GENERATE_LATEX         = NO
@@ -99,26 +100,26 @@ EXTRACT_ALL            = YES
 FILE_PATTERNS          = *.h *.hpp *.dox
 QUIET                  = YES
 """
-    }
+}
 
-    commandLine 'doxygen', file("$buildDir/Doxyfile")
-    ignoreExitValue = true
+commandLine 'doxygen', file("$buildDir/Doxyfile")
+ignoreExitValue = true
 }
 
 task cppDoxygenZip(type: Zip, dependsOn: generateDoxygen) {
-    onlyIf { doxygenAvailable }
-    destinationDirectory = outputsFolder
-    archiveBaseName = zipBaseName
-    archiveClassifier = "cppapi"
+onlyIf { doxygenAvailable }
+destinationDirectory = outputsFolder
+archiveBaseName = zipBaseName
+archiveClassifier = "cppapi"
 
-    from(doxygenOutputDir) {
-        into '/'
-    }
+from(doxygenOutputDir) {
+    into '/'
+}
 }
 
 if (!skipCpp) {
-    build.dependsOn cppHeadersZip
-    addTaskToCopyAllOutputs(cppHeadersZip)
+build.dependsOn cppHeadersZip
+addTaskToCopyAllOutputs(cppHeadersZip)
 }
 
 // -----------------------------------------------------------------------------------------------
@@ -130,60 +131,64 @@ if (!skipCpp) {
 // changes needed.
 // -----------------------------------------------------------------------------------------------
 task javadocJar(type: Jar, dependsOn: javadoc) {
+archiveClassifier = 'javadoc'
+from javadoc.destinationDir
+}
+
+def javaArtifactNames = [
+'core',
+'commands2',
+'commands3'
+]
+def javaArtifacts = [:]
+
+javaArtifactNames.each { name ->
+def packageGlob = "yams/${name}/**"
+def outputBaseName = "_GROUP_yams_ID_${baseArtifactId}-${name}_CLS"
+def titleCaseName = name.capitalize()
+
+def jar = tasks.create("${name}Jar", Jar) {
+    dependsOn classes
+    archiveClassifier = name
+    from(sourceSets.main.output) { include packageGlob }
+}
+def sourcesJar = tasks.create("${name}SourcesJar", Jar) {
+    dependsOn classes
+    archiveClassifier = "${name}-sources"
+    from(sourceSets.main.allSource) { include packageGlob }
+}
+def outputJar = tasks.create("output${titleCaseName}Jar", Jar) {
+    dependsOn classes
+    archiveBaseName = outputBaseName
+    destinationDirectory = outputsFolder
+    from(sourceSets.main.output) { include packageGlob }
+}
+def outputSourcesJar = tasks.create("output${titleCaseName}SourcesJar", Jar) {
+    dependsOn classes
+    archiveBaseName = outputBaseName
+    destinationDirectory = outputsFolder
+    archiveClassifier = 'sources'
+    from(sourceSets.main.allSource) { include packageGlob }
+}
+def outputJavadocJar = tasks.create("output${titleCaseName}JavadocJar", Jar) {
+    dependsOn javadoc
+    archiveBaseName = outputBaseName
+    destinationDirectory = outputsFolder
     archiveClassifier = 'javadoc'
     from javadoc.destinationDir
 }
 
-def javaArtifactNames = ['core', 'commands2', 'commands3']
-def javaArtifacts = [:]
+javaArtifacts[name] = [
+    jar: jar, sourcesJar: sourcesJar,
+    outputJar: outputJar, outputSourcesJar: outputSourcesJar, outputJavadocJar: outputJavadocJar,
+]
 
-javaArtifactNames.each { name ->
-    def packageGlob = "yams/${name}/**"
-    def outputBaseName = "_GROUP_yams_ID_${baseArtifactId}-${name}_CLS"
-    def titleCaseName = name.capitalize()
-
-    def jar = tasks.create("${name}Jar", Jar) {
-        dependsOn classes
-        archiveClassifier = name
-        from(sourceSets.main.output) { include packageGlob }
-    }
-    def sourcesJar = tasks.create("${name}SourcesJar", Jar) {
-        dependsOn classes
-        archiveClassifier = "${name}-sources"
-        from(sourceSets.main.allSource) { include packageGlob }
-    }
-    def outputJar = tasks.create("output${titleCaseName}Jar", Jar) {
-        dependsOn classes
-        archiveBaseName = outputBaseName
-        destinationDirectory = outputsFolder
-        from(sourceSets.main.output) { include packageGlob }
-    }
-    def outputSourcesJar = tasks.create("output${titleCaseName}SourcesJar", Jar) {
-        dependsOn classes
-        archiveBaseName = outputBaseName
-        destinationDirectory = outputsFolder
-        archiveClassifier = 'sources'
-        from(sourceSets.main.allSource) { include packageGlob }
-    }
-    def outputJavadocJar = tasks.create("output${titleCaseName}JavadocJar", Jar) {
-        dependsOn javadoc
-        archiveBaseName = outputBaseName
-        destinationDirectory = outputsFolder
-        archiveClassifier = 'javadoc'
-        from javadoc.destinationDir
-    }
-
-    javaArtifacts[name] = [
-        jar: jar, sourcesJar: sourcesJar,
-        outputJar: outputJar, outputSourcesJar: outputSourcesJar, outputJavadocJar: outputJavadocJar,
-    ]
-
-    addTaskToCopyAllOutputs(outputSourcesJar)
-    addTaskToCopyAllOutputs(outputJavadocJar)
-    addTaskToCopyAllOutputs(outputJar)
-    build.dependsOn outputSourcesJar
-    build.dependsOn outputJavadocJar
-    build.dependsOn outputJar
+addTaskToCopyAllOutputs(outputSourcesJar)
+addTaskToCopyAllOutputs(outputJavadocJar)
+addTaskToCopyAllOutputs(outputJar)
+build.dependsOn outputSourcesJar
+build.dependsOn outputJavadocJar
+build.dependsOn outputJar
 }
 
 // Builds yams_commands2.json/yams_commands3.json from yams.json and wires up their zip tasks
@@ -191,79 +196,78 @@ javaArtifactNames.each { name ->
 apply from: 'vendordepJson.gradle'
 
 artifacts {
-    tasks.named("assemble") {
-        javaArtifacts.each { name, t ->
-            archives t.jar
-            archives t.sourcesJar
-            archives t.outputJar
-            archives t.outputSourcesJar
-            archives t.outputJavadocJar
-        }
-        archives javadocJar
+tasks.named("assemble") {
+    javaArtifacts.each { name, t ->
+        archives t.jar
+        archives t.sourcesJar
+        archives t.outputJar
+        archives t.outputSourcesJar
+        archives t.outputJavadocJar
     }
+    archives javadocJar
+}
 }
 
 if (!skipCpp && doxygenAvailable) {
-    build.dependsOn cppDoxygenZip
-    addTaskToCopyAllOutputs(cppDoxygenZip)
+build.dependsOn cppDoxygenZip
+addTaskToCopyAllOutputs(cppDoxygenZip)
 }
 
 libraryBuild.dependsOn build
 
 
 publishing {
-    repositories {
-        maven {
-            url = releasesRepoUrl
-        }
+repositories {
+    maven {
+        url = releasesRepoUrl
     }
+}
 }
 
 model {
-    publishing {
-        def taskList = createComponentZipTasks($.components, ['YAMS'], zipBaseName, Zip, project, includeStandardZipFormat)
+publishing {
+    def taskList = createComponentZipTasks($.components, ['YAMS'], zipBaseName, Zip, project, includeStandardZipFormat)
 
-        publications {
-            if (!skipCpp) {
-                cpp(MavenPublication) {
-                    taskList.each {
-                        artifact it
-                    }
-                    artifact cppHeadersZip
-                    if (doxygenAvailable) {
-                        artifact cppDoxygenZip
-                    }
-
-                    artifactId = "${baseArtifactId}-cpp"
-                    groupId = artifactGroupId
-                    version = pubVersion
+    publications {
+        if (!skipCpp) {
+            cpp(MavenPublication) {
+                taskList.each {
+                    artifact it
                 }
+                artifact cppHeadersZip
+                if (doxygenAvailable) {
+                    artifact cppDoxygenZip
+                }
+
+                artifactId = "${baseArtifactId}-cpp"
+                groupId = artifactGroupId
+                version = pubVersion
+            }
+        }
+
+        javaArtifactNames.each { name ->
+            def t = javaArtifacts[name]
+            "$name"(MavenPublication) {
+                artifact t.jar
+                artifact t.sourcesJar
+                artifact javadocJar
+
+                artifactId = "${baseArtifactId}-${name}"
+                groupId = artifactGroupId
+                version = pubVersion
             }
 
-            javaArtifactNames.each { name ->
-                def t = javaArtifacts[name]
-                "$name"(MavenPublication) {
-                    artifact t.jar
-                    artifact t.sourcesJar
-                    artifact javadocJar
+            // Only non-core variants ship their own vendordep JSON.
+            if (name != 'core') {
+                "${name}Vendordep"(MavenPublication) {
+                    artifact tasks.named("${name}VendordepJsonZip").get()
 
-                    artifactId = "${baseArtifactId}-${name}"
+                    artifactId = "${baseArtifactId}-${name}-vendordep"
                     groupId = artifactGroupId
                     version = pubVersion
-
-                }
-
-                // Only non-core variants ship their own vendordep JSON.
-                if (name != 'core') {
-                    "${name}Vendordep"(MavenPublication) {
-                        artifact tasks.named("${name}VendordepJsonZip").get()
-
-                        artifactId = "${baseArtifactId}-${name}-vendordep"
-                        groupId = artifactGroupId
-                        version = pubVersion
-                    }
                 }
             }
         }
     }
+}
 }

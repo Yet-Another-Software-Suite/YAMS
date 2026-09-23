@@ -32,9 +32,7 @@ import yams.core.telemetry.NetworkTablesBackends;
  * <li>Configure a motor controller: {@link
  * yams.core.motorcontrollers.SmartMotorControllerConfig}</li> <li>Instantiate the appropriate
  * wrapper: {@link yams.core.motorcontrollers.local.SparkWrapper} (REV), or
- * {@code yams.core.motorcontrollers.remote.TalonFXWrapper}/{@code
- * yams.motorcontrollers.remote.TalonFXSWrapper} (CTRE unavailable while CTRE has no Phoenix6
- * build for this wpilib version)</li> <li>Build a mechanism config (e.g., {@link
+ * {@code yams.core.motorcontrollers.remote.TalonFXWrapper}/{@code yams.motorcontrollers.remote.TalonFXSWrapper}</li> <li>Build a mechanism config (e.g., {@link
  * yams.core.mechanisms.config.ArmConfig})</li> <li>Construct the concrete mechanism (e.g., {@link
  * yams.core.mechanisms.positional.Arm})</li> <li>Schedule setpoint commands and bind triggers</li>
  * </ol>

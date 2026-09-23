@@ -15,6 +15,8 @@ import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import java.util.stream.Stream;
@@ -36,18 +38,12 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.motorcontrollers.remote.TalonFXSWrapper;
+import yams.core.motorcontrollers.remote.TalonFXWrapper;
 import yams.helpers.DeviceCreator;
 import yams.helpers.MockHardwareExtension;
 import yams.helpers.PeriodicScheduler;
 import yams.helpers.SmartMotorControllerTestSubsystem;
-
-/* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7; re-enable once
-available.
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.hardware.TalonFXS;
-import yams.core.motorcontrollers.remote.TalonFXSWrapper;
-import yams.core.motorcontrollers.remote.TalonFXWrapper;
-*/
 
 /**
  * Tests for the drive-wheel feedforward {@link Force} added to {@link
@@ -78,12 +74,14 @@ public class ForceFeedforwardTest {
     Force feedforwardForce = Newtons.of(10);
     AngularVelocity mechanismVelocity = RotationsPerSecond.of(2);
 
-    double expectedRotorTorqueNm = feedforwardForce.in(Newtons) *WHEEL_RADIUS_METERS / GEAR_RATIO;
-    double expectedRotorVelocityRadS = mechanismVelocity.in(RadiansPerSecond) *GEAR_RATIO;
+    double expectedRotorTorqueNm = feedforwardForce.in(Newtons) * WHEEL_RADIUS_METERS / GEAR_RATIO;
+    double expectedRotorVelocityRadS = mechanismVelocity.in(RadiansPerSecond) * GEAR_RATIO;
     double expectedVoltage = motor.getVoltage(expectedRotorTorqueNm, expectedRotorVelocityRadS);
 
-    assertEquals(expectedVoltage,
-        config.convertToVoltage(motor, mechanismVelocity, feedforwardForce).in(Volts), 1e-9,
+    assertEquals(
+        expectedVoltage,
+        config.convertToVoltage(motor, mechanismVelocity, feedforwardForce).in(Volts),
+        1e-9,
         "convertToVoltage should match DCMotor's own torque/speed voltage model.");
   }
 
@@ -93,10 +91,13 @@ public class ForceFeedforwardTest {
     DCMotor motor = DCMotor.getKrakenX60(1);
     Force feedforwardForce = Newtons.of(25);
 
-    double expectedRotorTorqueNm = feedforwardForce.in(Newtons) *WHEEL_RADIUS_METERS / GEAR_RATIO;
+    double expectedRotorTorqueNm = feedforwardForce.in(Newtons) * WHEEL_RADIUS_METERS / GEAR_RATIO;
     double expectedCurrent = motor.getCurrent(expectedRotorTorqueNm);
 
-    assertEquals(expectedCurrent, config.convertToCurrent(motor, feedforwardForce).in(Amps), 1e-9,
+    assertEquals(
+        expectedCurrent,
+        config.convertToCurrent(motor, feedforwardForce).in(Amps),
+        1e-9,
         "convertToCurrent should match DCMotor's own torque/current model.");
   }
 
@@ -114,18 +115,19 @@ public class ForceFeedforwardTest {
     offset += 1;
     SmartMotorControllerConfig cfg = baseSmcConfig();
     return Stream.of(
-        Arguments.of(new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
-            ((yams.commands2.config.SmartMotorControllerConfig) cfg.clone())
-                .withSubsystem(new SmartMotorControllerTestSubsystem())
-                .withTelemetry(
-                    "ForceFeedforwardTest SparkMax(" + offset + ")", TelemetryVerbosity.LOW)))
-        /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
-        ,
+        Arguments.of(
+            new SparkWrapper(
+                DeviceCreator.createSparkMax(),
+                DCMotor.getNEO(1),
+                ((yams.commands2.config.SmartMotorControllerConfig) cfg.clone())
+                    .withSubsystem(new SmartMotorControllerTestSubsystem())
+                    .withTelemetry(
+                        "ForceFeedforwardTest SparkMax(" + offset + ")", TelemetryVerbosity.LOW))),
         Arguments.of(
             new TalonFXWrapper(
                 DeviceCreator.createTalonFX(),
                 DCMotor.getKrakenX60(1),
-                cfg.clone()
+                ((yams.commands2.config.SmartMotorControllerConfig) cfg.clone())
                     .withSubsystem(new SmartMotorControllerTestSubsystem())
                     .withTelemetry(
                         "ForceFeedforwardTest TalonFX(" + offset + ")", TelemetryVerbosity.LOW))),
@@ -133,17 +135,16 @@ public class ForceFeedforwardTest {
             new TalonFXSWrapper(
                 DeviceCreator.createTalonFXS(),
                 DCMotor.getNEO(1),
-                cfg.clone()
+                ((yams.commands2.config.SmartMotorControllerConfig) cfg.clone())
                     .withSubsystem(new SmartMotorControllerTestSubsystem())
                     .withTelemetry(
-                        "ForceFeedforwardTest TalonFXS(" + offset + ")", TelemetryVerbosity.LOW)))
-        */
-    );
+                        "ForceFeedforwardTest TalonFXS(" + offset + ")", TelemetryVerbosity.LOW))));
   }
 
   private static void closeSmc(SmartMotorController smc) {
     SmartMotorControllerTestSubsystem subsys =
-        (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
+        (SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
     SmartMotorControllerCommandRegistry.removeCommands(subsys);
     CommandScheduler.getInstance().unregisterSubsystem(subsys);
     subsys.close();
@@ -154,32 +155,34 @@ public class ForceFeedforwardTest {
       ((SparkMax) motorController).close();
     } else if (motorController instanceof SparkFlex) {
       ((SparkFlex) motorController).close();
-    }
-    /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
-    else if (motorController instanceof TalonFXS)
-    {
+    } else if (motorController instanceof TalonFXS) {
       ((TalonFXS) motorController).close();
-    } else if (motorController instanceof TalonFX)
-    {
+    } else if (motorController instanceof TalonFX) {
       ((TalonFX) motorController).close();
     }
-    */
   }
 
   @ParameterizedTest
   @MethodSource("createConfigs")
   void testSetpointFeedforwardForceOptionalTracking(SmartMotorController smc) {
     try {
-      ((SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem()).setSMC(smc);
+      ((SmartMotorControllerTestSubsystem)
+              ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+          .setSMC(smc);
 
       smc.setVelocity(RPM.of(500), Newtons.of(5));
-      assertTrue(smc.getSetpointFeedforwardForce().isPresent(),
+      assertTrue(
+          smc.getSetpointFeedforwardForce().isPresent(),
           smc.getName() + ": setVelocity(velocity, force) should record the feedforward force.");
-      assertEquals(5.0, smc.getSetpointFeedforwardForce().get().in(Newtons), 1e-9,
+      assertEquals(
+          5.0,
+          smc.getSetpointFeedforwardForce().get().in(Newtons),
+          1e-9,
           smc.getName() + ": the recorded feedforward force should match what was supplied.");
 
       smc.setVelocity(RPM.of(500));
-      assertTrue(smc.getSetpointFeedforwardForce().isEmpty(),
+      assertTrue(
+          smc.getSetpointFeedforwardForce().isEmpty(),
           smc.getName()
               + ": setVelocity(velocity) with no force should clear the feedforward force, "
               + "primarily so telemetry reports it as unset.");
@@ -191,7 +194,8 @@ public class ForceFeedforwardTest {
       smc.setVelocity(RPM.of(500), Newtons.of(5));
       assertTrue(smc.getSetpointFeedforwardForce().isPresent());
       smc.setVelocity(RPM.of(500), null);
-      assertTrue(smc.getSetpointFeedforwardForce().isEmpty(),
+      assertTrue(
+          smc.getSetpointFeedforwardForce().isEmpty(),
           smc.getName()
               + ": setVelocity(velocity, null) should fall back to plain velocity control and "
               + "clear the feedforward force.");
@@ -205,7 +209,8 @@ public class ForceFeedforwardTest {
   void testFeedforwardForceProducesMotorOutput(SmartMotorController smc) {
     try {
       SmartMotorControllerTestSubsystem subsys =
-          (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
+          (SmartMotorControllerTestSubsystem)
+              ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
       subsys.setSMC(smc);
       subsys.testRunning = true;
       smc.setupSimulation();
@@ -215,31 +220,45 @@ public class ForceFeedforwardTest {
       // whatever feedforward Force is supplied below, isolating its effect from closed-loop
       // correction.
       try (PeriodicScheduler scheduler = new PeriodicScheduler()) {
-        scheduler.addPeriodic(() -> {
-          smc.setVelocity(RPM.of(0), Newtons.of(0));
-          smc.simIterate();
-        }, Milliseconds.of(20));
+        scheduler.addPeriodic(
+            () -> {
+              smc.setVelocity(RPM.of(0), Newtons.of(0));
+              smc.simIterate();
+            },
+            Milliseconds.of(20));
         scheduler.runFor(Seconds.of(1));
       }
       double zeroForceDutyCycle = Math.abs(smc.getDutyCycle());
 
       try (PeriodicScheduler scheduler = new PeriodicScheduler()) {
-        scheduler.addPeriodic(() -> {
-          smc.setVelocity(RPM.of(0), Newtons.of(8));
-          smc.simIterate();
-        }, Milliseconds.of(20));
+        scheduler.addPeriodic(
+            () -> {
+              smc.setVelocity(RPM.of(0), Newtons.of(8));
+              smc.simIterate();
+            },
+            Milliseconds.of(20));
         scheduler.runFor(Seconds.of(1));
       }
       double forceDutyCycle = Math.abs(smc.getDutyCycle());
 
-      System.out.println(smc.getName() + ": zero-force duty cycle=" + zeroForceDutyCycle
-          + ", with-force duty cycle=" + forceDutyCycle);
+      System.out.println(
+          smc.getName()
+              + ": zero-force duty cycle="
+              + zeroForceDutyCycle
+              + ", with-force duty cycle="
+              + forceDutyCycle);
 
-      assertEquals(0.0, zeroForceDutyCycle, 1e-6,
-          smc.getName() + ": expected no commanded output with zero PID gains and zero feedforward "
+      assertEquals(
+          0.0,
+          zeroForceDutyCycle,
+          1e-6,
+          smc.getName()
+              + ": expected no commanded output with zero PID gains and zero feedforward "
               + "force.");
-      assertTrue(forceDutyCycle > 0.01,
-          smc.getName() + ": expected the feedforward Force to produce commanded output even with "
+      assertTrue(
+          forceDutyCycle > 0.01,
+          smc.getName()
+              + ": expected the feedforward Force to produce commanded output even with "
               + "zero PID gains.");
     } finally {
       closeSmc(smc);

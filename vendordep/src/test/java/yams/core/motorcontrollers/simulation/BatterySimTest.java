@@ -10,6 +10,8 @@ import static org.wpilib.units.Units.MilliOhms;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import java.util.ArrayList;
@@ -34,18 +36,12 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.motorcontrollers.remote.TalonFXSWrapper;
+import yams.core.motorcontrollers.remote.TalonFXWrapper;
 import yams.helpers.DeviceCreator;
 import yams.helpers.MockHardwareExtension;
 import yams.helpers.SmartMotorControllerTestSubsystem;
 import yams.helpers.TestWithScheduler;
-
-/* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7; re-enable once
-available.
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.hardware.TalonFXS;
-import yams.core.motorcontrollers.remote.TalonFXSWrapper;
-import yams.core.motorcontrollers.remote.TalonFXWrapper;
-*/
 
 /**
  * Tests that {@link BatterySim} models the shared simulated battery sagging and draining as
@@ -83,23 +79,27 @@ public class BatterySimTest {
             .withMomentOfInertia(KilogramSquareMeters.of(2.0));
 
     List<SmartMotorController> smcs = new ArrayList<>();
-    smcs.add(new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
-        ((yams.commands2.config.SmartMotorControllerConfig) baseConfig.clone())
-            .withSubsystem(new SmartMotorControllerTestSubsystem())
-            .withTelemetry(
-                "BatterySim SparkMax(" + (10 + offset) + ") NEO", TelemetryVerbosity.LOW)));
-    smcs.add(new SparkWrapper(DeviceCreator.createSparkFlex(), DCMotor.getNeoVortex(1),
-        ((yams.commands2.config.SmartMotorControllerConfig) baseConfig.clone())
-            .withSubsystem(new SmartMotorControllerTestSubsystem())
-            .withTelemetry(
-                "BatterySim SparkFlex(" + (20 + offset) + ") Vortex", TelemetryVerbosity.LOW)));
-    /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
+    smcs.add(
+        new SparkWrapper(
+            DeviceCreator.createSparkMax(),
+            DCMotor.getNEO(1),
+            ((yams.commands2.config.SmartMotorControllerConfig) baseConfig.clone())
+                .withSubsystem(new SmartMotorControllerTestSubsystem())
+                .withTelemetry(
+                    "BatterySim SparkMax(" + (10 + offset) + ") NEO", TelemetryVerbosity.LOW)));
+    smcs.add(
+        new SparkWrapper(
+            DeviceCreator.createSparkFlex(),
+            DCMotor.getNeoVortex(1),
+            ((yams.commands2.config.SmartMotorControllerConfig) baseConfig.clone())
+                .withSubsystem(new SmartMotorControllerTestSubsystem())
+                .withTelemetry(
+                    "BatterySim SparkFlex(" + (20 + offset) + ") Vortex", TelemetryVerbosity.LOW)));
     smcs.add(
         new TalonFXSWrapper(
             DeviceCreator.createTalonFXS(),
             DCMotor.getNEO(1),
-            baseConfig
-                .clone()
+            ((yams.commands2.config.SmartMotorControllerConfig) baseConfig.clone())
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(
                     "BatterySim TalonFXS(" + (30 + offset) + ") NEO", TelemetryVerbosity.LOW)));
@@ -107,16 +107,15 @@ public class BatterySimTest {
         new TalonFXWrapper(
             DeviceCreator.createTalonFX(),
             DCMotor.getKrakenX60(1),
-            baseConfig
-                .clone()
+            ((yams.commands2.config.SmartMotorControllerConfig) baseConfig.clone())
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(
                     "BatterySim TalonFX(" + (40 + offset) + ") Kraken", TelemetryVerbosity.LOW)));
-    */
 
     for (SmartMotorController smc : smcs) {
       SmartMotorControllerTestSubsystem subsys =
-          (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
+          (SmartMotorControllerTestSubsystem)
+              ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
       subsys.setSMC(smc);
       smc.setupSimulation();
       subsys.testRunning = true;
@@ -126,7 +125,8 @@ public class BatterySimTest {
 
   /** Build a duty cycle command for the given {@link SmartMotorController}. */
   private static Command dutyCycleCommand(SmartMotorController smc, double dutyCycle) {
-    return ((SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+    return ((SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
         .setDutyCycle(dutyCycle);
   }
 
@@ -158,10 +158,16 @@ public class BatterySimTest {
    * scheduler registrations.
    */
   private static void closeSmc(SmartMotorController smc) {
-    SmartMotorControllerCommandRegistry.removeCommands(((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem());
-    CommandScheduler.getInstance().unregisterSubsystem(
-        (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem());
-    ((SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem()).close();
+    SmartMotorControllerCommandRegistry.removeCommands(
+        ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem());
+    CommandScheduler.getInstance()
+        .unregisterSubsystem(
+            (SmartMotorControllerTestSubsystem)
+                ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig())
+                    .getSubsystem());
+    ((SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+        .close();
     smc.close();
 
     Object motorController = smc.getMotorController();
@@ -169,16 +175,11 @@ public class BatterySimTest {
       ((SparkMax) motorController).close();
     } else if (motorController instanceof SparkFlex) {
       ((SparkFlex) motorController).close();
-    }
-    /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
-    else if (motorController instanceof TalonFXS)
-    {
+    } else if (motorController instanceof TalonFXS) {
       ((TalonFXS) motorController).close();
-    } else if (motorController instanceof TalonFX)
-    {
+    } else if (motorController instanceof TalonFX) {
       ((TalonFX) motorController).close();
     }
-    */
   }
 
   /**
@@ -195,7 +196,8 @@ public class BatterySimTest {
    */
   private static double minVoltageOverCycle(double seconds) throws InterruptedException {
     double[] minVoltage = {Double.POSITIVE_INFINITY};
-    TestWithScheduler.cycle(Seconds.of(seconds),
+    TestWithScheduler.cycle(
+        Seconds.of(seconds),
         () -> minVoltage[0] = Math.min(minVoltage[0], RoboRioSim.getVInVoltage()));
     return minVoltage[0];
   }
@@ -221,9 +223,11 @@ public class BatterySimTest {
       System.out.println("Single motor heavy load voltage: " + singleMotorVoltage);
       System.out.println("All motors heavy load voltage: " + allMotorsVoltage);
 
-      assertTrue(singleMotorVoltage < idleVoltage,
+      assertTrue(
+          singleMotorVoltage < idleVoltage,
           "Voltage should sag below idle once a single motor is drawing heavy current.");
-      assertTrue(allMotorsVoltage < singleMotorVoltage,
+      assertTrue(
+          allMotorsVoltage < singleMotorVoltage,
           "Voltage should sag further once every motor is drawing heavy current simultaneously.");
     } finally {
       smcs.forEach(BatterySimTest::closeSmc);
@@ -250,7 +254,8 @@ public class BatterySimTest {
 
       double stateOfCharge = BatterySim.getStateOfCharge();
       System.out.println("State of charge after sustained heavy load: " + stateOfCharge);
-      assertTrue(stateOfCharge < 1.0,
+      assertTrue(
+          stateOfCharge < 1.0,
           "Sustained heavy current draw from multiple motors should drain the battery's state of "
               + "charge.");
     } finally {
@@ -279,10 +284,12 @@ public class BatterySimTest {
       double loadedVoltage = minVoltageOverCycle(0.2);
       System.out.println("Fully charged voltage under heavy load: " + loadedVoltage);
 
-      assertTrue(loadedVoltage < idleVoltage,
+      assertTrue(
+          loadedVoltage < idleVoltage,
           "Voltage should sag from nominal once multiple motors draw heavy current, even on a full "
               + "battery.");
-      assertTrue(BatterySim.getStateOfCharge() < 1.0,
+      assertTrue(
+          BatterySim.getStateOfCharge() < 1.0,
           "Drawing current from a fully charged battery should begin depleting its state of "
               + "charge.");
     } finally {
@@ -304,7 +311,8 @@ public class BatterySimTest {
       }
       double deadIdleVoltage = minVoltageOverCycle(0.2);
       System.out.println("Depleted battery idle voltage: " + deadIdleVoltage);
-      assertTrue(deadIdleVoltage < 10.0,
+      assertTrue(
+          deadIdleVoltage < 10.0,
           "A fully depleted battery should sag well below a healthy battery's nominal voltage.");
     } finally {
       smcs.forEach(BatterySimTest::closeSmc);
@@ -361,7 +369,8 @@ public class BatterySimTest {
 
       System.out.println("State of charge after 5.4 Ah at 54A: " + highCurrentSoc);
       System.out.println("State of charge after 5.4 Ah at 0.9A: " + lowCurrentSoc);
-      assertTrue(highCurrentSoc < lowCurrentSoc,
+      assertTrue(
+          highCurrentSoc < lowCurrentSoc,
           "Drawing the same amp-hours at a high discharge current should drain more of the "
               + "battery's capacity than drawing them at a low discharge current (Peukert "
               + "effect).");
@@ -401,7 +410,8 @@ public class BatterySimTest {
 
       System.out.println("State of charge with default derating curve: " + defaultCurveSoc);
       System.out.println("State of charge with harsher custom derating curve: " + customCurveSoc);
-      assertTrue(customCurveSoc < defaultCurveSoc,
+      assertTrue(
+          customCurveSoc < defaultCurveSoc,
           "A custom capacity derating curve with a harsher fraction should drain more state of "
               + "charge than the default curve for the same current and duration.");
     } finally {
@@ -447,7 +457,8 @@ public class BatterySimTest {
 
     System.out.println("Single motor heavy load voltage: " + soloVoltage);
     System.out.println("Many motors heavy load voltage: " + manyVoltage);
-    assertTrue(manyVoltage <= soloVoltage + VOLTAGE_RISE_TOLERANCE,
+    assertTrue(
+        manyVoltage <= soloVoltage + VOLTAGE_RISE_TOLERANCE,
         "An SMC's available voltage should not be higher when many other SMCs are also drawing "
             + "heavy current than when it is drawing heavy current alone.");
   }
@@ -480,7 +491,8 @@ public class BatterySimTest {
 
       System.out.println("Dead battery idle voltage: " + deadIdleVoltage);
       System.out.println("Dead battery voltage under heavy load: " + deadLoadedVoltage);
-      assertTrue(deadLoadedVoltage <= deadIdleVoltage + VOLTAGE_RISE_TOLERANCE,
+      assertTrue(
+          deadLoadedVoltage <= deadIdleVoltage + VOLTAGE_RISE_TOLERANCE,
           "Voltage should not rise above the depleted-battery baseline just because motors are "
               + "drawing heavy "
               + "current.");

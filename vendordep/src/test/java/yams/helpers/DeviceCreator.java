@@ -3,18 +3,16 @@
 
 package yams.helpers;
 
-/* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7; re-enable once
-   com.ctre.phoenix6 is available again.
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
-*/
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.util.CANPorts;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.wpilib.hardware.bus.CANPort;
 
 /**
  * Centralised factory for test motor controller devices.
@@ -27,17 +25,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  * devices the whole suite creates in one run if it wraps mid-suite, a later test can reuse
  * the CAN ID of an earlier test's still-registered simulated device, corrupting that test's
  * results in a way that only reproduces when the full suite runs (not in isolation).
- *
- * <p>CTRE device factories (TalonFX, TalonFXS, CANcoder) are commented out until CTRE publishes
- * a Phoenix6 build compatible with wpilib 2027-alpha-7.
  */
 public class DeviceCreator {
   private static final int MAX_REV_ID = 10000;
-  // private static final int MAX_CTRE_ID = 61;
+  private static final int MAX_CTRE_ID = 61;
 
   private static final AtomicInteger revId = new AtomicInteger(1);
 
-  // private static final AtomicInteger ctreId = new AtomicInteger(1);
+  private static final AtomicInteger ctreId = new AtomicInteger(1);
 
   public static SparkMax createSparkMax() {
     int id = revId.getAndIncrement();
@@ -57,33 +52,26 @@ public class DeviceCreator {
     return new SparkFlex(CANPorts.fromBusId(1), id, MotorType.kBrushless);
   }
 
-  /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
-  public static TalonFX createTalonFX()
-  {
+  public static TalonFX createTalonFX() {
     int id = ctreId.getAndIncrement();
-    if (id > MAX_CTRE_ID)
-    {
-        ctreId.setRelease(1);
-        System.err.println("Warning: used maximum device IDs, resetting to 0");
+    if (id > MAX_CTRE_ID) {
+      ctreId.setRelease(1);
+      System.err.println("Warning: used maximum device IDs, resetting to 0");
     }
-    return new TalonFX(id, CANBus.systemcore(1));
+    return new TalonFX(id, new CANBus(CANPort.CAN_S0));
   }
 
-  public static TalonFXS createTalonFXS()
-  {
+  public static TalonFXS createTalonFXS() {
     int id = ctreId.getAndIncrement();
-    if (id > MAX_CTRE_ID)
-    {
-        ctreId.setRelease(1);
-        System.err.println("Warning: used maximum device IDs, resetting to 0");
+    if (id > MAX_CTRE_ID) {
+      ctreId.setRelease(1);
+      System.err.println("Warning: used maximum device IDs, resetting to 0");
     }
-    return new TalonFXS(id, CANBus.systemcore(1));
+    return new TalonFXS(id, new CANBus(CANPort.CAN_S0));
   }
 
   // Creates a CANcoder sharing the same CAN ID as the given TalonFX.
-  public static CANcoder createCANcoderFor(TalonFX talon)
-  {
-    return new CANcoder(talon.getDeviceID(), CANBus.systemcore(1));
+  public static CANcoder createCANcoderFor(TalonFX talon) {
+    return new CANcoder(talon.getDeviceID(), new CANBus(CANPort.CAN_S0));
   }
-  */
 }

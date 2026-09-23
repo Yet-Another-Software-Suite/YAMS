@@ -51,10 +51,16 @@ public class ChineseRemainderTheoremTest {
         new EasyCRTConfig(this::getAbs1, this::getAbs2)
             .withCommonDriveGear(commonRatio, driveGearTeeth, encoder1Pinion, encoder2Pinion);
 
-    assertTrue(MathUtil.isNear(absoluteEncoder1Gearing.getMechanismToRotorRatio(),
-        config.getEncoder1RotationsPerMechanismRotation(), 0.0000001));
-    assertTrue(MathUtil.isNear(absoluteEncoder2Gearing.getMechanismToRotorRatio(),
-        config.getEncoder2RotationsPerMechanismRotation(), 0.0000001));
+    assertTrue(
+        MathUtil.isNear(
+            absoluteEncoder1Gearing.getMechanismToRotorRatio(),
+            config.getEncoder1RotationsPerMechanismRotation(),
+            0.0000001));
+    assertTrue(
+        MathUtil.isNear(
+            absoluteEncoder2Gearing.getMechanismToRotorRatio(),
+            config.getEncoder2RotationsPerMechanismRotation(),
+            0.0000001));
   }
 
   /**
@@ -78,8 +84,9 @@ public class ChineseRemainderTheoremTest {
         new EasyCRTConfig(this::getAbs1, this::getAbs2)
             .withCommonDriveGear(commonRatio, driveGearTeeth, encoder1Pinion, encoder2Pinion);
 
-    config.getUniqueCoverage().ifPresent(
-        angle -> System.out.println("Unique Coverage(rots): " + angle.in(Rotations)));
+    config
+        .getUniqueCoverage()
+        .ifPresent(angle -> System.out.println("Unique Coverage(rots): " + angle.in(Rotations)));
 
     // Limit the sweep to the unique coverage
     double coverageRotations =

@@ -20,10 +20,6 @@
  * {@code TalonFXWrapper} but targets the TalonFXS CAN device type.</li>
  * </ul>
  *
- * <p><strong>Currently unavailable:</strong> CTRE has not published a Phoenix6 build compatible
- * with this wpilib version, so this package's classes are excluded from compilation until one is
- * available.
- *
  * <h2>Phoenix 6 API</h2>
  * <p>Both wrappers are built on the <a href="https://v6.docs.ctr-electronics.com/">Phoenix 6
  * API</a>. Configuration is applied via YAMS' own

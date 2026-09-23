@@ -18,9 +18,12 @@ public class SmartMotorControllerTestSubsystem extends SubsystemBase {
   public SmartMotorControllerTestSubsystem() {}
 
   public Command setDutyCycle(double dutyCycle) {
-    return startRun(smc::stopClosedLoopController, () -> {
-      smc.setDutyCycle(dutyCycle);
-    }).finallyDo(smc::startClosedLoopController);
+    return startRun(
+            smc::stopClosedLoopController,
+            () -> {
+              smc.setDutyCycle(dutyCycle);
+            })
+        .finallyDo(smc::startClosedLoopController);
   }
 
   public Command setPositionSetpoint(Angle position) {

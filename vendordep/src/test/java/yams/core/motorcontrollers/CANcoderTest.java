@@ -15,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.wpilib.command2.CommandScheduler;
 import org.wpilib.math.system.DCMotor;
-import org.wpilib.util.Preferences;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
@@ -39,7 +38,6 @@ public class CANcoderTest {
   @AfterEach
   void tearDown() {
     MockHardwareExtension.afterAll();
-    Preferences.removeAll();
   }
 
   /**
@@ -48,7 +46,8 @@ public class CANcoderTest {
    */
   private static void closeWrapper(TalonFXWrapper wrapper, TalonFX talon) {
     SmartMotorControllerTestSubsystem subsys =
-        (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) wrapper.getConfig()).getSubsystem();
+        (SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) wrapper.getConfig()).getSubsystem();
     CommandScheduler.getInstance().unregisterSubsystem(subsys);
     wrapper.close();
     talon.close();
@@ -107,10 +106,11 @@ public class CANcoderTest {
    */
   @Test
   void testInvalidDiscontinuityPointThrows() {
-    assertThrows(SmartMotorControllerConfigurationException.class,
-        ()
-            -> new SmartMotorControllerConfig().withExternalEncoderDiscontinuityPoint(
-                Rotations.of(0.3)));
+    assertThrows(
+        SmartMotorControllerConfigurationException.class,
+        () ->
+            new SmartMotorControllerConfig()
+                .withExternalEncoderDiscontinuityPoint(Rotations.of(0.3)));
   }
 
   /** Test 4: Verify that a zero offset of 45 degrees is accepted without exception. */

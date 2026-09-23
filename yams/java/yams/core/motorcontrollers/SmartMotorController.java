@@ -63,9 +63,7 @@ import yams.core.telemetry.SmartMotorControllerTelemetryConfig;
  *
  * <p>This abstract class is not instantiated directly. Instantiate the appropriate vendor wrapper:
  * {@link yams.core.motorcontrollers.local.SparkWrapper} for REV SPARK hardware, or
- * {@code yams.core.motorcontrollers.remote.TalonFXWrapper}/{@code
- * yams.core.motorcontrollers.remote.TalonFXSWrapper} for CTRE hardware (unavailable while CTRE has
- * no Phoenix6 build for this wpilib version). Configure all three via {@link
+ * {@code yams.core.motorcontrollers.remote.TalonFXWrapper}/{@code yams.core.motorcontrollers.remote.TalonFXSWrapper} for CTRE hardware. Configure all three via {@link
  * yams.core.motorcontrollers.SmartMotorControllerConfig}.
  *
  * <h2>Example</h2>

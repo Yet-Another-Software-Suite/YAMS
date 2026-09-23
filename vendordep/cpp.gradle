@@ -83,8 +83,6 @@ model {
                 source {
                     srcDir 'src/test/native/cpp'
                     include '**/*.cpp'
-                    // CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
-                    exclude "**/SwerveDriveTest.cpp"
                 }
                 exportedHeaders {
                     srcDirs 'src/test/native/include'

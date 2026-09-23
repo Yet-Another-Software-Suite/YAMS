@@ -53,9 +53,10 @@ public class SparkAbsoluteEncoderTest {
   @Test
   void testZeroCenteredFalseWith1_0DiscontinuityPoint() {
     SparkMax sparkMax = DeviceCreator.createSparkMax();
-    SmartMotorControllerConfig config = baseConfig()
-                                            .withExternalEncoder(sparkMax.getAbsoluteEncoder())
-                                            .withExternalEncoderDiscontinuityPoint(Rotations.of(1));
+    SmartMotorControllerConfig config =
+        baseConfig()
+            .withExternalEncoder(sparkMax.getAbsoluteEncoder())
+            .withExternalEncoderDiscontinuityPoint(Rotations.of(1));
     assertDoesNotThrow(() -> new SparkWrapper(sparkMax, DCMotor.getNEO(1), config));
     sparkMax.close();
   }
@@ -65,7 +66,8 @@ public class SparkAbsoluteEncoderTest {
     SparkMax sparkMax = DeviceCreator.createSparkMax();
     SmartMotorControllerConfig config =
         baseConfig().withExternalEncoderDiscontinuityPoint(Rotations.of(0.5));
-    assertThrows(SmartMotorControllerConfigurationException.class,
+    assertThrows(
+        SmartMotorControllerConfigurationException.class,
         () -> new SparkWrapper(sparkMax, DCMotor.getNEO(1), config));
     sparkMax.close();
   }

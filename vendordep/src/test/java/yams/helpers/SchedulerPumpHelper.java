@@ -3,12 +3,13 @@
 
 package yams.helpers;
 
+import static org.wpilib.units.Units.*;
+
 import java.util.concurrent.atomic.AtomicLong;
 import org.wpilib.command2.CommandScheduler;
 import org.wpilib.hardware.hal.simulation.NotifierDataJNI;
 import org.wpilib.simulation.SimHooks;
 import org.wpilib.system.RobotController;
-import static org.wpilib.units.Units.*;
 import org.wpilib.units.measure.Time;
 
 /**

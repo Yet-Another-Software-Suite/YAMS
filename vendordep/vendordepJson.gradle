@@ -45,7 +45,7 @@ ext.createVendordepJsonTask = { variant ->
             expand(version: pubVersion,
             groupId: artifactGroupId,
             artifactId: baseArtifactId,
-						uuid: variant.uuid)
+            uuid: variant.uuid)
         }
 
         def vendordep = new JsonSlurper().parse(outFile)

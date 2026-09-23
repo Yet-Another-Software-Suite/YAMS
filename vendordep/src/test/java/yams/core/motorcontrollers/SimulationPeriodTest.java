@@ -9,6 +9,8 @@ import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Milliseconds;
 import static org.wpilib.units.Units.Seconds;
 
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import java.util.stream.Stream;
@@ -30,18 +32,12 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.motorcontrollers.remote.TalonFXSWrapper;
+import yams.core.motorcontrollers.remote.TalonFXWrapper;
 import yams.helpers.DeviceCreator;
 import yams.helpers.MockHardwareExtension;
 import yams.helpers.PeriodicScheduler;
 import yams.helpers.SmartMotorControllerTestSubsystem;
-
-/* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7; re-enable once
-available.
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.hardware.TalonFXS;
-import yams.core.motorcontrollers.remote.TalonFXSWrapper;
-import yams.core.motorcontrollers.remote.TalonFXWrapper;
-*/
 
 /**
  * Tests that closed loop control has no negative effects when {@link
@@ -71,39 +67,40 @@ public class SimulationPeriodTest {
             .withStartingPosition(Degrees.of(0));
 
     return Stream.of(
-        Arguments.of(new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
-            ((yams.commands2.config.SmartMotorControllerConfig) baseConfig.clone())
-                .withSubsystem(new SmartMotorControllerTestSubsystem())
-                .withTelemetry("SimulationPeriodTest SparkMax", TelemetryVerbosity.LOW))),
-        Arguments.of(new SparkWrapper(DeviceCreator.createSparkFlex(), DCMotor.getNeoVortex(1),
-            ((yams.commands2.config.SmartMotorControllerConfig) baseConfig.clone())
-                .withSubsystem(new SmartMotorControllerTestSubsystem())
-                .withTelemetry("SimulationPeriodTest SparkFlex", TelemetryVerbosity.LOW)))
-        /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
-        ,
+        Arguments.of(
+            new SparkWrapper(
+                DeviceCreator.createSparkMax(),
+                DCMotor.getNEO(1),
+                ((yams.commands2.config.SmartMotorControllerConfig) baseConfig.clone())
+                    .withSubsystem(new SmartMotorControllerTestSubsystem())
+                    .withTelemetry("SimulationPeriodTest SparkMax", TelemetryVerbosity.LOW))),
+        Arguments.of(
+            new SparkWrapper(
+                DeviceCreator.createSparkFlex(),
+                DCMotor.getNeoVortex(1),
+                ((yams.commands2.config.SmartMotorControllerConfig) baseConfig.clone())
+                    .withSubsystem(new SmartMotorControllerTestSubsystem())
+                    .withTelemetry("SimulationPeriodTest SparkFlex", TelemetryVerbosity.LOW))),
         Arguments.of(
             new TalonFXSWrapper(
                 DeviceCreator.createTalonFXS(),
                 DCMotor.getNEO(1),
-                baseConfig
-                    .clone()
+                ((yams.commands2.config.SmartMotorControllerConfig) baseConfig.clone())
                     .withSubsystem(new SmartMotorControllerTestSubsystem())
                     .withTelemetry("SimulationPeriodTest TalonFXS", TelemetryVerbosity.LOW))),
         Arguments.of(
             new TalonFXWrapper(
                 DeviceCreator.createTalonFX(),
                 DCMotor.getKrakenX60(1),
-                baseConfig
-                    .clone()
+                ((yams.commands2.config.SmartMotorControllerConfig) baseConfig.clone())
                     .withSubsystem(new SmartMotorControllerTestSubsystem())
-                    .withTelemetry("SimulationPeriodTest TalonFX", TelemetryVerbosity.LOW)))
-        */
-    );
+                    .withTelemetry("SimulationPeriodTest TalonFX", TelemetryVerbosity.LOW))));
   }
 
   private static void closeSmc(SmartMotorController smc) {
     SmartMotorControllerTestSubsystem subsys =
-        (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
+        (SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
     SmartMotorControllerCommandRegistry.removeCommands(subsys);
     CommandScheduler.getInstance().unregisterSubsystem(subsys);
     subsys.close();
@@ -114,16 +111,11 @@ public class SimulationPeriodTest {
       ((SparkMax) motorController).close();
     } else if (motorController instanceof SparkFlex) {
       ((SparkFlex) motorController).close();
-    }
-    /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
-    else if (motorController instanceof TalonFXS)
-    {
+    } else if (motorController instanceof TalonFXS) {
       ((TalonFXS) motorController).close();
-    } else if (motorController instanceof TalonFX)
-    {
+    } else if (motorController instanceof TalonFX) {
       ((TalonFX) motorController).close();
     }
-    */
   }
 
   @ParameterizedTest
@@ -131,7 +123,8 @@ public class SimulationPeriodTest {
   void testSimIterateAccurateWithSlowerTelemetryPeriod(SmartMotorController smc) {
     try {
       SmartMotorControllerTestSubsystem subsys =
-          (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
+          (SmartMotorControllerTestSubsystem)
+              ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
       subsys.setSMC(smc);
       smc.setupSimulation();
 
@@ -147,30 +140,43 @@ public class SimulationPeriodTest {
         smc.setPosition(setpoint);
 
         // simIterate() at the configured 10ms simulation period.
-        scheduler.addPeriodic(() -> {
-          smc.simIterate();
-          simIterations[0]++;
-        }, Milliseconds.of(10));
+        scheduler.addPeriodic(
+            () -> {
+              smc.simIterate();
+              simIterations[0]++;
+            },
+            Milliseconds.of(10));
         // Re-commanding the setpoint and publishing telemetry at 20ms a robot's normal periodic
         // loop, decoupled from the (faster) simulation period above.
-        scheduler.addPeriodic(() -> {
-          smc.setPosition(setpoint);
-          smc.updateTelemetry();
-          telemetryIterations[0]++;
-        }, Milliseconds.of(20));
+        scheduler.addPeriodic(
+            () -> {
+              smc.setPosition(setpoint);
+              smc.updateTelemetry();
+              telemetryIterations[0]++;
+            },
+            Milliseconds.of(20));
 
         scheduler.runFor(Seconds.of(3.0));
 
         finalPosition = smc.getMechanismPosition();
       }
-      System.out.println(smc.getName() + ": sim iterations=" + simIterations[0]
-          + ", telemetry iterations=" + telemetryIterations[0] + ", final position="
-          + finalPosition.in(Degrees) + " deg (target " + setpoint.in(Degrees) + " deg)");
+      System.out.println(
+          smc.getName()
+              + ": sim iterations="
+              + simIterations[0]
+              + ", telemetry iterations="
+              + telemetryIterations[0]
+              + ", final position="
+              + finalPosition.in(Degrees)
+              + " deg (target "
+              + setpoint.in(Degrees)
+              + " deg)");
 
       // Over 1.5s, a 10ms period should fire ~150 times and a 20ms period ~75 times roughly twice
       // as often confirming simIterate() genuinely ran at the configured simulation period rather
       // than some other period.
-      assertTrue(simIterations[0] > telemetryIterations[0],
+      assertTrue(
+          simIterations[0] > telemetryIterations[0],
           smc.getName()
               + (": expected simIterate() (10ms) to run more often than the periodic loop "
                   + "(20ms)."));
@@ -182,8 +188,10 @@ public class SimulationPeriodTest {
       // that shows up as an error of 100+ degrees (as observed while developing this test), not a
       // few degrees of jitter, so a generous tolerance here still catches a real regression while
       // absorbing CTRE's own background CAN-refresh-thread timing jitter under simulation.
-      assertTrue(finalPosition.isNear(setpoint, Degrees.of(5)),
-          smc.getName() + ": closed loop position control should converge to the setpoint with a "
+      assertTrue(
+          finalPosition.isNear(setpoint, Degrees.of(5)),
+          smc.getName()
+              + ": closed loop position control should converge to the setpoint with a "
               + "10ms simulation period and a 20ms periodic loop period.");
     } finally {
       closeSmc(smc);

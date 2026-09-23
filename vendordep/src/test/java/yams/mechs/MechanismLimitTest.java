@@ -13,6 +13,8 @@ import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Milliseconds;
 import static org.wpilib.units.Units.Pounds;
 
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import java.util.ArrayList;
@@ -49,18 +51,12 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.motorcontrollers.remote.TalonFXSWrapper;
+import yams.core.motorcontrollers.remote.TalonFXWrapper;
 import yams.helpers.DeviceCreator;
 import yams.helpers.MockHardwareExtension;
 import yams.helpers.SmartMotorControllerTestSubsystem;
 import yams.helpers.TestWithScheduler;
-
-/* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7; re-enable once
-   com.ctre.phoenix6 is available again.
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.hardware.TalonFXS;
-import yams.core.motorcontrollers.remote.TalonFXSWrapper;
-import yams.core.motorcontrollers.remote.TalonFXWrapper;
-*/
 
 /**
  * Verifies that:
@@ -135,7 +131,8 @@ public class MechanismLimitTest {
     Pivot pivot = new Pivot(config, smc);
     smc.setupSimulation();
     SmartMotorControllerTestSubsystem subsys =
-        (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
+        (SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
     subsys.mechSimPeriodic = pivot::simIterate;
     subsys.mechUpdateTelemetry = pivot::updateTelemetry;
     return pivot;
@@ -149,7 +146,8 @@ public class MechanismLimitTest {
         new ArmConfig().withLength(Inches.of(4)).withHardLimits(Degrees.of(-110), Degrees.of(200));
     Arm arm = new Arm(config, smc);
     SmartMotorControllerTestSubsystem subsys =
-        (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
+        (SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
     subsys.mechSimPeriodic = arm::simIterate;
     subsys.mechUpdateTelemetry = arm::updateTelemetry;
     return arm;
@@ -163,12 +161,14 @@ public class MechanismLimitTest {
    * (-0.01 m) clears the bounds check while remaining below the 0 m soft limit.
    */
   private static Elevator createElevator(SmartMotorController smc) {
-    ElevatorConfig config = new ElevatorConfig()
-                                .withHardLimits(Meters.of(-0.1), Meters.of(6))
-                                .withCarriageWeight(Pounds.of(16));
+    ElevatorConfig config =
+        new ElevatorConfig()
+            .withHardLimits(Meters.of(-0.1), Meters.of(6))
+            .withCarriageWeight(Pounds.of(16));
     Elevator elevator = new Elevator(config, smc);
     SmartMotorControllerTestSubsystem subsys =
-        (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
+        (SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
     subsys.mechSimPeriodic = elevator::simIterate;
     subsys.mechUpdateTelemetry = elevator::updateTelemetry;
     return elevator;
@@ -179,106 +179,136 @@ public class MechanismLimitTest {
   // ──────────────────────────────────────────────
 
   private static SmartMotorController makePivotSparkMax(Angle startPos, String label) {
-    return setupTestSubsystem(new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
-        ((yams.commands2.config.SmartMotorControllerConfig) pivotBase().withStartingPosition(
-             startPos))
-            .withSubsystem(new SmartMotorControllerTestSubsystem())
-            .withTelemetry(label, TelemetryVerbosity.HIGH)));
+    return setupTestSubsystem(
+        new SparkWrapper(
+            DeviceCreator.createSparkMax(),
+            DCMotor.getNEO(1),
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    pivotBase().withStartingPosition(startPos))
+                .withSubsystem(new SmartMotorControllerTestSubsystem())
+                .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
   private static SmartMotorController makePivotSparkFlex(Angle startPos, String label) {
     return setupTestSubsystem(
-        new SparkWrapper(DeviceCreator.createSparkFlex(), DCMotor.getNeoVortex(1),
-            ((yams.commands2.config.SmartMotorControllerConfig) pivotBase().withStartingPosition(
-                 startPos))
+        new SparkWrapper(
+            DeviceCreator.createSparkFlex(),
+            DCMotor.getNeoVortex(1),
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    pivotBase().withStartingPosition(startPos))
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
-  /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
-  private static SmartMotorController makePivotTalonFXS(Angle startPos, String label)
-  {
-    return setupTestSubsystem(new TalonFXSWrapper(DeviceCreator.createTalonFXS(), DCMotor.getNEO(1),
-        pivotBase().withStartingPosition(startPos)
-                   .withSubsystem(new SmartMotorControllerTestSubsystem())
-                   .withTelemetry(label, TelemetryVerbosity.HIGH)));
+  private static SmartMotorController makePivotTalonFXS(Angle startPos, String label) {
+    return setupTestSubsystem(
+        new TalonFXSWrapper(
+            DeviceCreator.createTalonFXS(),
+            DCMotor.getNEO(1),
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    pivotBase().withStartingPosition(startPos))
+                .withSubsystem(new SmartMotorControllerTestSubsystem())
+                .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
-  private static SmartMotorController makePivotTalonFX(Angle startPos, String label)
-  {
-    return setupTestSubsystem(new TalonFXWrapper(DeviceCreator.createTalonFX(),
-  DCMotor.getKrakenX60(1), pivotBase().withStartingPosition(startPos) .withSubsystem(new
-  SmartMotorControllerTestSubsystem()) .withTelemetry(label, TelemetryVerbosity.HIGH)));
+  private static SmartMotorController makePivotTalonFX(Angle startPos, String label) {
+    return setupTestSubsystem(
+        new TalonFXWrapper(
+            DeviceCreator.createTalonFX(),
+            DCMotor.getKrakenX60(1),
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    pivotBase().withStartingPosition(startPos))
+                .withSubsystem(new SmartMotorControllerTestSubsystem())
+                .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
-  */
 
   private static SmartMotorController makeArmSparkMax(Angle startPos, String label) {
-    return setupTestSubsystem(new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
-        ((yams.commands2.config.SmartMotorControllerConfig) armBase().withStartingPosition(
-             startPos))
-            .withSubsystem(new SmartMotorControllerTestSubsystem())
-            .withTelemetry(label, TelemetryVerbosity.HIGH)));
+    return setupTestSubsystem(
+        new SparkWrapper(
+            DeviceCreator.createSparkMax(),
+            DCMotor.getNEO(1),
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    armBase().withStartingPosition(startPos))
+                .withSubsystem(new SmartMotorControllerTestSubsystem())
+                .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
   private static SmartMotorController makeArmSparkFlex(Angle startPos, String label) {
     return setupTestSubsystem(
-        new SparkWrapper(DeviceCreator.createSparkFlex(), DCMotor.getNeoVortex(1),
-            ((yams.commands2.config.SmartMotorControllerConfig) armBase().withStartingPosition(
-                 startPos))
+        new SparkWrapper(
+            DeviceCreator.createSparkFlex(),
+            DCMotor.getNeoVortex(1),
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    armBase().withStartingPosition(startPos))
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
-  /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
-  private static SmartMotorController makeArmTalonFXS(Angle startPos, String label)
-  {
-    return setupTestSubsystem(new TalonFXSWrapper(DeviceCreator.createTalonFXS(), DCMotor.getNEO(1),
-        armBase().withStartingPosition(startPos)
-                 .withSubsystem(new SmartMotorControllerTestSubsystem())
-                 .withTelemetry(label, TelemetryVerbosity.HIGH)));
+  private static SmartMotorController makeArmTalonFXS(Angle startPos, String label) {
+    return setupTestSubsystem(
+        new TalonFXSWrapper(
+            DeviceCreator.createTalonFXS(),
+            DCMotor.getNEO(1),
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    armBase().withStartingPosition(startPos))
+                .withSubsystem(new SmartMotorControllerTestSubsystem())
+                .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
-  private static SmartMotorController makeArmTalonFX(Angle startPos, String label)
-  {
-    return setupTestSubsystem(new TalonFXWrapper(DeviceCreator.createTalonFX(),
-  DCMotor.getKrakenX60(1), armBase().withStartingPosition(startPos) .withSubsystem(new
-  SmartMotorControllerTestSubsystem()) .withTelemetry(label, TelemetryVerbosity.HIGH)));
+  private static SmartMotorController makeArmTalonFX(Angle startPos, String label) {
+    return setupTestSubsystem(
+        new TalonFXWrapper(
+            DeviceCreator.createTalonFX(),
+            DCMotor.getKrakenX60(1),
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    armBase().withStartingPosition(startPos))
+                .withSubsystem(new SmartMotorControllerTestSubsystem())
+                .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
-  */
 
   private static SmartMotorController makeElevSparkMax(Distance startHeight, String label) {
-    return setupTestSubsystem(new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
-        ((yams.commands2.config.SmartMotorControllerConfig) elevatorBase().withStartingPosition(
-             startHeight))
-            .withSubsystem(new SmartMotorControllerTestSubsystem())
-            .withTelemetry(label, TelemetryVerbosity.HIGH)));
+    return setupTestSubsystem(
+        new SparkWrapper(
+            DeviceCreator.createSparkMax(),
+            DCMotor.getNEO(1),
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    elevatorBase().withStartingPosition(startHeight))
+                .withSubsystem(new SmartMotorControllerTestSubsystem())
+                .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
   private static SmartMotorController makeElevSparkFlex(Distance startHeight, String label) {
     return setupTestSubsystem(
-        new SparkWrapper(DeviceCreator.createSparkFlex(), DCMotor.getNeoVortex(1),
-            ((yams.commands2.config.SmartMotorControllerConfig) elevatorBase().withStartingPosition(
-                 startHeight))
+        new SparkWrapper(
+            DeviceCreator.createSparkFlex(),
+            DCMotor.getNeoVortex(1),
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    elevatorBase().withStartingPosition(startHeight))
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
-  /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
-  private static SmartMotorController makeElevTalonFXS(Distance startHeight, String label)
-  {
-    return setupTestSubsystem(new TalonFXSWrapper(DeviceCreator.createTalonFXS(), DCMotor.getNEO(1),
-        elevatorBase().withStartingPosition(startHeight)
-                      .withSubsystem(new SmartMotorControllerTestSubsystem())
-                      .withTelemetry(label, TelemetryVerbosity.HIGH)));
+  private static SmartMotorController makeElevTalonFXS(Distance startHeight, String label) {
+    return setupTestSubsystem(
+        new TalonFXSWrapper(
+            DeviceCreator.createTalonFXS(),
+            DCMotor.getNEO(1),
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    elevatorBase().withStartingPosition(startHeight))
+                .withSubsystem(new SmartMotorControllerTestSubsystem())
+                .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
-  private static SmartMotorController makeElevTalonFX(Distance startHeight, String label)
-  {
-    return setupTestSubsystem(new TalonFXWrapper(DeviceCreator.createTalonFX(),
-  DCMotor.getKrakenX60(1), elevatorBase().withStartingPosition(startHeight) .withSubsystem(new
-  SmartMotorControllerTestSubsystem()) .withTelemetry(label, TelemetryVerbosity.HIGH)));
+  private static SmartMotorController makeElevTalonFX(Distance startHeight, String label) {
+    return setupTestSubsystem(
+        new TalonFXWrapper(
+            DeviceCreator.createTalonFX(),
+            DCMotor.getKrakenX60(1),
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    elevatorBase().withStartingPosition(startHeight))
+                .withSubsystem(new SmartMotorControllerTestSubsystem())
+                .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
-  */
 
   // ──────────────────────────────────────────────
   // Argument stream factories
@@ -292,24 +322,28 @@ public class MechanismLimitTest {
   private static Stream<Arguments> pivotMinArgs() {
     offset++;
     var args = new ArrayList<Arguments>();
-    for (Object[] row : new Object[][] {
-             {Degrees.of(0), false, ""},
-             // -101° is 1° past the -100° soft limit; DCMotorSim has no gravity so the
-             // position stays near -101° after the physics step, well below -100°.
-             {Degrees.of(-101), true, "-atMin"},
-         }) {
+    for (Object[] row :
+        new Object[][] {
+          {Degrees.of(0), false, ""},
+          // -101° is 1° past the -100° soft limit; DCMotorSim has no gravity so the
+          // position stays near -101° after the physics step, well below -100°.
+          {Degrees.of(-101), true, "-atMin"},
+        }) {
       Angle pos = (Angle) row[0];
       boolean expected = (boolean) row[1];
       String sfx = (String) row[2];
-      args.add(Arguments.of(
-          makePivotSparkMax(pos, "SparkMax(pMin" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(
-          makePivotSparkFlex(pos, "SparkFlex(pMin" + sfx + ")[" + offset + "]"), expected));
-      /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
-      args.add(Arguments.of(makePivotTalonFXS(pos, "TalonFXS(pMin" + sfx + ")[" + offset + "]"),
-      expected)); args.add(Arguments.of(makePivotTalonFX(pos, "TalonFX(pMin" + sfx + ")[" + offset +
-      "]"), expected));
-      */
+      args.add(
+          Arguments.of(
+              makePivotSparkMax(pos, "SparkMax(pMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(
+              makePivotSparkFlex(pos, "SparkFlex(pMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(
+              makePivotTalonFXS(pos, "TalonFXS(pMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(
+              makePivotTalonFX(pos, "TalonFX(pMin" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -317,24 +351,28 @@ public class MechanismLimitTest {
   private static Stream<Arguments> pivotMaxArgs() {
     offset++;
     var args = new ArrayList<Arguments>();
-    for (Object[] row : new Object[][] {
-             {Degrees.of(0), false, ""},
-             // 101° is 1° past the 100° soft limit; DCMotorSim has no gravity so the
-             // position stays near 101° after the physics step, well above 100°.
-             {Degrees.of(101), true, "-atMax"},
-         }) {
+    for (Object[] row :
+        new Object[][] {
+          {Degrees.of(0), false, ""},
+          // 101° is 1° past the 100° soft limit; DCMotorSim has no gravity so the
+          // position stays near 101° after the physics step, well above 100°.
+          {Degrees.of(101), true, "-atMax"},
+        }) {
       Angle pos = (Angle) row[0];
       boolean expected = (boolean) row[1];
       String sfx = (String) row[2];
-      args.add(Arguments.of(
-          makePivotSparkMax(pos, "SparkMax(pMax" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(
-          makePivotSparkFlex(pos, "SparkFlex(pMax" + sfx + ")[" + offset + "]"), expected));
-      /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
-      args.add(Arguments.of(makePivotTalonFXS(pos, "TalonFXS(pMax" + sfx + ")[" + offset + "]"),
-      expected)); args.add(Arguments.of(makePivotTalonFX(pos, "TalonFX(pMax" + sfx + ")[" + offset +
-      "]"), expected));
-      */
+      args.add(
+          Arguments.of(
+              makePivotSparkMax(pos, "SparkMax(pMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(
+              makePivotSparkFlex(pos, "SparkFlex(pMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(
+              makePivotTalonFXS(pos, "TalonFXS(pMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(
+              makePivotTalonFX(pos, "TalonFX(pMax" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -342,24 +380,27 @@ public class MechanismLimitTest {
   private static Stream<Arguments> armMinArgs() {
     offset++;
     var args = new ArrayList<Arguments>();
-    for (Object[] row : new Object[][] {
-             {Degrees.of(0), false, ""},
-             // -105° is 5° past the -100° soft limit so gravity's restoring force
-             // (which pushes the arm back toward 0°) cannot drift it above -100° in 20 ms.
-             {Degrees.of(-105), true, "-atMin"},
-         }) {
+    for (Object[] row :
+        new Object[][] {
+          {Degrees.of(0), false, ""},
+          // -105° is 5° past the -100° soft limit so gravity's restoring force
+          // (which pushes the arm back toward 0°) cannot drift it above -100° in 20 ms.
+          {Degrees.of(-105), true, "-atMin"},
+        }) {
       Angle pos = (Angle) row[0];
       boolean expected = (boolean) row[1];
       String sfx = (String) row[2];
-      args.add(Arguments.of(
-          makeArmSparkMax(pos, "SparkMax(aMin" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(
-          makeArmSparkFlex(pos, "SparkFlex(aMin" + sfx + ")[" + offset + "]"), expected));
-      /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
-      args.add(Arguments.of(makeArmTalonFXS(pos, "TalonFXS(aMin" + sfx + ")[" + offset + "]"),
-      expected)); args.add(Arguments.of(makeArmTalonFX(pos, "TalonFX(aMin" + sfx + ")[" + offset +
-      "]"), expected));
-      */
+      args.add(
+          Arguments.of(
+              makeArmSparkMax(pos, "SparkMax(aMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(
+              makeArmSparkFlex(pos, "SparkFlex(aMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(
+              makeArmTalonFXS(pos, "TalonFXS(aMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(makeArmTalonFX(pos, "TalonFX(aMin" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -367,25 +408,28 @@ public class MechanismLimitTest {
   private static Stream<Arguments> armMaxArgs() {
     offset++;
     var args = new ArrayList<Arguments>();
-    for (Object[] row : new Object[][] {
-             {Degrees.of(0), false, ""},
-             // 101° is 1° past the 100° soft limit; at 101° gravity pushes the arm further
-             // from horizontal (past vertical), so the position stays above 100° after one
-             // physics step.
-             {Degrees.of(101), true, "-atMax"},
-         }) {
+    for (Object[] row :
+        new Object[][] {
+          {Degrees.of(0), false, ""},
+          // 101° is 1° past the 100° soft limit; at 101° gravity pushes the arm further
+          // from horizontal (past vertical), so the position stays above 100° after one
+          // physics step.
+          {Degrees.of(101), true, "-atMax"},
+        }) {
       Angle pos = (Angle) row[0];
       boolean expected = (boolean) row[1];
       String sfx = (String) row[2];
-      args.add(Arguments.of(
-          makeArmSparkMax(pos, "SparkMax(aMax" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(
-          makeArmSparkFlex(pos, "SparkFlex(aMax" + sfx + ")[" + offset + "]"), expected));
-      /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
-      args.add(Arguments.of(makeArmTalonFXS(pos, "TalonFXS(aMax" + sfx + ")[" + offset + "]"),
-      expected)); args.add(Arguments.of(makeArmTalonFX(pos, "TalonFX(aMax" + sfx + ")[" + offset +
-      "]"), expected));
-      */
+      args.add(
+          Arguments.of(
+              makeArmSparkMax(pos, "SparkMax(aMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(
+              makeArmSparkFlex(pos, "SparkFlex(aMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(
+              makeArmTalonFXS(pos, "TalonFXS(aMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(makeArmTalonFX(pos, "TalonFX(aMax" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -393,24 +437,27 @@ public class MechanismLimitTest {
   private static Stream<Arguments> elevatorMinArgs() {
     offset++;
     var args = new ArrayList<Arguments>();
-    for (Object[] row : new Object[][] {
-             {Meters.of(1.5), false, ""},
-             // -0.01 m is below the 0 m soft limit; avoids float-point epsilon where
-             // exactly 0 m reads back as ~8e-8 m (> 0) causing lte(0) = false.
-             {Meters.of(-0.01), true, "-atMin"},
-         }) {
+    for (Object[] row :
+        new Object[][] {
+          {Meters.of(1.5), false, ""},
+          // -0.01 m is below the 0 m soft limit; avoids float-point epsilon where
+          // exactly 0 m reads back as ~8e-8 m (> 0) causing lte(0) = false.
+          {Meters.of(-0.01), true, "-atMin"},
+        }) {
       Distance pos = (Distance) row[0];
       boolean expected = (boolean) row[1];
       String sfx = (String) row[2];
-      args.add(Arguments.of(
-          makeElevSparkMax(pos, "SparkMax(eMin" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(
-          makeElevSparkFlex(pos, "SparkFlex(eMin" + sfx + ")[" + offset + "]"), expected));
-      /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
-      args.add(Arguments.of(makeElevTalonFXS(pos, "TalonFXS(eMin" + sfx + ")[" + offset + "]"),
-      expected)); args.add(Arguments.of(makeElevTalonFX(pos, "TalonFX(eMin" + sfx + ")[" + offset +
-      "]"), expected));
-      */
+      args.add(
+          Arguments.of(
+              makeElevSparkMax(pos, "SparkMax(eMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(
+              makeElevSparkFlex(pos, "SparkFlex(eMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(
+              makeElevTalonFXS(pos, "TalonFXS(eMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(makeElevTalonFX(pos, "TalonFX(eMin" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -418,24 +465,27 @@ public class MechanismLimitTest {
   private static Stream<Arguments> elevatorMaxArgs() {
     offset++;
     var args = new ArrayList<Arguments>();
-    for (Object[] row : new Object[][] {
-             {Meters.of(1.5), false, ""},
-             // 5.5 m > 5 m soft limit; gravity drops the elevator slightly in one step
-             // but it remains well above 5 m.
-             {Meters.of(5.5), true, "-atMax"},
-         }) {
+    for (Object[] row :
+        new Object[][] {
+          {Meters.of(1.5), false, ""},
+          // 5.5 m > 5 m soft limit; gravity drops the elevator slightly in one step
+          // but it remains well above 5 m.
+          {Meters.of(5.5), true, "-atMax"},
+        }) {
       Distance pos = (Distance) row[0];
       boolean expected = (boolean) row[1];
       String sfx = (String) row[2];
-      args.add(Arguments.of(
-          makeElevSparkMax(pos, "SparkMax(eMax" + sfx + ")[" + offset + "]"), expected));
-      args.add(Arguments.of(
-          makeElevSparkFlex(pos, "SparkFlex(eMax" + sfx + ")[" + offset + "]"), expected));
-      /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
-      args.add(Arguments.of(makeElevTalonFXS(pos, "TalonFXS(eMax" + sfx + ")[" + offset + "]"),
-      expected)); args.add(Arguments.of(makeElevTalonFX(pos, "TalonFX(eMax" + sfx + ")[" + offset +
-      "]"), expected));
-      */
+      args.add(
+          Arguments.of(
+              makeElevSparkMax(pos, "SparkMax(eMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(
+              makeElevSparkFlex(pos, "SparkFlex(eMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(
+              makeElevTalonFXS(pos, "TalonFXS(eMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(makeElevTalonFX(pos, "TalonFX(eMax" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -445,10 +495,8 @@ public class MechanismLimitTest {
     var args = new ArrayList<Arguments>();
     args.add(Arguments.of(makePivotSparkMax(Degrees.of(45), "SparkMax(spos)[" + offset + "]")));
     args.add(Arguments.of(makePivotSparkFlex(Degrees.of(45), "SparkFlex(spos)[" + offset + "]")));
-    /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
     args.add(Arguments.of(makePivotTalonFXS(Degrees.of(45), "TalonFXS(spos)[" + offset + "]")));
     args.add(Arguments.of(makePivotTalonFX(Degrees.of(45), "TalonFX(spos)[" + offset + "]")));
-    */
     return args.stream();
   }
 
@@ -457,35 +505,41 @@ public class MechanismLimitTest {
   // ──────────────────────────────────────────────
 
   private static SmartMotorController setupTestSubsystem(SmartMotorController smc) {
-    ((SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem()).setSMC(smc);
+    ((SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+        .setSMC(smc);
     return smc;
   }
 
   private static void startTest(SmartMotorController smc) {
-    ((SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem()).testRunning = true;
+    ((SmartMotorControllerTestSubsystem)
+                ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+            .testRunning =
+        true;
   }
 
   private static void closeSMC(SmartMotorController smc) {
-    SmartMotorControllerCommandRegistry.removeCommands(((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem());
-    CommandScheduler.getInstance().unregisterSubsystem(
-        (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem());
-    ((SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem()).close();
+    SmartMotorControllerCommandRegistry.removeCommands(
+        ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem());
+    CommandScheduler.getInstance()
+        .unregisterSubsystem(
+            (SmartMotorControllerTestSubsystem)
+                ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig())
+                    .getSubsystem());
+    ((SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+        .close();
     smc.close();
     Object motor = smc.getMotorController();
     if (motor instanceof SparkMax) {
       ((SparkMax) motor).close();
     } else if (motor instanceof SparkFlex) {
       ((SparkFlex) motor).close();
-    }
-    /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
-    else if (motor instanceof TalonFXS)
-    {
+    } else if (motor instanceof TalonFXS) {
       ((TalonFXS) motor).close();
-    } else if (motor instanceof TalonFX)
-    {
+    } else if (motor instanceof TalonFX) {
       ((TalonFX) motor).close();
     }
-    */
   }
 
   // ──────────────────────────────────────────────
@@ -507,7 +561,9 @@ public class MechanismLimitTest {
       Pivot pivot = createPivot(smc);
       startTest(smc);
       TestWithScheduler.cycle(Milliseconds.of(20));
-      assertEquals(expectedTrigger, pivot.min().getAsBoolean(),
+      assertEquals(
+          expectedTrigger,
+          pivot.min().getAsBoolean(),
           "pivot.min() at " + smc.getMechanismPosition() + " vs soft lower limit (-100°)");
     } finally {
       closeSMC(smc);
@@ -522,7 +578,9 @@ public class MechanismLimitTest {
       Pivot pivot = createPivot(smc);
       startTest(smc);
       TestWithScheduler.cycle(Milliseconds.of(20));
-      assertEquals(expectedTrigger, pivot.max().getAsBoolean(),
+      assertEquals(
+          expectedTrigger,
+          pivot.max().getAsBoolean(),
           "pivot.max() at " + smc.getMechanismPosition() + " vs soft upper limit (100°)");
     } finally {
       closeSMC(smc);
@@ -537,7 +595,9 @@ public class MechanismLimitTest {
       Arm arm = createArm(smc);
       startTest(smc);
       TestWithScheduler.cycle(Milliseconds.of(20));
-      assertEquals(expectedTrigger, arm.min().getAsBoolean(),
+      assertEquals(
+          expectedTrigger,
+          arm.min().getAsBoolean(),
           "arm.min() at " + smc.getMechanismPosition() + " vs soft lower limit (-100°)");
     } finally {
       closeSMC(smc);
@@ -552,7 +612,9 @@ public class MechanismLimitTest {
       Arm arm = createArm(smc);
       startTest(smc);
       TestWithScheduler.cycle(Milliseconds.of(20));
-      assertEquals(expectedTrigger, arm.max().getAsBoolean(),
+      assertEquals(
+          expectedTrigger,
+          arm.max().getAsBoolean(),
           "arm.max() at " + smc.getMechanismPosition() + " vs soft upper limit (100°)");
     } finally {
       closeSMC(smc);
@@ -567,7 +629,9 @@ public class MechanismLimitTest {
       Elevator elevator = createElevator(smc);
       startTest(smc);
       TestWithScheduler.cycle(Milliseconds.of(20));
-      assertEquals(expectedTrigger, elevator.min().getAsBoolean(),
+      assertEquals(
+          expectedTrigger,
+          elevator.min().getAsBoolean(),
           "elevator.min() at " + smc.getMechanismPosition() + " vs soft lower limit (0 m)");
     } finally {
       closeSMC(smc);
@@ -582,7 +646,9 @@ public class MechanismLimitTest {
       Elevator elevator = createElevator(smc);
       startTest(smc);
       TestWithScheduler.cycle(Milliseconds.of(20));
-      assertEquals(expectedTrigger, elevator.max().getAsBoolean(),
+      assertEquals(
+          expectedTrigger,
+          elevator.max().getAsBoolean(),
           "elevator.max() at " + smc.getMechanismPosition() + " vs soft upper limit (5 m)");
     } finally {
       closeSMC(smc);
@@ -605,7 +671,8 @@ public class MechanismLimitTest {
       startTest(smc);
       smc.setupSimulation();
       TestWithScheduler.cycle(Milliseconds.of(20));
-      assertTrue(smc.getMechanismPosition().isNear(Degrees.of(45), Degrees.of(2)),
+      assertTrue(
+          smc.getMechanismPosition().isNear(Degrees.of(45), Degrees.of(2)),
           "Expected starting position ~45° but got " + smc.getMechanismPosition());
     } finally {
       closeSMC(smc);
@@ -619,14 +686,18 @@ public class MechanismLimitTest {
   @Test
   void testPivotThrowsWhenStartingPositionBelowLowerLimit() {
     SmartMotorController motor =
-        setupTestSubsystem(new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
-            ((yams.commands2.config.SmartMotorControllerConfig) pivotBase().withStartingPosition(
-                 Degrees.of(-200)))
-                .withSubsystem(new SmartMotorControllerTestSubsystem())));
+        setupTestSubsystem(
+            new SparkWrapper(
+                DeviceCreator.createSparkMax(),
+                DCMotor.getNEO(1),
+                ((yams.commands2.config.SmartMotorControllerConfig)
+                        pivotBase().withStartingPosition(Degrees.of(-200)))
+                    .withSubsystem(new SmartMotorControllerTestSubsystem())));
     try {
-      assertThrows(PivotConfigurationException.class,
-          ()
-              -> new Pivot(
+      assertThrows(
+          PivotConfigurationException.class,
+          () ->
+              new Pivot(
                   new PivotConfig().withHardLimits(Degrees.of(-100), Degrees.of(150)), motor));
     } finally {
       closeSMC(motor);
@@ -636,14 +707,18 @@ public class MechanismLimitTest {
   @Test
   void testPivotThrowsWhenStartingPositionAboveUpperLimit() {
     SmartMotorController motor =
-        setupTestSubsystem(new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
-            ((yams.commands2.config.SmartMotorControllerConfig) pivotBase().withStartingPosition(
-                 Degrees.of(200)))
-                .withSubsystem(new SmartMotorControllerTestSubsystem())));
+        setupTestSubsystem(
+            new SparkWrapper(
+                DeviceCreator.createSparkMax(),
+                DCMotor.getNEO(1),
+                ((yams.commands2.config.SmartMotorControllerConfig)
+                        pivotBase().withStartingPosition(Degrees.of(200)))
+                    .withSubsystem(new SmartMotorControllerTestSubsystem())));
     try {
-      assertThrows(PivotConfigurationException.class,
-          ()
-              -> new Pivot(
+      assertThrows(
+          PivotConfigurationException.class,
+          () ->
+              new Pivot(
                   new PivotConfig().withHardLimits(Degrees.of(-100), Degrees.of(150)), motor));
     } finally {
       closeSMC(motor);
@@ -653,16 +728,21 @@ public class MechanismLimitTest {
   @Test
   void testArmThrowsWhenStartingPositionBelowLowerLimit() {
     SmartMotorController motor =
-        setupTestSubsystem(new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
-            ((yams.commands2.config.SmartMotorControllerConfig) armBase().withStartingPosition(
-                 Degrees.of(-200)))
-                .withSubsystem(new SmartMotorControllerTestSubsystem())));
+        setupTestSubsystem(
+            new SparkWrapper(
+                DeviceCreator.createSparkMax(),
+                DCMotor.getNEO(1),
+                ((yams.commands2.config.SmartMotorControllerConfig)
+                        armBase().withStartingPosition(Degrees.of(-200)))
+                    .withSubsystem(new SmartMotorControllerTestSubsystem())));
     try {
-      assertThrows(ArmConfigurationException.class,
-          ()
-              -> new Arm(new ArmConfig()
-                             .withLength(Inches.of(4))
-                             .withHardLimits(Degrees.of(-100), Degrees.of(200)),
+      assertThrows(
+          ArmConfigurationException.class,
+          () ->
+              new Arm(
+                  new ArmConfig()
+                      .withLength(Inches.of(4))
+                      .withHardLimits(Degrees.of(-100), Degrees.of(200)),
                   motor));
     } finally {
       closeSMC(motor);
@@ -672,16 +752,21 @@ public class MechanismLimitTest {
   @Test
   void testArmThrowsWhenStartingPositionAboveUpperLimit() {
     SmartMotorController motor =
-        setupTestSubsystem(new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
-            ((yams.commands2.config.SmartMotorControllerConfig) armBase().withStartingPosition(
-                 Degrees.of(300)))
-                .withSubsystem(new SmartMotorControllerTestSubsystem())));
+        setupTestSubsystem(
+            new SparkWrapper(
+                DeviceCreator.createSparkMax(),
+                DCMotor.getNEO(1),
+                ((yams.commands2.config.SmartMotorControllerConfig)
+                        armBase().withStartingPosition(Degrees.of(300)))
+                    .withSubsystem(new SmartMotorControllerTestSubsystem())));
     try {
-      assertThrows(ArmConfigurationException.class,
-          ()
-              -> new Arm(new ArmConfig()
-                             .withLength(Inches.of(4))
-                             .withHardLimits(Degrees.of(-100), Degrees.of(200)),
+      assertThrows(
+          ArmConfigurationException.class,
+          () ->
+              new Arm(
+                  new ArmConfig()
+                      .withLength(Inches.of(4))
+                      .withHardLimits(Degrees.of(-100), Degrees.of(200)),
                   motor));
     } finally {
       closeSMC(motor);
@@ -691,16 +776,21 @@ public class MechanismLimitTest {
   @Test
   void testElevatorThrowsWhenStartingHeightBelowMinimum() {
     SmartMotorController motor =
-        setupTestSubsystem(new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
-            ((yams.commands2.config.SmartMotorControllerConfig) elevatorBase())
-                .withSubsystem(new SmartMotorControllerTestSubsystem())
-                .withStartingPosition(Meters.of(-1))));
+        setupTestSubsystem(
+            new SparkWrapper(
+                DeviceCreator.createSparkMax(),
+                DCMotor.getNEO(1),
+                ((yams.commands2.config.SmartMotorControllerConfig) elevatorBase())
+                    .withSubsystem(new SmartMotorControllerTestSubsystem())
+                    .withStartingPosition(Meters.of(-1))));
     try {
-      assertThrows(SmartMotorControllerConfigurationException.class,
-          ()
-              -> new Elevator(new ElevatorConfig()
-                                  .withHardLimits(Meters.of(0), Meters.of(6))
-                                  .withCarriageWeight(Pounds.of(16)),
+      assertThrows(
+          SmartMotorControllerConfigurationException.class,
+          () ->
+              new Elevator(
+                  new ElevatorConfig()
+                      .withHardLimits(Meters.of(0), Meters.of(6))
+                      .withCarriageWeight(Pounds.of(16)),
                   motor));
     } finally {
       closeSMC(motor);
@@ -710,16 +800,21 @@ public class MechanismLimitTest {
   @Test
   void testElevatorThrowsWhenStartingHeightAboveMaximum() {
     SmartMotorController motor =
-        setupTestSubsystem(new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
-            ((yams.commands2.config.SmartMotorControllerConfig) elevatorBase())
-                .withSubsystem(new SmartMotorControllerTestSubsystem())
-                .withStartingPosition(Meters.of(7))));
+        setupTestSubsystem(
+            new SparkWrapper(
+                DeviceCreator.createSparkMax(),
+                DCMotor.getNEO(1),
+                ((yams.commands2.config.SmartMotorControllerConfig) elevatorBase())
+                    .withSubsystem(new SmartMotorControllerTestSubsystem())
+                    .withStartingPosition(Meters.of(7))));
     try {
-      assertThrows(SmartMotorControllerConfigurationException.class,
-          ()
-              -> new Elevator(new ElevatorConfig()
-                                  .withHardLimits(Meters.of(0), Meters.of(6))
-                                  .withCarriageWeight(Pounds.of(16)),
+      assertThrows(
+          SmartMotorControllerConfigurationException.class,
+          () ->
+              new Elevator(
+                  new ElevatorConfig()
+                      .withHardLimits(Meters.of(0), Meters.of(6))
+                      .withCarriageWeight(Pounds.of(16)),
                   motor));
     } finally {
       closeSMC(motor);

@@ -7,11 +7,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.DegreesPerSecond;
 import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Millisecond;
+import static org.wpilib.units.Units.Milliseconds;
 import static org.wpilib.units.Units.RPM;
 import static org.wpilib.units.Units.Second;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import java.util.ArrayList;
@@ -41,18 +45,12 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.motorcontrollers.remote.TalonFXSWrapper;
+import yams.core.motorcontrollers.remote.TalonFXWrapper;
 import yams.helpers.DeviceCreator;
 import yams.helpers.MockHardwareExtension;
 import yams.helpers.SmartMotorControllerTestSubsystem;
 import yams.helpers.TestWithScheduler;
-
-/* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7; re-enable once
-   com.ctre.phoenix6 is available again.
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.hardware.TalonFXS;
-import yams.core.motorcontrollers.remote.TalonFXSWrapper;
-import yams.core.motorcontrollers.remote.TalonFXWrapper;
-*/
 
 public class ShooterTest {
   private static SmartMotorControllerConfig createSMCConfig() {
@@ -72,7 +70,9 @@ public class ShooterTest {
     FlyWheelConfig cfg = new FlyWheelConfig().withDiameter(Inches.of(4));
     FlyWheel shooter = new FlyWheel(cfg, smc);
     SmartMotorControllerTestSubsystem subsys =
-        (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
+        (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig)
+                                                 smc.getConfig())
+            .getSubsystem();
     subsys.smc = smc;
     subsys.mechSimPeriodic = shooter::simIterate;
     subsys.mechUpdateTelemetry = shooter::updateTelemetry;
@@ -110,10 +110,8 @@ public class ShooterTest {
       SparkMax smax = DeviceCreator.createSparkMax();
       SparkFlex sflex = DeviceCreator.createSparkFlex();
       //    ThriftyNova tnova = new ThriftyNova(30 + offset+i);
-      /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
       TalonFXS tfxs = DeviceCreator.createTalonFXS();
-      TalonFX  tfx  = DeviceCreator.createTalonFX();
-      */
+      TalonFX tfx = DeviceCreator.createTalonFX();
       smcList.add(Arguments.of(setupTestSubsystem(new SparkWrapper(smax, DCMotor.getNEO(1),
           ((yams.commands2.config.SmartMotorControllerConfig) smcConfig.clone())
               .withSubsystem(new SmartMotorControllerTestSubsystem())
@@ -124,32 +122,32 @@ public class ShooterTest {
               .withSubsystem(new SmartMotorControllerTestSubsystem())
               .withTelemetry("SparkFlex(" + (20 + offset) + "[" + i + "]) Vortex",
                   TelemetryVerbosity.HIGH)))));
-      /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
-      smcList.add(Arguments.of(setupTestSubsystem(new TalonFXSWrapper(tfxs,
-                                                                      DCMotor.getNEO(2),
-                                                                      smcConfig.clone()
-                                                                               .withSubsystem(new
-      SmartMotorControllerTestSubsystem()) .withTelemetry( "TalonFXS(" + (30 + offset) + "[" + i +
-                                                                                   "]) NEO",
-                                                                                   TelemetryVerbosity.HIGH)))));
-      smcList.add(Arguments.of(setupTestSubsystem(new TalonFXWrapper(tfx,
-                                                                     DCMotor.getKrakenX60(1),
-                                                                     smcConfig.clone()
-                                                                              .withSubsystem(new
-      SmartMotorControllerTestSubsystem()) .withTelemetry( "TalonFX(" + (40 + offset) + "[" + i +
-                                                                                  "]) Kraken",
-                                                                                  TelemetryVerbosity.HIGH)))));
-      */
+      smcList.add(Arguments.of(setupTestSubsystem(new TalonFXSWrapper(tfxs, DCMotor.getNEO(2),
+          ((yams.commands2.config.SmartMotorControllerConfig) smcConfig.clone())
+              .withSubsystem(new SmartMotorControllerTestSubsystem())
+              .withTelemetry(
+                  "TalonFXS(" + (30 + offset) + "[" + i + "]) NEO", TelemetryVerbosity.HIGH)))));
+      smcList.add(Arguments.of(setupTestSubsystem(new TalonFXWrapper(tfx, DCMotor.getKrakenX60(1),
+          ((yams.commands2.config.SmartMotorControllerConfig) smcConfig.clone())
+              .withSubsystem(new SmartMotorControllerTestSubsystem())
+              .withTelemetry(
+                  "TalonFX(" + (40 + offset) + "[" + i + "]) Kraken", TelemetryVerbosity.HIGH)))));
     }
 
     return smcList.stream();
   }
 
   private static void closeSMC(SmartMotorController smc) {
-    SmartMotorControllerCommandRegistry.removeCommands(((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem());
+    SmartMotorControllerCommandRegistry.removeCommands(
+        ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem());
     CommandScheduler.getInstance().unregisterSubsystem(
-        (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem());
-    ((SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem()).close();
+        (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig)
+                                                 smc.getConfig())
+            .getSubsystem());
+    ((SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig)
+                                              smc.getConfig())
+            .getSubsystem())
+        .close();
     smc.close();
 
     //    switch (smc.getMotorController())
@@ -161,16 +159,11 @@ public class ShooterTest {
       ((SparkMax) motorController).close();
     } else if (motorController instanceof SparkFlex) {
       ((SparkFlex) motorController).close();
-    }
-    /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
-    else if (motorController instanceof TalonFXS)
-    {
+    } else if (motorController instanceof TalonFXS) {
       ((TalonFXS) motorController).close();
-    } else if (motorController instanceof TalonFX)
-    {
+    } else if (motorController instanceof TalonFX) {
       ((TalonFX) motorController).close();
     }
-    */
   }
 
   private static void shooterVelocityPidTest(SmartMotorController smc, Command velocityUp)
@@ -182,39 +175,35 @@ public class ShooterTest {
     AtomicBoolean testPassed = new AtomicBoolean(false);
 
     TestWithScheduler.schedule(velocityUp);
-    /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7, so the
-       TalonFXSWrapper/TalonFXWrapper branch below is disabled and the else branch runs
-       unconditionally.
-    if (smc instanceof TalonFXSWrapper || smc instanceof TalonFXWrapper)
-    {
+    if (smc instanceof TalonFXSWrapper || smc instanceof TalonFXWrapper) {
       TestWithScheduler.cycle(Seconds.of(1), () -> {
-        try
-        {
-          Thread.sleep((long)
-    smc.getConfig().getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Millisecond)); }
-    catch (Exception e) {} if (smc.getDutyCycle() != 0)
-        {
+        try {
+          Thread.sleep((long) smc.getConfig()
+                  .getClosedLoopControlPeriod()
+                  .orElse(Milliseconds.of(20))
+                  .in(Millisecond));
+        } catch (Exception e) {
+        }
+        if (smc.getDutyCycle() != 0) {
           testPassed.set(true);
         }
       });
 
-    } else
-    {
-    */
-    TestWithScheduler.cycle(Seconds.of(2), () -> {
-      //        try
-      //        {
-      //          Thread.sleep((long)
-      // smc.getConfig().getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Millisecond));
-      //        } catch (InterruptedException e)
-      //        {
-      //          throw new RuntimeException(e);
-      //        }
-      if (smc.getDutyCycle() != 0) {
-        testPassed.set(true);
-      }
-    });
-    //    }
+    } else {
+      TestWithScheduler.cycle(Seconds.of(2), () -> {
+        //        try
+        //        {
+        //          Thread.sleep((long)
+        // smc.getConfig().getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Millisecond));
+        //        } catch (InterruptedException e)
+        //        {
+        //          throw new RuntimeException(e);
+        //        }
+        if (smc.getDutyCycle() != 0) {
+          testPassed.set(true);
+        }
+      });
+    }
 
     post = smc.getMechanismPosition();
     postVel = smc.getMechanismVelocity();
@@ -249,13 +238,10 @@ public class ShooterTest {
         testPassed.set(true);
       }
     });
-    /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7.
-    if (smc instanceof TalonFXSWrapper || smc instanceof TalonFXWrapper)
-    {
+    if (smc instanceof TalonFXSWrapper || smc instanceof TalonFXWrapper) {
       Thread.sleep(200);
       TestWithScheduler.cycle(Seconds.of(1));
     }
-    */
 
     post = smc.getMechanismVelocity();
     postAngle = smc.getMechanismPosition();
@@ -266,29 +252,23 @@ public class ShooterTest {
     System.out.println("DutyCycleUp PostTest Angle: " + postAngle);
 
     boolean pass = pre.lt(post) || preAngle.lt(postAngle) || testPassed.get();
-    /* CTRE has not published a Phoenix6 build compatible with wpilib 2027-alpha-7, so the
-       TalonFXSWrapper/TalonFXWrapper branch below is disabled and assertTrue(pass) runs
-       unconditionally.
-    if ((smc instanceof TalonFXSWrapper || smc instanceof TalonFXWrapper) && !pass)
-    {
-      System.out.println("[WARNING] TalonFXS or TalonFX did not pass test, current attributing this
-    to OS differences."); } else
-    {
-    */
     assertTrue(pass);
-    //    }
   }
 
   private static SmartMotorController setupTestSubsystem(SmartMotorController smc) {
     SmartMotorControllerTestSubsystem subsys =
-        (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
+        (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig)
+                                                 smc.getConfig())
+            .getSubsystem();
     subsys.setSMC(smc);
     return smc;
   }
 
   private static void startTest(SmartMotorController smc) {
     SmartMotorControllerTestSubsystem subsys =
-        (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
+        (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig)
+                                                 smc.getConfig())
+            .getSubsystem();
     subsys.testRunning = true;
   }
 
@@ -299,7 +279,9 @@ public class ShooterTest {
       startTest(smc);
       smc.setupSimulation();
       SmartMotorControllerTestSubsystem subsys =
-          (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
+          (SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig)
+                                                   smc.getConfig())
+              .getSubsystem();
 
       Command dutyCycleUp = subsys.setDutyCycle(0.5);
       Command dutyCycleDown = subsys.setDutyCycle(-0.5);
