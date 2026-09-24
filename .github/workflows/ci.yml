@@ -36,9 +36,6 @@ jobs:
           - container: wpilib/aarch64-cross-debian:trixie
             artifact-name: Arm64
             build-options: "-Ponlylinuxarm64"
-          - container: wpilib/systemcore-cross-debian:trixie
-            artifact-name: Linux
-            build-options: ""
     runs-on: ubuntu-24.04
     container: ${{ matrix.container }}
     steps:
@@ -59,7 +56,8 @@ jobs:
   build-linux:
     name: Build - Linux
     needs: [validation]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    container: wpilib/systemcore-cross-debian:trixie
     permissions:
       contents: read
     defaults:
