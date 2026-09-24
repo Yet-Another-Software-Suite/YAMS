@@ -83,7 +83,7 @@ jobs:
           path: vendordep/build/maven/
 
   test-cpp:
-    name: C++ unit tests - ${{ matrix.group }}
+    name: C++ unit tests
     needs: [build-linux]
     runs-on: ubuntu-latest
     container: wpilib/systemcore-cross-debian:trixie
@@ -92,24 +92,6 @@ jobs:
     defaults:
       run:
         working-directory: vendordep
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # Catch2 test specs (by tag), passed to the test binary via -PcatchFilter. Each
-          # mechanism integration test runs in its own process, mirroring test-java.
-          - group: arm
-            catch-filter: "[ArmTest]"
-          - group: elevator
-            catch-filter: "[ElevatorTest]"
-          - group: pivot
-            catch-filter: "[PivotTest]"
-          - group: shooter
-            catch-filter: "[ShooterTest]"
-          # Everything not in a group above (swerve, EasyCRT, LQR, ...), so new tests are picked
-          # up automatically. Keep this exclusion list in sync with the groups above.
-          - group: other
-            catch-filter: "~[ArmTest]~[ElevatorTest]~[PivotTest]~[ShooterTest]"
     steps:
       - uses: actions/checkout@v7
       - run: chmod +x gradlew
@@ -119,8 +101,8 @@ jobs:
         with:
           name: maven-linux
           path: vendordep/build/maven/
-      - name: C++ unit tests - ${{ matrix.group }}
-        run: ./gradlew catchTests "-PcatchFilter=${{ matrix.catch-filter }}"
+      - name: C++ unit tests
+        run: ./gradlew catchTests
 
   test-java:
     name: Java unit tests - ${{ matrix.group }}
