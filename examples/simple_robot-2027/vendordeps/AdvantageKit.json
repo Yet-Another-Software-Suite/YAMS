@@ -13,6 +13,11 @@
             "groupId": "org.littletonrobotics.akit",
             "artifactId": "akit-java",
             "version": "27.0.0-alpha-5"
+        },
+        {
+            "groupId": "org.littletonrobotics.akit",
+            "artifactId": "akit-autolog",
+            "version": "27.0.0-alpha-5"
         }
     ],
     "jniDependencies": [

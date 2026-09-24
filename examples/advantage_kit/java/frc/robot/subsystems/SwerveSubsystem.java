@@ -232,7 +232,7 @@ public class SwerveSubsystem extends SubsystemBase
                           "backright",
                           new Translation2d(Inches.of(-24), Inches.of(-24)));
 
-    config = new SwerveDriveConfig(this, fl, fr, bl, br)
+    config = (SwerveDriveConfig) new SwerveDriveConfig(this, fl, fr, bl, br)
         .withGyro(() -> getGyroAngle().getMeasure())
         // Use the logged estimated pose as the starting pose so the drive's
         // internal odometry initialises from the replayed value, not from zero.
@@ -346,7 +346,7 @@ public class SwerveSubsystem extends SubsystemBase
         // Each module points to its own corner: getAngle() returns the vector from
         // robot center to that module, which forms an X when all four are set.
         desiredStates[i] =
-            new SwerveModuleVelocity(0, modules[i].getConfig().getLocation().orElseThrow().getAngle());
+            new SwerveModuleVelocity(0, modules[i].getConfig().getLocation().orElseThrow().getAngle().orElse(Rotation2d.ZERO));
       }
       Logger.recordOutput("Swerve/DesiredStates", desiredStates);
       drive.setSwerveModuleStates(desiredStates);
