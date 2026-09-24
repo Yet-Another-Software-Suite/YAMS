@@ -14,6 +14,10 @@ task catchTests {
 tasks.whenTaskAdded { task ->
     if (task instanceof RunTestExecutable) {
         task.enabled = !gradle.startParameter.taskNames.contains('build')
+        // Optional Catch2 test spec, e.g. -PcatchFilter="[ArmTest]" or "~[ArmTest]~[PivotTest]"
+        if (project.hasProperty('catchFilter')) {
+            task.args project.property('catchFilter')
+        }
         if (task.name.contains(wpi.platforms.desktop.toString().capitalize()) && task.name.contains('Debug')) {
             catchTests.dependsOn task
         }

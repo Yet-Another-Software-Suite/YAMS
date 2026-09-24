@@ -83,7 +83,7 @@ jobs:
           path: vendordep/build/maven/
 
   test-cpp:
-    name: C++ unit tests
+    name: C++ unit tests - ${{ matrix.group }}
     needs: [build-linux]
     runs-on: ubuntu-latest
     container: wpilib/systemcore-cross-debian:trixie
@@ -92,6 +92,24 @@ jobs:
     defaults:
       run:
         working-directory: vendordep
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Catch2 test specs (by tag), passed to the test binary via -PcatchFilter. Each
+          # mechanism integration test runs in its own process, mirroring test-java.
+          - group: arm
+            catch-filter: "[ArmTest]"
+          - group: elevator
+            catch-filter: "[ElevatorTest]"
+          - group: pivot
+            catch-filter: "[PivotTest]"
+          - group: shooter
+            catch-filter: "[ShooterTest]"
+          # Everything not in a group above (swerve, EasyCRT, LQR, ...), so new tests are picked
+          # up automatically. Keep this exclusion list in sync with the groups above.
+          - group: other
+            catch-filter: "~[ArmTest]~[ElevatorTest]~[PivotTest]~[ShooterTest]"
     steps:
       - uses: actions/checkout@v7
       - run: chmod +x gradlew
@@ -101,8 +119,8 @@ jobs:
         with:
           name: maven-linux
           path: vendordep/build/maven/
-      - name: C++ unit tests
-        run: ./gradlew catchTests
+      - name: C++ unit tests - ${{ matrix.group }}
+        run: ./gradlew catchTests "-PcatchFilter=${{ matrix.catch-filter }}"
 
   test-java:
     name: Java unit tests - ${{ matrix.group }}
@@ -117,16 +135,25 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Mechanism-level integration tests (Arm/Elevator/Pivot/Shooter/Swerve/limits): these
-          # create the largest number of simulated motor controller devices per JVM.
-          - group: mechanisms
-            test-filter: '--tests "yams.mechs.*"'
-          # Motor controller / battery sim unit tests, plus the standalone math test: kept in
-          # their own JVM so they aren't run after the mechanisms group has already created
-          # hundreds of simulated devices in the same process — that accumulation was observed to
-          # make SimulationPeriodTest flaky.
-          - group: motorcontrollers
-            test-filter: '--tests "yams.motorcontrollers.*" --tests "yams.ChineseRemainderTheoremTest"'
+          # Each mechanism integration test runs in its own JVM: these create the largest number
+          # of simulated motor controller devices per process.
+          - group: arm
+            test-filter: '--tests "yams.mechs.ArmTest"'
+          - group: elevator
+            test-filter: '--tests "yams.mechs.ElevatorTest"'
+          - group: pivot
+            test-filter: '--tests "yams.mechs.PivotTest"'
+          - group: shooter
+            test-filter: '--tests "yams.mechs.ShooterTest"'
+          # Everything else: swerve and mechanism limit tests, motor controller / battery sim unit
+          # tests, and the standalone math test. Add new test classes here unless they get their
+          # own group above.
+          - group: other
+            test-filter: >-
+              --tests "yams.mechs.SwerveDriveTest"
+              --tests "yams.mechs.MechanismLimitTest"
+              --tests "yams.core.*"
+              --tests "yams.ChineseRemainderTheoremTest"
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-java@v5
