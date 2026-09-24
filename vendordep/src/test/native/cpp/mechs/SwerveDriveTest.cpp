@@ -145,14 +145,22 @@ struct SwerveSuiteHardware {
 
     sub = new SwerveTestSubsystem();
 
-    flDriveTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId(), ctre::phoenix6::CANBus{});
-    frDriveTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId(), ctre::phoenix6::CANBus{});
-    blDriveTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId(), ctre::phoenix6::CANBus{});
-    brDriveTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId(), ctre::phoenix6::CANBus{});
-    flAzimuthTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId(), ctre::phoenix6::CANBus{});
-    frAzimuthTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId(), ctre::phoenix6::CANBus{});
-    blAzimuthTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId(), ctre::phoenix6::CANBus{});
-    brAzimuthTalon = new ctre::phoenix6::hardware::TalonFX(NextCanId(), ctre::phoenix6::CANBus{});
+    flDriveTalon =
+        new ctre::phoenix6::hardware::TalonFX(NextReservedCanId(), ctre::phoenix6::CANBus{});
+    frDriveTalon =
+        new ctre::phoenix6::hardware::TalonFX(NextReservedCanId(), ctre::phoenix6::CANBus{});
+    blDriveTalon =
+        new ctre::phoenix6::hardware::TalonFX(NextReservedCanId(), ctre::phoenix6::CANBus{});
+    brDriveTalon =
+        new ctre::phoenix6::hardware::TalonFX(NextReservedCanId(), ctre::phoenix6::CANBus{});
+    flAzimuthTalon =
+        new ctre::phoenix6::hardware::TalonFX(NextReservedCanId(), ctre::phoenix6::CANBus{});
+    frAzimuthTalon =
+        new ctre::phoenix6::hardware::TalonFX(NextReservedCanId(), ctre::phoenix6::CANBus{});
+    blAzimuthTalon =
+        new ctre::phoenix6::hardware::TalonFX(NextReservedCanId(), ctre::phoenix6::CANBus{});
+    brAzimuthTalon =
+        new ctre::phoenix6::hardware::TalonFX(NextReservedCanId(), ctre::phoenix6::CANBus{});
 
     flDriveCfg = MakeDriveConfig("FL_Drive", sub);
     frDriveCfg = MakeDriveConfig("FR_Drive", sub);
@@ -212,6 +220,9 @@ static SwerveSuiteHardware& Hardware() {
 struct SwerveDriveTestFixture {
   SwerveDriveTestFixture() {
     SwerveSuiteHardware& hw = Hardware();
+    // Other suites' teardown resets DriverStation sim data (disabling the robot), and the shared
+    // hardware above only initializes once, so re-enable before each test so commands run.
+    InitializeHardware();
     SchedulerHelper::CancelAll();
     m_simGyro = 0_deg;
 
@@ -359,9 +370,10 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.LockPoseSetsXPattern",
   m_drive->LockPose();
 
   // Desired chassis speeds should be zero after locking.
-  auto robotSpeeds = m_drive->GetRobotRelativeSpeed();
-  CHECK(robotSpeeds.vx.value() == Catch::Approx(0.0).margin(0.5));
-  CHECK(robotSpeeds.vy.value() == Catch::Approx(0.0).margin(0.5));
+  auto desiredSpeeds = m_drive->GetDesiredChassisSpeeds();
+  CHECK(desiredSpeeds.vx.value() == Catch::Approx(0.0).margin(1e-9));
+  CHECK(desiredSpeeds.vy.value() == Catch::Approx(0.0).margin(1e-9));
+  CHECK(desiredSpeeds.omega.value() == Catch::Approx(0.0).margin(1e-9));
 
   // Run sim and check azimuth convergence toward X-pattern corner angles.
   SchedulerHelper::RunForDuration(0.5_s);
@@ -369,8 +381,11 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.LockPoseSetsXPattern",
   for (size_t i = 0; i < 4; ++i) {
     double expected = modules[i]->GetConfig().GetLocation()->Angle()->Degrees().value();
     double actual = modules[i]->GetState().angle.Degrees().value();
-    INFO("Module " << i << " angle should converge toward lock angle " << expected << "°");
-    CHECK(actual == Catch::Approx(expected).margin(180.0));
+    // Module optimization may reverse the wheel, so angles 180° apart are equivalent.
+    double error = std::remainder(actual - expected, 180.0);
+    INFO("Module " << i << " angle " << actual << "° should converge toward lock angle "
+                   << expected << "° (mod 180°)");
+    CHECK(error == Catch::Approx(0.0).margin(10.0));
   }
 }
 
