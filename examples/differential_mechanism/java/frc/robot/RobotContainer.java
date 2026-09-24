@@ -36,7 +36,7 @@ public class RobotContainer
   public RobotContainer()
   {
     // Suppress the "joystick not connected" DS warning during sim/bench testing.
-    DriverStationBackend.silenceJoystickConnectionWarning(true);
+    DriverStationBackend.silenceJoystickConnectionAlert(true);
     // Open-loop zero keeps the motors energized in brake mode without a position target,
     // which prevents the wrist from sagging when no button is held.
     diffyMech.setDefaultCommand(diffyMech.set(0, 0));
@@ -49,19 +49,19 @@ public class RobotContainer
   {
     // Button 1: closed-loop to tilt=15 deg, twist=15 deg -- exercises both DOFs together
     //           to verify the differential kinematics decompose correctly.
-    xboxController.button(1).whileTrue(diffyMech.setAngle(Degrees.of(15), Degrees.of(15)));
+    xboxController.getHID().button(1).whileTrue(diffyMech.setAngle(Degrees.of(15), Degrees.of(15)));
 
     // Button 2: larger setpoint to confirm profile limits (180 deg/s, 90 deg/s^2) are respected.
-    xboxController.button(2).whileTrue(diffyMech.setAngle(Degrees.of(30), Degrees.of(45)));
+    xboxController.getHID().button(2).whileTrue(diffyMech.setAngle(Degrees.of(30), Degrees.of(45)));
 
     // Button 3: open-loop zero -- explicit stop in case the default command is swapped out.
-    xboxController.button(3).whileTrue(diffyMech.set(0, 0));
+    xboxController.getHID().button(3).whileTrue(diffyMech.set(0, 0));
 
     // Button 4: 50% tilt only -- isolates the same-direction motor coupling (both motors forward).
-    xboxController.button(4).whileTrue(diffyMech.set(0.5, 0));
+    xboxController.getHID().button(4).whileTrue(diffyMech.set(0.5, 0));
 
     // Button 5: 50% twist only -- isolates the opposing-direction coupling (motors contra-rotate).
-    xboxController.button(5).whileTrue(diffyMech.set(0, 0.5));
+    xboxController.getHID().button(5).whileTrue(diffyMech.set(0, 0.5));
   }
 
 

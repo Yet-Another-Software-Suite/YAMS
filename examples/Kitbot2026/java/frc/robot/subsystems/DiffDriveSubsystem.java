@@ -6,21 +6,22 @@ package frc.robot.subsystems;
 
 import static org.wpilib.units.Units.Inches;
 
+import com.revrobotics.util.CANPorts;
 import com.revrobotics.spark.SparkMax;
-import org.wpilib.math.util.Pair;
+import org.wpilib.util.Pair;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.drive.DifferentialDrive;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
 import java.util.function.DoubleSupplier;
-import yams.gearing.MechanismGearing;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.local.SparkWrapper;
+import yams.core.gearing.MechanismGearing;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.local.SparkWrapper;
 
 /**
  * Tank-drive base for the 2026 Kitbot. Four NEOs in a 2+2 leader/follower layout
@@ -43,17 +44,17 @@ public class DiffDriveSubsystem extends SubsystemBase
   // 4-inch wheels are the standard Kitbot wheel size.
   private Distance         wheelDiameter = Inches.of(4);
 
-  private SparkMax leftMotor  = new SparkMax(1, 21, SparkMax.MotorType.kBrushless);
-  private SparkMax rightMotor = new SparkMax(1, 24, SparkMax.MotorType.kBrushless);
+  private SparkMax leftMotor  = new SparkMax(CANPorts.fromBusId(1), 21, SparkMax.MotorType.kBrushless);
+  private SparkMax rightMotor = new SparkMax(CANPorts.fromBusId(1), 24, SparkMax.MotorType.kBrushless);
 
   // Followers mirror the leader output. false = same direction as leader.
-  private SparkMax leftFollowerMotor  = new SparkMax(1, 22, SparkMax.MotorType.kBrushless);
-  private SparkMax rightFollowerMotor = new SparkMax(1, 23, SparkMax.MotorType.kBrushless);
+  private SparkMax leftFollowerMotor  = new SparkMax(CANPorts.fromBusId(1), 22, SparkMax.MotorType.kBrushless);
+  private SparkMax rightFollowerMotor = new SparkMax(CANPorts.fromBusId(1), 23, SparkMax.MotorType.kBrushless);
 
   // Left side is inverted because the motors are physically mirrored on the
   // chassis -- positive voltage on both sides would otherwise spin them in
   // opposite directions.
-  private SmartMotorControllerConfig leftMotorConfig = new SmartMotorControllerConfig(this)
+  private SmartMotorControllerConfig leftMotorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.OPEN_LOOP)
       .withGearing(gearing)
       .withIdleMode(MotorMode.COAST) // COAST lets the robot roll to a stop; easier to push around when disabled
@@ -62,7 +63,7 @@ public class DiffDriveSubsystem extends SubsystemBase
       .withTelemetry("LeftMotorMain", TelemetryVerbosity.LOW)
       .withFollowers(Pair.of(leftFollowerMotor, false)); // follower not inverted relative to leader
 
-  private SmartMotorControllerConfig rightMotorConfig = new SmartMotorControllerConfig(this)
+  private SmartMotorControllerConfig rightMotorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.OPEN_LOOP)
       .withGearing(gearing)
       .withIdleMode(MotorMode.COAST)

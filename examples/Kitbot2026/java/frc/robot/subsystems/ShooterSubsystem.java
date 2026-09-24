@@ -9,6 +9,7 @@ import static org.wpilib.units.Units.Pounds;
 import static org.wpilib.units.Units.RPM;
 import static org.wpilib.units.Units.Seconds;
 
+import com.revrobotics.util.CANPorts;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import org.wpilib.math.controller.SimpleMotorFeedforward;
@@ -17,16 +18,16 @@ import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
 import java.util.function.Supplier;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
-import yams.mechanisms.config.FlyWheelConfig;
-import yams.mechanisms.velocity.FlyWheel;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.local.SparkWrapper;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
+import yams.core.mechanisms.config.FlyWheelConfig;
+import yams.commands2.mechanisms.FlyWheel;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.local.SparkWrapper;
 
 /**
  * Flywheel shooter for the 2026 Kitbot. One NEO drives a 3:4 reduction into a
@@ -42,9 +43,9 @@ import yams.motorcontrollers.local.SparkWrapper;
 public class ShooterSubsystem extends SubsystemBase
 {
   // CAN ID 10. Single NEO in brushless mode.
-  private final SparkMax                   ShooterMotor    = new SparkMax(1, 10, MotorType.kBrushless);
+  private final SparkMax                   ShooterMotor    = new SparkMax(CANPorts.fromBusId(1), 10, MotorType.kBrushless);
 
-  private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig motorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
       // kP=1, kI=0, kD=0. See class javadoc for the tradeoff vs a tuned feedforward.
       .withClosedLoopController(1, 0, 0)
       // 3:4 reduction -- same gearbox ratio as the drivetrain. fromReductionStages

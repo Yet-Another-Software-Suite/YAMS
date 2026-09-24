@@ -12,6 +12,7 @@ import static org.wpilib.units.Units.Seconds;
 
 import java.util.function.Supplier;
 
+import com.revrobotics.util.CANPorts;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
@@ -20,21 +21,21 @@ import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
-import yams.mechanisms.config.ArmConfig;
-import yams.mechanisms.positional.Arm;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.local.SparkWrapper;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
+import yams.core.mechanisms.config.ArmConfig;
+import yams.commands2.mechanisms.Arm;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.local.SparkWrapper;
 
 public class HoodSubsystem extends SubsystemBase {
-    private final SparkMax hoodMotor = new SparkMax(1, 2, MotorType.kBrushless);
+    private final SparkMax hoodMotor = new SparkMax(CANPorts.fromBusId(1), 2, MotorType.kBrushless);
 
-    private final SmartMotorControllerConfig hoodMotorConfig = new SmartMotorControllerConfig(this)
+    private final SmartMotorControllerConfig hoodMotorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
             .withClosedLoopController(0.00016541, 0, 0)
             .withTrapezoidalProfile(RPM.of(5000), RotationsPerSecondPerSecond.of(2500))
             .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))

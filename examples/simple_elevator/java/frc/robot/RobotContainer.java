@@ -22,7 +22,7 @@ public class RobotContainer
 
   public RobotContainer()
   {
-    DriverStationBackend.silenceJoystickConnectionWarning(true);
+    DriverStationBackend.silenceJoystickConnectionAlert(true);
     elevator.setDefaultCommand(elevator.elevCmd(0));
     configureBindings();
   }
@@ -30,10 +30,10 @@ public class RobotContainer
 
   private void configureBindings()
   {
-    xboxController.button(1).whileTrue(elevator.setHeight(Meters.of(1)));
-    xboxController.button(2).whileTrue(elevator.setHeight(Meters.of(0)));
-    xboxController.button(4).whileTrue(elevator.elevCmd(-0.5));
-    xboxController.button(5).whileTrue(elevator.elevCmd(0.5));
+    xboxController.getHID().button(1).whileTrue(elevator.setHeight(Meters.of(1)));
+    xboxController.getHID().button(2).whileTrue(elevator.setHeight(Meters.of(0)));
+    xboxController.getHID().button(4).whileTrue(elevator.elevCmd(-0.5));
+    xboxController.getHID().button(5).whileTrue(elevator.elevCmd(0.5));
 
   }
 

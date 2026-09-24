@@ -22,7 +22,7 @@ public class RobotContainer
 
   public RobotContainer()
   {
-    DriverStationBackend.silenceJoystickConnectionWarning(true);
+    DriverStationBackend.silenceJoystickConnectionAlert(true);
     jointedArm.setDefaultCommand(jointedArm.set(0.0, 0.0));
 //    jointedArm.setDefaultCommand(jointedArm.setAngle(Degrees.of(0), Degrees.of(0)));
     configureBindings();
@@ -31,12 +31,12 @@ public class RobotContainer
 
   private void configureBindings()
   {
-    xboxController.button(1).whileTrue(jointedArm.setAngle(Degrees.of(90), null));
-    xboxController.button(2).whileTrue(jointedArm.set(null, 1.0));
-    xboxController.button(3).whileTrue(jointedArm.setAngle(Degrees.of(15), Degrees.of(45)));
-    xboxController.button(4).whileTrue(jointedArm.setAngle(Degrees.of(180), Degrees.of(90)));
-    xboxController.button(5).whileTrue(jointedArm.setAngle(Degrees.of(135), Degrees.of(135)));
-    //xboxController.button(6).whileTrue(jointedArm.sysId());
+    xboxController.getHID().button(1).whileTrue(jointedArm.setAngle(Degrees.of(90), null));
+    xboxController.getHID().button(2).whileTrue(jointedArm.set(null, 1.0));
+    xboxController.getHID().button(3).whileTrue(jointedArm.setAngle(Degrees.of(15), Degrees.of(45)));
+    xboxController.getHID().button(4).whileTrue(jointedArm.setAngle(Degrees.of(180), Degrees.of(90)));
+    xboxController.getHID().button(5).whileTrue(jointedArm.setAngle(Degrees.of(135), Degrees.of(135)));
+    //xboxController.getHID().button(6).whileTrue(jointedArm.sysId());
   }
 
 

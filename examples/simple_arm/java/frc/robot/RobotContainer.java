@@ -22,7 +22,7 @@ public class RobotContainer
 
   public RobotContainer()
   {
-    DriverStationBackend.silenceJoystickConnectionWarning(true);
+    DriverStationBackend.silenceJoystickConnectionAlert(true);
     arm.setDefaultCommand(arm.armCmd(0));
 //    arm.setDefaultCommand(arm.setAngle(Degrees.of(0)));
     configureBindings();
@@ -31,10 +31,10 @@ public class RobotContainer
 
   private void configureBindings()
   {
-    xboxController.button(1).whileTrue(arm.armCmd(0.5));
-    xboxController.button(2).whileTrue(arm.armCmd(-0.5));
-    xboxController.button(3).whileTrue(arm.setAngle(Degrees.of(30)));
-    xboxController.button(4).whileTrue(arm.setAngle(Degrees.of(80)));
+    xboxController.getHID().button(1).whileTrue(arm.armCmd(0.5));
+    xboxController.getHID().button(2).whileTrue(arm.armCmd(-0.5));
+    xboxController.getHID().button(3).whileTrue(arm.setAngle(Degrees.of(30)));
+    xboxController.getHID().button(4).whileTrue(arm.setAngle(Degrees.of(80)));
   }
 
 

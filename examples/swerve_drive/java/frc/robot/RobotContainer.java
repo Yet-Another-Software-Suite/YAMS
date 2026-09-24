@@ -25,7 +25,7 @@ public class RobotContainer
 
   public RobotContainer()
   {
-    DriverStationBackend.silenceJoystickConnectionWarning(true);
+    DriverStationBackend.silenceJoystickConnectionAlert(true);
     drive.setDefaultCommand(drive.drive(drive.getChassisSpeedsSupplier(xboxController::getLeftY,
                                                                        xboxController::getLeftX,
                                                                        xboxController::getRightX)));
@@ -34,16 +34,16 @@ public class RobotContainer
 
   private void configureBindings()
   {
-//    xboxController.button(1).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisVelocities(0.5, 0, 0)));
-    xboxController.button(1).whileTrue(drive.azimuthSysId());
-    xboxController.button(2).whileTrue(drive.driveSysId());
-//    xboxController.button(2).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisVelocities(-0.5, 0, 0)));
-//    xboxController.button(3).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisVelocities(0, 0.5, 0)));
-//    xboxController.button(4).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisVelocities(0, -0.5, 0)));
-    xboxController.button(5).whileTrue(drive.driveToPose(new Pose2d(Meters.of(3),
+//    xboxController.getHID().button(1).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisVelocities(0.5, 0, 0)));
+    xboxController.getHID().button(1).whileTrue(drive.azimuthSysId());
+    xboxController.getHID().button(2).whileTrue(drive.driveSysId());
+//    xboxController.getHID().button(2).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisVelocities(-0.5, 0, 0)));
+//    xboxController.getHID().button(3).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisVelocities(0, 0.5, 0)));
+//    xboxController.getHID().button(4).whileTrue(drive.setRobotRelativeChassisSpeeds(new ChassisVelocities(0, -0.5, 0)));
+    xboxController.getHID().button(5).whileTrue(drive.driveToPose(new Pose2d(Meters.of(3),
                                                                     Meters.of(3),
                                                                     Rotation2d.fromDegrees(30))));
-    xboxController.button(6).whileTrue(drive.driveToPose(new Pose2d(Meters.of(5),
+    xboxController.getHID().button(6).whileTrue(drive.driveToPose(new Pose2d(Meters.of(5),
                                                                     Meters.of(6),
                                                                     Rotation2d.fromDegrees(70))));
 

@@ -12,8 +12,8 @@ import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-import org.wpilib.vision.apriltag.AprilTagFieldLayout;
-import org.wpilib.vision.apriltag.AprilTagFields;
+import org.wpilib.fields.Field;
+import org.wpilib.fields.Fields;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.geometry.Rotation3d;
@@ -25,7 +25,7 @@ import org.wpilib.command2.SubsystemBase;
 public class VisionSubsystem extends SubsystemBase {
     PhotonCamera camera;
     VisionSystemSim visionSim;
-    AprilTagFieldLayout tagLayout;
+    Field tagLayout;
 
     SimCameraProperties cameraProp = new SimCameraProperties();
     PhotonCameraSim cameraSim;
@@ -36,7 +36,7 @@ public class VisionSubsystem extends SubsystemBase {
     public VisionSubsystem() {
         try {
             camera = new PhotonCamera("HubOrientedCameraMountedOnTurret");
-            tagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+            tagLayout = Field.loadField(Fields.DEFAULT_FIELD);
             photonAvailable = true;
         } catch (UnsatisfiedLinkError | Exception e) {
             System.err.println("[VisionSubsystem] PhotonVision unavailable (JNI load failed): " + e.getMessage());

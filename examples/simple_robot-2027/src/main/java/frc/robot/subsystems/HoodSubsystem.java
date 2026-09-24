@@ -11,6 +11,7 @@ import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Seconds;
 
 import com.ctre.phoenix6.CANBus;
+import org.wpilib.hardware.bus.CANPort;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import org.wpilib.math.controller.ArmFeedforward;
 import org.wpilib.math.geometry.Translation3d;
@@ -18,22 +19,22 @@ import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
-import yams.mechanisms.config.MechanismPositionConfig;
-import yams.mechanisms.config.PivotConfig;
-import yams.mechanisms.positional.Pivot;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.remote.TalonFXSWrapper;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
+import yams.core.mechanisms.config.MechanismPositionConfig;
+import yams.core.mechanisms.config.PivotConfig;
+import yams.commands2.mechanisms.Pivot;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.remote.TalonFXSWrapper;
 
 public class HoodSubsystem extends SubsystemBase
 {
-  private final TalonFXS                   hoodMotor        = new TalonFXS(9, CANBus.systemcore(1));//, MotorType.kBrushless);
-  private final SmartMotorControllerConfig motorConfig      = new SmartMotorControllerConfig(this)
+  private final TalonFXS                   hoodMotor        = new TalonFXS(9, new CANBus(CANPort.CAN_S0));//, MotorType.kBrushless);
+  private final SmartMotorControllerConfig motorConfig      = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
       .withClosedLoopController(4, 0, 0)
           .withTrapezoidalProfile(DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
           .withSoftLimits(Degrees.of(-30), Degrees.of(100))

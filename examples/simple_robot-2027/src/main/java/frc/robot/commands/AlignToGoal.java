@@ -30,7 +30,7 @@ import org.wpilib.command2.Command;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import java.util.List;
-import yams.mechanisms.swerve.utility.SwerveInputStream;
+import yams.core.mechanisms.swerve.utility.SwerveInputStream;
 
 public class AlignToGoal extends Command {
   private final SwerveSubsystem swerveSubsystem;
@@ -120,7 +120,7 @@ public class AlignToGoal extends Command {
     Translation2d shotVec     = targetVec.div(dist).times(idealHorizontalSpeed).minus(robotVelVec);
 
     // 5. CONVERT TO CONTROLS
-    Angle turretAngle = Degrees.of(shotVec.getAngle().getDegrees());
+    Angle turretAngle = Degrees.of(shotVec.getAngle().orElse(Rotation2d.ZERO).getDegrees());
     LinearVelocity newHorizontalSpeed = MetersPerSecond.of(shotVec.getNorm());
 
     // 7. SET OUTPUTS

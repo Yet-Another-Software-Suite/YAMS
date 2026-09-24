@@ -14,8 +14,10 @@ import static org.wpilib.units.Units.Second;
 import static org.wpilib.units.Units.Volts;
 
 import com.ctre.phoenix6.CANBus;
+import org.wpilib.hardware.bus.CANPort;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.revrobotics.util.CANPorts;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import org.wpilib.math.controller.PIDController;
@@ -29,22 +31,22 @@ import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.LinearVelocity;
 import org.wpilib.smartdashboard.Field2d;
-import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.tunable.Tunables;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-import yams.gearing.MechanismGearing;
-import yams.mechanisms.config.SwerveDriveConfig;
-import yams.mechanisms.config.SwerveModuleConfig;
-import yams.mechanisms.swerve.SwerveDrive;
-import yams.mechanisms.swerve.SwerveModule;
-import yams.telemetry.SwerveDriveTelemetryConfig;
-import yams.telemetry.SwerveModuleTelemetryConfig;
-import yams.mechanisms.swerve.utility.SwerveInputStream;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.local.SparkWrapper;
+import yams.core.gearing.MechanismGearing;
+import yams.commands2.config.SwerveDriveConfig;
+import yams.core.mechanisms.config.SwerveModuleConfig;
+import yams.commands2.swerve.SwerveDrive;
+import yams.core.mechanisms.swerve.SwerveModule;
+import yams.core.telemetry.SwerveDriveTelemetryConfig;
+import yams.core.telemetry.SwerveModuleTelemetryConfig;
+import yams.core.mechanisms.swerve.utility.SwerveInputStream;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.local.SparkWrapper;
 
 /**
  * Swerve drive subsystem built with YAMS. This example shows how to wire up four NEO-driven modules
@@ -139,7 +141,7 @@ public class SwerveSubsystem extends SubsystemBase
     MechanismGearing azimuthGearing = new MechanismGearing(6.75);
     // 4-inch wheels are standard for MK4i; diameter feeds both kinematics and feedforward.
     Distance wheelDiameter = Inches.of(4);
-    SmartMotorControllerConfig driveCfg = new SmartMotorControllerConfig(this)
+    SmartMotorControllerConfig driveCfg = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
         .withWheelDiameter(wheelDiameter)
         // kP=0.3 trims velocity error left over after the feedforward; raise it if the module
         // lags under load, lower it if it oscillates.
@@ -154,7 +156,7 @@ public class SwerveSubsystem extends SubsystemBase
         // 40 A prevents belt slip under hard acceleration; typical NEO limit for drive applications.
         .withStatorCurrentLimit(Amps.of(40))
         .withTelemetry("driveMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
-    SmartMotorControllerConfig azimuthCfg = new SmartMotorControllerConfig(this)
+    SmartMotorControllerConfig azimuthCfg = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
         // kP=1 is enough at 6.75:1 because the reduction makes the output stiff; the module
         // settles within one or two robot loops without needing D or I.
         .withClosedLoopController(1, 0, 0)
@@ -182,7 +184,7 @@ public class SwerveSubsystem extends SubsystemBase
   public SwerveSubsystem()
   {
     // CAN ID 14 is arbitrary; assign it to match your robot's Pigeon2 CAN ID.
-    Pigeon2 gyro = new Pigeon2(14, CANBus.systemcore(1));
+    Pigeon2 gyro = new Pigeon2(14, new CANBus(CANPort.CAN_S0));
     /*
      * Module locations use the WPILib coordinate frame: +X toward the front of the robot,
      * +Y toward the left side. The 24-inch offsets assume the module centers sit 24 inches
@@ -190,27 +192,27 @@ public class SwerveSubsystem extends SubsystemBase
      * CAN IDs are grouped in pairs (drive, steer) followed by the CANcoder, incrementing by
      * module to make wiring audits straightforward.
      */
-    var fl = createModule(new SparkMax(1, 1, MotorType.kBrushless),
-                          new SparkMax(1, 2, MotorType.kBrushless),
-                          new CANcoder(3, CANBus.systemcore(1)),
+    var fl = createModule(new SparkMax(CANPorts.fromBusId(1), 1, MotorType.kBrushless),
+                          new SparkMax(CANPorts.fromBusId(1), 2, MotorType.kBrushless),
+                          new CANcoder(3, new CANBus(CANPort.CAN_S0)),
                           "frontleft",
                           new Translation2d(Inches.of(24), Inches.of(24)));
-    var fr = createModule(new SparkMax(1, 4, MotorType.kBrushless),
-                          new SparkMax(1, 5, MotorType.kBrushless),
-                          new CANcoder(6, CANBus.systemcore(1)),
+    var fr = createModule(new SparkMax(CANPorts.fromBusId(1), 4, MotorType.kBrushless),
+                          new SparkMax(CANPorts.fromBusId(1), 5, MotorType.kBrushless),
+                          new CANcoder(6, new CANBus(CANPort.CAN_S0)),
                           "frontright",
                           new Translation2d(Inches.of(24), Inches.of(-24)));
-    var bl = createModule(new SparkMax(1, 7, MotorType.kBrushless),
-                          new SparkMax(1, 8, MotorType.kBrushless),
-                          new CANcoder(9, CANBus.systemcore(1)),
+    var bl = createModule(new SparkMax(CANPorts.fromBusId(1), 7, MotorType.kBrushless),
+                          new SparkMax(CANPorts.fromBusId(1), 8, MotorType.kBrushless),
+                          new CANcoder(9, new CANBus(CANPort.CAN_S0)),
                           "backleft",
                           new Translation2d(Inches.of(-24), Inches.of(24)));
-    var br = createModule(new SparkMax(1, 10, MotorType.kBrushless),
-                          new SparkMax(1, 11, MotorType.kBrushless),
-                          new CANcoder(12, CANBus.systemcore(1)),
+    var br = createModule(new SparkMax(CANPorts.fromBusId(1), 10, MotorType.kBrushless),
+                          new SparkMax(CANPorts.fromBusId(1), 11, MotorType.kBrushless),
+                          new CANcoder(12, new CANBus(CANPort.CAN_S0)),
                           "backright",
                           new Translation2d(Inches.of(-24), Inches.of(-24)));
-    SwerveDriveConfig config = new SwerveDriveConfig(this, fl, fr, bl, br)
+    SwerveDriveConfig config = (SwerveDriveConfig) new SwerveDriveConfig(this, fl, fr, bl, br)
         // gyro.getYaw() gives the heading used to rotate the velocity vector for field-relative
         // driving; without this, forward on the stick always means "robot nose direction".
         .withGyro(gyro.getYaw().asSupplier())
@@ -224,7 +226,7 @@ public class SwerveSubsystem extends SubsystemBase
                                                         .withTelemetryVerbosity(SmartMotorControllerConfig.TelemetryVerbosity.HIGH));
     drive = new SwerveDrive(config);
 
-    SmartDashboard.putData("Field", field);
+    Tunables.publish("Field", field);
   }
 
   /**

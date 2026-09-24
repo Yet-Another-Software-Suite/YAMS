@@ -13,6 +13,7 @@ import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
 import static org.wpilib.units.Units.Seconds;
 
+import com.revrobotics.util.CANPorts;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import org.wpilib.math.controller.SimpleMotorFeedforward;
@@ -23,16 +24,16 @@ import org.wpilib.units.measure.LinearVelocity;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
 import java.util.function.Supplier;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
-import yams.mechanisms.config.FlyWheelConfig;
-import yams.mechanisms.velocity.FlyWheel;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.local.SparkWrapper;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
+import yams.core.mechanisms.config.FlyWheelConfig;
+import yams.commands2.mechanisms.FlyWheel;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.local.SparkWrapper;
 
 /**
  * Velocity-controlled flywheel for the hooded shooter.
@@ -53,9 +54,9 @@ public class FlywheelSubsystem extends SubsystemBase
 {
   // 4-inch wheel diameter used for the RPM <-> surface-speed conversion below.
   private final Distance flywheelDiameter = Inches.of(4);
-  private final SparkMax flywheelMotor    = new SparkMax(1, 1, MotorType.kBrushless);
+  private final SparkMax flywheelMotor    = new SparkMax(CANPorts.fromBusId(1), 1, MotorType.kBrushless);
 
-  private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig motorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
       // P = 0.00016541 -- very small because feedforward handles ~95% of the output;
       // this term only corrects the last few RPM of steady-state error.
       // I and D are zero: integral windup risks are high on a flywheel with large set-point

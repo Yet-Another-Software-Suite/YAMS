@@ -12,6 +12,7 @@ import static org.wpilib.units.Units.Pounds;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
+import com.revrobotics.util.CANPorts;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import org.wpilib.math.controller.ArmFeedforward;
@@ -26,16 +27,16 @@ import org.wpilib.units.measure.Voltage;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.SubsystemBase;
-import yams.gearing.MechanismGearing;
-import yams.math.ExponentialProfilePIDController;
-import yams.mechanisms.config.ArmConfig;
-import yams.mechanisms.positional.Arm;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.local.SparkWrapper;
+import yams.core.gearing.MechanismGearing;
+import yams.core.math.ExponentialProfilePIDController;
+import yams.core.mechanisms.config.ArmConfig;
+import yams.commands2.mechanisms.Arm;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.local.SparkWrapper;
 
 // TODO: Example with absolute encoders
 
@@ -47,7 +48,7 @@ public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
 {
   private final String           motorTelemetryName = "ExponentiallyProfiledArmMotor";
   private final String           mechTelemetryName  = "ExponentiallyProfiledArm";
-  private final SparkMax         armMotor           = new SparkMax(1, 1, MotorType.kBrushless);
+  private final SparkMax         armMotor           = new SparkMax(CANPorts.fromBusId(1), 1, MotorType.kBrushless);
   ///  Configuration Options
   private final DCMotor          dcMotor            = DCMotor.getNEO(1);
   private final MechanismGearing gearing            = new MechanismGearing(7);
@@ -88,7 +89,7 @@ public class ExponentiallyProfiledArmSubsystem extends SubsystemBase
   /**
    * {@link SmartMotorControllerConfig} for the arm motor.
    */
-  private final SmartMotorControllerConfig      motorConfig    = new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig      motorConfig    = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
                                                 /*
                                                  * Basic Configuration options for the motor
                                                  */

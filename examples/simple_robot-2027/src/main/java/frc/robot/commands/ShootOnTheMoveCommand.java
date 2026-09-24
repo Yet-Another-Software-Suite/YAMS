@@ -23,13 +23,13 @@ import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.smartdashboard.Field2d;
-import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.tunable.Tunables;
 import org.wpilib.command2.Command;
 import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
 import java.util.function.Supplier;
-import yams.mechanisms.swerve.SwerveDrive;
+import yams.commands2.swerve.SwerveDrive;
 
 /**
  * Adapted from 6328 Mechanical Advantage! Original source is here:
@@ -99,7 +99,7 @@ public class ShootOnTheMoveCommand extends Command {
       ShooterSubsystem shooter,
       HoodSubsystem hood,
       SwerveDrive swerveDrive) {
-    SmartDashboard.putData("ShootOnTheMoveField", debugField);
+    Tunables.publish("ShootOnTheMoveField", debugField);
     estimatedPose = () -> {
       // Calculate estimated pose while accounting for phase delay
       ChassisVelocities robotRelativeVelocity = swerveDrive.getRobotRelativeSpeed();
@@ -151,7 +151,7 @@ public class ShootOnTheMoveCommand extends Command {
     }
 
     // Calculate parameters accounted for imparted velocity
-    turretAngle = target.minus(lookaheadPose.getTranslation()).getAngle();
+    turretAngle = target.minus(lookaheadPose.getTranslation()).getAngle().orElse(Rotation2d.ZERO);
     hoodAngle = launchHoodAngleMap.get(lookaheadTurretToTargetDistance).getRadians();
     if (lastTurretAngle == null) {
       lastTurretAngle = turretAngle;

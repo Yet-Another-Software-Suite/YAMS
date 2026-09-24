@@ -12,6 +12,7 @@ import static org.wpilib.units.Units.Rotations;
 import static org.wpilib.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.revrobotics.util.CANPorts;
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
 import org.wpilib.math.controller.ElevatorFeedforward;
@@ -22,19 +23,19 @@ import org.wpilib.units.measure.Mass;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
 import org.wpilib.command2.button.Trigger;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
-import yams.math.ExponentialProfilePIDController;
-import yams.mechanisms.config.ElevatorConfig;
-import yams.mechanisms.config.MechanismPositionConfig;
-import yams.mechanisms.positional.Elevator;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.local.SparkWrapper;
-import yams.motorcontrollers.remote.TalonFXWrapper;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
+import yams.core.math.ExponentialProfilePIDController;
+import yams.core.mechanisms.config.ElevatorConfig;
+import yams.core.mechanisms.config.MechanismPositionConfig;
+import yams.commands2.mechanisms.Elevator;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.motorcontrollers.remote.TalonFXWrapper;
 
 public class ElevatorSubsystem extends SubsystemBase
 {
@@ -45,13 +46,13 @@ public class ElevatorSubsystem extends SubsystemBase
   private final Mass     weight = Pounds.of(16);
   private final DCMotor  motors = DCMotor.getNEO(1);
   private final MechanismGearing gearing = new MechanismGearing(GearBox.fromReductionStages(3, 4));
-  private final SparkMax                    elevatorMotor      = new SparkMax(1, 2, SparkLowLevel.MotorType.kBrushless);
+  private final SparkMax                    elevatorMotor      = new SparkMax(CANPorts.fromBusId(1), 2, SparkLowLevel.MotorType.kBrushless);
   //  private final SmartMotorControllerTelemetryConfig motorTelemetryConfig = new SmartMotorControllerTelemetryConfig()
 //          .withMechanismPosition()
 //          .withRotorPosition()
 //          .withMechanismLowerLimit()
 //          .withMechanismUpperLimit(); // Specific telemetry verbosity
-  private final SmartMotorControllerConfig motorConfig        = new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig motorConfig        = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
       .withMechanismCircumference(circumference)
 //      .withFollowers(Pair.of(new SparkMax(3, SparkLowLevel.MotorType.kBrushless), true))
       .withClosedLoopController(30, 0, 0)

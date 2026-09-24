@@ -12,6 +12,7 @@ import static org.wpilib.units.Units.KilogramSquareMeters;
 import static org.wpilib.units.Units.Volts;
 
 import com.ctre.phoenix6.CANBus;
+import org.wpilib.hardware.bus.CANPort;
 import com.ctre.phoenix6.hardware.TalonFX;
 import org.wpilib.math.controller.ArmFeedforward;
 import org.wpilib.math.system.DCMotor;
@@ -24,16 +25,16 @@ import org.wpilib.command2.SubsystemBase;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
-import yams.mechanisms.config.ArmConfig;
-import yams.mechanisms.positional.Arm;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.remote.TalonFXWrapper;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
+import yams.core.mechanisms.config.ArmConfig;
+import yams.commands2.mechanisms.Arm;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.remote.TalonFXWrapper;
 
 /**
  * Single-pivot arm driven by a TalonFX with trapezoidal motion profiling.
@@ -105,12 +106,12 @@ public class ArmSubsystem extends SubsystemBase {
 
   private final ArmInputsAutoLogged armInputs = new ArmInputsAutoLogged();
 
-  private final TalonFX armMotor = new TalonFX(ArmConstants.MOTOR_ID, CANBus.systemcore(1));
+  private final TalonFX armMotor = new TalonFX(ArmConstants.MOTOR_ID, new CANBus(CANPort.CAN_S0));
 
   ///
   /// YAMS Configurations
   ///
-  private SmartMotorControllerConfig smcConfig = new SmartMotorControllerConfig(this)
+  private SmartMotorControllerConfig smcConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       .withClosedLoopController(ArmConstants.KP,
           ArmConstants.KI,

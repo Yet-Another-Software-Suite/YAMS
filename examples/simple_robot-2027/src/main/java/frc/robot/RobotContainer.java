@@ -28,7 +28,7 @@ public class RobotContainer {
   private final CommandNiDsXboxController xboxController = new CommandNiDsXboxController(0);
 
   public RobotContainer() {
-    DriverStationBackend.silenceJoystickConnectionWarning(true);
+    DriverStationBackend.silenceJoystickConnectionAlert(true);
     drive.setDefaultCommand(drive.driveWithJoystick(xboxController));
     arm.setDefaultCommand(arm.setAngle(Degrees.of(0)));
     elevator.setDefaultCommand(elevator.setHeight(Meters.of(0)));
@@ -37,14 +37,14 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    xboxController.button(1).whileTrue(arm.setAngle(Degrees.of(30)));
-    xboxController.button(2).whileTrue(arm.setAngle(Degrees.of(80)));
+    xboxController.getHID().button(1).whileTrue(arm.setAngle(Degrees.of(30)));
+    xboxController.getHID().button(2).whileTrue(arm.setAngle(Degrees.of(80)));
 
-    xboxController.button(3).whileTrue(elevator.setHeight(Meters.of(0.5)));
-    xboxController.button(4).whileTrue(elevator.setHeight(Meters.of(1.5)));
+    xboxController.getHID().button(3).whileTrue(elevator.setHeight(Meters.of(0.5)));
+    xboxController.getHID().button(4).whileTrue(elevator.setHeight(Meters.of(1.5)));
 
-    xboxController.button(5).whileTrue(shooter.setVelocity(RPM.of(3500)));
-    xboxController.button(6).whileTrue(shooter.setVelocity(RPM.of(2000)));
+    xboxController.getHID().button(5).whileTrue(shooter.setVelocity(RPM.of(3500)));
+    xboxController.getHID().button(6).whileTrue(shooter.setVelocity(RPM.of(2000)));
   }
 
   public Command getAutonomousCommand() {

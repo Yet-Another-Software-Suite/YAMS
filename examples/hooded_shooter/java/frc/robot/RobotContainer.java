@@ -19,7 +19,7 @@ public class RobotContainer {
   public CommandNiDsXboxController xboxController = new CommandNiDsXboxController(0);
 
   public RobotContainer() {
-    DriverStationBackend.silenceJoystickConnectionWarning(true);
+    DriverStationBackend.silenceJoystickConnectionAlert(true);
     configureBindings();
   }
 

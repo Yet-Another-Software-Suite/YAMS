@@ -4,6 +4,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.CANBus;
+import org.wpilib.hardware.bus.CANPort;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Degrees;
@@ -17,22 +18,22 @@ import java.util.function.Supplier;
 
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
-import yams.motorcontrollers.SmartMotorControllerConfig;
+import yams.commands2.config.SmartMotorControllerConfig;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
-import yams.mechanisms.config.PivotConfig;
-import yams.mechanisms.positional.Pivot;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.remote.TalonFXSWrapper;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
+import yams.core.mechanisms.config.PivotConfig;
+import yams.commands2.mechanisms.Pivot;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.remote.TalonFXSWrapper;
 
 public class TurretSubsystem extends SubsystemBase {
-        private final TalonFXS turretMotor = new TalonFXS(1, CANBus.systemcore(1));
-        private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
+        private final TalonFXS turretMotor = new TalonFXS(1, new CANBus(CANPort.CAN_S0));
+        private final SmartMotorControllerConfig motorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
                         .withControlMode(ControlMode.CLOSED_LOOP)
                         .withClosedLoopController(4, 0, 0)
                         .withTrapezoidalProfile(DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))

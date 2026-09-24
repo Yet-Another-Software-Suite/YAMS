@@ -25,7 +25,7 @@ public class RobotContainer
   public RobotContainer()
   {
     // Suppress the "joystick not connected" alert in simulation so it does not flood the DS log.
-    DriverStationBackend.silenceJoystickConnectionWarning(true);
+    DriverStationBackend.silenceJoystickConnectionAlert(true);
     // elevCmd(0) holds duty cycle at zero, acting as a safe idle when no other command is scheduled.
     elevator.setDefaultCommand(elevator.elevCmd(0));
     configureBindings();
@@ -40,14 +40,14 @@ public class RobotContainer
 
     // Button 1 (A): move to 1 m -- scoring height.
     // whileTrue re-commands the profile every loop, so releasing the button drops back to the default.
-    xboxController.button(1).whileTrue(elevator.setHeight(Meters.of(1)));
+    xboxController.getHID().button(1).whileTrue(elevator.setHeight(Meters.of(1)));
     // Button 2 (B): retract to 0 m -- stowed / intake height.
-    xboxController.button(2).whileTrue(elevator.setHeight(Meters.of(0)));
+    xboxController.getHID().button(2).whileTrue(elevator.setHeight(Meters.of(0)));
     // Buttons 4 and 5 are manual override bindings for tuning; remove before competition.
     // Negative duty cycle drives the carriage down.
-    xboxController.button(4).whileTrue(elevator.elevCmd(-0.5));
+    xboxController.getHID().button(4).whileTrue(elevator.elevCmd(-0.5));
     // Positive duty cycle drives the carriage up.
-    xboxController.button(5).whileTrue(elevator.elevCmd(0.5));
+    xboxController.getHID().button(5).whileTrue(elevator.elevCmd(0.5));
   }
 
 

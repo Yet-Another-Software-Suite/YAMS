@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import static org.wpilib.units.Units.Amps;
 
+import com.revrobotics.util.CANPorts;
 import com.revrobotics.sim.SparkMaxSim;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
@@ -42,7 +43,7 @@ public class IntakeRollerSubsystem extends SubsystemBase
   public static final double kWristMomentOfInertia = 0.00032; // kg * m^2
 
   // CAN ID 30. Neo Vortex is brushless; kBrushless is required for SparkMax.
-  private final SparkMax m_rollerMotor = new SparkMax(1, 30, MotorType.kBrushless);
+  private final SparkMax m_rollerMotor = new SparkMax(CANPorts.fromBusId(1), 30, MotorType.kBrushless);
 
   private final DCMotor m_rollerMotorGearbox = DCMotor.getNeoVortex(1);
 

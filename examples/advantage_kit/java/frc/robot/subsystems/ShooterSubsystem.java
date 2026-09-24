@@ -11,6 +11,7 @@ import static org.wpilib.units.Units.RPM;
 import static org.wpilib.units.Units.Second;
 import static org.wpilib.units.Units.Volts;
 
+import com.revrobotics.util.CANPorts;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import org.wpilib.math.controller.SimpleMotorFeedforward;
@@ -24,16 +25,16 @@ import org.wpilib.command2.SubsystemBase;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
-import yams.mechanisms.config.FlyWheelConfig;
-import yams.mechanisms.velocity.FlyWheel;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.local.SparkWrapper;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
+import yams.core.mechanisms.config.FlyWheelConfig;
+import yams.commands2.mechanisms.FlyWheel;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.local.SparkWrapper;
 
 /**
  * Flywheel shooter with AdvantageKit input logging. The key pattern here is that
@@ -69,9 +70,9 @@ public class ShooterSubsystem extends SubsystemBase {
 
   private final ShooterInputsAutoLogged shooterInputs = new ShooterInputsAutoLogged();
 
-  private final SparkMax armMotor = new SparkMax(1, 20, MotorType.kBrushless);
+  private final SparkMax armMotor = new SparkMax(CANPorts.fromBusId(1), 20, MotorType.kBrushless);
 
-  private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig motorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
       // kP=1 is a starting point; a flywheel typically needs little P because
       // SimpleMotorFeedforward carries most of the steady-state load.
       .withClosedLoopController(1, 0, 0)

@@ -21,7 +21,7 @@ public class RobotContainer
 
   public RobotContainer()
   {
-    DriverStationBackend.silenceJoystickConnectionWarning(true);
+    DriverStationBackend.silenceJoystickConnectionAlert(true);
     shooter.setDefaultCommand(shooter.setDutyCycle(0));
     configureBindings();
   }
@@ -29,10 +29,10 @@ public class RobotContainer
 
   private void configureBindings()
   {
-    xboxController.button(1).whileTrue(shooter.setVelocity(RPM.of(300)));
-    xboxController.button(2).whileTrue(shooter.setVelocity(RPM.of(0)));
-    xboxController.button(4).whileTrue(shooter.setDutyCycle(-0.5));
-    xboxController.button(5).whileTrue(shooter.setDutyCycle(0.5));
+    xboxController.getHID().button(1).whileTrue(shooter.setVelocity(RPM.of(300)));
+    xboxController.getHID().button(2).whileTrue(shooter.setVelocity(RPM.of(0)));
+    xboxController.getHID().button(4).whileTrue(shooter.setDutyCycle(-0.5));
+    xboxController.getHID().button(5).whileTrue(shooter.setDutyCycle(0.5));
 
   }
 

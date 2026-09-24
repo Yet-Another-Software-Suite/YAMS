@@ -10,6 +10,7 @@ import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.RadiansPerSecond;
 
 import com.ctre.phoenix6.CANBus;
+import org.wpilib.hardware.bus.CANPort;
 import com.ctre.phoenix6.hardware.TalonFX;
 import org.wpilib.math.controller.ArmFeedforward;
 import org.wpilib.math.geometry.Pose2d;
@@ -23,23 +24,23 @@ import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
-import yams.mechanisms.config.PivotConfig;
-import yams.mechanisms.positional.Pivot;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.remote.TalonFXWrapper;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
+import yams.core.mechanisms.config.PivotConfig;
+import yams.commands2.mechanisms.Pivot;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.remote.TalonFXWrapper;
 
 public class TurretSubsystem extends SubsystemBase
 {
   double[] ratio = {144.0 / 15.0, 5.0, 1.08};
 
   SmartMotorControllerConfig motorConfig =
-      new SmartMotorControllerConfig(this)
+      (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
           .withControlMode(ControlMode.CLOSED_LOOP)
           .withSimClosedLoopController(0.0, 0.0, 0)
           // 99.0, 0.0, .6
@@ -58,11 +59,11 @@ public class TurretSubsystem extends SubsystemBase
           // Power Optimization
           .withStatorCurrentLimit(Amps.of(60))
           .withStartingPosition(Degrees.of(0)) // Starting position of the Pivot
-          .withMomentOfInertia(yams.units.YUnits.PoundSquareInches.of(0.01)); // MOI Calculation
+          .withMomentOfInertia(yams.core.units.YUnits.PoundSquareInches.of(0.01)); // MOI Calculation
   // .withClosedLoopRampRate(Seconds.of(0.0))
 
   // .withOpenLoopRampRate(Seconds.of(0.0));
-  SmartMotorController motor = new TalonFXWrapper(new TalonFX(12, CANBus.systemcore(1)),
+  SmartMotorController motor = new TalonFXWrapper(new TalonFX(12, new CANBus(CANPort.CAN_S0)),
                                                   DCMotor.getKrakenX60(1),
                                                   motorConfig);
 

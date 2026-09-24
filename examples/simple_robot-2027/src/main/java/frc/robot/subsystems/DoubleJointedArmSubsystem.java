@@ -3,6 +3,7 @@
 
 package frc.robot.subsystems;
 
+import com.revrobotics.util.CANPorts;
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
 import org.wpilib.math.controller.ArmFeedforward;
@@ -14,20 +15,20 @@ import org.wpilib.util.Color;
 import org.wpilib.util.Color8Bit;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
-import yams.mechanisms.config.ArmConfig;
-import yams.mechanisms.positional.DoubleJointedArm;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.local.SparkWrapper;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
+import yams.core.mechanisms.config.ArmConfig;
+import yams.commands2.mechanisms.DoubleJointedArm;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.local.SparkWrapper;
 
 import static org.wpilib.units.Units.*;
 
 public class DoubleJointedArmSubsystem extends SubsystemBase
 {
-  private final SparkMax                   lowerMotor  = new SparkMax(1, 1, SparkLowLevel.MotorType.kBrushless);
-  private final SmartMotorControllerConfig lowerConfig = new SmartMotorControllerConfig(this)
+  private final SparkMax                   lowerMotor  = new SparkMax(CANPorts.fromBusId(1), 1, SparkLowLevel.MotorType.kBrushless);
+  private final SmartMotorControllerConfig lowerConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
           .withClosedLoopController(16, 0, 0)
     .withTrapezoidalProfile(DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
           //.withSoftLimits(Degrees.of(-30), Degrees.of(100))
@@ -50,8 +51,8 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
           .withLength(Feet.of(2))
           .withHardLimits(Degrees.of(-720), Degrees.of(720))
           .withTelemetry("LowerArm", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
-  private final SparkMax                   upperMotor  = new SparkMax(1, 2, SparkLowLevel.MotorType.kBrushless);
-  private final SmartMotorControllerConfig upperConfig = new SmartMotorControllerConfig(this)
+  private final SparkMax                   upperMotor  = new SparkMax(CANPorts.fromBusId(1), 2, SparkLowLevel.MotorType.kBrushless);
+  private final SmartMotorControllerConfig upperConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
           .withClosedLoopController(16, 0, 0)
     .withTrapezoidalProfile(DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
           //.withSoftLimits(Degrees.of(-30), Degrees.of(100))

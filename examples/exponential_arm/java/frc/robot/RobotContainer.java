@@ -30,7 +30,7 @@ public class RobotContainer
   {
     // Suppress the "joystick not connected" warning in sim so the log is not spammed
     // when running without a physical controller plugged in.
-    DriverStationBackend.silenceJoystickConnectionWarning(true);
+    DriverStationBackend.silenceJoystickConnectionAlert(true);
 
     // Default command: hold the arm in place with 0% duty cycle.
     // This keeps the motor active in BRAKE mode so the arm does not sag between
@@ -53,8 +53,8 @@ public class RobotContainer
     // Button 2 (B): manual drive down at 50% duty cycle.
     // whileTrue means the command runs while the button is held and cancels on release,
     // which returns control to the default command (0% duty cycle).
-    xboxController.button(1).whileTrue(arm.armCmd(0.5));
-    xboxController.button(2).whileTrue(arm.armCmd(-0.5));
+    xboxController.getHID().button(1).whileTrue(arm.armCmd(0.5));
+    xboxController.getHID().button(2).whileTrue(arm.armCmd(-0.5));
 
     // Button 4 (Y): move to 30 deg -- stow / intake position.
     // Button 5 (left bumper): move to 80 deg -- scoring position.
@@ -62,8 +62,8 @@ public class RobotContainer
     // settles smoothly without the sharp deceleration edge of a trapezoidal profile.
     // The command holds the setpoint until interrupted (whileTrue), so releasing
     // the button hands off back to the 0% duty-cycle default command.
-    xboxController.button(4).whileTrue(arm.setAngle(Degrees.of(30)));
-    xboxController.button(5).whileTrue(arm.setAngle(Degrees.of(80)));
+    xboxController.getHID().button(4).whileTrue(arm.setAngle(Degrees.of(30)));
+    xboxController.getHID().button(5).whileTrue(arm.setAngle(Degrees.of(80)));
   }
 
 

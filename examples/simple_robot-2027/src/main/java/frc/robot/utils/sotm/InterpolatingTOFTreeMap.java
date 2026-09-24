@@ -7,6 +7,7 @@ import static org.wpilib.units.Units.Milliseconds;
 import static org.wpilib.units.Units.RotationsPerSecond;
 
 import org.wpilib.math.geometry.Pose2d;
+import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.interpolation.InterpolatingDoubleTreeMap;
 import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.units.measure.Distance;
@@ -47,11 +48,12 @@ public class InterpolatingTOFTreeMap {
     // 3. Shot vector
     var shotVector = targetVector.minus(input.getLinearVelocity());
 
-    return new LinearVelocityVector(new Pose2d(estimatedPose, estimatedPose.getAngle()),
+    return new LinearVelocityVector(
+                                    new Pose2d(estimatedPose, estimatedPose.getAngle().orElse(Rotation2d.ZERO)),
                                     input.target,
                                     new ChassisVelocities(shotVector.getX(),
                                                       shotVector.getY(),
-                                                      shotVector.getAngle().getRadians()),
+                                                      shotVector.getAngle().get().getRadians()),
                                     RotationsPerSecond.of(shotVector.getNorm()));
   }
 }

@@ -11,8 +11,10 @@ import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.CANBus;
+import org.wpilib.hardware.bus.CANPort;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.revrobotics.util.CANPorts;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import org.wpilib.math.controller.PIDController;
@@ -23,21 +25,21 @@ import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.smartdashboard.Field2d;
-import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.tunable.Tunables;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
 import org.wpilib.command2.button.CommandNiDsXboxController;
 import java.util.function.Supplier;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
-import yams.mechanisms.config.SwerveDriveConfig;
-import yams.mechanisms.config.SwerveModuleConfig;
-import yams.mechanisms.swerve.SwerveDrive;
-import yams.mechanisms.swerve.SwerveModule;
-import yams.mechanisms.swerve.utility.SwerveInputStream;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.local.SparkWrapper;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
+import yams.commands2.config.SwerveDriveConfig;
+import yams.core.mechanisms.config.SwerveModuleConfig;
+import yams.commands2.swerve.SwerveDrive;
+import yams.core.mechanisms.swerve.SwerveModule;
+import yams.core.mechanisms.swerve.utility.SwerveInputStream;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.local.SparkWrapper;
 
 public class SwerveSubsystem extends SubsystemBase {
   private final SwerveDrive drive;
@@ -52,7 +54,7 @@ public class SwerveSubsystem extends SubsystemBase {
     MechanismGearing driveGearing = new MechanismGearing(GearBox.fromReductionStages(6.75));
     MechanismGearing azimuthGearing = new MechanismGearing(GearBox.fromReductionStages(12.8));
     SmartMotorControllerConfig driveCfg =
-        new SmartMotorControllerConfig(this)
+        (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
             .withWheelDiameter(Inches.of(4))
             .withClosedLoopController(0.4, 0, 0)
             //            .withFeedforward(new SimpleMotorFeedforward(0, 0.7, 0.1))
@@ -60,7 +62,7 @@ public class SwerveSubsystem extends SubsystemBase {
             .withStatorCurrentLimit(Amps.of(40))
             .withTelemetry("driveMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
     SmartMotorControllerConfig azimuthCfg =
-        new SmartMotorControllerConfig(this)
+        (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
             .withClosedLoopController(3.8476, 0, 0)
             .withContinuousWrapping(Radians.of(-Math.PI), Radians.of(Math.PI))
             .withGearing(azimuthGearing)
@@ -77,31 +79,31 @@ public class SwerveSubsystem extends SubsystemBase {
     return new SwerveModule(moduleConfig);
   }
 
-  private final Pigeon2 gyro = new Pigeon2(14, CANBus.systemcore(1));
+  private final Pigeon2 gyro = new Pigeon2(14, new CANBus(CANPort.CAN_S0));
 
   public SwerveSubsystem()
   {
-    var fl = createModule(new SparkMax(1, 1, MotorType.kBrushless),
-                          new SparkMax(1, 2, MotorType.kBrushless),
-                          new CANcoder(3, CANBus.systemcore(1)),
+    var fl = createModule(new SparkMax(CANPorts.fromBusId(1), 1, MotorType.kBrushless),
+                          new SparkMax(CANPorts.fromBusId(1), 2, MotorType.kBrushless),
+                          new CANcoder(3, new CANBus(CANPort.CAN_S0)),
                           "frontleft",
                           new Translation2d(Inches.of(24), Inches.of(24)));
-    var fr = createModule(new SparkMax(1, 4, MotorType.kBrushless),
-                          new SparkMax(1, 5, MotorType.kBrushless),
-                          new CANcoder(6, CANBus.systemcore(1)),
+    var fr = createModule(new SparkMax(CANPorts.fromBusId(1), 4, MotorType.kBrushless),
+                          new SparkMax(CANPorts.fromBusId(1), 5, MotorType.kBrushless),
+                          new CANcoder(6, new CANBus(CANPort.CAN_S0)),
                           "frontright",
                           new Translation2d(Inches.of(24), Inches.of(-24)));
-    var bl = createModule(new SparkMax(1, 7, MotorType.kBrushless),
-                          new SparkMax(1, 8, MotorType.kBrushless),
-                          new CANcoder(9, CANBus.systemcore(1)),
+    var bl = createModule(new SparkMax(CANPorts.fromBusId(1), 7, MotorType.kBrushless),
+                          new SparkMax(CANPorts.fromBusId(1), 8, MotorType.kBrushless),
+                          new CANcoder(9, new CANBus(CANPort.CAN_S0)),
                           "backleft",
                           new Translation2d(Inches.of(-24), Inches.of(24)));
-    var br = createModule(new SparkMax(1, 10, MotorType.kBrushless),
-                          new SparkMax(1, 11, MotorType.kBrushless),
-                          new CANcoder(12, CANBus.systemcore(1)),
+    var br = createModule(new SparkMax(CANPorts.fromBusId(1), 10, MotorType.kBrushless),
+                          new SparkMax(CANPorts.fromBusId(1), 11, MotorType.kBrushless),
+                          new CANcoder(12, new CANBus(CANPort.CAN_S0)),
                           "backright",
                           new Translation2d(Inches.of(-24), Inches.of(-24)));
-    SwerveDriveConfig config = new SwerveDriveConfig(this, fl, fr, bl, br)
+    SwerveDriveConfig config = (SwerveDriveConfig) new SwerveDriveConfig(this, fl, fr, bl, br)
         .withGyro(gyro.getYaw().asSupplier())
         .withMaximumChassisSpeed(MetersPerSecond.of(4), RotationsPerSecond.of(360))
         .withStartingPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)))
@@ -109,7 +111,7 @@ public class SwerveSubsystem extends SubsystemBase {
         .withRotationController(new PIDController(1, 0, 0));
     drive = new SwerveDrive(config);
 
-    SmartDashboard.putData("Field", field);
+    Tunables.publish("Field", field);
   }
 
   public Command setRobotRelativeChassisSpeeds(ChassisVelocities speeds)

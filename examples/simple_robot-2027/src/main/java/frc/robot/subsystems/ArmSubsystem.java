@@ -13,6 +13,7 @@ import static org.wpilib.units.Units.Pounds;
 import static org.wpilib.units.Units.Seconds;
 
 import com.ctre.phoenix6.CANBus;
+import org.wpilib.hardware.bus.CANPort;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import org.wpilib.math.controller.ArmFeedforward;
@@ -23,30 +24,30 @@ import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
 import org.wpilib.hardware.discrete.DigitalInput;
 
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
-import yams.mechanisms.config.ArmConfig;
-import yams.mechanisms.config.MechanismPositionConfig;
-import yams.mechanisms.config.SensorConfig;
-import yams.mechanisms.positional.Arm;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.remote.TalonFXWrapper;
-import yams.motorcontrollers.simulation.Sensor;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
+import yams.core.mechanisms.config.ArmConfig;
+import yams.core.mechanisms.config.MechanismPositionConfig;
+import yams.core.mechanisms.config.SensorConfig;
+import yams.commands2.mechanisms.Arm;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.remote.TalonFXWrapper;
+import yams.core.motorcontrollers.simulation.Sensor;
 
 public class ArmSubsystem extends SubsystemBase
 {
-  private final CANcoder                   cancoder    = new CANcoder(2, CANBus.systemcore(1));
-  private final TalonFX                    armMotor    = new TalonFX(1, CANBus.systemcore(1));
+  private final CANcoder                   cancoder    = new CANcoder(2, new CANBus(CANPort.CAN_S0));
+  private final TalonFX                    armMotor    = new TalonFX(1, new CANBus(CANPort.CAN_S0));
   //  private final SmartMotorControllerTelemetryConfig motorTelemetryConfig = new SmartMotorControllerTelemetryConfig()
 //          .withMechanismPosition()
 //          .withRotorPosition()
 //          .withMechanismLowerLimit()
 //          .withMechanismUpperLimit();
-  private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig motorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
       .withClosedLoopController(4, 0, 0)
     .withTrapezoidalProfile(DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
       .withSoftLimits(Degrees.of(-30), Degrees.of(100))
@@ -87,7 +88,7 @@ public class ArmSubsystem extends SubsystemBase
   private final Sensor       coralSensor = new SensorConfig("CoralDetectorBeamBreak")
       .withField("Beam", dio::get, false)
       .withSimulatedValue("Beam", Seconds.of(3), Seconds.of(4), true)
-      .withSimulatedValue("Beam", arm.isNear(Degrees.of(40), Degrees.of(2)), true)
+      .withSimulatedValue("Beam", () -> arm.isNear(Degrees.of(40), Degrees.of(2)), true)
       .getSensor();
 
   public ArmSubsystem()

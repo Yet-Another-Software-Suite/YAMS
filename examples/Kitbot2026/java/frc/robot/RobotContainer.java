@@ -53,9 +53,9 @@ public class RobotContainer {
           m_driverController :: getLeftY,
           m_driverController :: getRightX));
 
-     m_driverController.button(1).whileTrue(m_intakeSubsystem.out(0.8));
-     m_driverController.button(2).whileTrue(m_intakeSubsystem.in(0.8));
-     m_driverController.button(3).whileTrue(m_shooterSubsystem.setVelocity(RotationsPerSecond.of(200)));
+     m_driverController.getHID().button(1).whileTrue(m_intakeSubsystem.out(0.8));
+     m_driverController.getHID().button(2).whileTrue(m_intakeSubsystem.in(0.8));
+     m_driverController.getHID().button(3).whileTrue(m_shooterSubsystem.setVelocity(RotationsPerSecond.of(200)));
   }
 
   /**

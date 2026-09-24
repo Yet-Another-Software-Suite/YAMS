@@ -3,8 +3,8 @@
 
 package frc.robot.commands;
 
-import org.wpilib.vision.apriltag.AprilTagFieldLayout;
-import org.wpilib.vision.apriltag.AprilTagFields;
+import org.wpilib.fields.Field;
+import org.wpilib.fields.Fields;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.geometry.Translation3d;
@@ -20,8 +20,8 @@ public class FieldConstants {
   public static final FieldType fieldType = FieldType.WELDED;
 
   // AprilTag related constants
-  public static final AprilTagFieldLayout aprilTagLayout =
-      AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
+  public static final Field aprilTagLayout =
+      Field.loadField(Fields.FRC_2026_REBUILT_ANDY_MARK);
   public static final int aprilTagCount = aprilTagLayout.getTags().size();
   public static final double aprilTagWidth = Units.inchesToMeters(6.5);
 

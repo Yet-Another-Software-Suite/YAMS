@@ -23,6 +23,7 @@ package frc.robot.subsystems;
  * </ul>
  */
 
+import com.revrobotics.util.CANPorts;
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
 import org.wpilib.math.controller.ArmFeedforward;
@@ -34,13 +35,13 @@ import org.wpilib.util.Color;
 import org.wpilib.util.Color8Bit;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
-import yams.mechanisms.config.ArmConfig;
-import yams.mechanisms.positional.DoubleJointedArm;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.local.SparkWrapper;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
+import yams.core.mechanisms.config.ArmConfig;
+import yams.commands2.mechanisms.DoubleJointedArm;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.local.SparkWrapper;
 
 import static org.wpilib.units.Units.*;
 
@@ -52,9 +53,9 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
   // attached to it. Motor is on CAN ID 1.
   // -------------------------------------------------------------------------
 
-  private final SparkMax                   lowerMotor  = new SparkMax(1, 1, SparkLowLevel.MotorType.kBrushless);
+  private final SparkMax                   lowerMotor  = new SparkMax(CANPorts.fromBusId(1), 1, SparkLowLevel.MotorType.kBrushless);
 
-  private final SmartMotorControllerConfig lowerConfig = new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig lowerConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
           // kP=16 produces roughly 16 volts of correction per radian of error.
           // This is a starting point; tune down if you see oscillation at the setpoint.
           .withClosedLoopController(16, 0, 0)
@@ -104,9 +105,9 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
   // than the proximal joint. Motor is on CAN ID 2.
   // -------------------------------------------------------------------------
 
-  private final SparkMax                   upperMotor  = new SparkMax(1, 2, SparkLowLevel.MotorType.kBrushless);
+  private final SparkMax                   upperMotor  = new SparkMax(CANPorts.fromBusId(1), 2, SparkLowLevel.MotorType.kBrushless);
 
-  private final SmartMotorControllerConfig upperConfig = new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig upperConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
           // Same kP as lower joint for this template. In practice the distal joint
           // may tolerate a higher kP because it has less load and less inertia.
           .withClosedLoopController(16, 0, 0)

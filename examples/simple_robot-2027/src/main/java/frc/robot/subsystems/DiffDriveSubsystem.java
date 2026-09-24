@@ -5,6 +5,7 @@ package frc.robot.subsystems;
 
 import static org.wpilib.units.Units.Inches;
 
+import com.revrobotics.util.CANPorts;
 import com.revrobotics.spark.SparkMax;
 import org.wpilib.util.Pair;
 import org.wpilib.math.system.DCMotor;
@@ -13,26 +14,26 @@ import org.wpilib.drive.DifferentialDrive;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
 import java.util.function.DoubleSupplier;
-import yams.gearing.MechanismGearing;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.local.SparkWrapper;
+import yams.core.gearing.MechanismGearing;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.local.SparkWrapper;
 
 public class DiffDriveSubsystem extends SubsystemBase {
   private MechanismGearing gearing = new MechanismGearing(3, 4);
   private Distance wheelDiameter = Inches.of(4);
 
-  private SparkMax leftMotor  = new SparkMax(1, 21, SparkMax.MotorType.kBrushless);
-  private SparkMax rightMotor = new SparkMax(1, 24, SparkMax.MotorType.kBrushless);
+  private SparkMax leftMotor  = new SparkMax(CANPorts.fromBusId(1), 21, SparkMax.MotorType.kBrushless);
+  private SparkMax rightMotor = new SparkMax(CANPorts.fromBusId(1), 24, SparkMax.MotorType.kBrushless);
 
-  private SparkMax leftFollowerMotor  = new SparkMax(1, 22, SparkMax.MotorType.kBrushless);
-  private SparkMax rightFollowerMotor = new SparkMax(1, 23, SparkMax.MotorType.kBrushless);
+  private SparkMax leftFollowerMotor  = new SparkMax(CANPorts.fromBusId(1), 22, SparkMax.MotorType.kBrushless);
+  private SparkMax rightFollowerMotor = new SparkMax(CANPorts.fromBusId(1), 23, SparkMax.MotorType.kBrushless);
 
   private SmartMotorControllerConfig leftMotorConfig =
-      new SmartMotorControllerConfig(this)
+      (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
           .withControlMode(ControlMode.OPEN_LOOP)
           .withGearing(gearing)
           .withIdleMode(MotorMode.COAST)
@@ -42,7 +43,7 @@ public class DiffDriveSubsystem extends SubsystemBase {
           .withFollowers(Pair.of(leftFollowerMotor, false));
 
   private SmartMotorControllerConfig rightMotorConfig =
-      new SmartMotorControllerConfig(this)
+      (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
           .withControlMode(ControlMode.OPEN_LOOP)
           .withGearing(gearing)
           .withIdleMode(MotorMode.COAST)

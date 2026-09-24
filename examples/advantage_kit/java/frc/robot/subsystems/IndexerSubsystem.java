@@ -7,6 +7,7 @@ import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.DegreesPerSecond;
 import static org.wpilib.units.Units.Volts;
 
+import com.revrobotics.util.CANPorts;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import org.wpilib.math.system.DCMotor;
@@ -18,14 +19,14 @@ import org.wpilib.command2.SubsystemBase;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.local.SparkWrapper;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.local.SparkWrapper;
 
 /**
  * Open-loop belt indexer with AdvantageKit input logging. The indexer is
@@ -55,9 +56,9 @@ public class IndexerSubsystem extends SubsystemBase
   private final IndexerInputsAutoLogged indexerInputs = new IndexerInputsAutoLogged();
 
   // CAN ID 20 -- check against the robot wiring diagram if swapping hardware.
-  private final SparkMax someMotor = new SparkMax(1, 20, MotorType.kBrushless);
+  private final SparkMax someMotor = new SparkMax(CANPorts.fromBusId(1), 20, MotorType.kBrushless);
 
-  private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig motorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
       // 3:4 box = 12:1 total reduction. Fast enough for reliable feeding without
       // back-driving the rollers when the motor is released.
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))

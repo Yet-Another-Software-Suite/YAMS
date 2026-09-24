@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import static org.wpilib.units.Units.*;
 
+import com.revrobotics.util.CANPorts;
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
 import org.wpilib.math.controller.ElevatorFeedforward;
@@ -15,16 +16,16 @@ import org.wpilib.units.measure.*;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.SubsystemBase;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
-import yams.mechanisms.config.ElevatorConfig;
-import yams.mechanisms.positional.Elevator;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.local.SparkWrapper;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
+import yams.core.mechanisms.config.ElevatorConfig;
+import yams.commands2.mechanisms.Elevator;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.local.SparkWrapper;
 
 // TODO: Example with absolute encoders
 
@@ -42,7 +43,7 @@ public class ExponentiallyProfiledElevatorSubsystem extends SubsystemBase
   private final String           motorTelemetryName = "ExponentiallyProfiledElevatorMotor";
   private final String           mechTelemetryName  = "ExponentiallyProfiledElevator";
   // CAN ID 2 -- change to match your robot's CAN bus assignment.
-  private final SparkMax         elevatorMotor      = new SparkMax(1, 2, SparkLowLevel.MotorType.kBrushless);
+  private final SparkMax         elevatorMotor      = new SparkMax(CANPorts.fromBusId(1), 2, SparkLowLevel.MotorType.kBrushless);
   ///  Configuration Options
   // NEO rated at 5880 RPM free speed and 2.6 N*m stall torque; matches most FRC elevator designs.
   private final DCMotor          dcMotor            = DCMotor.getNEO(1);
@@ -100,7 +101,7 @@ public class ExponentiallyProfiledElevatorSubsystem extends SubsystemBase
   /**
   * {@link SmartMotorControllerConfig} for the elevator motor.
   */
-  private final SmartMotorControllerConfig      motorConfig    = new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig      motorConfig    = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
       /*
        * Basic Configuration options for the motor
        */

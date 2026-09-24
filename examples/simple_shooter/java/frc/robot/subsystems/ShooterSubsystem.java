@@ -15,6 +15,7 @@ import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
 import static org.wpilib.units.Units.Seconds;
 
+import com.revrobotics.util.CANPorts;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 
@@ -27,16 +28,16 @@ import org.wpilib.command2.SubsystemBase;
 import java.util.function.Supplier;
 
 import org.wpilib.math.controller.SimpleMotorFeedforward;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
-import yams.mechanisms.config.FlyWheelConfig;
-import yams.mechanisms.velocity.FlyWheel;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.local.SparkWrapper;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
+import yams.core.mechanisms.config.FlyWheelConfig;
+import yams.commands2.mechanisms.FlyWheel;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.local.SparkWrapper;
 
 /**
  * Simple flywheel shooter subsystem demonstrating continuous closed-loop velocity control
@@ -69,7 +70,7 @@ public class ShooterSubsystem extends SubsystemBase
    * Physical hardware
    */
   // SparkMAX on CAN ID 1; NEO is brushless so kBrushless is required.
-  private final SparkMax                   armMotor    = new SparkMax(1, 1, MotorType.kBrushless);
+  private final SparkMax                   armMotor    = new SparkMax(CANPorts.fromBusId(1), 1, MotorType.kBrushless);
 
   //  private final SmartMotorControllerTelemetryConfig motorTelemetryConfig = new SmartMotorControllerTelemetryConfig()
 //          .withMechanismPosition()
@@ -80,7 +81,7 @@ public class ShooterSubsystem extends SubsystemBase
   /*
    * Motor controller configuration
    */
-  private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig motorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
       /*
        * kP = 0.00016541: this looks tiny, but velocity error is measured in RPM (hundreds of
        * units), so even a small gain produces meaningful correction.  Contrast with a position
