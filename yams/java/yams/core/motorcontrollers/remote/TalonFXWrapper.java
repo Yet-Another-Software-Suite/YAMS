@@ -181,6 +181,11 @@ public class TalonFXWrapper extends SmartMotorController {
   private Alert m_zeroOffsetNoExternalEncoderAlert;
   /** Alert shown when a discontinuity point is set without an external encoder present. */
   private Alert m_discontinuityPointNoExternalEncoderAlert;
+  /**
+   * Whether {@link StatusSignal} refreshes should report errors; false in simulation, where status
+   * signals are not always updated before they are read.
+   */
+  private final boolean m_reportStatusSignalErrors = !RobotBase.isSimulation();
 
   /**
    * Create the {@link TalonFX} wrapper
@@ -211,16 +216,16 @@ public class TalonFXWrapper extends SmartMotorController {
         m_configurator.refresh(m_talonConfig);
       }
     }
-    m_mechanismPosition = m_talonfx.getPosition();
-    m_mechanismVelocity = m_talonfx.getVelocity();
-    m_mechanismAcceleration = m_talonfx.getAcceleration();
-    m_dutyCycle = m_talonfx.getDutyCycle();
-    m_statorCurrent = m_talonfx.getStatorCurrent();
-    m_supplyCurrent = m_talonfx.getSupplyCurrent();
-    m_outputVoltage = m_talonfx.getMotorVoltage();
-    m_rotorPosition = m_talonfx.getRotorPosition();
-    m_rotorVelocity = m_talonfx.getRotorVelocity();
-    m_deviceTemperature = m_talonfx.getDeviceTemp();
+    m_mechanismPosition = m_talonfx.getPosition(false);
+    m_mechanismVelocity = m_talonfx.getVelocity(false);
+    m_mechanismAcceleration = m_talonfx.getAcceleration(false);
+    m_dutyCycle = m_talonfx.getDutyCycle(false);
+    m_statorCurrent = m_talonfx.getStatorCurrent(false);
+    m_supplyCurrent = m_talonfx.getSupplyCurrent(false);
+    m_outputVoltage = m_talonfx.getMotorVoltage(false);
+    m_rotorPosition = m_talonfx.getRotorPosition(false);
+    m_rotorVelocity = m_talonfx.getRotorVelocity(false);
+    m_deviceTemperature = m_talonfx.getDeviceTemp(false);
     m_closedLoopControllerThread = null;
 
     setupSimulation();
@@ -620,7 +625,7 @@ public class TalonFXWrapper extends SmartMotorController {
 
   @Override
   public double getDutyCycle() {
-    return m_dutyCycle.refresh().getValue();
+    return m_dutyCycle.refresh(m_reportStatusSignalErrors).getValue();
   }
 
   @Override
@@ -1025,17 +1030,17 @@ public class TalonFXWrapper extends SmartMotorController {
 
   @Override
   public Optional<Current> getSupplyCurrent() {
-    return Optional.of(m_supplyCurrent.refresh().getValue());
+    return Optional.of(m_supplyCurrent.refresh(m_reportStatusSignalErrors).getValue());
   }
 
   @Override
   public Current getStatorCurrent() {
-    return m_statorCurrent.refresh().getValue();
+    return m_statorCurrent.refresh(m_reportStatusSignalErrors).getValue();
   }
 
   @Override
   public Voltage getVoltage() {
-    return m_outputVoltage.refresh().getValue();
+    return m_outputVoltage.refresh(m_reportStatusSignalErrors).getValue();
   }
 
   @Override
@@ -1070,68 +1075,68 @@ public class TalonFXWrapper extends SmartMotorController {
   public AngularVelocity getMechanismVelocity() {
     /*if (m_cancoder.isPresent())
     {
-      return m_cancoder.get().getVelocity().getValue();
+      return m_cancoder.get().getVelocity(false).refresh(m_reportStatusSignalErrors).getValue();
     }
     if (m_candi.isPresent())
     {
       if (useCANdiPWM1())
       {
-        return m_candi.get().getPWM1Velocity().getValue();
+        return m_candi.get().getPWM1Velocity(false).refresh(m_reportStatusSignalErrors).getValue();
       }
       if (useCANdiPWM2())
       {
-        return m_candi.get().getPWM2Velocity().getValue();
+        return m_candi.get().getPWM2Velocity(false).refresh(m_reportStatusSignalErrors).getValue();
       }
     }*/
-    return m_mechanismVelocity.refresh().getValue();
+    return m_mechanismVelocity.refresh(m_reportStatusSignalErrors).getValue();
   }
 
   @Override
   public AngularAcceleration getMechanismAcceleration() {
-    return m_mechanismAcceleration.refresh().getValue();
+    return m_mechanismAcceleration.refresh(m_reportStatusSignalErrors).getValue();
   }
 
   @Override
   public Angle getMechanismPosition() {
     /*if (m_cancoder.isPresent())
     {
-      return m_cancoder.get().getPosition().getValue();
+      return m_cancoder.get().getPosition(false).refresh(m_reportStatusSignalErrors).getValue();
     }
     if (m_candi.isPresent())
     {
       if (useCANdiPWM1())
       {
-        return m_candi.get().getPWM1Position().getValue();
+        return m_candi.get().getPWM1Position(false).refresh(m_reportStatusSignalErrors).getValue();
       }
       if (useCANdiPWM2())
       {
-        return m_candi.get().getPWM2Position().getValue();
+        return m_candi.get().getPWM2Position(false).refresh(m_reportStatusSignalErrors).getValue();
       }
     }*/
-    return m_mechanismPosition.refresh().getValue();
+    return m_mechanismPosition.refresh(m_reportStatusSignalErrors).getValue();
   }
 
   @Override
   public AngularVelocity getRotorVelocity() {
-    return m_rotorVelocity.refresh().getValue();
+    return m_rotorVelocity.refresh(m_reportStatusSignalErrors).getValue();
   }
 
   @Override
   public Angle getRotorPosition() {
-    return m_rotorPosition.refresh().getValue();
+    return m_rotorPosition.refresh(m_reportStatusSignalErrors).getValue();
   }
 
   @Override
   public Optional<Angle> getExternalEncoderPosition() {
     if (m_cancoder.isPresent()) {
-      return Optional.ofNullable(m_cancoder.get().getPosition().getValue());
+      return Optional.ofNullable(m_cancoder.get().getPosition(false).refresh(m_reportStatusSignalErrors).getValue());
     }
     if (m_candi.isPresent()) {
       if (useCANdiPWM1()) {
-        return Optional.ofNullable(m_candi.get().getPWM1Position().getValue());
+        return Optional.ofNullable(m_candi.get().getPWM1Position(false).refresh(m_reportStatusSignalErrors).getValue());
       }
       if (useCANdiPWM2()) {
-        return Optional.ofNullable(m_candi.get().getPWM2Position().getValue());
+        return Optional.ofNullable(m_candi.get().getPWM2Position(false).refresh(m_reportStatusSignalErrors).getValue());
       }
     }
     return Optional.empty();
@@ -1140,14 +1145,14 @@ public class TalonFXWrapper extends SmartMotorController {
   @Override
   public Optional<AngularVelocity> getExternalEncoderVelocity() {
     if (m_cancoder.isPresent()) {
-      return Optional.ofNullable(m_cancoder.get().getVelocity().getValue());
+      return Optional.ofNullable(m_cancoder.get().getVelocity(false).refresh(m_reportStatusSignalErrors).getValue());
     }
     if (m_candi.isPresent()) {
       if (useCANdiPWM1()) {
-        return Optional.ofNullable(m_candi.get().getPWM1Velocity().getValue());
+        return Optional.ofNullable(m_candi.get().getPWM1Velocity(false).refresh(m_reportStatusSignalErrors).getValue());
       }
       if (useCANdiPWM2()) {
-        return Optional.ofNullable(m_candi.get().getPWM2Velocity().getValue());
+        return Optional.ofNullable(m_candi.get().getPWM2Velocity(false).refresh(m_reportStatusSignalErrors).getValue());
       }
     }
     return Optional.empty();
@@ -1716,7 +1721,7 @@ public class TalonFXWrapper extends SmartMotorController {
 
   @Override
   public Temperature getTemperature() {
-    return m_deviceTemperature.refresh().getValue();
+    return m_deviceTemperature.refresh(m_reportStatusSignalErrors).getValue();
   }
 
   @Override

@@ -31,7 +31,10 @@ namespace yams::motorcontrollers::remote {
 
 TalonFXWrapper::TalonFXWrapper(hardware::TalonFX* talon, wpi::math::DCMotor dcMotor,
                                SmartMotorControllerConfig* config)
-    : SmartMotorController(), m_talon(talon), m_dcMotor(dcMotor) {
+    : SmartMotorController(),
+      m_talon(talon),
+      m_dcMotor(dcMotor),
+      m_reportStatusSignalErrors(!wpi::RobotBase::IsSimulation()) {
   m_config = config;
   m_config->WithSimMotor(dcMotor);
   if (auto vc = config->GetVendorConfig(); vc.has_value()) {
@@ -492,13 +495,17 @@ void TalonFXWrapper::SetDutyCycle(double dutyCycle) {
   m_talon->SetControl(m_dutyCycleReq.WithOutput(dutyCycle));
 }
 
-double TalonFXWrapper::GetDutyCycle() { return m_talon->GetDutyCycle().GetValue(); }
+double TalonFXWrapper::GetDutyCycle() {
+  return m_talon->GetDutyCycle(false).Refresh(m_reportStatusSignalErrors).GetValue();
+}
 
 void TalonFXWrapper::SetVoltage(wpi::units::volt_t voltage) {
   m_talon->SetControl(m_voltageReq.WithOutput(voltage));
 }
 
-wpi::units::volt_t TalonFXWrapper::GetVoltage() { return m_talon->GetMotorVoltage().GetValue(); }
+wpi::units::volt_t TalonFXWrapper::GetVoltage() {
+  return m_talon->GetMotorVoltage(false).Refresh(m_reportStatusSignalErrors).GetValue();
+}
 
 // ---- Closed-loop setpoints --------------------------------------------------
 
@@ -549,23 +556,23 @@ void TalonFXWrapper::SetEncoderVelocity(wpi::units::meters_per_second_t velocity
 // ---- Encoder reads ----------------------------------------------------------
 
 wpi::units::turn_t TalonFXWrapper::GetMechanismPosition() {
-  return m_talon->GetPosition().GetValue();
+  return m_talon->GetPosition(false).Refresh(m_reportStatusSignalErrors).GetValue();
 }
 
 wpi::units::turns_per_second_t TalonFXWrapper::GetMechanismVelocity() {
-  return m_talon->GetVelocity().GetValue();
+  return m_talon->GetVelocity(false).Refresh(m_reportStatusSignalErrors).GetValue();
 }
 
 wpi::units::turns_per_second_squared_t TalonFXWrapper::GetMechanismAcceleration() {
-  return m_talon->GetAcceleration().GetValue();
+  return m_talon->GetAcceleration(false).Refresh(m_reportStatusSignalErrors).GetValue();
 }
 
 wpi::units::turn_t TalonFXWrapper::GetRotorPosition() {
-  return m_talon->GetRotorPosition().GetValue();
+  return m_talon->GetRotorPosition(false).Refresh(m_reportStatusSignalErrors).GetValue();
 }
 
 wpi::units::turns_per_second_t TalonFXWrapper::GetRotorVelocity() {
-  return m_talon->GetRotorVelocity().GetValue();
+  return m_talon->GetRotorVelocity(false).Refresh(m_reportStatusSignalErrors).GetValue();
 }
 
 wpi::units::meter_t TalonFXWrapper::GetMeasurementPosition() {
@@ -584,28 +591,34 @@ wpi::units::meters_per_second_squared_t TalonFXWrapper::GetMeasurementAccelerati
 }
 
 std::optional<wpi::units::degree_t> TalonFXWrapper::GetExternalEncoderPosition() {
-  if (m_cancoder) return wpi::units::degree_t{m_cancoder->get().GetAbsolutePosition().GetValue()};
+  if (m_cancoder)
+    return wpi::units::degree_t{m_cancoder->get()
+                                    .GetAbsolutePosition(false)
+                                    .Refresh(m_reportStatusSignalErrors)
+                                    .GetValue()};
   return std::nullopt;
 }
 
 std::optional<wpi::units::degrees_per_second_t> TalonFXWrapper::GetExternalEncoderVelocity() {
   if (m_cancoder)
-    return wpi::units::degrees_per_second_t{m_cancoder->get().GetVelocity().GetValue()};
+    return wpi::units::degrees_per_second_t{
+        m_cancoder->get().GetVelocity(false).Refresh(m_reportStatusSignalErrors).GetValue()};
   return std::nullopt;
 }
 
 // ---- Motor status -----------------------------------------------------------
 
 std::optional<wpi::units::ampere_t> TalonFXWrapper::GetSupplyCurrent() {
-  return m_talon->GetSupplyCurrent().GetValue();
+  return m_talon->GetSupplyCurrent(false).Refresh(m_reportStatusSignalErrors).GetValue();
 }
 
 wpi::units::ampere_t TalonFXWrapper::GetStatorCurrent() {
-  return m_talon->GetStatorCurrent().GetValue();
+  return m_talon->GetStatorCurrent(false).Refresh(m_reportStatusSignalErrors).GetValue();
 }
 
 wpi::units::celsius_t TalonFXWrapper::GetTemperature() {
-  return wpi::units::celsius_t{m_talon->GetDeviceTemp().GetValue().value()};
+  return wpi::units::celsius_t{
+      m_talon->GetDeviceTemp(false).Refresh(m_reportStatusSignalErrors).GetValue().value()};
 }
 
 wpi::math::DCMotor TalonFXWrapper::GetDCMotor() { return m_dcMotor; }

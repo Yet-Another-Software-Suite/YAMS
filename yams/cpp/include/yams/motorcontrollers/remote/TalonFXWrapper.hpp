@@ -287,6 +287,9 @@ class TalonFXWrapper : public SmartMotorController {
   SmartMotorControllerConfig* m_config{nullptr};
   ctre::phoenix6::hardware::TalonFX* m_talon;
   wpi::math::DCMotor m_dcMotor;
+  // Whether StatusSignal refreshes should report errors; false in simulation, where status
+  // signals are not always updated before they are read.
+  const bool m_reportStatusSignalErrors;
   ctre::phoenix6::configs::TalonFXConfiguration m_talonConfig;
 
   // Active closed-loop control requests variant selects the active request type
