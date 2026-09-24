@@ -86,6 +86,7 @@ jobs:
     name: C++ unit tests
     needs: [build-linux]
     runs-on: ubuntu-latest
+    container: wpilib/systemcore-cross-debian:trixie
     permissions:
       contents: read
     defaults:
@@ -93,12 +94,7 @@ jobs:
         working-directory: vendordep
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: 25
       - run: chmod +x gradlew
-      - uses: gradle/actions/setup-gradle@v6
       - name: Install toolchain
         run: ./gradlew installSystemCoreToolchain
       - uses: actions/download-artifact@v7
