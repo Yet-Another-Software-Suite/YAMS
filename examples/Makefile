@@ -38,6 +38,7 @@ $(1):
 	@mkdir -p $(GENERATED_DIR)/$(1)/src/main
 	@cp -r $(EXAMPLES_DIR)/$(1)/java $(GENERATED_DIR)/$(1)/src/main/java
 	@$(if $(wildcard $(EXAMPLES_DIR)/$(1)/deploy),cp -r $(EXAMPLES_DIR)/$(1)/deploy $(GENERATED_DIR)/$(1)/src/main/deploy)
+	@$(if $(wildcard $(EXAMPLES_DIR)/$(1)/build.gradle),cp $(EXAMPLES_DIR)/$(1)/build.gradle $(GENERATED_DIR)/$(1)/build.gradle)
 endef
 
 $(foreach proj,$(EXAMPLE_PROJECTS),$(eval $(call make-example,$(proj))))

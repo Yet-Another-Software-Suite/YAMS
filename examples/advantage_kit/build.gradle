@@ -72,6 +72,12 @@ def includeDesktopSupport = true
 // Also defines JUnit 5.
 dependencies {
     annotationProcessor wpi.java.deps.wpilibAnnotations()
+    // AdvantageKit's @AutoLog codegen processor; recommended setup from
+    // https://docs.advantagekit.org/getting-started/installation/existing-projects
+    def akitJson = new groovy.json.JsonSlurper().parseText(
+        new File(projectDir.getAbsolutePath() +
+        "/vendordeps/AdvantageKit.json").text)
+    annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
 
