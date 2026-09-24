@@ -56,7 +56,7 @@ jobs:
   build-linux:
     name: Build - Linux
     needs: [validation]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     container: wpilib/systemcore-cross-debian:trixie
     permissions:
       contents: read
