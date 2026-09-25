@@ -36,6 +36,7 @@
 #include "helpers/MockHardware.h"
 #include "helpers/MotorControllerFactory.h"
 #include "helpers/SchedulerHelper.h"
+#include "yams/exceptions.hpp"
 #include "yams/gearing/GearBox.hpp"
 #include "yams/gearing/MechanismGearing.hpp"
 #include "yams/mechanisms/config/SwerveModuleConfig.hpp"
@@ -296,6 +297,46 @@ struct SwerveDriveTestFixture {
 TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.ConstructionDoesNotCrash",
                  "[SwerveDriveTest]") {
   CHECK(m_drive.has_value());
+}
+
+// Configured translation and rotation controllers are returned by the config.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.ConfiguredPIDControllersArePresent",
+                 "[SwerveDriveTest]") {
+  auto translationPID = m_driveCfg.GetTranslationPID();
+  auto rotationPID = m_driveCfg.GetRotationPID();
+  REQUIRE(translationPID.has_value());
+  REQUIRE(rotationPID.has_value());
+  CHECK(translationPID->get().GetP() == Catch::Approx(2.0));
+  CHECK(rotationPID->get().GetP() == Catch::Approx(4.0));
+}
+
+// Translation and rotation controllers are optional: a drive without them constructs, runs its
+// telemetry, and resets cleanly, and only drive to pose reports that they are missing.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.PIDControllersAreOptional",
+                 "[SwerveDriveTest]") {
+  // Release the fixture's drive so its modules can be reused by a drive without controllers.
+  Hardware().sub->m_drive = nullptr;
+  m_drive.reset();
+
+  // Declared before the drive so the config outlives it.
+  SwerveDriveConfig cfg;
+  cfg.WithSubsystem(Hardware().sub)
+      .WithModules({&m_fl.value(), &m_fr.value(), &m_bl.value(), &m_br.value()})
+      .WithGyro([this] { return m_simGyro; })
+      .WithStartingPose(wpi::math::Pose2d{})
+      .WithMaximumChassisSpeed(4.5_mps, wpi::units::degrees_per_second_t{540});
+  CHECK_FALSE(cfg.GetTranslationPID().has_value());
+  CHECK_FALSE(cfg.GetRotationPID().has_value());
+
+  std::optional<SwerveDrive<4>> drive;
+  REQUIRE_NOTHROW(drive.emplace(&cfg));
+  CHECK_NOTHROW(drive->UpdateTelemetry());
+  CHECK_NOTHROW(drive->SimIterate());
+  CHECK_NOTHROW(drive->ResetTranslationPID());
+  CHECK_NOTHROW(drive->ResetRotationPID());
+  CHECK_THROWS_AS(drive->DriveToPoseSetpoint(wpi::math::Pose2d{}),
+                  yams::exceptions::SwerveDriveConfigurationException);
+  drive.reset();
 }
 
 // UpdateTelemetry and SimIterate run for several loops without crashing.

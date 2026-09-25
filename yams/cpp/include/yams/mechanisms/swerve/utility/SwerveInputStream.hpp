@@ -21,6 +21,7 @@
 #include <wpi/units/length.hpp>
 #include <wpi/units/velocity.hpp>
 
+#include "yams/exceptions.hpp"
 #include "yams/mechanisms/swerve/SwerveDrive.hpp"
 #include "yams/mechanisms/swerve/SwerveDriveConfig.hpp"
 
@@ -364,7 +365,7 @@ class SwerveInputStream {
 
     switch (newMode) {
       case SwerveInputMode::TRANSLATION_ONLY: {
-        auto& pid = m_swerveDrive->GetConfig().GetRotationPID();
+        auto& pid = RequireRotationPID();
         omega = pid.Calculate(wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}.value(),
                               m_lockedHeading.value().Radians().value());
         break;
@@ -375,7 +376,7 @@ class SwerveInputStream {
         break;
       }
       case SwerveInputMode::HEADING: {
-        auto& pid = m_swerveDrive->GetConfig().GetRotationPID();
+        auto& pid = RequireRotationPID();
         double headingTarget =
             std::atan2(m_controllerHeadingX.value()(), m_controllerHeadingY.value()());
         omega = pid.Calculate(wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}.value(),
@@ -388,7 +389,7 @@ class SwerveInputStream {
         break;
       }
       case SwerveInputMode::AIM: {
-        auto& pid = m_swerveDrive->GetConfig().GetRotationPID();
+        auto& pid = RequireRotationPID();
         auto currentHeading =
             wpi::math::Rotation2d{wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}};
         auto relativeTrl = m_aimTarget.value()().RelativeTo(m_swerveDrive->GetPose()).Translation();
@@ -459,6 +460,22 @@ class SwerveInputStream {
   wpi::units::radians_per_second_t m_maximumChassisAngularVelocity{2.0 * std::numbers::pi};
 
   // ---- Private helpers -------------------------------------------------------
+
+  /**
+   * Get the rotation PID controller needed by the heading, aim, and translation only modes.
+   *
+   * @throws SwerveDriveConfigurationException if no rotation PID controller is configured.
+   */
+  wpi::math::PIDController& RequireRotationPID() {
+    auto pid = m_swerveDrive->GetConfig().GetRotationPID();
+    if (!pid) {
+      throw exceptions::SwerveDriveConfigurationException(
+          "No rotation PID controller configured, heading, aim, and translation only control are "
+          "unavailable. Use SwerveDriveConfig::WithRotationController(PIDController) to fix this "
+          "error.");
+    }
+    return pid->get();
+  }
 
   SwerveInputMode FindMode() {
     if (m_translationOnlyEnabled.has_value() && m_translationOnlyEnabled.value()()) {

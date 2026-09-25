@@ -35,6 +35,7 @@
 #include <wpi/units/velocity.hpp>
 #include <wpi/util/array.hpp>
 
+#include "yams/exceptions.hpp"
 #include "yams/mechanisms/swerve/SwerveDriveConfig.hpp"
 #include "yams/mechanisms/swerve/SwerveModule.hpp"
 #include "yams/telemetry/MechanismTelemetry.hpp"
@@ -195,10 +196,24 @@ class SwerveDrive {
    * @return robot-relative ChassisSpeeds to drive the robot to the given pose.
    * @note Remember to call ResetTranslationPID() and ResetRotationPID() before calling this
    *     method in a loop.
+   * @throws SwerveDriveConfigurationException if the translation or rotation PID controller is
+   *     not configured.
    */
   wpi::math::ChassisVelocities DriveToPoseSetpoint(wpi::math::Pose2d targetPose) {
-    auto& rotationPID = m_config->GetRotationPID();
-    auto& translationPID = m_config->GetTranslationPID();
+    auto rotationPIDRef = m_config->GetRotationPID();
+    if (!rotationPIDRef) {
+      throw exceptions::SwerveDriveConfigurationException(
+          "No rotation PID controller configured, cannot drive to pose. Use "
+          "SwerveDriveConfig::WithRotationController(PIDController) to fix this error.");
+    }
+    auto translationPIDRef = m_config->GetTranslationPID();
+    if (!translationPIDRef) {
+      throw exceptions::SwerveDriveConfigurationException(
+          "No translation PID controller configured, cannot drive to pose. Use "
+          "SwerveDriveConfig::WithTranslationController(PIDController) to fix this error.");
+    }
+    auto& rotationPID = rotationPIDRef->get();
+    auto& translationPID = translationPIDRef->get();
     auto distance = GetDistanceFromPose(targetPose);
     auto translationScalar = translationPID.Calculate(distance.value(), 0.0);
     auto currentPose = GetPose();
@@ -481,8 +496,15 @@ class SwerveDrive {
     return std::nullopt;
   }
 
-  void ResetRotationPID() { m_config->GetRotationPID().Reset(); }
-  void ResetTranslationPID() { m_config->GetTranslationPID().Reset(); }
+  /** Reset the auto-align rotational PID controller, if one is configured. */
+  void ResetRotationPID() {
+    if (auto pid = m_config->GetRotationPID()) pid->get().Reset();
+  }
+
+  /** Reset the auto-align translation PID controller, if one is configured. */
+  void ResetTranslationPID() {
+    if (auto pid = m_config->GetTranslationPID()) pid->get().Reset();
+  }
 
   /**
    * Set the auto-align rotational PID controller.
@@ -490,10 +512,10 @@ class SwerveDrive {
    * @param controller PIDController to use, input units are radians.
    */
   void SetRotationPID(wpi::math::PIDController controller) {
-    auto& currentRotationPID = m_config->GetRotationPID();
-    if (currentRotationPID.GetP() != controller.GetP() ||
-        currentRotationPID.GetI() != controller.GetI() ||
-        currentRotationPID.GetD() != controller.GetD()) {
+    auto currentRotationPID = m_config->GetRotationPID();
+    if (!currentRotationPID || currentRotationPID->get().GetP() != controller.GetP() ||
+        currentRotationPID->get().GetI() != controller.GetI() ||
+        currentRotationPID->get().GetD() != controller.GetD()) {
       controller.Reset();
       m_config->WithRotationController(std::move(controller));
     }
@@ -505,10 +527,10 @@ class SwerveDrive {
    * @param controller PIDController to use, input units are metres.
    */
   void SetTranslationPID(wpi::math::PIDController controller) {
-    auto& currentTranslationPID = m_config->GetTranslationPID();
-    if (currentTranslationPID.GetP() != controller.GetP() ||
-        currentTranslationPID.GetI() != controller.GetI() ||
-        currentTranslationPID.GetD() != controller.GetD()) {
+    auto currentTranslationPID = m_config->GetTranslationPID();
+    if (!currentTranslationPID || currentTranslationPID->get().GetP() != controller.GetP() ||
+        currentTranslationPID->get().GetI() != controller.GetI() ||
+        currentTranslationPID->get().GetD() != controller.GetD()) {
       controller.Reset();
       m_config->WithTranslationController(std::move(controller));
     }
@@ -602,17 +624,20 @@ class SwerveDrive {
     m_swerveTelemetry.emplace(std::move(telemetryCfg));
     m_swerveTelemetry->SetupTelemetry(this);
 
-    m_driveToPoseTuningCommand.emplace(wpi::cmd::StartRun(
-        [this] {
-          std::puts(
-              "================= Starting SwerveDrive.driveToPoseTuning() =================\n");
-          ResetTranslationPID();
-          ResetRotationPID();
-        },
-        [this] { m_swerveTelemetry->ApplyTuningValues(this); }));
-    telemetry::EnsureMechanismsTunableBackend();
-    wpi::tunables::Publish("Mechanisms/" + GetName() + "/tuning/driveToPose",
-                           *m_driveToPoseTuningCommand->get());
+    // Drive to pose tuning needs both controllers, so only offer it when they are configured.
+    if (m_config->GetTranslationPID() && m_config->GetRotationPID()) {
+      m_driveToPoseTuningCommand.emplace(wpi::cmd::StartRun(
+          [this] {
+            std::puts(
+                "================= Starting SwerveDrive.driveToPoseTuning() =================\n");
+            ResetTranslationPID();
+            ResetRotationPID();
+          },
+          [this] { m_swerveTelemetry->ApplyTuningValues(this); }));
+      telemetry::EnsureMechanismsTunableBackend();
+      wpi::tunables::Publish("Mechanisms/" + GetName() + "/tuning/driveToPose",
+                             *m_driveToPoseTuningCommand->get());
+    }
   }
 
   void UpdatePoseEstimator() {
@@ -670,26 +695,38 @@ void SwerveDriveTelemetry::SetupTelemetry(mechanisms::swerve::SwerveDrive<NumMod
   auto dataLogName = m_config.GetDataLogName();
 
   {
-    auto& translationPID = drive->GetConfig().GetTranslationPID();
-    auto& rotationPID = drive->GetConfig().GetRotationPID();
-    m_config.GetDoubleFields()
-        .at(DoubleTelemetryField::TranslationP)
-        .SetDefaultValue(translationPID.GetP());
-    m_config.GetDoubleFields()
-        .at(DoubleTelemetryField::TranslationI)
-        .SetDefaultValue(translationPID.GetI());
-    m_config.GetDoubleFields()
-        .at(DoubleTelemetryField::TranslationD)
-        .SetDefaultValue(translationPID.GetD());
-    m_config.GetDoubleFields()
-        .at(DoubleTelemetryField::RotationP)
-        .SetDefaultValue(rotationPID.GetP());
-    m_config.GetDoubleFields()
-        .at(DoubleTelemetryField::RotationI)
-        .SetDefaultValue(rotationPID.GetI());
-    m_config.GetDoubleFields()
-        .at(DoubleTelemetryField::RotationD)
-        .SetDefaultValue(rotationPID.GetD());
+    // Only publish the drive to pose gains and auto-align fields for controllers that exist.
+    auto translationPID = drive->GetConfig().GetTranslationPID();
+    auto rotationPID = drive->GetConfig().GetRotationPID();
+    auto& doubleFields = m_config.GetDoubleFields();
+    if (translationPID) {
+      doubleFields.at(DoubleTelemetryField::TranslationP)
+          .SetDefaultValue(translationPID->get().GetP());
+      doubleFields.at(DoubleTelemetryField::TranslationI)
+          .SetDefaultValue(translationPID->get().GetI());
+      doubleFields.at(DoubleTelemetryField::TranslationD)
+          .SetDefaultValue(translationPID->get().GetD());
+    } else {
+      doubleFields.at(DoubleTelemetryField::TranslationP).Disable();
+      doubleFields.at(DoubleTelemetryField::TranslationI).Disable();
+      doubleFields.at(DoubleTelemetryField::TranslationD).Disable();
+    }
+    if (rotationPID) {
+      doubleFields.at(DoubleTelemetryField::RotationP).SetDefaultValue(rotationPID->get().GetP());
+      doubleFields.at(DoubleTelemetryField::RotationI).SetDefaultValue(rotationPID->get().GetI());
+      doubleFields.at(DoubleTelemetryField::RotationD).SetDefaultValue(rotationPID->get().GetD());
+    } else {
+      doubleFields.at(DoubleTelemetryField::RotationP).Disable();
+      doubleFields.at(DoubleTelemetryField::RotationI).Disable();
+      doubleFields.at(DoubleTelemetryField::RotationD).Disable();
+    }
+    // Auto-align drives to a pose, which needs both controllers.
+    if (!translationPID || !rotationPID) {
+      doubleFields.at(DoubleTelemetryField::AutoAlignPoseX).Disable();
+      doubleFields.at(DoubleTelemetryField::AutoAlignPoseY).Disable();
+      doubleFields.at(DoubleTelemetryField::AutoAlignPoseRotation).Disable();
+      m_config.GetBoolFields().at(BooleanTelemetryField::AutoAlignEnabled).Disable();
+    }
 
     auto& modules = drive->GetConfig().GetModules();
     if (!modules.empty()) {
@@ -906,34 +943,49 @@ void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<Num
     drive->SetSwerveModuleStates(states);
   }
 
-  auto translationPID = drive->GetConfig().GetTranslationPID();
-  auto rotationPID = drive->GetConfig().GetRotationPID();
+  // Copies of the configured controllers; gain fields for missing controllers are disabled.
+  std::optional<wpi::math::PIDController> translationPID;
+  if (auto pid = drive->GetConfig().GetTranslationPID()) translationPID = pid->get();
+  std::optional<wpi::math::PIDController> rotationPID;
+  if (auto pid = drive->GetConfig().GetRotationPID()) rotationPID = pid->get();
   for (auto& [field, dt] : m_config.GetDoubleFields()) {
     if (!dt.IsTunable()) continue;
     switch (field) {
       case DoubleTelemetryField::TranslationP:
-        translationPID.SetP(dt.Get());
-        drive->SetTranslationPID(translationPID);
+        if (translationPID) {
+          translationPID->SetP(dt.Get());
+          drive->SetTranslationPID(*translationPID);
+        }
         break;
       case DoubleTelemetryField::TranslationI:
-        translationPID.SetI(dt.Get());
-        drive->SetTranslationPID(translationPID);
+        if (translationPID) {
+          translationPID->SetI(dt.Get());
+          drive->SetTranslationPID(*translationPID);
+        }
         break;
       case DoubleTelemetryField::TranslationD:
-        translationPID.SetD(dt.Get());
-        drive->SetTranslationPID(translationPID);
+        if (translationPID) {
+          translationPID->SetD(dt.Get());
+          drive->SetTranslationPID(*translationPID);
+        }
         break;
       case DoubleTelemetryField::RotationP:
-        rotationPID.SetP(dt.Get());
-        drive->SetRotationPID(rotationPID);
+        if (rotationPID) {
+          rotationPID->SetP(dt.Get());
+          drive->SetRotationPID(*rotationPID);
+        }
         break;
       case DoubleTelemetryField::RotationI:
-        rotationPID.SetI(dt.Get());
-        drive->SetRotationPID(rotationPID);
+        if (rotationPID) {
+          rotationPID->SetI(dt.Get());
+          drive->SetRotationPID(*rotationPID);
+        }
         break;
       case DoubleTelemetryField::RotationD:
-        rotationPID.SetD(dt.Get());
-        drive->SetRotationPID(rotationPID);
+        if (rotationPID) {
+          rotationPID->SetD(dt.Get());
+          drive->SetRotationPID(*rotationPID);
+        }
         break;
       case DoubleTelemetryField::ModulesDriveP:
         for (auto* module : drive->GetConfig().GetModules()) {
