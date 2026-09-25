@@ -12,8 +12,6 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.util.CANPorts;
 import org.wpilib.command2.SubsystemBase;
 import org.wpilib.math.system.DCMotor;
-import org.wpilib.tunable.Tunables;
-import org.wpilib.tunable.TunableDouble;
 import org.wpilib.util.Pair;
 import yams.commands2.config.SmartMotorControllerConfig;
 import yams.commands2.mechanisms.FlyWheel;
@@ -58,14 +56,6 @@ public class IntakeLauncherSubsystem extends SubsystemBase {
       .withDiameter(Inches.of(4))
       .withTelemetry("IntakeLauncher", TelemetryVerbosity.HIGH),
       intakeLauncherMotorController);
-
-  // put default values for the intake/launcher rollers onto the dashboard
-  // all commands using this subsystem pull values from the dashboard to allow
-  // you to tune the values easily, and then replace the values in Constants.java
-  // with your new values. For more information, see the Software Guide.
-  public final TunableDouble intakingIntakeValue = Tunables.addDouble("Intaking intake roller value", INTAKE_INTAKING_PERCENT);
-  public final TunableDouble ejectingIntakeValue = Tunables.addDouble("Ejecting intake roller value", INTAKE_EJECT_PERCENT);
-  public final TunableDouble launchingLauncherValue = Tunables.addDouble("Launching launcher roller value", LAUNCHING_LAUNCHER_PERCENT);
 
   /** Creates a new IntakeLauncherSubsystem. */
   public IntakeLauncherSubsystem() {

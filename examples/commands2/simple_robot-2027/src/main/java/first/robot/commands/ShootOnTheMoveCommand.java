@@ -22,8 +22,6 @@ import org.wpilib.math.interpolation.InverseInterpolator;
 import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.Distance;
-import org.wpilib.smartdashboard.Field2d;
-import org.wpilib.tunable.Tunables;
 import org.wpilib.command2.Command;
 import first.robot.subsystems.HoodSubsystem;
 import first.robot.subsystems.ShooterSubsystem;
@@ -49,7 +47,6 @@ public class ShootOnTheMoveCommand extends Command {
   private              HoodSubsystem                            hoodSubsystem;
   private              Supplier<ChassisVelocities>                  _fieldRelativeVelocity;
   private              Supplier<Pose2d>                         estimatedPose;
-  private              Field2d                                  debugField             = new Field2d();
   private static final InterpolatingTreeMap<Double, Rotation2d> launchHoodAngleMap     =
       new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Rotation2d::interpolate);
   private static final InterpolatingDoubleTreeMap launchFlywheelSpeedMap =
@@ -99,7 +96,6 @@ public class ShootOnTheMoveCommand extends Command {
       ShooterSubsystem shooter,
       HoodSubsystem hood,
       SwerveDrive swerveDrive) {
-    Tunables.publish("ShootOnTheMoveField", debugField);
     estimatedPose = () -> {
       // Calculate estimated pose while accounting for phase delay
       ChassisVelocities robotRelativeVelocity = swerveDrive.getRobotRelativeSpeed();
@@ -108,7 +104,7 @@ public class ShootOnTheMoveCommand extends Command {
     robotPose = robotPose.transformBy(
           robotRelativeVelocity.toTwist2d(phaseDelay).exp());
       // Optional, add logging here
-      debugField.setRobotPose(robotPose);
+      swerveDrive.getField2d().getObject("ShootOnTheMovePose").setPose(robotPose);
       return robotPose;
     };
     _fieldRelativeVelocity = swerveDrive::getFieldRelativeSpeed;

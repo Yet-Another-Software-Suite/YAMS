@@ -12,8 +12,6 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.util.CANPorts;
 import org.wpilib.command2.SubsystemBase;
 import org.wpilib.math.system.DCMotor;
-import org.wpilib.tunable.Tunables;
-import org.wpilib.tunable.TunableDouble;
 import yams.commands2.config.SmartMotorControllerConfig;
 import yams.commands2.mechanisms.FlyWheel;
 import yams.core.gearing.MechanismGearing;
@@ -49,14 +47,6 @@ public class IndexerSubsystem extends SubsystemBase {
       .withDiameter(Inches.of(2))
       .withTelemetry("Indexer", TelemetryVerbosity.HIGH),
       indexerMotorController);
-
-  // put default values for the indexer onto the dashboard
-  // all commands using this subsystem pull values from the dashboard to allow
-  // you to tune the values easily, and then replace the values in Constants.java
-  // with your new values. For more information, see the Software Guide.
-  public final TunableDouble intakingFeederValue = Tunables.addDouble("Intaking feeder roller value", INDEXER_INTAKING_PERCENT);
-  public final TunableDouble launchingFeederValue = Tunables.addDouble("Launching feeder roller value", INDEXER_LAUNCHING_PERCENT);
-  public final TunableDouble spinUpFeederValue = Tunables.addDouble("Launching spin-up feeder value", INDEXER_SPIN_UP_PRE_LAUNCH_PERCENT);
 
   /** Creates a new IndexerSubsystem. */
   public IndexerSubsystem() {

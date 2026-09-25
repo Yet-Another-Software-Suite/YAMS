@@ -3,6 +3,8 @@
 
 package first.robot.commands;
 
+import static first.robot.Constants.FuelConstants.*;
+
 import org.wpilib.command2.Command;
 import first.robot.subsystems.IndexerSubsystem;
 import first.robot.subsystems.IntakeLauncherSubsystem;
@@ -24,9 +26,8 @@ public class SpinUp extends Command {
   // appropriate values for intaking
   @Override
   public void initialize() {
-    intakeLauncher.setIntakeLauncherRoller(
-            intakeLauncher.launchingLauncherValue.get());
-    indexer.setFeederRoller(indexer.spinUpFeederValue.get());
+    intakeLauncher.setIntakeLauncherRoller(LAUNCHING_LAUNCHER_PERCENT);
+    indexer.setFeederRoller(INDEXER_SPIN_UP_PRE_LAUNCH_PERCENT);
   }
 
   // Called every time the scheduler runs while the command is scheduled. This

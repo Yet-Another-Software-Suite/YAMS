@@ -33,8 +33,6 @@ import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.LinearVelocity;
-import org.wpilib.smartdashboard.Field2d;
-import org.wpilib.tunable.Tunables;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
 import java.util.function.DoubleSupplier;
@@ -101,7 +99,6 @@ public class SwerveSubsystem extends SubsystemBase
   private final SwerveInputsAutoLogged swerveInputs = new SwerveInputsAutoLogged();
 
   private final SwerveDrive drive;
-  private final Field2d     field = new Field2d();
 
   /**
    * Builds one swerve module from a drive motor, azimuth motor, CANcoder, and
@@ -249,7 +246,6 @@ public class SwerveSubsystem extends SubsystemBase
                                                        getGyroAngle(),
                                                        drive.getModulePositions(),
                                                        swerveInputs.estimatedPose);
-    Tunables.publish("Field", field);
   }
 
 
@@ -382,12 +378,11 @@ public class SwerveSubsystem extends SubsystemBase
     // processInputs stamps SwerveInputs and closes the replay bubble. After this
     // call getGyroAngle() and getPose() return replayed values in replay mode.
     Logger.processInputs("Swerve", swerveInputs);
-    field.setRobotPose(getPose());
     // Vision estimator updates are computed outputs; they do NOT enter the replay
     // bubble. The fused pose is re-derived from the replayed module positions and
     // gyro angle, so vision accuracy can be tuned offline.
     visionPoseEstimator.update(getGyroAngle(), swerveInputs.positions);
-    field.getObject("VisionPose").setPose(visionPoseEstimator.getEstimatedPosition());
+    drive.getField2d().getObject("VisionPose").setPose(visionPoseEstimator.getEstimatedPosition());
     Logger.recordOutput("Swerve/VisionPose", visionPoseEstimator.getEstimatedPosition());
     // TODO: Add vision stuff here
   }

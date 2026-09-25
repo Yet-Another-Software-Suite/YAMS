@@ -3,6 +3,8 @@
 
 package first.robot.commands;
 
+import static first.robot.Constants.FuelConstants.*;
+
 import org.wpilib.command2.Command;
 import first.robot.subsystems.IndexerSubsystem;
 import first.robot.subsystems.IntakeLauncherSubsystem;
@@ -24,9 +26,8 @@ public class Eject extends Command {
   // appropriate values for ejecting
   @Override
   public void initialize() {
-    intakeLauncher.setIntakeLauncherRoller(
-             intakeLauncher.ejectingIntakeValue.get());
-     indexer.setFeederRoller(indexer.launchingFeederValue.get());
+    intakeLauncher.setIntakeLauncherRoller(INTAKE_EJECT_PERCENT);
+    indexer.setFeederRoller(INDEXER_LAUNCHING_PERCENT);
   }
 
   // Called every time the scheduler runs while the command is scheduled. This

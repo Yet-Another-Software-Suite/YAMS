@@ -17,8 +17,6 @@ import org.wpilib.math.controller.PIDController;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.kinematics.ChassisVelocities;
-import org.wpilib.smartdashboard.Field2d;
-import org.wpilib.tunable.Tunables;
 import yams.commands2.config.SwerveDriveConfig;
 import yams.commands2.swerve.SwerveDrive;
 import yams.core.mechanisms.swerve.SwerveModule;
@@ -37,7 +35,6 @@ public class DriveSubsystem extends SubsystemBase
   private final OnboardIMU m_gyro = new OnboardIMU(MountOrientation.FLAT);
 
   private final SwerveDrive m_drive;
-  private final Field2d     m_field = new Field2d();
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem()
@@ -90,8 +87,6 @@ public class DriveSubsystem extends SubsystemBase
         .withRotationController(new PIDController(1, 0, 0))
         .withTelemetry("Drive", TelemetryVerbosity.HIGH);
     m_drive = new SwerveDrive(config);
-
-    Tunables.publish("Field", m_field);
   }
 
   /**
@@ -207,7 +202,6 @@ public class DriveSubsystem extends SubsystemBase
   public void periodic()
   {
     m_drive.updateTelemetry();
-    m_field.setRobotPose(m_drive.getPose());
   }
 
   @Override

@@ -57,7 +57,8 @@ public final class Constants {
     public static final Current INDEXER_MOTOR_CURRENT_LIMIT = Amps.of(80);
     public static final Current LAUNCHER_MOTOR_CURRENT_LIMIT = Amps.of(80);
 
-    // All values likely need to be tuned based on your robot
+    // All values likely need to be tuned based on your robot. Tune them live with YAMS,
+    // then copy the values here.
     public static final double INDEXER_INTAKING_PERCENT = -.8;
     public static final double INDEXER_LAUNCHING_PERCENT = 0.6;
     public static final double INDEXER_SPIN_UP_PRE_LAUNCH_PERCENT = -0.5;

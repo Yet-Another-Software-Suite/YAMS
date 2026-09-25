@@ -24,8 +24,6 @@ import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
-import org.wpilib.smartdashboard.Field2d;
-import org.wpilib.tunable.Tunables;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
 import org.wpilib.command2.button.CommandNiDsXboxController;
@@ -43,7 +41,6 @@ import yams.core.motorcontrollers.local.SparkWrapper;
 
 public class SwerveSubsystem extends SubsystemBase {
   private final SwerveDrive drive;
-  private final Field2d field = new Field2d();
 
   public SwerveModule createModule(
       SparkMax drive,
@@ -110,8 +107,6 @@ public class SwerveSubsystem extends SubsystemBase {
         .withTranslationController(new PIDController(1, 0, 0))
         .withRotationController(new PIDController(1, 0, 0));
     drive = new SwerveDrive(config);
-
-    Tunables.publish("Field", field);
   }
 
   public Command setRobotRelativeChassisSpeeds(ChassisVelocities speeds)
@@ -156,7 +151,6 @@ public class SwerveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     drive.updateTelemetry();
-    field.setRobotPose(drive.getPose());
   }
 
   @Override
