@@ -29,7 +29,7 @@ jobs:
         working-directory: vendordep
         run: chmod a+x gradlew && ./gradlew installSystemCoreToolchain
       - name: Build java examples
-        # Generates every examples/commands2 project into examples/generated, then builds each one.
+        # Generates every examples/commands2 and examples/commands3 project into examples/generated, then builds each one.
         run: make build
         working-directory: examples
       - name: Build C++ example

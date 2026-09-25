@@ -1,0 +1,136 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
+package first.robot.mechanisms;
+
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.Feet;
+import static org.wpilib.units.Units.Radians;
+import static org.wpilib.units.Units.RadiansPerSecond;
+
+import com.ctre.phoenix6.CANBus;
+import org.wpilib.hardware.bus.CANPort;
+import com.ctre.phoenix6.hardware.TalonFX;
+import org.wpilib.math.controller.ArmFeedforward;
+import org.wpilib.math.geometry.Pose2d;
+import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Rotation3d;
+import org.wpilib.math.geometry.Transform2d;
+import org.wpilib.math.geometry.Transform3d;
+import org.wpilib.math.geometry.Translation2d;
+import org.wpilib.math.kinematics.ChassisVelocities;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.command3.Command;
+import org.wpilib.command3.Mechanism;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
+import yams.core.mechanisms.config.PivotConfig;
+import yams.commands3.mechanisms.Pivot;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.commands3.config.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.remote.TalonFXWrapper;
+
+public class TurretMechanism implements Mechanism
+{
+  double[] ratio = {144.0 / 15.0, 5.0, 1.08};
+
+  SmartMotorControllerConfig motorConfig =
+      (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+          .withControlMode(ControlMode.CLOSED_LOOP)
+          .withSimClosedLoopController(0.0, 0.0, 0)
+          // 99.0, 0.0, .6
+          .withClosedLoopController(0.0, 0.0, 0)
+
+          // Configure Motor and Mechanism properties
+          .withGearing(new MechanismGearing(new GearBox(ratio)))
+          .withIdleMode(MotorMode.BRAKE)
+          .withMotorInverted(false)
+          .withFeedforward(new ArmFeedforward(0.5, 0.0, 5.0, 0))
+          .withSimFeedforward(new ArmFeedforward(0.5, 0.0, 5.0, 0))
+
+          // 0.0,5.5`
+          // Setup Telemetry
+          .withTelemetry("TurretMotor", TelemetryVerbosity.HIGH)
+          // Power Optimization
+          .withStatorCurrentLimit(Amps.of(60))
+          .withStartingPosition(Degrees.of(0)) // Starting position of the Pivot
+          .withMomentOfInertia(yams.core.units.YUnits.PoundSquareInches.of(0.01)); // MOI Calculation
+  // .withClosedLoopRampRate(Seconds.of(0.0))
+
+  // .withOpenLoopRampRate(Seconds.of(0.0));
+  SmartMotorController motor = new TalonFXWrapper(new TalonFX(12, new CANBus(CANPort.CAN_S0)),
+                                                  DCMotor.getKrakenX60(1),
+                                                  motorConfig);
+
+  PivotConfig m_config =
+      new PivotConfig()
+          .withHardLimits(
+              Degrees.of(-360), Degrees.of(360)) // Hard limit bc wiring prevents infinite spinning
+          // .withSoftLimits(Degrees.of(-360), Degrees.of(360))
+          .withTelemetry("Turret", TelemetryVerbosity.HIGH); // Telemetry
+
+  private Pivot turret = new Pivot(m_config, motor);
+
+  // Robot to turret transform, from center of robot to turret.
+  private final Transform3d roboToTurret =
+      new Transform3d(Feet.of(-1.5), Feet.of(0), Feet.of(0.5), Rotation3d.ZERO);
+
+  public TurretMechanism() {
+    // TODO: Set the default command, if any, for this mechanism by calling
+    // setDefaultCommand(command)
+    //       in the constructor or in the Robot class.
+  }
+
+  public Pose2d getPose(Pose2d robotPose) {
+    return robotPose.plus(
+        new Transform2d(
+            roboToTurret.getTranslation().toTranslation2d(),
+            roboToTurret.getRotation().toRotation2d()));
+  }
+
+ public ChassisVelocities getVelocity(ChassisVelocities robotVelocity, Angle robotAngle)
+  {
+      Translation2d rRobot = roboToTurret.getTranslation().toTranslation2d(); // in robot frame
+    Translation2d rWorld = rRobot.rotateBy(Rotation2d.fromRadians(robotAngle.in(Radians))); // rotate into field frame
+
+      double omega = robotVelocity.omega; // robot yaw rate (rad/s)
+
+    // rotational linear velocity at turret (v_rot = ω × r_world)
+    double vRotX = -omega * rWorld.getY();
+    double vRotY = omega * rWorld.getX();
+
+      // final turret linear velocity in field frame
+      double turretVx = robotVelocity.vx + vRotX;
+      double turretVy = robotVelocity.vy + vRotY;
+
+      // turret angular velocity in field frame
+      double turretOmega = omega + motor.getMechanismVelocity().in(RadiansPerSecond);
+
+      return new ChassisVelocities(turretVx, turretVy, turretOmega);
+  }
+
+  public void periodic() {
+    turret.updateTelemetry();
+  }
+
+  public void simulationPeriodic() {
+    turret.simIterate();
+  }
+
+  public Command turretCmd(double dutycycle) {
+    return turret.set(dutycycle);
+  }
+
+  public Command setAngle(Angle angle) {
+    return turret.setAngle(angle);
+  }
+
+  public void setAngleSetpoint(Angle measure) {
+    turret.setMechanismPositionSetpoint(measure);
+  }
+}

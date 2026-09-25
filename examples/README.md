@@ -16,11 +16,16 @@ make build
 make clean
 
 # Generate a single example
-make advantage_kit
+make advantage_kit            # Commands v2
+make commands3-advantage_kit  # Commands v3
 ```
 
-Generated projects are written to `generated/<example_name>/` and are fully self-contained
-WPILib Gradle projects ready to open in VS Code or IntelliJ.
+Generated projects are written to `generated/<example_name>/` (Commands v2) and
+`generated/commands3-<example_name>/` (Commands v3). They are fully self-contained WPILib Gradle
+projects ready to open in VS Code or IntelliJ.
+
+Every example exists in both `commands2/` and `commands3/`. The Commands v3 versions use
+`Mechanism`s instead of `Subsystem`s, coroutine commands, and opmodes for teleop and autonomous.
 
 ## How it works
 
@@ -35,6 +40,9 @@ examples/
 │       ├── deploy/         # Optional deploy files (replace src/main/deploy/)
 │       ├── vendordeps/     # Optional extra vendordeps (added to vendordeps/)
 │       └── build.gradle    # Optional replacement for the skeleton's build.gradle
+├── commands3/              # Commands v3 examples, same layout as commands2/
+│   ├── simple_robot-2027/  # Commands v3 skeleton
+│   └── <example_name>/
 ├── cpptest/                # C++ example, built on its own
 ├── generated/              # Output, created by `make` and gitignored
 └── Makefile
@@ -42,11 +50,14 @@ examples/
 
 ### What the Makefile does
 
-1. **Discovers examples**: finds every folder in `commands2/` that contains a `java/` folder. The
-   skeleton has no `java/` folder, so it is skipped.
+1. **Discovers examples**: finds every folder in `commands2/` and `commands3/` that contains a
+   `java/` folder. The skeletons have no `java/` folder, so they are skipped. Commands v3 targets
+   are prefixed with `commands3-`.
 
-2. **Copies the skeleton**: each discovered example gets a copy of `commands2/simple_robot-2027/`
-   at `generated/<example_name>/`, without the skeleton's own source or build output.
+2. **Copies the skeleton**: each discovered example gets a copy of its skeleton
+   (`commands2/simple_robot-2027/` or `commands3/simple_robot-2027/`) at
+   `generated/<example_name>/` or `generated/commands3-<example_name>/`, without the skeleton's own
+   source or build output.
 
 3. **Injects source**: the example's `java/` and `deploy/` folders become
    `generated/<example_name>/src/main/java/` and `src/main/deploy/`, its `vendordeps/` files are
@@ -72,7 +83,8 @@ generated/advantage_kit/
 
 ### Adding a new example
 
-1. Create a new folder under `examples/commands2/` with a descriptive name (no `cpp` in the name).
+1. Create a new folder under `examples/commands2/` (and its Commands v3 version under
+   `examples/commands3/`) with a descriptive name (no `cpp` in the name).
 2. Add a `java/` subfolder containing your source tree: robot code in the `first.robot` package
    (`java/first/robot/`) and the entry point at `java/first/Main.java`, which the skeleton's
    `build.gradle` launches as `first.Main`.
@@ -87,5 +99,7 @@ Running `make` will automatically pick up the new folder and generate its projec
 ### Skeleton
 
 `commands2/simple_robot-2027/` is a WPILib project with the YAMS vendordeps pre-configured. It
-only compiles YAMS core and the commands2 layer. Do not add robot-specific source to it; it is
+only compiles YAMS core and the commands2 layer. `commands3/simple_robot-2027/` is the same
+project with the Commands v3 vendordep instead of Commands v2; it only compiles YAMS core and the
+commands3 layer. The two vendordeps cannot be used in the same project. Do not add robot-specific source to it; it is
 shared by all examples.
