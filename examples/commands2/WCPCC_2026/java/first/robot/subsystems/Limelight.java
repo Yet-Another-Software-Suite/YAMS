@@ -25,7 +25,7 @@ public class Limelight extends SubsystemBase {
 
     public Limelight(String name) {
         this.limelight = new com.limelightvision.Limelight(name);
-        this.telemetryTable = NetworkTableInstance.getDefault().getTable("SmartDashboard/" + name);
+        this.telemetryTable = NetworkTableInstance.getDefault().getTable("WCPCC_Limelight/" + name);
         this.posePublisher = telemetryTable.getStructTopic("Estimated Robot Pose", Pose2d.struct).publish();
     }
 
