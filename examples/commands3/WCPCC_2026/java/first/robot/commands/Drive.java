@@ -4,8 +4,6 @@
 
 package first.robot.commands;
 
-import static org.wpilib.units.Units.Degrees;
-
 import first.robot.Constants.Driving;
 import first.robot.Landmarks;
 import first.robot.mechanisms.Swerve;
@@ -15,7 +13,6 @@ import org.wpilib.command3.button.CommandNiDsXboxController;
 import org.wpilib.driverstation.NiDsXboxController;
 import org.wpilib.math.filter.Debouncer;
 import org.wpilib.math.geometry.Rotation2d;
-import org.wpilib.units.measure.Angle;
 
 /**
  * Drive commands for the swerve drivetrain. {@link Swerve} owns one YAMS
@@ -25,14 +22,13 @@ import org.wpilib.units.measure.Angle;
  * <p>{@link #teleop} reads the driver controller. It drives field centric with manual rotation,
  * holds the current heading once the rotation stick has been idle for a short delay, and turns to a
  * heading picked with the A/B/X/Y buttons until the driver rotates manually. Back makes the
- * direction the robot is facing "forward". While the right trigger is held (aim and shoot) the
- * driver still translates, but the heading faces the hub.
+ * direction the robot is facing "forward". While the right trigger is held (shoot) the driver still
+ * translates, but the heading faces the hub.
  *
  * <p>{@link #autoAim} is the autonomous drive loop: it holds position and faces the hub.
  */
 public final class Drive {
-    private static final Angle kAimTolerance = Degrees.of(5);
-    // Matches the right trigger binding for aim and shoot.
+    // Matches the right trigger binding for shooting.
     private static final double kAimTriggerThreshold = 0.5;
 
     private Drive() {
@@ -129,10 +125,5 @@ public final class Drive {
                 coroutine.yield();
             }
         }).named("Auto Aim");
-    }
-
-    /** Whether the robot is facing the hub closely enough to shoot. */
-    public static boolean isAimedAtHub(Swerve swerve) {
-        return swerve.isFacing(Landmarks.hubPosition(), kAimTolerance);
     }
 }

@@ -4,10 +4,13 @@
 
 package first.robot.commands;
 
+import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Seconds;
 
+import first.robot.Landmarks;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Coroutine;
+import org.wpilib.units.measure.Angle;
 import first.robot.mechanisms.Feeder;
 import first.robot.mechanisms.Floor;
 import first.robot.mechanisms.Hanger;
@@ -23,6 +26,8 @@ import first.robot.mechanisms.Swerve;
  * mechanisms. Feeding is plain sequential code shared by both shooting commands.
  */
 public final class MechanismCommands {
+    private static final Angle kAimTolerance = Degrees.of(5);
+
     private final Swerve swerve;
     private final IntakePivot intakePivot;
     private final IntakeRollers intakeRollers;
@@ -31,7 +36,6 @@ public final class MechanismCommands {
     private final Shooter shooter;
     private final Hood hood;
     private final Hanger hanger;
-
 
     // Set once feeding starts rocking the intake, so canceling before then leaves the pivot alone.
     private boolean isAgitating = false;
@@ -58,12 +62,12 @@ public final class MechanismCommands {
     }
 
     /**
-     * Start tracking the shot after 0.25 s, and feed once the robot is aimed at the hub and the shot is
-     * ready. Runs until canceled. Aiming is done by the drive command running alongside it:
+     * Start tracking the shot after 0.25 s, and feed once the robot is facing the hub and the shot is
+     * ready. Runs until canceled. The drive command running alongside it does the aiming:
      * {@link Drive#teleop} aims while the right trigger is held, and the autonomous routine runs
      * {@link Drive#autoAim}.
      */
-    public Command aimAndShoot() {
+    public Command shootWhenAimed() {
         final PrepareShot prepareShot = new PrepareShot(shooter, hood, () -> swerve.getPose());
         return Command.requiring(shooter, hood, feeder, floor, intakePivot, intakeRollers)
             .executing(coroutine -> {
@@ -71,11 +75,11 @@ public final class MechanismCommands {
                 coroutine.fork(prepareShot.command());
                 // The shot cannot be ready before PrepareShot has set a velocity, so waiting from here
                 // matches the v2 port's waitUntil that started at the same time as the aim.
-                coroutine.waitUntil(() -> Drive.isAimedAtHub(swerve) && prepareShot.isReadyToShoot());
+                coroutine.waitUntil(() -> swerve.isFacing(Landmarks.hubPosition(), kAimTolerance) && prepareShot.isReadyToShoot());
                 feed(coroutine);
             })
             .whenCanceled(this::stopFeeding)
-            .named("Aim And Shoot");
+            .named("Shoot When Aimed");
     }
 
     /** Spin up to the dashboard RPM, then feed. The shooter stops when the command is canceled. */

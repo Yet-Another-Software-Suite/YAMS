@@ -104,7 +104,7 @@ public class OutpostAndDepotAuto implements OpMode {
         final Command intake = robot.mechanismCommands.intake();
         final Command spinUp = robot.shooter.spinUpCommand(2600);
         final Command hoodUp = robot.hood.positionCommand(0.32);
-        final Command aimAndShoot = robot.mechanismCommands.aimAndShoot();
+        final Command shootWhenAimed = robot.mechanismCommands.shootWhenAimed();
         final Command aim = Drive.autoAim(robot.swerve);
         final Command extendHanger = robot.hanger.positionCommand(Hanger.Position.HANGING);
         final Command hang = robot.hanger.positionCommand(Hanger.Position.HUNG);
@@ -135,9 +135,9 @@ public class OutpostAndDepotAuto implements OpMode {
             scheduler.cancel(pauseVisionToShootingPose);
 
             // Aim and shoot for five seconds.
-            coroutine.fork(aim, aimAndShoot);
-            coroutine.waitUntil(() -> !scheduler.isScheduledOrRunning(aimAndShoot), Seconds.of(5));
-            scheduler.cancel(aimAndShoot);
+            coroutine.fork(aim, shootWhenAimed);
+            coroutine.waitUntil(() -> !scheduler.isScheduledOrRunning(shootWhenAimed), Seconds.of(5));
+            scheduler.cancel(shootWhenAimed);
             scheduler.cancel(aim);
 
             // Vision is paused on the way to the tower, and the hanger extends while driving there.

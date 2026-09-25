@@ -30,7 +30,7 @@ public class DriverTeleop implements OpMode {
         final CommandNiDsXboxController driver = robot.driver;
 
         // The drive command aims at the hub while the right trigger is held.
-        driver.rightTrigger().whileTrue(robot.mechanismCommands.aimAndShoot());
+        driver.rightTrigger().whileTrue(robot.mechanismCommands.shootWhenAimed());
         driver.rightBumper().whileTrue(robot.mechanismCommands.shootManually());
         driver.leftTrigger().whileTrue(robot.mechanismCommands.intake());
         driver.leftBumper().onTrue(robot.intakePivot.positionCommand(IntakePivot.Position.STOWED));
