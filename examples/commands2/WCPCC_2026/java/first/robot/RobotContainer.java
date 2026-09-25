@@ -5,7 +5,7 @@
 package first.robot;
 
 import first.robot.commands.AutoRoutines;
-import first.robot.commands.ManualDriveCommand;
+import first.robot.commands.ManualDrive;
 import first.robot.commands.SubsystemCommands;
 import first.robot.subsystems.Feeder;
 import first.robot.subsystems.Floor;
@@ -98,18 +98,18 @@ public class RobotContainer {
     }
 
     private void configureManualDriveBindings() {
-        final ManualDriveCommand manualDriveCommand = new ManualDriveCommand(
+        final ManualDrive manualDrive = new ManualDrive(
             swerve,
             () -> -driver.getLeftY(),
             () -> -driver.getLeftX(),
             () -> -driver.getRightX()
         );
-        swerve.setDefaultCommand(manualDriveCommand);
-        driver.a().onTrue(Commands.runOnce(() -> manualDriveCommand.setLockedHeading(Rotation2d.k180deg)));
-        driver.b().onTrue(Commands.runOnce(() -> manualDriveCommand.setLockedHeading(Rotation2d.CW_90DEG)));
-        driver.x().onTrue(Commands.runOnce(() -> manualDriveCommand.setLockedHeading(Rotation2d.CCW_90DEG)));
-        driver.y().onTrue(Commands.runOnce(() -> manualDriveCommand.setLockedHeading(Rotation2d.ZERO)));
-        driver.back().onTrue(Commands.runOnce(() -> manualDriveCommand.seedFieldCentric()));
+        swerve.setDefaultCommand(manualDrive.command());
+        driver.a().onTrue(Commands.runOnce(() -> manualDrive.setLockedHeading(Rotation2d.k180deg)));
+        driver.b().onTrue(Commands.runOnce(() -> manualDrive.setLockedHeading(Rotation2d.CW_90DEG)));
+        driver.x().onTrue(Commands.runOnce(() -> manualDrive.setLockedHeading(Rotation2d.CCW_90DEG)));
+        driver.y().onTrue(Commands.runOnce(() -> manualDrive.setLockedHeading(Rotation2d.ZERO)));
+        driver.back().onTrue(Commands.runOnce(() -> manualDrive.seedFieldCentric()));
     }
 
     private Command updateVisionCommand() {

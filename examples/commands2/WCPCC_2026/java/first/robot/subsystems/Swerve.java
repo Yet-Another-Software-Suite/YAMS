@@ -16,7 +16,9 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import first.robot.Constants.Driving;
 import first.robot.util.GeometryUtil;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 import first.robot.Ports;
+import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
 import org.wpilib.driverstation.Alliance;
 import org.wpilib.driverstation.MatchState;
@@ -159,19 +161,9 @@ public class Swerve extends SubsystemBase {
         return operatorForwardDirection;
     }
 
-    /** Robot heading from the operator's perspective. */
-    public Rotation2d getHeadingInOperatorPerspective() {
-        return getPose().getRotation().minus(operatorForwardDirection);
-    }
-
     /** Make the direction the robot is currently facing "forward" for field centric driving. */
     public void seedFieldCentric() {
         resetPose(new Pose2d(getPose().getTranslation(), operatorForwardDirection));
-    }
-
-    /** Stop driving. Replaces the CTRE idle swerve request. */
-    public void stop() {
-        drive.setRobotRelativeChassisSpeeds(new ChassisVelocities());
     }
 
     /**
@@ -196,6 +188,11 @@ public class Swerve extends SubsystemBase {
     /** Drive with field relative speeds, e.g. from {@link #createDriverInput}. */
     public void driveFieldRelative(ChassisVelocities fieldRelativeSpeeds) {
         drive.setFieldRelativeChassisSpeeds(fieldRelativeSpeeds);
+    }
+
+    /** Command that drives with field relative speeds, e.g. from {@link #createDriverInput}. */
+    public Command driveCommand(Supplier<ChassisVelocities> fieldRelativeSpeeds) {
+        return run(() -> driveFieldRelative(fieldRelativeSpeeds.get()));
     }
 
     /**
