@@ -40,11 +40,10 @@ public class ManualDrive {
         // Rotating manually cancels a picked heading.
         rotating.onTrue(Commands.runOnce(() -> snapHeading = Optional.empty()));
 
-        // SwerveInputStream turns the heading axes into a target with atan2(x, y), so a heading of
-        // theta is given as (sin(theta), cos(theta)), in the field frame.
         final SwerveInputStream input = swerve.createDriverInput(forwardInput, leftInput, rotationInput)
             .withTranslationOnly(rotating.negate().debounce(Driving.kHeadingLockDelaySeconds).and(() -> snapHeading.isEmpty()))
-            .withControllerHeadingAxis(() -> snapHeadingInField().getSin(), () -> snapHeadingInField().getCos())
+            // Face the picked heading, converted to the field frame, until it is cleared.
+            .withHeading(() -> snapHeadingInField().getMeasure())
             .withHeadingControl(() -> snapHeading.isPresent());
 
         command = swerve.driveCommand(input).beforeStarting(() -> snapHeading = Optional.empty());

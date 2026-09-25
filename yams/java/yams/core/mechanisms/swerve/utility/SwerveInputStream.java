@@ -29,6 +29,7 @@ import org.wpilib.math.linalg.Vector;
 import org.wpilib.math.numbers.N2;
 import org.wpilib.math.util.MathUtil;
 import org.wpilib.math.util.Nat;
+import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.LinearVelocity;
@@ -117,13 +118,17 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
    */
   private Optional<DoubleSupplier>        controllerOmega                     = Optional.empty();
   /**
-   * Controller supplier as heading.
+   * Controller heading axis X, kept to hold the heading while the stick is inside the deadband.
    */
   private Optional<DoubleSupplier>        controllerHeadingX                  = Optional.empty();
   /**
-   * Controller supplier as heading.
+   * Controller heading axis Y, kept to hold the heading while the stick is inside the deadband.
    */
   private Optional<DoubleSupplier>        controllerHeadingY                  = Optional.empty();
+  /**
+   * Field relative heading to face in {@link SwerveInputMode#HEADING}.
+   */
+  private Optional<Supplier<Angle>>       headingSupplier                     = Optional.empty();
   /**
    * Axis deadband for the controller.
    */
@@ -249,8 +254,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
    */
   public SwerveInputStream(SwerveDrive drive, DoubleSupplier x, DoubleSupplier y, DoubleSupplier headingX, DoubleSupplier headingY) {
     this(drive, x, y);
-    controllerHeadingX = Optional.of(headingX);
-    controllerHeadingY = Optional.of(headingY);
+    withControllerHeadingAxis(headingX, headingY);
   }
 
   /**
@@ -287,6 +291,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
     driveToPoseOmegaPIDController = cfg.driveToPoseOmegaPIDController;
     aimTarget = cfg.aimTarget;
     headingEnabled = cfg.headingEnabled;
+    headingSupplier = cfg.headingSupplier;
     aimEnabled = cfg.aimEnabled;
     driveToPoseEnabled = cfg.driveToPoseEnabled;
     currentMode = cfg.currentMode;
@@ -458,6 +463,8 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
    * @return self
    */
   public SwerveInputStream withControllerHeadingAxis(DoubleSupplier headingX, DoubleSupplier headingY) {
+    // The stick points at the heading to face; atan2(x, y) turns it into that heading.
+    withHeading(() -> Radians.of(Math.atan2(headingX.getAsDouble(), headingY.getAsDouble())));
     controllerHeadingX = Optional.of(headingX);
     controllerHeadingY = Optional.of(headingY);
     return this;
@@ -519,6 +526,21 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
   }
 
   /**
+   * Supply the field relative heading to face in heading mode, which is enabled with
+   * {@link #withHeadingControl(BooleanSupplier)}. Replaces any controller heading axis.
+   *
+   * @param heading Field relative heading to face, blue-origin where 0 degrees faces the red
+   *                alliance wall.
+   * @return this.
+   */
+  public SwerveInputStream withHeading(Supplier<Angle> heading) {
+    headingSupplier = Optional.ofNullable(heading);
+    controllerHeadingX = Optional.empty();
+    controllerHeadingY = Optional.empty();
+    return this;
+  }
+
+  /**
    * Aim the {@link SwerveDrive} at this pose while driving.
    *
    * @param trigger   When True will enable aiming at the current target.
@@ -571,10 +593,10 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
         DriverStationErrors.reportError("Attempting to enter AIM mode without target, please use " + "SwerveInputStream.aim() to select a target first!", false);
       }
     } else if (headingEnabled.isPresent() && headingEnabled.get().getAsBoolean()) {
-      if (controllerHeadingX.isPresent() && controllerHeadingY.isPresent()) {
+      if (headingSupplier.isPresent()) {
         return SwerveInputMode.HEADING;
       } else {
-        DriverStationErrors.reportError("Attempting to enter HEADING mode without heading axis, please use " + "SwerveInputStream.withControllerHeadingAxis to add heading axis!", false);
+        DriverStationErrors.reportError("Attempting to enter HEADING mode without a heading, please use " + "SwerveInputStream.withHeading or SwerveInputStream.withControllerHeadingAxis to add one!", false);
       }
     } else if (controllerOmega.isEmpty()) {
       DriverStationErrors.reportError("Attempting to enter ANGULAR_VELOCITY mode without a rotation axis, please use " + "SwerveInputStream.withControllerRotationAxis to add angular velocity axis!", false);
@@ -818,10 +840,11 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
       }
       case HEADING -> {
         var azimuthPIDs = requireRotationPID(config);
-        omegaRadiansPerSecond = azimuthPIDs.calculate(swerveDrive.getGyroAngle().in(Radians), Rotation2d.fromRadians(Math.atan2(controllerHeadingX.orElseThrow().getAsDouble(), controllerHeadingY.orElseThrow().getAsDouble())).getRadians());
+        omegaRadiansPerSecond = azimuthPIDs.calculate(swerveDrive.getGyroAngle().in(Radians), headingSupplier.orElseThrow().get().in(Radians));
 
         // Prevent rotation if controller heading inputs are not past axisDeadband
-        if (Math.abs(controllerHeadingX.get().getAsDouble()) + Math.abs(controllerHeadingY.get().getAsDouble()) < axisDeadband.orElseThrow()) {
+        if (controllerHeadingX.isPresent() && controllerHeadingY.isPresent() && axisDeadband.isPresent() &&
+            Math.abs(controllerHeadingX.get().getAsDouble()) + Math.abs(controllerHeadingY.get().getAsDouble()) < axisDeadband.get()) {
           omegaRadiansPerSecond = 0;
         }
         speeds = new ChassisVelocities(vxMetersPerSecond, vyMetersPerSecond, omegaRadiansPerSecond);

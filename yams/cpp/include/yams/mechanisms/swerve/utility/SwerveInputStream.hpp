@@ -115,8 +115,7 @@ class SwerveInputStream {
                     std::function<double()> y, std::function<double()> headingX,
                     std::function<double()> headingY)
       : SwerveInputStream{drive, std::move(x), std::move(y)} {
-    m_controllerHeadingX = std::move(headingX);
-    m_controllerHeadingY = std::move(headingY);
+    WithControllerHeadingAxis(std::move(headingX), std::move(headingY));
   }
 
   /** Return a copy of this stream; subsequent With* calls on the copy do not affect the original.
@@ -167,6 +166,11 @@ class SwerveInputStream {
    */
   SwerveInputStream& WithControllerHeadingAxis(std::function<double()> headingX,
                                                std::function<double()> headingY) {
+    // The stick points at the heading to face; atan2(x, y) turns it into that heading.
+    WithHeading([headingX, headingY] {
+      return wpi::units::radian_t{std::atan2(headingX(), headingY())};
+    });
+    // Kept to hold the heading while the stick is inside the deadband.
     m_controllerHeadingX = std::move(headingX);
     m_controllerHeadingY = std::move(headingY);
     return *this;
@@ -208,13 +212,28 @@ class SwerveInputStream {
   /**
    * Enable heading-based control while the supplier returns true.
    *
-   * Requires WithControllerHeadingAxis() to be configured.
+   * Requires WithControllerHeadingAxis() or WithHeading() to be configured.
    *
    * @param trigger Supplier that enables HEADING mode when true.
    * @return *this for chaining.
    */
   SwerveInputStream& WithHeadingControl(std::function<bool()> trigger) {
     m_headingEnabled = std::move(trigger);
+    return *this;
+  }
+
+  /**
+   * Supply the field relative heading to face in heading mode, which is enabled with
+   * WithHeadingControl(). Replaces any controller heading axes.
+   *
+   * @param heading Field relative heading to face, blue-origin where 0 degrees faces the red
+   *     alliance wall.
+   * @return *this for chaining.
+   */
+  SwerveInputStream& WithHeading(std::function<wpi::units::radian_t()> heading) {
+    m_headingSupplier = std::move(heading);
+    m_controllerHeadingX.reset();
+    m_controllerHeadingY.reset();
     return *this;
   }
 
@@ -378,11 +397,11 @@ class SwerveInputStream {
       }
       case SwerveInputMode::HEADING: {
         auto& pid = RequireRotationPID();
-        double headingTarget =
-            std::atan2(m_controllerHeadingX.value()(), m_controllerHeadingY.value()());
         omega = pid.Calculate(wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}.value(),
-                              headingTarget);
-        if (m_axisDeadband.has_value() &&
+                              m_headingSupplier.value()().value());
+        // Prevent rotation if controller heading inputs are not past axisDeadband
+        if (m_controllerHeadingX.has_value() && m_controllerHeadingY.has_value() &&
+            m_axisDeadband.has_value() &&
             std::abs(m_controllerHeadingX.value()()) + std::abs(m_controllerHeadingY.value()()) <
                 m_axisDeadband.value()) {
           omega = 0.0;
@@ -442,6 +461,8 @@ class SwerveInputStream {
   std::optional<std::function<double()>> m_controllerOmega;
   std::optional<std::function<double()>> m_controllerHeadingX;
   std::optional<std::function<double()>> m_controllerHeadingY;
+  /** Field relative heading to face in HEADING mode. */
+  std::optional<std::function<wpi::units::radian_t()>> m_headingSupplier;
   std::optional<double> m_axisDeadband;
   std::optional<double> m_translationAxisScale;
   std::optional<double> m_omegaAxisScale;
@@ -490,11 +511,11 @@ class SwerveInputStream {
                    "Call WithAim() first.\n";
     }
     if (m_headingEnabled.has_value() && m_headingEnabled.value()()) {
-      if (m_controllerHeadingX.has_value() && m_controllerHeadingY.has_value()) {
+      if (m_headingSupplier.has_value()) {
         return SwerveInputMode::HEADING;
       }
-      std::cerr << "[YAMS SwerveInputStream] HEADING mode enabled but no heading axes set. "
-                   "Call WithControllerHeadingAxis() first.\n";
+      std::cerr << "[YAMS SwerveInputStream] HEADING mode enabled but no heading set. "
+                   "Call WithHeading() or WithControllerHeadingAxis() first.\n";
     }
     if (!m_controllerOmega.has_value()) {
       std::cerr << "[YAMS SwerveInputStream] No rotation axis configured. "
