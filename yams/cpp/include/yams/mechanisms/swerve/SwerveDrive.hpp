@@ -146,6 +146,8 @@ class SwerveDrive {
            "Module count in SwerveDriveConfig must equal NumModules template parameter.");
 
     m_simPose = m_config->GetInitialPose();
+    // Start with the gyro reading the starting pose's heading so field relative driving matches it.
+    ResetOdometry(m_config->GetInitialPose());
 
     SetupTelemetry();
 
@@ -314,11 +316,14 @@ class SwerveDrive {
   wpi::math::Pose2d GetPose() { return m_poseEstimator.GetEstimatedPosition(); }
 
   /**
-   * Reset odometry to the given pose.
+   * Reset odometry to the given pose, and set the gyro to read the pose's heading. Field relative
+   * driving and heading control use the gyro, so keeping it aligned with the pose makes them agree
+   * with the reset pose.
    *
    * @param pose New field-relative pose (blue-origin, 0° facing red alliance wall).
    */
   void ResetOdometry(wpi::math::Pose2d pose) {
+    SetGyroAngle(pose.Rotation().Degrees());
     m_poseEstimator.ResetPosition(wpi::math::Rotation2d{wpi::units::radian_t{GetGyroAngle()}},
                                   GetModulePositions(), pose);
     m_desiredChassisSpeeds = wpi::math::ChassisVelocities{};
@@ -330,7 +335,7 @@ class SwerveDrive {
    * Zero the gyro and reset odometry to the current translation with 0° heading.
    */
   void ZeroGyro() {
-    m_config->WithGyroOffset(GetGyroAngle() + m_config->GetGyroOffset());
+    // ResetOdometry also sets the gyro to read the new heading.
     ResetOdometry(wpi::math::Pose2d{GetPose().Translation(), wpi::math::Rotation2d{}});
   }
 
@@ -653,6 +658,18 @@ class SwerveDrive {
       locations[i] = *config.GetModules()[i]->GetConfig().GetLocation();
     }
     return wpi::math::SwerveDriveKinematics<NumModules>{locations};
+  }
+
+  /**
+   * Make GetGyroAngle() read the given heading from now on. On a real robot the gyro offset is
+   * adjusted; in simulation the simulated gyro angle is set directly.
+   */
+  void SetGyroAngle(wpi::units::degree_t heading) {
+    if (wpi::RobotBase::IsSimulation()) {
+      m_simGyroAngle = heading;
+      return;
+    }
+    m_config->WithGyroOffset(GetGyroAngle() + m_config->GetGyroOffset() - heading);
   }
 
   static wpi::math::Rotation2d ComputeInitialRotation(const SwerveDriveConfig& config) {

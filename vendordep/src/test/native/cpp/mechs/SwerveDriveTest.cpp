@@ -365,6 +365,20 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.ResetOdometryMatchesPo
   CHECK(pose.Rotation().Degrees().value() == Catch::Approx(45.0).margin(0.1));
 }
 
+// ResetOdometry sets the gyro to the pose's heading so field relative driving and heading control,
+// which use the gyro, agree with the reset pose. ZeroGyro resets both to 0 degrees.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.ResetOdometryAlignsGyro",
+                 "[SwerveDriveTest]") {
+  m_drive->ResetOdometry(wpi::math::Pose2d{1.0_m, 2.0_m, wpi::math::Rotation2d{90.0_deg}});
+  CHECK(m_drive->GetGyroAngle().value() == Catch::Approx(90.0).margin(0.1));
+  CHECK(m_drive->GetPose().Rotation().Degrees().value() == Catch::Approx(90.0).margin(0.1));
+
+  m_drive->ZeroGyro();
+  CHECK(m_drive->GetGyroAngle().value() == Catch::Approx(0.0).margin(0.1));
+  CHECK(m_drive->GetPose().Rotation().Degrees().value() == Catch::Approx(0.0).margin(0.1));
+  CHECK(m_drive->GetPose().X().value() == Catch::Approx(1.0).margin(0.01));
+}
+
 // GetStateFromRobotRelativeChassisSpeeds converts a pure forward command into
 // forward-pointing states for all four modules.
 TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.GetStateFromSpeedsForwardDrive",
