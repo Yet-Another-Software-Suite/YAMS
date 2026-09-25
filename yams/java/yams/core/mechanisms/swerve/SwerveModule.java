@@ -179,11 +179,19 @@ public class SwerveModule {
    *
    * @param state            State to set.
    * @param feedforwardForce Feedforward {@link Force} applied at the drive wheel, in the direction
-   *                         of travel.
+   *                         of travel of the requested state. It is reversed along with the drive
+   *                         direction when optimization turns the wheel around.
    * @return The optimized {@link SwerveModuleVelocity}.
    */
   public SwerveModuleVelocity setSwerveModuleState(SwerveModuleVelocity state, Force feedforwardForce) {
+    final Rotation2d requestedAngle = state.angle;
     state = m_config.getOptimizedState(state);
+    // Optimization may point the wheel the opposite way and reverse the drive motor. The force was
+    // given along the requested direction, so it must reverse too or it would fight the motion.
+    // Compare angles rather than velocity signs so the flip is caught even when starting from rest.
+    if (state.angle.minus(requestedAngle).getCos() < 0) {
+      feedforwardForce = feedforwardForce.unaryMinus();
+    }
     m_driveMotorController.setVelocity(MetersPerSecond.of(state.velocity), feedforwardForce);
     m_azimuthMotorController.setPosition(state.angle.getMeasure());
     return state;

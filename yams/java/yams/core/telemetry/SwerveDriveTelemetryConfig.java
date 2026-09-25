@@ -191,19 +191,40 @@ public class SwerveDriveTelemetryConfig {
    *
    * @param drive {@link SwerveDrive} used to seed the auto-align and module PID gain fields with
    *              the currently-configured PID values, so the tuning table starts from the real
-   *              gains instead of {@code 0}.
+   *              gains instead of {@code 0}. Auto-align fields for a translation or rotation PID
+   *              controller that is not configured are disabled.
    * @return Configured {@link DoubleTelemetry} for each {@link DoubleTelemetryField}
    */
   public Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> getDoubleFields(SwerveDrive drive) {
     var cfg = drive.getConfig();
     var translationPID = cfg.getTranslationPID();
     var rotationPID = cfg.getRotationPID();
-    doubleFields.get(DoubleTelemetryField.TranslationP).setDefaultValue(translationPID.getP());
-    doubleFields.get(DoubleTelemetryField.TranslationI).setDefaultValue(translationPID.getI());
-    doubleFields.get(DoubleTelemetryField.TranslationD).setDefaultValue(translationPID.getD());
-    doubleFields.get(DoubleTelemetryField.RotationP).setDefaultValue(rotationPID.getP());
-    doubleFields.get(DoubleTelemetryField.RotationI).setDefaultValue(rotationPID.getI());
-    doubleFields.get(DoubleTelemetryField.RotationD).setDefaultValue(rotationPID.getD());
+    // Only publish the drive to pose gains and auto-align fields for controllers that exist.
+    translationPID.ifPresentOrElse(pid -> {
+      doubleFields.get(DoubleTelemetryField.TranslationP).setDefaultValue(pid.getP());
+      doubleFields.get(DoubleTelemetryField.TranslationI).setDefaultValue(pid.getI());
+      doubleFields.get(DoubleTelemetryField.TranslationD).setDefaultValue(pid.getD());
+    }, () -> {
+      doubleFields.get(DoubleTelemetryField.TranslationP).disable();
+      doubleFields.get(DoubleTelemetryField.TranslationI).disable();
+      doubleFields.get(DoubleTelemetryField.TranslationD).disable();
+    });
+    rotationPID.ifPresentOrElse(pid -> {
+      doubleFields.get(DoubleTelemetryField.RotationP).setDefaultValue(pid.getP());
+      doubleFields.get(DoubleTelemetryField.RotationI).setDefaultValue(pid.getI());
+      doubleFields.get(DoubleTelemetryField.RotationD).setDefaultValue(pid.getD());
+    }, () -> {
+      doubleFields.get(DoubleTelemetryField.RotationP).disable();
+      doubleFields.get(DoubleTelemetryField.RotationI).disable();
+      doubleFields.get(DoubleTelemetryField.RotationD).disable();
+    });
+    // Auto-align drives to a pose, which needs both controllers.
+    if (translationPID.isEmpty() || rotationPID.isEmpty()) {
+      doubleFields.get(DoubleTelemetryField.AutoAlignPoseX).disable();
+      doubleFields.get(DoubleTelemetryField.AutoAlignPoseY).disable();
+      doubleFields.get(DoubleTelemetryField.AutoAlignPoseRotation).disable();
+      boolFields.get(BooleanTelemetryField.AutoAlignEnabled).disable();
+    }
 
     var modules = drive.getModules();
     if (modules.length > 0) {

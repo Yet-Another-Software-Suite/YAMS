@@ -50,7 +50,10 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
   public SwerveDrive(SwerveDriveConfig config) {
     super(config);
     this.subsystem = config.getSubsystem();
-    Tunables.publish("Mechanisms/" + getName() + "/tuning/driveToPose", Commands.startRun(this::startDriveToPoseTuning, this::applyDriveToPoseTuningValues));
+    // Drive to pose tuning needs both controllers, so only offer it when they are configured.
+    if (config.getTranslationPID().isPresent() && config.getRotationPID().isPresent()) {
+      Tunables.publish("Mechanisms/" + getName() + "/tuning/driveToPose", Commands.startRun(this::startDriveToPoseTuning, this::applyDriveToPoseTuningValues));
+    }
   }
 
   /**
@@ -80,10 +83,11 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
    *
    * @param pose {@link Pose2d} to drive the robot to. Field relative, blue-origin where 0deg is
    *             facing towards RED
-   * @return {@link Command} to drive the robot to the given pose.
+   * @return {@link Command} that drives the robot toward the given pose until interrupted.
    * @implNote Not compatible with AdvantageKit
    */
   public Command driveToPose(Pose2d pose) {
-    return Commands.runOnce(this::startDriveToPoseTuning).andThen(() -> setFieldRelativeChassisSpeeds(driveToPoseSetpoint(pose)), subsystem).withName("Drive to Pose");
+    // driveToPoseSetpoint already returns robot relative speeds.
+    return Commands.startRun(this::startDriveToPoseTuning, () -> setRobotRelativeChassisSpeeds(driveToPoseSetpoint(pose)), subsystem).withName("Drive to Pose");
   }
 }

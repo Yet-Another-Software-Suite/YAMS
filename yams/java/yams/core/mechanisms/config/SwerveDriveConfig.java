@@ -607,21 +607,23 @@ public class SwerveDriveConfig {
   }
 
   /**
-   * Get the translation PID controller.
+   * Get the translation PID controller used for drive to pose. In simulation the simulation
+   * controller is preferred over the real one.
    *
-   * @return Translation PID controller.
+   * @return Translation PID controller, or empty when none is configured.
    */
-  public PIDController getTranslationPID() {
-    return (RobotBase.isSimulation() ? simTranslationController.orElse(translationController.orElseThrow()) : translationController.orElseThrow());
+  public Optional<PIDController> getTranslationPID() {
+    return RobotBase.isSimulation() ? simTranslationController.or(() -> translationController) : translationController;
   }
 
   /**
-   * Get the rotation PID controller.
+   * Get the rotation PID controller used for drive to pose and heading control. In simulation the
+   * simulation controller is preferred over the real one.
    *
-   * @return Rotation PID controller.
+   * @return Rotation PID controller, or empty when none is configured.
    */
-  public PIDController getRotationPID() {
-    return (RobotBase.isSimulation() ? simRotationController.orElse(rotationController.orElseThrow()) : rotationController.orElseThrow());
+  public Optional<PIDController> getRotationPID() {
+    return RobotBase.isSimulation() ? simRotationController.or(() -> rotationController) : rotationController;
   }
 
   /**

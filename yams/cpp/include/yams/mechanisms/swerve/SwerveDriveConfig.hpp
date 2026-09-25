@@ -282,18 +282,20 @@ class SwerveDriveConfig {
       wpi::math::ChassisVelocities speeds) const;
 
   /**
-   * Get the active translation PID controller (sim variant if in simulation and configured).
+   * Get the active translation PID controller used for drive to pose (sim variant if in
+   * simulation and configured).
    *
-   * @throws std::logic_error if no translation controller has been set.
+   * @return Reference to the translation PID controller, or empty when none is configured.
    */
-  wpi::math::PIDController& GetTranslationPID();
+  std::optional<std::reference_wrapper<wpi::math::PIDController>> GetTranslationPID();
 
   /**
-   * Get the active rotation PID controller (sim variant if in simulation and configured).
+   * Get the active rotation PID controller used for drive to pose and heading control (sim
+   * variant if in simulation and configured).
    *
-   * @throws std::logic_error if no rotation controller has been set.
+   * @return Reference to the rotation PID controller, or empty when none is configured.
    */
-  wpi::math::PIDController& GetRotationPID();
+  std::optional<std::reference_wrapper<wpi::math::PIDController>> GetRotationPID();
 
   /** Cube the polar-coordinate magnitude of a Translation2d. */
   static wpi::math::Translation2d CubeTranslation(wpi::math::Translation2d translation);

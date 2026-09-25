@@ -32,6 +32,8 @@ import org.wpilib.math.util.Nat;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.LinearVelocity;
+import org.wpilib.math.controller.PIDController;
+import yams.core.exceptions.SwerveDriveConfigurationException;
 import yams.core.mechanisms.config.SwerveDriveConfig;
 import yams.core.mechanisms.swerve.SwerveDrive;
 
@@ -771,6 +773,17 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
    *
    * @return {@link ChassisVelocities}
    */
+  /**
+   * Get the rotation PID controller needed by the heading, aim, and translation only modes.
+   *
+   * @param config {@link SwerveDriveConfig} of the drive.
+   * @return Rotation PID controller.
+   * @throws SwerveDriveConfigurationException if no rotation PID controller is configured.
+   */
+  private static PIDController requireRotationPID(SwerveDriveConfig config) {
+    return config.getRotationPID().orElseThrow(() -> new SwerveDriveConfigurationException("No rotation PID controller configured", "Heading, aim, and translation only control are unavailable", "withRotationController(PIDController)"));
+  }
+
   @Override
   public ChassisVelocities get() {
     var config = swerveDrive.getConfig();
@@ -792,7 +805,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
     }
     switch (newMode) {
       case TRANSLATION_ONLY -> {
-        var azimuthPIDs = config.getRotationPID();
+        var azimuthPIDs = requireRotationPID(config);
 
         omegaRadiansPerSecond = azimuthPIDs.calculate(swerveDrive.getGyroAngle().in(Radians), lockedHeading.orElseThrow().getRadians());
         speeds = new ChassisVelocities(vxMetersPerSecond, vyMetersPerSecond, omegaRadiansPerSecond);
@@ -804,7 +817,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
         break;
       }
       case HEADING -> {
-        var azimuthPIDs = config.getRotationPID();
+        var azimuthPIDs = requireRotationPID(config);
         omegaRadiansPerSecond = azimuthPIDs.calculate(swerveDrive.getGyroAngle().in(Radians), Rotation2d.fromRadians(Math.atan2(controllerHeadingX.orElseThrow().getAsDouble(), controllerHeadingY.orElseThrow().getAsDouble())).getRadians());
 
         // Prevent rotation if controller heading inputs are not past axisDeadband
@@ -815,7 +828,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
         break;
       }
       case AIM -> {
-        var azimuthPIDs = config.getRotationPID();
+        var azimuthPIDs = requireRotationPID(config);
         Rotation2d currentHeading = new Rotation2d(swerveDrive.getGyroAngle());
         Translation2d relativeTrl = aimTarget.orElseThrow().get().relativeTo(swerveDrive.getPose()).getTranslation();
         Rotation2d target = new Rotation2d(relativeTrl.getX(), relativeTrl.getY()).plus(currentHeading);

@@ -146,6 +146,7 @@ public class SwerveDriveTelemetry {
     var azimuthTuningBt = m_boolTelemetry.get(BooleanTelemetryField.ModulesAzimuthTuningEnabled);
     var driveInPlaceBt = m_boolTelemetry.get(BooleanTelemetryField.ModulesDriveInPlace);
 
+    // Auto-align fields are disabled when either drive to pose controller is missing.
     boolean autoAlignOn = autoAlignBt.enabled && nt4Enabled && autoAlignBt.get();
     boolean driveTuningOn = driveTuningBt.enabled && nt4Enabled && driveTuningBt.get();
     boolean azimuthTuningOn = azimuthTuningBt.enabled && nt4Enabled && azimuthTuningBt.get();
@@ -218,30 +219,30 @@ public class SwerveDriveTelemetry {
       if (!dt.tunable())
         continue;
       switch (dt.getField()) {
-        case TranslationP -> {
-          translationPID.setP(dt.get());
-          drive.setTranslationPID(translationPID);
-        }
-        case TranslationI -> {
-          translationPID.setI(dt.get());
-          drive.setTranslationPID(translationPID);
-        }
-        case TranslationD -> {
-          translationPID.setD(dt.get());
-          drive.setTranslationPID(translationPID);
-        }
-        case RotationP -> {
-          rotationPID.setP(dt.get());
-          drive.setRotationPID(rotationPID);
-        }
-        case RotationI -> {
-          rotationPID.setI(dt.get());
-          drive.setRotationPID(rotationPID);
-        }
-        case RotationD -> {
-          rotationPID.setD(dt.get());
-          drive.setRotationPID(rotationPID);
-        }
+        case TranslationP -> translationPID.ifPresent(pid -> {
+          pid.setP(dt.get());
+          drive.setTranslationPID(pid);
+        });
+        case TranslationI -> translationPID.ifPresent(pid -> {
+          pid.setI(dt.get());
+          drive.setTranslationPID(pid);
+        });
+        case TranslationD -> translationPID.ifPresent(pid -> {
+          pid.setD(dt.get());
+          drive.setTranslationPID(pid);
+        });
+        case RotationP -> rotationPID.ifPresent(pid -> {
+          pid.setP(dt.get());
+          drive.setRotationPID(pid);
+        });
+        case RotationI -> rotationPID.ifPresent(pid -> {
+          pid.setI(dt.get());
+          drive.setRotationPID(pid);
+        });
+        case RotationD -> rotationPID.ifPresent(pid -> {
+          pid.setD(dt.get());
+          drive.setRotationPID(pid);
+        });
         case ModulesDriveP -> {
           for (SwerveModule module : drive.getModules()) {
             module.getDriveMotorController().setKp(dt.get());

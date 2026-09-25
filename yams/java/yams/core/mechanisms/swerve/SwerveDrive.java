@@ -32,6 +32,7 @@ import org.wpilib.tunable.Tunables;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.Force;
+import yams.core.exceptions.SwerveDriveConfigurationException;
 import yams.core.mechanisms.config.SwerveDriveConfig;
 import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.core.telemetry.MechanismTelemetry;
@@ -385,14 +386,14 @@ public class SwerveDrive {
     m_simPose = pose;
   }
 
-  /** Resets the auto-align rotational PID controller. */
+  /** Resets the auto-align rotational PID controller, if one is configured. */
   public void resetRotationPID() {
-    m_config.getRotationPID().reset();
+    m_config.getRotationPID().ifPresent(PIDController::reset);
   }
 
-  /** Resets the auto-align translation PID controller. */
+  /** Resets the auto-align translation PID controller, if one is configured. */
   public void resetTranslationPID() {
-    m_config.getTranslationPID().reset();
+    m_config.getTranslationPID().ifPresent(PIDController::reset);
   }
 
   /**
@@ -402,7 +403,7 @@ public class SwerveDrive {
    */
   public void setRotationPID(PIDController controller) {
     var currentRotationPID = m_config.getRotationPID();
-    if (currentRotationPID.getP() != controller.getP() || currentRotationPID.getI() != controller.getI() || currentRotationPID.getD() != controller.getD()) {
+    if (currentRotationPID.isEmpty() || currentRotationPID.get().getP() != controller.getP() || currentRotationPID.get().getI() != controller.getI() || currentRotationPID.get().getD() != controller.getD()) {
       controller.reset();
       m_config.withRotationController(controller);
     }
@@ -415,7 +416,7 @@ public class SwerveDrive {
    */
   public void setTranslationPID(PIDController controller) {
     var currentTranslationPID = m_config.getTranslationPID();
-    if (currentTranslationPID.getP() != controller.getP() || currentTranslationPID.getI() != controller.getI() || currentTranslationPID.getD() != controller.getD()) {
+    if (currentTranslationPID.isEmpty() || currentTranslationPID.get().getP() != controller.getP() || currentTranslationPID.get().getI() != controller.getI() || currentTranslationPID.get().getD() != controller.getD()) {
       controller.reset();
       m_config.withTranslationController(controller);
     }
@@ -449,10 +450,12 @@ public class SwerveDrive {
    * @implNote Remember to call {@link #resetRotationPID()} and {@link #resetTranslationPID()}
    *           before calling this method in a loop.
    * @return robot-relative {@link ChassisVelocities} to drive the robot to the given pose.
+   * @throws SwerveDriveConfigurationException if the translation or rotation PID controller is not
+   *                                           configured.
    */
   public ChassisVelocities driveToPoseSetpoint(Pose2d targetPose) {
-    var rotationPID = m_config.getRotationPID();
-    var translationPID = m_config.getTranslationPID();
+    var rotationPID = m_config.getRotationPID().orElseThrow(() -> new SwerveDriveConfigurationException("No rotation PID controller configured", "Cannot drive to pose", "withRotationController(PIDController)"));
+    var translationPID = m_config.getTranslationPID().orElseThrow(() -> new SwerveDriveConfigurationException("No translation PID controller configured", "Cannot drive to pose", "withTranslationController(PIDController)"));
     var distance = getDistanceFromPose(targetPose);
     var translationScalar = translationPID.calculate(distance.in(Meters), 0);
     var currentPose = getPose();
