@@ -89,8 +89,8 @@ import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.simulation.BatterySim;
 import yams.core.motorcontrollers.simulation.DCMotorSimSupplier;
 import yams.core.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
@@ -194,7 +194,7 @@ public class TalonFXSWrapper extends SmartMotorController {
    * @param motor       {@link DCMotor}
    * @param smartConfig {@link SmartMotorControllerConfig}
    */
-  public TalonFXSWrapper(TalonFXS controller, DCMotor motor, SmartMotorControllerConfig smartConfig) {
+  public TalonFXSWrapper(TalonFXS controller, DCMotor motor, SmartMotorControllerConfig<?> smartConfig) {
     this.m_talonfxs = controller;
     this.m_dcmotor = motor;
     this.m_config = smartConfig;
@@ -661,7 +661,7 @@ public class TalonFXSWrapper extends SmartMotorController {
   }
 
   @Override
-  public boolean applyConfig(SmartMotorControllerConfig config) {
+  public boolean applyConfig(SmartMotorControllerConfig<?> config) {
     config.resetValidationCheck();
     this.m_config = config;
     if (!m_config.getResetPreviousConfig()) {
@@ -1713,7 +1713,7 @@ public class TalonFXSWrapper extends SmartMotorController {
   }
 
   @Override
-  public SmartMotorControllerConfig getConfig() {
+  public SmartMotorControllerConfig<?> getConfig() {
     return m_config;
   }
 

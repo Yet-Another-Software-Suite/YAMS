@@ -17,9 +17,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.core.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
 import yams.core.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Smart motor controller telemetry configuration.

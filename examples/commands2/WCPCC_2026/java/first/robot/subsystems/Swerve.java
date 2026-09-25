@@ -39,15 +39,15 @@ import org.wpilib.units.measure.Force;
 import yams.commands2.config.SmartMotorControllerConfig;
 import yams.commands2.config.SwerveDriveConfig;
 import yams.commands2.swerve.SwerveDrive;
+import yams.commands2.swerve.SwerveInputStream;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.SwerveModuleConfig;
 import yams.core.mechanisms.swerve.SwerveModule;
-import yams.commands2.swerve.SwerveInputStream;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Swerve drivetrain built with YAMS: four Kraken X60 modules with fused CANcoders and a Pigeon 2.
@@ -108,20 +108,19 @@ public class Swerve extends SubsystemBase {
         final TalonFX steerMotor = new TalonFX(steerId, Ports.kCANivoreCANBus);
         final CANcoder encoder = new CANcoder(encoderId, Ports.kCANivoreCANBus);
 
-        final SmartMotorControllerConfig driveConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+        final SmartMotorControllerConfig driveConfig = new SmartMotorControllerConfig(this)
             .withControlMode(ControlMode.CLOSED_LOOP)
             .withGearing(new MechanismGearing(kDriveGearRatio))
             .withWheelRadius(kWheelRadius)
-            // Tuner X drive gains are per motor rotation; YAMS runs them per wheel rotation.
-            .withClosedLoopController(kDriveKP * kDriveGearRatio, 0, 0)
-            .withFeedforward(new SimpleMotorFeedforward(0, kDriveKV * kDriveGearRatio))
+            .withClosedLoopController(kDriveKP, 0, 0)
+            .withFeedforward(new SimpleMotorFeedforward(0, kDriveKV))
             .withIdleMode(MotorMode.BRAKE)
             // The slip current limits the drive stator current, as in the CTRE swerve API.
             .withStatorCurrentLimit(kSlipCurrent)
             .withMotorInverted(driveInverted)
             .withTelemetry("driveMotor", TelemetryVerbosity.HIGH);
 
-        final SmartMotorControllerConfig steerConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+        final SmartMotorControllerConfig steerConfig = new SmartMotorControllerConfig(this)
             .withControlMode(ControlMode.CLOSED_LOOP)
             .withGearing(new MechanismGearing(kSteerGearRatio))
             .withClosedLoopController(kSteerKP, 0, kSteerKD)

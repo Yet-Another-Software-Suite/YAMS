@@ -27,11 +27,11 @@ import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.ElevatorConfig;
 import yams.core.mechanisms.config.SensorConfig;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
 import yams.core.motorcontrollers.simulation.Sensor;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Hanger that extends to reach the tower and retracts to lift the robot, modeled as a YAMS
@@ -64,7 +64,7 @@ public class Hanger implements Mechanism {
 
     private final TalonFX motor = new TalonFX(Ports.kHanger, Ports.kRoboRioCANBus);
 
-    private final SmartMotorControllerConfig motorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+    private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
         .withControlMode(ControlMode.CLOSED_LOOP)
         .withGearing(new MechanismGearing(kMotorRotationsPerMechanismRotation))
         .withMechanismCircumference(kExtensionPerMechanismRotation)

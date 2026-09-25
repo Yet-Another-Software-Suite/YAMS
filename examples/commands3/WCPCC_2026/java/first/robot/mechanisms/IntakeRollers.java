@@ -19,10 +19,10 @@ import yams.commands3.mechanisms.FlyWheel;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.FlyWheelConfig;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Intake rollers, modeled as a YAMS {@link FlyWheel} driven open loop. The pivot is a separate
@@ -46,7 +46,7 @@ public class IntakeRollers implements Mechanism {
 
     private final TalonFX rollerMotor = new TalonFX(Ports.kIntakeRollers, Ports.kRoboRioCANBus);
 
-    private final SmartMotorControllerConfig rollerConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+    private final SmartMotorControllerConfig rollerConfig = new SmartMotorControllerConfig(this)
         .withControlMode(ControlMode.OPEN_LOOP)
         .withGearing(new MechanismGearing(1.0))
         // Clockwise_Positive

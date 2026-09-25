@@ -25,16 +25,16 @@ import org.wpilib.command3.Mechanism;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import yams.commands3.config.SmartMotorControllerConfig;
+import yams.commands3.mechanisms.Arm;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.ArmConfig;
-import yams.commands3.mechanisms.Arm;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands3.config.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Single-pivot arm driven by a TalonFX with trapezoidal motion profiling.
@@ -111,7 +111,7 @@ public class ArmMechanism implements Mechanism {
   ///
   /// YAMS Configurations
   ///
-  private SmartMotorControllerConfig smcConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private SmartMotorControllerConfig smcConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       .withClosedLoopController(ArmConstants.KP,
           ArmConstants.KI,

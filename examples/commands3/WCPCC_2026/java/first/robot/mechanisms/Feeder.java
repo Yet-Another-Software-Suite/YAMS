@@ -23,10 +23,10 @@ import yams.commands3.mechanisms.FlyWheel;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.FlyWheelConfig;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Feeder roller that pushes fuel into the shooter. Runs closed loop velocity on the Talon, as a
@@ -49,7 +49,7 @@ public class Feeder implements Mechanism {
 
     private final TalonFX motor = new TalonFX(Ports.kFeeder, Ports.kRoboRioCANBus);
 
-    private final SmartMotorControllerConfig motorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+    private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
         .withControlMode(ControlMode.CLOSED_LOOP)
         .withGearing(new MechanismGearing(1.0))
         // CounterClockwise_Positive

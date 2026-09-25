@@ -75,8 +75,8 @@ import yams.core.gearing.MechanismGearing;
 import yams.core.math.DerivativeTimeFilter;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.simulation.BatterySim;
 import yams.core.motorcontrollers.simulation.DCMotorSimSupplier;
 import yams.core.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
@@ -153,7 +153,7 @@ public class SparkWrapper extends SmartMotorController {
    *                   brushless motor.
    * @param config     {@link SmartMotorControllerConfig} to apply.
    */
-  public SparkWrapper(SparkBase controller, DCMotor motor, SmartMotorControllerConfig config) {
+  public SparkWrapper(SparkBase controller, DCMotor motor, SmartMotorControllerConfig<?> config) {
     if (controller instanceof SparkMax) {
       if (config.getVendorConfig().isPresent()) {
         var genCfg = config.getVendorConfig().get();
@@ -363,7 +363,7 @@ public class SparkWrapper extends SmartMotorController {
   }
 
   @Override
-  public boolean applyConfig(SmartMotorControllerConfig config) {
+  public boolean applyConfig(SmartMotorControllerConfig<?> config) {
     m_config = config;
     config.resetValidationCheck();
     m_systemCoreClosedLoopAlert.ifPresent(alert -> alert.set(false));
@@ -1219,7 +1219,7 @@ public class SparkWrapper extends SmartMotorController {
   }
 
   @Override
-  public SmartMotorControllerConfig getConfig() {
+  public SmartMotorControllerConfig<?> getConfig() {
     return m_config;
   }
 

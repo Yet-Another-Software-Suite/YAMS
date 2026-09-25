@@ -23,19 +23,19 @@ import org.wpilib.units.measure.Mass;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
 import org.wpilib.command2.button.Trigger;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.commands2.mechanisms.Elevator;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.math.ExponentialProfilePIDController;
 import yams.core.mechanisms.config.ElevatorConfig;
 import yams.core.mechanisms.config.MechanismPositionConfig;
-import yams.commands2.mechanisms.Elevator;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands2.config.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 public class ElevatorSubsystem extends SubsystemBase
 {
@@ -52,7 +52,7 @@ public class ElevatorSubsystem extends SubsystemBase
 //          .withRotorPosition()
 //          .withMechanismLowerLimit()
 //          .withMechanismUpperLimit(); // Specific telemetry verbosity
-  private final SmartMotorControllerConfig motorConfig        = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig motorConfig        = new SmartMotorControllerConfig(this)
       .withMechanismCircumference(circumference)
 //      .withFollowers(Pair.of(new SparkMax(3, SparkLowLevel.MotorType.kBrushless), true))
       .withClosedLoopController(30, 0, 0)

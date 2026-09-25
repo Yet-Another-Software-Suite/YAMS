@@ -8,9 +8,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import yams.core.mechanisms.swerve.SwerveModule;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.core.telemetry.SwerveModuleTelemetry.DoubleTelemetryField;
 import yams.core.telemetry.SwerveModuleTelemetry.StructTelemetryField;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Swerve module telemetry configuration.

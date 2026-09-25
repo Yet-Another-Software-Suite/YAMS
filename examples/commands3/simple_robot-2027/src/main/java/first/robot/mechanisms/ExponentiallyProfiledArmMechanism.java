@@ -26,16 +26,16 @@ import org.wpilib.units.measure.Mass;
 import org.wpilib.units.measure.Voltage;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
+import yams.commands3.config.SmartMotorControllerConfig;
+import yams.commands3.mechanisms.Arm;
 import yams.core.gearing.MechanismGearing;
 import yams.core.math.ExponentialProfilePIDController;
 import yams.core.mechanisms.config.ArmConfig;
-import yams.commands3.mechanisms.Arm;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands3.config.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 // TODO: Example with absolute encoders
 
@@ -88,7 +88,7 @@ public class ExponentiallyProfiledArmMechanism implements Mechanism
   /**
    * {@link SmartMotorControllerConfig} for the arm motor.
    */
-  private final SmartMotorControllerConfig      motorConfig    = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig      motorConfig    = new SmartMotorControllerConfig(this)
                                                 /*
                                                  * Basic Configuration options for the motor
                                                  */

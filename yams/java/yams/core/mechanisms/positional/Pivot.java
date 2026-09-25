@@ -64,7 +64,7 @@ public class Pivot extends SmartPositionalMechanism {
   protected Pivot(PivotConfig config, SmartMotorController smc) {
     m_config = config;
     m_smc = smc;
-    SmartMotorControllerConfig motorConfig = m_smc.getConfig();
+    SmartMotorControllerConfig<?> motorConfig = m_smc.getConfig();
     DCMotor dcMotor = m_smc.getDCMotor();
     MechanismGearing gearing = m_smc.getConfig().getGearing();
     // Seed the relative encoder

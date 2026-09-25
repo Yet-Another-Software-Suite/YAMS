@@ -59,16 +59,17 @@ import java.io.IOException;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.json.simple.parser.ParseException;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.commands2.config.SwerveDriveConfig;
+import yams.commands2.swerve.SwerveDrive;
+import yams.commands2.swerve.SwerveInputStream;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
-import yams.commands2.config.SwerveDriveConfig;
 import yams.core.mechanisms.config.SwerveModuleConfig;
-import yams.commands2.swerve.SwerveDrive;
 import yams.core.mechanisms.swerve.SwerveModule;
-import yams.commands2.swerve.SwerveInputStream;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands2.config.SmartMotorControllerConfig;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 public class SwerveSubsystem extends SubsystemBase
 {
@@ -134,24 +135,24 @@ public class SwerveSubsystem extends SubsystemBase
     // 21:1 single-stage azimuth; typical for MK4i-style modules.
     MechanismGearing azimuthGearing       = new MechanismGearing(GearBox.fromStages("21:1"));
     PIDController    azimuthPIDController = new PIDController(1, 0, 0);
-    SmartMotorControllerConfig driveCfg = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+    SmartMotorControllerConfig driveCfg = new SmartMotorControllerConfig(this)
         .withWheelDiameter(Inches.of(4))           // Measure the actual wheel; worn wheels are smaller than nominal.
         .withClosedLoopController(50, 0, 4)        // kP=50 on velocity is a starting point; expect 20-80 in practice.
         .withGearing(driveGearing)
         .withStatorCurrentLimit(Amps.of(40))       // 40 A stall limit keeps NEOs below thermal rollback at full push.
-        .withTelemetry("driveMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
-    SmartMotorControllerConfig azimuthCfg = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+        .withTelemetry("driveMotor", TelemetryVerbosity.HIGH);
+    SmartMotorControllerConfig azimuthCfg = new SmartMotorControllerConfig(this)
         .withClosedLoopController(50, 0, 4)
         // Continuous wrapping lets the controller take the shortest arc through +/-pi without unwinding.
         .withContinuousWrapping(Radians.of(-Math.PI), Radians.of(Math.PI))
         .withGearing(azimuthGearing)
         .withStatorCurrentLimit(Amps.of(20))       // Azimuth has no traction load; 20 A is generous headroom.
-        .withTelemetry("angleMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
+        .withTelemetry("angleMotor", TelemetryVerbosity.HIGH);
     SmartMotorController driveSMC   = new SparkWrapper(drive, DCMotor.getNEO(1), driveCfg);
     SmartMotorController azimuthSMC = new SparkWrapper(azimuth, DCMotor.getNEO(1), azimuthCfg);
     SwerveModuleConfig moduleConfig = new SwerveModuleConfig(driveSMC, azimuthSMC)
         .withAbsoluteEncoder(absoluteEncoder.getAbsolutePosition().asSupplier())
-        .withTelemetry(moduleName, SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
+        .withTelemetry(moduleName, TelemetryVerbosity.HIGH)
         .withLocation(location)
         .withOptimization(true); // Wheel flip optimization: never rotate more than 90 deg, reverse drive instead.
     return new SwerveModule(moduleConfig);

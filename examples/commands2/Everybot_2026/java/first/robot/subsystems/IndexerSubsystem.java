@@ -17,9 +17,9 @@ import yams.commands2.mechanisms.FlyWheel;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.FlyWheelConfig;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Indexer of the 2026 Everybot: a brushed motor that moves fuel between the intake and the
@@ -31,7 +31,7 @@ public class IndexerSubsystem extends SubsystemBase {
   private final SparkMax indexerMotor = new SparkMax(CANPorts.fromBusId(1), INDEXER_MOTOR_ID, MotorType.kBrushed);
 
   // create the configuration for the feeder roller and set a current limit
-  private final SmartMotorControllerConfig indexerConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig indexerConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.OPEN_LOOP)
       // Gearing is only used for telemetry and simulation on this open loop roller.
       .withGearing(new MechanismGearing(1.0))

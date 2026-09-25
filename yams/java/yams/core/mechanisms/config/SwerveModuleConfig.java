@@ -22,8 +22,8 @@ import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.swerve.SwerveModule;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.core.telemetry.SwerveModuleTelemetryConfig;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Swerve Module
@@ -39,7 +39,7 @@ import yams.core.telemetry.SwerveModuleTelemetryConfig;
  * import com.ctre.phoenix6.hardware.CANcoder;
  * import org.wpilib.math.system.DCMotor;
  * import yams.core.motorcontrollers.SmartMotorControllerConfig;
- * import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
+ * import yams.core.motorcontrollers.enums.ControlMode;
  * import yams.core.motorcontrollers.SmartMotorController;
  * import yams.core.motorcontrollers.remote.TalonFXWrapper;
  * import yams.core.mechanisms.config.SwerveModuleConfig;
@@ -327,7 +327,7 @@ public class SwerveModuleConfig {
   public SwerveModuleConfig withAbsoluteEncoderGearing(GearBox gearing) {
     absoluteEncoderGearbox = gearing;
     if (azimuthMotor.isPresent()) {
-      SmartMotorControllerConfig azimuthConfig = azimuthMotor.orElseThrow().getConfig();
+      SmartMotorControllerConfig<?> azimuthConfig = azimuthMotor.orElseThrow().getConfig();
       if (azimuthConfig.getExternalEncoder().isPresent()) {
         azimuthConfig.withExternalEncoderGearing(new MechanismGearing(gearing));
       }
@@ -346,7 +346,7 @@ public class SwerveModuleConfig {
     absoluteEncoderOffset = Optional.ofNullable(offset);
 
     if (azimuthMotor.isPresent()) {
-      SmartMotorControllerConfig azimuthConfig = azimuthMotor.orElseThrow().getConfig();
+      SmartMotorControllerConfig<?> azimuthConfig = azimuthMotor.orElseThrow().getConfig();
       if (azimuthConfig.getExternalEncoder().isPresent()) {
         azimuthConfig.withExternalEncoderZeroOffset(offset);
       }

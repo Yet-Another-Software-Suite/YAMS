@@ -19,10 +19,10 @@ import yams.commands2.mechanisms.FlyWheel;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.FlyWheelConfig;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Feeder that pushes fuel into the shooter flywheel: one Vortex, open loop, as a YAMS
@@ -35,7 +35,7 @@ public class FeederSubsystem extends SubsystemBase
                                                       ShooterSubsystemConstants.kFeederMotorCanId,
                                                       MotorType.kBrushless);
 
-  private final SmartMotorControllerConfig feederConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig feederConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.OPEN_LOOP)
       .withGearing(new MechanismGearing(1.0))
       .withMotorInverted(true)

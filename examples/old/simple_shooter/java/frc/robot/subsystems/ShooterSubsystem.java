@@ -28,16 +28,16 @@ import org.wpilib.command2.SubsystemBase;
 import java.util.function.Supplier;
 
 import org.wpilib.math.controller.SimpleMotorFeedforward;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.commands2.mechanisms.FlyWheel;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.FlyWheelConfig;
-import yams.commands2.mechanisms.FlyWheel;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands2.config.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Simple flywheel shooter subsystem demonstrating continuous closed-loop velocity control
@@ -81,7 +81,7 @@ public class ShooterSubsystem extends SubsystemBase
   /*
    * Motor controller configuration
    */
-  private final SmartMotorControllerConfig motorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       /*
        * kP = 0.00016541: this looks tiny, but velocity error is measured in RPM (hundreds of
        * units), so even a small gain produces meaningful correction.  Contrast with a position

@@ -175,7 +175,7 @@ public class DoubleTelemetry<F> {
    *            will be in meters, else it will be in degrees.
    * @return {@link DoubleTelemetry} for chaining.
    */
-  public DoubleTelemetry transformUnit(SmartMotorControllerConfig cfg) {
+  public DoubleTelemetry transformUnit(SmartMotorControllerConfig<?> cfg) {
     switch (unit) {
       case "tunable_position":
         unit = cfg.getLinearClosedLoopControllerUse() ? "meter" : "degrees";

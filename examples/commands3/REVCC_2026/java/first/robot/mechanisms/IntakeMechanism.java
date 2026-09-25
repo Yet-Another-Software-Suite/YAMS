@@ -19,10 +19,10 @@ import yams.commands3.mechanisms.FlyWheel;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.FlyWheelConfig;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Fuel intake rollers for the 2026 REV ION Starter Bot: one Vortex, open loop. The rollers are a
@@ -40,7 +40,7 @@ public class IntakeMechanism implements Mechanism
                                                       IntakeSubsystemConstants.kIntakeMotorCanId,
                                                       MotorType.kBrushless);
 
-  private final SmartMotorControllerConfig intakeConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig intakeConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.OPEN_LOOP)
       // Direct drive; the ratio only matters for telemetry and simulation here.
       .withGearing(new MechanismGearing(1.0))

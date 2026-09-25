@@ -21,19 +21,19 @@ import org.wpilib.command2.SubsystemBase;
 import yams.commands2.config.SmartMotorControllerConfig;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
+import yams.commands2.mechanisms.Pivot;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.PivotConfig;
-import yams.commands2.mechanisms.Pivot;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 public class TurretSubsystem extends SubsystemBase {
         private final TalonFXS turretMotor = new TalonFXS(1, new CANBus(CANPort.CAN_S0));
-        private final SmartMotorControllerConfig motorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+        private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
                         .withControlMode(ControlMode.CLOSED_LOOP)
                         .withClosedLoopController(4, 0, 0)
                         .withTrapezoidalProfile(DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))

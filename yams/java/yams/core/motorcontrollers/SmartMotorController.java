@@ -49,14 +49,14 @@ import org.wpilib.util.Pair;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.gearing.MechanismGearing;
 import yams.core.math.LQRController;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.simulation.BatterySim;
-import yams.core.telemetry.SmartMotorControllerTelemetry;
 import yams.core.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
 import yams.core.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
+import yams.core.telemetry.SmartMotorControllerTelemetry;
 import yams.core.telemetry.SmartMotorControllerTelemetryConfig;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Smart motor controller wrapper for motor controllers.
@@ -85,7 +85,7 @@ public abstract class SmartMotorController {
   protected SmartMotorControllerTelemetry telemetry = new SmartMotorControllerTelemetry();
 
   /** {@link SmartMotorControllerConfig} for the motor. */
-  protected SmartMotorControllerConfig m_config;
+  protected SmartMotorControllerConfig<?> m_config;
 
   /** {@link ClosedLoopControllerSlot} for the closed loop controller. */
   protected ClosedLoopControllerSlot m_slot = ClosedLoopControllerSlot.SLOT_0;
@@ -168,7 +168,7 @@ public abstract class SmartMotorController {
    * @param cfg             {@link SmartMotorControllerConfig} for the {@link SmartMotorController}
    * @return {@link SmartMotorController}.
    */
-  public static SmartMotorController create(Object motorController, DCMotor motorSim, SmartMotorControllerConfig cfg) {
+  public static SmartMotorController create(Object motorController, DCMotor motorSim, SmartMotorControllerConfig<?> cfg) {
     return null;
   }
 
@@ -600,7 +600,7 @@ public abstract class SmartMotorController {
    * @param config {@link SmartMotorControllerConfig} to use.
    * @return Successful Application of the configuration.
    */
-  public abstract boolean applyConfig(SmartMotorControllerConfig config);
+  public abstract boolean applyConfig(SmartMotorControllerConfig<?> config);
 
   /**
    * Get the duty cycle output of the motor controller.
@@ -1040,7 +1040,7 @@ public abstract class SmartMotorController {
    *
    * @return {@link SmartMotorControllerConfig} used.
    */
-  public abstract SmartMotorControllerConfig getConfig();
+  public abstract SmartMotorControllerConfig<?> getConfig();
 
   /**
    * Get the Motor Controller Object passed into the {@link SmartMotorController}.

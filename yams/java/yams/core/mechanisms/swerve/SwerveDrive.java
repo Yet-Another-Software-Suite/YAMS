@@ -32,11 +32,11 @@ import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.Force;
 import yams.core.exceptions.SwerveDriveConfigurationException;
 import yams.core.mechanisms.config.SwerveDriveConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.core.telemetry.MechanismTelemetry;
 import yams.core.telemetry.NetworkTablesBackends;
 import yams.core.telemetry.SwerveDriveTelemetry;
 import yams.core.telemetry.SwerveDriveTelemetryConfig;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Swerve Drive mechanism.

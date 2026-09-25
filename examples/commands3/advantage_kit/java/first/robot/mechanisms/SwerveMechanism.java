@@ -35,16 +35,17 @@ import org.wpilib.command3.Mechanism;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
-import yams.core.gearing.GearBox;
-import yams.core.gearing.MechanismGearing;
+import yams.commands3.config.SmartMotorControllerConfig;
 import yams.commands3.config.SwerveDriveConfig;
-import yams.core.mechanisms.config.SwerveModuleConfig;
 import yams.commands3.swerve.SwerveDrive;
 import yams.commands3.swerve.SwerveInputStream;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
+import yams.core.mechanisms.config.SwerveModuleConfig;
 import yams.core.mechanisms.swerve.SwerveModule;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands3.config.SmartMotorControllerConfig;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Four-module NEO swerve drive with Pigeon 2 gyro and AdvantageKit input logging.
@@ -117,7 +118,7 @@ public class SwerveMechanism implements Mechanism
     // while still allowing full 180 deg azimuth reversal in under 0.4 seconds.
     MechanismGearing azimuthGearing = new MechanismGearing(GearBox.fromStages("21:1"));
 
-    SmartMotorControllerConfig driveCfg = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+    SmartMotorControllerConfig driveCfg = new SmartMotorControllerConfig(this)
         .withWheelDiameter(Inches.of(4))
         // kP=50 on drive gives crisp velocity tracking; kD=4 dampens oscillation
         // at high speeds where back-EMF changes quickly.
@@ -125,9 +126,9 @@ public class SwerveMechanism implements Mechanism
         .withGearing(driveGearing)
         // 40 A stator limit prevents the drive NEO from derating during hard pushes.
         .withStatorCurrentLimit(Amps.of(40))
-        .withTelemetry("driveMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
+        .withTelemetry("driveMotor", TelemetryVerbosity.HIGH);
 
-    SmartMotorControllerConfig azimuthCfg = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+    SmartMotorControllerConfig azimuthCfg = new SmartMotorControllerConfig(this)
         // Same kP/kD as drive; wrapping from -pi to pi means the controller never
         // takes the long way around past 180 deg.
         .withClosedLoopController(50, 0, 4)
@@ -136,14 +137,14 @@ public class SwerveMechanism implements Mechanism
         // 20 A for azimuth -- lighter load than drive and current limits help
         // prevent the motor from fighting the absolute encoder on power-up sync.
         .withStatorCurrentLimit(Amps.of(20))
-        .withTelemetry("angleMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
+        .withTelemetry("angleMotor", TelemetryVerbosity.HIGH);
 
     SmartMotorController driveSMC   = new SparkWrapper(drive, DCMotor.getNEO(1), driveCfg);
     SmartMotorController azimuthSMC = new SparkWrapper(azimuth, DCMotor.getNEO(1), azimuthCfg);
 
     SwerveModuleConfig moduleConfig = new SwerveModuleConfig(driveSMC, azimuthSMC)
         .withAbsoluteEncoder(absoluteEncoder.getAbsolutePosition().asSupplier())
-        .withTelemetry(moduleName, SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
+        .withTelemetry(moduleName, TelemetryVerbosity.HIGH)
         .withLocation(location)
         .withOptimization(true); // Flip drive direction rather than rotating azimuth >90 deg.
 

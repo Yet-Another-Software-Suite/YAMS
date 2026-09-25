@@ -12,7 +12,7 @@ import yams.core.mechanisms.positional.Arm;
 import yams.core.mechanisms.positional.Elevator;
 import yams.core.mechanisms.positional.Pivot;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Arm configuration class.

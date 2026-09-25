@@ -19,10 +19,10 @@ import yams.commands2.mechanisms.FlyWheel;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.FlyWheelConfig;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Conveyor that carries fuel from the intake up to the shooter: one Vortex, open loop, as a YAMS
@@ -35,7 +35,7 @@ public class ConveyorSubsystem extends SubsystemBase
                                                         IntakeSubsystemConstants.kConveyorMotorCanId,
                                                         MotorType.kBrushless);
 
-  private final SmartMotorControllerConfig conveyorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig conveyorConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.OPEN_LOOP)
       .withGearing(new MechanismGearing(1.0))
       // Mounted opposite the intake motor, so it is inverted to make positive mean "toward the shooter".

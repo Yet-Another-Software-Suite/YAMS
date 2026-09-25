@@ -8,11 +8,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import yams.core.mechanisms.swerve.SwerveDrive;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.core.telemetry.SwerveDriveTelemetry.BooleanTelemetryField;
 import yams.core.telemetry.SwerveDriveTelemetry.DoubleTelemetryField;
 import yams.core.telemetry.SwerveDriveTelemetry.StructArrayTelemetryField;
 import yams.core.telemetry.SwerveDriveTelemetry.StructTelemetryField;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Swerve drive telemetry configuration.

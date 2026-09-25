@@ -24,19 +24,19 @@ import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
 import org.wpilib.hardware.discrete.DigitalInput;
 
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.commands2.mechanisms.Arm;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.ArmConfig;
 import yams.core.mechanisms.config.MechanismPositionConfig;
 import yams.core.mechanisms.config.SensorConfig;
-import yams.commands2.mechanisms.Arm;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands2.config.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
 import yams.core.motorcontrollers.simulation.Sensor;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 public class ArmSubsystem extends SubsystemBase
 {
@@ -47,7 +47,7 @@ public class ArmSubsystem extends SubsystemBase
 //          .withRotorPosition()
 //          .withMechanismLowerLimit()
 //          .withMechanismUpperLimit();
-  private final SmartMotorControllerConfig motorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withClosedLoopController(4, 0, 0)
     .withTrapezoidalProfile(DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
       .withSoftLimits(Degrees.of(-30), Degrees.of(100))

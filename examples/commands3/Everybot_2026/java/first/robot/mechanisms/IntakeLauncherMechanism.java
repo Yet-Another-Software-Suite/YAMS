@@ -19,10 +19,10 @@ import yams.commands3.mechanisms.FlyWheel;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.FlyWheelConfig;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Intake/launcher rollers of the 2026 Everybot: two NEOs spin the rollers from either side, open
@@ -38,7 +38,7 @@ public class IntakeLauncherMechanism implements Mechanism {
 
   // create the configuration for the launcher rollers, set a current limit, and coast so the
   // rollers spin down freely
-  private final SmartMotorControllerConfig launcherConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig launcherConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.OPEN_LOOP)
       .withGearing(new MechanismGearing(1.0))
       .withStatorCurrentLimit(LAUNCHER_MOTOR_CURRENT_LIMIT)

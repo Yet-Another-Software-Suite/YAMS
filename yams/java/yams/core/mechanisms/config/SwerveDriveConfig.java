@@ -28,8 +28,8 @@ import org.wpilib.util.Alert;
 import yams.core.math.DerivativeTimeFilter;
 import yams.core.mechanisms.swerve.SwerveDrive;
 import yams.core.mechanisms.swerve.SwerveModule;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.core.telemetry.SwerveDriveTelemetryConfig;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Swerve Drive Configuration.

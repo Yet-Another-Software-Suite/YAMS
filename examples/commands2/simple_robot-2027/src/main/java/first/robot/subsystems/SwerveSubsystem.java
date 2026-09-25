@@ -28,16 +28,17 @@ import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
 import org.wpilib.command2.button.CommandNiDsXboxController;
 import java.util.function.Supplier;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.commands2.config.SwerveDriveConfig;
+import yams.commands2.swerve.SwerveDrive;
+import yams.commands2.swerve.SwerveInputStream;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
-import yams.commands2.config.SwerveDriveConfig;
 import yams.core.mechanisms.config.SwerveModuleConfig;
-import yams.commands2.swerve.SwerveDrive;
 import yams.core.mechanisms.swerve.SwerveModule;
-import yams.commands2.swerve.SwerveInputStream;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands2.config.SmartMotorControllerConfig;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 public class SwerveSubsystem extends SubsystemBase {
   private final SwerveDrive drive;
@@ -51,26 +52,26 @@ public class SwerveSubsystem extends SubsystemBase {
     MechanismGearing driveGearing = new MechanismGearing(GearBox.fromReductionStages(6.75));
     MechanismGearing azimuthGearing = new MechanismGearing(GearBox.fromReductionStages(12.8));
     SmartMotorControllerConfig driveCfg =
-        (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+        new SmartMotorControllerConfig(this)
             .withWheelDiameter(Inches.of(4))
             .withClosedLoopController(0.4, 0, 0)
             //            .withFeedforward(new SimpleMotorFeedforward(0, 0.7, 0.1))
             .withGearing(driveGearing)
             .withStatorCurrentLimit(Amps.of(40))
-            .withTelemetry("driveMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
+            .withTelemetry("driveMotor", TelemetryVerbosity.HIGH);
     SmartMotorControllerConfig azimuthCfg =
-        (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+        new SmartMotorControllerConfig(this)
             .withClosedLoopController(3.8476, 0, 0)
             .withContinuousWrapping(Radians.of(-Math.PI), Radians.of(Math.PI))
             .withGearing(azimuthGearing)
             .withStatorCurrentLimit(Amps.of(40))
-            .withTelemetry("angleMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
+            .withTelemetry("angleMotor", TelemetryVerbosity.HIGH);
     SmartMotorController driveSMC = new SparkWrapper(drive, DCMotor.getNEO(1), driveCfg);
     SmartMotorController azimuthSMC = new SparkWrapper(azimuth, DCMotor.getNEO(1), azimuthCfg);
     SwerveModuleConfig moduleConfig =
         new SwerveModuleConfig(driveSMC, azimuthSMC)
             .withAbsoluteEncoder(absoluteEncoder.getAbsolutePosition().asSupplier())
-            .withTelemetry(moduleName, SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
+            .withTelemetry(moduleName, TelemetryVerbosity.HIGH)
             .withLocation(location)
             .withOptimization(true);
     return new SwerveModule(moduleConfig);

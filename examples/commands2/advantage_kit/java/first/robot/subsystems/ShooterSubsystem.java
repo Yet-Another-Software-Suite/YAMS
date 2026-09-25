@@ -25,16 +25,16 @@ import org.wpilib.command2.SubsystemBase;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.commands2.mechanisms.FlyWheel;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.FlyWheelConfig;
-import yams.commands2.mechanisms.FlyWheel;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands2.config.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Flywheel shooter with AdvantageKit input logging. The key pattern here is that
@@ -72,7 +72,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   private final SparkMax armMotor = new SparkMax(CANPorts.fromBusId(1), 20, MotorType.kBrushless);
 
-  private final SmartMotorControllerConfig motorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       // kP=1 is a starting point; a flywheel typically needs little P because
       // SimpleMotorFeedforward carries most of the steady-state load.
       .withClosedLoopController(1, 0, 0)

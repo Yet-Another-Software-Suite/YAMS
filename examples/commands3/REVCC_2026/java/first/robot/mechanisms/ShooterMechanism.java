@@ -29,10 +29,10 @@ import yams.commands3.mechanisms.FlyWheel;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.FlyWheelConfig;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Shooter flywheel for the 2026 REV ION Starter Bot. Two Vortexes drive the flywheel (right leader,
@@ -56,7 +56,7 @@ public class ShooterMechanism implements Mechanism
                                                                 ShooterSubsystemConstants.kFlywheelFollowerMotorCanId,
                                                                 MotorType.kBrushless);
 
-  private final SmartMotorControllerConfig flywheelConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig flywheelConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       // The flywheel is direct drive in the REV code (no conversion factor on the encoder).
       .withGearing(new MechanismGearing(1.0))

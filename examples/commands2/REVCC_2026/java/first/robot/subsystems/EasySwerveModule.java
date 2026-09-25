@@ -24,10 +24,10 @@ import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.SwerveModuleConfig;
 import yams.core.mechanisms.swerve.SwerveModule;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Builds a YAMS {@link SwerveModule} for the REV EasySwerve Module built with NEOs, SPARK MAXs, and
@@ -69,7 +69,7 @@ public final class EasySwerveModule
     SparkMax drivingSpark = new SparkMax(CANPorts.fromBusId(1), drivingCANId, MotorType.kBrushless);
     SparkMax turningSpark = new SparkMax(CANPorts.fromBusId(1), turningCANId, MotorType.kBrushless);
 
-    SmartMotorControllerConfig drivingConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(subsystem)
+    SmartMotorControllerConfig drivingConfig = new SmartMotorControllerConfig(subsystem)
         .withControlMode(ControlMode.CLOSED_LOOP)
         .withGearing(new MechanismGearing(ModuleConstants.kDrivingMotorReduction))
         .withWheelDiameter(ModuleConstants.kWheelDiameter)
@@ -90,7 +90,7 @@ public final class EasySwerveModule
         .startPulseUs(3.88443797)
         .endPulseUs(1.94221899);
 
-    SmartMotorControllerConfig turningConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(subsystem)
+    SmartMotorControllerConfig turningConfig = new SmartMotorControllerConfig(subsystem)
         .withVendorConfig(turningVendorConfig)
         .withControlMode(ControlMode.CLOSED_LOOP)
         .withGearing(new MechanismGearing(ModuleConstants.kTurningMotorReduction))

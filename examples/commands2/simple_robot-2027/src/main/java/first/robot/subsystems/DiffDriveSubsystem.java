@@ -14,13 +14,13 @@ import org.wpilib.drive.DifferentialDrive;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
 import java.util.function.DoubleSupplier;
+import yams.commands2.config.SmartMotorControllerConfig;
 import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands2.config.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 public class DiffDriveSubsystem extends SubsystemBase {
   private MechanismGearing gearing = new MechanismGearing(3, 4);
@@ -33,7 +33,7 @@ public class DiffDriveSubsystem extends SubsystemBase {
   private SparkMax rightFollowerMotor = new SparkMax(CANPorts.fromBusId(1), 23, SparkMax.MotorType.kBrushless);
 
   private SmartMotorControllerConfig leftMotorConfig =
-      (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+      new SmartMotorControllerConfig(this)
           .withControlMode(ControlMode.OPEN_LOOP)
           .withGearing(gearing)
           .withIdleMode(MotorMode.COAST)
@@ -43,7 +43,7 @@ public class DiffDriveSubsystem extends SubsystemBase {
           .withFollowers(Pair.of(leftFollowerMotor, false));
 
   private SmartMotorControllerConfig rightMotorConfig =
-      (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+      new SmartMotorControllerConfig(this)
           .withControlMode(ControlMode.OPEN_LOOP)
           .withGearing(gearing)
           .withIdleMode(MotorMode.COAST)

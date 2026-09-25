@@ -53,9 +53,9 @@ public final class Constants {
         public static final Distance kWheelRadius = Inches.of(2);
 
         // Drive gains from Tuner X are per motor rotation; YAMS closes the loop per wheel rotation, so
-        // they are scaled by the drive gear ratio where they are used.
-        public static final double kDriveKP = 0.1;
-        public static final double kDriveKV = 0.124;
+        // they are scaled by the drive gear ratio here.
+        public static final double kDriveKP = 0.1 * kDriveGearRatio;
+        public static final double kDriveKV = 0.124 * kDriveGearRatio;
 
         // Steer gains are already per module rotation (fused CANcoder feedback).
         public static final double kSteerKP = 100;

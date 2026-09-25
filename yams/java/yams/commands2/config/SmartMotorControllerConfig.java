@@ -23,7 +23,7 @@ import yams.core.motorcontrollers.SmartMotorController;
  * }</pre>
  *
  */
-public class SmartMotorControllerConfig extends yams.core.motorcontrollers.SmartMotorControllerConfig {
+public class SmartMotorControllerConfig extends yams.core.motorcontrollers.SmartMotorControllerConfig<SmartMotorControllerConfig> {
   /** Subsystem that the {@link SmartMotorController} controls. */
   private Optional<Subsystem> subsystem = Optional.empty();
 
@@ -55,6 +55,11 @@ public class SmartMotorControllerConfig extends yams.core.motorcontrollers.Smart
   private SmartMotorControllerConfig(SmartMotorControllerConfig cfg) {
     super(cfg);
     this.subsystem = cfg.subsystem;
+  }
+
+  @Override
+  protected SmartMotorControllerConfig self() {
+    return this;
   }
 
   @Override

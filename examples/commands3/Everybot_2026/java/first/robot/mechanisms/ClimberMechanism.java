@@ -14,10 +14,10 @@ import org.wpilib.math.system.DCMotor;
 import yams.commands3.config.SmartMotorControllerConfig;
 import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Climber for the 2026 Everybot: one brushed motor driven open loop up or down while a button is
@@ -29,7 +29,7 @@ public class ClimberMechanism implements Mechanism {
 
   // create the configuration for the climb motor and set a current limit. BRAKE holds the robot
   // on the tower when the button is released.
-  private final SmartMotorControllerConfig climbConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig climbConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.OPEN_LOOP)
       // Gearing is only used for telemetry and simulation on this open loop climber.
       .withGearing(new MechanismGearing(1.0))

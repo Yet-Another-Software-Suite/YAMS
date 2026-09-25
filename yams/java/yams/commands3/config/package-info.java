@@ -22,8 +22,7 @@
  *
  * <pre>{@code
  * public class ShooterMechanism implements Mechanism {
- *   private final SmartMotorControllerConfig config = (SmartMotorControllerConfig)
- *       new SmartMotorControllerConfig(this)
+ *   private final SmartMotorControllerConfig config = new SmartMotorControllerConfig(this)
  *           .withControlMode(ControlMode.CLOSED_LOOP)
  *           .withClosedLoopController(0.01, 0, 0)
  *           .withStatorCurrentLimit(Amps.of(40));

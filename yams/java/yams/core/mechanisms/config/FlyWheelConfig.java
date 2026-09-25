@@ -17,7 +17,7 @@ import org.wpilib.util.Color8Bit;
 import yams.core.exceptions.FlyWheelConfigurationException;
 import yams.core.mechanisms.positional.Pivot;
 import yams.core.mechanisms.velocity.FlyWheel;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * FlyWheel configuration class.

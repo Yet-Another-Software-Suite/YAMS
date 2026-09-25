@@ -21,16 +21,16 @@ import org.wpilib.command2.SubsystemBase;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.commands2.mechanisms.FlyWheel;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.FlyWheelConfig;
-import yams.commands2.mechanisms.FlyWheel;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands2.config.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Open-loop belt indexer with AdvantageKit input logging. The indexer is
@@ -65,7 +65,7 @@ public class IndexerSubsystem extends SubsystemBase
   // CAN ID 20 -- check against the robot wiring diagram if swapping hardware.
   private final SparkMax someMotor = new SparkMax(CANPorts.fromBusId(1), 20, MotorType.kBrushless);
 
-  private final SmartMotorControllerConfig motorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       // 3:4 box = 12:1 total reduction. Fast enough for reliable feeding without
       // back-driving the rollers when the motor is released.
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))

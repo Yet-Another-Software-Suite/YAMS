@@ -23,7 +23,7 @@ import yams.core.mechanisms.swerve.SwerveModule;
  *
  * <p>This class is managed internally by {@link SwerveModule}. You do not normally instantiate
  * it directly; instead configure telemetry through {@link yams.core.mechanisms.config.SwerveModuleConfig#withTelemetry(String, SwerveModuleTelemetryConfig)} or
- * {@link yams.core.mechanisms.config.SwerveModuleConfig#withTelemetry(String, yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity)}
+ * {@link yams.core.mechanisms.config.SwerveModuleConfig#withTelemetry(String, yams.core.telemetry.enums.TelemetryVerbosity)}
  * before constructing the module.
  */
 public class SwerveModuleTelemetry {

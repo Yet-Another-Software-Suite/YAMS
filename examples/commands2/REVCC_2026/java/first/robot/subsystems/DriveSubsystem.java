@@ -19,9 +19,9 @@ import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.kinematics.ChassisVelocities;
 import yams.commands2.config.SwerveDriveConfig;
 import yams.commands2.swerve.SwerveDrive;
-import yams.core.mechanisms.swerve.SwerveModule;
 import yams.commands2.swerve.SwerveInputStream;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.mechanisms.swerve.SwerveModule;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Swerve drive for the 2026 REV ION Starter Bot: four REV EasySwerve modules and the Systemcore

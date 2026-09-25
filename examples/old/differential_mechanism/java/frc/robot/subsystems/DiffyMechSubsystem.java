@@ -11,15 +11,18 @@ import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.commands2.mechanisms.DifferentialMechanism;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.DifferentialMechanismConfig;
-import yams.commands2.mechanisms.DifferentialMechanism;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands2.config.SmartMotorControllerConfig;
 import yams.core.motorcontrollers.local.SparkWrapper;
 
 import static org.wpilib.units.Units.*;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Subsystem for a two-DOF differential (diffy) mechanism driven by two NEO motors.
@@ -52,7 +55,7 @@ public class DiffyMechSubsystem extends SubsystemBase
   // -----------------------------------------------------------------------
 
   private final SparkMax                   leftMotor  = new SparkMax(CANPorts.fromBusId(1), 1, SparkLowLevel.MotorType.kBrushless);
-  private final SmartMotorControllerConfig leftConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig leftConfig = new SmartMotorControllerConfig(this)
           // kP=16 was tuned empirically; high gain is workable here because the 60:1 reduction
           // dramatically damps the plant and the trapezoidal profile limits velocity error.
           .withClosedLoopController(16, 0, 0)
@@ -64,8 +67,8 @@ public class DiffyMechSubsystem extends SubsystemBase
           // High reduction buys holding torque without a brake -- important when tilt fights gravity.
           .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4, 5)))
 //      .withExternalEncoder(armMotor.getAbsoluteEncoder())
-          .withIdleMode(SmartMotorControllerConfig.MotorMode.BRAKE)
-          .withTelemetry("LeftMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
+          .withIdleMode(MotorMode.BRAKE)
+          .withTelemetry("LeftMotor", TelemetryVerbosity.HIGH)
           // 40 A stator protects the NEO on sustained stall (e.g., mechanism jammed at hard stop).
           .withStatorCurrentLimit(Amps.of(40))
           .withMotorInverted(false)
@@ -75,7 +78,7 @@ public class DiffyMechSubsystem extends SubsystemBase
           // Feedforward coefficients are zero because the sim plant handles the dynamics.
           // On real hardware, characterize with SysId and fill in ks, kg, kv, ka.
           .withFeedforward(new ArmFeedforward(0, 0, 0, 0))
-          .withControlMode(SmartMotorControllerConfig.ControlMode.CLOSED_LOOP);
+          .withControlMode(ControlMode.CLOSED_LOOP);
   private final SmartMotorController       leftSMC    = new SparkWrapper(leftMotor,
           DCMotor.getNEO(1),
           leftConfig);
@@ -87,15 +90,15 @@ public class DiffyMechSubsystem extends SubsystemBase
   // -----------------------------------------------------------------------
 
   private final SparkMax                   rightMotor  = new SparkMax(CANPorts.fromBusId(1), 2, SparkLowLevel.MotorType.kBrushless);
-  private final SmartMotorControllerConfig rightConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig rightConfig = new SmartMotorControllerConfig(this)
           // Same kP as left -- symmetric gearbox means symmetric closed-loop dynamics.
           .withClosedLoopController(16, 0, 0)
           .withTrapezoidalProfile(DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
           //.withSoftLimits(Degrees.of(-30), Degrees.of(100))
           .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4, 5)))
 //      .withExternalEncoder(armMotor.getAbsoluteEncoder())
-          .withIdleMode(SmartMotorControllerConfig.MotorMode.BRAKE)
-          .withTelemetry("RightMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
+          .withIdleMode(MotorMode.BRAKE)
+          .withTelemetry("RightMotor", TelemetryVerbosity.HIGH)
           .withStatorCurrentLimit(Amps.of(40))
           // Not inverted here -- DifferentialMechanism handles the sign convention internally
           // when it decomposes tilt/twist commands into per-motor setpoints.
@@ -103,7 +106,7 @@ public class DiffyMechSubsystem extends SubsystemBase
           .withClosedLoopRampRate(Seconds.of(0.25))
           .withOpenLoopRampRate(Seconds.of(0.25))
           .withFeedforward(new ArmFeedforward(0, 0, 0, 0))
-          .withControlMode(SmartMotorControllerConfig.ControlMode.CLOSED_LOOP);
+          .withControlMode(ControlMode.CLOSED_LOOP);
   private final SmartMotorController       rightSMC    = new SparkWrapper(rightMotor,
                                                                           DCMotor.getNEO(1),
                                                                           rightConfig);
@@ -118,7 +121,7 @@ public class DiffyMechSubsystem extends SubsystemBase
           .withStartingPosition(Degrees.of(90), Degrees.of(0))
           // MOI: 0.3 m arm length, 4 lb end-effector mass -- drives sim inertia calculation.
           .withMOI(Meters.of(0.3), Pounds.of(4))
-          .withTelemetry("DiffyMech", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
+          .withTelemetry("DiffyMech", TelemetryVerbosity.HIGH);
   private final DifferentialMechanism diffy     = new DifferentialMechanism(config);
 
   public DiffyMechSubsystem()

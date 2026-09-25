@@ -14,13 +14,13 @@ import org.wpilib.drive.DifferentialDrive;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.command3.button.CommandNiDsXboxController;
+import yams.commands3.config.SmartMotorControllerConfig;
 import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands3.config.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 public class DiffDriveMechanism implements Mechanism {
   private MechanismGearing gearing = new MechanismGearing(3, 4);
@@ -33,7 +33,7 @@ public class DiffDriveMechanism implements Mechanism {
   private SparkMax rightFollowerMotor = new SparkMax(CANPorts.fromBusId(1), 23, SparkMax.MotorType.kBrushless);
 
   private SmartMotorControllerConfig leftMotorConfig =
-      (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+      new SmartMotorControllerConfig(this)
           .withControlMode(ControlMode.OPEN_LOOP)
           .withGearing(gearing)
           .withIdleMode(MotorMode.COAST)
@@ -43,7 +43,7 @@ public class DiffDriveMechanism implements Mechanism {
           .withFollowers(Pair.of(leftFollowerMotor, false));
 
   private SmartMotorControllerConfig rightMotorConfig =
-      (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+      new SmartMotorControllerConfig(this)
           .withControlMode(ControlMode.OPEN_LOOP)
           .withGearing(gearing)
           .withIdleMode(MotorMode.COAST)

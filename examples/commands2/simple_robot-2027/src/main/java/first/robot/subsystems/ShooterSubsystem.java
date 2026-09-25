@@ -16,23 +16,23 @@ import org.wpilib.units.measure.LinearVelocity;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
 import java.util.function.Supplier;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.commands2.mechanisms.FlyWheel;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.FlyWheelConfig;
-import yams.commands2.mechanisms.FlyWheel;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands2.config.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 public class ShooterSubsystem extends SubsystemBase
 {
   private final TalonFX                    flywheelMotor1         = new TalonFX(1, new CANBus(CANPort.CAN_S0));
   private final TalonFX                    flywheelMotor2         = new TalonFX(2, new CANBus(CANPort.CAN_S0));
   private final boolean                    flywheelMotor2Inverted = true;
-  private final SmartMotorControllerConfig motorConfig            = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig motorConfig            = new SmartMotorControllerConfig(this)
       .withClosedLoopController(1, 0, 0)
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
       .withIdleMode(MotorMode.COAST)

@@ -32,17 +32,17 @@ import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.commands2.mechanisms.Elevator;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.ElevatorConfig;
 import yams.core.mechanisms.config.MechanismPositionConfig;
-import yams.commands2.mechanisms.Elevator;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands2.config.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 public class ElevatorSubsystem extends SubsystemBase
 {
@@ -55,7 +55,7 @@ public class ElevatorSubsystem extends SubsystemBase
 //          .withMechanismLowerLimit()
 //          .withMechanismUpperLimit();
 
-  private final SmartMotorControllerConfig motorConfig   = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig motorConfig   = new SmartMotorControllerConfig(this)
       // Drum circumference = pi * d = pitch * teeth = 0.25 in * 22 teeth, converted to meters.
       // This is how YAMS converts encoder rotations into carriage displacement. Every full motor
       // revolution moves the carriage exactly one drum circumference up or down the travel path.

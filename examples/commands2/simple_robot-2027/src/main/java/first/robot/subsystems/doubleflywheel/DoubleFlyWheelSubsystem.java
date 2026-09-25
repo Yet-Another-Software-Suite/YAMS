@@ -21,13 +21,14 @@ import org.wpilib.units.measure.Voltage;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
 import java.util.function.Supplier;
+import yams.commands2.config.SmartMotorControllerConfig;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands2.config.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * With 2 {@link SmartMotorController}s we can control a DoubleFlyWheelSubsystem which can
@@ -35,7 +36,7 @@ import yams.core.motorcontrollers.remote.TalonFXWrapper;
  */
 public class DoubleFlyWheelSubsystem extends SubsystemBase {
   private SmartMotorControllerConfig lowerFlyWheelConfig =
-      (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+      new SmartMotorControllerConfig(this)
           .withControlMode(ControlMode.CLOSED_LOOP)
           .withIdleMode(MotorMode.COAST)
           //      .withWheelDiameter(Inches.of(4)) // Only needed to find the MPH of the flywheel
@@ -47,13 +48,13 @@ public class DoubleFlyWheelSubsystem extends SubsystemBase {
               0) // You generally do not want a profile because its not a position controlled loop.
           .withFeedforward(new SimpleMotorFeedforward(0, 0, 0)) // Helps track changing RPM goals
           .withMotorInverted(false)
-          .withTelemetry("LowerFlyWheel", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
+          .withTelemetry("LowerFlyWheel", TelemetryVerbosity.HIGH);
 
   private SmartMotorController lowerFlyWheel = new TalonFXWrapper(new TalonFX(4, new CANBus(CANPort.CAN_S0)),
                                                                   DCMotor.getKrakenX60(1),
                                                                   lowerFlyWheelConfig);
 
-  private SmartMotorControllerConfig upperFlyWheelConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private SmartMotorControllerConfig upperFlyWheelConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       .withIdleMode(MotorMode.COAST)
 //      .withWheelDiameter(Inches.of(4)) // Only needed to find the MPH of the flywheel for fun.
@@ -64,7 +65,7 @@ public class DoubleFlyWheelSubsystem extends SubsystemBase {
                                 0) // You generally do not want a profile because its not a position controlled loop.
       .withFeedforward(new SimpleMotorFeedforward(0, 0, 0)) // Helps track changing RPM goals
       .withMotorInverted(false)
-      .withTelemetry("UpperFlyWheel", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
+      .withTelemetry("UpperFlyWheel", TelemetryVerbosity.HIGH);
   private SmartMotorController       upperflyWheel       = new TalonFXWrapper(new TalonFX(6, new CANBus(CANPort.CAN_S0)),
                                                                               DCMotor.getKrakenX60(1),
                                                                               upperFlyWheelConfig);

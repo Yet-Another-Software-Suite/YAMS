@@ -24,23 +24,23 @@ import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.commands2.mechanisms.Pivot;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.PivotConfig;
-import yams.commands2.mechanisms.Pivot;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands2.config.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 public class TurretSubsystem extends SubsystemBase
 {
   double[] ratio = {144.0 / 15.0, 5.0, 1.08};
 
   SmartMotorControllerConfig motorConfig =
-      (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+      new SmartMotorControllerConfig(this)
           .withControlMode(ControlMode.CLOSED_LOOP)
           .withSimClosedLoopController(0.0, 0.0, 0)
           // 99.0, 0.0, .6

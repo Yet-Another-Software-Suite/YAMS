@@ -68,7 +68,7 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig;
  */
 public class ElevatorSimSupplier implements SimSupplier {
   private final ElevatorSim                sim;
-  private final SmartMotorControllerConfig config;
+  private final SmartMotorControllerConfig<?> config;
   private final MechanismGearing           mechGearing;
   private final DCMotor                    motor;
   private final UUID                       uuid;

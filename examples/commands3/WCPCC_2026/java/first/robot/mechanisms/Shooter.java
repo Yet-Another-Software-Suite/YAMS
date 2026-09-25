@@ -29,10 +29,10 @@ import yams.commands3.mechanisms.FlyWheel;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.FlyWheelConfig;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Three-Kraken shooter flywheel. WCP ran a velocity loop on each Talon. With YAMS each motor still
@@ -53,7 +53,7 @@ public class Shooter implements Mechanism {
 
     // Same configuration for all three motors, as in the original; only the inversion differs.
     private SmartMotorControllerConfig motorConfig(String telemetryName, boolean inverted) {
-        return (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+        return new SmartMotorControllerConfig(this)
             .withVendorConfig(vendorConfig())
             .withControlMode(ControlMode.CLOSED_LOOP)
             .withGearing(new MechanismGearing(1.0))
@@ -78,7 +78,7 @@ public class Shooter implements Mechanism {
     // Left is CounterClockwise_Positive and leads; its velocity setpoints go to the followers too.
     private final SmartMotorController leftMotor = new TalonFXWrapper(
         new TalonFX(Ports.kShooterLeft, Ports.kRoboRioCANBus), DCMotor.getKrakenX60(1),
-        (SmartMotorControllerConfig) motorConfig("ShooterLeftMotor", false)
+        motorConfig("ShooterLeftMotor", false)
             .withLooselyCoupledFollowers(middleMotor, rightMotor));
 
     private final List<SmartMotorController> motors = List.of(leftMotor, middleMotor, rightMotor);

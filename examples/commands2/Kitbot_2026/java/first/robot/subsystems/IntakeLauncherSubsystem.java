@@ -18,9 +18,9 @@ import yams.commands2.mechanisms.FlyWheel;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.FlyWheelConfig;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Intake/launcher roller of the 2026 FIRST KitBot fuel mechanism: a brushed motor that both intakes
@@ -32,7 +32,7 @@ public class IntakeLauncherSubsystem extends SubsystemBase {
 
   // create the configuration for the launcher roller, set a current limit, and set the motor to
   // inverted so that positive values are used for both intaking and launching
-  private final SmartMotorControllerConfig launcherConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig launcherConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.OPEN_LOOP)
       .withGearing(new MechanismGearing(1.0))
       .withMotorInverted(true)

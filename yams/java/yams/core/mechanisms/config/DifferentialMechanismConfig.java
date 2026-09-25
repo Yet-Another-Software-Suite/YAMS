@@ -25,7 +25,7 @@ import yams.core.mechanisms.positional.DifferentialMechanism;
 import yams.core.mechanisms.positional.Pivot;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Configuration for a {@link DifferentialMechanism} driven by two coordinated motors working

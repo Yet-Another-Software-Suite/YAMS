@@ -23,9 +23,10 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import org.wpilib.networktables.NetworkTable;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
-import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
+import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.enums.ControlMode;
 
 /**
  * Smart motor controller telemetry.
@@ -87,7 +88,7 @@ public class SmartMotorControllerTelemetry {
     if (!publishTable.equals(this.dataNetworkTable)) {
       dataNetworkTable = publishTable;
       tuningNetworkTable = tuningTable;
-      SmartMotorControllerConfig smcConfig = smartMotorController.getConfig();
+      SmartMotorControllerConfig<?> smcConfig = smartMotorController.getConfig();
       this.config = config;
       doubleFields = config.getDoubleFields(smartMotorController);
       boolFields = config.getBoolFields(smartMotorController);
@@ -116,7 +117,7 @@ public class SmartMotorControllerTelemetry {
    * @param smc Smart motor controller to publish telemetry for.
    */
   public void publish(SmartMotorController smc) {
-    SmartMotorControllerConfig cfg = smc.getConfig();
+    SmartMotorControllerConfig<?> cfg = smc.getConfig();
     for (Map.Entry<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> entry : boolFields.entrySet()) {
       BooleanTelemetry<BooleanTelemetryField> bt = entry.getValue();
       if (!bt.enabled) {
@@ -172,8 +173,8 @@ public class SmartMotorControllerTelemetry {
    * @param smartMotorController {@link SmartMotorController} to control.
    */
   public void applyTuningValues(SmartMotorController smartMotorController) {
-    SmartMotorControllerConfig cfg = smartMotorController.getConfig();
-    if (cfg.getMotorControllerMode() != SmartMotorControllerConfig.ControlMode.CLOSED_LOOP) {
+    SmartMotorControllerConfig<?> cfg = smartMotorController.getConfig();
+    if (cfg.getMotorControllerMode() != ControlMode.CLOSED_LOOP) {
       throw new SmartMotorControllerConfigurationException("Live tuning does not work in OPEN_LOOP", "Cannot apply setpoints for Live Tuning.", ".withControlMode(ControlMode.CLOSED_LOOP) instead of " + ".withControlMode(ControlMode.OPEN_LOOP)");
     }
     for (Map.Entry<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> entry : boolFields.entrySet()) {

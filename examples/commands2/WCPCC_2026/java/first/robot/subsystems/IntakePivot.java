@@ -29,11 +29,11 @@ import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.ArmConfig;
 import yams.core.mechanisms.config.SensorConfig;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
 import yams.core.motorcontrollers.simulation.Sensor;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Intake pivot that swings the over-the-bumper intake out, modeled as a YAMS {@link Arm}. The
@@ -64,7 +64,7 @@ public class IntakePivot extends SubsystemBase {
 
     private final TalonFX pivotMotor = new TalonFX(Ports.kIntakePivot, Ports.kCANivoreCANBus);
 
-    private final SmartMotorControllerConfig pivotConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+    private final SmartMotorControllerConfig pivotConfig = new SmartMotorControllerConfig(this)
         .withControlMode(ControlMode.CLOSED_LOOP)
         .withGearing(new MechanismGearing(kPivotReduction))
         // CounterClockwise_Positive

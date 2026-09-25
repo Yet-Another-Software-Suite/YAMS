@@ -18,9 +18,9 @@ import org.wpilib.util.Pair;
 import yams.commands3.config.SmartMotorControllerConfig;
 import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Tank drive for the 2026 FIRST KitBot: four brushed CIMs on SPARK MAXes, two per side in a
@@ -40,7 +40,7 @@ public class CANDriveMechanism implements Mechanism {
   // Voltage compensation helps the robot perform more similarly on different battery voltages (at
   // the cost of a little bit of top speed on a fully charged battery). The current limit helps
   // prevent tripping breakers.
-  private final SmartMotorControllerConfig leftConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig leftConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.OPEN_LOOP)
       .withGearing(new MechanismGearing(DRIVE_GEAR_RATIO))
       .withWheelDiameter(WHEEL_DIAMETER)
@@ -52,7 +52,7 @@ public class CANDriveMechanism implements Mechanism {
       // Follower spins the same direction as its leader
       .withFollowers(Pair.of(leftFollower, false));
 
-  private final SmartMotorControllerConfig rightConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig rightConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.OPEN_LOOP)
       .withGearing(new MechanismGearing(DRIVE_GEAR_RATIO))
       .withWheelDiameter(WHEEL_DIAMETER)

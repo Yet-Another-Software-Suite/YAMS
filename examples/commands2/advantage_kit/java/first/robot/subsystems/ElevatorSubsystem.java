@@ -28,17 +28,17 @@ import org.wpilib.command2.SubsystemBase;
 import org.wpilib.command2.button.Trigger;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.commands2.mechanisms.Elevator;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.math.ExponentialProfilePIDController;
 import yams.core.mechanisms.config.ElevatorConfig;
-import yams.commands2.mechanisms.Elevator;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands2.config.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Chain-driven dual-NEO elevator with AdvantageKit input logging and exponential
@@ -88,7 +88,7 @@ public class ElevatorSubsystem extends SubsystemBase
   private final SparkMax         elevatorMotor  = new SparkMax(CANPorts.fromBusId(1), 30, SparkLowLevel.MotorType.kBrushless);
   private final SparkMax         elevatorMotor2 = new SparkMax(CANPorts.fromBusId(1), 31, SparkLowLevel.MotorType.kBrushless);
 
-  private final SmartMotorControllerConfig motorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       .withMechanismCircumference(circumference)
       // kP=30 on a chain elevator is reasonable; the exponential profile limits

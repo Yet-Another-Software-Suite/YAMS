@@ -18,9 +18,9 @@ import yams.commands3.mechanisms.FlyWheel;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.FlyWheelConfig;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Feeder roller of the 2026 FIRST KitBot fuel mechanism: a brushed motor that moves fuel into the
@@ -31,7 +31,7 @@ public class FeederMechanism implements Mechanism {
   private final SparkMax feederMotor = new SparkMax(CANPorts.fromBusId(1), FEEDER_MOTOR_ID, MotorType.kBrushed);
 
   // create the configuration for the feeder roller and set a current limit
-  private final SmartMotorControllerConfig feederConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig feederConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.OPEN_LOOP)
       // Gearing is only used for telemetry and simulation on this open loop roller.
       .withGearing(new MechanismGearing(1.0))

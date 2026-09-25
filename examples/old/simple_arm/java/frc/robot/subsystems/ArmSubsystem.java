@@ -16,16 +16,16 @@ import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.commands2.mechanisms.Arm;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.ArmConfig;
-import yams.commands2.mechanisms.Arm;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands2.config.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Simple single-jointed arm driven by a NEO through a 12:1 gearbox, controlled with
@@ -44,7 +44,7 @@ public class ArmSubsystem extends SubsystemBase
   // NEO on CAN ID 1.  Change this to match your robot's CAN bus assignment.
   private final SparkMax armMotor = new SparkMax(CANPorts.fromBusId(1), 1, SparkLowLevel.MotorType.kBrushless);
 
-  private final SmartMotorControllerConfig motorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       // kP=4 produces 4 V per radian of error (~0.07 V/deg). I and D are 0 because
       // the trapezoidal profile keeps velocity error small enough that integral
       // windup would add more instability than benefit, and the stiff gearbox

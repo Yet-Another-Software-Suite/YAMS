@@ -25,8 +25,8 @@ import org.wpilib.util.Color8Bit;
 import yams.core.exceptions.ArmConfigurationException;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.ArmConfig;
-import yams.core.mechanisms.config.MechanismPositionConfig;
 import yams.core.mechanisms.config.MechanismPositionConfig.Plane;
+import yams.core.mechanisms.config.MechanismPositionConfig;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
 import yams.core.motorcontrollers.simulation.ArmSimSupplier;
@@ -63,7 +63,7 @@ public class Arm extends SmartPositionalMechanism {
   protected Arm(ArmConfig config, SmartMotorController smc) {
     this.m_config = config;
     m_smc = smc;
-    SmartMotorControllerConfig smccfg = smc.getConfig();
+    SmartMotorControllerConfig<?> smccfg = smc.getConfig();
     DCMotor dcmotor = m_smc.getDCMotor();
     MechanismGearing gearing = m_smc.getConfig().getGearing();
     // Seed the relative encoder

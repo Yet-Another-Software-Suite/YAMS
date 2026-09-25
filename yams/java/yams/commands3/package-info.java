@@ -36,8 +36,7 @@
  * <pre>{@code
  * public class ArmMechanism implements Mechanism {
  *   // 1. Configure the motor controller for this Mechanism
- *   private final SmartMotorControllerConfig motorConfig = (SmartMotorControllerConfig)
- *       new SmartMotorControllerConfig(this)
+ *   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
  *           .withClosedLoopController(4, 0, 0)
  *           .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)));
  *   private final SmartMotorController motor =

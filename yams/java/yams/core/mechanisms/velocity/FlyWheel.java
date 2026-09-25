@@ -60,7 +60,7 @@ public class FlyWheel extends SmartVelocityMechanism {
   protected FlyWheel(FlyWheelConfig config, SmartMotorController smc) {
     m_config = config;
     m_smc = smc;
-    SmartMotorControllerConfig smcCfg = smc.getConfig();
+    SmartMotorControllerConfig<?> smcCfg = smc.getConfig();
     DCMotor dcMotor = m_smc.getDCMotor();
     // Seed the relative encoder
     if (m_smc.getConfig().getExternalEncoder().isPresent()) {

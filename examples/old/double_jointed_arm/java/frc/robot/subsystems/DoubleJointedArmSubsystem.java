@@ -35,15 +35,18 @@ import org.wpilib.util.Color;
 import org.wpilib.util.Color8Bit;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.commands2.mechanisms.DoubleJointedArm;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.ArmConfig;
-import yams.commands2.mechanisms.DoubleJointedArm;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands2.config.SmartMotorControllerConfig;
 import yams.core.motorcontrollers.local.SparkWrapper;
 
 import static org.wpilib.units.Units.*;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 public class DoubleJointedArmSubsystem extends SubsystemBase
 {
@@ -55,7 +58,7 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
 
   private final SparkMax                   lowerMotor  = new SparkMax(CANPorts.fromBusId(1), 1, SparkLowLevel.MotorType.kBrushless);
 
-  private final SmartMotorControllerConfig lowerConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig lowerConfig = new SmartMotorControllerConfig(this)
           // kP=16 produces roughly 16 volts of correction per radian of error.
           // This is a starting point; tune down if you see oscillation at the setpoint.
           .withClosedLoopController(16, 0, 0)
@@ -67,8 +70,8 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
           // important for the proximal joint which must support the distal segment's weight.
           .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4, 5)))
 //      .withExternalEncoder(armMotor.getAbsoluteEncoder()) // Uncomment for absolute position on power-cycle
-          .withIdleMode(SmartMotorControllerConfig.MotorMode.BRAKE) // BRAKE prevents the joint from sagging when disabled
-          .withTelemetry("LowerMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
+          .withIdleMode(MotorMode.BRAKE) // BRAKE prevents the joint from sagging when disabled
+          .withTelemetry("LowerMotor", TelemetryVerbosity.HIGH)
           // 40 A stator limit protects the NEO from stalling into a hard stop.
           // A NEO can sustain ~40 A continuously without thermal shutdown on a typical arm.
           .withStatorCurrentLimit(Amps.of(40))
@@ -81,7 +84,7 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
           // ks: static friction voltage, kg: gravity compensation at horizontal,
           // kv: velocity feedforward, ka: acceleration feedforward.
           .withFeedforward(new ArmFeedforward(0, 0, 0, 0))
-          .withControlMode(SmartMotorControllerConfig.ControlMode.CLOSED_LOOP)
+          .withControlMode(ControlMode.CLOSED_LOOP)
           // 45 deg starting position relative to horizontal. Adjust to match the arm's
           // actual resting angle so the encoder agrees with reality at robot enable.
           .withStartingPosition(Degrees.of(45));
@@ -97,7 +100,7 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
           // you are prototyping. Tighten these to real mechanical hard stops before
           // deploying to a physical robot so the sim reflects actual risk.
           .withHardLimits(Degrees.of(-720), Degrees.of(720))
-          .withTelemetry("LowerArm", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
+          .withTelemetry("LowerArm", TelemetryVerbosity.HIGH);
 
   // -------------------------------------------------------------------------
   // UPPER (DISTAL) JOINT
@@ -107,7 +110,7 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
 
   private final SparkMax                   upperMotor  = new SparkMax(CANPorts.fromBusId(1), 2, SparkLowLevel.MotorType.kBrushless);
 
-  private final SmartMotorControllerConfig upperConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig upperConfig = new SmartMotorControllerConfig(this)
           // Same kP as lower joint for this template. In practice the distal joint
           // may tolerate a higher kP because it has less load and less inertia.
           .withClosedLoopController(16, 0, 0)
@@ -119,14 +122,14 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
           // if the distal segment does not need the same holding torque.
           .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4, 5)))
 //      .withExternalEncoder(armMotor.getAbsoluteEncoder())
-          .withIdleMode(SmartMotorControllerConfig.MotorMode.BRAKE)
-          .withTelemetry("UpperMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
+          .withIdleMode(MotorMode.BRAKE)
+          .withTelemetry("UpperMotor", TelemetryVerbosity.HIGH)
           .withStatorCurrentLimit(Amps.of(40)) // Same 40 A limit; distal joint can often tolerate 30 A in practice
           .withMotorInverted(false)
           .withClosedLoopRampRate(Seconds.of(0.25))
           .withOpenLoopRampRate(Seconds.of(0.25))
           .withFeedforward(new ArmFeedforward(0, 0, 0, 0)) // Replace with SysId results
-          .withControlMode(SmartMotorControllerConfig.ControlMode.CLOSED_LOOP)
+          .withControlMode(ControlMode.CLOSED_LOOP)
           .withStartingPosition(Degrees.of(45)); // Match the upper segment's physical resting angle
 
   private final SmartMotorController       upperSMC    = new SparkWrapper(upperMotor,
@@ -138,7 +141,7 @@ public class DoubleJointedArmSubsystem extends SubsystemBase
       // per degree of rotation. This affects the IK solution for Cartesian setpoints.
       .withLength(Feet.of(2.5))
       .withHardLimits(Degrees.of(-720), Degrees.of(720)) // Widen or tighten to match physical stops
-      .withTelemetry("UpperArm", SmartMotorControllerConfig.TelemetryVerbosity.HIGH)
+      .withTelemetry("UpperArm", TelemetryVerbosity.HIGH)
       .withSimColor(new Color8Bit(Color.DARK_RED)); // Dark red distinguishes the upper segment in simulation
 
   // DoubleJointedArm wires both joints together. It exposes angle, duty-cycle,

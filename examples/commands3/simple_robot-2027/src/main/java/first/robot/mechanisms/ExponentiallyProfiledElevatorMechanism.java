@@ -15,17 +15,17 @@ import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.*;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
+import yams.commands3.config.SmartMotorControllerConfig;
+import yams.commands3.mechanisms.Elevator;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.math.ExponentialProfilePIDController;
 import yams.core.mechanisms.config.ElevatorConfig;
-import yams.commands3.mechanisms.Elevator;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands3.config.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 // TODO: Example with absolute encoders
 
@@ -68,7 +68,7 @@ public class ExponentiallyProfiledElevatorMechanism implements Mechanism
   /**
   * {@link SmartMotorControllerConfig} for the elevator motor.
   */
-  private final SmartMotorControllerConfig      motorConfig    = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig      motorConfig    = new SmartMotorControllerConfig(this)
       /*
        * Basic Configuration options for the motor
        */

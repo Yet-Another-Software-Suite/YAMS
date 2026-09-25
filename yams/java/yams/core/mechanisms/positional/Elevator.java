@@ -24,8 +24,8 @@ import org.wpilib.util.Color8Bit;
 import yams.core.exceptions.ElevatorConfigurationException;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.mechanisms.config.ElevatorConfig;
-import yams.core.mechanisms.config.MechanismPositionConfig;
 import yams.core.mechanisms.config.MechanismPositionConfig.Plane;
+import yams.core.mechanisms.config.MechanismPositionConfig;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
 import yams.core.motorcontrollers.simulation.ElevatorSimSupplier;
@@ -61,8 +61,8 @@ public class Elevator extends SmartPositionalMechanism {
   protected Elevator(ElevatorConfig config, SmartMotorController smc) {
     m_config = config;
     m_smc = smc;
-    SmartMotorControllerConfig smcCfg = smc.getConfig();
-    SmartMotorControllerConfig smcConfig = m_smc.getConfig();
+    SmartMotorControllerConfig<?> smcCfg = smc.getConfig();
+    SmartMotorControllerConfig<?> smcConfig = m_smc.getConfig();
     if (config.getTelemetryName().isPresent()) {
       // TODO: Add telemetry units to config.
       m_telemetry.setupTelemetry(getName(), m_smc);

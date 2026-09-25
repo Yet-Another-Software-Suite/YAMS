@@ -36,17 +36,18 @@ import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-import yams.core.gearing.MechanismGearing;
+import yams.commands2.config.SmartMotorControllerConfig;
 import yams.commands2.config.SwerveDriveConfig;
-import yams.core.mechanisms.config.SwerveModuleConfig;
 import yams.commands2.swerve.SwerveDrive;
+import yams.commands2.swerve.SwerveInputStream;
+import yams.core.gearing.MechanismGearing;
+import yams.core.mechanisms.config.SwerveModuleConfig;
 import yams.core.mechanisms.swerve.SwerveModule;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.telemetry.SwerveDriveTelemetryConfig;
 import yams.core.telemetry.SwerveModuleTelemetryConfig;
-import yams.commands2.swerve.SwerveInputStream;
-import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands2.config.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Swerve drive subsystem built with YAMS. This example shows how to wire up four NEO-driven modules
@@ -141,7 +142,7 @@ public class SwerveSubsystem extends SubsystemBase
     MechanismGearing azimuthGearing = new MechanismGearing(6.75);
     // 4-inch wheels are standard for MK4i; diameter feeds both kinematics and feedforward.
     Distance wheelDiameter = Inches.of(4);
-    SmartMotorControllerConfig driveCfg = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+    SmartMotorControllerConfig driveCfg = new SmartMotorControllerConfig(this)
         .withWheelDiameter(wheelDiameter)
         // kP=0.3 trims velocity error left over after the feedforward; raise it if the module
         // lags under load, lower it if it oscillates.
@@ -155,8 +156,8 @@ public class SwerveSubsystem extends SubsystemBase
                                                     0.01))
         // 40 A prevents belt slip under hard acceleration; typical NEO limit for drive applications.
         .withStatorCurrentLimit(Amps.of(40))
-        .withTelemetry("driveMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
-    SmartMotorControllerConfig azimuthCfg = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+        .withTelemetry("driveMotor", TelemetryVerbosity.HIGH);
+    SmartMotorControllerConfig azimuthCfg = new SmartMotorControllerConfig(this)
         // kP=1 is enough at 6.75:1 because the reduction makes the output stiff; the module
         // settles within one or two robot loops without needing D or I.
         .withClosedLoopController(1, 0, 0)
@@ -165,7 +166,7 @@ public class SwerveSubsystem extends SubsystemBase
         .withGearing(azimuthGearing)
         // 20 A is sufficient for steering; the steer motor almost never stalls under normal driving.
         .withStatorCurrentLimit(Amps.of(20))
-        .withTelemetry("angleMotor", SmartMotorControllerConfig.TelemetryVerbosity.HIGH);
+        .withTelemetry("angleMotor", TelemetryVerbosity.HIGH);
     SmartMotorController driveSMC   = new SparkWrapper(drive, DCMotor.getNEO(1), driveCfg);
     SmartMotorController azimuthSMC = new SparkWrapper(azimuth, DCMotor.getNEO(1), azimuthCfg);
     SwerveModuleConfig moduleConfig = new SwerveModuleConfig(driveSMC, azimuthSMC)
@@ -174,7 +175,7 @@ public class SwerveSubsystem extends SubsystemBase
         // Nested under the same "Swerve" DataLog prefix as SwerveDriveConfig below, so the module's
         // absolute encoder shows up alongside the rest of the drive's DataLog entries.
         .withTelemetry(moduleName, new SwerveModuleTelemetryConfig().withDataLogName("Swerve/" + moduleName)
-                                                                     .withTelemetryVerbosity(SmartMotorControllerConfig.TelemetryVerbosity.HIGH))
+                                                                     .withTelemetryVerbosity(TelemetryVerbosity.HIGH))
         .withLocation(location)
         // Optimization rotates the module at most 90 deg instead of 180 deg + reversing drive direction.
         .withOptimization(true);
@@ -223,7 +224,7 @@ public class SwerveSubsystem extends SubsystemBase
         // Logs pose/gyro/chassis speeds/module states to a WPILib DataLog (readable with AdvantageScope
         // or DataLogTool) in addition to NetworkTables. Each module above nests under "Swerve/<name>".
         .withTelemetry("swerve", new SwerveDriveTelemetryConfig().withDataLogName("Swerve")
-                                                        .withTelemetryVerbosity(SmartMotorControllerConfig.TelemetryVerbosity.HIGH));
+                                                        .withTelemetryVerbosity(TelemetryVerbosity.HIGH));
     drive = new SwerveDrive(config);
 
     Tunables.publish("Field", field);

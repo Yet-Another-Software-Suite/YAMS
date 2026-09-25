@@ -24,16 +24,16 @@ import org.wpilib.units.measure.LinearVelocity;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
 import java.util.function.Supplier;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.commands2.mechanisms.FlyWheel;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.FlyWheelConfig;
-import yams.commands2.mechanisms.FlyWheel;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands2.config.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Velocity-controlled flywheel for the hooded shooter.
@@ -56,7 +56,7 @@ public class FlywheelSubsystem extends SubsystemBase
   private final Distance flywheelDiameter = Inches.of(4);
   private final SparkMax flywheelMotor    = new SparkMax(CANPorts.fromBusId(1), 1, MotorType.kBrushless);
 
-  private final SmartMotorControllerConfig motorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+  private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       // P = 0.00016541 -- very small because feedforward handles ~95% of the output;
       // this term only corrects the last few RPM of steady-state error.
       // I and D are zero: integral windup risks are high on a flywheel with large set-point

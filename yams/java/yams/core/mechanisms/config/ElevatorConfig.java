@@ -14,7 +14,7 @@ import org.wpilib.util.Color;
 import org.wpilib.util.Color8Bit;
 import yams.core.mechanisms.positional.Elevator;
 import yams.core.mechanisms.positional.Pivot;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Elevator configuration class.

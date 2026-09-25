@@ -21,7 +21,7 @@ import yams.commands3.config.SwerveDriveConfig;
 import yams.commands3.swerve.SwerveDrive;
 import yams.commands3.swerve.SwerveInputStream;
 import yams.core.mechanisms.swerve.SwerveModule;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Swerve drive for the 2026 REV ION Starter Bot: four REV EasySwerve modules and the Systemcore

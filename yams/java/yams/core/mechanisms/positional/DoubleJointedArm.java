@@ -128,8 +128,8 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
     m_upperArmConfig = upperConfig;
     m_lowerSMC = lowerSMC;
     m_upperSMC = upperSMC;
-    SmartMotorControllerConfig lowerSMCConfig = lowerSMC.getConfig();
-    SmartMotorControllerConfig upperSMCConfig = upperSMC.getConfig();
+    SmartMotorControllerConfig<?> lowerSMCConfig = lowerSMC.getConfig();
+    SmartMotorControllerConfig<?> upperSMCConfig = upperSMC.getConfig();
 
     // Check that the starting angle is defined
     if (lowerSMCConfig.getStartingPosition().isEmpty() || upperSMCConfig.getStartingPosition().isEmpty()) {

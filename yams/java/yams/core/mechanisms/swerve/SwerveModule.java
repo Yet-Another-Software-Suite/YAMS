@@ -15,10 +15,10 @@ import org.wpilib.units.measure.Force;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.mechanisms.config.SwerveModuleConfig;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.core.telemetry.MechanismTelemetry;
 import yams.core.telemetry.SwerveModuleTelemetry;
 import yams.core.telemetry.SwerveModuleTelemetryConfig;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Swerve Module

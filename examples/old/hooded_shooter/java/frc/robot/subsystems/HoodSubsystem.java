@@ -21,21 +21,21 @@ import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.commands2.mechanisms.Arm;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.ArmConfig;
-import yams.commands2.mechanisms.Arm;
 import yams.core.motorcontrollers.SmartMotorController;
-import yams.commands2.config.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 public class HoodSubsystem extends SubsystemBase {
     private final SparkMax hoodMotor = new SparkMax(CANPorts.fromBusId(1), 2, MotorType.kBrushless);
 
-    private final SmartMotorControllerConfig hoodMotorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+    private final SmartMotorControllerConfig hoodMotorConfig = new SmartMotorControllerConfig(this)
             .withClosedLoopController(0.00016541, 0, 0)
             .withTrapezoidalProfile(RPM.of(5000), RotationsPerSecondPerSecond.of(2500))
             .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
