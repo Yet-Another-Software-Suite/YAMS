@@ -96,6 +96,9 @@ public class ShootOnTheMoveCommand extends Command {
       ShooterSubsystem shooter,
       HoodSubsystem hood,
       SwerveDrive swerveDrive) {
+    this.turret = turret;
+    this.shooterSubsystem = shooter;
+    this.hoodSubsystem = hood;
     estimatedPose = () -> {
       // Calculate estimated pose while accounting for phase delay
       ChassisVelocities robotRelativeVelocity = swerveDrive.getRobotRelativeSpeed();

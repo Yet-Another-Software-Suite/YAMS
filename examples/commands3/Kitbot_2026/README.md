@@ -54,7 +54,7 @@ A port of the FIRST 2026 KitBot code to WPILib 2027, Commands v3 and YAMS.
   - Right bumper: spin up for 1 s, then launch.
   - A: eject.
   - Drive default (teleop only): arcade drive with 0.7 / 0.8 scaling.
-- The auto is unchanged: drive at 0.5 for 0.25 s, spin up 1 s, launch 9 s, stop.
+- The auto keeps the original steps: drive at 0.5 for 0.25 s, stop, spin up 1 s, launch 9 s, stop.
 - CAN IDs, current limits and every roller voltage are unchanged.
 
 ### Behavior differences
@@ -71,5 +71,5 @@ This is the Commands v3 version of [`examples/commands2/Kitbot_2026`](../../comm
 - Subsystems became `org.wpilib.command3.Mechanism` classes in the `mechanisms` package. Their YAMS telemetry and simulation calls moved from `periodic()`/`simulationPeriodic()` overrides into methods that `Robot.robotPeriodic()` and `Robot.simulationPeriodic()` call.
 - `RobotContainer` is gone. The bindings live in the `KitBot Teleop` opmode and the auto in the `Example Auto` opmode, so they only exist while that opmode is selected.
 - The fuel commands are coroutines that require both rollers and `awaitAll` one `runAt` command per roller. `runEnd`/`finallyDo` stops became `whenCanceled(stop)`, and "spin up for 1 s, then launch" is the `Fuel.SpinUpAndLaunch` coroutine.
-- The auto is a coroutine that `await`s each step instead of a `SequentialCommandGroup`, and it starts when the robot is enabled in the `Example Auto` opmode. Unlike the v2 port, its stop-driving step ends, so it goes on to spin up and launch.
+- The auto is a coroutine that `await`s each step instead of a `SequentialCommandGroup`, and it starts when the robot is enabled in the `Example Auto` opmode.
 - Every command is named (`Drive.Arcade`, `Fuel.Intake`, `Fuel.SpinUpAndLaunch`, and so on).

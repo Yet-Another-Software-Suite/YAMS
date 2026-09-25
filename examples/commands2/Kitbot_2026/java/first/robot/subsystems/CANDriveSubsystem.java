@@ -88,4 +88,9 @@ public class CANDriveSubsystem extends SubsystemBase {
     return this.run(
         () -> drive.arcadeDrive(xSpeed.getAsDouble(), zRotation.getAsDouble()));
   }
+
+  // Command factory to create a command that stops the drive motors once and then ends.
+  public Command stopCommand() {
+    return this.runOnce(() -> drive.arcadeDrive(0, 0));
+  }
 }

@@ -14,7 +14,6 @@ import org.wpilib.math.filter.Debouncer;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.*;
 import org.wpilib.command2.Command;
-import org.wpilib.command2.Commands;
 import org.wpilib.command2.SubsystemBase;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
@@ -139,7 +138,7 @@ public class ExponentiallyProfiledElevatorSubsystem extends SubsystemBase
       Voltage runVolts          = Volts.of(-2); // Volts required to run the mechanism down. Could be positive if the mechanism is inverted.
       Distance limitHit          = hardLowerLimit;  // Limit which gets hit. Could be the lower limit if the volts makes the arm go down.
       AngularVelocity velocityThreshold = DegreesPerSecond.of(2); // The maximum amount of movement for the arm to be considered "hitting the hard limit".
-      return Commands.startRun(motor::stopClosedLoopController, // Stop the closed loop controller
+      return startRun(motor::stopClosedLoopController, // Stop the closed loop controller, requires this subsystem
                       () -> motor.setVoltage(runVolts)) // Set the voltage of the motor
               .until(() -> currentDebouncer.calculate(motor.getStatorCurrent().gte(threshold) &&
                       motor.getMechanismVelocity().abs(DegreesPerSecond) <=

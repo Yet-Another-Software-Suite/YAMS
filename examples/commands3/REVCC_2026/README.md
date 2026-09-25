@@ -22,7 +22,7 @@ This is the Commands v3 version of [`examples/commands2/REVCC_2026`](../../comma
   - `shoot` awaits `spinUp()`, then awaits the flywheel and feeder together.
   - The Y toggle uses `FuelCommands.shootAndIntake`, a no-requirements coroutine that awaits `shoot` and `intake` together. It replaces v2's `alongWith`.
   - `Autos.exampleAuto` resets odometry, then awaits each `driveToPoseCommand` in turn.
-  - `driveToPoseCommand` awaits YAMS `driveToPose(...).until(...)` and stops the modules when it finishes or is canceled.
+  - `driveToPoseCommand` uses the YAMS `driveToPose(pose, 5 cm, 3°)` overload, which ends at the pose and stops the modules when it finishes or is canceled.
 - **Dashboard.**
   - The Intake, Extake, Feeder and Flywheel buttons are published through YAMS `CommandTunable`, because v3 commands are not tunables themselves.
   - The command names are the ones the factories give (for example "Intaking" instead of "Intake - Intaking").

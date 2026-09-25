@@ -4,7 +4,7 @@
 package first.robot.mechanisms;
 
 import static org.wpilib.units.Units.Degrees;
-import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.Centimeters;
 import static org.wpilib.units.Units.Radians;
 
 import first.robot.Constants.DriveConstants;
@@ -135,18 +135,7 @@ public class DriveMechanism implements Mechanism
    */
   public Command driveToPoseCommand(Pose2d pose)
   {
-    return run(coroutine -> {
-      coroutine.await(m_drive.driveToPose(pose).until(() -> isAtPose(pose)).withAutomaticName());
-      stop();
-    }).whenCanceled(this::stop)
-      .named("Drive.DriveToPose" + pose);
-  }
-
-  /** Whether the robot is within 5 cm and 3 degrees of the pose. */
-  private boolean isAtPose(Pose2d pose)
-  {
-    return m_drive.getDistanceFromPose(pose).lt(Meters.of(0.05))
-           && Math.abs(m_drive.getAngleDifferenceFromPose(pose).in(Degrees)) < 3;
+    return m_drive.driveToPose(pose, Centimeters.of(5), Degrees.of(3));
   }
 
   /** Stop all modules. */

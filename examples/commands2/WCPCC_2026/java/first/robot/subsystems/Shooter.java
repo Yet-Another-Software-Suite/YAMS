@@ -103,6 +103,10 @@ public class Shooter extends SubsystemBase {
     public void setRPM(double rpm) {
         targetVelocity = RPM.of(rpm);
         isInVelocityMode = true;
+        // setPercentOutput() stops the followers' closed loops, and a loosely coupled follower only
+        // receives the leader's setpoint, so restart them before handing them a velocity again. The
+        // leader's closed loop is restarted by setMechanismVelocitySetpoint().
+        followers.forEach(SmartMotorController::startClosedLoopController);
         shooter.setMechanismVelocitySetpoint(targetVelocity);
     }
 

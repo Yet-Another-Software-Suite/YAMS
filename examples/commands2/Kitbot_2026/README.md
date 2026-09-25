@@ -50,10 +50,11 @@ A port of the FIRST 2026 KitBot code to WPILib 2027 and YAMS.
   - Right bumper: spin up for 1 s, then launch.
   - A: eject.
   - Drive default: arcade drive with 0.7 / 0.8 scaling.
-- The auto is unchanged: drive at 0.5 for 0.25 s, spin up 1 s, launch 9 s, stop.
+- The auto keeps the original steps: drive at 0.5 for 0.25 s, stop, spin up 1 s, launch 9 s, stop.
 - CAN IDs, current limits and every roller voltage are unchanged.
 
 ### Behavior differences
 
+- **Auto fix.** In the original, the "stop driving" step used `driveArcade(() -> 0, () -> 0)`, a `run` command that never ends, so the auto never reached spin-up and launch. The port adds a `stopCommand()` that ends right away, so the auto now launches.
 - `setCANTimeout(250)` and the explicit REV `ResetMode`/`PersistMode` flags are no longer called. The controllers are built with the 2027 `CANPorts.fromBusId(1)` API.
 - Every fuel command requires both roller subsystems, so scheduling behaves as it did with the single original subsystem.

@@ -3,12 +3,16 @@
 
 package yams.commands3.swerve;
 
+import static org.wpilib.units.Units.Radians;
+
 import java.util.function.Supplier;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.tunable.Tunables;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.Distance;
 import yams.commands3.config.SwerveDriveConfig;
 import yams.commands3.telemetry.CommandTunable;
 
@@ -86,7 +90,8 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
   }
 
   /**
-   * Drive the robot to the given pose.
+   * Drive the robot to the given pose. The command runs until it is canceled and stops the drive
+   * when it is.
    *
    * @param pose {@link Pose2d} to drive the robot to. Field relative, blue-origin where 0deg is
    *             facing towards RED
@@ -97,9 +102,51 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
     return mechanism.run(coroutine -> {
       startDriveToPoseTuning();
       while (true) {
-        setFieldRelativeChassisSpeeds(driveToPoseSetpoint(pose));
+        // driveToPoseSetpoint already returns robot relative speeds.
+        setRobotRelativeChassisSpeeds(driveToPoseSetpoint(pose));
         coroutine.yield();
       }
-    }).named("Drive to Pose");
+    }).whenCanceled(this::stop).named("Drive to Pose");
+  }
+
+  /**
+   * Drive the robot to the given pose, ending once the robot is within the given tolerances. The
+   * drive is stopped when the command ends or is canceled.
+   *
+   * @param pose                 {@link Pose2d} to drive the robot to. Field relative, blue-origin
+   *                             where 0deg is facing towards RED
+   * @param translationTolerance Maximum distance from the pose to be considered at the pose.
+   * @param rotationTolerance    Maximum heading error from the pose to be considered at the pose.
+   * @return {@link Command} to drive the robot to the given pose.
+   * @implNote Not compatible with AdvantageKit
+   */
+  public Command driveToPose(Pose2d pose, Distance translationTolerance, Angle rotationTolerance) {
+    return mechanism.run(coroutine -> {
+      startDriveToPoseTuning();
+      while (!isNear(pose, translationTolerance, rotationTolerance)) {
+        // driveToPoseSetpoint already returns robot relative speeds.
+        setRobotRelativeChassisSpeeds(driveToPoseSetpoint(pose));
+        coroutine.yield();
+      }
+      stop();
+    }).whenCanceled(this::stop).named("Drive to Pose");
+  }
+
+  /**
+   * Whether the robot is within the given tolerances of a pose.
+   *
+   * @param pose                 {@link Pose2d} to compare against.
+   * @param translationTolerance Maximum distance from the pose.
+   * @param rotationTolerance    Maximum heading error from the pose.
+   * @return True if the robot is within both tolerances of the pose.
+   */
+  public boolean isNear(Pose2d pose, Distance translationTolerance, Angle rotationTolerance) {
+    return getDistanceFromPose(pose).lte(translationTolerance) &&
+           Math.abs(getAngleDifferenceFromPose(pose).in(Radians)) <= rotationTolerance.in(Radians);
+  }
+
+  /** Stop the drive by commanding zero chassis speeds. */
+  public void stop() {
+    setRobotRelativeChassisSpeeds(new ChassisVelocities());
   }
 }
