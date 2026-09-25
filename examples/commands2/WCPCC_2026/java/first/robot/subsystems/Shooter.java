@@ -15,6 +15,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import first.robot.Constants.KrakenX60;
 import first.robot.Ports;
+import java.util.List;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.SubsystemBase;
@@ -23,7 +24,7 @@ import org.wpilib.math.system.DCMotor;
 import org.wpilib.tunable.TunableDouble;
 import org.wpilib.tunable.Tunables;
 import org.wpilib.units.measure.AngularVelocity;
-import org.wpilib.util.Pair;
+import org.wpilib.units.measure.Voltage;
 import yams.commands2.config.SmartMotorControllerConfig;
 import yams.commands2.mechanisms.FlyWheel;
 import yams.core.gearing.MechanismGearing;
@@ -35,16 +36,13 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
 
 /**
- * Three-Kraken shooter flywheel. WCP commanded each Talon with the same velocity request; with
- * YAMS the left motor leads a {@link FlyWheel} and the middle and right motors follow it, spinning
- * opposite the leader just as their inversions did in the original.
+ * Three-Kraken shooter flywheel. WCP ran a velocity loop on each Talon. With YAMS each motor still
+ * has its own {@link SmartMotorController} and closed loop: the left motor leads a {@link FlyWheel},
+ * and the middle and right motors are loosely coupled followers that receive the same velocity
+ * setpoints.
  */
 public class Shooter extends SubsystemBase {
     private static final AngularVelocity kVelocityTolerance = RPM.of(100);
-
-    private final TalonFX leftMotor = new TalonFX(Ports.kShooterLeft, Ports.kRoboRioCANBus);
-    private final TalonFX middleMotor = new TalonFX(Ports.kShooterMiddle, Ports.kRoboRioCANBus);
-    private final TalonFX rightMotor = new TalonFX(Ports.kShooterRight, Ports.kRoboRioCANBus);
 
     // YAMS has no setting for the peak reverse voltage, so it is passed through as the base Talon
     // config. Keeping it at 0 V stops the flywheel from ever being driven backwards.
@@ -54,31 +52,44 @@ public class Shooter extends SubsystemBase {
         return config;
     }
 
-    private final SmartMotorControllerConfig motorConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
-        .withVendorConfig(vendorConfig())
-        .withControlMode(ControlMode.CLOSED_LOOP)
-        .withGearing(new MechanismGearing(1.0))
-        // Left motor is CounterClockwise_Positive
-        .withMotorInverted(false)
-        .withIdleMode(MotorMode.COAST)
-        .withStatorCurrentLimit(Amps.of(120))
-        .withSupplyCurrentLimit(Amps.of(70))
-        .withClosedLoopController(0.5, 2, 0)
-        // 12 volts when requesting max RPS
-        .withFeedforward(new SimpleMotorFeedforward(0, 12.0 / KrakenX60.kFreeSpeed.in(RotationsPerSecond)))
-        // Simulation only: rough estimate of the flywheel's inertia.
-        .withMomentOfInertia(Inches.of(2), Pounds.of(2))
-        .withTelemetry("ShooterMotor", TelemetryVerbosity.HIGH)
-        // Middle and right are Clockwise_Positive, so they oppose the left leader.
-        .withFollowers(Pair.of(middleMotor, true), Pair.of(rightMotor, true));
+    // Same configuration for all three motors, as in the original; only the inversion differs.
+    private SmartMotorControllerConfig motorConfig(String telemetryName, boolean inverted) {
+        return (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
+            .withVendorConfig(vendorConfig())
+            .withControlMode(ControlMode.CLOSED_LOOP)
+            .withGearing(new MechanismGearing(1.0))
+            .withMotorInverted(inverted)
+            .withIdleMode(MotorMode.COAST)
+            .withStatorCurrentLimit(Amps.of(120))
+            .withSupplyCurrentLimit(Amps.of(70))
+            .withClosedLoopController(0.5, 2, 0)
+            // 12 volts when requesting max RPS
+            .withFeedforward(new SimpleMotorFeedforward(0, 12.0 / KrakenX60.kFreeSpeed.in(RotationsPerSecond)))
+            // Simulation only: rough estimate of each motor's share of the flywheel's inertia.
+            .withMomentOfInertia(Inches.of(2), Pounds.of(2.0 / 3))
+            .withTelemetry(telemetryName, TelemetryVerbosity.HIGH);
+    }
 
-    private final SmartMotorController motorController = new TalonFXWrapper(leftMotor, DCMotor.getKrakenX60(3), motorConfig);
+    // Middle and right are Clockwise_Positive.
+    private final SmartMotorController middleMotor = new TalonFXWrapper(
+        new TalonFX(Ports.kShooterMiddle, Ports.kRoboRioCANBus), DCMotor.getKrakenX60(1), motorConfig("ShooterMiddleMotor", true));
+    private final SmartMotorController rightMotor = new TalonFXWrapper(
+        new TalonFX(Ports.kShooterRight, Ports.kRoboRioCANBus), DCMotor.getKrakenX60(1), motorConfig("ShooterRightMotor", true));
+
+    // Left is CounterClockwise_Positive and leads; its velocity setpoints go to the followers too.
+    private final SmartMotorController leftMotor = new TalonFXWrapper(
+        new TalonFX(Ports.kShooterLeft, Ports.kRoboRioCANBus), DCMotor.getKrakenX60(1),
+        (SmartMotorControllerConfig) motorConfig("ShooterLeftMotor", false)
+            .withLooselyCoupledFollowers(middleMotor, rightMotor));
+
+    private final List<SmartMotorController> motors = List.of(leftMotor, middleMotor, rightMotor);
+    private final List<SmartMotorController> followers = List.of(middleMotor, rightMotor);
 
     // Wheel diameter is an estimate; it only affects telemetry and the simulation display.
     private final FlyWheel shooter = new FlyWheel(new FlyWheelConfig()
         .withDiameter(Inches.of(4))
         .withTelemetry("Shooter", TelemetryVerbosity.HIGH),
-        motorController);
+        leftMotor);
 
     private final TunableDouble dashboardTargetRPM = Tunables.addDouble("Shooter/Dashboard RPM", 0.0);
 
@@ -92,13 +103,19 @@ public class Shooter extends SubsystemBase {
     public void setRPM(double rpm) {
         targetVelocity = RPM.of(rpm);
         isInVelocityMode = true;
-        motorController.startClosedLoopController();
         shooter.setMechanismVelocitySetpoint(targetVelocity);
     }
 
     public void setPercentOutput(double percentOutput) {
         isInVelocityMode = false;
-        shooter.setVoltageSetpoint(Volts.of(percentOutput * 12.0));
+        final Voltage voltage = Volts.of(percentOutput * 12.0);
+        shooter.setVoltageSetpoint(voltage);
+        // Loosely coupled followers only receive position and velocity setpoints, so open loop
+        // output is sent to them directly.
+        for (final SmartMotorController follower : followers) {
+            follower.stopClosedLoopController();
+            follower.setVoltage(voltage);
+        }
     }
 
     public void stop() {
@@ -115,16 +132,19 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean isVelocityWithinTolerance() {
-        return isInVelocityMode && shooter.getSpeed().isNear(targetVelocity, kVelocityTolerance);
+        return isInVelocityMode && motors.stream()
+            .allMatch(motor -> motor.getMechanismVelocity().isNear(targetVelocity, kVelocityTolerance));
     }
 
     @Override
     public void periodic() {
         shooter.updateTelemetry();
+        followers.forEach(SmartMotorController::updateTelemetry);
     }
 
     @Override
     public void simulationPeriodic() {
         shooter.simIterate();
+        followers.forEach(SmartMotorController::simIterate);
     }
 }
