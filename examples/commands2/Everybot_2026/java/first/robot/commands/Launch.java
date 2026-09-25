@@ -4,27 +4,29 @@
 package first.robot.commands;
 
 import org.wpilib.command2.Command;
-import first.robot.subsystems.CANFuelSubsystem;
+import first.robot.subsystems.IndexerSubsystem;
+import first.robot.subsystems.IntakeLauncherSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class Launch extends Command {
   /** Creates a new Intake. */
 
-  CANFuelSubsystem fuelSubsystem;
+  IntakeLauncherSubsystem intakeLauncher;
+  IndexerSubsystem indexer;
 
-  public Launch(CANFuelSubsystem fuelSystem) {
-    addRequirements(fuelSystem);
-    this.fuelSubsystem = fuelSystem;
+  public Launch(IntakeLauncherSubsystem intakeLauncher, IndexerSubsystem indexer) {
+    addRequirements(intakeLauncher, indexer);
+    this.intakeLauncher = intakeLauncher;
+    this.indexer = indexer;
   }
 
   // Called when the command is initially scheduled. Set the rollers to the
   // appropriate values for intaking
   @Override
   public void initialize() {
-    fuelSubsystem
-        .setIntakeLauncherRoller(
-            fuelSubsystem.launchingLauncherValue.get());
-    fuelSubsystem.setFeederRoller(fuelSubsystem.launchingFeederValue.get());
+    intakeLauncher.setIntakeLauncherRoller(
+            intakeLauncher.launchingLauncherValue.get());
+    indexer.setFeederRoller(indexer.launchingFeederValue.get());
   }
 
   // Called every time the scheduler runs while the command is scheduled. This

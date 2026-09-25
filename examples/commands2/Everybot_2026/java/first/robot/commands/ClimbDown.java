@@ -1,7 +1,6 @@
 package first.robot.commands;
 
 import org.wpilib.command2.Command;
-import first.robot.subsystems.CANFuelSubsystem;
 import first.robot.subsystems.ClimberSubsystem;
 
 import static first.robot.Constants.ClimbConstants.*;

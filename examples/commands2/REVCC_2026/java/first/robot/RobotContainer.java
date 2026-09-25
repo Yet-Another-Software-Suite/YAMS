@@ -6,6 +6,9 @@ package first.robot;
 import first.robot.Constants.OIConstants;
 import first.robot.commands.Autos;
 import first.robot.subsystems.DriveSubsystem;
+import first.robot.commands.FuelCommands;
+import first.robot.subsystems.ConveyorSubsystem;
+import first.robot.subsystems.FeederSubsystem;
 import first.robot.subsystems.IntakeSubsystem;
 import first.robot.subsystems.ShooterSubsystem;
 import org.wpilib.command2.Command;
@@ -23,8 +26,10 @@ public class RobotContainer
 {
   // The robot's subsystems and commands are defined here...
   private final DriveSubsystem   m_robotDrive = new DriveSubsystem();
-  private final IntakeSubsystem  m_intake     = new IntakeSubsystem();
-  private final ShooterSubsystem m_shooter    = new ShooterSubsystem();
+  private final IntakeSubsystem   m_intake     = new IntakeSubsystem();
+  private final ConveyorSubsystem m_conveyor   = new ConveyorSubsystem();
+  private final ShooterSubsystem  m_shooter    = new ShooterSubsystem();
+  private final FeederSubsystem   m_feeder     = new FeederSubsystem();
 
   // The driver's controller
   private final CommandNiDsXboxController m_driverController =
@@ -49,10 +54,10 @@ public class RobotContainer
             true).withName("Robot Drive Default"));
 
     // Dashboard buttons for running individual mechanisms.
-    Tunables.publish("Intake", m_intake.runIntakeCommand().withName("Intake - Intaking"));
-    Tunables.publish("Extake", m_intake.runExtakeCommand().withName("Intake - Extaking"));
+    Tunables.publish("Intake", FuelCommands.intake(m_intake, m_conveyor).withName("Intake - Intaking"));
+    Tunables.publish("Extake", FuelCommands.extake(m_intake, m_conveyor).withName("Intake - Extaking"));
 
-    Tunables.publish("Feeder", m_shooter.runFeederCommand().withName("Shooter - Feeding and Shooting"));
+    Tunables.publish("Feeder", FuelCommands.feed(m_shooter, m_feeder).withName("Shooter - Feeding and Shooting"));
     Tunables.publish("Flywheel", m_shooter.runFlywheelCommand().withName("Shooter - Spinning up Flywheel"));
   }
 
@@ -76,15 +81,15 @@ public class RobotContainer
     // Right Trigger -> Run fuel intake
     m_driverController
         .rightTrigger(OIConstants.kTriggerButtonThreshold)
-        .whileTrue(m_intake.runIntakeCommand());
+        .whileTrue(FuelCommands.intake(m_intake, m_conveyor));
 
     // Left Trigger -> Run fuel intake in reverse
     m_driverController
         .leftTrigger(OIConstants.kTriggerButtonThreshold)
-        .whileTrue(m_intake.runExtakeCommand());
+        .whileTrue(FuelCommands.extake(m_intake, m_conveyor));
 
     // Y Button -> Run intake and run the shooter flywheel and feeder
-    m_driverController.y().toggleOnTrue(m_shooter.runShooterCommand().alongWith(m_intake.runIntakeCommand()));
+    m_driverController.y().toggleOnTrue(FuelCommands.shoot(m_shooter, m_feeder).alongWith(FuelCommands.intake(m_intake, m_conveyor)));
   }
 
   /**

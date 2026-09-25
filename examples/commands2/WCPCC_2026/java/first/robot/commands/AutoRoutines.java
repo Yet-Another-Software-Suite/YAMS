@@ -24,14 +24,16 @@ import first.robot.subsystems.Feeder;
 import first.robot.subsystems.Floor;
 import first.robot.subsystems.Hanger;
 import first.robot.subsystems.Hood;
-import first.robot.subsystems.Intake;
+import first.robot.subsystems.IntakePivot;
+import first.robot.subsystems.IntakeRollers;
 import first.robot.subsystems.Limelight;
 import first.robot.subsystems.Shooter;
 import first.robot.subsystems.Swerve;
 
 public final class AutoRoutines {
     private final Swerve swerve;
-    private final Intake intake;
+    private final IntakePivot intakePivot;
+    private final IntakeRollers intakeRollers;
     private final Floor floor;
     private final Feeder feeder;
     private final Shooter shooter;
@@ -46,7 +48,8 @@ public final class AutoRoutines {
 
     public AutoRoutines(
         Swerve swerve,
-        Intake intake,
+        IntakePivot intakePivot,
+        IntakeRollers intakeRollers,
         Floor floor,
         Feeder feeder,
         Shooter shooter,
@@ -55,7 +58,8 @@ public final class AutoRoutines {
         Limelight limelight
     ) {
         this.swerve = swerve;
-        this.intake = intake;
+        this.intakePivot = intakePivot;
+        this.intakeRollers = intakeRollers;
         this.floor = floor;
         this.feeder = feeder;
         this.shooter = shooter;
@@ -63,7 +67,7 @@ public final class AutoRoutines {
         this.hanger = hanger;
         this.limelight = limelight;
 
-        this.subsystemCommands = new SubsystemCommands(swerve, intake, floor, feeder, shooter, hood, hanger);
+        this.subsystemCommands = new SubsystemCommands(swerve, intakePivot, intakeRollers, floor, feeder, shooter, hood, hanger);
 
         this.autoFactory = swerve.createAutoFactory();
         this.autoChooser = new AutoChooser();
@@ -92,13 +96,13 @@ public final class AutoRoutines {
         routine.observe(hanger::isHomed).onTrue(
             Commands.sequence(
                 Commands.waitSeconds(0.5),
-                intake.runOnce(() -> intake.set(Intake.Position.INTAKE))
+                intakePivot.positionCommand(IntakePivot.Position.INTAKE)
             )
         );
 
         startToOutpost.doneDelayed(1).onTrue(outpostToDepot.cmd());
 
-        outpostToDepot.atTimeBeforeEnd(1).onTrue(intake.intakeCommand());
+        outpostToDepot.atTimeBeforeEnd(1).onTrue(subsystemCommands.intake());
         outpostToDepot.doneDelayed(0.1).onTrue(depotToShootingPose.cmd());
 
         depotToShootingPose.active().whileTrue(limelight.idle());

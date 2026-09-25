@@ -13,7 +13,8 @@ import first.robot.commands.ExampleAuto;
 import first.robot.commands.Intake;
 import first.robot.commands.LaunchSequence;
 import first.robot.subsystems.CANDriveSubsystem;
-import first.robot.subsystems.CANFuelSubsystem;
+import first.robot.subsystems.IndexerSubsystem;
+import first.robot.subsystems.IntakeLauncherSubsystem;
 import first.robot.subsystems.ClimberSubsystem;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.button.CommandNiDsXboxController;
@@ -29,7 +30,8 @@ import org.wpilib.command2.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems
   private final CANDriveSubsystem driveSubsystem = new CANDriveSubsystem();
-  private final CANFuelSubsystem fuelSubsystem = new CANFuelSubsystem();
+  private final IntakeLauncherSubsystem intakeLauncherSubsystem = new IntakeLauncherSubsystem();
+  private final IndexerSubsystem indexerSubsystem = new IndexerSubsystem();
   private final ClimberSubsystem climberSubsystem = new ClimberSubsystem();
 
   // The driver's controller
@@ -50,7 +52,7 @@ public class RobotContainer {
   public RobotContainer() {
     configureBindings();
 
-    autonomousCommand = new ExampleAuto(driveSubsystem, fuelSubsystem);
+    autonomousCommand = new ExampleAuto(driveSubsystem, intakeLauncherSubsystem, indexerSubsystem);
   }
 
   /**
@@ -67,13 +69,13 @@ public class RobotContainer {
   private void configureBindings() {
 
     // While the left bumper on operator controller is held, intake Fuel
-    driverController.leftBumper().whileTrue(new Intake(fuelSubsystem));
+    driverController.leftBumper().whileTrue(new Intake(intakeLauncherSubsystem, indexerSubsystem));
     // While the right bumper on the operator controller is held, spin up for 1
     // second, then launch fuel. When the button is released, stop.
-    driverController.rightBumper().whileTrue(new LaunchSequence(fuelSubsystem));
+    driverController.rightBumper().whileTrue(new LaunchSequence(intakeLauncherSubsystem, indexerSubsystem));
     // While the A button is held on the operator controller, eject fuel back out
     // the intake
-    driverController.a().whileTrue(new Eject(fuelSubsystem));
+    driverController.a().whileTrue(new Eject(intakeLauncherSubsystem, indexerSubsystem));
     // The D-pad triggers live on the generic HID in 2027.
     // While the down arrow on the directional pad is held it will unclimb the robot
     driverController.getHID().povDown().whileTrue(new ClimbDown(climberSubsystem));
@@ -87,7 +89,9 @@ public class RobotContainer {
     // value)
     driveSubsystem.setDefaultCommand(new Drive(driveSubsystem, driverController));
 
-    fuelSubsystem.setDefaultCommand(fuelSubsystem.run(() -> fuelSubsystem.stop()));
+    intakeLauncherSubsystem.setDefaultCommand(intakeLauncherSubsystem.run(() -> intakeLauncherSubsystem.stop()));
+
+    indexerSubsystem.setDefaultCommand(indexerSubsystem.run(() -> indexerSubsystem.stop()));
 
     climberSubsystem.setDefaultCommand(climberSubsystem.run(() -> climberSubsystem.stop()));
   }

@@ -11,7 +11,8 @@ import first.robot.subsystems.Feeder;
 import first.robot.subsystems.Floor;
 import first.robot.subsystems.Hanger;
 import first.robot.subsystems.Hood;
-import first.robot.subsystems.Intake;
+import first.robot.subsystems.IntakePivot;
+import first.robot.subsystems.IntakeRollers;
 import first.robot.subsystems.Limelight;
 import first.robot.subsystems.Shooter;
 import first.robot.subsystems.Swerve;
@@ -32,7 +33,8 @@ import org.wpilib.math.geometry.Rotation2d;
  */
 public class RobotContainer {
     private final Swerve swerve = new Swerve();
-    private final Intake intake = new Intake();
+    private final IntakePivot intakePivot = new IntakePivot();
+    private final IntakeRollers intakeRollers = new IntakeRollers();
     private final Floor floor = new Floor();
     private final Feeder feeder = new Feeder();
     private final Shooter shooter = new Shooter();
@@ -44,7 +46,8 @@ public class RobotContainer {
 
     private final AutoRoutines autoRoutines = new AutoRoutines(
         swerve,
-        intake,
+        intakePivot,
+        intakeRollers,
         floor,
         feeder,
         shooter,
@@ -55,7 +58,8 @@ public class RobotContainer {
 
     private final SubsystemCommands subsystemCommands = new SubsystemCommands(
         swerve,
-        intake,
+        intakePivot,
+        intakeRollers,
         floor,
         feeder,
         shooter,
@@ -85,13 +89,13 @@ public class RobotContainer {
         configureManualDriveBindings();
         limelight.setDefaultCommand(updateVisionCommand());
         RobotModeTriggers.autonomous().or(RobotModeTriggers.teleop())
-            .onTrue(intake.homingCommand())
+            .onTrue(intakePivot.homingCommand())
             .onTrue(hanger.homingCommand());
 
         driver.rightTrigger().whileTrue(subsystemCommands.aimAndShoot());
         driver.rightBumper().whileTrue(subsystemCommands.shootManually());
-        driver.leftTrigger().whileTrue(intake.intakeCommand());
-        driver.leftBumper().onTrue(intake.runOnce(() -> intake.set(Intake.Position.STOWED)));
+        driver.leftTrigger().whileTrue(subsystemCommands.intake());
+        driver.leftBumper().onTrue(intakePivot.positionCommand(IntakePivot.Position.STOWED));
         // The D-pad triggers live on the generic HID in 2027.
         driver.getHID().povUp().onTrue(hanger.positionCommand(Hanger.Position.HANGING));
         driver.getHID().povDown().onTrue(hanger.positionCommand(Hanger.Position.HUNG));

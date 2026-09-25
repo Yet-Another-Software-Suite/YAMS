@@ -23,13 +23,10 @@ import org.wpilib.math.controller.ArmFeedforward;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
-import org.wpilib.units.measure.Voltage;
 import yams.commands2.config.SmartMotorControllerConfig;
 import yams.commands2.mechanisms.Arm;
-import yams.commands2.mechanisms.FlyWheel;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.ArmConfig;
-import yams.core.mechanisms.config.FlyWheelConfig;
 import yams.core.mechanisms.config.SensorConfig;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
@@ -39,25 +36,11 @@ import yams.core.motorcontrollers.remote.TalonFXWrapper;
 import yams.core.motorcontrollers.simulation.Sensor;
 
 /**
- * Over-the-bumper intake: a pivot that swings the intake out, modeled as a YAMS {@link Arm}, and
- * the intake rollers, modeled as a YAMS {@link FlyWheel}.
+ * Intake pivot that swings the over-the-bumper intake out, modeled as a YAMS {@link Arm}. The
+ * rollers are a separate subsystem ({@link IntakeRollers}) so each mechanism can be tuned live on
+ * its own.
  */
-public class Intake extends SubsystemBase {
-    public enum Speed {
-        STOP(0),
-        INTAKE(0.8);
-
-        private final double percentOutput;
-
-        private Speed(double percentOutput) {
-            this.percentOutput = percentOutput;
-        }
-
-        public Voltage voltage() {
-            return Volts.of(percentOutput * 12.0);
-        }
-    }
-
+public class IntakePivot extends SubsystemBase {
     public enum Position {
         HOMED(110),
         STOWED(100),
@@ -80,7 +63,6 @@ public class Intake extends SubsystemBase {
     private static final Angle kPositionTolerance = Degrees.of(5);
 
     private final TalonFX pivotMotor = new TalonFX(Ports.kIntakePivot, Ports.kCANivoreCANBus);
-    private final TalonFX rollerMotor = new TalonFX(Ports.kIntakeRollers, Ports.kRoboRioCANBus);
 
     private final SmartMotorControllerConfig pivotConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
         .withControlMode(ControlMode.CLOSED_LOOP)
@@ -111,26 +93,6 @@ public class Intake extends SubsystemBase {
         .withTelemetry("IntakePivot", TelemetryVerbosity.HIGH),
         pivotMotorController);
 
-    private final SmartMotorControllerConfig rollerConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
-        .withControlMode(ControlMode.OPEN_LOOP)
-        .withGearing(new MechanismGearing(1.0))
-        // Clockwise_Positive
-        .withMotorInverted(true)
-        .withIdleMode(MotorMode.BRAKE)
-        .withStatorCurrentLimit(Amps.of(120))
-        .withSupplyCurrentLimit(Amps.of(70))
-        // Simulation only: rough estimate of the intake rollers' inertia.
-        .withMomentOfInertia(Inches.of(1), Pounds.of(1))
-        .withTelemetry("IntakeRollerMotor", TelemetryVerbosity.HIGH);
-
-    private final SmartMotorController rollerMotorController = new TalonFXWrapper(rollerMotor, DCMotor.getKrakenX60(1), rollerConfig);
-
-    // Roller diameter is an estimate; it only affects telemetry and the simulation display.
-    private final FlyWheel rollers = new FlyWheel(new FlyWheelConfig()
-        .withDiameter(Inches.of(2))
-        .withTelemetry("IntakeRollers", TelemetryVerbosity.HIGH),
-        rollerMotorController);
-
     // Homing detects the hard stop from the pivot's supply current. The simulator does not model the
     // current rise against a hard stop, so the sensor reports a spike once the pivot reaches it.
     private final Sensor pivotCurrentSensor = new SensorConfig("IntakePivotCurrent")
@@ -140,59 +102,32 @@ public class Intake extends SubsystemBase {
 
     private boolean isHomed = false;
 
-    public Intake() {
+    public IntakePivot() {
     }
 
-    private boolean isPositionWithinTolerance() {
+    public boolean isPositionWithinTolerance() {
         final Angle currentPosition = pivot.getAngle();
         final Angle targetPosition = pivotMotorController.getMechanismPositionSetpoint().orElse(currentPosition);
         return currentPosition.isNear(targetPosition, kPositionTolerance);
     }
 
-    private void setPivotPercentOutput(double percentOutput) {
+    private void setPercentOutput(double percentOutput) {
         pivot.setVoltageSetpoint(Volts.of(percentOutput * 12.0));
     }
 
     public void set(Position position) {
-        pivotMotorController.startClosedLoopController();
         pivot.setMechanismPositionSetpoint(position.angle());
     }
 
-    public void set(Speed speed) {
-        rollers.setVoltageSetpoint(speed.voltage());
-    }
-
-    public Command intakeCommand() {
-        return startEnd(
-            () -> {
-                set(Position.INTAKE);
-                set(Speed.INTAKE);
-            },
-            () -> set(Speed.STOP)
-        );
-    }
-
-    public Command agitateCommand() {
-        return runOnce(() -> set(Speed.INTAKE))
-            .andThen(
-                Commands.sequence(
-                    runOnce(() -> set(Position.AGITATE)),
-                    Commands.waitUntil(this::isPositionWithinTolerance),
-                    runOnce(() -> set(Position.INTAKE)),
-                    Commands.waitUntil(this::isPositionWithinTolerance)
-                )
-                .repeatedly()
-            )
-            .handleInterrupt(() -> {
-                set(Position.INTAKE);
-                set(Speed.STOP);
-            });
+    /** Move the pivot to a position. */
+    public Command positionCommand(Position position) {
+        return runOnce(() -> set(position));
     }
 
     /** Drive the pivot into its upper hard stop until the current spikes, then zero the encoder there. */
     public Command homingCommand() {
         return Commands.sequence(
-            runOnce(() -> setPivotPercentOutput(0.1)),
+            runOnce(() -> setPercentOutput(0.1)),
             Commands.waitUntil(() -> pivotCurrentSensor.getAsDouble("SupplyAmps") > 6),
             runOnce(() -> {
                 pivotMotorController.setEncoderPosition(Position.HOMED.angle());
@@ -207,12 +142,10 @@ public class Intake extends SubsystemBase {
     @Override
     public void periodic() {
         pivot.updateTelemetry();
-        rollers.updateTelemetry();
     }
 
     @Override
     public void simulationPeriodic() {
         pivot.simIterate();
-        rollers.simIterate();
     }
 }

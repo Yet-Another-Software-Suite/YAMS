@@ -5,18 +5,19 @@ package first.robot.commands;
 
 import org.wpilib.command2.SequentialCommandGroup;
 import first.robot.Constants.FuelConstants;
-import first.robot.subsystems.CANFuelSubsystem;
+import first.robot.subsystems.IndexerSubsystem;
+import first.robot.subsystems.IntakeLauncherSubsystem;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class LaunchSequence extends SequentialCommandGroup {
   /** Creates a new LaunchSequence. */
-  public LaunchSequence(CANFuelSubsystem fuelSubsystem) {
+  public LaunchSequence(IntakeLauncherSubsystem intakeLauncher, IndexerSubsystem indexer) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-        new SpinUp(fuelSubsystem).withTimeout(FuelConstants.SPIN_UP_SECONDS),
-        new Launch(fuelSubsystem));
+        new SpinUp(intakeLauncher, indexer).withTimeout(FuelConstants.SPIN_UP_SECONDS),
+        new Launch(intakeLauncher, indexer));
   }
 }

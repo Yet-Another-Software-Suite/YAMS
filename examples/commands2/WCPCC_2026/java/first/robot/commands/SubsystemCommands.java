@@ -12,13 +12,15 @@ import first.robot.subsystems.Feeder;
 import first.robot.subsystems.Floor;
 import first.robot.subsystems.Hanger;
 import first.robot.subsystems.Hood;
-import first.robot.subsystems.Intake;
+import first.robot.subsystems.IntakePivot;
+import first.robot.subsystems.IntakeRollers;
 import first.robot.subsystems.Shooter;
 import first.robot.subsystems.Swerve;
 
 public final class SubsystemCommands {
     private final Swerve swerve;
-    private final Intake intake;
+    private final IntakePivot intakePivot;
+    private final IntakeRollers intakeRollers;
     private final Floor floor;
     private final Feeder feeder;
     private final Shooter shooter;
@@ -30,7 +32,8 @@ public final class SubsystemCommands {
 
     public SubsystemCommands(
         Swerve swerve,
-        Intake intake,
+        IntakePivot intakePivot,
+        IntakeRollers intakeRollers,
         Floor floor,
         Feeder feeder,
         Shooter shooter,
@@ -40,7 +43,8 @@ public final class SubsystemCommands {
         DoubleSupplier leftInput
     ) {
         this.swerve = swerve;
-        this.intake = intake;
+        this.intakePivot = intakePivot;
+        this.intakeRollers = intakeRollers;
         this.floor = floor;
         this.feeder = feeder;
         this.shooter = shooter;
@@ -53,7 +57,8 @@ public final class SubsystemCommands {
 
     public SubsystemCommands(
         Swerve swerve,
-        Intake intake,
+        IntakePivot intakePivot,
+        IntakeRollers intakeRollers,
         Floor floor,
         Feeder feeder,
         Shooter shooter,
@@ -62,7 +67,8 @@ public final class SubsystemCommands {
     ) {
         this(
             swerve,
-            intake,
+            intakePivot,
+            intakeRollers,
             floor,
             feeder,
             shooter,
@@ -91,13 +97,44 @@ public final class SubsystemCommands {
             .handleInterrupt(() -> shooter.stop());
     }
 
+    /** Swing the intake out and run the rollers; the rollers stop when the command ends. */
+    public Command intake() {
+        return Commands.startEnd(
+            () -> {
+                intakePivot.set(IntakePivot.Position.INTAKE);
+                intakeRollers.set(IntakeRollers.Speed.INTAKE);
+            },
+            () -> intakeRollers.set(IntakeRollers.Speed.STOP),
+            intakePivot,
+            intakeRollers
+        );
+    }
+
+    /** Run the rollers while rocking the intake to push fuel toward the floor rollers. */
+    public Command agitate() {
+        return intakeRollers.runOnce(() -> intakeRollers.set(IntakeRollers.Speed.INTAKE))
+            .andThen(
+                Commands.sequence(
+                    intakePivot.runOnce(() -> intakePivot.set(IntakePivot.Position.AGITATE)),
+                    Commands.waitUntil(intakePivot::isPositionWithinTolerance),
+                    intakePivot.runOnce(() -> intakePivot.set(IntakePivot.Position.INTAKE)),
+                    Commands.waitUntil(intakePivot::isPositionWithinTolerance)
+                )
+                .repeatedly()
+            )
+            .handleInterrupt(() -> {
+                intakePivot.set(IntakePivot.Position.INTAKE);
+                intakeRollers.set(IntakeRollers.Speed.STOP);
+            });
+    }
+
     private Command feed() {
         return Commands.sequence(
             Commands.waitSeconds(0.25),
             Commands.parallel(
                 feeder.feedCommand(),
                 Commands.waitSeconds(0.125)
-                    .andThen(floor.feedCommand().alongWith(intake.agitateCommand()))
+                    .andThen(floor.feedCommand().alongWith(agitate()))
             )
         );
     }

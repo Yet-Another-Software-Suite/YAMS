@@ -8,7 +8,9 @@ import static first.robot.Constants.OperatorConstants.*;
 
 import first.robot.commands.Autos;
 import first.robot.subsystems.CANDriveSubsystem;
-import first.robot.subsystems.CANFuelSubsystem;
+import first.robot.commands.FuelCommands;
+import first.robot.subsystems.FeederSubsystem;
+import first.robot.subsystems.IntakeLauncherSubsystem;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.button.CommandNiDsXboxController;
 import org.wpilib.command2.button.Trigger;
@@ -23,7 +25,10 @@ import org.wpilib.command2.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems
   private final CANDriveSubsystem driveSubsystem = new CANDriveSubsystem();
-  private final CANFuelSubsystem ballSubsystem = new CANFuelSubsystem();
+  private final FeederSubsystem feederSubsystem = new FeederSubsystem();
+  private final IntakeLauncherSubsystem intakeLauncherSubsystem = new IntakeLauncherSubsystem();
+  // Fuel actions that run both rollers together
+  private final FuelCommands fuel = new FuelCommands(feederSubsystem, intakeLauncherSubsystem);
 
   // The driver's controller
   private final CommandNiDsXboxController driverController = new CommandNiDsXboxController(
@@ -43,7 +48,7 @@ public class RobotContainer {
   public RobotContainer() {
     configureBindings();
 
-    autonomousCommand = Autos.exampleAuto(driveSubsystem, ballSubsystem);
+    autonomousCommand = Autos.exampleAuto(driveSubsystem, fuel);
   }
 
   /**
@@ -61,17 +66,17 @@ public class RobotContainer {
 
     // While the left bumper on operator controller is held, intake Fuel
     operatorController.leftBumper()
-        .whileTrue(ballSubsystem.runEnd(() -> ballSubsystem.intake(), () -> ballSubsystem.stop()));
+        .whileTrue(fuel.intakeCommand());
     // While the right bumper on the operator controller is held, spin up for 1
     // second, then launch fuel. When the button is released, stop.
     operatorController.rightBumper()
-        .whileTrue(ballSubsystem.spinUpCommand().withTimeout(SPIN_UP_SECONDS)
-            .andThen(ballSubsystem.launchCommand())
-            .finallyDo(() -> ballSubsystem.stop()));
+        .whileTrue(fuel.spinUpCommand().withTimeout(SPIN_UP_SECONDS)
+            .andThen(fuel.launchCommand())
+            .finallyDo(() -> fuel.stop()));
     // While the A button is held on the operator controller, eject fuel back out
     // the intake
     operatorController.a()
-        .whileTrue(ballSubsystem.runEnd(() -> ballSubsystem.eject(), () -> ballSubsystem.stop()));
+        .whileTrue(fuel.ejectCommand());
 
     // Set the default command for the drive subsystem to the command provided by
     // factory with the values provided by the joystick axes on the driver

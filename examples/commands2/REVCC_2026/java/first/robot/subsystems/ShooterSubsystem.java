@@ -16,7 +16,6 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.util.CANPorts;
 import first.robot.Constants.NeoMotorConstants;
 import first.robot.Constants.ShooterSubsystemConstants;
-import first.robot.Constants.ShooterSubsystemConstants.FeederSetpoints;
 import first.robot.Constants.ShooterSubsystemConstants.FlywheelSetpoints;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
@@ -36,15 +35,15 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.core.motorcontrollers.local.SparkWrapper;
 
 /**
- * Shooter for the 2026 REV ION Starter Bot. Two Vortexes drive the flywheel (right leader, left
- * follower) and a third Vortex runs the feeder that pushes fuel into the flywheel.
+ * Shooter flywheel for the 2026 REV ION Starter Bot. Two Vortexes drive the flywheel (right leader,
+ * left follower), as a YAMS {@link FlyWheel}.
  *
- * <p>The flywheel and the feeder are both YAMS {@link FlyWheel} mechanisms; the feeder is driven
- * open loop but is still a velocity mechanism.
+ * <p>Configuring a trapezoidal profile on the {@link SparkWrapper} makes YAMS command the SPARK with
+ * MAXMotion Velocity control, which is the same smooth spin-up the REV code set up by hand.
  *
- * <p>For the flywheel, configuring a trapezoidal profile on the
- * {@link SparkWrapper} makes YAMS command the SPARK with MAXMotion Velocity control, which is the
- * same smooth spin-up the REV code set up by hand.
+ * <p>The REV code drove the flywheel and feeder from one subsystem. The feeder is its own subsystem
+ * ({@link FeederSubsystem}) so each mechanism can be tuned live on its own;
+ * {@link first.robot.commands.FuelCommands} runs them together.
  */
 public class ShooterSubsystem extends SubsystemBase
 {
@@ -56,11 +55,6 @@ public class ShooterSubsystem extends SubsystemBase
   private final SparkFlex flywheelFollowerMotor = new SparkFlex(CANPorts.fromBusId(1),
                                                                 ShooterSubsystemConstants.kFlywheelFollowerMotorCanId,
                                                                 MotorType.kBrushless);
-
-  // Initialize feeder SPARK. We will use open loop control for this.
-  private final SparkFlex feederMotor = new SparkFlex(CANPorts.fromBusId(1),
-                                                      ShooterSubsystemConstants.kFeederMotorCanId,
-                                                      MotorType.kBrushless);
 
   private final SmartMotorControllerConfig flywheelConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
@@ -85,34 +79,14 @@ public class ShooterSubsystem extends SubsystemBase
       // The follower sits on the opposite side of the shooter, so it spins inverted from the leader.
       .withFollowers(Pair.of(flywheelFollowerMotor, true));
 
-  private final SmartMotorControllerConfig feederConfig = (SmartMotorControllerConfig) new SmartMotorControllerConfig(this)
-      .withControlMode(ControlMode.OPEN_LOOP)
-      .withGearing(new MechanismGearing(1.0))
-      .withMotorInverted(true)
-      .withIdleMode(MotorMode.COAST)
-      .withOpenLoopRampRate(Seconds.of(1.0))
-      .withStatorCurrentLimit(Amps.of(60))
-      // Simulation only: rough estimate of the feeder rollers' inertia.
-      .withMomentOfInertia(Inches.of(1), Pounds.of(0.5))
-      .withTelemetry("FeederMotor", TelemetryVerbosity.HIGH);
-
   private final SmartMotorController flywheelMotorController = new SparkWrapper(flywheelMotor,
                                                                                 DCMotor.getNeoVortex(2),
                                                                                 flywheelConfig);
-  private final SmartMotorController feederMotorController   = new SparkWrapper(feederMotor,
-                                                                                DCMotor.getNeoVortex(1),
-                                                                                feederConfig);
 
   private final FlyWheel flywheel = new FlyWheel(new FlyWheelConfig()
                                                      .withDiameter(Inches.of(4))
                                                      .withTelemetry("Flywheel", TelemetryVerbosity.HIGH),
                                                  flywheelMotorController);
-
-  // Roller diameter is an estimate; it only affects telemetry and the simulation display.
-  private final FlyWheel feeder = new FlyWheel(new FlyWheelConfig()
-                                                   .withDiameter(Inches.of(2))
-                                                   .withTelemetry("Feeder", TelemetryVerbosity.HIGH),
-                                               feederMotorController);
 
   /** Creates a new ShooterSubsystem. */
   public ShooterSubsystem()
@@ -141,22 +115,15 @@ public class ShooterSubsystem extends SubsystemBase
    * Drive the flywheels to their set velocity. YAMS uses MAXMotion velocity control because a
    * trapezoidal profile is configured, giving a smooth acceleration to the setpoint.
    */
-  private void setFlywheelVelocity(AngularVelocity velocity)
+  public void setFlywheelVelocity(AngularVelocity velocity)
   {
-    flywheelMotorController.startClosedLoopController();
-    flywheelMotorController.setVelocity(velocity);
+    flywheel.setMechanismVelocitySetpoint(velocity);
   }
 
   /** Stop the flywheel without actively braking it to zero. */
-  private void stopFlywheel()
+  public void stopFlywheel()
   {
-    flywheelMotorController.setDutyCycle(0);
-  }
-
-  /** Set the feeder motor power in the range of [-1, 1]. */
-  private void setFeederPower(double power)
-  {
-    feeder.setDutyCycleSetpoint(power);
+    flywheel.setDutyCycleSetpoint(0);
   }
 
   /**
@@ -170,43 +137,6 @@ public class ShooterSubsystem extends SubsystemBase
         () -> this.setFlywheelVelocity(RPM.of(0))).withName("Spinning Up Flywheel");
   }
 
-  /**
-   * Command to run the feeder and flywheel motors. When the command is interrupted, e.g. the button
-   * is released, the motors will stop.
-   */
-  public Command runFeederCommand()
-  {
-    return this.startEnd(
-        () -> {
-          this.setFlywheelVelocity(FlywheelSetpoints.kShootRpm);
-          this.setFeederPower(FeederSetpoints.kFeed);
-        }, () -> {
-          this.setFlywheelVelocity(RPM.of(0));
-          this.setFeederPower(0.0);
-        }).withName("Feeding");
-  }
-
-  /**
-   * Meta-command to operate the shooter. The Flywheel starts spinning up and when it reaches the
-   * desired speed it starts the Feeder.
-   */
-  public Command runShooterCommand()
-  {
-    return this.startEnd(
-        () -> this.setFlywheelVelocity(FlywheelSetpoints.kShootRpm),
-        this::stopFlywheel
-    ).until(isFlywheelSpinning).andThen(
-        this.startEnd(
-            () -> {
-              this.setFlywheelVelocity(FlywheelSetpoints.kShootRpm);
-              this.setFeederPower(FeederSetpoints.kFeed);
-            }, () -> {
-              this.stopFlywheel();
-              this.setFeederPower(0.0);
-            })
-    ).withName("Shooting");
-  }
-
   /** Current flywheel velocity. */
   public AngularVelocity getFlywheelVelocity()
   {
@@ -218,13 +148,11 @@ public class ShooterSubsystem extends SubsystemBase
   {
     // Replaces the SmartDashboard output/current/velocity entries from the REV code.
     flywheel.updateTelemetry();
-    feeder.updateTelemetry();
   }
 
   @Override
   public void simulationPeriodic()
   {
     flywheel.simIterate();
-    feeder.simIterate();
   }
 }

@@ -4,26 +4,28 @@
 package first.robot.commands;
 
 import org.wpilib.command2.Command;
-import first.robot.subsystems.CANFuelSubsystem;
+import first.robot.subsystems.IndexerSubsystem;
+import first.robot.subsystems.IntakeLauncherSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class Intake extends Command {
   /** Creates a new Intake. */
 
-  CANFuelSubsystem fuelSubsystem;
+  IntakeLauncherSubsystem intakeLauncher;
+  IndexerSubsystem indexer;
 
-  public Intake(CANFuelSubsystem fuelSystem) {
-    addRequirements(fuelSystem);
-    this.fuelSubsystem = fuelSystem;
+  public Intake(IntakeLauncherSubsystem intakeLauncher, IndexerSubsystem indexer) {
+    addRequirements(intakeLauncher, indexer);
+    this.intakeLauncher = intakeLauncher;
+    this.indexer = indexer;
   }
 
   // Called when the command is initially scheduled. Set the rollers to the
   // appropriate values for intaking
   @Override
   public void initialize() {
-    fuelSubsystem
-        .setIntakeLauncherRoller(fuelSubsystem.intakingIntakeValue.get());
-    fuelSubsystem.setFeederRoller(fuelSubsystem.intakingFeederValue.get());
+    intakeLauncher.setIntakeLauncherRoller(intakeLauncher.intakingIntakeValue.get());
+    indexer.setFeederRoller(indexer.intakingFeederValue.get());
   }
 
   // Called every time the scheduler runs while the command is scheduled. This
@@ -35,8 +37,8 @@ public class Intake extends Command {
   // Called once the command ends or is interrupted. Stop the rollers
   @Override
   public void end(boolean interrupted) {
-    fuelSubsystem.setIntakeLauncherRoller(0);
-    fuelSubsystem.setFeederRoller(0);
+    intakeLauncher.setIntakeLauncherRoller(0);
+    indexer.setFeederRoller(0);
   }
 
   // Returns true when the command should end.

@@ -5,14 +5,15 @@ package first.robot.commands;
 
 import org.wpilib.command2.SequentialCommandGroup;
 import first.robot.subsystems.CANDriveSubsystem;
-import first.robot.subsystems.CANFuelSubsystem;
+import first.robot.subsystems.IndexerSubsystem;
+import first.robot.subsystems.IntakeLauncherSubsystem;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class ExampleAuto extends SequentialCommandGroup {
   /** Creates a new ExampleAuto. */
-  public ExampleAuto(CANDriveSubsystem driveSubsystem, CANFuelSubsystem ballSubsystem) {
+  public ExampleAuto(CANDriveSubsystem driveSubsystem, IntakeLauncherSubsystem intakeLauncher, IndexerSubsystem indexer) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
@@ -22,7 +23,7 @@ public class ExampleAuto extends SequentialCommandGroup {
     new AutoDrive(driveSubsystem,0.5,  0.0).withTimeout(3),
     // Spin up the launcher for 0.75 second and then launch balls for 9.25 seconds, for a
     // total of 10 seconds
-    new LaunchSequence(ballSubsystem).withTimeout(10));
+    new LaunchSequence(intakeLauncher, indexer).withTimeout(10));
 
 
   }
