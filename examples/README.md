@@ -62,8 +62,14 @@ generated/advantage_kit/
 ### Adding a new example
 
 1. Create a new folder under `examples/` with a descriptive name (no `cpp` in the name).
-2. Add a `java/` subfolder containing your source tree rooted at `frc/robot/`.
+2. Add a `java/` subfolder containing your source tree: robot code in the `first.robot` package
+   (`java/first/robot/`) and the entry point at `java/first/Main.java`, which the skeleton's
+   `build.gradle` launches as `first.Main`.
 3. Optionally add a `deploy/` subfolder for any files that should be deployed to the robot.
+4. Optionally add a `vendordeps/` subfolder for vendor libraries only this example needs (for
+   example ChoreoLib); its files are added to the skeleton's vendordeps.
+5. Optionally add a `build.gradle` to replace the skeleton's, for plain Maven dependencies that
+   have no vendordep (for example Jackson).
 
 Running `make` will automatically pick up the new folder and generate its project.
 

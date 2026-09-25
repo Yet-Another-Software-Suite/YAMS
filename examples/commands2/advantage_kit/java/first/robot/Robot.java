@@ -1,0 +1,126 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package first.robot;
+
+import org.wpilib.framework.RobotBase;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.CommandScheduler;
+import org.littletonrobotics.junction.LogFileUtil;
+import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGReader;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+public class Robot extends LoggedRobot {
+  public static enum Mode {
+    /** Running on a real robot. */
+    REAL,
+
+    /** Running a physics simulator. */
+    SIM,
+
+    /** Replaying from a log file. */
+    REPLAY
+  }
+
+  private Command autonomousCommand;
+
+  public final RobotContainer robotContainer;
+  public static final Mode simMode     = Mode.SIM;
+  /// Change to Mode.REPLAY to enable REPLAy.
+  public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
+
+  public Robot() {
+    switch (currentMode) {
+      case REAL:
+        // Running on a real robot, log to a USB stick ("/U/logs")
+        Logger.addDataReceiver(new WPILOGWriter());
+        Logger.addDataReceiver(new NT4Publisher());
+        break;
+
+      case SIM:
+        // Running a physics simulator, log to NT
+        Logger.addDataReceiver(new NT4Publisher());
+        break;
+
+      case REPLAY:
+        // Replaying a log, set up replay source
+        setUseTiming(false); // Run as fast as possible
+        String logPath = LogFileUtil.findReplayLog();
+        Logger.setReplaySource(new WPILOGReader(logPath));
+        Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
+        break;
+    }
+
+    // Start AdvantageKit logger
+    Logger.start();
+
+    robotContainer = new RobotContainer();
+  }
+
+  @Override
+  public void robotPeriodic() {
+    CommandScheduler.getInstance().run();
+  }
+
+  @Override
+  public void disabledInit() {
+  }
+
+  @Override
+  public void disabledPeriodic() {
+  }
+
+  @Override
+  public void disabledExit() {
+  }
+
+  @Override
+  public void autonomousInit() {
+    autonomousCommand = robotContainer.getAutonomousCommand();
+
+    if (autonomousCommand != null) {
+      CommandScheduler.getInstance().schedule(autonomousCommand);
+    }
+  }
+
+  @Override
+  public void autonomousPeriodic() {
+  }
+
+  @Override
+  public void autonomousExit() {
+  }
+
+  @Override
+  public void teleopInit() {
+    if (autonomousCommand != null) {
+      autonomousCommand.cancel();
+    }
+  }
+
+  @Override
+  public void teleopPeriodic() {
+  }
+
+  @Override
+  public void teleopExit() {
+  }
+
+  @Override
+  public void utilityInit() {
+    CommandScheduler.getInstance().cancelAll();
+  }
+
+  @Override
+  public void utilityPeriodic() {
+  }
+
+  @Override
+  public void utilityExit() {
+  }
+}
