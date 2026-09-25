@@ -4,41 +4,44 @@
 
 package first.robot.subsystems;
 
+import com.limelightvision.PoseEstimate;
+import com.limelightvision.PoseEstimateType;
 import java.util.Optional;
-
+import org.wpilib.command2.SubsystemBase;
+import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.linalg.Matrix;
 import org.wpilib.math.linalg.VecBuilder;
-import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.numbers.N1;
 import org.wpilib.math.numbers.N3;
 import org.wpilib.networktables.NetworkTable;
 import org.wpilib.networktables.NetworkTableInstance;
 import org.wpilib.networktables.StructPublisher;
-import org.wpilib.command2.SubsystemBase;
-import first.robot.LimelightHelpers;
-import first.robot.LimelightHelpers.PoseEstimate;
 
+/** MegaTag pose estimates from a Limelight, read through LimelightLib. */
 public class Limelight extends SubsystemBase {
-    private final String name;
+    private final com.limelightvision.Limelight limelight;
     private final NetworkTable telemetryTable;
     private final StructPublisher<Pose2d> posePublisher;
 
     public Limelight(String name) {
-        this.name = name;
+        this.limelight = new com.limelightvision.Limelight(name);
         this.telemetryTable = NetworkTableInstance.getDefault().getTable("SmartDashboard/" + name);
         this.posePublisher = telemetryTable.getStructTopic("Estimated Robot Pose", Pose2d.struct).publish();
     }
 
     public Optional<Measurement> getMeasurement(Pose2d currentRobotPose) {
-        LimelightHelpers.SetRobotOrientation(name, currentRobotPose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        // Only this camera is updated each loop, so flush the orientation right away.
+        limelight.setRobotOrientation(currentRobotPose.getRotation().getDegrees(), true);
 
-        final PoseEstimate poseEstimate_MegaTag1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(name);
-        final PoseEstimate poseEstimate_MegaTag2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(name);
+        final PoseEstimate poseEstimate_MegaTag1 = limelight.getPoseEstimate(PoseEstimateType.MT1_WPIBLUE);
+        final PoseEstimate poseEstimate_MegaTag2 = limelight.getPoseEstimate(PoseEstimateType.MT2_WPIBLUE);
+
+        // isValid() requires at least one fielded tag and no rejected checks.
         if (
-            poseEstimate_MegaTag1 == null 
+            poseEstimate_MegaTag1 == null
                 || poseEstimate_MegaTag2 == null
-                || poseEstimate_MegaTag1.tagCount == 0
-                || poseEstimate_MegaTag2.tagCount == 0
+                || !poseEstimate_MegaTag1.isValid()
+                || !poseEstimate_MegaTag2.isValid()
         ) {
             return Optional.empty();
         }

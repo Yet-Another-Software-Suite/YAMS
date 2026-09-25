@@ -29,7 +29,10 @@ public final class Constants {
     public static class Driving {
         public static final LinearVelocity kMaxSpeed = SwerveConstants.kSpeedAt12Volts;
         public static final AngularVelocity kMaxRotationalRate = RotationsPerSecond.of(1);
-        public static final AngularVelocity kPIDRotationDeadband = kMaxRotationalRate.times(0.005);
+        // Joystick deadband; SwerveInputStream also cubes the translation and rotation axes.
+        public static final double kJoystickDeadband = 0.15;
+        // Rotation stick must be idle this long before the current heading is held.
+        public static final double kHeadingLockDelaySeconds = 0.25;
     }
 
     public static class KrakenX60 {

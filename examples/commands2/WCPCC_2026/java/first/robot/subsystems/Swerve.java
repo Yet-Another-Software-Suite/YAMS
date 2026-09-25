@@ -5,9 +5,7 @@
 package first.robot.subsystems;
 
 import static first.robot.Constants.SwerveConstants.*;
-import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Newtons;
-import static org.wpilib.units.Units.RadiansPerSecond;
 import static org.wpilib.units.Units.Rotations;
 
 import choreo.auto.AutoFactory;
@@ -16,6 +14,8 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import first.robot.Constants.Driving;
+import first.robot.util.GeometryUtil;
+import java.util.function.DoubleSupplier;
 import first.robot.Ports;
 import org.wpilib.command2.SubsystemBase;
 import org.wpilib.driverstation.Alliance;
@@ -33,15 +33,14 @@ import org.wpilib.math.numbers.N1;
 import org.wpilib.math.numbers.N3;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
-import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Force;
-import org.wpilib.units.measure.LinearVelocity;
 import yams.commands2.config.SmartMotorControllerConfig;
 import yams.commands2.config.SwerveDriveConfig;
 import yams.commands2.swerve.SwerveDrive;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.SwerveModuleConfig;
 import yams.core.mechanisms.swerve.SwerveModule;
+import yams.core.mechanisms.swerve.utility.SwerveInputStream;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;
@@ -52,8 +51,9 @@ import yams.core.motorcontrollers.remote.TalonFXWrapper;
  * Swerve drivetrain built with YAMS: four Kraken X60 modules with fused CANcoders and a Pigeon 2.
  *
  * <p>The WCP code extended CTRE's generated swerve drivetrain and drove it with swerve requests.
- * This subsystem exposes the same behavior through a few methods instead: field centric driving
- * from the operator's perspective, driving while holding a heading, and Choreo path following.
+ * Teleop driving now goes through a YAMS {@link SwerveInputStream}, which handles the deadband,
+ * response curve, alliance relative control, heading hold, and aiming; this subsystem adds Choreo
+ * path following and vision.
  */
 public class Swerve extends SubsystemBase {
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
@@ -71,12 +71,8 @@ public class Swerve extends SubsystemBase {
     private final PIDController pathYController = new PIDController(10, 0, 0);
     private final PIDController pathThetaController = new PIDController(7, 0, 0);
 
-    // Heading controller used when driving while facing an angle (heading PID 5, 0, 0 in the original).
-    private final PIDController headingController = new PIDController(5, 0, 0);
-
     public Swerve() {
         pathThetaController.enableContinuousInput(-Math.PI, Math.PI);
-        headingController.enableContinuousInput(-Math.PI, Math.PI);
 
         final SwerveModule frontLeft = createModule("frontleft", Ports.kFrontLeftDrive, Ports.kFrontLeftSteer,
             Ports.kFrontLeftEncoder, kFrontLeftEncoderOffset, kInvertLeftSide,
@@ -97,6 +93,9 @@ public class Swerve extends SubsystemBase {
             .withGyro(pigeon.getYaw().asSupplier())
             .withStartingPose(Pose2d.ZERO)
             .withMaximumModuleSpeed(kSpeedAt12Volts)
+            // Heading PID from the original drive requests; SwerveInputStream uses it to hold, snap,
+            // and aim the robot's heading.
+            .withRotationController(new PIDController(5, 0, 0))
             .withTelemetry("Swerve", TelemetryVerbosity.HIGH);
         drive = new SwerveDrive(config);
     }
@@ -176,36 +175,40 @@ public class Swerve extends SubsystemBase {
     }
 
     /**
-     * Drive field centric from the operator's perspective.
+     * Create a driver input stream: field centric from the operator's perspective, with WCP's
+     * joystick deadband and a cubed response on both the translation and rotation axes.
      *
-     * @param forward      Velocity away from the operator.
-     * @param left         Velocity to the operator's left.
-     * @param rotationRate Counterclockwise rotation rate.
+     * @param forward  Stick input away from the operator, in [-1, 1].
+     * @param left     Stick input to the operator's left, in [-1, 1].
+     * @param rotation Counterclockwise rotation stick input, in [-1, 1].
+     * @return {@link SwerveInputStream} producing field relative {@link ChassisVelocities}.
      */
-    public void driveFieldCentric(LinearVelocity forward, LinearVelocity left, AngularVelocity rotationRate) {
-        final Translation2d fieldVelocity = new Translation2d(forward.in(MetersPerSecond), left.in(MetersPerSecond))
-            .rotateBy(operatorForwardDirection);
-        drive.setFieldRelativeChassisSpeeds(
-            new ChassisVelocities(fieldVelocity.getX(), fieldVelocity.getY(), rotationRate.in(RadiansPerSecond)));
+    public SwerveInputStream createDriverInput(DoubleSupplier forward, DoubleSupplier left, DoubleSupplier rotation) {
+        return new SwerveInputStream(drive, forward, left, rotation)
+            .withMaximumLinearVelocity(Driving.kMaxSpeed)
+            .withMaximumAngularVelocity(Driving.kMaxRotationalRate)
+            .withDeadband(Driving.kJoystickDeadband)
+            .withCubeTranslationControllerAxis()
+            .withCubeRotationControllerAxis()
+            .withAllianceRelativeControl();
+    }
+
+    /** Drive with field relative speeds, e.g. from {@link #createDriverInput}. */
+    public void driveFieldRelative(ChassisVelocities fieldRelativeSpeeds) {
+        drive.setFieldRelativeChassisSpeeds(fieldRelativeSpeeds);
     }
 
     /**
-     * Drive field centric from the operator's perspective while turning to face a direction.
+     * Whether the robot is facing a field position within a tolerance.
      *
-     * @param forward         Velocity away from the operator.
-     * @param left            Velocity to the operator's left.
-     * @param targetDirection Direction to face, from the operator's perspective.
+     * @param target    Field position, blue alliance origin.
+     * @param tolerance Allowed heading error.
      */
-    public void driveFacingAngle(LinearVelocity forward, LinearVelocity left, Rotation2d targetDirection) {
-        final Rotation2d fieldTargetDirection = targetDirection.plus(operatorForwardDirection);
-        final double maxRate = Driving.kMaxRotationalRate.in(RadiansPerSecond);
-        double rotationRate = Math.clamp(
-            headingController.calculate(getPose().getRotation().getRadians(), fieldTargetDirection.getRadians()),
-            -maxRate, maxRate);
-        if (Math.abs(rotationRate) < Driving.kPIDRotationDeadband.in(RadiansPerSecond)) {
-            rotationRate = 0;
-        }
-        driveFieldCentric(forward, left, RadiansPerSecond.of(rotationRate));
+    public boolean isFacing(Translation2d target, Angle tolerance) {
+        final Pose2d pose = getPose();
+        return target.minus(pose.getTranslation()).getAngle()
+            .map(direction -> GeometryUtil.isNear(direction, pose.getRotation(), tolerance))
+            .orElse(true);
     }
 
     /**

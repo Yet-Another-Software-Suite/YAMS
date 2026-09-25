@@ -6,23 +6,21 @@ package first.robot.commands;
 
 import static org.wpilib.units.Units.Degrees;
 
-import first.robot.Constants.Driving;
 import first.robot.Landmarks;
 import first.robot.subsystems.Swerve;
-import first.robot.util.DriveInputSmoother;
-import first.robot.util.GeometryUtil;
-import first.robot.util.ManualDriveInput;
 import java.util.function.DoubleSupplier;
 import org.wpilib.command2.Command;
+import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
-import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.units.measure.Angle;
+import yams.core.mechanisms.swerve.utility.SwerveInputStream;
 
+/** Drive with the translation sticks while a YAMS {@link SwerveInputStream} aims at the hub. */
 public class AimAndDriveCommand extends Command {
     private static final Angle kAimTolerance = Degrees.of(5);
 
     private final Swerve swerve;
-    private final DriveInputSmoother inputSmoother;
+    private final SwerveInputStream input;
 
     public AimAndDriveCommand(
         Swerve swerve,
@@ -30,7 +28,8 @@ public class AimAndDriveCommand extends Command {
         DoubleSupplier leftInput
     ) {
         this.swerve = swerve;
-        this.inputSmoother = new DriveInputSmoother(forwardInput, leftInput);
+        this.input = swerve.createDriverInput(forwardInput, leftInput, () -> 0)
+            .withAim(() -> new Pose2d(Landmarks.hubPosition(), Rotation2d.ZERO), () -> true);
         addRequirements(swerve);
     }
 
@@ -39,25 +38,12 @@ public class AimAndDriveCommand extends Command {
     }
 
     public boolean isAimed() {
-        return GeometryUtil.isNear(getDirectionToHub(), swerve.getHeadingInOperatorPerspective(), kAimTolerance);
-    }
-
-    /** Direction from the robot to the hub, from the operator's perspective. */
-    private Rotation2d getDirectionToHub() {
-        final Translation2d hubPosition = Landmarks.hubPosition();
-        final Translation2d robotPosition = swerve.getPose().getTranslation();
-        final Rotation2d hubDirectionInBlueAlliancePerspective = hubPosition.minus(robotPosition).getAngle().orElse(Rotation2d.ZERO);
-        return hubDirectionInBlueAlliancePerspective.minus(swerve.getOperatorForwardDirection());
+        return swerve.isFacing(Landmarks.hubPosition(), kAimTolerance);
     }
 
     @Override
     public void execute() {
-        final ManualDriveInput input = inputSmoother.getSmoothedInput();
-        swerve.driveFacingAngle(
-            Driving.kMaxSpeed.times(input.forward),
-            Driving.kMaxSpeed.times(input.left),
-            getDirectionToHub()
-        );
+        swerve.driveFieldRelative(input.get());
     }
 
     @Override
