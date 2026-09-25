@@ -112,6 +112,8 @@ public class SwerveDrive {
     Arrays.fill(m_desiredModuleStates, new SwerveModuleVelocity());
     m_kinematics = getKinematics();
     m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics, new Rotation2d(getGyroAngle()), getModulePositions(), m_config.getInitialPose());
+    // Start with the gyro reading the starting pose's heading so field relative driving matches it.
+    resetOdometry(m_config.getInitialPose());
     setupTelemetry();
   }
 
@@ -349,12 +351,22 @@ public class SwerveDrive {
    * @implNote Not compatible with AdvantageKit
    */
   public void zeroGyro() {
-    m_config.withGyroOffset(getGyroAngle().plus(m_config.getGyroOffset()));
-    // If in sim reset to the simulated drive.
-    //    resetOdometry(
-    //        RobotBase.isSimulation() ? getMapleSimPose() : new Pose2d(getPose().getTranslation(),
-    //        Rotation2d.ZERO));
+    // resetOdometry also sets the gyro to read the new heading.
     resetOdometry(new Pose2d(getPose().getTranslation(), Rotation2d.ZERO));
+  }
+
+  /**
+   * Make {@link #getGyroAngle()} read the given heading from now on. On a real robot the gyro offset
+   * is adjusted; in simulation the simulated gyro angle is set directly.
+   *
+   * @param heading Heading the gyro should report.
+   */
+  private void setGyroAngle(Angle heading) {
+    if (RobotBase.isSimulation()) {
+      m_simGyroAngle = heading;
+      return;
+    }
+    m_config.withGyroOffset(getGyroAngle().plus(m_config.getGyroOffset()).minus(heading));
   }
 
   /**
@@ -367,9 +379,9 @@ public class SwerveDrive {
   }
 
   /**
-   * Resets odometry to the given pose. Gyro angle and module positions do not need to be reset
-   * when calling this method. However, if either gyro angle or module position is reset, this
-   * must be called in order for odometry to keep working.
+   * Resets odometry to the given pose, and sets the gyro to read the pose's heading. Field relative
+   * driving and heading control use the gyro, so keeping it aligned with the pose makes them agree
+   * with the reset pose. Module positions do not need to be reset when calling this method.
    *
    * @param pose The pose to set the odometry to. Field relative, blue-origin where 0deg is facing
    *             towards RED alliance.
@@ -380,6 +392,7 @@ public class SwerveDrive {
     //      m_config.getMapleDriveSim().get().resetOdometry(pose);
     //      m_config.getMapleDriveSim().get().setSimulationWorldPose(pose);
     //    }
+    setGyroAngle(pose.getRotation().getMeasure());
     m_poseEstimator.resetPosition(new Rotation2d(getGyroAngle()), getModulePositions(), pose);
     m_desiredChassisSpeeds = new ChassisVelocities();
     m_desiredModuleStates = m_kinematics.toSwerveModuleVelocities(new ChassisVelocities());
