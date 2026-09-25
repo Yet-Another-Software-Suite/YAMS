@@ -12,7 +12,7 @@ import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.button.Trigger;
 import org.wpilib.math.geometry.Rotation2d;
-import yams.core.mechanisms.swerve.utility.SwerveInputStream;
+import yams.commands2.swerve.SwerveInputStream;
 
 /**
  * Teleop manual driving for the swerve drivetrain, built on a YAMS {@link SwerveInputStream}.

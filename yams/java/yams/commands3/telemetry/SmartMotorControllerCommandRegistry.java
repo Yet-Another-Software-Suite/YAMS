@@ -42,9 +42,12 @@ public class SmartMotorControllerCommandRegistry {
    */
   private static void addCommandToNT(String cmdName, Mechanism mechanism) {
     var key = mechanism.getName() + "/" + cmdName;
-    Command cmd = mechanism.runRepeatedly(() -> {
-      for (var callback : commandCallbacks.get(key)) {
-        callback.run();
+    Command cmd = mechanism.run(coroutine -> {
+      while (true) {
+        for (var callback : commandCallbacks.get(key)) {
+          callback.run();
+        }
+        coroutine.yield();
       }
     }).named(cmdName);
     commands.put(key, cmd);

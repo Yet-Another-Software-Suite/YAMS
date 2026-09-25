@@ -71,9 +71,12 @@ public class DifferentialMechanism extends yams.core.mechanisms.positional.Diffe
     SmartMotorController left = getLeftMotorController();
     SmartMotorController right = getRightMotorController();
     var config = getDifferentialMechanismConfig();
-    return mechanism.runRepeatedly(() -> {
-      left.setPosition(config.getLeftMechanismPosition(tilt.get(), twist.get()));
-      right.setPosition(config.getRightMechanismPosition(tilt.get(), twist.get()));
+    return mechanism.run(coroutine -> {
+      while (true) {
+        left.setPosition(config.getLeftMechanismPosition(tilt.get(), twist.get()));
+        right.setPosition(config.getRightMechanismPosition(tilt.get(), twist.get()));
+        coroutine.yield();
+      }
     }).named(getName() + " set position");
   }
 
@@ -112,9 +115,12 @@ public class DifferentialMechanism extends yams.core.mechanisms.positional.Diffe
     SmartMotorController left = getLeftMotorController();
     SmartMotorController right = getRightMotorController();
     var config = getDifferentialMechanismConfig();
-    return mechanism.runRepeatedly(() -> {
-      left.setPosition(config.getLeftMechanismPosition(tilt, twist));
-      right.setPosition(config.getRightMechanismPosition(tilt, twist));
+    return mechanism.run(coroutine -> {
+      while (true) {
+        left.setPosition(config.getLeftMechanismPosition(tilt, twist));
+        right.setPosition(config.getRightMechanismPosition(tilt, twist));
+        coroutine.yield();
+      }
     }).named(getName() + " set position");
   }
 

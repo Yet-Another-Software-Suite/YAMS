@@ -26,21 +26,21 @@ import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
-import org.wpilib.command3.button.CommandNiDsXboxController;
 import java.util.function.Supplier;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.commands3.config.SwerveDriveConfig;
 import yams.core.mechanisms.config.SwerveModuleConfig;
 import yams.commands3.swerve.SwerveDrive;
+import yams.commands3.swerve.SwerveInputStream;
 import yams.core.mechanisms.swerve.SwerveModule;
-import yams.core.mechanisms.swerve.utility.SwerveInputStream;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.commands3.config.SmartMotorControllerConfig;
 import yams.core.motorcontrollers.local.SparkWrapper;
 
 public class SwerveMechanism implements Mechanism {
   private final SwerveDrive drive;
+  private final SwerveInputStream input;
 
   public SwerveModule createModule(
       SparkMax drive,
@@ -107,12 +107,23 @@ public class SwerveMechanism implements Mechanism {
         .withTranslationController(new PIDController(1, 0, 0))
         .withRotationController(new PIDController(1, 0, 0));
     drive = new SwerveDrive(config);
+    // The one driver input; drive commands set its sticks every loop.
+    input = new SwerveInputStream(drive)
+        .withMaximumLinearVelocity(MetersPerSecond.of(4))
+        .withMaximumAngularVelocity(DegreesPerSecond.of(360))
+        .withDeadband(0.05)
+        .withCubeTranslationControllerAxis(true)
+        .withAllianceRelativeControl(true);
   }
 
   public Command setRobotRelativeChassisSpeeds(ChassisVelocities speeds)
   {
-    return runRepeatedly(() -> drive.setRobotRelativeChassisSpeeds(speeds))
-        .named("Swerve Set Robot Relative Chassis Speeds");
+    return run(coroutine -> {
+      while (true) {
+        drive.setRobotRelativeChassisSpeeds(speeds);
+        coroutine.yield();
+      }
+    }).named("Swerve Set Robot Relative Chassis Speeds");
   }
 
   public Command driveToPose(Pose2d pose) {
@@ -124,25 +135,34 @@ public class SwerveMechanism implements Mechanism {
     return drive.drive(speedsSupplier);
   }
 
-  /**
-   * Drive the robot field-relative using a driver controller, converting joystick axes into {@link
-   * ChassisVelocities} via {@link SwerveInputStream}.
-   *
-   * @param controller Driver controller to read translation/rotation axes from.
-   * @return {@link Command} that drives the robot while scheduled.
-   */
-  public Command driveWithJoystick(CommandNiDsXboxController controller) {
-    SwerveInputStream inputStream =
-        SwerveInputStream.of(drive, () -> -controller.getLeftY(), () -> -controller.getLeftX())
-            .withControllerRotationAxis(() -> -controller.getRightX())
-            .withMaximumLinearVelocity(MetersPerSecond.of(4))
-            .withMaximumAngularVelocity(DegreesPerSecond.of(360))
-            .withDeadband(0.05)
-            .withCubeTranslationControllerAxis()
-            .withAllianceRelativeControl();
+  /** Reset the drive input: sticks at zero. */
+  public void resetDriveInput() {
+    input.reset();
+  }
 
-    return drive.drive(
-        () -> inputStream.get().toRobotRelative(new Rotation2d(drive.getGyroAngle())));
+  /**
+   * Set the driver's stick inputs on the drive input.
+   *
+   * @param forward  Forward stick input, [-1, 1].
+   * @param left     Left stick input, [-1, 1].
+   * @param rotation Counterclockwise rotation stick input, [-1, 1].
+   */
+  public void setDriveInput(double forward, double left, double rotation) {
+    input.withTranslation(forward, left).withRotation(rotation);
+  }
+
+  /**
+   * Field relative {@link ChassisVelocities} from the drive input.
+   *
+   * @return Field relative {@link ChassisVelocities}.
+   */
+  public ChassisVelocities getDriveInput() {
+    return input.get();
+  }
+
+  /** Drive from the drive input set with {@link #setDriveInput}. Call once per loop. */
+  public void driveFromInput() {
+    drive.setFieldRelativeChassisSpeeds(input.get());
   }
 
   /**
@@ -157,7 +177,12 @@ public class SwerveMechanism implements Mechanism {
   }
 
   public Command lock() {
-    return runRepeatedly(drive::lockPose).named("Swerve Lock");
+    return run(coroutine -> {
+      while (true) {
+        drive.lockPose();
+        coroutine.yield();
+      }
+    }).named("Swerve Lock");
   }
 
   public void periodic() {

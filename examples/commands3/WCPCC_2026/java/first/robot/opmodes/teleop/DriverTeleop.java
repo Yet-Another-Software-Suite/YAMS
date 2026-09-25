@@ -5,12 +5,9 @@
 package first.robot.opmodes.teleop;
 
 import first.robot.Robot;
-import first.robot.commands.ManualDrive;
 import first.robot.mechanisms.Hanger;
 import first.robot.mechanisms.IntakePivot;
-import org.wpilib.command3.Command;
 import org.wpilib.command3.button.CommandNiDsXboxController;
-import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.opmode.OpMode;
 import org.wpilib.opmode.Teleop;
 
@@ -32,23 +29,14 @@ public class DriverTeleop implements OpMode {
         this.robot = robot;
         final CommandNiDsXboxController driver = robot.driver;
 
-        configureManualDriveBindings(robot.manualDrive, driver);
-
-        driver.rightTrigger().whileTrue(robot.driverCommands.aimAndShoot());
-        driver.rightBumper().whileTrue(robot.driverCommands.shootManually());
-        driver.leftTrigger().whileTrue(robot.driverCommands.intake());
+        // The drive command aims at the hub while the right trigger is held.
+        driver.rightTrigger().whileTrue(robot.mechanismCommands.aimAndShoot());
+        driver.rightBumper().whileTrue(robot.mechanismCommands.shootManually());
+        driver.leftTrigger().whileTrue(robot.mechanismCommands.intake());
         driver.leftBumper().onTrue(robot.intakePivot.positionCommand(IntakePivot.Position.STOWED));
         // The D-pad triggers live on the generic HID in 2027.
         driver.getHID().povUp().onTrue(robot.hanger.positionCommand(Hanger.Position.HANGING));
         driver.getHID().povDown().onTrue(robot.hanger.positionCommand(Hanger.Position.HUNG));
-    }
-
-    private static void configureManualDriveBindings(ManualDrive manualDrive, CommandNiDsXboxController driver) {
-        driver.a().onTrue(Command.noRequirements(coroutine -> manualDrive.setLockedHeading(Rotation2d.k180deg)).named("Snap to 180"));
-        driver.b().onTrue(Command.noRequirements(coroutine -> manualDrive.setLockedHeading(Rotation2d.CW_90DEG)).named("Snap to CW 90"));
-        driver.x().onTrue(Command.noRequirements(coroutine -> manualDrive.setLockedHeading(Rotation2d.CCW_90DEG)).named("Snap to CCW 90"));
-        driver.y().onTrue(Command.noRequirements(coroutine -> manualDrive.setLockedHeading(Rotation2d.ZERO)).named("Snap to 0"));
-        driver.back().onTrue(Command.noRequirements(coroutine -> manualDrive.seedFieldCentric()).named("Seed Field Centric"));
     }
 
     /** Homing runs when teleop is enabled, as it did on the v2 port's teleop trigger. */

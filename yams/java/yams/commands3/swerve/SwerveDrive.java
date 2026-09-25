@@ -31,13 +31,17 @@ import yams.commands3.telemetry.CommandTunable;
  *         drive = new SwerveDrive(new SwerveDriveConfig(this, modules)....);
  *     }
  *
- *     public Command driveWithJoystick(CommandXboxController controller) {
+ *     public Command driveWithJoystick(CommandNiDsXboxController controller) {
  *         return drive.drive(() -> new ChassisVelocities(...));
  *     }
  *
  *     public Command driveFieldRelative(Supplier<ChassisVelocities> speedsSupplier) {
- *         return runRepeatedly(() -> drive.setFieldRelativeChassisSpeeds(speedsSupplier.get()))
- *             .named("Drive Field Relative");
+ *         return run(coroutine -> {
+ *             while (true) {
+ *                 drive.setFieldRelativeChassisSpeeds(speedsSupplier.get());
+ *                 coroutine.yield();
+ *             }
+ *         }).named("Drive Field Relative");
  *     }
  * }
  * }</pre>
@@ -80,13 +84,19 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
    * Create a {@link Command} to drive the swerve drive with robot relative chassis speeds.
    *
    * @param robotRelativeChassisSpeeds {@link Supplier} of {@link ChassisVelocities} for the robot
-   *                                   relative chassis speeds. Could also use {@link
-   *                                   yams.core.mechanisms.swerve.utility.SwerveInputStream}
+   *                                   relative chassis speeds. For driver input, use a
+   *                                   {@link SwerveInputStream} (field relative) in your own drive
+   *                                   loop instead.
    * @return {@link Command} to drive the swerve drive.
    * @implNote Not compatible with AdvantageKit
    */
   public Command drive(Supplier<ChassisVelocities> robotRelativeChassisSpeeds) {
-    return mechanism.runRepeatedly(() -> setRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds.get())).named("Drive");
+    return mechanism.run(coroutine -> {
+      while (true) {
+        setRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds.get());
+        coroutine.yield();
+      }
+    }).named("Drive");
   }
 
   /**

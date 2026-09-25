@@ -12,6 +12,11 @@
  * {@link yams.core.motorcontrollers.SmartMotorController}s (drive and steer), configured with
  * {@link yams.core.mechanisms.config.SwerveModuleConfig}.
  *
+ * <p>{@link yams.commands3.swerve.SwerveInputStream} turns driver inputs into
+ * {@link org.wpilib.math.kinematics.ChassisVelocities}. It holds plain values rather than
+ * suppliers: a drive coroutine reads the controller, sets the stick values and modes, and calls
+ * {@code get()} every loop.
+ *
  * <pre>{@code
  * public class DriveMechanism implements Mechanism {
  *   private final SwerveDrive drive = new SwerveDrive((SwerveDriveConfig)
@@ -26,6 +31,6 @@
  * }</pre>
  *
  * @see yams.core.mechanisms.swerve
- * @see yams.core.mechanisms.swerve.utility.SwerveInputStream
+ * @see yams.commands3.swerve.SwerveInputStream
  */
 package yams.commands3.swerve;

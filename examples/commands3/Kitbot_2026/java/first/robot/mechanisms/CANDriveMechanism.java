@@ -4,13 +4,14 @@
 package first.robot.mechanisms;
 
 import static first.robot.Constants.DriveConstants.*;
+import static first.robot.Constants.OperatorConstants.*;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.util.CANPorts;
-import java.util.function.DoubleSupplier;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
+import org.wpilib.command3.button.CommandNiDsXboxController;
 import org.wpilib.drive.DifferentialDrive;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.util.Pair;
@@ -83,25 +84,37 @@ public class CANDriveMechanism implements Mechanism {
     right.simIterate();
   }
 
-  // Command factory to create command to drive the robot with joystick inputs. Runs until
-  // interrupted by another command.
-  public Command driveArcade(DoubleSupplier xSpeed, DoubleSupplier zRotation) {
-    return runRepeatedly(
-        () -> drive.arcadeDrive(xSpeed.getAsDouble(), zRotation.getAsDouble()))
-        .named("Drive.Arcade");
+  // Drives the robot open loop. DifferentialDrive motor safety expects this to be called every loop
+  // while driving.
+  public void arcadeDrive(double xSpeed, double zRotation) {
+    drive.arcadeDrive(xSpeed, zRotation);
   }
 
-  // Command factory to stop driving. Commands the motors to stop once and then ends immediately.
-  public Command stop() {
-    return run(coroutine -> drive.arcadeDrive(0, 0)).named("Drive.Stop");
+  // Command factory to create command to drive the robot with the driver controller's joysticks.
+  // Runs until interrupted by another command.
+  public Command driveArcade(CommandNiDsXboxController controller) {
+    return run(coroutine -> {
+      while (true) {
+        // The Y axis of the controller is inverted so that pushing the stick away from you (a
+        // negative value) drives the robot forwards (a positive value). The X-axis is also inverted
+        // so a positive value (stick to the right) results in clockwise rotation (front of the
+        // robot turning right). Both axes are also scaled down so the rotation is more easily
+        // controllable.
+        arcadeDrive(-controller.getLeftY() * DRIVE_SCALING, -controller.getRightX() * ROTATION_SCALING);
+        coroutine.yield();
+      }
+    }).named("Drive.Arcade");
   }
 
   // Keeps the motors stopped (and the DifferentialDrive motor safety fed) whenever no other command
   // is driving. Used as the default command outside of teleop.
   @Override
   public Command idle() {
-    return runRepeatedly(() -> drive.arcadeDrive(0, 0))
-        .withPriority(Command.LOWEST_PRIORITY)
-        .named("Drive.Idle");
+    return run(coroutine -> {
+      while (true) {
+        arcadeDrive(0, 0);
+        coroutine.yield();
+      }
+    }).withPriority(Command.LOWEST_PRIORITY).named("Drive.Idle");
   }
 }

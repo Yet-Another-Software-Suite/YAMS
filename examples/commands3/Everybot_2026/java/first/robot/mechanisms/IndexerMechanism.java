@@ -54,41 +54,18 @@ public class IndexerMechanism implements Mechanism {
   }
 
   /**
-   * Runs the indexer roller at a fixed power until interrupted. Positive is toward the launcher.
+   * Sets the indexer roller power. Positive is toward the launcher. The power holds until it is
+   * set again.
    *
    * @param power duty cycle, [-1, 1]
-   * @param name  name of the command
-   * @return a command that holds the indexer at the given power
    */
-  private Command runFeeder(double power, String name) {
-    return runRepeatedly(() -> indexer.setDutyCycleSetpoint(power)).named("Indexer." + name);
+  public void setPower(double power) {
+    indexer.setDutyCycleSetpoint(power);
   }
 
-  /**
-   * Pulls fuel in from the intake.
-   *
-   * @return a command that runs the indexer at the intaking percentage
-   */
-  public Command intake() {
-    return runFeeder(INDEXER_INTAKING_PERCENT, "Intake");
-  }
-
-  /**
-   * Feeds fuel into the launcher. Also used while ejecting.
-   *
-   * @return a command that runs the indexer at the launching percentage
-   */
-  public Command feed() {
-    return runFeeder(INDEXER_LAUNCHING_PERCENT, "Feed");
-  }
-
-  /**
-   * Holds fuel back while the launcher spins up.
-   *
-   * @return a command that runs the indexer at the pre-launch spin-up percentage
-   */
-  public Command spinUp() {
-    return runFeeder(INDEXER_SPIN_UP_PRE_LAUNCH_PERCENT, "SpinUp");
+  /** Stops the indexer roller. */
+  public void stop() {
+    setPower(0);
   }
 
   /**
@@ -96,13 +73,14 @@ public class IndexerMechanism implements Mechanism {
    *
    * @return a command that stops the indexer until interrupted
    */
-  public Command stop() {
-    return runFeeder(0, "Stop");
-  }
-
   @Override
   public Command idle() {
-    return stop();
+    return run(coroutine -> {
+      while (true) {
+        stop();
+        coroutine.yield();
+      }
+    }).named("Indexer.Stop");
   }
 
   /** Publishes YAMS telemetry. Called from {@code Robot.robotPeriodic()}. */

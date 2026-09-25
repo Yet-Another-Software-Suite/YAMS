@@ -42,7 +42,7 @@ import yams.commands2.swerve.SwerveDrive;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.SwerveModuleConfig;
 import yams.core.mechanisms.swerve.SwerveModule;
-import yams.core.mechanisms.swerve.utility.SwerveInputStream;
+import yams.commands2.swerve.SwerveInputStream;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.core.motorcontrollers.SmartMotorControllerConfig.MotorMode;

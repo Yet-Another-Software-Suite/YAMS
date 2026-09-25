@@ -94,10 +94,13 @@ public class DoubleJointedArm extends yams.core.mechanisms.positional.DoubleJoin
   public Command run(Supplier<Translation2d> translation, Supplier<Boolean> invert) {
     SmartMotorController lower = getLowerMotorController();
     SmartMotorController upper = getUpperMotorController();
-    return mechanism.runRepeatedly(() -> {
-      var thetas = getAnglesForPosition(translation.get(), invert.get());
-      lower.setPosition(thetas.getFirst());
-      upper.setPosition(thetas.getSecond());
+    return mechanism.run(coroutine -> {
+      while (true) {
+        var thetas = getAnglesForPosition(translation.get(), invert.get());
+        lower.setPosition(thetas.getFirst());
+        upper.setPosition(thetas.getSecond());
+        coroutine.yield();
+      }
     }).named(mechanism.getName() + " Run Position");
   }
 
@@ -146,12 +149,15 @@ public class DoubleJointedArm extends yams.core.mechanisms.positional.DoubleJoin
   public Command setAngle(Angle lowerAngle, Angle upperAngle) {
     SmartMotorController lower = getLowerMotorController();
     SmartMotorController upper = getUpperMotorController();
-    return mechanism.runRepeatedly(() -> {
-      if (lowerAngle != null) {
-        lower.setPosition(lowerAngle);
-      }
-      if (upperAngle != null) {
-        upper.setPosition(upperAngle);
+    return mechanism.run(coroutine -> {
+      while (true) {
+        if (lowerAngle != null) {
+          lower.setPosition(lowerAngle);
+        }
+        if (upperAngle != null) {
+          upper.setPosition(upperAngle);
+        }
+        coroutine.yield();
       }
     }).named(mechanism.getName() + " SetAngle");
   }

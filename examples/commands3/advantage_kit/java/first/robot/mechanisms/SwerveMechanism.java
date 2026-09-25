@@ -8,11 +8,8 @@ import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.DegreesPerSecond;
 import static org.wpilib.units.Units.Inches;
-import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Radians;
-import static org.wpilib.units.Units.RadiansPerSecond;
-import static org.wpilib.units.Units.Second;
 
 import com.ctre.phoenix6.CANBus;
 import org.wpilib.hardware.bus.CANPort;
@@ -35,7 +32,6 @@ import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.LinearVelocity;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
-import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
@@ -44,8 +40,8 @@ import yams.core.gearing.MechanismGearing;
 import yams.commands3.config.SwerveDriveConfig;
 import yams.core.mechanisms.config.SwerveModuleConfig;
 import yams.commands3.swerve.SwerveDrive;
+import yams.commands3.swerve.SwerveInputStream;
 import yams.core.mechanisms.swerve.SwerveModule;
-import yams.core.mechanisms.swerve.utility.SwerveInputStream;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.commands3.config.SmartMotorControllerConfig;
 import yams.core.motorcontrollers.local.SparkWrapper;
@@ -99,6 +95,7 @@ public class SwerveMechanism implements Mechanism
   private final SwerveInputsAutoLogged swerveInputs = new SwerveInputsAutoLogged();
 
   private final SwerveDrive drive;
+  private final SwerveInputStream input;
 
   /**
    * Builds one swerve module from a drive motor, azimuth motor, CANcoder, and
@@ -153,52 +150,50 @@ public class SwerveMechanism implements Mechanism
     return new SwerveModule(moduleConfig);
   }
 
-  /**
-   * Get a {@link Supplier<ChassisVelocities>} for the robot relative chassis speeds based on "standard" swerve drive
-   * controls.
-   *
-   * @param translationXScalar Translation in the X direction from [-1,1]
-   * @param translationYScalar Translation in the Y direction from [-1,1]
-   * @param rotationScalar     Rotation speed from [-1,1]
-   * @return {@link Supplier<ChassisVelocities>} for the robot relative chassis speeds.
-   */
-  public SwerveInputStream getChassisSpeedsSupplier(DoubleSupplier translationXScalar,
-                                                    DoubleSupplier translationYScalar,
-                                                    DoubleSupplier rotationScalar)
+  /** Reset the drive input: sticks at zero. */
+  public void resetDriveInput()
   {
-    return new SwerveInputStream(drive, translationXScalar, translationYScalar, rotationScalar)
-        .withMaximumAngularVelocity(maximumChassisSpeedsAngularVelocity)
-        .withMaximumLinearVelocity(maximumChassisSpeedsLinearVelocity)
-        // 0.01 deadband eliminates stick drift without adding noticeable dead zone.
-        .withDeadband(0.01)
-        // Cubing the rotation axis gives finer control at low inputs without
-        // reducing the achievable maximum.
-        .withCubeRotationControllerAxis()
-        .withCubeTranslationControllerAxis()
-        // Alliance-relative: forward on the stick always moves toward the opposing
-        // alliance wall regardless of which side the robot started on.
-        .withAllianceRelativeControl();
+    input.reset();
   }
 
   /**
-   * Get a {@link Supplier<ChassisVelocities>} for the robot relative chassis speeds based on "standard" swerve drive
-   * controls.
+   * Set the driver's stick inputs for "standard" swerve drive controls, each from [-1,1].
    *
-   * @param translationXScalar Translation in the X direction from [-1,1]
-   * @param translationYScalar Translation in the Y direction from [-1,1]
-   * @param rotationScalar     Rotation speed from [-1,1]
-   * @return {@link Supplier<ChassisVelocities>} for the robot relative chassis speeds.
+   * @param translationX Translation in the X direction.
+   * @param translationY Translation in the Y direction.
+   * @param rotation     Rotation speed.
    */
-  public Supplier<ChassisVelocities> getSimpleChassisSpeeds(DoubleSupplier translationXScalar,
-                                                        DoubleSupplier translationYScalar,
-                                                        DoubleSupplier rotationScalar)
+  public void setDriveInput(double translationX, double translationY, double rotation)
   {
-    return () -> new ChassisVelocities(maximumChassisSpeedsLinearVelocity.times(translationXScalar.getAsDouble())
-                                                                     .in(MetersPerSecond),
-                                   maximumChassisSpeedsLinearVelocity.times(translationYScalar.getAsDouble())
-                                                                     .in(MetersPerSecond),
-                                   maximumChassisSpeedsAngularVelocity.times(rotationScalar.getAsDouble())
-                                                                      .in(RadiansPerSecond));
+    input.withTranslation(translationX, translationY).withRotation(rotation);
+  }
+
+  /** Drive from the drive input set with {@link #setDriveInput}. Call once per loop. */
+  public void driveFromInput()
+  {
+    ChassisVelocities speeds = input.get();
+    Logger.recordOutput("Swerve/DesiredChassisSpeeds", speeds);
+    Logger.recordOutput("Swerve/DesiredOptimizedChassisSpeeds", config.optimizeRobotRelativeChassisSpeeds(speeds));
+    SwerveModuleVelocity[] states = drive.getStateFromRobotRelativeChassisSpeeds(speeds);
+    Logger.recordOutput("Swerve/DesiredStates", states);
+    drive.setSwerveModuleStates(states);
+  }
+
+  /** Reset the drive to pose PIDs. Call before driving to a new pose with {@link #driveTowardPose}. */
+  public void startDriveToPose()
+  {
+    drive.resetTranslationPID();
+    drive.resetRotationPID();
+  }
+
+  /**
+   * PID-drive toward a field-relative pose for one loop. Call {@link #startDriveToPose} first.
+   *
+   * @param pose Field-relative pose to drive toward.
+   */
+  public void driveTowardPose(Pose2d pose)
+  {
+    drive.setRobotRelativeChassisSpeeds(driveToPoseSpeeds(pose));
   }
 
   public SwerveMechanism()
@@ -239,6 +234,19 @@ public class SwerveMechanism implements Mechanism
         .withTranslationController(new PIDController(1, 0, 0))
         .withRotationController(new PIDController(1, 0, 0));
     drive = new SwerveDrive(config);
+    // The one driver input; drive commands set its sticks every loop through setDriveInput.
+    input = new SwerveInputStream(drive)
+        .withMaximumAngularVelocity(maximumChassisSpeedsAngularVelocity)
+        .withMaximumLinearVelocity(maximumChassisSpeedsLinearVelocity)
+        // 0.01 deadband eliminates stick drift without adding noticeable dead zone.
+        .withDeadband(0.01)
+        // Cubing the rotation axis gives finer control at low inputs without
+        // reducing the achievable maximum.
+        .withCubeRotationControllerAxis(true)
+        .withCubeTranslationControllerAxis(true)
+        // Alliance-relative: forward on the stick always moves toward the opposing
+        // alliance wall regardless of which side the robot started on.
+        .withAllianceRelativeControl(true);
 
     // Second pose estimator for vision fusion. Its output is a computed value
     // (NOT in SwerveInputs) so it is recomputed from scratch during replay.
@@ -271,14 +279,18 @@ public class SwerveMechanism implements Mechanism
 
   public Command setRobotRelativeChassisSpeeds(ChassisVelocities speeds)
   {
-    return runRepeatedly(() -> {
-      // DesiredChassisSpeeds and DesiredStates are computed outputs -- they are
-      // recomputed each replay loop from the same command logic, not stored.
-      Logger.recordOutput("Swerve/DesiredChassisSpeeds", speeds);
-      Logger.recordOutput("Swerve/DesiredOptimizedChassisSpeeds", config.optimizeRobotRelativeChassisSpeeds(speeds));
-      SwerveModuleVelocity[] states = drive.getStateFromRobotRelativeChassisSpeeds(speeds);
-      Logger.recordOutput("Swerve/DesiredStates", states);
-      drive.setSwerveModuleStates(states);
+    return run(coroutine -> {
+      while (true)
+      {
+        // DesiredChassisSpeeds and DesiredStates are computed outputs -- they are
+        // recomputed each replay loop from the same command logic, not stored.
+        Logger.recordOutput("Swerve/DesiredChassisSpeeds", speeds);
+        Logger.recordOutput("Swerve/DesiredOptimizedChassisSpeeds", config.optimizeRobotRelativeChassisSpeeds(speeds));
+        SwerveModuleVelocity[] states = drive.getStateFromRobotRelativeChassisSpeeds(speeds);
+        Logger.recordOutput("Swerve/DesiredStates", states);
+        drive.setSwerveModuleStates(states);
+        coroutine.yield();
+      }
     }).named("Set Robot Relative Chassis Speeds");
   }
 
@@ -290,42 +302,38 @@ public class SwerveMechanism implements Mechanism
   public Command driveToPose(Pose2d pose)
   {
     return run(coroutine -> {
-      drive.resetTranslationPID();
-      drive.resetRotationPID();
+      startDriveToPose();
       while (true)
       {
-        // Both controllers are configured in the constructor, so they are always present here.
-        var azimuthPID        = config.getRotationPID().orElseThrow();
-        var translationPID    = config.getTranslationPID().orElseThrow();
-        var distance          = drive.getDistanceFromPose(pose);
-        var angleDifference   = drive.getAngleDifferenceFromPose(pose);
-        var translationScalar = translationPID.calculate(distance.in(Meters), 0);
-        var currentPose       = getPose(); // Returns replayed pose during log replay.
-        var poseDifference    = currentPose.minus(pose);
-        drive.setRobotRelativeChassisSpeeds(new ChassisVelocities(poseDifference.getMeasureX().per(Second)
-                                                                                .times(translationScalar),
-                                                                  poseDifference.getMeasureY().per(Second)
-                                                                                .times(translationScalar),
-                                                                  RadiansPerSecond.of(azimuthPID.calculate(
-                                                                      currentPose.getRotation()
-                                                                                 .getRadians(),
-                                                                      pose.getRotation()
-                                                                          .getRadians())))
-                                                .toRobotRelative(getGyroAngle()));
+        driveTowardPose(pose);
         coroutine.yield();
       }
     }).named("Drive to Pose");
   }
 
+  /**
+   * Robot relative speeds that PID-drive toward a field-relative pose. Reset the translation and
+   * rotation PIDs before calling this in a loop.
+   */
+  private ChassisVelocities driveToPoseSpeeds(Pose2d pose)
+  {
+    // Replayed pose and gyro angle during log replay, so the path matches the real match.
+    return drive.driveToPoseSetpoint(pose, getPose(), getGyroAngle());
+  }
+
   public Command setRobotRelativeChassisSpeeds(Supplier<ChassisVelocities> speedsSupplier)
   {
-    return runRepeatedly(() -> {
-      Logger.recordOutput("Swerve/DesiredChassisSpeeds", speedsSupplier.get());
-      Logger.recordOutput("Swerve/DesiredOptimizedChassisSpeeds",
-                          config.optimizeRobotRelativeChassisSpeeds(speedsSupplier.get()));
-      SwerveModuleVelocity[] states = drive.getStateFromRobotRelativeChassisSpeeds(speedsSupplier.get());
-      Logger.recordOutput("Swerve/DesiredStates", states);
-      drive.setSwerveModuleStates(states);
+    return run(coroutine -> {
+      while (true)
+      {
+        Logger.recordOutput("Swerve/DesiredChassisSpeeds", speedsSupplier.get());
+        Logger.recordOutput("Swerve/DesiredOptimizedChassisSpeeds",
+                            config.optimizeRobotRelativeChassisSpeeds(speedsSupplier.get()));
+        SwerveModuleVelocity[] states = drive.getStateFromRobotRelativeChassisSpeeds(speedsSupplier.get());
+        Logger.recordOutput("Swerve/DesiredStates", states);
+        drive.setSwerveModuleStates(states);
+        coroutine.yield();
+      }
     }).named("Set Robot Relative Chassis Speeds Supplier");
   }
 
@@ -335,21 +343,25 @@ public class SwerveMechanism implements Mechanism
    */
   public Command lock()
   {
-    return runRepeatedly(() -> {
-      ChassisVelocities speeds = new ChassisVelocities();
-      Logger.recordOutput("Swerve/DesiredChassisSpeeds", speeds);
-      Logger.recordOutput("Swerve/DesiredOptimizedChassisSpeeds", speeds);
-      SwerveModule[]      modules       = config.getModules();
-      SwerveModuleVelocity[] desiredStates = new SwerveModuleVelocity[modules.length];
-      for (int i = 0; i < modules.length; i++)
+    return run(coroutine -> {
+      while (true)
       {
-        // Each module points to its own corner: getAngle() returns the vector from
-        // robot center to that module, which forms an X when all four are set.
-        desiredStates[i] =
-            new SwerveModuleVelocity(0, modules[i].getConfig().getLocation().orElseThrow().getAngle().orElse(Rotation2d.ZERO));
+        ChassisVelocities speeds = new ChassisVelocities();
+        Logger.recordOutput("Swerve/DesiredChassisSpeeds", speeds);
+        Logger.recordOutput("Swerve/DesiredOptimizedChassisSpeeds", speeds);
+        SwerveModule[]      modules       = config.getModules();
+        SwerveModuleVelocity[] desiredStates = new SwerveModuleVelocity[modules.length];
+        for (int i = 0; i < modules.length; i++)
+        {
+          // Each module points to its own corner: getAngle() returns the vector from
+          // robot center to that module, which forms an X when all four are set.
+          desiredStates[i] =
+              new SwerveModuleVelocity(0, modules[i].getConfig().getLocation().orElseThrow().getAngle().orElse(Rotation2d.ZERO));
+        }
+        Logger.recordOutput("Swerve/DesiredStates", desiredStates);
+        drive.setSwerveModuleStates(desiredStates);
+        coroutine.yield();
       }
-      Logger.recordOutput("Swerve/DesiredStates", desiredStates);
-      drive.setSwerveModuleStates(desiredStates);
     }).named("Lock");
   }
 

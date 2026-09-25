@@ -16,7 +16,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import first.robot.Constants.KrakenX60;
 import first.robot.Ports;
 import java.util.List;
-import java.util.function.DoubleSupplier;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.math.controller.SimpleMotorFeedforward;
@@ -128,19 +127,15 @@ public class Shooter implements Mechanism {
 
     /** Spin up to a speed, finishing once all three motors are within tolerance. */
     public Command spinUpCommand(double rpm) {
-        return spinUpCommand(() -> rpm, "Shooter Spin Up " + rpm + " RPM");
-    }
-
-    /** Spin up to the RPM entered on the dashboard, read when the command starts. */
-    public Command dashboardSpinUpCommand() {
-        return spinUpCommand(dashboardTargetRPM::get, "Shooter Dashboard Spin Up");
-    }
-
-    private Command spinUpCommand(DoubleSupplier rpm, String name) {
         return run(coroutine -> {
-            setRPM(rpm.getAsDouble());
+            setRPM(rpm);
             coroutine.waitUntil(this::isVelocityWithinTolerance);
-        }).named(name);
+        }).named("Shooter Spin Up " + rpm + " RPM");
+    }
+
+    /** The RPM entered on the dashboard. */
+    public double getDashboardTargetRPM() {
+        return dashboardTargetRPM.get();
     }
 
     public boolean isVelocityWithinTolerance() {

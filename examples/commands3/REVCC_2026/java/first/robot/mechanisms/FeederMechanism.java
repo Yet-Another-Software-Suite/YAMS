@@ -12,7 +12,6 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.util.CANPorts;
 import first.robot.Constants.ShooterSubsystemConstants;
-import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.math.system.DCMotor;
 import yams.commands3.config.SmartMotorControllerConfig;
@@ -56,18 +55,19 @@ public class FeederMechanism implements Mechanism
                                                feederMotorController);
 
   /**
-   * Runs the feeder motor at a power in the range of [-1, 1] until canceled, then stops the motor.
+   * Runs the feeder motor at a power in the range of [-1, 1].
    *
    * @param power Duty cycle to run at.
-   * @return Command that runs the feeder.
    */
-  public Command runAtPower(double power)
+  public void setPower(double power)
   {
-    return run(coroutine -> {
-      feeder.setDutyCycleSetpoint(power);
-      coroutine.park();
-    }).whenCanceled(() -> feeder.setDutyCycleSetpoint(0.0))
-      .named("Feeder.RunAtPower[" + power + "]");
+    feeder.setDutyCycleSetpoint(power);
+  }
+
+  /** Stops the feeder motor. */
+  public void stop()
+  {
+    feeder.setDutyCycleSetpoint(0.0);
   }
 
   /** Publishes the feeder telemetry. */

@@ -12,6 +12,7 @@
  * <p>Configure the full drivetrain via {@link yams.core.mechanisms.config.SwerveDriveConfig} and
  * each module via {@link yams.core.mechanisms.config.SwerveModuleConfig}.
  *
- * @see yams.core.mechanisms.swerve.utility
+ * <p>Joystick input streams live in the command layers: {@code yams.commands2.swerve.SwerveInputStream}
+ * and {@code yams.commands3.swerve.SwerveInputStream}.
  */
 package yams.core.mechanisms.swerve;

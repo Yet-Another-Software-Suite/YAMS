@@ -8,11 +8,9 @@ import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.DegreesPerSecond;
 import static org.wpilib.units.Units.Inches;
-import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.RadiansPerSecond;
-import static org.wpilib.units.Units.Second;
 
 import com.ctre.phoenix6.CANBus;
 import org.wpilib.hardware.bus.CANPort;
@@ -45,7 +43,7 @@ import yams.commands2.config.SwerveDriveConfig;
 import yams.core.mechanisms.config.SwerveModuleConfig;
 import yams.commands2.swerve.SwerveDrive;
 import yams.core.mechanisms.swerve.SwerveModule;
-import yams.core.mechanisms.swerve.utility.SwerveInputStream;
+import yams.commands2.swerve.SwerveInputStream;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.commands2.config.SmartMotorControllerConfig;
 import yams.core.motorcontrollers.local.SparkWrapper;
@@ -293,24 +291,8 @@ public class SwerveSubsystem extends SubsystemBase
       drive.resetTranslationPID();
       drive.resetRotationPID();
     }, () -> {
-      // Both controllers are configured in the constructor, so they are always present here.
-      var azimuthPID        = config.getRotationPID().orElseThrow();
-      var translationPID    = config.getTranslationPID().orElseThrow();
-      var distance          = drive.getDistanceFromPose(pose);
-      var angleDifference   = drive.getAngleDifferenceFromPose(pose);
-      var translationScalar = translationPID.calculate(distance.in(Meters), 0);
-      var currentPose       = getPose(); // Returns replayed pose during log replay.
-      var poseDifference    = currentPose.minus(pose);
-      drive.setRobotRelativeChassisSpeeds(new ChassisVelocities(poseDifference.getMeasureX().per(Second)
-                                                                              .times(translationScalar),
-                                                                poseDifference.getMeasureY().per(Second)
-                                                                              .times(translationScalar),
-                                                                RadiansPerSecond.of(azimuthPID.calculate(
-                                                                    currentPose.getRotation()
-                                                                               .getRadians(),
-                                                                    pose.getRotation()
-                                                                        .getRadians())))
-                                              .toRobotRelative(getGyroAngle()));
+      // Replayed pose and gyro angle during log replay, so the path matches the real match.
+      drive.setRobotRelativeChassisSpeeds(drive.driveToPoseSetpoint(pose, getPose(), getGyroAngle()));
     }).withName("Drive to Pose");
   }
 

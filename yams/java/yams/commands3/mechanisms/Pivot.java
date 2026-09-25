@@ -91,7 +91,12 @@ public class Pivot extends yams.core.mechanisms.positional.Pivot implements Comm
    * @return {@link Command} that sets the pivot to the desired angle.
    */
   public Command setAngle(Angle angle) {
-    return mechanism.runRepeatedly(() -> getMotorController().setPosition(angle)).named(mechanism.getName() + " SetAngle");
+    return mechanism.run(coroutine -> {
+      while (true) {
+        getMotorController().setPosition(angle);
+        coroutine.yield();
+      }
+    }).named(mechanism.getName() + " SetAngle");
   }
 
   /**
@@ -101,7 +106,12 @@ public class Pivot extends yams.core.mechanisms.positional.Pivot implements Comm
    * @return {@link Command} that sets the pivot to the desired angle.
    */
   public Command setAngle(Supplier<Angle> angle) {
-    return mechanism.runRepeatedly(() -> getMotorController().setPosition(angle.get())).named(mechanism.getName() + " SetAngle Supplier");
+    return mechanism.run(coroutine -> {
+      while (true) {
+        getMotorController().setPosition(angle.get());
+        coroutine.yield();
+      }
+    }).named(mechanism.getName() + " SetAngle Supplier");
   }
 
   /**
@@ -111,7 +121,12 @@ public class Pivot extends yams.core.mechanisms.positional.Pivot implements Comm
    * @return {@link Command} that sets the pivot to the desired angle.
    */
   public Command run(Angle angle) {
-    return mechanism.runRepeatedly(() -> getMotorController().setPosition(angle)).named(mechanism.getName() + " SetAngle");
+    return mechanism.run(coroutine -> {
+      while (true) {
+        getMotorController().setPosition(angle);
+        coroutine.yield();
+      }
+    }).named(mechanism.getName() + " SetAngle");
   }
 
   /**
@@ -121,7 +136,12 @@ public class Pivot extends yams.core.mechanisms.positional.Pivot implements Comm
    * @return {@link Command} that sets the pivot to the desired angle.
    */
   public Command run(Supplier<Angle> angle) {
-    return mechanism.runRepeatedly(() -> getMotorController().setPosition(angle.get())).named(mechanism.getName() + " RunAngle Supplier");
+    return mechanism.run(coroutine -> {
+      while (true) {
+        getMotorController().setPosition(angle.get());
+        coroutine.yield();
+      }
+    }).named(mechanism.getName() + " RunAngle Supplier");
   }
 
   /**

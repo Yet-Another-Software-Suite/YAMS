@@ -13,7 +13,7 @@ import org.wpilib.command2.Command;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.units.measure.Angle;
-import yams.core.mechanisms.swerve.utility.SwerveInputStream;
+import yams.commands2.swerve.SwerveInputStream;
 
 /** Drive with the translation sticks while a YAMS {@link SwerveInputStream} aims at the hub. */
 public class AimAndDriveCommand extends Command {

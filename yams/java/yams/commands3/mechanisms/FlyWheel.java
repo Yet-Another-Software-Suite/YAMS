@@ -137,7 +137,12 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel implements 
    * @return {@link Command} that sets the FlyWheel to the desired speed.
    */
   public Command run(AngularVelocity velocity) {
-    return mechanism.runRepeatedly(() -> getMotorController().setVelocity(velocity)).named(mechanism.getName() + " " + getName() + " SetSpeed");
+    return mechanism.run(coroutine -> {
+      while (true) {
+        getMotorController().setVelocity(velocity);
+        coroutine.yield();
+      }
+    }).named(mechanism.getName() + " " + getName() + " SetSpeed");
   }
 
   /**
@@ -213,6 +218,11 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel implements 
    */
   public Command run(LinearVelocity speed) {
     AngularVelocity target = getShooterConfig().getAngularVelocity(speed);
-    return mechanism.runRepeatedly(() -> getMotorController().setVelocity(target)).named(mechanism.getName() + " RunSpeed");
+    return mechanism.run(coroutine -> {
+      while (true) {
+        getMotorController().setVelocity(target);
+        coroutine.yield();
+      }
+    }).named(mechanism.getName() + " RunSpeed");
   }
 }

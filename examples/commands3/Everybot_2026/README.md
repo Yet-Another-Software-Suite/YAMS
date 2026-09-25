@@ -13,13 +13,13 @@ This is the Commands v3 version of [`examples/commands2/Everybot_2026`](../../co
 - `Robot` extends `OpModeRobot` instead of `TimedRobot`, and `RobotContainer` is gone. `Robot` holds the mechanisms and controllers, sets the stop default commands and runs `Scheduler.getDefault().run()`.
 - The subsystems became `org.wpilib.command3.Mechanism` classes in `mechanisms/` (`CANDriveMechanism`, `IntakeLauncherMechanism`, `IndexerMechanism`, `ClimberMechanism`). They are still split one YAMS mechanism per class so live tuning works.
 - Mechanisms have no `periodic()` in v3, so `Robot.robotPeriodic()` calls each mechanism's `updateTelemetry()` and `Robot.simulationPeriodic()` calls each `simIterate()`.
-- The 10 command classes became command factories:
-  - `ClimbUp`/`ClimbDown` are `climber.climbUp()`/`climbDown()`.
-  - `Drive` and `AutoDrive` are `drive.arcadeDrive(...)` and `drive.autoDrive(...)`.
-  - `Intake`, `Eject`, `SpinUp`, `Launch` and `LaunchSequence` are coroutine commands in `commands/FuelCommands`. Each one requires both fuel mechanisms and awaits one roller command on each. `LaunchSequence` awaits `SpinUp` with a 0.75 s timeout, then awaits `Launch`.
-- Each mechanism overrides `idle()` with its stop command, which `Robot` sets as the default command.
+- The 10 command classes became coroutine command factories and plain mechanism methods:
+  - `ClimbUp`/`ClimbDown` are `climber.climbUp()`/`climbDown()`, which set the climber power in a `while (true)` loop.
+  - `Drive` is `drive.arcadeDrive(...)`, which sends the joystick values every loop in a `while (true)` loop. `AutoDrive` is gone; the drive has plain `setArcadeDrive(x, z)` and `stop()` methods that commands call directly.
+  - `Intake`, `Eject` and `LaunchSequence` are coroutine commands in `commands/FuelCommands`. Each one requires both fuel mechanisms, sets the roller powers through the mechanisms' plain `setPower(...)` methods, parks, and stops both rollers when canceled. `LaunchSequence` sets the spin-up powers, waits 0.75 s, then switches the indexer to feeding. `SpinUp` and `Launch` are written inline as those two steps.
+- Each mechanism overrides `idle()` with a `while (true)` loop that holds it stopped, which `Robot` sets as the default command.
 - The bindings moved to the `@Teleop` opmode `opmodes/teleop/DefaultTeleop`. It also sets the joystick arcade drive as the drive default command while it is active.
-- `ExampleAuto` is now the `@Autonomous` opmode `opmodes/auto/ExampleAuto`. It is a coroutine that requires the drive and both fuel mechanisms, awaits `autoDrive(0.5, 0)` for 3 s, then awaits `LaunchSequence` for 10 s. It starts when the robot is enabled. Pick it on the Driver Station instead of it being hardcoded in `getAutonomousCommand()`.
+- `ExampleAuto` is now the `@Autonomous` opmode `opmodes/auto/ExampleAuto`. It is one coroutine that requires the drive and both fuel mechanisms. It drives at 0.5 for 3 s (resending the drive values every loop), stops the drive, then runs the launch steps inline: spin up for 0.75 s and feed for the remaining 9.25 s, then stops the rollers. It starts when the robot is enabled. Pick it on the Driver Station instead of it being hardcoded in `getAutonomousCommand()`.
 - The v3 controller class is `org.wpilib.command3.button.CommandNiDsXboxController`, and the POV triggers still go through `getHID().povUp()/povDown()`.
 - The drive only runs joystick arcade drive while the teleop opmode is active. Outside teleop it holds the drive stopped. In the v2 port the joystick drive was the global default, so it also ran after `ExampleAuto` finished.
 
@@ -41,8 +41,8 @@ This is the Commands v3 version of [`examples/commands2/Everybot_2026`](../../co
 | `subsystems/CANFuelSubsystem.java` | `mechanisms/IntakeLauncherMechanism.java`, `mechanisms/IndexerMechanism.java` | Split so each mechanism is its own `Mechanism` and can be live tuned on its own |
 | `subsystems/CANDriveSubsystem.java` | `mechanisms/CANDriveMechanism.java` | Rewritten on YAMS `SmartMotorController`s |
 | `subsystems/ClimberSubsystem.java` | `mechanisms/ClimberMechanism.java` | Rewritten on a YAMS `SmartMotorController` |
-| `commands/Intake.java`, `Eject.java`, `SpinUp.java`, `Launch.java`, `LaunchSequence.java` | `commands/FuelCommands.java` | Coroutine command factories that take `(IntakeLauncherMechanism, IndexerMechanism)` |
-| `commands/Drive.java`, `AutoDrive.java` | `CANDriveMechanism.arcadeDrive(...)`, `autoDrive(...)` | Command factories on the drive |
+| `commands/Intake.java`, `Eject.java`, `SpinUp.java`, `Launch.java`, `LaunchSequence.java` | `commands/FuelCommands.java` | Coroutine command factories that take `(IntakeLauncherMechanism, IndexerMechanism)`; `SpinUp` and `Launch` are inline steps of the launch sequence |
+| `commands/Drive.java`, `AutoDrive.java` | `CANDriveMechanism.arcadeDrive(...)`, `setArcadeDrive(...)` | A command factory and a plain method on the drive |
 | `commands/ClimbUp.java`, `ClimbDown.java` | `ClimberMechanism.climbUp()`, `climbDown()` | Command factories on the climber |
 | `commands/ExampleAuto.java` | `opmodes/auto/ExampleAuto.java` | `@Autonomous` opmode |
 | `RobotContainer.java` | `Robot.java`, `opmodes/teleop/DefaultTeleop.java` | Mechanisms in `Robot`, bindings in the `@Teleop` opmode |
@@ -85,5 +85,5 @@ Every motor is a SPARK MAX wrapped in a YAMS `SparkWrapper` and driven open loop
 
 - **Eject speed.** The original Eject read the `"Intaking intake roller value"` dashboard key, so by default it ran the rollers at -0.6. The port uses `INTAKE_EJECT_PERCENT` (-0.8), which the original only used as the fallback when that key was missing. The feeder still runs at 0.6 (`INDEXER_LAUNCHING_PERCENT`).
 - **Drive outside teleop.** The original's joystick drive was the global default command. The port only runs it in the teleop opmode; in other modes the drive default holds the drive stopped.
-- **Roller commands.** The original commands set the roller power once and stopped the rollers in `end()`. The port's commands resend the power every loop, and the stop default commands take over when they end.
+- **Roller commands.** Like the original, the fuel commands set the roller powers and stop the rollers when they end. The stop default commands then take over and resend 0 every loop.
 - `setCANTimeout(250)` and the explicit REV `ResetMode`/`PersistMode` flags are no longer called. The controllers are built with the 2027 `CANPorts.fromBusId(1)` API.

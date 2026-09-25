@@ -115,13 +115,13 @@ public class ShooterMechanism implements Mechanism
    * Drive the flywheels to their set velocity. YAMS uses MAXMotion velocity control because a
    * trapezoidal profile is configured, giving a smooth acceleration to the setpoint.
    */
-  private void setFlywheelVelocity(AngularVelocity velocity)
+  public void setFlywheelVelocity(AngularVelocity velocity)
   {
     flywheel.setMechanismVelocitySetpoint(velocity);
   }
 
   /** Stop the flywheel without actively braking it to zero. */
-  private void stopFlywheel()
+  public void stopFlywheel()
   {
     flywheel.setDutyCycleSetpoint(0);
   }
@@ -137,33 +137,6 @@ public class ShooterMechanism implements Mechanism
       coroutine.park();
     }).whenCanceled(() -> setFlywheelVelocity(RPM.of(0)))
       .named("Shooter.RunFlywheel");
-  }
-
-  /**
-   * Command to hold the flywheel at the shooting speed. When the command is interrupted the
-   * flywheel coasts down.
-   */
-  public Command holdShootSpeed()
-  {
-    return run(coroutine -> {
-      setFlywheelVelocity(FlywheelSetpoints.kShootRpm);
-      coroutine.park();
-    }).whenCanceled(this::stopFlywheel)
-      .named("Shooter.HoldShootSpeed");
-  }
-
-  /**
-   * Command to spin the flywheel up to the shooting speed. Ends once {@link #isFlywheelSpinning}
-   * is true, then lets the flywheel coast.
-   */
-  public Command spinUp()
-  {
-    return run(coroutine -> {
-      setFlywheelVelocity(FlywheelSetpoints.kShootRpm);
-      coroutine.waitUntil(isFlywheelSpinning);
-      stopFlywheel();
-    }).whenCanceled(this::stopFlywheel)
-      .named("Shooter.SpinUp");
   }
 
   /** Current flywheel velocity. */

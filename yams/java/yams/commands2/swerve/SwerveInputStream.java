@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-package yams.core.mechanisms.swerve.utility;
+package yams.commands2.swerve;
 
 import static org.wpilib.units.Units.Centimeters;
 import static org.wpilib.units.Units.Degrees;

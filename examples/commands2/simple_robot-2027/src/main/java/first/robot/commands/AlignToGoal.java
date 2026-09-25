@@ -30,7 +30,7 @@ import org.wpilib.command2.Command;
 import first.robot.subsystems.ShooterSubsystem;
 import first.robot.subsystems.SwerveSubsystem;
 import java.util.List;
-import yams.core.mechanisms.swerve.utility.SwerveInputStream;
+import yams.commands2.swerve.SwerveInputStream;
 
 public class AlignToGoal extends Command {
   private final SwerveSubsystem swerveSubsystem;

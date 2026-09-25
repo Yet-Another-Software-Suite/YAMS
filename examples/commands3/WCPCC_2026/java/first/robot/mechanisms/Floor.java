@@ -11,7 +11,6 @@ import static org.wpilib.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import first.robot.Ports;
-import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Voltage;
@@ -72,16 +71,6 @@ public class Floor implements Mechanism {
 
     public void set(Speed speed) {
         floor.setVoltageSetpoint(speed.voltage());
-    }
-
-    /** Run the floor rollers at feed speed until canceled, then stop them. */
-    public Command feedCommand() {
-        return run(coroutine -> {
-            set(Speed.FEED);
-            coroutine.park();
-        })
-        .whenCanceled(() -> set(Speed.STOP))
-        .named("Floor Feed");
     }
 
     /** Called from {@code Robot.robotPeriodic()}, replacing the v2 subsystem periodic. */

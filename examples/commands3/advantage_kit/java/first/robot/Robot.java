@@ -10,6 +10,7 @@ import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.RPM;
 
+import first.robot.commands.Drive;
 import first.robot.mechanisms.ArmMechanism;
 import first.robot.mechanisms.ElevatorMechanism;
 import first.robot.mechanisms.ShooterMechanism;
@@ -98,9 +99,10 @@ public class Robot extends LoggedRobot {
     shooter = new ShooterMechanism();
 
     DriverStationBackend.silenceJoystickConnectionAlert(true);
-    drive.setDefaultCommand(drive.setRobotRelativeChassisSpeeds(drive.getChassisSpeedsSupplier(xboxController::getLeftY,
-                                                                                               xboxController::getLeftX,
-                                                                                               xboxController::getRightX)));
+    // The drive command also drives to these poses while the left or right bumper is held.
+    drive.setDefaultCommand(Drive.teleop(drive, xboxController,
+                                          new Pose2d(Meters.of(3), Meters.of(3), Rotation2d.fromDegrees(30)),
+                                          new Pose2d(Meters.of(5), Meters.of(6), Rotation2d.fromDegrees(70))));
     arm.setDefaultCommand(arm.setAngle(Degrees.of(0)));
     elevator.setDefaultCommand(elevator.setHeight(Meters.of(0)));
     shooter.setDefaultCommand(shooter.set(0));
@@ -112,12 +114,6 @@ public class Robot extends LoggedRobot {
     xboxController.a().whileTrue(arm.setAngle(Degrees.of(20)));
     xboxController.b().whileTrue(elevator.setHeight(Meters.of(1)));
     xboxController.x().whileTrue(shooter.setVelocity(RPM.of(3000)));
-    xboxController.leftBumper().whileTrue(drive.driveToPose(new Pose2d(Meters.of(3),
-                                                                    Meters.of(3),
-                                                                    Rotation2d.fromDegrees(30))));
-    xboxController.rightBumper().whileTrue(drive.driveToPose(new Pose2d(Meters.of(5),
-                                                                    Meters.of(6),
-                                                                    Rotation2d.fromDegrees(70))));
   }
 
   @Override

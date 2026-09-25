@@ -12,7 +12,6 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.util.CANPorts;
 import first.robot.Constants.IntakeSubsystemConstants;
-import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.math.system.DCMotor;
 import yams.commands3.config.SmartMotorControllerConfig;
@@ -70,19 +69,19 @@ public class IntakeMechanism implements Mechanism
   }
 
   /**
-   * Runs the intake motor at a power in the range of [-1, 1] until canceled, e.g. the button is
-   * released, then stops the motor.
+   * Runs the intake motor at a power in the range of [-1, 1].
    *
    * @param power Duty cycle to run at.
-   * @return Command that runs the intake.
    */
-  public Command runAtPower(double power)
+  public void setPower(double power)
   {
-    return run(coroutine -> {
-      intake.setDutyCycleSetpoint(power);
-      coroutine.park();
-    }).whenCanceled(() -> intake.setDutyCycleSetpoint(0.0))
-      .named("Intake.RunAtPower[" + power + "]");
+    intake.setDutyCycleSetpoint(power);
+  }
+
+  /** Stops the intake motor. */
+  public void stop()
+  {
+    intake.setDutyCycleSetpoint(0.0);
   }
 
   /** Replaces the SmartDashboard applied-output entries from the REV code. */

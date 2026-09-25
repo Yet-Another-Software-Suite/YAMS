@@ -27,53 +27,42 @@ import org.wpilib.units.measure.AngularAcceleration;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.LinearVelocity;
 import org.wpilib.command3.Command;
-import org.wpilib.command3.Coroutine;
-import org.wpilib.command3.Mechanism;
+import org.wpilib.command3.button.CommandNiDsXboxController;
 import first.robot.mechanisms.ShooterMechanism;
 import first.robot.mechanisms.SwerveMechanism;
 import java.util.List;
-import java.util.Set;
-import yams.core.mechanisms.swerve.utility.SwerveInputStream;
 
-public class AlignToGoal implements Command {
-  private final SwerveMechanism swerveMechanism;
-  private final ShooterMechanism shooterMechanism;
-  private final SwerveInputStream inputStream;
-  private final Pose2d targetPose;
-
+/** Factory for a command that rotates the drivetrain toward a goal and spins the shooter while driving. */
+public final class AlignToGoal {
   // Tuned Constants
   /**
    * Time in seconds between when the robot is told to move and when the shooter actually shoots.
    */
-  private final double latency = 0.15;
+  private static final double latency = 0.15;
 
-  /** Maps Distance to RPM */
-  private final InterpolatingDoubleTreeMap shooterTable = new InterpolatingDoubleTreeMap();
+  private static final Angle setpointTolerance = Degrees.of(1);
+  private static final AngularVelocity maxProfiledVelocity = RotationsPerSecond.of(3);
+  private static final AngularAcceleration maxProfiledAcceleration =
+      RotationsPerSecondPerSecond.of(3);
 
-  private final Angle setpointTolerance = Degrees.of(1);
-  private final AngularVelocity maxProfiledVelocity = RotationsPerSecond.of(3);
-  private final AngularAcceleration maxProfiledAcceleration = RotationsPerSecondPerSecond.of(3);
-  private final ProfiledPIDController pidController =
-      new ProfiledPIDController(
-          1,
-          0,
-          0,
-          new Constraints(
-              maxProfiledVelocity.in(RadiansPerSecond),
-              maxProfiledAcceleration.in(RadiansPerSecondPerSecond)));
-  private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0, 0, 0);
+  private AlignToGoal() {}
 
-  public AlignToGoal(
+  /**
+   * Create the AlignToGoal command.
+   *
+   * @param swerveMechanism Drivetrain to rotate toward the goal.
+   * @param shooterMechanism Shooter to spin up for the current distance.
+   * @param controller Driver controller; the left stick translates while aligning.
+   * @param targetPose Goal pose.
+   * @return {@link Command} requiring the drivetrain and shooter.
+   */
+  public static Command create(
       SwerveMechanism swerveMechanism,
-      ShooterMechanism shooter,
-      SwerveInputStream inputStream,
+      ShooterMechanism shooterMechanism,
+      CommandNiDsXboxController controller,
       Pose2d targetPose) {
-    this.swerveMechanism = swerveMechanism;
-    this.shooterMechanism = shooter;
-    this.inputStream = inputStream;
-    this.targetPose = targetPose;
-    pidController.setTolerance(setpointTolerance.in(Radians));
-
+    // Maps Distance to RPM
+    InterpolatingDoubleTreeMap shooterTable = new InterpolatingDoubleTreeMap();
     // Test Results
     for (var entry :
         List.of(
@@ -82,72 +71,65 @@ public class AlignToGoal implements Command {
             Pair.of(Meters.of(3), RPM.of(3000)))) {
       shooterTable.put(entry.getFirst().in(Meters), entry.getSecond().in(RPM));
     }
-  }
 
-  @Override
-  public String name() {
-    return "AlignToGoal";
-  }
+    ProfiledPIDController pidController =
+        new ProfiledPIDController(
+            1,
+            0,
+            0,
+            new Constraints(
+                maxProfiledVelocity.in(RadiansPerSecond),
+                maxProfiledAcceleration.in(RadiansPerSecondPerSecond)));
+    pidController.setTolerance(setpointTolerance.in(Radians));
+    SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0, 0, 0);
 
-  @Override
-  public Set<Mechanism> requirements() {
-    return Set.of(swerveMechanism, shooterMechanism);
-  }
+    return Command.requiring(swerveMechanism, shooterMechanism).executing(coroutine -> {
+      pidController.reset(swerveMechanism.getPose().getRotation().getRadians(),
+                          swerveMechanism.getFieldOrientedChassisSpeed().omega);
 
-  @Override
-  public void run(Coroutine coroutine) {
-    initialize();
-    while (true) {
-      execute();
-      coroutine.yield();
-    }
-  }
+      while (true) {
+        // Please look here for the original authors work!
+        // https://blog.eeshwark.com/robotblog/shooting-on-the-fly
+        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        // YASS did not come up with this
+        // -------------------------------------------------------
 
-  private void initialize()
-  {
-    pidController.reset(swerveMechanism.getPose().getRotation().getRadians(),
-                        swerveMechanism.getFieldOrientedChassisSpeed().omega);
-  }
+        var robotSpeed = swerveMechanism.getFieldOrientedChassisSpeed();
+        // 1. LATENCY COMP
+        Translation2d futurePos = swerveMechanism.getPose().getTranslation().plus(
+            new Translation2d(robotSpeed.vx, robotSpeed.vy).times(latency));
 
-  private void execute() {
-    // Please look here for the original authors work!
-    // https://blog.eeshwark.com/robotblog/shooting-on-the-fly
-    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    // YASS did not come up with this
-    // -------------------------------------------------------
+        // 2. GET TARGET VECTOR
+        Translation2d goalLocation = targetPose.getTranslation();
+        Translation2d targetVec = goalLocation.minus(futurePos);
+        double dist = targetVec.getNorm();
 
-    var robotSpeed = swerveMechanism.getFieldOrientedChassisSpeed();
-    // 1. LATENCY COMP
-    Translation2d futurePos = swerveMechanism.getPose().getTranslation().plus(
-        new Translation2d(robotSpeed.vx, robotSpeed.vy).times(latency)
-                                                                             );
+        // 3. CALCULATE IDEAL SHOT (Stationary)
+        // Note: This returns HORIZONTAL velocity component
+        double idealHorizontalSpeed = shooterTable.get(dist);
 
-    // 2. GET TARGET VECTOR
-    Translation2d goalLocation = targetPose.getTranslation();
-    Translation2d targetVec = goalLocation.minus(futurePos);
-    double dist = targetVec.getNorm();
+        // 4. VECTOR SUBTRACTION
+        Translation2d robotVelVec = new Translation2d(robotSpeed.vx, robotSpeed.vy);
+        Translation2d shotVec     = targetVec.div(dist).times(idealHorizontalSpeed).minus(robotVelVec);
 
-    // 3. CALCULATE IDEAL SHOT (Stationary)
-    // Note: This returns HORIZONTAL velocity component
-    double idealHorizontalSpeed = shooterTable.get(dist);
+        // 5. CONVERT TO CONTROLS
+        Angle turretAngle = Degrees.of(shotVec.getAngle().orElse(Rotation2d.ZERO).getDegrees());
+        LinearVelocity newHorizontalSpeed = MetersPerSecond.of(shotVec.getNorm());
 
-    // 4. VECTOR SUBTRACTION
-    Translation2d robotVelVec = new Translation2d(robotSpeed.vx, robotSpeed.vy);
-    Translation2d shotVec     = targetVec.div(dist).times(idealHorizontalSpeed).minus(robotVelVec);
+        // 7. SET OUTPUTS
+        var output =
+            pidController.calculate(
+                swerveMechanism.getPose().getRotation().getRadians(),
+                new State(turretAngle.in(Radians), 0));
+        var feedforwardOutput = feedforward.calculate(pidController.getSetpoint().velocity);
+        swerveMechanism.setDriveInput(-controller.getLeftY(), -controller.getLeftX(), 0);
+        var originalSpeed     = swerveMechanism.getDriveInput();
+        originalSpeed.omega = output + feedforwardOutput;
+        swerveMechanism.setRobotRelativeChassisSpeedsSetpoint(originalSpeed.toRobotRelative(new Rotation2d(swerveMechanism.getGyroAngle())));
+        shooterMechanism.setRPM(newHorizontalSpeed);
 
-    // 5. CONVERT TO CONTROLS
-    Angle turretAngle = Degrees.of(shotVec.getAngle().orElse(Rotation2d.ZERO).getDegrees());
-    LinearVelocity newHorizontalSpeed = MetersPerSecond.of(shotVec.getNorm());
-
-    // 7. SET OUTPUTS
-    var output =
-        pidController.calculate(
-            swerveMechanism.getPose().getRotation().getRadians(),
-            new State(turretAngle.in(Radians), 0));
-    var feedforwardOutput = feedforward.calculate(pidController.getSetpoint().velocity);
-    var originalSpeed     = this.inputStream.get();
-    originalSpeed.omega = output + feedforwardOutput;
-    swerveMechanism.setRobotRelativeChassisSpeedsSetpoint(originalSpeed.toRobotRelative(new Rotation2d(swerveMechanism.getGyroAngle())));
-    shooterMechanism.setRPM(newHorizontalSpeed);
+        coroutine.yield();
+      }
+    }).named("AlignToGoal");
   }
 }

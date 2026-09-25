@@ -12,6 +12,9 @@
  * <p>Configure the full drivetrain via {@link yams.core.mechanisms.config.SwerveDriveConfig} and
  * each module via {@link yams.core.mechanisms.config.SwerveModuleConfig}.
  *
- * @see yams.core.mechanisms.swerve.utility
+ * <p>{@link yams.commands2.swerve.SwerveInputStream} converts driver controller axis suppliers into
+ * {@link org.wpilib.math.kinematics.ChassisVelocities} for {@link yams.commands2.swerve.SwerveDrive}.
+ *
+ * @see yams.commands2.swerve.SwerveInputStream
  */
 package yams.commands2.swerve;

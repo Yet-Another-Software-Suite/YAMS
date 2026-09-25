@@ -64,41 +64,18 @@ public class IntakeLauncherMechanism implements Mechanism {
   }
 
   /**
-   * Runs the intake/launcher rollers at a fixed power until interrupted. Positive is for shooting.
+   * Sets the intake/launcher roller power. Positive is for shooting. The power holds until it is
+   * set again.
    *
    * @param power duty cycle, [-1, 1]
-   * @param name  name of the command
-   * @return a command that holds the rollers at the given power
    */
-  private Command runRoller(double power, String name) {
-    return runRepeatedly(() -> intakeLauncher.setDutyCycleSetpoint(power)).named("IntakeLauncher." + name);
+  public void setPower(double power) {
+    intakeLauncher.setDutyCycleSetpoint(power);
   }
 
-  /**
-   * Pulls fuel in off the ground.
-   *
-   * @return a command that runs the rollers at the intaking percentage
-   */
-  public Command intake() {
-    return runRoller(INTAKE_INTAKING_PERCENT, "Intake");
-  }
-
-  /**
-   * Spins the rollers for launching. Used both while spinning up and while launching.
-   *
-   * @return a command that runs the rollers at the launching percentage
-   */
-  public Command launch() {
-    return runRoller(LAUNCHING_LAUNCHER_PERCENT, "Launch");
-  }
-
-  /**
-   * Pushes fuel back out through the intake.
-   *
-   * @return a command that runs the rollers at the eject percentage
-   */
-  public Command eject() {
-    return runRoller(INTAKE_EJECT_PERCENT, "Eject");
+  /** Stops the intake/launcher rollers. */
+  public void stop() {
+    setPower(0);
   }
 
   /**
@@ -106,13 +83,14 @@ public class IntakeLauncherMechanism implements Mechanism {
    *
    * @return a command that stops the rollers until interrupted
    */
-  public Command stop() {
-    return runRoller(0, "Stop");
-  }
-
   @Override
   public Command idle() {
-    return stop();
+    return run(coroutine -> {
+      while (true) {
+        stop();
+        coroutine.yield();
+      }
+    }).named("IntakeLauncher.Stop");
   }
 
   /** Publishes YAMS telemetry. Called from {@code Robot.robotPeriodic()}. */

@@ -156,10 +156,13 @@ public class ShooterMechanism implements Mechanism {
   }
 
   public Command setVelocity(Supplier<AngularVelocity> speed) {
-    return runRepeatedly(() -> {
-      AngularVelocity v = speed.get();
-      Logger.recordOutput("Shooter/Setpoint", v);
-      motor.setVelocity(v);
+    return run(coroutine -> {
+      while (true) {
+        AngularVelocity v = speed.get();
+        Logger.recordOutput("Shooter/Setpoint", v);
+        motor.setVelocity(v);
+        coroutine.yield();
+      }
     }).named("ShooterSetVelocitySupplier");
   }
 

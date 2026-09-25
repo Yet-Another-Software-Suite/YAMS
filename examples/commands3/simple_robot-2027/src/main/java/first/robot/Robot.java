@@ -10,6 +10,7 @@ import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.RPM;
 
+import first.robot.commands.Drive;
 import first.robot.mechanisms.ArmMechanism;
 import first.robot.mechanisms.ElevatorMechanism;
 import first.robot.mechanisms.ShooterMechanism;
@@ -32,7 +33,7 @@ public class Robot extends OpModeRobot {
 
   public Robot() {
     DriverStationBackend.silenceJoystickConnectionAlert(true);
-    drive.setDefaultCommand(drive.driveWithJoystick(xboxController));
+    drive.setDefaultCommand(Drive.teleop(drive, xboxController));
     arm.setDefaultCommand(arm.setAngle(Degrees.of(0)));
     elevator.setDefaultCommand(elevator.setHeight(Meters.of(0)));
     shooter.setDefaultCommand(shooter.setVelocity(RPM.of(0)));

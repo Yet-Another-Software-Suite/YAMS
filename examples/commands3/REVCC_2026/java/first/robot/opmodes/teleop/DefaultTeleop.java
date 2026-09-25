@@ -5,6 +5,7 @@ package first.robot.opmodes.teleop;
 
 import first.robot.Constants.OIConstants;
 import first.robot.Robot;
+import first.robot.commands.Drive;
 import first.robot.commands.FuelCommands;
 import org.wpilib.command3.button.CommandNiDsXboxController;
 import org.wpilib.opmode.OpMode;
@@ -29,20 +30,9 @@ public class DefaultTeleop implements OpMode
 
     // The left stick controls translation of the robot.
     // Turning is controlled by the X axis of the right stick.
-    robot.drive.setDefaultCommand(
-        robot.drive.driveCommand(
-            robot.drive.getInputStream(
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> -controller.getRightX(),
-                OIConstants.kDriveDeadband),
-            true));
-
-    // Left Stick Button -> Set swerve to X
-    controller.leftStick().whileTrue(robot.drive.setXCommand());
-
-    // Start Button -> Zero swerve heading
-    controller.start().onTrue(robot.drive.zeroHeadingCommand());
+    // The drive command also reads Left Stick Button -> Set swerve to X
+    // and Start Button -> Zero swerve heading.
+    robot.drive.setDefaultCommand(Drive.teleop(robot.drive, controller, true));
 
     // Right Trigger -> Run fuel intake
     controller

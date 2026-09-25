@@ -4,13 +4,14 @@
 package first.robot.mechanisms;
 
 import static first.robot.Constants.DriveConstants.*;
+import static first.robot.Constants.OperatorConstants.*;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.util.CANPorts;
-import java.util.function.DoubleSupplier;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
+import org.wpilib.command3.button.CommandNiDsXboxController;
 import org.wpilib.drive.DifferentialDrive;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.util.Pair;
@@ -76,31 +77,39 @@ public class CANDriveMechanism implements Mechanism {
   }
 
   /**
-   * Arcade drive from suppliers. Runs until interrupted and stops the drive when canceled. The
-   * values are sent every loop, which also feeds the {@link DifferentialDrive} watchdog.
+   * Arcade drive from the driver controller's joysticks. Runs until interrupted and stops the drive
+   * when canceled. The sticks are read and sent every loop, which also feeds the
+   * {@link DifferentialDrive} watchdog.
    *
-   * @param xSpeed    forward speed supplier, [-1, 1]
-   * @param zRotation rotation supplier, [-1, 1]
+   * @param controller the driver controller
    * @return a command that drives the robot with arcade controls
    */
-  public Command arcadeDrive(DoubleSupplier xSpeed, DoubleSupplier zRotation) {
-    return runRepeatedly(() -> drive.arcadeDrive(xSpeed.getAsDouble(), zRotation.getAsDouble()))
-        .whenCanceled(() -> drive.arcadeDrive(0, 0))
-        .named("CANDrive.ArcadeDrive");
+  public Command arcadeDrive(CommandNiDsXboxController controller) {
+    return run(coroutine -> {
+      while (true) {
+        // The Y axis of the controller is inverted so that pushing the stick away from you (a
+        // negative value) drives the robot forwards (a positive value). Both axes are scaled down
+        // so the robot is more easily controllable.
+        drive.arcadeDrive(-controller.getLeftY() * DRIVE_SCALING, -controller.getRightX() * ROTATION_SCALING);
+        coroutine.yield();
+      }
+    }).whenCanceled(this::stop).named("CANDrive.ArcadeDrive");
   }
 
   /**
-   * Arcade drive at fixed values. This command never ends on its own, so use a timeout to control
-   * how long it runs.
+   * Sends one arcade drive update. Call it every loop from a command that requires this mechanism
+   * so the {@link DifferentialDrive} watchdog stays fed.
    *
    * @param xSpeed    forward speed, [-1, 1]
    * @param zRotation rotation, [-1, 1]
-   * @return a command that drives the robot at the given values until interrupted
    */
-  public Command autoDrive(double xSpeed, double zRotation) {
-    return runRepeatedly(() -> drive.arcadeDrive(xSpeed, zRotation))
-        .whenCanceled(() -> drive.arcadeDrive(0, 0))
-        .named("CANDrive.AutoDrive[" + xSpeed + ", " + zRotation + "]");
+  public void setArcadeDrive(double xSpeed, double zRotation) {
+    drive.arcadeDrive(xSpeed, zRotation);
+  }
+
+  /** Sends one stopped arcade drive update. */
+  public void stop() {
+    drive.arcadeDrive(0, 0);
   }
 
   /**
@@ -108,13 +117,14 @@ public class CANDriveMechanism implements Mechanism {
    *
    * @return a command that stops the drive until interrupted
    */
-  public Command stop() {
-    return runRepeatedly(() -> drive.arcadeDrive(0, 0)).named("CANDrive.Stop");
-  }
-
   @Override
   public Command idle() {
-    return stop();
+    return run(coroutine -> {
+      while (true) {
+        stop();
+        coroutine.yield();
+      }
+    }).named("CANDrive.Stop");
   }
 
   /** Publishes YAMS telemetry. Called from {@code Robot.robotPeriodic()}. */

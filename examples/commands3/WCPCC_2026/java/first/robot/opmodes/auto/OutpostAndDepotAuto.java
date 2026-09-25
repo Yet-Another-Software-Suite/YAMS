@@ -14,6 +14,7 @@ import choreo.Choreo;
 import choreo.trajectory.SwerveSample;
 import choreo.trajectory.Trajectory;
 import first.robot.Robot;
+import first.robot.commands.Drive;
 import first.robot.generated.ChoreoTraj;
 import first.robot.mechanisms.Hanger;
 import first.robot.mechanisms.IntakePivot;
@@ -100,10 +101,11 @@ public class OutpostAndDepotAuto implements OpMode {
             coroutine.await(robot.intakePivot.positionCommand(IntakePivot.Position.INTAKE));
         }).named("Deploy Intake Once Homed");
 
-        final Command intake = robot.autoCommands.intake();
+        final Command intake = robot.mechanismCommands.intake();
         final Command spinUp = robot.shooter.spinUpCommand(2600);
         final Command hoodUp = robot.hood.positionCommand(0.32);
-        final Command aimAndShoot = robot.autoCommands.aimAndShoot().withTimeout(Seconds.of(5));
+        final Command aimAndShoot = robot.mechanismCommands.aimAndShoot();
+        final Command aim = Drive.autoAim(robot.swerve);
         final Command extendHanger = robot.hanger.positionCommand(Hanger.Position.HANGING);
         final Command hang = robot.hanger.positionCommand(Hanger.Position.HUNG);
 
@@ -113,7 +115,7 @@ public class OutpostAndDepotAuto implements OpMode {
             coroutine.setCancelOnForkFailure(false);
             coroutine.fork(deployIntake);
 
-            coroutine.await(robot.swerve.resetOdometryCommand(startToOutpost));
+            robot.swerve.resetOdometry(startToOutpost);
             coroutine.await(startToOutpostCmd);
             coroutine.wait(Seconds.of(1));
 
@@ -132,7 +134,11 @@ public class OutpostAndDepotAuto implements OpMode {
             awaitFinished(coroutine, depotToShootingPoseCmd);
             scheduler.cancel(pauseVisionToShootingPose);
 
-            coroutine.await(aimAndShoot);
+            // Aim and shoot for five seconds.
+            coroutine.fork(aim, aimAndShoot);
+            coroutine.waitUntil(() -> !scheduler.isScheduledOrRunning(aimAndShoot), Seconds.of(5));
+            scheduler.cancel(aimAndShoot);
+            scheduler.cancel(aim);
 
             // Vision is paused on the way to the tower, and the hanger extends while driving there.
             final Command pauseVisionToTower = robot.limelight.idle();

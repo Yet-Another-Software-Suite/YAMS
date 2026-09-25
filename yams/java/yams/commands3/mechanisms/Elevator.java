@@ -67,7 +67,12 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator implement
    * @return {@link Command} that sets the elevator height, stops immediately.
    */
   public Command setHeight(Distance height) {
-    return mechanism.runRepeatedly(() -> getMotorController().setPosition(height)).named(mechanism.getName() + " SetHeight");
+    return mechanism.run(coroutine -> {
+      while (true) {
+        getMotorController().setPosition(height);
+        coroutine.yield();
+      }
+    }).named(mechanism.getName() + " SetHeight");
   }
 
   /**
@@ -77,7 +82,12 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator implement
    * @return {@link Command} that sets the elevator height, stops immediately.
    */
   public Command setHeight(Supplier<Distance> height) {
-    return mechanism.runRepeatedly(() -> getMotorController().setPosition(height.get())).named(mechanism.getName() + " SetHeight Supplier");
+    return mechanism.run(coroutine -> {
+      while (true) {
+        getMotorController().setPosition(height.get());
+        coroutine.yield();
+      }
+    }).named(mechanism.getName() + " SetHeight Supplier");
   }
 
   /**
@@ -87,7 +97,12 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator implement
    * @return {@link Command} that sets the elevator height, does not stop.
    */
   public Command run(Distance height) {
-    return mechanism.runRepeatedly(() -> getMotorController().setPosition(height)).named(mechanism.getName() + " Run Height");
+    return mechanism.run(coroutine -> {
+      while (true) {
+        getMotorController().setPosition(height);
+        coroutine.yield();
+      }
+    }).named(mechanism.getName() + " Run Height");
   }
 
   /**
@@ -97,7 +112,12 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator implement
    * @return {@link Command} that sets the elevator height, stops immediately.
    */
   public Command run(Supplier<Distance> height) {
-    return mechanism.runRepeatedly(() -> getMotorController().setPosition(height.get())).named(mechanism.getName() + " Run Height Supplier");
+    return mechanism.run(coroutine -> {
+      while (true) {
+        getMotorController().setPosition(height.get());
+        coroutine.yield();
+      }
+    }).named(mechanism.getName() + " Run Height Supplier");
   }
 
   /**

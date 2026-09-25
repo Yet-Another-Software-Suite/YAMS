@@ -12,7 +12,6 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.util.CANPorts;
 import first.robot.Constants.IntakeSubsystemConstants;
-import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.math.system.DCMotor;
 import yams.commands3.config.SmartMotorControllerConfig;
@@ -57,19 +56,19 @@ public class ConveyorMechanism implements Mechanism
                                                  conveyorMotorController);
 
   /**
-   * Runs the conveyor motor at a power in the range of [-1, 1] until canceled, then stops the
-   * motor.
+   * Runs the conveyor motor at a power in the range of [-1, 1].
    *
    * @param power Duty cycle to run at.
-   * @return Command that runs the conveyor.
    */
-  public Command runAtPower(double power)
+  public void setPower(double power)
   {
-    return run(coroutine -> {
-      conveyor.setDutyCycleSetpoint(power);
-      coroutine.park();
-    }).whenCanceled(() -> conveyor.setDutyCycleSetpoint(0.0))
-      .named("Conveyor.RunAtPower[" + power + "]");
+    conveyor.setDutyCycleSetpoint(power);
+  }
+
+  /** Stops the conveyor motor. */
+  public void stop()
+  {
+    conveyor.setDutyCycleSetpoint(0.0);
   }
 
   /** Publishes the conveyor telemetry. */

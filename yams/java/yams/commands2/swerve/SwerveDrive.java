@@ -70,7 +70,7 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
    *
    * @param robotRelativeChassisSpeeds {@link Supplier} of {@link ChassisVelocities} for the robot
    *                                   relative chassis speeds. Could also use {@link
-   *                                   yams.core.mechanisms.swerve.utility.SwerveInputStream}
+   *                                   yams.commands2.swerve.SwerveInputStream}
    * @return {@link Command} to drive the swerve drive.
    * @implNote Not compatible with AdvantageKit
    */

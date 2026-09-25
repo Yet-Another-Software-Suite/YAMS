@@ -13,7 +13,7 @@ import org.wpilib.units.measure.Distance;
 import org.wpilib.drive.DifferentialDrive;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
-import java.util.function.DoubleSupplier;
+import org.wpilib.command3.button.CommandNiDsXboxController;
 import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.commands3.config.SmartMotorControllerConfig;
@@ -65,17 +65,32 @@ public class DiffDriveMechanism implements Mechanism {
   }
 
   public Command stop() {
-    return runRepeatedly(drive::stopMotor).named("DiffDrive Stop");
+    return run(coroutine -> {
+      while (true) {
+        drive.stopMotor();
+        coroutine.yield();
+      }
+    }).named("DiffDrive Stop");
   }
 
-  public Command tankDrive(DoubleSupplier left, DoubleSupplier right) {
-    return runRepeatedly(() -> drive.tankDrive(left.getAsDouble(), right.getAsDouble()))
-        .named("DiffDrive Tank Drive");
+  /** Tank drive from the controller: the left stick drives the left side, the right stick the right. */
+  public Command tankDrive(CommandNiDsXboxController controller) {
+    return run(coroutine -> {
+      while (true) {
+        drive.tankDrive(-controller.getLeftY(), -controller.getRightY());
+        coroutine.yield();
+      }
+    }).named("DiffDrive Tank Drive");
   }
 
-  public Command arcadeDrive(DoubleSupplier xSpeed, DoubleSupplier zRotation) {
-    return runRepeatedly(() -> drive.arcadeDrive(xSpeed.getAsDouble(), zRotation.getAsDouble()))
-        .named("DiffDrive Arcade Drive");
+  /** Arcade drive from the controller: the left stick drives forward, the right stick turns. */
+  public Command arcadeDrive(CommandNiDsXboxController controller) {
+    return run(coroutine -> {
+      while (true) {
+        drive.arcadeDrive(-controller.getLeftY(), -controller.getRightX());
+        coroutine.yield();
+      }
+    }).named("DiffDrive Arcade Drive");
   }
 
   public void periodic() {

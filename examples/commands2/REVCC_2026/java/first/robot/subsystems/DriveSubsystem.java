@@ -20,7 +20,7 @@ import org.wpilib.math.kinematics.ChassisVelocities;
 import yams.commands2.config.SwerveDriveConfig;
 import yams.commands2.swerve.SwerveDrive;
 import yams.core.mechanisms.swerve.SwerveModule;
-import yams.core.mechanisms.swerve.utility.SwerveInputStream;
+import yams.commands2.swerve.SwerveInputStream;
 import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
 /**

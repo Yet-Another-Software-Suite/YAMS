@@ -43,7 +43,7 @@ A port of the FIRST 2026 KitBot code to WPILib 2027, Commands v3 and YAMS.
 - **Feeder** (`FeederMechanism`, CAN 6) and **Intake/Launcher** (`IntakeLauncherMechanism`, CAN 5)
   - Each is modeled as a YAMS `FlyWheel` on a `SparkWrapper`, running open loop with a 60 A limit. The intake/launcher stays inverted.
   - Voltages are applied with `setVoltageSetpoint`. Stop is `setDutyCycleSetpoint(0)`.
-  - Each exposes a `runAt(Voltage)` command that the fuel commands run on both rollers at once.
+  - Each exposes plain `setVoltage(Voltage)` and `stop()` methods that the fuel commands call on both rollers.
   - New: YAMS telemetry and simulation. The motor type (CIM), roller diameters (2 in, 4 in) and moments of inertia are estimates used only for sim and telemetry.
 
 ### Commands, bindings and constants
@@ -61,7 +61,7 @@ A port of the FIRST 2026 KitBot code to WPILib 2027, Commands v3 and YAMS.
 
 - `setCANTimeout(250)` and the explicit REV `ResetMode`/`PersistMode` flags are no longer called. The controllers are built with the 2027 `CANPorts.fromBusId(1)` API.
 - Every fuel command requires both roller mechanisms, so scheduling behaves as it did with the single original subsystem.
-- The auto now reaches the launch step. In the original, the "stop driving" step used the same never-ending `driveArcade` command, so the sequence never got past it; here `CANDriveMechanism.stop()` commands the motors once and ends.
+- The auto now reaches the launch step. In the original, the "stop driving" step used the same never-ending `driveArcade` command, so the sequence never got past it; here the auto drives for 0.25 s, then commands the motors to zero once and moves on.
 - Outside teleop the drive's default command holds the motors at zero (feeding motor safety) instead of reading the driver's joysticks.
 
 ## Commands v3 version
@@ -70,6 +70,7 @@ This is the Commands v3 version of [`examples/commands2/Kitbot_2026`](../../comm
 
 - Subsystems became `org.wpilib.command3.Mechanism` classes in the `mechanisms` package. Their YAMS telemetry and simulation calls moved from `periodic()`/`simulationPeriodic()` overrides into methods that `Robot.robotPeriodic()` and `Robot.simulationPeriodic()` call.
 - `RobotContainer` is gone. The bindings live in the `KitBot Teleop` opmode and the auto in the `Example Auto` opmode, so they only exist while that opmode is selected.
-- The fuel commands are coroutines that require both rollers and `awaitAll` one `runAt` command per roller. `runEnd`/`finallyDo` stops became `whenCanceled(stop)`, and "spin up for 1 s, then launch" is the `Fuel.SpinUpAndLaunch` coroutine.
-- The auto is a coroutine that `await`s each step instead of a `SequentialCommandGroup`, and it starts when the robot is enabled in the `Example Auto` opmode.
+- The fuel commands are coroutines that require both rollers, set the roller voltages directly and then `park()`. `runEnd`/`finallyDo` stops became `whenCanceled(stop)`, and "spin up for 1 s, then launch" is the `Fuel.SpinUpAndLaunch` coroutine: set spin-up voltages, `wait` 1 s, set launch voltages, `park()`.
+- The drive commands (`Drive.Arcade`, `Drive.Idle`) are `while (true)` loops that call `arcadeDrive` and `yield()` every loop to keep motor safety fed.
+- The auto is one coroutine written as plain sequential code instead of a `SequentialCommandGroup`: it drives in a timed loop, stops the drive, then sets the rollers and `wait`s between the spin-up, launch and stop steps. It starts when the robot is enabled in the `Example Auto` opmode.
 - Every command is named (`Drive.Arcade`, `Fuel.Intake`, `Fuel.SpinUpAndLaunch`, and so on).

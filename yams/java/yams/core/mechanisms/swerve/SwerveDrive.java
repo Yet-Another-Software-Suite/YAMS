@@ -5,9 +5,7 @@ package yams.core.mechanisms.swerve;
 
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Radians;
-import static org.wpilib.units.Units.RadiansPerSecond;
 import static org.wpilib.units.Units.Rotations;
-import static org.wpilib.units.Units.Second;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -467,17 +465,37 @@ public class SwerveDrive {
    *                                           configured.
    */
   public ChassisVelocities driveToPoseSetpoint(Pose2d targetPose) {
+    return driveToPoseSetpoint(targetPose, getPose(), new Rotation2d(getGyroAngle()));
+  }
+
+  /**
+   * Drive to the target pose from a given pose, e.g. a pose replayed from a log. The translation
+   * speed is the translation PID output toward the target, proportional to the distance for a P
+   * controller.
+   *
+   * @param targetPose  Pose to drive towards.
+   * @param currentPose Pose of the robot.
+   * @param heading     Heading of the robot, used to convert the result to robot-relative speeds.
+   * @implNote Remember to call {@link #resetRotationPID()} and {@link #resetTranslationPID()}
+   *           before calling this method in a loop.
+   * @return robot-relative {@link ChassisVelocities} to drive the robot to the given pose.
+   * @throws SwerveDriveConfigurationException if the translation or rotation PID controller is not
+   *                                           configured.
+   */
+  public ChassisVelocities driveToPoseSetpoint(Pose2d targetPose, Pose2d currentPose, Rotation2d heading) {
     var rotationPID = m_config.getRotationPID().orElseThrow(() -> new SwerveDriveConfigurationException("No rotation PID controller configured", "Cannot drive to pose", "withRotationController(PIDController)"));
     var translationPID = m_config.getTranslationPID().orElseThrow(() -> new SwerveDriveConfigurationException("No translation PID controller configured", "Cannot drive to pose", "withTranslationController(PIDController)"));
-    var distance = getDistanceFromPose(targetPose);
-    var translationScalar = translationPID.calculate(distance.in(Meters), 0);
-    var currentPose = getPose();
     // Plain field-frame translation delta (not Pose2d.minus(), which expresses the result in
     // targetPose's rotated frame and would skew the commanded direction whenever targetPose's
     // heading is non-zero).
-    var translationDifference = currentPose.getTranslation().minus(targetPose.getTranslation());
-    return new ChassisVelocities(translationDifference.getMeasureX().per(Second).times(translationScalar), translationDifference.getMeasureY().per(Second).times(translationScalar), RadiansPerSecond.of(rotationPID.calculate(currentPose.getRotation()
-        .getRadians(), targetPose.getRotation().getRadians()))).toRobotRelative(new Rotation2d(getGyroAngle()));
+    var toTarget = targetPose.getTranslation().minus(currentPose.getTranslation());
+    var distance = toTarget.getNorm();
+    // The PID drives the distance to zero, so its output is the speed toward the target in m/s.
+    var speed = -translationPID.calculate(distance, 0);
+    // Scale the unit direction by the speed, so the speed is proportional to the distance.
+    var velocity = distance > 1e-9 ? toTarget.div(distance).times(speed) : new Translation2d();
+    return new ChassisVelocities(velocity.getX(), velocity.getY(), rotationPID.calculate(currentPose.getRotation().getRadians(),
+        targetPose.getRotation().getRadians())).toRobotRelative(heading);
   }
 
   /**

@@ -3,8 +3,6 @@
 
 package first.robot.opmodes.teleop;
 
-import static first.robot.Constants.OperatorConstants.*;
-
 import first.robot.Robot;
 import org.wpilib.opmode.OpMode;
 import org.wpilib.opmode.Teleop;
@@ -34,16 +32,8 @@ public class KitBotTeleop implements OpMode {
     robot.operatorController.a()
         .whileTrue(robot.fuel.eject());
 
-    // Set the default command for the drive mechanism to the command provided by
-    // factory with the values provided by the joystick axes on the driver
-    // controller. The Y axis of the controller is inverted so that pushing the
-    // stick away from you (a negative value) drives the robot forwards (a positive
-    // value). The X-axis is also inverted so a positive value (stick to the right)
-    // results in clockwise rotation (front of the robot turning right). Both axes
-    // are also scaled down so the rotation is more easily controllable.
-    robot.drive.setDefaultCommand(
-        robot.drive.driveArcade(
-            () -> -robot.driverController.getLeftY() * DRIVE_SCALING,
-            () -> -robot.driverController.getRightX() * ROTATION_SCALING));
+    // Set the default command for the drive mechanism to arcade drive from the driver
+    // controller's joysticks.
+    robot.drive.setDefaultCommand(robot.drive.driveArcade(robot.driverController));
   }
 }

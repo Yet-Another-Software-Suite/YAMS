@@ -143,19 +143,22 @@ public class DoubleFlyWheelMechanism implements Mechanism {
    * @return {@link Command}
    */
   public Command setSpeedForDistance(Supplier<Distance> distanceToGoal) {
-    return runRepeatedly(() -> {
-          var lowerSpeeds =
-              RPM.of(
-                  DoubleFlyWheelConstants.distanceToRPM
-                      .getFirst()
-                      .get(distanceToGoal.get().in(Meters)));
-          var upperSpeeds =
-              RPM.of(
-                  DoubleFlyWheelConstants.distanceToRPM
-                      .getSecond()
-                      .get(distanceToGoal.get().in(Meters)));
-          lowerFlyWheel.setVelocity(lowerSpeeds);
-          upperflyWheel.setVelocity(upperSpeeds);
+    return run(coroutine -> {
+          while (true) {
+            var lowerSpeeds =
+                RPM.of(
+                    DoubleFlyWheelConstants.distanceToRPM
+                        .getFirst()
+                        .get(distanceToGoal.get().in(Meters)));
+            var upperSpeeds =
+                RPM.of(
+                    DoubleFlyWheelConstants.distanceToRPM
+                        .getSecond()
+                        .get(distanceToGoal.get().in(Meters)));
+            lowerFlyWheel.setVelocity(lowerSpeeds);
+            upperflyWheel.setVelocity(upperSpeeds);
+            coroutine.yield();
+          }
         })
         .named("Set Speed For Distance (Double FlyWheel)");
   }
@@ -168,10 +171,12 @@ public class DoubleFlyWheelMechanism implements Mechanism {
    * @return {@link Command}
    */
   public Command setVelocity(Supplier<AngularVelocity> lower, Supplier<AngularVelocity> upper) {
-    return runRepeatedly(
-        () -> {
-          lowerFlyWheel.setVelocity(lower.get());
-          upperflyWheel.setVelocity(upper.get());
+    return run(coroutine -> {
+          while (true) {
+            lowerFlyWheel.setVelocity(lower.get());
+            upperflyWheel.setVelocity(upper.get());
+            coroutine.yield();
+          }
         })
         .named("Set Velocity Supplier (Double FlyWheel)");
   }
@@ -184,10 +189,12 @@ public class DoubleFlyWheelMechanism implements Mechanism {
    * @return {@link Command}
    */
   public Command setVelocity(AngularVelocity lower, AngularVelocity upper) {
-    return runRepeatedly(
-        () -> {
-          lowerFlyWheel.setVelocity(lower);
-          upperflyWheel.setVelocity(upper);
+    return run(coroutine -> {
+          while (true) {
+            lowerFlyWheel.setVelocity(lower);
+            upperflyWheel.setVelocity(upper);
+            coroutine.yield();
+          }
         })
         .named("Set Velocity (Double FlyWheel)");
   }

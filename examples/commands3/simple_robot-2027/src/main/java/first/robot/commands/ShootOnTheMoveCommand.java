@@ -5,10 +5,8 @@ package first.robot.commands;
 
 import static org.wpilib.units.Units.Feet;
 import static org.wpilib.units.Units.Meters;
-import static org.wpilib.units.Units.Milliseconds;
 import static org.wpilib.units.Units.RPM;
 import static org.wpilib.units.Units.Radians;
-import static org.wpilib.units.Units.Seconds;
 
 import org.wpilib.math.filter.Debouncer;
 import org.wpilib.math.filter.Debouncer.DebounceType;
@@ -23,12 +21,9 @@ import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.command3.Command;
-import org.wpilib.command3.Coroutine;
-import org.wpilib.command3.Mechanism;
 import first.robot.mechanisms.HoodMechanism;
 import first.robot.mechanisms.ShooterMechanism;
 import first.robot.mechanisms.TurretMechanism;
-import java.util.Set;
 import java.util.function.Supplier;
 import yams.commands3.swerve.SwerveDrive;
 
@@ -36,20 +31,7 @@ import yams.commands3.swerve.SwerveDrive;
  * Adapted from 6328 Mechanical Advantage! Original source is here:
  * https://github.com/Mechanical-Advantage/RobotCode2026Public/blob/alpha-bot-turret/src/main/java/org/littletonrobotics/frc2026/subsystems/launcher/LaunchCalculator.java
  */
-public class ShootOnTheMoveCommand implements Command {
-  private final double loopPeriodSecs = Milliseconds.of(20).in(Seconds);
-  // Outputs
-  private Rotation2d lastTurretAngle;
-  private double lastHoodAngle;
-  private Rotation2d turretAngle;
-  private double hoodAngle = Double.NaN;
-
-  // Private Variables
-  private              TurretMechanism                          turret;
-  private              ShooterMechanism                         shooterMechanism;
-  private              HoodMechanism                            hoodMechanism;
-  private              Supplier<ChassisVelocities>                  _fieldRelativeVelocity;
-  private              Supplier<Pose2d>                         estimatedPose;
+public final class ShootOnTheMoveCommand {
   private static final InterpolatingTreeMap<Double, Rotation2d> launchHoodAngleMap     =
       new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Rotation2d::interpolate);
   private static final InterpolatingDoubleTreeMap launchFlywheelSpeedMap =
@@ -58,10 +40,9 @@ public class ShootOnTheMoveCommand implements Command {
       new InterpolatingDoubleTreeMap();
 
   // Tuning Constants
-  private final Debouncer shootingDebounce = new Debouncer(0.1, DebounceType.FALLING);
-  private final double phaseDelay = 0.05;
-  private Distance minDistance = Feet.of(1);
-  private Distance maxDistance = Meters.of(5);
+  private static final double phaseDelay = 0.05;
+  private static final Distance minDistance = Feet.of(1);
+  private static final Distance maxDistance = Meters.of(5);
 
   static {
     // These should be found on your robot
@@ -94,104 +75,99 @@ public class ShootOnTheMoveCommand implements Command {
     timeOfFlightMap.put(1.38, 0.90);
   }
 
-  public ShootOnTheMoveCommand(
+  private ShootOnTheMoveCommand() {}
+
+  /**
+   * Create the ShootOnTheMove command.
+   *
+   * @param turret Turret to aim at the hub.
+   * @param shooterMechanism Shooter to spin up for the lookahead distance.
+   * @param hoodMechanism Hood to angle for the lookahead distance.
+   * @param swerveDrive Drivetrain used for the robot pose and velocity.
+   * @return {@link Command} requiring the turret, shooter and hood.
+   */
+  public static Command create(
       TurretMechanism turret,
-      ShooterMechanism shooter,
-      HoodMechanism hood,
+      ShooterMechanism shooterMechanism,
+      HoodMechanism hoodMechanism,
       SwerveDrive swerveDrive) {
-    this.turret = turret;
-    this.shooterMechanism = shooter;
-    this.hoodMechanism = hood;
-    estimatedPose = () -> {
+    Supplier<Pose2d> estimatedPose = () -> {
       // Calculate estimated pose while accounting for phase delay
       ChassisVelocities robotRelativeVelocity = swerveDrive.getRobotRelativeSpeed();
       var           robotPose             = swerveDrive.getPose();
 
-    robotPose = robotPose.transformBy(
+      robotPose = robotPose.transformBy(
           robotRelativeVelocity.toTwist2d(phaseDelay).exp());
       // Optional, add logging here
       swerveDrive.getField2d().getObject("ShootOnTheMovePose").setPose(robotPose);
       return robotPose;
     };
-    _fieldRelativeVelocity = swerveDrive::getFieldRelativeSpeed;
-  }
+    Supplier<ChassisVelocities> fieldRelativeVelocitySupplier = swerveDrive::getFieldRelativeSpeed;
+    Debouncer shootingDebounce = new Debouncer(0.1, DebounceType.FALLING);
 
-  @Override
-  public String name() {
-    return "ShootOnTheMove";
-  }
+    return Command.requiring(turret, shooterMechanism, hoodMechanism).executing(coroutine -> {
+      // Outputs
+      Rotation2d lastTurretAngle = null;
+      double lastHoodAngle = Double.NaN;
 
-  @Override
-  public Set<Mechanism> requirements() {
-    return Set.of(turret, shooterMechanism, hoodMechanism);
-  }
+      while (true) {
+        // Get estimated pose
+        var robotPose = estimatedPose.get();
+        var fieldRelativeVelocity = fieldRelativeVelocitySupplier.get();
 
-  @Override
-  public void run(Coroutine coroutine) {
-    while (true) {
-      execute();
-      coroutine.yield();
-    }
-  }
+        // Calculate distance from turret to target
+        Translation2d target =
+            AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
+        Pose2d turretPosition = turret.getPose(robotPose);
+        double turretToTargetDistance = target.getDistance(turretPosition.getTranslation());
 
-  private void execute() {
-    // Get estimated pose
-    var robotPose = estimatedPose.get();
-    var fieldRelativeVelocity = _fieldRelativeVelocity.get();
+        // Calculate field relative turret velocity
+        Angle         robotAngle     = robotPose.getRotation().getMeasure();
+        ChassisVelocities turretVelocity = turret.getVelocity(fieldRelativeVelocity, robotAngle);
 
-    // Calculate distance from turret to target
-    Translation2d target =
-        AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint.toTranslation2d());
-    Pose2d turretPosition = turret.getPose(robotPose);
-    double turretToTargetDistance = target.getDistance(turretPosition.getTranslation());
+        // Account for imparted velocity by robot (turret) to offset
+        double timeOfFlight;
+        Pose2d lookaheadPose = turretPosition;
+        double lookaheadTurretToTargetDistance = turretToTargetDistance;
+        for (int i = 0; i < 20; i++) {
+          timeOfFlight = timeOfFlightMap.get(lookaheadTurretToTargetDistance);
+          double offsetX = turretVelocity.vx * timeOfFlight;
+          double offsetY = turretVelocity.vy * timeOfFlight;
+          lookaheadPose =
+              new Pose2d(
+                  turretPosition.getTranslation().plus(new Translation2d(offsetX, offsetY)),
+                  turretPosition.getRotation());
+          lookaheadTurretToTargetDistance = target.getDistance(lookaheadPose.getTranslation());
+        }
 
-    // Calculate field relative turret velocity
-    Angle         robotAngle     = robotPose.getRotation().getMeasure();
-    ChassisVelocities turretVelocity = turret.getVelocity(fieldRelativeVelocity, robotAngle);
+        // Calculate parameters accounted for imparted velocity
+        Rotation2d turretAngle =
+            target.minus(lookaheadPose.getTranslation()).getAngle().orElse(Rotation2d.ZERO);
+        double hoodAngle = launchHoodAngleMap.get(lookaheadTurretToTargetDistance).getRadians();
+        if (lastTurretAngle == null) {
+          lastTurretAngle = turretAngle;
+        }
+        if (Double.isNaN(lastHoodAngle)) {
+          lastHoodAngle = hoodAngle;
+        }
+        lastTurretAngle = turretAngle;
+        lastHoodAngle = hoodAngle;
+        var lookaheadTurretToTargetDistanceMeasure = Meters.of(lookaheadTurretToTargetDistance);
+        if (lookaheadTurretToTargetDistanceMeasure.gte(minDistance)
+            && lookaheadTurretToTargetDistanceMeasure.lte(maxDistance)) {
+          var shooterRPM = RPM.of(launchFlywheelSpeedMap.get(lookaheadTurretToTargetDistance));
+          turret.setAngleSetpoint(turretAngle.getMeasure());
+          hoodMechanism.setAngleSetpoint(Radians.of(hoodAngle));
+          shooterMechanism.setVelocitySetpoint(shooterRPM);
+          if (shootingDebounce.calculate(
+              shooterMechanism.getVelocity().isNear(shooterRPM, RPM.of(10)))) {
+            // Set indexer to go vrooooom
+            // HERE
+          }
+        }
 
-    // Account for imparted velocity by robot (turret) to offset
-    double timeOfFlight;
-    Pose2d lookaheadPose = turretPosition;
-    double lookaheadTurretToTargetDistance = turretToTargetDistance;
-    for (int i = 0; i < 20; i++) {
-      timeOfFlight = timeOfFlightMap.get(lookaheadTurretToTargetDistance);
-      double offsetX = turretVelocity.vx * timeOfFlight;
-      double offsetY = turretVelocity.vy * timeOfFlight;
-      lookaheadPose =
-          new Pose2d(
-              turretPosition.getTranslation().plus(new Translation2d(offsetX, offsetY)),
-              turretPosition.getRotation());
-      lookaheadTurretToTargetDistance = target.getDistance(lookaheadPose.getTranslation());
-    }
-
-    // Calculate parameters accounted for imparted velocity
-    turretAngle = target.minus(lookaheadPose.getTranslation()).getAngle().orElse(Rotation2d.ZERO);
-    hoodAngle = launchHoodAngleMap.get(lookaheadTurretToTargetDistance).getRadians();
-    if (lastTurretAngle == null) {
-      lastTurretAngle = turretAngle;
-    }
-    if (Double.isNaN(lastHoodAngle)) {
-      lastHoodAngle = hoodAngle;
-    }
-    lastTurretAngle = turretAngle;
-    lastHoodAngle = hoodAngle;
-    var lookaheadTurretToTargetDistanceMeasure = Meters.of(lookaheadTurretToTargetDistance);
-    if (lookaheadTurretToTargetDistanceMeasure.gte(minDistance)
-        && lookaheadTurretToTargetDistanceMeasure.lte(maxDistance)) {
-      var shooterRPM = RPM.of(launchFlywheelSpeedMap.get(lookaheadTurretToTargetDistance));
-      turret.setAngleSetpoint(turretAngle.getMeasure());
-      hoodMechanism.setAngleSetpoint(Radians.of(hoodAngle));
-      shooterMechanism.setVelocitySetpoint(shooterRPM);
-      if (shootingDebounce.calculate(
-          shooterMechanism.getVelocity().isNear(shooterRPM, RPM.of(10)))) {
-        // Set indexer to go vrooooom
-        // HERE
+        coroutine.yield();
       }
-    }
-  }
-
-  @Override
-  public void onCancel() {
-    shooterMechanism.setDutyCycleSetpoint(0);
+    }).whenCanceled(() -> shooterMechanism.setDutyCycleSetpoint(0)).named("ShootOnTheMove");
   }
 }

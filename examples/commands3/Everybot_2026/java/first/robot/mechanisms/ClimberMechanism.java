@@ -49,7 +49,12 @@ public class ClimberMechanism implements Mechanism {
    * @return a command that climbs the tower
    */
   public Command climbUp() {
-    return runRepeatedly(() -> climber.setDutyCycle(CLIMBER_MOTOR_UP_PERCENT)).named("Climber.ClimbUp");
+    return run(coroutine -> {
+      while (true) {
+        climber.setDutyCycle(CLIMBER_MOTOR_UP_PERCENT);
+        coroutine.yield();
+      }
+    }).named("Climber.ClimbUp");
   }
 
   /**
@@ -58,7 +63,12 @@ public class ClimberMechanism implements Mechanism {
    * @return a command that lowers the robot off the tower
    */
   public Command climbDown() {
-    return runRepeatedly(() -> climber.setDutyCycle(CLIMBER_MOTOR_DOWN_PERCENT)).named("Climber.ClimbDown");
+    return run(coroutine -> {
+      while (true) {
+        climber.setDutyCycle(CLIMBER_MOTOR_DOWN_PERCENT);
+        coroutine.yield();
+      }
+    }).named("Climber.ClimbDown");
   }
 
   /**
@@ -66,13 +76,14 @@ public class ClimberMechanism implements Mechanism {
    *
    * @return a command that stops the climber until interrupted
    */
-  public Command stop() {
-    return runRepeatedly(() -> climber.setDutyCycle(0)).named("Climber.Stop");
-  }
-
   @Override
   public Command idle() {
-    return stop();
+    return run(coroutine -> {
+      while (true) {
+        climber.setDutyCycle(0);
+        coroutine.yield();
+      }
+    }).named("Climber.Stop");
   }
 
   /** Publishes YAMS telemetry. Called from {@code Robot.robotPeriodic()}. */

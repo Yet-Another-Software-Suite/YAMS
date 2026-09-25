@@ -10,7 +10,6 @@ import static org.wpilib.units.Units.Pounds;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.util.CANPorts;
-import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Voltage;
@@ -55,12 +54,6 @@ public class FeederMechanism implements Mechanism {
 
   public void stop() {
     feederRoller.setDutyCycleSetpoint(0);
-  }
-
-  // Runs the roller at the given voltage until interrupted. Does not stop the roller when it ends;
-  // the fuel commands decide when to stop.
-  public Command runAt(Voltage voltage) {
-    return runRepeatedly(() -> setVoltage(voltage)).named("Feeder.RunAt[" + voltage + "]");
   }
 
   /** Publishes YAMS telemetry. Called from {@link first.robot.Robot#robotPeriodic()}. */

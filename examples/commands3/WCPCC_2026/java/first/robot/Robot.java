@@ -6,7 +6,7 @@ package first.robot;
 
 import static org.wpilib.units.Units.Volts;
 
-import first.robot.commands.ManualDrive;
+import first.robot.commands.Drive;
 import first.robot.commands.MechanismCommands;
 import first.robot.mechanisms.Feeder;
 import first.robot.mechanisms.Floor;
@@ -44,29 +44,8 @@ public class Robot extends OpModeRobot {
 
     public final CommandNiDsXboxController driver = new CommandNiDsXboxController(0);
 
-    public final ManualDrive manualDrive = new ManualDrive(
-        swerve,
-        () -> -driver.getLeftY(),
-        () -> -driver.getLeftX(),
-        () -> -driver.getRightX()
-    );
-
-    /** Driver controlled commands for teleop. */
-    public final MechanismCommands driverCommands = new MechanismCommands(
-        swerve,
-        intakePivot,
-        intakeRollers,
-        floor,
-        feeder,
-        shooter,
-        hood,
-        hanger,
-        () -> -driver.getLeftY(),
-        () -> -driver.getLeftX()
-    );
-
-    /** Commands for autonomous, which aim without any driver translation. */
-    public final MechanismCommands autoCommands = new MechanismCommands(
+    /** Commands that use several mechanisms, shared by teleop and autonomous. */
+    public final MechanismCommands mechanismCommands = new MechanismCommands(
         swerve,
         intakePivot,
         intakeRollers,
@@ -89,7 +68,7 @@ public class Robot extends OpModeRobot {
     public Robot() {
         // Manual drive is the default in every mode, as in the v2 port, so the drivetrain holds its
         // heading between autonomous trajectories.
-        swerve.setDefaultCommand(manualDrive.command());
+        swerve.setDefaultCommand(Drive.teleop(swerve, driver));
         // Lowest priority so an autonomous routine can pause vision with limelight.idle().
         limelight.setDefaultCommand(updateVisionCommand());
         // 2027 also takes the voltage to recover at, which must be at least 0.5 V above brownout.
@@ -140,16 +119,19 @@ public class Robot extends OpModeRobot {
     }
 
     private Command updateVisionCommand() {
-        return limelight.runRepeatedly(() -> {
-            final Pose2d currentRobotPose = swerve.getPose();
-            final Optional<Limelight.Measurement> measurement = limelight.getMeasurement(currentRobotPose);
-            measurement.ifPresent(m -> {
-                swerve.addVisionMeasurement(
-                    m.poseEstimate.pose,
-                    m.poseEstimate.timestampSeconds,
-                    m.standardDeviations
-                );
-            });
+        return limelight.run(coroutine -> {
+            while (true) {
+                final Pose2d currentRobotPose = swerve.getPose();
+                final Optional<Limelight.Measurement> measurement = limelight.getMeasurement(currentRobotPose);
+                measurement.ifPresent(m -> {
+                    swerve.addVisionMeasurement(
+                        m.poseEstimate.pose,
+                        m.poseEstimate.timestampSeconds,
+                        m.standardDeviations
+                    );
+                });
+                coroutine.yield();
+            }
         })
         .withPriority(Command.LOWEST_PRIORITY)
         .named("Update Vision");

@@ -3,8 +3,6 @@
 
 package first.robot.opmodes.teleop;
 
-import static first.robot.Constants.OperatorConstants.*;
-
 import first.robot.Robot;
 import first.robot.commands.FuelCommands;
 import org.wpilib.opmode.OpMode;
@@ -34,11 +32,7 @@ public class DefaultTeleop implements OpMode {
     // While the up arrow on the directional pad is held it will climb the robot
     controller.getHID().povUp().whileTrue(robot.climber.climbUp());
 
-    // Arcade drive from the joysticks. The Y axis of the controller is inverted so that pushing the
-    // stick away from you (a negative value) drives the robot forwards (a positive value). Both
-    // axes are scaled down so the robot is more easily controllable.
-    robot.drive.setDefaultCommand(robot.drive.arcadeDrive(
-        () -> -controller.getLeftY() * DRIVE_SCALING,
-        () -> -controller.getRightX() * ROTATION_SCALING));
+    // Arcade drive from the joysticks.
+    robot.drive.setDefaultCommand(robot.drive.arcadeDrive(controller));
   }
 }

@@ -14,7 +14,6 @@ import static org.wpilib.units.Units.Volts;
 import com.ctre.phoenix6.hardware.TalonFX;
 import first.robot.Constants.KrakenX60;
 import first.robot.Ports;
-import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.math.controller.SimpleMotorFeedforward;
 import org.wpilib.math.system.DCMotor;
@@ -82,16 +81,6 @@ public class Feeder implements Mechanism {
 
     public void setPercentOutput(double percentOutput) {
         feeder.setVoltageSetpoint(Volts.of(percentOutput * 12.0));
-    }
-
-    /** Run the feeder at feed speed until canceled, then stop it. */
-    public Command feedCommand() {
-        return run(coroutine -> {
-            set(Speed.FEED);
-            coroutine.park();
-        })
-        .whenCanceled(() -> setPercentOutput(0))
-        .named("Feeder Feed");
     }
 
     /** Called from {@code Robot.robotPeriodic()}, replacing the v2 subsystem periodic. */

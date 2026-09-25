@@ -125,11 +125,15 @@ public class IndexerMechanism implements Mechanism
    */
   public Command setVoltage(Voltage volts)
   {
-    return runRepeatedly(() -> {
-      // recordOutput logs the commanded voltage as a computed output; it is NOT
-      // replayed. Lets you see in replay what was sent vs. what the roller did.
-      Logger.recordOutput("Indexer/Voltage", volts);
-      indexer.setVoltageSetpoint(volts);
+    return run(coroutine -> {
+      while (true)
+      {
+        // recordOutput logs the commanded voltage as a computed output; it is NOT
+        // replayed. Lets you see in replay what was sent vs. what the roller did.
+        Logger.recordOutput("Indexer/Voltage", volts);
+        indexer.setVoltageSetpoint(volts);
+        coroutine.yield();
+      }
     }).named("IndexerSetVoltage");
   }
 
@@ -141,9 +145,13 @@ public class IndexerMechanism implements Mechanism
    */
   public Command set(double dutyCycle)
   {
-    return runRepeatedly(() -> {
-      Logger.recordOutput("Indexer/DutyCycle", dutyCycle);
-      indexer.setDutyCycleSetpoint(dutyCycle);
+    return run(coroutine -> {
+      while (true)
+      {
+        Logger.recordOutput("Indexer/DutyCycle", dutyCycle);
+        indexer.setDutyCycleSetpoint(dutyCycle);
+        coroutine.yield();
+      }
     }).named("IndexerSetDutyCycle");
   }
 
@@ -155,9 +163,13 @@ public class IndexerMechanism implements Mechanism
    */
   public Command setDutyCycle(Supplier<Double> dutyCycle)
   {
-    return runRepeatedly(() -> {
-      Logger.recordOutput("Indexer/DutyCycle", dutyCycle.get());
-      indexer.setDutyCycleSetpoint(dutyCycle.get());
+    return run(coroutine -> {
+      while (true)
+      {
+        Logger.recordOutput("Indexer/DutyCycle", dutyCycle.get());
+        indexer.setDutyCycleSetpoint(dutyCycle.get());
+        coroutine.yield();
+      }
     }).named("IndexerSetDutyCycleSupplier");
   }
 

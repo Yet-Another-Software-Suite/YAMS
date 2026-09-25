@@ -8,7 +8,7 @@ import static org.wpilib.units.Units.Centimeters;
 import static org.wpilib.units.Units.Radians;
 
 import first.robot.Constants.DriveConstants;
-import java.util.function.DoubleSupplier;
+import first.robot.Constants.OIConstants;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.hardware.imu.OnboardIMU;
@@ -19,8 +19,8 @@ import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.kinematics.ChassisVelocities;
 import yams.commands3.config.SwerveDriveConfig;
 import yams.commands3.swerve.SwerveDrive;
+import yams.commands3.swerve.SwerveInputStream;
 import yams.core.mechanisms.swerve.SwerveModule;
-import yams.core.mechanisms.swerve.utility.SwerveInputStream;
 import yams.core.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
 /**
@@ -35,6 +35,7 @@ public class DriveMechanism implements Mechanism
   private final OnboardIMU m_gyro = new OnboardIMU(MountOrientation.FLAT);
 
   private final SwerveDrive m_drive;
+  private final SwerveInputStream m_input;
 
   /** Creates a new DriveMechanism. */
   public DriveMechanism()
@@ -87,44 +88,60 @@ public class DriveMechanism implements Mechanism
         .withRotationController(new PIDController(1, 0, 0))
         .withTelemetry("Drive", TelemetryVerbosity.HIGH);
     m_drive = new SwerveDrive(config);
-  }
-
-  /**
-   * Joystick input stream for teleop driving. Inputs are in [-1, 1] and are scaled to the maximum
-   * chassis speeds configured above.
-   *
-   * @param xSpeed Speed of the robot in the x direction (forward).
-   * @param ySpeed Speed of the robot in the y direction (sideways).
-   * @param rot    Angular rate of the robot.
-   * @param deadband Joystick deadband.
-   * @return {@link SwerveInputStream} producing field relative {@link ChassisVelocities}.
-   */
-  public SwerveInputStream getInputStream(DoubleSupplier xSpeed, DoubleSupplier ySpeed, DoubleSupplier rot,
-                                          double deadband)
-  {
-    return new SwerveInputStream(m_drive, xSpeed, ySpeed, rot)
+    // The one driver input. Drive commands set its sticks every loop; the sticks are scaled to the
+    // maximum chassis speeds configured above.
+    m_input = new SwerveInputStream(m_drive)
         .withMaximumLinearVelocity(DriveConstants.kMaxSpeed)
         .withMaximumAngularVelocity(DriveConstants.kMaxAngularSpeed)
-        .withDeadband(deadband);
+        .withDeadband(OIConstants.kDriveDeadband);
+  }
+
+  /** Reset the drive input: sticks at zero and field relative translation. */
+  public void resetDriveInput()
+  {
+    m_input.reset().withRobotRelative(false);
   }
 
   /**
-   * Command to drive the robot using joystick info.
+   * Set the driver's stick inputs. The sticks are scaled to the maximum chassis speeds configured
+   * above.
    *
-   * @param speeds        Chassis speeds, e.g. from {@link #getInputStream}.
-   * @param fieldRelative Whether the provided x and y speeds are relative to the field.
+   * @param forward  Forward stick input, [-1, 1].
+   * @param left     Left stick input, [-1, 1].
+   * @param rotation Counterclockwise rotation stick input, [-1, 1].
    */
-  public Command driveCommand(SwerveInputStream speeds, boolean fieldRelative)
+  public void setDriveInput(double forward, double left, double rotation)
   {
-    return runRepeatedly(() -> {
-      if (fieldRelative)
-      {
-        m_drive.setFieldRelativeChassisSpeeds(speeds.get());
-      } else
-      {
-        m_drive.setRobotRelativeChassisSpeeds(speeds.get());
-      }
-    }).named(fieldRelative ? "Drive.FieldRelative" : "Drive.RobotRelative");
+    m_input.withTranslation(forward, left).withRotation(rotation);
+  }
+
+  /**
+   * Drive the translation sticks relative to the field or to the robot.
+   *
+   * @param fieldRelative Whether the translation sticks are relative to the field.
+   */
+  public void setFieldRelative(boolean fieldRelative)
+  {
+    m_input.withRobotRelative(!fieldRelative);
+  }
+
+  /** Drive from the drive input set with the methods above. Call once per loop. */
+  public void driveFromInput()
+  {
+    // The stream always outputs field relative speeds; robot relative sticks are converted.
+    m_drive.setFieldRelativeChassisSpeeds(m_input.get());
+  }
+
+  /** Sets the wheels into an X formation to prevent movement. Call once per loop to hold it. */
+  public void lockWheels()
+  {
+    m_drive.lockPose();
+  }
+
+  /** Zeroes the heading of the robot. */
+  public void zeroHeading()
+  {
+    m_drive.zeroGyro();
   }
 
   /**
@@ -162,18 +179,6 @@ public class DriveMechanism implements Mechanism
   public void resetOdometry(Pose2d pose)
   {
     m_drive.resetOdometry(pose);
-  }
-
-  /** Sets the wheels into an X formation to prevent movement. */
-  public Command setXCommand()
-  {
-    return runRepeatedly(m_drive::lockPose).named("Drive.SetX");
-  }
-
-  /** Zeroes the heading of the robot. */
-  public Command zeroHeadingCommand()
-  {
-    return run(coroutine -> m_drive.zeroGyro()).named("Drive.ZeroHeading");
   }
 
   /**
