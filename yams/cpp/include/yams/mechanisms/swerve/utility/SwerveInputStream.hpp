@@ -10,7 +10,8 @@
 #include <optional>
 #include <stdexcept>
 #include <utility>
-#include <wpi/driverstation/DriverStation.hpp>
+#include <wpi/driverstation/Alliance.hpp>
+#include <wpi/driverstation/MatchState.hpp>
 #include <wpi/math/geometry/Pose2d.hpp>
 #include <wpi/math/geometry/Rotation2d.hpp>
 #include <wpi/math/geometry/Translation2d.hpp>
@@ -576,8 +577,8 @@ class SwerveInputStream {
       if (m_robotRelative.has_value() && m_robotRelative.value()()) {
         throw std::runtime_error{"Cannot use robot-oriented control with alliance-aware movement!"};
       }
-      auto alliance = wpi::DriverStation::GetAlliance();
-      if (alliance.has_value() && alliance.value() == wpi::DriverStation::Alliance::kRed) {
+      auto alliance = wpi::MatchState::GetAlliance();
+      if (alliance.has_value() && alliance.value() == wpi::Alliance::RED) {
         return translation.RotateBy(wpi::math::Rotation2d{wpi::units::degree_t{180.0}});
       }
     }
