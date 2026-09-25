@@ -31,9 +31,6 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer. This will perform all our button bindings
     // and build the autonomous command.
     m_robotContainer = new RobotContainer();
-
-    // Used to track usage of Kitbot code, please do not remove.
-    UsageReporting.reportUsage("Framework", "Kitbot");
   }
 
   /**
