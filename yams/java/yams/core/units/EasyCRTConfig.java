@@ -183,9 +183,11 @@ public class EasyCRTConfig {
    * @param absoluteEncoder1PinionTeeth tooth count on encoder 1 pinion
    * @param absoluteEncoder2PinionTeeth tooth count on encoder 2 pinion
    * @return this configuration for chaining
-   * @throws IllegalArgumentException if {@code commonRatio} is not finite or is zero, or if
-   *                                  {@code driveGearTeeth}, {@code absoluteEncoder1PinionTeeth},
-   *                                  or {@code absoluteEncoder2PinionTeeth} is not positive.
+   * @throws IllegalArgumentException if {@code commonRatio} is not finite.
+   * @throws IllegalArgumentException if {@code commonRatio} is zero.
+   * @throws IllegalArgumentException if {@code driveGearTeeth} is not positive.
+   * @throws IllegalArgumentException if {@code absoluteEncoder1PinionTeeth} or
+   *                                  {@code absoluteEncoder2PinionTeeth} is not positive.
    */
   public EasyCRTConfig withCommonDriveGear(double commonRatio, int driveGearTeeth, int absoluteEncoder1PinionTeeth, int absoluteEncoder2PinionTeeth) {
     requireNonZeroFinite(commonRatio, "commonRatio");
@@ -312,8 +314,9 @@ public class EasyCRTConfig {
    * @param stage1GearTeeth tooth count on the gear that drives both encoders
    * @param stage2Ratio     common ratio between mechanism and drive gear
    * @return this configuration for chaining
-   * @throws IllegalArgumentException if {@code stage1GearTeeth} is not positive, or if
-   *                                  {@code stage2Ratio} is not finite or is zero.
+   * @throws IllegalArgumentException if {@code stage1GearTeeth} is not positive.
+   * @throws IllegalArgumentException if {@code stage2Ratio} is not finite.
+   * @throws IllegalArgumentException if {@code stage2Ratio} is zero.
    */
   public EasyCRTConfig withCrtGearRecommendationInputs(int stage1GearTeeth, double stage2Ratio) {
     requirePositiveTeeth(stage1GearTeeth, "stage1GearTeeth");
@@ -336,10 +339,16 @@ public class EasyCRTConfig {
    * @param maxTeeth           maximum tooth count to search
    * @param maxIterationsLimit maximum iterations per gear to consider valid
    * @return this configuration for chaining
-   * @throws IllegalArgumentException when running in simulation, if {@code coverageMargin} is not
-   *                                  finite and positive, if {@code minTeeth} or {@code maxTeeth}
-   *                                  is not positive, if {@code maxTeeth} is less than
-   *                                  {@code minTeeth}, or if {@code maxIterationsLimit} is less than 1.
+   * @throws IllegalArgumentException if running in simulation and {@code coverageMargin} is not
+   *                                  finite.
+   * @throws IllegalArgumentException if running in simulation and {@code coverageMargin} is not
+   *                                  positive.
+   * @throws IllegalArgumentException if running in simulation and {@code minTeeth} or
+   *                                  {@code maxTeeth} is not positive.
+   * @throws IllegalArgumentException if running in simulation and {@code maxTeeth} is less than
+   *                                  {@code minTeeth}.
+   * @throws IllegalArgumentException if running in simulation and {@code maxIterationsLimit} is
+   *                                  less than 1.
    */
   public EasyCRTConfig withCrtGearRecommendationConstraints(double coverageMargin, int minTeeth, int maxTeeth, int maxIterationsLimit) {
     if (!RobotBase.isSimulation()) {
@@ -435,9 +444,11 @@ public class EasyCRTConfig {
    *
    * @return gearing representation for encoder 1
    * @throws IllegalStateException    if neither a gear chain nor gear stages are configured for
-   *                                  encoder 1, if the configured stages do not have an even length
-   *                                  of at least 2, or if the configured chain has fewer than 2
-   *                                  tooth counts.
+   *                                  encoder 1.
+   * @throws IllegalStateException    if the configured stages for encoder 1 do not have an even
+   *                                  length of at least 2.
+   * @throws IllegalStateException    if the configured chain for encoder 1 has fewer than 2 tooth
+   *                                  counts.
    * @throws IllegalArgumentException if any configured tooth count for encoder 1 is not positive.
    */
   public MechanismGearing getAbsoluteEncoder1Gearing() {
@@ -449,9 +460,11 @@ public class EasyCRTConfig {
    *
    * @return gearing representation for encoder 2
    * @throws IllegalStateException    if neither a gear chain nor gear stages are configured for
-   *                                  encoder 2, if the configured stages do not have an even length
-   *                                  of at least 2, or if the configured chain has fewer than 2
-   *                                  tooth counts.
+   *                                  encoder 2.
+   * @throws IllegalStateException    if the configured stages for encoder 2 do not have an even
+   *                                  length of at least 2.
+   * @throws IllegalStateException    if the configured chain for encoder 2 has fewer than 2 tooth
+   *                                  counts.
    * @throws IllegalArgumentException if any configured tooth count for encoder 2 is not positive.
    */
   public MechanismGearing getAbsoluteEncoder2Gearing() {
@@ -464,9 +477,11 @@ public class EasyCRTConfig {
    * @param encoderIndex encoder index (1 or 2) to build gearing for
    * @return gearing representation based on provided configuration
    * @throws IllegalStateException    if neither a gear chain nor gear stages are configured for
-   *                                  the encoder, if the configured stages do not have an even
-   *                                  length of at least 2, or if the configured chain has fewer
-   *                                  than 2 tooth counts.
+   *                                  the encoder.
+   * @throws IllegalStateException    if the configured stages for the encoder do not have an even
+   *                                  length of at least 2.
+   * @throws IllegalStateException    if the configured chain for the encoder has fewer than 2
+   *                                  tooth counts.
    * @throws IllegalArgumentException if any configured tooth count for the encoder is not positive.
    */
   private MechanismGearing buildMechanismGearingForEncoder(int encoderIndex) {
@@ -579,8 +594,10 @@ public class EasyCRTConfig {
    *                                  {@link #withCommonDriveGear(double, int, int, int)}) and no gear chain
    *                                  or gear stages are configured for it.
    * @throws IllegalArgumentException if the ratio is derived from configured gear stages that do not
-   *                                  have an even length of at least 2, from a gear chain with fewer
-   *                                  than 2 tooth counts, or from any tooth count that is not
+   *                                  have an even length of at least 2.
+   * @throws IllegalArgumentException if the ratio is derived from a gear chain with fewer than 2
+   *                                  tooth counts.
+   * @throws IllegalArgumentException if the ratio is derived from any tooth count that is not
    *                                  positive.
    */
   public double getEncoder1RotationsPerMechanismRotation() {
@@ -597,8 +614,10 @@ public class EasyCRTConfig {
    *                                  {@link #withCommonDriveGear(double, int, int, int)}) and no gear chain
    *                                  or gear stages are configured for it.
    * @throws IllegalArgumentException if the ratio is derived from configured gear stages that do not
-   *                                  have an even length of at least 2, from a gear chain with fewer
-   *                                  than 2 tooth counts, or from any tooth count that is not
+   *                                  have an even length of at least 2.
+   * @throws IllegalArgumentException if the ratio is derived from a gear chain with fewer than 2
+   *                                  tooth counts.
+   * @throws IllegalArgumentException if the ratio is derived from any tooth count that is not
    *                                  positive.
    */
   public double getEncoder2RotationsPerMechanismRotation() {
@@ -614,8 +633,10 @@ public class EasyCRTConfig {
    * @throws IllegalStateException    if no ratio was set directly for the encoder and no gear chain
    *                                  or gear stages are configured for it.
    * @throws IllegalArgumentException if the ratio is derived from configured gear stages that do not
-   *                                  have an even length of at least 2, from a gear chain with fewer
-   *                                  than 2 tooth counts, or from any tooth count that is not
+   *                                  have an even length of at least 2.
+   * @throws IllegalArgumentException if the ratio is derived from a gear chain with fewer than 2
+   *                                  tooth counts.
+   * @throws IllegalArgumentException if the ratio is derived from any tooth count that is not
    *                                  positive.
    */
   private double getOrComputeRatio(int encoderIndex) {
@@ -645,8 +666,8 @@ public class EasyCRTConfig {
    *
    * @param teethChain ordered tooth counts from mechanism to encoder
    * @return encoder rotations per mechanism rotation
-   * @throws IllegalArgumentException if {@code teethChain} has fewer than 2 tooth counts or any
-   *                                  tooth count is not positive.
+   * @throws IllegalArgumentException if {@code teethChain} has fewer than 2 tooth counts.
+   * @throws IllegalArgumentException if any tooth count in {@code teethChain} is not positive.
    */
   public static double ratioFromChain(int... teethChain) {
     String[] stages = buildStagesFromChain(teethChain);
@@ -661,7 +682,9 @@ public class EasyCRTConfig {
    * @param driverDrivenPairs alternating driver and driven teeth counts for each stage
    * @return encoder rotations per mechanism rotation
    * @throws IllegalArgumentException if {@code driverDrivenPairs} does not have an even length of
-   *                                  at least 2, or any tooth count is not positive.
+   *                                  at least 2.
+   * @throws IllegalArgumentException if any tooth count in {@code driverDrivenPairs} is not
+   *                                  positive.
    */
   public static double ratioFromDriverDrivenPairs(int... driverDrivenPairs) {
     String[] stages = buildStagesFromDriverDrivenPairs(driverDrivenPairs);
@@ -677,8 +700,10 @@ public class EasyCRTConfig {
    * @param driveGearTeeth tooth count on the gear that drives encoder pinions
    * @param encoderTeeth   tooth count on the encoder pinion
    * @return encoder rotations per mechanism rotation
-   * @throws IllegalArgumentException if {@code commonRatio} is not finite or is zero, or if
-   *                                  {@code driveGearTeeth} or {@code encoderTeeth} is not positive.
+   * @throws IllegalArgumentException if {@code commonRatio} is not finite.
+   * @throws IllegalArgumentException if {@code commonRatio} is zero.
+   * @throws IllegalArgumentException if {@code driveGearTeeth} is not positive.
+   * @throws IllegalArgumentException if {@code encoderTeeth} is not positive.
    */
   public static double ratioFromCommonDrive(double commonRatio, int driveGearTeeth, int encoderTeeth) {
     requireNonZeroFinite(commonRatio, "commonRatio");
@@ -834,8 +859,8 @@ public class EasyCRTConfig {
    *
    * @param value numeric value to check
    * @param label label used in the error message
-   * @throws IllegalArgumentException if {@code value} is not finite or its magnitude is below
-   *                                  1e-12.
+   * @throws IllegalArgumentException if {@code value} is not finite.
+   * @throws IllegalArgumentException if the magnitude of {@code value} is below 1e-12.
    */
   private static void requireNonZeroFinite(double value, String label) {
     if (!Double.isFinite(value) || Math.abs(value) < 1e-12) {
@@ -861,7 +886,8 @@ public class EasyCRTConfig {
    *
    * @param value numeric value to validate
    * @param label label used in the error message
-   * @throws IllegalArgumentException if {@code value} is not finite or is zero or negative.
+   * @throws IllegalArgumentException if {@code value} is not finite.
+   * @throws IllegalArgumentException if {@code value} is zero or negative.
    */
   private static void requirePositiveFinite(double value, String label) {
     if (!Double.isFinite(value) || value <= 0.0) {
@@ -891,8 +917,8 @@ public class EasyCRTConfig {
    *
    * @param teethChain ordered tooth counts from mechanism to encoder
    * @return gearbox stage strings for the chain
-   * @throws IllegalArgumentException if {@code teethChain} has fewer than 2 tooth counts or any
-   *                                  tooth count is not positive.
+   * @throws IllegalArgumentException if {@code teethChain} has fewer than 2 tooth counts.
+   * @throws IllegalArgumentException if any tooth count in {@code teethChain} is not positive.
    */
   private static String[] buildStagesFromChain(int[] teethChain) {
     Objects.requireNonNull(teethChain, "teethChain");
@@ -915,7 +941,9 @@ public class EasyCRTConfig {
    * @param driverDrivenPairs alternating driver and driven teeth counts for each stage
    * @return gearbox stage strings for the provided stages
    * @throws IllegalArgumentException if {@code driverDrivenPairs} does not have an even length of
-   *                                  at least 2, or any tooth count is not positive.
+   *                                  at least 2.
+   * @throws IllegalArgumentException if any tooth count in {@code driverDrivenPairs} is not
+   *                                  positive.
    */
   private static String[] buildStagesFromDriverDrivenPairs(int[] driverDrivenPairs) {
     Objects.requireNonNull(driverDrivenPairs, "driverDrivenPairs");

@@ -170,9 +170,9 @@ public class BooleanTelemetry<F> {
    * Get the value.
    *
    * @return Value.
-   * @throws RuntimeException if no tuning subscriber exists because this field is not tunable or
-   *                          {@link #setupNetworkTables(NetworkTable, NetworkTable)} was not called
-   *                          with a non-null tuning table.
+   * @throws RuntimeException if this field is not tunable, so no tuning subscriber exists.
+   * @throws RuntimeException if {@link #setupNetworkTables(NetworkTable, NetworkTable)} was not
+   *                          called with a non-null tuning table, so no tuning subscriber exists.
    */
   public boolean get() {
     if (subscriber.isPresent()) {

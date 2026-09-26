@@ -45,11 +45,12 @@ public class DoubleJointedArm extends yams.core.mechanisms.positional.DoubleJoin
    *           {@link yams.commands3.config.SmartMotorControllerConfig}s that share the same
    *           {@link Mechanism} set via {@code withMechanism(Mechanism)}.
    * @throws DoubleJointedArmConfigurationException if either motor controller's starting position
-   *                                                or either arm length is not configured, in
-   *                                                simulation if any arm lower or upper hard limit
-   *                                                is not configured, or if the two motor
-   *                                                controllers' configs do not share the same
-   *                                                {@link Mechanism}.
+   *                                                is not configured.
+   * @throws DoubleJointedArmConfigurationException if either arm length is not configured.
+   * @throws DoubleJointedArmConfigurationException if running in simulation and any arm lower or
+   *                                                upper hard limit is not configured.
+   * @throws DoubleJointedArmConfigurationException if the two motor controllers' configs do not
+   *                                                share the same {@link Mechanism}.
    * @throws SmartMotorControllerConfigurationException if either motor controller's config does not
    *                                                    have a {@link Mechanism} set via
    *                                                    {@code withMechanism(Mechanism)}.

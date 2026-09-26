@@ -44,9 +44,12 @@ public class Pivot extends yams.core.mechanisms.positional.Pivot implements Comm
    * @param smc    {@link SmartMotorController} driving the pivot.
    * @implNote {@code smc}'s config must be a {@link yams.commands3.config.SmartMotorControllerConfig}
    *           with a {@link Mechanism} set via {@code withMechanism(Mechanism)}.
-   * @throws PivotConfigurationException in simulation, if the pivot lower hard limit, upper hard
-   *                                     limit, or starting position is not configured, or if the
-   *                                     starting position is outside the hard limits.
+   * @throws PivotConfigurationException if running in simulation and the pivot lower or upper hard
+   *                                     limit is not configured.
+   * @throws PivotConfigurationException if running in simulation and the starting position is not
+   *                                     configured.
+   * @throws PivotConfigurationException if running in simulation and the starting position is
+   *                                     outside the hard limits.
    * @throws SmartMotorControllerConfigurationException if {@code smc}'s config does not have a
    *                                                    {@link Mechanism} set via
    *                                                    {@code withMechanism(Mechanism)}.

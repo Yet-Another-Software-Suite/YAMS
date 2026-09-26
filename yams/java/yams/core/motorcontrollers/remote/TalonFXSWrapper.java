@@ -194,13 +194,15 @@ public class TalonFXSWrapper extends SmartMotorController {
    * @param motor       {@link DCMotor}
    * @param smartConfig {@link SmartMotorControllerConfig}
    * @throws SmartMotorControllerConfigurationException if the vendor config is not a
-   *                                                    TalonFXSConfiguration, if
+   *                                                    TalonFXSConfiguration.
+   * @throws SmartMotorControllerConfigurationException if
    *                                                    {@link #applyConfig(SmartMotorControllerConfig)}
-   *                                                    rejects the config, or if the motor is a
-   *                                                    single NEO 550 without a stator current
-   *                                                    limit of at most 40A.
+   *                                                    rejects the config.
+   * @throws SmartMotorControllerConfigurationException if the motor is a single NEO 550 without
+   *                                                    a stator current limit of at most 40A.
    * @throws IllegalArgumentException                   if motor is not a Minion, NEO, NEO 550, or
-   *                                                    NEO Vortex, or if
+   *                                                    NEO Vortex.
+   * @throws IllegalArgumentException                   if
    *                                                    {@link #applyConfig(SmartMotorControllerConfig)}
    *                                                    rejects an unsupported option (see its
    *                                                    documentation).
@@ -609,9 +611,10 @@ public class TalonFXSWrapper extends SmartMotorController {
    * {@inheritDoc}
    *
    * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
-   *                                                    configured, or if the configured position
-   *                                                    control request is not a supported Phoenix 6
-   *                                                    position request.
+   *                                                    configured.
+   * @throws SmartMotorControllerConfigurationException if the configured position control request
+   *                                                    is not a supported Phoenix 6 position
+   *                                                    request.
    */
   @Override
   public void setPosition(Distance distance) {
@@ -622,9 +625,10 @@ public class TalonFXSWrapper extends SmartMotorController {
    * {@inheritDoc}
    *
    * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
-   *                                                    configured, or if the configured velocity
-   *                                                    control request is not a supported Phoenix 6
-   *                                                    velocity request.
+   *                                                    configured.
+   * @throws SmartMotorControllerConfigurationException if the configured velocity control request
+   *                                                    is not a supported Phoenix 6 velocity
+   *                                                    request.
    */
   @Override
   public void setVelocity(LinearVelocity velocity) {
@@ -681,9 +685,10 @@ public class TalonFXSWrapper extends SmartMotorController {
    *
    * @throws SmartMotorControllerConfigurationException if a feedforward force is given without an
    *                                                    LQR controller and the mechanism
-   *                                                    circumference is not configured, or if the
-   *                                                    configured velocity control request is not a
-   *                                                    supported Phoenix 6 velocity request.
+   *                                                    circumference is not configured.
+   * @throws SmartMotorControllerConfigurationException if the configured velocity control request
+   *                                                    is not a supported Phoenix 6 velocity
+   *                                                    request.
    */
   @Override
   public void setVelocity(AngularVelocity angularVelocity, Force feedforwardForce) {
@@ -749,20 +754,26 @@ public class TalonFXSWrapper extends SmartMotorController {
    * {@inheritDoc}
    *
    * @throws SmartMotorControllerConfigurationException if a closed loop tolerance is configured
-   *                                                    without an LQR controller, if an external
-   *                                                    encoder inversion or gearing is set while no
-   *                                                    external encoder is used, if the vendor
-   *                                                    control request is not a supported Phoenix 6
-   *                                                    position or velocity request, if the
-   *                                                    continuous wrapping bounds are not exactly
-   *                                                    one rotation apart, or if not every required
-   *                                                    config option was read during validation.
+   *                                                    without an LQR controller.
+   * @throws SmartMotorControllerConfigurationException if an external encoder inversion or gearing
+   *                                                    is set while no external encoder is used.
+   * @throws SmartMotorControllerConfigurationException if the vendor control request is not a
+   *                                                    supported Phoenix 6 position or velocity
+   *                                                    request.
+   * @throws SmartMotorControllerConfigurationException if the continuous wrapping bounds are not
+   *                                                    exactly one rotation apart.
+   * @throws SmartMotorControllerConfigurationException if not every required config option was
+   *                                                    read during validation.
    * @throws IllegalArgumentException                   if an LQR controller is configured together
-   *                                                    with a closed loop tolerance, if a follower
-   *                                                    is neither a TalonFX nor a TalonFXS, or if a
-   *                                                    closed loop control period, temperature
-   *                                                    cutoff, feedback synchronization threshold,
-   *                                                    or voltage compensation is configured.
+   *                                                    with a closed loop tolerance.
+   * @throws IllegalArgumentException                   if a follower is neither a TalonFX nor a
+   *                                                    TalonFXS.
+   * @throws IllegalArgumentException                   if a closed loop control period is
+   *                                                    configured.
+   * @throws IllegalArgumentException                   if a temperature cutoff is configured.
+   * @throws IllegalArgumentException                   if a feedback synchronization threshold is
+   *                                                    configured.
+   * @throws IllegalArgumentException                   if voltage compensation is configured.
    */
   @Override
   public boolean applyConfig(SmartMotorControllerConfig<?> config) {

@@ -730,14 +730,22 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
    * Calculate the {@link ChassisVelocities} for the current controller inputs and active mode.
    *
    * @return Field relative {@link ChassisVelocities} for the current inputs.
-   * @throws SwerveDriveConfigurationException if translation only, heading, or aim mode is active
-   *                                           (including the fallback to translation only mode
-   *                                           when no controller rotation axis is set) and no
-   *                                           rotation PID controller is configured.
-   * @throws NoSuchElementException            if heading or aim mode is requested without a
-   *                                           heading or aim target configured and no controller
-   *                                           rotation axis is set, so the stream falls back to
-   *                                           angular velocity mode without an axis.
+   * @throws SwerveDriveConfigurationException if translation only mode is active (including the
+   *                                           fallback to translation only mode when no
+   *                                           controller rotation axis is set) and no rotation PID
+   *                                           controller is configured.
+   * @throws SwerveDriveConfigurationException if heading mode is active and no rotation PID
+   *                                           controller is configured.
+   * @throws SwerveDriveConfigurationException if aim mode is active and no rotation PID controller
+   *                                           is configured.
+   * @throws NoSuchElementException            if heading mode is requested without a heading
+   *                                           configured and no controller rotation axis is set,
+   *                                           so the stream falls back to angular velocity mode
+   *                                           without an axis.
+   * @throws NoSuchElementException            if aim mode is requested without an aim target
+   *                                           configured and no controller rotation axis is set,
+   *                                           so the stream falls back to angular velocity mode
+   *                                           without an axis.
    */
   @Override
   public ChassisVelocities get() {

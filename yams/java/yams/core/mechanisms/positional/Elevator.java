@@ -58,14 +58,17 @@ public class Elevator extends SmartPositionalMechanism {
    * @param smc    {@link SmartMotorController} to use for the Elevator
    * @implNote Protected so only {@link yams.commands2.mechanisms.Elevator} can construct this.
    * @throws ElevatorConfigurationException             if running in simulation and the carriage
-   *                                                    mass, minimum height, or maximum height is
-   *                                                    not configured.
+   *                                                    mass is not configured.
+   * @throws ElevatorConfigurationException             if running in simulation and the minimum or
+   *                                                    maximum height is not configured.
    * @throws SmartMotorControllerConfigurationException if running in simulation and the starting
    *                                                    position is not set on the
-   *                                                    {@link SmartMotorControllerConfig}, the
-   *                                                    mechanism circumference is not configured,
-   *                                                    or the starting height is outside the
-   *                                                    minimum and maximum heights.
+   *                                                    {@link SmartMotorControllerConfig}.
+   * @throws SmartMotorControllerConfigurationException if running in simulation and the mechanism
+   *                                                    circumference is not configured.
+   * @throws SmartMotorControllerConfigurationException if running in simulation and the starting
+   *                                                    height is outside the minimum and maximum
+   *                                                    heights.
    */
   protected Elevator(ElevatorConfig config, SmartMotorController smc) {
     m_config = config;

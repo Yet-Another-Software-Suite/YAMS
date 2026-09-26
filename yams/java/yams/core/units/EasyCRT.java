@@ -124,9 +124,11 @@ public class EasyCRT {
    *                                  configuration has neither a direct ratio nor a gear chain or
    *                                  gear stages for that encoder.
    * @throws IllegalArgumentException if an encoder ratio is derived from configured gear stages
-   *                                  that do not have an even length of at least 2, from a gear
-   *                                  chain with fewer than 2 tooth counts, or from any tooth count
-   *                                  that is not positive.
+   *                                  that do not have an even length of at least 2.
+   * @throws IllegalArgumentException if an encoder ratio is derived from a gear chain with fewer
+   *                                  than 2 tooth counts.
+   * @throws IllegalArgumentException if an encoder ratio is derived from any tooth count that is
+   *                                  not positive.
    */
   public Optional<Angle> getAngleOptional() {
     final double ratio1 = easyCrtConfig.getEncoder1RotationsPerMechanismRotation();

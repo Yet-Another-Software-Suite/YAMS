@@ -494,8 +494,8 @@ public class SwerveDrive {
    * @implNote Remember to call {@link #resetRotationPID()} and {@link #resetTranslationPID()}
    *           before calling this method in a loop.
    * @return robot-relative {@link ChassisVelocities} to drive the robot to the given pose.
-   * @throws SwerveDriveConfigurationException if the translation or rotation PID controller is not
-   *                                           configured.
+   * @throws SwerveDriveConfigurationException if the translation PID controller is not configured.
+   * @throws SwerveDriveConfigurationException if the rotation PID controller is not configured.
    */
   public ChassisVelocities driveToPoseSetpoint(Pose2d targetPose) {
     return driveToPoseSetpoint(targetPose, getPose(), new Rotation2d(getGyroAngle()));
@@ -512,8 +512,8 @@ public class SwerveDrive {
    * @implNote Remember to call {@link #resetRotationPID()} and {@link #resetTranslationPID()}
    *           before calling this method in a loop.
    * @return robot-relative {@link ChassisVelocities} to drive the robot to the given pose.
-   * @throws SwerveDriveConfigurationException if the translation or rotation PID controller is not
-   *                                           configured.
+   * @throws SwerveDriveConfigurationException if the translation PID controller is not configured.
+   * @throws SwerveDriveConfigurationException if the rotation PID controller is not configured.
    */
   public ChassisVelocities driveToPoseSetpoint(Pose2d targetPose, Pose2d currentPose, Rotation2d heading) {
     var rotationPID = m_config.getRotationPID().orElseThrow(() -> new SwerveDriveConfigurationException("No rotation PID controller configured", "Cannot drive to pose", "withRotationController(PIDController)"));

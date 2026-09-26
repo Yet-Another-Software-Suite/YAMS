@@ -103,8 +103,10 @@ public class DifferentialMechanism extends SmartPositionalMechanism {
    *                                                     {@link SmartMotorController} was not set on
    *                                                     the {@link DifferentialMechanismConfig}.
    * @throws DifferentialMechanismConfigurationException if the starting tilt or twist angle is not
-   *                                                     set, the length is not set, or running in
-   *                                                     simulation and the MOI is not set.
+   *                                                     set.
+   * @throws DifferentialMechanismConfigurationException if the length is not set.
+   * @throws DifferentialMechanismConfigurationException if running in simulation and the MOI is not
+   *                                                     set.
    */
   protected DifferentialMechanism(DifferentialMechanismConfig diffConfig) {
     m_config = diffConfig;

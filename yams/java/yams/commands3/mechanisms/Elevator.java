@@ -51,15 +51,19 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator implement
    * @param smc    {@link SmartMotorController} to use for the Elevator
    * @implNote {@code smc}'s config must be a {@link yams.commands3.config.SmartMotorControllerConfig}
    *           with a {@link Mechanism} set via {@code withMechanism(Mechanism)}.
-   * @throws ElevatorConfigurationException in simulation, if the carriage mass, minimum height, or
-   *                                        maximum height is not configured.
+   * @throws ElevatorConfigurationException if running in simulation and the carriage mass is not
+   *                                        configured.
+   * @throws ElevatorConfigurationException if running in simulation and the minimum or maximum
+   *                                        height is not configured.
    * @throws SmartMotorControllerConfigurationException if {@code smc}'s config does not have a
    *                                                    {@link Mechanism} set via
-   *                                                    {@code withMechanism(Mechanism)}, or, in
-   *                                                    simulation, if the starting position or
-   *                                                    mechanism circumference is not configured or
-   *                                                    the starting height is outside the hard
-   *                                                    limits.
+   *                                                    {@code withMechanism(Mechanism)}.
+   * @throws SmartMotorControllerConfigurationException if running in simulation and the starting
+   *                                                    position is not configured.
+   * @throws SmartMotorControllerConfigurationException if running in simulation and the mechanism
+   *                                                    circumference is not configured.
+   * @throws SmartMotorControllerConfigurationException if running in simulation and the starting
+   *                                                    height is outside the hard limits.
    */
   public Elevator(ElevatorConfig config, SmartMotorController smc) {
     super(config, smc);

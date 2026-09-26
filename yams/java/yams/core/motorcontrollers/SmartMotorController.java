@@ -187,8 +187,9 @@ public abstract class SmartMotorController {
    * Check config for safe values.
    *
    * @throws SmartMotorControllerConfigurationException if the motor is a single NEO 550 and the
-   *                                                    stator current limit is not defined or is
-   *                                                    above 40A.
+   *                                                    stator current limit is not defined.
+   * @throws SmartMotorControllerConfigurationException if the motor is a single NEO 550 and the
+   *                                                    stator current limit is above 40A.
    */
   public void checkConfigSafety() {
     if (isMotor(getDCMotor(), DCMotor.getNeo550(1))) {
@@ -288,8 +289,10 @@ public abstract class SmartMotorController {
    * Iterate the closed loop controller. Feedforward are only applied with profiled pid controllers.
    *
    * @throws SmartMotorControllerConfigurationException if the controller is running with a linear
-   *                                                    closed loop controller, or with a velocity
-   *                                                    setpoint that has a feedforward force, while
+   *                                                    closed loop controller while the mechanism
+   *                                                    circumference is not configured.
+   * @throws SmartMotorControllerConfigurationException if the controller is running with a velocity
+   *                                                    setpoint that has a feedforward force while
    *                                                    the mechanism circumference is not
    *                                                    configured.
    */
@@ -583,9 +586,10 @@ public abstract class SmartMotorController {
    *
    * @param distance Mechanism {@link Distance} to set.
    * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
-   *                                                    configured, or if the configured vendor
-   *                                                    position control request is not supported by
-   *                                                    the motor controller.
+   *                                                    configured.
+   * @throws SmartMotorControllerConfigurationException if the configured vendor position control
+   *                                                    request is not supported by the motor
+   *                                                    controller.
    */
   public abstract void setPosition(Distance distance);
 
@@ -595,9 +599,10 @@ public abstract class SmartMotorController {
    *
    * @param velocity Mechanism {@link LinearVelocity} to target.
    * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
-   *                                                    configured, or if the configured vendor
-   *                                                    velocity control request is not supported by
-   *                                                    the motor controller.
+   *                                                    configured.
+   * @throws SmartMotorControllerConfigurationException if the configured vendor velocity control
+   *                                                    request is not supported by the motor
+   *                                                    controller.
    */
   public void setVelocity(LinearVelocity velocity) {
     setVelocity(m_config.convertToMechanism(velocity));
@@ -624,9 +629,10 @@ public abstract class SmartMotorController {
    * @param feedforwardForce Additional feedforward {@link Force} applied to the mechanism, or
    *                         {@code null} for none.
    * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
-   *                                                    configured, or if the configured vendor
-   *                                                    velocity control request is not supported by
-   *                                                    the motor controller.
+   *                                                    configured.
+   * @throws SmartMotorControllerConfigurationException if the configured vendor velocity control
+   *                                                    request is not supported by the motor
+   *                                                    controller.
    */
   public void setVelocity(LinearVelocity velocity, Force feedforwardForce) {
     setVelocity(m_config.convertToMechanism(velocity), feedforwardForce);
@@ -642,8 +648,8 @@ public abstract class SmartMotorController {
    * @param feedforwardForce Additional feedforward {@link Force} applied to the mechanism, or
    *                         {@code null} for none.
    * @throws SmartMotorControllerConfigurationException if a feedforward force is given and the
-   *                                                    mechanism circumference is not configured,
-   *                                                    or if the configured vendor velocity control
+   *                                                    mechanism circumference is not configured.
+   * @throws SmartMotorControllerConfigurationException if the configured vendor velocity control
    *                                                    request is not supported by the motor
    *                                                    controller.
    */
@@ -656,8 +662,9 @@ public abstract class SmartMotorController {
    * @return Successful Application of the configuration.
    * @throws SmartMotorControllerConfigurationException if the config contains options that are
    *                                                    invalid or unsupported for the motor
-   *                                                    controller, or if a required config option
-   *                                                    is left unhandled during validation.
+   *                                                    controller.
+   * @throws SmartMotorControllerConfigurationException if a required config option is left
+   *                                                    unhandled during validation.
    * @throws IllegalArgumentException if the config references an unsupported device or option for
    *                                  the motor controller (e.g. an unsupported external encoder or
    *                                  follower type).
@@ -840,8 +847,9 @@ public abstract class SmartMotorController {
    * Apply the live-tuned values (from the Tuning NetworkTable) to this {@link SmartMotorController}.
    *
    * @throws SmartMotorControllerConfigurationException if the control mode is not
-   *                                                    {@code CLOSED_LOOP}, or if the motor controller
-   *                                                    implementation rejects a tuned value.
+   *                                                    {@code CLOSED_LOOP}.
+   * @throws SmartMotorControllerConfigurationException if the motor controller implementation
+   *                                                    rejects a tuned value.
    * @throws IllegalArgumentException if the tuned closed loop controller slot is not supported by
    *                                  the motor controller implementation.
    */

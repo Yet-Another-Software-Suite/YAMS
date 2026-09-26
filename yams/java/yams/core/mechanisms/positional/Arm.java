@@ -59,11 +59,14 @@ public class Arm extends SmartPositionalMechanism {
    * @param config {@link ArmConfig} to use.
    * @param smc    {@link SmartMotorController} for the Arm.
    * @implNote Protected so only {@link yams.commands2.mechanisms.Arm} can construct this.
-   * @throws ArmConfigurationException if running in simulation and the arm length is not set, the
-   *                                   lower or upper hard limit is not set, neither a starting
-   *                                   position nor an external encoder zero offset is set on the
-   *                                   {@link SmartMotorControllerConfig}, or the starting position
-   *                                   is outside the hard limits.
+   * @throws ArmConfigurationException if running in simulation and the arm length is not set.
+   * @throws ArmConfigurationException if running in simulation and the lower or upper hard limit
+   *                                   is not set.
+   * @throws ArmConfigurationException if running in simulation and neither a starting position nor
+   *                                   an external encoder zero offset is set on the
+   *                                   {@link SmartMotorControllerConfig}.
+   * @throws ArmConfigurationException if running in simulation and the starting position is
+   *                                   outside the hard limits.
    */
   protected Arm(ArmConfig config, SmartMotorController smc) {
     this.m_config = config;

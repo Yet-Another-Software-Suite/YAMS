@@ -47,10 +47,12 @@ public class DifferentialMechanism extends yams.core.mechanisms.positional.Diffe
    * @implNote Both motor controllers' configs must be {@link yams.commands3.config.SmartMotorControllerConfig}s that share the same
    *           {@link Mechanism} set via {@code withMechanism(Mechanism)}.
    * @throws DifferentialMechanismConfigurationException if the starting tilt or twist angle is not
-   *                                                     configured, if the length is not
-   *                                                     configured, in simulation if the MOI is not
-   *                                                     configured, or if the left and right motor
-   *                                                     controllers' configs do not share the same
+   *                                                     configured.
+   * @throws DifferentialMechanismConfigurationException if the length is not configured.
+   * @throws DifferentialMechanismConfigurationException if running in simulation and the MOI is not
+   *                                                     configured.
+   * @throws DifferentialMechanismConfigurationException if the left and right motor controllers'
+   *                                                     configs do not share the same
    *                                                     {@link Mechanism}.
    * @throws NoSuchElementException if the left or right {@link SmartMotorController} was never set
    *                                on {@code diffConfig}.

@@ -334,10 +334,12 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
    * Calculate the {@link ChassisVelocities} for the current inputs and modes.
    *
    * @return Field relative {@link ChassisVelocities}.
-   * @throws SwerveDriveConfigurationException if translation only mode is enabled, aiming is
-   *                                           enabled with an aim target set, or heading control
-   *                                           is enabled with a heading set, and no rotation PID
-   *                                           controller is configured.
+   * @throws SwerveDriveConfigurationException if translation only mode is enabled and no rotation
+   *                                           PID controller is configured.
+   * @throws SwerveDriveConfigurationException if aiming is enabled with an aim target set and no
+   *                                           rotation PID controller is configured.
+   * @throws SwerveDriveConfigurationException if heading control is enabled with a heading set and
+   *                                           no rotation PID controller is configured.
    */
   @Override
   public ChassisVelocities get() {

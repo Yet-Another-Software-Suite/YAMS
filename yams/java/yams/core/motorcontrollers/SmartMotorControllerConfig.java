@@ -650,10 +650,10 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @param bottom Bottom value to wrap to.
    * @param top    Top value to wrap to.
    * @return {@link SmartMotorControllerConfig} for chaining.
-   * @throws SmartMotorControllerConfigurationException if soft limits are already configured, if a
-   *                                                    linear (distance based) closed loop
-   *                                                    controller is in use, or if no closed loop
-   *                                                    controller is configured.
+   * @throws SmartMotorControllerConfigurationException if soft limits are already configured.
+   * @throws SmartMotorControllerConfigurationException if a linear (distance based) closed loop
+   *                                                    controller is in use.
+   * @throws SmartMotorControllerConfigurationException if no closed loop controller is configured.
    */
   public T withContinuousWrapping(Angle bottom, Angle top) {
     if (mechanismUpperLimit.isPresent() || mechanismLowerLimit.isPresent()) {
@@ -701,9 +701,11 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @param tolerance {@link Distance} tolerance.
    * @return {@link SmartMotorControllerConfig} for chaining.
    * @throws SmartMotorControllerConfigurationException if a linear closed loop controller is not in
-   *                                                    use, if the mechanism circumference is not
-   *                                                    configured, or if the tolerance is not null
-   *                                                    and no closed loop controller is configured.
+   *                                                    use.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   * @throws SmartMotorControllerConfigurationException if the tolerance is not null and no closed
+   *                                                    loop controller is configured.
    */
   public T withClosedLoopTolerance(Distance tolerance) {
     if (!linearClosedLoopController) {
@@ -798,8 +800,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @param high High distance soft limit.
    * @return {@link SmartMotorControllerConfig} for chaining.
    * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
-   *                                                    configured, or if the converted lower limit
-   *                                                    is greater than or equal to the upper limit.
+   *                                                    configured.
+   * @throws SmartMotorControllerConfigurationException if the converted lower limit is greater than
+   *                                                    or equal to the upper limit.
    */
   public T withSoftLimits(Distance low, Distance high) {
     if (mechanismCircumference.isEmpty()) {
@@ -2330,8 +2333,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * Validate external encoder config options for the config.
    *
    * @throws SmartMotorControllerConfigurationException if any external encoder option was not
-   *                                                     fetched (applied) by the SmartMotorController
-   *                                                     wrapper.
+   *                                                    fetched (applied) by the
+   *                                                    SmartMotorController wrapper.
    */
   public void validateExternalEncoderOptions() {
     if (!externalEncoderOptions.isEmpty()) {

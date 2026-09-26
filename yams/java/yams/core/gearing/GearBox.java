@@ -112,8 +112,9 @@ public class GearBox {
    *
    * @param teeth Gear teeth from driven gear to drive gear.
    * @return {@link GearBox}
-   * @throws IllegalArgumentException if {@code teeth} is null or has fewer than two entries, or if
-   *                                  any tooth count is zero or negative.
+   * @throws IllegalArgumentException if {@code teeth} is null.
+   * @throws IllegalArgumentException if {@code teeth} has fewer than two entries.
+   * @throws IllegalArgumentException if any tooth count is zero or negative.
    */
   public static GearBox fromTeeth(int... teeth) {
     if (teeth == null || teeth.length < 2) {

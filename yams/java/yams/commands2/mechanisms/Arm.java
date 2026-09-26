@@ -54,10 +54,14 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    * @param smc    {@link SmartMotorController} for the Arm.
    * @implNote {@code smc}'s config must be a {@link yams.commands2.config.SmartMotorControllerConfig}
    *           with a {@link Subsystem} set via {@code withSubsystem(Subsystem)}.
-   * @throws ArmConfigurationException in simulation, if the arm length, lower hard limit, or upper
-   *                                   hard limit is not configured, if neither a starting position
-   *                                   nor an external encoder zero offset is configured, or if the
-   *                                   starting position is outside the hard limits.
+   * @throws ArmConfigurationException if running in simulation and the arm length is not
+   *                                   configured.
+   * @throws ArmConfigurationException if running in simulation and the lower or upper hard limit is
+   *                                   not configured.
+   * @throws ArmConfigurationException if running in simulation and neither a starting position nor
+   *                                   an external encoder zero offset is configured.
+   * @throws ArmConfigurationException if running in simulation and the starting position is outside
+   *                                   the hard limits.
    * @throws SmartMotorControllerConfigurationException if {@code smc}'s config does not have a
    *                                                    {@link Subsystem} set via
    *                                                    {@code withSubsystem(Subsystem)}.

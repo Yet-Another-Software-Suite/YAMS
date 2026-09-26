@@ -237,10 +237,11 @@ public class DoubleTelemetry<F> {
    * Get the value.
    *
    * @return value of telemetry.
-   * @throws RuntimeException if the telemetry is enabled but no tuning subscriber exists because
-   *                          this field is not tunable or
-   *                          {@link #setupNetworkTables(NetworkTable, NetworkTable)} was not called with a non-null tuning table while
-   *                          enabled.
+   * @throws RuntimeException if the telemetry is enabled and this field is not tunable, so no
+   *                          tuning subscriber exists.
+   * @throws RuntimeException if the telemetry is enabled and
+   *                          {@link #setupNetworkTables(NetworkTable, NetworkTable)} was not called
+   *                          with a non-null tuning table, so no tuning subscriber exists.
    */
   public double get() {
     if (!enabled) {

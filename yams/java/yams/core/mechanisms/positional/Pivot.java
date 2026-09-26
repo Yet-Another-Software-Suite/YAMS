@@ -61,9 +61,11 @@ public class Pivot extends SmartPositionalMechanism {
    * @param smc    {@link SmartMotorController} driving the pivot.
    * @implNote Protected so only {@link yams.commands2.mechanisms.Pivot} can construct this.
    * @throws PivotConfigurationException if running in simulation and the lower or upper hard limit
-   *                                     is not set, the starting position is not set on the
-   *                                     {@link SmartMotorControllerConfig}, or the starting
-   *                                     position is outside the hard limits.
+   *                                     is not set.
+   * @throws PivotConfigurationException if running in simulation and the starting position is not
+   *                                     set on the {@link SmartMotorControllerConfig}.
+   * @throws PivotConfigurationException if running in simulation and the starting position is
+   *                                     outside the hard limits.
    */
   protected Pivot(PivotConfig config, SmartMotorController smc) {
     m_config = config;

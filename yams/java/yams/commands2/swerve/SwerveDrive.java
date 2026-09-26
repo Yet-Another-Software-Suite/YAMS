@@ -97,8 +97,9 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
    * @return {@link Command} that drives the robot toward the given pose until interrupted.
    * @implNote Not compatible with AdvantageKit
    * @throws SwerveDriveConfigurationException when the returned command runs, if the
-   *                                           translation or rotation PID controller is not
-   *                                           configured.
+   *                                           translation PID controller is not configured.
+   * @throws SwerveDriveConfigurationException when the returned command runs, if the rotation
+   *                                           PID controller is not configured.
    * @throws IllegalStateException when the returned command runs, if a gyro angular velocity
    *                               scale factor is configured but no gyro supplier was set with
    *                               {@code withGyro(Supplier)}.

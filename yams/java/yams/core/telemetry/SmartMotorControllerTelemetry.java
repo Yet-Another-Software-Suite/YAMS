@@ -172,12 +172,15 @@ public class SmartMotorControllerTelemetry {
    *
    * @param smartMotorController {@link SmartMotorController} to control.
    * @throws SmartMotorControllerConfigurationException if the controller's control mode is not
-   *                                                    {@code CLOSED_LOOP}, or if the underlying
-   *                                                    motor controller implementation rejects a
-   *                                                    tuned value (for example, a gain applied
-   *                                                    while slot 3 is active on a TalonFX, or an
-   *                                                    unsupported vendor control request when
-   *                                                    applying a setpoint or slot).
+   *                                                    {@code CLOSED_LOOP}.
+   * @throws SmartMotorControllerConfigurationException if the underlying motor controller
+   *                                                    implementation rejects a tuned gain (for
+   *                                                    example, a gain applied while slot 3 is
+   *                                                    active on a TalonFX).
+   * @throws SmartMotorControllerConfigurationException if the underlying motor controller
+   *                                                    implementation rejects an unsupported
+   *                                                    vendor control request when applying a
+   *                                                    setpoint or slot.
    * @throws IllegalArgumentException                   if the tuned closed loop controller slot is
    *                                                    not supported by the underlying motor
    *                                                    controller implementation (for example, slot

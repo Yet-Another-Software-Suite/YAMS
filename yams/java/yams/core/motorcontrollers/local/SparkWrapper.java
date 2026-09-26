@@ -155,15 +155,17 @@ public class SparkWrapper extends SmartMotorController {
    * @throws SmartMotorControllerConfigurationException if the vendor config does not match the
    *                                                    controller type (a SparkMaxConfig is
    *                                                    required for a SparkMax and a
-   *                                                    SparkFlexConfig for a SparkFlex), if the
-   *                                                    motor is a NEO 550 with no stator current
-   *                                                    limit or a stator current limit above 40A,
-   *                                                    or if
+   *                                                    SparkFlexConfig for a SparkFlex).
+   * @throws SmartMotorControllerConfigurationException if the motor is a NEO 550 with no stator
+   *                                                    current limit.
+   * @throws SmartMotorControllerConfigurationException if the motor is a NEO 550 with a stator
+   *                                                    current limit above 40A.
+   * @throws SmartMotorControllerConfigurationException if
    *                                                    {@link #applyConfig(SmartMotorControllerConfig)}
    *                                                    rejects the config.
-   * @throws IllegalArgumentException if the controller is neither a SparkMax nor a SparkFlex, or if
-   *                                  {@link #applyConfig(SmartMotorControllerConfig)} rejects the
-   *                                  config.
+   * @throws IllegalArgumentException if the controller is neither a SparkMax nor a SparkFlex.
+   * @throws IllegalArgumentException if {@link #applyConfig(SmartMotorControllerConfig)} rejects
+   *                                  the config.
    */
   public SparkWrapper(SparkBase controller, DCMotor motor, SmartMotorControllerConfig<?> config) {
     if (controller instanceof SparkMax) {
@@ -416,29 +418,42 @@ public class SparkWrapper extends SmartMotorController {
   /**
    * {@inheritDoc}
    *
-   * @throws SmartMotorControllerConfigurationException if a supply current limit is configured; if
-   *                                                    an external encoder discontinuity point,
-   *                                                    zero offset, inversion, or gearing is
-   *                                                    configured without an external encoder; if a
-   *                                                    closed loop control period, closed loop
-   *                                                    controller maximum voltage, or feedback
-   *                                                    synchronization threshold is configured
-   *                                                    without an exponential profile or LQR
-   *                                                    controller; if a temperature cutoff is
-   *                                                    configured without an exponential or
-   *                                                    trapezoidal profile; if a vendor control
-   *                                                    request is configured; if the continuous
-   *                                                    wrapping bounds do not span exactly one
-   *                                                    rotation; if a linear closed loop controller
-   *                                                    is in use without a mechanism circumference;
-   *                                                    or if a required config option is left
+   * @throws SmartMotorControllerConfigurationException if a supply current limit is configured.
+   * @throws SmartMotorControllerConfigurationException if an external encoder discontinuity point
+   *                                                    is configured without an external encoder.
+   * @throws SmartMotorControllerConfigurationException if an external encoder zero offset is
+   *                                                    configured without an external encoder.
+   * @throws SmartMotorControllerConfigurationException if an external encoder inversion is
+   *                                                    configured without an external encoder.
+   * @throws SmartMotorControllerConfigurationException if an external encoder gearing is configured
+   *                                                    without an external encoder.
+   * @throws SmartMotorControllerConfigurationException if a closed loop control period is
+   *                                                    configured without an exponential profile
+   *                                                    or LQR controller.
+   * @throws SmartMotorControllerConfigurationException if a closed loop controller maximum voltage
+   *                                                    is configured without an exponential
+   *                                                    profile or LQR controller.
+   * @throws SmartMotorControllerConfigurationException if a feedback synchronization threshold is
+   *                                                    configured without an exponential profile
+   *                                                    or LQR controller.
+   * @throws SmartMotorControllerConfigurationException if a temperature cutoff is configured
+   *                                                    without an exponential or trapezoidal
+   *                                                    profile.
+   * @throws SmartMotorControllerConfigurationException if a vendor control request is configured.
+   * @throws SmartMotorControllerConfigurationException if the continuous wrapping bounds do not
+   *                                                    span exactly one rotation.
+   * @throws SmartMotorControllerConfigurationException if a linear closed loop controller is in use
+   *                                                    without a mechanism circumference.
+   * @throws SmartMotorControllerConfigurationException if a required config option is left
    *                                                    unhandled during validation.
    * @throws IllegalArgumentException if a closed loop control period is configured with an
    *                                  exponential profile or LQR controller while not in closed loop
-   *                                  mode, if a closed loop tolerance is configured with an LQR
-   *                                  controller, if the external encoder is not a
-   *                                  SparkAbsoluteEncoder, if a follower is not a SparkMax or
-   *                                  SparkFlex, or if relative encoder inversion is configured.
+   *                                  mode.
+   * @throws IllegalArgumentException if a closed loop tolerance is configured with an LQR
+   *                                  controller.
+   * @throws IllegalArgumentException if the external encoder is not a SparkAbsoluteEncoder.
+   * @throws IllegalArgumentException if a follower is not a SparkMax or SparkFlex.
+   * @throws IllegalArgumentException if relative encoder inversion is configured.
    */
   @Override
   public boolean applyConfig(SmartMotorControllerConfig<?> config) {

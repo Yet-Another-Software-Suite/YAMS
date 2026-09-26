@@ -96,8 +96,8 @@ public class SwerveModule {
    * @param config {@link SwerveModuleConfig} for the module.
    * @throws NoSuchElementException                     if the drive or azimuth motor controller is
    *                                                    not set in the config.
-   * @throws IllegalArgumentException                   if the config has no telemetry name or no
-   *                                                    location.
+   * @throws IllegalArgumentException                   if the config has no telemetry name.
+   * @throws IllegalArgumentException                   if the config has no location.
    * @throws SmartMotorControllerConfigurationException if the azimuth motor controller has an
    *                                                    external encoder configured but external
    *                                                    feedback is not enabled with
