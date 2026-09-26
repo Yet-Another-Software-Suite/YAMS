@@ -26,7 +26,8 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  * Indexer of the 2026 Everybot: a brushed motor that moves fuel between the intake and the
  * launcher, open loop, as a YAMS {@link FlyWheel}. The intake/launcher is its own mechanism
  * ({@link IntakeLauncherMechanism}) so each one can be tuned live on its own; the fuel commands in
- * {@link first.robot.commands.FuelCommands} require both.
+ * {@link first.robot.commands.FuelCommands} run this mechanism's commands together with the
+ * intake/launcher's.
  */
 public class IndexerMechanism implements Mechanism {
   private final SparkMax indexerMotor = new SparkMax(CANPorts.fromBusId(1), INDEXER_MOTOR_ID, MotorType.kBrushed);
@@ -59,17 +60,60 @@ public class IndexerMechanism implements Mechanism {
    *
    * @param power duty cycle, [-1, 1]
    */
-  public void setPower(double power) {
+  private void setPower(double power) {
     indexer.setDutyCycleSetpoint(power);
   }
 
   /** Stops the indexer roller. */
-  public void stop() {
+  private void stop() {
     setPower(0);
   }
 
   /**
-   * Holds the indexer stopped. Used as the default command.
+   * Runs the indexer at a fixed power until interrupted, then stops it.
+   *
+   * @param power duty cycle, [-1, 1]
+   * @param name  the command name
+   * @return a command that runs the indexer
+   */
+  private Command runAt(double power, String name) {
+    return run(coroutine -> {
+      // The duty cycle setpoint holds on its own, so the command sets it once and parks.
+      setPower(power);
+      coroutine.park();
+    }).whenCanceled(this::stop).named(name);
+  }
+
+  /**
+   * Runs the indexer at the intaking power. Runs until interrupted.
+   *
+   * @return the intake command
+   */
+  public Command intake() {
+    return runAt(INDEXER_INTAKING_PERCENT, "Indexer.Intake");
+  }
+
+  /**
+   * Feeds fuel toward the launcher. Used to launch and to eject. Runs until interrupted.
+   *
+   * @return the feed command
+   */
+  public Command feed() {
+    return runAt(INDEXER_LAUNCHING_PERCENT, "Indexer.Feed");
+  }
+
+  /**
+   * Holds the fuel back from the launcher while it spins up. Runs until interrupted.
+   *
+   * @return the hold back command
+   */
+  public Command holdBack() {
+    return runAt(INDEXER_SPIN_UP_PRE_LAUNCH_PERCENT, "Indexer.HoldBack");
+  }
+
+  /**
+   * Holds the indexer stopped. Used as the default command, at the lowest priority so any other
+   * indexer command can take over.
    *
    * @return a command that stops the indexer until interrupted
    */
@@ -80,7 +124,7 @@ public class IndexerMechanism implements Mechanism {
         stop();
         coroutine.yield();
       }
-    }).named("Indexer.Stop");
+    }).withPriority(Command.LOWEST_PRIORITY).named("Indexer.Stop");
   }
 
   /** Publishes YAMS telemetry. Called from {@code Robot.robotPeriodic()}. */

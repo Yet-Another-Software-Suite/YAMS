@@ -20,6 +20,7 @@ import first.robot.mechanisms.Swerve;
 import java.util.Optional;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Scheduler;
+import org.wpilib.command3.button.RobotModeTriggers;
 import org.wpilib.command3.button.CommandNiDsXboxController;
 import org.wpilib.framework.OpModeRobot;
 import org.wpilib.math.geometry.Pose2d;
@@ -56,9 +57,6 @@ public class Robot extends OpModeRobot {
         hanger
     );
 
-    private final Command intakePivotHoming = intakePivot.homingCommand();
-    private final Command hangerHoming = hanger.homingCommand();
-
     private final Scheduler scheduler = Scheduler.getDefault();
 
     /**
@@ -71,21 +69,15 @@ public class Robot extends OpModeRobot {
         swerve.setDefaultCommand(Drive.teleop(swerve, driver));
         // Lowest priority so an autonomous routine can pause vision with limelight.idle().
         limelight.setDefaultCommand(updateVisionCommand());
+        // The rollers stop whenever no command is using them, at the lowest priority.
+        feeder.setDefaultCommand(feeder.stop());
+        floor.setDefaultCommand(floor.stop());
+        intakeRollers.setDefaultCommand(intakeRollers.stop());
+        // Home when autonomous or teleop is enabled, as in the v2 port. Disabling cancels it.
+        RobotModeTriggers.autonomous().or(RobotModeTriggers.teleop()).whileTrue(mechanismCommands.home());
         // 2027 also takes the voltage to recover at, which must be at least 0.5 V above brownout.
         RobotController.setBrownoutVoltages(Volts.of(6.1), Volts.of(6.6));
         // Swerve telemetry is published by the YAMS SwerveDrive, replacing SwerveTelemetry.
-    }
-
-    /** Home the intake pivot and the hanger. Scheduled when an autonomous or teleop opmode starts. */
-    public void scheduleHoming() {
-        scheduler.schedule(intakePivotHoming);
-        scheduler.schedule(hangerHoming);
-    }
-
-    /** Stop homing when the opmode ends, as disabling canceled it in the v2 port. */
-    public void cancelHoming() {
-        scheduler.cancel(intakePivotHoming);
-        scheduler.cancel(hangerHoming);
     }
 
     /**

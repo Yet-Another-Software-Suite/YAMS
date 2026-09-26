@@ -28,7 +28,8 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  * Intake/launcher rollers of the 2026 Everybot: two NEOs spin the rollers from either side, open
  * loop, as a YAMS {@link FlyWheel}. The indexer is its own mechanism ({@link IndexerMechanism}) so
  * each one can be tuned live on its own; the fuel commands in
- * {@link first.robot.commands.FuelCommands} require both.
+ * {@link first.robot.commands.FuelCommands} run this mechanism's commands together with the
+ * indexer's.
  */
 public class IntakeLauncherMechanism implements Mechanism {
   // The right launcher motor is wrapped by YAMS; the left one faces the opposite way, so it is
@@ -69,17 +70,60 @@ public class IntakeLauncherMechanism implements Mechanism {
    *
    * @param power duty cycle, [-1, 1]
    */
-  public void setPower(double power) {
+  private void setPower(double power) {
     intakeLauncher.setDutyCycleSetpoint(power);
   }
 
   /** Stops the intake/launcher rollers. */
-  public void stop() {
+  private void stop() {
     setPower(0);
   }
 
   /**
-   * Holds the rollers stopped. Used as the default command.
+   * Runs the rollers at a fixed power until interrupted, then stops them.
+   *
+   * @param power duty cycle, [-1, 1]
+   * @param name  the command name
+   * @return a command that runs the rollers
+   */
+  private Command runAt(double power, String name) {
+    return run(coroutine -> {
+      // The duty cycle setpoint holds on its own, so the command sets it once and parks.
+      setPower(power);
+      coroutine.park();
+    }).whenCanceled(this::stop).named(name);
+  }
+
+  /**
+   * Spins the rollers inward to pull fuel off the ground. Runs until interrupted.
+   *
+   * @return the intake command
+   */
+  public Command intake() {
+    return runAt(INTAKE_INTAKING_PERCENT, "IntakeLauncher.Intake");
+  }
+
+  /**
+   * Spins the rollers backward to push fuel back out through the intake. Runs until interrupted.
+   *
+   * @return the eject command
+   */
+  public Command eject() {
+    return runAt(INTAKE_EJECT_PERCENT, "IntakeLauncher.Eject");
+  }
+
+  /**
+   * Spins the rollers at the launching power. Runs until interrupted.
+   *
+   * @return the launch command
+   */
+  public Command launch() {
+    return runAt(LAUNCHING_LAUNCHER_PERCENT, "IntakeLauncher.Launch");
+  }
+
+  /**
+   * Holds the rollers stopped. Used as the default command, at the lowest priority so any other
+   * roller command can take over.
    *
    * @return a command that stops the rollers until interrupted
    */
@@ -90,7 +134,7 @@ public class IntakeLauncherMechanism implements Mechanism {
         stop();
         coroutine.yield();
       }
-    }).named("IntakeLauncher.Stop");
+    }).withPriority(Command.LOWEST_PRIORITY).named("IntakeLauncher.Stop");
   }
 
   /** Publishes YAMS telemetry. Called from {@code Robot.robotPeriodic()}. */

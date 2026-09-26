@@ -12,6 +12,8 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.util.CANPorts;
 import first.robot.Constants.IntakeSubsystemConstants;
+import first.robot.Constants.IntakeSubsystemConstants.ConveyorSetpoints;
+import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.math.system.DCMotor;
 import yams.commands3.config.SmartMotorControllerConfig;
@@ -55,20 +57,37 @@ public class ConveyorMechanism implements Mechanism
                                                      .withTelemetry("Conveyor", TelemetryVerbosity.HIGH),
                                                  conveyorMotorController);
 
-  /**
-   * Runs the conveyor motor at a power in the range of [-1, 1].
-   *
-   * @param power Duty cycle to run at.
-   */
-  public void setPower(double power)
+  /** Creates a new ConveyorMechanism. Its default command stops the motor. */
+  public ConveyorMechanism()
   {
-    conveyor.setDutyCycleSetpoint(power);
+    setDefaultCommand(idle());
   }
 
-  /** Stops the conveyor motor. */
-  public void stop()
+  /** Command to run the conveyor toward the shooter until canceled. */
+  public Command intake()
   {
-    conveyor.setDutyCycleSetpoint(0.0);
+    return conveyor.set(ConveyorSetpoints.kIntake);
+  }
+
+  /** Command to run the conveyor in reverse until canceled. */
+  public Command extake()
+  {
+    return conveyor.set(ConveyorSetpoints.kExtake);
+  }
+
+  /**
+   * Stops the conveyor motor and keeps it stopped. This is the default command, so the motor stops
+   * as soon as the command using it ends. It has the lowest priority so any other command can take
+   * the conveyor.
+   */
+  @Override
+  public Command idle()
+  {
+    return run(coroutine -> {
+      conveyor.setDutyCycleSetpoint(0.0);
+      coroutine.park();
+    }).withPriority(Command.LOWEST_PRIORITY)
+      .named("Conveyor.Stop");
   }
 
   /** Publishes the conveyor telemetry. */

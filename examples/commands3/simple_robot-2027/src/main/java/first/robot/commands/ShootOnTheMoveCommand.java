@@ -19,8 +19,10 @@ import org.wpilib.math.interpolation.InterpolatingTreeMap;
 import org.wpilib.math.interpolation.InverseInterpolator;
 import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.command3.Command;
+import org.wpilib.command3.Trigger;
 import first.robot.mechanisms.HoodMechanism;
 import first.robot.mechanisms.ShooterMechanism;
 import first.robot.mechanisms.TurretMechanism;
@@ -77,6 +79,9 @@ public final class ShootOnTheMoveCommand {
 
   private ShootOnTheMoveCommand() {}
 
+  /** One shot solution: where to point the turret and hood, and how fast to spin the flywheel. */
+  private record Shot(Angle turretAngle, Angle hoodAngle, AngularVelocity flywheelSpeed) {}
+
   /**
    * Create the ShootOnTheMove command.
    *
@@ -84,7 +89,8 @@ public final class ShootOnTheMoveCommand {
    * @param shooterMechanism Shooter to spin up for the lookahead distance.
    * @param hoodMechanism Hood to angle for the lookahead distance.
    * @param swerveDrive Drivetrain used for the robot pose and velocity.
-   * @return {@link Command} requiring the turret, shooter and hood.
+   * @return {@link Command} with no requirements of its own. Once the first in-range shot is found it forks one YAMS
+   *     command each for the turret, hood and shooter, which follow the latest in-range shot.
    */
   public static Command create(
       TurretMechanism turret,
@@ -103,13 +109,23 @@ public final class ShootOnTheMoveCommand {
       return robotPose;
     };
     Supplier<ChassisVelocities> fieldRelativeVelocitySupplier = swerveDrive::getFieldRelativeSpeed;
-    Debouncer shootingDebounce = new Debouncer(0.1, DebounceType.FALLING);
 
-    return Command.requiring(turret, shooterMechanism, hoodMechanism).executing(coroutine -> {
-      // Outputs
-      Rotation2d lastTurretAngle = null;
-      double lastHoodAngle = Double.NaN;
+    return Command.noRequirements(coroutine -> {
+      // Latest in-range shot, null until the first one is found.
+      Shot[] shot = {null};
+      Debouncer shootingDebounce = new Debouncer(0.1, DebounceType.FALLING);
 
+      // Command-scoped trigger: this binding only exists while ShootOnTheMove runs.
+      new Trigger(() -> shot[0] != null
+                        && shootingDebounce.calculate(
+                            shooterMechanism.getVelocity().isNear(shot[0].flywheelSpeed(), RPM.of(10))))
+          .whileTrue(Command.noRequirements(feed -> {
+            // Set indexer to go vrooooom
+            // HERE, e.g. feed.await(indexer.feed());
+            feed.park();
+          }).named("ShootOnTheMove Feed"));
+
+      boolean aiming = false;
       while (true) {
         // Get estimated pose
         var robotPose = estimatedPose.get();
@@ -144,26 +160,20 @@ public final class ShootOnTheMoveCommand {
         Rotation2d turretAngle =
             target.minus(lookaheadPose.getTranslation()).getAngle().orElse(Rotation2d.ZERO);
         double hoodAngle = launchHoodAngleMap.get(lookaheadTurretToTargetDistance).getRadians();
-        if (lastTurretAngle == null) {
-          lastTurretAngle = turretAngle;
-        }
-        if (Double.isNaN(lastHoodAngle)) {
-          lastHoodAngle = hoodAngle;
-        }
-        lastTurretAngle = turretAngle;
-        lastHoodAngle = hoodAngle;
         var lookaheadTurretToTargetDistanceMeasure = Meters.of(lookaheadTurretToTargetDistance);
         if (lookaheadTurretToTargetDistanceMeasure.gte(minDistance)
             && lookaheadTurretToTargetDistanceMeasure.lte(maxDistance)) {
           var shooterRPM = RPM.of(launchFlywheelSpeedMap.get(lookaheadTurretToTargetDistance));
-          turret.setAngleSetpoint(turretAngle.getMeasure());
-          hoodMechanism.setAngleSetpoint(Radians.of(hoodAngle));
-          shooterMechanism.setVelocitySetpoint(shooterRPM);
-          if (shootingDebounce.calculate(
-              shooterMechanism.getVelocity().isNear(shooterRPM, RPM.of(10)))) {
-            // Set indexer to go vrooooom
-            // HERE
-          }
+          shot[0] = new Shot(turretAngle.getMeasure(), Radians.of(hoodAngle), shooterRPM);
+        }
+
+        if (!aiming && shot[0] != null) {
+          // Each mechanism is only owned by its forked command, which ends with this command.
+          coroutine.fork(
+              turret.setAngle(() -> shot[0].turretAngle()),
+              hoodMechanism.setAngle(() -> shot[0].hoodAngle()),
+              shooterMechanism.setVelocity(() -> shot[0].flywheelSpeed()));
+          aiming = true;
         }
 
         coroutine.yield();

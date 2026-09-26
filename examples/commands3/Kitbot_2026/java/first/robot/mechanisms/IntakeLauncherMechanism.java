@@ -10,6 +10,7 @@ import static org.wpilib.units.Units.Pounds;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.util.CANPorts;
+import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Voltage;
@@ -25,7 +26,8 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
 /**
  * Intake/launcher roller of the 2026 FIRST KitBot fuel mechanism: a brushed motor that both intakes
  * and launches fuel, as a YAMS {@link FlyWheel}. Each fuel roller is its own mechanism so it can be
- * tuned live on its own; {@link first.robot.commands.FuelCommands} runs them together.
+ * tuned live on its own. It exposes one command per roller action, and
+ * {@link first.robot.commands.FuelCommands} combines them with the feeder's commands.
  */
 public class IntakeLauncherMechanism implements Mechanism {
   private final SparkMax intakeLauncherMotor = new SparkMax(CANPorts.fromBusId(1), INTAKE_LAUNCHER_MOTOR_ID, MotorType.kBrushed);
@@ -49,12 +51,38 @@ public class IntakeLauncherMechanism implements Mechanism {
       .withTelemetry("IntakeLauncherRoller", TelemetryVerbosity.HIGH),
       intakeLauncherMotorController);
 
-  public void setVoltage(Voltage voltage) {
-    intakeLauncherRoller.setVoltageSetpoint(voltage);
+  // Runs the intake/launcher at the given voltage and holds it there until the command is
+  // interrupted. The idle command stops the roller again once nothing else is using it.
+  private Command runAt(Voltage voltage, String name) {
+    return run(coroutine -> {
+      intakeLauncherRoller.setVoltageSetpoint(voltage);
+      coroutine.park();
+    }).named(name);
   }
 
-  public void stop() {
-    intakeLauncherRoller.setDutyCycleSetpoint(0);
+  // Pulls fuel in off the floor.
+  public Command intake() {
+    return runAt(INTAKING_INTAKE_VOLTAGE, "IntakeLauncher.Intake");
+  }
+
+  // Pushes fuel back out the intake. Same voltage as intaking, opposite direction.
+  public Command eject() {
+    return runAt(INTAKING_INTAKE_VOLTAGE.unaryMinus(), "IntakeLauncher.Eject");
+  }
+
+  // Spins the launcher at launching voltage. Used both while spinning up and while launching.
+  public Command launch() {
+    return runAt(LAUNCHING_LAUNCHER_VOLTAGE, "IntakeLauncher.Launch");
+  }
+
+  // Stops the roller and keeps it stopped until another command claims the intake/launcher. Used
+  // as the default command, so it runs whenever no fuel command is using the roller.
+  @Override
+  public Command idle() {
+    return run(coroutine -> {
+      intakeLauncherRoller.setDutyCycleSetpoint(0);
+      coroutine.park();
+    }).withPriority(Command.LOWEST_PRIORITY).named("IntakeLauncher.Idle");
   }
 
   /** Publishes YAMS telemetry. Called from {@link first.robot.Robot#robotPeriodic()}. */

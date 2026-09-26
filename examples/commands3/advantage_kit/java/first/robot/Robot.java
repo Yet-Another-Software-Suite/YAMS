@@ -9,10 +9,13 @@ package first.robot;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.RPM;
+import static org.wpilib.units.Units.Seconds;
 
 import first.robot.commands.Drive;
 import first.robot.mechanisms.ArmMechanism;
+import first.robot.mechanisms.ArmMechanism.ArmConstants;
 import first.robot.mechanisms.ElevatorMechanism;
+import first.robot.mechanisms.IndexerMechanism;
 import first.robot.mechanisms.ShooterMechanism;
 import first.robot.mechanisms.SwerveMechanism;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -21,12 +24,16 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+import org.wpilib.command3.Command;
 import org.wpilib.command3.Scheduler;
 import org.wpilib.command3.button.CommandNiDsXboxController;
 import org.wpilib.driverstation.internal.DriverStationBackend;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Distance;
 
 /**
  * AdvantageKit robot using Commands v3.
@@ -40,6 +47,10 @@ import org.wpilib.math.geometry.Rotation2d;
  * default {@link Scheduler} from robotPeriodic() and button bindings are created in the
  * constructor, where they are globally scoped (active in every mode, like the v2 port).
  * Replay (including {@link #setUseTiming(boolean)}) keeps working unchanged.
+ *
+ * <p>Commands that use more than one mechanism ({@link #shoot}, {@link #scorePreloadAuto}) have no
+ * requirements of their own and run each mechanism's command as a child, so a mechanism is only
+ * owned while its child command runs and its default command resumes afterwards.
  */
 public class Robot extends LoggedRobot {
   public static enum Mode {
@@ -65,6 +76,17 @@ public class Robot extends LoggedRobot {
   private final ArmMechanism      arm;
   private final ElevatorMechanism elevator;
   private final ShooterMechanism  shooter;
+  private final IndexerMechanism  indexer;
+
+  // Setpoints shared by the teleop bindings and the autonomous routine.
+  private static final Angle           SCORE_ANGLE       = ArmConstants.SOME_ANGLE;
+  private static final Distance        SCORE_HEIGHT      = Meters.of(1);
+  private static final AngularVelocity SHOOT_SPEED       = RPM.of(3000);
+  private static final AngularVelocity SHOOTER_TOLERANCE = RPM.of(100);
+  private static final Angle           ARM_TOLERANCE     = Degrees.of(3);
+  private static final Distance        HEIGHT_TOLERANCE  = Meters.of(0.05);
+
+  private final Command autonomousCommand;
 
   private final CommandNiDsXboxController xboxController = new CommandNiDsXboxController(0);
 
@@ -97,6 +119,7 @@ public class Robot extends LoggedRobot {
     arm = new ArmMechanism();
     elevator = new ElevatorMechanism();
     shooter = new ShooterMechanism();
+    indexer = new IndexerMechanism();
 
     DriverStationBackend.silenceJoystickConnectionAlert(true);
     // The drive command also drives to these poses while the left or right bumper is held.
@@ -106,14 +129,52 @@ public class Robot extends LoggedRobot {
     arm.setDefaultCommand(arm.setAngle(Degrees.of(0)));
     elevator.setDefaultCommand(elevator.setHeight(Meters.of(0)));
     shooter.setDefaultCommand(shooter.set(0));
+    indexer.setDefaultCommand(indexer.idle());
+    autonomousCommand = scorePreloadAuto();
     configureBindings();
   }
 
   private void configureBindings()
   {
-    xboxController.a().whileTrue(arm.setAngle(Degrees.of(20)));
-    xboxController.b().whileTrue(elevator.setHeight(Meters.of(1)));
-    xboxController.x().whileTrue(shooter.setVelocity(RPM.of(3000)));
+    xboxController.a().whileTrue(arm.setAngle(SCORE_ANGLE));
+    xboxController.b().whileTrue(elevator.setHeight(SCORE_HEIGHT));
+    xboxController.x().whileTrue(shooter.setVelocity(SHOOT_SPEED));
+    xboxController.rightTrigger().whileTrue(shoot(SHOOT_SPEED));
+  }
+
+  /**
+   * Spin the shooter up and feed whenever it is at speed. The feed binding is created inside this
+   * command, so it only exists while shooting; if the wheel drops out of tolerance after a shot,
+   * feeding pauses until it recovers. Runs until canceled.
+   *
+   * @param speed Shooter speed.
+   * @return {@link Command}
+   */
+  private Command shoot(AngularVelocity speed)
+  {
+    return Command.noRequirements(coroutine -> {
+      coroutine.fork(shooter.setVelocity(speed));
+      shooter.atSpeed(speed, SHOOTER_TOLERANCE).whileTrue(indexer.feed());
+      coroutine.park();
+    }).named("Shoot");
+  }
+
+  /**
+   * Raise the arm and elevator to the scoring position, then shoot for two seconds. The arm and
+   * elevator commands are forked so they keep holding the scoring position during the shot; they are
+   * canceled (and the default commands resume) when the routine ends.
+   *
+   * @return {@link Command}
+   */
+  private Command scorePreloadAuto()
+  {
+    return Command.noRequirements(coroutine -> {
+      coroutine.fork(arm.setAngle(SCORE_ANGLE), elevator.setHeight(SCORE_HEIGHT));
+      // Give up waiting after two seconds so a mechanism that never settles cannot stall the auto.
+      coroutine.waitUntil(arm.near(SCORE_ANGLE, ARM_TOLERANCE).and(elevator.near(SCORE_HEIGHT, HEIGHT_TOLERANCE)),
+                          Seconds.of(2));
+      coroutine.awaitAny(shoot(SHOOT_SPEED), Command.waitFor(Seconds.of(2)).named("Shot Time"));
+    }).named("Score Preload Auto");
   }
 
   @Override
@@ -125,6 +186,7 @@ public class Robot extends LoggedRobot {
     arm.periodic();
     elevator.periodic();
     shooter.periodic();
+    indexer.periodic();
     scheduler.run();
   }
 
@@ -134,6 +196,7 @@ public class Robot extends LoggedRobot {
     arm.simulationPeriodic();
     elevator.simulationPeriodic();
     shooter.simulationPeriodic();
+    indexer.simulationPeriodic();
   }
 
   @Override
@@ -150,7 +213,8 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void autonomousInit() {
-    // The v2 port offered no autonomous command.
+    // Scheduled from the global scope, so it is canceled by hand when autonomous ends.
+    scheduler.schedule(autonomousCommand);
   }
 
   @Override
@@ -159,6 +223,7 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void autonomousExit() {
+    scheduler.cancel(autonomousCommand);
   }
 
   @Override

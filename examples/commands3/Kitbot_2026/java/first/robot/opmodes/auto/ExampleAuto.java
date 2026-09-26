@@ -3,13 +3,14 @@
 
 package first.robot.opmodes.auto;
 
+import static org.wpilib.units.Units.Seconds;
+
 import first.robot.Robot;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Trigger;
 import org.wpilib.driverstation.RobotState;
 import org.wpilib.opmode.Autonomous;
 import org.wpilib.opmode.OpMode;
-import org.wpilib.system.Timer;
 
 /** The KitBot's example autonomous: drive forward briefly, then spin up and launch fuel. */
 @Autonomous(name = "Example Auto")
@@ -27,35 +28,22 @@ public class ExampleAuto implements OpMode {
     enabled.onTrue(exampleAuto(robot));
   }
 
-  // Example autonomous command which drives forward and then launches fuel.
+  // Example autonomous command which drives forward and then launches fuel. It requires no
+  // mechanism itself: each step runs a mechanism's own command, and a mechanism's default command
+  // takes over as soon as its step is done. That keeps the drive stopped (and motor safety fed)
+  // while launching, and stops the rollers when the routine ends.
   private static Command exampleAuto(Robot robot) {
-    return Command.requiring(robot.drive, robot.feeder, robot.intakeLauncher)
-        .executing(coroutine -> {
-          // Drive for .25 seconds. DifferentialDrive motor safety needs the output sent every
-          // loop, so keep driving until the time is up
-          Timer timer = new Timer();
-          timer.start();
-          while (!timer.hasElapsed(.25)) {
-            robot.drive.arcadeDrive(0.5, 0);
-            coroutine.yield();
-          }
-          // Spin up the launcher for 1 second and then launch balls for 9 seconds, for a
-          // total of 10 seconds. The drive stays stopped, still sent every loop for motor safety
-          robot.fuel.setSpinUp();
-          timer.restart();
-          while (!timer.hasElapsed(1)) {
-            robot.drive.arcadeDrive(0, 0);
-            coroutine.yield();
-          }
-          robot.fuel.setLaunch();
-          timer.restart();
-          while (!timer.hasElapsed(9)) {
-            robot.drive.arcadeDrive(0, 0);
-            coroutine.yield();
-          }
-          // Stop running the launcher
-          robot.fuel.stop();
-        })
-        .named("Example Auto");
+    return Command.noRequirements(coroutine -> {
+      // Drive for .25 seconds. Whichever command finishes first cancels the other, so the drive
+      // command ends when the timer does
+      coroutine.awaitAny(
+          robot.drive.driveArcade(0.5, 0),
+          Command.waitFor(Seconds.of(.25)).named("Example Auto.DriveTime"));
+      // Spin up the launcher for 1 second and then launch balls for 9 seconds, for a
+      // total of 10 seconds
+      coroutine.awaitAny(
+          robot.fuel.spinUpAndLaunch(),
+          Command.waitFor(Seconds.of(10)).named("Example Auto.LaunchTime"));
+    }).named("Example Auto");
   }
 }

@@ -51,7 +51,7 @@ public class Robot extends OpModeRobot
     Tunables.publish("Extake", new CommandTunable(FuelCommands.extake(intake, conveyor)));
 
     Tunables.publish("Feeder", new CommandTunable(FuelCommands.feed(shooter, feeder)));
-    Tunables.publish("Flywheel", new CommandTunable(shooter.runFlywheel()));
+    Tunables.publish("Flywheel", new CommandTunable(shooter.spinUp()));
 
     Tunables.publishDouble("Bat Voltage", RobotController::getBatteryVoltage, voltage -> {});
   }

@@ -118,9 +118,39 @@ public class IntakePivot implements Mechanism {
         pivot.setMechanismPositionSetpoint(position.angle());
     }
 
-    /** Move the pivot to a position. The closed loop keeps holding it after the command ends. */
-    public Command positionCommand(Position position) {
-        return run(coroutine -> set(position)).named("IntakePivot to " + position);
+    /**
+     * Move the pivot to a position, finishing once it is within tolerance. The closed loop keeps
+     * holding it after the command ends.
+     */
+    public Command moveTo(Position position) {
+        return run(coroutine -> {
+            set(position);
+            coroutine.waitUntil(this::isPositionWithinTolerance);
+        }).named("IntakePivot to " + position);
+    }
+
+    /** Hold the pivot at a position until canceled, using the YAMS angle command. */
+    public Command holdAt(Position position) {
+        return pivot.setAngle(position.angle());
+    }
+
+    /**
+     * Rock the intake between its agitate and intake positions until canceled, to push fuel toward
+     * the floor rollers. Canceling returns the pivot to its intake position.
+     */
+    public Command agitate() {
+        final Command up = moveTo(Position.AGITATE);
+        final Command down = moveTo(Position.INTAKE);
+        return run(coroutine -> {
+            while (true) {
+                // Each move finishes once the pivot is within tolerance, so the loop yields inside
+                // the awaits.
+                coroutine.await(up);
+                coroutine.await(down);
+            }
+        })
+        .whenCanceled(() -> set(Position.INTAKE))
+        .named("IntakePivot Agitate");
     }
 
     /**
@@ -128,7 +158,7 @@ public class IntakePivot implements Mechanism {
      * Does nothing once homed. It runs above the default priority, so other pivot commands (and any
      * command that requires the pivot) cannot interrupt it, like v2's {@code CANCEL_INCOMING}.
      */
-    public Command homingCommand() {
+    public Command home() {
         return run(coroutine -> {
             if (isHomed) {
                 return;

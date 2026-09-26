@@ -19,6 +19,7 @@ import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
+import java.util.function.Supplier;
 import yams.commands3.config.SmartMotorControllerConfig;
 import yams.commands3.mechanisms.Pivot;
 import yams.core.gearing.GearBox;
@@ -81,6 +82,16 @@ public class HoodMechanism implements Mechanism
   }
 
   public Command setAngle(Angle angle) {
+    return hood.setAngle(angle);
+  }
+
+  /**
+   * Follow an angle supplier, read every loop.
+   *
+   * @param angle Supplier of the angle to hold.
+   * @return {@link Command} that follows the supplied angle until canceled.
+   */
+  public Command setAngle(Supplier<Angle> angle) {
     return hood.setAngle(angle);
   }
 

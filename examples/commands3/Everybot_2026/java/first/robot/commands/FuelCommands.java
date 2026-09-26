@@ -11,10 +11,14 @@ import first.robot.mechanisms.IntakeLauncherMechanism;
 import org.wpilib.command3.Command;
 
 /**
- * Fuel commands that drive the intake/launcher and the indexer together. These replace the
+ * Fuel commands that run the intake/launcher and the indexer together. These replace the
  * Everybot's Intake, Eject and LaunchSequence command classes; the SpinUp and Launch steps are
- * written inline in the launch sequence. Each one requires both mechanisms for its whole run, like
- * the original commands did, runs until interrupted, and stops both rollers when canceled.
+ * steps of the launch sequence.
+ *
+ * <p>
+ * Each one is a coroutine with no requirements of its own that runs the mechanisms' own commands.
+ * A mechanism is only owned while its command runs, and each mechanism command stops its roller
+ * when it is canceled. All of them run until interrupted.
  */
 public final class FuelCommands {
   private FuelCommands() {
@@ -29,13 +33,8 @@ public final class FuelCommands {
    * @return the intake command
    */
   public static Command intake(IntakeLauncherMechanism intakeLauncher, IndexerMechanism indexer) {
-    return Command.requiring(intakeLauncher, indexer).executing(coroutine -> {
-      intakeLauncher.setPower(INTAKE_INTAKING_PERCENT);
-      indexer.setPower(INDEXER_INTAKING_PERCENT);
-      coroutine.park();
-    }).whenCanceled(() -> {
-      intakeLauncher.stop();
-      indexer.stop();
+    return Command.noRequirements(coroutine -> {
+      coroutine.awaitAll(intakeLauncher.intake(), indexer.intake());
     }).named("Intake");
   }
 
@@ -47,13 +46,8 @@ public final class FuelCommands {
    * @return the eject command
    */
   public static Command eject(IntakeLauncherMechanism intakeLauncher, IndexerMechanism indexer) {
-    return Command.requiring(intakeLauncher, indexer).executing(coroutine -> {
-      intakeLauncher.setPower(INTAKE_EJECT_PERCENT);
-      indexer.setPower(INDEXER_LAUNCHING_PERCENT);
-      coroutine.park();
-    }).whenCanceled(() -> {
-      intakeLauncher.stop();
-      indexer.stop();
+    return Command.noRequirements(coroutine -> {
+      coroutine.awaitAll(intakeLauncher.eject(), indexer.feed());
     }).named("Eject");
   }
 
@@ -66,17 +60,12 @@ public final class FuelCommands {
    * @return the launch sequence command
    */
   public static Command launchSequence(IntakeLauncherMechanism intakeLauncher, IndexerMechanism indexer) {
-    return Command.requiring(intakeLauncher, indexer).executing(coroutine -> {
-      // Spin up
-      intakeLauncher.setPower(LAUNCHING_LAUNCHER_PERCENT);
-      indexer.setPower(INDEXER_SPIN_UP_PRE_LAUNCH_PERCENT);
+    return Command.noRequirements(coroutine -> {
+      // Spin up. The launcher keeps running for the rest of the sequence.
+      coroutine.fork(intakeLauncher.launch(), indexer.holdBack());
       coroutine.wait(Seconds.of(SPIN_UP_SECONDS));
-      // Launch
-      indexer.setPower(INDEXER_LAUNCHING_PERCENT);
-      coroutine.park();
-    }).whenCanceled(() -> {
-      intakeLauncher.stop();
-      indexer.stop();
+      // Launch. Feeding interrupts its sibling holdBack() on the indexer.
+      coroutine.await(indexer.feed());
     }).named("LaunchSequence");
   }
 }

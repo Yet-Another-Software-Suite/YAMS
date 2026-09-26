@@ -11,6 +11,7 @@ import static org.wpilib.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import first.robot.Ports;
+import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Voltage;
@@ -71,6 +72,29 @@ public class Floor implements Mechanism {
 
     public void set(Speed speed) {
         floor.setVoltageSetpoint(speed.voltage());
+    }
+
+    /**
+     * Run the floor rollers at the feed voltage until canceled, using the YAMS voltage command. The
+     * default command ({@link #stop()}) stops them again afterwards.
+     */
+    public Command feed() {
+        return floor.setVoltage(Speed.FEED.voltage());
+    }
+
+    /** Stop the floor rollers and keep them stopped. The default command, at the lowest priority. */
+    public Command stop() {
+        return run(coroutine -> {
+            set(Speed.STOP);
+            coroutine.park();
+        })
+        .withPriority(Command.LOWEST_PRIORITY)
+        .named("Floor Stop");
+    }
+
+    @Override
+    public Command idle() {
+        return stop();
     }
 
     /** Called from {@code Robot.robotPeriodic()}, replacing the v2 subsystem periodic. */

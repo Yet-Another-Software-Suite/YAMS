@@ -72,7 +72,8 @@ public class ClimberMechanism implements Mechanism {
   }
 
   /**
-   * Holds the climber stopped. Used as the default command.
+   * Holds the climber stopped. Used as the default command, at the lowest priority so the climb
+   * commands can always take over.
    *
    * @return a command that stops the climber until interrupted
    */
@@ -83,7 +84,7 @@ public class ClimberMechanism implements Mechanism {
         climber.setDutyCycle(0);
         coroutine.yield();
       }
-    }).named("Climber.Stop");
+    }).withPriority(Command.LOWEST_PRIORITY).named("Climber.Stop");
   }
 
   /** Publishes YAMS telemetry. Called from {@code Robot.robotPeriodic()}. */

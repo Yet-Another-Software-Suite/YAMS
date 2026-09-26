@@ -21,6 +21,7 @@ import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.Voltage;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
+import org.wpilib.command3.Trigger;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
@@ -142,6 +143,17 @@ public class ShooterMechanism implements Mechanism {
     // new log, which lets you compare commanded vs. actual across replay runs.
     Logger.recordOutput("Shooter/Setpoint", speed);
     return shooter.run(speed);
+  }
+
+  /**
+   * Whether the shooter is near a speed. Reads the logged velocity so replay sees the same result.
+   *
+   * @param speed  Target speed.
+   * @param within Allowed error.
+   * @return {@link Trigger} that is true while the shooter is within tolerance.
+   */
+  public Trigger atSpeed(AngularVelocity speed, AngularVelocity within) {
+    return new Trigger(() -> getVelocity().isNear(speed, within));
   }
 
   /**

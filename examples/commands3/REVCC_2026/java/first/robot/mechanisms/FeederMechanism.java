@@ -12,6 +12,8 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.util.CANPorts;
 import first.robot.Constants.ShooterSubsystemConstants;
+import first.robot.Constants.ShooterSubsystemConstants.FeederSetpoints;
+import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.math.system.DCMotor;
 import yams.commands3.config.SmartMotorControllerConfig;
@@ -54,20 +56,31 @@ public class FeederMechanism implements Mechanism
                                                    .withTelemetry("Feeder", TelemetryVerbosity.HIGH),
                                                feederMotorController);
 
-  /**
-   * Runs the feeder motor at a power in the range of [-1, 1].
-   *
-   * @param power Duty cycle to run at.
-   */
-  public void setPower(double power)
+  /** Creates a new FeederMechanism. Its default command stops the motor. */
+  public FeederMechanism()
   {
-    feeder.setDutyCycleSetpoint(power);
+    setDefaultCommand(idle());
   }
 
-  /** Stops the feeder motor. */
-  public void stop()
+  /** Command to push fuel into the shooter flywheel until canceled. */
+  public Command feed()
   {
-    feeder.setDutyCycleSetpoint(0.0);
+    return feeder.set(FeederSetpoints.kFeed);
+  }
+
+  /**
+   * Stops the feeder motor and keeps it stopped. This is the default command, so the motor stops
+   * as soon as the command using it ends. It has the lowest priority so any other command can take
+   * the feeder.
+   */
+  @Override
+  public Command idle()
+  {
+    return run(coroutine -> {
+      feeder.setDutyCycleSetpoint(0.0);
+      coroutine.park();
+    }).withPriority(Command.LOWEST_PRIORITY)
+      .named("Feeder.Stop");
   }
 
   /** Publishes the feeder telemetry. */

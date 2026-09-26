@@ -27,7 +27,8 @@ public final class Drive
    * @param drive         The drivetrain.
    * @param controller    Driver controller.
    * @param fieldRelative Whether the left stick drives relative to the field.
-   * @return A command that drives from the controller until canceled.
+   * @return A command that drives from the controller until canceled. It is used as a default
+   *         command, so it has the lowest priority and any other drive command can take over.
    */
   public static Command teleop(DriveMechanism drive, CommandNiDsXboxController controller, boolean fieldRelative)
   {
@@ -53,6 +54,7 @@ public final class Drive
         }
         coroutine.yield();
       }
-    }).named(fieldRelative ? "Drive.FieldRelative" : "Drive.RobotRelative");
+    }).withPriority(Command.LOWEST_PRIORITY)
+      .named(fieldRelative ? "Drive.FieldRelative" : "Drive.RobotRelative");
   }
 }

@@ -5,6 +5,7 @@ package first.robot.mechanisms;
 
 import static org.wpilib.units.Units.Inches;
 import static org.wpilib.units.Units.Pounds;
+import static org.wpilib.units.Units.RPM;
 
 import com.ctre.phoenix6.CANBus;
 import org.wpilib.hardware.bus.CANPort;
@@ -15,6 +16,7 @@ import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.LinearVelocity;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
+import org.wpilib.command3.Trigger;
 import java.util.function.Supplier;
 import yams.commands3.config.SmartMotorControllerConfig;
 import yams.commands3.mechanisms.FlyWheel;
@@ -29,6 +31,9 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
 
 public class ShooterMechanism implements Mechanism
 {
+  /// How close the shooter must be to a target velocity to count as at speed.
+  public static final AngularVelocity TOLERANCE = RPM.of(50);
+
   private final TalonFX                    flywheelMotor1         = new TalonFX(1, new CANBus(CANPort.CAN_S0));
   private final TalonFX                    flywheelMotor2         = new TalonFX(2, new CANBus(CANPort.CAN_S0));
   private final boolean                    flywheelMotor2Inverted = true;
@@ -81,6 +86,43 @@ public class ShooterMechanism implements Mechanism
   public Command setDutyCycle(Supplier<Double> dutyCycle) {return shooter.set(dutyCycle);}
 
   public Command setVelocity(Supplier<AngularVelocity> speed) {return shooter.run(speed);}
+
+  /**
+   * Set the shooter's surface velocity from a supplier, read every loop.
+   *
+   * @param speed Supplier of the surface (exit) velocity.
+   * @return {@link Command}
+   */
+  public Command setLinearVelocity(Supplier<LinearVelocity> speed) {return shooter.run(speed);}
+
+  /**
+   * Hold the shooter at a velocity at the lowest priority, so any other shooter command can take over. Meant for
+   * default commands.
+   *
+   * @param speed Velocity to hold.
+   * @return {@link Command}
+   */
+  public Command hold(AngularVelocity speed)
+  {
+    return run(coroutine -> coroutine.await(shooter.run(speed)))
+        .withPriority(Command.LOWEST_PRIORITY)
+        .named("Shooter Hold " + speed.in(RPM) + " RPM");
+  }
+
+  /**
+   * Hold the shooter at 0 RPM. This is the shooter's default command.
+   *
+   * @return {@link Command}
+   */
+  public Command stop() {return hold(RPM.of(0));}
+
+  /**
+   * Trigger that is true while the shooter is within {@link #TOLERANCE} of a velocity.
+   *
+   * @param speed Velocity to check.
+   * @return {@link Trigger}
+   */
+  public Trigger atSpeed(AngularVelocity speed) {return shooter.near(speed, TOLERANCE);}
 
   public void simulationPeriodic()
   {

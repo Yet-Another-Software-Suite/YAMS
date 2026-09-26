@@ -11,7 +11,6 @@ import static org.wpilib.units.Units.Seconds;
 
 import first.robot.Landmarks;
 import org.wpilib.command3.Command;
-import org.wpilib.command3.Coroutine;
 import org.wpilib.networktables.DoublePublisher;
 import org.wpilib.networktables.NetworkTableInstance;
 import org.wpilib.units.measure.Angle;
@@ -26,9 +25,11 @@ import first.robot.mechanisms.Shooter;
 import first.robot.mechanisms.Swerve;
 
 /**
- * Commands that use several mechanisms. Each is one coroutine that requires every mechanism it
- * drives, like the v2 port's command groups, so starting one interrupts whatever else is using those
- * mechanisms. Feeding is plain sequential code shared by both shooting commands.
+ * Commands that use several mechanisms. Each is a coroutine without requirements of its own that
+ * runs the mechanisms' own commands with {@code fork}, {@code await} and {@code awaitAll}, so a
+ * mechanism is only owned while its command runs, and its default command (stopping the rollers)
+ * takes over again once that command ends. Canceling one of these commands cancels the mechanism
+ * commands it started.
  */
 public final class MechanismCommands {
     private static final Angle kAimTolerance = Degrees.of(5);
@@ -44,9 +45,6 @@ public final class MechanismCommands {
     private final Shooter shooter;
     private final Hood hood;
     private final Hanger hanger;
-
-    // Set once feeding starts rocking the intake, so canceling before then leaves the pivot alone.
-    private boolean isAgitating = false;
 
     public MechanismCommands(
         Swerve swerve,
@@ -75,18 +73,17 @@ public final class MechanismCommands {
      * {@link Drive#autoAim}.
      */
     public Command shootWhenAimed() {
-        return Command.requiring(shooter, hood, feeder, floor, intakePivot, intakeRollers)
-            .executing(coroutine -> {
-                coroutine.wait(Seconds.of(0.25));
-                coroutine.fork(prepareShot());
-                // The shot cannot be ready before prepareShot has set a velocity, so waiting from here
-                // matches the v2 port's waitUntil that started at the same time as the aim.
-                coroutine.waitUntil(() -> swerve.isFacing(Landmarks.hubPosition(), kAimTolerance)
-                    && shooter.isVelocityWithinTolerance() && hood.isPositionWithinTolerance());
-                feed(coroutine);
-            })
-            .whenCanceled(this::stopFeeding)
-            .named("Shoot When Aimed");
+        final Command prepareShot = prepareShot();
+        final Command feed = feed();
+        return Command.noRequirements(coroutine -> {
+            coroutine.wait(Seconds.of(0.25));
+            coroutine.fork(prepareShot);
+            // The shot cannot be ready before prepareShot has set a velocity, so waiting from here
+            // matches the v2 port's waitUntil that started at the same time as the aim.
+            coroutine.waitUntil(() -> swerve.isFacing(Landmarks.hubPosition(), kAimTolerance)
+                && shooter.isVelocityWithinTolerance() && hood.isPositionWithinTolerance());
+            coroutine.await(feed);
+        }).named("Shoot When Aimed");
     }
 
     /**
@@ -110,60 +107,59 @@ public final class MechanismCommands {
             .named("Prepare Shot");
     }
 
-    /** Spin up to the dashboard RPM, then feed. The shooter stops when the command is canceled. */
+    /**
+     * Spin up to the dashboard RPM, then feed. The shooter is held at that speed until the command
+     * is canceled, and then stops.
+     */
     public Command shootManually() {
-        return Command.requiring(shooter, feeder, floor, intakePivot, intakeRollers)
-            .executing(coroutine -> {
-                shooter.setRPM(shooter.getDashboardTargetRPM());
-                coroutine.waitUntil(shooter::isVelocityWithinTolerance);
-                feed(coroutine);
-            })
-            .whenCanceled(() -> {
-                stopFeeding();
-                shooter.stop();
-            })
-            .named("Shoot Manually");
+        final Command feed = feed();
+        return Command.noRequirements(coroutine -> {
+            coroutine.fork(shooter.runAt(shooter.getDashboardTargetRPM()));
+            coroutine.waitUntil(shooter::isVelocityWithinTolerance);
+            coroutine.await(feed);
+        }).named("Shoot Manually");
     }
 
-    /** Swing the intake out and run the rollers; the rollers stop when the command is canceled. */
+    /**
+     * Swing the intake out and run the rollers until canceled. The pivot holds its intake position
+     * afterwards, and the rollers stop.
+     */
     public Command intake() {
-        return Command.requiring(intakePivot, intakeRollers)
-            .executing(coroutine -> {
-                intakePivot.set(IntakePivot.Position.INTAKE);
-                intakeRollers.set(IntakeRollers.Speed.INTAKE);
-                coroutine.park();
-            })
-            .whenCanceled(() -> intakeRollers.set(IntakeRollers.Speed.STOP))
-            .named("Intake");
+        final Command pivotOut = intakePivot.holdAt(IntakePivot.Position.INTAKE);
+        final Command rollersIn = intakeRollers.intake();
+        return Command.noRequirements(coroutine -> {
+            coroutine.awaitAll(pivotOut, rollersIn);
+        }).named("Intake");
     }
 
     /**
      * Feed fuel into the shooter until canceled: start the feeder after 0.25 s, then 0.125 s later run
      * the floor rollers and intake rollers while rocking the intake to push fuel toward the floor.
      */
-    private void feed(Coroutine coroutine) {
-        coroutine.wait(Seconds.of(0.25));
-        feeder.set(Feeder.Speed.FEED);
-        coroutine.wait(Seconds.of(0.125));
-        floor.set(Floor.Speed.FEED);
-        intakeRollers.set(IntakeRollers.Speed.INTAKE);
-        isAgitating = true;
-        while (true) {
-            intakePivot.set(IntakePivot.Position.AGITATE);
-            coroutine.waitUntil(intakePivot::isPositionWithinTolerance);
-            intakePivot.set(IntakePivot.Position.INTAKE);
-            coroutine.waitUntil(intakePivot::isPositionWithinTolerance);
-        }
+    private Command feed() {
+        final Command feederIn = feeder.feed();
+        final Command floorIn = floor.feed();
+        final Command rollersIn = intakeRollers.intake();
+        final Command agitate = intakePivot.agitate();
+        return Command.noRequirements(coroutine -> {
+            coroutine.wait(Seconds.of(0.25));
+            coroutine.fork(feederIn);
+            coroutine.wait(Seconds.of(0.125));
+            // These run until feeding is canceled; forked commands end with their parent, so park.
+            coroutine.fork(floorIn, rollersIn, agitate);
+            coroutine.park();
+        }).named("Feed");
     }
 
-    /** Stop the rollers, and return the intake to its intake position if it was being rocked. */
-    private void stopFeeding() {
-        feeder.setPercentOutput(0);
-        floor.set(Floor.Speed.STOP);
-        intakeRollers.set(IntakeRollers.Speed.STOP);
-        if (isAgitating) {
-            intakePivot.set(IntakePivot.Position.INTAKE);
-            isAgitating = false;
-        }
+    /**
+     * Home the intake pivot and the hanger together. Each homing command runs above the default
+     * priority and does nothing once its mechanism is homed.
+     */
+    public Command home() {
+        final Command homePivot = intakePivot.home();
+        final Command homeHanger = hanger.home();
+        return Command.noRequirements(coroutine -> {
+            coroutine.awaitAll(homePivot, homeHanger);
+        }).named("Home");
     }
 }

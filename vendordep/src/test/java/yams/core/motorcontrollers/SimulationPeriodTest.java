@@ -9,6 +9,7 @@ import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Milliseconds;
 import static org.wpilib.units.Units.Seconds;
 
+import yams.commands2.config.SmartMotorControllerConfig;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;

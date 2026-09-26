@@ -106,6 +106,17 @@ public class CANDriveMechanism implements Mechanism {
     }).named("Drive.Arcade");
   }
 
+  // Command factory to drive at a fixed speed and rotation, such as during autonomous. Runs until
+  // interrupted, sending the output every loop to keep motor safety fed.
+  public Command driveArcade(double xSpeed, double zRotation) {
+    return run(coroutine -> {
+      while (true) {
+        arcadeDrive(xSpeed, zRotation);
+        coroutine.yield();
+      }
+    }).named("Drive.ArcadeFixed");
+  }
+
   // Keeps the motors stopped (and the DifferentialDrive motor safety fed) whenever no other command
   // is driving. Used as the default command outside of teleop.
   @Override

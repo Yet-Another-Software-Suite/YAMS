@@ -3,12 +3,6 @@
 
 package first.robot.commands;
 
-import static org.wpilib.units.Units.RPM;
-
-import first.robot.Constants.IntakeSubsystemConstants.ConveyorSetpoints;
-import first.robot.Constants.IntakeSubsystemConstants.IntakeSetpoints;
-import first.robot.Constants.ShooterSubsystemConstants.FeederSetpoints;
-import first.robot.Constants.ShooterSubsystemConstants.FlywheelSetpoints;
 import first.robot.mechanisms.ConveyorMechanism;
 import first.robot.mechanisms.FeederMechanism;
 import first.robot.mechanisms.IntakeMechanism;
@@ -17,8 +11,10 @@ import org.wpilib.command3.Command;
 
 /**
  * Commands that run more than one fuel mechanism together. Each mechanism is its own
- * {@link org.wpilib.command3.Mechanism} so it can be tuned live on its own; these coroutines
- * require every mechanism they drive and set each mechanism's outputs directly.
+ * {@link org.wpilib.command3.Mechanism} with its own commands, so it can be tuned live on its own.
+ * These coroutines have no requirements of their own: they await the mechanism commands, so each
+ * mechanism is only owned while its command runs. When a mechanism command ends or is canceled, that
+ * mechanism's default command stops it.
  */
 public final class FuelCommands
 {
@@ -28,13 +24,8 @@ public final class FuelCommands
    */
   public static Command intake(IntakeMechanism intake, ConveyorMechanism conveyor)
   {
-    return Command.requiring(intake, conveyor).executing(coroutine -> {
-      intake.setPower(IntakeSetpoints.kIntake);
-      conveyor.setPower(ConveyorSetpoints.kIntake);
-      coroutine.park();
-    }).whenCanceled(() -> {
-      intake.stop();
-      conveyor.stop();
+    return Command.noRequirements(coroutine -> {
+      coroutine.awaitAll(intake.intake(), conveyor.intake());
     }).named("Intaking");
   }
 
@@ -44,29 +35,19 @@ public final class FuelCommands
    */
   public static Command extake(IntakeMechanism intake, ConveyorMechanism conveyor)
   {
-    return Command.requiring(intake, conveyor).executing(coroutine -> {
-      intake.setPower(IntakeSetpoints.kExtake);
-      conveyor.setPower(ConveyorSetpoints.kExtake);
-      coroutine.park();
-    }).whenCanceled(() -> {
-      intake.stop();
-      conveyor.stop();
+    return Command.noRequirements(coroutine -> {
+      coroutine.awaitAll(intake.extake(), conveyor.extake());
     }).named("Extaking");
   }
 
   /**
    * Command to run the feeder and flywheel motors. When the command is interrupted, e.g. the button
-   * is released, the feeder stops and the flywheel is driven to 0 RPM.
+   * is released, the feeder stops and the flywheel coasts down.
    */
   public static Command feed(ShooterMechanism shooter, FeederMechanism feeder)
   {
-    return Command.requiring(shooter, feeder).executing(coroutine -> {
-      shooter.setFlywheelVelocity(FlywheelSetpoints.kShootRpm);
-      feeder.setPower(FeederSetpoints.kFeed);
-      coroutine.park();
-    }).whenCanceled(() -> {
-      shooter.setFlywheelVelocity(RPM.of(0));
-      feeder.stop();
+    return Command.noRequirements(coroutine -> {
+      coroutine.awaitAll(shooter.spinUp(), feeder.feed());
     }).named("Feeding");
   }
 
@@ -77,14 +58,12 @@ public final class FuelCommands
    */
   public static Command shoot(ShooterMechanism shooter, FeederMechanism feeder)
   {
-    return Command.requiring(shooter, feeder).executing(coroutine -> {
-      shooter.setFlywheelVelocity(FlywheelSetpoints.kShootRpm);
+    return Command.noRequirements(coroutine -> {
+      // The flywheel keeps spinning in the background while this command waits for it.
+      coroutine.fork(shooter.spinUp());
       coroutine.waitUntil(shooter.isFlywheelSpinning);
-      feeder.setPower(FeederSetpoints.kFeed);
-      coroutine.park();
-    }).whenCanceled(() -> {
-      shooter.stopFlywheel();
-      feeder.stop();
+      // The feeder is only claimed once the flywheel is at speed.
+      coroutine.await(feeder.feed());
     }).named("Shooting");
   }
 

@@ -99,27 +99,25 @@ public class Hanger implements Mechanism {
         .withSimulatedValue("SupplyAmps", () -> hanger.isNear(Position.HOMED.extension(), Inches.of(0.1)), 1.0)
         .getSensor();
 
-    private Distance targetExtension = Position.HOMED.extension();
     private boolean isHomed = false;
 
     public Hanger() {
     }
 
     public void set(Position position) {
-        targetExtension = position.extension();
-        hanger.setMeasurementPositionSetpoint(targetExtension);
+        hanger.setMeasurementPositionSetpoint(position.extension());
     }
 
     public void setPercentOutput(double percentOutput) {
         hanger.setVoltageSetpoint(Volts.of(percentOutput * 12.0));
     }
 
-    /** Move the hanger to a position, finishing once it is within tolerance. */
-    public Command positionCommand(Position position) {
-        return run(coroutine -> {
-            set(position);
-            coroutine.waitUntil(this::isExtensionWithinTolerance);
-        }).named("Hanger to " + position);
+    /**
+     * Move the hanger to a position, finishing once it has been within tolerance for 0.1 s, using the
+     * YAMS height command. The closed loop keeps holding it after the command ends.
+     */
+    public Command moveTo(Position position) {
+        return hanger.runTo(position.extension(), kExtensionTolerance);
     }
 
     /**
@@ -127,7 +125,7 @@ public class Hanger implements Mechanism {
      * Does nothing once homed. It runs above the default priority, so other hanger commands cannot
      * interrupt it, like v2's {@code CANCEL_INCOMING}.
      */
-    public Command homingCommand() {
+    public Command home() {
         return run(coroutine -> {
             if (isHomed) {
                 return;
@@ -144,10 +142,6 @@ public class Hanger implements Mechanism {
 
     public boolean isHomed() {
         return isHomed;
-    }
-
-    private boolean isExtensionWithinTolerance() {
-        return hanger.getHeight().isNear(targetExtension, kExtensionTolerance);
     }
 
     /** Called from {@code Robot.robotPeriodic()}, replacing the v2 subsystem periodic. */

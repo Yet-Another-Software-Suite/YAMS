@@ -22,6 +22,7 @@ import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
+import org.wpilib.command3.Trigger;
 import org.wpilib.hardware.discrete.DigitalInput;
 
 import yams.commands3.config.SmartMotorControllerConfig;
@@ -40,6 +41,13 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
 
 public class ArmMechanism implements Mechanism
 {
+  /// Angle the arm rests at when nothing else is commanding it.
+  public static final Angle STOW_ANGLE   = Degrees.of(0);
+  /// Angle the arm picks up game pieces at.
+  public static final Angle PICKUP_ANGLE = Degrees.of(40);
+  /// How close the arm must be to a target angle to count as there.
+  public static final Angle TOLERANCE    = Degrees.of(2);
+
   private final CANcoder                   cancoder    = new CANcoder(2, new CANBus(CANPort.CAN_S0));
   private final TalonFX                    armMotor    = new TalonFX(1, new CANBus(CANPort.CAN_S0));
   //  private final SmartMotorControllerTelemetryConfig motorTelemetryConfig = new SmartMotorControllerTelemetryConfig()
@@ -88,7 +96,7 @@ public class ArmMechanism implements Mechanism
   private final Sensor       coralSensor = new SensorConfig("CoralDetectorBeamBreak")
       .withField("Beam", dio::get, false)
       .withSimulatedValue("Beam", Seconds.of(3), Seconds.of(4), true)
-      .withSimulatedValue("Beam", () -> arm.isNear(Degrees.of(40), Degrees.of(2)), true)
+      .withSimulatedValue("Beam", () -> arm.isNear(PICKUP_ANGLE, TOLERANCE), true)
       .getSensor();
 
   public ArmMechanism()
@@ -119,5 +127,66 @@ public class ArmMechanism implements Mechanism
   public Command setAngle(Angle angle)
   {
     return arm.setAngle(angle);
+  }
+
+  /**
+   * Hold the arm at an angle at the lowest priority, so any other arm command can take over. Meant for default
+   * commands.
+   *
+   * @param angle Angle to hold.
+   * @return {@link Command} that holds the arm at the angle until another arm command runs.
+   */
+  public Command hold(Angle angle)
+  {
+    return run(coroutine -> coroutine.await(arm.setAngle(angle)))
+        .withPriority(Command.LOWEST_PRIORITY)
+        .named("Arm Hold " + angle.in(Degrees) + " deg");
+  }
+
+  /**
+   * Hold the arm at {@link #STOW_ANGLE}. This is the arm's default command.
+   *
+   * @return {@link Command} that stows the arm.
+   */
+  public Command stow()
+  {
+    return hold(STOW_ANGLE);
+  }
+
+  /**
+   * Move the arm to an angle and finish once it is within {@link #TOLERANCE}. The arm's default command takes over
+   * after this ends.
+   *
+   * @param angle Angle to move to.
+   * @return {@link Command} that ends when the arm reaches the angle.
+   */
+  public Command moveTo(Angle angle)
+  {
+    return arm.runTo(angle, TOLERANCE);
+  }
+
+  /**
+   * Trigger that is true while the arm is within {@link #TOLERANCE} of an angle.
+   *
+   * @param angle Angle to check.
+   * @return {@link Trigger} for the arm being at the angle.
+   */
+  public Trigger near(Angle angle)
+  {
+    return arm.near(angle, TOLERANCE);
+  }
+
+  /**
+   * Move the arm to {@link #PICKUP_ANGLE} and hold it there until the beam break sees a game piece.
+   *
+   * @return {@link Command} that ends once a game piece is detected.
+   */
+  public Command pickUp()
+  {
+    return run(coroutine -> {
+      // The forked hold is a child of this command, so it ends as soon as the beam break trips.
+      coroutine.fork(arm.setAngle(PICKUP_ANGLE));
+      coroutine.waitUntil(this::getBeamBreak);
+    }).named("Arm Pick Up");
   }
 }

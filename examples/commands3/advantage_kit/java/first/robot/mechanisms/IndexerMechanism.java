@@ -62,8 +62,12 @@ public class IndexerMechanism implements Mechanism
 
   private final IndexerInputsAutoLogged indexerInputs = new IndexerInputsAutoLogged();
 
-  // CAN ID 20 -- check against the robot wiring diagram if swapping hardware.
-  private final SparkMax someMotor = new SparkMax(CANPorts.fromBusId(1), 20, MotorType.kBrushless);
+  // Duty cycle that pushes a game piece from the indexer into the shooter.
+  public static final double FEED_DUTY_CYCLE = 0.8;
+
+  // CAN ID 21 -- check against the robot wiring diagram if swapping hardware.
+  // (ID 20 is the shooter's SparkMax.)
+  private final SparkMax someMotor = new SparkMax(CANPorts.fromBusId(1), 21, MotorType.kBrushless);
 
   private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       // 3:4 box = 12:1 total reduction. Fast enough for reliable feeding without
@@ -115,6 +119,43 @@ public class IndexerMechanism implements Mechanism
     // Reads from indexerInputs so this returns the replayed value during log
     // replay, not a live hardware read.
     return indexerInputs.velocity;
+  }
+
+  /**
+   * Feed a game piece into the shooter. Runs until canceled; the {@link #idle()} default command
+   * stops the rollers again afterwards.
+   *
+   * @return {@link Command}
+   */
+  public Command feed()
+  {
+    return run(coroutine -> {
+      while (true)
+      {
+        Logger.recordOutput("Indexer/DutyCycle", FEED_DUTY_CYCLE);
+        indexer.setDutyCycleSetpoint(FEED_DUTY_CYCLE);
+        coroutine.yield();
+      }
+    }).named("IndexerFeed");
+  }
+
+  /**
+   * Stop the rollers. This is the indexer's default command, so it runs at the lowest priority and
+   * any other indexer command can take over.
+   *
+   * @return {@link Command}
+   */
+  @Override
+  public Command idle()
+  {
+    return run(coroutine -> {
+      while (true)
+      {
+        Logger.recordOutput("Indexer/DutyCycle", 0.0);
+        indexer.setDutyCycleSetpoint(0);
+        coroutine.yield();
+      }
+    }).withPriority(Command.LOWEST_PRIORITY).named("IndexerIdle");
   }
 
   /**

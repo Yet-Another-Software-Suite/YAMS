@@ -44,6 +44,9 @@ public class Robot extends OpModeRobot {
     // Keep the drive stopped whenever nothing else is driving it. The teleop opmode replaces this
     // with joystick arcade drive while it is running.
     drive.setDefaultCommand(drive.idle());
+    // Stop each roller whenever no fuel command is using it.
+    feeder.setDefaultCommand(feeder.idle());
+    intakeLauncher.setDefaultCommand(intakeLauncher.idle());
   }
 
   /**

@@ -8,12 +8,16 @@ import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.RPM;
 
 import first.robot.Robot;
+import first.robot.commands.Drive;
 import org.wpilib.opmode.OpMode;
 import org.wpilib.opmode.Teleop;
 
 @Teleop
 public class DefaultTeleop implements OpMode {
   public DefaultTeleop(Robot robot) {
+    // Opmode-scoped default command and bindings: they only exist while this teleop runs.
+    robot.drive.setDefaultCommand(Drive.teleop(robot.drive, robot.xboxController));
+
     var hid = robot.xboxController.getHID();
 
     hid.button(1).whileTrue(robot.arm.setAngle(Degrees.of(30)));
@@ -24,5 +28,8 @@ public class DefaultTeleop implements OpMode {
 
     hid.button(5).whileTrue(robot.shooter.setVelocity(RPM.of(3500)));
     hid.button(6).whileTrue(robot.shooter.setVelocity(RPM.of(2000)));
+
+    robot.xboxController.leftTrigger().whileTrue(robot.arm.pickUp());
+    robot.xboxController.rightTrigger().onTrue(robot.scoreHigh());
   }
 }

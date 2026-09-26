@@ -187,6 +187,18 @@ public class ElevatorMechanism implements Mechanism
     return m_elevator.setHeight(height);
   }
 
+  /**
+   * Whether the carriage is near a height. Reads the logged height so replay sees the same result.
+   *
+   * @param height Target height.
+   * @param within Allowed error.
+   * @return {@link Trigger} that is true while the carriage is within tolerance.
+   */
+  public Trigger near(Distance height, Distance within)
+  {
+    return new Trigger(() -> getHeight().isNear(height, within));
+  }
+
   public Distance getHeight()
   {
     // Reads from elevatorInputs so replay returns the logged sensor value, not

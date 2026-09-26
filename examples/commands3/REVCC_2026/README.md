@@ -11,18 +11,19 @@ A port of the REV Robotics 2026 ION FRC StarterBot to WPILib 2027, Commands v3 a
 This is the Commands v3 version of [`examples/commands2/REVCC_2026`](../../commands2/REVCC_2026). The hardware setup, YAMS configuration, setpoints and bindings are the same as that port. What differs from the v2 port:
 
 - **Mechanisms instead of subsystems.** Each v2 `...Subsystem` is now a `...Mechanism` class in `mechanisms/` that implements `org.wpilib.command3.Mechanism`. It uses the `yams.commands3` classes (`SmartMotorControllerConfig`, `FlyWheel`, `SwerveDriveConfig`, `SwerveDrive`).
-  - The roller mechanisms keep plain `setPower(power)` and `stop()` methods, which the `FuelCommands` coroutines call directly.
-  - The shooter has `setFlywheelVelocity(...)` and `stopFlywheel()` (coasts), plus a `runFlywheel()` command for the Flywheel dashboard button (stops at 0 RPM, closed loop).
+  - Each mechanism exposes command factories for its own actions, built on the YAMS `FlyWheel` factories: `IntakeMechanism.intake()`/`extake()` and `ConveyorMechanism.intake()`/`extake()` (YAMS `set(dutyCycle)`), `FeederMechanism.feed()` (YAMS `set(dutyCycle)`) and `ShooterMechanism.spinUp()` (YAMS `run(kShootRpm)`, MAXMotion velocity). They run until canceled.
+  - Each fuel mechanism overrides `idle()` with a `Command.LOWEST_PRIORITY` command that stops its motor (the shooter coasts with duty cycle 0) and sets it as its default command in its constructor. So a mechanism stops as soon as the command using it ends, without any `whenCanceled` cleanup.
   - Mechanisms have no `periodic()`. `Robot.robotPeriodic()` calls each mechanism's `updateTelemetry()` before running the scheduler, and `Robot.simulationPeriodic()` calls `simIterate()`.
 - **OpModes instead of `RobotContainer`.** `Robot` extends `OpModeRobot` and owns the mechanisms and the controller.
   - The bindings and the field-relative drive default are in the `@Teleop` opmode `opmodes/teleop/DefaultTeleop`.
   - The S-curve auto is the `@Autonomous` opmode `opmodes/auto/ExampleAuto`. It starts `Autos.exampleAuto` when the robot is enabled.
 - **Coroutines.**
   - `DriveMechanism` owns one YAMS commands3 `SwerveInputStream` and exposes methods to change it (`setDriveInput`, `setFieldRelative`, `driveFromInput`, `lockWheels`, `zeroHeading`). Driving is one `while (true)` loop in `commands/Drive.teleop(drive, controller, true)` that reads the controller and calls those methods every loop: the sticks drive through the stream, holding the left stick button locks the wheels in an X, and pressing Start zeroes the heading. The v2 `setXCommand` and `zeroHeadingCommand` bindings are gone.
-  - `FuelCommands` builds `Command.requiring(...)` coroutines that set every mechanism's outputs, park, and stop the motors in `whenCanceled`, which does the same job as the v2 `startEnd`.
-  - `shoot` sets the flywheel speed, calls `coroutine.waitUntil(isFlywheelSpinning)`, then starts the feeder and parks.
+  - `FuelCommands` builds `Command.noRequirements(...)` coroutines that compose the mechanism commands. `intake`, `extake` and `feed` `awaitAll` the two mechanism commands. In v3 nested commands are effectively proxied, so each mechanism is only owned while its own command runs and its default command takes over afterwards.
+  - `shoot` forks `shooter.spinUp()`, calls `coroutine.waitUntil(isFlywheelSpinning)`, then awaits `feeder.feed()`. The feeder is only claimed once the flywheel is at speed.
   - The Y toggle uses `FuelCommands.shootAndIntake`, a no-requirements coroutine that awaits `shoot` and `intake` together. It replaces v2's `alongWith`.
-  - `Autos.exampleAuto` resets odometry, then awaits each `driveToPoseCommand` in turn.
+  - The drive loop runs at `Command.LOWEST_PRIORITY`, as recommended for default commands.
+  - `Autos.exampleAuto` is a `drive.run(...)` coroutine that resets odometry, then awaits each `driveToPoseCommand` in turn.
   - `driveToPoseCommand` uses the YAMS `driveToPose(pose, 5 cm, 3°)` overload, which ends at the pose and stops the modules when it finishes or is canceled.
 - **Dashboard.**
   - The Intake, Extake, Feeder and Flywheel buttons are published through YAMS `CommandTunable`, because v3 commands are not tunables themselves.
@@ -30,7 +31,8 @@ This is the Commands v3 version of [`examples/commands2/REVCC_2026`](../../comma
   - The scheduler is logged with `Telemetry.log("Scheduler", ...)` instead of being published as a tunable.
 - **Behavior differences from the v2 port.**
   - The drive default command and the controller bindings only exist while the teleop opmode is running. In v2 they were global.
-  - Outside teleop the mechanisms run the v3 default `idle()` command.
+  - Outside teleop the drive runs the v3 default idle command. The fuel mechanisms run their stop/coast default commands in every mode.
+  - The Flywheel and Feeder dashboard buttons let the flywheel coast down when they end, the same as `shoot`, instead of closing the loop on 0 RPM. The flywheel is configured in coast mode for exactly that.
   - v2's `utilityInit` `cancelAll()` is gone. v3 cancels commands and bindings that were scheduled in an opmode when that opmode exits.
 
 ## What changed
@@ -103,7 +105,7 @@ This is the Commands v3 version of [`examples/commands2/REVCC_2026`](../../comma
   - Left trigger: extake.
   - Y: toggles shoot along with intake.
   - Drive default: field-relative drive with a 0.1 deadband.
-- `FuelCommands` keeps the original setpoints: intake ±0.6, conveyor ±0.7, flywheel 5000 RPM, feeder 0.95.
+- The mechanism commands keep the original setpoints: intake ±0.6, conveyor ±0.7, flywheel 5000 RPM, feeder 0.95.
 - `isFlywheelSpinning`, `isFlywheelSpinningBackwards` and `isFlywheelStopped` are kept as command3 `Trigger`s. They now compare typed `kShootRpm`/`kVelocityTolerance` constants against the YAMS flywheel speed.
 - The dashboard buttons (Intake, Extake, Feeder, Flywheel) are published with `Tunables.publish` under the same names.
   - The "Intake | ..." and "Shooter | ..." SmartDashboard entries are replaced by YAMS telemetry.
@@ -121,5 +123,5 @@ This is the Commands v3 version of [`examples/commands2/REVCC_2026`](../../comma
   - Speed is capped only by the 4.8 m/s chassis limit.
 - **SPARK configuration is not reset.** The original reset the SPARKs to safe parameters and persisted them on every boot. `SparkWrapper` does not reset unless asked to, and persists only while disabled.
 - **Shooter stop.** After `shoot`, the shooter is stopped with duty cycle 0 instead of `stopMotor()`. In coast mode, that coasts down the same way.
-- **Command requirements.** Intake/extake require Intake and Conveyor, and feed/shoot require Shooter and Feeder. A command that needs any one of them cancels the combined command.
+- **Command requirements.** Intake/extake use Intake and Conveyor, and feed/shoot use Shooter and Feeder, through their mechanism commands. Scheduling a command that needs a mechanism the combined command is currently using cancels the combined command. `shoot` only uses the feeder once the flywheel is at speed.
 - **Retune the closed-loop gains.** They were converted by unit math from REV's values and should be checked on a real robot.

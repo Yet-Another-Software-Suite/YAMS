@@ -79,7 +79,8 @@ public class CANDriveMechanism implements Mechanism {
   /**
    * Arcade drive from the driver controller's joysticks. Runs until interrupted and stops the drive
    * when canceled. The sticks are read and sent every loop, which also feeds the
-   * {@link DifferentialDrive} watchdog.
+   * {@link DifferentialDrive} watchdog. The teleop opmode uses it as the default command, so it
+   * runs at the lowest priority.
    *
    * @param controller the driver controller
    * @return a command that drives the robot with arcade controls
@@ -93,27 +94,34 @@ public class CANDriveMechanism implements Mechanism {
         drive.arcadeDrive(-controller.getLeftY() * DRIVE_SCALING, -controller.getRightX() * ROTATION_SCALING);
         coroutine.yield();
       }
-    }).whenCanceled(this::stop).named("CANDrive.ArcadeDrive");
+    }).whenCanceled(this::stop).withPriority(Command.LOWEST_PRIORITY).named("CANDrive.ArcadeDrive");
   }
 
   /**
-   * Sends one arcade drive update. Call it every loop from a command that requires this mechanism
-   * so the {@link DifferentialDrive} watchdog stays fed.
+   * Arcade drive at fixed speeds. Runs until interrupted and stops the drive when canceled. The
+   * speeds are sent every loop so the {@link DifferentialDrive} watchdog stays fed.
    *
    * @param xSpeed    forward speed, [-1, 1]
    * @param zRotation rotation, [-1, 1]
+   * @return a command that drives the robot at the given speeds
    */
-  public void setArcadeDrive(double xSpeed, double zRotation) {
-    drive.arcadeDrive(xSpeed, zRotation);
+  public Command arcadeDrive(double xSpeed, double zRotation) {
+    return run(coroutine -> {
+      while (true) {
+        drive.arcadeDrive(xSpeed, zRotation);
+        coroutine.yield();
+      }
+    }).whenCanceled(this::stop).named("CANDrive.ArcadeDrive[" + xSpeed + ", " + zRotation + "]");
   }
 
   /** Sends one stopped arcade drive update. */
-  public void stop() {
+  private void stop() {
     drive.arcadeDrive(0, 0);
   }
 
   /**
-   * Holds the drive stopped. Used as the default command.
+   * Holds the drive stopped. Used as the default command, at the lowest priority so any other drive
+   * command can take over.
    *
    * @return a command that stops the drive until interrupted
    */
@@ -124,7 +132,7 @@ public class CANDriveMechanism implements Mechanism {
         stop();
         coroutine.yield();
       }
-    }).named("CANDrive.Stop");
+    }).withPriority(Command.LOWEST_PRIORITY).named("CANDrive.Stop");
   }
 
   /** Publishes YAMS telemetry. Called from {@code Robot.robotPeriodic()}. */

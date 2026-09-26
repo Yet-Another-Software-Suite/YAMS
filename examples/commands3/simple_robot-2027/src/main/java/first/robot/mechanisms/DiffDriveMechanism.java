@@ -64,13 +64,17 @@ public class DiffDriveMechanism implements Mechanism {
     setDefaultCommand(stop());
   }
 
+  /**
+   * Stop the drivetrain, feeding the motor safety watchdog every loop. Lowest priority, so it only runs as the
+   * default command while no other drive command is active.
+   */
   public Command stop() {
     return run(coroutine -> {
       while (true) {
         drive.stopMotor();
         coroutine.yield();
       }
-    }).named("DiffDrive Stop");
+    }).withPriority(Command.LOWEST_PRIORITY).named("DiffDrive Stop");
   }
 
   /** Tank drive from the controller: the left stick drives the left side, the right stick the right. */

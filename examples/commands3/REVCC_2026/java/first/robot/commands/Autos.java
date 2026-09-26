@@ -20,7 +20,8 @@ public final class Autos
     // Start at the origin facing the +X direction
     Pose2d startPose = new Pose2d(0, 0, Rotation2d.ZERO);
 
-    return Command.requiring(drive).executing(coroutine -> {
+    // The routine owns the drive for the whole path, so nothing else drives between waypoints.
+    return drive.run(coroutine -> {
       // Reset odometry to the starting pose of the path.
       drive.resetOdometry(startPose);
       // Pass through these two interior waypoints, making an 's' curve path

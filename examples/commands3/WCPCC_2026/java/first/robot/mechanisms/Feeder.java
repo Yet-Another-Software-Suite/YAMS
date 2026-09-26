@@ -14,6 +14,7 @@ import static org.wpilib.units.Units.Volts;
 import com.ctre.phoenix6.hardware.TalonFX;
 import first.robot.Constants.KrakenX60;
 import first.robot.Ports;
+import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.math.controller.SimpleMotorFeedforward;
 import org.wpilib.math.system.DCMotor;
@@ -81,6 +82,29 @@ public class Feeder implements Mechanism {
 
     public void setPercentOutput(double percentOutput) {
         feeder.setVoltageSetpoint(Volts.of(percentOutput * 12.0));
+    }
+
+    /**
+     * Run the feeder at the feed speed until canceled, using the YAMS velocity command. The default
+     * command ({@link #stop()}) stops it again afterwards.
+     */
+    public Command feed() {
+        return feeder.run(() -> Speed.FEED.angularVelocity());
+    }
+
+    /** Stop the feeder and keep it stopped. The default command, at the lowest priority. */
+    public Command stop() {
+        return run(coroutine -> {
+            setPercentOutput(0);
+            coroutine.park();
+        })
+        .withPriority(Command.LOWEST_PRIORITY)
+        .named("Feeder Stop");
+    }
+
+    @Override
+    public Command idle() {
+        return stop();
     }
 
     /** Called from {@code Robot.robotPeriodic()}, replacing the v2 subsystem periodic. */

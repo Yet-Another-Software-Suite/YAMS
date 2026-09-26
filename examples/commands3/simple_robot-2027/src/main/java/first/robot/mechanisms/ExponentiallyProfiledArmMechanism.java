@@ -149,34 +149,29 @@ public class ExponentiallyProfiledArmMechanism implements Mechanism
   /**
    * Reset the encoder to the lowest position when the current threshold is reached. Should be used when the Arm
    * position is unreliable, like startup. Threshold is only detected if exceeded for 0.4 seconds, and the motor moves
-   * less than 2 degrees per second.
+   * less than 2 degrees per second. Runs above the default priority, so normal arm commands cannot interrupt it
+   * before the arm is homed.
    *
    * @param threshold The current threshold held when the Arm is at its hard limit.
-   * @return
+   * @return {@link Command} that ends once the arm is homed.
    */
   public Command homing(Current threshold)
   {
-    Debouncer       currentDebouncer  = new Debouncer(0.4); // Current threshold is only detected if exceeded for 0.4 seconds.
     Voltage         runVolts          = Volts.of(2); // Volts required to run the mechanism up. Could be negative if the mechanism is inverted.
     Angle           limitHit          = hardUpperLimit;  // Limit which gets hit. Could be the lower limit if the volts makes the arm go down.
     AngularVelocity velocityThreshold = DegreesPerSecond.of(2); // The maximum amount of movement for the arm to be considered "hitting the hard limit".
-    Runnable finish = () -> {
-      motor.setEncoderPosition(limitHit);
-      motor.startClosedLoopController();
-    };
     return run(coroutine -> {
-      motor.stopClosedLoopController(); // Stop the closed loop controller
-      while (true) {
-        motor.setVoltage(runVolts); // Set the voltage of the motor
-        if (currentDebouncer.calculate(motor.getStatorCurrent().gte(threshold) &&
-                                       motor.getMechanismVelocity().abs(DegreesPerSecond) <=
-                                       velocityThreshold.in(DegreesPerSecond))) {
-          break;
-        }
-        coroutine.yield();
-      }
-      finish.run();
-    }).whenCanceled(finish).named("ExponentiallyProfiledArm Homing");
+      Debouncer currentDebouncer = new Debouncer(0.4); // Current threshold is only detected if exceeded for 0.4 seconds.
+      // The YAMS voltage command stops the closed loop controller while it runs and restarts it when it ends. As a
+      // forked child it ends together with this command.
+      coroutine.fork(arm.setVoltage(runVolts));
+      coroutine.waitUntil(() -> currentDebouncer.calculate(motor.getStatorCurrent().gte(threshold) &&
+                                                           motor.getMechanismVelocity().abs(DegreesPerSecond) <=
+                                                           velocityThreshold.in(DegreesPerSecond)));
+      motor.setEncoderPosition(limitHit);
+    }).whenCanceled(() -> motor.setEncoderPosition(limitHit))
+      .withPriority(Command.DEFAULT_PRIORITY + 1)
+      .named("ExponentiallyProfiledArm Homing");
   }
 
   public Command armCmd(double dutycycle)

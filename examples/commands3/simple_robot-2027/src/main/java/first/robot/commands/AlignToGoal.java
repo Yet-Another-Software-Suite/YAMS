@@ -54,7 +54,8 @@ public final class AlignToGoal {
    * @param shooterMechanism Shooter to spin up for the current distance.
    * @param controller Driver controller; the left stick translates while aligning.
    * @param targetPose Goal pose.
-   * @return {@link Command} requiring the drivetrain and shooter.
+   * @return {@link Command} requiring the drivetrain. The shooter runs as a forked child command, so it is only owned
+   *     while this command runs and its default command resumes afterwards.
    */
   public static Command create(
       SwerveMechanism swerveMechanism,
@@ -83,9 +84,12 @@ public final class AlignToGoal {
     pidController.setTolerance(setpointTolerance.in(Radians));
     SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0, 0, 0);
 
-    return Command.requiring(swerveMechanism, shooterMechanism).executing(coroutine -> {
+    return swerveMechanism.run(coroutine -> {
       pidController.reset(swerveMechanism.getPose().getRotation().getRadians(),
                           swerveMechanism.getFieldOrientedChassisSpeed().omega);
+      // Latest shot speed; the forked YAMS shooter command reads it every loop.
+      LinearVelocity[] shotSpeed = {MetersPerSecond.of(0)};
+      coroutine.fork(shooterMechanism.setLinearVelocity(() -> shotSpeed[0]));
 
       while (true) {
         // Please look here for the original authors work!
@@ -126,7 +130,7 @@ public final class AlignToGoal {
         var originalSpeed     = swerveMechanism.getDriveInput();
         originalSpeed.omega = output + feedforwardOutput;
         swerveMechanism.setRobotRelativeChassisSpeedsSetpoint(originalSpeed.toRobotRelative(new Rotation2d(swerveMechanism.getGyroAngle())));
-        shooterMechanism.setRPM(newHorizontalSpeed);
+        shotSpeed[0] = newHorizontalSpeed;
 
         coroutine.yield();
       }

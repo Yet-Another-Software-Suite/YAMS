@@ -13,12 +13,10 @@ import org.wpilib.opmode.Teleop;
 
 /**
  * Driver controlled teleop with the original WCP bindings. The bindings are created in the
- * constructor, so they only exist while this opmode is selected.
+ * constructor, so they only exist while this opmode is selected. Homing is bound in {@link Robot}.
  */
 @Teleop(name = "Driver Teleop")
 public class DriverTeleop implements OpMode {
-    private final Robot robot;
-
     /**
      * Creates the teleop opmode. The OpModeRobot framework calls this when the opmode is selected on
      * the driver station.
@@ -26,28 +24,15 @@ public class DriverTeleop implements OpMode {
      * @param robot The robot instance to control.
      */
     public DriverTeleop(Robot robot) {
-        this.robot = robot;
         final CommandNiDsXboxController driver = robot.driver;
 
         // The drive command aims at the hub while the right trigger is held.
         driver.rightTrigger().whileTrue(robot.mechanismCommands.shootWhenAimed());
         driver.rightBumper().whileTrue(robot.mechanismCommands.shootManually());
         driver.leftTrigger().whileTrue(robot.mechanismCommands.intake());
-        driver.leftBumper().onTrue(robot.intakePivot.positionCommand(IntakePivot.Position.STOWED));
+        driver.leftBumper().onTrue(robot.intakePivot.moveTo(IntakePivot.Position.STOWED));
         // The D-pad triggers live on the generic HID in 2027.
-        driver.getHID().povUp().onTrue(robot.hanger.positionCommand(Hanger.Position.HANGING));
-        driver.getHID().povDown().onTrue(robot.hanger.positionCommand(Hanger.Position.HUNG));
-    }
-
-    /** Homing runs when teleop is enabled, as it did on the v2 port's teleop trigger. */
-    @Override
-    public void start() {
-        robot.scheduleHoming();
-    }
-
-    /** Stop homing when teleop is disabled, as the v2 port did. */
-    @Override
-    public void end() {
-        robot.cancelHoming();
+        driver.getHID().povUp().onTrue(robot.hanger.moveTo(Hanger.Position.HANGING));
+        driver.getHID().povDown().onTrue(robot.hanger.moveTo(Hanger.Position.HUNG));
     }
 }

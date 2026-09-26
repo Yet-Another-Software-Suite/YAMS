@@ -64,7 +64,7 @@ public class Hood implements Mechanism {
     }
 
     /** Move to a position between 0.0 and 1.0, finishing once the estimated position reaches it. */
-    public Command positionCommand(double position) {
+    public Command moveTo(double position) {
         return run(coroutine -> {
             setPosition(position);
             coroutine.waitUntil(this::isPositionWithinTolerance);

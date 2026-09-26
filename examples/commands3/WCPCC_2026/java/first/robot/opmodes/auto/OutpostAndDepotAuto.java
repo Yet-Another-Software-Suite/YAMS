@@ -21,8 +21,9 @@ import first.robot.mechanisms.IntakePivot;
 import java.util.List;
 import java.util.Optional;
 import org.wpilib.command3.Command;
-import org.wpilib.command3.Coroutine;
 import org.wpilib.command3.Scheduler;
+import org.wpilib.command3.Trigger;
+import org.wpilib.command3.button.RobotModeTriggers;
 import org.wpilib.driverstation.DriverStationErrors;
 import org.wpilib.opmode.Autonomous;
 import org.wpilib.opmode.OpMode;
@@ -30,8 +31,10 @@ import org.wpilib.opmode.OpMode;
 /**
  * WCP's "Outpost and Depot" routine. ChoreoLib's AutoFactory, AutoRoutine and AutoTrajectory are
  * built on commands v2, so the trajectories are loaded with {@link Choreo#loadTrajectory} and
- * followed with {@code Swerve.followTrajectory}, and the v2 port's trajectory triggers ({@code
- * done()}, {@code atTime()}, {@code active()}) become waits in one coroutine. Timings are unchanged.
+ * followed with {@code Swerve.followTrajectory}. The routine coroutine awaits the trajectories in
+ * order, replacing the v2 port's {@code done()} chaining, and the v2 port's {@code active()} and
+ * {@code atTime()} events become triggers bound inside the routine, so they only exist while it
+ * runs. Timings are unchanged.
  */
 @Autonomous(name = "Outpost and Depot")
 public class OutpostAndDepotAuto implements OpMode {
@@ -42,8 +45,6 @@ public class OutpostAndDepotAuto implements OpMode {
     private final Trajectory<SwerveSample> outpostToDepot;
     private final Trajectory<SwerveSample> depotToShootingPose;
     private final Trajectory<SwerveSample> shootingPoseToTower;
-
-    private final Command routine;
 
     /**
      * Creates the autonomous opmode and loads its trajectories. The OpModeRobot framework calls this
@@ -58,21 +59,11 @@ public class OutpostAndDepotAuto implements OpMode {
         outpostToDepot = segment(fullTrajectory, OutpostAndDepotTrajectory$1);
         depotToShootingPose = segment(fullTrajectory, OutpostAndDepotTrajectory$2);
         shootingPoseToTower = segment(fullTrajectory, OutpostAndDepotTrajectory$3);
-        routine = outpostAndDepotRoutine();
-    }
 
-    /** Homing and the routine start together when autonomous is enabled. */
-    @Override
-    public void start() {
-        robot.scheduleHoming();
-        scheduler.schedule(routine);
-    }
-
-    /** Stop the routine and homing when autonomous is disabled, as the v2 port did. */
-    @Override
-    public void end() {
-        scheduler.cancel(routine);
-        robot.cancelHoming();
+        // Created in the opmode, so this binding only exists while the opmode is selected. The
+        // routine starts when autonomous is enabled and is canceled when it is disabled. Homing is
+        // bound in Robot.
+        RobotModeTriggers.autonomous().whileTrue(outpostAndDepotRoutine());
     }
 
     /**
@@ -96,64 +87,64 @@ public class OutpostAndDepotAuto implements OpMode {
 
         // Deploy the intake half a second after the hanger has homed.
         final Command deployIntake = Command.noRequirements(coroutine -> {
-            coroutine.waitUntil(robot.hanger::isHomed);
             coroutine.wait(Seconds.of(0.5));
-            coroutine.await(robot.intakePivot.positionCommand(IntakePivot.Position.INTAKE));
-        }).named("Deploy Intake Once Homed");
+            coroutine.await(robot.intakePivot.moveTo(IntakePivot.Position.INTAKE));
+        }).named("Deploy Intake");
 
         final Command intake = robot.mechanismCommands.intake();
-        final Command spinUp = robot.shooter.spinUpCommand(2600);
-        final Command hoodUp = robot.hood.positionCommand(0.32);
+        final Command spinUp = robot.shooter.spinUp(2600);
+        final Command hoodUp = robot.hood.moveTo(0.32);
+        final Command pauseVisionToShootingPose = robot.limelight.idle();
         final Command shootWhenAimed = robot.mechanismCommands.shootWhenAimed();
         final Command aim = Drive.autoAim(robot.swerve);
-        final Command extendHanger = robot.hanger.positionCommand(Hanger.Position.HANGING);
-        final Command hang = robot.hanger.positionCommand(Hanger.Position.HUNG);
+        final Command shotTimeout = Command.waitFor(Seconds.of(5)).named("Shot Timeout");
+        final Command pauseVisionToTower = robot.limelight.idle();
+        final Command extendHanger = robot.hanger.moveTo(Hanger.Position.HANGING);
+        final Command hang = robot.hanger.moveTo(Hanger.Position.HUNG);
 
         return Command.noRequirements(coroutine -> {
-            // Like the v2 trigger bindings, a command that cannot start (e.g. while homing holds
-            // the pivot) is skipped instead of ending the whole routine.
+            // Like the v2 trigger bindings, a command that cannot start (e.g. the hanger while it is
+            // still homing) is skipped instead of ending the whole routine.
             coroutine.setCancelOnForkFailure(false);
-            coroutine.fork(deployIntake);
+
+            // Events along the way, like the v2 port's routine triggers. They are bound inside this
+            // command, so they stop firing and their commands are canceled when the routine ends.
+            // Commands they start are not children of the routine, so a later step that needs the
+            // same mechanism (feeding takes the intake, the shot takes the shooter and hood) just
+            // interrupts them.
+            new Trigger(robot.hanger::isHomed).onTrue(deployIntake);
+            // Start intaking one second before reaching the depot.
+            following(outpostToDepotCmd)
+                .debounce(Seconds.of(Math.max(outpostToDepot.getTotalTime() - 1, 0)))
+                .onTrue(intake);
+            // Vision is paused on the way to the shooting pose; spin up half a second in.
+            final Trigger toShootingPose = following(depotToShootingPoseCmd);
+            toShootingPose.whileTrue(pauseVisionToShootingPose);
+            toShootingPose.debounce(Seconds.of(0.5))
+                .onTrue(spinUp)
+                .onTrue(hoodUp);
+            // Vision is paused on the way to the tower, and the hanger extends while driving there.
+            following(shootingPoseToTowerCmd)
+                .whileTrue(pauseVisionToTower)
+                .onTrue(extendHanger);
 
             robot.swerve.resetOdometry(startToOutpost);
             coroutine.await(startToOutpostCmd);
             coroutine.wait(Seconds.of(1));
-
-            // Start intaking one second before reaching the depot.
-            coroutine.fork(outpostToDepotCmd);
-            coroutine.wait(Seconds.of(outpostToDepot.getTotalTime() - 1));
-            coroutine.fork(intake);
-            awaitFinished(coroutine, outpostToDepotCmd);
+            coroutine.await(outpostToDepotCmd);
             coroutine.wait(Seconds.of(0.1));
+            coroutine.await(depotToShootingPoseCmd);
 
-            // Vision is paused on the way to the shooting pose; spin up half a second in.
-            final Command pauseVisionToShootingPose = robot.limelight.idle();
-            coroutine.fork(depotToShootingPoseCmd, pauseVisionToShootingPose);
-            coroutine.wait(Seconds.of(0.5));
-            coroutine.fork(spinUp, hoodUp);
-            awaitFinished(coroutine, depotToShootingPoseCmd);
-            scheduler.cancel(pauseVisionToShootingPose);
+            // Aim and shoot for five seconds; the timeout ending cancels the other two.
+            coroutine.awaitAny(aim, shootWhenAimed, shotTimeout);
 
-            // Aim and shoot for five seconds.
-            coroutine.fork(aim, shootWhenAimed);
-            coroutine.waitUntil(() -> !scheduler.isScheduledOrRunning(shootWhenAimed), Seconds.of(5));
-            scheduler.cancel(shootWhenAimed);
-            scheduler.cancel(aim);
-
-            // Vision is paused on the way to the tower, and the hanger extends while driving there.
-            final Command pauseVisionToTower = robot.limelight.idle();
-            coroutine.fork(shootingPoseToTowerCmd, pauseVisionToTower, extendHanger);
-            awaitFinished(coroutine, shootingPoseToTowerCmd);
-            scheduler.cancel(pauseVisionToTower);
-            coroutine.fork(hang);
-
-            // Stay alive so the forked commands are not canceled before autonomous ends.
-            coroutine.park();
+            coroutine.await(shootingPoseToTowerCmd);
+            coroutine.await(hang);
         }).named("Outpost and Depot");
     }
 
-    /** Yield until a forked command has finished. */
-    private void awaitFinished(Coroutine coroutine, Command command) {
-        coroutine.waitUntil(() -> !scheduler.isScheduledOrRunning(command));
+    /** A trigger that is true while a trajectory command is running, like {@code active()} in v2. */
+    private Trigger following(Command trajectoryCommand) {
+        return new Trigger(() -> scheduler.isRunning(trajectoryCommand));
     }
 }

@@ -12,6 +12,8 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.util.CANPorts;
 import first.robot.Constants.IntakeSubsystemConstants;
+import first.robot.Constants.IntakeSubsystemConstants.IntakeSetpoints;
+import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.math.system.DCMotor;
 import yams.commands3.config.SmartMotorControllerConfig;
@@ -31,7 +33,10 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  *
  * <p>The REV code drove the intake and conveyor from one subsystem. They are separate mechanisms
  * here so each one can be tuned live on its own; {@link first.robot.commands.FuelCommands} runs
- * them together.
+ * their commands together.
+ *
+ * <p>The mechanism's own commands ({@link #intake()}, {@link #extake()}) run until canceled. The
+ * default command, {@link #idle()}, stops the rollers whenever no other command owns the intake.
  */
 public class IntakeMechanism implements Mechanism
 {
@@ -65,23 +70,35 @@ public class IntakeMechanism implements Mechanism
   /** Creates a new IntakeMechanism. */
   public IntakeMechanism()
   {
+    setDefaultCommand(idle());
     System.out.println("---> IntakeMechanism initialized");
   }
 
-  /**
-   * Runs the intake motor at a power in the range of [-1, 1].
-   *
-   * @param power Duty cycle to run at.
-   */
-  public void setPower(double power)
+  /** Command to run the intake rollers inward until canceled. */
+  public Command intake()
   {
-    intake.setDutyCycleSetpoint(power);
+    return intake.set(IntakeSetpoints.kIntake);
   }
 
-  /** Stops the intake motor. */
-  public void stop()
+  /** Command to run the intake rollers in reverse until canceled. */
+  public Command extake()
   {
-    intake.setDutyCycleSetpoint(0.0);
+    return intake.set(IntakeSetpoints.kExtake);
+  }
+
+  /**
+   * Stops the intake motor and keeps it stopped. This is the default command, so the rollers stop
+   * as soon as the command using them ends. It has the lowest priority so any other command can
+   * take the intake.
+   */
+  @Override
+  public Command idle()
+  {
+    return run(coroutine -> {
+      intake.setDutyCycleSetpoint(0.0);
+      coroutine.park();
+    }).withPriority(Command.LOWEST_PRIORITY)
+      .named("Intake.Stop");
   }
 
   /** Replaces the SmartDashboard applied-output entries from the REV code. */

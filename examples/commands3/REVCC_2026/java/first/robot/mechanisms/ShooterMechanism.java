@@ -43,7 +43,10 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  *
  * <p>The REV code drove the flywheel and feeder from one subsystem. The feeder is its own mechanism
  * ({@link FeederMechanism}) so each mechanism can be tuned live on its own;
- * {@link first.robot.commands.FuelCommands} runs them together.
+ * {@link first.robot.commands.FuelCommands} runs their commands together.
+ *
+ * <p>{@link #spinUp()} holds the shooting speed until canceled. The default command,
+ * {@link #idle()}, lets the flywheel coast whenever no other command owns the shooter.
  */
 public class ShooterMechanism implements Mechanism
 {
@@ -91,6 +94,7 @@ public class ShooterMechanism implements Mechanism
   /** Creates a new ShooterMechanism. */
   public ShooterMechanism()
   {
+    setDefaultCommand(idle());
     System.out.println("---> ShooterMechanism initialized");
   }
 
@@ -112,31 +116,28 @@ public class ShooterMechanism implements Mechanism
       () -> flywheel.getSpeed().isNear(RPM.of(0), FlywheelSetpoints.kVelocityTolerance));
 
   /**
-   * Drive the flywheels to their set velocity. YAMS uses MAXMotion velocity control because a
-   * trapezoidal profile is configured, giving a smooth acceleration to the setpoint.
+   * Command to spin the flywheels up to the shooting speed and hold it until canceled. YAMS uses
+   * MAXMotion velocity control because a trapezoidal profile is configured, giving a smooth
+   * acceleration to the setpoint.
    */
-  public void setFlywheelVelocity(AngularVelocity velocity)
+  public Command spinUp()
   {
-    flywheel.setMechanismVelocitySetpoint(velocity);
-  }
-
-  /** Stop the flywheel without actively braking it to zero. */
-  public void stopFlywheel()
-  {
-    flywheel.setDutyCycleSetpoint(0);
+    return flywheel.run(FlywheelSetpoints.kShootRpm);
   }
 
   /**
-   * Command to run the flywheel motors. When the command is interrupted, e.g. the button is
-   * released, the flywheel is driven to 0 RPM.
+   * Lets the flywheel coast down without actively braking it to zero, and keeps it that way. This
+   * is the default command, so the flywheel coasts as soon as the command using it ends. It has the
+   * lowest priority so any other command can take the shooter.
    */
-  public Command runFlywheel()
+  @Override
+  public Command idle()
   {
     return run(coroutine -> {
-      setFlywheelVelocity(FlywheelSetpoints.kShootRpm);
+      flywheel.setDutyCycleSetpoint(0);
       coroutine.park();
-    }).whenCanceled(() -> setFlywheelVelocity(RPM.of(0)))
-      .named("Shooter.RunFlywheel");
+    }).withPriority(Command.LOWEST_PRIORITY)
+      .named("Shooter.Coast");
   }
 
   /** Current flywheel velocity. */

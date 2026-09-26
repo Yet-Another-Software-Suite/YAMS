@@ -39,6 +39,11 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
 
 public class ElevatorMechanism implements Mechanism
 {
+  /// Height the elevator rests at when nothing else is commanding it.
+  public static final Distance STOW_HEIGHT = Meters.of(0);
+  /// How close the elevator must be to a target height to count as there.
+  public static final Distance TOLERANCE   = Meters.of(0.02);
+
   private final Distance chainPitch = Inches.of(0.25);
   private final int toothCount = 22;
   private final Distance circumference = chainPitch.times(toothCount);
@@ -114,6 +119,53 @@ public class ElevatorMechanism implements Mechanism
   public Command setHeight(Distance height)
   {
     return m_elevator.setHeight(height);
+  }
+
+  /**
+   * Hold the elevator at a height at the lowest priority, so any other elevator command can take over. Meant for
+   * default commands.
+   *
+   * @param height Height to hold.
+   * @return {@link Command} that holds the elevator at the height until another elevator command runs.
+   */
+  public Command hold(Distance height)
+  {
+    return run(coroutine -> coroutine.await(m_elevator.setHeight(height)))
+        .withPriority(Command.LOWEST_PRIORITY)
+        .named("Elevator Hold " + height.in(Meters) + " m");
+  }
+
+  /**
+   * Hold the elevator at {@link #STOW_HEIGHT}. This is the elevator's default command.
+   *
+   * @return {@link Command} that stows the elevator.
+   */
+  public Command stow()
+  {
+    return hold(STOW_HEIGHT);
+  }
+
+  /**
+   * Move the elevator to a height and finish once it is within {@link #TOLERANCE}. The elevator's default command
+   * takes over after this ends.
+   *
+   * @param height Height to move to.
+   * @return {@link Command} that ends when the elevator reaches the height.
+   */
+  public Command moveTo(Distance height)
+  {
+    return m_elevator.runTo(height, TOLERANCE);
+  }
+
+  /**
+   * Trigger that is true while the elevator is within {@link #TOLERANCE} of a height.
+   *
+   * @param height Height to check.
+   * @return {@link Trigger} for the elevator being at the height.
+   */
+  public Trigger near(Distance height)
+  {
+    return m_elevator.near(height, TOLERANCE);
   }
 
 }

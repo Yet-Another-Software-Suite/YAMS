@@ -22,6 +22,7 @@ import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.Voltage;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
+import org.wpilib.command3.Trigger;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -177,6 +178,17 @@ public class ArmMechanism implements Mechanism {
    */
   public Command setAngle(Angle angle) {
     return arm.setAngle(angle);
+  }
+
+  /**
+   * Whether the arm is near an angle. Reads the logged angle so replay sees the same result.
+   *
+   * @param angle  Target angle.
+   * @param within Allowed error.
+   * @return {@link Trigger} that is true while the arm is within tolerance.
+   */
+  public Trigger near(Angle angle, Angle within) {
+    return new Trigger(() -> getAngle().isNear(angle, within));
   }
 
   /**

@@ -125,12 +125,25 @@ public class Shooter implements Mechanism {
         setPercentOutput(0.0);
     }
 
-    /** Spin up to a speed, finishing once all three motors are within tolerance. */
-    public Command spinUpCommand(double rpm) {
+    /**
+     * Spin up to a speed, finishing once all three motors are within tolerance. The flywheel keeps
+     * spinning after the command ends.
+     */
+    public Command spinUp(double rpm) {
         return run(coroutine -> {
             setRPM(rpm);
             coroutine.waitUntil(this::isVelocityWithinTolerance);
         }).named("Shooter Spin Up " + rpm + " RPM");
+    }
+
+    /** Hold a speed until canceled, then stop the flywheel. */
+    public Command runAt(double rpm) {
+        return run(coroutine -> {
+            setRPM(rpm);
+            coroutine.park();
+        })
+        .whenCanceled(this::stop)
+        .named("Shooter at " + rpm + " RPM");
     }
 
     /** The RPM entered on the dashboard. */
