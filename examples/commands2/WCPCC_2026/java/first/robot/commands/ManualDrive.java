@@ -19,11 +19,12 @@ import yams.commands2.swerve.SwerveInputStream;
  *
  * <p>The stream drives field centric with manual rotation, holds the current heading once the
  * rotation stick has been idle for a short delay (translation only mode), and turns to a heading
- * picked with {@link #setLockedHeading} (heading mode) until the driver rotates manually.
+ * picked with {@link #setLockedHeading} (heading mode) until the driver rotates manually. Like
+ * WCP's {@code ManualDriveCommand}, it is the drivetrain's default command.
  */
-public class ManualDrive {
+public class ManualDrive extends Command {
     private final Swerve swerve;
-    private final Command command;
+    private final SwerveInputStream input;
 
     // Heading picked with the face buttons, from the operator's perspective.
     private Optional<Rotation2d> snapHeading = Optional.empty();
@@ -40,18 +41,23 @@ public class ManualDrive {
         // Rotating manually cancels a picked heading.
         rotating.onTrue(Commands.runOnce(() -> snapHeading = Optional.empty()));
 
-        final SwerveInputStream input = swerve.createDriverInput(forwardInput, leftInput, rotationInput)
+        input = swerve.createDriverInput(forwardInput, leftInput, rotationInput)
             .withTranslationOnly(rotating.negate().debounce(Driving.kHeadingLockDelaySeconds).and(() -> snapHeading.isEmpty()))
             // Face the picked heading, converted to the field frame, until it is cleared.
             .withHeading(() -> snapHeadingInField().getMeasure())
             .withHeadingControl(() -> snapHeading.isPresent());
 
-        command = swerve.driveCommand(input).beforeStarting(() -> snapHeading = Optional.empty());
+        addRequirements(swerve);
     }
 
-    /** Default drive command for the drivetrain. */
-    public Command command() {
-        return command;
+    @Override
+    public void initialize() {
+        snapHeading = Optional.empty();
+    }
+
+    @Override
+    public void execute() {
+        swerve.driveFieldRelative(input.get());
     }
 
     /** Turn to and hold a heading from the operator's perspective until the driver rotates. */

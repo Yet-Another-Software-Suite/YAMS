@@ -16,7 +16,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import first.robot.Constants.Driving;
 import first.robot.util.GeometryUtil;
 import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 import first.robot.Ports;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
@@ -187,11 +186,6 @@ public class Swerve extends SubsystemBase {
     /** Drive with field relative speeds, e.g. from {@link #createDriverInput}. */
     public void driveFieldRelative(ChassisVelocities fieldRelativeSpeeds) {
         drive.setFieldRelativeChassisSpeeds(fieldRelativeSpeeds);
-    }
-
-    /** Command that drives with field relative speeds, e.g. from {@link #createDriverInput}. */
-    public Command driveCommand(Supplier<ChassisVelocities> fieldRelativeSpeeds) {
-        return run(() -> driveFieldRelative(fieldRelativeSpeeds.get()));
     }
 
     /**

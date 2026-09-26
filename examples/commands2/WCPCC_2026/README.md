@@ -29,7 +29,7 @@ A port of the West Coast Products 2026 Competitive Concept robot code to WPILib 
 | `subsystems/Intake.java` | `subsystems/IntakePivot.java`, `subsystems/IntakeRollers.java` | Split so each mechanism is its own subsystem and can be live tuned on its own. `intakeCommand()`/`agitateCommand()` moved to `SubsystemCommands.intake()`/`agitate()` |
 | `subsystems/Swerve.java` (`TunerSwerveDrivetrain`) | `subsystems/Swerve.java` | Rewritten on YAMS `SwerveDrive` |
 | `generated/TunerConstants.java` | (removed) | IDs moved to `Ports`; gains, ratios and offsets moved to `Constants.SwerveConstants` |
-| `commands/ManualDriveCommand.java` | `commands/ManualDrive.java` | No longer a `Command` subclass; builds a YAMS `SwerveInputStream` and exposes `command()` |
+| `commands/ManualDriveCommand.java` | `commands/ManualDrive.java` | Still a `Command` subclass (the drivetrain default), now driving from a YAMS `SwerveInputStream` |
 | `LimelightHelpers.java` | (removed) | Replaced by the LimelightLib vendordep |
 | `frc/util/SwerveTelemetry.java` | (removed) | Replaced by YAMS swerve telemetry |
 | `frc/util/DriveInputSmoother.java`, `frc/util/ManualDriveInput.java` | (removed) | Replaced by `SwerveInputStream` |

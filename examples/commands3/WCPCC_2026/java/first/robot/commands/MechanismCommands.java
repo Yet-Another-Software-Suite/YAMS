@@ -5,12 +5,17 @@
 package first.robot.commands;
 
 import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Seconds;
 
 import first.robot.Landmarks;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Coroutine;
+import org.wpilib.networktables.DoublePublisher;
+import org.wpilib.networktables.NetworkTableInstance;
 import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.Distance;
 import first.robot.mechanisms.Feeder;
 import first.robot.mechanisms.Floor;
 import first.robot.mechanisms.Hanger;
@@ -27,6 +32,9 @@ import first.robot.mechanisms.Swerve;
  */
 public final class MechanismCommands {
     private static final Angle kAimTolerance = Degrees.of(5);
+    private static final DoublePublisher distanceToHubPublisher = NetworkTableInstance.getDefault()
+        .getDoubleTopic("SmartDashboard/Distance to Hub (inches)")
+        .publish();
 
     private final Swerve swerve;
     private final IntakePivot intakePivot;
@@ -58,7 +66,6 @@ public final class MechanismCommands {
         this.shooter = shooter;
         this.hood = hood;
         this.hanger = hanger;
-
     }
 
     /**
@@ -68,18 +75,39 @@ public final class MechanismCommands {
      * {@link Drive#autoAim}.
      */
     public Command shootWhenAimed() {
-        final PrepareShot prepareShot = new PrepareShot(shooter, hood, () -> swerve.getPose());
         return Command.requiring(shooter, hood, feeder, floor, intakePivot, intakeRollers)
             .executing(coroutine -> {
                 coroutine.wait(Seconds.of(0.25));
-                coroutine.fork(prepareShot.command());
-                // The shot cannot be ready before PrepareShot has set a velocity, so waiting from here
+                coroutine.fork(prepareShot());
+                // The shot cannot be ready before prepareShot has set a velocity, so waiting from here
                 // matches the v2 port's waitUntil that started at the same time as the aim.
-                coroutine.waitUntil(() -> swerve.isFacing(Landmarks.hubPosition(), kAimTolerance) && prepareShot.isReadyToShoot());
+                coroutine.waitUntil(() -> swerve.isFacing(Landmarks.hubPosition(), kAimTolerance)
+                    && shooter.isVelocityWithinTolerance() && hood.isPositionWithinTolerance());
                 feed(coroutine);
             })
             .whenCanceled(this::stopFeeding)
             .named("Shoot When Aimed");
+    }
+
+    /**
+     * Set the shooter speed and hood position from the distance to the hub every loop, using
+     * {@link ShotMap}. The shooter stops when the command is canceled.
+     */
+    private Command prepareShot() {
+        return Command.requiring(shooter, hood)
+            .executing(coroutine -> {
+                while (true) {
+                    final Distance distanceToHub =
+                        Meters.of(swerve.getPose().getTranslation().getDistance(Landmarks.hubPosition()));
+                    final ShotMap.Shot shot = ShotMap.forDistance(distanceToHub);
+                    shooter.setRPM(shot.shooterRPM);
+                    hood.setPosition(shot.hoodPosition);
+                    distanceToHubPublisher.set(distanceToHub.in(Inches));
+                    coroutine.yield();
+                }
+            })
+            .whenCanceled(shooter::stop)
+            .named("Prepare Shot");
     }
 
     /** Spin up to the dashboard RPM, then feed. The shooter stops when the command is canceled. */

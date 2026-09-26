@@ -108,7 +108,7 @@ public class RobotContainer {
             () -> -driver.getLeftX(),
             () -> -driver.getRightX()
         );
-        swerve.setDefaultCommand(manualDrive.command());
+        swerve.setDefaultCommand(manualDrive);
         driver.a().onTrue(Commands.runOnce(() -> manualDrive.setLockedHeading(Rotation2d.k180deg)));
         driver.b().onTrue(Commands.runOnce(() -> manualDrive.setLockedHeading(Rotation2d.CW_90DEG)));
         driver.x().onTrue(Commands.runOnce(() -> manualDrive.setLockedHeading(Rotation2d.CCW_90DEG)));

@@ -36,7 +36,7 @@ A port of the West Coast Products 2026 Competitive Concept robot code to WPILib 
 | `generated/TunerConstants.java` | (removed) | IDs moved to `Ports`; gains, ratios and offsets moved to `Constants.SwerveConstants` |
 | `commands/SubsystemCommands.java` | `commands/MechanismCommands.java` | Multi-mechanism coroutine commands |
 | `commands/ManualDriveCommand.java`, `commands/AimAndDriveCommand.java` | `commands/Drive.java` | Merged into one teleop drive loop, `Drive.teleop(swerve, controller)`, that drives through the `Swerve` input stream every loop and aims while the right trigger is held. `Drive.autoAim(swerve)` is the autonomous aim loop |
-| `commands/PrepareShotCommand.java` | `commands/PrepareShot.java` | Exposes `command()` and `isReadyToShoot()` |
+| `commands/PrepareShotCommand.java` | `commands/ShotMap.java`, `commands/MechanismCommands.java` | The shot map is a plain `ShotMap.forDistance(...)` lookup; the shot tracking loop is the `prepareShot()` factory in `MechanismCommands` |
 | `LimelightHelpers.java` | (removed) | Replaced by the LimelightLib vendordep |
 | `frc/util/SwerveTelemetry.java` | (removed) | Replaced by YAMS swerve telemetry |
 | `frc/util/DriveInputSmoother.java`, `frc/util/ManualDriveInput.java` | (removed) | Replaced by `SwerveInputStream` |
@@ -98,7 +98,7 @@ Every motor is a TalonFX wrapped in a YAMS `TalonFXWrapper` (`DCMotor.getKrakenX
   - The A/B/X/Y snap headings use `withHeading(...)` + `withHeadingControl(...)`.
 - **Aiming** uses `SwerveInputStream.withAim(hub)`: in teleop `Drive.teleop` aims while the right trigger is held, and in autonomous `Drive.autoAim` aims in place. The aimed check uses `swerve.isFacing(hub, 5°)`.
 - **MechanismCommands** adds `intake()`, and agitating the intake is part of feeding. The v2 `aimAndShoot` is `shootWhenAimed`, since the drive commands now do the aiming; its logic and timings, and those of `shootManually`, are unchanged.
-- The **PrepareShot** shot map is unchanged.
+- The shot map (`ShotMap`) is unchanged.
 - **OutpostAndDepotAuto**: the same Choreo routine, speeds and timings.
   - The X/Y (10) and theta (7) path PID is kept.
   - Trajectories are mirrored for the red alliance and skipped while the alliance is unknown, as ChoreoLib's `AutoFactory` did.
@@ -134,7 +134,7 @@ This is the Commands v3 version of `examples/commands2/WCPCC_2026`. The mechanis
 - **Opmodes instead of `RobotContainer`.** `Robot` extends `OpModeRobot` and sets the global defaults (manual drive, vision). `DriverTeleop` creates the bindings, and `OutpostAndDepotAuto` replaces `AutoRoutines` and its `AutoChooser`. Both schedule homing when they start and cancel it when they end, as disabling did in v2; the auto also cancels its routine.
 - **Coroutines instead of decorators and groups.**
   - Single-mechanism commands (`spinUpCommand`, `positionCommand`, homing, the drive and vision loops) are coroutines with `waitUntil`/`park` or a `while (true)` loop that yields, and `whenCanceled` replaces `startEnd` and `handleInterrupt`.
-  - `shootWhenAimed`, `shootManually` and `intake` require every mechanism they drive, like the v2 groups, and are written as sequential code: they set the rollers, shooter and pivot directly and `wait`/`waitUntil` between steps. Feeding (feeder, then floor rollers while rocking the intake) is a plain method both shooting commands call, so the v2 feed, floor feed and agitate commands are gone. `shootWhenAimed` does not require the swerve: it `fork`s `PrepareShot`, which runs alongside it, and waits for the drive command to face the hub.
+  - `shootWhenAimed`, `shootManually` and `intake` require every mechanism they drive, like the v2 groups, and are written as sequential code: they set the rollers, shooter and pivot directly and `wait`/`waitUntil` between steps. Feeding (feeder, then floor rollers while rocking the intake) is a plain method both shooting commands call, so the v2 feed, floor feed and agitate commands are gone. `shootWhenAimed` does not require the swerve: it `fork`s `prepareShot()`, which sets the shooter and hood from the shot map every loop, and waits until the drive command faces the hub and the shooter and hood are at their setpoints.
   - The auto forks its trajectory followers and mechanism commands, resets odometry with a plain `Swerve.resetOdometry` call, and gives aim and shoot five seconds with a timed `waitUntil` before canceling it.
   - Driving commands take the driver controller instead of stick suppliers, and one `MechanismCommands` instance is shared by teleop and autonomous.
   - `Swerve` owns the one `SwerveInputStream`, and commands change it through `Swerve` methods (`setDriveInput`, `setAimTarget`, `setHeadingLock`, `setHoldHeading`, `driveFromInput`) every loop. `Drive.teleop` is the manual drive loop: it reads the driver controller every loop and handles the A/B/X/Y snap headings, Back (seed field centric), the rotation edge and the heading hold `Debouncer` instead of using triggers and bindings. While the right trigger is held (the shoot button, which runs `shootWhenAimed`) the same loop keeps the driver's translation and faces the hub. Autonomous has its own drive loop, `Drive.autoAim`, which the auto forks with `shootWhenAimed` for its five second shot.
