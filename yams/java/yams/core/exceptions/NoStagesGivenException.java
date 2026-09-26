@@ -4,13 +4,13 @@
 package yams.core.exceptions;
 
 /**
- * Thrown by {@link yams.core.gearing.GearBox}, {@link yams.core.gearing.Sprocket}, and {@link
- * yams.core.math.SmartMath} when a gear reduction calculation is requested but no gear stages were
+ * Thrown by {@link yams.core.gearing.GearBox}, {@link yams.core.gearing.Sprocket}, and
+ * {@link yams.core.math.SmartMath} when a gear reduction calculation is requested but no gear stages were
  * supplied.
  *
  * <p>At least one reduction stage (in the {@code "IN:OUT"} string format) is required for the ratio
- * calculation to be mathematically valid. Passing an empty stage array or constructing a {@code
- * GearBox}/{@code Sprocket} with zero stages triggers this exception.
+ * calculation to be mathematically valid. Passing an empty stage array or constructing a
+ * {@code GearBox}/{@code Sprocket} with zero stages triggers this exception.
  *
  * <p><b>Resolution:</b> Provide one or more reduction stages. Each stage must be a {@code String}
  * in the form {@code "driverTeeth:drivenTeeth"} (e.g., {@code "12:60"}).

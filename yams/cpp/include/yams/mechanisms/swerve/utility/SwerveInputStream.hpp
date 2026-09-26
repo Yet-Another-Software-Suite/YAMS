@@ -296,6 +296,7 @@ class SwerveInputStream {
 
   /**
    * Flip the translation when on the Red alliance so forward always aims toward the opponent wall.
+   * Has no effect while robot-relative control is enabled.
    *
    * @param enabled Supplier that enables alliance-relative control when true.
    * @return *this for chaining.
@@ -305,7 +306,10 @@ class SwerveInputStream {
     return *this;
   }
 
-  /** Enable alliance-relative control unconditionally. @return *this for chaining. */
+  /**
+   * Enable alliance-relative control unconditionally. Has no effect while robot-relative control is
+   * enabled. @return *this for chaining.
+   */
   SwerveInputStream& WithAllianceRelativeControl() {
     return WithAllianceRelativeControl([] { return true; });
   }
@@ -594,10 +598,11 @@ class SwerveInputStream {
   }
 
   wpi::math::Translation2d ApplyAllianceAwareTranslation(wpi::math::Translation2d translation) {
+    // Robot relative translation does not depend on the alliance, so it is never flipped.
+    if (m_robotRelative.has_value() && m_robotRelative.value()()) {
+      return translation;
+    }
     if (m_allianceRelative.has_value() && m_allianceRelative.value()()) {
-      if (m_robotRelative.has_value() && m_robotRelative.value()()) {
-        throw std::runtime_error{"Cannot use robot-oriented control with alliance-aware movement!"};
-      }
       auto alliance = wpi::MatchState::GetAlliance();
       if (alliance.has_value() && alliance.value() == wpi::Alliance::RED) {
         return translation.RotateBy(wpi::math::Rotation2d{wpi::units::degree_t{180.0}});

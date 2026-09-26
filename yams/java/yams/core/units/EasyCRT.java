@@ -116,10 +116,17 @@ public class EasyCRT {
   /**
    * Returns the mechanism angle if a unique solution is found.
    *
-   * <p>If no unique solution is found (outside tolerance or ambiguous), returns {@link
-   * Optional#empty()}.
+   * <p>If no unique solution is found (outside tolerance or ambiguous), returns
+   * {@link Optional#empty()}.
    *
    * @return optional containing mechanism angle when uniquely resolved
+   * @throws IllegalStateException    if an encoder ratio cannot be determined because the
+   *                                  configuration has neither a direct ratio nor a gear chain or
+   *                                  gear stages for that encoder.
+   * @throws IllegalArgumentException if an encoder ratio is derived from configured gear stages
+   *                                  that do not have an even length of at least 2, from a gear
+   *                                  chain with fewer than 2 tooth counts, or from any tooth count
+   *                                  that is not positive.
    */
   public Optional<Angle> getAngleOptional() {
     final double ratio1 = easyCrtConfig.getEncoder1RotationsPerMechanismRotation();

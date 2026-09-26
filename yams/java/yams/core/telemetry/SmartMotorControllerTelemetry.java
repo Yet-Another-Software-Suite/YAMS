@@ -171,6 +171,17 @@ public class SmartMotorControllerTelemetry {
    * Apply the tuning values from {@link NetworkTable} to the {@link SmartMotorController}
    *
    * @param smartMotorController {@link SmartMotorController} to control.
+   * @throws SmartMotorControllerConfigurationException if the controller's control mode is not
+   *                                                    {@code CLOSED_LOOP}, or if the underlying
+   *                                                    motor controller implementation rejects a
+   *                                                    tuned value (for example, a gain applied
+   *                                                    while slot 3 is active on a TalonFX, or an
+   *                                                    unsupported vendor control request when
+   *                                                    applying a setpoint or slot).
+   * @throws IllegalArgumentException                   if the tuned closed loop controller slot is
+   *                                                    not supported by the underlying motor
+   *                                                    controller implementation (for example, slot
+   *                                                    3 on a TalonFX or TalonFXS).
    */
   public void applyTuningValues(SmartMotorController smartMotorController) {
     SmartMotorControllerConfig<?> cfg = smartMotorController.getConfig();
@@ -283,8 +294,8 @@ public class SmartMotorControllerTelemetry {
   /**
    * Whether or not tuning is enabled.
    *
-   * @return Checks if {@link DoubleTelemetryField#TunableSetpointPosition} or {@link
-   *         DoubleTelemetryField#TunableSetpointVelocity} are enabled.
+   * @return Checks if {@link DoubleTelemetryField#TunableSetpointPosition} or
+   *         {@link DoubleTelemetryField#TunableSetpointVelocity} are enabled.
    */
   public boolean tuningEnabled() {
     return doubleFields.get(DoubleTelemetryField.TunableSetpointPosition).enabled || doubleFields.get(DoubleTelemetryField.TunableSetpointVelocity).enabled;

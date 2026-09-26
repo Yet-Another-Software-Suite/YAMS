@@ -23,26 +23,26 @@
  * which signals to publish and under what NetworkTables keys. Signals include duty cycle,
  * applied voltage, velocity, position, supply current, stator current, and device
  * temperature.
- * <li>{@link yams.core.telemetry.SmartMotorControllerTelemetry} publisher that consumes a {@code
- * SmartMotorControllerTelemetryConfig} and writes the selected signals to NetworkTables on every
+ * <li>{@link yams.core.telemetry.SmartMotorControllerTelemetry} publisher that consumes a
+ * {@code SmartMotorControllerTelemetryConfig} and writes the selected signals to NetworkTables on every
  * {@code periodic()} call.
  * </ul>
  *
  * <h2>Lightweight scalar publishers</h2>
  *
  * <ul>
- * <li>{@link yams.core.telemetry.BooleanTelemetry} lightweight publisher for a single {@code
- * boolean} value (e.g. limit switch state, at-setpoint flag). <li>{@link
- * yams.core.telemetry.DoubleTelemetry} lightweight publisher for a single {@code double} value
+ * <li>{@link yams.core.telemetry.BooleanTelemetry} lightweight publisher for a single
+ * {@code boolean} value (e.g. limit switch state, at-setpoint flag). <li>
+ * {@link yams.core.telemetry.DoubleTelemetry} lightweight publisher for a single {@code double} value
  * (e.g. a raw sensor reading or computed error).
  * </ul>
  *
  * <h2>Enabling telemetry</h2>
  *
- * <p>Telemetry is opt-in. Call {@code setupTelemetry()} on a {@link
- * yams.core.motorcontrollers.SmartMotorController} or mechanism instance, passing the desired
- * configuration object, to begin publishing. The call must happen before the first {@code
- * periodic()} call (typically in {@code robotInit} or the subsystem constructor):
+ * <p>Telemetry is opt-in. Call {@code setupTelemetry()} on a
+ * {@link yams.core.motorcontrollers.SmartMotorController} or mechanism instance, passing the desired
+ * configuration object, to begin publishing. The call must happen before the first
+ * {@code periodic()} call (typically in {@code robotInit} or the subsystem constructor):
  *
  * <pre>{@code
  * SmartMotorControllerTelemetryConfig telemetryCfg =

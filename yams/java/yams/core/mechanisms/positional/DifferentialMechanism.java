@@ -8,6 +8,7 @@ import static org.wpilib.units.Units.Inches;
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Radians;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.math.geometry.Rotation2d;
@@ -98,6 +99,12 @@ public class DifferentialMechanism extends SmartPositionalMechanism {
    * @param diffConfig Lower {@link DifferentialMechanismConfig} to use.
    * @implNote Protected so only {@link yams.commands2.mechanisms.DifferentialMechanism} can
    *           construct this.
+   * @throws NoSuchElementException                      if the left or right
+   *                                                     {@link SmartMotorController} was not set on
+   *                                                     the {@link DifferentialMechanismConfig}.
+   * @throws DifferentialMechanismConfigurationException if the starting tilt or twist angle is not
+   *                                                     set, the length is not set, or running in
+   *                                                     simulation and the MOI is not set.
    */
   protected DifferentialMechanism(DifferentialMechanismConfig diffConfig) {
     m_config = diffConfig;
@@ -270,11 +277,23 @@ public class DifferentialMechanism extends SmartPositionalMechanism {
     return m_config.getTelemetryName().orElse("DifferentialMechanism");
   }
 
+  /**
+   * Not supported for {@link DifferentialMechanism}.
+   *
+   * @return Never returns.
+   * @throws RuntimeException always, since max limits are not supported for this mechanism.
+   */
   @Override
   public boolean isAtMax() {
     throw new RuntimeException("Unsupported operation");
   }
 
+  /**
+   * Not supported for {@link DifferentialMechanism}.
+   *
+   * @return Never returns.
+   * @throws RuntimeException always, since min limits are not supported for this mechanism.
+   */
   @Override
   public boolean isAtMin() {
     throw new RuntimeException("Unsupported operation");

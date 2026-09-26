@@ -22,26 +22,26 @@ import yams.core.telemetry.NetworkTablesBackends;
  * <p>
  * {@code SmartMechanism} is the abstract root of all YAMS mechanism implementations. It combines a
  * {@link yams.core.motorcontrollers.SmartMotorController} with integrated telemetry, simulation
- * support, and WPILib {@link org.wpilib.command2.Command} / {@link
- * org.wpilib.command2.button.Trigger} integration so that every concrete mechanism (Arm, Elevator,
+ * support, and WPILib {@link org.wpilib.command2.Command} /
+ * {@link org.wpilib.command2.button.Trigger} integration so that every concrete mechanism (Arm, Elevator,
  * Flywheel, etc.) shares a consistent API for control, feedback, and visualization.
  * </p>
  *
  * <h2>Mechanism Lifecycle</h2>
  * <ol>
- * <li>Configure a motor controller: {@link
- * yams.core.motorcontrollers.SmartMotorControllerConfig}</li> <li>Instantiate the appropriate
+ * <li>Configure a motor controller:
+ * {@link yams.core.motorcontrollers.SmartMotorControllerConfig}</li> <li>Instantiate the appropriate
  * wrapper: {@link yams.core.motorcontrollers.local.SparkWrapper} (REV), or
- * {@code yams.core.motorcontrollers.remote.TalonFXWrapper}/{@code yams.motorcontrollers.remote.TalonFXSWrapper}</li> <li>Build a mechanism config (e.g., {@link
- * yams.core.mechanisms.config.ArmConfig})</li> <li>Construct the concrete mechanism (e.g., {@link
- * yams.core.mechanisms.positional.Arm})</li> <li>Schedule setpoint commands and bind triggers</li>
+ * {@code yams.core.motorcontrollers.remote.TalonFXWrapper}/{@code yams.motorcontrollers.remote.TalonFXSWrapper}</li> <li>Build a mechanism config (e.g.,
+ * {@link yams.core.mechanisms.config.ArmConfig})</li> <li>Construct the concrete mechanism (e.g.,
+ * {@link yams.core.mechanisms.positional.Arm})</li> <li>Schedule setpoint commands and bind triggers</li>
  * </ol>
  *
  * <p>
  * <b>Periodic calls required:</b> {@link #simIterate()}, {@link #updateTelemetry()}, and
  * {@link #visualizationUpdate()} must be called periodically typically from
- * {@code robotPeriodic()} so that simulation state, telemetry, and the {@link
- * org.wpilib.smartdashboard.Mechanism2d} visualization remain up to date.
+ * {@code robotPeriodic()} so that simulation state, telemetry, and the
+ * {@link org.wpilib.smartdashboard.Mechanism2d} visualization remain up to date.
  * </p>
  *
  * <h2>Example</h2>

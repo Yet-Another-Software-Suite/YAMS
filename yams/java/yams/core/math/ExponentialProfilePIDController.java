@@ -17,6 +17,7 @@ import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.wpilib.math.controller.PIDController;
 import org.wpilib.math.system.DCMotor;
@@ -47,8 +48,8 @@ import yams.core.gearing.MechanismGearing;
  * shape respects the plant's natural first-order dynamics, making it well-suited for flywheels,
  * arms, and elevators.
  *
- * <p>Use the static factory helpers ({@link #createArmConstraints}, {@link
- * #createElevatorConstraints},
+ * <p>Use the static factory helpers ({@link #createArmConstraints},
+ * {@link #createElevatorConstraints},
  * {@link #createFlywheelConstraints}) to derive physically accurate
  * {@link ExponentialProfile.Constraints} directly from motor and mechanism parameters.
  *
@@ -233,6 +234,8 @@ public class ExponentialProfilePIDController {
    * Get the velocity gain as constant.
    *
    * @return kV with (-A/B)
+   * @throws IllegalStateException if the profile constraints are {@code null} (never set or set to
+   *                               {@code null}).
    */
   public AngularVelocity getKv() {
     if (constraints == null) {
@@ -247,6 +250,8 @@ public class ExponentialProfilePIDController {
    * Get the acceleration gain kA
    *
    * @return kA interpreted as (1.0/B)
+   * @throws IllegalStateException if the profile constraints are {@code null} (never set or set to
+   *                               {@code null}).
    */
   public AngularAcceleration getKa() {
     if (constraints == null) {
@@ -349,6 +354,9 @@ public class ExponentialProfilePIDController {
    * Get the next angle from the {@link ExponentialProfile}
    *
    * @return {@link Angle} from {@link ExponentialProfile}
+   * @throws NoSuchElementException if no next state exists because
+   *                                {@link #calculate(double, double, double)} has not been called since construction or the
+   *                                last {@link #reset(State)}.
    */
   public Angle getNextAngle() {
     return Rotations.of(nextState.orElseThrow().position);
@@ -367,6 +375,9 @@ public class ExponentialProfilePIDController {
    * Get the next velocity from {@link ExponentialProfile}
    *
    * @return Next {@link AngularVelocity} from {@link ExponentialProfile}
+   * @throws NoSuchElementException if no next state exists because
+   *                                {@link #calculate(double, double, double)} has not been called since construction or the
+   *                                last {@link #reset(State)}.
    */
   public AngularVelocity getNextVelocitySetpoint() {
     return RotationsPerSecond.of(nextState.orElseThrow().velocity);

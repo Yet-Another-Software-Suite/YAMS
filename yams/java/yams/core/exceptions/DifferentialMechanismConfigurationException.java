@@ -4,8 +4,8 @@
 package yams.core.exceptions;
 
 /**
- * Thrown by {@link yams.core.mechanisms.positional.DifferentialMechanism} or {@link
- * yams.core.mechanisms.config.DifferentialMechanismConfig} when a required field is missing or an
+ * Thrown by {@link yams.core.mechanisms.positional.DifferentialMechanism} or
+ * {@link yams.core.mechanisms.config.DifferentialMechanismConfig} when a required field is missing or an
  * attempt is made to violate a config invariant.
  *
  * <p>Common triggers include:
@@ -22,9 +22,9 @@ package yams.core.exceptions;
  * <li>Twist MOI not set ({@code withMOI()}) required for simulation
  * </ul>
  *
- * <p><b>Resolution:</b> Call {@code DifferentialMechanismConfig.withSmartMotorControllers(left,
- * right)} exactly once, ensure both motors reference the same subsystem via {@code
- * SmartMotorControllerConfig.withSubsystem(Subsystem)}, and provide all required geometry and
+ * <p><b>Resolution:</b> Call
+ * {@code DifferentialMechanismConfig.withSmartMotorControllers(left, right)} exactly once, ensure both motors reference the same subsystem via
+ * {@code SmartMotorControllerConfig.withSubsystem(Subsystem)}, and provide all required geometry and
  * simulation parameters.
  *
  * <p>Example minimal configuration:

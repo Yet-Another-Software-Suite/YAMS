@@ -4,6 +4,7 @@
 package yams.core.gearing;
 
 import java.util.Optional;
+import yams.core.exceptions.NoStagesGivenException;
 
 /**
  * Mechanism gearing for conversions from the motor output to the mechanism output.
@@ -69,6 +70,7 @@ public class MechanismGearing {
    *
    * @param reductionRatios Reduction ratio. For example, a reduction of "3:1" is 3.0; a reduction
    *                        of "1:2" is 0.5.
+   * @throws NoStagesGivenException if no reduction ratios are given.
    */
   public MechanismGearing(double... reductionRatios) {
     gearBox = GearBox.fromReductionStages(reductionRatios);

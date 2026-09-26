@@ -13,17 +13,17 @@ import yams.core.motorcontrollers.SmartMotorController;
  *
  * <p>
  * {@code SmartPositionalMechanism} sits between {@link yams.core.mechanisms.SmartMechanism} and the
- * concrete positional mechanism implementations such as {@link
- * yams.core.mechanisms.positional.Arm},
+ * concrete positional mechanism implementations such as
+ * {@link yams.core.mechanisms.positional.Arm},
  * {@link yams.core.mechanisms.positional.Elevator}, {@link yams.core.mechanisms.positional.Pivot},
  * and
  * {@link yams.core.mechanisms.positional.DifferentialMechanism}. It provides the shared
  * infrastructure required for closed-loop position control:
  * </p>
  * <ul>
- * <li>Setpoint management via {@link
- * yams.core.mechanisms.SmartMechanism#setMechanismPositionSetpoint} and {@link
- * yams.core.mechanisms.SmartMechanism#setMeasurementPositionSetpoint}</li> <li>Position-based
+ * <li>Setpoint management via
+ * {@link yams.core.mechanisms.SmartMechanism#setMechanismPositionSetpoint} and
+ * {@link yams.core.mechanisms.SmartMechanism#setMeasurementPositionSetpoint}</li> <li>Position-based
  * {@link org.wpilib.command2.button.Trigger} factories
  * ({@code near()}, {@code gte()}, {@code lte()}, {@code between()}, {@code max()},
  * {@code min()}) defined by each concrete subclass</li>

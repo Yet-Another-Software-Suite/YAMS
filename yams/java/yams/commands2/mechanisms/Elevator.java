@@ -10,6 +10,8 @@ import org.wpilib.command2.Subsystem;
 import org.wpilib.command2.button.Trigger;
 import org.wpilib.math.filter.Debouncer.DebounceType;
 import org.wpilib.units.measure.Distance;
+import yams.core.exceptions.ElevatorConfigurationException;
+import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.mechanisms.config.ElevatorConfig;
 import yams.core.motorcontrollers.SmartMotorController;
 
@@ -49,6 +51,15 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator implement
    * @param smc    {@link SmartMotorController} to use for the Elevator
    * @implNote {@code smc}'s config must be a {@link yams.commands2.config.SmartMotorControllerConfig}
    *           with a {@link Subsystem} set via {@code withSubsystem(Subsystem)}.
+   * @throws ElevatorConfigurationException in simulation, if the carriage mass, minimum height, or
+   *                                        maximum height is not configured.
+   * @throws SmartMotorControllerConfigurationException if {@code smc}'s config does not have a
+   *                                                    {@link Subsystem} set via
+   *                                                    {@code withSubsystem(Subsystem)}, or, in
+   *                                                    simulation, if the starting position or
+   *                                                    mechanism circumference is not configured or
+   *                                                    the starting height is outside the hard
+   *                                                    limits.
    */
   public Elevator(ElevatorConfig config, SmartMotorController smc) {
     super(config, smc);
@@ -144,6 +155,9 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator implement
    * limit on the elevator.
    *
    * @return {@link Trigger} on maximum of the elevator.
+   * @throws ElevatorConfigurationException when the returned trigger is evaluated, if neither a
+   *                                        motor controller upper soft limit nor an elevator
+   *                                        maximum height is configured.
    */
   public Trigger max() {
     return new Trigger(this::isAtMax);
@@ -153,6 +167,9 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator implement
    * Minimum height of the elevator given by the soft limit or hard limit of the elevator.
    *
    * @return {@link Trigger} on minimum of the elevator.
+   * @throws ElevatorConfigurationException when the returned trigger is evaluated, if neither a
+   *                                        motor controller lower soft limit nor an elevator
+   *                                        minimum height is configured.
    */
   public Trigger min() {
     return new Trigger(this::isAtMin);

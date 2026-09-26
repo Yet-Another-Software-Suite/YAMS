@@ -49,8 +49,8 @@ public class BatterySim {
 
   /**
    * Fraction of the nominal (20-hour rate) amp-hour capacity a sealed lead-acid battery actually
-   * delivers as a function of discharge current, keyed by current in {@link
-   * org.wpilib.units.Units#Amps Amps}. Lead-acid batteries are far less coulombically efficient
+   * delivers as a function of discharge current, keyed by current in
+   * {@link org.wpilib.units.Units#Amps Amps}. Lead-acid batteries are far less coulombically efficient
    * than lithium chemistries at high discharge rates (the Peukert effect), so a battery rated for
    * 18 Ah at a 0.9 A discharge might only deliver ~11 Ah at a sustained 54 A draw.
    *
@@ -117,8 +117,8 @@ public class BatterySim {
    * }</pre>
    *
    * @param socToVoltage Interpolation table mapping state of charge {@code [0, 1]} to open circuit
-   *                     voltage. Call this before {@link #enableDischarge(double, Voltage,
-   *                     Resistance)} so discharge simulation uses the new curve from the start.
+   *                     voltage. Call this before
+   *                     {@link #enableDischarge(double, Voltage, Resistance)} so discharge simulation uses the new curve from the start.
    */
   public static void replaceSOCInterpolation(InterpolatingDoubleTreeMap socToVoltage) {
     BatterySim.SOC_TO_VOLTAGE = socToVoltage;
@@ -208,8 +208,8 @@ public class BatterySim {
    * that sustained high currents consume the nominal capacity faster than the raw amp-hours drawn
    * would suggest (the Peukert effect).
    *
-   * @param totalCurrentAmps Total current drawn by the robot in {@link org.wpilib.units.Units#Amps
-   *                         Amps}.
+   * @param totalCurrentAmps Total current drawn by the robot in
+   *                         {@link org.wpilib.units.Units#Amps Amps}.
    */
   private static void updateDischarge(double totalCurrentAmps) {
     double now = Timer.getTimestamp();

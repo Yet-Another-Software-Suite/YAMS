@@ -133,6 +133,11 @@ public class SwerveDriveTelemetry {
    * Apply the tuning values from {@link NetworkTable} to the {@link SwerveDrive}
    *
    * @param drive {@link SwerveDrive} to control.
+   * @throws IllegalStateException if auto-align is enabled and a gyro angular velocity scale factor
+   *                               is configured with
+   *                               {@link yams.core.mechanisms.config.SwerveDriveConfig#withGyroAngularVelocityScaleFactor(double)}
+   *                               but no gyro supplier was set with
+   *                               {@link yams.core.mechanisms.config.SwerveDriveConfig#withGyro(java.util.function.Supplier)}.
    */
   @SuppressWarnings("unchecked")
   public void applyTuningValues(SwerveDrive drive) {
@@ -341,8 +346,8 @@ public class SwerveDriveTelemetry {
      */
     TargetPose("tuning/driveToPose", Pose2d.struct, new Pose2d(), true),
     /**
-     * Estimated {@link Pose2d} of the robot, as reported by the {@link
-     * org.wpilib.math.estimator.SwerveDrivePoseEstimator}.
+     * Estimated {@link Pose2d} of the robot, as reported by the
+     * {@link org.wpilib.math.estimator.SwerveDrivePoseEstimator}.
      */
     Pose("pose", Pose2d.struct, new Pose2d(), false),
     /** Last-commanded desired robot relative {@link ChassisVelocities}. */

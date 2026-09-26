@@ -11,6 +11,8 @@ import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.tunable.Tunables;
 import yams.commands2.config.SwerveDriveConfig;
+import yams.core.exceptions.SmartMotorControllerConfigurationException;
+import yams.core.exceptions.SwerveDriveConfigurationException;
 
 /**
  * Command-based extension of {@link yams.core.mechanisms.swerve.SwerveDrive} that adds the
@@ -46,6 +48,12 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
    *
    * @param config {@link SwerveDriveConfig} to use, with a {@link Subsystem} set via
    *               {@code withSubsystem(Subsystem)}.
+   * @throws IllegalStateException                      on a real robot (not in simulation), if no
+   *                                                    gyro supplier was set with
+   *                                                    {@code withGyro(Supplier)}.
+   * @throws SmartMotorControllerConfigurationException if a module's drive motor has no mechanism
+   *                                                    circumference configured (e.g. via
+   *                                                    {@code SwerveModuleConfig.withWheelRadius(Distance)}).
    */
   public SwerveDrive(SwerveDriveConfig config) {
     super(config);
@@ -69,10 +77,13 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
    * Create a {@link Command} to drive the swerve drive with robot relative chassis speeds.
    *
    * @param robotRelativeChassisSpeeds {@link Supplier} of {@link ChassisVelocities} for the robot
-   *                                   relative chassis speeds. Could also use {@link
-   *                                   yams.commands2.swerve.SwerveInputStream}
+   *                                   relative chassis speeds. Could also use
+   *                                   {@link yams.commands2.swerve.SwerveInputStream}
    * @return {@link Command} to drive the swerve drive.
    * @implNote Not compatible with AdvantageKit
+   * @throws IllegalStateException when the returned command runs, if a gyro angular velocity
+   *                               scale factor is configured but no gyro supplier was set with
+   *                               {@code withGyro(Supplier)}.
    */
   public Command drive(Supplier<ChassisVelocities> robotRelativeChassisSpeeds) {
     return Commands.run(() -> setRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds.get()), subsystem).withName("Drive");
@@ -85,6 +96,12 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
    *             facing towards RED
    * @return {@link Command} that drives the robot toward the given pose until interrupted.
    * @implNote Not compatible with AdvantageKit
+   * @throws SwerveDriveConfigurationException when the returned command runs, if the
+   *                                           translation or rotation PID controller is not
+   *                                           configured.
+   * @throws IllegalStateException when the returned command runs, if a gyro angular velocity
+   *                               scale factor is configured but no gyro supplier was set with
+   *                               {@code withGyro(Supplier)}.
    */
   public Command driveToPose(Pose2d pose) {
     // driveToPoseSetpoint already returns robot relative speeds.

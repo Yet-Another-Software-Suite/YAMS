@@ -34,8 +34,8 @@
  *
  * <ul>
  * <li>{@link yams.core.exceptions.SmartMotorControllerConfigurationException} the motor
- * controller wrapper itself has an invalid or incomplete configuration <li>{@link
- * yams.core.exceptions.MotorNotPresentException} a required motor controller could not be found
+ * controller wrapper itself has an invalid or incomplete configuration <li>
+ * {@link yams.core.exceptions.MotorNotPresentException} a required motor controller could not be found
  * on the CAN bus or is otherwise unavailable
  * </ul>
  *

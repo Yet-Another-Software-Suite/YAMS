@@ -60,6 +60,10 @@ public class Pivot extends SmartPositionalMechanism {
    * @param config Pivot configuration.
    * @param smc    {@link SmartMotorController} driving the pivot.
    * @implNote Protected so only {@link yams.commands2.mechanisms.Pivot} can construct this.
+   * @throws PivotConfigurationException if running in simulation and the lower or upper hard limit
+   *                                     is not set, the starting position is not set on the
+   *                                     {@link SmartMotorControllerConfig}, or the starting
+   *                                     position is outside the hard limits.
    */
   protected Pivot(PivotConfig config, SmartMotorController smc) {
     m_config = config;
@@ -157,6 +161,14 @@ public class Pivot extends SmartPositionalMechanism {
     return getAngle().isNear(angle, within);
   }
 
+  /**
+   * Whether the pivot is at or above its maximum angle, defined by the motor controller upper soft
+   * limit if present, otherwise the pivot upper hard limit.
+   *
+   * @return True if the pivot is at its configured maximum.
+   * @throws PivotConfigurationException if neither a motor controller upper soft limit nor a pivot
+   *                                     upper hard limit is configured.
+   */
   @Override
   public boolean isAtMax() {
     if (m_smc.getConfig().getMechanismUpperLimit().isPresent()) {
@@ -168,6 +180,14 @@ public class Pivot extends SmartPositionalMechanism {
     throw new PivotConfigurationException("Pivot upper hard and motor controller soft limit is empty", "Cannot create max trigger.", "withHardLimits(Angle,Angle)");
   }
 
+  /**
+   * Whether the pivot is at or below its minimum angle, defined by the motor controller lower soft
+   * limit if present, otherwise the pivot lower hard limit.
+   *
+   * @return True if the pivot is at its configured minimum.
+   * @throws PivotConfigurationException if neither a motor controller lower soft limit nor a pivot
+   *                                     lower hard limit is configured.
+   */
   @Override
   public boolean isAtMin() {
     if (m_smc.getConfig().getMechanismLowerLimit().isPresent()) {

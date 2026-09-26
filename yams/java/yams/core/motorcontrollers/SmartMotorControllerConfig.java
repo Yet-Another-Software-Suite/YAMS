@@ -212,20 +212,20 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    100 speed. */
   private Optional<Time> closeLoopRampRate = Optional.empty();
   /**
-   * Set the stator current limit in Amps for the {@link
-   SmartMotorController} */
+   * Set the stator current limit in Amps for the {@link SmartMotorController}.
+   */
   private OptionalInt statorStallCurrentLimit = OptionalInt.empty();
   /**
-   * The supply current limit in Amps for the {@link
-   SmartMotorController} */
+   * The supply current limit in Amps for the {@link SmartMotorController}.
+   */
   private OptionalInt supplyStallCurrentLimit = OptionalInt.empty();
   /**
    * The voltage compensation.
    */
   private Optional<Voltage> voltageCompensation = Optional.empty();
   /**
-   * Set the {@link MotorMode} for the {@link
-   SmartMotorController}. */
+   * Set the {@link MotorMode} for the {@link SmartMotorController}.
+   */
   private Optional<MotorMode> idleMode = Optional.empty();
   /**
    * Mechanism lower limit to prevent movement below.
@@ -408,8 +408,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * Set the vendor specific config for the {@link SmartMotorController} which will be used as a
    * base. Vendor configs will be overridden by the {@link SmartMotorControllerConfig} options.
    *
-   * @param vendorConfig Vendor specific config object. Must be of the correct type for the {@link
-   *                     SmartMotorController}. Only the root configuration class is accepted.
+   * @param vendorConfig Vendor specific config object. Must be of the correct type for the
+   *                     {@link SmartMotorController}. Only the root configuration class is accepted.
    * @return {@link SmartMotorControllerConfig} for chaining.
    * @implSpec {@link SmartMotorControllerConfig} options will always take precedence and overwrite
    *           the vendor config. Apply any changes after the {@link SmartMotorController} is
@@ -432,8 +432,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Get the {@link SmartMotorController} this config was attached to via {@link
-   * #attachController(SmartMotorController)}, if any.
+   * Get the {@link SmartMotorController} this config was attached to via
+   * {@link #attachController(SmartMotorController)}, if any.
    *
    * @return {@link Optional} of the attached {@link SmartMotorController}.
    */
@@ -470,6 +470,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    *
    * @param angle {@link Angle} to exceed.
    * @return {@link SmartMotorControllerConfig} for chaining.
+   * @throws SmartMotorControllerConfigurationException if a mechanism circumference is configured,
+   *                                                    since auto-synchronization is unavailable
+   *                                                    for distance based mechanisms.
    */
   public T withFeedbackSynchronizationThreshold(Angle angle) {
     if (mechanismCircumference.isPresent()) {
@@ -506,6 +509,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    *
    * @param startingAngle Starting Mechanism Distance.
    * @return {@link SmartMotorControllerConfig} for chaining.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
    */
   public T withStartingPosition(Distance startingAngle) {
     return withStartingPosition(convertToMechanism(startingAngle));
@@ -527,6 +532,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    *
    * @param simStartingAngle Starting Mechanism Distance.
    * @return {@link SmartMotorControllerConfig} for chaining.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
    */
   public T withSimStartingPosition(Distance simStartingAngle) {
     return withSimStartingPosition(convertToMechanism(simStartingAngle));
@@ -593,6 +600,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    *
    * @param distance Zero offset in distance.
    * @return {@link SmartMotorControllerConfig} for chaining.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
    */
   public T withExternalEncoderZeroOffset(Distance distance) {
     if (mechanismCircumference.isEmpty()) {
@@ -608,6 +617,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    *                           external encoder will read between [-0.5, 0.5]; when provided 1rot
    *                           the external encoder will read between [0, 1].
    * @return {@link SmartMotorControllerConfig} for chaining.
+   * @throws SmartMotorControllerConfigurationException if the discontinuity point is not equivalent
+   *                                                    to 0.5 or 1 rotations.
    * @implNote Only works for External Absolute Encoders.
    */
   public T withExternalEncoderDiscontinuityPoint(Angle discontinuityPoint) {
@@ -639,6 +650,10 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @param bottom Bottom value to wrap to.
    * @param top    Top value to wrap to.
    * @return {@link SmartMotorControllerConfig} for chaining.
+   * @throws SmartMotorControllerConfigurationException if soft limits are already configured, if a
+   *                                                    linear (distance based) closed loop
+   *                                                    controller is in use, or if no closed loop
+   *                                                    controller is configured.
    */
   public T withContinuousWrapping(Angle bottom, Angle top) {
     if (mechanismUpperLimit.isPresent() || mechanismLowerLimit.isPresent()) {
@@ -664,6 +679,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    *
    * @param tolerance Closed loop controller tolerance
    * @return {@link SmartMotorControllerConfig} for chaining.
+   * @throws SmartMotorControllerConfigurationException if the tolerance is not null and no closed
+   *                                                    loop controller is configured.
    */
   public T withClosedLoopTolerance(Angle tolerance) {
     closedLoopTolerance = Optional.ofNullable(tolerance);
@@ -683,6 +700,10 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    *
    * @param tolerance {@link Distance} tolerance.
    * @return {@link SmartMotorControllerConfig} for chaining.
+   * @throws SmartMotorControllerConfigurationException if a linear closed loop controller is not in
+   *                                                    use, if the mechanism circumference is not
+   *                                                    configured, or if the tolerance is not null
+   *                                                    and no closed loop controller is configured.
    */
   public T withClosedLoopTolerance(Distance tolerance) {
     if (!linearClosedLoopController) {
@@ -737,8 +758,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Set the telemetry for the {@link SmartMotorController} with a {@link
-   * SmartMotorControllerTelemetryConfig}
+   * Set the telemetry for the {@link SmartMotorController} with a
+   * {@link SmartMotorControllerTelemetryConfig}
    *
    * @param telemetryName   Name for the {@link SmartMotorController}
    * @param telemetryConfig Config that specifies what to log.
@@ -776,6 +797,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @param low  Low distance soft limit.
    * @param high High distance soft limit.
    * @return {@link SmartMotorControllerConfig} for chaining.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured, or if the converted lower limit
+   *                                                    is greater than or equal to the upper limit.
    */
   public T withSoftLimits(Distance low, Distance high) {
     if (mechanismCircumference.isEmpty()) {
@@ -792,6 +816,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @param length Length of the mechanism for MOI.
    * @param weight Weight of the mechanism for MOI.
    * @return {@link SmartMotorControllerConfig} for chaining
+   * @throws SmartMotorControllerConfigurationException if the length or weight is null.
    */
   public T withMomentOfInertia(Distance length, Mass weight) {
     if (length == null || weight == null) {
@@ -820,6 +845,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @param low  Low angle soft limit.
    * @param high High angle soft limit.
    * @return {@link SmartMotorControllerConfig} for chaining.
+   * @throws SmartMotorControllerConfigurationException if both limits are non-null and the lower
+   *                                                    limit is greater than or equal to the upper
+   *                                                    limit.
    */
   public T withSoftLimits(Angle low, Angle high) {
     if (low != null && high != null && low.gte(high)) {
@@ -1013,8 +1041,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Set the external encoder which is attached to the motor type sent used by {@link
-   * SmartMotorController}
+   * Set the external encoder which is attached to the motor type sent used by
+   * {@link SmartMotorController}
    *
    * @param externalEncoder External encoder attached to the {@link SmartMotorController}
    * @return {@link SmartMotorControllerConfig} for chaining.
@@ -1058,8 +1086,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Set the mechanism circumference to allow distance calculations on the {@link
-   * SmartMotorController}.
+   * Set the mechanism circumference to allow distance calculations on the
+   * {@link SmartMotorController}.
    *
    * @param circumference Circumference of the actuating spool or sprocket+chain attached the
    *                      mechanism actuator.
@@ -1184,8 +1212,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
 
   /**
    * Get the simulation loop period the rate at which {@link SmartMotorController#simIterate()}
-   * steps the simulated physics forward. Defaults to 20ms if not set via {@link
-   * #withSimulationPeriod(Time)}.
+   * steps the simulated physics forward. Defaults to 20ms if not set via
+   * {@link #withSimulationPeriod(Time)}.
    *
    * @return Simulation loop period.
    */
@@ -1280,8 +1308,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   /**
    * Configure {@link ElevatorFeedforward} for the {@link SmartMotorController}
    *
-   * @param slot                {@link ClosedLoopControllerSlot} for the {@link
-   *                            ElevatorFeedforward}.
+   * @param slot                {@link ClosedLoopControllerSlot} for the
+   *                            {@link ElevatorFeedforward}.
    * @param elevatorFeedforward {@link ElevatorFeedforward} to set.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
@@ -1310,8 +1338,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   /**
    * Configure {@link ElevatorFeedforward} for the {@link SmartMotorController}
    *
-   * @param slot                {@link ClosedLoopControllerSlot} for the {@link
-   *                            ElevatorFeedforward}.
+   * @param slot                {@link ClosedLoopControllerSlot} for the
+   *                            {@link ElevatorFeedforward}.
    * @param elevatorFeedforward {@link ElevatorFeedforward} to set.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
@@ -1803,11 +1831,11 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Get the gearing to convert rotor rotations to mechanisms rotations connected to the {@link
-   * SmartMotorController}
+   * Get the gearing to convert rotor rotations to mechanisms rotations connected to the
+   * {@link SmartMotorController}
    *
-   * @return {@link MechanismGearing} representing the gearbox and sprockets attached to the {@link
-   *         SmartMotorController}.
+   * @return {@link MechanismGearing} representing the gearbox and sprockets attached to the
+   *         {@link SmartMotorController}.
    */
   public MechanismGearing getGearing() {
     basicOptions.remove(BasicOptions.Gearing);
@@ -1868,6 +1896,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    *
    * @param jerk Linear jerk to convert.
    * @return Equivalent angular jerk.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
    */
   public Velocity<AngularAccelerationUnit> convertToMechanism(Velocity<LinearAccelerationUnit> jerk) {
     if (mechanismCircumference.isEmpty()) {
@@ -1883,6 +1913,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    *
    * @param jerk Angular jerk to convert.
    * @return Equivalent angular jerk.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
    */
   public Velocity<LinearAccelerationUnit> convertFromMechanism(Velocity<AngularAccelerationUnit> jerk) {
     if (mechanismCircumference.isEmpty()) {
@@ -1893,11 +1925,13 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Convert {@link LinearVelocity} to {@link AngularVelocity} using the {@link
-   * SmartMotorControllerConfig#mechanismCircumference}
+   * Convert {@link LinearVelocity} to {@link AngularVelocity} using the
+   * {@link SmartMotorControllerConfig#mechanismCircumference}
    *
    * @param velocity Linear velocity to convert.
    * @return Equivalent angular velocity.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
    */
   public AngularVelocity convertToMechanism(LinearVelocity velocity) {
     if (mechanismCircumference.isEmpty()) {
@@ -1908,11 +1942,13 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Convert {@link LinearAcceleration} to {@link AngularAcceleration} using the {@link
-   * SmartMotorControllerConfig#mechanismCircumference}
+   * Convert {@link LinearAcceleration} to {@link AngularAcceleration} using the
+   * {@link SmartMotorControllerConfig#mechanismCircumference}
    *
    * @param acceleration Linear acceleration to convert.
    * @return Equivalent angular acceleration.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
    */
   public AngularAcceleration convertToMechanism(LinearAcceleration acceleration) {
     if (mechanismCircumference.isEmpty()) {
@@ -1923,11 +1959,13 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Convert {@link Distance} to {@link Angle} using {@link
-   * SmartMotorControllerConfig#mechanismCircumference}
+   * Convert {@link Distance} to {@link Angle} using
+   * {@link SmartMotorControllerConfig#mechanismCircumference}
    *
    * @param distance {@link Distance} to convert to {@link Angle}
    * @return {@link Angle} of distance.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
    */
   public Angle convertToMechanism(Distance distance) {
     if (mechanismCircumference.isEmpty()) {
@@ -1937,11 +1975,13 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Convert {@link Angle} to {@link Distance} using {@link
-   * SmartMotorControllerConfig#mechanismCircumference}
+   * Convert {@link Angle} to {@link Distance} using
+   * {@link SmartMotorControllerConfig#mechanismCircumference}
    *
    * @param rotations Rotations to convert.
    * @return Distance of the mechanism.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
    */
   public Distance convertFromMechanism(Angle rotations) {
     if (mechanismCircumference.isEmpty()) {
@@ -1951,11 +1991,13 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Convert {@link Angle} to {@link LinearVelocity} using {@link
-   * SmartMotorControllerConfig#mechanismCircumference}
+   * Convert {@link Angle} to {@link LinearVelocity} using
+   * {@link SmartMotorControllerConfig#mechanismCircumference}
    *
    * @param velocity Velocity to convert.
    * @return Velocity of the mechanism.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
    */
   public LinearVelocity convertFromMechanism(AngularVelocity velocity) {
     if (mechanismCircumference.isEmpty()) {
@@ -1965,11 +2007,13 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Convert {@link Angle} to {@link LinearAcceleration} using {@link
-   * SmartMotorControllerConfig#mechanismCircumference}
+   * Convert {@link Angle} to {@link LinearAcceleration} using
+   * {@link SmartMotorControllerConfig#mechanismCircumference}
    *
    * @param acceleration Rotations to convert.
    * @return Acceleration of the mechanism.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
    */
   public LinearAcceleration convertFromMechanism(AngularAcceleration acceleration) {
     if (mechanismCircumference.isEmpty()) {
@@ -1980,13 +2024,15 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
 
   /**
    * Convert a feedforward {@link Force} applied at the mechanism into the equivalent motor
-   * feedforward {@link Voltage}, using {@link SmartMotorControllerConfig#gearing} and {@link
-   * SmartMotorControllerConfig#mechanismCircumference}.
+   * feedforward {@link Voltage}, using {@link SmartMotorControllerConfig#gearing} and
+   * {@link SmartMotorControllerConfig#mechanismCircumference}.
    *
    * @param motor             {@link DCMotor} of the mechanism.
    * @param mechanismVelocity Commanded mechanism (post-gearbox) {@link AngularVelocity}.
    * @param feedforwardForce  Feedforward {@link Force} applied to the mechanism.
    * @return Equivalent feedforward {@link Voltage} at the motor.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
    */
   public Voltage convertToVoltage(DCMotor motor, AngularVelocity mechanismVelocity, Force feedforwardForce) {
     double rotorAngularVelocityRadPerSec = mechanismVelocity.in(RadiansPerSecond) * gearing.getMechanismToRotorRatio();
@@ -1995,14 +2041,16 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
 
   /**
    * Convert a feedforward {@link Force} applied at the mechanism into the equivalent motor
-   * feedforward {@link Current}, using {@link SmartMotorControllerConfig#gearing} and {@link
-   * SmartMotorControllerConfig#mechanismCircumference}. Unlike {@link #convertToVoltage(DCMotor,
-   * AngularVelocity, Force)}, this does not depend on the commanded speed and is the correct
+   * feedforward {@link Current}, using {@link SmartMotorControllerConfig#gearing} and
+   * {@link SmartMotorControllerConfig#mechanismCircumference}. Unlike
+   * {@link #convertToVoltage(DCMotor, AngularVelocity, Force)}, this does not depend on the commanded speed and is the correct
    * feedforward to use for torque-current based closed-loop control (e.g. TorqueCurrentFOC).
    *
    * @param motor            {@link DCMotor} of the mechanism.
    * @param feedforwardForce Feedforward {@link Force} applied to the mechanism.
    * @return Equivalent feedforward {@link Current} at the motor.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
    */
   public Current convertToCurrent(DCMotor motor, Force feedforwardForce) {
     return Amps.of(motor.getCurrent(forceToRotorTorque(feedforwardForce)));
@@ -2010,11 +2058,13 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
 
   /**
    * Convert a feedforward {@link Force} applied at the mechanism into the equivalent rotor torque,
-   * using {@link SmartMotorControllerConfig#gearing} and {@link
-   * SmartMotorControllerConfig#mechanismCircumference}.
+   * using {@link SmartMotorControllerConfig#gearing} and
+   * {@link SmartMotorControllerConfig#mechanismCircumference}.
    *
    * @param feedforwardForce Feedforward {@link Force} applied to the mechanism.
    * @return Equivalent rotor torque in Newton-meters.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
    */
   private double forceToRotorTorque(Force feedforwardForce) {
     if (mechanismCircumference.isEmpty()) {
@@ -2168,6 +2218,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * Get the continuous wrapping point for the {@link SmartMotorController} encoder.
    *
    * @return {@link Angle} where the encoder wraps around.
+   * @throws SmartMotorControllerConfigurationException if continuous wrapping is configured with
+   *                                                    bounds that do not span exactly one rotation
+   *                                                    (minimum is not maximum minus 1 rotation).
    */
   public Optional<Angle> getContinuousWrapping() {
     if (maxContinuousWrappingAngle.isPresent() && minContinuousWrappingAngle.isPresent() && !minContinuousWrappingAngle.get().equals(Rotations.of(maxContinuousWrappingAngle.get().in(Rotations) - 1))) {
@@ -2182,6 +2235,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * Get the continuous wrapping point for the {@link SmartMotorController} encoder.
    *
    * @return {@link Angle} where the encoder wraps around.
+   * @throws SmartMotorControllerConfigurationException if continuous wrapping is configured with
+   *                                                    bounds that do not span exactly one rotation
+   *                                                    (minimum is not maximum minus 1 rotation).
    */
   public Optional<Angle> getContinuousWrappingMin() {
     if (maxContinuousWrappingAngle.isPresent() && minContinuousWrappingAngle.isPresent() && !minContinuousWrappingAngle.get().equals(Rotations.of(maxContinuousWrappingAngle.get().in(Rotations) - 1))) {
@@ -2243,9 +2299,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Reset the validation checks for all required options to be applied to {@link
-   * SmartMotorController} from {@link
-   * SmartMotorController#applyConfig(SmartMotorControllerConfig)}.
+   * Reset the validation checks for all required options to be applied to
+   * {@link SmartMotorController} from
+   * {@link SmartMotorController#applyConfig(SmartMotorControllerConfig)}.
    */
   public void resetValidationCheck() {
     basicOptions = EnumSet.allOf(BasicOptions.class);
@@ -2253,8 +2309,12 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Validate all required options are at least fetched and handled in each {@link
-   * SmartMotorController} wrapper.
+   * Validate all required options are at least fetched and handled in each
+   * {@link SmartMotorController} wrapper.
+   *
+   * @throws SmartMotorControllerConfigurationException if any required basic option was not fetched
+   *                                                    (applied) by the SmartMotorController
+   *                                                    wrapper.
    */
   public void validateBasicOptions() {
     if (!basicOptions.isEmpty()) {
@@ -2266,7 +2326,13 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     }
   }
 
-  /** Validate external encoder config options for the config. */
+  /**
+   * Validate external encoder config options for the config.
+   *
+   * @throws SmartMotorControllerConfigurationException if any external encoder option was not
+   *                                                     fetched (applied) by the SmartMotorController
+   *                                                     wrapper.
+   */
   public void validateExternalEncoderOptions() {
     if (!externalEncoderOptions.isEmpty()) {
       System.err.println("========= External Encoder Option Validation FAILED ==========");

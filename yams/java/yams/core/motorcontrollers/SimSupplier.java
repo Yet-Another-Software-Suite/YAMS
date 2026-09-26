@@ -18,16 +18,16 @@ import org.wpilib.units.measure.Voltage;
  * implementations translate the simulation state position, velocity, current draw, voltage into
  * the typed unit-safe values that YAMS motor controller wrappers consume each control loop.
  *
- * <p>On a real robot the motor controller hardware provides these values; in simulation a {@code
- * SimSupplier} steps the physics model forward and exposes the same interface so that mechanism and
+ * <p>On a real robot the motor controller hardware provides these values; in simulation a
+ * {@code SimSupplier} steps the physics model forward and exposes the same interface so that mechanism and
  * control code requires no changes between real and simulated runs.
  *
  * <h2>How to use</h2>
  *
- * <p>Create a concrete {@code SimSupplier} (e.g. {@link
- * yams.core.motorcontrollers.simulation.ArmSimSupplier} or {@link
- * yams.core.motorcontrollers.simulation.DCMotorSimSupplier}) and pass it to {@code
- * SmartMotorControllerConfig} via {@code withSimSupplier()}:
+ * <p>Create a concrete {@code SimSupplier} (e.g.
+ * {@link yams.core.motorcontrollers.simulation.ArmSimSupplier} or
+ * {@link yams.core.motorcontrollers.simulation.DCMotorSimSupplier}) and pass it to
+ * {@code SmartMotorControllerConfig} via {@code withSimSupplier()}:
  *
  * <pre>{@code
  * // Create the WPILib physics model
@@ -47,9 +47,9 @@ import org.wpilib.units.measure.Voltage;
  *     .withSimSupplier(new ArmSimSupplier(armPhysics, motorController));
  * }</pre>
  *
- * <p>Implementations must advance the physics model on each control loop tick via {@link
- * #updateSimState()}, and signal readiness through the watchdog helpers ({@link
- * #feedUpdateSim()}/{@link #starveUpdateSim()}).
+ * <p>Implementations must advance the physics model on each control loop tick via
+ * {@link #updateSimState()}, and signal readiness through the watchdog helpers (
+ * {@link #feedUpdateSim()}/{@link #starveUpdateSim()}).
  */
 public interface SimSupplier {
   /** Update the sim state. */

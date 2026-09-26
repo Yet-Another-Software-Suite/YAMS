@@ -30,6 +30,7 @@ import org.wpilib.tunable.Tunables;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.Force;
+import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.exceptions.SwerveDriveConfigurationException;
 import yams.core.mechanisms.config.SwerveDriveConfig;
 import yams.core.telemetry.MechanismTelemetry;
@@ -101,6 +102,14 @@ public class SwerveDrive {
    *
    * @param config {@link SwerveDriveConfig} for the drive.
    * @implNote Protected so only {@link yams.commands2.swerve.SwerveDrive} can construct this.
+   * @throws IllegalStateException                      on a real robot (not in simulation), if no
+   *                                                    gyro supplier was set with
+   *                                                    {@link SwerveDriveConfig#withGyro(java.util.function.Supplier)}.
+   * @throws SmartMotorControllerConfigurationException if a module's drive motor has no mechanism
+   *                                                    circumference configured (e.g. via
+   *                                                    {@link yams.core.mechanisms.config.SwerveModuleConfig#withWheelRadius(Distance)}),
+   *                                                    so its position cannot be converted to a
+   *                                                    distance.
    */
   protected SwerveDrive(SwerveDriveConfig config) {
     m_config = config;
@@ -118,8 +127,8 @@ public class SwerveDrive {
   /**
    * Setup telemetry for the drive; the {@link SwerveDriveTelemetry} config used is either the one
    * supplied via {@link SwerveDriveConfig#withTelemetry(String, SwerveDriveTelemetryConfig)} or a
-   * default built from {@link SwerveDriveConfig#getTelemetryVerbosity()} (defaulting to {@link
-   * TelemetryVerbosity#HIGH}).
+   * default built from {@link SwerveDriveConfig#getTelemetryVerbosity()} (defaulting to
+   * {@link TelemetryVerbosity#HIGH}).
    */
   private void setupTelemetry() {
     var cfg = m_config.getSwerveDriveTelemetryConfig().orElseGet(() -> new SwerveDriveTelemetryConfig().withTelemetryVerbosity(m_config.getTelemetryVerbosity().orElse(TelemetryVerbosity.HIGH)));
@@ -152,6 +161,12 @@ public class SwerveDrive {
   /**
    * Apply the live-tuned values (from NetworkTables) to this {@link SwerveDrive}'s drive-to-pose
    * controllers. Intended to be wired into a periodic/scheduled callback by the command layer.
+   *
+   * @throws IllegalStateException if the auto-align tuning toggle is enabled and a gyro angular
+   *                               velocity scale factor is configured with
+   *                               {@link SwerveDriveConfig#withGyroAngularVelocityScaleFactor(double)}
+   *                               but no gyro supplier was set with
+   *                               {@link SwerveDriveConfig#withGyro(java.util.function.Supplier)}.
    */
   public void applyDriveToPoseTuningValues() {
     m_swerveTelemetry.applyTuningValues(this);
@@ -180,8 +195,8 @@ public class SwerveDrive {
    * the modules are met perfectly. Useful for feeding a simulated vision system with ground-truth
    * poses under perfect-world conditions.
    *
-   * @return Simulated {@link Pose2d} of the robot. Only updated in simulation by {@link
-   *         #simIterate()}; on a real robot this remains the configured starting pose.
+   * @return Simulated {@link Pose2d} of the robot. Only updated in simulation by
+   *         {@link #simIterate()}; on a real robot this remains the configured starting pose.
    */
   public Pose2d getSimPose() {
     return m_simPose;
@@ -246,6 +261,10 @@ public class SwerveDrive {
    *
    * @param robotRelativeChassisSpeeds Robot relative {@link ChassisVelocities}.
    * @return {@link SwerveModuleVelocity}s of the swerve drive.
+   * @throws IllegalStateException if a gyro angular velocity scale factor is configured with
+   *                               {@link SwerveDriveConfig#withGyroAngularVelocityScaleFactor(double)}
+   *                               but no gyro supplier was set with
+   *                               {@link SwerveDriveConfig#withGyro(java.util.function.Supplier)}.
    */
   public SwerveModuleVelocity[] getStateFromRobotRelativeChassisSpeeds(ChassisVelocities robotRelativeChassisSpeeds) {
     robotRelativeChassisSpeeds = m_config.optimizeRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds);
@@ -268,6 +287,10 @@ public class SwerveDrive {
    * Set robot relative chassis speeds.
    *
    * @param robotRelativeChassisSpeeds Robot relative chassis speeds.
+   * @throws IllegalStateException if a gyro angular velocity scale factor is configured with
+   *                               {@link SwerveDriveConfig#withGyroAngularVelocityScaleFactor(double)}
+   *                               but no gyro supplier was set with
+   *                               {@link SwerveDriveConfig#withGyro(java.util.function.Supplier)}.
    */
   public void setRobotRelativeChassisSpeeds(ChassisVelocities robotRelativeChassisSpeeds) {
     setRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds, new Force[0]);
@@ -281,6 +304,12 @@ public class SwerveDrive {
    * @param feedforwardForces          Feedforward {@link Force}s to apply, one per module in FL,
    *                                   FR, BL, BR
    *                                   order. Pass an empty array to apply no feedforward.
+   * @throws IllegalArgumentException if {@code feedforwardForces} is not empty and its length does
+   *                                  not match the number of modules.
+   * @throws IllegalStateException    if a gyro angular velocity scale factor is configured with
+   *                                  {@link SwerveDriveConfig#withGyroAngularVelocityScaleFactor(double)}
+   *                                  but no gyro supplier was set with
+   *                                  {@link SwerveDriveConfig#withGyro(java.util.function.Supplier)}.
    */
   public void setRobotRelativeChassisSpeeds(ChassisVelocities robotRelativeChassisSpeeds, Force[] feedforwardForces) {
     m_desiredChassisSpeeds = robotRelativeChassisSpeeds;
@@ -299,6 +328,10 @@ public class SwerveDrive {
    * Set field relative chassis speeds.
    *
    * @param fieldRelativeChassisSpeeds Field relative chassis speeds.
+   * @throws IllegalStateException if a gyro angular velocity scale factor is configured with
+   *                               {@link SwerveDriveConfig#withGyroAngularVelocityScaleFactor(double)}
+   *                               but no gyro supplier was set with
+   *                               {@link SwerveDriveConfig#withGyro(java.util.function.Supplier)}.
    */
   public void setFieldRelativeChassisSpeeds(ChassisVelocities fieldRelativeChassisSpeeds) {
     setRobotRelativeChassisSpeeds(fieldRelativeChassisSpeeds.toRobotRelative(new Rotation2d(getGyroAngle())));
@@ -318,8 +351,8 @@ public class SwerveDrive {
   }
 
   /**
-   * Create the {@link SwerveDriveKinematics} so you can recreate a new {@link
-   * SwerveDrivePoseEstimator}.
+   * Create the {@link SwerveDriveKinematics} so you can recreate a new
+   * {@link SwerveDrivePoseEstimator}.
    *
    * @return {@link SwerveDriveKinematics}
    */
@@ -542,8 +575,8 @@ public class SwerveDrive {
   }
 
   /**
-   * Update the {@link SwerveDrivePoseEstimator} with the current gyro angle and {@link
-   * SwerveModulePosition}
+   * Update the {@link SwerveDrivePoseEstimator} with the current gyro angle and
+   * {@link SwerveModulePosition}
    */
   private void updatePoseEstimator() {
     m_poseEstimator.update(new Rotation2d(getGyroAngle()), getModulePositions());
@@ -679,8 +712,8 @@ public class SwerveDrive {
   /**
    * Get the last-commanded desired {@link SwerveModuleVelocity}s of the drive.
    *
-   * @return {@link SwerveModuleVelocity}s last commanded to the drive. Defaults to a zeroed {@link
-   *         SwerveModuleVelocity}s if the drive has never been commanded.
+   * @return {@link SwerveModuleVelocity}s last commanded to the drive. Defaults to a zeroed
+   *         {@link SwerveModuleVelocity}s if the drive has never been commanded.
    */
   public SwerveModuleVelocity[] getDesiredModuleStates() {
     return m_desiredModuleStates;

@@ -119,6 +119,8 @@ public class FlyWheelConfig {
    * physically move it.
    *
    * @return {@link FlyWheelConfig} for chaining.
+   * @throws FlyWheelConfigurationException if the speedometer max velocity has not been set with
+   *                                        {@link #withSpeedometerSimulation(AngularVelocity)}.
    */
   public FlyWheelConfig withSpeedometerSimulation() {
     if (!speedometerMaxVelocity.isPresent()) {
@@ -265,6 +267,8 @@ public class FlyWheelConfig {
    * Get the circumference of the {@link FlyWheel}.
    *
    * @return {@link Distance} representing the circumference of the FlyWheel.
+   * @throws FlyWheelConfigurationException if the diameter is not set with
+   *                                        {@link #withDiameter(Distance)}.
    */
   public Distance getCircumference() {
     if (diameter.isEmpty()) {
@@ -278,6 +282,8 @@ public class FlyWheelConfig {
    *
    * @param velocity {@link AngularVelocity} to convert to {@link LinearVelocity}
    * @return {@link LinearVelocity} of the {@link FlyWheel}
+   * @throws FlyWheelConfigurationException if the diameter is not set with
+   *                                        {@link #withDiameter(Distance)}.
    */
   public LinearVelocity getLinearVelocity(AngularVelocity velocity) {
     return getCircumference().per(Second).times(velocity.in(RotationsPerSecond));
@@ -288,6 +294,8 @@ public class FlyWheelConfig {
    *
    * @param velocity {@link LinearVelocity} to convert to {@link AngularVelocity}
    * @return {@link AngularVelocity} of the {@link FlyWheel}
+   * @throws FlyWheelConfigurationException if the diameter is not set with
+   *                                        {@link #withDiameter(Distance)}.
    */
   public AngularVelocity getAngularVelocity(LinearVelocity velocity) {
     return RotationsPerSecond.of(velocity.in(MetersPerSecond) / getCircumference().in(Meters));

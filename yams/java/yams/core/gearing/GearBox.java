@@ -54,6 +54,7 @@ public class GearBox {
    * Construct the {@link GearBox} with the reduction stages given.
    *
    * @param reductionStage Reduction stages where the number is > 0 to indicate a reduction.
+   * @throws NoStagesGivenException if {@code reductionStage} is empty.
    */
   public GearBox(double[] reductionStage) {
     setupGearBox(reductionStage);
@@ -63,6 +64,9 @@ public class GearBox {
    * Construct the {@link GearBox} with the reduction stages given.
    *
    * @param reductionStage List of stages in the format of "IN:OUT".
+   * @throws InvalidStageGivenException if any stage string does not contain a {@code ':'}
+   *                                    separator.
+   * @throws NoStagesGivenException     if {@code reductionStage} is empty.
    */
   public GearBox(String[] reductionStage) {
     double[] stages = new double[reductionStage.length];
@@ -84,6 +88,7 @@ public class GearBox {
    *
    * @param reductionStages Reduction stages where the number is > 0 to indicate a reduction.
    * @return {@link GearBox}.
+   * @throws NoStagesGivenException if no reduction stages are given.
    */
   public static GearBox fromReductionStages(double... reductionStages) {
     return new GearBox(reductionStages);
@@ -94,6 +99,9 @@ public class GearBox {
    *
    * @param stages Stages in the format of "IN:OUT". For example, "3:1"
    * @return {@link GearBox}
+   * @throws InvalidStageGivenException if any stage string does not contain a {@code ':'}
+   *                                    separator.
+   * @throws NoStagesGivenException     if no stages are given.
    */
   public static GearBox fromStages(String... stages) {
     return new GearBox(stages);
@@ -104,6 +112,8 @@ public class GearBox {
    *
    * @param teeth Gear teeth from driven gear to drive gear.
    * @return {@link GearBox}
+   * @throws IllegalArgumentException if {@code teeth} is null or has fewer than two entries, or if
+   *                                  any tooth count is zero or negative.
    */
   public static GearBox fromTeeth(int... teeth) {
     if (teeth == null || teeth.length < 2) {
@@ -128,6 +138,7 @@ public class GearBox {
    * Sets the stages and calculates the reduction for the {@link GearBox}
    *
    * @param reductionStage Reduction stages where the number is > 0 to indicate a reduction.
+   * @throws NoStagesGivenException if {@code reductionStage} is empty.
    */
   private void setupGearBox(double[] reductionStage) {
     this.reductionStages = reductionStage;

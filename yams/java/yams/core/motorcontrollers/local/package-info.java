@@ -20,8 +20,8 @@
  *
  * <p>When a {@code SparkAbsoluteEncoder} (REV Through Bore Encoder) is used as the feedback device,
  * a <em>discontinuity point</em> <strong>must</strong> be configured so the SPARK firmware knows
- * where the sensor wraps around. Set this via {@link
- * yams.core.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint}:
+ * where the sensor wraps around. Set this via
+ * {@link yams.core.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint}:
  *
  * <ul>
  * <li>{@code 0.5} sensor range {@code [-0.5, 0.5)}: useful when the mechanism travels through

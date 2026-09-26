@@ -12,8 +12,8 @@
  * <h2>Entry Points</h2>
  *
  * <p>There is no single top-level convenience class. The recommended starting point is one of the
- * mechanism config classes found in the {@code yams.core.mechanisms.config} sub-package, such as {@link
- * yams.core.mechanisms.config.ArmConfig}. Construct a config, supply the required hardware
+ * mechanism config classes found in the {@code yams.core.mechanisms.config} sub-package, such as
+ * {@link yams.core.mechanisms.config.ArmConfig}. Construct a config, supply the required hardware
  * parameters, then pass it to the corresponding mechanism class to obtain a fully configured,
  * telemetry-enabled mechanism instance.
  *
@@ -24,8 +24,8 @@
  * flywheel, pivot, swerve, differential drive, double-jointed arm) and their config classes.
  * <li><b>{@code yams.core.motorcontrollers}</b> vendor-agnostic smart motor-controller wrappers that
  * normalize REV, CTRE, and other controllers behind a common interface.
- * <li><b>{@code yams.core.gearing}</b> gear-ratio helpers ({@link yams.core.gearing.GearBox}, {@link
- * yams.core.gearing.Sprocket}, {@link yams.core.gearing.MechanismGearing}) for expressing mechanism
+ * <li><b>{@code yams.core.gearing}</b> gear-ratio helpers ({@link yams.core.gearing.GearBox},
+ * {@link yams.core.gearing.Sprocket}, {@link yams.core.gearing.MechanismGearing}) for expressing mechanism
  * gearing without manual ratio arithmetic.
  * <li><b>{@code yams.core.telemetry}</b> automatic publishing of mechanism state to AdvantageKit,
  * SmartDashboard, and other telemetry back-ends.

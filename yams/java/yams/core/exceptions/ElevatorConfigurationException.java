@@ -4,8 +4,8 @@
 package yams.core.exceptions;
 
 /**
- * Thrown by {@link yams.core.mechanisms.positional.Elevator} when a required {@link
- * yams.core.mechanisms.config.ElevatorConfig} field is missing or invalid.
+ * Thrown by {@link yams.core.mechanisms.positional.Elevator} when a required
+ * {@link yams.core.mechanisms.config.ElevatorConfig} field is missing or invalid.
  *
  * <p>Common triggers include:
  *
@@ -16,11 +16,11 @@ package yams.core.exceptions;
  * <li>No motor controller provided
  * </ul>
  *
- * <p><b>Resolution:</b> Ensure {@code
- * ElevatorConfig.withSmartMotorController(SmartMotorController)} is called, {@code
- * ElevatorConfig.withHardLimits(Distance, Distance)} defines both the minimum and maximum travel
- * distances, {@code ElevatorConfig.withMass(Mass)} provides the carriage mass, and {@code
- * ElevatorConfig.withStartingHeight(Distance)} sets the initial position.
+ * <p><b>Resolution:</b> Ensure
+ * {@code ElevatorConfig.withSmartMotorController(SmartMotorController)} is called,
+ * {@code ElevatorConfig.withHardLimits(Distance, Distance)} defines both the minimum and maximum travel
+ * distances, {@code ElevatorConfig.withMass(Mass)} provides the carriage mass, and
+ * {@code ElevatorConfig.withStartingHeight(Distance)} sets the initial position.
  *
  * <p>Example minimal configuration:
  *

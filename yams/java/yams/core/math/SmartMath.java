@@ -36,6 +36,7 @@ public class SmartMath {
    *
    * @param stages stages between the motor and output shaft.
    * @return sensor to mechanism ratio.
+   * @throws NoStagesGivenException if {@code stages} is empty.
    */
   public static double sensorToMechanismRatio(double... stages) {
     if (stages.length == 0) {
@@ -54,6 +55,7 @@ public class SmartMath {
    * @param stages stages between the motor and output shaft.
    * @return rotor rotations to mechanism ratio in the form of MECHANISM_ROTATIONS/ROTOR_ROTATIONS
    *         or ROTOR_ROTATIONS:MECHANISM_ROTATIONS
+   * @throws NoStagesGivenException if {@code stages} is empty.
    */
   public static double gearBox(double... stages) {
     if (stages.length == 0) {

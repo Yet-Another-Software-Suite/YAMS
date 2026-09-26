@@ -63,8 +63,8 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  *
  * <p>This abstract class is not instantiated directly. Instantiate the appropriate vendor wrapper:
  * {@link yams.core.motorcontrollers.local.SparkWrapper} for REV SPARK hardware, or
- * {@code yams.core.motorcontrollers.remote.TalonFXWrapper}/{@code yams.core.motorcontrollers.remote.TalonFXSWrapper} for CTRE hardware. Configure all three via {@link
- * yams.core.motorcontrollers.SmartMotorControllerConfig}.
+ * {@code yams.core.motorcontrollers.remote.TalonFXWrapper}/{@code yams.core.motorcontrollers.remote.TalonFXSWrapper} for CTRE hardware. Configure all three via
+ * {@link yams.core.motorcontrollers.SmartMotorControllerConfig}.
  *
  * <h2>Example</h2>
  *
@@ -183,7 +183,13 @@ public abstract class SmartMotorController {
     return a.stallTorque == b.stallTorque && a.stallCurrent == b.stallCurrent && a.freeCurrent == b.freeCurrent && a.freeSpeed == b.freeSpeed && a.Kt == b.Kt && a.Kv == b.Kv && a.nominalVoltage == b.nominalVoltage;
   }
 
-  /** Check config for safe values. */
+  /**
+   * Check config for safe values.
+   *
+   * @throws SmartMotorControllerConfigurationException if the motor is a single NEO 550 and the
+   *                                                    stator current limit is not defined or is
+   *                                                    above 40A.
+   */
   public void checkConfigSafety() {
     if (isMotor(getDCMotor(), DCMotor.getNeo550(1))) {
       if (m_config.getStatorStallCurrentLimit().isEmpty()) {
@@ -216,6 +222,9 @@ public abstract class SmartMotorController {
    * Get the current encoder trapezoidal profile state for the closed loop controller.
    *
    * @return {@link TrapezoidProfile.State} from the encoders.
+   * @throws SmartMotorControllerConfigurationException if a trapezoidal profile and a linear closed
+   *                                                    loop controller are in use but the mechanism
+   *                                                    circumference is not configured.
    */
   protected Optional<TrapezoidProfile.State> getTrapezoidalProfileState() {
     if (m_trapezoidProfile.isEmpty()) {
@@ -231,6 +240,9 @@ public abstract class SmartMotorController {
    * Get the current encoder exponential profile state for the closed loop controller.
    *
    * @return {@link ExponentialProfile.State} from the encoders.
+   * @throws SmartMotorControllerConfigurationException if an exponential profile and a linear
+   *                                                    closed loop controller are in use but the
+   *                                                    mechanism circumference is not configured.
    */
   protected Optional<ExponentialProfile.State> getExponentialProfileState() {
     if (m_expoProfile.isEmpty()) {
@@ -250,7 +262,13 @@ public abstract class SmartMotorController {
     }
   }
 
-  /** Start the closed loop controller with the period. */
+  /**
+   * Start the closed loop controller with the period.
+   *
+   * @throws SmartMotorControllerConfigurationException if the control mode is closed loop, a linear
+   *                                                    closed loop controller is in use, and the
+   *                                                    mechanism circumference is not configured.
+   */
   public void startClosedLoopController() {
     if (m_closedLoopControllerThread != null && m_config.getMotorControllerMode() == ControlMode.CLOSED_LOOP) {
       m_pid.ifPresent(PIDController::reset);
@@ -268,6 +286,12 @@ public abstract class SmartMotorController {
 
   /**
    * Iterate the closed loop controller. Feedforward are only applied with profiled pid controllers.
+   *
+   * @throws SmartMotorControllerConfigurationException if the controller is running with a linear
+   *                                                    closed loop controller, or with a velocity
+   *                                                    setpoint that has a feedforward force, while
+   *                                                    the mechanism circumference is not
+   *                                                    configured.
    */
   public void iterateClosedLoopController() {
     AtomicReference<Boolean> velocityTrapezoidalProfile = new AtomicReference<>(false);
@@ -510,6 +534,8 @@ public abstract class SmartMotorController {
    * Set the encoder velocity
    *
    * @param velocity {@link AngularVelocity} of the Mechanism.
+   * @throws UnsupportedOperationException if the motor controller does not support setting encoder
+   *                                       velocity outside of simulation (e.g. REV Sparks).
    */
   public abstract void setEncoderVelocity(AngularVelocity velocity);
 
@@ -517,6 +543,10 @@ public abstract class SmartMotorController {
    * Set the encoder velocity.
    *
    * @param velocity Measurement {@link LinearVelocity}
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   * @throws UnsupportedOperationException if the motor controller does not support setting encoder
+   *                                       velocity outside of simulation (e.g. REV Sparks).
    */
   public abstract void setEncoderVelocity(LinearVelocity velocity);
 
@@ -531,66 +561,91 @@ public abstract class SmartMotorController {
    * Set the encoder position.
    *
    * @param distance Current Measurement {@link Distance}.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
    */
   public abstract void setEncoderPosition(Distance distance);
 
   /**
-   * Set the Mechanism {@link Angle} using the PID and feedforward from {@link
-   * SmartMotorControllerConfig}.
+   * Set the Mechanism {@link Angle} using the PID and feedforward from
+   * {@link SmartMotorControllerConfig}.
    *
    * @param angle Mechanism angle to set.
+   * @throws SmartMotorControllerConfigurationException if the configured vendor position control
+   *                                                    request is not supported by the motor
+   *                                                    controller.
    */
   public abstract void setPosition(Angle angle);
 
   /**
-   * Set the Mechanism {@link Distance} using the PID and feedforward from {@link
-   * SmartMotorControllerConfig}.
+   * Set the Mechanism {@link Distance} using the PID and feedforward from
+   * {@link SmartMotorControllerConfig}.
    *
    * @param distance Mechanism {@link Distance} to set.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured, or if the configured vendor
+   *                                                    position control request is not supported by
+   *                                                    the motor controller.
    */
   public abstract void setPosition(Distance distance);
 
   /**
-   * Set the Mechanism {@link LinearVelocity} using the PID and feedforward from {@link
-   * SmartMotorControllerConfig}.
+   * Set the Mechanism {@link LinearVelocity} using the PID and feedforward from
+   * {@link SmartMotorControllerConfig}.
    *
    * @param velocity Mechanism {@link LinearVelocity} to target.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured, or if the configured vendor
+   *                                                    velocity control request is not supported by
+   *                                                    the motor controller.
    */
   public void setVelocity(LinearVelocity velocity) {
     setVelocity(m_config.convertToMechanism(velocity));
   }
 
   /**
-   * Set the Mechanism {@link AngularVelocity} using the PID and feedforward from {@link
-   * SmartMotorControllerConfig}.
+   * Set the Mechanism {@link AngularVelocity} using the PID and feedforward from
+   * {@link SmartMotorControllerConfig}.
    *
    * @param angle Mechanism {@link AngularVelocity} to target.
+   * @throws SmartMotorControllerConfigurationException if the configured vendor velocity control
+   *                                                    request is not supported by the motor
+   *                                                    controller.
    */
   public abstract void setVelocity(AngularVelocity angle);
 
   /**
-   * Set the Mechanism {@link LinearVelocity} using the PID and feedforward from {@link
-   * SmartMotorControllerConfig}, with an additional feedforward {@link Force} applied on top, e.g.
+   * Set the Mechanism {@link LinearVelocity} using the PID and feedforward from
+   * {@link SmartMotorControllerConfig}, with an additional feedforward {@link Force} applied on top, e.g.
    * from a PathPlanner set-point generator. Applied whether the motor controller's native
    * closed-loop velocity control or an LQR/software motion profile loop is driving the mechanism.
    *
    * @param velocity         Mechanism {@link LinearVelocity} to target.
    * @param feedforwardForce Additional feedforward {@link Force} applied to the mechanism, or
    *                         {@code null} for none.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured, or if the configured vendor
+   *                                                    velocity control request is not supported by
+   *                                                    the motor controller.
    */
   public void setVelocity(LinearVelocity velocity, Force feedforwardForce) {
     setVelocity(m_config.convertToMechanism(velocity), feedforwardForce);
   }
 
   /**
-   * Set the Mechanism {@link AngularVelocity} using the PID and feedforward from {@link
-   * SmartMotorControllerConfig}, with an additional feedforward {@link Force} applied on top, e.g.
+   * Set the Mechanism {@link AngularVelocity} using the PID and feedforward from
+   * {@link SmartMotorControllerConfig}, with an additional feedforward {@link Force} applied on top, e.g.
    * from a PathPlanner set-point generator. Applied whether the motor controller's native
    * closed-loop velocity control or an LQR/software motion profile loop is driving the mechanism.
    *
    * @param angle            Mechanism {@link AngularVelocity} to target.
    * @param feedforwardForce Additional feedforward {@link Force} applied to the mechanism, or
    *                         {@code null} for none.
+   * @throws SmartMotorControllerConfigurationException if a feedforward force is given and the
+   *                                                    mechanism circumference is not configured,
+   *                                                    or if the configured vendor velocity control
+   *                                                    request is not supported by the motor
+   *                                                    controller.
    */
   public abstract void setVelocity(AngularVelocity angle, Force feedforwardForce);
 
@@ -599,6 +654,13 @@ public abstract class SmartMotorController {
    *
    * @param config {@link SmartMotorControllerConfig} to use.
    * @return Successful Application of the configuration.
+   * @throws SmartMotorControllerConfigurationException if the config contains options that are
+   *                                                    invalid or unsupported for the motor
+   *                                                    controller, or if a required config option
+   *                                                    is left unhandled during validation.
+   * @throws IllegalArgumentException if the config references an unsupported device or option for
+   *                                  the motor controller (e.g. an unsupported external encoder or
+   *                                  follower type).
    */
   public abstract boolean applyConfig(SmartMotorControllerConfig<?> config);
 
@@ -656,6 +718,8 @@ public abstract class SmartMotorController {
    * with the {@link SmartMotorControllerConfig}.
    *
    * @return Measurement velocity of the mechanism post-gearing.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
    */
   public abstract LinearVelocity getMeasurementVelocity();
 
@@ -664,6 +728,8 @@ public abstract class SmartMotorController {
    * with the {@link SmartMotorControllerConfig}.
    *
    * @return Measurement velocity of the mechanism post-gearing.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
    */
   public abstract Distance getMeasurementPosition();
 
@@ -672,6 +738,8 @@ public abstract class SmartMotorController {
    * with the {@link SmartMotorControllerConfig}
    *
    * @return Measurement acceleration of the mechanism post-gearing.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
    */
   public abstract LinearAcceleration getMeasurementAcceleration();
 
@@ -692,8 +760,8 @@ public abstract class SmartMotorController {
   public abstract AngularAcceleration getMechanismAcceleration();
 
   /**
-   * Get the mechanism {@link Angle} taking the configured {@link MechanismGearing} from {@link
-   * SmartMotorControllerConfig}.
+   * Get the mechanism {@link Angle} taking the configured {@link MechanismGearing} from
+   * {@link SmartMotorControllerConfig}.
    *
    * @return Mechanism {@link Angle}
    */
@@ -732,11 +800,11 @@ public abstract class SmartMotorController {
    * Update the telemetry under the motor name under the given {@link NetworkTable}
    *
    * @param telemetry {@link NetworkTable} to create the {@link SmartMotorControllerTelemetry}
-   *                  subtable under based off of {@link
-   *                  SmartMotorControllerConfig#getTelemetryName()}.
-   * @param tuning    {@link NetworkTable} to create the tunable telemetry from {@link
-   *                  SmartMotorControllerTelemetry} subtable under. Based off of {@link
-   *                  SmartMotorControllerConfig#getTelemetryName()}.
+   *                  subtable under based off of
+   *                  {@link SmartMotorControllerConfig#getTelemetryName()}.
+   * @param tuning    {@link NetworkTable} to create the tunable telemetry from
+   *                  {@link SmartMotorControllerTelemetry} subtable under. Based off of
+   *                  {@link SmartMotorControllerConfig#getTelemetryName()}.
    */
   public void setupTelemetry(NetworkTable telemetry, NetworkTable tuning) {
     //    System.out.println(
@@ -770,6 +838,12 @@ public abstract class SmartMotorController {
 
   /**
    * Apply the live-tuned values (from the Tuning NetworkTable) to this {@link SmartMotorController}.
+   *
+   * @throws SmartMotorControllerConfigurationException if the control mode is not
+   *                                                    {@code CLOSED_LOOP}, or if the motor controller
+   *                                                    implementation rejects a tuned value.
+   * @throws IllegalArgumentException if the tuned closed loop controller slot is not supported by
+   *                                  the motor controller implementation.
    */
   public void applyTuningValues() {
     telemetry.applyTuningValues(this);
@@ -825,6 +899,8 @@ public abstract class SmartMotorController {
    * Set the maximum velocity of the trapezoidal profile for the feedback controller.
    *
    * @param maxVelocity Maximum velocity, will be translated to MetersPerSecond.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
    */
   public abstract void setMotionProfileMaxVelocity(LinearVelocity maxVelocity);
 
@@ -832,6 +908,8 @@ public abstract class SmartMotorController {
    * Set the maximum acceleration of the trapezoidal profile for the feedback controller.
    *
    * @param maxAcceleration Maximum acceleration, will be translated to MetersPerSecondPerSecond.
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
    */
   public abstract void setMotionProfileMaxAcceleration(LinearAcceleration maxAcceleration);
 
@@ -967,6 +1045,9 @@ public abstract class SmartMotorController {
    * Set the measurement upper limit, only works if mechanism circumference is defined.
    *
    * @param upperLimit Upper limit, will be translated to meters.
+   * @throws SmartMotorControllerConfigurationException if a lower limit is configured and it is
+   *                                                    greater than or equal to the new upper
+   *                                                    limit.
    */
   public abstract void setMeasurementUpperLimit(Distance upperLimit);
 
@@ -974,6 +1055,8 @@ public abstract class SmartMotorController {
    * Set the measurement lower limit, only works if mechanism circumference is defined.
    *
    * @param lowerLimit Lower limit, will be translated to meters.
+   * @throws SmartMotorControllerConfigurationException if an upper limit is configured and the new
+   *                                                    lower limit is greater than or equal to it.
    */
   public abstract void setMeasurementLowerLimit(Distance lowerLimit);
 
@@ -981,6 +1064,9 @@ public abstract class SmartMotorController {
    * Set the mechanism upper limit.
    *
    * @param upperLimit Upper limit, will be translated to rotations.
+   * @throws SmartMotorControllerConfigurationException if a lower limit is configured and it is
+   *                                                    greater than or equal to the new upper
+   *                                                    limit.
    */
   public abstract void setMechanismUpperLimit(Angle upperLimit);
 
@@ -988,6 +1074,8 @@ public abstract class SmartMotorController {
    * Set the mechanism lower limit.
    *
    * @param lowerLimit Lower limit, will be translated to rotations.
+   * @throws SmartMotorControllerConfigurationException if an upper limit is configured and the new
+   *                                                    lower limit is greater than or equal to it.
    */
   public abstract void setMechanismLowerLimit(Angle lowerLimit);
 
@@ -996,6 +1084,9 @@ public abstract class SmartMotorController {
    *
    * @param lower Lower limit, will be translated to rotations.
    * @param upper Upper limit, will be translated to rotations.
+   * @throws SmartMotorControllerConfigurationException if both limits are non-null and the lower
+   *                                                    limit is greater than or equal to the upper
+   *                                                    limit.
    */
   public abstract void setMechanismLimits(Angle lower, Angle upper);
 
@@ -1025,6 +1116,8 @@ public abstract class SmartMotorController {
    * Set the closed loop controller slot to use.
    *
    * @param slot Slot to use.
+   * @throws IllegalArgumentException if the slot is not supported by the motor controller (e.g.
+   *                                  SLOT_3 on a TalonFX or TalonFXS).
    */
   public abstract void setClosedLoopSlot(ClosedLoopControllerSlot slot);
 

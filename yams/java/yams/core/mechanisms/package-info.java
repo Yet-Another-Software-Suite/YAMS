@@ -16,8 +16,8 @@
  * {@link yams.core.mechanisms.config.ElevatorConfig}) and populate it via the fluent
  * {@code with*()} API.</li>
  * <li><b>Construct the mechanism</b> pass the finished config to the mechanism constructor
- * (e.g. {@link yams.core.mechanisms.positional.Arm}, {@link
- * yams.core.mechanisms.positional.Elevator}). The constructor validates the config and initialises
+ * (e.g. {@link yams.core.mechanisms.positional.Arm},
+ * {@link yams.core.mechanisms.positional.Elevator}). The constructor validates the config and initialises
  * all internal controllers.</li> <li><b>Command the mechanism</b> call setpoint methods such as
  * {@code setAngle()} or
  * {@code setHeight()}. Each method returns a WPILib {@code Command} that can be bound,

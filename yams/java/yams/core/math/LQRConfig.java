@@ -13,6 +13,7 @@ import static org.wpilib.units.Units.RadiansPerSecond;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import org.wpilib.math.controller.LinearQuadraticRegulator;
@@ -75,6 +76,10 @@ public class LQRConfig {
    * Get the {@link LQRType} of the LQR.
    *
    * @return {@link LQRType} of the LQR.
+   * @throws NoSuchElementException if no mechanism type has been configured via
+   *                                {@link #withFlyWheel(AngularVelocity, AngularVelocity, AngularVelocity)},
+   *                                {@link #withArm(Angle, AngularVelocity, Angle, AngularVelocity, Angle)}, or
+   *                                {@link #withElevator(Distance, LinearVelocity, Distance, LinearVelocity, Distance, Mass, Distance)}.
    */
   public LQRType getType() {
     return m_type.orElseThrow();
@@ -157,8 +162,8 @@ public class LQRConfig {
    */
   private Optional<Mass>         m_elevatorMass       = Optional.empty();
   /**
-   * Elevator radius for {@link Models#elevatorFromPhysicalConstants(DCMotor, double, double,
-   * double)}
+   * Elevator radius for
+   * {@link Models#elevatorFromPhysicalConstants(DCMotor, double, double, double)}
    */
   private Optional<Distance>     m_elevatorDrumRadius = Optional.empty();
   /**
@@ -173,12 +178,12 @@ public class LQRConfig {
   /**
    * Create a new LQR Configuration.
    *
-   * @param motor   {@link DCMotor} for the {@link
-   *                org.wpilib.math.controller.LinearQuadraticRegulator}.
-   * @param gearing {@link MechanismGearing} for the {@link
-   *                org.wpilib.math.controller.LinearQuadraticRegulator}.
-   * @param moi     {@link MomentOfInertia} for the {@link
-   *                org.wpilib.math.controller.LinearQuadraticRegulator}.
+   * @param motor   {@link DCMotor} for the
+   *                {@link org.wpilib.math.controller.LinearQuadraticRegulator}.
+   * @param gearing {@link MechanismGearing} for the
+   *                {@link org.wpilib.math.controller.LinearQuadraticRegulator}.
+   * @param moi     {@link MomentOfInertia} for the
+   *                {@link org.wpilib.math.controller.LinearQuadraticRegulator}.
    */
   public LQRConfig(DCMotor motor, MechanismGearing gearing, MomentOfInertia moi) {
     m_motor = motor;
@@ -276,12 +281,12 @@ public class LQRConfig {
    *                             more heavily penalize
    *                             state excursion, or make the controller behave more aggressively.
    *                             This can be tuned to balance the position and velocity errors.
-   * @param modelPositionTrust   Standard deviation of the model position, represented in {@link
-   *                             Distance}.
-   * @param modelVelocityTrust   Standard deviation of the model velocity, represented in {@link
-   *                             LinearVelocity}.
-   * @param encoderPositionTrust Standard deviation of the encoder position, represented in {@link
-   *                             Distance}.
+   * @param modelPositionTrust   Standard deviation of the model position, represented in
+   *                             {@link Distance}.
+   * @param modelVelocityTrust   Standard deviation of the model velocity, represented in
+   *                             {@link LinearVelocity}.
+   * @param encoderPositionTrust Standard deviation of the encoder position, represented in
+   *                             {@link Distance}.
    * @param mass                 Mass of the elevator, represented in {@link Mass}.
    * @param drumRadius           Radius of the elevator drum, represented in {@link Distance}.
    * @return {@link LQRConfig} for chaining.
@@ -307,12 +312,12 @@ public class LQRConfig {
    *                             more heavily
    *                             penalize state excursion, or make the controller behave more
    *                             aggressively. This can be tuned to balance the position and velocity errors.
-   * @param modelPositionTrust   Standard deviation of the model position, represented in {@link
-   *                             Angle}.
-   * @param modelVelocityTrust   Standard deviation of the model velocity, represented in {@link
-   *                             AngularVelocity}.
-   * @param encoderPositionTrust Standard deviation of the encoder position, represented in {@link
-   *                             Angle}.
+   * @param modelPositionTrust   Standard deviation of the model position, represented in
+   *                             {@link Angle}.
+   * @param modelVelocityTrust   Standard deviation of the model velocity, represented in
+   *                             {@link AngularVelocity}.
+   * @param encoderPositionTrust Standard deviation of the encoder position, represented in
+   *                             {@link Angle}.
    * @return {@link LQRConfig} for chaining.
    */
   public LQRConfig withArm(Angle qelmsPosition, AngularVelocity qelmsVelocity, Angle modelPositionTrust, AngularVelocity modelVelocityTrust, Angle encoderPositionTrust) {
@@ -327,6 +332,10 @@ public class LQRConfig {
    * Get the {@link LinearSystem} for the LQR. with {@link Models}
    *
    * @return {@link LinearSystem} for the LQR.
+   * @throws NoSuchElementException if no mechanism type has been configured via
+   *                                {@link #withFlyWheel(AngularVelocity, AngularVelocity, AngularVelocity)},
+   *                                {@link #withArm(Angle, AngularVelocity, Angle, AngularVelocity, Angle)}, or
+   *                                {@link #withElevator(Distance, LinearVelocity, Distance, LinearVelocity, Distance, Mass, Distance)}.
    */
   public LinearSystem<?, ?, ?> getSystem() {
     switch (m_type.orElseThrow()) {
@@ -348,6 +357,10 @@ public class LQRConfig {
    *
    * @param plant {@link LinearSystem} for the LQR, fetched from {@link #getSystem()}.
    * @return {@link KalmanFilter} for the LQR.
+   * @throws NoSuchElementException if no mechanism type has been configured via
+   *                                {@link #withFlyWheel(AngularVelocity, AngularVelocity, AngularVelocity)},
+   *                                {@link #withArm(Angle, AngularVelocity, Angle, AngularVelocity, Angle)}, or
+   *                                {@link #withElevator(Distance, LinearVelocity, Distance, LinearVelocity, Distance, Mass, Distance)}.
    */
   @SuppressWarnings("unchecked")
   public KalmanFilter<?, ?, ?> getKalmanFilter(LinearSystem<?, ?, ?> plant) {
@@ -369,6 +382,10 @@ public class LQRConfig {
    *
    * @param plant {@link LinearSystem} for the LQR, fetched from {@link #getSystem()}.
    * @return {@link LinearQuadraticRegulator} for the LQR.
+   * @throws NoSuchElementException if no mechanism type has been configured via
+   *                                {@link #withFlyWheel(AngularVelocity, AngularVelocity, AngularVelocity)},
+   *                                {@link #withArm(Angle, AngularVelocity, Angle, AngularVelocity, Angle)}, or
+   *                                {@link #withElevator(Distance, LinearVelocity, Distance, LinearVelocity, Distance, Mass, Distance)}.
    */
   @SuppressWarnings("unchecked")
   public LinearQuadraticRegulator<?, ?, ?> getRegulator(LinearSystem<?, ?, ?> plant) {
@@ -389,11 +406,15 @@ public class LQRConfig {
    * Get the {@link LinearSystemLoop}.
    *
    * @param plant      {@link LinearSystem} for the LQR, fetched from {@link #getSystem()}
-   * @param controller {@link LinearQuadraticRegulator} for the LQR, fetched from {@link
-   *                   #getRegulator(LinearSystem)}
-   * @param observer   {@link KalmanFilter} for the LQR, fetched from {@link
-   *                   #getKalmanFilter(LinearSystem)}
+   * @param controller {@link LinearQuadraticRegulator} for the LQR, fetched from
+   *                   {@link #getRegulator(LinearSystem)}
+   * @param observer   {@link KalmanFilter} for the LQR, fetched from
+   *                   {@link #getKalmanFilter(LinearSystem)}
    * @return {@link LinearSystemLoop} for the LQR.
+   * @throws NoSuchElementException if no mechanism type has been configured via
+   *                                {@link #withFlyWheel(AngularVelocity, AngularVelocity, AngularVelocity)},
+   *                                {@link #withArm(Angle, AngularVelocity, Angle, AngularVelocity, Angle)}, or
+   *                                {@link #withElevator(Distance, LinearVelocity, Distance, LinearVelocity, Distance, Mass, Distance)}.
    */
   @SuppressWarnings("unchecked")
   public LinearSystemLoop<?, ?, ?> getLoop(LinearSystem<?, ?, ?> plant, LinearQuadraticRegulator<?, ?, ?> controller, KalmanFilter<?, ?, ?> observer) {
@@ -414,6 +435,10 @@ public class LQRConfig {
    * Get the {@link LinearSystemLoop} with the currently configured LQR.
    *
    * @return {@link LinearSystemLoop} for the LQR.
+   * @throws NoSuchElementException if no mechanism type has been configured via
+   *                                {@link #withFlyWheel(AngularVelocity, AngularVelocity, AngularVelocity)},
+   *                                {@link #withArm(Angle, AngularVelocity, Angle, AngularVelocity, Angle)}, or
+   *                                {@link #withElevator(Distance, LinearVelocity, Distance, LinearVelocity, Distance, Mass, Distance)}.
    */
   @SuppressWarnings("unchecked")
   public LinearSystemLoop<?, ?, ?> getLoop() {

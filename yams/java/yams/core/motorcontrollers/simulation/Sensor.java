@@ -43,10 +43,9 @@ import yams.core.mechanisms.config.SensorConfig;
  * <li>{@link #getAsDouble(String)}, {@link #getAsInt(String)}, {@link #getAsBoolean(String)},
  * {@link #getAsLong(String)} typed convenience accessors that call through to
  * the underlying field.</li>
- * <li>{@link #addSimTrigger(String, org.wpilib.hardware.hal.HALValue,
- * java.util.function.BooleanSupplier)} inject a simulated override value whenever a condition is
- * true.</li> <li>{@link #getDevice()} returns the underlying {@link
- * org.wpilib.hardware.hal.SimDevice} (empty when running on a real robot).</li>
+ * <li>
+ * {@link #addSimTrigger(String, org.wpilib.hardware.hal.HALValue, java.util.function.BooleanSupplier)} inject a simulated override value whenever a condition is
+ * true.</li> <li>{@link #getDevice()} returns the underlying {@link org.wpilib.hardware.hal.SimDevice} (empty when running on a real robot).</li>
  * </ul>
  *
  * <h2>Example</h2>
@@ -84,6 +83,7 @@ public class Sensor {
    *
    * @param sensorName   Name of the sensor.
    * @param sensorFields List of sensor fields. See {@link SensorData}.
+   * @throws IllegalStateException if two sensor fields share the same name.
    */
   public Sensor(String sensorName, List<SensorData> sensorFields) {
     m_sensorName = sensorName;
@@ -102,6 +102,7 @@ public class Sensor {
    * Sensor simulation constructor.
    *
    * @param cfg {@link SensorConfig} class
+   * @throws IllegalStateException if two sensor fields in the config share the same name.
    */
   public Sensor(SensorConfig cfg) {
     this(cfg.getName(), cfg.getFields());
@@ -112,6 +113,7 @@ public class Sensor {
    *
    * @param name Name of the field
    * @return {@link SensorData} of the field.
+   * @throws IllegalArgumentException if no field with the given name exists on this sensor.
    */
   public SensorData getField(String name) {
     if (!m_simData.containsKey(name)) {
@@ -125,6 +127,8 @@ public class Sensor {
    *
    * @param name Name of the field
    * @return Value of the field as a double.
+   * @throws IllegalArgumentException if no field with the given name exists on this sensor.
+   * @throws IllegalStateException if the field is not a double field.
    */
   public double getAsDouble(String name) {
     return getField(name).getAsDouble();
@@ -135,6 +139,8 @@ public class Sensor {
    *
    * @param name Name of the field
    * @return Value of the field as an int.
+   * @throws IllegalArgumentException if no field with the given name exists on this sensor.
+   * @throws IllegalStateException if the field is not an int field.
    */
   public int getAsInt(String name) {
     return getField(name).getAsInt();
@@ -145,6 +151,8 @@ public class Sensor {
    *
    * @param name Name of the field
    * @return Value of the field as a boolean.
+   * @throws IllegalArgumentException if no field with the given name exists on this sensor.
+   * @throws IllegalStateException if the field is not a boolean field.
    */
   public boolean getAsBoolean(String name) {
     return getField(name).getAsBoolean();
@@ -155,6 +163,8 @@ public class Sensor {
    *
    * @param name Name of the field
    * @return Value of the field as a long.
+   * @throws IllegalArgumentException if no field with the given name exists on this sensor.
+   * @throws IllegalStateException if the field is not a long field.
    */
   public long getAsLong(String name) {
     return getField(name).getAsLong();
@@ -175,6 +185,7 @@ public class Sensor {
    * @param field   Field name to set.
    * @param value   {@link HALValue} to set.
    * @param trigger {@link BooleanSupplier} when to use.
+   * @throws IllegalArgumentException if no field with the given name exists on this sensor.
    */
   public void addSimTrigger(String field, HALValue value, BooleanSupplier trigger) {
     getField(field).addSimTrigger(value, trigger);

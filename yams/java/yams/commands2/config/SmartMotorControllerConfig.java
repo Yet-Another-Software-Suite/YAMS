@@ -40,8 +40,8 @@ public class SmartMotorControllerConfig extends yams.core.motorcontrollers.Smart
   /**
    * Construct the {@link SmartMotorControllerConfig} with a {@link Subsystem} added later.
    *
-   * @implNote You must use {@link #withSubsystem(Subsystem)} before passing off to {@link
-   *           SmartMotorController}
+   * @implNote You must use {@link #withSubsystem(Subsystem)} before passing off to
+   *           {@link SmartMotorController}
    */
   public SmartMotorControllerConfig() {
     super();
@@ -68,13 +68,16 @@ public class SmartMotorControllerConfig extends yams.core.motorcontrollers.Smart
   }
 
   /**
-   * Sets the {@link Subsystem} for the {@link SmartMotorControllerConfig} to pass along to {@link
-   * SmartMotorController} and the mechanisms built on it. Must be set if a {@link Subsystem} was
+   * Sets the {@link Subsystem} for the {@link SmartMotorControllerConfig} to pass along to
+   * {@link SmartMotorController} and the mechanisms built on it. Must be set if a {@link Subsystem} was
    * not defined previously.
    *
    * @param subsystem {@link Subsystem} to use.
    * @return {@link SmartMotorControllerConfig} for chaining.
    * @implNote Does not copy the entire config, should NEVER be reused.
+   * @throws SmartMotorControllerConfigurationException if a {@link Subsystem} has already been set,
+   *                                                    either through the constructor or a previous
+   *                                                    call to this method.
    */
   public SmartMotorControllerConfig withSubsystem(Subsystem subsystem) {
     if (this.subsystem.isPresent()) {
@@ -88,6 +91,10 @@ public class SmartMotorControllerConfig extends yams.core.motorcontrollers.Smart
    * Get the subsystem controlled by the {@link SmartMotorController}
    *
    * @return {@link Subsystem} controlled.
+   * @throws SmartMotorControllerConfigurationException if no {@link Subsystem} was set, i.e. the
+   *                                                    no-arg constructor (or a null subsystem) was
+   *                                                    used and {@link #withSubsystem(Subsystem)}
+   *                                                    was never called.
    */
   public Subsystem getSubsystem() {
     if (subsystem.isEmpty()) {
@@ -101,6 +108,9 @@ public class SmartMotorControllerConfig extends yams.core.motorcontrollers.Smart
    * a shared "Live Tuning" {@link org.wpilib.command2.Command} on {@link #getSubsystem()} via
    * {@link SmartMotorControllerCommandRegistry} that pulls tuned values from NetworkTables each
    * loop, and registers cleanup so the registration is removed when the controller is closed.
+   *
+   * @throws IllegalStateException if a different {@link Subsystem} instance with the same name has
+   *                               already registered a "Live Tuning" command.
    */
   @Override
   public void setupLiveTuning() {

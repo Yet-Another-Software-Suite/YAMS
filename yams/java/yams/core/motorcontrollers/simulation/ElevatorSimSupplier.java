@@ -25,6 +25,7 @@ import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.Time;
 import org.wpilib.units.measure.Voltage;
+import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.gearing.MechanismGearing;
 import yams.core.math.DerivativeTimeFilter;
 import yams.core.motorcontrollers.SimSupplier;
@@ -36,8 +37,8 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig;
  * {@link org.wpilib.simulation.ElevatorSim}.
  *
  * <p>This supplier steps WPILib's {@code ElevatorSim} physics model each control loop and exposes
- * the resulting height, linear velocity, current draw, and voltage through the {@link
- * yams.core.motorcontrollers.SimSupplier} interface. Because {@code ElevatorSim} operates in linear
+ * the resulting height, linear velocity, current draw, and voltage through the
+ * {@link yams.core.motorcontrollers.SimSupplier} interface. Because {@code ElevatorSim} operates in linear
  * units (meters), positions and velocities are converted to and from mechanism (angular) units
  * using the associated {@link yams.core.motorcontrollers.SmartMotorController}'s config.
  *
@@ -167,31 +168,67 @@ public class ElevatorSimSupplier implements SimSupplier {
     sim.setInputVoltage(volts.in(Volts));
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   */
   @Override
   public Angle getMechanismPosition() {
     return config.convertToMechanism(Meters.of(pos.get()));
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   */
   @Override
   public void setMechanismPosition(Angle position) {
     sim.setState(config.convertFromMechanism(position).in(Meters), mps.get());
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   */
   @Override
   public Angle getRotorPosition() {
     return getMechanismPosition().times(mechGearing.getMechanismToRotorRatio());
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   */
   @Override
   public AngularVelocity getMechanismVelocity() {
     return config.convertToMechanism(MetersPerSecond.of(mps.get()));
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   */
   @Override
   public void setMechanismVelocity(AngularVelocity velocity) {
     sim.setState(pos.get(), config.convertFromMechanism(velocity).in(MetersPerSecond));
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   */
   @Override
   public AngularVelocity getRotorVelocity() {
     return getMechanismVelocity().times(mechGearing.getMechanismToRotorRatio());
@@ -211,6 +248,12 @@ public class ElevatorSimSupplier implements SimSupplier {
     return Amps.of(supplyCurrentFilter.calculate(dutyCycle * sim.getCurrentDraw()));
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   */
   @Override
   public AngularAcceleration getRotorAcceleration() {
     return RotationsPerSecond.per(Microsecond).of(mpsps.derivative(getRotorVelocity().in(RotationsPerSecond)));

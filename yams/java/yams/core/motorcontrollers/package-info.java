@@ -13,16 +13,16 @@
  *
  * <ul>
  * <li>{@link yams.core.motorcontrollers.SmartMotorController} the hardware-agnostic abstract base
- * that all vendor wrappers extend. Defines the lifecycle methods ({@code configure}, {@code
- * periodic}, {@code stop}) and the control interface (position, velocity, voltage, duty-cycle
+ * that all vendor wrappers extend. Defines the lifecycle methods ({@code configure},
+ * {@code periodic}, {@code stop}) and the control interface (position, velocity, voltage, duty-cycle
  * setpoints).
  * <li>{@link yams.core.motorcontrollers.SmartMotorControllerConfig} a fluent builder used to
  * configure every aspect of a motor before it is applied. Settings include PID gains,
  * feedforward constants, position and velocity software limits, ramp rates, current limits,
- * encoder resolution and offsets, and gear ratios. Call {@code
- * SmartMotorController.configure(config)} to push all settings to hardware. <li>{@link
- * yams.commands2.telemetry.SmartMotorControllerCommandRegistry} registers WPILib {@code
- * Command} objects that operate a specific motor so they can be discovered and scheduled by a
+ * encoder resolution and offsets, and gear ratios. Call
+ * {@code SmartMotorController.configure(config)} to push all settings to hardware. <li>
+ * {@link yams.commands2.telemetry.SmartMotorControllerCommandRegistry} registers WPILib
+ * {@code Command} objects that operate a specific motor so they can be discovered and scheduled by a
  * mechanism.
  * </ul>
  *

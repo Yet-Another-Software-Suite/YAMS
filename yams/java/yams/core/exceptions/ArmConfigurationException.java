@@ -4,8 +4,8 @@
 package yams.core.exceptions;
 
 /**
- * Thrown by {@link yams.core.mechanisms.positional.Arm} when a required {@link
- * yams.core.mechanisms.config.ArmConfig} field is missing or invalid.
+ * Thrown by {@link yams.core.mechanisms.positional.Arm} when a required
+ * {@link yams.core.mechanisms.config.ArmConfig} field is missing or invalid.
  *
  * <p>Common triggers include:
  *

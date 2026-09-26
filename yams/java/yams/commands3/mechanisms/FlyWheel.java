@@ -12,6 +12,8 @@ import org.wpilib.command3.Trigger;
 import org.wpilib.math.filter.Debouncer.DebounceType;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.LinearVelocity;
+import yams.core.exceptions.FlyWheelConfigurationException;
+import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.mechanisms.config.FlyWheelConfig;
 import yams.core.motorcontrollers.SmartMotorController;
 
@@ -45,6 +47,9 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel implements 
    * @param smc    {@link SmartMotorController} for the Mechanism
    * @implNote {@code smc}'s config must be a {@link yams.commands3.config.SmartMotorControllerConfig}
    *           with a {@link Mechanism} set via {@code withMechanism(Mechanism)}.
+   * @throws SmartMotorControllerConfigurationException if {@code smc}'s config does not have a
+   *                                                    {@link Mechanism} set via
+   *                                                    {@code withMechanism(Mechanism)}.
    */
   public FlyWheel(FlyWheelConfig config, SmartMotorController smc) {
     super(config, smc);
@@ -105,6 +110,12 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel implements 
    * @param <T>      Must be a {@link LinearVelocity} or {@link AngularVelocity}
    * @return {@link Command} which runs the FlyWheel to the desired velocity with the closed loop
    *         controller.
+   * @throws IllegalArgumentException if the value returned by {@code velocity} when this method is
+   *                                  called is neither an {@link AngularVelocity} nor a
+   *                                  {@link LinearVelocity}.
+   * @throws FlyWheelConfigurationException if the value returned by {@code velocity} is a
+   *                                        {@link LinearVelocity} and the FlyWheel diameter is not
+   *                                        configured.
    */
   public <T> Command run(Supplier<T> velocity) {
     SmartMotorController smc = getMotorController();
@@ -190,6 +201,9 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel implements 
    * @return {@link Command} that runs the FlyWheel to the desired velocity then moves on.
    * @implNote If you are using this function, try not to have a default command or else the default
    *           command will override the setting after this command ends.
+   * @throws FlyWheelConfigurationException if the FlyWheel diameter is not configured, since it is
+   *                                        needed to convert the linear velocity to an angular
+   *                                        velocity.
    */
   public Command runTo(LinearVelocity velocity, LinearVelocity tolerance) {
     getShooterConfig().getCircumference(); // Circumference check
@@ -204,6 +218,9 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel implements 
    * @return {@link Command} that runs the FlyWheel to the desired velocity then moves on.
    * @implNote If you are using this function, try not to have a default command or else the default
    *           command will override the setting after this command ends.
+   * @throws FlyWheelConfigurationException if the FlyWheel diameter is not configured, since it is
+   *                                        needed to convert the linear velocity to an angular
+   *                                        velocity.
    */
   public Command runTo(Supplier<LinearVelocity> velocity, LinearVelocity tolerance) {
     getShooterConfig().getCircumference(); // Circumference check
@@ -215,6 +232,9 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel implements 
    *
    * @param speed FlyWheel speed to go to.
    * @return {@link Command} that sets the FlyWheel to the desired speed.
+   * @throws FlyWheelConfigurationException if the FlyWheel diameter is not configured, since it is
+   *                                        needed to convert the linear velocity to an angular
+   *                                        velocity.
    */
   public Command run(LinearVelocity speed) {
     AngularVelocity target = getShooterConfig().getAngularVelocity(speed);

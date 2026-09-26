@@ -10,6 +10,7 @@ import static org.wpilib.units.Units.RadiansPerSecond;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import org.wpilib.math.linalg.VecBuilder;
@@ -90,6 +91,9 @@ public class LQRController {
    * Create a LQR Controller.
    *
    * @param config {@link LQRConfig} to create the controller from.
+   * @throws NoSuchElementException if {@code config} has no mechanism type configured (none of
+   *                                {@code withFlyWheel}, {@code withArm}, or {@code withElevator}
+   *                                was called).
    */
   public LQRController(LQRConfig config) {
     m_config = Optional.of(config);
@@ -102,6 +106,9 @@ public class LQRController {
    * Update LQR based off config.
    *
    * @param config {@link LQRConfig}
+   * @throws NoSuchElementException if {@code config} has no mechanism type configured (none of
+   *                                {@code withFlyWheel}, {@code withArm}, or {@code withElevator}
+   *                                was called).
    */
   public void updateConfig(LQRConfig config) {
     m_config = Optional.of(config);

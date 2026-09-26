@@ -7,6 +7,7 @@ import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Rotations;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -97,8 +98,8 @@ public class SwerveModuleConfig {
    */
   private Optional<TelemetryVerbosity> telemetryVerbosity = Optional.empty();
   /**
-   * User specified {@link SwerveModuleTelemetryConfig}, takes precedence over {@link
-   * #telemetryVerbosity} if present.
+   * User specified {@link SwerveModuleTelemetryConfig}, takes precedence over
+   * {@link #telemetryVerbosity} if present.
    */
   private Optional<SwerveModuleTelemetryConfig> specifiedTelemetryConfig = Optional.empty();
   /**
@@ -163,8 +164,8 @@ public class SwerveModuleConfig {
   /**
    * Create the {@link SwerveModuleConfig} for the {@link SwerveModule}
    *
-   * @implNote Required to use {@link #withSmartMotorController(SmartMotorController,
-   *           SmartMotorController)} BEFORE passed into {@link SwerveModule}
+   * @implNote Required to use
+   *           {@link #withSmartMotorController(SmartMotorController, SmartMotorController)} BEFORE passed into {@link SwerveModule}
    */
   public SwerveModuleConfig() {
   }
@@ -203,6 +204,9 @@ public class SwerveModuleConfig {
    * @param driveMotor   {@link SmartMotorController} for the drive motor.
    * @param azimuthMotor {@link SmartMotorController} for the azimuth motor.
    * @return {@link SwerveModuleConfig} for chaining.
+   * @throws IllegalStateException if the drive or azimuth motor controller was already set, either
+   *                               by
+   *                               {@link #SwerveModuleConfig(SmartMotorController, SmartMotorController)} or a previous call to this method.
    */
   public SwerveModuleConfig withSmartMotorController(SmartMotorController driveMotor, SmartMotorController azimuthMotor) {
     if (this.driveMotor.isPresent()) {
@@ -417,8 +421,8 @@ public class SwerveModuleConfig {
   }
 
   /**
-   * Configure telemetry for the {@link SwerveModule} mechanism with a {@link
-   * SwerveModuleTelemetryConfig}.
+   * Configure telemetry for the {@link SwerveModule} mechanism with a
+   * {@link SwerveModuleTelemetryConfig}.
    *
    * @param telemetryName   Telemetry NetworkTable name to appear under "SmartDashboard/"
    * @param telemetryConfig Config that specifies what to log.
@@ -432,8 +436,8 @@ public class SwerveModuleConfig {
   }
 
   /**
-   * Get the user specified {@link SwerveModuleTelemetryConfig}, if configured via {@link
-   * #withTelemetry(String, SwerveModuleTelemetryConfig)}.
+   * Get the user specified {@link SwerveModuleTelemetryConfig}, if configured via
+   * {@link #withTelemetry(String, SwerveModuleTelemetryConfig)}.
    *
    * @return {@link SwerveModuleTelemetryConfig} if configured.
    */
@@ -445,6 +449,8 @@ public class SwerveModuleConfig {
    * Get the absolute encoder angle for the azimuth {@link SmartMotorController}.
    *
    * @return Absolute encoder {@link Angle}.
+   * @throws NoSuchElementException if no azimuth motor controller is set, even when an
+   *                                absolute encoder supplier is configured.
    */
   public Angle getAbsoluteEncoderAngle() {
     return absoluteEncoderSupplier.map(angleSupplier -> angleSupplier.get().times(absoluteEncoderGearbox.getInputToOutputConversionFactor()).minus(absoluteEncoderOffset.orElse(Rotations.of(0)))).orElse(azimuthMotor.orElseThrow()
@@ -455,6 +461,8 @@ public class SwerveModuleConfig {
    * Get the absolute encoder angle as a supplier without offsets applied.
    *
    * @return {@link Supplier<Angle>} for the absolute encoder angle without offsets.
+   * @throws NoSuchElementException if no absolute encoder supplier is configured and no
+   *                                azimuth motor controller is set.
    */
   public Supplier<Angle> getRawAbsoluteEncoderAngle() {
     if (absoluteEncoderSupplier.isPresent()) {
@@ -487,6 +495,9 @@ public class SwerveModuleConfig {
    * Get the drive {@link SmartMotorController} for the {@link SwerveModule}.
    *
    * @return {@link SmartMotorController} for the drive motor.
+   * @throws NoSuchElementException if no drive motor controller is set, e.g. the no-arg
+   *                                constructor was used without calling
+   *                                {@link #withSmartMotorController(SmartMotorController, SmartMotorController)}.
    */
   public SmartMotorController getDriveMotor() {
     return driveMotor.orElseThrow();
@@ -496,6 +507,9 @@ public class SwerveModuleConfig {
    * Get the azimuth {@link SmartMotorController} for the {@link SwerveModule}.
    *
    * @return {@link SmartMotorController} for the azimuth motor.
+   * @throws NoSuchElementException if no azimuth motor controller is set, e.g. the no-arg
+   *                                constructor was used without calling
+   *                                {@link #withSmartMotorController(SmartMotorController, SmartMotorController)}.
    */
   public SmartMotorController getAzimuthMotor() {
     return azimuthMotor.orElseThrow();
@@ -536,6 +550,7 @@ public class SwerveModuleConfig {
    *
    * @param state {@link SwerveModuleVelocity} to optimize.
    * @return {@link SwerveModuleVelocity} optimized.
+   * @throws NoSuchElementException if no azimuth motor controller is set.
    */
   public SwerveModuleVelocity getOptimizedState(SwerveModuleVelocity state) {
     Rotation2d currentAngle = new Rotation2d(azimuthMotor.orElseThrow().getMechanismPosition());

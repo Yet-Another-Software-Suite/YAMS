@@ -4,8 +4,8 @@
 package yams.core.exceptions;
 
 /**
- * Thrown by {@link yams.core.mechanisms.swerve.SwerveDrive} or {@link
- * yams.core.mechanisms.config.SwerveDriveConfig} when a required field is missing or a config
+ * Thrown by {@link yams.core.mechanisms.swerve.SwerveDrive} or
+ * {@link yams.core.mechanisms.config.SwerveDriveConfig} when a required field is missing or a config
  * invariant is violated.
  *
  * <p>Common triggers include:
@@ -18,8 +18,8 @@ package yams.core.exceptions;
  * </ul>
  *
  * <p><b>Resolution:</b> Ensure {@code SwerveDriveConfig} is fully populated with all swerve module
- * configs, a gyro source, and the required kinematic geometry before constructing {@link
- * yams.core.mechanisms.swerve.SwerveDrive}. Consult the {@code SwerveDriveConfig} builder methods
+ * configs, a gyro source, and the required kinematic geometry before constructing
+ * {@link yams.core.mechanisms.swerve.SwerveDrive}. Consult the {@code SwerveDriveConfig} builder methods
  * for the specific setter that the error message recommends.
  *
  * <p>Example minimal configuration:

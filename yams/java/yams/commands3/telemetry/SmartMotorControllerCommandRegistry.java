@@ -61,6 +61,8 @@ public class SmartMotorControllerCommandRegistry {
    * @param cmdName   Command name to publish to NetworkTables.
    * @param mechanism Mechanism to create the command for.
    * @param callback  Runnable to be added to the shared command.
+   * @throws IllegalStateException if a different {@link Mechanism} instance with the same name has
+   *                               already registered a command under {@code cmdName}.
    */
   public static void addCommand(String cmdName, Mechanism mechanism, Runnable callback) {
     var key = mechanism.getName() + "/" + cmdName;

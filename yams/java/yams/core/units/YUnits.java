@@ -28,8 +28,8 @@ import org.wpilib.units.TimeUnit;
  * YUnits that are fun and useful!
  *
  * <p>This class extends the standard WPILib unit set with additional units that are either useful
- * for FRC robotics or simply entertaining. Beyond what WPILib provides out of the box, {@code
- * YUnits} adds:
+ * for FRC robotics or simply entertaining. Beyond what WPILib provides out of the box,
+ * {@code YUnits} adds:
  *
  * <ul>
  * <li><b>Imperial distance units</b> {@link #Hands}, {@link #Yards}, {@link #Cubits},
@@ -94,38 +94,38 @@ public class YUnits {
   public static final MomentOfInertiaUnit PoundSquareInches = MomentOfInertiaUnit.combine(PoundInchesSquaredPerSecond, RadiansPerSecond);
 
   /**
-   * 101.6/1000 of a {@link org.wpilib.units.Units#Meters}, or 4 {@link
-   * org.wpilib.units.Units#Inches}.
+   * 101.6/1000 of a {@link org.wpilib.units.Units#Meters}, or 4
+   * {@link org.wpilib.units.Units#Inches}.
    */
   public static final DistanceUnit Hands = derive(Inches).aggregate(4).named("Hand").symbol("hand").make();
 
   /**
-   * 101.6/1000 of a {@link org.wpilib.units.Units#Meters}, or 4 {@link
-   * org.wpilib.units.Units#Inches}.
+   * 101.6/1000 of a {@link org.wpilib.units.Units#Meters}, or 4
+   * {@link org.wpilib.units.Units#Inches}.
    */
   public static final DistanceUnit Hand = Hands;
 
   /**
-   * 914.4/1000 of a {@link org.wpilib.units.Units#Meters}, or 3 {@link
-   * org.wpilib.units.Units#Feet}.
+   * 914.4/1000 of a {@link org.wpilib.units.Units#Meters}, or 3
+   * {@link org.wpilib.units.Units#Feet}.
    */
   public static final DistanceUnit Yards = derive(Feet).aggregate(3).named("Yard").symbol("yd").make();
 
   /**
-   * 914.4/1000 of a {@link org.wpilib.units.Units#Meters}, or 3 {@link
-   * org.wpilib.units.Units#Feet}.
+   * 914.4/1000 of a {@link org.wpilib.units.Units#Meters}, or 3
+   * {@link org.wpilib.units.Units#Feet}.
    */
   public static final DistanceUnit Yard = Yards;
 
   /**
-   * 457.2/1000 of a {@link org.wpilib.units.Units#Meters}, or 18 {@link
-   * org.wpilib.units.Units#Inches}.
+   * 457.2/1000 of a {@link org.wpilib.units.Units#Meters}, or 18
+   * {@link org.wpilib.units.Units#Inches}.
    */
   public static final DistanceUnit Cubits = derive(Inches).aggregate(18).named("Cubit").symbol("cbt").make();
 
   /**
-   * 457.2/1000 of a {@link org.wpilib.units.Units#Meters}, or 18 {@link
-   * org.wpilib.units.Units#Inches}.
+   * 457.2/1000 of a {@link org.wpilib.units.Units#Meters}, or 18
+   * {@link org.wpilib.units.Units#Inches}.
    */
   public static final DistanceUnit Cubit = Cubits;
 

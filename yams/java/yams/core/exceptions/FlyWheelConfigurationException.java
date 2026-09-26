@@ -4,24 +4,24 @@
 package yams.core.exceptions;
 
 /**
- * Thrown by {@link yams.core.mechanisms.velocity.FlyWheel} or {@link
- * yams.core.mechanisms.config.FlyWheelConfig} when a required field in {@link
- * yams.core.mechanisms.config.FlyWheelConfig} is missing or invalid.
+ * Thrown by {@link yams.core.mechanisms.velocity.FlyWheel} or
+ * {@link yams.core.mechanisms.config.FlyWheelConfig} when a required field in
+ * {@link yams.core.mechanisms.config.FlyWheelConfig} is missing or invalid.
  *
  * <p>Common triggers include:
  *
  * <ul>
  * <li>{@code withSmartMotorController(SmartMotorController)} called more than once on the same
  * config
- * <li>Speedometer max velocity not set when speedometer simulation is requested ({@code
- * withSpeedometerSimulation(AngularVelocity)}) <li>Flywheel diameter not set when surface speed
+ * <li>Speedometer max velocity not set when speedometer simulation is requested (
+ * {@code withSpeedometerSimulation(AngularVelocity)}) <li>Flywheel diameter not set when surface speed
  * calculations are needed ({@code withDiameter(Distance)}) <li>MOI (moment of inertia) not
  * derivable neither diameter+mass nor an explicit MOI was provided
  * </ul>
  *
- * <p><b>Resolution:</b> Ensure {@code
- * FlyWheelConfig.withSmartMotorController(SmartMotorController)} is called exactly once, {@code
- * FlyWheelConfig.withDiameter(Distance)} and {@code FlyWheelConfig.withMass(Mass)} are set (or
+ * <p><b>Resolution:</b> Ensure
+ * {@code FlyWheelConfig.withSmartMotorController(SmartMotorController)} is called exactly once,
+ * {@code FlyWheelConfig.withDiameter(Distance)} and {@code FlyWheelConfig.withMass(Mass)} are set (or
  * provide an explicit MOI via {@code FlyWheelConfig.withMOI()}), and when using speedometer
  * simulation {@code FlyWheelConfig.withSpeedometerSimulation(AngularVelocity)} is called with a
  * nonzero max velocity.

@@ -57,6 +57,15 @@ public class Elevator extends SmartPositionalMechanism {
    * @param config {@link ElevatorConfig} to set.
    * @param smc    {@link SmartMotorController} to use for the Elevator
    * @implNote Protected so only {@link yams.commands2.mechanisms.Elevator} can construct this.
+   * @throws ElevatorConfigurationException             if running in simulation and the carriage
+   *                                                    mass, minimum height, or maximum height is
+   *                                                    not configured.
+   * @throws SmartMotorControllerConfigurationException if running in simulation and the starting
+   *                                                    position is not set on the
+   *                                                    {@link SmartMotorControllerConfig}, the
+   *                                                    mechanism circumference is not configured,
+   *                                                    or the starting height is outside the
+   *                                                    minimum and maximum heights.
    */
   protected Elevator(ElevatorConfig config, SmartMotorController smc) {
     m_config = config;
@@ -146,6 +155,10 @@ public class Elevator extends SmartPositionalMechanism {
   /**
    * Updates the length of the mechanism ligament to match the current height of the elevator in
    * meters.
+   *
+   * @throws SmartMotorControllerConfigurationException if a mechanism position setpoint is present
+   *                                                    and the mechanism circumference is not
+   *                                                    configured.
    */
   @Override
   public void visualizationUpdate() {
@@ -206,6 +219,18 @@ public class Elevator extends SmartPositionalMechanism {
     return getHeight().isNear(height, within);
   }
 
+  /**
+   * Whether the elevator is at or above its maximum height, defined by the motor controller upper
+   * soft limit if present, otherwise the elevator maximum height.
+   *
+   * @return True if the elevator is at its configured maximum.
+   * @throws ElevatorConfigurationException             if neither a motor controller upper soft
+   *                                                    limit nor an elevator maximum height is
+   *                                                    configured.
+   * @throws SmartMotorControllerConfigurationException if a motor controller upper soft limit is
+   *                                                    configured but the mechanism circumference
+   *                                                    is not.
+   */
   @Override
   public boolean isAtMax() {
     if (m_smc.getConfig().getMechanismUpperLimit().isPresent()) {
@@ -217,6 +242,18 @@ public class Elevator extends SmartPositionalMechanism {
     throw new ElevatorConfigurationException("Maximum height is not configured!", "Cannot create max trigger.", "withHardLimits(Distance,Distance)");
   }
 
+  /**
+   * Whether the elevator is at or below its minimum height, defined by the motor controller lower
+   * soft limit if present, otherwise the elevator minimum height.
+   *
+   * @return True if the elevator is at its configured minimum.
+   * @throws ElevatorConfigurationException             if neither a motor controller lower soft
+   *                                                    limit nor an elevator minimum height is
+   *                                                    configured.
+   * @throws SmartMotorControllerConfigurationException if a motor controller lower soft limit is
+   *                                                    configured but the mechanism circumference
+   *                                                    is not.
+   */
   @Override
   public boolean isAtMin() {
     if (m_smc.getConfig().getMechanismLowerLimit().isPresent()) {

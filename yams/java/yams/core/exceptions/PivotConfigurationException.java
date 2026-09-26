@@ -4,9 +4,9 @@
 package yams.core.exceptions;
 
 /**
- * Thrown by {@link yams.core.mechanisms.positional.Pivot} or {@link
- * yams.core.mechanisms.config.PivotConfig} when a required field in {@link
- * yams.core.mechanisms.config.PivotConfig} is missing or invalid.
+ * Thrown by {@link yams.core.mechanisms.positional.Pivot} or
+ * {@link yams.core.mechanisms.config.PivotConfig} when a required field in
+ * {@link yams.core.mechanisms.config.PivotConfig} is missing or invalid.
  *
  * <p>Common triggers include:
  *
@@ -18,8 +18,8 @@ package yams.core.exceptions;
  * </ul>
  *
  * <p><b>Resolution:</b> Ensure {@code PivotConfig.withSmartMotorController(SmartMotorController)}
- * is called exactly once, and that the motor's {@code SmartMotorControllerConfig} includes {@code
- * withMomentOfInertia(Distance, Mass)} or {@code withMomentOfInertia(MomentOfInertia)} when
+ * is called exactly once, and that the motor's {@code SmartMotorControllerConfig} includes
+ * {@code withMomentOfInertia(Distance, Mass)} or {@code withMomentOfInertia(MomentOfInertia)} when
  * simulation is used.
  *
  * <p>Example minimal configuration:

@@ -3,6 +3,7 @@
 
 package yams.commands2.mechanisms;
 
+import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
@@ -10,6 +11,7 @@ import org.wpilib.command2.Subsystem;
 import org.wpilib.command2.button.Trigger;
 import org.wpilib.units.measure.Angle;
 import yams.core.exceptions.DifferentialMechanismConfigurationException;
+import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.mechanisms.config.DifferentialMechanismConfig;
 import yams.core.motorcontrollers.SmartMotorController;
 
@@ -46,6 +48,17 @@ public class DifferentialMechanism extends yams.core.mechanisms.positional.Diffe
    * @param diffConfig Lower {@link DifferentialMechanismConfig} to use.
    * @implNote Both motor controllers' configs must be {@link yams.commands2.config.SmartMotorControllerConfig}s that share the same
    *           {@link Subsystem} set via {@code withSubsystem(Subsystem)}.
+   * @throws DifferentialMechanismConfigurationException if the starting tilt or twist angle is not
+   *                                                     configured, if the length is not
+   *                                                     configured, in simulation if the MOI is not
+   *                                                     configured, or if the left and right motor
+   *                                                     controllers' configs do not share the same
+   *                                                     {@link Subsystem}.
+   * @throws NoSuchElementException if the left or right {@link SmartMotorController} was never set
+   *                                on {@code diffConfig}.
+   * @throws SmartMotorControllerConfigurationException if either motor controller's config does not
+   *                                                    have a {@link Subsystem} set via
+   *                                                    {@code withSubsystem(Subsystem)}.
    */
   public DifferentialMechanism(DifferentialMechanismConfig diffConfig) {
     super(diffConfig);

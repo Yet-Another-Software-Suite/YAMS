@@ -211,7 +211,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
 
   /**
    * Flip the translation for the red alliance, so forward on the stick always drives away from
-   * your own alliance wall.
+   * your own alliance wall. Has no effect while robot relative translation is enabled.
    *
    * @param enabled Alliance relative translation while true.
    * @return this
@@ -334,6 +334,10 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
    * Calculate the {@link ChassisVelocities} for the current inputs and modes.
    *
    * @return Field relative {@link ChassisVelocities}.
+   * @throws SwerveDriveConfigurationException if translation only mode is enabled, aiming is
+   *                                           enabled with an aim target set, or heading control
+   *                                           is enabled with a heading set, and no rotation PID
+   *                                           controller is configured.
    */
   @Override
   public ChassisVelocities get() {
@@ -413,11 +417,9 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
   }
 
   private Translation2d applyAllianceRelative(Translation2d translation) {
-    if (!allianceRelative) {
+    // Robot relative translation does not depend on the alliance, so it is never flipped.
+    if (!allianceRelative || robotRelative) {
       return translation;
-    }
-    if (robotRelative) {
-      throw new IllegalStateException("Cannot use robot relative translation with alliance relative control!");
     }
     if (MatchState.getAlliance().isPresent() && MatchState.getAlliance().get() == Alliance.RED) {
       return translation.rotateBy(Rotation2d.k180deg);
@@ -425,6 +427,13 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
     return translation;
   }
 
+  /**
+   * Get the rotation PID controller needed by the heading, aim, and translation only modes.
+   *
+   * @param config {@link SwerveDriveConfig} of the drive.
+   * @return Rotation PID controller.
+   * @throws SwerveDriveConfigurationException if no rotation PID controller is configured.
+   */
   private static PIDController requireRotationPID(SwerveDriveConfig config) {
     return config.getRotationPID().orElseThrow(() -> new SwerveDriveConfigurationException("No rotation PID controller configured", "Heading, aim, and translation only control are unavailable", "withRotationController(PIDController)"));
   }

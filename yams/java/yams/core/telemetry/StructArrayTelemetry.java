@@ -18,8 +18,8 @@ import org.wpilib.util.struct.Struct;
 /**
  * Struct array Telemetry for arbitrary {@link Struct} serializable array types.
  *
- * <p>A lightweight wrapper that publishes a struct-encoded array value (e.g. {@code
- * SwerveModuleState[]}, {@code SwerveModulePosition[]}) to NetworkTables and/or a WPILib DataLog.
+ * <p>A lightweight wrapper that publishes a struct-encoded array value (e.g.
+ * {@code SwerveModuleState[]}, {@code SwerveModulePosition[]}) to NetworkTables and/or a WPILib DataLog.
  * It mirrors {@link StructTelemetry}, but publishes an array of struct-serializable values instead
  * of a single value.
  *
@@ -205,6 +205,10 @@ public class StructArrayTelemetry<T, F> {
    * Get the value.
    *
    * @return value of telemetry.
+   * @throws RuntimeException if the telemetry is enabled but no tuning subscriber exists because
+   *                          this field is not tunable or
+   *                          {@link #setupNetworkTables(NetworkTable, NetworkTable)} was not called with a non-null tuning table while
+   *                          enabled.
    */
   public T[] get() {
     if (!enabled) {

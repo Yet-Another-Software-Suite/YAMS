@@ -7,6 +7,7 @@ import static org.wpilib.units.Units.KilogramSquareMeters;
 import static org.wpilib.units.Units.Kilograms;
 import static org.wpilib.units.Units.Meters;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.function.Supplier;
@@ -164,6 +165,9 @@ public class DifferentialMechanismConfig {
    * @param left  Left {@link SmartMotorController}
    * @param right Right {@link SmartMotorController}
    * @return {@link DifferentialMechanismConfig} for chaining.
+   * @throws DifferentialMechanismConfigurationException if the left or right
+   *                                                     {@link SmartMotorController} is already
+   *                                                     defined, e.g. through the constructor.
    */
   public DifferentialMechanismConfig withSmartMotorControllers(SmartMotorController left, SmartMotorController right) {
     if (leftMotorController.isPresent())
@@ -246,8 +250,8 @@ public class DifferentialMechanismConfig {
   }
 
   /**
-   * Configure the MOI directly instead of estimating it with the length and mass of the {@link
-   * DifferentialMechanism} for simulation.
+   * Configure the MOI directly instead of estimating it with the length and mass of the
+   * {@link DifferentialMechanism} for simulation.
    *
    * @param MOI Moment of Inertia of the {@link DifferentialMechanism}
    * @return {@link DifferentialMechanismConfig} for chaining.
@@ -269,8 +273,8 @@ public class DifferentialMechanismConfig {
   }
 
   /**
-   * Configure the MOI directly instead of estimating it with the length and mass of the {@link
-   * DifferentialMechanism} for simulation.
+   * Configure the MOI directly instead of estimating it with the length and mass of the
+   * {@link DifferentialMechanism} for simulation.
    *
    * @param length Length of the {@link DifferentialMechanism}.
    * @param weight Weight of the {@link DifferentialMechanism}
@@ -298,8 +302,8 @@ public class DifferentialMechanismConfig {
   /**
    * Set the differential mechanism position configuration.
    *
-   * @param mechanismPositionConfig {@link MechanismPositionConfig} for the {@link
-   *                                DifferentialMechanism}
+   * @param mechanismPositionConfig {@link MechanismPositionConfig} for the
+   *                                {@link DifferentialMechanism}
    * @return {@link DifferentialMechanismConfig} for chaining
    */
   public DifferentialMechanismConfig withMechanismPositionConfig(MechanismPositionConfig mechanismPositionConfig) {
@@ -374,6 +378,9 @@ public class DifferentialMechanismConfig {
    * Apply config changes from this class to the {@link SmartMotorController}
    *
    * @return {@link SmartMotorController#applyConfig(SmartMotorControllerConfig)} result.
+   * @throws NoSuchElementException if the left or right {@link SmartMotorController} was never set
+   *                                through the constructor or
+   *                                {@link #withSmartMotorControllers(SmartMotorController, SmartMotorController)}.
    */
   public boolean applyConfig() {
     return leftMotorController.orElseThrow().applyConfig(leftMotorController.orElseThrow().getConfig()) && rightMotorController.orElseThrow().applyConfig(rightMotorController.orElseThrow().getConfig());
@@ -383,6 +390,9 @@ public class DifferentialMechanismConfig {
    * Get the moment of inertia for the {@link DifferentialMechanism} simulation.
    *
    * @return Moment of Inertia.
+   * @throws DifferentialMechanismConfigurationException if the MOI was not set with
+   *                                                     {@link #withMOI(MomentOfInertia)} or
+   *                                                     {@link #withMOI(Distance, Mass)}.
    */
   public double getMOI() {
     if (MOI.isPresent()) {
@@ -485,6 +495,9 @@ public class DifferentialMechanismConfig {
    * Get the left {@link SmartMotorController} of the {@link DifferentialMechanism}
    *
    * @return left {@link SmartMotorController}
+   * @throws NoSuchElementException if the left {@link SmartMotorController} was never set through
+   *                                the constructor or
+   *                                {@link #withSmartMotorControllers(SmartMotorController, SmartMotorController)}.
    */
   public SmartMotorController getLeftMotorController() {
     return leftMotorController.orElseThrow();
@@ -494,6 +507,9 @@ public class DifferentialMechanismConfig {
    * Get the right {@link SmartMotorController} of the {@link DifferentialMechanism}
    *
    * @return right {@link SmartMotorController}
+   * @throws NoSuchElementException if the right {@link SmartMotorController} was never set through
+   *                                the constructor or
+   *                                {@link #withSmartMotorControllers(SmartMotorController, SmartMotorController)}.
    */
   public SmartMotorController getRightMotorController() {
     return rightMotorController.orElseThrow();
@@ -509,8 +525,8 @@ public class DifferentialMechanismConfig {
   }
 
   /**
-   * Get the {@link MechanismPositionConfig} associated with this {@link
-   * DifferentialMechanismConfig}.
+   * Get the {@link MechanismPositionConfig} associated with this
+   * {@link DifferentialMechanismConfig}.
    *
    * @return An {@link Optional} containing the {@link MechanismPositionConfig} if present,
    *         otherwise an empty

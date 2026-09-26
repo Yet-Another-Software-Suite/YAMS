@@ -193,6 +193,16 @@ public class TalonFXWrapper extends SmartMotorController {
    * @param controller  {@link TalonFX}
    * @param motor       {@link DCMotor}
    * @param smartConfig {@link SmartMotorControllerConfig}
+   * @throws SmartMotorControllerConfigurationException if the vendor config is not a
+   *                                                    TalonFXConfiguration, if
+   *                                                    {@link #applyConfig(SmartMotorControllerConfig)}
+   *                                                    rejects the config, or if the motor is a
+   *                                                    single NEO 550 without a stator current
+   *                                                    limit of at most 40A.
+   * @throws IllegalArgumentException                   if
+   *                                                    {@link #applyConfig(SmartMotorControllerConfig)}
+   *                                                    rejects an unsupported option (see its
+   *                                                    documentation).
    */
   public TalonFXWrapper(TalonFX controller, DCMotor motor, SmartMotorControllerConfig<?> smartConfig) {
     this.m_talonfx = controller;
@@ -237,6 +247,10 @@ public class TalonFXWrapper extends SmartMotorController {
    * Configure FOC for the current position and velocity control requests.
    *
    * @param foc FOC state.
+   * @throws SmartMotorControllerConfigurationException if the position or velocity control request
+   *                                                    is a TorqueCurrentFOC request (set through
+   *                                                    withVendorControlRequest), which does not
+   *                                                    support toggling FOC.
    */
   private void setFOC(boolean foc) {
     switch (m_positionReq.getName()) {
@@ -283,6 +297,10 @@ public class TalonFXWrapper extends SmartMotorController {
    * Enable FOC control, ignored if the device isn't PRO licensed.
    *
    * @return {@link TalonFXWrapper} for ease of use.
+   * @throws SmartMotorControllerConfigurationException if the position or velocity control request
+   *                                                    is a TorqueCurrentFOC request (set through
+   *                                                    withVendorControlRequest), which does not
+   *                                                    support toggling FOC.
    */
   public TalonFXWrapper enableFOC() {
     setFOC(true);
@@ -293,6 +311,10 @@ public class TalonFXWrapper extends SmartMotorController {
    * Disable FOC control, ignored if the device isn't PRO licensed.
    *
    * @return {@link TalonFXWrapper} for ease of use.
+   * @throws SmartMotorControllerConfigurationException if the position or velocity control request
+   *                                                    is a TorqueCurrentFOC request (set through
+   *                                                    withVendorControlRequest), which does not
+   *                                                    support toggling FOC.
    */
   public TalonFXWrapper disableFOC() {
     setFOC(false);
@@ -318,9 +340,14 @@ public class TalonFXWrapper extends SmartMotorController {
     // throw new RuntimeException("Unsupported operation");
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @implNote Does nothing, the TalonFX fuses its feedback sources on the device, so there is no
+   *           relative encoder to resynchronize.
+   */
   @Override
   public void synchronizeRelativeEncoder() {
-    throw new RuntimeException("Unsupported operation");
   }
 
   @Override
@@ -387,11 +414,14 @@ public class TalonFXWrapper extends SmartMotorController {
   }
 
   /**
-   * Check if {@link CANdi} PWM1 is used as the {@link
-   * com.ctre.phoenix6.configs.ExternalFeedbackConfigs#ExternalFeedbackSensorSource} in {@link
-   * TalonFXConfiguration#Feedback}.
+   * Check if {@link CANdi} PWM1 is used as the
+   * {@link com.ctre.phoenix6.configs.ExternalFeedbackConfigs#ExternalFeedbackSensorSource} in
+   * {@link TalonFXConfiguration#Feedback}.
    *
    * @return True if CANdi PWM1 is used and configured.
+   * @throws IllegalArgumentException if the feedback sensor source is set to a CANdi PWM1 source
+   *                                  but no CANdi is configured as the external encoder in the
+   *                                  SmartMotorControllerConfig.
    */
   public boolean useCANdiPWM1() {
     m_configurator.refresh(m_talonConfig.Feedback);
@@ -403,11 +433,14 @@ public class TalonFXWrapper extends SmartMotorController {
   }
 
   /**
-   * Check if {@link CANdi} PWM1 is used as the {@link
-   * com.ctre.phoenix6.configs.ExternalFeedbackConfigs#ExternalFeedbackSensorSource} in {@link
-   * TalonFXConfiguration#Feedback}.
+   * Check if {@link CANdi} PWM1 is used as the
+   * {@link com.ctre.phoenix6.configs.ExternalFeedbackConfigs#ExternalFeedbackSensorSource} in
+   * {@link TalonFXConfiguration#Feedback}.
    *
    * @return True if CANdi is used.
+   * @throws IllegalArgumentException if the feedback sensor source is set to a CANdi PWM2 source
+   *                                  but no CANdi is configured as the external encoder in the
+   *                                  SmartMotorControllerConfig.
    */
   public boolean useCANdiPWM2() {
     m_configurator.refresh(m_talonConfig.Feedback);
@@ -418,6 +451,12 @@ public class TalonFXWrapper extends SmartMotorController {
     return configured;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   */
   @Override
   public void setEncoderVelocity(LinearVelocity velocity) {
     setEncoderVelocity(m_config.convertToMechanism(velocity));
@@ -472,6 +511,12 @@ public class TalonFXWrapper extends SmartMotorController {
      */
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   */
   @Override
   public void setEncoderPosition(Distance distance) {
     setEncoderPosition(m_config.convertToMechanism(distance));
@@ -491,6 +536,13 @@ public class TalonFXWrapper extends SmartMotorController {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the configured position control request
+   *                                                    is not a supported Phoenix 6 position
+   *                                                    request.
+   */
   @Override
   public void setPosition(Angle angle) {
     setpointVelocity = Optional.empty();
@@ -533,16 +585,39 @@ public class TalonFXWrapper extends SmartMotorController {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured, or if the configured position
+   *                                                    control request is not a supported Phoenix 6
+   *                                                    position request.
+   */
   @Override
   public void setPosition(Distance distance) {
     setPosition(m_config.convertToMechanism(distance));
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured, or if the configured velocity
+   *                                                    control request is not a supported Phoenix 6
+   *                                                    velocity request.
+   */
   @Override
   public void setVelocity(LinearVelocity velocity) {
     setVelocity(m_config.convertToMechanism(velocity));
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the configured velocity control request
+   *                                                    is not a supported Phoenix 6 velocity
+   *                                                    request.
+   */
   @Override
   public void setVelocity(AngularVelocity angularVelocity) {
     setpointPosition = Optional.empty();
@@ -581,6 +656,15 @@ public class TalonFXWrapper extends SmartMotorController {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if a feedforward force is given without an
+   *                                                    LQR controller and the mechanism
+   *                                                    circumference is not configured, or if the
+   *                                                    configured velocity control request is not a
+   *                                                    supported Phoenix 6 velocity request.
+   */
   @Override
   public void setVelocity(AngularVelocity angularVelocity, Force feedforwardForce) {
     setpointPosition = Optional.empty();
@@ -641,6 +725,27 @@ public class TalonFXWrapper extends SmartMotorController {
     // m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismStatorDutyCycle(dutyCycle));
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if a closed loop tolerance is configured
+   *                                                    without an LQR controller, if a feedforward
+   *                                                    is configured for SLOT_3, if an external
+   *                                                    encoder inversion or gearing is set while no
+   *                                                    external encoder is used, if an integrated
+   *                                                    encoder inversion is set, if the vendor
+   *                                                    control request is not a supported Phoenix 6
+   *                                                    position or velocity request, if the
+   *                                                    continuous wrapping bounds are not exactly
+   *                                                    one rotation apart, or if not every required
+   *                                                    config option was read during validation.
+   * @throws IllegalArgumentException                   if an LQR controller is configured together
+   *                                                    with a closed loop tolerance, if a follower
+   *                                                    is neither a TalonFX nor a TalonFXS, or if a
+   *                                                    closed loop control period, temperature
+   *                                                    cutoff, feedback synchronization threshold,
+   *                                                    or voltage compensation is configured.
+   */
   @Override
   public boolean applyConfig(SmartMotorControllerConfig<?> config) {
     config.resetValidationCheck();
@@ -983,7 +1088,7 @@ public class TalonFXWrapper extends SmartMotorController {
                 "withVendorControlRequest()");
         }
       } else {
-        throw new SmartMotorControllerConfigurationException("TalonFX(" + m_talonfx.getDeviceID() + ") does not support the '" + ((ControlRequest) req).getName() + "' control request!", "Cannot use given control request",
+        throw new SmartMotorControllerConfigurationException("TalonFX(" + m_talonfx.getDeviceID() + ") does not support the '" + req + "' control request!", "Cannot use given control request",
             "withVendorControlRequest()");
       }
     }
@@ -1056,16 +1161,34 @@ public class TalonFXWrapper extends SmartMotorController {
     return m_dcmotor;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   */
   @Override
   public LinearVelocity getMeasurementVelocity() {
     return m_config.convertFromMechanism(getMechanismVelocity());
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   */
   @Override
   public Distance getMeasurementPosition() {
     return m_config.convertFromMechanism(getMechanismPosition());
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   */
   @Override
   public LinearAcceleration getMeasurementAcceleration() {
     return m_config.convertFromMechanism(getMechanismAcceleration());
@@ -1173,6 +1296,12 @@ public class TalonFXWrapper extends SmartMotorController {
     //    SensorPhaseValue.Aligned); m_configurator.apply(m_talonConfig);
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   */
   @Override
   public void setMotionProfileMaxVelocity(LinearVelocity maxVelocity) {
     if (m_trapezoidProfile.isPresent()) {
@@ -1191,6 +1320,12 @@ public class TalonFXWrapper extends SmartMotorController {
     });
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   */
   @Override
   public void setMotionProfileMaxAcceleration(LinearAcceleration maxAcceleration) {
     if (m_trapezoidProfile.isPresent()) {
@@ -1294,6 +1429,12 @@ public class TalonFXWrapper extends SmartMotorController {
     return status;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the active closed loop slot is SLOT_3,
+   *                                                    which the TalonFX does not support.
+   */
   @Override
   public void setKp(double kP) {
     m_config.getPID(m_slot).ifPresent(pidController -> {
@@ -1313,6 +1454,12 @@ public class TalonFXWrapper extends SmartMotorController {
     });
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the active closed loop slot is SLOT_3,
+   *                                                    which the TalonFX does not support.
+   */
   @Override
   public void setKi(double kI) {
     m_config.getPID(m_slot).ifPresent(pidController -> {
@@ -1332,6 +1479,12 @@ public class TalonFXWrapper extends SmartMotorController {
     });
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the active closed loop slot is SLOT_3,
+   *                                                    which the TalonFX does not support.
+   */
   @Override
   public void setKd(double kD) {
     m_config.getPID(m_slot).ifPresent(pidController -> {
@@ -1351,6 +1504,12 @@ public class TalonFXWrapper extends SmartMotorController {
     });
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the active closed loop slot is SLOT_3,
+   *                                                    which the TalonFX does not support.
+   */
   @Override
   public void setFeedback(double kP, double kI, double kD) {
     m_config.getPID(m_slot).ifPresent(pidController -> {
@@ -1377,6 +1536,12 @@ public class TalonFXWrapper extends SmartMotorController {
     });
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the active closed loop slot is SLOT_3,
+   *                                                    which the TalonFX does not support.
+   */
   @Override
   public void setKs(double kS) {
     m_config.getSimpleFeedforward(m_slot).ifPresent(simpleMotorFeedforward -> {
@@ -1402,6 +1567,12 @@ public class TalonFXWrapper extends SmartMotorController {
     });
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the active closed loop slot is SLOT_3,
+   *                                                    which the TalonFX does not support.
+   */
   @Override
   public void setKv(double kV) {
     m_config.getSimpleFeedforward(m_slot).ifPresent(simpleMotorFeedforward -> {
@@ -1427,6 +1598,12 @@ public class TalonFXWrapper extends SmartMotorController {
     });
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the active closed loop slot is SLOT_3,
+   *                                                    which the TalonFX does not support.
+   */
   @Override
   public void setKa(double kA) {
     m_config.getSimpleFeedforward(m_slot).ifPresent(simpleMotorFeedforward -> {
@@ -1452,6 +1629,12 @@ public class TalonFXWrapper extends SmartMotorController {
     });
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the active closed loop slot is SLOT_3,
+   *                                                    which the TalonFX does not support.
+   */
   @Override
   public void setKg(double kG) {
     m_config.getArmFeedforward(m_slot).ifPresent(armFeedforward -> {
@@ -1474,6 +1657,12 @@ public class TalonFXWrapper extends SmartMotorController {
     });
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the active closed loop slot is SLOT_3,
+   *                                                    which the TalonFX does not support.
+   */
   @Override
   public void setFeedforward(double kS, double kV, double kA, double kG) {
     m_config.getSimpleFeedforward(m_slot).ifPresent(simpleMotorFeedforward -> {
@@ -1566,6 +1755,13 @@ public class TalonFXWrapper extends SmartMotorController {
     });
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference and lower
+   *                                                    limit are configured and the lower limit is
+   *                                                    greater than or equal to upperLimit.
+   */
   @Override
   public void setMeasurementUpperLimit(Distance upperLimit) {
     if (m_config.getMechanismCircumference().isPresent() && m_config.getMechanismLowerLimit().isPresent()) {
@@ -1580,6 +1776,13 @@ public class TalonFXWrapper extends SmartMotorController {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference and upper
+   *                                                    limit are configured and lowerLimit is
+   *                                                    greater than or equal to the upper limit.
+   */
   @Override
   public void setMeasurementLowerLimit(Distance lowerLimit) {
     if (m_config.getMechanismCircumference().isPresent() && m_config.getMechanismUpperLimit().isPresent()) {
@@ -1594,6 +1797,12 @@ public class TalonFXWrapper extends SmartMotorController {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if a lower limit is configured and it is
+   *                                                    greater than or equal to upperLimit.
+   */
   @Override
   public void setMechanismUpperLimit(Angle upperLimit) {
     m_config.getMechanismLowerLimit().ifPresent(lowerLimit -> {
@@ -1608,6 +1817,12 @@ public class TalonFXWrapper extends SmartMotorController {
     });
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if an upper limit is configured and
+   *                                                    lowerLimit is greater than or equal to it.
+   */
   @Override
   public void setMechanismLowerLimit(Angle lowerLimit) {
     m_config.getMechanismUpperLimit().ifPresent(upperLimit -> {
@@ -1622,6 +1837,11 @@ public class TalonFXWrapper extends SmartMotorController {
     });
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if lower is greater than or equal to upper.
+   */
   @Override
   public void setMechanismLimits(Angle lower, Angle upper) {
     m_config.withSoftLimits(lower, upper);
@@ -1672,6 +1892,12 @@ public class TalonFXWrapper extends SmartMotorController {
    *
    * @param slot Slot to use.
    * @implNote The TalonFX supports 3 slots, not 4!
+   * @throws IllegalArgumentException                   if slot is SLOT_3, since the TalonFX only
+   *                                                    supports slots 0 through 2.
+   * @throws SmartMotorControllerConfigurationException if the position or velocity control request
+   *                                                    is a TorqueCurrentFOC request (set through
+   *                                                    withVendorControlRequest), which this method
+   *                                                    does not handle.
    */
   @Override
   public void setClosedLoopSlot(ClosedLoopControllerSlot slot) {

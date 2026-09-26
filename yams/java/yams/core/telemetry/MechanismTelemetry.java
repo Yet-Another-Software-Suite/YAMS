@@ -26,10 +26,10 @@ import yams.core.motorcontrollers.SmartMotorController;
  * time, and motor controller data to NetworkTables under the {@code Mechanisms/<name>} and
  * {@code Tuning/<name>} tables. Data is visible in SmartDashboard, Elastic, and Advantage Scope.
  *
- * <p>This class is managed internally by mechanism classes such as {@link
- * yams.core.mechanisms.positional.Arm},
- * {@link yams.core.mechanisms.positional.Elevator}, and {@link
- * yams.core.mechanisms.velocity.FlyWheel}. You do <b>not</b> usually construct it directly; instead
+ * <p>This class is managed internally by mechanism classes such as
+ * {@link yams.core.mechanisms.positional.Arm},
+ * {@link yams.core.mechanisms.positional.Elevator}, and
+ * {@link yams.core.mechanisms.velocity.FlyWheel}. You do <b>not</b> usually construct it directly; instead
  * enable telemetry through the mechanism's configuration object before constructing the mechanism:
  *
  * <h2>Enabling via ArmConfig</h2>
@@ -73,8 +73,8 @@ public class MechanismTelemetry {
    */
   private double                    prevTimestamp     = 0;
   /**
-   * DataLog entry name prefix for this mechanism's fields, if configured via {@link
-   * #setupTelemetry(String, String)}. Must be set before {@link #publishDouble(String, String)},
+   * DataLog entry name prefix for this mechanism's fields, if configured via
+   * {@link #setupTelemetry(String, String)}. Must be set before {@link #publishDouble(String, String)},
    * {@link #publishStruct(String, Struct)}, or
    * {@link #publishStructArray(String, Struct)} are called, since each of those decides once, at
    * the time it's called, whether to also create a DataLog entry.
@@ -152,8 +152,8 @@ public class MechanismTelemetry {
   /**
    * Publish a mechanism-level {@code double} field under this mechanism's data table, and if this
    * mechanism was set up with a DataLog name via {@link #setupTelemetry(String, String)} to the
-   * DataLog as well. For fields tied to a {@link SmartMotorController} use {@link
-   * #setupTelemetry(String, SmartMotorController)} or
+   * DataLog as well. For fields tied to a {@link SmartMotorController} use
+   * {@link #setupTelemetry(String, SmartMotorController)} or
    * {@link #addMotorController(String, SmartMotorController)} instead.
    *
    * @param key  NetworkTables key, relative to this mechanism's data table.

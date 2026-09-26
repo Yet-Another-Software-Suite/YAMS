@@ -22,6 +22,7 @@ import org.wpilib.smartdashboard.MechanismLigament2d;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.LinearVelocity;
+import yams.core.exceptions.FlyWheelConfigurationException;
 import yams.core.mechanisms.config.FlyWheelConfig;
 import yams.core.mechanisms.config.MechanismPositionConfig;
 import yams.core.motorcontrollers.SmartMotorController;
@@ -127,6 +128,8 @@ public class FlyWheel extends SmartVelocityMechanism {
    * Get the {@link LinearVelocity} of the FlyWheel.
    *
    * @return FlyWheel {@link LinearVelocity}
+   * @throws FlyWheelConfigurationException if the FlyWheel diameter is not set in the
+   *                                        {@link FlyWheelConfig}.
    */
   public LinearVelocity getLinearVelocity() {
     return m_config.getLinearVelocity(m_smc.getMechanismVelocity());
@@ -156,6 +159,8 @@ public class FlyWheel extends SmartVelocityMechanism {
    * Set the FlyWheel to the given speed.
    *
    * @param speed {@link LinearVelocity} to go to.
+   * @throws FlyWheelConfigurationException if the FlyWheel diameter is not set in the
+   *                                        {@link FlyWheelConfig}.
    */
   @Override
   public void setMeasurementVelocitySetpoint(LinearVelocity speed) {

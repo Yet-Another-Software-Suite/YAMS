@@ -13,12 +13,12 @@
  * <h2>Available Mechanisms</h2>
  * <ul>
  * <li>{@link yams.core.mechanisms.positional.Arm} single-jointed arm rotating about a fixed
- * pivot, configured with {@link yams.core.mechanisms.config.ArmConfig}</li> <li>{@link
- * yams.core.mechanisms.positional.Elevator} linear-travel elevator stage, configured with {@link
- * yams.core.mechanisms.config.ElevatorConfig}</li> <li>{@link
- * yams.core.mechanisms.positional.Pivot} generic pivot that may rotate continuously or within
- * bounded limits, configured with {@link yams.core.mechanisms.config.PivotConfig}</li> <li>{@link
- * yams.core.mechanisms.positional.DifferentialMechanism} mechanism driven by two motors in a
+ * pivot, configured with {@link yams.core.mechanisms.config.ArmConfig}</li> <li>
+ * {@link yams.core.mechanisms.positional.Elevator} linear-travel elevator stage, configured with
+ * {@link yams.core.mechanisms.config.ElevatorConfig}</li> <li>
+ * {@link yams.core.mechanisms.positional.Pivot} generic pivot that may rotate continuously or within
+ * bounded limits, configured with {@link yams.core.mechanisms.config.PivotConfig}</li> <li>
+ * {@link yams.core.mechanisms.positional.DifferentialMechanism} mechanism driven by two motors in a
  * differential arrangement (e.g. differential wrist), configured with
  * {@link yams.core.mechanisms.config.DifferentialMechanismConfig}</li>
  * <li>{@link yams.core.mechanisms.positional.DoubleJointedArm} two-segment arm whose second joint

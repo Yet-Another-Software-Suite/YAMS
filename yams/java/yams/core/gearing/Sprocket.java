@@ -47,6 +47,7 @@ public class Sprocket {
    * Create the sprocket given the teeth of each sprocket in the chain.
    *
    * @param sprocketReductionStage Sprocket teeth, in the form of "IN:OUT" => IN/OUT
+   * @throws NoStagesGivenException if no reduction stages are given.
    */
   public Sprocket(double... sprocketReductionStage) {
     setupStages(sprocketReductionStage);
@@ -56,6 +57,9 @@ public class Sprocket {
    * Construct the {@link Sprocket} with the reduction stages given.
    *
    * @param reductionStage List of stages in the format of "IN:OUT".
+   * @throws InvalidStageGivenException if any stage string does not contain a {@code ':'}
+   *                                    separator.
+   * @throws NoStagesGivenException     if {@code reductionStage} is empty.
    */
   public Sprocket(String[] reductionStage) {
     double[] stages = new double[reductionStage.length];
@@ -77,6 +81,9 @@ public class Sprocket {
    *
    * @param stages List of stages in the format of "IN:OUT".
    * @return Sprocket representation
+   * @throws InvalidStageGivenException if any stage string does not contain a {@code ':'}
+   *                                    separator.
+   * @throws NoStagesGivenException     if no stages are given.
    */
   public static Sprocket fromStages(String... stages) {
     return new Sprocket(stages);
@@ -86,6 +93,7 @@ public class Sprocket {
    * Set up the reduction stages for the {@link Sprocket}
    *
    * @param sprocketReductionStage Reductions in the form of "IN:OUT" => IN/OUT
+   * @throws NoStagesGivenException if {@code sprocketReductionStage} is empty.
    */
   private void setupStages(double[] sprocketReductionStage) {
     reductionStages = sprocketReductionStage;

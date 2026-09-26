@@ -59,6 +59,11 @@ public class Arm extends SmartPositionalMechanism {
    * @param config {@link ArmConfig} to use.
    * @param smc    {@link SmartMotorController} for the Arm.
    * @implNote Protected so only {@link yams.commands2.mechanisms.Arm} can construct this.
+   * @throws ArmConfigurationException if running in simulation and the arm length is not set, the
+   *                                   lower or upper hard limit is not set, neither a starting
+   *                                   position nor an external encoder zero offset is set on the
+   *                                   {@link SmartMotorControllerConfig}, or the starting position
+   *                                   is outside the hard limits.
    */
   protected Arm(ArmConfig config, SmartMotorController smc) {
     this.m_config = config;
@@ -190,6 +195,14 @@ public class Arm extends SmartPositionalMechanism {
     return getAngle().isNear(angle, within);
   }
 
+  /**
+   * Whether the arm is at or above its maximum angle, defined by the motor controller upper soft
+   * limit if present, otherwise the arm upper hard limit.
+   *
+   * @return True if the arm is at its configured maximum.
+   * @throws ArmConfigurationException if neither a motor controller upper soft limit nor an arm
+   *                                   upper hard limit is configured.
+   */
   @Override
   public boolean isAtMax() {
     if (m_smc.getConfig().getMechanismUpperLimit().isPresent()) {
@@ -201,6 +214,14 @@ public class Arm extends SmartPositionalMechanism {
     throw new ArmConfigurationException("Arm upper hard and motor controller soft limit is empty", "Cannot create max trigger.", "withHardLimits(Angle,Angle)");
   }
 
+  /**
+   * Whether the arm is at or below its minimum angle, defined by the motor controller lower soft
+   * limit if present, otherwise the arm lower hard limit.
+   *
+   * @return True if the arm is at its configured minimum.
+   * @throws ArmConfigurationException if neither a motor controller lower soft limit nor an arm
+   *                                   lower hard limit is configured.
+   */
   @Override
   public boolean isAtMin() {
     if (m_smc.getConfig().getMechanismLowerLimit().isPresent()) {

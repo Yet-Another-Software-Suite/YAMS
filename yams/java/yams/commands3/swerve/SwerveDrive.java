@@ -15,6 +15,8 @@ import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.Distance;
 import yams.commands3.config.SwerveDriveConfig;
 import yams.commands3.telemetry.CommandTunable;
+import yams.core.exceptions.SmartMotorControllerConfigurationException;
+import yams.core.exceptions.SwerveDriveConfigurationException;
 
 /**
  * Command-based extension of {@link yams.core.mechanisms.swerve.SwerveDrive} that adds the
@@ -55,6 +57,12 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
    *
    * @param config {@link SwerveDriveConfig} to use, with a {@link Mechanism} set via
    *               {@code withMechanism(Mechanism)}.
+   * @throws IllegalStateException                      on a real robot (not in simulation), if no
+   *                                                    gyro supplier was set with
+   *                                                    {@code withGyro(Supplier)}.
+   * @throws SmartMotorControllerConfigurationException if a module's drive motor has no mechanism
+   *                                                    circumference configured (e.g. via
+   *                                                    {@code SwerveModuleConfig.withWheelRadius(Distance)}).
    */
   public SwerveDrive(SwerveDriveConfig config) {
     super(config);
@@ -89,6 +97,9 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
    *                                   loop instead.
    * @return {@link Command} to drive the swerve drive.
    * @implNote Not compatible with AdvantageKit
+   * @throws IllegalStateException when the returned command runs, if a gyro angular velocity
+   *                               scale factor is configured but no gyro supplier was set with
+   *                               {@code withGyro(Supplier)}.
    */
   public Command drive(Supplier<ChassisVelocities> robotRelativeChassisSpeeds) {
     return mechanism.run(coroutine -> {
@@ -107,6 +118,12 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
    *             facing towards RED
    * @return {@link Command} to drive the robot to the given pose.
    * @implNote Not compatible with AdvantageKit
+   * @throws SwerveDriveConfigurationException when the returned command runs, if the
+   *                                           translation or rotation PID controller is not
+   *                                           configured.
+   * @throws IllegalStateException when the returned command runs, if a gyro angular velocity
+   *                               scale factor is configured but no gyro supplier was set with
+   *                               {@code withGyro(Supplier)}.
    */
   public Command driveToPose(Pose2d pose) {
     return mechanism.run(coroutine -> {
@@ -129,6 +146,12 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
    * @param rotationTolerance    Maximum heading error from the pose to be considered at the pose.
    * @return {@link Command} to drive the robot to the given pose.
    * @implNote Not compatible with AdvantageKit
+   * @throws SwerveDriveConfigurationException when the returned command runs, if the
+   *                                           translation or rotation PID controller is not
+   *                                           configured.
+   * @throws IllegalStateException when the returned command runs, if a gyro angular velocity
+   *                               scale factor is configured but no gyro supplier was set with
+   *                               {@code withGyro(Supplier)}.
    */
   public Command driveToPose(Pose2d pose, Distance translationTolerance, Angle rotationTolerance) {
     return mechanism.run(coroutine -> {
@@ -155,7 +178,12 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
            Math.abs(getAngleDifferenceFromPose(pose).in(Radians)) <= rotationTolerance.in(Radians);
   }
 
-  /** Stop the drive by commanding zero chassis speeds. */
+  /**
+   * Stop the drive by commanding zero chassis speeds.
+   *
+   * @throws IllegalStateException if a gyro angular velocity scale factor is configured but no gyro
+   *                               supplier was set with {@code withGyro(Supplier)}.
+   */
   public void stop() {
     setRobotRelativeChassisSpeeds(new ChassisVelocities());
   }

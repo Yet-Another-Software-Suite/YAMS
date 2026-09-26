@@ -31,8 +31,8 @@ import yams.core.motorcontrollers.simulation.SensorData;
  * match-time window or by an arbitrary {@link java.util.function.BooleanSupplier} trigger,
  * allowing a team to script realistic sensor behaviour during automated testing.
  *
- * <p>The finished configuration is converted to a {@link
- * yams.core.motorcontrollers.simulation.Sensor} via {@link #getSensor()}, which handles the
+ * <p>The finished configuration is converted to a
+ * {@link yams.core.motorcontrollers.simulation.Sensor} via {@link #getSensor()}, which handles the
  * real/simulated value arbitration at runtime.
  *
  * <h2>Example</h2>

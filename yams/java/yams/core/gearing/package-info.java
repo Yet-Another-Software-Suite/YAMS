@@ -17,16 +17,16 @@
  * driven). Multiple stages are multiplied automatically.
  * <li><b>{@link yams.core.gearing.Sprocket}</b> models a chain or belt drive between two
  * sprockets, computing the linear or rotational ratio from sprocket tooth counts and, for linear
- * drives, the pitch diameter. <li><b>{@link yams.core.gearing.MechanismGearing}</b> ties a {@link
- * yams.core.gearing.GearBox} to the physical output dimensions of a mechanism (e.g., spool radius
+ * drives, the pitch diameter. <li><b>{@link yams.core.gearing.MechanismGearing}</b> ties a
+ * {@link yams.core.gearing.GearBox} to the physical output dimensions of a mechanism (e.g., spool radius
  * for an elevator, arm length for a rotary mechanism) so that motor-side units can be converted
  * directly to real-world position and velocity.
  * </ul>
  *
  * <h2>Example Single-Stage 5:1 Reduction</h2>
  *
- * <p>Pass the driver tooth count first, then the driven tooth count. The ratio is {@code driven /
- * driver}, so {@code 12} driver teeth and {@code 60} driven teeth produces a 5:1 reduction:
+ * <p>Pass the driver tooth count first, then the driven tooth count. The ratio is
+ * {@code driven / driver}, so {@code 12} driver teeth and {@code 60} driven teeth produces a 5:1 reduction:
  *
  * <pre>{@code
  * // Represents a single 12T-to-60T gear stage (5:1 overall reduction).

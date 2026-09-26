@@ -10,6 +10,7 @@ import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.Distance;
 import yams.core.exceptions.DoubleJointedArmConfigurationException;
+import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.mechanisms.config.ArmConfig;
 import yams.core.motorcontrollers.SmartMotorController;
 
@@ -40,9 +41,18 @@ public class DoubleJointedArm extends yams.core.mechanisms.positional.DoubleJoin
    * @param lowerSMC    {@link SmartMotorController} driving the lower joint.
    * @param upperConfig Upper {@link ArmConfig} to use.
    * @param upperSMC    {@link SmartMotorController} driving the upper joint.
-   * @implNote Both motor controllers' configs must be {@link
-   *           yams.commands3.config.SmartMotorControllerConfig}s that share the same
+   * @implNote Both motor controllers' configs must be
+   *           {@link yams.commands3.config.SmartMotorControllerConfig}s that share the same
    *           {@link Mechanism} set via {@code withMechanism(Mechanism)}.
+   * @throws DoubleJointedArmConfigurationException if either motor controller's starting position
+   *                                                or either arm length is not configured, in
+   *                                                simulation if any arm lower or upper hard limit
+   *                                                is not configured, or if the two motor
+   *                                                controllers' configs do not share the same
+   *                                                {@link Mechanism}.
+   * @throws SmartMotorControllerConfigurationException if either motor controller's config does not
+   *                                                    have a {@link Mechanism} set via
+   *                                                    {@code withMechanism(Mechanism)}.
    */
   public DoubleJointedArm(ArmConfig lowerConfig, SmartMotorController lowerSMC, ArmConfig upperConfig, SmartMotorController upperSMC) {
     super(lowerConfig, lowerSMC, upperConfig, upperSMC);

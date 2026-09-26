@@ -52,8 +52,8 @@ public class SwerveDriveConfig {
    */
   private Optional<TelemetryVerbosity> telemetryVerbosity = Optional.empty();
   /**
-   * User specified {@link SwerveDriveTelemetryConfig}, takes precedence over {@link
-   * #telemetryVerbosity} if present.
+   * User specified {@link SwerveDriveTelemetryConfig}, takes precedence over
+   * {@link #telemetryVerbosity} if present.
    */
   private Optional<SwerveDriveTelemetryConfig> specifiedTelemetryConfig = Optional.empty();
   /**
@@ -65,8 +65,8 @@ public class SwerveDriveConfig {
    */
   private Optional<Supplier<AngularVelocity>> gyroAngularVelocitySupplier = Optional.empty();
   /**
-   * Derives the gyro angular velocity from the gyro angle ({@link #getGyroAngle()}) when {@link
-   * #gyroAngularVelocitySupplier} is not configured, in both simulation and real robot code.
+   * Derives the gyro angular velocity from the gyro angle ({@link #getGyroAngle()}) when
+   * {@link #gyroAngularVelocitySupplier} is not configured, in both simulation and real robot code.
    */
   private final DerivativeTimeFilter gyroAngularVelocityFilter = new DerivativeTimeFilter(Milliseconds.of(20));
   /**
@@ -460,8 +460,8 @@ public class SwerveDriveConfig {
   }
 
   /**
-   * Get the user specified {@link SwerveDriveTelemetryConfig}, if configured via {@link
-   * #withTelemetry(String,SwerveDriveTelemetryConfig)}.
+   * Get the user specified {@link SwerveDriveTelemetryConfig}, if configured via
+   * {@link #withTelemetry(String,SwerveDriveTelemetryConfig)}.
    *
    * @return {@link SwerveDriveTelemetryConfig} if configured.
    */
@@ -509,6 +509,7 @@ public class SwerveDriveConfig {
    * Get the gyro angle with inversions and offsets applied.
    *
    * @return {@link Angle} of the gyro.
+   * @throws IllegalStateException if no gyro supplier was set with {@link #withGyro(Supplier)}.
    */
   public Angle getGyroAngle() {
     if (gyroSupplier.isEmpty()) {
@@ -558,6 +559,7 @@ public class SwerveDriveConfig {
    *
    * @param robotRelativeVelocity The chassis speeds to set the robot to achieve.
    * @return {@link ChassisVelocities} of the robot after angular velocity skew correction.
+   * @throws IllegalStateException if no gyro supplier was set with {@link #withGyro(Supplier)}.
    */
   private ChassisVelocities angularVelocitySkewCorrection(ChassisVelocities robotRelativeVelocity) {
     AngularVelocity gyroAngularVelocity;
@@ -586,6 +588,9 @@ public class SwerveDriveConfig {
    *
    * @param speeds {@link ChassisVelocities} to optimize.
    * @return Optimized {@link ChassisVelocities}.
+   * @throws IllegalStateException if a gyro angular velocity scale factor is configured with
+   *                               {@link #withGyroAngularVelocityScaleFactor(double)} but no gyro
+   *                               supplier was set with {@link #withGyro(Supplier)}.
    */
   public ChassisVelocities optimizeRobotRelativeChassisSpeeds(ChassisVelocities speeds) {
     if (angularVelocityScaleFactor.isPresent()) {

@@ -9,6 +9,7 @@ import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.RadiansPerSecond;
 import static org.wpilib.units.Units.RotationsPerSecond;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -32,8 +33,8 @@ import yams.core.mechanisms.swerve.SwerveDrive;
 
 /**
  * Helper class to easily transform Controller inputs into workable Chassis speeds. Intended to
- * easily create an interface that generates {@link ChassisVelocities} from {@link
- * NiDsXboxController} <p> <br /> Inspired by SciBorgs FRC 1155. <br /> Example: <pre>
+ * easily create an interface that generates {@link ChassisVelocities} from
+ * {@link NiDsXboxController} <p> <br /> Inspired by SciBorgs FRC 1155. <br /> Example: <pre>
  * {@code
  *   NiDsXboxController driverXbox = new NiDsXboxController(0);
  *
@@ -58,8 +59,8 @@ import yams.core.mechanisms.swerve.SwerveDrive;
  * <h2>Joystick-to-{@link yams.core.mechanisms.swerve.SwerveDrive} adapter</h2>
  * <p>
  * {@link SwerveInputStream} acts as a bridge between raw controller axis values (in the range
- * {@code [-1, 1]}) and the {@link ChassisVelocities} that {@link
- * yams.core.mechanisms.swerve.SwerveDrive} expects. It handles deadbands, axis scaling, non-linear
+ * {@code [-1, 1]}) and the {@link ChassisVelocities} that
+ * {@link yams.core.mechanisms.swerve.SwerveDrive} expects. It handles deadbands, axis scaling, non-linear
  * (cubed) response curves, field-relative / alliance-relative flipping, and multiple drive modes
  * (angular-velocity, heading-snap, translation-only, aim-at-target). Because it
  * implements
@@ -358,6 +359,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
 
   /**
    * Modify the output {@link ChassisVelocities} so that it is always relative to your alliance.
+   * Has no effect while robot relative control is enabled.
    *
    * @return self
    */
@@ -367,6 +369,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
 
   /**
    * Modify the output {@link ChassisVelocities} so that it is always relative to your alliance.
+   * Has no effect while robot relative control is enabled.
    *
    * @param enabled Alliance aware {@link ChassisVelocities} output.
    * @return self
@@ -539,8 +542,8 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
   /**
    * Find {@link SwerveInputMode} based off existing parameters of the {@link SwerveInputStream}
    *
-   * @return The calculated {@link SwerveInputMode}, defaults to {@link
-   *         SwerveInputMode#ANGULAR_VELOCITY}.
+   * @return The calculated {@link SwerveInputMode}, defaults to
+   *         {@link SwerveInputMode#ANGULAR_VELOCITY}.
    */
   private SwerveInputMode findMode() {
     if (translationOnlyEnabled.isPresent() && translationOnlyEnabled.get().getAsBoolean()) {
@@ -678,16 +681,17 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
 
   /**
    * Apply alliance aware translation which flips the {@link Translation2d} if the robot is on the
-   * Blue alliance.
+   * Red alliance. Skipped while robot relative control is enabled, since robot relative translation
+   * does not depend on the alliance.
    *
    * @param fieldRelativeTranslation Field-relative {@link Translation2d} to flip.
    * @return Alliance-oriented {@link Translation2d}
    */
   private Translation2d applyAllianceAwareTranslation(Translation2d fieldRelativeTranslation) {
+    if (robotRelative.isPresent() && robotRelative.get().getAsBoolean()) {
+      return fieldRelativeTranslation;
+    }
     if (allianceRelative.isPresent() && allianceRelative.get().getAsBoolean()) {
-      if (robotRelative.isPresent() && robotRelative.get().getAsBoolean()) {
-        throw new RuntimeException("Cannot use robot oriented control with Alliance aware movement!");
-      }
       if (MatchState.getAlliance().isPresent() && MatchState.getAlliance().get() == Alliance.RED) {
         return fieldRelativeTranslation.rotateBy(Rotation2d.k180deg);
       }
@@ -722,6 +726,19 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
     return config.getRotationPID().orElseThrow(() -> new SwerveDriveConfigurationException("No rotation PID controller configured", "Heading, aim, and translation only control are unavailable", "withRotationController(PIDController)"));
   }
 
+  /**
+   * Calculate the {@link ChassisVelocities} for the current controller inputs and active mode.
+   *
+   * @return Field relative {@link ChassisVelocities} for the current inputs.
+   * @throws SwerveDriveConfigurationException if translation only, heading, or aim mode is active
+   *                                           (including the fallback to translation only mode
+   *                                           when no controller rotation axis is set) and no
+   *                                           rotation PID controller is configured.
+   * @throws NoSuchElementException            if heading or aim mode is requested without a
+   *                                           heading or aim target configured and no controller
+   *                                           rotation axis is set, so the stream falls back to
+   *                                           angular velocity mode without an axis.
+   */
   @Override
   public ChassisVelocities get() {
     var config = swerveDrive.getConfig();

@@ -40,8 +40,8 @@ public class SmartMotorControllerConfig extends yams.core.motorcontrollers.Smart
   /**
    * Construct the {@link SmartMotorControllerConfig} with a {@link Mechanism} added later.
    *
-   * @implNote You must use {@link #withMechanism(Mechanism)} before passing off to {@link
-   *           SmartMotorController}
+   * @implNote You must use {@link #withMechanism(Mechanism)} before passing off to
+   *           {@link SmartMotorController}
    */
   public SmartMotorControllerConfig() {
     super();
@@ -68,13 +68,16 @@ public class SmartMotorControllerConfig extends yams.core.motorcontrollers.Smart
   }
 
   /**
-   * Sets the {@link Mechanism} for the {@link SmartMotorControllerConfig} to pass along to {@link
-   * SmartMotorController} and the mechanisms built on it. Must be set if a {@link Mechanism} was
+   * Sets the {@link Mechanism} for the {@link SmartMotorControllerConfig} to pass along to
+   * {@link SmartMotorController} and the mechanisms built on it. Must be set if a {@link Mechanism} was
    * not defined previously.
    *
    * @param mechanism {@link Mechanism} to use.
    * @return {@link SmartMotorControllerConfig} for chaining.
    * @implNote Does not copy the entire config, should NEVER be reused.
+   * @throws SmartMotorControllerConfigurationException if a {@link Mechanism} has already been set,
+   *                                                    either through the constructor or a previous
+   *                                                    call to this method.
    */
   public SmartMotorControllerConfig withMechanism(Mechanism mechanism) {
     if (this.mechanism.isPresent()) {
@@ -88,6 +91,10 @@ public class SmartMotorControllerConfig extends yams.core.motorcontrollers.Smart
    * Get the mechanism controlled by the {@link SmartMotorController}
    *
    * @return {@link Mechanism} controlled.
+   * @throws SmartMotorControllerConfigurationException if no {@link Mechanism} was set, i.e. the
+   *                                                    no-arg constructor (or a null mechanism) was
+   *                                                    used and {@link #withMechanism(Mechanism)}
+   *                                                    was never called.
    */
   public Mechanism getMechanism() {
     if (mechanism.isEmpty()) {
@@ -101,6 +108,9 @@ public class SmartMotorControllerConfig extends yams.core.motorcontrollers.Smart
    * a shared "Live Tuning" {@link org.wpilib.command3.Command} on {@link #getMechanism()} via
    * {@link SmartMotorControllerCommandRegistry} that pulls tuned values from NetworkTables each
    * loop, and registers cleanup so the registration is removed when the controller is closed.
+   *
+   * @throws IllegalStateException if a different {@link Mechanism} instance with the same name has
+   *                               already registered a "Live Tuning" command.
    */
   @Override
   public void setupLiveTuning() {

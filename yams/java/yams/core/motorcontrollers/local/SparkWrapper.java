@@ -152,6 +152,18 @@ public class SparkWrapper extends SmartMotorController {
    *                   be a
    *                   brushless motor.
    * @param config     {@link SmartMotorControllerConfig} to apply.
+   * @throws SmartMotorControllerConfigurationException if the vendor config does not match the
+   *                                                    controller type (a SparkMaxConfig is
+   *                                                    required for a SparkMax and a
+   *                                                    SparkFlexConfig for a SparkFlex), if the
+   *                                                    motor is a NEO 550 with no stator current
+   *                                                    limit or a stator current limit above 40A,
+   *                                                    or if
+   *                                                    {@link #applyConfig(SmartMotorControllerConfig)}
+   *                                                    rejects the config.
+   * @throws IllegalArgumentException if the controller is neither a SparkMax nor a SparkFlex, or if
+   *                                  {@link #applyConfig(SmartMotorControllerConfig)} rejects the
+   *                                  config.
    */
   public SparkWrapper(SparkBase controller, DCMotor motor, SmartMotorControllerConfig<?> config) {
     if (controller instanceof SparkMax) {
@@ -273,6 +285,14 @@ public class SparkWrapper extends SmartMotorController {
     configureSpark(() -> m_spark.configure(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters));
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   * @throws UnsupportedOperationException if called outside of simulation, since REV Sparks do not
+   *                                       support setting encoder velocity.
+   */
   @Override
   public void setEncoderVelocity(LinearVelocity velocity) {
     setEncoderVelocity(m_config.convertToMechanism(velocity));
@@ -290,6 +310,12 @@ public class SparkWrapper extends SmartMotorController {
     m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismPosition(angle));
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws UnsupportedOperationException if called outside of simulation, since REV Sparks do not
+   *                                       support setting encoder velocity.
+   */
   @Override
   public void setEncoderVelocity(AngularVelocity velocity) {
     if (!RobotBase.isSimulation())
@@ -298,6 +324,12 @@ public class SparkWrapper extends SmartMotorController {
     m_sparkAbsoluteEncoderSim.ifPresent(absoluteEncoderSim -> absoluteEncoderSim.setVelocity(velocity.in(RotationsPerSecond)));
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   */
   @Override
   public void setEncoderPosition(Distance distance) {
     setEncoderPosition(m_config.convertToMechanism(distance));
@@ -318,11 +350,23 @@ public class SparkWrapper extends SmartMotorController {
     });
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   */
   @Override
   public void setPosition(Distance distance) {
     setPosition(m_config.convertToMechanism(distance));
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   */
   @Override
   public void setVelocity(LinearVelocity velocity) {
     setVelocity(m_config.convertToMechanism(velocity));
@@ -343,6 +387,13 @@ public class SparkWrapper extends SmartMotorController {
     });
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if a feedforward force is given without an
+   *                                                    LQR controller and the mechanism
+   *                                                    circumference is not configured.
+   */
   @Override
   public void setVelocity(AngularVelocity angularVelocity, Force feedforwardForce) {
     setpointPosition = Optional.empty();
@@ -362,6 +413,33 @@ public class SparkWrapper extends SmartMotorController {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if a supply current limit is configured; if
+   *                                                    an external encoder discontinuity point,
+   *                                                    zero offset, inversion, or gearing is
+   *                                                    configured without an external encoder; if a
+   *                                                    closed loop control period, closed loop
+   *                                                    controller maximum voltage, or feedback
+   *                                                    synchronization threshold is configured
+   *                                                    without an exponential profile or LQR
+   *                                                    controller; if a temperature cutoff is
+   *                                                    configured without an exponential or
+   *                                                    trapezoidal profile; if a vendor control
+   *                                                    request is configured; if the continuous
+   *                                                    wrapping bounds do not span exactly one
+   *                                                    rotation; if a linear closed loop controller
+   *                                                    is in use without a mechanism circumference;
+   *                                                    or if a required config option is left
+   *                                                    unhandled during validation.
+   * @throws IllegalArgumentException if a closed loop control period is configured with an
+   *                                  exponential profile or LQR controller while not in closed loop
+   *                                  mode, if a closed loop tolerance is configured with an LQR
+   *                                  controller, if the external encoder is not a
+   *                                  SparkAbsoluteEncoder, if a follower is not a SparkMax or
+   *                                  SparkFlex, or if relative encoder inversion is configured.
+   */
   @Override
   public boolean applyConfig(SmartMotorControllerConfig<?> config) {
     m_config = config;
@@ -690,16 +768,34 @@ public class SparkWrapper extends SmartMotorController {
     return m_motor;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   */
   @Override
   public LinearVelocity getMeasurementVelocity() {
     return m_config.convertFromMechanism(getMechanismVelocity());
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   */
   @Override
   public Distance getMeasurementPosition() {
     return m_config.convertFromMechanism(getMechanismPosition());
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   */
   @Override
   public LinearAcceleration getMeasurementAcceleration() {
     return m_config.convertFromMechanism(getMechanismAcceleration());
@@ -766,6 +862,12 @@ public class SparkWrapper extends SmartMotorController {
     m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   */
   @Override
   public void setMotionProfileMaxVelocity(LinearVelocity maxVelocity) {
     if (m_trapezoidProfile.isPresent()) {
@@ -780,6 +882,12 @@ public class SparkWrapper extends SmartMotorController {
     });
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   *                                                    configured.
+   */
   @Override
   public void setMotionProfileMaxAcceleration(LinearAcceleration maxAcceleration) {
     if (m_trapezoidProfile.isPresent()) {
@@ -841,6 +949,13 @@ public class SparkWrapper extends SmartMotorController {
     });
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if an exponential profile is configured with
+   *                                                    a linear closed loop controller and the
+   *                                                    mechanism circumference is not configured.
+   */
   @Override
   public void setExponentialProfile(OptionalDouble kV, OptionalDouble kA, Optional<Voltage> maxInput) {
     if (m_expoProfile.isPresent() && m_config.getExponentialProfile().isPresent()) {
@@ -1082,6 +1197,13 @@ public class SparkWrapper extends SmartMotorController {
     });
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if a lower limit is configured and it is
+   *                                                    greater than or equal to the new upper
+   *                                                    limit.
+   */
   @Override
   public void setMeasurementUpperLimit(Distance upperLimit) {
     if (m_config.getMechanismCircumference().isPresent() && m_config.getMechanismLowerLimit().isPresent()) {
@@ -1096,6 +1218,12 @@ public class SparkWrapper extends SmartMotorController {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if an upper limit is configured and the new
+   *                                                    lower limit is greater than or equal to it.
+   */
   @Override
   public void setMeasurementLowerLimit(Distance lowerLimit) {
     if (m_config.getMechanismCircumference().isPresent() && m_config.getMechanismUpperLimit().isPresent()) {
@@ -1110,6 +1238,13 @@ public class SparkWrapper extends SmartMotorController {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if a lower limit is configured and it is
+   *                                                    greater than or equal to the new upper
+   *                                                    limit.
+   */
   @Override
   public void setMechanismUpperLimit(Angle upperLimit) {
     m_config.getMechanismLowerLimit().ifPresent(lowerLimit -> {
@@ -1124,6 +1259,12 @@ public class SparkWrapper extends SmartMotorController {
     });
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if an upper limit is configured and the new
+   *                                                    lower limit is greater than or equal to it.
+   */
   @Override
   public void setMechanismLowerLimit(Angle lowerLimit) {
     m_config.getMechanismUpperLimit().ifPresent(upperLimit -> {
@@ -1138,6 +1279,13 @@ public class SparkWrapper extends SmartMotorController {
     });
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws SmartMotorControllerConfigurationException if both limits are non-null and the lower
+   *                                                    limit is greater than or equal to the upper
+   *                                                    limit.
+   */
   @Override
   public void setMechanismLimits(Angle lower, Angle upper) {
     m_config.withSoftLimits(lower, upper);
@@ -1186,6 +1334,7 @@ public class SparkWrapper extends SmartMotorController {
    *
    * @param slot {@link ClosedLoopControllerSlot} to convert
    * @return spark specific slot {@link ClosedLoopSlot}
+   * @throws IllegalArgumentException if the slot is not one of SLOT_0 through SLOT_3.
    */
   private ClosedLoopSlot getSparkClosedLoopSlot(ClosedLoopControllerSlot slot) {
     switch (slot) {

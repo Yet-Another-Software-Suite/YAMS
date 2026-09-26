@@ -202,6 +202,10 @@ public class StructTelemetry<T, F> {
    * Get the value.
    *
    * @return value of telemetry.
+   * @throws RuntimeException if the telemetry is enabled but no tuning subscriber exists because
+   *                          this field is not tunable or
+   *                          {@link #setupNetworkTables(NetworkTable, NetworkTable)} was not called with a non-null tuning table while
+   *                          enabled.
    */
   public T get() {
     if (!enabled) {

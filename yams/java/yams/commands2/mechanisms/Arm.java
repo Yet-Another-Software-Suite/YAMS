@@ -10,6 +10,8 @@ import org.wpilib.command2.Subsystem;
 import org.wpilib.command2.button.Trigger;
 import org.wpilib.math.filter.Debouncer.DebounceType;
 import org.wpilib.units.measure.Angle;
+import yams.core.exceptions.ArmConfigurationException;
+import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.mechanisms.config.ArmConfig;
 import yams.core.motorcontrollers.SmartMotorController;
 
@@ -52,6 +54,13 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    * @param smc    {@link SmartMotorController} for the Arm.
    * @implNote {@code smc}'s config must be a {@link yams.commands2.config.SmartMotorControllerConfig}
    *           with a {@link Subsystem} set via {@code withSubsystem(Subsystem)}.
+   * @throws ArmConfigurationException in simulation, if the arm length, lower hard limit, or upper
+   *                                   hard limit is not configured, if neither a starting position
+   *                                   nor an external encoder zero offset is configured, or if the
+   *                                   starting position is outside the hard limits.
+   * @throws SmartMotorControllerConfigurationException if {@code smc}'s config does not have a
+   *                                                    {@link Subsystem} set via
+   *                                                    {@code withSubsystem(Subsystem)}.
    */
   public Arm(ArmConfig config, SmartMotorController smc) {
     super(config, smc);
@@ -145,6 +154,9 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    * on the arm.
    *
    * @return {@link Trigger} on maximum of the arm.
+   * @throws ArmConfigurationException when the returned trigger is evaluated, if neither a motor
+   *                                   controller upper soft limit nor an arm upper hard limit is
+   *                                   configured.
    */
   public Trigger max() {
     return new Trigger(this::isAtMax);
@@ -154,6 +166,9 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    * Minimum angle of the arm given by the soft limit or hard limit of the arm.
    *
    * @return {@link Trigger} on minimum of the arm.
+   * @throws ArmConfigurationException when the returned trigger is evaluated, if neither a motor
+   *                                   controller lower soft limit nor an arm lower hard limit is
+   *                                   configured.
    */
   public Trigger min() {
     return new Trigger(this::isAtMin);

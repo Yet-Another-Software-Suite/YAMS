@@ -34,8 +34,8 @@ import yams.core.motorcontrollers.SmartMotorController;
  * {@link org.wpilib.simulation.SingleJointedArmSim}.
  *
  * <p>This supplier steps WPILib's {@code SingleJointedArmSim} physics model each control loop and
- * exposes the resulting angle, angular velocity, current draw, and voltage through the {@link
- * yams.core.motorcontrollers.SimSupplier} interface. The arm's gear ratio and control period are
+ * exposes the resulting angle, angular velocity, current draw, and voltage through the
+ * {@link yams.core.motorcontrollers.SimSupplier} interface. The arm's gear ratio and control period are
  * read directly from the associated {@link yams.core.motorcontrollers.SmartMotorController}'s
  * config, so no duplication of parameters is required.
  *

@@ -10,6 +10,8 @@ import org.wpilib.command2.Subsystem;
 import org.wpilib.command2.button.Trigger;
 import org.wpilib.math.filter.Debouncer.DebounceType;
 import org.wpilib.units.measure.Angle;
+import yams.core.exceptions.PivotConfigurationException;
+import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.mechanisms.config.PivotConfig;
 import yams.core.motorcontrollers.SmartMotorController;
 
@@ -43,6 +45,12 @@ public class Pivot extends yams.core.mechanisms.positional.Pivot implements Comm
    * @param smc    {@link SmartMotorController} driving the pivot.
    * @implNote {@code smc}'s config must be a {@link yams.commands2.config.SmartMotorControllerConfig}
    *           with a {@link Subsystem} set via {@code withSubsystem(Subsystem)}.
+   * @throws PivotConfigurationException in simulation, if the pivot lower hard limit, upper hard
+   *                                     limit, or starting position is not configured, or if the
+   *                                     starting position is outside the hard limits.
+   * @throws SmartMotorControllerConfigurationException if {@code smc}'s config does not have a
+   *                                                    {@link Subsystem} set via
+   *                                                    {@code withSubsystem(Subsystem)}.
    */
   public Pivot(PivotConfig config, SmartMotorController smc) {
     super(config, smc);
@@ -167,6 +175,9 @@ public class Pivot extends yams.core.mechanisms.positional.Pivot implements Comm
    * limit on the pivot.
    *
    * @return {@link Trigger} on maximum of the pivot.
+   * @throws PivotConfigurationException when the returned trigger is evaluated, if neither a motor
+   *                                     controller upper soft limit nor a pivot upper hard limit is
+   *                                     configured.
    */
   public Trigger max() {
     return new Trigger(this::isAtMax);
@@ -176,6 +187,9 @@ public class Pivot extends yams.core.mechanisms.positional.Pivot implements Comm
    * Minimum angle of the pivot given by the soft limit or hard limit of the pivot.
    *
    * @return {@link Trigger} on minimum of the pivot.
+   * @throws PivotConfigurationException when the returned trigger is evaluated, if neither a motor
+   *                                     controller lower soft limit nor a pivot lower hard limit is
+   *                                     configured.
    */
   public Trigger min() {
     return new Trigger(this::isAtMin);

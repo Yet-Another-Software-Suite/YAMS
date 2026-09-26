@@ -242,6 +242,7 @@ public class SensorData {
    * Get the sensor value as a double.
    *
    * @return Sensor value.
+   * @throws IllegalStateException if this sensor field is not of type double.
    */
   public double getAsDouble() {
     if (m_type != HALValueType.kDouble) {
@@ -254,6 +255,7 @@ public class SensorData {
    * Get the sensor value as an int.
    *
    * @return Sensor value.
+   * @throws IllegalStateException if this sensor field is not of type int.
    */
   public int getAsInt() {
     if (m_type != HALValueType.kInt) {
@@ -266,6 +268,7 @@ public class SensorData {
    * Get the sensor value as a long.
    *
    * @return Sensor value.
+   * @throws IllegalStateException if this sensor field is not of type long.
    */
   public long getAsLong() {
     if (m_type != HALValueType.kLong) {
@@ -278,6 +281,7 @@ public class SensorData {
    * Get the sensor value as a boolean.
    *
    * @return Sensor value.
+   * @throws IllegalStateException if this sensor field is not of type boolean.
    */
   public boolean getAsBoolean() {
     if (m_type != HALValueType.kBoolean) {

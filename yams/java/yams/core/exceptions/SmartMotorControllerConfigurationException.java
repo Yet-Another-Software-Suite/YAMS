@@ -4,8 +4,8 @@
 package yams.core.exceptions;
 
 /**
- * Thrown by {@link yams.core.motorcontrollers.SmartMotorControllerConfig} or a {@link
- * yams.core.motorcontrollers.SmartMotorController} wrapper when the applied configuration contains
+ * Thrown by {@link yams.core.motorcontrollers.SmartMotorControllerConfig} or a
+ * {@link yams.core.motorcontrollers.SmartMotorController} wrapper when the applied configuration contains
  * conflicting, incomplete, or incompatible settings.
  *
  * <p>Common triggers include:
@@ -15,8 +15,8 @@ package yams.core.exceptions;
  * <li>Auto-synchronization threshold set while a distance-based (linear) mechanism circumference
  * is configured the two options are mutually exclusive
  * <li>Mechanism circumference undefined when a conversion method (e.g., {@code withZeroOffset()},
- * {@code withSoftLimits()}, or linear unit conversions) requires it fix with {@code
- * withMechanismCircumference(Distance)} <li>External encoder discontinuity point outside the
+ * {@code withSoftLimits()}, or linear unit conversions) requires it fix with
+ * {@code withMechanismCircumference(Distance)} <li>External encoder discontinuity point outside the
  * allowed values (must be {@code Rotations.of(0.5)} or {@code Rotations.of(1)}) <li>Continuous
  * wrapping requested while soft limits are also set, or while a distance-based (linear) mechanism
  * circumference is configured <li>Continuous wrapping or closed-loop tolerance requested without a
@@ -30,8 +30,8 @@ package yams.core.exceptions;
  * {@code OPEN_LOOP} requires {@code withControlMode(ControlMode.CLOSED_LOOP)}
  * </ul>
  *
- * <p><b>Resolution:</b> Read the exception message; it always names the specific {@code
- * SmartMotorControllerConfig} method to call (or to remove) to resolve the conflict.
+ * <p><b>Resolution:</b> Read the exception message; it always names the specific
+ * {@code SmartMotorControllerConfig} method to call (or to remove) to resolve the conflict.
  *
  * <p>Example triggering continuous-wrapping conflict:
  *

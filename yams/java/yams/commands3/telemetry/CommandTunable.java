@@ -9,8 +9,8 @@ import org.wpilib.tunable.ComplexTunable;
 import org.wpilib.tunable.TunableTable;
 
 /**
- * Adapts an {@link Command} for publishing to NetworkTables via {@link
- * org.wpilib.tunable.Tunables}. Unlike {@code org.wpilib.command2.Command}, {@link Command} does
+ * Adapts an {@link Command} for publishing to NetworkTables via
+ * {@link org.wpilib.tunable.Tunables}. Unlike {@code org.wpilib.command2.Command}, {@link Command} does
  * not implement {@link ComplexTunable} itself, so this wrapper exposes a "running" boolean that
  * schedules the command when set true and cancels it when set false.
  */

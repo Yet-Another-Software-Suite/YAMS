@@ -54,7 +54,8 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  * Swerve drivetrain built with YAMS: four Kraken X60 modules with fused CANcoders and a Pigeon 2.
  *
  * <p>The WCP code extended CTRE's generated swerve drivetrain and drove it with swerve requests.
- * Teleop driving now goes through a YAMS {@link SwerveInputStream}, which handles the deadband,
+ * IF YOU CAN USE CTRE GENERATED SWERVE CODE, DO SO!
+ * This example has Teleop driving go through a YAMS {@link SwerveInputStream}, which handles the deadband,
  * response curve, alliance relative control, heading hold, and aiming; this mechanism adds Choreo
  * path following and vision.
  */

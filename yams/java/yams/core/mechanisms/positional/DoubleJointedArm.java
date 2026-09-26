@@ -122,6 +122,11 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
    * @param upperSMC    {@link SmartMotorController} driving the upper joint.
    * @implNote Protected so only {@link yams.commands2.mechanisms.DoubleJointedArm} can construct
    *           this.
+   * @throws DoubleJointedArmConfigurationException if either {@link SmartMotorControllerConfig}
+   *                                                has no starting position, either {@link ArmConfig}
+   *                                                has no length, or running in simulation and either
+   *                                                {@link ArmConfig} is missing its lower or upper hard
+   *                                                limit.
    */
   protected DoubleJointedArm(ArmConfig lowerConfig, SmartMotorController lowerSMC, ArmConfig upperConfig, SmartMotorController upperSMC) {
     m_lowerArmConfig = lowerConfig;
@@ -379,11 +384,23 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
     return m_upperSMC.getMechanismPosition();
   }
 
+  /**
+   * Not supported for {@link DoubleJointedArm}.
+   *
+   * @return Never returns.
+   * @throws RuntimeException always, since max limits are not supported for this mechanism.
+   */
   @Override
   public boolean isAtMax() {
     throw new RuntimeException("Unsupported operation");
   }
 
+  /**
+   * Not supported for {@link DoubleJointedArm}.
+   *
+   * @return Never returns.
+   * @throws RuntimeException always, since min limits are not supported for this mechanism.
+   */
   @Override
   public boolean isAtMin() {
     throw new RuntimeException("Unsupported operation");

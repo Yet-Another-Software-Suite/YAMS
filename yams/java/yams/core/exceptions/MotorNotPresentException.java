@@ -6,8 +6,8 @@ package yams.core.exceptions;
 import yams.core.mechanisms.SmartMechanism;
 
 /**
- * Thrown by a {@link yams.core.mechanisms.SmartMechanism} subclass when the primary {@link
- * yams.core.motorcontrollers.SmartMotorController} has not been set before the mechanism attempts
+ * Thrown by a {@link yams.core.mechanisms.SmartMechanism} subclass when the primary
+ * {@link yams.core.motorcontrollers.SmartMotorController} has not been set before the mechanism attempts
  * to use it.
  *
  * <p>This exception signals that the mechanism's motor slot is {@code null} either because no
@@ -17,8 +17,8 @@ import yams.core.mechanisms.SmartMechanism;
  * <p>Common triggers include:
  *
  * <ul>
- * <li>Constructing or activating a mechanism without calling the appropriate {@code
- * withSmartMotorController()} builder method on its config <li>Passing {@code null} as the motor
+ * <li>Constructing or activating a mechanism without calling the appropriate
+ * {@code withSmartMotorController()} builder method on its config <li>Passing {@code null} as the motor
  * argument to {@code setMotor()} or the config builder
  * </ul>
  *

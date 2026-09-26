@@ -29,8 +29,7 @@
  *
  * <h2>CANcoder discontinuity</h2>
  * <p>When a CANcoder is fused as the remote sensor, specifying a discontinuity point via
- * {@link
- * yams.core.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint} is
+ * {@link yams.core.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint} is
  * <strong>optional</strong>. If omitted, the CTRE default sensor range ({@code [0, 1)}) is used.
  * Unlike the REV absolute encoder, the Phoenix 6 firmware handles the wrap transparently in most
  * configurations.
