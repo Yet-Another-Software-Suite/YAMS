@@ -5,6 +5,8 @@
 package first.robot.mechanisms;
 
 import static first.robot.Constants.SwerveConstants.*;
+import static org.wpilib.units.Units.KilogramSquareMeters;
+import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Newtons;
 import static org.wpilib.units.Units.Rotations;
 
@@ -94,7 +96,7 @@ public class Swerve implements Mechanism {
 
         final Pigeon2 pigeon = new Pigeon2(Ports.kPigeon, Ports.kCANivoreCANBus);
 
-        final SwerveDriveConfig config = (SwerveDriveConfig) new SwerveDriveConfig(this, frontLeft, frontRight, backLeft, backRight)
+        final SwerveDriveConfig config = new SwerveDriveConfig(this, frontLeft, frontRight, backLeft, backRight)
             .withGyro(pigeon.getYaw().asSupplier())
             .withStartingPose(Pose2d.ZERO)
             .withMaximumModuleSpeed(kSpeedAt12Volts)
@@ -147,6 +149,8 @@ public class Swerve implements Mechanism {
             .withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5))
             .withIdleMode(MotorMode.BRAKE)
             .withStatorCurrentLimit(kSteerStatorCurrentLimit)
+            // Steer inertia from the CTRE Tuner X swerve defaults, used by the simulation.
+            .withMomentOfInertia(KilogramSquareMeters.of(0.01))
             .withMotorInverted(kSteerMotorInverted)
             .withTelemetry("angleMotor", TelemetryVerbosity.HIGH);
 
@@ -156,12 +160,24 @@ public class Swerve implements Mechanism {
         return new SwerveModule(new SwerveModuleConfig(driveController, steerController)
             .withLocation(location)
             .withOptimization(true)
+            // Scale drive speed by how far each wheel is from its target angle, as the CTRE swerve API
+            // does, so wheels do not drive full speed while still turning.
+            .withCosineCompensation(true)
+            // Too slow to steer by: hold the wheel angle rather than steer toward controller noise.
+            .withMinimumVelocity(MetersPerSecond.of(0.1))
+            // The drive gearing turns the wheel when the module steers; compensate as the CTRE API does.
+            .withCouplingRatio(kCoupleRatio)
             .withTelemetry(name, TelemetryVerbosity.HIGH));
     }
 
     /** Current estimated pose of the robot, blue alliance origin. */
     public Pose2d getPose() {
         return drive.getPose();
+    }
+
+    /** Module states last commanded, after optimization, in FL, FR, BL, BR order. */
+    public SwerveModuleVelocity[] getDesiredModuleStates() {
+        return drive.getDesiredModuleStates();
     }
 
     public void resetPose(Pose2d pose) {
@@ -242,15 +258,16 @@ public class Swerve implements Mechanism {
     }
 
     /**
-     * Whether Choreo trajectories should be mirrored for the red alliance. Empty while the alliance
-     * is unknown, in which case trajectories are skipped, as ChoreoLib's AutoFactory did.
+     * Whether Choreo trajectories should be mirrored for the red alliance. While the alliance is
+     * unknown, which is the default in simulation, trajectories are followed as blue instead of
+     * skipped like ChoreoLib's AutoFactory does, so the routine still runs.
      */
-    private static Optional<Boolean> shouldFlipTrajectories() {
+    private static boolean shouldFlipTrajectories() {
         final Optional<Alliance> alliance = MatchState.getAlliance();
         if (alliance.isEmpty()) {
-            DriverStationErrors.reportWarning("Alliance unknown; Choreo trajectory skipped", false);
+            DriverStationErrors.reportWarning("Alliance unknown; following Choreo trajectory as blue", false);
         }
-        return alliance.map(color -> color == Alliance.RED);
+        return alliance.map(color -> color == Alliance.RED).orElse(false);
     }
 
     /**
@@ -259,9 +276,7 @@ public class Swerve implements Mechanism {
      * @param trajectory Trajectory whose initial pose becomes the robot pose.
      */
     public void resetOdometry(Trajectory<SwerveSample> trajectory) {
-        shouldFlipTrajectories()
-            .flatMap(trajectory::getInitialPose)
-            .ifPresent(this::resetPose);
+        trajectory.getInitialPose(shouldFlipTrajectories()).ifPresent(this::resetPose);
     }
 
     /**
@@ -273,20 +288,20 @@ public class Swerve implements Mechanism {
      */
     public Command followTrajectory(Trajectory<SwerveSample> trajectory) {
         return run(coroutine -> {
-            final Optional<Boolean> flip = shouldFlipTrajectories();
-            if (flip.isEmpty() || trajectory.samples().isEmpty()) {
+            final boolean flip = shouldFlipTrajectories();
+            if (trajectory.samples().isEmpty()) {
                 return;
             }
             final Timer timer = new Timer();
             timer.start();
             while (true) {
-                trajectory.sampleAt(timer.get(), flip.get()).ifPresent(this::followPath);
+                trajectory.sampleAt(timer.get(), flip).ifPresent(this::followPath);
                 if (timer.get() > trajectory.getTotalTime()) {
                     break;
                 }
                 coroutine.yield();
             }
-            trajectory.getFinalSample(flip.get()).ifPresent(this::followPath);
+            trajectory.getFinalSample(flip).ifPresent(this::followPath);
         }).named("Follow " + trajectory.name());
     }
 

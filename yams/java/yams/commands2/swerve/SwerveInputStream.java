@@ -722,7 +722,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
    * @return Rotation PID controller.
    * @throws SwerveDriveConfigurationException if no rotation PID controller is configured.
    */
-  private static PIDController requireRotationPID(SwerveDriveConfig config) {
+  private static PIDController requireRotationPID(SwerveDriveConfig<?> config) {
     return config.getRotationPID().orElseThrow(() -> new SwerveDriveConfigurationException("No rotation PID controller configured", "Heading, aim, and translation only control are unavailable", "withRotationController(PIDController)"));
   }
 

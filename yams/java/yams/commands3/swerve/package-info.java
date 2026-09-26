@@ -19,7 +19,7 @@
  *
  * <pre>{@code
  * public class DriveMechanism implements Mechanism {
- *   private final SwerveDrive drive = new SwerveDrive((SwerveDriveConfig)
+ *   private final SwerveDrive drive = new SwerveDrive(
  *       new SwerveDriveConfig(this, frontLeft, frontRight, backLeft, backRight)
  *           .withTranslationController(new PIDController(1, 0, 0))
  *           .withRotationController(new PIDController(1, 0, 0)));

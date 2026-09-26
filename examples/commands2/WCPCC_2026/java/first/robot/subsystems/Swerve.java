@@ -5,6 +5,8 @@
 package first.robot.subsystems;
 
 import static first.robot.Constants.SwerveConstants.*;
+import static org.wpilib.units.Units.KilogramSquareMeters;
+import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Newtons;
 import static org.wpilib.units.Units.Rotations;
 
@@ -90,7 +92,7 @@ public class Swerve extends SubsystemBase {
 
         final Pigeon2 pigeon = new Pigeon2(Ports.kPigeon, Ports.kCANivoreCANBus);
 
-        final SwerveDriveConfig config = (SwerveDriveConfig) new SwerveDriveConfig(this, frontLeft, frontRight, backLeft, backRight)
+        final SwerveDriveConfig config = new SwerveDriveConfig(this, frontLeft, frontRight, backLeft, backRight)
             .withGyro(pigeon.getYaw().asSupplier())
             .withStartingPose(Pose2d.ZERO)
             .withMaximumModuleSpeed(kSpeedAt12Volts)
@@ -133,6 +135,8 @@ public class Swerve extends SubsystemBase {
             .withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5))
             .withIdleMode(MotorMode.BRAKE)
             .withStatorCurrentLimit(kSteerStatorCurrentLimit)
+            // Steer inertia from the CTRE Tuner X swerve defaults, used by the simulation.
+            .withMomentOfInertia(KilogramSquareMeters.of(0.01))
             .withMotorInverted(kSteerMotorInverted)
             .withTelemetry("angleMotor", TelemetryVerbosity.HIGH);
 
@@ -142,12 +146,24 @@ public class Swerve extends SubsystemBase {
         return new SwerveModule(new SwerveModuleConfig(driveController, steerController)
             .withLocation(location)
             .withOptimization(true)
+            // Scale drive speed by how far each wheel is from its target angle, as the CTRE swerve API
+            // does, so wheels do not drive full speed while still turning.
+            .withCosineCompensation(true)
+            // Too slow to steer by: hold the wheel angle rather than steer toward controller noise.
+            .withMinimumVelocity(MetersPerSecond.of(0.1))
+            // The drive gearing turns the wheel when the module steers; compensate as the CTRE API does.
+            .withCouplingRatio(kCoupleRatio)
             .withTelemetry(name, TelemetryVerbosity.HIGH));
     }
 
     /** Current estimated pose of the robot, blue alliance origin. */
     public Pose2d getPose() {
         return drive.getPose();
+    }
+
+    /** Module states last commanded, after optimization, in FL, FR, BL, BR order. */
+    public SwerveModuleVelocity[] getDesiredModuleStates() {
+        return drive.getDesiredModuleStates();
     }
 
     public void resetPose(Pose2d pose) {

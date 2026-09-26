@@ -627,24 +627,25 @@ public class TalonFXWrapper extends SmartMotorController {
     setpointVelocity = Optional.ofNullable(angularVelocity);
     setpointFeedforwardForce = Optional.empty();
     if (angularVelocity != null && m_lqr.isEmpty()) {
+      // The request objects are reused, so clear any feedforward left by setVelocity(velocity, force).
       switch (m_velocityReq.getName()) {
         case "MotionMagicVelocityDutyCycle":
-          ensureRequest(() -> m_talonfx.setControl(((MotionMagicVelocityDutyCycle) m_velocityReq).withVelocity(angularVelocity)));
+          ensureRequest(() -> m_talonfx.setControl(((MotionMagicVelocityDutyCycle) m_velocityReq).withVelocity(angularVelocity).withFeedForward(0)));
           break;
         case "MotionMagicVelocityTorqueCurrentFOC":
-          ensureRequest(() -> m_talonfx.setControl(((MotionMagicVelocityTorqueCurrentFOC) m_velocityReq).withVelocity(angularVelocity)));
+          ensureRequest(() -> m_talonfx.setControl(((MotionMagicVelocityTorqueCurrentFOC) m_velocityReq).withVelocity(angularVelocity).withFeedForward(0)));
           break;
         case "MotionMagicVelocityVoltage":
-          ensureRequest(() -> m_talonfx.setControl(((MotionMagicVelocityVoltage) m_velocityReq).withVelocity(angularVelocity)));
+          ensureRequest(() -> m_talonfx.setControl(((MotionMagicVelocityVoltage) m_velocityReq).withVelocity(angularVelocity).withFeedForward(0)));
           break;
         case "VelocityDutyCycle":
-          ensureRequest(() -> m_talonfx.setControl(((VelocityDutyCycle) m_velocityReq).withVelocity(angularVelocity)));
+          ensureRequest(() -> m_talonfx.setControl(((VelocityDutyCycle) m_velocityReq).withVelocity(angularVelocity).withFeedForward(0)));
           break;
         case "VelocityTorqueCurrentFOC":
-          ensureRequest(() -> m_talonfx.setControl(((VelocityTorqueCurrentFOC) m_velocityReq).withVelocity(angularVelocity)));
+          ensureRequest(() -> m_talonfx.setControl(((VelocityTorqueCurrentFOC) m_velocityReq).withVelocity(angularVelocity).withFeedForward(0)));
           break;
         case "VelocityVoltage":
-          ensureRequest(() -> m_talonfx.setControl(((VelocityVoltage) m_velocityReq).withVelocity(angularVelocity)));
+          ensureRequest(() -> m_talonfx.setControl(((VelocityVoltage) m_velocityReq).withVelocity(angularVelocity).withFeedForward(0)));
           break;
         default:
           throw new SmartMotorControllerConfigurationException("TalonFX(" + m_talonfx.getDeviceID() + ") does not support the '" + m_velocityReq.getName() + "' control request!", "Cannot use given control request", "withVendorControlRequest()");
@@ -675,7 +676,7 @@ public class TalonFXWrapper extends SmartMotorController {
     setpointVelocity = Optional.ofNullable(angularVelocity);
     setpointFeedforwardForce = Optional.ofNullable(feedforwardForce);
     if (angularVelocity != null && m_lqr.isEmpty() && setpointFeedforwardForce.isPresent()) {
-      Voltage feedforwardVoltage = m_config.convertToVoltage(m_dcmotor, angularVelocity, feedforwardForce);
+      Voltage feedforwardVoltage = m_config.convertToVoltage(m_dcmotor, feedforwardForce);
       Current feedforwardCurrent = m_config.convertToCurrent(m_dcmotor, feedforwardForce);
       switch (m_velocityReq.getName()) {
         case "MotionMagicVelocityDutyCycle":

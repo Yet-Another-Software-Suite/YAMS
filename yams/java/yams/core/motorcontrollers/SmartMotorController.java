@@ -482,7 +482,7 @@ public abstract class SmartMotorController {
     // Apply the feedforward Force supplied to setVelocity(..., Force), e.g. from a PathPlanner
     // set-point generator.
     if (setpointVelocity.isPresent() && setpointFeedforwardForce.isPresent()) {
-      feedforward.set(feedforward.get() + m_config.convertToVoltage(getDCMotor(), setpointVelocity.get(), setpointFeedforwardForce.get()).in(Volts));
+      feedforward.set(feedforward.get() + m_config.convertToVoltage(getDCMotor(), setpointFeedforwardForce.get()).in(Volts));
     }
 
     // Boundary check.

@@ -10,12 +10,9 @@ import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Milliseconds;
 import static org.wpilib.units.Units.Newtons;
 import static org.wpilib.units.Units.RPM;
-import static org.wpilib.units.Units.RadiansPerSecond;
-import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
-import yams.commands2.config.SmartMotorControllerConfig;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
@@ -30,8 +27,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.wpilib.command2.CommandScheduler;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.preferences.Preferences;
-import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Force;
+import yams.commands2.config.SmartMotorControllerConfig;
 import yams.commands2.telemetry.SmartMotorControllerCommandRegistry;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
@@ -73,17 +70,17 @@ public class ForceFeedforwardTest {
     SmartMotorControllerConfig config = configWithGearingAndWheel();
     DCMotor motor = DCMotor.getNEO(1);
     Force feedforwardForce = Newtons.of(10);
-    AngularVelocity mechanismVelocity = RotationsPerSecond.of(2);
 
+    // Only the voltage that produces the force: the velocity feedforward it is added to already
+    // covers the back-EMF of the commanded speed.
     double expectedRotorTorqueNm = feedforwardForce.in(Newtons) * WHEEL_RADIUS_METERS / GEAR_RATIO;
-    double expectedRotorVelocityRadS = mechanismVelocity.in(RadiansPerSecond) * GEAR_RATIO;
-    double expectedVoltage = motor.getVoltage(expectedRotorTorqueNm, expectedRotorVelocityRadS);
+    double expectedVoltage = motor.getVoltage(expectedRotorTorqueNm, 0);
 
     assertEquals(
         expectedVoltage,
-        config.convertToVoltage(motor, mechanismVelocity, feedforwardForce).in(Volts),
+        config.convertToVoltage(motor, feedforwardForce).in(Volts),
         1e-9,
-        "convertToVoltage should match DCMotor's own torque/speed voltage model.");
+        "convertToVoltage should be the resistive voltage of the force's current, without back-EMF.");
   }
 
   @Test

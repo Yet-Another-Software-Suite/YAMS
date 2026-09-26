@@ -130,4 +130,9 @@ public class RobotContainer {
         })
         .ignoringDisable(true);
     }
+
+    /** @return The drivetrain, for tests. */
+    Swerve getSwerve() {
+        return swerve;
+    }
 }

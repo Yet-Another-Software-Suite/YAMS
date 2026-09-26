@@ -37,6 +37,7 @@ examples/
 │   ├── simple_robot-2027/  # Skeleton: base WPILib project (build.gradle, vendordeps, Gradle wrapper)
 │   └── <example_name>/     # Source-only folders, one per example
 │       ├── java/           # Java source tree (copied to src/main/java/)
+│       ├── test/           # Optional JUnit tests (added to src/test/java/)
 │       ├── deploy/         # Optional deploy files (replace src/main/deploy/)
 │       ├── vendordeps/     # Optional extra vendordeps (added to vendordeps/)
 │       └── build.gradle    # Optional replacement for the skeleton's build.gradle
@@ -61,7 +62,8 @@ examples/
 
 3. **Injects source**: the example's `java/` and `deploy/` folders become
    `generated/<example_name>/src/main/java/` and `src/main/deploy/`, its `vendordeps/` files are
-   added to the skeleton's, and its `build.gradle`, if present, replaces the skeleton's.
+   added to the skeleton's, its `test/` files are added to `src/test/java/` next to the
+   skeleton's tests, and its `build.gradle`, if present, replaces the skeleton's.
 
 Generated projects must stay in `examples/generated/`: the skeleton's `build.gradle` compiles YAMS
 from `../../../yams/java`, which only resolves from there.

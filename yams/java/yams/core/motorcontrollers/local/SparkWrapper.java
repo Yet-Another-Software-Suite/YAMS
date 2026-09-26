@@ -402,7 +402,7 @@ public class SparkWrapper extends SmartMotorController {
     setpointVelocity = Optional.ofNullable(angularVelocity);
     setpointFeedforwardForce = Optional.ofNullable(feedforwardForce);
     if (m_lqr.isEmpty() && angularVelocity != null && setpointFeedforwardForce.isPresent()) {
-      Voltage feedforwardVoltage = m_config.convertToVoltage(getDCMotor(), angularVelocity, feedforwardForce);
+      Voltage feedforwardVoltage = m_config.convertToVoltage(getDCMotor(), feedforwardForce);
       configureSpark(() -> m_sparkPidController.setSetpoint(setpointVelocity.orElse(RPM.of(0)).times(m_config.getGearing().getMechanismToRotorRatio()).in(RotationsPerSecond), m_velocityControlType, m_closedLoopSlot, feedforwardVoltage.in(Volts),
           ArbFFUnits.kVoltage));
       m_looseFollowers.ifPresent(smcs -> {

@@ -101,7 +101,7 @@ public class SwerveSubsystem extends SubsystemBase {
                           new CANcoder(12, new CANBus(CANPort.CAN_S0)),
                           "backright",
                           new Translation2d(Inches.of(-24), Inches.of(-24)));
-    SwerveDriveConfig config = (SwerveDriveConfig) new SwerveDriveConfig(this, fl, fr, bl, br)
+    SwerveDriveConfig config = new SwerveDriveConfig(this, fl, fr, bl, br)
         .withGyro(gyro.getYaw().asSupplier())
         .withMaximumChassisSpeed(MetersPerSecond.of(4), RotationsPerSecond.of(360))
         .withStartingPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)))

@@ -7,13 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.wpilib.units.Units.Rotations;
 
-import yams.commands2.config.SmartMotorControllerConfig;
 import com.revrobotics.spark.SparkMax;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.preferences.Preferences;
+import yams.commands2.config.SmartMotorControllerConfig;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;

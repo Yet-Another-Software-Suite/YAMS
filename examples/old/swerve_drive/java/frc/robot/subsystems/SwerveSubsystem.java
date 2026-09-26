@@ -213,7 +213,7 @@ public class SwerveSubsystem extends SubsystemBase
                           new CANcoder(12, new CANBus(CANPort.CAN_S0)),
                           "backright",
                           new Translation2d(Inches.of(-24), Inches.of(-24)));
-    SwerveDriveConfig config = (SwerveDriveConfig) new SwerveDriveConfig(this, fl, fr, bl, br)
+    SwerveDriveConfig config = new SwerveDriveConfig(this, fl, fr, bl, br)
         // gyro.getYaw() gives the heading used to rotate the velocity vector for field-relative
         // driving; without this, forward on the stick always means "robot nose direction".
         .withGyro(gyro.getYaw().asSupplier())

@@ -28,8 +28,10 @@ import org.wpilib.smartdashboard.Field2d;
 import org.wpilib.system.Timer;
 import org.wpilib.tunable.Tunables;
 import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.Force;
+import org.wpilib.units.measure.LinearVelocity;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.exceptions.SwerveDriveConfigurationException;
 import yams.core.mechanisms.config.SwerveDriveConfig;
@@ -66,7 +68,7 @@ public class SwerveDrive {
   /**
    * The config for the drive.
    */
-  private final SwerveDriveConfig m_config;
+  private final SwerveDriveConfig<?> m_config;
   /**
    * Mechanism telemetry, used for the loop time and the {@link Field2d}.
    */
@@ -111,7 +113,7 @@ public class SwerveDrive {
    *                                                    so its position cannot be converted to a
    *                                                    distance.
    */
-  protected SwerveDrive(SwerveDriveConfig config) {
+  protected SwerveDrive(SwerveDriveConfig<?> config) {
     m_config = config;
     m_modules = config.getModules();
     m_desiredModuleStates = new SwerveModuleVelocity[m_modules.length];
@@ -257,7 +259,11 @@ public class SwerveDrive {
 
   /**
    * Get the {@link SwerveModuleVelocity}s of the swerve drive given a robot relative chassis
-   * speed..
+   * speed. When a maximum module speed is configured with
+   * {@link SwerveDriveConfig#withMaximumModuleSpeed(LinearVelocity)}, the module speeds are scaled
+   * down together so none exceeds it, also respecting
+   * {@link SwerveDriveConfig#withMaximumChassisSpeed(LinearVelocity, AngularVelocity)} if set, which
+   * keeps the direction of travel and rotation intact.
    *
    * @param robotRelativeChassisSpeeds Robot relative {@link ChassisVelocities}.
    * @return {@link SwerveModuleVelocity}s of the swerve drive.
@@ -268,7 +274,20 @@ public class SwerveDrive {
    */
   public SwerveModuleVelocity[] getStateFromRobotRelativeChassisSpeeds(ChassisVelocities robotRelativeChassisSpeeds) {
     robotRelativeChassisSpeeds = m_config.optimizeRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds);
-    return m_config.getCenterOfRotation().isPresent() ? m_kinematics.toSwerveModuleVelocities(robotRelativeChassisSpeeds, m_config.getCenterOfRotation().get()) : m_kinematics.toSwerveModuleVelocities(robotRelativeChassisSpeeds);
+    SwerveModuleVelocity[] states = m_config.getCenterOfRotation().isPresent() ? m_kinematics.toSwerveModuleVelocities(robotRelativeChassisSpeeds, m_config.getCenterOfRotation().get()) : m_kinematics.toSwerveModuleVelocities(robotRelativeChassisSpeeds);
+    // Without desaturation, modules asked to go faster than they can would each saturate by a
+    // different amount, skewing the direction of travel and turning the robot.
+    var maxModuleSpeed = m_config.getMaximumModuleLinearVelocity();
+    if (maxModuleSpeed.isPresent()) {
+      var maxLinear = m_config.getMaximumChassisLinearVelocity();
+      var maxAngular = m_config.getMaximumChassisAngularVelocity();
+      if (maxLinear.isPresent() && maxAngular.isPresent()) {
+        states = SwerveDriveKinematics.desaturateWheelVelocities(states, robotRelativeChassisSpeeds, maxModuleSpeed.get(), maxLinear.get(), maxAngular.get());
+      } else {
+        states = SwerveDriveKinematics.desaturateWheelVelocities(states, maxModuleSpeed.get());
+      }
+    }
+    return states;
   }
 
   /**
@@ -676,7 +695,7 @@ public class SwerveDrive {
    *
    * @return {@link SwerveDriveConfig} of the drive.
    */
-  public SwerveDriveConfig getConfig() {
+  public SwerveDriveConfig<?> getConfig() {
     return m_config;
   }
 

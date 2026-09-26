@@ -51,7 +51,7 @@ public class ElevatorMechanism implements Mechanism
   private final Mass     weight = Pounds.of(16);
   private final DCMotor  motors = DCMotor.getNEO(1);
   private final MechanismGearing gearing = new MechanismGearing(GearBox.fromReductionStages(3, 4));
-  private final SparkMax                    elevatorMotor      = new SparkMax(CANPorts.fromBusId(1), 2, SparkLowLevel.MotorType.kBrushless);
+  private final SparkMax                    elevatorMotor      = new SparkMax(CANPorts.fromBusId(60), 2, SparkLowLevel.MotorType.kBrushless);
   //  private final SmartMotorControllerTelemetryConfig motorTelemetryConfig = new SmartMotorControllerTelemetryConfig()
 //          .withMechanismPosition()
 //          .withRotorPosition()

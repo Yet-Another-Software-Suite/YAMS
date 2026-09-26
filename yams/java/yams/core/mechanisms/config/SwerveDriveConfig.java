@@ -37,8 +37,10 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  * <p>Holds modules, gyro supplier, and drive controllers. Modules are ordered clockwise from
  * front-left: FL, FR, BL, BR. See {@link yams.commands2.config.SwerveDriveConfig} for the
  * Subsystem-bound subclass and a full construction example.
+ *
+ * @param <T> Concrete config type, so chained {@code with} calls keep the subclass type.
  */
-public class SwerveDriveConfig {
+public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
   /**
    * {@link SwerveModule}s for the {@link SwerveDrive}.
    */
@@ -157,7 +159,7 @@ public class SwerveDriveConfig {
   protected SwerveDriveConfig() {
   }
 
-  protected SwerveDriveConfig(SwerveDriveConfig cfg) {
+  protected SwerveDriveConfig(SwerveDriveConfig<T> cfg) {
     this.telemetryVerbosity = cfg.telemetryVerbosity;
     this.specifiedTelemetryConfig = cfg.specifiedTelemetryConfig;
     this.initialPose = cfg.initialPose;
@@ -185,14 +187,20 @@ public class SwerveDriveConfig {
   }
 
   /**
+   * Get this config as its concrete type, so chained {@code with} calls keep the subclass type.
+   *
+   * @return this {@link SwerveDriveConfig}.
+   */
+  protected abstract T self();
+
+  /**
    * Clone the {@link SwerveDriveConfig} without modules, subsystem, telemetry name, gyro supplier,
    * gyro angular velocity supplier, gyro offset, and gyro inversion.
    *
    * @return New {@link SwerveDriveConfig}
    */
-  public SwerveDriveConfig clone() {
-    return new SwerveDriveConfig(this);
-  }
+  @Override
+  public abstract T clone();
 
   /**
    * Set the {@link SwerveModule}s for the {@link SwerveDrive}.
@@ -200,9 +208,9 @@ public class SwerveDriveConfig {
    * @param modules {@link SwerveModule}s for the {@link SwerveDrive}.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withModules(SwerveModule... modules) {
+  public T withModules(SwerveModule... modules) {
     this.modules = modules;
-    return this;
+    return self();
   }
 
   /**
@@ -211,9 +219,9 @@ public class SwerveDriveConfig {
    * @param controller {@link PIDController} for the translation, input units are meters.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withSimTranslationController(PIDController controller) {
+  public T withSimTranslationController(PIDController controller) {
     simTranslationController = Optional.ofNullable(controller);
-    return this;
+    return self();
   }
 
   /**
@@ -222,12 +230,12 @@ public class SwerveDriveConfig {
    * @param controller {@link PIDController} for the rotation, input units are radians.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withSimRotationController(PIDController controller) {
+  public T withSimRotationController(PIDController controller) {
     if (controller != null) {
       controller.enableContinuousInput(-Math.PI, Math.PI);
     }
     simRotationController = Optional.ofNullable(controller);
-    return this;
+    return self();
   }
 
   /**
@@ -236,9 +244,9 @@ public class SwerveDriveConfig {
    * @param controller {@link PIDController} for the translation, input units are meters.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withTranslationController(PIDController controller) {
+  public T withTranslationController(PIDController controller) {
     translationController = Optional.ofNullable(controller);
-    return this;
+    return self();
   }
 
   /**
@@ -247,12 +255,12 @@ public class SwerveDriveConfig {
    * @param controller {@link PIDController} for the rotation, input units are radians.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withRotationController(PIDController controller) {
+  public T withRotationController(PIDController controller) {
     if (controller != null) {
       controller.enableContinuousInput(-Math.PI, Math.PI);
     }
     rotationController = Optional.ofNullable(controller);
-    return this;
+    return self();
   }
 
   /**
@@ -262,9 +270,9 @@ public class SwerveDriveConfig {
    *                         forward, Y is left.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withCenterOfRotation(Translation2d centerOfRotation) {
+  public T withCenterOfRotation(Translation2d centerOfRotation) {
     this.centerOfRotation = Optional.ofNullable(centerOfRotation);
-    return this;
+    return self();
   }
 
   /**
@@ -274,9 +282,9 @@ public class SwerveDriveConfig {
    * @param left    Left distance from the center of robot.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withCenterOfRotation(Distance forward, Distance left) {
+  public T withCenterOfRotation(Distance forward, Distance left) {
     this.centerOfRotation = Optional.ofNullable(new Translation2d(forward, left));
-    return this;
+    return self();
   }
 
   /**
@@ -285,9 +293,9 @@ public class SwerveDriveConfig {
    * @param dt Discretization time for the pose estimation.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withSimDiscretizationTime(Time dt) {
+  public T withSimDiscretizationTime(Time dt) {
     simDiscretizationSeconds = Optional.ofNullable(dt);
-    return this;
+    return self();
   }
 
   /**
@@ -296,9 +304,9 @@ public class SwerveDriveConfig {
    * @param scaleFactor Scale factor to apply to the gyro angular velocity, [0, 1].
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withSimGyroAngularVelocityScaleFactor(double scaleFactor) {
+  public T withSimGyroAngularVelocityScaleFactor(double scaleFactor) {
     simAngularVelocityScaleFactor = OptionalDouble.of(scaleFactor);
-    return this;
+    return self();
   }
 
   /**
@@ -307,9 +315,9 @@ public class SwerveDriveConfig {
    * @param dt Discretization time for the pose estimation.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withDiscretizationTime(Time dt) {
+  public T withDiscretizationTime(Time dt) {
     discretizationSeconds = Optional.ofNullable(dt);
-    return this;
+    return self();
   }
 
   /**
@@ -318,9 +326,9 @@ public class SwerveDriveConfig {
    * @param scaleFactor Scale factor to apply to the gyro angular velocity, [0, 1].
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withGyroAngularVelocityScaleFactor(double scaleFactor) {
+  public T withGyroAngularVelocityScaleFactor(double scaleFactor) {
     angularVelocityScaleFactor = OptionalDouble.of(scaleFactor);
-    return this;
+    return self();
   }
 
   /**
@@ -329,9 +337,9 @@ public class SwerveDriveConfig {
    * @param angularVelocitySupplier {@link Supplier<AngularVelocity>} for the gyro angular velocity.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withGyroVelocity(Supplier<AngularVelocity> angularVelocitySupplier) {
+  public T withGyroVelocity(Supplier<AngularVelocity> angularVelocitySupplier) {
     gyroAngularVelocitySupplier = Optional.ofNullable(angularVelocitySupplier);
-    return this;
+    return self();
   }
 
   /**
@@ -340,9 +348,9 @@ public class SwerveDriveConfig {
    * @param gyro {@link Supplier} for the gyro.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withGyro(Supplier<Angle> gyro) {
+  public T withGyro(Supplier<Angle> gyro) {
     gyroSupplier = Optional.ofNullable(gyro);
-    return this;
+    return self();
   }
 
   /**
@@ -351,9 +359,9 @@ public class SwerveDriveConfig {
    * @param offset Offset to apply to the gyro.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withGyroOffset(Angle offset) {
+  public T withGyroOffset(Angle offset) {
     gyroOffset = Optional.ofNullable(offset);
-    return this;
+    return self();
   }
 
   /**
@@ -362,9 +370,9 @@ public class SwerveDriveConfig {
    * @param inverted Inverted state of the gyro.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withGyroInverted(boolean inverted) {
+  public T withGyroInverted(boolean inverted) {
     gyroInverted = inverted;
-    return this;
+    return self();
   }
 
   /**
@@ -374,10 +382,10 @@ public class SwerveDriveConfig {
    * @param angularVelocity Angular velocity of the Chassis.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withMaximumChassisSpeed(LinearVelocity speed, AngularVelocity angularVelocity) {
+  public T withMaximumChassisSpeed(LinearVelocity speed, AngularVelocity angularVelocity) {
     maximumChassisLinearVelocity = Optional.ofNullable(speed);
     maximumChassisAngularVelocity = Optional.ofNullable(angularVelocity);
-    return this;
+    return self();
   }
 
   /**
@@ -386,9 +394,9 @@ public class SwerveDriveConfig {
    * @param speed Linear velocity of the modules.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withMaximumModuleSpeed(LinearVelocity speed) {
+  public T withMaximumModuleSpeed(LinearVelocity speed) {
     maximumModuleLinearVelocity = Optional.ofNullable(speed);
-    return this;
+    return self();
   }
 
   /**
@@ -397,9 +405,9 @@ public class SwerveDriveConfig {
    * @param pose {@link Pose2d} to set the robot to. {@code new Pose2d()}
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withStartingPose(Pose2d pose) {
+  public T withStartingPose(Pose2d pose) {
     initialPose = pose;
-    return this;
+    return self();
   }
 
   //  /**
@@ -418,7 +426,7 @@ public class SwerveDriveConfig {
   //   yams.mechanisms.swerve.SwerveDrive}.
   //   * @return {@link SwerveDriveConfig} for chaining.
   //   */
-  //  public SwerveDriveConfig withMapleSim(DriveTrainSimulationConfig mapleConfig, Pose2d
+  //  public T withMapleSim(DriveTrainSimulationConfig mapleConfig, Pose2d
   // startingPose)
   //  {
   //      if (RobotBase.isSimulation()) {
@@ -429,7 +437,7 @@ public class SwerveDriveConfig {
   //
   // SimulatedArena.getInstance().addDriveTrainSimulation(mapleDriveSim.get().getDriveTrainSimulation());
   //      }
-  //      return this;
+  //      return self();
   //  }
 
   /**
@@ -439,10 +447,10 @@ public class SwerveDriveConfig {
    * @param telemetryVerbosity Telemetry verbosity to apply.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withTelemetry(String name, TelemetryVerbosity telemetryVerbosity) {
+  public T withTelemetry(String name, TelemetryVerbosity telemetryVerbosity) {
     this.telemetryName = name;
     this.telemetryVerbosity = Optional.ofNullable(telemetryVerbosity);
-    return this;
+    return self();
   }
 
   /**
@@ -452,11 +460,11 @@ public class SwerveDriveConfig {
    * @param telemetryConfig Config that specifies what to log.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withTelemetry(String name, SwerveDriveTelemetryConfig telemetryConfig) {
+  public T withTelemetry(String name, SwerveDriveTelemetryConfig telemetryConfig) {
     this.telemetryName = name;
     this.telemetryVerbosity = Optional.empty();
     this.specifiedTelemetryConfig = Optional.ofNullable(telemetryConfig);
-    return this;
+    return self();
   }
 
   /**

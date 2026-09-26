@@ -53,6 +53,7 @@ $(1):
 	@$(if $(wildcard $(2)/deploy),rm -rf $(GENERATED_DIR)/$(1)/src/main/deploy && cp -r $(2)/deploy $(GENERATED_DIR)/$(1)/src/main/deploy)
 	@$(if $(wildcard $(2)/build.gradle),cp $(2)/build.gradle $(GENERATED_DIR)/$(1)/build.gradle)
 	@$(if $(wildcard $(2)/vendordeps),cp -r $(2)/vendordeps/. $(GENERATED_DIR)/$(1)/vendordeps/)
+	@$(if $(wildcard $(2)/test),mkdir -p $(GENERATED_DIR)/$(1)/src/test/java && cp -r $(2)/test/. $(GENERATED_DIR)/$(1)/src/test/java/)
 endef
 
 $(foreach proj,$(EXAMPLE_PROJECTS),$(eval $(call make-example,$(proj),$(COMMANDS2_DIR)/$(proj),$(SKELETON2_DIR))))

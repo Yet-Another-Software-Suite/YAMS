@@ -125,9 +125,10 @@ public class SwerveModuleConfig {
    */
   private boolean cosineCompensation = false;
   /**
-   * Coupling ratio for the {@link SwerveModule}.
+   * Coupling ratio for the {@link SwerveModule}: drive motor rotations per azimuth rotation. 0 when
+   * not compensated.
    */
-  private GearBox couplingRatio;
+  private double couplingRatio = 0;
   /**
    * Swerve module minimum velocity.
    */
@@ -149,6 +150,11 @@ public class SwerveModuleConfig {
    * Last angle this config actually commanded via {@link #getOptimizedState(SwerveModuleVelocity)}.
    */
   private Rotation2d lastCommandedAngle;
+  /**
+   * How far past 90 degrees from the wheel the previous orientation may be before the optimizer turns
+   * the wheel around, so it does not flip back and forth near the boundary.
+   */
+  private static final double kOptimizationHysteresisDegrees = 15.0;
 
   /**
    * Create the {@link SwerveModuleConfig} for the {@link SwerveModule}
@@ -234,7 +240,31 @@ public class SwerveModuleConfig {
     return this;
   }
 
-  // TODO: Add coupling ratio
+  /**
+   * Set the steer to drive coupling ratio, compensated as in the CTRE swerve API. On most modules the
+   * drive gearing turns the wheel when the azimuth rotates, even with the drive motor still, so
+   * steering alone would drive the wheel and skew its speed and odometry. With the ratio set, the
+   * drive setpoint includes the motion steering causes, and it is removed from the measured wheel
+   * speed and distance.
+   *
+   * @param driveMotorRotationsPerAzimuthRotation Drive motor rotations caused by one azimuth rotation
+   *                                              with the wheel held still (e.g. {@code
+   *                                              kCoupleRatio} from CTRE Tuner X).
+   * @return {@link SwerveModuleConfig} for chaining.
+   */
+  public SwerveModuleConfig withCouplingRatio(double driveMotorRotationsPerAzimuthRotation) {
+    this.couplingRatio = driveMotorRotationsPerAzimuthRotation;
+    return this;
+  }
+
+  /**
+   * Get the steer to drive coupling ratio.
+   *
+   * @return Drive motor rotations per azimuth rotation, or 0 if coupling is not compensated.
+   */
+  public double getCouplingRatio() {
+    return couplingRatio;
+  }
 
   /**
    * Set the absolute encoder for the azimuth {@link SmartMotorController} if it's the SAME VENDOR,
@@ -532,17 +562,37 @@ public class SwerveModuleConfig {
     /* If error is close to 0 rotations, we're already there, so apply full power */
     /* If the error is close to 0.25 rotations, then we're 90 degrees, so movement doesn't help us
      * at all */
-    // The azimuth is only meaningful modulo 180 degrees (0 == 180) since the drive motor can spin
-    // either direction. Using the SIGNED cosine of the (correctly wrapped) angle difference
-    // handles that on its own: near 0 degrees it scales close to +1 (drive forward as
-    // commanded), near 90 degrees it goes to 0, and near 180 degrees it goes to -1, which flips
-    // the sign of the applied speed so the wheel drives backward at its current heading instead
-    // of losing that direction to a forced-positive scalar.
-    double cosineScalar = desiredState.angle.minus(currentAngle).getCos();
-    if (cosineScalar < 0.0)
-      cosineScalar = 1.0;
+    return desiredState.velocity * getCosineScalar(desiredState.angle, currentAngle);
+  }
 
-    return desiredState.velocity * cosineScalar;
+  /**
+   * The cosine compensation factor for a wheel at {@code currentAngle} asked to point at
+   * {@code desiredAngle}: 1 when aligned, falling to 0 at 90 degrees off. It is clamped at 0 past
+   * 90 degrees, as in the CTRE SwerveModule, so a badly misaligned wheel never drives backward.
+   *
+   * @param desiredAngle Angle the wheel is asked to point at.
+   * @param currentAngle Angle the wheel is pointing at.
+   * @return Factor from 0 to 1 to scale the drive command by.
+   */
+  private static double getCosineScalar(Rotation2d desiredAngle, Rotation2d currentAngle) {
+    return Math.max(desiredAngle.minus(currentAngle).getCos(), 0.0);
+  }
+
+  /**
+   * Get the cosine compensation factor for the given desired module angle, measured against the
+   * current azimuth angle. Used to scale drive commands that bypass
+   * {@link #getOptimizedState(SwerveModuleVelocity)}, e.g. a drive wheel feedforward force.
+   *
+   * @param desiredAngle Angle the module is asked to point at.
+   * @return Factor from 0 to 1, or 1 if cosine compensation is disabled.
+   * @throws NoSuchElementException if no azimuth motor controller was set with
+   *                                {@link #withSmartMotorController(SmartMotorController, SmartMotorController)}.
+   */
+  public double getCosineCompensationScalar(Rotation2d desiredAngle) {
+    if (!cosineCompensation) {
+      return 1.0;
+    }
+    return getCosineScalar(desiredAngle, new Rotation2d(azimuthMotor.orElseThrow().getMechanismPosition()));
   }
 
   /**
@@ -565,6 +615,15 @@ public class SwerveModuleConfig {
         lastCommandedAngle = currentAngle;
       }
       state = state.optimize(currentAngle);
+      // Hysteresis: while the wheel is near 90 degrees from its target, small wobbles in its measured
+      // angle would tip the optimizer back and forth between the two orientations, reversing the
+      // azimuth every loop. Keep last loop's orientation unless it is now clearly the wrong one.
+      if (Math.abs(state.angle.minus(lastCommandedAngle).getDegrees()) > 90.0) {
+        var previousOrientation = new SwerveModuleVelocity(-state.velocity, state.angle.rotateBy(Rotation2d.PI));
+        if (Math.abs(previousOrientation.angle.minus(currentAngle).getDegrees()) < 90.0 + kOptimizationHysteresisDegrees) {
+          state = previousOrientation;
+        }
+      }
       lastCommandedAngle = state.angle;
     }
     if (cosineCompensation) {

@@ -225,7 +225,7 @@ public class SwerveMechanism implements Mechanism
                           "backright",
                           new Translation2d(Inches.of(-24), Inches.of(-24)));
 
-    config = (SwerveDriveConfig) new SwerveDriveConfig(this, fl, fr, bl, br)
+    config = new SwerveDriveConfig(this, fl, fr, bl, br)
         .withGyro(() -> getGyroAngle().getMeasure())
         // Use the logged estimated pose as the starting pose so the drive's
         // internal odometry initialises from the replayed value, not from zero.

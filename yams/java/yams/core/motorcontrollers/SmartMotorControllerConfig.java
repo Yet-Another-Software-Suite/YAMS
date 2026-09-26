@@ -2028,26 +2028,25 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   /**
    * Convert a feedforward {@link Force} applied at the mechanism into the equivalent motor
    * feedforward {@link Voltage}, using {@link SmartMotorControllerConfig#gearing} and
-   * {@link SmartMotorControllerConfig#mechanismCircumference}.
+   * {@link SmartMotorControllerConfig#mechanismCircumference}. This is only the voltage that
+   * produces the force (the resistive drop of the matching current), not the back-EMF of the
+   * commanded speed, since it is added on top of a velocity feedforward that already covers that.
    *
-   * @param motor             {@link DCMotor} of the mechanism.
-   * @param mechanismVelocity Commanded mechanism (post-gearbox) {@link AngularVelocity}.
-   * @param feedforwardForce  Feedforward {@link Force} applied to the mechanism.
+   * @param motor            {@link DCMotor} of the mechanism.
+   * @param feedforwardForce Feedforward {@link Force} applied to the mechanism.
    * @return Equivalent feedforward {@link Voltage} at the motor.
    * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
    *                                                    configured.
    */
-  public Voltage convertToVoltage(DCMotor motor, AngularVelocity mechanismVelocity, Force feedforwardForce) {
-    double rotorAngularVelocityRadPerSec = mechanismVelocity.in(RadiansPerSecond) * gearing.getMechanismToRotorRatio();
-    return Volts.of(motor.getVoltage(forceToRotorTorque(feedforwardForce), rotorAngularVelocityRadPerSec));
+  public Voltage convertToVoltage(DCMotor motor, Force feedforwardForce) {
+    return Volts.of(motor.getVoltage(forceToRotorTorque(feedforwardForce), 0));
   }
 
   /**
    * Convert a feedforward {@link Force} applied at the mechanism into the equivalent motor
    * feedforward {@link Current}, using {@link SmartMotorControllerConfig#gearing} and
-   * {@link SmartMotorControllerConfig#mechanismCircumference}. Unlike
-   * {@link #convertToVoltage(DCMotor, AngularVelocity, Force)}, this does not depend on the commanded speed and is the correct
-   * feedforward to use for torque-current based closed-loop control (e.g. TorqueCurrentFOC).
+   * {@link SmartMotorControllerConfig#mechanismCircumference}. This is the feedforward to use for
+   * torque-current based closed-loop control (e.g. TorqueCurrentFOC).
    *
    * @param motor            {@link DCMotor} of the mechanism.
    * @param feedforwardForce Feedforward {@link Force} applied to the mechanism.

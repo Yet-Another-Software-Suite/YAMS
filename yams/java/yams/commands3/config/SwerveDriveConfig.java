@@ -22,7 +22,7 @@ import yams.core.mechanisms.swerve.SwerveModule;
  * SwerveDrive drive = new SwerveDrive(config);
  * }</pre>
  */
-public class SwerveDriveConfig extends yams.core.mechanisms.config.SwerveDriveConfig {
+public class SwerveDriveConfig extends yams.core.mechanisms.config.SwerveDriveConfig<SwerveDriveConfig> {
   /** Swerve drive mechanism. */
   private Mechanism mechanism;
 
@@ -49,6 +49,11 @@ public class SwerveDriveConfig extends yams.core.mechanisms.config.SwerveDriveCo
 
   private SwerveDriveConfig(SwerveDriveConfig cfg) {
     super(cfg);
+  }
+
+  @Override
+  protected SwerveDriveConfig self() {
+    return this;
   }
 
   /**

@@ -75,7 +75,7 @@ public class DriveSubsystem extends SubsystemBase
                                                      DriveConstants.kRearRightDrivingMotorOnBottom,
                                                      DriveConstants.kRearRightTurningMotorOnBottom);
 
-    SwerveDriveConfig config = (SwerveDriveConfig) new SwerveDriveConfig(this, frontLeft, frontRight, rearLeft, rearRight)
+    SwerveDriveConfig config = new SwerveDriveConfig(this, frontLeft, frontRight, rearLeft, rearRight)
         .withGyro(() -> Radians.of(m_gyro.getYawRadians()))
         .withGyroInverted(DriveConstants.kGyroReversed)
         .withStartingPose(Pose2d.ZERO)

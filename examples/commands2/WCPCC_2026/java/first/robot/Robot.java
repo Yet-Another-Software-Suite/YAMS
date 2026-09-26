@@ -8,6 +8,8 @@ import static org.wpilib.units.Units.Volts;
 
 import org.wpilib.command2.CommandScheduler;
 import org.wpilib.framework.TimedRobot;
+import org.wpilib.hardware.hal.AllianceStationID;
+import org.wpilib.simulation.DriverStationSim;
 import org.wpilib.system.RobotController;
 import org.wpilib.tunable.Tunables;
 
@@ -46,5 +48,23 @@ public class Robot extends TimedRobot {
         // and running subsystem periodic() methods.  This must be called from the robot's periodic
         // block in order for anything in the Command-based framework to work.
         CommandScheduler.getInstance().run();
+    }
+
+    /** @return The robot container, for tests. */
+    RobotContainer getRobotContainer() {
+        return m_robotContainer;
+    }
+
+    /**
+     * Simulation starts with an unknown alliance, and ChoreoLib neither generates nor follows
+     * routines until it is known, so autonomous would do nothing. Default to Blue 1; another
+     * alliance can still be picked in the simulated driver station.
+     */
+    @Override
+    public void simulationInit() {
+        if (DriverStationSim.getAllianceStationId() == AllianceStationID.UNKNOWN) {
+            DriverStationSim.setAllianceStationId(AllianceStationID.BLUE_1);
+            DriverStationSim.notifyNewData();
+        }
     }
 }

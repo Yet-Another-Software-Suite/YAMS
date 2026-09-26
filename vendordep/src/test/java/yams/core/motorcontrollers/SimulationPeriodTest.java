@@ -9,7 +9,6 @@ import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Milliseconds;
 import static org.wpilib.units.Units.Seconds;
 
-import yams.commands2.config.SmartMotorControllerConfig;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
@@ -26,6 +25,7 @@ import org.wpilib.math.system.DCMotor;
 import org.wpilib.preferences.Preferences;
 import org.wpilib.simulation.RoboRioSim;
 import org.wpilib.units.measure.Angle;
+import yams.commands2.config.SmartMotorControllerConfig;
 import yams.commands2.telemetry.SmartMotorControllerCommandRegistry;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;

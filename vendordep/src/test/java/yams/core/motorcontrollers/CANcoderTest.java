@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Rotations;
 
-import yams.commands2.config.SmartMotorControllerConfig;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import org.junit.jupiter.api.AfterEach;
@@ -16,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.wpilib.command2.CommandScheduler;
 import org.wpilib.math.system.DCMotor;
+import yams.commands2.config.SmartMotorControllerConfig;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
