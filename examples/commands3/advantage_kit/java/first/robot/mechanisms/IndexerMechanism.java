@@ -1,0 +1,230 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
+package first.robot.mechanisms;
+
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.DegreesPerSecond;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Pounds;
+import static org.wpilib.units.Units.Volts;
+
+import com.revrobotics.util.CANPorts;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Current;
+import org.wpilib.units.measure.Voltage;
+import org.wpilib.command3.Command;
+import org.wpilib.command3.Mechanism;
+import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.Logger;
+import yams.commands3.config.SmartMotorControllerConfig;
+import yams.commands3.mechanisms.FlyWheel;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
+import yams.core.mechanisms.config.FlyWheelConfig;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
+
+/**
+ * Open-loop belt indexer with AdvantageKit input logging. The indexer is
+ * deliberately open-loop -- velocity feedback isn't needed for reliable
+ * game-piece feeding, and open-loop keeps the control path simple. Logging
+ * velocity, volts, and current still enables post-match diagnosis of jams
+ * and brown-outs through log replay.
+ *
+ * <p>Open loop or not, the indexer is a velocity mechanism, so it is a YAMS
+ * {@link FlyWheel}; the mechanism adds telemetry and a physics simulation.
+ */
+public class IndexerMechanism implements Mechanism
+{
+  /*
+   * IndexerInputs crosses the replay boundary. @AutoLog generates
+   * IndexerInputsAutoLogged; Logger.processInputs() uses it to stamp all three
+   * fields with the same timestamp each loop. Because the indexer is open-loop,
+   * there is no setpoint field -- the only meaningful hardware observables are
+   * velocity (to detect jams), volts, and current.
+   */
+  @AutoLog
+  public static class IndexerInputs
+  {
+    // Roller speed; a sharp drop while volts are applied indicates a jam.
+    public AngularVelocity velocity = DegreesPerSecond.of(0);
+    public Voltage         volts    = Volts.of(0);
+    public Current         current  = Amps.of(0);
+  }
+
+  private final IndexerInputsAutoLogged indexerInputs = new IndexerInputsAutoLogged();
+
+  // Duty cycle that pushes a game piece from the indexer into the shooter.
+  public static final double FEED_DUTY_CYCLE = 0.8;
+
+  // CAN ID 21 -- check against the robot wiring diagram if swapping hardware.
+  // (ID 20 is the shooter's SparkMax.)
+  private final SparkMax someMotor = new SparkMax(CANPorts.fromBusId(1), 21, MotorType.kBrushless);
+
+  private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
+      // 3:4 box = 12:1 total reduction. Fast enough for reliable feeding without
+      // back-driving the rollers when the motor is released.
+      .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
+      // COAST lets game pieces coast through after power is removed, preventing
+      // double-feeds from a late motor stop.
+      .withIdleMode(MotorMode.COAST)
+      .withTelemetry("IndexerMotor", TelemetryVerbosity.HIGH)
+      // 40 A stator limit; jams can spike current quickly on a belt drive.
+      .withStatorCurrentLimit(Amps.of(40))
+      // Simulation only: rough estimate of the indexer rollers' inertia.
+      .withMomentOfInertia(Inches.of(1), Pounds.of(0.5))
+      .withMotorInverted(false)
+      .withControlMode(ControlMode.OPEN_LOOP);
+
+  private final SmartMotorController motor = new SparkWrapper(someMotor, DCMotor.getNEO(1), motorConfig);
+
+  // Roller diameter is an estimate; it only affects telemetry and the simulation display.
+  private final FlyWheel indexer = new FlyWheel(new FlyWheelConfig()
+      .withDiameter(Inches.of(2))
+      .withTelemetry("IndexerMech", TelemetryVerbosity.HIGH),
+      motor);
+
+  /**
+   * Populate IndexerInputs from the SMC. Called at the start of periodic() so
+   * Logger.processInputs() can stamp the values before any consumer reads them.
+   * During replay the logger overwrites these fields, making getVelocity() return
+   * the recorded roller speed rather than a live hardware read.
+   */
+  private void updateInputs()
+  {
+    indexerInputs.velocity = motor.getMechanismVelocity();
+    indexerInputs.volts = motor.getVoltage();
+    indexerInputs.current = motor.getStatorCurrent();
+  }
+
+  public IndexerMechanism()
+  {
+  }
+
+  /**
+   * Gets the current velocity of the indexer.
+   *
+   * @return FlyWheel velocity.
+   */
+  public AngularVelocity getVelocity()
+  {
+    // Reads from indexerInputs so this returns the replayed value during log
+    // replay, not a live hardware read.
+    return indexerInputs.velocity;
+  }
+
+  /**
+   * Feed a game piece into the shooter. Runs until canceled; the {@link #idle()} default command
+   * stops the rollers again afterwards.
+   *
+   * @return {@link Command}
+   */
+  public Command feed()
+  {
+    return run(coroutine -> {
+      while (true)
+      {
+        Logger.recordOutput("Indexer/DutyCycle", FEED_DUTY_CYCLE);
+        indexer.setDutyCycleSetpoint(FEED_DUTY_CYCLE);
+        coroutine.yield();
+      }
+    }).named("IndexerFeed");
+  }
+
+  /**
+   * Stop the rollers. This is the indexer's default command, so it runs at the lowest priority and
+   * any other indexer command can take over.
+   *
+   * @return {@link Command}
+   */
+  @Override
+  public Command idle()
+  {
+    return run(coroutine -> {
+      while (true)
+      {
+        Logger.recordOutput("Indexer/DutyCycle", 0.0);
+        indexer.setDutyCycleSetpoint(0);
+        coroutine.yield();
+      }
+    }).withPriority(Command.LOWEST_PRIORITY).named("IndexerIdle");
+  }
+
+  /**
+   * Set the voltage of the indexer.
+   *
+   * @param volts Voltage to set.
+   * @return {@link Command}
+   */
+  public Command setVoltage(Voltage volts)
+  {
+    return run(coroutine -> {
+      while (true)
+      {
+        // recordOutput logs the commanded voltage as a computed output; it is NOT
+        // replayed. Lets you see in replay what was sent vs. what the roller did.
+        Logger.recordOutput("Indexer/Voltage", volts);
+        indexer.setVoltageSetpoint(volts);
+        coroutine.yield();
+      }
+    }).named("IndexerSetVoltage");
+  }
+
+  /**
+   * Set the dutycycle of the indexer.
+   *
+   * @param dutyCycle DutyCycle to set.
+   * @return {@link Command}
+   */
+  public Command set(double dutyCycle)
+  {
+    return run(coroutine -> {
+      while (true)
+      {
+        Logger.recordOutput("Indexer/DutyCycle", dutyCycle);
+        indexer.setDutyCycleSetpoint(dutyCycle);
+        coroutine.yield();
+      }
+    }).named("IndexerSetDutyCycle");
+  }
+
+  /**
+   * DutyCycle supplier controlling the indexer
+   *
+   * @param dutyCycle Dutycyle supplier
+   * @return Command
+   */
+  public Command setDutyCycle(Supplier<Double> dutyCycle)
+  {
+    return run(coroutine -> {
+      while (true)
+      {
+        Logger.recordOutput("Indexer/DutyCycle", dutyCycle.get());
+        indexer.setDutyCycleSetpoint(dutyCycle.get());
+        coroutine.yield();
+      }
+    }).named("IndexerSetDutyCycleSupplier");
+  }
+
+  public void simulationPeriodic()
+  {
+    indexer.simIterate();
+  }
+
+  public void periodic()
+  {
+    updateInputs();
+    // processInputs stamps IndexerInputs and closes the replay bubble.
+    // After this call, getVelocity() returns the logged value in replay mode.
+    Logger.processInputs("Indexer", indexerInputs);
+    indexer.updateTelemetry();
+  }
+}

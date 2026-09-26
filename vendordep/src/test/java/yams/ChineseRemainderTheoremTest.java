@@ -3,16 +3,16 @@
 
 package yams;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Rotations;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.Rotations;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.units.measure.Angle;
 import org.junit.jupiter.api.Test;
-import yams.gearing.MechanismGearing;
-import yams.units.EasyCRT;
-import yams.units.EasyCRTConfig;
+import org.wpilib.math.util.MathUtil;
+import org.wpilib.units.measure.Angle;
+import yams.core.gearing.MechanismGearing;
+import yams.core.units.EasyCRT;
+import yams.core.units.EasyCRTConfig;
 
 public class ChineseRemainderTheoremTest {
   private Angle readingTolerance = Degrees.of(0.001);
@@ -117,7 +117,6 @@ public class ChineseRemainderTheoremTest {
       }
       assertTrue(testing);
       //      System.out.println("CRT Angle(rots): " + encoder.getAngleOptional());
-
     }
   }
 }

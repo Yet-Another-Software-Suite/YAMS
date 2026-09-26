@@ -3,19 +3,18 @@
 
 #pragma once
 
-#include <frc/DataLogManager.h>
-#include <networktables/DoubleTopic.h>
-#include <networktables/NetworkTable.h>
-#include <networktables/StructArrayTopic.h>
-#include <networktables/StructTopic.h>
-#include <wpi/DataLog.h>
-#include <wpi/json.h>
-
 #include <functional>
 #include <memory>
 #include <optional>
 #include <span>
 #include <string>
+#include <wpi/datalog/DataLog.hpp>
+#include <wpi/nt/DoubleTopic.hpp>
+#include <wpi/nt/NetworkTable.hpp>
+#include <wpi/nt/StructArrayTopic.hpp>
+#include <wpi/nt/StructTopic.hpp>
+#include <wpi/system/DataLogManager.hpp>
+#include <wpi/util/json.hpp>
 
 namespace yams::motorcontrollers {
 class SmartMotorController;
@@ -79,8 +78,8 @@ class MechanismTelemetry {
                           motorcontrollers::SmartMotorController& motorController);
 
   /**
-   * Publish a mechanism-level double field under this mechanism's data table, and — if this
-   * mechanism was set up with a DataLog name via SetupTelemetry(name, dataLogName) — to the
+   * Publish a mechanism-level double field under this mechanism's data table, and if this
+   * mechanism was set up with a DataLog name via SetupTelemetry(name, dataLogName) to the
    * DataLog as well. For fields tied to a SmartMotorController use SetupTelemetry(name, smc)
    * or AddMotorController() instead.
    *
@@ -92,8 +91,8 @@ class MechanismTelemetry {
   std::function<void(double)> PublishDouble(const std::string& key, const std::string& unit = "");
 
   /**
-   * Publish a mechanism-level struct field under this mechanism's data table, and — if this
-   * mechanism was set up with a DataLog name via SetupTelemetry(name, dataLogName) — to the
+   * Publish a mechanism-level struct field under this mechanism's data table, and if this
+   * mechanism was set up with a DataLog name via SetupTelemetry(name, dataLogName) to the
    * DataLog as well.
    *
    * @tparam T    Type of the published value.
@@ -102,11 +101,11 @@ class MechanismTelemetry {
    */
   template <typename T>
   std::function<void(const T&)> PublishStruct(const std::string& key) {
-    auto publisher = std::make_shared<nt::StructPublisher<T>>(
+    auto publisher = std::make_shared<wpi::nt::StructPublisher<T>>(
         m_networkTable->template GetStructTopic<T>(key).Publish());
     std::shared_ptr<wpi::log::StructLogEntry<T>> logEntry;
     if (m_dataLogName) {
-      logEntry = std::make_shared<wpi::log::StructLogEntry<T>>(frc::DataLogManager::GetLog(),
+      logEntry = std::make_shared<wpi::log::StructLogEntry<T>>(wpi::DataLogManager::GetLog(),
                                                                *m_dataLogName + "/" + key);
     }
     return [publisher, logEntry](const T& value) {
@@ -116,8 +115,8 @@ class MechanismTelemetry {
   }
 
   /**
-   * Publish a mechanism-level struct array field under this mechanism's data table, and — if
-   * this mechanism was set up with a DataLog name via SetupTelemetry(name, dataLogName) — to
+   * Publish a mechanism-level struct array field under this mechanism's data table, and if
+   * this mechanism was set up with a DataLog name via SetupTelemetry(name, dataLogName) to
    * the DataLog as well.
    *
    * @tparam T    Type of the published array elements.
@@ -126,11 +125,11 @@ class MechanismTelemetry {
    */
   template <typename T>
   std::function<void(std::span<const T>)> PublishStructArray(const std::string& key) {
-    auto publisher = std::make_shared<nt::StructArrayPublisher<T>>(
+    auto publisher = std::make_shared<wpi::nt::StructArrayPublisher<T>>(
         m_networkTable->template GetStructArrayTopic<T>(key).Publish());
     std::shared_ptr<wpi::log::StructArrayLogEntry<T>> logEntry;
     if (m_dataLogName) {
-      logEntry = std::make_shared<wpi::log::StructArrayLogEntry<T>>(frc::DataLogManager::GetLog(),
+      logEntry = std::make_shared<wpi::log::StructArrayLogEntry<T>>(wpi::DataLogManager::GetLog(),
                                                                     *m_dataLogName + "/" + key);
     }
     return [publisher, logEntry](std::span<const T> value) {
@@ -143,17 +142,17 @@ class MechanismTelemetry {
   void UpdateLoopTime();
 
   /** @return The data NT4 table ("Mechanisms/<name>"). */
-  std::shared_ptr<nt::NetworkTable> GetDataTable() const;
+  std::shared_ptr<wpi::nt::NetworkTable> GetDataTable() const;
 
   /** @return The tuning NT4 table ("Tuning/<name>"). */
-  std::shared_ptr<nt::NetworkTable> GetTuningTable() const;
+  std::shared_ptr<wpi::nt::NetworkTable> GetTuningTable() const;
 
  private:
   void SetupLoopTime();
 
-  std::shared_ptr<nt::NetworkTable> m_networkTable;
-  std::shared_ptr<nt::NetworkTable> m_tuningNetworkTable;
-  std::optional<nt::DoublePublisher> m_loopTimePublisher;
+  std::shared_ptr<wpi::nt::NetworkTable> m_networkTable;
+  std::shared_ptr<wpi::nt::NetworkTable> m_tuningNetworkTable;
+  std::optional<wpi::nt::DoublePublisher> m_loopTimePublisher;
   double m_prevTimestamp{0.0};
   std::optional<std::string> m_dataLogName;
 };

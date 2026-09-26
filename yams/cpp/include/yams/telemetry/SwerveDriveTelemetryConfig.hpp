@@ -3,17 +3,16 @@
 
 #pragma once
 
-#include <frc/geometry/Pose2d.h>
-#include <frc/geometry/struct/Pose2dStruct.h>
-#include <frc/kinematics/ChassisSpeeds.h>
-#include <frc/kinematics/SwerveModuleState.h>
-#include <frc/kinematics/struct/ChassisSpeedsStruct.h>
-#include <frc/kinematics/struct/SwerveModuleStateStruct.h>
-
 #include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <wpi/math/geometry/Pose2d.hpp>
+#include <wpi/math/geometry/struct/Pose2dStruct.hpp>
+#include <wpi/math/kinematics/ChassisVelocities.hpp>
+#include <wpi/math/kinematics/SwerveModuleVelocity.hpp>
+#include <wpi/math/kinematics/struct/ChassisVelocitiesStruct.hpp>
+#include <wpi/math/kinematics/struct/SwerveModuleVelocityStruct.hpp>
 
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 #include "yams/telemetry/SmartMotorControllerTelemetry.hpp"
@@ -53,7 +52,7 @@ class SwerveDriveTelemetryConfig {
  public:
   using TelemetryVerbosity = motorcontrollers::SmartMotorControllerConfig::TelemetryVerbosity;
 
-  /** Struct telemetry field for a SwerveDrive, backed by frc::Pose2d. */
+  /** Struct telemetry field for a SwerveDrive, backed by wpi::math::Pose2d. */
   enum class StructTelemetryField {
     /** Estimated field-relative pose of the robot. */
     Pose,
@@ -65,7 +64,7 @@ class SwerveDriveTelemetryConfig {
     FieldRelativeChassisSpeeds,
   };
 
-  /** Struct array telemetry field for a SwerveDrive, backed by frc::SwerveModuleState. */
+  /** Struct array telemetry field for a SwerveDrive, backed by wpi::math::SwerveModuleVelocity. */
   enum class StructArrayTelemetryField {
     /** Last-commanded desired module states. */
     DesiredModuleStates,
@@ -206,17 +205,19 @@ class SwerveDriveTelemetryConfig {
   GetBoolFields();
 
   /** @return Configured StructTelemetry<Pose2d> for Pose. */
-  std::unordered_map<StructTelemetryField, StructTelemetry<frc::Pose2d, StructTelemetryField>>&
+  std::unordered_map<StructTelemetryField,
+                     StructTelemetry<wpi::math::Pose2d, StructTelemetryField>>&
   GetPoseFields();
 
   /** @return Configured StructTelemetry<ChassisSpeeds> for the chassis speeds fields. */
   std::unordered_map<StructTelemetryField,
-                     StructTelemetry<frc::ChassisSpeeds, StructTelemetryField>>&
+                     StructTelemetry<wpi::math::ChassisVelocities, StructTelemetryField>>&
   GetChassisSpeedsFields();
 
   /** @return Configured StructArrayTelemetry<SwerveModuleState> for the module state fields. */
-  std::unordered_map<StructArrayTelemetryField,
-                     StructArrayTelemetry<frc::SwerveModuleState, StructArrayTelemetryField>>&
+  std::unordered_map<
+      StructArrayTelemetryField,
+      StructArrayTelemetry<wpi::math::SwerveModuleVelocity, StructArrayTelemetryField>>&
   GetModuleStatesFields();
 
   /**
@@ -252,13 +253,14 @@ class SwerveDriveTelemetryConfig {
 
   std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> m_doubleFields;
   std::unordered_map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> m_boolFields;
-  std::unordered_map<StructTelemetryField, StructTelemetry<frc::Pose2d, StructTelemetryField>>
+  std::unordered_map<StructTelemetryField, StructTelemetry<wpi::math::Pose2d, StructTelemetryField>>
       m_poseFields;
   std::unordered_map<StructTelemetryField,
-                     StructTelemetry<frc::ChassisSpeeds, StructTelemetryField>>
+                     StructTelemetry<wpi::math::ChassisVelocities, StructTelemetryField>>
       m_chassisSpeedsFields;
-  std::unordered_map<StructArrayTelemetryField,
-                     StructArrayTelemetry<frc::SwerveModuleState, StructArrayTelemetryField>>
+  std::unordered_map<
+      StructArrayTelemetryField,
+      StructArrayTelemetry<wpi::math::SwerveModuleVelocity, StructArrayTelemetryField>>
       m_moduleStatesFields;
 };
 

@@ -1,15 +1,16 @@
 // Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-// Unit tests for EasyCRT — pure math, no hardware required.
+// Unit tests for EasyCRT pure math, no hardware required.
 // Reference geometry: 200T mechanism with 19T and 21T encoder gears (coprime).
 // CRT period = lcm(19, 21) / 200 = 399 / 200 = 1.995 rotations.
 
-#include <gtest/gtest.h>
-#include <units/angle.h>
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <cmath>
 #include <optional>
+#include <wpi/units/angle.hpp>
 
 #include "yams/units/EasyCRT.hpp"
 
@@ -31,132 +32,138 @@ static EasyCRTConfig MakePerfectConfig(double mechRot, int t1 = 19, int t2 = 21,
   const double e1 = mechRot * k / t1;
   const double e2 = mechRot * k / t2;
   EasyCRTConfig cfg;
-  cfg.enc1 = [e1] { return ::units::turn_t{e1}; };
-  cfg.enc2 = [e2] { return ::units::turn_t{e2}; };
+  cfg.enc1 = [e1] { return wpi::units::turn_t{e1}; };
+  cfg.enc2 = [e2] { return wpi::units::turn_t{e2}; };
   const double period = CrtLcm(t1, t2) / k;
   return cfg.WithTeeth(t1, t2, k).WithRange(0.0, period - 1e-6);
 }
 
 // ── CrtGcd ────────────────────────────────────────────────────────────────────
 
-TEST(CrtGcdTest, CommonFactor) { EXPECT_EQ(CrtGcd(4, 6), 2); }
+TEST_CASE("CrtGcd.CommonFactor", "[CrtGcd]") { CHECK(CrtGcd(4, 6) == 2); }
 
-TEST(CrtGcdTest, Coprime) { EXPECT_EQ(CrtGcd(19, 21), 1); }
+TEST_CASE("CrtGcd.Coprime", "[CrtGcd]") { CHECK(CrtGcd(19, 21) == 1); }
 
-TEST(CrtGcdTest, IdentityWithZero) { EXPECT_EQ(CrtGcd(7, 0), 7); }
+TEST_CASE("CrtGcd.IdentityWithZero", "[CrtGcd]") { CHECK(CrtGcd(7, 0) == 7); }
 
 // ── CrtLcm ────────────────────────────────────────────────────────────────────
 
-TEST(CrtLcmTest, BasicLcm) { EXPECT_EQ(CrtLcm(4, 6), 12); }
+TEST_CASE("CrtLcm.BasicLcm", "[CrtLcm]") { CHECK(CrtLcm(4, 6) == 12); }
 
-TEST(CrtLcmTest, CoprimeLcm) { EXPECT_EQ(CrtLcm(19, 21), 399); }
+TEST_CASE("CrtLcm.CoprimeLcm", "[CrtLcm]") { CHECK(CrtLcm(19, 21) == 399); }
 
 // ── CrtIsCoprime ──────────────────────────────────────────────────────────────
 
-TEST(CrtIsCoprimeTest, CoprimePair) { EXPECT_TRUE(CrtIsCoprime(19, 21)); }
+TEST_CASE("CrtIsCoprime.CoprimePair", "[CrtIsCoprime]") { CHECK(CrtIsCoprime(19, 21)); }
 
-TEST(CrtIsCoprimeTest, NonCoprimePair) { EXPECT_FALSE(CrtIsCoprime(4, 6)); }
+TEST_CASE("CrtIsCoprime.NonCoprimePair", "[CrtIsCoprime]") { CHECK_FALSE(CrtIsCoprime(4, 6)); }
 
 // ── CrtRatioFromChain ─────────────────────────────────────────────────────────
 
-TEST(CrtRatioFromChainTest, TwoGears) {
-  EXPECT_NEAR(CrtRatioFromChain({50, 30}), 50.0 / 30.0, 1e-12);
+TEST_CASE("CrtRatioFromChain.TwoGears", "[CrtRatioFromChain]") {
+  CHECK(CrtRatioFromChain({50, 30}) == Catch::Approx(50.0 / 30.0).margin(1e-12));
 }
 
-TEST(CrtRatioFromChainTest, ThreeGearsIntermediateCancels) {
+TEST_CASE("CrtRatioFromChain.ThreeGearsIntermediateCancels", "[CrtRatioFromChain]") {
   // 50T→20T→40T: result is 50/40, not (50/20)*(20/40) computed separately.
-  EXPECT_NEAR(CrtRatioFromChain({50, 20, 40}), 50.0 / 40.0, 1e-12);
+  CHECK(CrtRatioFromChain({50, 20, 40}) == Catch::Approx(50.0 / 40.0).margin(1e-12));
 }
 
-TEST(CrtRatioFromChainTest, SingleElementReturnsOne) {
-  EXPECT_NEAR(CrtRatioFromChain({50}), 1.0, 1e-12);
+TEST_CASE("CrtRatioFromChain.SingleElementReturnsOne", "[CrtRatioFromChain]") {
+  CHECK(CrtRatioFromChain({50}) == Catch::Approx(1.0).margin(1e-12));
 }
 
 // ── CrtRatioFromStages ────────────────────────────────────────────────────────
 
-TEST(CrtRatioFromStagesTest, SingleStage) {
-  EXPECT_NEAR(CrtRatioFromStages({12, 36}), 12.0 / 36.0, 1e-12);
+TEST_CASE("CrtRatioFromStages.SingleStage", "[CrtRatioFromStages]") {
+  CHECK(CrtRatioFromStages({12, 36}) == Catch::Approx(12.0 / 36.0).margin(1e-12));
 }
 
-TEST(CrtRatioFromStagesTest, TwoStages) {
-  EXPECT_NEAR(CrtRatioFromStages({12, 36, 18, 60}), (12.0 / 36.0) * (18.0 / 60.0), 1e-12);
+TEST_CASE("CrtRatioFromStages.TwoStages", "[CrtRatioFromStages]") {
+  CHECK(CrtRatioFromStages({12, 36, 18, 60}) ==
+        Catch::Approx((12.0 / 36.0) * (18.0 / 60.0)).margin(1e-12));
 }
 
 // ── CrtCommonK ────────────────────────────────────────────────────────────────
 
-TEST(CrtCommonKTest, Basic) { EXPECT_NEAR(CrtCommonK(11.0, 50), 550.0, 1e-12); }
+TEST_CASE("CrtCommonK.Basic", "[CrtCommonK]") {
+  CHECK(CrtCommonK(11.0, 50) == Catch::Approx(550.0).margin(1e-12));
+}
 
-TEST(CrtCommonKTest, DirectTurret) { EXPECT_NEAR(CrtCommonK(1.0, 200), 200.0, 1e-12); }
+TEST_CASE("CrtCommonK.DirectTurret", "[CrtCommonK]") {
+  CHECK(CrtCommonK(1.0, 200) == Catch::Approx(200.0).margin(1e-12));
+}
 
 // ── EasyCRT: initial state ────────────────────────────────────────────────────
 
-TEST(EasyCRTTest, InitialStatusIsNotAttempted) {
+TEST_CASE("EasyCRT.InitialStatusIsNotAttempted", "[EasyCRT]") {
   EasyCRT solver{MakePerfectConfig(0.5)};
-  EXPECT_EQ(solver.GetStatus(), EasyCRT::Status::NotAttempted);
+  CHECK(solver.GetStatus() == EasyCRT::Status::NotAttempted);
 }
 
-TEST(EasyCRTTest, InitialErrorIsNaN) {
+TEST_CASE("EasyCRT.InitialErrorIsNaN", "[EasyCRT]") {
   EasyCRT solver{MakePerfectConfig(0.5)};
-  EXPECT_TRUE(std::isnan(solver.GetLastError()));
+  CHECK(std::isnan(solver.GetLastError()));
 }
 
 // ── EasyCRT: successful solves ────────────────────────────────────────────────
 
-TEST(EasyCRTTest, SolveNearZero) {
+TEST_CASE("EasyCRT.SolveNearZero", "[EasyCRT]") {
   EasyCRT solver{MakePerfectConfig(0.05)};
   auto result = solver.GetAngle();
-  ASSERT_TRUE(result.has_value());
-  EXPECT_NEAR(result->value(), 0.05, 1e-9);
+  REQUIRE(result.has_value());
+  CHECK(result->value() == Catch::Approx(0.05).margin(1e-9));
 }
 
-TEST(EasyCRTTest, SolveAtMidRange) {
+TEST_CASE("EasyCRT.SolveAtMidRange", "[EasyCRT]") {
   EasyCRT solver{MakePerfectConfig(1.0)};
   auto result = solver.GetAngle();
-  ASSERT_TRUE(result.has_value());
-  EXPECT_NEAR(result->value(), 1.0, 1e-9);
+  REQUIRE(result.has_value());
+  CHECK(result->value() == Catch::Approx(1.0).margin(1e-9));
 }
 
-TEST(EasyCRTTest, SolveNearEndOfPeriod) {
+TEST_CASE("EasyCRT.SolveNearEndOfPeriod", "[EasyCRT]") {
   // Just under one full CRT period.
   const double pos = 1.99;
   EasyCRT solver{MakePerfectConfig(pos)};
   auto result = solver.GetAngle();
-  ASSERT_TRUE(result.has_value());
-  EXPECT_NEAR(result->value(), pos, 1e-9);
+  REQUIRE(result.has_value());
+  CHECK(result->value() == Catch::Approx(pos).margin(1e-9));
 }
 
-TEST(EasyCRTTest, StatusIsOkAfterSuccessfulSolve) {
+TEST_CASE("EasyCRT.StatusIsOkAfterSuccessfulSolve", "[EasyCRT]") {
   EasyCRT solver{MakePerfectConfig(0.75)};
   solver.GetAngle();
-  EXPECT_EQ(solver.GetStatus(), EasyCRT::Status::Ok);
+  CHECK(solver.GetStatus() == EasyCRT::Status::Ok);
 }
 
-TEST(EasyCRTTest, LastIterationsIsFourAfterSolve) {
+TEST_CASE("EasyCRT.LastIterationsIsFourAfterSolve", "[EasyCRT]") {
   EasyCRT solver{MakePerfectConfig(0.75)};
   solver.GetAngle();
-  EXPECT_EQ(solver.GetLastIterations(), 4);
+  CHECK(solver.GetLastIterations() == 4);
 }
 
-TEST(EasyCRTTest, LastErrorIsSmallAfterSuccessfulSolve) {
+TEST_CASE("EasyCRT.LastErrorIsSmallAfterSuccessfulSolve", "[EasyCRT]") {
   EasyCRT solver{MakePerfectConfig(0.75)};
   solver.GetAngle();
-  EXPECT_LT(solver.GetLastError(), 1e-6);
+  CHECK(solver.GetLastError() < 1e-6);
 }
 
-TEST(EasyCRTTest, SweepPositions) {
+TEST_CASE("EasyCRT.SweepPositions", "[EasyCRT]") {
   // Verify the solver recovers every position across the full CRT period.
   for (int i = 1; i <= 199; ++i) {
     const double pos = i * 0.01;  // 0.01 .. 1.99 rotations
     EasyCRT solver{MakePerfectConfig(pos)};
     auto result = solver.GetAngle();
-    ASSERT_TRUE(result.has_value()) << "Failed at mechRot=" << pos;
-    EXPECT_NEAR(result->value(), pos, 1e-9) << "Wrong result at mechRot=" << pos;
+    INFO("Failed at mechRot=" << pos);
+    REQUIRE(result.has_value());
+    CHECK(result->value() == Catch::Approx(pos).margin(1e-9));
   }
 }
 
 // ── EasyCRT: offsets ──────────────────────────────────────────────────────────
 
-TEST(EasyCRTTest, SolveWithEncoderOffsets) {
+TEST_CASE("EasyCRT.SolveWithEncoderOffsets", "[EasyCRT]") {
   const double mechRot = 0.8;
   const double off1 = 0.12, off2 = -0.07;
   const int t1 = 19, t2 = 21;
@@ -168,20 +175,20 @@ TEST(EasyCRTTest, SolveWithEncoderOffsets) {
   const double raw2 = mechRot * k / t2 - off2;
 
   EasyCRTConfig cfg;
-  cfg.enc1 = [raw1] { return ::units::turn_t{raw1}; };
-  cfg.enc2 = [raw2] { return ::units::turn_t{raw2}; };
+  cfg.enc1 = [raw1] { return wpi::units::turn_t{raw1}; };
+  cfg.enc2 = [raw2] { return wpi::units::turn_t{raw2}; };
   const double period = CrtLcm(t1, t2) / k;
   cfg.WithTeeth(t1, t2, k).WithRange(0.0, period - 1e-6).WithOffsets(off1, off2);
 
   EasyCRT solver{cfg};
   auto result = solver.GetAngle();
-  ASSERT_TRUE(result.has_value());
-  EXPECT_NEAR(result->value(), mechRot, 1e-9);
+  REQUIRE(result.has_value());
+  CHECK(result->value() == Catch::Approx(mechRot).margin(1e-9));
 }
 
 // ── EasyCRT: inversion ────────────────────────────────────────────────────────
 
-TEST(EasyCRTTest, SolveWithEnc1Inverted) {
+TEST_CASE("EasyCRT.SolveWithEnc1Inverted", "[EasyCRT]") {
   const double mechRot = 0.6;
   const int t1 = 19, t2 = 21;
   const double k = 200.0;
@@ -192,58 +199,58 @@ TEST(EasyCRTTest, SolveWithEnc1Inverted) {
   const double e2 = mechRot * k / t2;
 
   EasyCRTConfig cfg;
-  cfg.enc1 = [e1_inverted] { return ::units::turn_t{e1_inverted}; };
-  cfg.enc2 = [e2] { return ::units::turn_t{e2}; };
+  cfg.enc1 = [e1_inverted] { return wpi::units::turn_t{e1_inverted}; };
+  cfg.enc2 = [e2] { return wpi::units::turn_t{e2}; };
   const double period = CrtLcm(t1, t2) / k;
   cfg.WithTeeth(t1, t2, k).WithRange(0.0, period - 1e-6).WithInversions(true, false);
 
   EasyCRT solver{cfg};
   auto result = solver.GetAngle();
-  ASSERT_TRUE(result.has_value());
-  EXPECT_NEAR(result->value(), mechRot, 1e-9);
+  REQUIRE(result.has_value());
+  CHECK(result->value() == Catch::Approx(mechRot).margin(1e-9));
 }
 
 // ── EasyCRT: invalid config ───────────────────────────────────────────────────
 
-TEST(EasyCRTTest, InvalidConfig_NaNEncoder) {
+TEST_CASE("EasyCRT.InvalidConfig_NaNEncoder", "[EasyCRT]") {
   EasyCRTConfig cfg;
-  cfg.enc1 = [] { return ::units::turn_t{std::numeric_limits<double>::quiet_NaN()}; };
-  cfg.enc2 = [] { return ::units::turn_t{0.5}; };
+  cfg.enc1 = [] { return wpi::units::turn_t{std::numeric_limits<double>::quiet_NaN()}; };
+  cfg.enc2 = [] { return wpi::units::turn_t{0.5}; };
   cfg.WithTeeth(19, 21, 200.0).WithRange(0.0, 1.99);
 
   EasyCRT solver{cfg};
   auto result = solver.GetAngle();
-  EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(solver.GetStatus(), EasyCRT::Status::InvalidConfig);
+  CHECK_FALSE(result.has_value());
+  CHECK(solver.GetStatus() == EasyCRT::Status::InvalidConfig);
 }
 
-TEST(EasyCRTTest, InvalidConfig_ZeroCommonK) {
+TEST_CASE("EasyCRT.InvalidConfig_ZeroCommonK", "[EasyCRT]") {
   EasyCRTConfig cfg;
-  cfg.enc1 = [] { return ::units::turn_t{0.1}; };
-  cfg.enc2 = [] { return ::units::turn_t{0.2}; };
+  cfg.enc1 = [] { return wpi::units::turn_t{0.1}; };
+  cfg.enc2 = [] { return wpi::units::turn_t{0.2}; };
   cfg.WithTeeth(19, 21, 0.0).WithRange(0.0, 1.99);
 
   EasyCRT solver{cfg};
   auto result = solver.GetAngle();
-  EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(solver.GetStatus(), EasyCRT::Status::InvalidConfig);
+  CHECK_FALSE(result.has_value());
+  CHECK(solver.GetStatus() == EasyCRT::Status::InvalidConfig);
 }
 
-TEST(EasyCRTTest, InvalidConfig_InvertedRange) {
+TEST_CASE("EasyCRT.InvalidConfig_InvertedRange", "[EasyCRT]") {
   EasyCRTConfig cfg;
-  cfg.enc1 = [] { return ::units::turn_t{0.1}; };
-  cfg.enc2 = [] { return ::units::turn_t{0.2}; };
+  cfg.enc1 = [] { return wpi::units::turn_t{0.1}; };
+  cfg.enc2 = [] { return wpi::units::turn_t{0.2}; };
   cfg.WithTeeth(19, 21, 200.0).WithRange(2.0, 0.0);  // min > max
 
   EasyCRT solver{cfg};
   auto result = solver.GetAngle();
-  EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(solver.GetStatus(), EasyCRT::Status::InvalidConfig);
+  CHECK_FALSE(result.has_value());
+  CHECK(solver.GetStatus() == EasyCRT::Status::InvalidConfig);
 }
 
 // ── EasyCRT: no solution ──────────────────────────────────────────────────────
 
-TEST(EasyCRTTest, NoSolution_PositionOutsideRange) {
+TEST_CASE("EasyCRT.NoSolution_PositionOutsideRange", "[EasyCRT]") {
   // Mechanism is at 1.5 rot but the range only covers [0, 1.0].
   const double mechRot = 1.5;
   const int t1 = 19, t2 = 21;
@@ -252,14 +259,14 @@ TEST(EasyCRTTest, NoSolution_PositionOutsideRange) {
   const double e1 = mechRot * k / t1;
   const double e2 = mechRot * k / t2;
   EasyCRTConfig cfg;
-  cfg.enc1 = [e1] { return ::units::turn_t{e1}; };
-  cfg.enc2 = [e2] { return ::units::turn_t{e2}; };
+  cfg.enc1 = [e1] { return wpi::units::turn_t{e1}; };
+  cfg.enc2 = [e2] { return wpi::units::turn_t{e2}; };
   cfg.WithTeeth(t1, t2, k).WithRange(0.0, 1.0);
 
   EasyCRT solver{cfg};
   auto result = solver.GetAngle();
-  EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(solver.GetStatus(), EasyCRT::Status::NoSolution);
+  CHECK_FALSE(result.has_value());
+  CHECK(solver.GetStatus() == EasyCRT::Status::NoSolution);
 }
 
 }  // namespace yams::test

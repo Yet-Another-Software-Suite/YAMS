@@ -3,29 +3,21 @@
 
 package yams.mechs;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Millisecond;
-import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Second;
-import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.DegreesPerSecond;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Millisecond;
+import static org.wpilib.units.Units.Milliseconds;
+import static org.wpilib.units.Units.RPM;
+import static org.wpilib.units.Units.Second;
+import static org.wpilib.units.Units.Seconds;
+import static org.wpilib.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.wpilibj.Preferences;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
@@ -34,27 +26,35 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.CommandScheduler;
+import org.wpilib.command2.Commands;
+import org.wpilib.math.controller.SimpleMotorFeedforward;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.preferences.Preferences;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
+import yams.commands2.mechanisms.FlyWheel;
+import yams.commands2.telemetry.SmartMotorControllerCommandRegistry;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
+import yams.core.mechanisms.config.FlyWheelConfig;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.motorcontrollers.remote.TalonFXSWrapper;
+import yams.core.motorcontrollers.remote.TalonFXWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 import yams.helpers.DeviceCreator;
 import yams.helpers.MockHardwareExtension;
 import yams.helpers.SmartMotorControllerTestSubsystem;
 import yams.helpers.TestWithScheduler;
-import yams.mechanisms.config.FlyWheelConfig;
-import yams.mechanisms.velocity.FlyWheel;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerCommandRegistry;
-import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.local.SparkWrapper;
-import yams.motorcontrollers.remote.TalonFXSWrapper;
-import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class ShooterTest {
   private static SmartMotorControllerConfig createSMCConfig() {
-    return new SmartMotorControllerConfig()
+    return new yams.commands2.config.SmartMotorControllerConfig()
         .withClosedLoopController(100, 0, 0)
         //        .withSoftLimits(Degrees.of(-100), Degrees.of(100))
         .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
@@ -70,7 +70,8 @@ public class ShooterTest {
     FlyWheelConfig cfg = new FlyWheelConfig().withDiameter(Inches.of(4));
     FlyWheel shooter = new FlyWheel(cfg, smc);
     SmartMotorControllerTestSubsystem subsys =
-        (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
+        (SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
     subsys.smc = smc;
     subsys.mechSimPeriodic = shooter::simIterate;
     subsys.mechUpdateTelemetry = shooter::updateTelemetry;
@@ -116,8 +117,7 @@ public class ShooterTest {
                   new SparkWrapper(
                       smax,
                       DCMotor.getNEO(1),
-                      smcConfig
-                          .clone()
+                      ((yams.commands2.config.SmartMotorControllerConfig) smcConfig.clone())
                           .withSubsystem(new SmartMotorControllerTestSubsystem())
                           .withTelemetry(
                               "SparkMax(" + (10 + offset) + "[" + i + "]) NEO",
@@ -128,8 +128,7 @@ public class ShooterTest {
                   new SparkWrapper(
                       sflex,
                       DCMotor.getNeoVortex(1),
-                      smcConfig
-                          .clone()
+                      ((yams.commands2.config.SmartMotorControllerConfig) smcConfig.clone())
                           .withSubsystem(new SmartMotorControllerTestSubsystem())
                           .withTelemetry(
                               "SparkFlex(" + (20 + offset) + "[" + i + "]) Vortex",
@@ -140,8 +139,7 @@ public class ShooterTest {
                   new TalonFXSWrapper(
                       tfxs,
                       DCMotor.getNEO(2),
-                      smcConfig
-                          .clone()
+                      ((yams.commands2.config.SmartMotorControllerConfig) smcConfig.clone())
                           .withSubsystem(new SmartMotorControllerTestSubsystem())
                           .withTelemetry(
                               "TalonFXS(" + (30 + offset) + "[" + i + "]) NEO",
@@ -152,8 +150,7 @@ public class ShooterTest {
                   new TalonFXWrapper(
                       tfx,
                       DCMotor.getKrakenX60(1),
-                      smcConfig
-                          .clone()
+                      ((yams.commands2.config.SmartMotorControllerConfig) smcConfig.clone())
                           .withSubsystem(new SmartMotorControllerTestSubsystem())
                           .withTelemetry(
                               "TalonFX(" + (40 + offset) + "[" + i + "]) Kraken",
@@ -164,10 +161,17 @@ public class ShooterTest {
   }
 
   private static void closeSMC(SmartMotorController smc) {
-    SmartMotorControllerCommandRegistry.removeCommands(smc.getConfig().getSubsystem());
+    SmartMotorControllerCommandRegistry.removeCommands(
+        ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem());
     CommandScheduler.getInstance()
-        .unregisterSubsystem((SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem());
-    ((SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem()).close();
+        .unregisterSubsystem(
+            (SmartMotorControllerTestSubsystem)
+                ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig())
+                    .getSubsystem());
+    ((SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+        .close();
+    smc.close();
 
     //    switch (smc.getMotorController())
     //    {
@@ -280,24 +284,21 @@ public class ShooterTest {
     System.out.println("DutyCycleUp PostTest Angle: " + postAngle);
 
     boolean pass = pre.lt(post) || preAngle.lt(postAngle) || testPassed.get();
-    if ((smc instanceof TalonFXSWrapper || smc instanceof TalonFXWrapper) && !pass) {
-      System.out.println(
-          "[WARNING] TalonFXS or TalonFX did not pass test, current attributing this to OS differences.");
-    } else {
-      assertTrue(pass);
-    }
+    assertTrue(pass);
   }
 
   private static SmartMotorController setupTestSubsystem(SmartMotorController smc) {
     SmartMotorControllerTestSubsystem subsys =
-        (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
+        (SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
     subsys.setSMC(smc);
     return smc;
   }
 
   private static void startTest(SmartMotorController smc) {
     SmartMotorControllerTestSubsystem subsys =
-        (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
+        (SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
     subsys.testRunning = true;
   }
 
@@ -308,7 +309,8 @@ public class ShooterTest {
       startTest(smc);
       smc.setupSimulation();
       SmartMotorControllerTestSubsystem subsys =
-          (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
+          (SmartMotorControllerTestSubsystem)
+              ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
 
       Command dutyCycleUp = subsys.setDutyCycle(0.5);
       Command dutyCycleDown = subsys.setDutyCycle(-0.5);

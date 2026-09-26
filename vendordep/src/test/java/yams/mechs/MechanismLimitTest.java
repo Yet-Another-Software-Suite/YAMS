@@ -3,28 +3,20 @@
 
 package yams.mechs;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.Pounds;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.Milliseconds;
+import static org.wpilib.units.Units.Pounds;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.Preferences;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import java.util.ArrayList;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
@@ -33,30 +25,38 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import yams.exceptions.ArmConfigurationException;
-import yams.exceptions.PivotConfigurationException;
-import yams.exceptions.SmartMotorControllerConfigurationException;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
+import org.wpilib.command2.CommandScheduler;
+import org.wpilib.math.controller.ArmFeedforward;
+import org.wpilib.math.controller.ElevatorFeedforward;
+import org.wpilib.math.controller.SimpleMotorFeedforward;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.preferences.Preferences;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.Distance;
+import yams.commands2.mechanisms.Arm;
+import yams.commands2.mechanisms.Elevator;
+import yams.commands2.mechanisms.Pivot;
+import yams.commands2.telemetry.SmartMotorControllerCommandRegistry;
+import yams.core.exceptions.ArmConfigurationException;
+import yams.core.exceptions.PivotConfigurationException;
+import yams.core.exceptions.SmartMotorControllerConfigurationException;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
+import yams.core.mechanisms.config.ArmConfig;
+import yams.core.mechanisms.config.ElevatorConfig;
+import yams.core.mechanisms.config.PivotConfig;
+import yams.core.motorcontrollers.SmartMotorController;
+import yams.commands2.config.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.motorcontrollers.remote.TalonFXSWrapper;
+import yams.core.motorcontrollers.remote.TalonFXWrapper;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 import yams.helpers.DeviceCreator;
 import yams.helpers.MockHardwareExtension;
 import yams.helpers.SmartMotorControllerTestSubsystem;
 import yams.helpers.TestWithScheduler;
-import yams.mechanisms.config.ArmConfig;
-import yams.mechanisms.config.ElevatorConfig;
-import yams.mechanisms.config.PivotConfig;
-import yams.mechanisms.positional.Arm;
-import yams.mechanisms.positional.Elevator;
-import yams.mechanisms.positional.Pivot;
-import yams.motorcontrollers.SmartMotorController;
-import yams.motorcontrollers.SmartMotorControllerCommandRegistry;
-import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.local.SparkWrapper;
-import yams.motorcontrollers.remote.TalonFXSWrapper;
-import yams.motorcontrollers.remote.TalonFXWrapper;
 
 /**
  * Verifies that:
@@ -64,7 +64,7 @@ import yams.motorcontrollers.remote.TalonFXWrapper;
  * <ol>
  *   <li>min()/max() Triggers fire in the correct direction for Pivot, Arm, and Elevator. Starting
  *       positions are configured in SmartMotorControllerConfig so the mechanism sim is seeded via
- *       the normal construction path — not via setEncoderPosition.
+ *       the normal construction path not via setEncoderPosition.
  *   <li>A configured starting position is reflected in getMechanismPosition() after setupSimulation
  *       + one scheduler cycle.
  *   <li>Constructors throw when the starting position exceeds the mechanism's hard limits.
@@ -79,7 +79,7 @@ public class MechanismLimitTest {
   // ──────────────────────────────────────────────
 
   private static SmartMotorControllerConfig pivotBase() {
-    return new SmartMotorControllerConfig()
+    return new yams.commands2.config.SmartMotorControllerConfig()
         .withClosedLoopController(4, 0, 0)
         .withSoftLimits(Degrees.of(-100), Degrees.of(100))
         .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4, 5)))
@@ -92,7 +92,7 @@ public class MechanismLimitTest {
   }
 
   private static SmartMotorControllerConfig armBase() {
-    return new SmartMotorControllerConfig()
+    return new yams.commands2.config.SmartMotorControllerConfig()
         .withClosedLoopController(5, 0, 0)
         .withSoftLimits(Degrees.of(-100), Degrees.of(100))
         .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
@@ -104,7 +104,7 @@ public class MechanismLimitTest {
   }
 
   private static SmartMotorControllerConfig elevatorBase() {
-    return new SmartMotorControllerConfig()
+    return new yams.commands2.config.SmartMotorControllerConfig()
         .withMechanismCircumference(Meters.of(Inches.of(0.25).in(Meters) * 22))
         .withClosedLoopController(4, 0, 0)
         .withSoftLimits(Meters.of(0), Meters.of(5))
@@ -124,11 +124,15 @@ public class MechanismLimitTest {
   // ──────────────────────────────────────────────
 
   private static Pivot createPivot(SmartMotorController smc) {
-    PivotConfig config = new PivotConfig().withHardLimits(Degrees.of(-100), Degrees.of(150));
+    // Hard limit is 5° wider at the bottom than the soft limit so that a "true at min"
+    // starting position (-101°) can clear the constructor's bounds check while still
+    // being below the -100° soft limit.
+    PivotConfig config = new PivotConfig().withHardLimits(Degrees.of(-105), Degrees.of(150));
     Pivot pivot = new Pivot(config, smc);
     smc.setupSimulation();
     SmartMotorControllerTestSubsystem subsys =
-        (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
+        (SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
     subsys.mechSimPeriodic = pivot::simIterate;
     subsys.mechUpdateTelemetry = pivot::updateTelemetry;
     return pivot;
@@ -142,18 +146,19 @@ public class MechanismLimitTest {
         new ArmConfig().withLength(Inches.of(4)).withHardLimits(Degrees.of(-110), Degrees.of(200));
     Arm arm = new Arm(config, smc);
     SmartMotorControllerTestSubsystem subsys =
-        (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
+        (SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
     subsys.mechSimPeriodic = arm::simIterate;
     subsys.mechUpdateTelemetry = arm::updateTelemetry;
     return arm;
   }
 
   /**
-   * Creates an Elevator from {@code smc}. Starting height comes from the starting position already
-   * configured in the SMC config by the factory method — do NOT call {@code withStartingHeight}
-   * here, or it would overwrite the factory-supplied seed. Hard limits extend 0.1 m below 0 so that
-   * a "true at min" starting position (-0.01 m) clears the bounds check while remaining below the 0
-   * m soft limit.
+   * Creates an Elevator from {@code smc}. Starting height comes from the starting position
+   * already configured in the SMC config by the factory method do NOT call
+   * {@code withStartingHeight} here, or it would overwrite the factory-supplied seed.
+   * Hard limits extend 0.1 m below 0 so that a "true at min" starting position
+   * (-0.01 m) clears the bounds check while remaining below the 0 m soft limit.
    */
   private static Elevator createElevator(SmartMotorController smc) {
     ElevatorConfig config =
@@ -162,7 +167,8 @@ public class MechanismLimitTest {
             .withCarriageWeight(Pounds.of(16));
     Elevator elevator = new Elevator(config, smc);
     SmartMotorControllerTestSubsystem subsys =
-        (SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem();
+        (SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
     subsys.mechSimPeriodic = elevator::simIterate;
     subsys.mechUpdateTelemetry = elevator::updateTelemetry;
     return elevator;
@@ -177,8 +183,8 @@ public class MechanismLimitTest {
         new SparkWrapper(
             DeviceCreator.createSparkMax(),
             DCMotor.getNEO(1),
-            pivotBase()
-                .withStartingPosition(startPos)
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    pivotBase().withStartingPosition(startPos))
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
@@ -188,8 +194,8 @@ public class MechanismLimitTest {
         new SparkWrapper(
             DeviceCreator.createSparkFlex(),
             DCMotor.getNeoVortex(1),
-            pivotBase()
-                .withStartingPosition(startPos)
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    pivotBase().withStartingPosition(startPos))
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
@@ -199,8 +205,8 @@ public class MechanismLimitTest {
         new TalonFXSWrapper(
             DeviceCreator.createTalonFXS(),
             DCMotor.getNEO(1),
-            pivotBase()
-                .withStartingPosition(startPos)
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    pivotBase().withStartingPosition(startPos))
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
@@ -210,8 +216,8 @@ public class MechanismLimitTest {
         new TalonFXWrapper(
             DeviceCreator.createTalonFX(),
             DCMotor.getKrakenX60(1),
-            pivotBase()
-                .withStartingPosition(startPos)
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    pivotBase().withStartingPosition(startPos))
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
@@ -221,8 +227,8 @@ public class MechanismLimitTest {
         new SparkWrapper(
             DeviceCreator.createSparkMax(),
             DCMotor.getNEO(1),
-            armBase()
-                .withStartingPosition(startPos)
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    armBase().withStartingPosition(startPos))
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
@@ -232,8 +238,8 @@ public class MechanismLimitTest {
         new SparkWrapper(
             DeviceCreator.createSparkFlex(),
             DCMotor.getNeoVortex(1),
-            armBase()
-                .withStartingPosition(startPos)
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    armBase().withStartingPosition(startPos))
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
@@ -243,8 +249,8 @@ public class MechanismLimitTest {
         new TalonFXSWrapper(
             DeviceCreator.createTalonFXS(),
             DCMotor.getNEO(1),
-            armBase()
-                .withStartingPosition(startPos)
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    armBase().withStartingPosition(startPos))
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
@@ -254,8 +260,8 @@ public class MechanismLimitTest {
         new TalonFXWrapper(
             DeviceCreator.createTalonFX(),
             DCMotor.getKrakenX60(1),
-            armBase()
-                .withStartingPosition(startPos)
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    armBase().withStartingPosition(startPos))
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
@@ -265,8 +271,8 @@ public class MechanismLimitTest {
         new SparkWrapper(
             DeviceCreator.createSparkMax(),
             DCMotor.getNEO(1),
-            elevatorBase()
-                .withStartingPosition(startHeight)
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    elevatorBase().withStartingPosition(startHeight))
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
@@ -276,8 +282,8 @@ public class MechanismLimitTest {
         new SparkWrapper(
             DeviceCreator.createSparkFlex(),
             DCMotor.getNeoVortex(1),
-            elevatorBase()
-                .withStartingPosition(startHeight)
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    elevatorBase().withStartingPosition(startHeight))
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
@@ -287,8 +293,8 @@ public class MechanismLimitTest {
         new TalonFXSWrapper(
             DeviceCreator.createTalonFXS(),
             DCMotor.getNEO(1),
-            elevatorBase()
-                .withStartingPosition(startHeight)
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    elevatorBase().withStartingPosition(startHeight))
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
@@ -298,8 +304,8 @@ public class MechanismLimitTest {
         new TalonFXWrapper(
             DeviceCreator.createTalonFX(),
             DCMotor.getKrakenX60(1),
-            elevatorBase()
-                .withStartingPosition(startHeight)
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    elevatorBase().withStartingPosition(startHeight))
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
@@ -319,7 +325,9 @@ public class MechanismLimitTest {
     for (Object[] row :
         new Object[][] {
           {Degrees.of(0), false, ""},
-          {Degrees.of(-100), true, "-atMin"},
+          // -101° is 1° past the -100° soft limit; DCMotorSim has no gravity so the
+          // position stays near -101° after the physics step, well below -100°.
+          {Degrees.of(-101), true, "-atMin"},
         }) {
       Angle pos = (Angle) row[0];
       boolean expected = (boolean) row[1];
@@ -497,19 +505,31 @@ public class MechanismLimitTest {
   // ──────────────────────────────────────────────
 
   private static SmartMotorController setupTestSubsystem(SmartMotorController smc) {
-    ((SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem()).setSMC(smc);
+    ((SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+        .setSMC(smc);
     return smc;
   }
 
   private static void startTest(SmartMotorController smc) {
-    ((SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem()).testRunning = true;
+    ((SmartMotorControllerTestSubsystem)
+                ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+            .testRunning =
+        true;
   }
 
   private static void closeSMC(SmartMotorController smc) {
-    SmartMotorControllerCommandRegistry.removeCommands(smc.getConfig().getSubsystem());
+    SmartMotorControllerCommandRegistry.removeCommands(
+        ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem());
     CommandScheduler.getInstance()
-        .unregisterSubsystem((SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem());
-    ((SmartMotorControllerTestSubsystem) smc.getConfig().getSubsystem()).close();
+        .unregisterSubsystem(
+            (SmartMotorControllerTestSubsystem)
+                ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig())
+                    .getSubsystem());
+    ((SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+        .close();
+    smc.close();
     Object motor = smc.getMotorController();
     if (motor instanceof SparkMax) {
       ((SparkMax) motor).close();
@@ -670,8 +690,8 @@ public class MechanismLimitTest {
             new SparkWrapper(
                 DeviceCreator.createSparkMax(),
                 DCMotor.getNEO(1),
-                pivotBase()
-                    .withStartingPosition(Degrees.of(-200))
+                ((yams.commands2.config.SmartMotorControllerConfig)
+                        pivotBase().withStartingPosition(Degrees.of(-200)))
                     .withSubsystem(new SmartMotorControllerTestSubsystem())));
     try {
       assertThrows(
@@ -691,8 +711,8 @@ public class MechanismLimitTest {
             new SparkWrapper(
                 DeviceCreator.createSparkMax(),
                 DCMotor.getNEO(1),
-                pivotBase()
-                    .withStartingPosition(Degrees.of(200))
+                ((yams.commands2.config.SmartMotorControllerConfig)
+                        pivotBase().withStartingPosition(Degrees.of(200)))
                     .withSubsystem(new SmartMotorControllerTestSubsystem())));
     try {
       assertThrows(
@@ -712,8 +732,8 @@ public class MechanismLimitTest {
             new SparkWrapper(
                 DeviceCreator.createSparkMax(),
                 DCMotor.getNEO(1),
-                armBase()
-                    .withStartingPosition(Degrees.of(-200))
+                ((yams.commands2.config.SmartMotorControllerConfig)
+                        armBase().withStartingPosition(Degrees.of(-200)))
                     .withSubsystem(new SmartMotorControllerTestSubsystem())));
     try {
       assertThrows(
@@ -736,8 +756,8 @@ public class MechanismLimitTest {
             new SparkWrapper(
                 DeviceCreator.createSparkMax(),
                 DCMotor.getNEO(1),
-                armBase()
-                    .withStartingPosition(Degrees.of(300))
+                ((yams.commands2.config.SmartMotorControllerConfig)
+                        armBase().withStartingPosition(Degrees.of(300)))
                     .withSubsystem(new SmartMotorControllerTestSubsystem())));
     try {
       assertThrows(
@@ -760,7 +780,7 @@ public class MechanismLimitTest {
             new SparkWrapper(
                 DeviceCreator.createSparkMax(),
                 DCMotor.getNEO(1),
-                elevatorBase()
+                ((yams.commands2.config.SmartMotorControllerConfig) elevatorBase())
                     .withSubsystem(new SmartMotorControllerTestSubsystem())
                     .withStartingPosition(Meters.of(-1))));
     try {
@@ -784,7 +804,7 @@ public class MechanismLimitTest {
             new SparkWrapper(
                 DeviceCreator.createSparkMax(),
                 DCMotor.getNEO(1),
-                elevatorBase()
+                ((yams.commands2.config.SmartMotorControllerConfig) elevatorBase())
                     .withSubsystem(new SmartMotorControllerTestSubsystem())
                     .withStartingPosition(Meters.of(7))));
     try {

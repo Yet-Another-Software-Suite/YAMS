@@ -1,0 +1,86 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
+// Generates yams_commands2.json and yams_commands3.json from the single yams.json base by
+// patching the parsed JSON per variant, instead of maintaining two hand-written template files.
+// The base file already declares the shared yams-core javaDependency and the full cppDependencies
+// block; each variant task adds its own commands2/commands3 javaDependency on top, and drops
+// cppDependencies entirely for commands3 (WPILib has not published a C++ Commands v3 API for
+// 2027-alpha-7, so there is nothing to ship there).
+//
+// uuid/name/fileName/jsonUrl are hardcoded per variant below (not read from the base file) so
+// each vendordep's identity stays fixed regardless of what the base yams.json's own fields say.
+def baseVendorFile = "yams.json"
+
+def vendordepVariants = [
+    commands2: [
+        taskSuffix        : 'Commands2',
+        fileName          : 'yams_commands2.json',
+        name              : 'Yet Another Mechanism System (Commands v2)',
+        uuid              : 'a1051e86-a979-4880-a28b-a0d5362d1d96',
+        javaArtifactSuffix: 'commands2',
+        includeCpp        : true,
+    ],
+    commands3: [
+        taskSuffix        : 'Commands3',
+        fileName          : 'yams_commands3.json',
+        name              : 'Yet Another Mechanism System (Commands v3)',
+        uuid              : '9eadd383-6bdc-4107-957a-b50cd3146f17',
+        javaArtifactSuffix: 'commands3',
+        includeCpp        : false,
+    ],
+]
+
+ext.createVendordepJsonTask = { variant ->
+    tasks.create("vendordepJson${variant.taskSuffix}") {
+        description = "Builds the ${variant.fileName} vendordep json file."
+        group = 'Build'
+        def outFile = file("$releasePath/${variant.fileName}")
+        outputs.file(outFile)
+
+        copy {
+            from baseVendorFile
+            into "$releasePath/"
+            rename { variant.fileName }
+            expand(version: pubVersion,
+            groupId: artifactGroupId,
+            artifactId: baseArtifactId,
+            uuid: variant.uuid)
+        }
+
+        def vendordep = new JsonSlurper().parse(outFile)
+        vendordep.fileName = variant.fileName
+        vendordep.name = variant.name
+        vendordep.uuid = variant.uuid
+        vendordep.jsonUrl = "https://yet-another-software-suite.github.io/YAMS/${variant.fileName}"
+        vendordep.javaDependencies << [
+            groupId   : artifactGroupId,
+            artifactId: "${baseArtifactId}-${variant.javaArtifactSuffix}",
+            version   : pubVersion,
+        ]
+        // skipCpp strips cppDependencies from the compiled build entirely; a variant that never
+        // ships cpp deps (commands3) stays empty either way.
+        vendordep.cppDependencies = (variant.includeCpp && !skipCpp) ? vendordep.cppDependencies : []
+
+        def pretty = JsonOutput.prettyPrint(JsonOutput.toJson(vendordep))
+        // Groovy's pretty-printer spreads empty arrays/objects across three lines; collapse them
+        // back down so cppDependencies renders as a plain "[]" like the other empty fields.
+        pretty = pretty.replaceAll(/(?s)\[\s*\]/, '[]').replaceAll(/(?s)\{\s*\}/, '{}')
+        outFile.text = pretty
+    }
+}
+
+vendordepVariants.each { name, variant ->
+    def jsonTask = createVendordepJsonTask(variant)
+    def zipTask = tasks.create("${name}VendordepJsonZip", Zip) {
+        destinationDirectory = outputsFolder
+        archiveBaseName = "vendordepJson${variant.taskSuffix}"
+
+        from("$releasePath/${variant.fileName}") {
+            into '/'
+        }
+        dependsOn jsonTask
+    }
+    addTaskToCopyAllOutputs(zipTask)
+    build.dependsOn zipTask
+}

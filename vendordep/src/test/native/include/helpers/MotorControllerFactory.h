@@ -6,15 +6,16 @@
 // Factory helpers used by all mechanism tests to create SmartMotorController
 // instances for each (HardwareType × ProfileType) combination.
 
-#include <frc/system/plant/DCMotor.h>
 #include <rev/SparkFlex.h>
 #include <rev/SparkMax.h>
 
 #include <atomic>
+#include <stdexcept>
+#include <wpi/hardware/bus/CANPort.hpp>
+#include <wpi/math/system/DCMotor.hpp>
 #include <ctre/phoenix6/TalonFX.hpp>
 #include <ctre/phoenix6/TalonFXS.hpp>
 #include <memory>
-#include <ostream>
 #include <string>
 #include <vector>
 
@@ -31,11 +32,26 @@ namespace yams::test {
 
 using namespace motorcontrollers;
 
-// Unique CAN IDs across all test instances, incremented atomically.
-// Wraps within 1-62 (the valid Phoenix 6 / REV CAN device ID range).
+// CAN IDs kReservedCanIdStart-62 are reserved for hardware that lives for the whole test binary
+// (see NextReservedCanId()); per-test hardware must never reuse them, or two devices would share
+// the same Phoenix/REV simulation state.
+inline constexpr int kReservedCanIdStart = 55;
+
+// Unique CAN IDs across per-test instances, incremented atomically.
+// Wraps within 1-(kReservedCanIdStart - 1).
 inline std::atomic<int> gCanIdCounter{0};
 
-inline int NextCanId() { return (gCanIdCounter.fetch_add(1) % 62) + 1; }
+inline int NextCanId() { return (gCanIdCounter.fetch_add(1) % (kReservedCanIdStart - 1)) + 1; }
+
+// CAN IDs for hardware kept alive for the whole test binary (e.g. shared swerve hardware).
+// Never wraps; running out of reserved IDs is a test setup bug.
+inline std::atomic<int> gReservedCanIdCounter{kReservedCanIdStart};
+
+inline int NextReservedCanId() {
+  int id = gReservedCanIdCounter.fetch_add(1);
+  if (id > 62) throw std::runtime_error("Out of reserved test CAN IDs");
+  return id;
+}
 
 enum class HardwareType { SparkMax, SparkFlex, TalonFXS, TalonFX };
 enum class ProfileType { None, Trapezoid, Exponential };
@@ -45,10 +61,6 @@ struct MotorTestParam {
   ProfileType profile;
   std::string name;
 };
-
-// Lets gtest print human-readable param info in failure messages instead of a
-// raw hex dump.
-inline void PrintTo(const MotorTestParam& p, std::ostream* os) { *os << p.name; }
 
 // Concrete hardware objects that must outlive the wrapper.
 struct HardwareBundle {
@@ -82,18 +94,18 @@ inline SmartMotorControllerConfig MakeBaseConfig(ProfileType profile, double kP,
 }
 
 // Return the canonical DCMotor model for a given hardware type.
-inline frc::DCMotor MotorForHardware(HardwareType hw) {
+inline wpi::math::DCMotor MotorForHardware(HardwareType hw) {
   switch (hw) {
     case HardwareType::SparkMax:
-      return frc::DCMotor::NEO(1);
+      return wpi::math::DCMotor::NEO(1);
     case HardwareType::SparkFlex:
-      return frc::DCMotor::NeoVortex(1);
+      return wpi::math::DCMotor::NeoVortex(1);
     case HardwareType::TalonFXS:
-      return frc::DCMotor::NEO(2);
+      return wpi::math::DCMotor::NEO(2);
     case HardwareType::TalonFX:
-      return frc::DCMotor::KrakenX60(1);
+      return wpi::math::DCMotor::KrakenX60(1);
   }
-  return frc::DCMotor::NEO(1);
+  return wpi::math::DCMotor::NEO(1);
 }
 
 // Create a bundle (hardware + subsystem + wrapper) for a given parameter set.
@@ -112,27 +124,29 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
   switch (param.hardware) {
     case HardwareType::SparkMax: {
       bundle.sparkMax = std::make_unique<rev::spark::SparkMax>(
-          canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
+          wpi::CANPort::CAN_S0, canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
       bundle.smc = new local::SparkWrapper(bundle.sparkMax.get(), MotorForHardware(param.hardware),
                                            &bundle.cfg);
       break;
     }
     case HardwareType::SparkFlex: {
       bundle.sparkFlex = std::make_unique<rev::spark::SparkFlex>(
-          canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
+          wpi::CANPort::CAN_S0, canId, rev::spark::SparkLowLevel::MotorType::kBrushless);
       bundle.smc = new local::SparkWrapper(bundle.sparkFlex.get(), MotorForHardware(param.hardware),
                                            &bundle.cfg);
       break;
     }
     case HardwareType::TalonFXS: {
-      bundle.talonFXS = std::make_unique<ctre::phoenix6::hardware::TalonFXS>(canId);
+      bundle.talonFXS = std::make_unique<ctre::phoenix6::hardware::TalonFXS>(
+          canId, ctre::phoenix6::CANBus{});
       bundle.smc =
           new remote::TalonFXSWrapper(bundle.talonFXS.get(), MotorForHardware(param.hardware),
                                       remote::TalonFXSWrapper::MotorArrangement::NEO, &bundle.cfg);
       break;
     }
     case HardwareType::TalonFX: {
-      bundle.talonFX = std::make_unique<ctre::phoenix6::hardware::TalonFX>(canId);
+      bundle.talonFX = std::make_unique<ctre::phoenix6::hardware::TalonFX>(
+          canId, ctre::phoenix6::CANBus{});
       bundle.smc = new remote::TalonFXWrapper(bundle.talonFX.get(),
                                               MotorForHardware(param.hardware), &bundle.cfg);
       break;
@@ -144,14 +158,12 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
 }
 
 // True if the bundle wraps a CTRE TalonFX or TalonFXS.
-inline bool IsCTRE(const HardwareBundle& b) {
-  return b.talonFX != nullptr || b.talonFXS != nullptr;
-}
+inline bool IsCTRE(const HardwareBundle& b) { return b.talonFXS || b.talonFX; }
 
 // Standard teardown: unregister subsystem, close SMC, delete wrapper.
 inline void CloseBundle(HardwareBundle& b) {
   motorcontrollers::SmartMotorControllerCommandRegistry::RemoveCommands(b.subsystem.get());
-  frc2::CommandScheduler::GetInstance().UnregisterSubsystem(b.subsystem.get());
+  wpi::cmd::CommandScheduler::GetInstance().UnregisterSubsystem(b.subsystem.get());
   b.subsystem->Close();
   delete b.smc;
   b.smc = nullptr;

@@ -11,33 +11,33 @@ namespace yams::telemetry {
 
 SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig() {
   m_poseFields.emplace(StructTelemetryField::Pose,
-                       StructTelemetry<frc::Pose2d, StructTelemetryField>{
-                           "pose", frc::Pose2d{}, StructTelemetryField::Pose, false});
+                       StructTelemetry<wpi::math::Pose2d, StructTelemetryField>{
+                           "pose", wpi::math::Pose2d{}, StructTelemetryField::Pose, false});
 
   m_chassisSpeedsFields.emplace(
       StructTelemetryField::DesiredRobotRelativeChassisSpeeds,
-      StructTelemetry<frc::ChassisSpeeds, StructTelemetryField>{
-          "chassis/desired", frc::ChassisSpeeds{},
+      StructTelemetry<wpi::math::ChassisVelocities, StructTelemetryField>{
+          "chassis/desired", wpi::math::ChassisVelocities{},
           StructTelemetryField::DesiredRobotRelativeChassisSpeeds, false});
   m_chassisSpeedsFields.emplace(
       StructTelemetryField::CurrentRobotRelativeChassisSpeeds,
-      StructTelemetry<frc::ChassisSpeeds, StructTelemetryField>{
-          "chassis/current", frc::ChassisSpeeds{},
+      StructTelemetry<wpi::math::ChassisVelocities, StructTelemetryField>{
+          "chassis/current", wpi::math::ChassisVelocities{},
           StructTelemetryField::CurrentRobotRelativeChassisSpeeds, false});
   m_chassisSpeedsFields.emplace(StructTelemetryField::FieldRelativeChassisSpeeds,
-                                StructTelemetry<frc::ChassisSpeeds, StructTelemetryField>{
-                                    "chassis/field", frc::ChassisSpeeds{},
+                                StructTelemetry<wpi::math::ChassisVelocities, StructTelemetryField>{
+                                    "chassis/field", wpi::math::ChassisVelocities{},
                                     StructTelemetryField::FieldRelativeChassisSpeeds, false});
 
   m_moduleStatesFields.emplace(
       StructArrayTelemetryField::DesiredModuleStates,
-      StructArrayTelemetry<frc::SwerveModuleState, StructArrayTelemetryField>{
-          "states/desired", std::vector<frc::SwerveModuleState>{},
+      StructArrayTelemetry<wpi::math::SwerveModuleVelocity, StructArrayTelemetryField>{
+          "states/desired", std::vector<wpi::math::SwerveModuleVelocity>{},
           StructArrayTelemetryField::DesiredModuleStates, false});
   m_moduleStatesFields.emplace(
       StructArrayTelemetryField::CurrentModuleStates,
-      StructArrayTelemetry<frc::SwerveModuleState, StructArrayTelemetryField>{
-          "states/current", std::vector<frc::SwerveModuleState>{},
+      StructArrayTelemetry<wpi::math::SwerveModuleVelocity, StructArrayTelemetryField>{
+          "states/current", std::vector<wpi::math::SwerveModuleVelocity>{},
           StructArrayTelemetryField::CurrentModuleStates, false});
 
   for (auto [field, key, unit] :
@@ -228,21 +228,22 @@ SwerveDriveTelemetryConfig::GetBoolFields() {
   return m_boolFields;
 }
 
-std::unordered_map<SwerveDriveTelemetryConfig::StructTelemetryField,
-                   StructTelemetry<frc::Pose2d, SwerveDriveTelemetryConfig::StructTelemetryField>>&
+std::unordered_map<
+    SwerveDriveTelemetryConfig::StructTelemetryField,
+    StructTelemetry<wpi::math::Pose2d, SwerveDriveTelemetryConfig::StructTelemetryField>>&
 SwerveDriveTelemetryConfig::GetPoseFields() {
   return m_poseFields;
 }
 
-std::unordered_map<
-    SwerveDriveTelemetryConfig::StructTelemetryField,
-    StructTelemetry<frc::ChassisSpeeds, SwerveDriveTelemetryConfig::StructTelemetryField>>&
+std::unordered_map<SwerveDriveTelemetryConfig::StructTelemetryField,
+                   StructTelemetry<wpi::math::ChassisVelocities,
+                                   SwerveDriveTelemetryConfig::StructTelemetryField>>&
 SwerveDriveTelemetryConfig::GetChassisSpeedsFields() {
   return m_chassisSpeedsFields;
 }
 
 std::unordered_map<SwerveDriveTelemetryConfig::StructArrayTelemetryField,
-                   StructArrayTelemetry<frc::SwerveModuleState,
+                   StructArrayTelemetry<wpi::math::SwerveModuleVelocity,
                                         SwerveDriveTelemetryConfig::StructArrayTelemetryField>>&
 SwerveDriveTelemetryConfig::GetModuleStatesFields() {
   return m_moduleStatesFields;
