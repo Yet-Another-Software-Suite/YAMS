@@ -103,6 +103,10 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
    */
   private Optional<LinearVelocity> maximumModuleLinearVelocity = Optional.empty();
   /**
+   * Override for every module's state optimization; empty to leave each module's own setting.
+   */
+  private Optional<Boolean> moduleStateOptimization = Optional.empty();
+  /**
    * Discretization time for the pose estimation.
    */
   private Optional<Time> discretizationSeconds = Optional.empty();
@@ -166,6 +170,7 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
     this.maximumChassisLinearVelocity = cfg.maximumChassisLinearVelocity;
     this.maximumChassisAngularVelocity = cfg.maximumChassisAngularVelocity;
     this.maximumModuleLinearVelocity = cfg.maximumModuleLinearVelocity;
+    this.moduleStateOptimization = cfg.moduleStateOptimization;
     this.discretizationSeconds = cfg.discretizationSeconds;
     this.angularVelocityScaleFactor = cfg.angularVelocityScaleFactor;
     this.centerOfRotation = cfg.centerOfRotation;
@@ -400,6 +405,30 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
   }
 
   /**
+   * Enable or disable state optimization on every {@link SwerveModule} of the drive, overriding each
+   * module's {@link yams.core.mechanisms.config.SwerveModuleConfig#withOptimization(boolean)}. Without
+   * this override, each module keeps its own setting.
+   *
+   * <p>Modules already in this config are updated immediately, so calling this on a running drive's
+   * config (e.g. {@code drive.getConfig().withModuleStateOptimization(false)}) toggles optimization
+   * during operation. Modules added later with {@link #withModules(SwerveModule...)} get it when the
+   * {@link SwerveDrive} is created.
+   *
+   * @param enabled True to let modules turn around and reverse their drive when that is the shorter
+   *                way to the requested angle, false to always steer to the requested angle.
+   * @return {@link SwerveDriveConfig} for chaining.
+   */
+  public T withModuleStateOptimization(boolean enabled) {
+    moduleStateOptimization = Optional.of(enabled);
+    if (modules != null) {
+      for (SwerveModule module : modules) {
+        module.getConfig().withOptimization(enabled);
+      }
+    }
+    return self();
+  }
+
+  /**
    * Set the starting pose of the robot.
    *
    * @param pose {@link Pose2d} to set the robot to. {@code new Pose2d()}
@@ -560,6 +589,16 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
    */
   public Optional<LinearVelocity> getMaximumModuleLinearVelocity() {
     return maximumModuleLinearVelocity;
+  }
+
+  /**
+   * Get the module state optimization override.
+   *
+   * @return True or false to enable or disable optimization on every module, or empty to leave each
+   *         module's own setting.
+   */
+  public Optional<Boolean> getModuleStateOptimization() {
+    return moduleStateOptimization;
   }
 
   /**

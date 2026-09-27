@@ -116,6 +116,8 @@ public class SwerveDrive {
   protected SwerveDrive(SwerveDriveConfig<?> config) {
     m_config = config;
     m_modules = config.getModules();
+    // The drive-wide optimization override, if set, replaces each module's own setting.
+    config.getModuleStateOptimization().ifPresent(enabled -> Arrays.stream(m_modules).forEach(module -> module.getConfig().withOptimization(enabled)));
     m_desiredModuleStates = new SwerveModuleVelocity[m_modules.length];
     m_simPose = config.getInitialPose();
     Arrays.fill(m_desiredModuleStates, new SwerveModuleVelocity());
