@@ -108,9 +108,10 @@ Every motor is a TalonFX wrapped in a YAMS `TalonFXWrapper` (`DCMotor.getKrakenX
 - **Drive control.**
   - The original drove open-loop voltage with MotionMagicExpo steering and sent `SwerveRequest.Idle` with no input.
   - The port drives closed-loop velocity with PID + FF steering and always commands field-relative speeds.
+  - Steer/drive coupling is compensated with the same 4.909 ratio, through YAMS `withCouplingRatio`.
+  - Module speeds under 0.1 m/s hold the wheel angle instead of steering, so wheels do not chase controller noise.
 - **Heading lock.** The original's rotational deadband is gone. Manual rotation is now detected from the raw stick instead of the smoothed input.
 - **Not carried over from CTRE swerve:**
-  - Steer/drive coupling compensation (the ratio of 4.909 is kept, but YAMS does not compensate for it yet).
   - The custom 0.1 odometry/vision std devs.
   - The high-frequency odometry thread.
   - The FPGA-time conversion of vision timestamps.

@@ -5,7 +5,7 @@ package yams.core.mechanisms.swerve;
 
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.MetersPerSecond;
-import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.Rotations;
 
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
@@ -14,7 +14,10 @@ import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.kinematics.SwerveModulePosition;
 import org.wpilib.math.kinematics.SwerveModuleVelocity;
 import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.Force;
+import org.wpilib.units.measure.LinearVelocity;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.mechanisms.config.SwerveModuleConfig;
 import yams.core.motorcontrollers.SmartMotorController;
@@ -93,8 +96,8 @@ public class SwerveModule {
   private final Supplier<Angle> m_azimuthEncoderWithoutOffsets;
   /** Azimuth angle at the last {@link #getPosition()} call, to accumulate continuous azimuth turns. */
   private Rotation2d m_lastAzimuthAngle;
-  /** Azimuth rotations turned so far, for removing steer to drive coupling from the wheel distance. */
-  private double m_azimuthRotations = 0;
+  /** Azimuth angle turned so far, for removing steer to drive coupling from the wheel distance. */
+  private Angle m_azimuthTravel = Rotations.zero();
 
   /**
    * Create a SwerveModule.
@@ -186,7 +189,7 @@ public class SwerveModule {
    */
   public SwerveModuleVelocity setSwerveModuleState(SwerveModuleVelocity state) {
     state = m_config.getOptimizedState(state);
-    m_driveMotorController.setVelocity(MetersPerSecond.of(state.velocity + getCouplingVelocity()));
+    m_driveMotorController.setVelocity(MetersPerSecond.of(state.velocity).plus(getCouplingVelocity()));
     m_azimuthMotorController.setPosition(state.angle.getMeasure());
     return state;
   }
@@ -217,7 +220,7 @@ public class SwerveModule {
     // Scale the force like the drive velocity, so a wheel still turning toward its target does not
     // push at full strength in the wrong direction.
     feedforwardForce = feedforwardForce.times(m_config.getCosineCompensationScalar(state.angle));
-    m_driveMotorController.setVelocity(MetersPerSecond.of(state.velocity + getCouplingVelocity()), feedforwardForce);
+    m_driveMotorController.setVelocity(MetersPerSecond.of(state.velocity).plus(getCouplingVelocity()), feedforwardForce);
     m_azimuthMotorController.setPosition(state.angle.getMeasure());
     return state;
   }
@@ -231,7 +234,7 @@ public class SwerveModule {
    *                                                    {@link SwerveModuleConfig#withWheelRadius(org.wpilib.units.measure.Distance)}).
    */
   public SwerveModuleVelocity getState() {
-    return new SwerveModuleVelocity(m_driveMotorController.getMeasurementVelocity().in(MetersPerSecond) - getCouplingVelocity(), new Rotation2d(m_azimuthMotorController.getMechanismPosition()));
+    return new SwerveModuleVelocity(m_driveMotorController.getMeasurementVelocity().minus(getCouplingVelocity()), new Rotation2d(m_azimuthMotorController.getMechanismPosition()));
   }
 
   /**
@@ -245,38 +248,51 @@ public class SwerveModule {
   public SwerveModulePosition getPosition() {
     final Rotation2d azimuthAngle = new Rotation2d(m_azimuthMotorController.getMechanismPosition());
     if (m_lastAzimuthAngle != null) {
-      m_azimuthRotations += azimuthAngle.minus(m_lastAzimuthAngle).getRotations();
+      m_azimuthTravel = m_azimuthTravel.plus(azimuthAngle.minus(m_lastAzimuthAngle).getMeasure());
     }
     m_lastAzimuthAngle = azimuthAngle;
-    return new SwerveModulePosition(m_driveMotorController.getMeasurementPosition().in(Meters) - m_azimuthRotations * getCouplingMetersPerAzimuthRotation(), azimuthAngle);
+    return new SwerveModulePosition(m_driveMotorController.getMeasurementPosition().minus(getCouplingDistance(m_azimuthTravel)), azimuthAngle);
   }
 
   /**
-   * Wheel distance the drive gearing covers when the azimuth turns one rotation with the drive motor
-   * still, from {@link SwerveModuleConfig#withCouplingRatio(double)}.
+   * Wheel angle the drive gearing turns when the azimuth turns by {@code azimuthAngle} with the drive
+   * motor still, from {@link SwerveModuleConfig#withCouplingRatio(double)}.
    *
-   * @return Meters per azimuth rotation, or 0 if coupling is not compensated.
+   * @param azimuthAngle Angle the azimuth turned.
+   * @return Wheel angle caused by the coupling, zero if coupling is not compensated.
    */
-  private double getCouplingMetersPerAzimuthRotation() {
-    final double couplingRatio = m_config.getCouplingRatio();
-    if (couplingRatio == 0) {
-      return 0;
+  private Angle getCoupledWheelAngle(Angle azimuthAngle) {
+    return azimuthAngle.times(m_config.getCouplingRatio()).times(m_driveMotorController.getConfig().getGearing().getRotorToMechanismRatio());
+  }
+
+  /**
+   * Wheel distance the drive gearing covers when the azimuth turns by {@code azimuthAngle}.
+   *
+   * @param azimuthAngle Angle the azimuth turned.
+   * @return Wheel distance caused by the coupling, zero if coupling is not compensated.
+   * @throws SmartMotorControllerConfigurationException if the drive motor has no mechanism
+   *                                                    circumference configured.
+   */
+  private Distance getCouplingDistance(Angle azimuthAngle) {
+    if (m_config.getCouplingRatio() == 0) {
+      return Meters.zero();
     }
-    final var driveConfig = m_driveMotorController.getConfig();
-    return couplingRatio / driveConfig.getGearing().getMechanismToRotorRatio() * driveConfig.getMechanismCircumference().map(c -> c.in(Meters)).orElse(0.0);
+    return m_driveMotorController.getConfig().convertFromMechanism(getCoupledWheelAngle(azimuthAngle));
   }
 
   /**
    * Wheel speed the drive gearing produces from the azimuth turning at its current rate.
    *
-   * @return Meters per second, or 0 if coupling is not compensated.
+   * @return Wheel speed caused by the coupling, zero if coupling is not compensated.
+   * @throws SmartMotorControllerConfigurationException if the drive motor has no mechanism
+   *                                                    circumference configured.
    */
-  private double getCouplingVelocity() {
-    final double metersPerAzimuthRotation = getCouplingMetersPerAzimuthRotation();
-    if (metersPerAzimuthRotation == 0) {
-      return 0;
+  private LinearVelocity getCouplingVelocity() {
+    if (m_config.getCouplingRatio() == 0) {
+      return MetersPerSecond.zero();
     }
-    return m_azimuthMotorController.getMechanismVelocity().in(RotationsPerSecond) * metersPerAzimuthRotation;
+    final AngularVelocity coupledWheelVelocity = m_azimuthMotorController.getMechanismVelocity().times(m_config.getCouplingRatio()).times(m_driveMotorController.getConfig().getGearing().getRotorToMechanismRatio());
+    return m_driveMotorController.getConfig().convertFromMechanism(coupledWheelVelocity);
   }
 
   /** Update the telemetry of the module. */

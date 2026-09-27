@@ -53,7 +53,7 @@ public final class Constants {
 
         public static final double kDriveGearRatio = 5.8909090909090915;
         public static final double kSteerGearRatio = 12.1;
-        // Steer to drive coupling. YAMS does not compensate for coupling yet, so this is unused.
+        // Steer to drive coupling: drive motor rotations per module rotation.
         public static final double kCoupleRatio = 4.909090909090909;
         public static final Distance kWheelRadius = Inches.of(2);
 
