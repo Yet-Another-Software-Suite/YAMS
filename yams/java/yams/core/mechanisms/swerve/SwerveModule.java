@@ -19,6 +19,7 @@ import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.Force;
 import org.wpilib.units.measure.LinearVelocity;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
+import yams.core.gearing.GearBox;
 import yams.core.mechanisms.config.SwerveModuleConfig;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.telemetry.MechanismTelemetry;
@@ -256,13 +257,14 @@ public class SwerveModule {
 
   /**
    * Wheel angle the drive gearing turns when the azimuth turns by {@code azimuthAngle} with the drive
-   * motor still, from {@link SwerveModuleConfig#withCouplingRatio(double)}.
+   * motor still, from {@link SwerveModuleConfig#withCouplingRatio(GearBox)}.
    *
-   * @param azimuthAngle Angle the azimuth turned.
-   * @return Wheel angle caused by the coupling, zero if coupling is not compensated.
+   * @param azimuthAngle  Angle the azimuth turned.
+   * @param couplingRatio Coupling from the drive motor (input) to the azimuth (output).
+   * @return Wheel angle caused by the coupling.
    */
-  private Angle getCoupledWheelAngle(Angle azimuthAngle) {
-    return azimuthAngle.times(m_config.getCouplingRatio()).times(m_driveMotorController.getConfig().getGearing().getRotorToMechanismRatio());
+  private Angle getCoupledWheelAngle(Angle azimuthAngle, GearBox couplingRatio) {
+    return azimuthAngle.times(couplingRatio.getOutputToInputConversionFactor()).times(m_driveMotorController.getConfig().getGearing().getRotorToMechanismRatio());
   }
 
   /**
@@ -274,10 +276,7 @@ public class SwerveModule {
    *                                                    circumference configured.
    */
   private Distance getCouplingDistance(Angle azimuthAngle) {
-    if (m_config.getCouplingRatio() == 0) {
-      return Meters.zero();
-    }
-    return m_driveMotorController.getConfig().convertFromMechanism(getCoupledWheelAngle(azimuthAngle));
+    return m_config.getCouplingRatio().map(couplingRatio -> m_driveMotorController.getConfig().convertFromMechanism(getCoupledWheelAngle(azimuthAngle, couplingRatio))).orElse(Meters.zero());
   }
 
   /**
@@ -288,11 +287,10 @@ public class SwerveModule {
    *                                                    circumference configured.
    */
   private LinearVelocity getCouplingVelocity() {
-    if (m_config.getCouplingRatio() == 0) {
-      return MetersPerSecond.zero();
-    }
-    final AngularVelocity coupledWheelVelocity = m_azimuthMotorController.getMechanismVelocity().times(m_config.getCouplingRatio()).times(m_driveMotorController.getConfig().getGearing().getRotorToMechanismRatio());
-    return m_driveMotorController.getConfig().convertFromMechanism(coupledWheelVelocity);
+    return m_config.getCouplingRatio().map(couplingRatio -> {
+      final AngularVelocity coupledWheelVelocity = m_azimuthMotorController.getMechanismVelocity().times(couplingRatio.getOutputToInputConversionFactor()).times(m_driveMotorController.getConfig().getGearing().getRotorToMechanismRatio());
+      return m_driveMotorController.getConfig().convertFromMechanism(coupledWheelVelocity);
+    }).orElse(MetersPerSecond.zero());
   }
 
   /** Update the telemetry of the module. */

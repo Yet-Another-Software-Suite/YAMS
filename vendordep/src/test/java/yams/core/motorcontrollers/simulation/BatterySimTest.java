@@ -20,6 +20,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.CommandScheduler;
 import org.wpilib.math.interpolation.InterpolatingDoubleTreeMap;
@@ -340,6 +341,8 @@ public class BatterySimTest {
   }
 
   @Test
+  // Steps 6 hours of simulated time, which takes about 45 minutes on a CI runner.
+  @DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Too slow for CI runners")
   void testHighCurrentDrainsCapacityFasterThanLowCurrentForSameAmpHours() {
     // BatterySim integrates discharge using Timer.getTimestamp(), which reads the HAL's actual
     // (simulated) FPGA clock rather than RobotController's overridable time source. SimHooks.
@@ -382,6 +385,8 @@ public class BatterySimTest {
   }
 
   @Test
+  // Steps 2 hours of simulated time, which takes about 15 minutes on a CI runner.
+  @DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Too slow for CI runners")
   void testReplaceCapacityDeratingUsesCustomCurve() {
     UUID defaultCurveId = UUID.randomUUID();
     UUID customCurveId = UUID.randomUUID();

@@ -125,14 +125,14 @@ public class SwerveModuleConfig {
    */
   private boolean cosineCompensation = false;
   /**
-   * Coupling ratio for the {@link SwerveModule}: drive motor rotations per azimuth rotation. 0 when
-   * not compensated.
+   * Steer to drive coupling of the {@link SwerveModule}, from the drive motor (input) to the azimuth
+   * (output). Empty when not compensated.
    */
-  private double couplingRatio = 0;
+  private Optional<GearBox> couplingRatio = Optional.empty();
   /**
    * Swerve module minimum velocity.
    */
-  private Optional<LinearVelocity> minimumVelocity = Optional.empty();
+  private Optional<LinearVelocity> minimumVelocity = Optional.of(MetersPerSecond.of(0.1));
   /**
    * Distance from the center of rotation for the {@link SwerveModule}.
    */
@@ -247,22 +247,44 @@ public class SwerveModuleConfig {
    * drive setpoint includes the motion steering causes, and it is removed from the measured wheel
    * speed and distance.
    *
+   * @param couplingRatio Coupling as a {@link GearBox} from the drive motor (input) to the azimuth
+   *                      (output): the drive motor rotations caused by one azimuth rotation with the
+   *                      wheel held still are its reduction, e.g.
+   *                      {@code GearBox.fromReductionStages(kCoupleRatio)} with {@code kCoupleRatio} from
+   *                      CTRE Tuner X.
+   * @return {@link SwerveModuleConfig} for chaining.
+   */
+  public SwerveModuleConfig withCouplingRatio(GearBox couplingRatio) {
+    this.couplingRatio = Optional.ofNullable(couplingRatio);
+    return this;
+  }
+
+  /**
+   * Set the steer to drive coupling ratio as a single reduction; see
+   * {@link #withCouplingRatio(GearBox)}.
+   *
    * @param driveMotorRotationsPerAzimuthRotation Drive motor rotations caused by one azimuth rotation
-   *                                              with the wheel held still (e.g. {@code
-   *                                              kCoupleRatio} from CTRE Tuner X).
+   *                                              with the wheel held still, e.g. {@code kCoupleRatio}
+   *                                              from CTRE Tuner X. 0 disables coupling
+   *                                              compensation.
    * @return {@link SwerveModuleConfig} for chaining.
    */
   public SwerveModuleConfig withCouplingRatio(double driveMotorRotationsPerAzimuthRotation) {
-    this.couplingRatio = driveMotorRotationsPerAzimuthRotation;
-    return this;
+    // A 0 reduction would make an infinite GearBox (1 / 0), so treat it as no coupling instead.
+    if (driveMotorRotationsPerAzimuthRotation == 0) {
+      this.couplingRatio = Optional.empty();
+      return this;
+    }
+    return withCouplingRatio(GearBox.fromReductionStages(driveMotorRotationsPerAzimuthRotation));
   }
 
   /**
    * Get the steer to drive coupling ratio.
    *
-   * @return Drive motor rotations per azimuth rotation, or 0 if coupling is not compensated.
+   * @return Coupling from the drive motor (input) to the azimuth (output), or empty if coupling is not
+   *         compensated.
    */
-  public double getCouplingRatio() {
+  public Optional<GearBox> getCouplingRatio() {
     return couplingRatio;
   }
 
