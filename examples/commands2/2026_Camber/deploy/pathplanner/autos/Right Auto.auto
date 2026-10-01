@@ -1,0 +1,67 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Right Shot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootBalls"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Right Trench"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Right Middle"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Right Middle Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Right Middle intake to Right Middle"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Right Middle to Right Trench"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Right Trench to Right Shot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootBalls"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

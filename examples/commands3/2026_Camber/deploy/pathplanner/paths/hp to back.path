@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 0.46332142857144165,
+        "y": 0.6985357142934845
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.078785714285714,
+        "y": 1.1196428571428567
+      },
+      "isLocked": false,
+      "linkedName": "A3"
+    },
+    {
+      "anchor": {
+        "x": 2.8875178316690437,
+        "y": 3.9457602862254024
+      },
+      "prevControl": {
+        "x": 2.4502142602404726,
+        "y": 3.0470178571428574
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "A1"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.5,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 1.2698625933615155
+  },
+  "reversed": false,
+  "folder": "Camber Middle Auto",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "useDefaultConstraints": true
+}

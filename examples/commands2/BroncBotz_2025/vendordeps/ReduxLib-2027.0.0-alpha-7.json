@@ -1,0 +1,72 @@
+{
+  "fileName": "ReduxLib-2027.0.0-alpha-7.json",
+  "name": "ReduxLib",
+  "version": "2027.0.0-alpha-7",
+  "wpilibYear": "2027_alpha7",
+  "uuid": "151ecca8-670b-4026-8160-cdd2679ef2bd",
+  "mavenUrls": [
+    "https://maven.reduxrobotics.com/"
+  ],
+  "jsonUrl": "https://frcsdk.reduxrobotics.com/ReduxLib_2027.json",
+  "javaDependencies": [
+    {
+      "groupId": "com.reduxrobotics.frc",
+      "artifactId": "ReduxLib-java",
+      "version": "2027.0.0-alpha-7"
+    }
+  ],
+  "jniDependencies": [
+    {
+      "groupId": "com.reduxrobotics.frc",
+      "artifactId": "ReduxLib-fifo",
+      "version": "2027.0.0-alpha-7",
+      "isJar": false,
+      "skipInvalidPlatforms": true,
+      "validPlatforms": [
+        "linuxsystemcore",
+        "linuxx86-64",
+        "linuxarm64",
+        "osxuniversal",
+        "windowsx86-64",
+        "windowsarm64"
+      ]
+    }
+  ],
+  "cppDependencies": [
+    {
+      "groupId": "com.reduxrobotics.frc",
+      "artifactId": "ReduxLib-cpp",
+      "version": "2027.0.0-alpha-7",
+      "libName": "ReduxLib",
+      "headerClassifier": "headers",
+      "sourcesClassifier": "sources",
+      "sharedLibrary": true,
+      "skipInvalidPlatforms": true,
+      "binaryPlatforms": [
+        "linuxsystemcore",
+        "linuxx86-64",
+        "linuxarm64",
+        "osxuniversal",
+        "windowsx86-64",
+        "windowsarm64"
+      ]
+    },
+    {
+      "groupId": "com.reduxrobotics.frc",
+      "artifactId": "ReduxLib-fifo",
+      "version": "2027.0.0-alpha-7",
+      "libName": "reduxfifo",
+      "headerClassifier": "headers",
+      "sharedLibrary": true,
+      "skipInvalidPlatforms": true,
+      "binaryPlatforms": [
+        "linuxsystemcore",
+        "linuxx86-64",
+        "linuxarm64",
+        "osxuniversal",
+        "windowsx86-64",
+        "windowsarm64"
+      ]
+    }
+  ]
+}
