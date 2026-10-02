@@ -64,6 +64,16 @@ public class AlgaeIntake implements Mechanism {
         return setDutyCycle(kOuttake);
     }
 
+    /** Spit the algae out, finishing once {@code done} is true. */
+    public Command outtakeUntil(BooleanSupplier done) {
+        return run(coroutine -> {
+            while (!done.getAsBoolean()) {
+                roller.setDutyCycleSetpoint(kOuttake);
+                coroutine.yield();
+            }
+        }).named("AlgaeIntake Outtake Until Done");
+    }
+
     public Command stop() {
         return setDutyCycle(0);
     }
