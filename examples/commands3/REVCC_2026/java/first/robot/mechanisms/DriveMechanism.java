@@ -5,7 +5,6 @@ package first.robot.mechanisms;
 
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Centimeters;
-import static org.wpilib.units.Units.Radians;
 
 import first.robot.Constants.DriveConstants;
 import first.robot.Constants.OIConstants;
@@ -77,7 +76,7 @@ public class DriveMechanism implements Mechanism
                                                      DriveConstants.kRearRightTurningMotorOnBottom);
 
     SwerveDriveConfig config = new SwerveDriveConfig(this, frontLeft, frontRight, rearLeft, rearRight)
-        .withGyro(() -> Radians.of(m_gyro.getYawRadians()))
+        .withGyro(m_gyro::getRotation3d)
         .withGyroInverted(DriveConstants.kGyroReversed)
         .withStartingPose(Pose2d.ZERO)
         // Caps chassis speeds and desaturates module speeds, like the REV drive() method did.

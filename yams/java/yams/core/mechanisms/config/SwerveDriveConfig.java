@@ -3,6 +3,7 @@
 
 package yams.core.mechanisms.config;
 
+import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Microsecond;
 import static org.wpilib.units.Units.Milliseconds;
 import static org.wpilib.units.Units.Radians;
@@ -14,11 +15,14 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.function.Supplier;
 import org.wpilib.framework.RobotBase;
+import org.wpilib.math.controller.AntiTipping;
 import org.wpilib.math.controller.PIDController;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.kinematics.ChassisVelocities;
+import org.wpilib.math.util.MathUtil;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Distance;
@@ -61,7 +65,16 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
   /**
    * Gyro supplier.
    */
-  private Optional<Supplier<Angle>> gyroSupplier = Optional.empty();
+  private Optional<Supplier<Rotation3d>> gyroSupplier = Optional.empty();
+  /**
+   * The gyro's yaw, kept continuous: a {@link Rotation3d}'s yaw wraps at half a rotation, but the
+   * heading must not jump when the robot turns past it.
+   */
+  private double continuousYawRadians = 0;
+  /**
+   * Whether {@link #continuousYawRadians} has been read from the gyro yet.
+   */
+  private boolean continuousYawRead = false;
   /**
    * Gyro angular velocity supplier.
    */
@@ -142,6 +155,10 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
    * Angular velocity scale factor.
    */
   private OptionalDouble simAngularVelocityScaleFactor = OptionalDouble.empty();
+  /**
+   * Anti-tipping correction, see {@link #withAntiTipping(AntiTipping)}.
+   */
+  private Optional<AntiTipping> antiTipping = Optional.empty();
 
   /**
    * Create the {@link SwerveDriveConfig} for the {@link SwerveDrive}
@@ -180,6 +197,7 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
     this.simRotationController = cfg.simRotationController;
     this.simDiscretizationSeconds = cfg.simDiscretizationSeconds;
     this.simAngularVelocityScaleFactor = cfg.simAngularVelocityScaleFactor;
+    this.antiTipping = cfg.antiTipping;
     // Intentionally not copying these, as they are not user-configurable.
     //    this.gyroSupplier = cfg.gyroSupplier;
     //    this.gyroAngularVelocitySupplier = cfg.gyroAngularVelocitySupplier;
@@ -348,14 +366,73 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
   }
 
   /**
-   * Get the {@link SwerveModule}s for the {@link SwerveDrive}.
+   * Set the gyro, as the robot's attitude: its yaw is the robot's heading, and its roll and pitch
+   * are what anti-tipping corrects with (see {@link #withAntiTipping(AntiTipping)}).
    *
-   * @param gyro {@link Supplier} for the gyro.
+   * @param gyro {@link Supplier} for the robot's attitude, such as {@code pigeon::getRotation3d} or
+   *             {@code imu::getRotation3d}.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public T withGyro(Supplier<Angle> gyro) {
+  public T withGyro(Supplier<Rotation3d> gyro) {
     gyroSupplier = Optional.ofNullable(gyro);
+    continuousYawRead = false;
     return self();
+  }
+
+  /**
+   * Drive the robot back under itself when it starts to tip, with WPILib's {@link AntiTipping}: once
+   * the robot's pitch or roll, from the gyro set with {@link #withGyro(Supplier)}, is past
+   * {@code tippingThreshold}, a correction toward the side it is tipping to, {@code kP} times the sine
+   * of the tilt and at most {@code maxCorrectionSpeed}, is added to every robot relative chassis
+   * speed. See {@link AntiTipping} for tuning.
+   *
+   * @param kP                 Correction speed per sine of the tilt.
+   * @param tippingThreshold   Tilt past which to correct: a few degrees above the most the robot
+   *                           tilts in normal driving, well below where it tips.
+   * @param maxCorrectionSpeed Fastest the correction may drive.
+   * @return {@link SwerveDriveConfig} for chaining.
+   * @throws IllegalArgumentException if {@code kP} or {@code maxCorrectionSpeed} is not positive, or
+   *                                  {@code tippingThreshold} is not between 0 and 90 degrees.
+   */
+  public T withAntiTipping(LinearVelocity kP, Angle tippingThreshold, LinearVelocity maxCorrectionSpeed) {
+    if (kP.in(MetersPerSecond) <= 0) {
+      throw new IllegalArgumentException("Anti-tipping kP must be positive, but was " + kP);
+    }
+    if (maxCorrectionSpeed.in(MetersPerSecond) <= 0) {
+      throw new IllegalArgumentException("Anti-tipping maximum correction speed must be positive, but was " + maxCorrectionSpeed);
+    }
+    if (tippingThreshold.in(Radians) <= 0 || tippingThreshold.in(Radians) >= Math.PI / 2) {
+      throw new IllegalArgumentException("Anti-tipping threshold must be between 0 and 90 degrees, but was " + tippingThreshold);
+    }
+    return withAntiTipping(new AntiTipping(kP.in(MetersPerSecond), tippingThreshold.in(Radians), maxCorrectionSpeed.in(MetersPerSecond)));
+  }
+
+  /**
+   * Drive the robot back under itself when it starts to tip, with an {@link AntiTipping} reading the
+   * robot's attitude from the gyro set with {@link #withGyro(Supplier)}: its correction is added to
+   * every robot relative chassis speed.
+   *
+   * @param antiTipping {@link AntiTipping} to correct with.
+   * @return {@link SwerveDriveConfig} for chaining.
+   */
+  public T withAntiTipping(AntiTipping antiTipping) {
+    this.antiTipping = Optional.ofNullable(antiTipping);
+    return self();
+  }
+
+  /**
+   * Get the anti-tipping correction for the robot's attitude now.
+   *
+   * @return Robot relative correction, or zero when the robot is not tipping, or anti-tipping or the
+   *     gyro is not configured.
+   */
+  public ChassisVelocities getAntiTippingCorrection() {
+    if (antiTipping.isEmpty() || gyroSupplier.isEmpty()) {
+      return new ChassisVelocities();
+    }
+    // Without the yaw, the correction is relative to the robot, like the chassis speeds it is added to.
+    final Rotation3d attitude = gyroSupplier.get().get();
+    return antiTipping.get().calculate(new Rotation3d(attitude.getX(), attitude.getY(), 0));
   }
 
   /**
@@ -552,7 +629,15 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
     if (gyroSupplier.isEmpty()) {
       throw new IllegalStateException("Gyro supplier is not set! Please use .withGyro() to set the gyro supplier!");
     }
-    return (gyroInverted ? gyroSupplier.get().get().unaryMinus() : gyroSupplier.get().get()).minus(gyroOffset.orElse(Rotations.of(0)));
+    // Keep the yaw continuous: unwrapped, it would jump a whole rotation when the robot turns past
+    // half a rotation, and the gyro angular velocity derived from it would spike.
+    final double wrappedYawRadians = gyroSupplier.get().get().getZ();
+    continuousYawRadians = continuousYawRead
+                           ? continuousYawRadians + MathUtil.angleModulus(wrappedYawRadians - continuousYawRadians)
+                           : wrappedYawRadians;
+    continuousYawRead = true;
+    final Angle yaw = Radians.of(continuousYawRadians);
+    return (gyroInverted ? yaw.unaryMinus() : yaw).minus(gyroOffset.orElse(Rotations.of(0)));
   }
 
   /**
@@ -631,7 +716,8 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
   }
 
   /**
-   * Optimize the given chassis speeds.
+   * Optimize the given chassis speeds, first adding the anti-tipping correction when it is
+   * configured with {@link #withAntiTipping(AntiTipping)}.
    *
    * @param speeds {@link ChassisVelocities} to optimize.
    * @return Optimized {@link ChassisVelocities}.
@@ -640,6 +726,9 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
    *                               supplier was set with {@link #withGyro(Supplier)}.
    */
   public ChassisVelocities optimizeRobotRelativeChassisSpeeds(ChassisVelocities speeds) {
+    if (antiTipping.isPresent()) {
+      speeds = speeds.plus(getAntiTippingCorrection());
+    }
     if (angularVelocityScaleFactor.isPresent()) {
       speeds = angularVelocitySkewCorrection(speeds);
     }

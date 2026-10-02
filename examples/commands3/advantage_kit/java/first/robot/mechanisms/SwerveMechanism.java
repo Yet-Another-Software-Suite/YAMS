@@ -22,6 +22,7 @@ import org.wpilib.math.controller.PIDController;
 import org.wpilib.math.estimator.SwerveDrivePoseEstimator;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.math.kinematics.SwerveModulePosition;
@@ -226,7 +227,7 @@ public class SwerveMechanism implements Mechanism
                           new Translation2d(Inches.of(-24), Inches.of(-24)));
 
     config = new SwerveDriveConfig(this, fl, fr, bl, br)
-        .withGyro(() -> getGyroAngle().getMeasure())
+        .withGyro(() -> new Rotation3d(getGyroAngle()))
         // Use the logged estimated pose as the starting pose so the drive's
         // internal odometry initialises from the replayed value, not from zero.
         .withStartingPose(swerveInputs.estimatedPose)

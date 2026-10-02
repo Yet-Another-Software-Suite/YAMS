@@ -97,7 +97,7 @@ public class Swerve implements Mechanism {
         final Pigeon2 pigeon = new Pigeon2(Ports.kPigeon, Ports.kCANivoreCANBus);
 
         final SwerveDriveConfig config = new SwerveDriveConfig(this, frontLeft, frontRight, backLeft, backRight)
-            .withGyro(pigeon.getYaw().asSupplier())
+            .withGyro(pigeon::getRotation3d)
             .withStartingPose(Pose2d.ZERO)
             .withMaximumModuleSpeed(kSpeedAt12Volts)
             // Heading PID from the original drive requests; SwerveInputStream uses it to hold, snap,

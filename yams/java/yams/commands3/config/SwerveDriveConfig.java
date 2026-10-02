@@ -14,7 +14,7 @@ import yams.core.mechanisms.swerve.SwerveModule;
  * <pre>{@code
  * // Build each SwerveModule (see SwerveModuleConfig for per-module setup), then:
  * SwerveDriveConfig config = new SwerveDriveConfig(this, fl, fr, bl, br)
- *     .withGyro(gyro.getYaw().asSupplier())
+ *     .withGyro(gyro::getRotation3d)
  *     .withMaximumChassisSpeed(MetersPerSecond.of(4.5), DegreesPerSecond.of(360))
  *     .withTranslationController(new PIDController(1.0, 0, 0))
  *     .withRotationController(new PIDController(1.0, 0, 0))

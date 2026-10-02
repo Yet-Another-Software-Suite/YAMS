@@ -65,7 +65,7 @@ public class Swerve implements Mechanism {
         final Pigeon2 gyro = new Pigeon2(Ports.kPigeon, Ports.kCTRECANBus);
 
         final SwerveDriveConfig config = new SwerveDriveConfig(this, frontLeft, frontRight, backLeft, backRight)
-            .withGyro(gyro.getYaw().asSupplier())
+            .withGyro(gyro::getRotation3d)
             .withStartingPose(kStartingPose)
             .withMaximumModuleSpeed(kMaxSpeed)
             // Drive to pose gains from the original's AlignmentConstants.

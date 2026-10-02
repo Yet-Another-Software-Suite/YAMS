@@ -92,7 +92,7 @@ public class SwerveSubsystem extends SubsystemBase
                                    .map(this::createModule)
                                    .toArray(SwerveModule[]::new);
     SwerveDriveConfig config = new SwerveDriveConfig(this, modules)
-        .withGyro(() -> Radians.of(imu.getYawRadians()))
+        .withGyro(imu::getRotation3d)
         .withStartingPose(Constants.SwerveDrive.startPose)
         .withMaximumChassisSpeed(maxLinearVelocity, maxAngularVelocity)
         .withMaximumModuleSpeed(maxLinearVelocity)
