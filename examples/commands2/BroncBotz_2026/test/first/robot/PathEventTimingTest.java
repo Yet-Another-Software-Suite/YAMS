@@ -25,9 +25,9 @@ import org.wpilib.hardware.hal.HAL;
 import org.wpilib.math.kinematics.ChassisVelocities;
 
 /**
- * Checks the event timing the Commands v3 port uses. Commands v3 cannot let PathPlanner create its
- * events (they need Commands v2), so it generates each trajectory from the path without its event
- * markers and times each marker itself: the first trajectory state whose waypoint relative position
+ * Checks the event timing planned for the Commands v3 port, whose PathPlanner support is not
+ * finished yet. Commands v3 cannot let PathPlanner create its events (they need Commands v2), so it
+ * will generate each trajectory from the path without its event markers and time each marker itself: the first trajectory state whose waypoint relative position
  * is closest to the marker's. This test runs PathPlanner's own event timing on every autonomous path
  * and checks the two agree.
  */
@@ -77,7 +77,7 @@ class PathEventTimingTest {
         }
     }
 
-    /** The same timing as {@code PathEvents.time(...)} in the Commands v3 port. */
+    /** The marker timing planned for the Commands v3 port. */
     private static List<TimedEvent> timeMarkers(PathPlannerPath path, PathPlannerTrajectory trajectory, List<EventMarker> markers) {
         final List<EventMarker> sorted = new ArrayList<>(markers);
         sorted.sort(Comparator.comparingDouble(EventMarker::position));

@@ -9,7 +9,7 @@ import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.RadiansPerSecond;
 import static org.wpilib.units.Units.Rotations;
 
-import com.reduxrobotics.sensors.canandgyro.Canandgyro;
+import com.ctre.phoenix6.hardware.Pigeon2;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import first.robot.Constants.DriveToPose;
@@ -43,7 +43,7 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Swerve drivetrain built with YAMS: four NEO / SPARK MAX modules with Thrifty absolute encoders and
- * a Redux Canandgyro. The original built the same drivetrain with YAGSL from the deploy/swerve JSON
+ * a Pigeon 2 (the original had a Redux Canandgyro). The original built the same drivetrain with YAGSL from the deploy/swerve JSON
  * files; those values now live in {@code Constants.SwerveConstants}.
  */
 public class Swerve extends SubsystemBase {
@@ -61,11 +61,11 @@ public class Swerve extends SubsystemBase {
             Ports.kBackRightEncoder, kBackRightEncoderOffset,
             new Translation2d(kModuleOffset.unaryMinus(), kModuleOffset.unaryMinus()));
 
-        // The Canandgyro reports yaw in rotations, counterclockwise positive.
-        final Canandgyro gyro = new Canandgyro(Ports.kCanandgyro, Ports.kCANBus);
+        // The Pigeon 2 reports yaw counterclockwise positive, without wrapping.
+        final Pigeon2 gyro = new Pigeon2(Ports.kPigeon, Ports.kCTRECANBus);
 
         final SwerveDriveConfig config = new SwerveDriveConfig(this, frontLeft, frontRight, backLeft, backRight)
-            .withGyro(() -> Rotations.of(gyro.getMultiturnYaw()))
+            .withGyro(gyro.getYaw().asSupplier())
             .withStartingPose(kStartingPose)
             .withMaximumModuleSpeed(kMaxSpeed)
             // Drive to pose gains from the original's AlignmentConstants.

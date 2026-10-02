@@ -4,10 +4,12 @@
 package yams.core.motorcontrollers;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Rotations;
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import org.junit.jupiter.api.AfterEach;
@@ -51,7 +53,15 @@ public class CANcoderTest {
             ((yams.commands2.config.SmartMotorControllerConfig) wrapper.getConfig()).getSubsystem();
     CommandScheduler.getInstance().unregisterSubsystem(subsys);
     wrapper.close();
+    DeviceCreator.silence(wrapper);
     talon.close();
+  }
+
+  /** The discontinuity point the CANcoder holds, in rotations. */
+  private static double cancoderDiscontinuityPoint(CANcoder cancoder) {
+    final CANcoderConfiguration config = new CANcoderConfiguration();
+    cancoder.getConfigurator().refresh(config);
+    return config.MagnetSensor.AbsoluteSensorDiscontinuityPoint;
   }
 
   /**
@@ -73,6 +83,7 @@ public class CANcoderTest {
     assertDoesNotThrow(
         () -> result[0] = new TalonFXWrapper(talon, DCMotor.getKrakenX60(1), config));
     if (result[0] != null) {
+      assertEquals(0.5, cancoderDiscontinuityPoint(cancoder), 1e-9);
       closeWrapper(result[0], talon);
     }
   }
@@ -96,6 +107,7 @@ public class CANcoderTest {
     assertDoesNotThrow(
         () -> result[0] = new TalonFXWrapper(talon, DCMotor.getKrakenX60(1), config));
     if (result[0] != null) {
+      assertEquals(1, cancoderDiscontinuityPoint(cancoder), 1e-9);
       closeWrapper(result[0], talon);
     }
   }

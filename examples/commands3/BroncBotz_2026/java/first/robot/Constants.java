@@ -58,12 +58,12 @@ public final class Constants {
         public static final Distance kWheelDiameter = Inches.of(4);
         public static final double kWheelCircumferenceMeters = Math.PI * kWheelDiameter.in(Meters);
 
-        // YAGSL drive gains are per m/s; YAMS closes the loop per wheel rotation per second.
-        public static final double kDriveKP = 0.0020645 * kWheelCircumferenceMeters;
+        // YAGSL drive gains are duty cycle per m/s; YAMS's are volts per wheel rotation per second.
+        public static final double kDriveKP = 0.0020645 * kWheelCircumferenceMeters * 12;
         // YAGSL's drive feedforward: 12 V at the maximum speed.
         public static final double kDriveKV = 12.0 / (DriveConstants.kMaxSpeed.in(MetersPerSecond) / kWheelCircumferenceMeters);
-        // YAGSL steer gains are per degree; YAMS closes the loop per module rotation.
-        public static final double kSteerKP = 0.01 * 360;
+        // YAGSL steer gains are duty cycle per degree; YAMS's are volts per module rotation.
+        public static final double kSteerKP = 0.01 * 360 * 12;
 
         public static final Current kDriveCurrentLimit = Amps.of(40);
         public static final Current kSteerCurrentLimit = Amps.of(20);

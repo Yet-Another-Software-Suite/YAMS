@@ -102,6 +102,12 @@ public abstract class SmartMotorController {
   /** Trapezoidal profile state for the closed loop controller. */
   protected Optional<TrapezoidProfile.State> m_trapState = Optional.empty();
 
+  /**
+   * Mechanism position the closed loop controller last used, unwrapped across the continuous
+   * wrapping point.
+   */
+  protected Optional<Angle> m_lastClosedLoopMechanismPosition = Optional.empty();
+
   /** Simple PID controller for the motor controller. */
   protected Optional<PIDController> m_pid = Optional.empty();
 
@@ -273,6 +279,7 @@ public abstract class SmartMotorController {
   public void startClosedLoopController() {
     if (m_closedLoopControllerThread != null && m_config.getMotorControllerMode() == ControlMode.CLOSED_LOOP) {
       m_pid.ifPresent(PIDController::reset);
+      m_lastClosedLoopMechanismPosition = Optional.empty();
       m_trapState = getTrapezoidalProfileState();
       m_expoState = getExponentialProfileState();
       m_lqr.ifPresent(lqr -> lqr.reset(getMechanismPosition(), getMechanismVelocity()));
@@ -315,6 +322,14 @@ public abstract class SmartMotorController {
       return;
     }
 
+    // With continuous wrapping, an absolute encoder's angle jumps by a whole wrapping range at the
+    // wrapping point. Use the equivalent angle nearest the last one, so the motion profile's state and
+    // the LQR's estimate, which carry over from the last loop, do not see the jump.
+    final Angle mechanismPosition = m_config.getContinuousWrapping().isPresent() && m_lastClosedLoopMechanismPosition.isPresent()
+                                    ? m_config.getContinuousWrappingSetpoint(getMechanismPosition(), m_lastClosedLoopMechanismPosition.get())
+                                    : getMechanismPosition();
+    m_lastClosedLoopMechanismPosition = Optional.of(mechanismPosition);
+
     if (setpointPosition.isPresent()) {
       if (mechLowerLimit.isPresent()) {
         if (setpointPosition.get().lt(mechLowerLimit.get())) {
@@ -331,10 +346,16 @@ public abstract class SmartMotorController {
       }
     }
 
+    // With continuous wrapping, go to the equivalent setpoint nearest the current position, so the
+    // motion profile and the closed loop controller take the short way around.
+    Optional<Angle> wrappedSetpointPosition = setpointPosition.map(angle -> m_config.getContinuousWrapping().isPresent()
+                                                                            ? m_config.getContinuousWrappingSetpoint(angle, mechanismPosition)
+                                                                            : angle);
+
     // Get the motion profile setpoints
     if (setpointPosition.isPresent()) {
-      var setpoint = setpointPosition.get().in(Rotations);
-      var position = getMechanismPosition().in(Rotations);
+      var setpoint = wrappedSetpointPosition.get().in(Rotations);
+      var position = mechanismPosition.in(Rotations);
       var velocity = getMechanismVelocity().in(RotationsPerSecond);
       var loopTime = m_config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Seconds);
 
@@ -370,8 +391,8 @@ public abstract class SmartMotorController {
 
     // Get the PID output
     if (setpointPosition.isPresent()) {
-      var measured = getMechanismPosition().in(Rotations);
-      var setpoint = setpointPosition.get().in(Rotations);
+      var measured = mechanismPosition.in(Rotations);
+      var setpoint = wrappedSetpointPosition.get().in(Rotations);
       var velocityProfile = 0.0;
 
       // Set the measured value and setpoint to Meters, if linear
@@ -434,12 +455,12 @@ public abstract class SmartMotorController {
       if (profiled && !velocityTrapezoidalProfile.get()) {
         var currentVelocitySetpoint = RotationsPerSecond.of(m_trapState.isPresent() ? m_trapState.get().velocity : (m_expoState.isPresent() ? m_expoState.get().velocity : 0.0));
         var nextVelocitySetpoint = RotationsPerSecond.of(m_trapezoidProfile.isPresent() ? nextTrapState.get().velocity : (m_expoProfile.isPresent() ? nextExpoState.get().velocity : 0.0));
-        feedforward.set(ff.calculate(getMechanismPosition().in(Radians), currentVelocitySetpoint.in(RadiansPerSecond), nextVelocitySetpoint.in(RadiansPerSecond)));
+        feedforward.set(ff.calculate(mechanismPosition.in(Radians), currentVelocitySetpoint.in(RadiansPerSecond), nextVelocitySetpoint.in(RadiansPerSecond)));
       } else {
         // When using a velocity profile the next velocity is the "position" (poorly named)
         var nextVelocitySetpoint = velocityTrapezoidalProfile.get() ? nextTrapState.get().position : setpointVelocity.orElse(RotationsPerSecond.zero()).in(RotationsPerSecond);
         // Not profiled, so using current velocity or setpoint velocity.
-        ff.calculate(getMechanismPosition().in(Radians), getMechanismVelocity().in(RadiansPerSecond), nextVelocitySetpoint);
+        ff.calculate(mechanismPosition.in(Radians), getMechanismVelocity().in(RadiansPerSecond), nextVelocitySetpoint);
       }
     });
 

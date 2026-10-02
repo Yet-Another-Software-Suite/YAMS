@@ -5,6 +5,7 @@ package yams.core.motorcontrollers;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.wpilib.units.Units.Rotations;
 
 import com.revrobotics.spark.SparkMax;
@@ -40,6 +41,16 @@ public class SparkAbsoluteEncoderTest {
     Preferences.removeAll();
   }
 
+  /** Check the SPARK's absolute encoder range offset, which is configured asynchronously. */
+  private static void assertRangeOffset(SparkMax sparkMax, double expected) {
+    try {
+      assertTrue(AbsoluteEncoderCases.eventually(() -> Math.abs(sparkMax.configAccessor.absoluteEncoder.getRangeOffset() - expected) < 1e-6),
+          "range offset expected " + expected + " but was " + sparkMax.configAccessor.absoluteEncoder.getRangeOffset());
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
+  }
+
   @Test
   void testZeroCenteredTrueWith0_5DiscontinuityPoint() {
     SparkMax sparkMax = DeviceCreator.createSparkMax();
@@ -48,6 +59,8 @@ public class SparkAbsoluteEncoderTest {
             .withExternalEncoder(sparkMax.getAbsoluteEncoder())
             .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5));
     assertDoesNotThrow(() -> new SparkWrapper(sparkMax, DCMotor.getNEO(1), config));
+    // REVLib's range offset is the middle of the range the encoder reports: [-0.5, 0.5) rotations.
+    assertRangeOffset(sparkMax, 0);
     sparkMax.close();
   }
 
@@ -59,6 +72,8 @@ public class SparkAbsoluteEncoderTest {
             .withExternalEncoder(sparkMax.getAbsoluteEncoder())
             .withExternalEncoderDiscontinuityPoint(Rotations.of(1));
     assertDoesNotThrow(() -> new SparkWrapper(sparkMax, DCMotor.getNEO(1), config));
+    // REVLib's range offset is the middle of the range the encoder reports: [0, 1) rotations.
+    assertRangeOffset(sparkMax, 0.5);
     sparkMax.close();
   }
 

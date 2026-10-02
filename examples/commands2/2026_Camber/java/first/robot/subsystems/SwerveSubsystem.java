@@ -124,6 +124,7 @@ public class SwerveSubsystem extends SubsystemBase
         .withControlMode(ControlMode.CLOSED_LOOP)
         .withGearing(new MechanismGearing(angleGearRatio))
         .withClosedLoopController(angleKP, 0, 0)
+        .withSimClosedLoopController(angleSimKP, 0, 0)
         .withContinuousWrapping(Radians.of(-Math.PI), Radians.of(Math.PI))
         .withIdleMode(MotorMode.BRAKE)
         .withStatorCurrentLimit(angleCurrentLimit)
@@ -312,10 +313,10 @@ public class SwerveSubsystem extends SubsystemBase
           // Reference to this subsystem to set requirements
                            );
 
-    } catch (Exception e)
+    } catch (Exception | LinkageError e)
     {
-      // Handle exception as needed
-      e.printStackTrace();
+      // PathPlanner failing to load only loses the autos; the drivetrain still works in teleop.
+      DriverStationErrors.reportError("Could not configure PathPlanner: " + e, e.getStackTrace());
     }
   }
 
@@ -328,7 +329,15 @@ public class SwerveSubsystem extends SubsystemBase
   public Command getAutonomousCommand(String pathName)
   {
     // Create a path following command using AutoBuilder. This will also trigger event markers.
-    return new PathPlannerAuto(pathName);
+    try
+    {
+      return new PathPlannerAuto(pathName);
+    } catch (Exception | LinkageError e)
+    {
+      // Do nothing rather than crash the robot code, which would also lose teleop.
+      DriverStationErrors.reportError("Could not load PathPlanner auto " + pathName + ": " + e, e.getStackTrace());
+      return Commands.none();
+    }
   }
 
   public Command driveToPose(Pose2d pose)

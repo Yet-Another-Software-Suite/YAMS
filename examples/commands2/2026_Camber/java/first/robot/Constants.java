@@ -133,10 +133,12 @@ public final class Constants
       public static final Current  angleCurrentLimit = Amps.of(20);
       public static final Time     rampRate          = Seconds.of(0.25);
 
-      // YAGSL gains were per m/s (drive) and per degree (angle); YAMS gains are per wheel rotation
-      // per second and per module rotation.
-      public static final double driveKP = 0.0020645 * wheelDiameter.in(Meters) * Math.PI;
-      public static final double angleKP = 0.01 * 360;
+      // YAGSL gains were duty cycle per m/s (drive) and per degree (angle); YAMS gains are volts per
+      // wheel rotation per second and per module rotation, so they are also scaled by 12 V.
+      public static final double driveKP = 0.0020645 * wheelDiameter.in(Meters) * Math.PI * 12;
+      public static final double angleKP = 0.01 * 360 * 12;
+      // Simulation only: the simulated steering lags far behind its setpoint with angleKP.
+      public static final double angleSimKP = 30;
 
       // YAGSL added a drive feedforward of 12 V at the maximum speed, in volts per m/s; here it is
       // per wheel rotation per second.

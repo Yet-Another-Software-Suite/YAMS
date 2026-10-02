@@ -35,14 +35,19 @@ public class CoralL4Auto implements OpMode {
         final Command score = robot.superstructure.scoreCoral();
         final Command rest = robot.superstructure.restArmsSafe();
 
-        final Command routine = Command.noRequirements(coroutine -> {
-            robot.targeting.setTarget(kBranch, ReefTargeting.Level.L4);
-            // Lift the elevator clear, then swing the coral arm out of its starting position while
-            // holding it there.
-            coroutine.await(liftClear);
+        // Swing the coral arm out of its starting position while holding the elevator clear. The hold
+        // is forked inside this step, so it ends with it. Forked by the routine instead, it would
+        // still be running when the scoring command takes the elevator, and a command interrupting
+        // a sibling of its ancestor cancels their shared ancestor: the whole routine.
+        final Command swingOutWhileClear = Command.noRequirements(coroutine -> {
             coroutine.fork(holdClear);
             coroutine.await(swingOut);
-            // The scoring command takes over the elevator from holdClear.
+        }).named("Swing Out While Clear");
+
+        final Command routine = Command.noRequirements(coroutine -> {
+            robot.targeting.setTarget(kBranch, ReefTargeting.Level.L4);
+            coroutine.await(liftClear);
+            coroutine.await(swingOutWhileClear);
             coroutine.await(score);
             coroutine.await(rest);
         }).named("Coral L4 " + kBranch);

@@ -194,8 +194,9 @@ public class Swerve extends SubsystemBase {
                 RobotConfig.fromGUISettings(),
                 Field::isRed,
                 this);
-        } catch (Exception e) {
-            DriverStationErrors.reportError("Could not configure PathPlanner: " + e.getMessage(), e.getStackTrace());
+        } catch (Exception | LinkageError e) {
+            // PathPlanner failing to load only loses the autos; the drivetrain still works in teleop.
+            DriverStationErrors.reportError("Could not configure PathPlanner: " + e, e.getStackTrace());
         }
     }
 

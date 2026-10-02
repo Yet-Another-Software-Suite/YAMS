@@ -8,14 +8,10 @@ import static first.robot.Constants.SwerveConstants.*;
 import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.Rotations;
 
-import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
-import com.pathplanner.lib.trajectory.PathPlannerTrajectoryState;
-import first.robot.Constants.OperatorConstants;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import first.robot.Constants.DriveConstants;
+import first.robot.Constants.OperatorConstants;
 import first.robot.Field;
 import first.robot.Ports;
 import first.robot.Vision;
@@ -33,7 +29,6 @@ import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.math.system.DCMotor;
-import org.wpilib.system.Timer;
 import org.wpilib.networktables.DoublePublisher;
 import org.wpilib.networktables.NetworkTableInstance;
 import org.wpilib.units.measure.Angle;
@@ -61,8 +56,6 @@ public class Swerve implements Mechanism {
     private final OnboardIMU gyro = new OnboardIMU(MountOrientation.FLAT);
     private final SwerveDrive drive;
     private final SwerveInputStream input;
-    private final PPHolonomicDriveController pathController =
-        new PPHolonomicDriveController(new PIDConstants(kTranslationKP, 0, 0), new PIDConstants(kRotationKP, 0, 0));
     private final List<Vision> cameras = List.of(Vision.drivetrainCamera(), Vision.turretCamera());
     private final DoublePublisher distanceToHubPublisher = NetworkTableInstance.getDefault()
         .getDoubleTopic("Swerve/Distance to Hub (m)")
@@ -191,42 +184,6 @@ public class Swerve implements Mechanism {
     /** Reset odometry to a blue pose, flipped for the red alliance. */
     public Command resetOdometryCommand(Pose2d bluePose) {
         return run(coroutine -> drive.resetOdometry(Field.forAlliance(bluePose))).named("Reset Odometry");
-    }
-
-    /** Reset odometry to a pose, e.g. the start of an autonomous path. */
-    public void resetOdometry(Pose2d pose) {
-        drive.resetOdometry(pose);
-    }
-
-    /** Robot relative speeds, measured by the modules. */
-    public ChassisVelocities getRobotRelativeSpeeds() {
-        return drive.getRobotRelativeSpeed();
-    }
-
-    /**
-     * Follow a PathPlanner trajectory with PathPlanner's holonomic controller and the original PID,
-     * passing its per-module force feedforwards to YAMS, like PathPlanner's {@code FollowPathCommand}.
-     * The drive stops at the end, or if the command is canceled.
-     *
-     * @param trajectory Trajectory to follow, already flipped for the alliance.
-     * @param name       Command name.
-     */
-    public Command followTrajectory(PathPlannerTrajectory trajectory, String name) {
-        return run(coroutine -> {
-            pathController.reset(getPose(), getRobotRelativeSpeeds());
-            final Timer timer = new Timer();
-            timer.start();
-            while (true) {
-                final PathPlannerTrajectoryState target = trajectory.sample(timer.get());
-                final ChassisVelocities speeds = pathController.calculateRobotRelativeSpeeds(getPose(), target);
-                drive.setRobotRelativeChassisSpeeds(speeds, target.feedforwards.linearForces());
-                if (timer.get() >= trajectory.getTotalTimeSeconds()) {
-                    break;
-                }
-                coroutine.yield();
-            }
-            stop();
-        }).whenCanceled(this::stop).named("Follow " + name);
     }
 
     public void stop() {

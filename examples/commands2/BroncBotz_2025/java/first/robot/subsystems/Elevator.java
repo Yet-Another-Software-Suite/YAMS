@@ -45,6 +45,9 @@ public class Elevator extends SubsystemBase {
         // Gains are per meter of travel, like the original's.
         .withLinearClosedLoopController(true)
         .withClosedLoopController(kP, 0, kD)
+        // Simulation only: REVLib's simulation runs the SPARK's loop every 10 ms rather than every
+        // millisecond, and this derivative gain makes it oscillate at that rate.
+        .withSimClosedLoopController(kP, 0, 0)
         .withFeedforward(new ElevatorFeedforward(kS, kG, kV))
         .withTrapezoidalProfile(kMaxVelocity, kMaxAcceleration)
         .withIdleMode(MotorMode.COAST)

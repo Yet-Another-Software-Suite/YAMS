@@ -418,7 +418,7 @@ public class TalonFXSWrapper extends SmartMotorController {
       }
       if (m_candi.isPresent()) {
         var candiSim = m_candi.get().getSimState();
-        candiSim.setSupplyVoltage(RoboRioSim.getVInVoltage());
+        candiSim.setSupplyVoltage(m_simSupplier.get().getMechanismSupplyVoltage());
         if (useCANdiPWM1()) {
           candiSim.setPwm1Connected(true);
           candiSim.setPwm1Position(m_simSupplier.get().getMechanismPosition().times(m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getMechanismToRotorRatio()).minus(m_config.getExternalEncoderZeroOffset().orElse(Rotations
@@ -451,15 +451,17 @@ public class TalonFXSWrapper extends SmartMotorController {
    * {@link com.ctre.phoenix6.configs.ExternalFeedbackConfigs#ExternalFeedbackSensorSource} in
    * {@link TalonFXSConfiguration#ExternalFeedback}.
    *
-   * @return True if CANdi PWM1 is used and configured.
+   * @return True if CANdi PWM1 is the feedback sensor source of the configuration being applied.
    * @throws IllegalArgumentException if the feedback sensor source is set to a CANdi PWM1 source
    *                                  but no CANdi is configured as the external encoder in the
    *                                  SmartMotorControllerConfig.
    */
   public boolean useCANdiPWM1() {
-    m_configurator.refresh(m_talonConfig.ExternalFeedback);
-    boolean configured =
-        (m_talonConfig.ExternalFeedback.ExternalFeedbackSensorSource == ExternalFeedbackSensorSourceValue.SyncCANdiPWM1 || m_talonConfig.ExternalFeedback.ExternalFeedbackSensorSource == ExternalFeedbackSensorSourceValue.RemoteCANdiPWM1);
+    // Read the configuration being applied instead of refreshing it from the device, which would
+    // discard its unapplied changes. YAMS applies the Fused source; Sync and Remote are the ones
+    // users select with a vendor config.
+    final var source = m_talonConfig.ExternalFeedback.ExternalFeedbackSensorSource;
+    boolean configured = source == ExternalFeedbackSensorSourceValue.FusedCANdiPWM1 || source == ExternalFeedbackSensorSourceValue.SyncCANdiPWM1 || source == ExternalFeedbackSensorSourceValue.RemoteCANdiPWM1;
     if (configured && m_candi.isEmpty()) {
       throw new IllegalArgumentException("[ERROR] CANdi PWM1 has been configured but is not " + "present in SmartMotorControllerConfig!");
     }
@@ -467,19 +469,21 @@ public class TalonFXSWrapper extends SmartMotorController {
   }
 
   /**
-   * Check if {@link CANdi} PWM1 is used as the
+   * Check if {@link CANdi} PWM2 is used as the
    * {@link com.ctre.phoenix6.configs.ExternalFeedbackConfigs#ExternalFeedbackSensorSource} in
    * {@link TalonFXSConfiguration#ExternalFeedback}.
    *
-   * @return True if CANdi is used.
+   * @return True if CANdi PWM2 is the feedback sensor source of the configuration being applied.
    * @throws IllegalArgumentException if the feedback sensor source is set to a CANdi PWM2 source
    *                                  but no CANdi is configured as the external encoder in the
    *                                  SmartMotorControllerConfig.
    */
   public boolean useCANdiPWM2() {
-    m_configurator.refresh(m_talonConfig.ExternalFeedback);
-    boolean configured =
-        (m_talonConfig.ExternalFeedback.ExternalFeedbackSensorSource == ExternalFeedbackSensorSourceValue.SyncCANdiPWM2 || m_talonConfig.ExternalFeedback.ExternalFeedbackSensorSource == ExternalFeedbackSensorSourceValue.RemoteCANdiPWM2);
+    // Read the configuration being applied instead of refreshing it from the device, which would
+    // discard its unapplied changes. YAMS applies the Fused source; Sync and Remote are the ones
+    // users select with a vendor config.
+    final var source = m_talonConfig.ExternalFeedback.ExternalFeedbackSensorSource;
+    boolean configured = source == ExternalFeedbackSensorSourceValue.FusedCANdiPWM2 || source == ExternalFeedbackSensorSourceValue.SyncCANdiPWM2 || source == ExternalFeedbackSensorSourceValue.RemoteCANdiPWM2;
     if (configured && m_candi.isEmpty()) {
       throw new IllegalArgumentException("[ERROR] CANdi PWM2 has been configured but is not " + "present in SmartMotorControllerConfig!");
     }
@@ -797,17 +801,21 @@ public class TalonFXSWrapper extends SmartMotorController {
     // Closed loop controllers.
     for (var closedLoopControlSlot : ClosedLoopControllerSlot.values()) {
       m_config.getPID(closedLoopControlSlot).ifPresent(pid -> {
+        // Gains of a linear mechanism are per meter; the Talon's are per mechanism rotation.
+        final double gainUnitsPerRotation = m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(Meters.of(1)).in(Rotations) : 1.0;
         switch (closedLoopControlSlot) {
-          case SLOT_0 -> m_talonConfig.Slot0.withKP(pid.getP()).withKI(pid.getI()).withKD(pid.getD());
-          case SLOT_1 -> m_talonConfig.Slot1.withKP(pid.getP()).withKI(pid.getI()).withKD(pid.getD());
-          case SLOT_2 -> m_talonConfig.Slot2.withKP(pid.getP()).withKI(pid.getI()).withKD(pid.getD());
+          case SLOT_0 -> m_talonConfig.Slot0.withKP(pid.getP() / gainUnitsPerRotation).withKI(pid.getI() / gainUnitsPerRotation).withKD(pid.getD() / gainUnitsPerRotation);
+          case SLOT_1 -> m_talonConfig.Slot1.withKP(pid.getP() / gainUnitsPerRotation).withKI(pid.getI() / gainUnitsPerRotation).withKD(pid.getD() / gainUnitsPerRotation);
+          case SLOT_2 -> m_talonConfig.Slot2.withKP(pid.getP() / gainUnitsPerRotation).withKI(pid.getI() / gainUnitsPerRotation).withKD(pid.getD() / gainUnitsPerRotation);
         }
       });
     }
     m_config.getExponentialProfile().ifPresent(exp -> {
       m_expoProfile = Optional.of(new ExponentialProfile(exp));
-      m_talonConfig.MotionMagic.MotionMagicExpo_kV = m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(Meters.of(-exp.A / exp.B)).in(Rotations) : (-exp.A / exp.B);
-      m_talonConfig.MotionMagic.MotionMagicExpo_kA = m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(Meters.of(1.0 / exp.B)).in(Rotations) : (1.0 / exp.B);
+      // A linear profile is in meters; Motion Magic Expo gains are per mechanism rotation.
+      final boolean linear = m_config.getLinearClosedLoopControllerUse();
+      m_talonConfig.MotionMagic.MotionMagicExpo_kV = (linear ? (-exp.A / exp.B) / m_config.convertToMechanism(MetersPerSecond.of(1)).in(RotationsPerSecond) : (-exp.A / exp.B));
+      m_talonConfig.MotionMagic.MotionMagicExpo_kA = (linear ? (1.0 / exp.B) / m_config.convertToMechanism(MetersPerSecondPerSecond.of(1)).in(RotationsPerSecondPerSecond) : (1.0 / exp.B));
 
       m_positionReq = m_expoPositionReq;
     });
@@ -903,11 +911,14 @@ public class TalonFXSWrapper extends SmartMotorController {
           kV = ff.getKv();
           kA = ff.getKa();
         }
+        // Gains of a linear mechanism are per meter; the Talon's are per mechanism rotation.
+        final double velocityGainUnitsPerRotation = m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(MetersPerSecond.of(1)).in(RotationsPerSecond) : 1.0;
+        final double accelerationGainUnitsPerRotation = m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(MetersPerSecondPerSecond.of(1)).in(RotationsPerSecondPerSecond) : 1.0;
         switch (closedLoopControlSlot) {
-          case SLOT_0 -> m_talonConfig.Slot0.withKS(kS).withKV(kV).withKA(kA).withKG(kG);
-          case SLOT_1 -> m_talonConfig.Slot1.withKS(kS).withKV(kV).withKA(kA).withKG(kG);
-          case SLOT_2 -> m_talonConfig.Slot2.withKS(kS).withKV(kV).withKA(kA).withKG(kG);
-          case SLOT_3 -> m_talonConfig.Slot2.withKS(kS).withKV(kV).withKA(kA).withKG(kG);
+          case SLOT_0 -> m_talonConfig.Slot0.withKS(kS).withKV(kV / velocityGainUnitsPerRotation).withKA(kA / accelerationGainUnitsPerRotation).withKG(kG);
+          case SLOT_1 -> m_talonConfig.Slot1.withKS(kS).withKV(kV / velocityGainUnitsPerRotation).withKA(kA / accelerationGainUnitsPerRotation).withKG(kG);
+          case SLOT_2 -> m_talonConfig.Slot2.withKS(kS).withKV(kV / velocityGainUnitsPerRotation).withKA(kA / accelerationGainUnitsPerRotation).withKG(kG);
+          case SLOT_3 -> m_talonConfig.Slot2.withKS(kS).withKV(kV / velocityGainUnitsPerRotation).withKA(kA / accelerationGainUnitsPerRotation).withKG(kG);
         }
       }
     }
@@ -1017,6 +1028,8 @@ public class TalonFXSWrapper extends SmartMotorController {
           if (config.getExternalEncoderDiscontinuityPoint().isPresent()) {
             cfg.PWM2.withAbsoluteSensorDiscontinuityPoint(config.getExternalEncoderDiscontinuityPoint().get());
           }
+        } else {
+          throw new SmartMotorControllerConfigurationException("CANdi is the external feedback encoder but no PWM input is selected", "The CANdi cannot be used as the feedback sensor!", "withVendorConfig() with the feedback sensor source set to SyncCANdiPWM1 or SyncCANdiPWM2");
         }
         configurator.apply(cfg);
       }
@@ -1054,10 +1067,8 @@ public class TalonFXSWrapper extends SmartMotorController {
       }
     }
 
-    // Continuous wrapping
-    if (config.getContinuousWrapping().isPresent()) {
-      m_talonConfig.ClosedLoopGeneral.ContinuousWrap = true;
-    }
+    // Continuous wrapping. Set either way: the configuration starts from the device's previous one.
+    m_talonConfig.ClosedLoopGeneral.ContinuousWrap = config.getContinuousWrapping().isPresent();
 
     // Invert the encoder.
     if (config.getEncoderInverted().isPresent()) {
@@ -1313,7 +1324,10 @@ public class TalonFXSWrapper extends SmartMotorController {
   @Override
   public void setMotionProfileMaxVelocity(LinearVelocity maxVelocity) {
     if (m_trapezoidProfile.isPresent()) {
-      m_trapezoidProfile = Optional.of(new TrapezoidProfile(new Constraints(maxVelocity.in(MetersPerSecond), m_config.getTrapezoidProfile().orElseThrow().maxAcceleration)));
+      final Constraints constraints = new Constraints(maxVelocity.in(MetersPerSecond), m_config.getTrapezoidProfile().orElseThrow().maxAcceleration);
+      // Keep the tuned constraints in the config, so tuning the next one keeps this one.
+      m_config.withTrapezoidalProfileConstraints(constraints);
+      m_trapezoidProfile = Optional.of(new TrapezoidProfile(constraints));
     }
     if (m_config.getVelocityTrapezoidalProfileInUse()) {
       m_talonConfig.MotionMagic.MotionMagicAcceleration = m_config.convertToMechanism(maxVelocity).in(RotationsPerSecond);
@@ -1337,7 +1351,10 @@ public class TalonFXSWrapper extends SmartMotorController {
   @Override
   public void setMotionProfileMaxAcceleration(LinearAcceleration maxAcceleration) {
     if (m_trapezoidProfile.isPresent()) {
-      m_trapezoidProfile = Optional.of(new TrapezoidProfile(new Constraints(m_config.getTrapezoidProfile().orElseThrow().maxVelocity, maxAcceleration.in(MetersPerSecondPerSecond))));
+      final Constraints constraints = new Constraints(m_config.getTrapezoidProfile().orElseThrow().maxVelocity, maxAcceleration.in(MetersPerSecondPerSecond));
+      // Keep the tuned constraints in the config, so tuning the next one keeps this one.
+      m_config.withTrapezoidalProfileConstraints(constraints);
+      m_trapezoidProfile = Optional.of(new TrapezoidProfile(constraints));
     }
     if (m_config.getVelocityTrapezoidalProfileInUse()) {
       m_talonConfig.MotionMagic.MotionMagicJerk = m_config.convertToMechanism(maxAcceleration).in(RotationsPerSecondPerSecond);
@@ -1355,7 +1372,10 @@ public class TalonFXSWrapper extends SmartMotorController {
   @Override
   public void setMotionProfileMaxVelocity(AngularVelocity maxVelocity) {
     if (m_trapezoidProfile.isPresent()) {
-      m_trapezoidProfile = Optional.of(new TrapezoidProfile(new Constraints(maxVelocity.in(RotationsPerSecond), m_config.getTrapezoidProfile().orElseThrow().maxAcceleration)));
+      final Constraints constraints = new Constraints(maxVelocity.in(RotationsPerSecond), m_config.getTrapezoidProfile().orElseThrow().maxAcceleration);
+      // Keep the tuned constraints in the config, so tuning the next one keeps this one.
+      m_config.withTrapezoidalProfileConstraints(constraints);
+      m_trapezoidProfile = Optional.of(new TrapezoidProfile(constraints));
     }
     if (m_config.getVelocityTrapezoidalProfileInUse()) {
       m_talonConfig.MotionMagic.MotionMagicAcceleration = maxVelocity.in(RotationsPerSecond);
@@ -1373,7 +1393,10 @@ public class TalonFXSWrapper extends SmartMotorController {
   @Override
   public void setMotionProfileMaxAcceleration(AngularAcceleration maxAcceleration) {
     if (m_trapezoidProfile.isPresent()) {
-      m_trapezoidProfile = Optional.of(new TrapezoidProfile(new Constraints(m_config.getTrapezoidProfile().orElseThrow().maxVelocity, maxAcceleration.in(RotationsPerSecondPerSecond))));
+      final Constraints constraints = new Constraints(m_config.getTrapezoidProfile().orElseThrow().maxVelocity, maxAcceleration.in(RotationsPerSecondPerSecond));
+      // Keep the tuned constraints in the config, so tuning the next one keeps this one.
+      m_config.withTrapezoidalProfileConstraints(constraints);
+      m_trapezoidProfile = Optional.of(new TrapezoidProfile(constraints));
     }
     m_talonConfig.MotionMagic.withMotionMagicAcceleration(maxAcceleration);
     forceConfigApply();
@@ -1387,7 +1410,10 @@ public class TalonFXSWrapper extends SmartMotorController {
   @Override
   public void setMotionProfileMaxJerk(Velocity<AngularAccelerationUnit> maxJerk) {
     if (m_trapezoidProfile.isPresent()) {
-      m_trapezoidProfile = Optional.of(new TrapezoidProfile(new Constraints(m_config.getTrapezoidProfile().orElseThrow().maxVelocity, maxJerk.in(RotationsPerSecondPerSecond.per(Second)))));
+      final Constraints constraints = new Constraints(m_config.getTrapezoidProfile().orElseThrow().maxVelocity, maxJerk.in(RotationsPerSecondPerSecond.per(Second)));
+      // Keep the tuned constraints in the config, so tuning the next one keeps this one.
+      m_config.withTrapezoidalProfileConstraints(constraints);
+      m_trapezoidProfile = Optional.of(new TrapezoidProfile(constraints));
     }
     m_talonConfig.MotionMagic.MotionMagicJerk = maxJerk.in(RotationsPerSecondPerSecond.per(Second));
     forceConfigApply();
@@ -1402,13 +1428,19 @@ public class TalonFXSWrapper extends SmartMotorController {
   public void setExponentialProfile(OptionalDouble kV, OptionalDouble kA, Optional<Voltage> maxInput) {
     if (m_expoProfile.isPresent() && m_config.getExponentialProfile().isPresent()) {
       var exp = m_config.getExponentialProfile().get();
-      var defaultkV = m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(Meters.of(-exp.A / exp.B)).in(Rotations) : (-exp.A / exp.B);
-      var defaultkA = m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(Meters.of(1.0 / exp.B)).in(Rotations) : (1.0 / exp.B);
+      // kV and kA are in the profile's units, like its constraints.
+      var defaultkV = -exp.A / exp.B;
+      var defaultkA = 1.0 / exp.B;
       var defaultMaxInput = exp.maxInput;
-      m_expoProfile = Optional.of(new ExponentialProfile(ExponentialProfile.Constraints.fromCharacteristics(kV.orElse(defaultkV), kA.orElse(defaultkA), maxInput.orElse(Volts.of(defaultMaxInput)).in(Volts))));
+      final ExponentialProfile.Constraints constraints = ExponentialProfile.Constraints.fromCharacteristics(maxInput.orElse(Volts.of(defaultMaxInput)).in(Volts), kV.orElse(defaultkV), kA.orElse(defaultkA));
+      // Keep the tuned constraints in the config, so tuning the next one keeps this one.
+      m_config.withExponentialProfile(constraints);
+      m_expoProfile = Optional.of(new ExponentialProfile(constraints));
 
-      m_talonConfig.MotionMagic.MotionMagicExpo_kV = kV.orElse(defaultkV);
-      m_talonConfig.MotionMagic.MotionMagicExpo_kA = kA.orElse(defaultkA);
+      // A linear profile is in meters; Motion Magic Expo gains are per mechanism rotation.
+      final boolean linear = m_config.getLinearClosedLoopControllerUse();
+      m_talonConfig.MotionMagic.MotionMagicExpo_kV = (linear ? kV.orElse(defaultkV) / m_config.convertToMechanism(MetersPerSecond.of(1)).in(RotationsPerSecond) : kV.orElse(defaultkV));
+      m_talonConfig.MotionMagic.MotionMagicExpo_kA = (linear ? kA.orElse(defaultkA) / m_config.convertToMechanism(MetersPerSecondPerSecond.of(1)).in(RotationsPerSecondPerSecond) : kA.orElse(defaultkA));
       forceConfigApply();
       m_looseFollowers.ifPresent(smcs -> {
         for (var f : smcs) {
@@ -1423,10 +1455,12 @@ public class TalonFXSWrapper extends SmartMotorController {
     m_config.getPID(m_slot).ifPresent(pidController -> {
       pidController.setP(kP);
     });
+    // Gains of a linear mechanism are per meter; the Talon's are per mechanism rotation.
+    final double gainUnitsPerRotation = m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(Meters.of(1)).in(Rotations) : 1.0;
     switch (m_slot) {
-      case SLOT_0 -> m_talonConfig.Slot0.kP = kP;
-      case SLOT_1 -> m_talonConfig.Slot1.kP = kP;
-      case SLOT_2 -> m_talonConfig.Slot2.kP = kP;
+      case SLOT_0 -> m_talonConfig.Slot0.kP = kP / gainUnitsPerRotation;
+      case SLOT_1 -> m_talonConfig.Slot1.kP = kP / gainUnitsPerRotation;
+      case SLOT_2 -> m_talonConfig.Slot2.kP = kP / gainUnitsPerRotation;
     }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {
@@ -1441,10 +1475,12 @@ public class TalonFXSWrapper extends SmartMotorController {
     m_config.getPID(m_slot).ifPresent(pidController -> {
       pidController.setI(kI);
     });
+    // Gains of a linear mechanism are per meter; the Talon's are per mechanism rotation.
+    final double gainUnitsPerRotation = m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(Meters.of(1)).in(Rotations) : 1.0;
     switch (m_slot) {
-      case SLOT_0 -> m_talonConfig.Slot0.kI = kI;
-      case SLOT_1 -> m_talonConfig.Slot1.kI = kI;
-      case SLOT_2 -> m_talonConfig.Slot2.kI = kI;
+      case SLOT_0 -> m_talonConfig.Slot0.kI = kI / gainUnitsPerRotation;
+      case SLOT_1 -> m_talonConfig.Slot1.kI = kI / gainUnitsPerRotation;
+      case SLOT_2 -> m_talonConfig.Slot2.kI = kI / gainUnitsPerRotation;
     }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {
@@ -1459,10 +1495,12 @@ public class TalonFXSWrapper extends SmartMotorController {
     m_config.getPID(m_slot).ifPresent(pidController -> {
       pidController.setD(kD);
     });
+    // Gains of a linear mechanism are per meter; the Talon's are per mechanism rotation.
+    final double gainUnitsPerRotation = m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(Meters.of(1)).in(Rotations) : 1.0;
     switch (m_slot) {
-      case SLOT_0 -> m_talonConfig.Slot0.kD = kD;
-      case SLOT_1 -> m_talonConfig.Slot1.kD = kD;
-      case SLOT_2 -> m_talonConfig.Slot2.kD = kD;
+      case SLOT_0 -> m_talonConfig.Slot0.kD = kD / gainUnitsPerRotation;
+      case SLOT_1 -> m_talonConfig.Slot1.kD = kD / gainUnitsPerRotation;
+      case SLOT_2 -> m_talonConfig.Slot2.kD = kD / gainUnitsPerRotation;
     }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {
@@ -1484,10 +1522,12 @@ public class TalonFXSWrapper extends SmartMotorController {
       simplePidController.setI(kI);
       simplePidController.setD(kD);
     });
+    // Gains of a linear mechanism are per meter; the Talon's are per mechanism rotation.
+    final double gainUnitsPerRotation = m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(Meters.of(1)).in(Rotations) : 1.0;
     switch (m_slot) {
-      case SLOT_0 -> m_talonConfig.Slot0.withKP(kP).withKI(kI).withKD(kD);
-      case SLOT_1 -> m_talonConfig.Slot1.withKP(kP).withKI(kI).withKD(kD);
-      case SLOT_2 -> m_talonConfig.Slot2.withKP(kP).withKI(kI).withKD(kD);
+      case SLOT_0 -> m_talonConfig.Slot0.withKP(kP / gainUnitsPerRotation).withKI(kI / gainUnitsPerRotation).withKD(kD / gainUnitsPerRotation);
+      case SLOT_1 -> m_talonConfig.Slot1.withKP(kP / gainUnitsPerRotation).withKI(kI / gainUnitsPerRotation).withKD(kD / gainUnitsPerRotation);
+      case SLOT_2 -> m_talonConfig.Slot2.withKP(kP / gainUnitsPerRotation).withKI(kI / gainUnitsPerRotation).withKD(kD / gainUnitsPerRotation);
     }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {
@@ -1532,10 +1572,12 @@ public class TalonFXSWrapper extends SmartMotorController {
     m_config.getElevatorFeedforward(m_slot).ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKv(kV);
     });
+    // Gains of a linear mechanism are per meter; the Talon's are per mechanism rotation.
+    final double velocityGainUnitsPerRotation = m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(MetersPerSecond.of(1)).in(RotationsPerSecond) : 1.0;
     switch (m_slot) {
-      case SLOT_0 -> m_talonConfig.Slot0.withKV(kV);
-      case SLOT_1 -> m_talonConfig.Slot1.withKV(kV);
-      case SLOT_2 -> m_talonConfig.Slot2.withKV(kV);
+      case SLOT_0 -> m_talonConfig.Slot0.withKV(kV / velocityGainUnitsPerRotation);
+      case SLOT_1 -> m_talonConfig.Slot1.withKV(kV / velocityGainUnitsPerRotation);
+      case SLOT_2 -> m_talonConfig.Slot2.withKV(kV / velocityGainUnitsPerRotation);
     }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {
@@ -1556,10 +1598,12 @@ public class TalonFXSWrapper extends SmartMotorController {
     m_config.getElevatorFeedforward(m_slot).ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKa(kA);
     });
+    // Gains of a linear mechanism are per meter; the Talon's are per mechanism rotation.
+    final double accelerationGainUnitsPerRotation = m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(MetersPerSecondPerSecond.of(1)).in(RotationsPerSecondPerSecond) : 1.0;
     switch (m_slot) {
-      case SLOT_0 -> m_talonConfig.Slot0.withKA(kA);
-      case SLOT_1 -> m_talonConfig.Slot1.withKA(kA);
-      case SLOT_2 -> m_talonConfig.Slot2.withKA(kA);
+      case SLOT_0 -> m_talonConfig.Slot0.withKA(kA / accelerationGainUnitsPerRotation);
+      case SLOT_1 -> m_talonConfig.Slot1.withKA(kA / accelerationGainUnitsPerRotation);
+      case SLOT_2 -> m_talonConfig.Slot2.withKA(kA / accelerationGainUnitsPerRotation);
     }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {
@@ -1619,10 +1663,13 @@ public class TalonFXSWrapper extends SmartMotorController {
         case SLOT_2 -> m_talonConfig.Slot2.GravityType = GravityTypeValue.Elevator_Static;
       }
     });
+    // Gains of a linear mechanism are per meter; the Talon's are per mechanism rotation.
+    final double velocityGainUnitsPerRotation = m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(MetersPerSecond.of(1)).in(RotationsPerSecond) : 1.0;
+    final double accelerationGainUnitsPerRotation = m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(MetersPerSecondPerSecond.of(1)).in(RotationsPerSecondPerSecond) : 1.0;
     switch (m_slot) {
-      case SLOT_0 -> m_talonConfig.Slot0.withKS(kS).withKV(kV).withKA(kA).withKG(kG);
-      case SLOT_1 -> m_talonConfig.Slot1.withKS(kS).withKV(kV).withKA(kA).withKG(kG);
-      case SLOT_2 -> m_talonConfig.Slot2.withKS(kS).withKV(kV).withKA(kA).withKG(kG);
+      case SLOT_0 -> m_talonConfig.Slot0.withKS(kS).withKV(kV / velocityGainUnitsPerRotation).withKA(kA / accelerationGainUnitsPerRotation).withKG(kG);
+      case SLOT_1 -> m_talonConfig.Slot1.withKS(kS).withKV(kV / velocityGainUnitsPerRotation).withKA(kA / accelerationGainUnitsPerRotation).withKG(kG);
+      case SLOT_2 -> m_talonConfig.Slot2.withKS(kS).withKV(kV / velocityGainUnitsPerRotation).withKA(kA / accelerationGainUnitsPerRotation).withKG(kG);
     }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {

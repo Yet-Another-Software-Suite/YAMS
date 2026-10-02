@@ -20,7 +20,9 @@ import first.robot.subsystems.IndexerSubsystem;
 import first.robot.subsystems.ShooterSubsystem;
 import first.robot.subsystems.SwerveSubsystem;
 import org.wpilib.command2.Command;
+import org.wpilib.command2.Commands;
 import org.wpilib.command2.button.CommandNiDsXboxController;
+import org.wpilib.driverstation.DriverStationErrors;
 import org.wpilib.math.util.MathUtil;
 import org.wpilib.tunable.Selectable;
 import org.wpilib.tunable.Tunables;
@@ -76,24 +78,42 @@ public class RobotContainer
 //        NamedCommands.registerCommand("ShootBalls",
 //                shooter.setVelocityCommand(Shooter.Setpoints.autonomousPeriodRPM)
 //                        .withTimeout(Seconds.of(4)));
-    NamedCommands.registerCommand("ShootBallsOdom",
-                                  new ShootAndIndexCommand(indexer,
-                                                           shooter,
-                                                           drivebase).withTimeout(4));
-
-    NamedCommands.registerCommand("ShootBalls",
-                                  new ShootAndIndexCommand(indexer,
-                                                           shooter,
-                                                           Setpoints.autonomousPeriodRPM).withTimeout(4));
-
-    NamedCommands.registerCommand("Stop", STOP());
-
-    NamedCommands.registerCommand("StartIntake", new IntakeCommand(indexer, shooter));
-
-    autChooser = AutoBuilder.buildAutoChooser("NO Auto");
+    autChooser = configurePathPlanner();
     Tunables.publish("Auto Chooser", autChooser);
 
     configureBindings();
+  }
+
+  /**
+   * Register the named commands and build the auto chooser. PathPlanner failing to load only loses
+   * the autos: the chooser is left with just "NO Auto" and teleop is unaffected.
+   */
+  private Selectable<Command> configurePathPlanner()
+  {
+    try
+    {
+      NamedCommands.registerCommand("ShootBallsOdom",
+                                    new ShootAndIndexCommand(indexer,
+                                                             shooter,
+                                                             drivebase).withTimeout(4));
+
+      NamedCommands.registerCommand("ShootBalls",
+                                    new ShootAndIndexCommand(indexer,
+                                                             shooter,
+                                                             Setpoints.autonomousPeriodRPM).withTimeout(4));
+
+      NamedCommands.registerCommand("Stop", STOP());
+
+      NamedCommands.registerCommand("StartIntake", new IntakeCommand(indexer, shooter));
+
+      return AutoBuilder.buildAutoChooser("NO Auto");
+    } catch (Exception | LinkageError e)
+    {
+      DriverStationErrors.reportError("Could not load the PathPlanner autos: " + e, e.getStackTrace());
+      Selectable<Command> chooser = new Selectable<>();
+      chooser.addDefault("NO Auto", Commands.none());
+      return chooser;
+    }
   }
 
   /** The right stick's heading, held while the stick is near the center. */

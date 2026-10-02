@@ -172,6 +172,7 @@ public class ShooterTest {
             ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
         .close();
     smc.close();
+    DeviceCreator.silence(smc);
 
     //    switch (smc.getMotorController())
     //    {

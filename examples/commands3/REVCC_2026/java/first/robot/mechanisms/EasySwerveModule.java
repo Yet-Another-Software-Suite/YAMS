@@ -74,8 +74,8 @@ public final class EasySwerveModule
         .withGearing(new MechanismGearing(ModuleConstants.kDrivingMotorReduction))
         .withWheelDiameter(ModuleConstants.kWheelDiameter)
         // These are example gains you may need to adjust them for your own robot!
-        // REV's kP of 0.04 per m/s, re-expressed per wheel rotation per second.
-        .withClosedLoopController(0.04 * ModuleConstants.kWheelDiameter.in(Meters) * Math.PI, 0, 0)
+        // REV's kP of 0.04 duty cycle per m/s, re-expressed in volts per wheel rotation per second.
+        .withClosedLoopController(0.04 * ModuleConstants.kWheelDiameter.in(Meters) * Math.PI * 12, 0, 0)
         // kV = 12 V / wheel free speed, the same feedforward the REV code computed.
         .withFeedforward(new SimpleMotorFeedforward(0, 12.0 / kDriveWheelFreeSpeedRps))
         .withIdleMode(MotorMode.BRAKE)
@@ -95,8 +95,8 @@ public final class EasySwerveModule
         .withControlMode(ControlMode.CLOSED_LOOP)
         .withGearing(new MechanismGearing(ModuleConstants.kTurningMotorReduction))
         // These are example gains you may need to adjust them for your own robot!
-        // REV's kP of 1 per radian, re-expressed per rotation.
-        .withClosedLoopController(2 * Math.PI, 0, 0)
+        // REV's kP of 1 duty cycle per radian, re-expressed in volts per rotation.
+        .withClosedLoopController(2 * Math.PI * 12, 0, 0)
         // Close the steering loop on the Through Bore Encoder, which sits on the module output
         // (1:1 with the wheel's azimuth), exactly like the REV code did.
         .withExternalEncoder(turningSpark.getAbsoluteEncoder())

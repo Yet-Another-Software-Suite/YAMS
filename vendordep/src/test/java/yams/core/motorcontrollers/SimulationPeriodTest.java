@@ -106,6 +106,7 @@ public class SimulationPeriodTest {
     CommandScheduler.getInstance().unregisterSubsystem(subsys);
     subsys.close();
     smc.close();
+    DeviceCreator.silence(smc);
 
     Object motorController = smc.getMotorController();
     if (motorController instanceof SparkMax) {

@@ -530,6 +530,7 @@ public class MechanismLimitTest {
             ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
         .close();
     smc.close();
+    DeviceCreator.silence(smc);
     Object motor = smc.getMotorController();
     if (motor instanceof SparkMax) {
       ((SparkMax) motor).close();

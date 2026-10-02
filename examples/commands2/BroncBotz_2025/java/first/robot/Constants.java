@@ -74,11 +74,11 @@ public final class Constants {
         // properties).
         public static final double kNeoFreeSpeedRps = 5676.0 / 60.0;
         public static final double kWheelFreeSpeedRps = kNeoFreeSpeedRps / kDriveGearRatio;
-        // YAGSL's drive kP is per m/s; YAMS closes the loop per wheel rotation per second.
-        public static final double kDriveKP = 0.0020645 * Math.PI * kWheelDiameter.in(Meters);
+        // YAGSL's drive kP is duty cycle per m/s; YAMS's is volts per wheel rotation per second.
+        public static final double kDriveKP = 0.0020645 * Math.PI * kWheelDiameter.in(Meters) * 12;
         public static final double kDriveKV = 12.0 / kWheelFreeSpeedRps;
-        // YAGSL's angle kP is per degree; YAMS closes the loop per rotation.
-        public static final double kAngleKP = 0.01 * 360;
+        // YAGSL's angle kP is duty cycle per degree; YAMS's is volts per rotation.
+        public static final double kAngleKP = 0.01 * 360 * 12;
 
         // Thrifty absolute encoder offsets from the YAGSL module files.
         public static final Angle kFrontLeftEncoderOffset = Degrees.of(84.64);

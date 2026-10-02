@@ -57,7 +57,8 @@ public class ElevatorTest {
   private static SmartMotorControllerConfig createSMCConfig() {
     return new yams.commands2.config.SmartMotorControllerConfig()
         .withMechanismCircumference(Meters.of(Inches.of(0.25).in(Meters) * 22))
-        .withClosedLoopController(4, 0, 0)
+        // Volts per meter of error; 30 V/m is about 4 V per drum rotation.
+        .withClosedLoopController(30, 0, 0)
         .withSoftLimits(Meters.of(0), Meters.of(5))
         .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
         .withIdleMode(MotorMode.BRAKE)
@@ -184,6 +185,7 @@ public class ElevatorTest {
             ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
         .close();
     smc.close();
+    DeviceCreator.silence(smc);
 
     //    switch (smc.getMotorController())
     //    {

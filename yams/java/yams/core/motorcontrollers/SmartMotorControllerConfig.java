@@ -37,6 +37,7 @@ import org.wpilib.math.system.DCMotor;
 import org.wpilib.math.system.Models;
 import org.wpilib.math.trajectory.ExponentialProfile;
 import org.wpilib.math.trajectory.TrapezoidProfile;
+import org.wpilib.math.util.MathUtil;
 import org.wpilib.simulation.SingleJointedArmSim;
 import org.wpilib.units.AngularAccelerationUnit;
 import org.wpilib.units.LinearAccelerationUnit;
@@ -662,16 +663,29 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     if (linearClosedLoopController) {
       throw new SmartMotorControllerConfigurationException("Distance based mechanism used with continuous wrapping", "Cannot set continuous wrapping", "withMechanismCircumference(Distance) should be removed");
     }
-    for (var pidController : pid.values()) {
-      pidController.enableContinuousInput(bottom.in(Rotations), top.in(Rotations));
-    }
-    if (pid.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("No PID controller used", "Cannot set continuous wrapping!", "withClosedLoopController()");
+    if (pid.isEmpty() && lqr.isEmpty()) {
+      throw new SmartMotorControllerConfigurationException("No closed loop controller used", "Cannot set continuous wrapping!", "withClosedLoopController()");
     }
 
     maxContinuousWrappingAngle = Optional.of(top);
     minContinuousWrappingAngle = Optional.of(bottom);
+    pid.values().forEach(this::applyContinuousWrapping);
+    sim_pid.values().forEach(this::applyContinuousWrapping);
     return self();
+  }
+
+  /**
+   * Make a PID controller wrap at the continuous wrapping bounds, if they are configured. Applied to
+   * every PID controller, including simulation ones and ones set after continuous wrapping.
+   *
+   * @param controller PID controller, in rotations.
+   * @return The same controller.
+   */
+  private PIDController applyContinuousWrapping(PIDController controller) {
+    if (minContinuousWrappingAngle.isPresent() && maxContinuousWrappingAngle.isPresent()) {
+      controller.enableContinuousInput(minContinuousWrappingAngle.get().in(Rotations), maxContinuousWrappingAngle.get().in(Rotations));
+    }
+    return controller;
   }
 
   /**
@@ -1047,6 +1061,15 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * Set the external encoder which is attached to the motor type sent used by
    * {@link SmartMotorController}
    *
+   * <p>Supported external encoders:
+   * <ul>
+   *   <li>SPARK MAX and SPARK Flex: the SPARK's absolute encoder, the SPARK MAX's alternate encoder or
+   *       the SPARK Flex's external encoder (quadrature, whose counts per revolution come from the
+   *       vendor config), or an encoder the SPARK reads over CAN (a REVLib {@code DetachedEncoder}).
+   *   <li>TalonFX and TalonFXS: a CANcoder, or a CANdi whose PWM input is selected by the feedback
+   *       sensor source of the vendor config.
+   * </ul>
+   *
    * @param externalEncoder External encoder attached to the {@link SmartMotorController}
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
@@ -1132,7 +1155,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @implNote Overload for {@link #withWheelRadius(Distance)}
    */
   public T withDrumRadius(Distance chainPitch, int teeth) {
-    return withWheelRadius(chainPitch.times(teeth));
+    // The chain travels one pitch per tooth, so pitch times teeth is the sprocket's circumference.
+    return withWheelRadius(chainPitch.times(teeth).div(2 * Math.PI));
   }
 
   /**
@@ -1407,7 +1431,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public T withSimClosedLoopController(double kP, double kI, double kD, ClosedLoopControllerSlot slot) {
-    this.sim_pid.put(slot, new PIDController(kP, kI, kD));
+    this.sim_pid.put(slot, applyContinuousWrapping(new PIDController(kP, kI, kD)));
     this.sim_lqr = Optional.empty();
     return self();
   }
@@ -1434,7 +1458,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public T withSimClosedLoopController(PIDController controller, ClosedLoopControllerSlot slot) {
-    this.sim_pid.put(slot, controller);
+    this.sim_pid.put(slot, applyContinuousWrapping(controller));
     this.sim_lqr = Optional.empty();
     return self();
   }
@@ -1549,10 +1573,12 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     var sysid = Models.singleJointedArmFromPhysicalConstants(motor, moi.in(KilogramSquareMeters), gearing.getMechanismToRotorRatio());
     var A = sysid.getA(0, 0); // radians
     var B = sysid.getB(0, 0); // radians
-    var kV = RadiansPerSecond.of(-A / B);
-    var kA = RadiansPerSecondPerSecond.of(1.0 / B);
+    // -A / B and 1 / B are in volts per radian per second (per second); the profile is in rotations,
+    // and a rotation is 2 pi radians.
+    var kV = -A / B * 2 * Math.PI;
+    var kA = 1.0 / B * 2 * Math.PI;
     this.trapezoidProfile = Optional.empty();
-    this.exponentialProfile = Optional.of(ExponentialProfile.Constraints.fromCharacteristics(maxVolts.in(Volts), kV.in(RotationsPerSecond), kA.in(RotationsPerSecondPerSecond)));
+    this.exponentialProfile = Optional.of(ExponentialProfile.Constraints.fromCharacteristics(maxVolts.in(Volts), kV, kA));
     return self();
   }
 
@@ -1589,7 +1615,23 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   public T withExponentialProfile(Voltage maxVolts, AngularVelocity maxVelocity, AngularAcceleration maxAcceleration) {
     var maxV = maxVolts.in(Volts);
     this.trapezoidProfile = Optional.empty();
-    this.exponentialProfile = Optional.of(ExponentialProfile.Constraints.fromStateSpace(maxVolts.in(Volts), maxV / maxVelocity.in(RotationsPerSecond), maxV / maxAcceleration.in(RotationsPerSecondPerSecond)));
+    // kV and kA, in volts per rotation per second (per second), reach the maximum velocity and
+    // acceleration at the maximum voltage.
+    this.exponentialProfile = Optional.of(ExponentialProfile.Constraints.fromCharacteristics(maxV, maxV / maxVelocity.in(RotationsPerSecond), maxV / maxAcceleration.in(RotationsPerSecondPerSecond)));
+    return self();
+  }
+
+  /**
+   * Replace the trapezoidal profile's constraints, keeping how the profile is used (position or
+   * velocity, rotational or linear). Used by live tuning, so that tuning one constraint keeps the
+   * others that were tuned before.
+   *
+   * @param constraints Constraints in the profile's units: rotations or meters, per second, or per
+   *                    second squared for a velocity profile.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public T withTrapezoidalProfileConstraints(TrapezoidProfile.Constraints constraints) {
+    this.trapezoidProfile = Optional.ofNullable(constraints);
     return self();
   }
 
@@ -1638,7 +1680,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public T withClosedLoopController(double kP, double kI, double kD, ClosedLoopControllerSlot slot) {
-    this.pid.put(slot, new PIDController(kP, kI, kD));
+    this.pid.put(slot, applyContinuousWrapping(new PIDController(kP, kI, kD)));
     this.lqr = Optional.empty();
     return self();
   }
@@ -1669,7 +1711,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public T withClosedLoopController(PIDController controller, ClosedLoopControllerSlot slot) {
-    this.pid.put(slot, controller);
+    this.pid.put(slot, applyContinuousWrapping(controller));
     this.lqr = Optional.empty();
     return self();
   }
@@ -2247,6 +2289,28 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
           Rotations) + "),Rotations.of(" + maxContinuousWrappingAngle.get().in(Rotations) + ")) instead ");
     }
     return minContinuousWrappingAngle;
+  }
+
+  /**
+   * Get the position setpoint to command with continuous wrapping: the angle equivalent to
+   * {@code setpoint}, a whole number of wrapping ranges away, that is nearest {@code current}. For
+   * motor controllers whose onboard wrapping cannot be given the mechanism's wrapping range.
+   *
+   * @param setpoint Mechanism angle to go to.
+   * @param current  Current mechanism angle.
+   * @return The equivalent setpoint nearest {@code current}, or {@code setpoint} unchanged when
+   *     continuous wrapping is not configured.
+   * @throws SmartMotorControllerConfigurationException if continuous wrapping is configured with
+   *                                                    bounds that do not span exactly one rotation
+   *                                                    (minimum is not maximum minus 1 rotation).
+   */
+  public Angle getContinuousWrappingSetpoint(Angle setpoint, Angle current) {
+    if (getContinuousWrapping().isEmpty() || getContinuousWrappingMin().isEmpty()) {
+      return setpoint;
+    }
+    final double halfRange = (maxContinuousWrappingAngle.get().in(Rotations) - minContinuousWrappingAngle.get().in(Rotations)) / 2;
+    final double currentRotations = current.in(Rotations);
+    return Rotations.of(currentRotations + MathUtil.inputModulus(setpoint.in(Rotations) - currentRotations, -halfRange, halfRange));
   }
 
   /**

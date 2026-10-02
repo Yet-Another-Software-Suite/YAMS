@@ -5,9 +5,7 @@ package yams.core.telemetry;
 
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Meters;
-import static org.wpilib.units.Units.Minute;
 import static org.wpilib.units.Units.RPM;
-import static org.wpilib.units.Units.Rotations;
 import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
 import static org.wpilib.units.Units.Second;
@@ -263,7 +261,8 @@ public class SmartMotorControllerTelemetryConfig {
         doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxVelocity).enable();
         doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxJerk).disable();
       } else {
-        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxAcceleration).setDefaultValue(RotationsPerSecondPerSecond.of(e.maxAcceleration).in(RPM.per(Minute)));
+        // In the units applyTuningValues reads it back in.
+        doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxAcceleration).setDefaultValue(RotationsPerSecondPerSecond.of(e.maxAcceleration).in(RPM.per(Second)));
         doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxVelocity).setDefaultValue(RotationsPerSecond.of(e.maxVelocity).in(RPM));
         doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxVelocity).enable();
         doubleFields.get(DoubleTelemetryField.TrapezoidalProfileMaxJerk).disable();
@@ -277,8 +276,9 @@ public class SmartMotorControllerTelemetryConfig {
       doubleFields.get(DoubleTelemetryField.ExponentialProfileKA).enable();
       doubleFields.get(DoubleTelemetryField.ExponentialProfileKV).enable();
       doubleFields.get(DoubleTelemetryField.ExponentialProfileMaxInput).enable();
-      var defaultkV = config.getLinearClosedLoopControllerUse() ? config.convertToMechanism(Meters.of(-e.A / e.B)).in(Rotations) : (-e.A / e.B);
-      var defaultkA = config.getLinearClosedLoopControllerUse() ? config.convertToMechanism(Meters.of(1.0 / e.B)).in(Rotations) : (1.0 / e.B);
+      // In the profile's own units, as configured and as setExponentialProfile takes them.
+      var defaultkV = -e.A / e.B;
+      var defaultkA = 1.0 / e.B;
       var defaultMaxInput = e.maxInput;
       doubleFields.get(DoubleTelemetryField.ExponentialProfileKA).setDefaultValue(defaultkA);
       doubleFields.get(DoubleTelemetryField.ExponentialProfileKV).setDefaultValue(defaultkV);

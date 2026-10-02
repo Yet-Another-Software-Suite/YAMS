@@ -21,13 +21,10 @@ import com.revrobotics.spark.SparkMax;
 import first.robot.Constants;
 import first.robot.Constants.CANIDS;
 import first.robot.Constants.SwerveDrive.Modules.Module;
-import first.robot.pathplanner.PathPlannerPath;
 import first.robot.pathplanner.AutoBuilder;
 import first.robot.utils.AllianceFlipUtil;
 import first.robot.utils.FieldConstants.Hub;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.driverstation.Alliance;
@@ -41,11 +38,8 @@ import org.wpilib.math.geometry.Pose3d;
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.kinematics.ChassisVelocities;
-import org.wpilib.math.trajectory.HolonomicSample;
-import org.wpilib.math.trajectory.HolonomicTrajectory;
 import org.wpilib.math.util.Units;
 import org.wpilib.smartdashboard.Field2d;
-import org.wpilib.system.Timer;
 import org.wpilib.telemetry.Telemetry;
 import org.wpilib.units.measure.Distance;
 import yams.commands3.config.SmartMotorControllerConfig;
@@ -64,8 +58,7 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
 /**
  * Swerve drivetrain: four NEO + NEO SPARK MAX modules with CANcoders. YAGSL built it from the JSON
  * files in {@code deploy/swerve}; it is now a YAMS {@link SwerveDrive} built from
- * {@link Constants.SwerveDrive.Modules}. It also fuses Limelight poses and follows PathPlanner
- * paths.
+ * {@link Constants.SwerveDrive.Modules}. It also fuses Limelight poses.
  */
 public class SwerveMechanism implements Mechanism
 {
@@ -77,11 +70,6 @@ public class SwerveMechanism implements Mechanism
   private Limelight limelight_swerve;
   private double    lastLLTimestamp_swerve = 0;
   private boolean   isLLEnabled_swerve     = false;
-
-  // PathPlanner path following PID, as the original PPHolonomicDriveController.
-  private final PIDController pathXController     = new PIDController(5.0, 0.0, 0.0);
-  private final PIDController pathYController     = new PIDController(5.0, 0.0, 0.0);
-  private final PIDController pathRotationController = new PIDController(5.0, 0.0, 0.0);
 
   public SwerveMechanism()
   {
@@ -99,8 +87,6 @@ public class SwerveMechanism implements Mechanism
         .withRotationController(new PIDController(headingKP, 0, 0))
         .withTelemetry("Swerve", TelemetryVerbosity.HIGH);
     swerveDrive = new SwerveDrive(config);
-    pathRotationController.enableContinuousInput(-Math.PI, Math.PI);
-    setupPathPlanner();
     setupLimeLight();
   }
 
@@ -122,6 +108,7 @@ public class SwerveMechanism implements Mechanism
         .withControlMode(ControlMode.CLOSED_LOOP)
         .withGearing(new MechanismGearing(angleGearRatio))
         .withClosedLoopController(angleKP, 0, 0)
+        .withSimClosedLoopController(angleSimKP, 0, 0)
         .withContinuousWrapping(Radians.of(-Math.PI), Radians.of(Math.PI))
         .withIdleMode(MotorMode.BRAKE)
         .withStatorCurrentLimit(angleCurrentLimit)
@@ -256,89 +243,9 @@ public class SwerveMechanism implements Mechanism
     swerveDrive.setFieldRelativeChassisSpeeds(velocity);
   }
 
-  /** Point the PathPlanner reader at this drivetrain. */
-  public void setupPathPlanner()
-  {
-    AutoBuilder.configure(this::followPath,
-                          swerveDrive::resetOdometry,
-                          () -> {
-                            // Boolean supplier that controls when the path will be mirrored for the red alliance
-                            // This will flip the path being followed to the red side of the field.
-                            // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-                            var alliance = MatchState.getAlliance();
-                            if (alliance.isPresent())
-                            {
-                              return alliance.get() == Alliance.RED;
-                            }
-                            return false;
-                          });
-  }
-
   /**
-   * Follow a PathPlanner path, mirrored for the red alliance, running its event markers along the way.
-   * Each marker's command is forked when the robot reaches it. A zoned marker's command is canceled
-   * when the robot leaves the zone, and every marker command still running is canceled when the path
-   * ends, as PathPlannerLib does.
-   *
-   * @param path Path to follow.
-   * @return Command that follows the path.
-   */
-  public Command followPath(PathPlannerPath path)
-  {
-    List<Command> markerCommands = new ArrayList<>();
-    for (PathPlannerPath.EventMarker marker : path.getEventMarkers())
-    {
-      markerCommands.add(AutoBuilder.buildCommand(marker.command()));
-    }
-    return run(coroutine -> {
-      HolonomicTrajectory trajectory = path.getTrajectory(AutoBuilder.shouldFlip());
-      List<PathPlannerPath.EventMarker> markers = path.getEventMarkers();
-      boolean[] started = new boolean[markers.size()];
-      pathXController.reset();
-      pathYController.reset();
-      pathRotationController.reset();
-      Timer timer = new Timer();
-      timer.start();
-      while (!timer.hasElapsed(trajectory.duration))
-      {
-        double time = timer.get();
-        followSample(trajectory.sampleAt(time));
-        for (int i = 0; i < markers.size(); i++)
-        {
-          PathPlannerPath.EventMarker marker = markers.get(i);
-          if (!started[i] && time >= marker.startTime())
-          {
-            started[i] = true;
-            coroutine.fork(markerCommands.get(i));
-          }
-          if (started[i] && marker.endTime().isPresent() && time >= marker.endTime().get())
-          {
-            // Left the marker's zone.
-            coroutine.scheduler().cancel(markerCommands.get(i));
-          }
-        }
-        coroutine.yield();
-      }
-      // Every path in this robot ends at rest, so stop instead of holding the last speed. Marker
-      // commands are canceled as this command ends.
-      swerveDrive.setRobotRelativeChassisSpeeds(new ChassisVelocities());
-    }).named("Follow " + path.getName());
-  }
-
-  /** Drive toward a field relative trajectory sample: its velocity plus a PID correction. */
-  private void followSample(HolonomicSample sample)
-  {
-    Pose2d            pose   = getPose();
-    ChassisVelocities speeds = new ChassisVelocities(
-        sample.velocity.vx + pathXController.calculate(pose.getX(), sample.pose.getX()),
-        sample.velocity.vy + pathYController.calculate(pose.getY(), sample.pose.getY()),
-        sample.velocity.omega + pathRotationController.calculate(pose.getRotation().getRadians(),
-                                                                 sample.pose.getRotation().getRadians()));
-    swerveDrive.setRobotRelativeChassisSpeeds(speeds.toRobotRelative(pose.getRotation()));
-  }
-
-  /**
-   * Run a PathPlanner auto.
+   * Run a PathPlanner auto. Not available with commands v3 yet, so this does nothing; see
+   * {@link AutoBuilder}.
    *
    * @param autoName PathPlanner auto name.
    * @return Command that runs the auto.

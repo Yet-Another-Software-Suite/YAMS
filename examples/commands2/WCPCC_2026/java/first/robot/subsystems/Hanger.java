@@ -6,6 +6,8 @@ package first.robot.subsystems;
 
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Pounds;
 import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.Second;
@@ -22,6 +24,7 @@ import org.wpilib.math.controller.ElevatorFeedforward;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.LinearVelocity;
 import yams.commands2.config.SmartMotorControllerConfig;
 import yams.commands2.mechanisms.Elevator;
 import yams.core.gearing.MechanismGearing;
@@ -61,6 +64,8 @@ public class Hanger extends SubsystemBase {
     private static final double kMotorRotationsPerMechanismRotation = 142;
     private static final Distance kExtensionPerMechanismRotation = Inches.of(6);
     private static final AngularVelocity kMaxMechanismSpeed = KrakenX60.kFreeSpeed.div(kMotorRotationsPerMechanismRotation);
+    private static final LinearVelocity kMaxExtensionSpeed =
+        MetersPerSecond.of(kMaxMechanismSpeed.in(RotationsPerSecond) * kExtensionPerMechanismRotation.in(Meters));
     private static final Distance kExtensionTolerance = Inches.of(1);
 
     private final TalonFX motor = new TalonFX(Ports.kHanger, Ports.kRoboRioCANBus);
@@ -74,12 +79,12 @@ public class Hanger extends SubsystemBase {
         .withIdleMode(MotorMode.BRAKE)
         .withStatorCurrentLimit(Amps.of(20))
         .withSupplyCurrentLimit(Amps.of(70))
-        // WCP's gains were per motor rotation (kP 10, kV 12 V at free speed); YAMS closes the loop
-        // per mechanism rotation, so both are scaled by the 142:1 reduction.
-        .withClosedLoopController(10 * kMotorRotationsPerMechanismRotation, 0, 0)
-        .withFeedforward(new ElevatorFeedforward(0, 0, 12.0 / kMaxMechanismSpeed.in(RotationsPerSecond)))
+        // WCP's gains were per motor rotation (kP 10, kV 12 V at free speed). The ElevatorFeedforward
+        // makes this a linear closed loop controller, so YAMS takes them per meter of extension.
+        .withClosedLoopController(10 * kMotorRotationsPerMechanismRotation / kExtensionPerMechanismRotation.in(Meters), 0, 0)
+        .withFeedforward(new ElevatorFeedforward(0, 0, 12.0 / kMaxExtensionSpeed.in(MetersPerSecond)))
         // Motion Magic cruise at motor free speed, accelerating to it in one second.
-        .withTrapezoidalProfile(kMaxMechanismSpeed, kMaxMechanismSpeed.per(Second))
+        .withTrapezoidalProfile(kMaxExtensionSpeed, kMaxExtensionSpeed.per(Second))
         // Start the simulated hanger off its bottom stop so homing has to drive into it.
         .withSimStartingPosition(Position.EXTEND_HOPPER.extension())
         .withTelemetry("HangerMotor", TelemetryVerbosity.HIGH);

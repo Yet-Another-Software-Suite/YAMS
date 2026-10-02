@@ -127,14 +127,34 @@ jobs:
             test-filter: '--tests "yams.mechs.PivotTest"'
           - group: shooter
             test-filter: '--tests "yams.mechs.ShooterTest"'
+          # External encoders on each motor controller: CANcoders and CANdis on Talons, the SPARK
+          # absolute encoder and Through Bore Encoders (wired and over CAN) on SPARKs, and starting
+          # away from zero with and without an absolute encoder.
+          - group: absolute-encoders
+            test-filter: >-
+              --tests "yams.core.motorcontrollers.CANcoderTest"
+              --tests "yams.core.motorcontrollers.CANdiTest"
+              --tests "yams.core.motorcontrollers.SparkAbsoluteEncoderTest"
+              --tests "yams.core.motorcontrollers.ThroughBoreEncoderTest"
+              --tests "yams.core.motorcontrollers.StartingPositionTest"
+          # Every absolute encoder under every closed loop controller: these create many simulated
+          # Talons, which Phoenix runs in real time, so each runs in its own JVM.
+          - group: discontinuity-points
+            test-filter: '--tests "yams.core.motorcontrollers.DiscontinuityPointTest"'
+          - group: zero-offsets
+            test-filter: '--tests "yams.core.motorcontrollers.ZeroOffsetTest"'
           # Everything else: swerve and mechanism limit tests, motor controller / battery sim unit
-          # tests, and the standalone math test. Add new test classes here unless they get their
-          # own group above.
+          # tests, and the standalone math test. Gradle's --tests cannot exclude the groups above,
+          # so each class is listed: add new test classes here unless they get their own group.
           - group: other
             test-filter: >-
               --tests "yams.mechs.SwerveDriveTest"
               --tests "yams.mechs.MechanismLimitTest"
-              --tests "yams.core.*"
+              --tests "yams.core.motorcontrollers.ContinuousWrappingTest"
+              --tests "yams.core.motorcontrollers.ForceFeedforwardTest"
+              --tests "yams.core.motorcontrollers.LiveTuningTest"
+              --tests "yams.core.motorcontrollers.SimulationPeriodTest"
+              --tests "yams.core.motorcontrollers.simulation.*"
               --tests "yams.ChineseRemainderTheoremTest"
     steps:
       - uses: actions/checkout@v7

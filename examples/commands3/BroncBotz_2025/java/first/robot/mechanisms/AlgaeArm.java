@@ -43,14 +43,19 @@ public class AlgaeArm implements Mechanism {
         .withControlMode(ControlMode.CLOSED_LOOP)
         .withGearing(new MechanismGearing(kReduction))
         .withClosedLoopController(kP, 0, kD)
+        // Simulation only: REVLib's simulation runs the SPARK's loop every 10 ms rather than every
+        // millisecond, and this derivative gain makes it oscillate at that rate.
+        .withSimClosedLoopController(kP, 0, 0)
         .withFeedforward(new ArmFeedforward(kS, kG, kV))
         .withTrapezoidalProfile(kMaxVelocity, kMaxAcceleration)
         .withIdleMode(MotorMode.COAST)
         .withStatorCurrentLimit(kCurrentLimit)
         .withOpenLoopRampRate(kRampRate)
         .withMotorInverted(false)
-        // The absolute encoder seeds the motor encoder (synchronizeAbsoluteEncoder() in the original).
+        // The absolute encoder seeds the motor encoder (synchronizeAbsoluteEncoder() in the original);
+        // the loop closes on the motor encoder, which the motor inversion also inverts.
         .withExternalEncoder(motor.getAbsoluteEncoder())
+        .withUseExternalFeedbackEncoder(false)
         .withExternalEncoderInverted(true)
         .withExternalEncoderZeroOffset(kAbsoluteEncoderOffset)
         // The SPARK only wraps at 0.5 or 1 rotation, so the encoder reads [-180, 180) degrees. The

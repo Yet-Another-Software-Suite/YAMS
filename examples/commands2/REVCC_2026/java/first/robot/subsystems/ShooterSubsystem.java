@@ -60,8 +60,8 @@ public class ShooterSubsystem extends SubsystemBase
       .withControlMode(ControlMode.CLOSED_LOOP)
       // The flywheel is direct drive in the REV code (no conversion factor on the encoder).
       .withGearing(new MechanismGearing(1.0))
-      // REV's kP of 0.0002 per RPM, re-expressed per rotation per second.
-      .withClosedLoopController(0.0002 * 60, 0, 0)
+      // REV's kP of 0.0002 duty cycle per RPM, re-expressed in volts per rotation per second.
+      .withClosedLoopController(0.0002 * 60 * 12, 0, 0)
       // kV = 12 V / free speed: at the Vortex free speed the feedforward alone commands 12 V, so
       // kP only has to clean up the residual error.
       .withFeedforward(new SimpleMotorFeedforward(0, 12.0 / NeoMotorConstants.kVortexFreeSpeed.in(RotationsPerSecond)))

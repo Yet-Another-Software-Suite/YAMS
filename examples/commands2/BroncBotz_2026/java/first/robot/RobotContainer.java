@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.button.CommandNiDsXboxController;
+import org.wpilib.driverstation.DriverStationErrors;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.tunable.Selectable;
@@ -62,21 +63,34 @@ public class RobotContainer {
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
-        // Named commands and event triggers must exist before the autos are loaded.
-        configurePathPlannerCommands();
         configureDefaultCommands();
         configureDriverBindings();
         configureOperatorBindings();
 
-        // Every auto in deploy/pathplanner/autos, plus a mirrored copy of each (the original's "Flip
-        // Auto" chooser), which runs it on the other side of the field's long centerline.
-        autoChooser = AutoBuilder.buildAutoChooserWithOptionsModifier(autos -> autos.flatMap(auto -> {
-            final PathPlannerAuto mirrored = new PathPlannerAuto(auto.getName(), true);
-            mirrored.setName(auto.getName() + " (Mirrored)");
-            return Stream.of(auto, mirrored);
-        }));
+        autoChooser = buildAutoChooser();
         autoChooser.addDefault("Do Nothing", Commands.none());
         Tunables.publish("Auto Chooser", autoChooser);
+    }
+
+    /**
+     * Every auto in deploy/pathplanner/autos, plus a mirrored copy of each (the original's "Flip
+     * Auto" chooser), which runs it on the other side of the field's long centerline. PathPlanner
+     * failing to load only loses the autos: the chooser is left with just "Do Nothing" and teleop is
+     * unaffected.
+     */
+    private Selectable<Command> buildAutoChooser() {
+        try {
+            // Named commands and event triggers must exist before the autos are loaded.
+            configurePathPlannerCommands();
+            return AutoBuilder.buildAutoChooserWithOptionsModifier(autos -> autos.flatMap(auto -> {
+                final PathPlannerAuto mirrored = new PathPlannerAuto(auto.getName(), true);
+                mirrored.setName(auto.getName() + " (Mirrored)");
+                return Stream.of(auto, mirrored);
+            }));
+        } catch (Exception | LinkageError e) {
+            DriverStationErrors.reportError("Could not load the PathPlanner autos: " + e, e.getStackTrace());
+            return new Selectable<>();
+        }
     }
 
     /** Driver input stream: field relative from the driver's alliance wall. */
