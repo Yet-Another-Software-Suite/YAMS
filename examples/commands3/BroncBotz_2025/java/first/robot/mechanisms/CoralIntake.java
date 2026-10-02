@@ -86,6 +86,11 @@ public class CoralIntake implements Mechanism {
         roller.setDutyCycleSetpoint(rollerDutyCycle);
     }
 
+    /** The wrist is at rest, out of the algae arm's way. */
+    public boolean isAtRest() {
+        return wrist.getMotorController().getMechanismPosition().isNear(kRest, kScoringTolerance);
+    }
+
     /** The wrist is at its scoring angle. */
     public boolean isAtScoringAngle() {
         return wrist.getMotorController().getMechanismPosition().isNear(kActive, kScoringTolerance);

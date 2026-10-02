@@ -211,9 +211,16 @@ public class RobotContainer {
 
     /**
      * The simulator has no game pieces, so load a coral after half a second of intaking at the human
-     * player station and an algae after half a second of intaking, and drop them when spat out.
+     * player station and an algae after half a second of intaking, and drop them when spat out. A
+     * coral also comes off onto the branch when the coral arm swings down onto it at the scoring pose.
+     * The game pieces only set what the simulated sensors read; the robot code reads the sensors as
+     * it would on the robot.
      */
     private void configureSimulatedGamePieces() {
+        new Trigger(() -> coralArm.isCoralLoaded() && elevator.isAtCoralLevel(targeting.getLevel())
+            && targeting.getCoralScoringPose().map(pose -> swerve.getPose().getTranslation().getDistance(pose.getTranslation()) < 0.15).orElse(false)
+            && coralArm.getAngle().lt(CoralArm.coralAngle(targeting.getLevel()).minus(CoralArmConstants.kScoreDrop.div(2))))
+            .onTrue(Commands.runOnce(() -> coralArm.setSimCoralLoaded(false)));
         new Trigger(() -> coralIntake.getRollerDutyCycle() > 0.3 && coralArm.isNear(CoralArmConstants.HP))
             .debounce(0.5)
             .onTrue(Commands.runOnce(() -> coralArm.setSimCoralLoaded(true)));

@@ -70,8 +70,8 @@ public class CoralArm implements Mechanism {
         .withTelemetry("CoralArm", TelemetryVerbosity.HIGH),
         motorController);
 
-    // In simulation the robot starts with a coral loaded; scoring or spitting it out clears that, and
-    // intaking at the human player station loads another (see setSimCoralLoaded).
+    // In simulation the robot starts with a coral loaded, and Robot's simulated game pieces load and
+    // unload it (see setSimCoralLoaded); the sensor reads them like a real one.
     private boolean simCoralLoaded = true;
     private final DistanceSensor coralSensor = new DistanceSensor("CoralLaserCan",
         () -> simCoralLoaded, Millimeters.of(70), Millimeters.of(400));
@@ -153,12 +153,13 @@ public class CoralArm implements Mechanism {
 
     /** Swing down onto the branch to place the coral, finishing once it has left the intake. */
     public Command score() {
-        final Command swingDown = holdAt(() -> getAngle().minus(kScoreDrop), "CoralArm Swing Down");
         return run(coroutine -> {
-            coroutine.fork(swingDown);
-            coroutine.waitUntil(this::isCoralScored);
-            setSimCoralLoaded(false);
-        }).whenCanceled(() -> setSimCoralLoaded(false)).named("CoralArm Score");
+            final Angle target = getAngle().minus(kScoreDrop);
+            while (!isCoralScored()) {
+                arm.setMechanismPositionSetpoint(target);
+                coroutine.yield();
+            }
+        }).named("CoralArm Score");
     }
 
     public static Angle coralAngle(ReefTargeting.Level level) {

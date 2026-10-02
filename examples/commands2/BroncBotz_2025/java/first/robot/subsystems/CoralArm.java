@@ -71,8 +71,8 @@ public class CoralArm extends SubsystemBase {
         .withTelemetry("CoralArm", TelemetryVerbosity.HIGH),
         motorController);
 
-    // In simulation the robot starts with a coral loaded; scoring or spitting it out clears that, and
-    // intaking at the human player station loads another (see setSimCoralLoaded).
+    // In simulation the robot starts with a coral loaded, and RobotContainer's simulated game pieces
+    // load and unload it (see setSimCoralLoaded); the sensor reads them like a real one.
     private boolean simCoralLoaded = true;
     private final DistanceSensor coralSensor = new DistanceSensor("CoralLaserCan",
         () -> simCoralLoaded, Millimeters.of(70), Millimeters.of(400));
@@ -132,7 +132,6 @@ public class CoralArm extends SubsystemBase {
     /** Swing down onto the branch to place the coral, ending once it has left the intake. */
     public Command score() {
         return defer(() -> holdAt(getAngle().minus(kScoreDrop))).until(this::isCoralScored)
-            .finallyDo(() -> setSimCoralLoaded(false))
             .withName("CoralArm Score");
     }
 

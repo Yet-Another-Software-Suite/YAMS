@@ -221,7 +221,8 @@ public final class Constants {
     public static class CoralIntakeConstants {
         public static final double kWristGearRatio = (30.0 / 54.0) * 28.0;
         public static final double kWristMomentOfInertia = 0.00032; // kg m^2
-        public static final double kWristKP = 1;
+        // The original's wrist kP was duty cycle per rotation; YAMS's is volts per rotation.
+        public static final double kWristKP = 1 * 12;
         public static final Current kWristCurrentLimit = Amps.of(40);
         public static final Time kWristRampRate = Seconds.of(0.25);
         // Wrist positions on the through bore encoder, in rotations.

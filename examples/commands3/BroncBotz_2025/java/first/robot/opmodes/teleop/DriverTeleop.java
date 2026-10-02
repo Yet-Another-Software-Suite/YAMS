@@ -55,19 +55,19 @@ public class DriverTeleop implements OpMode {
     }
 
     private void configureOperatorBindings(CommandNiDsXboxController operator) {
-        operator.a().whileTrue(robot.superstructure.coralLevel(Level.L1, CoralIntakeConstants.kRest));
-        operator.b().whileTrue(robot.superstructure.coralLevel(Level.L2, CoralIntakeConstants.kActive));
-        operator.x().whileTrue(robot.superstructure.coralLevel(Level.L3, CoralIntakeConstants.kActive));
-        operator.y().whileTrue(robot.superstructure.coralLevel(Level.L4, CoralIntakeConstants.kActive));
+        operator.a().whileTrue(robot.coralCommands.coralLevel(Level.L1, CoralIntakeConstants.kRest));
+        operator.b().whileTrue(robot.coralCommands.coralLevel(Level.L2, CoralIntakeConstants.kActive));
+        operator.x().whileTrue(robot.coralCommands.coralLevel(Level.L3, CoralIntakeConstants.kActive));
+        operator.y().whileTrue(robot.coralCommands.coralLevel(Level.L4, CoralIntakeConstants.kActive));
         operator.leftBumper().whileTrue(robot.coralIntake.outtake());
         operator.rightBumper().whileTrue(robot.algaeIntake.outtake());
         operator.rightTrigger().whileTrue(robot.algaeIntake.intake());
-        operator.leftTrigger().whileTrue(robot.superstructure.intakeFromHumanPlayer());
+        operator.leftTrigger().whileTrue(robot.coralCommands.intakeFromHumanPlayer());
         // The D-pad triggers live on the generic HID in 2027.
-        operator.getHID().povLeft().whileTrue(robot.superstructure.scoreAlgaeNet());
-        operator.getHID().povRight().whileTrue(robot.superstructure.processor());
-        operator.getHID().povDown().whileTrue(robot.superstructure.algaeReefPosition(Level.L2));
-        operator.getHID().povUp().whileTrue(robot.superstructure.algaeReefPosition(Level.L3));
+        operator.getHID().povLeft().whileTrue(robot.algaeCommands.scoreAlgaeNet());
+        operator.getHID().povRight().whileTrue(robot.algaeCommands.processor());
+        operator.getHID().povDown().whileTrue(robot.algaeCommands.algaeReefPosition(Level.L2));
+        operator.getHID().povUp().whileTrue(robot.algaeCommands.algaeReefPosition(Level.L3));
         operator.start().whileTrue(robot.superstructure.stowArms());
     }
 
@@ -82,7 +82,7 @@ public class DriverTeleop implements OpMode {
 
     /** Target the closest reef face's algae at a level, then pull it off. */
     private Command loadAlgae(Level level) {
-        final Command load = robot.superstructure.loadAlgae();
+        final Command load = robot.algaeCommands.loadAlgae();
         return Command.noRequirements(coroutine -> {
             robot.targeting.targetClosestBranch(robot.swerve.getPose());
             robot.targeting.setLevel(level);
@@ -92,7 +92,7 @@ public class DriverTeleop implements OpMode {
 
     /** Target the closest branch, then hold the coral arm and elevator at a level. */
     private Command holdCoralLevel(Level level) {
-        final Command hold = robot.superstructure.holdCoralLevel(level);
+        final Command hold = robot.coralCommands.holdCoralLevel(level);
         return Command.noRequirements(coroutine -> {
             robot.targeting.targetClosestBranch(robot.swerve.getPose());
             coroutine.await(hold);
@@ -111,7 +111,7 @@ public class DriverTeleop implements OpMode {
         launchpad.bind(0, 4, Launchpad.kCoralLevel, selectCoralLevel(Level.L1));
         launchpad.bind(3, 0, Color.RED, setSide(Side.LEFT));
         launchpad.bind(4, 0, Color.BLUE, setSide(Side.RIGHT));
-        final Command scoreCoral = robot.superstructure.scoreCoral();
+        final Command scoreCoral = robot.coralCommands.scoreCoral();
         launchpad.bind(7, 8, Launchpad.kScoreCoral, Command.noRequirements(coroutine -> {
             showSelectedLevel(null);
             coroutine.await(scoreCoral);
@@ -121,11 +121,11 @@ public class DriverTeleop implements OpMode {
         // Algae: pull the low or high algae off the closest face, then score it.
         launchpad.bind(1, 2, Launchpad.kAlgae, loadAlgae(Level.L2));
         launchpad.bind(1, 3, Launchpad.kAlgae, loadAlgae(Level.L3));
-        launchpad.bind(1, 0, Launchpad.kAlgae, robot.superstructure.scoreAlgaeNet());
-        launchpad.bind(2, 0, Launchpad.kAlgae, robot.superstructure.processorDelayed());
+        launchpad.bind(1, 0, Launchpad.kAlgae, robot.algaeCommands.scoreAlgaeNet());
+        launchpad.bind(2, 0, Launchpad.kAlgae, robot.algaeCommands.processorDelayed());
 
         // Coral intake.
-        launchpad.bind(7, 1, Launchpad.kHumanPlayer, robot.superstructure.intakeFromHumanPlayer());
+        launchpad.bind(7, 1, Launchpad.kHumanPlayer, robot.coralCommands.intakeFromHumanPlayer());
         launchpad.bind(6, 1, Color.ORANGE_RED, robot.coralIntake.rollerFull());
         launchpad.bind(4, 3, Color.RED, robot.coralIntake.intake());
         launchpad.bind(5, 3, Color.WHITE, robot.coralIntake.score());

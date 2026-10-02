@@ -14,6 +14,7 @@ import com.revrobotics.spark.SparkMax;
 import first.robot.Ports;
 import first.robot.util.DistanceSensor;
 import first.robot.util.ReefTargeting;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
@@ -78,7 +79,17 @@ public class AlgaeArm implements Mechanism {
     private final DistanceSensor algaeSensor = new DistanceSensor("AlgaeLaserCan",
         () -> simAlgaeLoaded, Millimeters.of(100), Millimeters.of(400));
 
-    public AlgaeArm() {
+    /** Whether the coral wrist is at rest; see {@link #setTarget}. */
+    private final BooleanSupplier wristAtRest;
+    /** Where the arm waits for the coral wrist to rest before swinging down to rest, or null. */
+    private Angle waitingForWristAt = null;
+
+    /**
+     * @param wristAtRest Whether the coral wrist is at rest. The arm only swings down to rest once it
+     *                    is, or it would hit the wrist and break.
+     */
+    public AlgaeArm(BooleanSupplier wristAtRest) {
+        this.wristAtRest = wristAtRest;
     }
 
     public Angle getAngle() {
@@ -115,17 +126,36 @@ public class AlgaeArm implements Mechanism {
         motorController.synchronizeRelativeEncoder();
     }
 
+    /**
+     * Send the arm to an angle. The coral wrist must be at rest before the arm swings down to rest,
+     * at or below its stowed angle, or the arm would hit it and break: until it is, the arm waits
+     * where it is instead. Every setpoint goes through here.
+     */
+    private void setTarget(Angle target) {
+        if (target.lte(kStowed) && target.lt(getAngle()) && !wristAtRest.getAsBoolean()) {
+            if (waitingForWristAt == null) {
+                waitingForWristAt = getAngle();
+            }
+            arm.setMechanismPositionSetpoint(waitingForWristAt);
+        } else {
+            waitingForWristAt = null;
+            arm.setMechanismPositionSetpoint(target);
+        }
+    }
+
     /** Move to an angle, finishing once there. The closed loop keeps holding it afterwards. */
     public Command moveTo(Angle angle) {
         return run(coroutine -> {
-            arm.setMechanismPositionSetpoint(angle);
-            coroutine.waitUntil(() -> isNear(angle));
+            while (!isNear(angle)) {
+                setTarget(angle);
+                coroutine.yield();
+            }
         }).named("AlgaeArm to " + angle);
     }
 
-    /** Hold an angle until canceled, using the YAMS angle command. */
+    /** Hold an angle until canceled. */
     public Command holdAt(Angle angle) {
-        return arm.setAngle(angle);
+        return holdAt(() -> angle, "AlgaeArm Hold " + angle);
     }
 
     /** Hold an angle, read when the command starts, until canceled. */
@@ -133,7 +163,7 @@ public class AlgaeArm implements Mechanism {
         return run(coroutine -> {
             final Angle target = angle.get();
             while (true) {
-                arm.setMechanismPositionSetpoint(target);
+                setTarget(target);
                 coroutine.yield();
             }
         }).named(name);
@@ -143,6 +173,29 @@ public class AlgaeArm implements Mechanism {
     public Command holdCurrent() {
         return holdAt(() -> Degrees.of(Math.clamp(getAngle().in(Degrees), kMinAngle.in(Degrees), kMaxAngle.in(Degrees))),
             "AlgaeArm Hold");
+    }
+
+    /**
+     * Keep the arm stowed out of the way, except while it holds an algae: stowed, the arm is too low
+     * for the intake to hold one, so it holds the angle it had the algae at instead. The default
+     * command.
+     */
+    public Command stowUnlessHoldingAlgae() {
+        return run(coroutine -> {
+            Angle heldAt = null;
+            while (true) {
+                if (isAlgaeLoaded()) {
+                    if (heldAt == null) {
+                        heldAt = getAngle();
+                    }
+                    setTarget(heldAt);
+                } else {
+                    heldAt = null;
+                    setTarget(kStowed);
+                }
+                coroutine.yield();
+            }
+        }).withPriority(Command.LOWEST_PRIORITY).named("AlgaeArm Stow Unless Holding Algae");
     }
 
     /** Lift the arm to pull the algae off the reef, holding there until canceled. */

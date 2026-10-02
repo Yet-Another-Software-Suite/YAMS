@@ -32,8 +32,7 @@ public class CoralL4Auto implements OpMode {
         final Command liftClear = robot.elevator.moveTo(ElevatorConstants.kAutoClearHeight);
         final Command holdClear = robot.elevator.holdAt(ElevatorConstants.kAutoClearHeight);
         final Command swingOut = robot.coralArm.moveTo(CoralArmConstants.kStowed);
-        final Command score = robot.superstructure.scoreCoral();
-        final Command rest = robot.superstructure.restArmsSafe();
+        final Command score = robot.coralCommands.scoreCoral();
 
         // Swing the coral arm out of its starting position while holding the elevator clear. The hold
         // is forked inside this step, so it ends with it. Forked by the routine instead, it would
@@ -49,7 +48,6 @@ public class CoralL4Auto implements OpMode {
             coroutine.await(liftClear);
             coroutine.await(swingOutWhileClear);
             coroutine.await(score);
-            coroutine.await(rest);
         }).named("Coral L4 " + kBranch);
 
         // Created in the opmode, so this binding only exists while the opmode is selected. The

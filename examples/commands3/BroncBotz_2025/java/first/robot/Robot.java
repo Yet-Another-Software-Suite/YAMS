@@ -11,6 +11,8 @@ import first.robot.Constants.CoralArmConstants;
 import first.robot.Constants.ElevatorConstants;
 import first.robot.Constants.OperatorConstants;
 import first.robot.commands.Drive;
+import first.robot.commands.AlgaeArmCommands;
+import first.robot.commands.CoralArmCommands;
 import first.robot.commands.SuperstructureCommands;
 import first.robot.mechanisms.AlgaeArm;
 import first.robot.mechanisms.AlgaeIntake;
@@ -41,7 +43,8 @@ public class Robot extends OpModeRobot {
     public final Elevator elevator = new Elevator();
     public final CoralArm coralArm = new CoralArm();
     public final CoralIntake coralIntake = new CoralIntake();
-    public final AlgaeArm algaeArm = new AlgaeArm();
+    // The algae arm only swings down to rest once the coral wrist is at rest.
+    public final AlgaeArm algaeArm = new AlgaeArm(coralIntake::isAtRest);
     public final AlgaeIntake algaeIntake = new AlgaeIntake();
     public final ReefTargeting targeting = new ReefTargeting();
 
@@ -51,8 +54,9 @@ public class Robot extends OpModeRobot {
         OperatorConstants.kLaunchpadPort3, Launchpad.kPressed);
 
     /** Commands that use several mechanisms, shared by teleop and autonomous. */
-    public final SuperstructureCommands superstructure =
-        new SuperstructureCommands(swerve, elevator, coralArm, coralIntake, algaeArm, algaeIntake, targeting);
+    public final CoralArmCommands coralCommands = new CoralArmCommands(swerve, elevator, coralArm, coralIntake, targeting);
+    public final AlgaeArmCommands algaeCommands = new AlgaeArmCommands(swerve, elevator, coralArm, algaeArm, algaeIntake, targeting);
+    public final SuperstructureCommands superstructure = new SuperstructureCommands(elevator, coralArm, algaeArm);
 
     private final Scheduler scheduler = Scheduler.getDefault();
 
@@ -62,10 +66,11 @@ public class Robot extends OpModeRobot {
      */
     public Robot() {
         swerve.setDefaultCommand(Drive.teleop(swerve, driver));
-        // Return the elevator to the bottom and hold the arms where they are.
+        // Return the elevator to the bottom, rest the coral arm, and keep the algae arm stowed out of
+        // the way unless it holds an algae.
         elevator.setDefaultCommand(elevator.holdAt(ElevatorConstants.kMinHeight));
-        coralArm.setDefaultCommand(coralArm.holdCurrent());
-        algaeArm.setDefaultCommand(algaeArm.holdCurrent());
+        coralArm.setDefaultCommand(coralArm.holdAt(CoralArmConstants.kStowed));
+        algaeArm.setDefaultCommand(algaeArm.stowUnlessHoldingAlgae());
         // Gently hold any game piece; the algae only while its arm is raised.
         coralIntake.setDefaultCommand(coralIntake.hold(coralArm::isCoralLoaded));
         algaeIntake.setDefaultCommand(algaeIntake.hold(
@@ -93,9 +98,16 @@ public class Robot extends OpModeRobot {
 
     /**
      * The simulator has no game pieces, so load a coral after half a second of intaking at the human
-     * player station and an algae after half a second of intaking, and drop them when spat out.
+     * player station and an algae after half a second of intaking, and drop them when spat out. A
+     * coral also comes off onto the branch when the coral arm swings down onto it at the scoring pose.
+     * The game pieces only set what the simulated sensors read; the robot code reads the sensors as
+     * it would on the robot.
      */
     private void configureSimulatedGamePieces() {
+        new Trigger(() -> coralArm.isCoralLoaded() && elevator.isAtCoralLevel(targeting.getLevel())
+            && targeting.getCoralScoringPose().map(pose -> swerve.getPose().getTranslation().getDistance(pose.getTranslation()) < 0.15).orElse(false)
+            && coralArm.getAngle().lt(CoralArm.coralAngle(targeting.getLevel()).minus(CoralArmConstants.kScoreDrop.div(2))))
+            .onTrue(Command.noRequirements(coroutine -> coralArm.setSimCoralLoaded(false)).named("Sim Score Coral"));
         new Trigger(() -> coralIntake.getRollerDutyCycle() > 0.3 && coralArm.isNear(CoralArmConstants.HP))
             .debounce(Seconds.of(0.5))
             .onTrue(Command.noRequirements(coroutine -> coralArm.setSimCoralLoaded(true)).named("Sim Load Coral"));

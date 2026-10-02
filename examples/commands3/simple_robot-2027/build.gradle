@@ -99,6 +99,9 @@ dependencies {
 test {
     useJUnitPlatform()
     systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+    // Each test class gets its own JVM: a robot's devices keep their CAN IDs for the life of the
+    // JVM, so a second test class starting a robot could not create them again.
+    forkEvery = 1
 }
 
 // Simulation configuration (e.g. environment variables).
