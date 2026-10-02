@@ -79,7 +79,7 @@ public class AlgaeArm implements Mechanism {
     private final DistanceSensor algaeSensor = new DistanceSensor("AlgaeLaserCan",
         () -> simAlgaeLoaded, Millimeters.of(100), Millimeters.of(400));
 
-    /** Whether the coral wrist is at rest; see {@link #setTarget}. */
+    /** Whether the coral wrist is at rest; see {@link #guarded}. */
     private final BooleanSupplier wristAtRest;
     /** Where the arm waits for the coral wrist to rest before swinging down to rest, or null. */
     private Angle waitingForWristAt = null;
@@ -127,27 +127,26 @@ public class AlgaeArm implements Mechanism {
     }
 
     /**
-     * Send the arm to an angle. The coral wrist must be at rest before the arm swings down to rest,
-     * at or below its stowed angle, or the arm would hit it and break: until it is, the arm waits
-     * where it is instead. Every setpoint goes through here.
+     * The angle to send the arm to for a target. The coral wrist must be at rest before the arm swings
+     * down to rest, at or below its stowed angle, or the arm would hit it and break: until it is, the
+     * arm waits where it is instead. Every setpoint goes through here.
      */
-    private void setTarget(Angle target) {
+    private Angle guarded(Angle target) {
         if (target.lte(kStowed) && target.lt(getAngle()) && !wristAtRest.getAsBoolean()) {
             if (waitingForWristAt == null) {
                 waitingForWristAt = getAngle();
             }
-            arm.setMechanismPositionSetpoint(waitingForWristAt);
-        } else {
-            waitingForWristAt = null;
-            arm.setMechanismPositionSetpoint(target);
+            return waitingForWristAt;
         }
+        waitingForWristAt = null;
+        return target;
     }
 
-    /** Move to an angle, finishing once there. The closed loop keeps holding it afterwards. */
+    /** Move to an angle, finishing once there. */
     public Command moveTo(Angle angle) {
         return run(coroutine -> {
             while (!isNear(angle)) {
-                setTarget(angle);
+                arm.setMechanismPositionSetpoint(guarded(angle));
                 coroutine.yield();
             }
         }).named("AlgaeArm to " + angle);
@@ -155,24 +154,13 @@ public class AlgaeArm implements Mechanism {
 
     /** Hold an angle until canceled. */
     public Command holdAt(Angle angle) {
-        return holdAt(() -> angle, "AlgaeArm Hold " + angle);
-    }
-
-    /** Hold an angle, read when the command starts, until canceled. */
-    private Command holdAt(Supplier<Angle> angle, String name) {
-        return run(coroutine -> {
-            final Angle target = angle.get();
-            while (true) {
-                setTarget(target);
-                coroutine.yield();
-            }
-        }).named(name);
+        return arm.setAngle(() -> guarded(angle));
     }
 
     /** Hold the angle the arm is at when this starts, inside the limits, until canceled. */
     public Command holdCurrent() {
-        return holdAt(() -> Degrees.of(Math.clamp(getAngle().in(Degrees), kMinAngle.in(Degrees), kMaxAngle.in(Degrees))),
-            "AlgaeArm Hold");
+        return Command.noRequirements(coroutine -> coroutine.await(holdAt(Degrees.of(Math.clamp(getAngle().in(Degrees),
+            kMinAngle.in(Degrees), kMaxAngle.in(Degrees)))))).named("AlgaeArm Hold");
     }
 
     /**
@@ -188,10 +176,10 @@ public class AlgaeArm implements Mechanism {
                     if (heldAt == null) {
                         heldAt = getAngle();
                     }
-                    setTarget(heldAt);
+                    arm.setMechanismPositionSetpoint(guarded(heldAt));
                 } else {
                     heldAt = null;
-                    setTarget(kStowed);
+                    arm.setMechanismPositionSetpoint(guarded(kStowed));
                 }
                 coroutine.yield();
             }
@@ -200,7 +188,7 @@ public class AlgaeArm implements Mechanism {
 
     /** Lift the arm to pull the algae off the reef, holding there until canceled. */
     public Command lift() {
-        return holdAt(() -> getAngle().plus(kLoadLift), "AlgaeArm Lift");
+        return Command.noRequirements(coroutine -> coroutine.await(holdAt(getAngle().plus(kLoadLift)))).named("AlgaeArm Lift");
     }
 
     /** The angle for pulling algae off the reef: L2 and L3 targets use the low and high algae. */
@@ -208,9 +196,9 @@ public class AlgaeArm implements Mechanism {
         return level == ReefTargeting.Level.L3 ? L34 : L23;
     }
 
-    /** Hold the algae angle for a level, read when the command starts, until canceled. */
+    /** Hold the algae angle for a level until canceled. */
     public Command holdAlgaeLevel(Supplier<ReefTargeting.Level> level) {
-        return holdAt(() -> algaeAngle(level.get()), "AlgaeArm Hold Algae Level");
+        return arm.setAngle(() -> guarded(algaeAngle(level.get())));
     }
 
     /** Called from {@code Robot.robotPeriodic()}, replacing the v2 subsystem periodic. */

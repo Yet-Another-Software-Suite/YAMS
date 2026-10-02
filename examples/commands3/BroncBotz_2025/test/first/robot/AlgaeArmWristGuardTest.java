@@ -82,7 +82,7 @@ class AlgaeArmWristGuardTest {
         operator.setBButton(true);
         operator.notifyNewData();
         step(1);
-        assertFalse(robot.coralIntake.isAtRest(), "swung the coral wrist out");
+        assertFalse(robot.coralWrist.isAtRest(), "swung the coral wrist out");
         operator.setPOV(POVDirection.CENTER);
         operator.notifyNewData();
         step(2);
@@ -93,7 +93,7 @@ class AlgaeArmWristGuardTest {
         operator.setBButton(false);
         operator.notifyNewData();
         step(3);
-        assertTrue(robot.coralIntake.isAtRest(), "the coral wrist went back to rest");
+        assertTrue(robot.coralWrist.isAtRest(), "the coral wrist went back to rest");
         assertTrue(robot.algaeArm.isNear(AlgaeArmConstants.kStowed),
             "the algae arm stowed once the coral wrist was at rest, but was at " + robot.algaeArm.getAngle().in(Degrees));
     }

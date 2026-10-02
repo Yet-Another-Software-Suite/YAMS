@@ -8,7 +8,8 @@ import static org.wpilib.units.Units.Seconds;
 
 import first.robot.Constants.CoralArmConstants;
 import first.robot.mechanisms.CoralArm;
-import first.robot.mechanisms.CoralIntake;
+import first.robot.mechanisms.CoralRoller;
+import first.robot.mechanisms.CoralWrist;
 import first.robot.mechanisms.Elevator;
 import first.robot.mechanisms.Swerve;
 import first.robot.util.ReefTargeting;
@@ -24,14 +25,17 @@ public class CoralArmCommands {
     private final Swerve swerve;
     private final Elevator elevator;
     private final CoralArm coralArm;
-    private final CoralIntake coralIntake;
+    private final CoralWrist coralWrist;
+    private final CoralRoller coralRoller;
     private final ReefTargeting targeting;
 
-    public CoralArmCommands(Swerve swerve, Elevator elevator, CoralArm coralArm, CoralIntake coralIntake, ReefTargeting targeting) {
+    public CoralArmCommands(Swerve swerve, Elevator elevator, CoralArm coralArm, CoralWrist coralWrist, CoralRoller coralRoller,
+                            ReefTargeting targeting) {
         this.swerve = swerve;
         this.elevator = elevator;
         this.coralArm = coralArm;
-        this.coralIntake = coralIntake;
+        this.coralWrist = coralWrist;
+        this.coralRoller = coralRoller;
         this.targeting = targeting;
     }
 
@@ -50,11 +54,11 @@ public class CoralArmCommands {
             // Pre-score, with the robot stopped: the elevator rises to the branch's scoring height while
             // the coral arm swings to its angle for the level and the wrist to its scoring angle. The
             // elevator and the wrist hold there until the coral is scored.
-            coroutine.fork(swerve.stopCommand(), elevator.holdCoralLevel(() -> level), coralArm.holdAt(armAngle), coralIntake.score());
+            coroutine.fork(swerve.stopCommand(), elevator.holdCoralLevel(() -> level), coralArm.holdAt(armAngle), coralWrist.swingOut(), coralRoller.score());
             // Only drive to the reef once all three are there, giving up if they are not within two
             // seconds.
             final WaitResult ready = coroutine.waitUntil(
-                () -> elevator.isAtCoralLevel(level) && coralArm.isNear(armAngle) && coralIntake.isAtScoringAngle(), Seconds.of(2));
+                () -> elevator.isAtCoralLevel(level) && coralArm.isNear(armAngle) && coralWrist.isAtScoringAngle(), Seconds.of(2));
             if (ready == WaitResult.TIMED_OUT) {
                 return;
             }
@@ -75,7 +79,7 @@ public class CoralArmCommands {
     public Command coralLevel(ReefTargeting.Level level, Angle wristAngle) {
         return Command.noRequirements(coroutine -> {
             final Angle armAngle = CoralArm.coralAngle(level);
-            coroutine.fork(coralIntake.holdWrist(wristAngle), coralArm.holdAt(armAngle));
+            coroutine.fork(coralWrist.holdAt(wristAngle), coralArm.holdAt(armAngle));
             coroutine.waitUntil(() -> coralArm.isNear(armAngle));
             coroutine.fork(elevator.holdCoralLevel(() -> level));
             // Hold them there until the button is released, like the original.
@@ -86,8 +90,22 @@ public class CoralArmCommands {
     /** Hold the coral arm at the human player station angle while intaking. */
     public Command intakeFromHumanPlayer() {
         final Command arm = coralArm.holdAt(CoralArmConstants.HP);
-        final Command intake = coralIntake.intake();
+        final Command intake = coralRoller.intake();
         return Command.noRequirements(coroutine -> coroutine.awaitAll(arm, intake)).named("Intake Human Player");
+    }
+
+    /** Swing the wrist out and hold the coral in, as when scoring, until canceled. */
+    public Command holdToScore() {
+        final Command wrist = coralWrist.swingOut();
+        final Command roller = coralRoller.score();
+        return Command.noRequirements(coroutine -> coroutine.awaitAll(wrist, roller)).named("Hold Coral to Score");
+    }
+
+    /** Swing the wrist out and push the coral out, until canceled. */
+    public Command outtake() {
+        final Command wrist = coralWrist.swingOut();
+        final Command roller = coralRoller.outtake();
+        return Command.noRequirements(coroutine -> coroutine.awaitAll(wrist, roller)).named("Outtake Coral");
     }
 
     /** Hold the coral arm and elevator at a level, until canceled. */

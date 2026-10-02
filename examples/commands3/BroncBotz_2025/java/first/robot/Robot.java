@@ -17,7 +17,8 @@ import first.robot.commands.SuperstructureCommands;
 import first.robot.mechanisms.AlgaeArm;
 import first.robot.mechanisms.AlgaeIntake;
 import first.robot.mechanisms.CoralArm;
-import first.robot.mechanisms.CoralIntake;
+import first.robot.mechanisms.CoralRoller;
+import first.robot.mechanisms.CoralWrist;
 import first.robot.mechanisms.Elevator;
 import first.robot.mechanisms.Swerve;
 import first.robot.util.Launchpad;
@@ -42,9 +43,10 @@ public class Robot extends OpModeRobot {
     public final Swerve swerve = new Swerve();
     public final Elevator elevator = new Elevator();
     public final CoralArm coralArm = new CoralArm();
-    public final CoralIntake coralIntake = new CoralIntake();
+    public final CoralWrist coralWrist = new CoralWrist();
+    public final CoralRoller coralRoller = new CoralRoller();
     // The algae arm only swings down to rest once the coral wrist is at rest.
-    public final AlgaeArm algaeArm = new AlgaeArm(coralIntake::isAtRest);
+    public final AlgaeArm algaeArm = new AlgaeArm(coralWrist::isAtRest);
     public final AlgaeIntake algaeIntake = new AlgaeIntake();
     public final ReefTargeting targeting = new ReefTargeting();
 
@@ -54,7 +56,7 @@ public class Robot extends OpModeRobot {
         OperatorConstants.kLaunchpadPort3, Launchpad.kPressed);
 
     /** Commands that use several mechanisms, shared by teleop and autonomous. */
-    public final CoralArmCommands coralCommands = new CoralArmCommands(swerve, elevator, coralArm, coralIntake, targeting);
+    public final CoralArmCommands coralCommands = new CoralArmCommands(swerve, elevator, coralArm, coralWrist, coralRoller, targeting);
     public final AlgaeArmCommands algaeCommands = new AlgaeArmCommands(swerve, elevator, coralArm, algaeArm, algaeIntake, targeting);
     public final SuperstructureCommands superstructure = new SuperstructureCommands(elevator, coralArm, algaeArm);
 
@@ -72,7 +74,8 @@ public class Robot extends OpModeRobot {
         coralArm.setDefaultCommand(coralArm.holdAt(CoralArmConstants.kStowed));
         algaeArm.setDefaultCommand(algaeArm.stowUnlessHoldingAlgae());
         // Gently hold any game piece; the algae only while its arm is raised.
-        coralIntake.setDefaultCommand(coralIntake.hold(coralArm::isCoralLoaded));
+        coralWrist.setDefaultCommand(coralWrist.rest());
+        coralRoller.setDefaultCommand(coralRoller.hold(coralArm::isCoralLoaded));
         algaeIntake.setDefaultCommand(algaeIntake.hold(
             () -> algaeArm.isAlgaeLoaded() && algaeArm.getAngle().gte(AlgaeArmConstants.kHoldAboveAngle)));
 
@@ -108,10 +111,10 @@ public class Robot extends OpModeRobot {
             && targeting.getCoralScoringPose().map(pose -> swerve.getPose().getTranslation().getDistance(pose.getTranslation()) < 0.15).orElse(false)
             && coralArm.getAngle().lt(CoralArm.coralAngle(targeting.getLevel()).minus(CoralArmConstants.kScoreDrop.div(2))))
             .onTrue(Command.noRequirements(coroutine -> coralArm.setSimCoralLoaded(false)).named("Sim Score Coral"));
-        new Trigger(() -> coralIntake.getRollerDutyCycle() > 0.3 && coralArm.isNear(CoralArmConstants.HP))
+        new Trigger(() -> coralRoller.getDutyCycle() > 0.3 && coralArm.isNear(CoralArmConstants.HP))
             .debounce(Seconds.of(0.5))
             .onTrue(Command.noRequirements(coroutine -> coralArm.setSimCoralLoaded(true)).named("Sim Load Coral"));
-        new Trigger(() -> coralIntake.getRollerDutyCycle() < -0.3)
+        new Trigger(() -> coralRoller.getDutyCycle() < -0.3)
             .debounce(Seconds.of(0.25))
             .onTrue(Command.noRequirements(coroutine -> coralArm.setSimCoralLoaded(false)).named("Sim Drop Coral"));
         new Trigger(() -> algaeIntake.getDutyCycle() > 0.5)
@@ -131,7 +134,8 @@ public class Robot extends OpModeRobot {
         swerve.periodic();
         elevator.periodic();
         coralArm.periodic();
-        coralIntake.periodic();
+        coralWrist.periodic();
+        coralRoller.periodic();
         algaeArm.periodic();
         algaeIntake.periodic();
 
@@ -144,7 +148,8 @@ public class Robot extends OpModeRobot {
         swerve.simulationPeriodic();
         elevator.simulationPeriodic();
         coralArm.simulationPeriodic();
-        coralIntake.simulationPeriodic();
+        coralWrist.simulationPeriodic();
+        coralRoller.simulationPeriodic();
         algaeArm.simulationPeriodic();
         algaeIntake.simulationPeriodic();
     }

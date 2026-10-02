@@ -59,7 +59,7 @@ public class DriverTeleop implements OpMode {
         operator.b().whileTrue(robot.coralCommands.coralLevel(Level.L2, CoralIntakeConstants.kActive));
         operator.x().whileTrue(robot.coralCommands.coralLevel(Level.L3, CoralIntakeConstants.kActive));
         operator.y().whileTrue(robot.coralCommands.coralLevel(Level.L4, CoralIntakeConstants.kActive));
-        operator.leftBumper().whileTrue(robot.coralIntake.outtake());
+        operator.leftBumper().whileTrue(robot.coralCommands.outtake());
         operator.rightBumper().whileTrue(robot.algaeIntake.outtake());
         operator.rightTrigger().whileTrue(robot.algaeIntake.intake());
         operator.leftTrigger().whileTrue(robot.coralCommands.intakeFromHumanPlayer());
@@ -126,10 +126,10 @@ public class DriverTeleop implements OpMode {
 
         // Coral intake.
         launchpad.bind(7, 1, Launchpad.kHumanPlayer, robot.coralCommands.intakeFromHumanPlayer());
-        launchpad.bind(6, 1, Color.ORANGE_RED, robot.coralIntake.rollerFull());
-        launchpad.bind(4, 3, Color.RED, robot.coralIntake.intake());
-        launchpad.bind(5, 3, Color.WHITE, robot.coralIntake.score());
-        launchpad.bind(6, 3, Color.PURPLE, robot.coralIntake.spit());
+        launchpad.bind(6, 1, Color.ORANGE_RED, robot.coralRoller.full());
+        launchpad.bind(4, 3, Color.RED, robot.coralRoller.intake());
+        launchpad.bind(5, 3, Color.WHITE, robot.coralCommands.holdToScore());
+        launchpad.bind(6, 3, Color.PURPLE, robot.coralRoller.spit());
 
         // Algae intake.
         launchpad.bind(4, 4, Color.DARK_GREEN, robot.algaeIntake.intake());

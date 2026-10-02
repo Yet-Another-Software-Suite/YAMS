@@ -84,67 +84,30 @@ public class Elevator implements Mechanism {
         return elevator.isNear(kMaxHeight, Inches.of(1));
     }
 
-    /** Move to a height, finishing once there. The closed loop keeps holding it afterwards. */
+    /** Move to a height, finishing once there. */
     public Command moveTo(Distance height) {
-        return run(coroutine -> {
-            elevator.setMeasurementPositionSetpoint(height);
-            coroutine.waitUntil(() -> isNear(height));
-        }).named("Elevator to " + height);
+        return elevator.runTo(height, kTolerance);
     }
 
-    /** Hold a height until canceled, using the YAMS height command. */
+    /** Hold a height until canceled. */
     public Command holdAt(Distance height) {
         return elevator.setHeight(height);
     }
 
-    /** Hold a height, read when the command starts, until canceled. */
-    private Command holdAt(Supplier<Distance> height, String name) {
-        return run(coroutine -> {
-            final Distance target = height.get();
-            while (true) {
-                elevator.setMeasurementPositionSetpoint(target);
-                coroutine.yield();
-            }
-        }).named(name);
-    }
-
     /** Hold the height the elevator is at when this starts, until canceled. */
     public Command holdCurrent() {
-        return holdAt(() -> Meters.of(elevator.getHeight().in(Meters)), "Elevator Hold");
+        return Command.noRequirements(coroutine -> coroutine.await(holdAt(Meters.of(elevator.getHeight().in(Meters))))).named("Elevator Hold");
     }
 
-    /** Lower slowly onto the bottom stop, finishing once there. */
-    public Command lowerToBottom() {
-        return run(coroutine -> {
-            elevator.setDutyCycleSetpoint(kLowerDutyCycle);
-            coroutine.waitUntil(this::isAtMin);
-        }).named("Elevator Lower");
-    }
-
-    /** Press down on the bottom stop until canceled; used for L1 and the human player station. */
-    private Command holdAtBottom() {
-        return setDutyCycle(kLowerDutyCycle);
-    }
-
-    /** Hold the coral height for a level, read when the command starts, until canceled. */
+    /**
+     * Hold the coral height for a level, read when the command starts, until canceled. L1 presses
+     * down on the bottom stop instead, as for the human player station.
+     */
     public Command holdCoralLevel(Supplier<ReefTargeting.Level> level) {
-        final Command bottom = holdAtBottom();
-        return run(coroutine -> {
+        return Command.noRequirements(coroutine -> {
             final ReefTargeting.Level target = level.get();
-            if (target == ReefTargeting.Level.L1) {
-                coroutine.await(bottom);
-                return;
-            }
-            while (true) {
-                elevator.setMeasurementPositionSetpoint(coralHeight(target));
-                coroutine.yield();
-            }
+            coroutine.await(target == ReefTargeting.Level.L1 ? setDutyCycle(kLowerDutyCycle) : holdAt(coralHeight(target)));
         }).named("Elevator Hold Coral Level");
-    }
-
-    /** Move to the coral height for a level, finishing once there. */
-    public Command moveToCoralLevel(ReefTargeting.Level level) {
-        return level == ReefTargeting.Level.L1 ? lowerToBottom() : moveTo(coralHeight(level));
     }
 
     private static Distance coralHeight(ReefTargeting.Level level) {
@@ -165,19 +128,14 @@ public class Elevator implements Mechanism {
         return level == ReefTargeting.Level.L3 ? Algae.L34 : Algae.L23;
     }
 
-    /** Hold the algae height for a level, read when the command starts, until canceled. */
+    /** Hold the algae height for a level until canceled. */
     public Command holdAlgaeLevel(Supplier<ReefTargeting.Level> level) {
-        return holdAt(() -> algaeHeight(level.get()), "Elevator Hold Algae Level");
+        return elevator.setHeight(() -> algaeHeight(level.get()));
     }
 
     /** Run at a duty cycle until canceled. */
     public Command setDutyCycle(double dutyCycle) {
-        return run(coroutine -> {
-            while (true) {
-                elevator.setDutyCycleSetpoint(dutyCycle);
-                coroutine.yield();
-            }
-        }).named("Elevator Duty Cycle " + dutyCycle);
+        return elevator.set(dutyCycle);
     }
 
     /** Called from {@code Robot.robotPeriodic()}, replacing the v2 subsystem periodic. */

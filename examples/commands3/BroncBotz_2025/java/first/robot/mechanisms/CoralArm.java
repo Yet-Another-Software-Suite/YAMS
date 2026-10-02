@@ -14,7 +14,6 @@ import com.revrobotics.spark.SparkMax;
 import first.robot.Ports;
 import first.robot.util.DistanceSensor;
 import first.robot.util.ReefTargeting;
-import java.util.function.Supplier;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.framework.RobotBase;
@@ -109,46 +108,20 @@ public class CoralArm implements Mechanism {
         motorController.synchronizeRelativeEncoder();
     }
 
-    /**
-     * Move to an angle, finishing once there or at a limit. The closed loop keeps holding it
-     * afterwards.
-     */
+    /** Move to an angle, finishing once there. */
     public Command moveTo(Angle angle) {
-        return run(coroutine -> {
-            arm.setMechanismPositionSetpoint(angle);
-            coroutine.waitUntil(() -> isNear(angle) || arm.isAtMax() || arm.isAtMin());
-        }).named("CoralArm to " + angle);
+        return arm.runTo(angle, kTolerance);
     }
 
-    /** Move to an angle, read when the command starts, finishing once there or at a limit. */
-    public Command moveTo(Supplier<Angle> angle) {
-        return run(coroutine -> {
-            final Angle target = angle.get();
-            arm.setMechanismPositionSetpoint(target);
-            coroutine.waitUntil(() -> isNear(target) || arm.isAtMax() || arm.isAtMin());
-        }).named("CoralArm to Target");
-    }
-
-    /** Hold an angle until canceled, using the YAMS angle command. */
+    /** Hold an angle until canceled. */
     public Command holdAt(Angle angle) {
         return arm.setAngle(angle);
     }
 
-    /** Hold an angle, read when the command starts, until canceled. */
-    private Command holdAt(Supplier<Angle> angle, String name) {
-        return run(coroutine -> {
-            final Angle target = angle.get();
-            while (true) {
-                arm.setMechanismPositionSetpoint(target);
-                coroutine.yield();
-            }
-        }).named(name);
-    }
-
     /** Hold the angle the arm is at when this starts, inside the limits, until canceled. */
     public Command holdCurrent() {
-        return holdAt(() -> Degrees.of(Math.clamp(getAngle().in(Degrees),
-            kMinAngle.plus(kTolerance).in(Degrees), kMaxAngle.minus(kTolerance).in(Degrees))), "CoralArm Hold");
+        return Command.noRequirements(coroutine -> coroutine.await(holdAt(Degrees.of(Math.clamp(getAngle().in(Degrees),
+            kMinAngle.plus(kTolerance).in(Degrees), kMaxAngle.minus(kTolerance).in(Degrees)))))).named("CoralArm Hold");
     }
 
     /** Swing down onto the branch to place the coral, finishing once it has left the intake. */
@@ -169,16 +142,6 @@ public class CoralArm implements Mechanism {
             case L3 -> L3;
             case L4 -> L4;
         };
-    }
-
-    /** Run at a duty cycle until canceled. */
-    public Command setDutyCycle(double dutyCycle) {
-        return run(coroutine -> {
-            while (true) {
-                arm.setDutyCycleSetpoint(dutyCycle);
-                coroutine.yield();
-            }
-        }).named("CoralArm Duty Cycle " + dutyCycle);
     }
 
     /** Called from {@code Robot.robotPeriodic()}, replacing the v2 subsystem periodic. */

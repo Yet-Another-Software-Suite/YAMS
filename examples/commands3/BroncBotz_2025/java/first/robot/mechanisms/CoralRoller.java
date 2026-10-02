@@ -4,7 +4,7 @@
 
 package first.robot.mechanisms;
 
-import static first.robot.Constants.AlgaeIntakeConstants.*;
+import static first.robot.Constants.CoralIntakeConstants.*;
 import static org.wpilib.units.Units.KilogramSquareMeters;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -24,58 +24,56 @@ import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.telemetry.enums.TelemetryVerbosity;
 
-/** Algae intake roller at the end of the algae arm, as an open loop YAMS {@link FlyWheel}. */
-public class AlgaeIntake implements Mechanism {
-    private final SparkMax motor = new SparkMax(Ports.kCANBus, Ports.kAlgaeRoller, MotorType.kBrushless);
+/** Roller of the coral intake at the end of the coral arm, as an open loop YAMS {@link FlyWheel}. */
+public class CoralRoller implements Mechanism {
+    private final SparkMax motor = new SparkMax(Ports.kCANBus, Ports.kCoralRoller, MotorType.kBrushless);
 
     private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
         .withControlMode(ControlMode.OPEN_LOOP)
         .withGearing(new MechanismGearing(1))
         .withIdleMode(MotorMode.BRAKE)
-        .withStatorCurrentLimit(kCurrentLimit)
+        .withStatorCurrentLimit(kRollerCurrentLimit)
         .withMotorInverted(true)
-        // Simulation only: the original's roller inertia.
-        .withMomentOfInertia(KilogramSquareMeters.of(0.00032))
-        .withTelemetry("AlgaeRollerMotor", TelemetryVerbosity.HIGH);
+        .withMomentOfInertia(KilogramSquareMeters.of(kWristMomentOfInertia))
+        .withTelemetry("CoralRollerMotor", TelemetryVerbosity.HIGH);
 
     private final SmartMotorController motorController = new SparkWrapper(motor, DCMotor.getNEO(1), motorConfig);
 
     private final FlyWheel roller = new FlyWheel(new FlyWheelConfig()
-        .withTelemetry("AlgaeRoller", TelemetryVerbosity.HIGH),
+        .withTelemetry("CoralRoller", TelemetryVerbosity.HIGH),
         motorController);
 
-    public AlgaeIntake() {
+    public CoralRoller() {
     }
 
-    public Command setDutyCycle(double dutyCycle) {
-        return roller.set(dutyCycle);
-    }
-
+    /** Intake from the human player station, until canceled. */
     public Command intake() {
-        return setDutyCycle(kIntake);
+        return roller.set(kIntake);
     }
 
+    /** Hold the coral in while scoring, until canceled. */
+    public Command score() {
+        return roller.set(kScore);
+    }
+
+    /** Push the coral out, until canceled. */
     public Command outtake() {
-        return setDutyCycle(kOuttake);
+        return roller.set(kOuttake);
     }
 
-    /** Spit the algae out, finishing once {@code done} is true. */
-    public Command outtakeUntil(BooleanSupplier done) {
-        return run(coroutine -> {
-            while (!done.getAsBoolean()) {
-                roller.setDutyCycleSetpoint(kOuttake);
-                coroutine.yield();
-            }
-        }).named("AlgaeIntake Outtake Until Done");
+    /** Spit the coral out, until canceled. */
+    public Command spit() {
+        return roller.set(kSpit);
     }
 
-    public Command stop() {
-        return setDutyCycle(0);
+    /** Run at full speed, until canceled. */
+    public Command full() {
+        return roller.set(kFull);
     }
 
-    /** Gently hold an algae while {@code holding} is true. The default command. */
-    public Command hold(BooleanSupplier holding) {
-        return roller.set(() -> holding.getAsBoolean() ? kHold : 0.0);
+    /** Gently hold a coral while one is loaded. The default command. */
+    public Command hold(BooleanSupplier coralLoaded) {
+        return roller.set(() -> coralLoaded.getAsBoolean() ? kHold : 0.0);
     }
 
     public double getDutyCycle() {
