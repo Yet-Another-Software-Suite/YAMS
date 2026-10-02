@@ -127,6 +127,12 @@ jobs:
             test-filter: '--tests "yams.mechs.PivotTest"'
           - group: shooter
             test-filter: '--tests "yams.mechs.ShooterTest"'
+          - group: mechanism-limits
+            test-filter: '--tests "yams.mechs.MechanismLimitTest"'
+          # Every motor controller, closed loop controller, and attached encoder crossing the
+          # continuous wrapping point: many simulated Talons, which Phoenix runs in real time.
+          - group: continuous-wrapping
+            test-filter: '--tests "yams.core.motorcontrollers.ContinuousWrappingTest"'
           # External encoders on each motor controller: CANcoders and CANdis on Talons, the SPARK
           # absolute encoder and Through Bore Encoders (wired and over CAN) on SPARKs, and starting
           # away from zero with and without an absolute encoder.
@@ -143,14 +149,13 @@ jobs:
             test-filter: '--tests "yams.core.motorcontrollers.DiscontinuityPointTest"'
           - group: zero-offsets
             test-filter: '--tests "yams.core.motorcontrollers.ZeroOffsetTest"'
-          # Everything else: swerve and mechanism limit tests, motor controller / battery sim unit
-          # tests, and the standalone math test. Gradle's --tests cannot exclude the groups above,
+          # Everything else: swerve tests, motor controller / battery sim unit tests, and the
+          # standalone math test. Gradle's --tests cannot exclude the groups above,
           # so each class is listed: add new test classes here unless they get their own group.
           - group: other
             test-filter: >-
               --tests "yams.mechs.SwerveDriveTest"
-              --tests "yams.mechs.MechanismLimitTest"
-              --tests "yams.core.motorcontrollers.ContinuousWrappingTest"
+              --tests "yams.core.mechanisms.*"
               --tests "yams.core.motorcontrollers.ForceFeedforwardTest"
               --tests "yams.core.motorcontrollers.LiveTuningTest"
               --tests "yams.core.motorcontrollers.SimulationPeriodTest"
