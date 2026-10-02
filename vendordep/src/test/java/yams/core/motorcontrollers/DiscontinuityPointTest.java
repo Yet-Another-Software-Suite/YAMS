@@ -21,14 +21,13 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.wpilib.command2.CommandScheduler;
-import org.wpilib.math.system.DCMotor;
 import org.wpilib.math.util.MathUtil;
 import org.wpilib.preferences.Preferences;
 import org.wpilib.units.measure.Angle;
@@ -36,8 +35,7 @@ import yams.commands2.config.SmartMotorControllerConfig;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.motorcontrollers.AbsoluteEncoderCases.Controller;
 import yams.core.motorcontrollers.AbsoluteEncoderCases.Encoder;
-import yams.core.motorcontrollers.local.SparkWrapper;
-import yams.helpers.DeviceCreator;
+import yams.core.motorcontrollers.AbsoluteEncoderCases.RelativeFeedback;
 import yams.helpers.MockHardwareExtension;
 
 /**
@@ -50,8 +48,8 @@ import yams.helpers.MockHardwareExtension;
  * with it, and the mechanism goes to an angle that only that range holds: -100° for 0.5 rotations,
  * 260° for 1 rotation. The encoder then reports that angle, inside its range; the mechanism may have
  * gone either way round to it, since the encoder gives the angle within a rotation. Only 0.5 and 1
- * rotation are accepted, and a quadrature encoder, which is not absolute, has no discontinuity
- * point.
+ * rotation are accepted. Without an absolute encoder, on the motor's encoder or a quadrature
+ * encoder, a SPARK rejects a discontinuity point, and a Talon ignores it.
  */
 public class DiscontinuityPointTest {
   private static final Angle kTolerance = Degrees.of(5);
@@ -164,21 +162,52 @@ public class DiscontinuityPointTest {
         () -> new yams.commands2.config.SmartMotorControllerConfig().withExternalEncoderDiscontinuityPoint(Rotations.of(rotations)));
   }
 
+  /** A motor controller without an absolute encoder, a closed loop controller, and a discontinuity point. */
+  private record RelativeCase(RelativeFeedback feedback, Controller controller, Angle discontinuityPoint) {
+    @Override
+    public String toString() {
+      return feedback + " " + controller + " discontinuity point " + discontinuityPoint.in(Rotations) + " rotations";
+    }
+  }
+
+  private static Stream<RelativeCase> createRelativeCases() {
+    final List<RelativeCase> cases = new ArrayList<>();
+    for (RelativeFeedback feedback : RelativeFeedback.values()) {
+      for (Controller controller : Controller.values()) {
+        for (Angle discontinuityPoint : new Angle[] {Rotations.of(0.5), Rotations.of(1)}) {
+          cases.add(new RelativeCase(feedback, controller, discontinuityPoint));
+        }
+      }
+    }
+    return cases.stream();
+  }
+
   @ParameterizedTest(name = "{0}")
-  @ValueSource(strings = {"SparkMax", "SparkFlex"})
-  void quadratureEncoderHasNoDiscontinuityPoint(String name) {
-    final SparkBase spark = name.equals("SparkFlex") ? DeviceCreator.createSparkFlex() : DeviceCreator.createSparkMax();
-    final SmartMotorControllerConfig config = ThroughBoreEncoderTest.withThroughBore(spark, ThroughBoreEncoderTest.Connection.QUADRATURE,
-            AbsoluteEncoderCases.config("DiscontinuityPointTest quadrature " + name, Controller.PID))
-        .withUseExternalFeedbackEncoder(true)
-        .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5));
+  @MethodSource("createRelativeCases")
+  void withoutAnAbsoluteEncoder(RelativeCase testCase) {
+    final String name = testCase.toString();
+    final SmartMotorControllerConfig config = AbsoluteEncoderCases.config("DiscontinuityPointTest " + name, testCase.controller())
+        .withExternalEncoderDiscontinuityPoint(testCase.discontinuityPoint());
+    if (!testCase.feedback().talon()) {
+      // A SPARK rejects the option without an absolute encoder to give it to.
+      assertThrows(SmartMotorControllerConfigurationException.class, () -> AbsoluteEncoderCases.create(testCase.feedback(), config),
+          name + ": a SPARK without an absolute encoder has no discontinuity point");
+      return;
+    }
+    // A Talon alerts that the discontinuity point is not applied without an external encoder. Its
+    // motor's encoder does not wrap: 260 degrees reads 260 degrees whatever the point.
+    final Angle setpoint = Degrees.of(260);
+    final SmartMotorController smc = AbsoluteEncoderCases.create(testCase.feedback(), config);
     try {
-      assertThrows(SmartMotorControllerConfigurationException.class,
-          () -> new SparkWrapper(spark, name.equals("SparkFlex") ? DCMotor.getNeoVortex(1) : DCMotor.getNEO(1), config),
-          name + ": a quadrature encoder has no discontinuity point");
+      AbsoluteEncoderCases.run(smc, true, Optional.of(setpoint), Seconds.of(2.5));
+      final Angle simulated = smc.getSimSupplier().orElseThrow().getMechanismPosition();
+      final Angle mechanism = smc.getMechanismPosition();
+      assertTrue(Math.abs(simulated.minus(setpoint).in(Degrees)) < kTolerance.in(Degrees),
+          name + ": expected the simulated mechanism at " + setpoint.in(Degrees) + " degrees but it was at " + simulated.in(Degrees));
+      assertTrue(Math.abs(mechanism.minus(setpoint).in(Degrees)) < kTolerance.in(Degrees),
+          name + ": expected the mechanism to read " + setpoint.in(Degrees) + " degrees but it read " + mechanism.in(Degrees));
     } finally {
-      CommandScheduler.getInstance().unregisterSubsystem(config.getSubsystem());
-      ThroughBoreEncoderTest.closeDevices(spark, null);
+      AbsoluteEncoderCases.close(smc);
     }
   }
 }

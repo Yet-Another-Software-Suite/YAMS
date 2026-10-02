@@ -21,6 +21,7 @@ import org.wpilib.units.measure.LinearVelocity;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.swerve.SwerveModule;
+import yams.core.mechanisms.swerve.SwerveModuleVelocityWithAzimuth;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
 import yams.core.telemetry.SwerveModuleTelemetryConfig;
@@ -133,6 +134,8 @@ public class SwerveModuleConfig {
    * Swerve module minimum velocity.
    */
   private Optional<LinearVelocity> minimumVelocity = Optional.of(MetersPerSecond.of(0.1));
+  /** Angle the wheel was last sent to by {@link #getOptimizedState}, or null before the first. */
+  private Rotation2d lastCommandedAngle;
   /**
    * Distance from the center of rotation for the {@link SwerveModule}.
    */
@@ -146,16 +149,6 @@ public class SwerveModuleConfig {
    * Wheel circumference for the drive {@link SmartMotorController}.
    */
   private Optional<Distance> wheelCircumference = Optional.empty();
-  /**
-   * Last angle this config actually commanded via {@link #getOptimizedState(SwerveModuleVelocity)}:
-   * where the wheel is turning to.
-   */
-  private Rotation2d lastCommandedAngle;
-  /**
-   * How far past 90 degrees from the wheel last loop's orientation may be before the optimizer turns
-   * the wheel around, so it does not flip back and forth while the wheel is turning.
-   */
-  private static final double kOptimizationHysteresisDegrees = 15.0;
 
   /**
    * Create the {@link SwerveModuleConfig} for the {@link SwerveModule}
@@ -450,9 +443,9 @@ public class SwerveModuleConfig {
 
   /**
    * Use {@link org.wpilib.math.kinematics.SwerveModuleVelocity#optimize(Rotation2d)} to optimize
-   * each state: turn the wheel at most 90 degrees and reverse the drive instead. A wheel that is
-   * still turning keeps last loop's orientation unless the other is clearly better, so it does not
-   * reverse back and forth.
+   * each state: turn the wheel at most 90 degrees and reverse the drive instead. A wheel keeps the
+   * orientation it was last sent to unless the other is clearly better, so a wheel that is still
+   * turning does not reverse back and forth.
    *
    * @param swerveModuleStateOptimization True to enable optimization, false otherwise.
    * @return {@link SwerveModuleConfig} for chaining.
@@ -621,37 +614,36 @@ public class SwerveModuleConfig {
   }
 
   /**
-   * Get the optimized {@link SwerveModuleVelocity} applying all optional optimizations.
+   * Get the optimized {@link SwerveModuleVelocity} applying all optional optimizations, measuring
+   * the wheel with the azimuth motor controller.
    *
    * @param state {@link SwerveModuleVelocity} to optimize.
    * @return {@link SwerveModuleVelocity} optimized.
    * @throws NoSuchElementException if no azimuth motor controller is set.
    */
   public SwerveModuleVelocity getOptimizedState(SwerveModuleVelocity state) {
-    Rotation2d currentAngle = new Rotation2d(azimuthMotor.orElseThrow().getMechanismPosition());
+    final SmartMotorController azimuth = azimuthMotor.orElseThrow();
+    return getOptimizedState(state, new SwerveModuleVelocityWithAzimuth(0, new Rotation2d(azimuth.getMechanismPosition()), azimuth.getMechanismVelocity()));
+  }
+
+  /**
+   * Get the optimized {@link SwerveModuleVelocity} applying all optional optimizations.
+   *
+   * @param state    {@link SwerveModuleVelocity} to optimize.
+   * @param measured The wheel's measured state: its angle and how fast it is turning.
+   * @return {@link SwerveModuleVelocity} optimized.
+   */
+  public SwerveModuleVelocity getOptimizedState(SwerveModuleVelocity state, SwerveModuleVelocityWithAzimuth measured) {
     if (minimumVelocity.isPresent() && MetersPerSecond.of(Math.abs(state.velocity)).lte(minimumVelocity.get())) {
       // Too slow to steer by: hold the wheel where it is.
-      state = new SwerveModuleVelocity(0, currentAngle);
-      lastCommandedAngle = currentAngle;
+      state = new SwerveModuleVelocity(0, measured.angle);
+      lastCommandedAngle = measured.angle;
     } else if (swerveModuleStateOptimization) {
-      if (lastCommandedAngle == null) {
-        lastCommandedAngle = currentAngle;
-      }
-      state = state.optimize(currentAngle);
-      // Hysteresis: a wheel still turning toward its last angle can be near 90 degrees from both
-      // orientations of a target that keeps moving, such as a path starting off in a new direction,
-      // and choosing by its measured angle alone would reverse it back and forth. Keep last loop's
-      // orientation unless it is now clearly the wrong one.
-      if (Math.abs(state.angle.minus(lastCommandedAngle).getDegrees()) > 90.0) {
-        var previousOrientation = new SwerveModuleVelocity(-state.velocity, state.angle.rotateBy(Rotation2d.PI));
-        if (Math.abs(previousOrientation.angle.minus(currentAngle).getDegrees()) < 90.0 + kOptimizationHysteresisDegrees) {
-          state = previousOrientation;
-        }
-      }
+      state = SwerveModuleVelocityWithAzimuth.optimize(state, measured, lastCommandedAngle);
       lastCommandedAngle = state.angle;
     }
     if (cosineCompensation) {
-      state.velocity = getCosineCompensatedVelocity(state, currentAngle);
+      state.velocity = getCosineCompensatedVelocity(state, measured.angle);
     }
     return state;
   }

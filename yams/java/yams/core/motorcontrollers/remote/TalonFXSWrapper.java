@@ -272,8 +272,15 @@ public class TalonFXSWrapper extends SmartMotorController {
     forceConfigApply();
 
     setupSimulation();
-    applyConfig(smartConfig);
-    checkConfigSafety();
+    try {
+      applyConfig(smartConfig);
+      checkConfigSafety();
+    } catch (RuntimeException e) {
+      // Release what applying the config started, such as the closed loop controller's Notifier,
+      // which would otherwise keep running for a motor controller that was never made.
+      close();
+      throw e;
+    }
   }
 
   /**

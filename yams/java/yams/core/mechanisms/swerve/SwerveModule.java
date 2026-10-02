@@ -189,7 +189,7 @@ public class SwerveModule {
    *                                                    {@link SwerveModuleConfig#withWheelRadius(org.wpilib.units.measure.Distance)}).
    */
   public SwerveModuleVelocity setSwerveModuleState(SwerveModuleVelocity state) {
-    state = m_config.getOptimizedState(state);
+    state = m_config.getOptimizedState(state, getState());
     m_driveMotorController.setVelocity(MetersPerSecond.of(state.velocity).plus(getCouplingVelocity()));
     m_azimuthMotorController.setPosition(state.angle.getMeasure());
     return state;
@@ -211,7 +211,7 @@ public class SwerveModule {
    */
   public SwerveModuleVelocity setSwerveModuleState(SwerveModuleVelocity state, Force feedforwardForce) {
     final Rotation2d requestedAngle = state.angle;
-    state = m_config.getOptimizedState(state);
+    state = m_config.getOptimizedState(state, getState());
     // Optimization may point the wheel the opposite way and reverse the drive motor. The force was
     // given along the requested direction, so it must reverse too or it would fight the motion.
     // Compare angles rather than velocity signs so the flip is caught even when starting from rest.
@@ -227,15 +227,16 @@ public class SwerveModule {
   }
 
   /**
-   * Get the {@link SwerveModuleVelocity} of the module.
+   * Get the {@link SwerveModuleVelocity} of the module, with how fast its azimuth is turning.
    *
-   * @return {@link SwerveModuleVelocity} of the module.
+   * @return {@link SwerveModuleVelocityWithAzimuth} of the module.
    * @throws SmartMotorControllerConfigurationException if the drive motor has no mechanism
    *                                                    circumference configured (e.g. via
    *                                                    {@link SwerveModuleConfig#withWheelRadius(org.wpilib.units.measure.Distance)}).
    */
-  public SwerveModuleVelocity getState() {
-    return new SwerveModuleVelocity(m_driveMotorController.getMeasurementVelocity().minus(getCouplingVelocity()), new Rotation2d(m_azimuthMotorController.getMechanismPosition()));
+  public SwerveModuleVelocityWithAzimuth getState() {
+    return new SwerveModuleVelocityWithAzimuth(m_driveMotorController.getMeasurementVelocity().minus(getCouplingVelocity()), new Rotation2d(m_azimuthMotorController.getMechanismPosition()),
+        m_azimuthMotorController.getMechanismVelocity());
   }
 
   /**

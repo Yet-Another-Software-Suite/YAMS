@@ -242,8 +242,15 @@ public class SparkWrapper extends SmartMotorController {
         getName() + (" external encoder gearing set while ExternalEncoderDiscontinuityPoint is also set; " + "the discontinuity point will NOT be moved by the gearing, wrapping will occur " + "non-uniformly"), Level.HIGH);
     m_sparkRelativeEncoder = controller.getEncoder();
     setupSimulation();
-    applyConfig(config);
-    checkConfigSafety();
+    try {
+      applyConfig(config);
+      checkConfigSafety();
+    } catch (RuntimeException e) {
+      // Release what applying the config started, such as the closed loop controller's Notifier,
+      // which would otherwise keep running for a motor controller that was never made.
+      close();
+      throw e;
+    }
   }
 
   /**

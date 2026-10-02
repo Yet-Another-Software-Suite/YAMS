@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Seconds;
 
-import com.revrobotics.spark.SparkBase;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -16,17 +15,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.wpilib.math.system.DCMotor;
 import org.wpilib.math.util.MathUtil;
 import org.wpilib.preferences.Preferences;
 import org.wpilib.units.measure.Angle;
 import yams.commands2.config.SmartMotorControllerConfig;
 import yams.core.motorcontrollers.AbsoluteEncoderCases.Controller;
 import yams.core.motorcontrollers.AbsoluteEncoderCases.Encoder;
-import yams.core.motorcontrollers.local.SparkWrapper;
-import yams.core.motorcontrollers.remote.TalonFXSWrapper;
-import yams.core.motorcontrollers.remote.TalonFXWrapper;
-import yams.helpers.DeviceCreator;
+import yams.core.motorcontrollers.AbsoluteEncoderCases.RelativeFeedback;
 import yams.helpers.MockHardwareExtension;
 
 /**
@@ -62,45 +57,15 @@ public class StartingPositionTest {
     Preferences.removeAll();
   }
 
-  /** What the mechanism's position comes from. */
-  private enum Feedback {
-    /** A SPARK MAX's motor encoder. */
-    SPARK_MAX("SparkMax motor encoder", null),
-    /** A SPARK Flex's motor encoder. */
-    SPARK_FLEX("SparkFlex motor encoder", null),
-    /** A TalonFX's motor encoder. */
-    TALONFX("TalonFX motor encoder", null),
-    /** A TalonFXS's motor encoder. */
-    TALONFXS("TalonFXS motor encoder", null),
-    /** A Through Bore Encoder's quadrature output on a SPARK MAX's alternate encoder port. */
-    SPARK_MAX_QUADRATURE("SparkMax quadrature Through Bore", null),
-    /** A Through Bore Encoder's quadrature output on a SPARK Flex's external encoder port. */
-    SPARK_FLEX_QUADRATURE("SparkFlex quadrature Through Bore", null),
-    SPARK_MAX_ABSOLUTE(null, Encoder.SPARK_MAX_ABSOLUTE),
-    SPARK_FLEX_ABSOLUTE(null, Encoder.SPARK_FLEX_ABSOLUTE),
-    SPARK_MAX_CAN(null, Encoder.SPARK_MAX_CAN),
-    SPARK_FLEX_CAN(null, Encoder.SPARK_FLEX_CAN),
-    TALONFX_CANCODER(null, Encoder.TALONFX_CANCODER),
-    TALONFXS_CANCODER(null, Encoder.TALONFXS_CANCODER),
-    TALONFX_CANDI(null, Encoder.TALONFX_CANDI),
-    TALONFXS_CANDI(null, Encoder.TALONFXS_CANDI);
-
-    private final String name;
-    /** The absolute encoder, or null without one. */
-    private final Encoder absoluteEncoder;
-
-    Feedback(String name, Encoder absoluteEncoder) {
-      this.name = name;
-      this.absoluteEncoder = absoluteEncoder;
-    }
-
+  /** What the mechanism's position comes from: an absolute encoder, or not. */
+  private record Feedback(RelativeFeedback relative, Encoder absoluteEncoder) {
     boolean talon() {
-      return absoluteEncoder != null ? absoluteEncoder.talon() : this == TALONFX || this == TALONFXS;
+      return absoluteEncoder != null ? absoluteEncoder.talon() : relative.talon();
     }
 
     @Override
     public String toString() {
-      return absoluteEncoder != null ? absoluteEncoder.toString() : name;
+      return absoluteEncoder != null ? absoluteEncoder.toString() : relative.toString();
     }
   }
 
@@ -114,7 +79,14 @@ public class StartingPositionTest {
 
   private static Stream<Case> createCases() {
     final List<Case> cases = new ArrayList<>();
-    for (Feedback feedback : Feedback.values()) {
+    final List<Feedback> feedbacks = new ArrayList<>();
+    for (RelativeFeedback relative : RelativeFeedback.values()) {
+      feedbacks.add(new Feedback(relative, null));
+    }
+    for (Encoder absoluteEncoder : Encoder.values()) {
+      feedbacks.add(new Feedback(null, absoluteEncoder));
+    }
+    for (Feedback feedback : feedbacks) {
       for (Controller controller : Controller.values()) {
         cases.add(new Case(feedback, controller));
       }
@@ -125,24 +97,10 @@ public class StartingPositionTest {
   private static SmartMotorController create(Case testCase, String name) {
     final SmartMotorControllerConfig config = AbsoluteEncoderCases.config(name, testCase.controller());
     final Feedback feedback = testCase.feedback();
-    if (feedback.absoluteEncoder != null) {
-      return AbsoluteEncoderCases.create(feedback.absoluteEncoder, config, cfg -> cfg.withSimStartingPosition(kStartingPosition));
+    if (feedback.absoluteEncoder() != null) {
+      return AbsoluteEncoderCases.create(feedback.absoluteEncoder(), config, cfg -> cfg.withSimStartingPosition(kStartingPosition));
     }
-    final SmartMotorControllerConfig startingConfig = config.withStartingPosition(kStartingPosition);
-    return switch (feedback) {
-      case SPARK_MAX -> new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1), startingConfig);
-      case SPARK_FLEX -> new SparkWrapper(DeviceCreator.createSparkFlex(), DCMotor.getNeoVortex(1), startingConfig);
-      case TALONFX -> new TalonFXWrapper(DeviceCreator.createTalonFX(), DCMotor.getKrakenX60(1), startingConfig);
-      case TALONFXS -> new TalonFXSWrapper(DeviceCreator.createTalonFXS(), DCMotor.getNEO(1), startingConfig);
-      case SPARK_MAX_QUADRATURE, SPARK_FLEX_QUADRATURE -> {
-        final boolean flex = feedback == Feedback.SPARK_FLEX_QUADRATURE;
-        final SparkBase spark = flex ? DeviceCreator.createSparkFlex() : DeviceCreator.createSparkMax();
-        yield new SparkWrapper(spark, flex ? DCMotor.getNeoVortex(1) : DCMotor.getNEO(1),
-            ThroughBoreEncoderTest.withThroughBore(spark, ThroughBoreEncoderTest.Connection.QUADRATURE, startingConfig)
-                .withUseExternalFeedbackEncoder(true));
-      }
-      default -> throw new IllegalArgumentException(feedback.toString());
-    };
+    return AbsoluteEncoderCases.create(feedback.relative(), config.withStartingPosition(kStartingPosition));
   }
 
   /** Difference between two angles, wrapped into [-180°, 180°). */

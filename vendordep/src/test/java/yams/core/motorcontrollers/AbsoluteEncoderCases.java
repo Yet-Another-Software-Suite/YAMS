@@ -81,6 +81,38 @@ final class AbsoluteEncoderCases {
     }
   }
 
+  /** A motor controller without an absolute encoder. */
+  enum RelativeFeedback {
+    /** A SPARK MAX on its motor's encoder. */
+    SPARK_MAX("SparkMax motor encoder"),
+    /** A SPARK Flex on its motor's encoder. */
+    SPARK_FLEX("SparkFlex motor encoder"),
+    /** A TalonFX on its motor's encoder. */
+    TALONFX("TalonFX motor encoder"),
+    /** A TalonFXS on its motor's encoder. */
+    TALONFXS("TalonFXS motor encoder"),
+    /** A Through Bore Encoder's quadrature output on a SPARK MAX's alternate encoder port. */
+    SPARK_MAX_QUADRATURE("SparkMax quadrature Through Bore"),
+    /** A Through Bore Encoder's quadrature output on a SPARK Flex's external encoder port. */
+    SPARK_FLEX_QUADRATURE("SparkFlex quadrature Through Bore");
+
+    private final String name;
+
+    RelativeFeedback(String name) {
+      this.name = name;
+    }
+
+    /** Whether the motor controller is a Talon, which Phoenix simulates in real time. */
+    boolean talon() {
+      return this == TALONFX || this == TALONFXS;
+    }
+
+    @Override
+    public String toString() {
+      return name;
+    }
+  }
+
   /** The closed loop controllers a mechanism can be configured with. */
   enum Controller {
     /** A plain PID controller, run onboard the motor controller. */
@@ -163,6 +195,34 @@ final class AbsoluteEncoderCases {
         yield new TalonFXSWrapper(talon, DCMotor.getNEO(1), encoderOptions.apply(config.withUseExternalFeedbackEncoder(true)));
       }
     };
+  }
+
+  /**
+   * Create a motor controller without an absolute encoder. A quadrature encoder closes the loop.
+   *
+   * @param feedback Its feedback sensor.
+   * @param config   Mechanism config.
+   * @return The motor controller.
+   */
+  static SmartMotorController create(RelativeFeedback feedback, SmartMotorControllerConfig config) {
+    if (feedback.talon()) {
+      return feedback == RelativeFeedback.TALONFX
+             ? new TalonFXWrapper(DeviceCreator.createTalonFX(), DCMotor.getKrakenX60(1), config)
+             : new TalonFXSWrapper(DeviceCreator.createTalonFXS(), DCMotor.getNEO(1), config);
+    }
+    final boolean flex = feedback == RelativeFeedback.SPARK_FLEX || feedback == RelativeFeedback.SPARK_FLEX_QUADRATURE;
+    final SparkBase spark = flex ? DeviceCreator.createSparkFlex() : DeviceCreator.createSparkMax();
+    try {
+      final boolean quadrature = feedback == RelativeFeedback.SPARK_MAX_QUADRATURE || feedback == RelativeFeedback.SPARK_FLEX_QUADRATURE;
+      return new SparkWrapper(spark, flex ? DCMotor.getNeoVortex(1) : DCMotor.getNEO(1), quadrature
+          ? ThroughBoreEncoderTest.withThroughBore(spark, ThroughBoreEncoderTest.Connection.QUADRATURE, config).withUseExternalFeedbackEncoder(true)
+          : config);
+    } catch (RuntimeException e) {
+      // The SPARK rejected the config; put it back to factory defaults for the tests after this one.
+      CommandScheduler.getInstance().unregisterSubsystem(config.getSubsystem());
+      ThroughBoreEncoderTest.closeDevices(spark, null);
+      throw e;
+    }
   }
 
   /**
