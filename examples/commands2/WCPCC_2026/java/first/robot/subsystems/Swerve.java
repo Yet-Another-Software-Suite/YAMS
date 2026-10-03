@@ -150,7 +150,7 @@ public class Swerve extends SubsystemBase {
             // does, so wheels do not drive full speed while still turning.
             .withCosineCompensation(true)
             // Too slow to steer by: hold the wheel angle rather than steer toward controller noise.
-            .withMinimumVelocity(MetersPerSecond.of(0.1))
+            .withVelocityDeadband(MetersPerSecond.of(0.1))
             // The drive gearing turns the wheel when the module steers; compensate as the CTRE API does.
             .withCouplingRatio(kCoupleRatio)
             .withTelemetry(name, TelemetryVerbosity.HIGH));
