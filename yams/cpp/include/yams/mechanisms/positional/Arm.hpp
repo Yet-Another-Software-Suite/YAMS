@@ -44,7 +44,7 @@ namespace yams::mechanisms::positional {
  *         .WithTrapezoidProfile(wpi::units::turns_per_second_t{0.5},
  *                               wpi::units::turns_per_second_squared_t{0.25})
  *         .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
- *         .WithIdleMode(Cfg::MotorMode::BRAKE)
+ *         .WithZeroPower(Cfg::MotorMode::BRAKE)
  *         .WithStatorCurrentLimit(40.0_A)
  *         .WithMotorInverted(false)
  *         .WithFeedforward(wpi::math::ArmFeedforward{

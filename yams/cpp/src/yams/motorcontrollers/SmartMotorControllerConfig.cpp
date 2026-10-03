@@ -45,8 +45,8 @@ std::string_view SmartMotorControllerConfig::ToString(BasicOptions opt) {
       return "UpperLimit";
     case BasicOptions::LowerLimit:
       return "LowerLimit";
-    case BasicOptions::IdleMode:
-      return "IdleMode";
+    case BasicOptions::ZeroPower:
+      return "ZeroPower";
     case BasicOptions::StatorCurrentLimit:
       return "StatorCurrentLimit";
     case BasicOptions::SupplyCurrentLimit:
@@ -100,7 +100,7 @@ void SmartMotorControllerConfig::ResetValidationCheck() const {
       BasicOptions::TemperatureCutoff,
       BasicOptions::UpperLimit,
       BasicOptions::LowerLimit,
-      BasicOptions::IdleMode,
+      BasicOptions::ZeroPower,
       BasicOptions::StatorCurrentLimit,
       BasicOptions::SupplyCurrentLimit,
       BasicOptions::ClosedLoopRampRate,
@@ -416,8 +416,8 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithContinuousWrapping(
 
 // ---- Control behaviour ---------------------------------------------------
 
-SmartMotorControllerConfig& SmartMotorControllerConfig::WithIdleMode(MotorMode mode) {
-  m_idleMode = mode;
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithZeroPower(MotorMode mode) {
+  m_zeroPower = mode;
   return *this;
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithClosedLoopMode() {
@@ -776,9 +776,9 @@ SmartMotorControllerConfig::ControlMode SmartMotorControllerConfig::GetMotorCont
   m_basicOptions.erase(BasicOptions::ControlMode);
   return m_controlMode;
 }
-SmartMotorControllerConfig::MotorMode SmartMotorControllerConfig::GetIdleMode() const {
-  m_basicOptions.erase(BasicOptions::IdleMode);
-  return m_idleMode;
+SmartMotorControllerConfig::MotorMode SmartMotorControllerConfig::GetZeroPower() const {
+  m_basicOptions.erase(BasicOptions::ZeroPower);
+  return m_zeroPower;
 }
 std::optional<wpi::units::second_t> SmartMotorControllerConfig::GetClosedLoopControlPeriod() const {
   return m_closedLoopPeriod;

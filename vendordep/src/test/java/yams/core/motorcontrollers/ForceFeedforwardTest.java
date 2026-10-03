@@ -102,7 +102,7 @@ public class ForceFeedforwardTest {
   private static SmartMotorControllerConfig baseSmcConfig() {
     return configWithGearingAndWheel()
         .withClosedLoopController(0, 0, 0)
-        .withIdleMode(MotorMode.BRAKE)
+        .withZeroPower(MotorMode.BRAKE)
         .withStatorCurrentLimit(Amps.of(40))
         .withControlMode(ControlMode.CLOSED_LOOP);
   }

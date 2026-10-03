@@ -74,7 +74,7 @@ bool TalonFXSWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     cfg.MotorOutput.Inverted = *inv ? signals::InvertedValue::Clockwise_Positive
                                     : signals::InvertedValue::CounterClockwise_Positive;
 
-  cfg.MotorOutput.NeutralMode = config.GetIdleMode() == SmartMotorControllerConfig::MotorMode::BRAKE
+  cfg.MotorOutput.NeutralMode = config.GetZeroPower() == SmartMotorControllerConfig::MotorMode::BRAKE
                                     ? signals::NeutralModeValue::Brake
                                     : signals::NeutralModeValue::Coast;
 
@@ -507,7 +507,7 @@ wpi::math::DCMotor TalonFXSWrapper::GetDCMotor() { return m_dcMotor; }
 
 // ---- Live-tuning setters ---------------------------------------------------
 
-void TalonFXSWrapper::SetIdleMode(MotorMode mode) {
+void TalonFXSWrapper::SetZeroPower(MotorMode mode) {
   m_talonConfig.MotorOutput.NeutralMode = mode == MotorMode::BRAKE
                                               ? signals::NeutralModeValue::Brake
                                               : signals::NeutralModeValue::Coast;

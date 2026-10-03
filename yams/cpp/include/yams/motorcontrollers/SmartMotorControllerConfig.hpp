@@ -332,7 +332,7 @@ class SmartMotorControllerConfig {
    * @param mode COAST or BRAKE.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithIdleMode(MotorMode mode);
+  SmartMotorControllerConfig& WithZeroPower(MotorMode mode);
 
   /**
    * Switch to closed-loop control mode.
@@ -889,8 +889,8 @@ class SmartMotorControllerConfig {
 
   /** @return Current control mode (CLOSED_LOOP or OPEN_LOOP). */
   ControlMode GetMotorControllerMode() const;
-  /** @return Current idle mode (COAST or BRAKE). */
-  MotorMode GetIdleMode() const;
+  /** @return Current zero power mode (COAST or BRAKE). */
+  MotorMode GetZeroPower() const;
   /** @return Optional closed-loop control thread period. */
   std::optional<wpi::units::second_t> GetClosedLoopControlPeriod() const;
   /** @return Optional open-loop ramp rate. */
@@ -1010,7 +1010,7 @@ class SmartMotorControllerConfig {
     TemperatureCutoff,
     UpperLimit,
     LowerLimit,
-    IdleMode,
+    ZeroPower,
     StatorCurrentLimit,
     SupplyCurrentLimit,
     ClosedLoopRampRate,
@@ -1074,7 +1074,7 @@ class SmartMotorControllerConfig {
 
   // Control behaviour
   ControlMode m_controlMode{ControlMode::CLOSED_LOOP};
-  MotorMode m_idleMode{MotorMode::COAST};
+  MotorMode m_zeroPower{MotorMode::COAST};
   std::optional<wpi::units::second_t> m_closedLoopPeriod;
   std::optional<wpi::units::second_t> m_openLoopRampRate;
   std::optional<wpi::units::second_t> m_closedLoopRampRate;

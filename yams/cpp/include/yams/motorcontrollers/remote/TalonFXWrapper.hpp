@@ -58,7 +58,7 @@ namespace yams::motorcontrollers::remote {
  *    .WithTrapezoidProfile(wpi::units::turns_per_second_t{0.5},
  *                          wpi::units::turns_per_second_squared_t{0.25})
  *    .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
- *    .WithIdleMode(Cfg::MotorMode::BRAKE)
+ *    .WithZeroPower(Cfg::MotorMode::BRAKE)
  *    .WithStatorCurrentLimit(40.0_A)
  *    .WithMotorInverted(false)
  *    .WithFeedforward(wpi::math::ArmFeedforward{
@@ -182,8 +182,8 @@ class TalonFXWrapper : public SmartMotorController {
   wpi::math::DCMotor GetDCMotor() override;
 
   // ---- Configuration setters (live tuning) --------------------------------
-  /** @copydoc SmartMotorController::SetIdleMode */
-  void SetIdleMode(MotorMode mode) override;
+  /** @copydoc SmartMotorController::SetZeroPower */
+  void SetZeroPower(MotorMode mode) override;
   /** @copydoc SmartMotorController::SetMotorInverted */
   void SetMotorInverted(bool inverted) override;
   /** TalonFX encoder direction follows motor output direction; has no effect. */

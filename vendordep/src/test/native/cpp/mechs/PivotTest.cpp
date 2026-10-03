@@ -41,7 +41,7 @@ static SmartMotorControllerConfig MakePivotSMCConfig(ProfileType profile, Hardwa
       .WithMechanismLimits(-100.0_deg, 100.0_deg)
       .WithMotorGearing(
           gearing::MechanismGearing{gearing::GearBox::FromReductionStages({3.0, 4.0})})
-      .WithIdleMode(SmartMotorControllerConfig::MotorMode::BRAKE)
+      .WithZeroPower(SmartMotorControllerConfig::MotorMode::BRAKE)
       .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
       .WithFeedforward(wpi::math::SimpleMotorFeedforward<wpi::units::turns>{

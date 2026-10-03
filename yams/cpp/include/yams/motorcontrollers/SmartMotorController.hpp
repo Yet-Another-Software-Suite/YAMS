@@ -293,7 +293,7 @@ class SmartMotorController {
    *
    * @param mode COAST or BRAKE.
    */
-  virtual void SetIdleMode(MotorMode mode) = 0;
+  virtual void SetZeroPower(MotorMode mode) = 0;
 
   /**
    * Set the motor output direction.

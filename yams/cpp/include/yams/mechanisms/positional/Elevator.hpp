@@ -47,7 +47,7 @@ namespace yams::mechanisms::positional {
  *         .WithStartingPosition(0.5_m)
  *         .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
  *         .WithMeasurementLimits(0.0_m, 2.0_m)
- *         .WithIdleMode(Cfg::MotorMode::BRAKE)
+ *         .WithZeroPower(Cfg::MotorMode::BRAKE)
  *         .WithSupplyCurrentLimit(40.0_A)
  *         .WithMotorInverted(false)
  *         .WithFeedforward(wpi::math::ElevatorFeedforward{

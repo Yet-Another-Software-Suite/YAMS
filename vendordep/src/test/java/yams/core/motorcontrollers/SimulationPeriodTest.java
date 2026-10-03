@@ -62,7 +62,7 @@ public class SimulationPeriodTest {
             .withClosedLoopController(8, 0, 0)
             .withFeedforward(new SimpleMotorFeedforward(0, 1))
             .withStatorCurrentLimit(Amps.of(40))
-            .withIdleMode(MotorMode.BRAKE)
+            .withZeroPower(MotorMode.BRAKE)
             .withControlMode(ControlMode.CLOSED_LOOP)
             .withSimulationPeriod(Milliseconds.of(10))
             .withStartingPosition(Degrees.of(0));

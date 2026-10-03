@@ -137,7 +137,7 @@ final class AbsoluteEncoderCases {
         .withSubsystem(new SmartMotorControllerTestSubsystem())
         .withGearing(ContinuousWrappingTest.kGearing)
         .withStatorCurrentLimit(Amps.of(40))
-        .withIdleMode(MotorMode.BRAKE)
+        .withZeroPower(MotorMode.BRAKE)
         .withControlMode(ControlMode.CLOSED_LOOP)
         .withSimulationPeriod(Milliseconds.of(10))
         // Roughly 12 V over the free speed of a NEO or Kraken behind the 12:1 gearing, in volts per

@@ -49,7 +49,7 @@ namespace yams::motorcontrollers::local {
  *    .WithFeedback(1.0, 0.0, 0.0)
  *    .WithMechanismCircumference(0.25_in, 22)
  *    .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
- *    .WithIdleMode(Cfg::MotorMode::BRAKE)
+ *    .WithZeroPower(Cfg::MotorMode::BRAKE)
  *    .WithSupplyCurrentLimit(40.0_A)
  *    .WithMotorInverted(false)
  *    .WithFeedforward(wpi::math::ElevatorFeedforward{
@@ -192,8 +192,8 @@ class SparkWrapper : public SmartMotorController {
   wpi::math::DCMotor GetDCMotor() override;
 
   // ---- Configuration setters (live tuning) --------------------------------
-  /** @copydoc SmartMotorController::SetIdleMode */
-  void SetIdleMode(MotorMode mode) override;
+  /** @copydoc SmartMotorController::SetZeroPower */
+  void SetZeroPower(MotorMode mode) override;
   /** @copydoc SmartMotorController::SetMotorInverted */
   void SetMotorInverted(bool inverted) override;
   /** @copydoc SmartMotorController::SetEncoderInverted */

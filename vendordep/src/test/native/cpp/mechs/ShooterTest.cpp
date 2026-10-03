@@ -39,7 +39,7 @@ static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, Test
   cfg.WithFeedback(100.0, 0.0, 0.0)
       .WithMotorGearing(
           gearing::MechanismGearing{gearing::GearBox::FromReductionStages({3.0, 4.0})})
-      .WithIdleMode(SmartMotorControllerConfig::MotorMode::COAST)
+      .WithZeroPower(SmartMotorControllerConfig::MotorMode::COAST)
       .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
       .WithFeedforward(wpi::math::SimpleMotorFeedforward<wpi::units::turns>{

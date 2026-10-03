@@ -128,7 +128,7 @@ public class ThroughBoreEncoderTest {
         .withSubsystem(new SmartMotorControllerTestSubsystem())
         .withGearing(kGearing)
         .withStatorCurrentLimit(Amps.of(40))
-        .withIdleMode(MotorMode.BRAKE)
+        .withZeroPower(MotorMode.BRAKE)
         .withControlMode(ControlMode.CLOSED_LOOP)
         .withSimulationPeriod(Milliseconds.of(10))
         .withClosedLoopController(8, 0, 0)

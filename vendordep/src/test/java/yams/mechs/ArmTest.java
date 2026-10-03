@@ -60,7 +60,7 @@ public class ArmTest {
         .withClosedLoopController(5, 0, 0)
         .withSoftLimits(Degrees.of(-100), Degrees.of(100))
         .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
-        .withIdleMode(MotorMode.BRAKE)
+        .withZeroPower(MotorMode.BRAKE)
         .withStatorCurrentLimit(Amps.of(40))
         .withMotorInverted(false)
         .withFeedforward(new ArmFeedforward(0, 1, 0, 0))

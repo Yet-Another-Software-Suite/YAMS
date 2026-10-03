@@ -548,11 +548,11 @@ public abstract class SmartMotorController {
   public abstract void simIterate();
 
   /**
-   * Set the motor idle mode from COAST or BRAKE.
+   * Set the motor zero power mode from COAST or BRAKE.
    *
    * @param mode {@link MotorMode} selected.
    */
-  public abstract void setIdleMode(MotorMode mode);
+  public abstract void setZeroPower(MotorMode mode);
 
   /**
    * Set the encoder velocity

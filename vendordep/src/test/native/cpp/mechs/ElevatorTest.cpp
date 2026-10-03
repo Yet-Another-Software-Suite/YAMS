@@ -46,7 +46,7 @@ static SmartMotorControllerConfig MakeElevatorSMCConfig(ProfileType profile, Har
       .WithMeasurementLimits(0.0_m, 5.0_m)
       .WithMotorGearing(
           gearing::MechanismGearing{gearing::GearBox::FromReductionStages({3.0, 4.0})})
-      .WithIdleMode(SmartMotorControllerConfig::MotorMode::BRAKE)
+      .WithZeroPower(SmartMotorControllerConfig::MotorMode::BRAKE)
       .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
       .WithFeedforward(wpi::math::ElevatorFeedforward{

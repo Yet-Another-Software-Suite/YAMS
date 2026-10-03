@@ -227,7 +227,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   /**
    * Set the {@link MotorMode} for the {@link SmartMotorController}.
    */
-  private Optional<MotorMode> idleMode = Optional.empty();
+  private Optional<MotorMode> zeroPower = Optional.empty();
   /**
    * Mechanism lower limit to prevent movement below.
    */
@@ -369,7 +369,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     this.statorStallCurrentLimit = cfg.statorStallCurrentLimit;
     this.supplyStallCurrentLimit = cfg.supplyStallCurrentLimit;
     this.voltageCompensation = cfg.voltageCompensation;
-    this.idleMode = cfg.idleMode;
+    this.zeroPower = cfg.zeroPower;
     this.mechanismLowerLimit = cfg.mechanismLowerLimit;
     this.mechanismUpperLimit = cfg.mechanismUpperLimit;
     this.telemetryName = cfg.telemetryName;
@@ -897,13 +897,13 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Get the idle mode for the {@link SmartMotorController}
+   * Get the zero power mode for the {@link SmartMotorController}
    *
    * @return {@link MotorMode}
    */
-  public Optional<MotorMode> getIdleMode() {
-    basicOptions.remove(BasicOptions.IdleMode);
-    return idleMode;
+  public Optional<MotorMode> getZeroPower() {
+    basicOptions.remove(BasicOptions.ZeroPower);
+    return zeroPower;
   }
 
   /**
@@ -940,11 +940,11 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   /**
    * Set the {@link SmartMotorController} to brake or coast mode.
    *
-   * @param idleMode {@link MotorMode} idle mode
+   * @param zeroPower {@link MotorMode} zero power mode
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
-  public T withIdleMode(MotorMode idleMode) {
-    this.idleMode = Optional.ofNullable(idleMode);
+  public T withZeroPower(MotorMode zeroPower) {
+    this.zeroPower = Optional.ofNullable(zeroPower);
     return self();
   }
 
@@ -2482,8 +2482,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     /** Closed loop controller lower limit. */
     LowerLimit,
     //    MomentOfInertia,
-    /** Motor idle mode. */
-    IdleMode,
+    /** Motor zero power mode. */
+    ZeroPower,
     /** Voltage compensation. */
     VoltageCompensation,
     /** Follower motors */

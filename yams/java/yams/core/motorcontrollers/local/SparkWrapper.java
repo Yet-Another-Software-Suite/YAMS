@@ -488,7 +488,7 @@ public class SparkWrapper extends SmartMotorController {
   }
 
   @Override
-  public void setIdleMode(MotorMode mode) {
+  public void setZeroPower(MotorMode mode) {
     m_sparkBaseConfig.idleMode(mode == MotorMode.BRAKE ? IdleMode.kBrake : IdleMode.kCoast);
     configureSpark(() -> m_spark.configure(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters));
   }
@@ -822,9 +822,9 @@ public class SparkWrapper extends SmartMotorController {
     if (config.getVoltageCompensation().isPresent()) {
       m_sparkBaseConfig.voltageCompensation(config.getVoltageCompensation().get().in(Volts));
     }
-    // Setup idle mode.
-    if (config.getIdleMode().isPresent()) {
-      m_sparkBaseConfig.idleMode(config.getIdleMode().get() == MotorMode.BRAKE ? IdleMode.kBrake : IdleMode.kCoast);
+    // Setup zero power mode.
+    if (config.getZeroPower().isPresent()) {
+      m_sparkBaseConfig.idleMode(config.getZeroPower().get() == MotorMode.BRAKE ? IdleMode.kBrake : IdleMode.kCoast);
     }
     // Setup starting position
     if (config.getStartingPosition().isPresent()) {
@@ -977,12 +977,12 @@ public class SparkWrapper extends SmartMotorController {
       for (Pair<Object, Boolean> follower : config.getFollowers().get()) {
         if (follower.getFirst() instanceof SparkMax) {
           var f_cfg = new SparkMaxConfig().follow(m_spark, follower.getSecond());
-          m_config.getIdleMode().ifPresent(mode -> f_cfg.idleMode(mode == MotorMode.BRAKE ? IdleMode.kBrake : IdleMode.kCoast));
+          m_config.getZeroPower().ifPresent(mode -> f_cfg.idleMode(mode == MotorMode.BRAKE ? IdleMode.kBrake : IdleMode.kCoast));
           ((SparkMax) follower.getFirst()).configure(f_cfg, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
 
         } else if (follower.getFirst() instanceof SparkFlex) {
           var f_cfg = new SparkFlexConfig().follow(m_spark, follower.getSecond());
-          m_config.getIdleMode().ifPresent(mode -> f_cfg.idleMode(mode == MotorMode.BRAKE ? IdleMode.kBrake : IdleMode.kCoast));
+          m_config.getZeroPower().ifPresent(mode -> f_cfg.idleMode(mode == MotorMode.BRAKE ? IdleMode.kBrake : IdleMode.kCoast));
           ((SparkFlex) follower.getFirst()).configure(f_cfg, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
 
         } else {

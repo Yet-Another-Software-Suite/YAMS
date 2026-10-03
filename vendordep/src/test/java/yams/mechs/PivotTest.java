@@ -59,7 +59,7 @@ public class PivotTest {
         .withClosedLoopController(4, 0, 0)
         .withSoftLimits(Degrees.of(-100), Degrees.of(100))
         .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4, 5)))
-        .withIdleMode(MotorMode.BRAKE)
+        .withZeroPower(MotorMode.BRAKE)
         .withStatorCurrentLimit(Amps.of(40))
         .withMotorInverted(false)
         .withFeedforward(new SimpleMotorFeedforward(1, 0, 0, 0.02))

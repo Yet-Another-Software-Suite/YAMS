@@ -85,7 +85,7 @@ inline SmartMotorControllerConfig MakeBaseConfig(ProfileType profile, double kP,
   SmartMotorControllerConfig cfg;
   cfg.WithFeedback(kP, 0.0, 0.0)
       .WithMotorGearing(gearing)
-      .WithIdleMode(SmartMotorControllerConfig::MotorMode::BRAKE)
+      .WithZeroPower(SmartMotorControllerConfig::MotorMode::BRAKE)
       .WithMotorInverted(false)
       .WithClosedLoopMode()
       .WithSubsystem(subsys)

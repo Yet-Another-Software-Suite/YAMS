@@ -80,7 +80,7 @@ static SmartMotorControllerConfig MakeDriveConfig(const std::string& name,
   cfg.WithFeedback(0.1, 0.0, 0.0)
       .WithMechanismCircumference(wpi::units::meter_t{4.0_in * std::numbers::pi})
       .WithMotorGearing(gearing::MechanismGearing{gearing::GearBox::FromReductionStages({6.75})})
-      .WithIdleMode(SmartMotorControllerConfig::MotorMode::BRAKE)
+      .WithZeroPower(SmartMotorControllerConfig::MotorMode::BRAKE)
       .WithStatorCurrentLimit(40.0_A)
       .WithSimMotor(wpi::math::DCMotor::KrakenX60(1))
       .WithClosedLoopMode()
@@ -95,7 +95,7 @@ static SmartMotorControllerConfig MakeAzimuthConfig(const std::string& name,
   cfg.WithFeedback(50.0, 0.0, 0.5)
       .WithMotorGearing(
           gearing::MechanismGearing{gearing::GearBox::FromReductionStages({150.0 / 7.0})})
-      .WithIdleMode(SmartMotorControllerConfig::MotorMode::BRAKE)
+      .WithZeroPower(SmartMotorControllerConfig::MotorMode::BRAKE)
       .WithStatorCurrentLimit(20.0_A)
       .WithSimMotor(wpi::math::DCMotor::KrakenX60(1))
       .WithMOI(4_in, 0.5_lb)

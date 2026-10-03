@@ -76,7 +76,7 @@ namespace yams::mechanisms::swerve {
  *         .WithFeedback(0.1, 0.0, 0.0)
  *         .WithMotorGearing(MechanismGearing{GearBox::FromStages({"6.75:1"})})
  *         .WithStatorCurrentLimit(40.0_A)
- *         .WithIdleMode(Cfg::MotorMode::BRAKE)
+ *         .WithZeroPower(Cfg::MotorMode::BRAKE)
  *         .WithTelemetry("FL_Drive", Cfg::TelemetryVerbosity::HIGH);
  *
  * SmartMotorControllerConfig azimuthCfg;

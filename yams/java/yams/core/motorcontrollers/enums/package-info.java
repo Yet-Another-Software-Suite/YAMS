@@ -3,6 +3,6 @@
 
 /**
  * Enums used to configure a {@link yams.core.motorcontrollers.SmartMotorController}: control
- * mode and idle mode.
+ * mode and zero power mode.
  */
 package yams.core.motorcontrollers.enums;

@@ -68,7 +68,7 @@ public class BatterySimTest {
     SmartMotorControllerConfig baseConfig =
         new yams.commands2.config.SmartMotorControllerConfig()
             .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
-            .withIdleMode(MotorMode.COAST)
+            .withZeroPower(MotorMode.COAST)
             .withStatorCurrentLimit(Amps.of(80))
             .withMotorInverted(false)
             .withControlMode(ControlMode.OPEN_LOOP)

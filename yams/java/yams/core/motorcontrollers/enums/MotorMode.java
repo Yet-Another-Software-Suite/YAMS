@@ -3,7 +3,7 @@
 
 package yams.core.motorcontrollers.enums;
 
-/** Idle mode for the {@link yams.core.motorcontrollers.SmartMotorController} */
+/** Zero power mode for the {@link yams.core.motorcontrollers.SmartMotorController} */
 public enum MotorMode {
   /** Brake mode. */
   BRAKE,

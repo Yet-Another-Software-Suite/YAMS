@@ -61,7 +61,7 @@ public class ElevatorTest {
         .withClosedLoopController(30, 0, 0)
         .withSoftLimits(Meters.of(0), Meters.of(5))
         .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
-        .withIdleMode(MotorMode.BRAKE)
+        .withZeroPower(MotorMode.BRAKE)
         .withStartingPosition(Meters.of(0))
         //        .withTelemetry("ElevatorMotor", TelemetryVerbosity.HIGH)
         .withStatorCurrentLimit(Amps.of(40))

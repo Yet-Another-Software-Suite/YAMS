@@ -81,7 +81,7 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   auto doConfig = [&](SparkBaseConfig& sparkCfg) {
     sparkCfg.DisableFollowerMode();  // Disable follower from the Spark.
     if (auto inv = config.GetMotorInverted(); inv) sparkCfg.Inverted(*inv);
-    sparkCfg.SetIdleMode(config.GetIdleMode() == SmartMotorControllerConfig::MotorMode::BRAKE
+    sparkCfg.SetIdleMode(config.GetZeroPower() == SmartMotorControllerConfig::MotorMode::BRAKE
                              ? SparkBaseConfig::IdleMode::kBrake
                              : SparkBaseConfig::IdleMode::kCoast);
 
@@ -531,7 +531,7 @@ wpi::math::DCMotor SparkWrapper::GetDCMotor() { return m_motor; }
 
 // ---- Live-tuning setters ----------------------------------------------------
 
-void SparkWrapper::SetIdleMode(MotorMode mode) {
+void SparkWrapper::SetZeroPower(MotorMode mode) {
   auto doConfig = [&](SparkBaseConfig& cfg) {
     cfg.SetIdleMode(mode == MotorMode::BRAKE ? SparkBaseConfig::IdleMode::kBrake
                                              : SparkBaseConfig::IdleMode::kCoast);

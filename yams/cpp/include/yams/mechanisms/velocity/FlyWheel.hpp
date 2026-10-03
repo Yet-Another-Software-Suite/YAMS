@@ -45,7 +45,7 @@ namespace yams::mechanisms::velocity {
  * motorCfg.WithSubsystem(this)
  *         .WithFeedback(100.0, 0.0, 0.0)
  *         .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
- *         .WithIdleMode(Cfg::MotorMode::COAST)
+ *         .WithZeroPower(Cfg::MotorMode::COAST)
  *         .WithStatorCurrentLimit(60.0_A)
  *         .WithMotorInverted(false)
  *         .WithFeedforward(wpi::math::SimpleMotorFeedforward<wpi::units::turns>{

@@ -129,7 +129,7 @@ public class LiveTuningTest {
         .withSubsystem(new SmartMotorControllerTestSubsystem())
         .withGearing(kGearing)
         .withStatorCurrentLimit(Amps.of(40))
-        .withIdleMode(MotorMode.BRAKE)
+        .withZeroPower(MotorMode.BRAKE)
         .withControlMode(ControlMode.CLOSED_LOOP)
         .withClosedLoopController(1.5, 0.25, 0.125)
         .withFeedforward(new SimpleMotorFeedforward(0.2, 0.75, 0.05))

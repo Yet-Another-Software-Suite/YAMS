@@ -444,7 +444,7 @@ public class TalonFXSWrapper extends SmartMotorController {
   }
 
   @Override
-  public void setIdleMode(MotorMode mode) {
+  public void setZeroPower(MotorMode mode) {
     m_talonConfig.MotorOutput.withNeutralMode(mode == MotorMode.BRAKE ? NeutralModeValue.Brake : NeutralModeValue.Coast);
     forceConfigApply();
   }
@@ -934,9 +934,9 @@ public class TalonFXSWrapper extends SmartMotorController {
     config.getMotorInverted().ifPresent(inverted -> {
       m_talonConfig.MotorOutput.Inverted = inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
     });
-    // Idle mode
-    if (config.getIdleMode().isPresent()) {
-      m_talonConfig.MotorOutput.NeutralMode = config.getIdleMode().get() == MotorMode.BRAKE ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+    // Zero power mode
+    if (config.getZeroPower().isPresent()) {
+      m_talonConfig.MotorOutput.NeutralMode = config.getZeroPower().get() == MotorMode.BRAKE ? NeutralModeValue.Brake : NeutralModeValue.Coast;
     }
     // Maximum and minimum voltage
     if (config.getClosedLoopControllerMaximumVoltage().isPresent()) {
@@ -1088,11 +1088,11 @@ public class TalonFXSWrapper extends SmartMotorController {
         StatusCode applied;
         do {
           if (follower.getFirst() instanceof TalonFXS) {
-            config.getIdleMode().ifPresent(mode -> ((TalonFXS) follower.getFirst()).configNeutralMode(mode == MotorMode.BRAKE ? NeutralModeValue.Brake : NeutralModeValue.Coast));
+            config.getZeroPower().ifPresent(mode -> ((TalonFXS) follower.getFirst()).configNeutralMode(mode == MotorMode.BRAKE ? NeutralModeValue.Brake : NeutralModeValue.Coast));
             applied = ((TalonFXS) follower.getFirst()).setControl(new Follower(m_talonfxs.getDeviceID(), follower.getSecond() ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned));
 
           } else if (follower.getFirst() instanceof TalonFX) {
-            config.getIdleMode().ifPresent(mode -> ((TalonFX) follower.getFirst()).configNeutralMode(mode == MotorMode.BRAKE ? NeutralModeValue.Brake : NeutralModeValue.Coast));
+            config.getZeroPower().ifPresent(mode -> ((TalonFX) follower.getFirst()).configNeutralMode(mode == MotorMode.BRAKE ? NeutralModeValue.Brake : NeutralModeValue.Coast));
             applied = ((TalonFX) follower.getFirst()).setControl(new Follower(m_talonfxs.getDeviceID(), follower.getSecond() ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned));
           } else {
             throw new IllegalArgumentException("[ERROR] Unknown follower type: " + follower.getFirst().getClass().getSimpleName());
