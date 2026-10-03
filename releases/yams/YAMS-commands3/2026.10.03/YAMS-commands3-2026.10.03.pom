@@ -5,5 +5,4 @@
   <groupId>yams</groupId>
   <artifactId>YAMS-commands3</artifactId>
   <version>2026.10.03</version>
-  <packaging>pom</packaging>
 </project>

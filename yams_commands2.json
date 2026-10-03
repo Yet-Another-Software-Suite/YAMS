@@ -2,7 +2,7 @@
     "fileName": "yams_commands2.json",
     "name": "Yet Another Mechanism System (Commands v2)",
     "version": "2026.10.03",
-    "frcYear": "2027_alpha7",
+    "wpilibYear": "2027_alpha7",
     "uuid": "a1051e86-a979-4880-a28b-a0d5362d1d96",
     "mavenUrls": [
         "https://yet-another-software-suite.github.io/YAMS/releases/"
@@ -33,8 +33,7 @@
                 "windowsx86-64",
                 "linuxarm64",
                 "linuxx86-64",
-                "linuxathena",
-                "linuxarm32",
+                "linuxsystemcore",
                 "osxuniversal"
             ]
         }
