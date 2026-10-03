@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['unsupportedtelemetryfields_0',['UnsupportedTelemetryFields',['../structyams_1_1telemetry_1_1UnsupportedTelemetryFields.html',1,'yams::telemetry']]]
+  ['talonfxswrapper_0',['TalonFXSWrapper',['../classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html',1,'yams::motorcontrollers::remote']]],
+  ['talonfxwrapper_1',['TalonFXWrapper',['../classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html',1,'yams::motorcontrollers::remote']]]
 ];

@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['pivot_2ehpp_0',['Pivot.hpp',['../Pivot_8hpp.html',1,'']]],
-  ['pivotconfig_2ehpp_1',['PivotConfig.hpp',['../PivotConfig_8hpp.html',1,'']]]
+  ['networktablesbackends_2ehpp_0',['NetworkTablesBackends.hpp',['../NetworkTablesBackends_8hpp.html',1,'']]]
 ];

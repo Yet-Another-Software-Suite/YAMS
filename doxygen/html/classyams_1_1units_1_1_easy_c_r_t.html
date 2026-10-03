@@ -100,7 +100,7 @@ Public Types</h2></td></tr>
 &#160;&#160;<a class="el" href="#a976b405a0e8174ccc6810143fe8cf34fa636bc5ca1e0ceb3e4c67067618d7ae09">InvalidConfig</a>
 <br />
  }</td></tr>
-<tr class="memdesc:a976b405a0e8174ccc6810143fe8cf34f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result status from the most recent <a class="el" href="#a107345a15d72dcef9c905a99ed1e38e3" title="Read both encoders and return the mechanism angle if uniquely resolved.">GetAngle()</a> call.  <a href="#a976b405a0e8174ccc6810143fe8cf34f">More...</a><br /></td></tr>
+<tr class="memdesc:a976b405a0e8174ccc6810143fe8cf34f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result status from the most recent <a class="el" href="#a8fcd4c5fa032219d3c662f8c428e3240" title="Read both encoders and return the mechanism angle if uniquely resolved.">GetAngle()</a> call.  <a href="#a976b405a0e8174ccc6810143fe8cf34f">More...</a><br /></td></tr>
 <tr class="separator:a976b405a0e8174ccc6810143fe8cf34f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
@@ -108,11 +108,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a380759d10d5cd149e6d1fb4798a42d92" id="r_a380759d10d5cd149e6d1fb4798a42d92"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a380759d10d5cd149e6d1fb4798a42d92">EasyCRT</a> (<a class="el" href="structyams_1_1units_1_1_easy_c_r_t_config.html">EasyCRTConfig</a> cfg)</td></tr>
 <tr class="memdesc:a380759d10d5cd149e6d1fb4798a42d92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a solver and precompute the CRT weights.  <br /></td></tr>
 <tr class="separator:a380759d10d5cd149e6d1fb4798a42d92"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a107345a15d72dcef9c905a99ed1e38e3" id="r_a107345a15d72dcef9c905a99ed1e38e3"><td class="memItemLeft" align="right" valign="top">std::optional&lt;::units::turn_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a107345a15d72dcef9c905a99ed1e38e3">GetAngle</a> ()</td></tr>
-<tr class="memdesc:a107345a15d72dcef9c905a99ed1e38e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read both encoders and return the mechanism angle if uniquely resolved.  <br /></td></tr>
-<tr class="separator:a107345a15d72dcef9c905a99ed1e38e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8fcd4c5fa032219d3c662f8c428e3240" id="r_a8fcd4c5fa032219d3c662f8c428e3240"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::turn_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8fcd4c5fa032219d3c662f8c428e3240">GetAngle</a> ()</td></tr>
+<tr class="memdesc:a8fcd4c5fa032219d3c662f8c428e3240"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read both encoders and return the mechanism angle if uniquely resolved.  <br /></td></tr>
+<tr class="separator:a8fcd4c5fa032219d3c662f8c428e3240"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5f82fd6785b0984591cf290a35aed4b0" id="r_a5f82fd6785b0984591cf290a35aed4b0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a976b405a0e8174ccc6810143fe8cf34f">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5f82fd6785b0984591cf290a35aed4b0">GetStatus</a> () const</td></tr>
-<tr class="memdesc:a5f82fd6785b0984591cf290a35aed4b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the status from the most recent <a class="el" href="#a107345a15d72dcef9c905a99ed1e38e3" title="Read both encoders and return the mechanism angle if uniquely resolved.">GetAngle()</a> call.  <br /></td></tr>
+<tr class="memdesc:a5f82fd6785b0984591cf290a35aed4b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the status from the most recent <a class="el" href="#a8fcd4c5fa032219d3c662f8c428e3240" title="Read both encoders and return the mechanism angle if uniquely resolved.">GetAngle()</a> call.  <br /></td></tr>
 <tr class="separator:a5f82fd6785b0984591cf290a35aed4b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3529970e862adafd87a7f8e52a8816dc" id="r_a3529970e862adafd87a7f8e52a8816dc"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3529970e862adafd87a7f8e52a8816dc">GetLastError</a> () const</td></tr>
 <tr class="memdesc:a3529970e862adafd87a7f8e52a8816dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the combined encoder modular error from the last solve.  <br /></td></tr>
@@ -124,26 +124,26 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>CRT-based absolute angle solver using two absolute encoders. </p>
 <dl class="section user"><dt>Algorithm</dt><dd>Given two absolute encoders with coprime gear tooth counts (enc1Teeth, enc2Teeth) driven from a common mechanism, the Chinese Remainder Theorem guarantees a unique mechanism position within one CRT period (= lcm(enc1Teeth, enc2Teeth) / commonK rotations).</dd></dl>
-<p><a class="el" href="#a107345a15d72dcef9c905a99ed1e38e3" title="Read both encoders and return the mechanism angle if uniquely resolved.">GetAngle()</a> tries all four floor/ceil rounding combinations for the two encoder readings (2 × 2 = 4 candidates), applies the precomputed CRT weights to recover the mechanism tooth count for each candidate in O(1), then selects the candidate with the smallest combined encoder error. Sub-tooth interpolation from enc2 provides fractional-tooth precision beyond the integer CRT result.</p>
+<p><a class="el" href="#a8fcd4c5fa032219d3c662f8c428e3240" title="Read both encoders and return the mechanism angle if uniquely resolved.">GetAngle()</a> tries all four floor/ceil rounding combinations for the two encoder readings (2 × 2 = 4 candidates), applies the precomputed CRT weights to recover the mechanism tooth count for each candidate in O(1), then selects the candidate with the smallest combined encoder error. Sub-tooth interpolation from enc2 provides fractional-tooth precision beyond the integer CRT result.</p>
 <dl class="section user"><dt>Configuration</dt><dd>Construct with a fully populated <a class="el" href="structyams_1_1units_1_1_easy_c_r_t_config.html" title="Configuration for the EasyCRT solver.">EasyCRTConfig</a>. enc1Teeth and enc2Teeth must be coprime and the mechanism range must not exceed one CRT period.</dd></dl>
 <dl class="section user"><dt>Typical usage</dt><dd><div class="fragment"><div class="line"><a class="code hl_struct" href="structyams_1_1units_1_1_easy_c_r_t_config.html">EasyCRTConfig</a> cfg;</div>
-<div class="line">cfg.<a class="code hl_variable" href="structyams_1_1units_1_1_easy_c_r_t_config.html#abe44599b0dbc5bafc27270fed00fad95">enc1</a> = [] { <span class="keywordflow">return</span> encoder1.GetAbsolutePosition(); };</div>
-<div class="line">cfg.<a class="code hl_variable" href="structyams_1_1units_1_1_easy_c_r_t_config.html#ab74de6488f8b5ca40056d86b782ce41f">enc2</a> = [] { <span class="keywordflow">return</span> encoder2.GetAbsolutePosition(); };</div>
+<div class="line">cfg.<a class="code hl_variable" href="structyams_1_1units_1_1_easy_c_r_t_config.html#aea29b3ed6a15f89677895276f04630c0">enc1</a> = [] { <span class="keywordflow">return</span> encoder1.GetAbsolutePosition(); };</div>
+<div class="line">cfg.<a class="code hl_variable" href="structyams_1_1units_1_1_easy_c_r_t_config.html#ae53ffaff633ffe3b71801a691cadafee">enc2</a> = [] { <span class="keywordflow">return</span> encoder2.GetAbsolutePosition(); };</div>
 <div class="line">cfg.<a class="code hl_function" href="structyams_1_1units_1_1_easy_c_r_t_config.html#a982524a6b868ce871afa7baf651157c1">WithTeeth</a>(19, 21, <a class="code hl_function" href="namespaceyams_1_1units.html#ae809ecacb0a120b22ed65cd0e7efbd3a">CrtCommonK</a>(1.0, 200))</div>
 <div class="line">   .<a class="code hl_function" href="structyams_1_1units_1_1_easy_c_r_t_config.html#ab3fbb06e31f0e1173f42a6ecbffe39b3">WithRange</a>(0.0, 1.99)</div>
 <div class="line">   .<a class="code hl_function" href="structyams_1_1units_1_1_easy_c_r_t_config.html#ab85ff4a3a97d9fa93a056976d0b06259">WithTolerance</a>(0.01);</div>
 <div class="line"><a class="code hl_function" href="#a380759d10d5cd149e6d1fb4798a42d92">EasyCRT</a> solver{cfg};</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// In periodic:</span></div>
-<div class="line"><span class="keyword">auto</span> angle = solver.GetAngle();  <span class="comment">// std::optional&lt;units::turn_t&gt;</span></div>
+<div class="line"><span class="keyword">auto</span> angle = solver.GetAngle();  <span class="comment">// std::optional&lt;wpi::units::turn_t&gt;</span></div>
 <div class="ttc" id="aclassyams_1_1units_1_1_easy_c_r_t_html_a380759d10d5cd149e6d1fb4798a42d92"><div class="ttname"><a href="#a380759d10d5cd149e6d1fb4798a42d92">yams::units::EasyCRT::EasyCRT</a></div><div class="ttdeci">EasyCRT(EasyCRTConfig cfg)</div><div class="ttdoc">Construct a solver and precompute the CRT weights.</div></div>
-<div class="ttc" id="anamespaceyams_1_1units_html_ae809ecacb0a120b22ed65cd0e7efbd3a"><div class="ttname"><a href="namespaceyams_1_1units.html#ae809ecacb0a120b22ed65cd0e7efbd3a">yams::units::CrtCommonK</a></div><div class="ttdeci">double CrtCommonK(double commonRatio, int driveTeeth)</div><div class="ttdoc">Computes the common-scale factor K used by EasyCRTConfig::commonK.</div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:156</div></div>
-<div class="ttc" id="astructyams_1_1units_1_1_easy_c_r_t_config_html"><div class="ttname"><a href="structyams_1_1units_1_1_easy_c_r_t_config.html">yams::units::EasyCRTConfig</a></div><div class="ttdoc">Configuration for the EasyCRT solver.</div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:174</div></div>
-<div class="ttc" id="astructyams_1_1units_1_1_easy_c_r_t_config_html_a982524a6b868ce871afa7baf651157c1"><div class="ttname"><a href="structyams_1_1units_1_1_easy_c_r_t_config.html#a982524a6b868ce871afa7baf651157c1">yams::units::EasyCRTConfig::WithTeeth</a></div><div class="ttdeci">EasyCRTConfig &amp; WithTeeth(int t1, int t2, double k)</div><div class="ttdoc">Set encoder teeth counts and the common scale factor.</div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:200</div></div>
-<div class="ttc" id="astructyams_1_1units_1_1_easy_c_r_t_config_html_ab3fbb06e31f0e1173f42a6ecbffe39b3"><div class="ttname"><a href="structyams_1_1units_1_1_easy_c_r_t_config.html#ab3fbb06e31f0e1173f42a6ecbffe39b3">yams::units::EasyCRTConfig::WithRange</a></div><div class="ttdeci">EasyCRTConfig &amp; WithRange(double minR, double maxR)</div><div class="ttdoc">Set the allowed mechanism position range.</div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:225</div></div>
-<div class="ttc" id="astructyams_1_1units_1_1_easy_c_r_t_config_html_ab74de6488f8b5ca40056d86b782ce41f"><div class="ttname"><a href="structyams_1_1units_1_1_easy_c_r_t_config.html#ab74de6488f8b5ca40056d86b782ce41f">yams::units::EasyCRTConfig::enc2</a></div><div class="ttdeci">std::function&lt;::units::turn_t()&gt; enc2</div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:176</div></div>
-<div class="ttc" id="astructyams_1_1units_1_1_easy_c_r_t_config_html_ab85ff4a3a97d9fa93a056976d0b06259"><div class="ttname"><a href="structyams_1_1units_1_1_easy_c_r_t_config.html#ab85ff4a3a97d9fa93a056976d0b06259">yams::units::EasyCRTConfig::WithTolerance</a></div><div class="ttdeci">EasyCRTConfig &amp; WithTolerance(double tol)</div><div class="ttdoc">Set the maximum acceptable combined encoder error.</div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:241</div></div>
-<div class="ttc" id="astructyams_1_1units_1_1_easy_c_r_t_config_html_abe44599b0dbc5bafc27270fed00fad95"><div class="ttname"><a href="structyams_1_1units_1_1_easy_c_r_t_config.html#abe44599b0dbc5bafc27270fed00fad95">yams::units::EasyCRTConfig::enc1</a></div><div class="ttdeci">std::function&lt;::units::turn_t()&gt; enc1</div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:175</div></div>
+<div class="ttc" id="anamespaceyams_1_1units_html_ae809ecacb0a120b22ed65cd0e7efbd3a"><div class="ttname"><a href="namespaceyams_1_1units.html#ae809ecacb0a120b22ed65cd0e7efbd3a">yams::units::CrtCommonK</a></div><div class="ttdeci">double CrtCommonK(double commonRatio, int driveTeeth)</div><div class="ttdoc">Computes the common-scale factor K used by EasyCRTConfig::commonK.</div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:155</div></div>
+<div class="ttc" id="astructyams_1_1units_1_1_easy_c_r_t_config_html"><div class="ttname"><a href="structyams_1_1units_1_1_easy_c_r_t_config.html">yams::units::EasyCRTConfig</a></div><div class="ttdoc">Configuration for the EasyCRT solver.</div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:173</div></div>
+<div class="ttc" id="astructyams_1_1units_1_1_easy_c_r_t_config_html_a982524a6b868ce871afa7baf651157c1"><div class="ttname"><a href="structyams_1_1units_1_1_easy_c_r_t_config.html#a982524a6b868ce871afa7baf651157c1">yams::units::EasyCRTConfig::WithTeeth</a></div><div class="ttdeci">EasyCRTConfig &amp; WithTeeth(int t1, int t2, double k)</div><div class="ttdoc">Set encoder teeth counts and the common scale factor.</div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:199</div></div>
+<div class="ttc" id="astructyams_1_1units_1_1_easy_c_r_t_config_html_ab3fbb06e31f0e1173f42a6ecbffe39b3"><div class="ttname"><a href="structyams_1_1units_1_1_easy_c_r_t_config.html#ab3fbb06e31f0e1173f42a6ecbffe39b3">yams::units::EasyCRTConfig::WithRange</a></div><div class="ttdeci">EasyCRTConfig &amp; WithRange(double minR, double maxR)</div><div class="ttdoc">Set the allowed mechanism position range.</div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:224</div></div>
+<div class="ttc" id="astructyams_1_1units_1_1_easy_c_r_t_config_html_ab85ff4a3a97d9fa93a056976d0b06259"><div class="ttname"><a href="structyams_1_1units_1_1_easy_c_r_t_config.html#ab85ff4a3a97d9fa93a056976d0b06259">yams::units::EasyCRTConfig::WithTolerance</a></div><div class="ttdeci">EasyCRTConfig &amp; WithTolerance(double tol)</div><div class="ttdoc">Set the maximum acceptable combined encoder error.</div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:240</div></div>
+<div class="ttc" id="astructyams_1_1units_1_1_easy_c_r_t_config_html_ae53ffaff633ffe3b71801a691cadafee"><div class="ttname"><a href="structyams_1_1units_1_1_easy_c_r_t_config.html#ae53ffaff633ffe3b71801a691cadafee">yams::units::EasyCRTConfig::enc2</a></div><div class="ttdeci">std::function&lt; wpi::units::turn_t()&gt; enc2</div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:175</div></div>
+<div class="ttc" id="astructyams_1_1units_1_1_easy_c_r_t_config_html_aea29b3ed6a15f89677895276f04630c0"><div class="ttname"><a href="structyams_1_1units_1_1_easy_c_r_t_config.html#aea29b3ed6a15f89677895276f04630c0">yams::units::EasyCRTConfig::enc1</a></div><div class="ttdeci">std::function&lt; wpi::units::turn_t()&gt; enc1</div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:174</div></div>
 </div><!-- fragment --> </dd></dl>
 </div><h2 class="groupheader">Member Enumeration Documentation</h2>
 <a id="a976b405a0e8174ccc6810143fe8cf34f" name="a976b405a0e8174ccc6810143fe8cf34f"></a>
@@ -166,11 +166,11 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Result status from the most recent <a class="el" href="#a107345a15d72dcef9c905a99ed1e38e3" title="Read both encoders and return the mechanism angle if uniquely resolved.">GetAngle()</a> call. </p>
+<p>Result status from the most recent <a class="el" href="#a8fcd4c5fa032219d3c662f8c428e3240" title="Read both encoders and return the mechanism angle if uniquely resolved.">GetAngle()</a> call. </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a976b405a0e8174ccc6810143fe8cf34faa65db4b39dd3b01787474dcdb81af5f0" name="a976b405a0e8174ccc6810143fe8cf34faa65db4b39dd3b01787474dcdb81af5f0"></a>NotAttempted&#160;</td><td class="fielddoc"><p>No solve has been attempted since construction. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a976b405a0e8174ccc6810143fe8cf34faa60852f204ed8028c1c58808b746d115" name="a976b405a0e8174ccc6810143fe8cf34faa60852f204ed8028c1c58808b746d115"></a>Ok&#160;</td><td class="fielddoc"><p>Solve succeeded; <a class="el" href="#a107345a15d72dcef9c905a99ed1e38e3" title="Read both encoders and return the mechanism angle if uniquely resolved.">GetAngle()</a> returned a value. </p>
+<tr><td class="fieldname"><a id="a976b405a0e8174ccc6810143fe8cf34faa60852f204ed8028c1c58808b746d115" name="a976b405a0e8174ccc6810143fe8cf34faa60852f204ed8028c1c58808b746d115"></a>Ok&#160;</td><td class="fielddoc"><p>Solve succeeded; <a class="el" href="#a8fcd4c5fa032219d3c662f8c428e3240" title="Read both encoders and return the mechanism angle if uniquely resolved.">GetAngle()</a> returned a value. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a976b405a0e8174ccc6810143fe8cf34faf99427fec2320b1892f1aaa99a9341b3" name="a976b405a0e8174ccc6810143fe8cf34faf99427fec2320b1892f1aaa99a9341b3"></a>NoSolution&#160;</td><td class="fielddoc"><p>No candidate fell within the range and tolerance. </p>
 </td></tr>
@@ -207,7 +207,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Construct a solver and precompute the CRT weights. </p>
-<p>The constructor derives modular-inverse weights from enc1Teeth and enc2Teeth. If those values are invalid (≤ 0) the first <a class="el" href="#a107345a15d72dcef9c905a99ed1e38e3" title="Read both encoders and return the mechanism angle if uniquely resolved.">GetAngle()</a> call will return InvalidConfig.</p>
+<p>The constructor derives modular-inverse weights from enc1Teeth and enc2Teeth. If those values are invalid (≤ 0) the first <a class="el" href="#a8fcd4c5fa032219d3c662f8c428e3240" title="Read both encoders and return the mechanism angle if uniquely resolved.">GetAngle()</a> call will return InvalidConfig.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">cfg</td><td>Fully populated <a class="el" href="structyams_1_1units_1_1_easy_c_r_t_config.html" title="Configuration for the EasyCRT solver.">EasyCRTConfig</a>. </td></tr>
@@ -218,14 +218,14 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a107345a15d72dcef9c905a99ed1e38e3" name="a107345a15d72dcef9c905a99ed1e38e3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a107345a15d72dcef9c905a99ed1e38e3">&#9670;&#160;</a></span>GetAngle()</h2>
+<a id="a8fcd4c5fa032219d3c662f8c428e3240" name="a8fcd4c5fa032219d3c662f8c428e3240"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8fcd4c5fa032219d3c662f8c428e3240">&#9670;&#160;</a></span>GetAngle()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">std::optional&lt;::units::turn_t &gt; yams::units::EasyCRT::GetAngle </td>
+          <td class="memname">std::optional&lt; wpi::units::turn_t &gt; yams::units::EasyCRT::GetAngle </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td></td>
@@ -293,7 +293,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Returns the number of candidates evaluated in the last solve. </p>
 <p>Always 4 (the 2 × 2 floor/ceil combinations), or 0 before the first call.</p>
-<dl class="section return"><dt>Returns</dt><dd>Candidate count from the previous <a class="el" href="#a107345a15d72dcef9c905a99ed1e38e3" title="Read both encoders and return the mechanism angle if uniquely resolved.">GetAngle()</a> call. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Candidate count from the previous <a class="el" href="#a8fcd4c5fa032219d3c662f8c428e3240" title="Read both encoders and return the mechanism angle if uniquely resolved.">GetAngle()</a> call. </dd></dl>
 
 </div>
 </div>
@@ -320,7 +320,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Returns the status from the most recent <a class="el" href="#a107345a15d72dcef9c905a99ed1e38e3" title="Read both encoders and return the mechanism angle if uniquely resolved.">GetAngle()</a> call. </p>
+<p>Returns the status from the most recent <a class="el" href="#a8fcd4c5fa032219d3c662f8c428e3240" title="Read both encoders and return the mechanism angle if uniquely resolved.">GetAngle()</a> call. </p>
 <dl class="section return"><dt>Returns</dt><dd>Last Status value. </dd></dl>
 
 </div>
