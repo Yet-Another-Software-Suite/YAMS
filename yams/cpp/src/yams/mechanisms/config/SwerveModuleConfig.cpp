@@ -89,8 +89,8 @@ SwerveModuleConfig& SwerveModuleConfig::WithWheelDiameter(wpi::units::meter_t di
   return *this;
 }
 
-SwerveModuleConfig& SwerveModuleConfig::WithMinimumVelocity(wpi::units::meters_per_second_t speed) {
-  m_minimumVelocity = speed;
+SwerveModuleConfig& SwerveModuleConfig::WithVelocityDeadband(wpi::units::meters_per_second_t speed) {
+  m_velocityDeadband = speed;
   return *this;
 }
 
@@ -202,8 +202,8 @@ double SwerveModuleConfig::GetCosineCompensatedVelocity(
 wpi::math::SwerveModuleVelocity SwerveModuleConfig::GetOptimizedState(
     wpi::math::SwerveModuleVelocity state) const {
   wpi::math::Rotation2d currentAngle{wpi::units::radian_t{GetAbsoluteEncoderAngle()}};
-  if (m_minimumVelocity) {
-    if (wpi::units::math::abs(state.velocity) <= *m_minimumVelocity) {
+  if (m_velocityDeadband) {
+    if (wpi::units::math::abs(state.velocity) <= *m_velocityDeadband) {
       state = wpi::math::SwerveModuleVelocity{wpi::units::meters_per_second_t{0}, currentAngle};
     }
   }

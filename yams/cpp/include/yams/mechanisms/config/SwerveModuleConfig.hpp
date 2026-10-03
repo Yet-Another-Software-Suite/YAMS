@@ -132,12 +132,13 @@ class SwerveModuleConfig {
   SwerveModuleConfig& WithWheelDiameter(wpi::units::meter_t diameter);
 
   /**
-   * Minimum speed below which the module holds its current azimuth instead of tracking.
+   * Velocity deadband: a requested wheel speed at or below it stops the module and holds its
+   * current azimuth instead of tracking.
    *
-   * @param speed Minimum speed threshold.
+   * @param speed Velocity deadband.
    * @return *this for chaining.
    */
-  SwerveModuleConfig& WithMinimumVelocity(wpi::units::meters_per_second_t speed);
+  SwerveModuleConfig& WithVelocityDeadband(wpi::units::meters_per_second_t speed);
 
   /**
    * Enable or disable WPILib SwerveModuleState optimization (flip by 180° to minimise rotation).
@@ -239,7 +240,7 @@ class SwerveModuleConfig {
   gearing::GearBox m_absoluteEncoderGearbox{1.0};
   bool m_stateOptimization{true};
   bool m_cosineCompensation{false};
-  std::optional<wpi::units::meters_per_second_t> m_minimumVelocity;
+  std::optional<wpi::units::meters_per_second_t> m_velocityDeadband;
   std::optional<wpi::math::Translation2d> m_location;
   std::optional<wpi::units::meter_t> m_wheelCircumference;
 

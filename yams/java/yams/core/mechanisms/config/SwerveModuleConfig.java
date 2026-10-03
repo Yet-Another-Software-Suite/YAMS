@@ -131,9 +131,9 @@ public class SwerveModuleConfig {
    */
   private Optional<GearBox> couplingRatio = Optional.empty();
   /**
-   * Swerve module minimum velocity.
+   * Wheel speed at or below which the module stops and holds its angle, see {@link #withVelocityDeadband}.
    */
-  private Optional<LinearVelocity> minimumVelocity = Optional.of(MetersPerSecond.of(0.1));
+  private Optional<LinearVelocity> velocityDeadband = Optional.of(MetersPerSecond.of(0.1));
   /** Angle the wheel was last sent to by {@link #getOptimizedState}, or null before the first. */
   private Rotation2d lastCommandedAngle;
   /**
@@ -187,7 +187,7 @@ public class SwerveModuleConfig {
     this.swerveModuleStateOptimization = cfg.swerveModuleStateOptimization;
     this.cosineCompensation = cfg.cosineCompensation;
     this.couplingRatio = cfg.couplingRatio;
-    this.minimumVelocity = cfg.minimumVelocity;
+    this.velocityDeadband = cfg.velocityDeadband;
     this.distanceFromCenterOfRotation = cfg.distanceFromCenterOfRotation;
     this.absoluteEncoder = cfg.absoluteEncoder;
     this.wheelCircumference = cfg.wheelCircumference;
@@ -431,13 +431,14 @@ public class SwerveModuleConfig {
   }
 
   /**
-   * Set the minimum velocity for the {@link SmartMotorController}.
+   * Set the velocity deadband: a requested wheel speed at or below it is too slow to steer by, so the
+   * module stops and holds its angle instead of turning toward controller noise.
    *
-   * @param speed Minimum velocity for the {@link SmartMotorController}.
+   * @param speed Velocity deadband, or null to always steer.
    * @return {@link SwerveModuleConfig} for chaining.
    */
-  public SwerveModuleConfig withMinimumVelocity(LinearVelocity speed) {
-    minimumVelocity = Optional.ofNullable(speed);
+  public SwerveModuleConfig withVelocityDeadband(LinearVelocity speed) {
+    velocityDeadband = Optional.ofNullable(speed);
     return this;
   }
 
@@ -634,7 +635,7 @@ public class SwerveModuleConfig {
    * @return {@link SwerveModuleVelocity} optimized.
    */
   public SwerveModuleVelocity getOptimizedState(SwerveModuleVelocity state, SwerveModuleVelocityWithAzimuth measured) {
-    if (minimumVelocity.isPresent() && MetersPerSecond.of(Math.abs(state.velocity)).lte(minimumVelocity.get())) {
+    if (velocityDeadband.isPresent() && MetersPerSecond.of(Math.abs(state.velocity)).lte(velocityDeadband.get())) {
       // Too slow to steer by: hold the wheel where it is.
       state = new SwerveModuleVelocity(0, measured.angle);
       lastCommandedAngle = measured.angle;

@@ -30,7 +30,7 @@ public class SwerveModuleConfigTest {
   @BeforeEach
   void createConfig() {
     // Given the wheel's measured state, the optimizer needs no motor controllers.
-    config = new SwerveModuleConfig(null, null).withOptimization(true).withMinimumVelocity(MetersPerSecond.of(0.1));
+    config = new SwerveModuleConfig(null, null).withOptimization(true).withVelocityDeadband(MetersPerSecond.of(0.1));
   }
 
   private static SwerveModuleVelocityWithAzimuth wheelAt(double degrees) {
