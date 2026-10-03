@@ -430,9 +430,10 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
     if (antiTipping.isEmpty() || gyroSupplier.isEmpty()) {
       return new ChassisVelocities();
     }
-    // Without the yaw, the correction is relative to the robot, like the chassis speeds it is added to.
+    // AntiTipping gives the correction in the frame of the attitude, which the gyro's yaw makes the
+    // field's. Turn it to the robot's, like the chassis speeds it is added to.
     final Rotation3d attitude = gyroSupplier.get().get();
-    return antiTipping.get().calculate(attitude);
+    return antiTipping.get().calculate(attitude).toRobotRelative(new Rotation2d(attitude.getZ()));
   }
 
   /**

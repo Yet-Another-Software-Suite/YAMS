@@ -4,6 +4,7 @@
 package yams.helpers;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -15,6 +16,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.util.CANPorts;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import org.wpilib.hardware.bus.CANPort;
 import yams.core.motorcontrollers.SmartMotorController;
 
@@ -151,5 +153,25 @@ public class DeviceCreator {
       ctreDevice.resetSignalFrequencies();
       ctreDevice.optimizeBusUtilization(0);
     }
+  }
+
+  /**
+   * Read a CTRE device's configuration, retrying while it times out. A loaded machine can take
+   * longer than Phoenix's default timeout to answer, which leaves the configuration read as its
+   * defaults.
+   *
+   * @param read Reads the configuration with a timeout, such as
+   *             {@code () -> talon.getConfigurator().refresh(config, 1.0)}.
+   * @throws AssertionError if no read succeeds.
+   */
+  public static void refreshConfig(Supplier<StatusCode> read) {
+    StatusCode status = StatusCode.OK;
+    for (int attempt = 0; attempt < 5; attempt++) {
+      status = read.get();
+      if (status.isOK()) {
+        return;
+      }
+    }
+    throw new AssertionError("Could not read the device's configuration: " + status);
   }
 }

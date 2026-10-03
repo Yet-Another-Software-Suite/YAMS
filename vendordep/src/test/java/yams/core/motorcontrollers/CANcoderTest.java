@@ -60,7 +60,7 @@ public class CANcoderTest {
   /** The discontinuity point the CANcoder holds, in rotations. */
   private static double cancoderDiscontinuityPoint(CANcoder cancoder) {
     final CANcoderConfiguration config = new CANcoderConfiguration();
-    cancoder.getConfigurator().refresh(config);
+    DeviceCreator.refreshConfig(() -> cancoder.getConfigurator().refresh(config, 1.0));
     return config.MagnetSensor.AbsoluteSensorDiscontinuityPoint;
   }
 

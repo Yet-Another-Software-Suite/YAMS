@@ -192,7 +192,7 @@ public class CANdiTest {
     final CANdi candi = (CANdi) smc.getConfig().getExternalEncoder().orElseThrow();
     if (testCase.talonFXS()) {
       final ExternalFeedbackConfigs feedback = new ExternalFeedbackConfigs();
-      ((TalonFXS) smc.getMotorController()).getConfigurator().refresh(feedback);
+      DeviceCreator.refreshConfig(() -> ((TalonFXS) smc.getMotorController()).getConfigurator().refresh(feedback, 1.0));
       assertEquals(testCase.pwm() == 1 ? ExternalFeedbackSensorSourceValue.FusedCANdiPWM1 : ExternalFeedbackSensorSourceValue.FusedCANdiPWM2,
           feedback.ExternalFeedbackSensorSource, name + ": feedback sensor source");
       assertEquals(candi.getDeviceID(), feedback.FeedbackRemoteSensorID, name + ": remote sensor ID");
@@ -200,7 +200,7 @@ public class CANdiTest {
       assertEquals(1, feedback.SensorToMechanismRatio, 1e-9, name + ": sensor to mechanism ratio");
     } else {
       final FeedbackConfigs feedback = new FeedbackConfigs();
-      ((TalonFX) smc.getMotorController()).getConfigurator().refresh(feedback);
+      DeviceCreator.refreshConfig(() -> ((TalonFX) smc.getMotorController()).getConfigurator().refresh(feedback, 1.0));
       assertEquals(testCase.pwm() == 1 ? FeedbackSensorSourceValue.FusedCANdiPWM1 : FeedbackSensorSourceValue.FusedCANdiPWM2,
           feedback.FeedbackSensorSource, name + ": feedback sensor source");
       assertEquals(candi.getDeviceID(), feedback.FeedbackRemoteSensorID, name + ": remote sensor ID");
@@ -209,7 +209,7 @@ public class CANdiTest {
     }
 
     final CANdiConfiguration candiConfig = new CANdiConfiguration();
-    candi.getConfigurator().refresh(candiConfig);
+    DeviceCreator.refreshConfig(() -> candi.getConfigurator().refresh(candiConfig, 1.0));
     final double discontinuityPoint = testCase.pwm() == 1 ? candiConfig.PWM1.AbsoluteSensorDiscontinuityPoint : candiConfig.PWM2.AbsoluteSensorDiscontinuityPoint;
     final double zeroOffset = testCase.pwm() == 1 ? candiConfig.PWM1.AbsoluteSensorOffset : candiConfig.PWM2.AbsoluteSensorOffset;
     assertEquals(expectedDiscontinuityPoint, discontinuityPoint, 1e-9, name + ": CANdi discontinuity point");

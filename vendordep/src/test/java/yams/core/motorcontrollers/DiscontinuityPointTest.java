@@ -36,6 +36,7 @@ import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.motorcontrollers.AbsoluteEncoderCases.Controller;
 import yams.core.motorcontrollers.AbsoluteEncoderCases.Encoder;
 import yams.core.motorcontrollers.AbsoluteEncoderCases.RelativeFeedback;
+import yams.helpers.DeviceCreator;
 import yams.helpers.MockHardwareExtension;
 
 /**
@@ -101,11 +102,11 @@ public class DiscontinuityPointTest {
     final Object encoder = smc.getConfig().getExternalEncoder().orElseThrow();
     if (encoder instanceof CANcoder cancoder) {
       final CANcoderConfiguration config = new CANcoderConfiguration();
-      cancoder.getConfigurator().refresh(config);
+      DeviceCreator.refreshConfig(() -> cancoder.getConfigurator().refresh(config, 1.0));
       assertEquals(point, config.MagnetSensor.AbsoluteSensorDiscontinuityPoint, 1e-9, name + ": CANcoder discontinuity point");
     } else if (encoder instanceof CANdi candi) {
       final CANdiConfiguration config = new CANdiConfiguration();
-      candi.getConfigurator().refresh(config);
+      DeviceCreator.refreshConfig(() -> candi.getConfigurator().refresh(config, 1.0));
       assertEquals(point, config.PWM1.AbsoluteSensorDiscontinuityPoint, 1e-9, name + ": CANdi discontinuity point");
     } else if (encoder instanceof DetachedEncoder detachedEncoder) {
       assertEquals(point == 0.5, detachedEncoder.detachedEncoderAccessor.isDutyCycleZeroCentered(), name + ": CAN encoder zero-centered");

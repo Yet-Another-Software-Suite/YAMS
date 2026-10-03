@@ -35,6 +35,7 @@ import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.motorcontrollers.AbsoluteEncoderCases.Controller;
 import yams.core.motorcontrollers.AbsoluteEncoderCases.Encoder;
 import yams.core.motorcontrollers.AbsoluteEncoderCases.RelativeFeedback;
+import yams.helpers.DeviceCreator;
 import yams.helpers.MockHardwareExtension;
 
 /**
@@ -94,11 +95,11 @@ public class ZeroOffsetTest {
     final Object encoder = smc.getConfig().getExternalEncoder().orElseThrow();
     if (encoder instanceof CANcoder cancoder) {
       final CANcoderConfiguration config = new CANcoderConfiguration();
-      cancoder.getConfigurator().refresh(config);
+      DeviceCreator.refreshConfig(() -> cancoder.getConfigurator().refresh(config, 1.0));
       assertEquals(offset, config.MagnetSensor.MagnetOffset, 1e-3, name + ": CANcoder magnet offset");
     } else if (encoder instanceof CANdi candi) {
       final CANdiConfiguration config = new CANdiConfiguration();
-      candi.getConfigurator().refresh(config);
+      DeviceCreator.refreshConfig(() -> candi.getConfigurator().refresh(config, 1.0));
       assertEquals(offset, config.PWM1.AbsoluteSensorOffset, 1e-3, name + ": CANdi absolute sensor offset");
     } else if (encoder instanceof DetachedEncoder detachedEncoder) {
       assertEquals(offset, detachedEncoder.detachedEncoderAccessor.getDutyCycleOffset(), 1e-6, name + ": CAN encoder duty cycle offset");

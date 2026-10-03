@@ -195,9 +195,9 @@ public class LiveTuningTest {
       } else {
         final Slot0Configs slot0 = new Slot0Configs();
         if (motorController instanceof TalonFXS talonFXS) {
-          talonFXS.getConfigurator().refresh(slot0);
+          DeviceCreator.refreshConfig(() -> talonFXS.getConfigurator().refresh(slot0, 1.0));
         } else {
-          ((TalonFX) motorController).getConfigurator().refresh(slot0);
+          DeviceCreator.refreshConfig(() -> ((TalonFX) motorController).getConfigurator().refresh(slot0, 1.0));
         }
         kP = slot0.kP;
       }
