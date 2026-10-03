@@ -1,0 +1,61 @@
+name: Publish Latest Release to WPILib
+# Opens the WPILib vendor-json-repo PRs for the latest full (non-prerelease) GitHub release, using
+# the versioned vendordep JSONs that release.yml pushed to gh-pages. Use this when the release
+# workflow skipped or failed the "Create Vendor JSON Repo PR" steps.
+on:
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  publish:
+    name: Publish to WPILib
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Resolve latest release version
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # `gh release view` with no tag returns the release marked "Latest", which is never a
+          # prerelease or draft.
+          TAG=$(gh release view --repo ${{ github.repository }} --json tagName --jq .tagName)
+          echo "Latest release: $TAG"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v7
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Check versioned vendordep JSONs exist
+        run: |
+          for variant in commands2 commands3; do
+            file="gh-pages/yams_${variant}-${{ steps.version.outputs.version }}.json"
+            if [ ! -f "$file" ]; then
+              echo "$file not found on gh-pages; was version ${{ steps.version.outputs.version }} released by release.yml?" >&2
+              exit 1
+            fi
+          done
+
+      - name: Create Vendor JSON Repo PR (Commands v2)
+        uses: wpilibsuite/vendor-json-repo/.github/actions/add_vendordep@main
+        with:
+          repo: Yet-Another-Software-Suite/vendor-json-repo
+          token: ${{ secrets.PUBLISH_VENDOR_JSON_TOKEN }}
+          vendordep_file: gh-pages/yams_commands2-${{ steps.version.outputs.version }}.json
+          pr_title: "Automatically add YAMS (Commands v2) version ${{ steps.version.outputs.version }}"
+          pr_branch: "publish_yams_commands2_${{ steps.version.outputs.version }}"
+
+      - name: Create Vendor JSON Repo PR (Commands v3)
+        uses: wpilibsuite/vendor-json-repo/.github/actions/add_vendordep@main
+        with:
+          repo: Yet-Another-Software-Suite/vendor-json-repo
+          token: ${{ secrets.PUBLISH_VENDOR_JSON_TOKEN }}
+          vendordep_file: gh-pages/yams_commands3-${{ steps.version.outputs.version }}.json
+          pr_title: "Automatically add YAMS (Commands v3) version ${{ steps.version.outputs.version }}"
+          pr_branch: "publish_yams_commands3_${{ steps.version.outputs.version }}"
