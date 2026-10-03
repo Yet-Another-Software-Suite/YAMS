@@ -227,10 +227,18 @@ jobs:
           name: release-examples
           path: release-artifacts/
 
+      # Laid out to be extracted straight into the WPILib home for the vendordep's frcYear
+      # (~/wpilib/<frcYear> or C:\Users\Public\wpilib\<frcYear>): maven/ is GradleRIO's local maven
+      # repo and vendordeps/ is where "Install new libraries (offline)" looks for vendordep JSONs.
       - name: Zip current version maven for offline installation
         run: |
-          cd ${{ env.workingDirectory }}/build
-          zip -r ${{ github.workspace }}/release-artifacts/${{ inputs.releaseVersion }}-YAMS-Offline.zip maven/
+          offline="${{ github.workspace }}/offline"
+          mkdir -p "$offline/maven" "$offline/vendordeps"
+          cd ${{ env.workingDirectory }}/build/maven
+          cp -r releases/. "$offline/maven/"
+          cp yams_commands2.json yams_commands3.json "$offline/vendordeps/"
+          cd "$offline"
+          zip -r ${{ github.workspace }}/release-artifacts/${{ inputs.releaseVersion }}-YAMS-Offline.zip maven/ vendordeps/
 
       # Pass 2: rebuild on top of the full gh-pages history so the deployed
       # maven metadata covers all versions, not just the current one.
@@ -285,6 +293,91 @@ jobs:
       - name: Output Pages Tree
         run: find ${{ env.workingDirectory }}/build/maven/ -type f
 
+      # Builds the release description: a "What's new" list of every commit since the previous
+      # full (non-prerelease, non-draft) release, followed by installation instructions. GitHub's
+      # generated notes (merged PRs, new contributors, full changelog link) are appended after this
+      # by --generate-notes.
+      - name: Write release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v${{ inputs.releaseVersion }}"
+          REPO_URL="${{ github.server_url }}/${{ github.repository }}"
+          # GradleRIO resolves the WPILib home as wpilib/<frcYear>, so the vendordep's frcYear
+          # names the exact folder the offline zip goes into.
+          FRC_YEAR=$(jq -r .frcYear ${{ env.workingDirectory }}/build/maven/yams_commands2.json)
+          if [ -z "$FRC_YEAR" ] || [ "$FRC_YEAR" = "null" ]; then
+            echo "Could not read frcYear from yams_commands2.json" >&2
+            exit 1
+          fi
+          # Newest full release other than this one (it may still exist when re-running a release).
+          PREVIOUS_TAG=$(gh release list --exclude-pre-releases --exclude-drafts --limit 100 \
+            --json tagName --jq '.[].tagName' | grep -vxF "$TAG" | head -n 1 || true)
+          if [ -n "$PREVIOUS_TAG" ]; then
+            RANGE="$PREVIOUS_TAG..$TAG"
+            SINCE="since $PREVIOUS_TAG"
+          else
+            RANGE="$TAG"
+            SINCE=""
+          fi
+
+          {
+            echo "## What's new"
+            echo
+            if [ -n "$SINCE" ]; then
+              echo "Commits $SINCE:"
+              echo
+            fi
+            git log --no-merges --format="- %s ([%h]($REPO_URL/commit/%H))" "$RANGE"
+            echo
+            # Quoted heredoc so backslashes and backticks stay literal; @FRC_YEAR@ is filled in below.
+            cat <<'EOF'
+          ## Installation
+
+          Pick the vendordep for the command framework your robot uses. Only install one of them.
+
+          ### Online
+
+          In VS Code, run **WPILib: Manage Vendor Libraries > Install new libraries (online)** and paste one of these URLs:
+
+          | Command framework | Vendordep URL |
+          | --- | --- |
+          | Commands v2 | `https://yet-another-software-suite.github.io/YAMS/yams_commands2.json` |
+          | Commands v3 | `https://yet-another-software-suite.github.io/YAMS/yams_commands3.json` |
+
+          Pinned to this release: `https://yet-another-software-suite.github.io/YAMS/yams_commands2-${{ inputs.releaseVersion }}.json` and `https://yet-another-software-suite.github.io/YAMS/yams_commands3-${{ inputs.releaseVersion }}.json`.
+
+          ### Offline
+
+          Download `${{ inputs.releaseVersion }}-YAMS-Offline.zip` from the assets below. It contains a `maven` folder and a `vendordeps` folder that merge into your **@FRC_YEAR@** WPILib home folder. The `@FRC_YEAR@` folder is created by the matching WPILib installer, so install that first.
+
+          **Windows:** extract into `C:\Users\Public\wpilib\@FRC_YEAR@`. In File Explorer, right click the zip, choose **Extract All...**, and enter that folder. Or in PowerShell:
+
+          ```powershell
+          Expand-Archive -Path "$HOME\Downloads\${{ inputs.releaseVersion }}-YAMS-Offline.zip" -DestinationPath "C:\Users\Public\wpilib\@FRC_YEAR@" -Force
+          ```
+
+          **macOS:** extract into `~/wpilib/@FRC_YEAR@`. Finder's double click extracts next to the zip instead, so use Terminal:
+
+          ```bash
+          unzip -o ~/Downloads/${{ inputs.releaseVersion }}-YAMS-Offline.zip -d ~/wpilib/@FRC_YEAR@
+          ```
+
+          **Linux:** extract into `~/wpilib/@FRC_YEAR@`:
+
+          ```bash
+          unzip -o ~/Downloads/${{ inputs.releaseVersion }}-YAMS-Offline.zip -d ~/wpilib/@FRC_YEAR@
+          ```
+
+          Afterwards you should have `wpilib/@FRC_YEAR@/maven/yams/...` and `wpilib/@FRC_YEAR@/vendordeps/yams_commands2.json` / `yams_commands3.json`. Then, in VS Code, run **WPILib: Manage Vendor Libraries > Install new libraries (offline)** and pick **Yet Another Mechanism System (Commands v2)** or **(Commands v3)**.
+
+          Example projects for both command frameworks are also attached below.
+          EOF
+            echo
+          } > release-notes.md
+          sed -i "s/@FRC_YEAR@/$FRC_YEAR/g" release-notes.md
+          cat release-notes.md
+
       - name: Create GitHub Release
         id: create_release
         env:
@@ -305,6 +398,7 @@ jobs:
           fi
           gh release create "$TAG" \
             --title "YAMS v${{ inputs.releaseVersion }}" \
+            --notes-file release-notes.md \
             --generate-notes \
             $RELEASE_FLAGS \
             release-artifacts/*
