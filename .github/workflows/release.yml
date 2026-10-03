@@ -227,8 +227,8 @@ jobs:
           name: release-examples
           path: release-artifacts/
 
-      # Laid out to be extracted straight into the WPILib home for the vendordep's frcYear
-      # (~/wpilib/<frcYear> or C:\Users\Public\wpilib\<frcYear>): maven/ is GradleRIO's local maven
+      # Laid out to be extracted straight into the WPILib home for the vendordep's wpilibYear
+      # (~/wpilib/<wpilibYear> or C:\Users\Public\wpilib\<wpilibYear>): maven/ is GradleRIO's local maven
       # repo and vendordeps/ is where "Install new libraries (offline)" looks for vendordep JSONs.
       - name: Zip current version maven for offline installation
         run: |
@@ -303,11 +303,11 @@ jobs:
         run: |
           TAG="v${{ inputs.releaseVersion }}"
           REPO_URL="${{ github.server_url }}/${{ github.repository }}"
-          # GradleRIO resolves the WPILib home as wpilib/<frcYear>, so the vendordep's frcYear
+          # GradleRIO resolves the WPILib home as wpilib/<wpilibYear>, so the vendordep's wpilibYear
           # names the exact folder the offline zip goes into.
-          FRC_YEAR=$(jq -r .frcYear ${{ env.workingDirectory }}/build/maven/yams_commands2.json)
-          if [ -z "$FRC_YEAR" ] || [ "$FRC_YEAR" = "null" ]; then
-            echo "Could not read frcYear from yams_commands2.json" >&2
+          WPILIB_YEAR=$(jq -r .wpilibYear ${{ env.workingDirectory }}/build/maven/yams_commands2.json)
+          if [ -z "$WPILIB_YEAR" ] || [ "$WPILIB_YEAR" = "null" ]; then
+            echo "Could not read wpilibYear from yams_commands2.json" >&2
             exit 1
           fi
           # Newest full release other than this one (it may still exist when re-running a release).
@@ -330,7 +330,7 @@ jobs:
             fi
             git log --no-merges --format="- %s ([%h]($REPO_URL/commit/%H))" "$RANGE"
             echo
-            # Quoted heredoc so backslashes and backticks stay literal; @FRC_YEAR@ is filled in below.
+            # Quoted heredoc so backslashes and backticks stay literal; @WPILIB_YEAR@ is filled in below.
             cat <<'EOF'
           ## Installation
 
@@ -349,33 +349,33 @@ jobs:
 
           ### Offline
 
-          Download `${{ inputs.releaseVersion }}-YAMS-Offline.zip` from the assets below. It contains a `maven` folder and a `vendordeps` folder that merge into your **@FRC_YEAR@** WPILib home folder. The `@FRC_YEAR@` folder is created by the matching WPILib installer, so install that first.
+          Download `${{ inputs.releaseVersion }}-YAMS-Offline.zip` from the assets below. It contains a `maven` folder and a `vendordeps` folder that merge into your **@WPILIB_YEAR@** WPILib home folder. The `@WPILIB_YEAR@` folder is created by the matching WPILib installer, so install that first.
 
-          **Windows:** extract into `C:\Users\Public\wpilib\@FRC_YEAR@`. In File Explorer, right click the zip, choose **Extract All...**, and enter that folder. Or in PowerShell:
+          **Windows:** extract into `C:\Users\Public\wpilib\@WPILIB_YEAR@`. In File Explorer, right click the zip, choose **Extract All...**, and enter that folder. Or in PowerShell:
 
           ```powershell
-          Expand-Archive -Path "$HOME\Downloads\${{ inputs.releaseVersion }}-YAMS-Offline.zip" -DestinationPath "C:\Users\Public\wpilib\@FRC_YEAR@" -Force
+          Expand-Archive -Path "$HOME\Downloads\${{ inputs.releaseVersion }}-YAMS-Offline.zip" -DestinationPath "C:\Users\Public\wpilib\@WPILIB_YEAR@" -Force
           ```
 
-          **macOS:** extract into `~/wpilib/@FRC_YEAR@`. Finder's double click extracts next to the zip instead, so use Terminal:
+          **macOS:** extract into `~/wpilib/@WPILIB_YEAR@`. Finder's double click extracts next to the zip instead, so use Terminal:
 
           ```bash
-          unzip -o ~/Downloads/${{ inputs.releaseVersion }}-YAMS-Offline.zip -d ~/wpilib/@FRC_YEAR@
+          unzip -o ~/Downloads/${{ inputs.releaseVersion }}-YAMS-Offline.zip -d ~/wpilib/@WPILIB_YEAR@
           ```
 
-          **Linux:** extract into `~/wpilib/@FRC_YEAR@`:
+          **Linux:** extract into `~/wpilib/@WPILIB_YEAR@`:
 
           ```bash
-          unzip -o ~/Downloads/${{ inputs.releaseVersion }}-YAMS-Offline.zip -d ~/wpilib/@FRC_YEAR@
+          unzip -o ~/Downloads/${{ inputs.releaseVersion }}-YAMS-Offline.zip -d ~/wpilib/@WPILIB_YEAR@
           ```
 
-          Afterwards you should have `wpilib/@FRC_YEAR@/maven/yams/...` and `wpilib/@FRC_YEAR@/vendordeps/yams_commands2.json` / `yams_commands3.json`. Then, in VS Code, run **WPILib: Manage Vendor Libraries > Install new libraries (offline)** and pick **Yet Another Mechanism System (Commands v2)** or **(Commands v3)**.
+          Afterwards you should have `wpilib/@WPILIB_YEAR@/maven/yams/...` and `wpilib/@WPILIB_YEAR@/vendordeps/yams_commands2.json` / `yams_commands3.json`. Then, in VS Code, run **WPILib: Manage Vendor Libraries > Install new libraries (offline)** and pick **Yet Another Mechanism System (Commands v2)** or **(Commands v3)**.
 
           Example projects for both command frameworks are also attached below.
           EOF
             echo
           } > release-notes.md
-          sed -i "s/@FRC_YEAR@/$FRC_YEAR/g" release-notes.md
+          sed -i "s/@WPILIB_YEAR@/$WPILIB_YEAR/g" release-notes.md
           cat release-notes.md
 
       - name: Create GitHub Release
