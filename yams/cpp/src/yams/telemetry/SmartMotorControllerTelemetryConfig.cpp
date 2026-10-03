@@ -3,11 +3,10 @@
 
 #include "yams/telemetry/SmartMotorControllerTelemetryConfig.hpp"
 
-#include <units/angle.h>
-#include <units/length.h>
-
 #include <string>
 #include <unordered_map>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/length.hpp>
 
 #include "yams/motorcontrollers/SmartMotorController.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
@@ -416,10 +415,10 @@ SmartMotorControllerTelemetryConfig::GetDoubleFields(SmartMotorController& smc) 
   // Set mechanism limit defaults (in degrees for human readability)
   if (auto lim = cfg.GetMechanismUpperLimit())
     m_doubleFields.at(DoubleTelemetryField::MechanismUpperLimit)
-        .SetDefaultValue(units::degree_t{*lim}.value());
+        .SetDefaultValue(wpi::units::degree_t{*lim}.value());
   if (auto lim = cfg.GetMechanismLowerLimit())
     m_doubleFields.at(DoubleTelemetryField::MechanismLowerLimit)
-        .SetDefaultValue(units::degree_t{*lim}.value());
+        .SetDefaultValue(wpi::units::degree_t{*lim}.value());
 
   // Current limit defaults
   if (auto lim = cfg.GetSupplyStallCurrentLimit())
@@ -484,7 +483,7 @@ SmartMotorControllerTelemetryConfig::GetDoubleFields(SmartMotorController& smc) 
     m_doubleFields.at(DoubleTelemetryField::kD).Disable();
   }
 
-  // Feedforward defaults — getters return units types, use .value() for raw doubles
+  // Feedforward defaults getters return units types, use .value() for raw doubles
   if (auto ff = cfg.GetArmFeedforward(slot)) {
     m_doubleFields.at(DoubleTelemetryField::kG).Enable();
     m_doubleFields.at(DoubleTelemetryField::kS).SetDefaultValue(ff->GetKs().value());

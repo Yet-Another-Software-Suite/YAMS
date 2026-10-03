@@ -40,7 +40,7 @@ HoodSubsystem::HoodSubsystem() {
       .WithTrapezoidProfile(units::turns_per_second_t{0.5}, units::turns_per_second_squared_t{0.25})
       .WithMechanismLimits(units::degree_t{-30}, units::degree_t{100})
       .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
-      .WithIdleMode(Cfg::MotorMode::BRAKE)
+      .WithZeroPower(Cfg::MotorMode::BRAKE)
       .WithTelemetry("HoodMotor", Cfg::TelemetryVerbosity::HIGH)
       .WithStatorCurrentLimit(units::ampere_t{40})
       .WithMotorInverted(false)

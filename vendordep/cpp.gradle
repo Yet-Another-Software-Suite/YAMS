@@ -1,0 +1,112 @@
+// C++ build configuration: native library/test suite definitions, exports, and the Catch2
+// test-runner task. Applied from build.gradle.
+
+import org.gradle.nativeplatform.test.tasks.RunTestExecutable
+
+// Apply C++ toolchain/platform configuration
+apply from: 'config.gradle'
+
+task catchTests {
+    description = 'Runs the Catch2 C++ unit tests for the current platform'
+    group = 'Verification'
+}
+
+tasks.whenTaskAdded { task ->
+    if (task instanceof RunTestExecutable) {
+        task.enabled = !gradle.startParameter.taskNames.contains('build')
+        // Optional Catch2 test spec, e.g. -PcatchFilter="[ArmTest]" or "~[ArmTest]~[PivotTest]"
+        if (project.hasProperty('catchFilter')) {
+            task.args project.property('catchFilter')
+        }
+        if (task.name.contains(wpi.platforms.desktop.toString().capitalize()) && task.name.contains('Debug')) {
+            catchTests.dependsOn task
+        }
+    }
+}
+
+nativeUtils {
+    exportsConfigs {
+        YAMS {
+            x86ExcludeSymbols = [
+                '_CT??_R0?AV_System_error',
+                '_CT??_R0?AVexception',
+                '_CT??_R0?AVfailure',
+                '_CT??_R0?AVruntime_error',
+                '_CT??_R0?AVsystem_error',
+                '_CTA5?AVfailure',
+                '_TI5?AVfailure',
+                '_CT??_R0?AVout_of_range',
+                '_CTA3?AVout_of_range',
+                '_TI3?AVout_of_range',
+                '_CT??_R0?AVbad_cast'
+            ]
+            x64ExcludeSymbols = [
+                '_CT??_R0?AV_System_error',
+                '_CT??_R0?AVexception',
+                '_CT??_R0?AVfailure',
+                '_CT??_R0?AVruntime_error',
+                '_CT??_R0?AVsystem_error',
+                '_CTA5?AVfailure',
+                '_TI5?AVfailure',
+                '_CT??_R0?AVout_of_range',
+                '_CTA3?AVout_of_range',
+                '_TI3?AVout_of_range',
+                '_CT??_R0?AVbad_cast'
+            ]
+        }
+    }
+}
+
+model {
+    components {
+        YAMS(NativeLibrarySpec) {
+            sources {
+                cpp {
+                    source {
+                        srcDirs "$rootDir/../yams/cpp/src"
+                        include '**/*.cpp'
+                    }
+                    exportedHeaders {
+                        srcDirs "$rootDir/../yams/cpp/include"
+                    }
+                }
+            }
+            nativeUtils.useRequiredLibrary(it, 'wpilib_shared')
+            wpi.vendor.nativeVendor.cpp(it)
+            if (skipCpp) {
+                binaries.all { buildable = false }
+            }
+        }
+    }
+    testSuites {
+        YAMSTest {
+            binaries.all {
+                buildable = !gradle.startParameter.taskNames.contains('build')
+            }
+            sources.cpp {
+                source {
+                    srcDir 'src/test/native/cpp'
+                    include '**/*.cpp'
+                }
+                exportedHeaders {
+                    srcDirs 'src/test/native/include'
+                }
+            }
+
+            /*binaries.all {
+             //              lib library: 'VendorDriver', linkage: 'shared'
+             def arch = it.targetPlatform.name
+             if (systemArch == arch && it.buildType.name == 'debug') {
+             def filePath = it.tasks.install.installDirectory.get().toString() + File.separatorChar + 'lib'
+             test.dependsOn it.tasks.install
+             test.systemProperty 'java.library.path', filePath
+             test.environment 'LD_LIBRARY_PATH', filePath
+             test.workingDir filePath
+             }
+             }*/
+
+            nativeUtils.useRequiredLibrary(it, "wpilib_shared", "catch2_static")
+            wpi.vendor.nativeVendor.cpp(it)
+        }
+    }
+}

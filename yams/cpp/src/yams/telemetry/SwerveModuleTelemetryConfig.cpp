@@ -14,8 +14,8 @@ SwerveModuleTelemetryConfig::SwerveModuleTelemetryConfig() {
                                             false, "degrees"});
   m_structFields.emplace(
       StructTelemetryField::State,
-      StructTelemetry<frc::SwerveModuleState, StructTelemetryField>{
-          "state", frc::SwerveModuleState{}, StructTelemetryField::State, false});
+      StructTelemetry<wpi::math::SwerveModuleVelocity, StructTelemetryField>{
+          "state", wpi::math::SwerveModuleVelocity{}, StructTelemetryField::State, false});
 }
 
 SwerveModuleTelemetryConfig::SwerveModuleTelemetryConfig(TelemetryVerbosity verbosity)
@@ -77,9 +77,9 @@ SwerveModuleTelemetryConfig::GetDoubleFields() {
   return m_doubleFields;
 }
 
-std::unordered_map<
-    SwerveModuleTelemetryConfig::StructTelemetryField,
-    StructTelemetry<frc::SwerveModuleState, SwerveModuleTelemetryConfig::StructTelemetryField>>&
+std::unordered_map<SwerveModuleTelemetryConfig::StructTelemetryField,
+                   StructTelemetry<wpi::math::SwerveModuleVelocity,
+                                   SwerveModuleTelemetryConfig::StructTelemetryField>>&
 SwerveModuleTelemetryConfig::GetStructFields() {
   return m_structFields;
 }

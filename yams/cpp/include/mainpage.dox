@@ -1,12 +1,12 @@
 /**
- * @mainpage YAMS — Yet Another Mechanism System
+ * @mainpage YAMS Yet Another Mechanism System
  *
  * @section intro_sec Introduction
  *
  * **YAMS** is a C++ FRC robotics library that provides a unified, hardware-agnostic
  * abstraction layer for common robot mechanisms. It wraps REV SPARK and CTRE TalonFX
  * motor controllers behind a single interface and ships ready-to-use implementations
- * for arms, elevators, pivots, flywheels, and swerve drives — all with built-in
+ * for arms, elevators, pivots, flywheels, and swerve drives all with built-in
  * simulation and telemetry support.
  *
  * Compatible with **WPILib 2026**, **REVLib**, and **CTRE Phoenix 6**.

@@ -1,33 +1,47 @@
+import org.wpilib.toolchain.*
+
 plugins {
     id "cpp"
     id "google-test-test-suite"
-    id "edu.wpi.first.GradleRIO" version "2026.2.1"
+    id "org.wpilib.GradleRIO" version "2027.0.0-alpha-6"
+    id "org.wpilib.WPILibRepositoriesPlugin" version "2027.0.0"
 }
 
-// Define my targets (RoboRIO) and artifacts (deployable files)
+// The GradleRIO plugin defaults wpi.versions.wpilibVersion to the exact "2027.0.0-alpha-6" tag.
+// Match vendordep/build.gradle's use of a floating "2027.+" range against the development
+// repositories (not just the release repository the GradleRIO plugin wires up by default) so the
+// same WPILib snapshot is used here as everywhere else in this repo.
+wpi.versions.wpilibVersion = "2027.+"
+wpilibRepositories.use2027Repos()
+wpilibRepositories.addAllDevelopmentRepositories(project)
+
+// Define my targets (SystemCore) and artifacts (deployable files)
 // This is added by GradleRIO's backing project DeployUtils.
 deploy {
     targets {
-        roborio(getTargetTypeClass('RoboRIO')) {
+        systemcore(getTargetTypeClass('SystemCore')) {
             // Team number is loaded either from the .wpilib/wpilib_preferences.json
             // or from command line. If not found an exception will be thrown.
             // You can use getTeamOrDefault(team) instead of getTeamNumber if you
             // want to store a team number in this file.
-            team = project.frc.getTeamNumber()
-            debug = project.frc.getDebugOrDefault(false)
+            team = project.wpilib.getTeamNumber()
+            // Use the default systemcore host name. This must be called after setting team
+            // as happens on the line above
+            useDefaultSystemcoreHostName()
+            debug = project.wpilib.getDebugOrDefault(false)
 
             artifacts {
                 // First part is artifact name, 2nd is artifact type
                 // getTargetTypeClass is a shortcut to get the class type using a string
 
-                frcCpp(getArtifactTypeClass('FRCNativeArtifact')) {
+                wpilibCpp(getArtifactTypeClass('WPILibNativeArtifact')) {
                 }
 
                 // Static files artifact
-                frcStaticFileDeploy(getArtifactTypeClass('FileTreeArtifact')) {
+                wpilibStaticFileDeploy(getArtifactTypeClass('FileTreeArtifact')) {
                     files = project.fileTree('src/main/deploy')
-                    directory = '/home/lvuser/deploy'
-                    deleteOldFiles = false // Change to true to delete files on roboRIO that no
+                    directory = '/home/systemcore/deploy'
+                    deleteOldFiles = false // Change to true to delete files on systemcore that no
                                            // longer exist in deploy directory of this project
                 }
             }
@@ -35,7 +49,7 @@ deploy {
     }
 }
 
-def deployArtifact = deploy.targets.roborio.artifacts.frcCpp
+def deployArtifact = deploy.targets.systemcore.artifacts.wpilibCpp
 
 // Set this to true to enable desktop support.
 def includeDesktopSupport = true
@@ -51,9 +65,9 @@ wpi.sim.addDriverstation()
 model {
     components {
         frcUserProgram(NativeExecutableSpec) {
-            targetPlatform wpi.platforms.roborio
+            targetPlatform wpi.platforms.systemcore
             if (includeDesktopSupport) {
-                targetPlatform wpi.platforms.desktop
+                targetPlatform NativePlatforms.desktop
             }
 
             sources.cpp {
@@ -76,7 +90,7 @@ model {
             wpi.sim.enable(it)
             // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
             wpi.cpp.vendor.cpp(it)
-            wpi.cpp.deps.wpilib(it)
+            wpi.cpp.deps.useRequiredLibrary(it, 'wpilib_shared')
         }
     }
     // testSuites {
@@ -94,8 +108,7 @@ model {
     //         wpi.cpp.enableExternalTasks(it)
 
     //         wpi.cpp.vendor.cpp(it)
-    //         wpi.cpp.deps.wpilib(it)
-    //         wpi.cpp.deps.googleTest(it)
+    //         wpi.cpp.deps.useRequiredLibrary(it, 'wpilib_shared', 'googletest_static')
     //     }
     // }
 }

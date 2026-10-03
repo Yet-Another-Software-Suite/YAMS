@@ -3,19 +3,18 @@
 
 #pragma once
 
-#include <frc/DataLogManager.h>
-#include <networktables/BooleanTopic.h>
-#include <networktables/DoubleTopic.h>
-#include <networktables/NetworkTable.h>
-#include <wpi/DataLog.h>
-#include <wpi/json.h>
-
 #include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <wpi/datalog/DataLog.hpp>
+#include <wpi/nt/BooleanTopic.hpp>
+#include <wpi/nt/DoubleTopic.hpp>
+#include <wpi/nt/NetworkTable.hpp>
+#include <wpi/system/DataLogManager.hpp>
+#include <wpi/util/json.hpp>
 
 // DoubleTelemetry<F>::TransformUnit() calls SmartMotorControllerConfig methods directly in its
 // (header-only, template) body; since SmartMotorControllerConfig is not a dependent type there,
@@ -35,10 +34,10 @@ enum class DoubleTelemetryField {
   ExponentialProfileKV,               ///< Exponential profile kV constant (tunable).
   ExponentialProfileKA,               ///< Exponential profile kA constant (tunable).
   ExponentialProfileMaxInput,         ///< Exponential profile maximum input voltage (tunable).
-  TrapezoidalProfileMaxVelocity,      ///< Trapezoidal profile max velocity — RPM or m/s (tunable).
-  TrapezoidalProfileMaxAcceleration,  ///< Trapezoidal profile max acceleration — RPM/s or m/s²
+  TrapezoidalProfileMaxVelocity,      ///< Trapezoidal profile max velocity RPM or m/s (tunable).
+  TrapezoidalProfileMaxAcceleration,  ///< Trapezoidal profile max acceleration RPM/s or m/s²
                                       ///< (tunable).
-  TrapezoidalProfileMaxJerk,          ///< Trapezoidal profile max jerk — RPM/s² (tunable).
+  TrapezoidalProfileMaxJerk,          ///< Trapezoidal profile max jerk RPM/s² (tunable).
   TunableClosedLoopControllerSlot,    ///< Live-tunable closed-loop gain slot selector.
   ActiveClosedLoopControllerSlot,     ///< Currently active closed-loop gain slot (read-only).
   kS,                                 ///< Static friction feedforward gain kS (tunable).
@@ -48,10 +47,10 @@ enum class DoubleTelemetryField {
   kP,                                 ///< Proportional feedback gain kP (tunable).
   kI,                                 ///< Integral feedback gain kI (tunable).
   kD,                                 ///< Derivative feedback gain kD (tunable).
-  TunableSetpointPosition,            ///< Live-tunable position setpoint — degrees or meters.
-  SetpointPosition,                   ///< Read-only position setpoint — rotations or meters.
-  TunableSetpointVelocity,            ///< Live-tunable velocity setpoint — RPM or m/s.
-  SetpointVelocity,                   ///< Read-only velocity setpoint — RPS or m/s.
+  TunableSetpointPosition,            ///< Live-tunable position setpoint degrees or meters.
+  SetpointPosition,                   ///< Read-only position setpoint rotations or meters.
+  TunableSetpointVelocity,            ///< Live-tunable velocity setpoint RPM or m/s.
+  SetpointVelocity,                   ///< Read-only velocity setpoint RPS or m/s.
   OutputVoltage,                      ///< Voltage currently applied to the motor (V).
   StatorCurrent,                      ///< Stator (output) current draw (A).
   StatorCurrentLimit,                 ///< Configured stator current limit (A, tunable).
@@ -151,8 +150,8 @@ class DoubleTelemetry {
    * @param dataTable   NT4 table for read-only sensor data.
    * @param tuningTable NT4 table for live-tunable gains.
    */
-  void SetupNetworkTables(std::shared_ptr<nt::NetworkTable> dataTable,
-                          std::shared_ptr<nt::NetworkTable> tuningTable) {
+  void SetupNetworkTables(std::shared_ptr<wpi::nt::NetworkTable> dataTable,
+                          std::shared_ptr<wpi::nt::NetworkTable> tuningTable) {
     m_dataTable = dataTable;
     m_tuningTable = tuningTable;
     if (!m_enabled) return;
@@ -160,7 +159,7 @@ class DoubleTelemetry {
     if (tuningTable && m_tunable) {
       auto topic = tuningTable->GetDoubleTopic(m_key);
       if (m_unit != "none") {
-        topic.SetProperties(wpi::json{{"units", m_unit}});
+        topic.SetProperties(wpi::util::json{{"units", m_unit}});
       }
       m_subPublisher = topic.Publish();
       m_subPublisher->SetDefault(m_defaultValue);
@@ -168,7 +167,7 @@ class DoubleTelemetry {
     } else if (dataTable) {
       auto topic = dataTable->GetDoubleTopic(m_key);
       if (m_unit != "none") {
-        topic.SetProperties(wpi::json{{"units", m_unit}});
+        topic.SetProperties(wpi::util::json{{"units", m_unit}});
       }
       m_publisher = topic.Publish();
       m_publisher->SetDefault(m_defaultValue);
@@ -180,7 +179,7 @@ class DoubleTelemetry {
    *
    * @param dataTable NT4 table for sensor data.
    */
-  void SetupNetworkTable(std::shared_ptr<nt::NetworkTable> dataTable) {
+  void SetupNetworkTable(std::shared_ptr<wpi::nt::NetworkTable> dataTable) {
     SetupNetworkTables(dataTable, nullptr);
   }
 
@@ -194,7 +193,7 @@ class DoubleTelemetry {
     std::string path = prefix;
     if (!path.empty() && path.back() != '/') path += '/';
     path += m_unit + '/' + m_key;
-    m_dataLogEntry = wpi::log::DoubleLogEntry{frc::DataLogManager::GetLog(), path};
+    m_dataLogEntry = wpi::log::DoubleLogEntry{wpi::DataLogManager::GetLog(), path};
   }
 
   /**
@@ -307,13 +306,13 @@ class DoubleTelemetry {
   double m_defaultValue;
   double m_cachedValue;
 
-  std::optional<nt::DoublePublisher> m_publisher;
-  std::optional<nt::DoubleSubscriber> m_subscriber;
-  std::optional<nt::DoublePublisher> m_subPublisher;  // tunable: publish + subscribe
+  std::optional<wpi::nt::DoublePublisher> m_publisher;
+  std::optional<wpi::nt::DoubleSubscriber> m_subscriber;
+  std::optional<wpi::nt::DoublePublisher> m_subPublisher;  // tunable: publish + subscribe
   std::optional<wpi::log::DoubleLogEntry> m_dataLogEntry;
 
-  std::shared_ptr<nt::NetworkTable> m_tuningTable;
-  std::shared_ptr<nt::NetworkTable> m_dataTable;
+  std::shared_ptr<wpi::nt::NetworkTable> m_tuningTable;
+  std::shared_ptr<wpi::nt::NetworkTable> m_dataTable;
 };
 
 // ---- BooleanTelemetry -------------------------------------------------------
@@ -351,10 +350,7 @@ class BooleanTelemetry {
    *
    * @param value New default value.
    */
-  void SetDefaultValue(bool value) {
-    m_defaultValue = value;
-    m_cachedValue = value;
-  }
+  void SetDefaultValue(bool value) { m_cachedValue = m_defaultValue = value; }
 
   /**
    * Create the NT4 publisher (and subscriber if tunable) under the given tables.
@@ -362,10 +358,12 @@ class BooleanTelemetry {
    * @param dataTable   NT4 table for read-only status data.
    * @param tuningTable NT4 table for live-tunable fields.
    */
-  void SetupNetworkTables(std::shared_ptr<nt::NetworkTable> dataTable,
-                          std::shared_ptr<nt::NetworkTable> tuningTable) {
+  void SetupNetworkTables(std::shared_ptr<wpi::nt::NetworkTable> dataTable,
+                          std::shared_ptr<wpi::nt::NetworkTable> tuningTable) {
     m_dataTable = dataTable;
     m_tuningTable = tuningTable;
+    if (!m_enabled) return;
+
     if (tuningTable && m_tunable) {
       auto topic = tuningTable->GetBooleanTopic(m_key);
       m_pubSub = topic.Publish();
@@ -383,7 +381,7 @@ class BooleanTelemetry {
    *
    * @param dataTable NT4 table for status data.
    */
-  void SetupNetworkTable(std::shared_ptr<nt::NetworkTable> dataTable) {
+  void SetupNetworkTable(std::shared_ptr<wpi::nt::NetworkTable> dataTable) {
     SetupNetworkTables(dataTable, nullptr);
   }
 
@@ -397,7 +395,7 @@ class BooleanTelemetry {
     std::string path = prefix;
     if (!path.empty() && path.back() != '/') path += '/';
     path += m_key;
-    m_dataLogEntry = wpi::log::BooleanLogEntry{frc::DataLogManager::GetLog(), path};
+    m_dataLogEntry = wpi::log::BooleanLogEntry{wpi::DataLogManager::GetLog(), path};
   }
 
   /**
@@ -427,6 +425,7 @@ class BooleanTelemetry {
    * @return Current field value.
    */
   bool Get() const {
+    if (!m_enabled) return m_defaultValue;
     if (m_subscriber) {
       return m_subscriber->Get(m_defaultValue);
     }
@@ -438,7 +437,7 @@ class BooleanTelemetry {
    * guard in Set(bool). Used to enforce mutual exclusion between tunable modes that share the
    * same underlying drive/mechanism.
    *
-   * @param value Value to force onto the tuning topic.
+   * @param value Value to force.
    */
   void ForceSet(bool value) {
     m_cachedValue = value;
@@ -501,13 +500,13 @@ class BooleanTelemetry {
   bool m_defaultValue;
   bool m_cachedValue;
 
-  std::optional<nt::BooleanPublisher> m_publisher;
-  std::optional<nt::BooleanSubscriber> m_subscriber;
-  std::optional<nt::BooleanPublisher> m_pubSub;  // tunable: publish + subscribe
+  std::optional<wpi::nt::BooleanPublisher> m_publisher;
+  std::optional<wpi::nt::BooleanSubscriber> m_subscriber;
+  std::optional<wpi::nt::BooleanPublisher> m_pubSub;  // tunable: publish + subscribe
   std::optional<wpi::log::BooleanLogEntry> m_dataLogEntry;
 
-  std::shared_ptr<nt::NetworkTable> m_tuningTable;
-  std::shared_ptr<nt::NetworkTable> m_dataTable;
+  std::shared_ptr<wpi::nt::NetworkTable> m_tuningTable;
+  std::shared_ptr<wpi::nt::NetworkTable> m_dataTable;
 };
 
 // ---- SmartMotorControllerTelemetry ------------------------------------------
@@ -533,8 +532,9 @@ class SmartMotorControllerTelemetry {
    * @param dataLogName  Optional DataLog prefix.
    */
   void SetupTelemetry(
-      motorcontrollers::SmartMotorController& smc, std::shared_ptr<nt::NetworkTable> publishTable,
-      std::shared_ptr<nt::NetworkTable> tuningTable,
+      motorcontrollers::SmartMotorController& smc,
+      std::shared_ptr<wpi::nt::NetworkTable> publishTable,
+      std::shared_ptr<wpi::nt::NetworkTable> tuningTable,
       std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>& doubleFields,
       std::unordered_map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>>&
           boolFields,
@@ -561,8 +561,8 @@ class SmartMotorControllerTelemetry {
   void Close();
 
  private:
-  std::shared_ptr<nt::NetworkTable> m_dataTable;
-  std::shared_ptr<nt::NetworkTable> m_tuningTable;
+  std::shared_ptr<wpi::nt::NetworkTable> m_dataTable;
+  std::shared_ptr<wpi::nt::NetworkTable> m_tuningTable;
 
   std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>* m_doubleFields{
       nullptr};

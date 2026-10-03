@@ -3,12 +3,11 @@
 
 #pragma once
 
-#include <units/current.h>
-#include <units/impedance.h>
-#include <units/voltage.h>
-
 #include <map>
 #include <unordered_map>
+#include <wpi/units/current.hpp>
+#include <wpi/units/impedance.hpp>
+#include <wpi/units/voltage.hpp>
 
 namespace yams::motorcontrollers::simulation {
 
@@ -19,14 +18,14 @@ namespace yams::motorcontrollers::simulation {
  * Each simulated mechanism should call CalculateVoltage() every simulation iteration with a
  * stable, unique identity (e.g. the address of its SimSupplier instance) and its own current
  * draw. The result accounts for the combined current draw of every registered mechanism, and
- * should be fed into frc::sim::RoboRioSim::SetVInVoltage().
+ * should be fed into wpi::sim::RoboRioSim::SetVInVoltage().
  */
 class BatterySim {
  public:
   /** Battery open circuit voltage, used when discharge simulation is disabled. */
-  static units::volt_t BatteryVoltage;
+  static wpi::units::volt_t BatteryVoltage;
   /** Battery internal resistance, used when discharge simulation is disabled. */
-  static units::ohm_t BatteryResistance;
+  static wpi::units::ohm_t BatteryResistance;
 
   /**
    * Calculate the voltage based on the currents used by the robot.
@@ -35,7 +34,7 @@ class BatterySim {
    * @param current Current used by the robot.
    * @return Loaded voltage of the robot.
    */
-  static units::volt_t CalculateVoltage(const void* id, units::ampere_t current);
+  static wpi::units::volt_t CalculateVoltage(const void* id, wpi::units::ampere_t current);
 
   /**
    * Replace the default state-of-charge -> open circuit voltage interpolation table used when
@@ -56,7 +55,7 @@ class BatterySim {
    *
    * BatterySim::ReplaceSOCInterpolation(wornBatteryCurve);
    * // Pair with a reduced usable capacity and higher resistance to match a worn battery.
-   * BatterySim::EnableDischarge(15.0, units::volt_t{12.6}, units::ohm_t{0.028});
+   * BatterySim::EnableDischarge(15.0, wpi::units::volt_t{12.6}, wpi::units::ohm_t{0.028});
    * @endcode
    *
    * @param socToVoltage Interpolation table mapping state of charge [0, 1] to open circuit
@@ -89,8 +88,8 @@ class BatterySim {
    * @param nominalVoltage          Nominal (fully charged) open circuit voltage of the battery.
    * @param nominalResistance       Nominal internal resistance of the battery.
    */
-  static void EnableDischarge(double batteryCapacityAmpHours, units::volt_t nominalVoltage,
-                              units::ohm_t nominalResistance);
+  static void EnableDischarge(double batteryCapacityAmpHours, wpi::units::volt_t nominalVoltage,
+                              wpi::units::ohm_t nominalResistance);
 
   /**
    * Disable battery discharge simulation, reverting to a constant BatteryVoltage and

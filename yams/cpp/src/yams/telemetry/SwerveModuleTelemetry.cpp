@@ -3,10 +3,8 @@
 
 #include "yams/telemetry/SwerveModuleTelemetry.hpp"
 
-#include <networktables/NetworkTableInstance.h>
-#include <units/angle.h>
-
 #include <utility>
+#include <wpi/nt/NetworkTableInstance.hpp>
 
 #include "yams/mechanisms/swerve/SwerveModule.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
@@ -18,7 +16,7 @@ SwerveModuleTelemetry::SwerveModuleTelemetry(SwerveModuleTelemetryConfig config)
 
 void SwerveModuleTelemetry::SetupTelemetry(const std::string& mechName,
                                            mechanisms::swerve::SwerveModule& module) {
-  auto inst = nt::NetworkTableInstance::GetDefault();
+  auto inst = wpi::nt::NetworkTableInstance::GetDefault();
   m_dataTable = inst.GetTable("Mechanisms")
                     ->GetSubTable(mechName)
                     ->GetSubTable("modules")

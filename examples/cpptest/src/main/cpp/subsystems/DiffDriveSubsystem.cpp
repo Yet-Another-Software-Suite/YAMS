@@ -18,7 +18,7 @@ DiffDriveSubsystem::DiffDriveSubsystem() {
 
   // Left side inverted because the left motor is mounted mirrored to the right.
   // Open-loop mode: DifferentialDrive sends duty-cycle directly, no closed-loop PID needed
-  // for basic tank/arcade drive.  COAST idle mode: wheels roll freely when the driver
+  // for basic tank/arcade drive.  COAST zero power mode: wheels roll freely when the driver
   // releases the stick, which feels natural for driver practice but may overshoot in auto --
   // switch to BRAKE if you want the robot to stop sharply.
   //
@@ -27,7 +27,7 @@ DiffDriveSubsystem::DiffDriveSubsystem() {
   m_leftConfig.WithSubsystem(this)
       .WithOpenLoopMode()
       .WithMotorGearing(gearing)
-      .WithIdleMode(Cfg::MotorMode::COAST)
+      .WithZeroPower(Cfg::MotorMode::COAST)
       .WithMotorInverted(true)
       .WithMechanismCircumference(wheelDiameter * 3.14159265)
       .WithTelemetry("LeftMotorMain", Cfg::TelemetryVerbosity::LOW);
@@ -35,7 +35,7 @@ DiffDriveSubsystem::DiffDriveSubsystem() {
   m_rightConfig.WithSubsystem(this)
       .WithOpenLoopMode()
       .WithMotorGearing(gearing)
-      .WithIdleMode(Cfg::MotorMode::COAST)
+      .WithZeroPower(Cfg::MotorMode::COAST)
       .WithMotorInverted(false)
       .WithMechanismCircumference(wheelDiameter * 3.14159265)
       .WithTelemetry("RightMotorMain", Cfg::TelemetryVerbosity::LOW);

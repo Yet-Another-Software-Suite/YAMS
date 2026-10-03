@@ -3,14 +3,16 @@
 
 package yams.helpers;
 
-import edu.wpi.first.hal.HAL;
-import edu.wpi.first.wpilibj.simulation.DriverStationSim;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
-import edu.wpi.first.wpilibj.simulation.SimHooks;
+import org.wpilib.hardware.hal.HAL;
+import org.wpilib.hardware.hal.RobotMode;
+import org.wpilib.simulation.DriverStationSim;
+import org.wpilib.simulation.RoboRioSim;
+import org.wpilib.simulation.SimHooks;
+import yams.core.motorcontrollers.simulation.BatterySim;
 
 /**
- * JUnit 5 testing extension which ensures all WPILib foundational bits are initialized to be able
- * to run the scheduler.
+ * JUnit 5 testing extension which ensures all WPILib foundational bits are
+ * initialized to be able to run the scheduler.
  */
 public final class MockHardwareExtension {
   public static void beforeAll() {
@@ -21,14 +23,17 @@ public final class MockHardwareExtension {
     RoboRioSim.resetData();
     DriverStationSim.resetData();
     DriverStationSim.notifyNewData();
+    // Without this, a SmartMotorController that wasn't (or couldn't be) closed by an earlier
+    // test leaves its last-known current draw permanently counted towards every later test's
+    // shared battery voltage calculation for the rest of the JVM's lifetime.
+    BatterySim.reset();
     //		HAL.releaseDSMutex();
   }
 
   private static void initializeHardware() {
-    HAL.initialize(500, 0);
+    HAL.initialize();
     DriverStationSim.setDsAttached(true);
-    DriverStationSim.setAutonomous(false);
-    DriverStationSim.setTest(false);
+    DriverStationSim.setRobotMode(RobotMode.TELEOPERATED);
     DriverStationSim.setEnabled(true);
     DriverStationSim.notifyNewData();
     SimHooks.stepTiming(0.0); // Wait for Notifiers

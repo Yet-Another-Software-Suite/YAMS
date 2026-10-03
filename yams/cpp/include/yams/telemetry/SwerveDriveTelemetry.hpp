@@ -3,10 +3,9 @@
 
 #pragma once
 
-#include <networktables/NetworkTable.h>
-
 #include <cstddef>
 #include <memory>
+#include <wpi/nt/NetworkTable.hpp>
 
 #include "yams/telemetry/SwerveDriveTelemetryConfig.hpp"
 
@@ -77,8 +76,8 @@ class SwerveDriveTelemetry {
  private:
   SwerveDriveTelemetryConfig m_config;
 
-  std::shared_ptr<nt::NetworkTable> m_dataTable;
-  std::shared_ptr<nt::NetworkTable> m_tuningTable;
+  std::shared_ptr<wpi::nt::NetworkTable> m_dataTable;
+  std::shared_ptr<wpi::nt::NetworkTable> m_tuningTable;
 };
 
 }  // namespace yams::telemetry

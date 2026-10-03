@@ -35,7 +35,7 @@ namespace yams::telemetry {
  * using TelCfg = yams::telemetry::SmartMotorControllerTelemetryConfig;
  *
  * ctre::phoenix6::hardware::TalonFX talon{1};
- * TalonFXWrapper smc{talon, frc::DCMotor::KrakenX60(1), cfg};
+ * TalonFXWrapper smc{talon, wpi::math::DCMotor::KrakenX60(1), cfg};
  *
  * smc.WithTelemetry(
  *     TelCfg{}

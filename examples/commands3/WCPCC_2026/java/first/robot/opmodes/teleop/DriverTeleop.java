@@ -1,0 +1,38 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Ported from the WCP 2026 Competitive Concept (MIT, see LICENSE-WCP).
+
+package first.robot.opmodes.teleop;
+
+import first.robot.Robot;
+import first.robot.mechanisms.Hanger;
+import first.robot.mechanisms.IntakePivot;
+import org.wpilib.command3.button.CommandNiDsXboxController;
+import org.wpilib.opmode.OpMode;
+import org.wpilib.opmode.Teleop;
+
+/**
+ * Driver controlled teleop with the original WCP bindings. The bindings are created in the
+ * constructor, so they only exist while this opmode is selected. Homing is bound in {@link Robot}.
+ */
+@Teleop(name = "Driver Teleop")
+public class DriverTeleop implements OpMode {
+    /**
+     * Creates the teleop opmode. The OpModeRobot framework calls this when the opmode is selected on
+     * the driver station.
+     *
+     * @param robot The robot instance to control.
+     */
+    public DriverTeleop(Robot robot) {
+        final CommandNiDsXboxController driver = robot.driver;
+
+        // The drive command aims at the hub while the right trigger is held.
+        driver.rightTrigger().whileTrue(robot.mechanismCommands.shootWhenAimed());
+        driver.rightBumper().whileTrue(robot.mechanismCommands.shootManually());
+        driver.leftTrigger().whileTrue(robot.mechanismCommands.intake());
+        driver.leftBumper().onTrue(robot.intakePivot.moveTo(IntakePivot.Position.STOWED));
+        // The D-pad triggers live on the generic HID in 2027.
+        driver.getHID().povUp().onTrue(robot.hanger.moveTo(Hanger.Position.HANGING));
+        driver.getHID().povDown().onTrue(robot.hanger.moveTo(Hanger.Position.HUNG));
+    }
+}

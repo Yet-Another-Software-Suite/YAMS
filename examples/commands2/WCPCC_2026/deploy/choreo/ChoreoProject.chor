@@ -1,0 +1,84 @@
+{
+ "name":"ChoreoProject",
+ "version":2,
+ "type":"Swerve",
+ "variables":{
+  "expressions":{},
+  "poses":{}
+ },
+ "config":{
+  "frontLeft":{
+   "x":{
+    "exp":"10 in",
+    "val":0.254
+   },
+   "y":{
+    "exp":"10 in",
+    "val":0.254
+   }
+  },
+  "backLeft":{
+   "x":{
+    "exp":"-10 in",
+    "val":-0.254
+   },
+   "y":{
+    "exp":"10 in",
+    "val":0.254
+   }
+  },
+  "mass":{
+   "exp":"137 lbs",
+   "val":62.142154690000005
+  },
+  "inertia":{
+   "exp":"6 kg m ^ 2",
+   "val":6.0
+  },
+  "gearing":{
+   "exp":"5.8909",
+   "val":5.8909
+  },
+  "radius":{
+   "exp":"2 in",
+   "val":0.0508
+  },
+  "vmax":{
+   "exp":"4800 RPM",
+   "val":502.6548245743669
+  },
+  "tmax":{
+   "exp":"0.58 N * m",
+   "val":0.58
+  },
+  "cof":{
+   "exp":"1.5",
+   "val":1.5
+  },
+  "bumper":{
+   "front":{
+    "exp":"16.875 in",
+    "val":0.428625
+   },
+   "side":{
+    "exp":"17.25 in",
+    "val":0.43815
+   },
+   "back":{
+    "exp":"16.875 in",
+    "val":0.428625
+   }
+  },
+  "differentialTrackWidth":{
+   "exp":"22 in",
+   "val":0.5588
+  }
+ },
+ "generationFeatures":[],
+ "codegen":{
+  "root":"../../java/frc/robot/generated",
+  "genVars":true,
+  "genTrajData":true,
+  "useChoreoLib":true
+ }
+}

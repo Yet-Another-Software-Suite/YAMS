@@ -3,7 +3,8 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
+#include <catch2/reporters/catch_reporter_event_listener.hpp>
+#include <catch2/reporters/catch_reporter_registrars.hpp>
 
 #include <cstdio>
 #include <string>
@@ -14,18 +15,22 @@ namespace yams::test {
 // empty string if no throw has occurred since the last ClearLast... call.
 std::string GetLastExceptionStackTrace();
 
-// Clears the stored stack trace (called at the start of each test).
+// Clears the stored stack trace (called at the start of each test case).
 void ClearLastExceptionStackTrace();
 
-// Appends to the gtest listener chain.  On any fatal failure that looks like
-// an uncaught exception it prints the stack trace that was captured at the
-// throw site, right after the default failure banner.
-class ExceptionTracerListener : public ::testing::EmptyTestEventListener {
+// Registered with Catch2 via CATCH_REGISTER_LISTENER below. On any failed
+// assertion it prints the stack trace that was captured at the throw site
+// (if one was captured), right after Catch2's own failure banner.
+class ExceptionTracerListener : public Catch::EventListenerBase {
  public:
-  void OnTestStart(const ::testing::TestInfo& /*info*/) override { ClearLastExceptionStackTrace(); }
+  using Catch::EventListenerBase::EventListenerBase;
 
-  void OnTestPartResult(const ::testing::TestPartResult& result) override {
-    if (result.type() != ::testing::TestPartResult::kFatalFailure) return;
+  void testCaseStarting(Catch::TestCaseInfo const& /*info*/) override {
+    ClearLastExceptionStackTrace();
+  }
+
+  void assertionEnded(Catch::AssertionStats const& stats) override {
+    if (stats.assertionResult.succeeded()) return;
     std::string trace = GetLastExceptionStackTrace();
     if (trace.empty()) return;
     std::printf("\nStack trace at throw site:\n%s\n", trace.c_str());
@@ -34,3 +39,5 @@ class ExceptionTracerListener : public ::testing::EmptyTestEventListener {
 };
 
 }  // namespace yams::test
+
+CATCH_REGISTER_LISTENER(yams::test::ExceptionTracerListener)

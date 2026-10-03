@@ -3,11 +3,11 @@
 
 package yams.helpers;
 
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import yams.motorcontrollers.SmartMotorController;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.SubsystemBase;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.Distance;
+import yams.core.motorcontrollers.SmartMotorController;
 
 public class SmartMotorControllerTestSubsystem extends SubsystemBase {
   public SmartMotorController smc;

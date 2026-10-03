@@ -1,21 +1,18 @@
-import edu.wpi.first.toolchain.*
-import org.gradle.nativeplatform.test.tasks.RunTestExecutable
-
 plugins {
     id 'cpp'
     id 'java'
     id 'google-test'
     id 'idea'
-    id 'edu.wpi.first.wpilib.repositories.WPILibRepositoriesPlugin' version '2025.0'
-    id 'edu.wpi.first.NativeUtils' version '2026.0.1'
-    id "edu.wpi.first.GradleRIO" version "2026.2.1" // WPILib version
-    id 'edu.wpi.first.GradleJni' version '1.1.0'
-    id 'edu.wpi.first.GradleVsCode' version '2.1.0'
+    id 'org.wpilib.WPILibRepositoriesPlugin' version '2027.0.0'
+    id 'org.wpilib.NativeUtils' version '2027.14.3'
+    id 'org.wpilib.GradleJni' version '2027.0.0'
+    id 'org.wpilib.GradleVsCode' version '2027.0.0'
+    id 'org.wpilib.GradleRIO' version '2027.0.0-alpha-7'
     id 'com.diffplug.spotless' version '8.0.0'
 }
 
 // WPILib Version
-ext.wpilibVersion = "2026.2.1"
+ext.wpilibVersion = "2027.0.0-alpha-7"
 ext.releasePath = "$buildDir/maven"
 ext.pubVersion = System.getenv("releaseVersion") ?: System.getenv("releaseName") ?: "test"
 // Set -PskipCpp=true to skip building/publishing the C++ library entirely. The generated
@@ -26,246 +23,19 @@ ext.skipCpp = project.hasProperty('skipCpp') && project.property('skipCpp').toSt
 repositories {
     mavenCentral()
 }
+
+wpilibRepositories.use2027Repos()
 if (project.hasProperty('releaseMode')) {
     wpilibRepositories.addAllReleaseRepositories(project)
 } else {
     wpilibRepositories.addAllDevelopmentRepositories(project)
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
+// Apply Java build configuration (sourceSets, dependencies, tests, javadoc)
+apply from: 'java.gradle'
 
-sourceSets {
-    main {
-        java {
-            srcDir "$rootDir/../yams/java/"
-        }
-    }
-}
-
-var javaVersion = "17"
-
-// Apply C++ configuration
-apply from: 'config.gradle'
-
-// Apply Java configuration
-dependencies {
-    annotationProcessor wpi.java.deps.wpilibAnnotations()
-    implementation wpi.java.deps.wpilib()
-    implementation wpi.java.vendor.java()
-
-    implementation "edu.wpi.first.cscore:cscore-java:$wpilibVersion"
-    implementation "edu.wpi.first.cameraserver:cameraserver-java:$wpilibVersion"
-    implementation "edu.wpi.first.ntcore:ntcore-java:$wpilibVersion"
-    implementation "edu.wpi.first.wpilibj:wpilibj-java:$wpilibVersion"
-    implementation "edu.wpi.first.wpiutil:wpiutil-java:$wpilibVersion"
-    implementation "edu.wpi.first.wpimath:wpimath-java:$wpilibVersion"
-    implementation "edu.wpi.first.wpiunits:wpiunits-java:$wpilibVersion"
-    implementation "edu.wpi.first.hal:hal-java:$wpilibVersion"
-    implementation "org.ejml:ejml-simple:0.44.0"
-    implementation "com.fasterxml.jackson.core:jackson-annotations:2.19.2"
-    implementation "com.fasterxml.jackson.core:jackson-core:2.19.2"
-    implementation "com.fasterxml.jackson.core:jackson-databind:2.19.2"
-    implementation 'edu.wpi.first.thirdparty.frc2025.opencv:opencv-java:4.10.0-2'
-
-    //    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
-    //    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    nativeDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.desktop)
-    nativeDebug wpi.java.vendor.jniDebug(wpi.platforms.desktop)
-    simulationDebug wpi.sim.enableDebug()
-
-    nativeRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.desktop)
-    nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
-    simulationRelease wpi.sim.enableRelease()
-
-    testImplementation platform("org.junit:junit-bom:5.11.4")
-    testImplementation "org.junit.jupiter:junit-jupiter-api"
-    testImplementation "org.junit.jupiter:junit-jupiter-params"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
-    testImplementation "org.mockito:mockito-core:5.3.1"
-    testImplementation "org.mockito:mockito-junit-jupiter:5.3.1"
-    testImplementation wpi.java.vendor.java()
-}
-
-// Set up java tests
-test {
-    useJUnitPlatform()
-    systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
-    testLogging {
-        events "failed"
-        exceptionFormat = "full"
-    }
-}
-
-wpi.sim.addGui().defaultEnabled = true
-wpi.sim.addDriverstation()
-wpi.java.configureTestTasks(test)
-
-tasks.test {
-    // Disable test when running 'build' task, but enable when running 'test' task directly
-    enabled = !gradle.startParameter.taskNames.contains('build')
-}
-
-task googleTest {
-    description = 'Runs the Google Test C++ unit tests for the current platform'
-    group = 'Verification'
-}
-
-tasks.whenTaskAdded { task ->
-    if (task instanceof RunTestExecutable) {
-        task.enabled = !gradle.startParameter.taskNames.contains('build')
-        if (task.name.contains(NativePlatforms.desktop.capitalize()) && task.name.contains('Debug')) {
-            googleTest.dependsOn task
-        }
-    }
-}
-
-if (project.hasProperty('onlylinuxathena') || project.hasProperty('onlylinuxarm32') || project.hasProperty('onlylinuxarm64') || project.hasProperty('onlywindowsarm64') || project.hasProperty('onlylinuxsystemcore') || project.hasProperty('onlywindows64') || project.hasProperty('onlyosxuniversal') || project.hasProperty('onlylinuxx64')) {
-    test.enabled = false
-}
-
-tasks.withType(JavaCompile) {
-    options.compilerArgs.add '-XDstringConcat=inline'
-    options.encoding = 'UTF-8'
-}
-
-javadoc {
-    title = "Yet Another Mechanism System API"
-    destinationDir = file("$releasePath/javadocs")
-    options {
-        encoding = 'UTF-8'
-        charSet = 'UTF-8'
-        links "https://docs.oracle.com/en/java/javase/$javaVersion/docs/api/",
-                'https://github.wpilib.org/allwpilib/docs/release/java/',
-                'https://codedocs.revrobotics.com/java/',
-                'https://api.ctr-electronics.com/phoenix6/stable/java/',
-                'https://api.ctr-electronics.com/phoenix/stable/java/'
-        tags 'todo:X"',
-                'apiNote:a:API Note:',
-                'implSpec:a:Implementation Requirements:',
-                'implNote:a:Implementation Note:'
-        overview "$rootDir/../yams/java/overview.html"
-    }
-}
-ext.getCurrentArch = {
-    return NativePlatforms.desktop
-}
-
-def systemArch = getCurrentArch()
-
-nativeUtils {
-    exportsConfigs {
-        YAMS {
-            x86ExcludeSymbols = [
-                '_CT??_R0?AV_System_error',
-                '_CT??_R0?AVexception',
-                '_CT??_R0?AVfailure',
-                '_CT??_R0?AVruntime_error',
-                '_CT??_R0?AVsystem_error',
-                '_CTA5?AVfailure',
-                '_TI5?AVfailure',
-                '_CT??_R0?AVout_of_range',
-                '_CTA3?AVout_of_range',
-                '_TI3?AVout_of_range',
-                '_CT??_R0?AVbad_cast'
-            ]
-            x64ExcludeSymbols = [
-                '_CT??_R0?AV_System_error',
-                '_CT??_R0?AVexception',
-                '_CT??_R0?AVfailure',
-                '_CT??_R0?AVruntime_error',
-                '_CT??_R0?AVsystem_error',
-                '_CTA5?AVfailure',
-                '_TI5?AVfailure',
-                '_CT??_R0?AVout_of_range',
-                '_CTA3?AVout_of_range',
-                '_TI3?AVout_of_range',
-                '_CT??_R0?AVbad_cast'
-            ]
-        }
-    }
-}
-
-model {
-    components {
-        YAMS(NativeLibrarySpec) {
-            sources {
-                cpp {
-                    source {
-                        srcDirs "$rootDir/../yams/cpp/src"
-                        include '**/*.cpp'
-                    }
-                    exportedHeaders {
-                        srcDirs "$rootDir/../yams/cpp/include"
-                    }
-                }
-            }
-            // Link WPILib itself as shared; wpilib_shared (unlike wpi.cpp.deps.wpilib) pulls in
-            // only the core WPILib shared libraries, not the executable/vision/NI runtime
-            // libraries that are only needed by an actual robot executable.
-            nativeUtils.useRequiredLibrary(it, 'wpilib_shared')
-            // Header access + linking for CTRE Phoenix 5/6 and REVLib, driven by the
-            // sharedLibrary flag in each vendordeps/*.json cppDependency entry. CTRE and
-            // WPILibNewCommands publish shared libraries; REVLib's core API (REVLib-cpp,
-            // REVLib-driver) is static-only upstream, so that portion is still statically
-            // linked no matter what we do here, with only its BackendDriver/REVLibWpi shared.
-            wpi.cpp.vendor.cpp(it)
-
-            // wpi.sim.enable(it) and wpi.cpp.enableExternalTasks(it) are intentionally not
-            // called here: both only wire up NativeExecutableBinarySpec/NativeTestSuiteBinarySpec
-            // binaries (sim GUI runtime files / external run tasks for an actual executable), and
-            // YAMS (NativeLibrarySpec) has neither, so they'd be no-ops. The YAMSTest test suite
-            // below already calls them where they're meaningful.
-
-            if (skipCpp) {
-                binaries.all { buildable = false }
-            }
-        }
-    }
-    testSuites {
-        YAMSTest {
-            binaries.all {
-                buildable = !gradle.startParameter.taskNames.contains('build')
-            }
-            sources.cpp {
-                source {
-                    srcDir 'src/test/native/cpp'
-                    include '**/*.cpp'
-                }
-                exportedHeaders {
-                    srcDirs 'src/test/native/include'
-                }
-            }
-
-            // Enable run tasks for this component
-            wpi.cpp.enableExternalTasks(it)
-
-            // Enable simulation for this component
-            wpi.sim.enable(it)
-            // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
-            wpi.cpp.vendor.cpp(it)
-            wpi.cpp.deps.wpilib(it)
-
-            /*binaries.all {
-             //              lib library: 'VendorDriver', linkage: 'shared'
-             def arch = it.targetPlatform.name
-             if (systemArch == arch && it.buildType.name == 'debug') {
-             def filePath = it.tasks.install.installDirectory.get().toString() + File.separatorChar + 'lib'
-             test.dependsOn it.tasks.install
-             test.systemProperty 'java.library.path', filePath
-             test.environment 'LD_LIBRARY_PATH', filePath
-             test.workingDir filePath
-             }
-             }*/
-
-            nativeUtils.useRequiredLibrary(it, "wpilib_executable_shared", "googletest_static")
-        }
-    }
-}
-
+// Apply C++ build configuration (native library/test suite, exports, Catch2 runner)
+apply from: 'cpp.gradle'
 
 spotless {
     java {
@@ -285,7 +55,7 @@ spotless {
             exclude '**/build/**', '**/build-*/**'
         }
         greclipse()
-        indentWithSpaces(4)
+        leadingTabsToSpaces(4)
         trimTrailingWhitespace()
         endWithNewline()
     }
@@ -296,7 +66,7 @@ spotless {
         }
         eclipseWtp('xml')
         trimTrailingWhitespace()
-        indentWithSpaces(2)
+        leadingTabsToSpaces(2)
         endWithNewline()
     }
     format 'misc', {
@@ -305,16 +75,14 @@ spotless {
             exclude '**/build/**', '**/build-*/**'
         }
         trimTrailingWhitespace()
-        indentWithSpaces(2)
+        leadingTabsToSpaces(2)
         endWithNewline()
     }
 }
 
-
-build.dependsOn javadoc
 build.dependsOn spotlessApply
 apply from: 'publish.gradle'
 
 wrapper {
-    gradleVersion = '8.14.3'
+    gradleVersion = '9.4.1'
 }

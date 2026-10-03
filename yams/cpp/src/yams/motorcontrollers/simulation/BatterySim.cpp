@@ -3,19 +3,18 @@
 
 #include "yams/motorcontrollers/simulation/BatterySim.hpp"
 
-#include <frc/Timer.h>
-#include <frc/simulation/BatterySim.h>
-
 #include <algorithm>
 #include <cmath>
 #include <limits>
 #include <utility>
 #include <vector>
+#include <wpi/simulation/BatterySim.hpp>
+#include <wpi/system/Timer.hpp>
 
 namespace yams::motorcontrollers::simulation {
 
-units::volt_t BatterySim::BatteryVoltage = units::volt_t{12.0};
-units::ohm_t BatterySim::BatteryResistance = units::ohm_t{0.020};
+wpi::units::volt_t BatterySim::BatteryVoltage = wpi::units::volt_t{12.0};
+wpi::units::ohm_t BatterySim::BatteryResistance = wpi::units::ohm_t{0.020};
 
 std::unordered_map<const void*, double> BatterySim::m_currents{};
 bool BatterySim::m_dischargeEnabled = false;
@@ -72,8 +71,8 @@ double BatterySim::InterpolateOpenCircuitVoltage(double stateOfCharge) {
   return Interpolate(m_socToVoltage, stateOfCharge);
 }
 
-void BatterySim::EnableDischarge(double batteryCapacityAmpHours, units::volt_t nominalVoltage,
-                                 units::ohm_t nominalResistance) {
+void BatterySim::EnableDischarge(double batteryCapacityAmpHours, wpi::units::volt_t nominalVoltage,
+                                 wpi::units::ohm_t nominalResistance) {
   m_dischargeEnabled = true;
   m_batteryCapacityAmpHours = batteryCapacityAmpHours;
   BatteryVoltage = nominalVoltage;
@@ -92,7 +91,7 @@ double BatterySim::GetStateOfCharge() {
 }
 
 void BatterySim::UpdateDischarge(double totalCurrentAmps) {
-  double now = frc::Timer::GetFPGATimestamp().value();
+  double now = wpi::Timer::GetTimestamp().value();
   if (!std::isnan(m_lastTimestampSeconds)) {
     double dtHours = (now - m_lastTimestampSeconds) / 3600.0;
     if (dtHours > 0) {
@@ -104,14 +103,14 @@ void BatterySim::UpdateDischarge(double totalCurrentAmps) {
   m_lastTimestampSeconds = now;
 }
 
-units::volt_t BatterySim::CalculateVoltage(const void* id, units::ampere_t current) {
+wpi::units::volt_t BatterySim::CalculateVoltage(const void* id, wpi::units::ampere_t current) {
   m_currents[id] = current.value();
 
-  std::vector<units::ampere_t> currentDraws;
+  std::vector<wpi::units::ampere_t> currentDraws;
   currentDraws.reserve(m_currents.size());
   double totalCurrentAmps = 0;
   for (const auto& [key, amps] : m_currents) {
-    currentDraws.push_back(units::ampere_t{amps});
+    currentDraws.push_back(wpi::units::ampere_t{amps});
     totalCurrentAmps += amps;
   }
 
@@ -126,8 +125,8 @@ units::volt_t BatterySim::CalculateVoltage(const void* id, units::ampere_t curre
     internalResistance *= 1.0 + (2.0 * (1.0 - stateOfCharge));
   }
 
-  return frc::sim::BatterySim::Calculate(units::volt_t{openCircuitVoltage},
-                                         units::ohm_t{internalResistance}, currentDraws);
+  return wpi::sim::BatterySim::Calculate(wpi::units::volt_t{openCircuitVoltage},
+                                         wpi::units::ohm_t{internalResistance}, currentDraws);
 }
 
 }  // namespace yams::motorcontrollers::simulation

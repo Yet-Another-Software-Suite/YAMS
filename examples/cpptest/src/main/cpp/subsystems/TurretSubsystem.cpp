@@ -42,7 +42,7 @@ TurretSubsystem::TurretSubsystem()
       .WithMotorGearing(MechanismGearing{GearBox({144.0 / 15.0, 5.0, 1.08})})
       // BRAKE prevents the turret from drifting off-target when no command is running.
       // On a turret with a heavy mechanism attached, COAST can cause dangerous snap rotation.
-      .WithIdleMode(Cfg::MotorMode::BRAKE)
+      .WithZeroPower(Cfg::MotorMode::BRAKE)
       .WithMotorInverted(false)
       // WithFeedforward(ArmFeedforward) on a turret: kS=0.5 V overcomes static friction at the
       // worm/gear interface; kV=5.0 V/(turn/s) is the velocity gain for tracking; kA=0 (no accel

@@ -20,7 +20,7 @@
 // Two-side differential drivetrain using four NEO motors on REV SPARK Max controllers.
 // Each side has a leader + follower (left: CAN 21/22, right: CAN 24/23) through a 12:1
 // (3:1 x 4:1) reduction on 4-inch wheels.  Both sides run open-loop (duty cycle).
-// Left is inverted; right is not.  COAST idle mode so the robot can be pushed when disabled.
+// Left is inverted; right is not.  COAST zero power mode so the robot can be pushed when disabled.
 //
 // SparkWrapper only wraps the leader on each side; follower mode is configured directly
 // on the hardware objects (CAN 22 follows 21, CAN 23 follows 24).

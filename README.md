@@ -73,7 +73,7 @@ public class ArmSubsystem extends SubsystemBase {
           .withTrapezoidalProfile(DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
           .withSoftLimits(Degrees.of(-30), Degrees.of(100))
           .withGearing(gearing(gearbox(3, 4)))
-          .withIdleMode(MotorMode.BRAKE)
+          .withZeroPower(MotorMode.BRAKE)
           .withTelemetry("ArmMotor", TelemetryVerbosity.HIGH)
           .withStatorCurrentLimit(Amps.of(40))
           .withFeedforward(new ArmFeedforward(0, 0, 0, 0))

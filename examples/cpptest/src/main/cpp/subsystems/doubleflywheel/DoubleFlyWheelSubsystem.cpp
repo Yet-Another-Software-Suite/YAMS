@@ -24,7 +24,7 @@ DoubleFlyWheelSubsystem::DoubleFlyWheelSubsystem() {
   m_lowerConfig.WithSubsystem(this)
       .WithClosedLoopMode()
       // COAST: lets the wheel spin down between shots rather than fighting back-EMF.
-      .WithIdleMode(Cfg::MotorMode::COAST)
+      .WithZeroPower(Cfg::MotorMode::COAST)
       // 3 * 4 = 12:1 reduction between Kraken shaft and wheel shaft.
       .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
       // MOI measured for the physical flywheel disk; simulation uses this for
@@ -41,7 +41,7 @@ DoubleFlyWheelSubsystem::DoubleFlyWheelSubsystem() {
 
   m_upperConfig.WithSubsystem(this)
       .WithClosedLoopMode()
-      .WithIdleMode(Cfg::MotorMode::COAST)
+      .WithZeroPower(Cfg::MotorMode::COAST)
       .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
       .WithMOI(units::kilogram_square_meter_t{0.00029264})
       .WithFeedback(1, 0, 0)

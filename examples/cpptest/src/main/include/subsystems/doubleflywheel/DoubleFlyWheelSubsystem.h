@@ -23,7 +23,7 @@
 // Two independent Kraken X60 flywheels on TalonFX controllers (lower: CAN 4, upper: CAN 6).
 // Both run through a 12:1 (3:1 x 4:1) reduction and are modeled with a 0.00029264 kg*m^2 MOI.
 // Closed-loop velocity control via on-board TalonFX PID (kP=1, kI=0, kD=0) with a
-// simple feedforward (kS=0, kV=0, kA=0 -- tune before match).  COAST idle mode so wheels
+// simple feedforward (kS=0, kV=0, kA=0 -- tune before match).  COAST zero power mode so wheels
 // spin down freely.  Neither wheel follows the other; setpoints are set independently on
 // every command so you can spin them at different speeds (e.g. backspin vs topspin).
 //

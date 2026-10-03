@@ -3,13 +3,13 @@
 
 #pragma once
 
-#include <units/angle.h>
-#include <units/angular_acceleration.h>
-#include <units/angular_velocity.h>
-#include <units/current.h>
-#include <units/length.h>
-#include <units/velocity.h>
-#include <units/voltage.h>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/angular_acceleration.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/current.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/velocity.hpp>
+#include <wpi/units/voltage.hpp>
 
 namespace yams::motorcontrollers {
 
@@ -32,77 +32,77 @@ class SimSupplier {
    *
    * @param volts Input voltage to inject.
    */
-  virtual void SetInputVoltage(units::volt_t volts) = 0;
+  virtual void SetInputVoltage(wpi::units::volt_t volts) = 0;
 
   /**
    * Get the simulated mechanism position.
    *
    * @return Mechanism position in turns.
    */
-  virtual units::turn_t GetMechanismPosition() = 0;
+  virtual wpi::units::turn_t GetMechanismPosition() = 0;
 
   /**
    * Get the simulated mechanism velocity.
    *
    * @return Mechanism velocity in turns per second.
    */
-  virtual units::turns_per_second_t GetMechanismVelocity() = 0;
+  virtual wpi::units::turns_per_second_t GetMechanismVelocity() = 0;
 
   /**
    * Get the simulated rotor position.
    *
    * @return Rotor position in turns.
    */
-  virtual units::turn_t GetRotorPosition() = 0;
+  virtual wpi::units::turn_t GetRotorPosition() = 0;
 
   /**
    * Get the simulated rotor velocity.
    *
    * @return Rotor velocity in turns per second.
    */
-  virtual units::turns_per_second_t GetRotorVelocity() = 0;
+  virtual wpi::units::turns_per_second_t GetRotorVelocity() = 0;
 
   /**
    * Get the simulated mechanism angular acceleration.
    *
    * @return Mechanism acceleration in turns per second squared.
    */
-  virtual units::turns_per_second_squared_t GetMechanismAcceleration() = 0;
+  virtual wpi::units::turns_per_second_squared_t GetMechanismAcceleration() = 0;
 
   /**
    * Get the simulated rotor angular acceleration.
    *
    * @return Rotor acceleration in turns per second squared.
    */
-  virtual units::turns_per_second_squared_t GetRotorAcceleration() = 0;
+  virtual wpi::units::turns_per_second_squared_t GetRotorAcceleration() = 0;
 
   /**
    * Set the simulated mechanism position.
    *
    * @param angle Mechanism position to inject.
    */
-  virtual void SetMechanismPosition(units::turn_t angle) = 0;
+  virtual void SetMechanismPosition(wpi::units::turn_t angle) = 0;
 
   /**
    * Set the simulated mechanism velocity.
    *
    * @param velocity Mechanism velocity to inject.
    */
-  virtual void SetMechanismVelocity(units::turns_per_second_t velocity) = 0;
+  virtual void SetMechanismVelocity(wpi::units::turns_per_second_t velocity) = 0;
 
   /**
    * Set the simulated rotor position.
    *
    * @param angle Rotor position to inject.
    */
-  virtual void SetRotorPosition(units::turn_t angle) = 0;
+  virtual void SetRotorPosition(wpi::units::turn_t angle) = 0;
 
   /**
    * Set the simulated rotor velocity.
    *
    * @param velocity Rotor velocity to inject.
    */
-  virtual void SetRotorVelocity(units::turns_per_second_t velocity) = 0;
+  virtual void SetRotorVelocity(wpi::units::turns_per_second_t velocity) = 0;
 
   /**
    * Return true if the simulation watchdog has expired (sim state is stale).
@@ -122,28 +122,28 @@ class SimSupplier {
    *
    * @return Current draw in amperes.
    */
-  virtual units::ampere_t GetCurrentDrawAmps() = 0;
+  virtual wpi::units::ampere_t GetCurrentDrawAmps() = 0;
 
   /**
    * Get the supply voltage available to the simulated motor controller (bus voltage).
    *
    * @return Supply voltage in volts.
    */
-  virtual units::volt_t GetMechanismSupplyVoltage() = 0;
+  virtual wpi::units::volt_t GetMechanismSupplyVoltage() = 0;
 
   /**
    * Get the last voltage applied to the simulated motor.
    *
    * @return Stator voltage in volts.
    */
-  virtual units::volt_t GetMechanismStatorVoltage() = 0;
+  virtual wpi::units::volt_t GetMechanismStatorVoltage() = 0;
 
   /**
    * Set the motor input voltage directly (e.g. from a hardware sim state).
    *
    * @param volts Voltage to apply.
    */
-  virtual void SetMechanismStatorVoltage(units::volt_t volts) = 0;
+  virtual void SetMechanismStatorVoltage(wpi::units::volt_t volts) = 0;
 };
 
 }  // namespace yams::motorcontrollers

@@ -3,22 +3,21 @@
 
 #include "yams/telemetry/SmartMotorControllerTelemetry.hpp"
 
-#include <frc/DataLogManager.h>
-#include <units/angle.h>
-#include <units/angular_acceleration.h>
-#include <units/angular_velocity.h>
-#include <units/current.h>
-#include <units/length.h>
-#include <units/time.h>
-#include <units/velocity.h>
-#include <units/voltage.h>
-#include <wpi/json.h>
-
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <utility>
+#include <wpi/system/DataLogManager.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/angular_acceleration.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/current.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/time.hpp>
+#include <wpi/units/velocity.hpp>
+#include <wpi/units/voltage.hpp>
+#include <wpi/util/json.hpp>
 
 #include "yams/exceptions.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
@@ -36,8 +35,8 @@ using namespace yams::motorcontrollers;
 // ============================================================================
 
 void SmartMotorControllerTelemetry::SetupTelemetry(
-    SmartMotorController& smc, std::shared_ptr<nt::NetworkTable> publishTable,
-    std::shared_ptr<nt::NetworkTable> tuningTable,
+    SmartMotorController& smc, std::shared_ptr<wpi::nt::NetworkTable> publishTable,
+    std::shared_ptr<wpi::nt::NetworkTable> tuningTable,
     std::unordered_map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>& doubleFields,
     std::unordered_map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>>& boolFields,
     bool nt4Enabled, std::optional<std::string> dataLogName) {
@@ -167,11 +166,12 @@ void SmartMotorControllerTelemetry::Publish(SmartMotorController& smc) {
         dt.Set(smc.GetRotorVelocity().value());
         break;
       case DoubleTelemetryField::ExternalEncoderPosition:
-        dt.Set(smc.GetExternalEncoderPosition().value_or(units::degree_t{0}).value() / 360.0);
+        dt.Set(smc.GetExternalEncoderPosition().value_or(wpi::units::degree_t{0}).value() / 360.0);
         break;
       case DoubleTelemetryField::ExternalEncoderVelocity:
-        dt.Set(smc.GetExternalEncoderVelocity().value_or(units::degrees_per_second_t{0}).value() /
-               360.0);
+        dt.Set(
+            smc.GetExternalEncoderVelocity().value_or(wpi::units::degrees_per_second_t{0}).value() /
+            360.0);
         break;
       case DoubleTelemetryField::ActiveClosedLoopControllerSlot:
         dt.Set(static_cast<double>(static_cast<int>(smc.GetClosedLoopControllerSlot())));
@@ -223,16 +223,16 @@ void SmartMotorControllerTelemetry::ApplyTuningValues(SmartMotorController& smc)
       }
       case DoubleTelemetryField::TunableSetpointPosition:
         if (linear)
-          smc.SetPosition(units::meter_t{dt.Get()});
+          smc.SetPosition(wpi::units::meter_t{dt.Get()});
         else
-          smc.SetPosition(units::degree_t{dt.Get()});
+          smc.SetPosition(wpi::units::degree_t{dt.Get()});
         break;
       case DoubleTelemetryField::TunableSetpointVelocity:
         if (dt.Get() == 0.0) break;
         if (linear)
-          smc.SetVelocity(units::meters_per_second_t{dt.Get()});
+          smc.SetVelocity(wpi::units::meters_per_second_t{dt.Get()});
         else
-          smc.SetVelocity(units::degrees_per_second_t{dt.Get() * 6.0});  // RPM → deg/s
+          smc.SetVelocity(wpi::units::degrees_per_second_t{dt.Get() * 6.0});  // RPM → deg/s
         break;
       case DoubleTelemetryField::kP:
         smc.SetKp(dt.Get());
@@ -256,46 +256,47 @@ void SmartMotorControllerTelemetry::ApplyTuningValues(SmartMotorController& smc)
         smc.SetKg(dt.Get());
         break;
       case DoubleTelemetryField::ClosedloopRampRate:
-        smc.SetClosedLoopRampRate(units::second_t{dt.Get()});
+        smc.SetClosedLoopRampRate(wpi::units::second_t{dt.Get()});
         break;
       case DoubleTelemetryField::OpenloopRampRate:
-        smc.SetOpenLoopRampRate(units::second_t{dt.Get()});
+        smc.SetOpenLoopRampRate(wpi::units::second_t{dt.Get()});
         break;
       case DoubleTelemetryField::SupplyCurrentLimit:
-        smc.SetSupplyCurrentLimit(units::ampere_t{dt.Get()});
+        smc.SetSupplyCurrentLimit(wpi::units::ampere_t{dt.Get()});
         break;
       case DoubleTelemetryField::StatorCurrentLimit:
-        smc.SetStatorCurrentLimit(units::ampere_t{dt.Get()});
+        smc.SetStatorCurrentLimit(wpi::units::ampere_t{dt.Get()});
         break;
       case DoubleTelemetryField::MeasurementUpperLimit:
-        smc.SetMeasurementUpperLimit(units::meter_t{dt.Get()});
+        smc.SetMeasurementUpperLimit(wpi::units::meter_t{dt.Get()});
         break;
       case DoubleTelemetryField::MeasurementLowerLimit:
-        smc.SetMeasurementLowerLimit(units::meter_t{dt.Get()});
+        smc.SetMeasurementLowerLimit(wpi::units::meter_t{dt.Get()});
         break;
       case DoubleTelemetryField::MechanismUpperLimit:
-        smc.SetMechanismUpperLimit(units::degree_t{dt.Get()});
+        smc.SetMechanismUpperLimit(wpi::units::degree_t{dt.Get()});
         break;
       case DoubleTelemetryField::MechanismLowerLimit:
-        smc.SetMechanismLowerLimit(units::degree_t{dt.Get()});
+        smc.SetMechanismLowerLimit(wpi::units::degree_t{dt.Get()});
         break;
       case DoubleTelemetryField::TrapezoidalProfileMaxAcceleration:
         if (linear)
-          smc.SetMotionProfileMaxAcceleration(units::meters_per_second_squared_t{dt.Get()});
+          smc.SetMotionProfileMaxAcceleration(wpi::units::meters_per_second_squared_t{dt.Get()});
         else
-          smc.SetMotionProfileMaxAcceleration(units::degrees_per_second_squared_t{dt.Get() * 6.0});
+          smc.SetMotionProfileMaxAcceleration(
+              wpi::units::degrees_per_second_squared_t{dt.Get() * 6.0});
         break;
       case DoubleTelemetryField::TrapezoidalProfileMaxVelocity:
         if (linear)
-          smc.SetMotionProfileMaxVelocity(units::meters_per_second_t{dt.Get()});
+          smc.SetMotionProfileMaxVelocity(wpi::units::meters_per_second_t{dt.Get()});
         else
-          smc.SetMotionProfileMaxVelocity(units::degrees_per_second_t{dt.Get() * 6.0});
+          smc.SetMotionProfileMaxVelocity(wpi::units::degrees_per_second_t{dt.Get() * 6.0});
         break;
       case DoubleTelemetryField::TrapezoidalProfileMaxJerk:
         smc.SetMotionProfileMaxJerk(
-            units::unit_t<
-                units::compound_unit<units::angular_acceleration::degrees_per_second_squared,
-                                     units::inverse<units::seconds>>>{dt.Get() * 6.0});
+            wpi::units::unit_t<wpi::units::compound_unit<
+                wpi::units::angular_acceleration::degrees_per_second_squared,
+                wpi::units::inverse<wpi::units::seconds>>>{dt.Get() * 6.0});
         break;
       case DoubleTelemetryField::ExponentialProfileKA:
         smc.SetExponentialProfile(std::nullopt, dt.Get(), std::nullopt);
@@ -304,7 +305,7 @@ void SmartMotorControllerTelemetry::ApplyTuningValues(SmartMotorController& smc)
         smc.SetExponentialProfile(dt.Get(), std::nullopt, std::nullopt);
         break;
       case DoubleTelemetryField::ExponentialProfileMaxInput:
-        smc.SetExponentialProfile(std::nullopt, std::nullopt, units::volt_t{dt.Get()});
+        smc.SetExponentialProfile(std::nullopt, std::nullopt, wpi::units::volt_t{dt.Get()});
         break;
       default:
         break;

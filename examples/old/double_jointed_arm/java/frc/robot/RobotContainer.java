@@ -1,0 +1,47 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot;
+
+import org.wpilib.driverstation.internal.DriverStationBackend;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.Commands;
+import org.wpilib.command2.button.CommandNiDsXboxController;
+import frc.robot.subsystems.DoubleJointedArmSubsystem;
+
+import static org.wpilib.units.Units.Degrees;
+
+
+public class RobotContainer
+{
+  private DoubleJointedArmSubsystem jointedArm = new DoubleJointedArmSubsystem();
+  public CommandNiDsXboxController xboxController = new CommandNiDsXboxController(0);
+
+  public RobotContainer()
+  {
+    DriverStationBackend.silenceJoystickConnectionAlert(true);
+    jointedArm.setDefaultCommand(jointedArm.set(0.0, 0.0));
+//    jointedArm.setDefaultCommand(jointedArm.setAngle(Degrees.of(0), Degrees.of(0)));
+    configureBindings();
+  }
+
+
+  private void configureBindings()
+  {
+    xboxController.getHID().button(1).whileTrue(jointedArm.setAngle(Degrees.of(90), null));
+    xboxController.getHID().button(2).whileTrue(jointedArm.set(null, 1.0));
+    xboxController.getHID().button(3).whileTrue(jointedArm.setAngle(Degrees.of(15), Degrees.of(45)));
+    xboxController.getHID().button(4).whileTrue(jointedArm.setAngle(Degrees.of(180), Degrees.of(90)));
+    xboxController.getHID().button(5).whileTrue(jointedArm.setAngle(Degrees.of(135), Degrees.of(135)));
+    //xboxController.getHID().button(6).whileTrue(jointedArm.sysId());
+  }
+
+
+  public Command getAutonomousCommand()
+  {
+    return Commands.print("No autonomous command configured");
+  }
+}

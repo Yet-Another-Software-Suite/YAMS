@@ -12,27 +12,27 @@ PivotConfig& PivotConfig::WithTelemetryName(const std::string& name) {
   return *this;
 }
 
-PivotConfig& PivotConfig::WithMinAngle(units::degree_t angle) {
+PivotConfig& PivotConfig::WithMinAngle(wpi::units::degree_t angle) {
   m_minAngle = angle;
   return *this;
 }
 
-PivotConfig& PivotConfig::WithMaxAngle(units::degree_t angle) {
+PivotConfig& PivotConfig::WithMaxAngle(wpi::units::degree_t angle) {
   m_maxAngle = angle;
   return *this;
 }
 
-PivotConfig& PivotConfig::WithSimColor(const frc::Color8Bit& color) {
+PivotConfig& PivotConfig::WithSimColor(const wpi::util::Color8Bit& color) {
   m_simColor = color;
   return *this;
 }
 
 std::string PivotConfig::GetTelemetryName() const { return m_telemetryName; }
 
-std::optional<units::degree_t> PivotConfig::GetMinAngle() const { return m_minAngle; }
+std::optional<wpi::units::degree_t> PivotConfig::GetMinAngle() const { return m_minAngle; }
 
-std::optional<units::degree_t> PivotConfig::GetMaxAngle() const { return m_maxAngle; }
+std::optional<wpi::units::degree_t> PivotConfig::GetMaxAngle() const { return m_maxAngle; }
 
-frc::Color8Bit PivotConfig::GetSimColor() const { return m_simColor; }
+wpi::util::Color8Bit PivotConfig::GetSimColor() const { return m_simColor; }
 
 }  // namespace yams::mechanisms::config

@@ -119,7 +119,7 @@ jobs:
 
             # The AKIT_TESTING fixup is only needed for examples that actually use
             # AdvantageKit; strip it from every other example.
-            if ! grep -rq "org.littletonrobotics" "examples/$name/java" 2>/dev/null; then
+            if ! grep -rq "org.littletonrobotics" "examples/commands2/$name/java" 2>/dev/null; then
               sed -i '/\/\/ AKIT_TESTING/,/\/\/ END_AKIT_TESTING/d' "$gradleFile"
             fi
           done

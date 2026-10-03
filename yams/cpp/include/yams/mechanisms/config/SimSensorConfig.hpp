@@ -3,13 +3,12 @@
 
 #pragma once
 
-#include <frc/DriverStation.h>
-#include <units/time.h>
-
 #include <functional>
 #include <memory>
 #include <string>
 #include <vector>
+#include <wpi/driverstation/DriverStation.hpp>
+#include <wpi/units/time.hpp>
 
 #include "yams/motorcontrollers/simulation/SensorData.hpp"
 
@@ -46,14 +45,14 @@ class SimSensorConfig {
 
   // ---- Match-time simulated value injection -----------------------------------
 
-  SimSensorConfig& WithSimulatedValue(const std::string& fieldName, units::second_t start,
-                                      units::second_t end, double value);
-  SimSensorConfig& WithSimulatedValue(const std::string& fieldName, units::second_t start,
-                                      units::second_t end, int value);
-  SimSensorConfig& WithSimulatedValue(const std::string& fieldName, units::second_t start,
-                                      units::second_t end, int64_t value);
-  SimSensorConfig& WithSimulatedValue(const std::string& fieldName, units::second_t start,
-                                      units::second_t end, bool value);
+  SimSensorConfig& WithSimulatedValue(const std::string& fieldName, wpi::units::second_t start,
+                                      wpi::units::second_t end, double value);
+  SimSensorConfig& WithSimulatedValue(const std::string& fieldName, wpi::units::second_t start,
+                                      wpi::units::second_t end, int value);
+  SimSensorConfig& WithSimulatedValue(const std::string& fieldName, wpi::units::second_t start,
+                                      wpi::units::second_t end, int64_t value);
+  SimSensorConfig& WithSimulatedValue(const std::string& fieldName, wpi::units::second_t start,
+                                      wpi::units::second_t end, bool value);
 
   // ---- Trigger-based simulated value injection --------------------------------
 
