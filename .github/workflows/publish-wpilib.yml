@@ -47,7 +47,7 @@ jobs:
         with:
           repo: Yet-Another-Software-Suite/vendor-json-repo
           token: ${{ secrets.PUBLISH_VENDOR_JSON_TOKEN }}
-          vendordep_file: gh-pages/yams_commands2-${{ steps.version.outputs.version }}.json
+          vendordep_file: ${{ github.workspace }}/gh-pages/yams_commands2-${{ steps.version.outputs.version }}.json
           pr_title: "Automatically add YAMS (Commands v2) version ${{ steps.version.outputs.version }}"
           pr_branch: "publish_yams_commands2_${{ steps.version.outputs.version }}"
 
@@ -56,6 +56,6 @@ jobs:
         with:
           repo: Yet-Another-Software-Suite/vendor-json-repo
           token: ${{ secrets.PUBLISH_VENDOR_JSON_TOKEN }}
-          vendordep_file: gh-pages/yams_commands3-${{ steps.version.outputs.version }}.json
+          vendordep_file: ${{ github.workspace }}/gh-pages/yams_commands3-${{ steps.version.outputs.version }}.json
           pr_title: "Automatically add YAMS (Commands v3) version ${{ steps.version.outputs.version }}"
           pr_branch: "publish_yams_commands3_${{ steps.version.outputs.version }}"
