@@ -2,7 +2,7 @@
   "fileName": "yams.json",
   "name": "Yet Another Mechanism System",
   "version": "${version}",
-  "frcYear": "2027_alpha7",
+  "wpilibYear": "2027_alpha7",
   "uuid": "${uuid}",
   "mavenUrls": [
     "https://yet-another-software-suite.github.io/YAMS/releases/"
@@ -28,8 +28,7 @@
         "windowsx86-64",
         "linuxarm64",
         "linuxx86-64",
-        "linuxathena",
-        "linuxarm32",
+        "linuxsystemcore",
         "osxuniversal"
       ]
     }

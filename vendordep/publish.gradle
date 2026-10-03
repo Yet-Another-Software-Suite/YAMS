@@ -147,14 +147,19 @@ def packageGlob = "yams/${name}/**"
 def outputBaseName = "_GROUP_yams_ID_${baseArtifactId}-${name}_CLS"
 def titleCaseName = name.capitalize()
 
+// The Maven publication uses each jar's classifier as-is, so these must be unclassified and
+// "sources" for the published files to be <artifactId>-<version>.jar and
+// <artifactId>-<version>-sources.jar, which is what the vendordep JSON's javaDependencies resolve
+// to. The per-variant base name keeps the variants from overwriting each other in build/libs.
 def jar = tasks.create("${name}Jar", Jar) {
     dependsOn classes
-    archiveClassifier = name
+    archiveBaseName = "${baseArtifactId}-${name}"
     from(sourceSets.main.output) { include packageGlob }
 }
 def sourcesJar = tasks.create("${name}SourcesJar", Jar) {
     dependsOn classes
-    archiveClassifier = "${name}-sources"
+    archiveBaseName = "${baseArtifactId}-${name}"
+    archiveClassifier = 'sources'
     from(sourceSets.main.allSource) { include packageGlob }
 }
 def outputJar = tasks.create("output${titleCaseName}Jar", Jar) {
