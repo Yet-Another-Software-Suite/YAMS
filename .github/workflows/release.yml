@@ -193,10 +193,28 @@ jobs:
             sleep 5
           done
 
+      # The tag carries the vendordep's frcYear and the title carries the WPILib version this branch
+      # builds against, so releases for different WPILib seasons are easy to tell apart.
+      - name: Resolve release tag
+        id: names
+        run: |
+          FRC_YEAR=$(jq -r .frcYear ${{ env.workingDirectory }}/yams.json)
+          if [ -z "$FRC_YEAR" ] || [ "$FRC_YEAR" = "null" ]; then
+            echo "Could not read frcYear from vendordep/yams.json" >&2
+            exit 1
+          fi
+          WPILIB_VERSION=$(sed -n 's/^ext\.wpilibVersion = "\(.*\)"/\1/p' ${{ env.workingDirectory }}/build.gradle)
+          if [ -z "$WPILIB_VERSION" ]; then
+            echo "Could not read ext.wpilibVersion from vendordep/build.gradle" >&2
+            exit 1
+          fi
+          echo "tag=v${{ inputs.releaseVersion }}-wpilib$FRC_YEAR" >> "$GITHUB_OUTPUT"
+          echo "wpilib_version=$WPILIB_VERSION" >> "$GITHUB_OUTPUT"
+
       - name: Create and push release tag
         id: create_tag
         run: |
-          TAG="v${{ inputs.releaseVersion }}"
+          TAG="${{ steps.names.outputs.tag }}"
           if git ls-remote --exit-code --tags origin "refs/tags/$TAG" > /dev/null 2>&1; then
             echo "Tag $TAG already exists on origin, deleting it before re-creating."
             git push origin ":refs/tags/$TAG"
@@ -288,12 +306,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="v${{ inputs.releaseVersion }}"
-          if [ "${{ inputs.publish }}" = "true" ]; then
-            RELEASE_FLAGS="--latest"
-          else
-            RELEASE_FLAGS="--prerelease"
-          fi
+          TAG="${{ steps.names.outputs.tag }}"
           if gh release view "$TAG" > /dev/null 2>&1; then
             echo "Release $TAG already exists, deleting it before re-creating."
             gh release delete "$TAG" --yes
@@ -301,10 +314,13 @@ jobs:
           else
             echo "release_existed=false" >> "$GITHUB_OUTPUT"
           fi
+          # Releases from this branch are always prereleases so they never take "Latest" from the
+          # main release line; publishing to the WPILib vendor-json-repo is controlled separately by
+          # the publish input.
           gh release create "$TAG" \
-            --title "YAMS v${{ inputs.releaseVersion }}" \
+            --title "YAMS v${{ inputs.releaseVersion }} (WPILib ${{ steps.names.outputs.wpilib_version }})" \
             --generate-notes \
-            $RELEASE_FLAGS \
+            --prerelease \
             release-artifacts/*
 
       - name: Create Vendor JSON Repo PR
@@ -318,6 +334,6 @@ jobs:
           repo: Yet-Another-Software-Suite/vendor-json-repo
           token: ${{ secrets.PUBLISH_VENDOR_JSON_TOKEN }}
           vendordep_file: ${{ env.workingDirectory }}/build/maven/yams-${{ inputs.releaseVersion }}.json
-          pr_title: "Automatically add YAMS version ${{ inputs.releaseVersion }}"
+          pr_title: "Automatically add YAMS version ${{ inputs.releaseVersion }} (WPILib ${{ steps.names.outputs.wpilib_version }})"
           pr_branch: "publish_yams_${{ inputs.releaseVersion }}"
         continue-on-error: true
