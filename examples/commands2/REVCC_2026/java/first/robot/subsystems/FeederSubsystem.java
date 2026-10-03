@@ -39,7 +39,7 @@ public class FeederSubsystem extends SubsystemBase
       .withControlMode(ControlMode.OPEN_LOOP)
       .withGearing(new MechanismGearing(1.0))
       .withMotorInverted(true)
-      .withIdleMode(MotorMode.COAST)
+      .withZeroPower(MotorMode.COAST)
       .withOpenLoopRampRate(Seconds.of(1.0))
       .withStatorCurrentLimit(Amps.of(60))
       // Simulation only: rough estimate of the feeder rollers' inertia.

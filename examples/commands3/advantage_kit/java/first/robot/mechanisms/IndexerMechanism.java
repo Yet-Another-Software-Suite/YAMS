@@ -75,7 +75,7 @@ public class IndexerMechanism implements Mechanism
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
       // COAST lets game pieces coast through after power is removed, preventing
       // double-feeds from a late motor stop.
-      .withIdleMode(MotorMode.COAST)
+      .withZeroPower(MotorMode.COAST)
       .withTelemetry("IndexerMotor", TelemetryVerbosity.HIGH)
       // 40 A stator limit; jams can spike current quickly on a belt drive.
       .withStatorCurrentLimit(Amps.of(40))

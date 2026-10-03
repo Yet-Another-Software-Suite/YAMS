@@ -40,7 +40,7 @@ public class ShooterMechanism implements Mechanism
   private final SmartMotorControllerConfig motorConfig            = new SmartMotorControllerConfig(this)
       .withClosedLoopController(1, 0, 0)
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
-      .withIdleMode(MotorMode.COAST)
+      .withZeroPower(MotorMode.COAST)
       .withTelemetry("ShooterMotor", TelemetryVerbosity.HIGH)
 //      .withStatorCurrentLimit(Amps.of(40))
       .withMotorInverted(false)

@@ -137,7 +137,7 @@ public class ArmSubsystem extends SubsystemBase {
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(12.5, 1)))
       .withMotorInverted(false)
       // BRAKE keeps the arm from drifting when disabled.
-      .withIdleMode(MotorMode.BRAKE)
+      .withZeroPower(MotorMode.BRAKE)
       .withStatorCurrentLimit(Amps.of(ArmConstants.STATOR_CURRENT_LIMIT))
       // 141 deg matches the hard upper limit -- arm boots at its stored-transport
       // position and the encoder is trusted from power-on.

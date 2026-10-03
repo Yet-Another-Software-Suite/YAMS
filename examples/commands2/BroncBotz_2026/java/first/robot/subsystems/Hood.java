@@ -42,7 +42,7 @@ public class Hood extends SubsystemBase {
         .withControlMode(ControlMode.CLOSED_LOOP)
         .withClosedLoopController(2, 0, 0)
         .withGearing(new MechanismGearing(1))
-        .withIdleMode(MotorMode.COAST)
+        .withZeroPower(MotorMode.COAST)
         .withStatorCurrentLimit(Amps.of(40))
         .withVoltageCompensation(Volts.of(12))
         .withMotorInverted(false)

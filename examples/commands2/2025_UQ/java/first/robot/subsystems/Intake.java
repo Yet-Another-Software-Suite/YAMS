@@ -34,7 +34,7 @@ public class Intake extends SubsystemBase {
       .withControlMode(ControlMode.OPEN_LOOP)
       // Gearing is only used for telemetry and simulation on this open loop roller.
       .withGearing(new MechanismGearing(1.0))
-      .withIdleMode(MotorMode.BRAKE)
+      .withZeroPower(MotorMode.BRAKE)
       .withMotorInverted(false)
       .withFollowers(Pair.of(intakeFollower, false))
       // Simulation only: rough estimate of the rollers' inertia.

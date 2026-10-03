@@ -33,7 +33,7 @@ public class DriveTrain extends SubsystemBase {
       .withControlMode(ControlMode.OPEN_LOOP)
       .withGearing(new MechanismGearing(kGearRatio))
       .withWheelDiameter(kWheelDiameter)
-      .withIdleMode(MotorMode.BRAKE)
+      .withZeroPower(MotorMode.BRAKE)
       .withMotorInverted(true)
       .withTelemetry("LeftDrive", TelemetryVerbosity.HIGH)
       .withFollowers(Pair.of(leftRear, false));
@@ -42,7 +42,7 @@ public class DriveTrain extends SubsystemBase {
       .withControlMode(ControlMode.OPEN_LOOP)
       .withGearing(new MechanismGearing(kGearRatio))
       .withWheelDiameter(kWheelDiameter)
-      .withIdleMode(MotorMode.BRAKE)
+      .withZeroPower(MotorMode.BRAKE)
       .withMotorInverted(false)
       .withTelemetry("RightDrive", TelemetryVerbosity.HIGH)
       .withFollowers(Pair.of(rightRear, false));

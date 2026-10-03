@@ -28,7 +28,7 @@ public class Climber extends SubsystemBase {
       .withControlMode(ControlMode.OPEN_LOOP)
       // Gearing is only used for telemetry and simulation on this open loop climber.
       .withGearing(new MechanismGearing(1.0))
-      .withIdleMode(MotorMode.BRAKE)
+      .withZeroPower(MotorMode.BRAKE)
       .withMotorInverted(true)
       .withTelemetry("Climber", TelemetryVerbosity.HIGH);
 

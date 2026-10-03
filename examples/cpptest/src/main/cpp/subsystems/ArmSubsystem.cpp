@@ -37,7 +37,7 @@ ArmSubsystem::ArmSubsystem() {
       .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
       // BRAKE holds the arm against gravity when idle; COAST would let it fall to the
       // lower soft limit and potentially stress the physical hard stop.
-      .WithIdleMode(Cfg::MotorMode::BRAKE)
+      .WithZeroPower(Cfg::MotorMode::BRAKE)
       .WithTelemetry("ArmMotor", Cfg::TelemetryVerbosity::HIGH)
       // Stator limit: 40 A prevents the motor from cooking the gearbox if the arm hits
       // a hard stop. Supply is left uncapped -- the stator limit is the binding one here.

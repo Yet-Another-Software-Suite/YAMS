@@ -47,7 +47,7 @@ public class CANDriveMechanism implements Mechanism {
       .withWheelDiameter(WHEEL_DIAMETER)
       .withVoltageCompensation(NOMINAL_VOLTAGE)
       .withStatorCurrentLimit(DRIVE_MOTOR_CURRENT_LIMIT)
-      .withIdleMode(MotorMode.BRAKE)
+      .withZeroPower(MotorMode.BRAKE)
       // Set Left side inverted so that positive values drive both sides forward
       .withMotorInverted(true)
       .withTelemetry("LeftDrive", TelemetryVerbosity.HIGH)
@@ -60,7 +60,7 @@ public class CANDriveMechanism implements Mechanism {
       .withWheelDiameter(WHEEL_DIAMETER)
       .withVoltageCompensation(NOMINAL_VOLTAGE)
       .withStatorCurrentLimit(DRIVE_MOTOR_CURRENT_LIMIT)
-      .withIdleMode(MotorMode.BRAKE)
+      .withZeroPower(MotorMode.BRAKE)
       .withMotorInverted(false)
       .withTelemetry("RightDrive", TelemetryVerbosity.HIGH)
       .withFollowers(Pair.of(rightFollower, false));

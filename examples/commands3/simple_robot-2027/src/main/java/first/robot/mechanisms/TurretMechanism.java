@@ -49,7 +49,7 @@ public class TurretMechanism implements Mechanism
 
           // Configure Motor and Mechanism properties
           .withGearing(new MechanismGearing(new GearBox(ratio)))
-          .withIdleMode(MotorMode.BRAKE)
+          .withZeroPower(MotorMode.BRAKE)
           .withMotorInverted(false)
           .withFeedforward(new ArmFeedforward(0.5, 0.0, 5.0, 0))
           .withSimFeedforward(new ArmFeedforward(0.5, 0.0, 5.0, 0))

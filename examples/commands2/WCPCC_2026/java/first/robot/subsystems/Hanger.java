@@ -76,7 +76,7 @@ public class Hanger extends SubsystemBase {
         .withMechanismCircumference(kExtensionPerMechanismRotation)
         // Clockwise_Positive
         .withMotorInverted(true)
-        .withIdleMode(MotorMode.BRAKE)
+        .withZeroPower(MotorMode.BRAKE)
         .withStatorCurrentLimit(Amps.of(20))
         .withSupplyCurrentLimit(Amps.of(70))
         // WCP's gains were per motor rotation (kP 10, kV 12 V at free speed). The ElevatorFeedforward

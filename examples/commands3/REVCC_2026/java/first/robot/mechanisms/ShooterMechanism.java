@@ -72,7 +72,7 @@ public class ShooterMechanism implements Mechanism
       .withTrapezoidalProfile(RPM.of(5000), RPM.per(Second).of(10000))
       .withMotorInverted(true)
       // COAST so the flywheel spins down naturally after a command ends.
-      .withIdleMode(MotorMode.COAST)
+      .withZeroPower(MotorMode.COAST)
       .withClosedLoopRampRate(Seconds.of(1.0))
       .withOpenLoopRampRate(Seconds.of(1.0))
       .withStatorCurrentLimit(Amps.of(80))

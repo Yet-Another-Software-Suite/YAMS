@@ -49,7 +49,7 @@ public class AlgaeArm implements Mechanism {
         .withSimClosedLoopController(kP, 0, 0)
         .withFeedforward(new ArmFeedforward(kS, kG, kV))
         .withTrapezoidalProfile(kMaxVelocity, kMaxAcceleration)
-        .withIdleMode(MotorMode.COAST)
+        .withZeroPower(MotorMode.COAST)
         .withStatorCurrentLimit(kCurrentLimit)
         .withOpenLoopRampRate(kRampRate)
         .withMotorInverted(false)

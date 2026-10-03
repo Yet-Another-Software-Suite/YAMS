@@ -28,7 +28,7 @@ ShooterSubsystem::ShooterSubsystem() {
       // motor-shaft turns and mechanism (wheel) turns for velocity control.
       .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
       // COAST so the wheel spins down freely after a shot instead of hard-braking.
-      .WithIdleMode(Cfg::MotorMode::COAST)
+      .WithZeroPower(Cfg::MotorMode::COAST)
       .WithTelemetry("ShooterMotor", Cfg::TelemetryVerbosity::HIGH)
       .WithMotorInverted(false)
       // Feedforward zeroed for now; tune kV once actual free-spin RPM is measured.

@@ -73,7 +73,7 @@ public class ExponentiallyProfiledElevatorSubsystem extends SubsystemBase
        * Basic Configuration options for the motor
        */
       .withMotorInverted(false)
-      .withIdleMode(MotorMode.BRAKE)
+      .withZeroPower(MotorMode.BRAKE)
       .withControlMode(ControlMode.CLOSED_LOOP)
       .withMechanismCircumference(circumference)
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))

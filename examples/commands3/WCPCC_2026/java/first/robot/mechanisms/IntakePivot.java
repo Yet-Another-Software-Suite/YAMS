@@ -68,7 +68,7 @@ public class IntakePivot implements Mechanism {
         .withGearing(new MechanismGearing(kPivotReduction))
         // CounterClockwise_Positive
         .withMotorInverted(false)
-        .withIdleMode(MotorMode.BRAKE)
+        .withZeroPower(MotorMode.BRAKE)
         .withStatorCurrentLimit(Amps.of(120))
         .withSupplyCurrentLimit(Amps.of(70))
         .withClosedLoopController(300, 0, 0)

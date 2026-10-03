@@ -46,7 +46,7 @@ public class IntakeSubsystem extends SubsystemBase
       .withGearing(new MechanismGearing(1.0))
       .withMotorInverted(false)
       // COAST lets the rollers spin down freely instead of jerking fuel when released.
-      .withIdleMode(MotorMode.COAST)
+      .withZeroPower(MotorMode.COAST)
       // 0.5 s ramp softens the current spike when the rollers start.
       .withOpenLoopRampRate(Seconds.of(0.5))
       .withStatorCurrentLimit(Amps.of(40))

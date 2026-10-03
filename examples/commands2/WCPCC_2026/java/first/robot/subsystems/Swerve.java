@@ -115,7 +115,7 @@ public class Swerve extends SubsystemBase {
             .withWheelRadius(kWheelRadius)
             .withClosedLoopController(kDriveKP, 0, 0)
             .withFeedforward(new SimpleMotorFeedforward(0, kDriveKV))
-            .withIdleMode(MotorMode.BRAKE)
+            .withZeroPower(MotorMode.BRAKE)
             // The slip current limits the drive stator current, as in the CTRE swerve API.
             .withStatorCurrentLimit(kSlipCurrent)
             .withMotorInverted(driveInverted)
@@ -133,7 +133,7 @@ public class Swerve extends SubsystemBase {
             .withExternalEncoderZeroOffset(encoderOffset)
             .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5))
             .withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5))
-            .withIdleMode(MotorMode.BRAKE)
+            .withZeroPower(MotorMode.BRAKE)
             .withStatorCurrentLimit(kSteerStatorCurrentLimit)
             // Steer inertia from the CTRE Tuner X swerve defaults, used by the simulation.
             .withMomentOfInertia(KilogramSquareMeters.of(0.01))

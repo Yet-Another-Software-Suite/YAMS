@@ -40,7 +40,7 @@ public class ConveyorSubsystem extends SubsystemBase
       .withGearing(new MechanismGearing(1.0))
       // Mounted opposite the intake motor, so it is inverted to make positive mean "toward the shooter".
       .withMotorInverted(true)
-      .withIdleMode(MotorMode.COAST)
+      .withZeroPower(MotorMode.COAST)
       .withOpenLoopRampRate(Seconds.of(0.5))
       .withStatorCurrentLimit(Amps.of(40))
       // Simulation only: rough estimate of the conveyor rollers' inertia.

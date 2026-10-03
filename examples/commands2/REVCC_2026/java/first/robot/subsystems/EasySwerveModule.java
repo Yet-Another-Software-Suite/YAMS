@@ -78,7 +78,7 @@ public final class EasySwerveModule
         .withClosedLoopController(0.04 * ModuleConstants.kWheelDiameter.in(Meters) * Math.PI * 12, 0, 0)
         // kV = 12 V / wheel free speed, the same feedforward the REV code computed.
         .withFeedforward(new SimpleMotorFeedforward(0, 12.0 / kDriveWheelFreeSpeedRps))
-        .withIdleMode(MotorMode.BRAKE)
+        .withZeroPower(MotorMode.BRAKE)
         .withStatorCurrentLimit(Amps.of(60))
         .withMotorInverted(drivingMotorOnBottom)
         .withTelemetry("driveMotor", TelemetryVerbosity.HIGH);
@@ -111,7 +111,7 @@ public final class EasySwerveModule
         // through 0 to get to the setpoint i.e. going from 350 degrees to 10 degrees will go
         // through 0 rather than the other direction which is a longer route.
         .withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5))
-        .withIdleMode(MotorMode.BRAKE)
+        .withZeroPower(MotorMode.BRAKE)
         .withStatorCurrentLimit(Amps.of(60))
         .withMotorInverted(!turningMotorOnBottom)
         .withTelemetry("angleMotor", TelemetryVerbosity.HIGH);

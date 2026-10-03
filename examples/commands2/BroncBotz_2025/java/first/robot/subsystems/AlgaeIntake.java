@@ -31,7 +31,7 @@ public class AlgaeIntake extends SubsystemBase {
     private final SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
         .withControlMode(ControlMode.OPEN_LOOP)
         .withGearing(new MechanismGearing(1))
-        .withIdleMode(MotorMode.BRAKE)
+        .withZeroPower(MotorMode.BRAKE)
         .withStatorCurrentLimit(kCurrentLimit)
         .withMotorInverted(true)
         // Simulation only: the original's roller inertia.

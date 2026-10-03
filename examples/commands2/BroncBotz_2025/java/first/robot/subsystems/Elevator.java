@@ -50,7 +50,7 @@ public class Elevator extends SubsystemBase {
         .withSimClosedLoopController(kP, 0, 0)
         .withFeedforward(new ElevatorFeedforward(kS, kG, kV))
         .withTrapezoidalProfile(kMaxVelocity, kMaxAcceleration)
-        .withIdleMode(MotorMode.COAST)
+        .withZeroPower(MotorMode.COAST)
         .withStatorCurrentLimit(kCurrentLimit)
         .withClosedLoopRampRate(kRampRate)
         // The right motor mirrors the left.

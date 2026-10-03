@@ -33,7 +33,7 @@ public class Agitator implements Mechanism {
         .withControlMode(ControlMode.CLOSED_LOOP)
         .withClosedLoopController(0, 0, 0)
         .withGearing(new MechanismGearing(3))
-        .withIdleMode(MotorMode.COAST)
+        .withZeroPower(MotorMode.COAST)
         .withStatorCurrentLimit(Amps.of(50))
         .withMotorInverted(false)
         .withFeedforward(new SimpleMotorFeedforward(0, 0, 0))

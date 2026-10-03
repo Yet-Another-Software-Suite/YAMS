@@ -42,7 +42,7 @@ public class CoralWrist implements Mechanism {
         .withExternalEncoderInverted(true)
         .withExternalEncoderDiscontinuityPoint(Rotations.of(1))
         .withContinuousWrapping(Rotations.of(0), Rotations.of(1))
-        .withIdleMode(MotorMode.COAST)
+        .withZeroPower(MotorMode.COAST)
         .withStatorCurrentLimit(kWristCurrentLimit)
         .withClosedLoopRampRate(kWristRampRate)
         .withMotorInverted(false)

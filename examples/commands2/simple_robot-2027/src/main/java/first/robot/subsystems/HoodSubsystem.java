@@ -39,7 +39,7 @@ public class HoodSubsystem extends SubsystemBase
           .withTrapezoidalProfile(DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
           .withSoftLimits(Degrees.of(-30), Degrees.of(100))
           .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
-          .withIdleMode(MotorMode.BRAKE)
+          .withZeroPower(MotorMode.BRAKE)
           .withTelemetry("HoodMotor", TelemetryVerbosity.HIGH)
           .withStatorCurrentLimit(Amps.of(40))
           .withMotorInverted(false)

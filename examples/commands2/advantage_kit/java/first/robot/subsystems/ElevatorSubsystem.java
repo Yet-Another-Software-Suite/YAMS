@@ -112,7 +112,7 @@ public class ElevatorSubsystem extends SubsystemBase
       .withSoftLimits(Meters.of(0), Meters.of(2))
       .withGearing(gearing)
       // BRAKE holds position when the command ends; avoids a gravity-driven drop.
-      .withIdleMode(MotorMode.BRAKE)
+      .withZeroPower(MotorMode.BRAKE)
       .withTelemetry("ElevatorMotor", TelemetryVerbosity.HIGH)
       // elevatorMotor2 is inverted relative to the leader because the two motors
       // face opposite directions on the carriage.

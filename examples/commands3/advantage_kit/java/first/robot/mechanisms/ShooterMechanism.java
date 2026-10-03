@@ -82,7 +82,7 @@ public class ShooterMechanism implements Mechanism {
       // 3:4 box gives a 12:1 total reduction from motor to flywheel shaft.
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
       // COAST: letting the wheel spin down naturally avoids back-driving the gearbox.
-      .withIdleMode(MotorMode.COAST)
+      .withZeroPower(MotorMode.COAST)
       .withTelemetry("ShooterMotor", TelemetryVerbosity.HIGH)
       // 40 A stator limit prevents the NEO from melting the winding during a jam.
       .withStatorCurrentLimit(Amps.of(40))

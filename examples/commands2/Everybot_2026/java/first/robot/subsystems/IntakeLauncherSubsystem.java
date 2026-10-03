@@ -41,7 +41,7 @@ public class IntakeLauncherSubsystem extends SubsystemBase {
       .withGearing(new MechanismGearing(1.0))
       .withStatorCurrentLimit(LAUNCHER_MOTOR_CURRENT_LIMIT)
       .withVoltageCompensation(NOMINAL_VOLTAGE)
-      .withIdleMode(MotorMode.COAST)
+      .withZeroPower(MotorMode.COAST)
       .withMotorInverted(false)
       // Simulation only: rough estimate of the launcher wheels' inertia.
       .withMomentOfInertia(Inches.of(2), Pounds.of(1))

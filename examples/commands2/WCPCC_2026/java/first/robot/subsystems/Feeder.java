@@ -55,7 +55,7 @@ public class Feeder extends SubsystemBase {
         .withGearing(new MechanismGearing(1.0))
         // CounterClockwise_Positive
         .withMotorInverted(false)
-        .withIdleMode(MotorMode.COAST)
+        .withZeroPower(MotorMode.COAST)
         .withStatorCurrentLimit(Amps.of(120))
         .withSupplyCurrentLimit(Amps.of(50))
         .withClosedLoopController(1, 0, 0)

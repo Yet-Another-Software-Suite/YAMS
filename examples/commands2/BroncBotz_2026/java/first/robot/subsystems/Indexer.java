@@ -34,7 +34,7 @@ public class Indexer extends SubsystemBase {
         .withControlMode(ControlMode.CLOSED_LOOP)
         .withClosedLoopController(0, 0, 0)
         .withGearing(new MechanismGearing(3))
-        .withIdleMode(MotorMode.COAST)
+        .withZeroPower(MotorMode.COAST)
         .withStatorCurrentLimit(Amps.of(40))
         .withMotorInverted(false)
         .withFeedforward(new SimpleMotorFeedforward(0.18, 0.62, 0))

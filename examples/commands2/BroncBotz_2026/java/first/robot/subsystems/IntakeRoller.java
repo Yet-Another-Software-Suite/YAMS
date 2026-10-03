@@ -33,7 +33,7 @@ public class IntakeRoller extends SubsystemBase {
         .withControlMode(ControlMode.CLOSED_LOOP)
         .withClosedLoopController(0, 0, 0)
         .withGearing(new MechanismGearing(1))
-        .withIdleMode(MotorMode.COAST)
+        .withZeroPower(MotorMode.COAST)
         .withStatorCurrentLimit(Amps.of(40))
         .withMotorInverted(false)
         .withFeedforward(new SimpleMotorFeedforward(0, 0, 0))

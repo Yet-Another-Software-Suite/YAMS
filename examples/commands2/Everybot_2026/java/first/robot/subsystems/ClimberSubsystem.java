@@ -33,7 +33,7 @@ public class ClimberSubsystem extends SubsystemBase {
       // Gearing is only used for telemetry and simulation on this open loop climber.
       .withGearing(new MechanismGearing(1.0))
       .withStatorCurrentLimit(CLIMBER_MOTOR_CURRENT_LIMIT)
-      .withIdleMode(MotorMode.BRAKE)
+      .withZeroPower(MotorMode.BRAKE)
       .withTelemetry("Climber", TelemetryVerbosity.HIGH);
 
   private final SmartMotorController climber = new SparkWrapper(climberMotor, DCMotor.getCIM(1), climbConfig);

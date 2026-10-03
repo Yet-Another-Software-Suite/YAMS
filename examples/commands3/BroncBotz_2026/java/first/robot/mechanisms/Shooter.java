@@ -37,7 +37,7 @@ public class Shooter implements Mechanism {
         .withClosedLoopController(0.3447, 0, 0.0025)
         // Kept at 1:1 as at competition; the actual gearing is 22:18.
         .withGearing(new MechanismGearing(1))
-        .withIdleMode(MotorMode.COAST)
+        .withZeroPower(MotorMode.COAST)
         .withStatorCurrentLimit(Amps.of(60))
         .withMotorInverted(true)
         .withFeedforward(new SimpleMotorFeedforward(0.17, 0.117, 0.01))

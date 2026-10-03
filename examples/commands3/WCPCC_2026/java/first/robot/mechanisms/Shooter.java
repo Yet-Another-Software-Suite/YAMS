@@ -58,7 +58,7 @@ public class Shooter implements Mechanism {
             .withControlMode(ControlMode.CLOSED_LOOP)
             .withGearing(new MechanismGearing(1.0))
             .withMotorInverted(inverted)
-            .withIdleMode(MotorMode.COAST)
+            .withZeroPower(MotorMode.COAST)
             .withStatorCurrentLimit(Amps.of(120))
             .withSupplyCurrentLimit(Amps.of(70))
             .withClosedLoopController(0.5, 2, 0)

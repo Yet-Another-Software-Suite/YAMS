@@ -49,7 +49,7 @@ ElevatorSubsystem::ElevatorSubsystem() {
       .WithMeasurementLimits(units::meter_t{0}, units::meter_t{2})
       // BRAKE keeps the carriage from drifting down when a command ends. COAST here would
       // let gravity pull it down against the feedforward, wasting current.
-      .WithIdleMode(Cfg::MotorMode::BRAKE)
+      .WithZeroPower(Cfg::MotorMode::BRAKE)
       .WithTelemetry("ElevatorMotor", Cfg::TelemetryVerbosity::HIGH)
       // Supply limit (input side of the controller): 40 A caps battery draw without
       // significantly reducing peak force on this ~1 kg carriage. Stator is left

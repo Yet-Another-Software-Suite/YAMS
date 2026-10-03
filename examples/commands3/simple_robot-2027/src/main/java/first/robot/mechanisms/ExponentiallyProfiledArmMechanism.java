@@ -93,7 +93,7 @@ public class ExponentiallyProfiledArmMechanism implements Mechanism
                                                  * Basic Configuration options for the motor
                                                  */
                                                 .withMotorInverted(false)
-                                                .withIdleMode(MotorMode.BRAKE)
+                                                .withZeroPower(MotorMode.BRAKE)
                                                 .withControlMode(ControlMode.CLOSED_LOOP)
                                                 .withGearing(gearing)
                                                 .withStatorCurrentLimit(Amps.of(40)) // Prevents our motor from continuously over-taxing itself when it is stuck.

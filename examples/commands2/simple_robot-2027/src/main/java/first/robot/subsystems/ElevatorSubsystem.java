@@ -66,7 +66,7 @@ public class ElevatorSubsystem extends SubsystemBase
       .withSoftLimits(Meters.of(0), Meters.of(2))
       .withGearing(gearing)
 //      .withExternalEncoder(armMotor.getAbsoluteEncoder()) // External Encoder if you need one, really shouldn't be used for Elevators
-      .withIdleMode(MotorMode.BRAKE)
+      .withZeroPower(MotorMode.BRAKE)
       .withTelemetry("ElevatorMotor", TelemetryVerbosity.HIGH)
 //      .withSpecificTelemetry("ElevatorMotor", motorTelemetryConfig) // Specific Telemetry
       .withStatorCurrentLimit(Amps.of(40))

@@ -47,7 +47,7 @@ public class ArmSubsystem extends SubsystemBase {
       .withFeedforward(new ArmFeedforward(0, 0, 0))
       // Targets are clamped to the arm's limits, as in the original.
       .withSoftLimits(armRearLimit, armFrontLimit)
-      .withIdleMode(MotorMode.BRAKE)
+      .withZeroPower(MotorMode.BRAKE)
       .withMotorInverted(true)
       .withFollowers(Pair.of(armFollower, true))
       // Simulation only: start at the coral intake position and a rough estimate of the arm's inertia.

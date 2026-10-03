@@ -38,7 +38,7 @@ public class DoubleFlyWheelSubsystem extends SubsystemBase {
   private SmartMotorControllerConfig lowerFlyWheelConfig =
       new SmartMotorControllerConfig(this)
           .withControlMode(ControlMode.CLOSED_LOOP)
-          .withIdleMode(MotorMode.COAST)
+          .withZeroPower(MotorMode.COAST)
           //      .withWheelDiameter(Inches.of(4)) // Only needed to find the MPH of the flywheel
           // for fun.
           .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
@@ -56,7 +56,7 @@ public class DoubleFlyWheelSubsystem extends SubsystemBase {
 
   private SmartMotorControllerConfig upperFlyWheelConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
-      .withIdleMode(MotorMode.COAST)
+      .withZeroPower(MotorMode.COAST)
 //      .withWheelDiameter(Inches.of(4)) // Only needed to find the MPH of the flywheel for fun.
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
       .withMomentOfInertia(Inches.of(4), Pounds.of(2))

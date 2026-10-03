@@ -52,7 +52,7 @@ public class Floor extends SubsystemBase {
         .withGearing(new MechanismGearing(1.0))
         // Clockwise_Positive
         .withMotorInverted(true)
-        .withIdleMode(MotorMode.BRAKE)
+        .withZeroPower(MotorMode.BRAKE)
         .withStatorCurrentLimit(Amps.of(120))
         .withSupplyCurrentLimit(Amps.of(30))
         // Simulation only: rough estimate of the floor rollers' inertia.

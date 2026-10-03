@@ -61,7 +61,7 @@ public class ArmMechanism implements Mechanism
       .withSoftLimits(Degrees.of(-30), Degrees.of(100))
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
 //      .withExternalEncoder(armMotor.getAbsoluteEncoder())
-      .withIdleMode(MotorMode.BRAKE)
+      .withZeroPower(MotorMode.BRAKE)
       .withTelemetry("ArmMotor", TelemetryVerbosity.HIGH)
 //      .withSpecificTelemetry("ArmMotor", motorTelemetryConfig)
       .withStatorCurrentLimit(Amps.of(40))
