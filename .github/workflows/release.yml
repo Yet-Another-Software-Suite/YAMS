@@ -20,6 +20,8 @@ env:
   # Publishing to WPILib always includes the C++ library, regardless of the buildCpp input.
   skipCpp: ${{ !(inputs.publish || inputs.buildCpp) }}
 
+# Mirrors ci.yml's build jobs, but only runs `publish` (never `build` or `test`) so no unit tests
+# are compiled or run during a release.
 jobs:
   build-cross:
     name: Release - ${{ matrix.artifact-name }}
@@ -27,16 +29,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - container: wpilib/roborio-cross-ubuntu:2025-22.04
-            artifact-name: athena
-            build-options: "-Ponlylinuxathena"
-          - container: wpilib/raspbian-cross-ubuntu:bookworm-22.04
-            artifact-name: arm32
-            build-options: "-Ponlylinuxarm32"
-          - container: wpilib/aarch64-cross-ubuntu:bookworm-22.04
-            artifact-name: arm64
+          - container: wpilib/systemcore-cross-debian:trixie
+            artifact-name: SystemCore
+            build-options: "-Ponlylinuxsystemcore"
+          - container: wpilib/aarch64-cross-debian:trixie
+            artifact-name: Arm64
             build-options: "-Ponlylinuxarm64"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     container: ${{ matrix.container }}
     env:
       releaseVersion: ${{ inputs.releaseVersion }}
@@ -44,6 +43,9 @@ jobs:
       - uses: actions/checkout@v7
       - name: Configure git safe directory
         run: git config --global --add safe.directory /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}
+      - name: Install toolchain
+        run: ./gradlew installSystemCoreToolchain
+        working-directory: vendordep
       - name: Publish
         run: ./gradlew publish ${{ matrix.build-options }} -PskipCpp=${{ env.skipCpp }}
         working-directory: vendordep
@@ -58,13 +60,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: windows-latest
+          - os: windows-2025
             artifact-name: windows
             gradlew: ./gradlew.bat
+            architecture: x64
             build-options: "-Ponlywindows64"
-          - os: macos-latest
+          - os: macos-15
             artifact-name: macos
             gradlew: ./gradlew
+            architecture: aarch64
             build-options: "-Ponlyosxuniversal"
     runs-on: ${{ matrix.os }}
     env:
@@ -74,14 +78,17 @@ jobs:
         working-directory: vendordep
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 25
+          architecture: ${{ matrix.architecture }}
       - name: Make gradlew executable
         if: runner.os != 'Windows'
         run: chmod +x gradlew
       - uses: gradle/actions/setup-gradle@v6
+      - name: Install toolchain
+        run: ${{ matrix.gradlew }} installSystemCoreToolchain
       - name: Publish
         run: ${{ matrix.gradlew }} publish -PskipCpp=${{ env.skipCpp }} ${{ matrix.build-options }}
       - uses: actions/upload-artifact@v7
@@ -98,30 +105,31 @@ jobs:
       - name: Generate Java examples
         run: mkdir -p generated && make
         working-directory: examples
-      - name: Download YAMS vendordep JSON
+      - name: Download YAMS vendordep JSONs
         uses: actions/download-artifact@v7
         with:
           name: maven-windows
           path: maven-windows/
       - name: Strip testing-only fixups from generated examples
         run: |
-          yamsJson="${{ github.workspace }}/maven-windows/yams.json"
           for dir in examples/generated/*/; do
             name=$(basename "$dir")
             gradleFile="$dir/build.gradle"
 
+            # Commands v3 examples are generated with a "commands3-" prefix; everything else is
+            # a Commands v2 example.
+            if [[ "$name" == commands3-* ]]; then
+              yamsJson="yams_commands3.json"
+            else
+              yamsJson="yams_commands2.json"
+            fi
+
             # The YAMS_TESTING fixup compiles against yams/java directly so example
             # builds don't depend on a published vendordep. Every real example should
-            # instead consume the generated yams.json vendordep like a real consumer would.
+            # instead consume the generated vendordep JSON like a real consumer would.
             sed -i '/\/\/ YAMS_TESTING/,/\/\/ END_YAMS_TESTING/d' "$gradleFile"
             mkdir -p "$dir/vendordeps"
-            cp "$yamsJson" "$dir/vendordeps/yams.json"
-
-            # The AKIT_TESTING fixup is only needed for examples that actually use
-            # AdvantageKit; strip it from every other example.
-            if ! grep -rq "org.littletonrobotics" "examples/commands2/$name/java" 2>/dev/null; then
-              sed -i '/\/\/ AKIT_TESTING/,/\/\/ END_AKIT_TESTING/d' "$gradleFile"
-            fi
+            cp "${{ github.workspace }}/maven-windows/$yamsJson" "$dir/vendordeps/$yamsJson"
           done
       - name: Zip generated Java examples
         run: |
@@ -162,10 +170,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 25
 
       - run: chmod +x gradlew
         working-directory: ${{ env.workingDirectory }}
@@ -173,25 +181,11 @@ jobs:
       - name: Install doxygen and graphviz
         run: sudo apt-get install -y doxygen graphviz
 
-      - name: Cache roboRIO toolchain
-        id: toolchain-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/wpilib/2026/roborio
-          key: roborio-toolchain-linux
-
       - uses: gradle/actions/setup-gradle@v6
 
-      - name: Install roboRIO toolchain
-        if: steps.toolchain-cache.outputs.cache-hit != 'true'
-        shell: bash
+      - name: Install toolchain
+        run: ./gradlew installSystemCoreToolchain
         working-directory: ${{ env.workingDirectory }}
-        run: |
-          for i in 1 2 3; do
-            ./gradlew installRoboRioToolchain && break
-            echo "Attempt $i failed, retrying in 15s..."
-            sleep 5
-          done
 
       - name: Create and push release tag
         id: create_tag
@@ -216,15 +210,15 @@ jobs:
 
       # Pass 1: publish into a clean directory so the offline zip contains only
       # the current version's artifacts with correctly stitched metadata.
-      - name: Merge cross-platform artifacts (pass 1 — clean dir)
+      - name: Merge cross-platform artifacts (pass 1, clean dir)
         run: |
           mkdir -p vendordep/build/maven
           for dir in cross/maven-*/; do
             cp -r "$dir." vendordep/build/maven/
           done
 
-      - name: Build and publish — stitch current version maven metadata
-        run: ./gradlew publish -PskipCpp=${{ env.skipCpp }}
+      - name: Build and publish (stitch current version maven metadata)
+        run: ./gradlew publish -Ponlylinuxx64 -PskipCpp=${{ env.skipCpp }}
         working-directory: ${{ env.workingDirectory }}
 
       - name: Download example artifacts
@@ -249,18 +243,26 @@ jobs:
           ref: gh-pages
           path: ${{ env.workingDirectory }}/build/maven/
 
-      - name: Merge cross-platform artifacts (pass 2 — full history)
+      - name: Merge cross-platform artifacts (pass 2, full history)
         run: |
           for dir in cross/maven-*/; do
             cp -r "$dir." vendordep/build/maven/
           done
 
-      - name: Build and publish (Linux — fixes maven metadata for all versions)
-        run: ./gradlew publish -PskipCpp=${{ env.skipCpp }}
+      - name: Build and publish (Linux, fixes maven metadata for all versions)
+        run: ./gradlew publish -Ponlylinuxx64 -PskipCpp=${{ env.skipCpp }}
         working-directory: ${{ env.workingDirectory }}
 
-      - name: Create versioned vendordep JSON
-        run: cp ${{ env.workingDirectory }}/build/maven/yams.json ${{ env.workingDirectory }}/build/maven/yams-${{ inputs.releaseVersion }}.json
+      # Both vendordep JSONs (yams_commands2.json and yams_commands3.json) are generated by
+      # vendordepJson.gradle into build/maven, so they are deployed to gh-pages alongside the
+      # maven repo. Also keep a versioned copy of each and attach them to the GitHub release.
+      - name: Create versioned vendordep JSONs
+        run: |
+          cd ${{ env.workingDirectory }}/build/maven
+          for variant in commands2 commands3; do
+            cp "yams_${variant}.json" "yams_${variant}-${{ inputs.releaseVersion }}.json"
+            cp "yams_${variant}.json" "${{ github.workspace }}/release-artifacts/yams_${variant}.json"
+          done
 
       - name: Push to gh-pages
         run: git add . && git commit -m "Automatically add YAMS version ${{ inputs.releaseVersion }}" && git push
@@ -307,17 +309,28 @@ jobs:
             $RELEASE_FLAGS \
             release-artifacts/*
 
-      - name: Create Vendor JSON Repo PR
-        # Skip re-publishing to the WPILib vendor-json-repo when this run is overwriting an
-        # existing tag/release for the same version, e.g. a re-run after a failure. That repo's PR
-        # represents "this version now exists"; re-filing it for a version that already went out
-        # would just create a duplicate/no-op PR against vendor-json-repo.
+      # Skip re-publishing to the WPILib vendor-json-repo when this run is overwriting an
+      # existing tag/release for the same version, e.g. a re-run after a failure. That repo's PR
+      # represents "this version now exists"; re-filing it for a version that already went out
+      # would just create a duplicate/no-op PR against vendor-json-repo.
+      - name: Create Vendor JSON Repo PR (Commands v2)
         if: ${{ inputs.publish == true && steps.create_tag.outputs.tag_existed == 'false' && steps.create_release.outputs.release_existed == 'false' }}
         uses: wpilibsuite/vendor-json-repo/.github/actions/add_vendordep@main
         with:
           repo: Yet-Another-Software-Suite/vendor-json-repo
           token: ${{ secrets.PUBLISH_VENDOR_JSON_TOKEN }}
-          vendordep_file: ${{ env.workingDirectory }}/build/maven/yams-${{ inputs.releaseVersion }}.json
-          pr_title: "Automatically add YAMS version ${{ inputs.releaseVersion }}"
-          pr_branch: "publish_yams_${{ inputs.releaseVersion }}"
+          vendordep_file: ${{ env.workingDirectory }}/build/maven/yams_commands2-${{ inputs.releaseVersion }}.json
+          pr_title: "Automatically add YAMS (Commands v2) version ${{ inputs.releaseVersion }}"
+          pr_branch: "publish_yams_commands2_${{ inputs.releaseVersion }}"
+        continue-on-error: true
+
+      - name: Create Vendor JSON Repo PR (Commands v3)
+        if: ${{ inputs.publish == true && steps.create_tag.outputs.tag_existed == 'false' && steps.create_release.outputs.release_existed == 'false' }}
+        uses: wpilibsuite/vendor-json-repo/.github/actions/add_vendordep@main
+        with:
+          repo: Yet-Another-Software-Suite/vendor-json-repo
+          token: ${{ secrets.PUBLISH_VENDOR_JSON_TOKEN }}
+          vendordep_file: ${{ env.workingDirectory }}/build/maven/yams_commands3-${{ inputs.releaseVersion }}.json
+          pr_title: "Automatically add YAMS (Commands v3) version ${{ inputs.releaseVersion }}"
+          pr_branch: "publish_yams_commands3_${{ inputs.releaseVersion }}"
         continue-on-error: true
