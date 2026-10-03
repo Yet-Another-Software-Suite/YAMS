@@ -448,7 +448,8 @@ public class SwerveDriveConfig {
   }
 
   /**
-   * Set the maximum speed of the modules to desaturate towards.
+   * Set the maximum speed of the modules to desaturate towards. {@link edu.wpi.first.math.kinematics.SwerveModuleState}s generated from
+   * {@link ChassisSpeeds} are scaled down together so no module exceeds this speed.
    *
    * @param speed Linear velocity of the modules.
    * @return {@link SwerveDriveConfig} for chaining.

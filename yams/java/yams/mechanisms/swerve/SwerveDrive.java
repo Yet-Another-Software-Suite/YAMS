@@ -292,14 +292,19 @@ public class SwerveDrive {
   }
 
   /**
-   * Get the {@link SwerveModuleState}s of the swerve drive given a robot relative chassis speed..
+   * Get the {@link SwerveModuleState}s of the swerve drive given a robot relative chassis speed, desaturated to
+   * {@link SwerveDriveConfig#getMaximumModuleLinearVelocity()} if it is set.
    *
    * @param robotRelativeChassisSpeeds Robot relative {@link ChassisSpeeds}.
    * @return {@link SwerveModuleState}s of the swerve drive.
    */
   public SwerveModuleState[] getStateFromRobotRelativeChassisSpeeds(ChassisSpeeds robotRelativeChassisSpeeds) {
     robotRelativeChassisSpeeds = m_config.optimizeRobotRelativeChassisSpeeds(robotRelativeChassisSpeeds);
-    return m_config.getCenterOfRotation().isPresent() ? m_kinematics.toSwerveModuleStates(robotRelativeChassisSpeeds, m_config.getCenterOfRotation().get()) : m_kinematics.toSwerveModuleStates(robotRelativeChassisSpeeds);
+    SwerveModuleState[] states = m_config.getCenterOfRotation().isPresent() ? m_kinematics.toSwerveModuleStates(robotRelativeChassisSpeeds, m_config.getCenterOfRotation().get()) : m_kinematics.toSwerveModuleStates(robotRelativeChassisSpeeds);
+    // Scale all modules down together so none exceeds its maximum speed. Saturating modules individually would
+    // break the speed ratios between them and make them fight each other.
+    m_config.getMaximumModuleLinearVelocity().ifPresent(maxSpeed -> SwerveDriveKinematics.desaturateWheelSpeeds(states, maxSpeed));
+    return states;
   }
 
   /**

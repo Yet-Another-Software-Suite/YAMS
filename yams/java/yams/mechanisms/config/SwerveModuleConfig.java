@@ -530,7 +530,10 @@ public class SwerveModuleConfig {
    * @return {@link SwerveModuleState} optimized.
    */
   public SwerveModuleState getOptimizedState(SwerveModuleState state) {
-    Rotation2d currentAngle = new Rotation2d(getAbsoluteEncoderAngle());
+    // Use the angle the azimuth controller is closing the loop on (seeded from the absolute encoder) so optimization,
+    // cosine compensation, and the azimuth setpoint all agree on where the module is pointing.
+    Rotation2d currentAngle = new Rotation2d(azimuthMotor.map(SmartMotorController::getMechanismPosition)
+                                                         .orElseGet(this::getAbsoluteEncoderAngle));
     if (minimumVelocity.isPresent()) {
       if (MetersPerSecond.of(Math.abs(state.speedMetersPerSecond)).lte(minimumVelocity.get())) {
         //        state = new SwerveModuleState(0, state.angle);
@@ -545,7 +548,7 @@ public class SwerveModuleConfig {
       lastCommandedAngle = state.angle;
     }
     if (cosineCompensation) {
-      state.speedMetersPerSecond = getCosineCompensatedVelocity(state, new Rotation2d(azimuthMotor.orElseThrow().getMechanismPosition()));
+      state.speedMetersPerSecond = getCosineCompensatedVelocity(state, currentAngle);
     }
     return state;
   }
