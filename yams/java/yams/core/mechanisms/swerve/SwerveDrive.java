@@ -215,12 +215,11 @@ public class SwerveDrive {
    * @implNote Not compatible with AdvantageKit
    */
   public void lockPose() {
-    // Sets states
-    SwerveModuleVelocity[] desiredStates = new SwerveModuleVelocity[m_modules.length];
+    // Turn each wheel toward the robot center without driving it. SwerveModule#lock skips the
+    // velocity deadband, which would otherwise hold these zero speed states where the wheels are.
     for (int i = 0; i < m_modules.length; i++) {
-      desiredStates[i] = new SwerveModuleVelocity(0, m_modules[i].getConfig().getLocation().orElseThrow().getAngle().orElse(new Rotation2d()));
+      m_desiredModuleStates[i] = m_modules[i].lock(m_modules[i].getConfig().getLocation().orElseThrow().getAngle().orElse(new Rotation2d()));
     }
-    setSwerveModuleStates(desiredStates);
     m_desiredChassisSpeeds = new ChassisVelocities();
   }
 

@@ -33,7 +33,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -461,8 +460,6 @@ public class SwerveDriveTest {
 
   @ParameterizedTest(name = "{0}")
   @MethodSource("layouts")
-  @Disabled("lockPose() commands zero speed states, which SwerveModuleConfig's default 0.1 m/s velocity "
-      + "deadband replaces with holding the wheels where they are, so the wheels never turn to the X pattern")
   void lockPoseSetsXPattern(Layout layout) {
     build(layout);
     drive.lockPose();
