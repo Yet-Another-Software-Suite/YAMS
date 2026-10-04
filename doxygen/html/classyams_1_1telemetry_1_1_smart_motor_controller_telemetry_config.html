@@ -168,7 +168,7 @@ Fine-grained override via SmartMotorController::WithTelemetry()</h3>
 <div class="line"><span class="keyword">using </span>TelCfg = <a class="code hl_class" href="classyams_1_1telemetry_1_1_smart_motor_controller_telemetry_config.html">yams::telemetry::SmartMotorControllerTelemetryConfig</a>;</div>
 <div class="line"> </div>
 <div class="line">ctre::phoenix6::hardware::TalonFX talon{1};</div>
-<div class="line">TalonFXWrapper smc{talon, wpi::math::DCMotor::KrakenX60(1), cfg};</div>
+<div class="line">TalonFXWrapper smc{talon, frc::DCMotor::KrakenX60(1), cfg};</div>
 <div class="line"> </div>
 <div class="line">smc.WithTelemetry(</div>
 <div class="line">    TelCfg{}</div>
@@ -179,7 +179,7 @@ Fine-grained override via SmartMotorController::WithTelemetry()</h3>
 <div class="line">        .<a class="code hl_function" href="#ab0df0cdee2e48663818b18f6e07f7a4e">WithOutputVoltage</a>()</div>
 <div class="line">        .<a class="code hl_function" href="#ae9b9b41288bc5bcf3c1c79b06296c554">WithDataLogName</a>(<span class="stringliteral">&quot;/Robot/Arm/Motor&quot;</span>)</div>
 <div class="line">        .<a class="code hl_function" href="#adaca9ff77e4dc9e61a5734143d12d3ca">WithoutNetworkTables</a>());   <span class="comment">// suppress NT4 during matches</span></div>
-<div class="ttc" id="aclassyams_1_1motorcontrollers_1_1_smart_motor_controller_config_html"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">yams::motorcontrollers::SmartMotorControllerConfig</a></div><div class="ttdef"><b>Definition</b> SmartMotorControllerConfig.hpp:49</div></div>
+<div class="ttc" id="aclassyams_1_1motorcontrollers_1_1_smart_motor_controller_config_html"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">yams::motorcontrollers::SmartMotorControllerConfig</a></div><div class="ttdef"><b>Definition</b> SmartMotorControllerConfig.hpp:50</div></div>
 <div class="ttc" id="aclassyams_1_1telemetry_1_1_smart_motor_controller_telemetry_config_html"><div class="ttname"><a href="classyams_1_1telemetry_1_1_smart_motor_controller_telemetry_config.html">yams::telemetry::SmartMotorControllerTelemetryConfig</a></div><div class="ttdef"><b>Definition</b> SmartMotorControllerTelemetryConfig.hpp:62</div></div>
 <div class="ttc" id="aclassyams_1_1telemetry_1_1_smart_motor_controller_telemetry_config_html_a465454afae4a4e4ce1201fb191fd53ea"><div class="ttname"><a href="#a465454afae4a4e4ce1201fb191fd53ea">yams::telemetry::SmartMotorControllerTelemetryConfig::WithStatorCurrent</a></div><div class="ttdeci">SmartMotorControllerTelemetryConfig &amp; WithStatorCurrent()</div></div>
 <div class="ttc" id="aclassyams_1_1telemetry_1_1_smart_motor_controller_telemetry_config_html_a5c18af95c78874fb1d41ef1b5eb9e5be"><div class="ttname"><a href="#a5c18af95c78874fb1d41ef1b5eb9e5be">yams::telemetry::SmartMotorControllerTelemetryConfig::WithMechanismVelocity</a></div><div class="ttdeci">SmartMotorControllerTelemetryConfig &amp; WithMechanismVelocity()</div></div>

@@ -89,10 +89,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:aff39e99bb5ee5663af2c8038b65757fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3eacb3e091173f5c589feb2cc3fe0b28" id="r_a3eacb3e091173f5c589feb2cc3fe0b28"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1telemetry_1_1BooleanTelemetry.html#a3eacb3e091173f5c589feb2cc3fe0b28">SetDefaultValue</a> (bool value)</td></tr>
 <tr class="separator:a3eacb3e091173f5c589feb2cc3fe0b28"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa82cb268c36e7da139d24b8d071e749b" id="r_aa82cb268c36e7da139d24b8d071e749b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1telemetry_1_1BooleanTelemetry.html#aa82cb268c36e7da139d24b8d071e749b">SetupNetworkTables</a> (std::shared_ptr&lt; wpi::nt::NetworkTable &gt; dataTable, std::shared_ptr&lt; wpi::nt::NetworkTable &gt; tuningTable)</td></tr>
-<tr class="separator:aa82cb268c36e7da139d24b8d071e749b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af7adbc530d9144b8652cf2b585acdd34" id="r_af7adbc530d9144b8652cf2b585acdd34"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1telemetry_1_1BooleanTelemetry.html#af7adbc530d9144b8652cf2b585acdd34">SetupNetworkTable</a> (std::shared_ptr&lt; wpi::nt::NetworkTable &gt; dataTable)</td></tr>
-<tr class="separator:af7adbc530d9144b8652cf2b585acdd34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61c065eab1ae0ff298d6626e5f80cfa5" id="r_a61c065eab1ae0ff298d6626e5f80cfa5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1telemetry_1_1BooleanTelemetry.html#a61c065eab1ae0ff298d6626e5f80cfa5">SetupNetworkTables</a> (std::shared_ptr&lt; nt::NetworkTable &gt; dataTable, std::shared_ptr&lt; nt::NetworkTable &gt; tuningTable)</td></tr>
+<tr class="separator:a61c065eab1ae0ff298d6626e5f80cfa5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe824fc4e4e98b3ded2116ea9d2b5bb3" id="r_abe824fc4e4e98b3ded2116ea9d2b5bb3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1telemetry_1_1BooleanTelemetry.html#abe824fc4e4e98b3ded2116ea9d2b5bb3">SetupNetworkTable</a> (std::shared_ptr&lt; nt::NetworkTable &gt; dataTable)</td></tr>
+<tr class="separator:abe824fc4e4e98b3ded2116ea9d2b5bb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55121cb68d17f1b254d79332584a9790" id="r_a55121cb68d17f1b254d79332584a9790"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1telemetry_1_1BooleanTelemetry.html#a55121cb68d17f1b254d79332584a9790">SetupDataLog</a> (const std::string &amp;prefix)</td></tr>
 <tr class="separator:a55121cb68d17f1b254d79332584a9790"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a52e64c08dd64c8bf13dcaebae718d1ea" id="r_a52e64c08dd64c8bf13dcaebae718d1ea"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1telemetry_1_1BooleanTelemetry.html#a52e64c08dd64c8bf13dcaebae718d1ea">Set</a> (bool value)</td></tr>
@@ -335,7 +335,7 @@ template&lt;typename F &gt; </div>
 <p>Forcibly overwrite the tunable value in NetworkTables, bypassing the subscriber-must-match guard in <a class="el" href="classyams_1_1telemetry_1_1BooleanTelemetry.html#a52e64c08dd64c8bf13dcaebae718d1ea">Set(bool)</a>. Used to enforce mutual exclusion between tunable modes that share the same underlying drive/mechanism.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">value</td><td>Value to force. </td></tr>
+    <tr><td class="paramname">value</td><td>Value to force onto the tuning topic. </td></tr>
   </table>
   </dd>
 </dl>
@@ -562,8 +562,8 @@ template&lt;typename F &gt; </div>
 
 </div>
 </div>
-<a id="af7adbc530d9144b8652cf2b585acdd34" name="af7adbc530d9144b8652cf2b585acdd34"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af7adbc530d9144b8652cf2b585acdd34">&#9670;&#160;</a></span>SetupNetworkTable()</h2>
+<a id="abe824fc4e4e98b3ded2116ea9d2b5bb3" name="abe824fc4e4e98b3ded2116ea9d2b5bb3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abe824fc4e4e98b3ded2116ea9d2b5bb3">&#9670;&#160;</a></span>SetupNetworkTable()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -576,7 +576,7 @@ template&lt;typename F &gt; </div>
         <tr>
           <td class="memname">void <a class="el" href="classyams_1_1telemetry_1_1BooleanTelemetry.html">yams::telemetry::BooleanTelemetry</a>&lt; F &gt;::SetupNetworkTable </td>
           <td>(</td>
-          <td class="paramtype">std::shared_ptr&lt; wpi::nt::NetworkTable &gt;&#160;</td>
+          <td class="paramtype">std::shared_ptr&lt; nt::NetworkTable &gt;&#160;</td>
           <td class="paramname"><em>dataTable</em></td><td>)</td>
           <td></td>
         </tr>
@@ -597,8 +597,8 @@ template&lt;typename F &gt; </div>
 
 </div>
 </div>
-<a id="aa82cb268c36e7da139d24b8d071e749b" name="aa82cb268c36e7da139d24b8d071e749b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa82cb268c36e7da139d24b8d071e749b">&#9670;&#160;</a></span>SetupNetworkTables()</h2>
+<a id="a61c065eab1ae0ff298d6626e5f80cfa5" name="a61c065eab1ae0ff298d6626e5f80cfa5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61c065eab1ae0ff298d6626e5f80cfa5">&#9670;&#160;</a></span>SetupNetworkTables()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -611,13 +611,13 @@ template&lt;typename F &gt; </div>
         <tr>
           <td class="memname">void <a class="el" href="classyams_1_1telemetry_1_1BooleanTelemetry.html">yams::telemetry::BooleanTelemetry</a>&lt; F &gt;::SetupNetworkTables </td>
           <td>(</td>
-          <td class="paramtype">std::shared_ptr&lt; wpi::nt::NetworkTable &gt;&#160;</td>
+          <td class="paramtype">std::shared_ptr&lt; nt::NetworkTable &gt;&#160;</td>
           <td class="paramname"><em>dataTable</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::shared_ptr&lt; wpi::nt::NetworkTable &gt;&#160;</td>
+          <td class="paramtype">std::shared_ptr&lt; nt::NetworkTable &gt;&#160;</td>
           <td class="paramname"><em>tuningTable</em>&#160;</td>
         </tr>
         <tr>

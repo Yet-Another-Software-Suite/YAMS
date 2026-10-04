@@ -89,14 +89,14 @@ $(function() { codefold.init(0); });
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &lt;wpi/hal/Value.h&gt;</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &lt;functional&gt;</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;optional&gt;</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;unordered_map&gt;</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;wpi/hal/SimDevice.hpp&gt;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &lt;hal/SimDevice.h&gt;</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &lt;hal/Value.h&gt;</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;functional&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;optional&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;unordered_map&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;<a class="code" href="_sensor_data_8hpp.html">yams/motorcontrollers/simulation/SensorData.hpp</a>&quot;</span></div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
@@ -138,7 +138,7 @@ $(function() { codefold.init(0); });
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
 <div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>}  <span class="comment">// namespace yams::motorcontrollers::simulation</span></div>
 <div class="ttc" id="a_sensor_data_8hpp_html"><div class="ttname"><a href="_sensor_data_8hpp.html">SensorData.hpp</a></div></div>
-<div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1_sim_sensor_config_html"><div class="ttname"><a href="classyams_1_1mechanisms_1_1config_1_1_sim_sensor_config.html">yams::mechanisms::config::SimSensorConfig</a></div><div class="ttdef"><b>Definition</b> SimSensorConfig.hpp:29</div></div>
+<div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1_sim_sensor_config_html"><div class="ttname"><a href="classyams_1_1mechanisms_1_1config_1_1_sim_sensor_config.html">yams::mechanisms::config::SimSensorConfig</a></div><div class="ttdef"><b>Definition</b> SimSensorConfig.hpp:30</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1simulation_1_1_sensor_data_html"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1simulation_1_1_sensor_data.html">yams::motorcontrollers::simulation::SensorData</a></div><div class="ttdef"><b>Definition</b> SensorData.hpp:24</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1simulation_1_1_sensor_html"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1simulation_1_1_sensor.html">yams::motorcontrollers::simulation::Sensor</a></div><div class="ttdef"><b>Definition</b> Sensor.hpp:68</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1simulation_1_1_sensor_html_a0ebfffd21a775fc65fa8addff71140c1"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1simulation_1_1_sensor.html#a0ebfffd21a775fc65fa8addff71140c1">yams::motorcontrollers::simulation::Sensor::GetDevice</a></div><div class="ttdeci">HAL_SimDeviceHandle GetDevice() const</div></div>
@@ -151,8 +151,8 @@ $(function() { codefold.init(0); });
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1simulation_1_1_sensor_html_abc39409ad1d516cfe7d425f8249d5b32"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1simulation_1_1_sensor.html#abc39409ad1d516cfe7d425f8249d5b32">yams::motorcontrollers::simulation::Sensor::GetAsLong</a></div><div class="ttdeci">int64_t GetAsLong(const std::string &amp;name) const</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1simulation_1_1_sensor_html_acc387f95930566eff0792c2d7cfcef7b"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1simulation_1_1_sensor.html#acc387f95930566eff0792c2d7cfcef7b">yams::motorcontrollers::simulation::Sensor::GetAsBoolean</a></div><div class="ttdeci">bool GetAsBoolean(const std::string &amp;name) const</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1simulation_1_1_sensor_html_aebaa579a47b5ff8118bb40e0007d4c2e"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1simulation_1_1_sensor.html#aebaa579a47b5ff8118bb40e0007d4c2e">yams::motorcontrollers::simulation::Sensor::Sensor</a></div><div class="ttdeci">Sensor(const yams::mechanisms::config::SimSensorConfig &amp;cfg)</div></div>
-<div class="ttc" id="anamespaceyams_1_1mechanisms_1_1config_html"><div class="ttname"><a href="namespaceyams_1_1mechanisms_1_1config.html">yams::mechanisms::config</a></div><div class="ttdef"><b>Definition</b> ArmConfig.hpp:15</div></div>
-<div class="ttc" id="anamespaceyams_1_1motorcontrollers_1_1simulation_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers_1_1simulation.html">yams::motorcontrollers::simulation</a></div><div class="ttdef"><b>Definition</b> SimSensorConfig.hpp:15</div></div>
+<div class="ttc" id="anamespaceyams_1_1mechanisms_1_1config_html"><div class="ttname"><a href="namespaceyams_1_1mechanisms_1_1config.html">yams::mechanisms::config</a></div><div class="ttdef"><b>Definition</b> ArmConfig.hpp:16</div></div>
+<div class="ttc" id="anamespaceyams_1_1motorcontrollers_1_1simulation_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers_1_1simulation.html">yams::motorcontrollers::simulation</a></div><div class="ttdef"><b>Definition</b> SimSensorConfig.hpp:16</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

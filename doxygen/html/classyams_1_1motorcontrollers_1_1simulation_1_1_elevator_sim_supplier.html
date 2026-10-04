@@ -96,46 +96,46 @@ Inheritance diagram for yams::motorcontrollers::simulation::ElevatorSimSupplier:
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a1d5bf2ce02d93c920a08e6d976324bc8" id="r_a1d5bf2ce02d93c920a08e6d976324bc8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1d5bf2ce02d93c920a08e6d976324bc8">ElevatorSimSupplier</a> (wpi::sim::ElevatorSim &amp;sim, std::function&lt; double()&gt; dutyCycleSupplier, const <a class="el" href="classyams_1_1gearing_1_1_mechanism_gearing.html">gearing::MechanismGearing</a> &amp;gearing, wpi::units::meter_t circumference, wpi::units::second_t period)</td></tr>
-<tr class="separator:a1d5bf2ce02d93c920a08e6d976324bc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a833bdc7831b85ac42e6a3c5ed608523b" id="r_a833bdc7831b85ac42e6a3c5ed608523b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a833bdc7831b85ac42e6a3c5ed608523b">ElevatorSimSupplier</a> (frc::sim::ElevatorSim &amp;sim, std::function&lt; double()&gt; dutyCycleSupplier, const <a class="el" href="classyams_1_1gearing_1_1_mechanism_gearing.html">gearing::MechanismGearing</a> &amp;gearing, units::meter_t circumference, units::second_t period)</td></tr>
+<tr class="separator:a833bdc7831b85ac42e6a3c5ed608523b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad6cd71ae41d29a7a73b0c3f60948f896" id="r_ad6cd71ae41d29a7a73b0c3f60948f896"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad6cd71ae41d29a7a73b0c3f60948f896">UpdateSim</a> () override</td></tr>
 <tr class="separator:ad6cd71ae41d29a7a73b0c3f60948f896"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a370cc016a14a2c03b973c485a77087db" id="r_a370cc016a14a2c03b973c485a77087db"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a370cc016a14a2c03b973c485a77087db">SetInputVoltage</a> (wpi::units::volt_t volts) override</td></tr>
-<tr class="separator:a370cc016a14a2c03b973c485a77087db"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8d85d385cda3f5539499d73e285f9e73" id="r_a8d85d385cda3f5539499d73e285f9e73"><td class="memItemLeft" align="right" valign="top">wpi::units::turn_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8d85d385cda3f5539499d73e285f9e73">GetMechanismPosition</a> () override</td></tr>
-<tr class="separator:a8d85d385cda3f5539499d73e285f9e73"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a08165f3a68a955cf61e73c16d22f2e0f" id="r_a08165f3a68a955cf61e73c16d22f2e0f"><td class="memItemLeft" align="right" valign="top">wpi::units::turns_per_second_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a08165f3a68a955cf61e73c16d22f2e0f">GetMechanismVelocity</a> () override</td></tr>
-<tr class="separator:a08165f3a68a955cf61e73c16d22f2e0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af368a2f9fcbcfe7e21339920c5e73e4f" id="r_af368a2f9fcbcfe7e21339920c5e73e4f"><td class="memItemLeft" align="right" valign="top">wpi::units::turns_per_second_squared_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af368a2f9fcbcfe7e21339920c5e73e4f">GetMechanismAcceleration</a> () override</td></tr>
-<tr class="separator:af368a2f9fcbcfe7e21339920c5e73e4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a422008ab4799ef654d4aac10c3455ad4" id="r_a422008ab4799ef654d4aac10c3455ad4"><td class="memItemLeft" align="right" valign="top">wpi::units::turn_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a422008ab4799ef654d4aac10c3455ad4">GetRotorPosition</a> () override</td></tr>
-<tr class="separator:a422008ab4799ef654d4aac10c3455ad4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a43920dd7466ee157d9852ec468033d51" id="r_a43920dd7466ee157d9852ec468033d51"><td class="memItemLeft" align="right" valign="top">wpi::units::turns_per_second_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a43920dd7466ee157d9852ec468033d51">GetRotorVelocity</a> () override</td></tr>
-<tr class="separator:a43920dd7466ee157d9852ec468033d51"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbe73e937eeb909b37093dc76295a29c" id="r_adbe73e937eeb909b37093dc76295a29c"><td class="memItemLeft" align="right" valign="top">wpi::units::turns_per_second_squared_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adbe73e937eeb909b37093dc76295a29c">GetRotorAcceleration</a> () override</td></tr>
-<tr class="separator:adbe73e937eeb909b37093dc76295a29c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:accdf89d916cb3846fcb8920ea48904e4" id="r_accdf89d916cb3846fcb8920ea48904e4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#accdf89d916cb3846fcb8920ea48904e4">SetMechanismPosition</a> (wpi::units::turn_t angle) override</td></tr>
-<tr class="separator:accdf89d916cb3846fcb8920ea48904e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5323225bbb40d10ce8262a03a91a28bc" id="r_a5323225bbb40d10ce8262a03a91a28bc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5323225bbb40d10ce8262a03a91a28bc">SetMechanismVelocity</a> (wpi::units::turns_per_second_t velocity) override</td></tr>
-<tr class="separator:a5323225bbb40d10ce8262a03a91a28bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abba9065f8976ab3fc235bb5068699542" id="r_abba9065f8976ab3fc235bb5068699542"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abba9065f8976ab3fc235bb5068699542">SetRotorPosition</a> (wpi::units::turn_t angle) override</td></tr>
-<tr class="separator:abba9065f8976ab3fc235bb5068699542"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a40ef3b11cef39a4add8334ebf6e39777" id="r_a40ef3b11cef39a4add8334ebf6e39777"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a40ef3b11cef39a4add8334ebf6e39777">SetRotorVelocity</a> (wpi::units::turns_per_second_t velocity) override</td></tr>
-<tr class="separator:a40ef3b11cef39a4add8334ebf6e39777"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa20f9f8f27fc633d7df24434c6aad82b" id="r_aa20f9f8f27fc633d7df24434c6aad82b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa20f9f8f27fc633d7df24434c6aad82b">SetInputVoltage</a> (units::volt_t volts) override</td></tr>
+<tr class="separator:aa20f9f8f27fc633d7df24434c6aad82b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add845e802f174befb04023eb309b127d" id="r_add845e802f174befb04023eb309b127d"><td class="memItemLeft" align="right" valign="top">units::turn_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#add845e802f174befb04023eb309b127d">GetMechanismPosition</a> () override</td></tr>
+<tr class="separator:add845e802f174befb04023eb309b127d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ed8d6c441bb9dd467d56d30fa64c34c" id="r_a1ed8d6c441bb9dd467d56d30fa64c34c"><td class="memItemLeft" align="right" valign="top">units::turns_per_second_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1ed8d6c441bb9dd467d56d30fa64c34c">GetMechanismVelocity</a> () override</td></tr>
+<tr class="separator:a1ed8d6c441bb9dd467d56d30fa64c34c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a25581608813bdf7d6d43763b340802de" id="r_a25581608813bdf7d6d43763b340802de"><td class="memItemLeft" align="right" valign="top">units::turns_per_second_squared_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a25581608813bdf7d6d43763b340802de">GetMechanismAcceleration</a> () override</td></tr>
+<tr class="separator:a25581608813bdf7d6d43763b340802de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5606e18bc35a63cc9ae690489cabae0f" id="r_a5606e18bc35a63cc9ae690489cabae0f"><td class="memItemLeft" align="right" valign="top">units::turn_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5606e18bc35a63cc9ae690489cabae0f">GetRotorPosition</a> () override</td></tr>
+<tr class="separator:a5606e18bc35a63cc9ae690489cabae0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afdf2471168fbcf61009bda3085b4bb78" id="r_afdf2471168fbcf61009bda3085b4bb78"><td class="memItemLeft" align="right" valign="top">units::turns_per_second_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afdf2471168fbcf61009bda3085b4bb78">GetRotorVelocity</a> () override</td></tr>
+<tr class="separator:afdf2471168fbcf61009bda3085b4bb78"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff0f80f82a97aee8032904989ef5bb61" id="r_aff0f80f82a97aee8032904989ef5bb61"><td class="memItemLeft" align="right" valign="top">units::turns_per_second_squared_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aff0f80f82a97aee8032904989ef5bb61">GetRotorAcceleration</a> () override</td></tr>
+<tr class="separator:aff0f80f82a97aee8032904989ef5bb61"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4a9d64f45382f558ff74fc5a9b4a7e8" id="r_ac4a9d64f45382f558ff74fc5a9b4a7e8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac4a9d64f45382f558ff74fc5a9b4a7e8">SetMechanismPosition</a> (units::turn_t angle) override</td></tr>
+<tr class="separator:ac4a9d64f45382f558ff74fc5a9b4a7e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab87e2c0d31256e6fe18cfb3871d88577" id="r_ab87e2c0d31256e6fe18cfb3871d88577"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab87e2c0d31256e6fe18cfb3871d88577">SetMechanismVelocity</a> (units::turns_per_second_t velocity) override</td></tr>
+<tr class="separator:ab87e2c0d31256e6fe18cfb3871d88577"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3fddfe1e53bf782eacf5b444861f8391" id="r_a3fddfe1e53bf782eacf5b444861f8391"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3fddfe1e53bf782eacf5b444861f8391">SetRotorPosition</a> (units::turn_t angle) override</td></tr>
+<tr class="separator:a3fddfe1e53bf782eacf5b444861f8391"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3bff60f3172e0b2e3ad9b60dda2985f5" id="r_a3bff60f3172e0b2e3ad9b60dda2985f5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3bff60f3172e0b2e3ad9b60dda2985f5">SetRotorVelocity</a> (units::turns_per_second_t velocity) override</td></tr>
+<tr class="separator:a3bff60f3172e0b2e3ad9b60dda2985f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af3c6148bfc1d84a14091fe1fc1bad557" id="r_af3c6148bfc1d84a14091fe1fc1bad557"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af3c6148bfc1d84a14091fe1fc1bad557">IsWatchdogExpired</a> () override</td></tr>
 <tr class="separator:af3c6148bfc1d84a14091fe1fc1bad557"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a214a2287dfa88f6afc078e4990c3d7b4" id="r_a214a2287dfa88f6afc078e4990c3d7b4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a214a2287dfa88f6afc078e4990c3d7b4">FeedWatchdog</a> () override</td></tr>
 <tr class="separator:a214a2287dfa88f6afc078e4990c3d7b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a65a5e3ad7afc6507fe4b9293c71b863c" id="r_a65a5e3ad7afc6507fe4b9293c71b863c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a65a5e3ad7afc6507fe4b9293c71b863c">StarveWatchdog</a> () override</td></tr>
 <tr class="separator:a65a5e3ad7afc6507fe4b9293c71b863c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a732aca51804d4bdbf2e56149760dede2" id="r_a732aca51804d4bdbf2e56149760dede2"><td class="memItemLeft" align="right" valign="top">wpi::units::ampere_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a732aca51804d4bdbf2e56149760dede2">GetCurrentDrawAmps</a> () override</td></tr>
-<tr class="separator:a732aca51804d4bdbf2e56149760dede2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8173f279cf38c7ee2a8ed7ec3d444249" id="r_a8173f279cf38c7ee2a8ed7ec3d444249"><td class="memItemLeft" align="right" valign="top">wpi::units::volt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8173f279cf38c7ee2a8ed7ec3d444249">GetMechanismSupplyVoltage</a> () override</td></tr>
-<tr class="separator:a8173f279cf38c7ee2a8ed7ec3d444249"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a20036eaf1bd0e156ea8290bbdf48312b" id="r_a20036eaf1bd0e156ea8290bbdf48312b"><td class="memItemLeft" align="right" valign="top">wpi::units::volt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a20036eaf1bd0e156ea8290bbdf48312b">GetMechanismStatorVoltage</a> () override</td></tr>
-<tr class="separator:a20036eaf1bd0e156ea8290bbdf48312b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3897e60d087853a48b33c8f02ffd20d9" id="r_a3897e60d087853a48b33c8f02ffd20d9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3897e60d087853a48b33c8f02ffd20d9">SetMechanismStatorVoltage</a> (wpi::units::volt_t volts) override</td></tr>
-<tr class="separator:a3897e60d087853a48b33c8f02ffd20d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a07db13305372bfafcf95abcd5f39dd31" id="r_a07db13305372bfafcf95abcd5f39dd31"><td class="memItemLeft" align="right" valign="top">units::ampere_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a07db13305372bfafcf95abcd5f39dd31">GetCurrentDrawAmps</a> () override</td></tr>
+<tr class="separator:a07db13305372bfafcf95abcd5f39dd31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3978c0d9010270d058905cc95682d8c1" id="r_a3978c0d9010270d058905cc95682d8c1"><td class="memItemLeft" align="right" valign="top">units::volt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3978c0d9010270d058905cc95682d8c1">GetMechanismSupplyVoltage</a> () override</td></tr>
+<tr class="separator:a3978c0d9010270d058905cc95682d8c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae2615b8929085f805356a4178d0f0692" id="r_ae2615b8929085f805356a4178d0f0692"><td class="memItemLeft" align="right" valign="top">units::volt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae2615b8929085f805356a4178d0f0692">GetMechanismStatorVoltage</a> () override</td></tr>
+<tr class="separator:ae2615b8929085f805356a4178d0f0692"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2cbd00d347af61e283bd23bff9c08238" id="r_a2cbd00d347af61e283bd23bff9c08238"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2cbd00d347af61e283bd23bff9c08238">SetMechanismStatorVoltage</a> (units::volt_t volts) override</td></tr>
+<tr class="separator:a2cbd00d347af61e283bd23bff9c08238"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classyams_1_1motorcontrollers_1_1_sim_supplier"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_classyams_1_1motorcontrollers_1_1_sim_supplier')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html">yams::motorcontrollers::SimSupplier</a></td></tr>
 <tr class="memitem:a4c96ea1541e6065aedae58d4aa687ec5 inherit pub_methods_classyams_1_1motorcontrollers_1_1_sim_supplier" id="r_a4c96ea1541e6065aedae58d4aa687ec5"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#a4c96ea1541e6065aedae58d4aa687ec5">~SimSupplier</a> ()=default</td></tr>
 <tr class="separator:a4c96ea1541e6065aedae58d4aa687ec5 inherit pub_methods_classyams_1_1motorcontrollers_1_1_sim_supplier"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -145,8 +145,8 @@ Public Member Functions</h2></td></tr>
 <p>Translates between the linear physics (metres, m/s) of the ElevatorSim and the angular mechanism representation (degrees, dps) expected by the <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html">SimSupplier</a> interface. The circumference of the drive sprocket/drum is required to perform this conversion.</p>
 <p>The duty cycle is read from the motor controller each iteration unless an explicit input voltage has been set. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a1d5bf2ce02d93c920a08e6d976324bc8" name="a1d5bf2ce02d93c920a08e6d976324bc8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1d5bf2ce02d93c920a08e6d976324bc8">&#9670;&#160;</a></span>ElevatorSimSupplier()</h2>
+<a id="a833bdc7831b85ac42e6a3c5ed608523b" name="a833bdc7831b85ac42e6a3c5ed608523b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a833bdc7831b85ac42e6a3c5ed608523b">&#9670;&#160;</a></span>ElevatorSimSupplier()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -154,7 +154,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">yams::motorcontrollers::simulation::ElevatorSimSupplier::ElevatorSimSupplier </td>
           <td>(</td>
-          <td class="paramtype">wpi::sim::ElevatorSim &amp;</td>          <td class="paramname"><span class="paramname"><em>sim</em>, </span></td>
+          <td class="paramtype">frc::sim::ElevatorSim &amp;</td>          <td class="paramname"><span class="paramname"><em>sim</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -169,12 +169,12 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">wpi::units::meter_t</td>          <td class="paramname"><span class="paramname"><em>circumference</em>, </span></td>
+          <td class="paramtype">units::meter_t</td>          <td class="paramname"><span class="paramname"><em>circumference</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">wpi::units::second_t</td>          <td class="paramname"><span class="paramname"><em>period</em></span>&#160;)</td>
+          <td class="paramtype">units::second_t</td>          <td class="paramname"><span class="paramname"><em>period</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -221,8 +221,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a732aca51804d4bdbf2e56149760dede2" name="a732aca51804d4bdbf2e56149760dede2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a732aca51804d4bdbf2e56149760dede2">&#9670;&#160;</a></span>GetCurrentDrawAmps()</h2>
+<a id="a07db13305372bfafcf95abcd5f39dd31" name="a07db13305372bfafcf95abcd5f39dd31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a07db13305372bfafcf95abcd5f39dd31">&#9670;&#160;</a></span>GetCurrentDrawAmps()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -231,7 +231,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">wpi::units::ampere_t yams::motorcontrollers::simulation::ElevatorSimSupplier::GetCurrentDrawAmps </td>
+          <td class="memname">units::ampere_t yams::motorcontrollers::simulation::ElevatorSimSupplier::GetCurrentDrawAmps </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td></td>
@@ -246,12 +246,12 @@ Public Member Functions</h2></td></tr>
 <p>Get the current draw from the simulated motor.</p>
 <dl class="section return"><dt>Returns</dt><dd>Current draw in amperes. </dd></dl>
 
-<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#adba7c8d27fb6f431010beda7f449b293">yams::motorcontrollers::SimSupplier</a>.</p>
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#ad9db1bbbc96cb9b7999b19013ced2ce8">yams::motorcontrollers::SimSupplier</a>.</p>
 
 </div>
 </div>
-<a id="af368a2f9fcbcfe7e21339920c5e73e4f" name="af368a2f9fcbcfe7e21339920c5e73e4f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af368a2f9fcbcfe7e21339920c5e73e4f">&#9670;&#160;</a></span>GetMechanismAcceleration()</h2>
+<a id="a25581608813bdf7d6d43763b340802de" name="a25581608813bdf7d6d43763b340802de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a25581608813bdf7d6d43763b340802de">&#9670;&#160;</a></span>GetMechanismAcceleration()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -260,7 +260,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">wpi::units::turns_per_second_squared_t yams::motorcontrollers::simulation::ElevatorSimSupplier::GetMechanismAcceleration </td>
+          <td class="memname">units::turns_per_second_squared_t yams::motorcontrollers::simulation::ElevatorSimSupplier::GetMechanismAcceleration </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td></td>
@@ -275,12 +275,12 @@ Public Member Functions</h2></td></tr>
 <p>Get the simulated mechanism angular acceleration.</p>
 <dl class="section return"><dt>Returns</dt><dd>Mechanism acceleration in turns per second squared. </dd></dl>
 
-<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#ac8267f04532fb56ef2743b5a9eda91bf">yams::motorcontrollers::SimSupplier</a>.</p>
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#a9736932c5f00b407f668a58143cff655">yams::motorcontrollers::SimSupplier</a>.</p>
 
 </div>
 </div>
-<a id="a8d85d385cda3f5539499d73e285f9e73" name="a8d85d385cda3f5539499d73e285f9e73"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8d85d385cda3f5539499d73e285f9e73">&#9670;&#160;</a></span>GetMechanismPosition()</h2>
+<a id="add845e802f174befb04023eb309b127d" name="add845e802f174befb04023eb309b127d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#add845e802f174befb04023eb309b127d">&#9670;&#160;</a></span>GetMechanismPosition()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -289,7 +289,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">wpi::units::turn_t yams::motorcontrollers::simulation::ElevatorSimSupplier::GetMechanismPosition </td>
+          <td class="memname">units::turn_t yams::motorcontrollers::simulation::ElevatorSimSupplier::GetMechanismPosition </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td></td>
@@ -304,12 +304,12 @@ Public Member Functions</h2></td></tr>
 <p>Get the simulated mechanism position.</p>
 <dl class="section return"><dt>Returns</dt><dd>Mechanism position in turns. </dd></dl>
 
-<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#a4b074783d23f192c9aa5bba7ec441040">yams::motorcontrollers::SimSupplier</a>.</p>
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#a23a58130384e92c939e625b8eb05bccf">yams::motorcontrollers::SimSupplier</a>.</p>
 
 </div>
 </div>
-<a id="a20036eaf1bd0e156ea8290bbdf48312b" name="a20036eaf1bd0e156ea8290bbdf48312b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a20036eaf1bd0e156ea8290bbdf48312b">&#9670;&#160;</a></span>GetMechanismStatorVoltage()</h2>
+<a id="ae2615b8929085f805356a4178d0f0692" name="ae2615b8929085f805356a4178d0f0692"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae2615b8929085f805356a4178d0f0692">&#9670;&#160;</a></span>GetMechanismStatorVoltage()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -318,7 +318,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">wpi::units::volt_t yams::motorcontrollers::simulation::ElevatorSimSupplier::GetMechanismStatorVoltage </td>
+          <td class="memname">units::volt_t yams::motorcontrollers::simulation::ElevatorSimSupplier::GetMechanismStatorVoltage </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td></td>
@@ -333,12 +333,12 @@ Public Member Functions</h2></td></tr>
 <p>Get the last voltage applied to the simulated motor.</p>
 <dl class="section return"><dt>Returns</dt><dd>Stator voltage in volts. </dd></dl>
 
-<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#adba18540cb212c7527234074b139c433">yams::motorcontrollers::SimSupplier</a>.</p>
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#ade0c3b4d9490d6d5fa09307075fb0a43">yams::motorcontrollers::SimSupplier</a>.</p>
 
 </div>
 </div>
-<a id="a8173f279cf38c7ee2a8ed7ec3d444249" name="a8173f279cf38c7ee2a8ed7ec3d444249"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8173f279cf38c7ee2a8ed7ec3d444249">&#9670;&#160;</a></span>GetMechanismSupplyVoltage()</h2>
+<a id="a3978c0d9010270d058905cc95682d8c1" name="a3978c0d9010270d058905cc95682d8c1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3978c0d9010270d058905cc95682d8c1">&#9670;&#160;</a></span>GetMechanismSupplyVoltage()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -347,7 +347,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">wpi::units::volt_t yams::motorcontrollers::simulation::ElevatorSimSupplier::GetMechanismSupplyVoltage </td>
+          <td class="memname">units::volt_t yams::motorcontrollers::simulation::ElevatorSimSupplier::GetMechanismSupplyVoltage </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td></td>
@@ -362,12 +362,12 @@ Public Member Functions</h2></td></tr>
 <p>Get the supply voltage available to the simulated motor controller (bus voltage).</p>
 <dl class="section return"><dt>Returns</dt><dd>Supply voltage in volts. </dd></dl>
 
-<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#a56a98fc91a46560785e76fd9d11405c6">yams::motorcontrollers::SimSupplier</a>.</p>
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#a9d14d442363bd1f44f307a7f59a41b9d">yams::motorcontrollers::SimSupplier</a>.</p>
 
 </div>
 </div>
-<a id="a08165f3a68a955cf61e73c16d22f2e0f" name="a08165f3a68a955cf61e73c16d22f2e0f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a08165f3a68a955cf61e73c16d22f2e0f">&#9670;&#160;</a></span>GetMechanismVelocity()</h2>
+<a id="a1ed8d6c441bb9dd467d56d30fa64c34c" name="a1ed8d6c441bb9dd467d56d30fa64c34c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ed8d6c441bb9dd467d56d30fa64c34c">&#9670;&#160;</a></span>GetMechanismVelocity()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -376,7 +376,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">wpi::units::turns_per_second_t yams::motorcontrollers::simulation::ElevatorSimSupplier::GetMechanismVelocity </td>
+          <td class="memname">units::turns_per_second_t yams::motorcontrollers::simulation::ElevatorSimSupplier::GetMechanismVelocity </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td></td>
@@ -391,12 +391,12 @@ Public Member Functions</h2></td></tr>
 <p>Get the simulated mechanism velocity.</p>
 <dl class="section return"><dt>Returns</dt><dd>Mechanism velocity in turns per second. </dd></dl>
 
-<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#aa0b78be635f6baa7793e771da88e432a">yams::motorcontrollers::SimSupplier</a>.</p>
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#a17cb248e13cdac6dcdf45c022ac8f48a">yams::motorcontrollers::SimSupplier</a>.</p>
 
 </div>
 </div>
-<a id="adbe73e937eeb909b37093dc76295a29c" name="adbe73e937eeb909b37093dc76295a29c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adbe73e937eeb909b37093dc76295a29c">&#9670;&#160;</a></span>GetRotorAcceleration()</h2>
+<a id="aff0f80f82a97aee8032904989ef5bb61" name="aff0f80f82a97aee8032904989ef5bb61"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff0f80f82a97aee8032904989ef5bb61">&#9670;&#160;</a></span>GetRotorAcceleration()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -405,7 +405,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">wpi::units::turns_per_second_squared_t yams::motorcontrollers::simulation::ElevatorSimSupplier::GetRotorAcceleration </td>
+          <td class="memname">units::turns_per_second_squared_t yams::motorcontrollers::simulation::ElevatorSimSupplier::GetRotorAcceleration </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td></td>
@@ -420,12 +420,12 @@ Public Member Functions</h2></td></tr>
 <p>Get the simulated rotor angular acceleration.</p>
 <dl class="section return"><dt>Returns</dt><dd>Rotor acceleration in turns per second squared. </dd></dl>
 
-<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#a88e835ce0774946cee98fa094b624975">yams::motorcontrollers::SimSupplier</a>.</p>
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#a56e587dc9565262cc05156da41ef13d1">yams::motorcontrollers::SimSupplier</a>.</p>
 
 </div>
 </div>
-<a id="a422008ab4799ef654d4aac10c3455ad4" name="a422008ab4799ef654d4aac10c3455ad4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a422008ab4799ef654d4aac10c3455ad4">&#9670;&#160;</a></span>GetRotorPosition()</h2>
+<a id="a5606e18bc35a63cc9ae690489cabae0f" name="a5606e18bc35a63cc9ae690489cabae0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5606e18bc35a63cc9ae690489cabae0f">&#9670;&#160;</a></span>GetRotorPosition()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -434,7 +434,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">wpi::units::turn_t yams::motorcontrollers::simulation::ElevatorSimSupplier::GetRotorPosition </td>
+          <td class="memname">units::turn_t yams::motorcontrollers::simulation::ElevatorSimSupplier::GetRotorPosition </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td></td>
@@ -449,12 +449,12 @@ Public Member Functions</h2></td></tr>
 <p>Get the simulated rotor position.</p>
 <dl class="section return"><dt>Returns</dt><dd>Rotor position in turns. </dd></dl>
 
-<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#ac6d63844f6e81f67ef12a20395471ace">yams::motorcontrollers::SimSupplier</a>.</p>
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#a346e2817b17886e409dd9d288c80ed1c">yams::motorcontrollers::SimSupplier</a>.</p>
 
 </div>
 </div>
-<a id="a43920dd7466ee157d9852ec468033d51" name="a43920dd7466ee157d9852ec468033d51"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a43920dd7466ee157d9852ec468033d51">&#9670;&#160;</a></span>GetRotorVelocity()</h2>
+<a id="afdf2471168fbcf61009bda3085b4bb78" name="afdf2471168fbcf61009bda3085b4bb78"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afdf2471168fbcf61009bda3085b4bb78">&#9670;&#160;</a></span>GetRotorVelocity()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -463,7 +463,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">wpi::units::turns_per_second_t yams::motorcontrollers::simulation::ElevatorSimSupplier::GetRotorVelocity </td>
+          <td class="memname">units::turns_per_second_t yams::motorcontrollers::simulation::ElevatorSimSupplier::GetRotorVelocity </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td></td>
@@ -478,7 +478,7 @@ Public Member Functions</h2></td></tr>
 <p>Get the simulated rotor velocity.</p>
 <dl class="section return"><dt>Returns</dt><dd>Rotor velocity in turns per second. </dd></dl>
 
-<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#a485a6dfda12c10ffaced54c5fe273f96">yams::motorcontrollers::SimSupplier</a>.</p>
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#acdf65a5ca2a2fe508dc02f79ae6ffbcb">yams::motorcontrollers::SimSupplier</a>.</p>
 
 </div>
 </div>
@@ -511,8 +511,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a370cc016a14a2c03b973c485a77087db" name="a370cc016a14a2c03b973c485a77087db"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a370cc016a14a2c03b973c485a77087db">&#9670;&#160;</a></span>SetInputVoltage()</h2>
+<a id="aa20f9f8f27fc633d7df24434c6aad82b" name="aa20f9f8f27fc633d7df24434c6aad82b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa20f9f8f27fc633d7df24434c6aad82b">&#9670;&#160;</a></span>SetInputVoltage()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -523,7 +523,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">void yams::motorcontrollers::simulation::ElevatorSimSupplier::SetInputVoltage </td>
           <td>(</td>
-          <td class="paramtype">wpi::units::volt_t</td>          <td class="paramname"><span class="paramname"><em>volts</em></span></td><td>)</td>
+          <td class="paramtype">units::volt_t</td>          <td class="paramname"><span class="paramname"><em>volts</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -541,12 +541,12 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#aef17699b31bf9f94d2dff331501c08b4">yams::motorcontrollers::SimSupplier</a>.</p>
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#a78c3f06f1c9e8a61057578505d593b29">yams::motorcontrollers::SimSupplier</a>.</p>
 
 </div>
 </div>
-<a id="accdf89d916cb3846fcb8920ea48904e4" name="accdf89d916cb3846fcb8920ea48904e4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#accdf89d916cb3846fcb8920ea48904e4">&#9670;&#160;</a></span>SetMechanismPosition()</h2>
+<a id="ac4a9d64f45382f558ff74fc5a9b4a7e8" name="ac4a9d64f45382f558ff74fc5a9b4a7e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4a9d64f45382f558ff74fc5a9b4a7e8">&#9670;&#160;</a></span>SetMechanismPosition()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -557,7 +557,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">void yams::motorcontrollers::simulation::ElevatorSimSupplier::SetMechanismPosition </td>
           <td>(</td>
-          <td class="paramtype">wpi::units::turn_t</td>          <td class="paramname"><span class="paramname"><em>angle</em></span></td><td>)</td>
+          <td class="paramtype">units::turn_t</td>          <td class="paramname"><span class="paramname"><em>angle</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -575,12 +575,12 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#a963c83ccc6018c5d895d4bd46337b0d5">yams::motorcontrollers::SimSupplier</a>.</p>
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#a4fc083caa54283913a70a5daf17be70d">yams::motorcontrollers::SimSupplier</a>.</p>
 
 </div>
 </div>
-<a id="a3897e60d087853a48b33c8f02ffd20d9" name="a3897e60d087853a48b33c8f02ffd20d9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3897e60d087853a48b33c8f02ffd20d9">&#9670;&#160;</a></span>SetMechanismStatorVoltage()</h2>
+<a id="a2cbd00d347af61e283bd23bff9c08238" name="a2cbd00d347af61e283bd23bff9c08238"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2cbd00d347af61e283bd23bff9c08238">&#9670;&#160;</a></span>SetMechanismStatorVoltage()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -591,7 +591,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">void yams::motorcontrollers::simulation::ElevatorSimSupplier::SetMechanismStatorVoltage </td>
           <td>(</td>
-          <td class="paramtype">wpi::units::volt_t</td>          <td class="paramname"><span class="paramname"><em>volts</em></span></td><td>)</td>
+          <td class="paramtype">units::volt_t</td>          <td class="paramname"><span class="paramname"><em>volts</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -609,12 +609,12 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#a5e43b6fd94b344c47fcdce3aef1d2ab2">yams::motorcontrollers::SimSupplier</a>.</p>
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#a2329f83aad07f9313291ee47ffe3e680">yams::motorcontrollers::SimSupplier</a>.</p>
 
 </div>
 </div>
-<a id="a5323225bbb40d10ce8262a03a91a28bc" name="a5323225bbb40d10ce8262a03a91a28bc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5323225bbb40d10ce8262a03a91a28bc">&#9670;&#160;</a></span>SetMechanismVelocity()</h2>
+<a id="ab87e2c0d31256e6fe18cfb3871d88577" name="ab87e2c0d31256e6fe18cfb3871d88577"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab87e2c0d31256e6fe18cfb3871d88577">&#9670;&#160;</a></span>SetMechanismVelocity()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -625,7 +625,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">void yams::motorcontrollers::simulation::ElevatorSimSupplier::SetMechanismVelocity </td>
           <td>(</td>
-          <td class="paramtype">wpi::units::turns_per_second_t</td>          <td class="paramname"><span class="paramname"><em>velocity</em></span></td><td>)</td>
+          <td class="paramtype">units::turns_per_second_t</td>          <td class="paramname"><span class="paramname"><em>velocity</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -643,12 +643,12 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#aac6b51776c4b1e4de60579072f73d67a">yams::motorcontrollers::SimSupplier</a>.</p>
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#ad3d4a95c876e9bd5431a74d5254cb353">yams::motorcontrollers::SimSupplier</a>.</p>
 
 </div>
 </div>
-<a id="abba9065f8976ab3fc235bb5068699542" name="abba9065f8976ab3fc235bb5068699542"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abba9065f8976ab3fc235bb5068699542">&#9670;&#160;</a></span>SetRotorPosition()</h2>
+<a id="a3fddfe1e53bf782eacf5b444861f8391" name="a3fddfe1e53bf782eacf5b444861f8391"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3fddfe1e53bf782eacf5b444861f8391">&#9670;&#160;</a></span>SetRotorPosition()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -659,7 +659,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">void yams::motorcontrollers::simulation::ElevatorSimSupplier::SetRotorPosition </td>
           <td>(</td>
-          <td class="paramtype">wpi::units::turn_t</td>          <td class="paramname"><span class="paramname"><em>angle</em></span></td><td>)</td>
+          <td class="paramtype">units::turn_t</td>          <td class="paramname"><span class="paramname"><em>angle</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -677,12 +677,12 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#acf31eb82dfd25fc34f03e47b3d21f1d0">yams::motorcontrollers::SimSupplier</a>.</p>
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#ac0dfa0171888366706621ccba329b93e">yams::motorcontrollers::SimSupplier</a>.</p>
 
 </div>
 </div>
-<a id="a40ef3b11cef39a4add8334ebf6e39777" name="a40ef3b11cef39a4add8334ebf6e39777"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a40ef3b11cef39a4add8334ebf6e39777">&#9670;&#160;</a></span>SetRotorVelocity()</h2>
+<a id="a3bff60f3172e0b2e3ad9b60dda2985f5" name="a3bff60f3172e0b2e3ad9b60dda2985f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3bff60f3172e0b2e3ad9b60dda2985f5">&#9670;&#160;</a></span>SetRotorVelocity()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -693,7 +693,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">void yams::motorcontrollers::simulation::ElevatorSimSupplier::SetRotorVelocity </td>
           <td>(</td>
-          <td class="paramtype">wpi::units::turns_per_second_t</td>          <td class="paramname"><span class="paramname"><em>velocity</em></span></td><td>)</td>
+          <td class="paramtype">units::turns_per_second_t</td>          <td class="paramname"><span class="paramname"><em>velocity</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -711,7 +711,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#aec694ad79548fd0889f760f3cc293d33">yams::motorcontrollers::SimSupplier</a>.</p>
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html#a267c33c939036e7df7b947f5e91e58f2">yams::motorcontrollers::SimSupplier</a>.</p>
 
 </div>
 </div>

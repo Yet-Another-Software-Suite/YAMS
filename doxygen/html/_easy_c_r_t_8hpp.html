@@ -86,11 +86,11 @@ $(function() {
 
 <p>CRT-based absolute angle solver for two-encoder FRC mechanisms.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;cmath&gt;</code><br />
+<div class="textblock"><code>#include &lt;units/angle.h&gt;</code><br />
+<code>#include &lt;cmath&gt;</code><br />
 <code>#include &lt;functional&gt;</code><br />
 <code>#include &lt;limits&gt;</code><br />
 <code>#include &lt;optional&gt;</code><br />
-<code>#include &lt;wpi/units/angle.hpp&gt;</code><br />
 </div>
 <p><a href="_easy_c_r_t_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -134,18 +134,18 @@ Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>CRT-based absolute angle solver for two-encoder FRC mechanisms. </p>
 <p>Provides the EasyCRT solver and its configuration, plus free inline utilities for gear-ratio arithmetic and coprimality checks. Created by team 6911.</p>
-<dl class="section user"><dt>Full example turret with 200T gear, 19T and 21T encoder pinions</dt><dd><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="_easy_c_r_t_8hpp.html">yams/units/EasyCRT.hpp</a>&quot;</span></div>
+<dl class="section user"><dt>Full example — turret with 200T gear, 19T and 21T encoder pinions</dt><dd><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="_easy_c_r_t_8hpp.html">yams/units/EasyCRT.hpp</a>&quot;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;ctre/phoenix6/CANcoder.hpp&gt;</span></div>
-<div class="line"><span class="preprocessor">#include &lt;wpi/commands2/SubsystemBase.hpp&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;frc2/command/SubsystemBase.h&gt;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">using namespace </span><a class="code hl_namespace" href="namespaceyams_1_1units.html">yams::units</a>;</div>
 <div class="line"> </div>
-<div class="line"><span class="keyword">class </span>Turret : <span class="keyword">public</span> wpi::cmd::SubsystemBase {</div>
+<div class="line"><span class="keyword">class </span>Turret : <span class="keyword">public</span> frc2::SubsystemBase {</div>
 <div class="line"> <span class="keyword">public</span>:</div>
 <div class="line">  Turret() {</div>
 <div class="line">    <span class="comment">// enc1Teeth=19, enc2Teeth=21 are coprime.</span></div>
 <div class="line">    <span class="comment">// commonK = 1.0 (no intermediate gearbox) * 200T (turret gear) = 200.</span></div>
-<div class="line">    <span class="comment">// CRT period = lcm(19,21)/200 = 399/200 = 1.995 rot covers full travel.</span></div>
+<div class="line">    <span class="comment">// CRT period = lcm(19,21)/200 = 399/200 = 1.995 rot — covers full travel.</span></div>
 <div class="line">    m_crt = std::make_unique&lt;EasyCRT&gt;(</div>
 <div class="line">        <a class="code hl_struct" href="structyams_1_1units_1_1_easy_c_r_t_config.html">EasyCRTConfig</a>{}</div>
 <div class="line">            .<a class="code hl_function" href="structyams_1_1units_1_1_easy_c_r_t_config.html#a982524a6b868ce871afa7baf651157c1">WithTeeth</a>(19, 21, CrtCommonK(1.0, 200))</div>
@@ -168,11 +168,11 @@ Functions</h2></td></tr>
 <div class="line">      <span class="comment">// Resolved: seed or correct the motor controller position.</span></div>
 <div class="line">      m_motor.SetEncoderPosition(*angle);</div>
 <div class="line">    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (m_crt-&gt;GetStatus() == EasyCRT::Status::InvalidConfig) {</div>
-<div class="line">      <span class="comment">// Sensor read failed (NaN) flag for diagnostics.</span></div>
+<div class="line">      <span class="comment">// Sensor read failed (NaN) — flag for diagnostics.</span></div>
 <div class="line">    }</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Log for tolerance tuning.</span></div>
-<div class="line">    wpi::telemetry::Log(<span class="stringliteral">&quot;CRT/error&quot;</span>, m_crt-&gt;GetLastError());</div>
+<div class="line">    frc::SmartDashboard::PutNumber(<span class="stringliteral">&quot;CRT/error&quot;</span>, m_crt-&gt;GetLastError());</div>
 <div class="line">  }</div>
 <div class="line"> </div>
 <div class="line"> <span class="keyword">private</span>:</div>
@@ -181,9 +181,9 @@ Functions</h2></td></tr>
 <div class="line">  std::unique_ptr&lt;EasyCRT&gt; m_crt;</div>
 <div class="line">};</div>
 <div class="ttc" id="a_easy_c_r_t_8hpp_html"><div class="ttname"><a href="_easy_c_r_t_8hpp.html">EasyCRT.hpp</a></div><div class="ttdoc">CRT-based absolute angle solver for two-encoder FRC mechanisms.</div></div>
-<div class="ttc" id="anamespaceyams_1_1units_html"><div class="ttname"><a href="namespaceyams_1_1units.html">yams::units</a></div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:70</div></div>
-<div class="ttc" id="astructyams_1_1units_1_1_easy_c_r_t_config_html"><div class="ttname"><a href="structyams_1_1units_1_1_easy_c_r_t_config.html">yams::units::EasyCRTConfig</a></div><div class="ttdoc">Configuration for the EasyCRT solver.</div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:173</div></div>
-<div class="ttc" id="astructyams_1_1units_1_1_easy_c_r_t_config_html_a982524a6b868ce871afa7baf651157c1"><div class="ttname"><a href="structyams_1_1units_1_1_easy_c_r_t_config.html#a982524a6b868ce871afa7baf651157c1">yams::units::EasyCRTConfig::WithTeeth</a></div><div class="ttdeci">EasyCRTConfig &amp; WithTeeth(int t1, int t2, double k)</div><div class="ttdoc">Set encoder teeth counts and the common scale factor.</div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:199</div></div>
+<div class="ttc" id="anamespaceyams_1_1units_html"><div class="ttname"><a href="namespaceyams_1_1units.html">yams::units</a></div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:71</div></div>
+<div class="ttc" id="astructyams_1_1units_1_1_easy_c_r_t_config_html"><div class="ttname"><a href="structyams_1_1units_1_1_easy_c_r_t_config.html">yams::units::EasyCRTConfig</a></div><div class="ttdoc">Configuration for the EasyCRT solver.</div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:174</div></div>
+<div class="ttc" id="astructyams_1_1units_1_1_easy_c_r_t_config_html_a982524a6b868ce871afa7baf651157c1"><div class="ttname"><a href="structyams_1_1units_1_1_easy_c_r_t_config.html#a982524a6b868ce871afa7baf651157c1">yams::units::EasyCRTConfig::WithTeeth</a></div><div class="ttdeci">EasyCRTConfig &amp; WithTeeth(int t1, int t2, double k)</div><div class="ttdoc">Set encoder teeth counts and the common scale factor.</div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:200</div></div>
 </div><!-- fragment --> </dd></dl>
 </div></div><!-- contents -->
 <!-- start footer part -->

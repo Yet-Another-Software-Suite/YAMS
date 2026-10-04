@@ -87,12 +87,12 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:acadd8acd4675294d52ccb23783e14841" id="r_acadd8acd4675294d52ccb23783e14841"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acadd8acd4675294d52ccb23783e14841">AddCommand</a> (const std::string &amp;cmdName, wpi::cmd::SubsystemBase *subsystem, std::function&lt; void()&gt; callback)</td></tr>
-<tr class="separator:acadd8acd4675294d52ccb23783e14841"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaa3f29422a81a96cc96089a37cba7590" id="r_aaa3f29422a81a96cc96089a37cba7590"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaa3f29422a81a96cc96089a37cba7590">CommandExists</a> (const std::string &amp;cmdName, wpi::cmd::SubsystemBase *subsystem)</td></tr>
-<tr class="separator:aaa3f29422a81a96cc96089a37cba7590"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0f484fbd111b938298e8541c588cb68a" id="r_a0f484fbd111b938298e8541c588cb68a"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0f484fbd111b938298e8541c588cb68a">RemoveCommands</a> (wpi::cmd::SubsystemBase *subsystem)</td></tr>
-<tr class="separator:a0f484fbd111b938298e8541c588cb68a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a007bc5f4054d3c12612029cba6194cef" id="r_a007bc5f4054d3c12612029cba6194cef"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a007bc5f4054d3c12612029cba6194cef">AddCommand</a> (const std::string &amp;cmdName, frc2::SubsystemBase *subsystem, std::function&lt; void()&gt; callback)</td></tr>
+<tr class="separator:a007bc5f4054d3c12612029cba6194cef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6bb44fc45833efbabb18f8201b83ecf" id="r_af6bb44fc45833efbabb18f8201b83ecf"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af6bb44fc45833efbabb18f8201b83ecf">CommandExists</a> (const std::string &amp;cmdName, frc2::SubsystemBase *subsystem)</td></tr>
+<tr class="separator:af6bb44fc45833efbabb18f8201b83ecf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b4f29b2e9c96ebfee87bea3d7e617f5" id="r_a2b4f29b2e9c96ebfee87bea3d7e617f5"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2b4f29b2e9c96ebfee87bea3d7e617f5">RemoveCommands</a> (frc2::SubsystemBase *subsystem)</td></tr>
+<tr class="separator:a2b4f29b2e9c96ebfee87bea3d7e617f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aad08fde5a1d0d68d593dccca7cc1c693" id="r_aad08fde5a1d0d68d593dccca7cc1c693"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aad08fde5a1d0d68d593dccca7cc1c693">Clear</a> ()</td></tr>
 <tr class="separator:aad08fde5a1d0d68d593dccca7cc1c693"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -101,8 +101,8 @@ Static Public Member Functions</h2></td></tr>
 <p>When multiple SmartMotorControllers belong to the same subsystem (e.g. a dual-motor arm), each one registers its live-tuning callback here. The registry creates a single combined command per subsystem that runs all registered callbacks on every periodic loop.</p>
 <p>The published SmartDashboard path is: Mechanisms/Commands/SubsystemName%/CommandName% </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="acadd8acd4675294d52ccb23783e14841" name="acadd8acd4675294d52ccb23783e14841"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acadd8acd4675294d52ccb23783e14841">&#9670;&#160;</a></span>AddCommand()</h2>
+<a id="a007bc5f4054d3c12612029cba6194cef" name="a007bc5f4054d3c12612029cba6194cef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a007bc5f4054d3c12612029cba6194cef">&#9670;&#160;</a></span>AddCommand()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -118,7 +118,7 @@ Static Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">wpi::cmd::SubsystemBase *</td>          <td class="paramname"><span class="paramname"><em>subsystem</em>, </span></td>
+          <td class="paramtype">frc2::SubsystemBase *</td>          <td class="paramname"><span class="paramname"><em>subsystem</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -172,8 +172,8 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="aaa3f29422a81a96cc96089a37cba7590" name="aaa3f29422a81a96cc96089a37cba7590"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaa3f29422a81a96cc96089a37cba7590">&#9670;&#160;</a></span>CommandExists()</h2>
+<a id="af6bb44fc45833efbabb18f8201b83ecf" name="af6bb44fc45833efbabb18f8201b83ecf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af6bb44fc45833efbabb18f8201b83ecf">&#9670;&#160;</a></span>CommandExists()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -189,7 +189,7 @@ Static Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">wpi::cmd::SubsystemBase *</td>          <td class="paramname"><span class="paramname"><em>subsystem</em></span>&#160;)</td>
+          <td class="paramtype">frc2::SubsystemBase *</td>          <td class="paramname"><span class="paramname"><em>subsystem</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -210,8 +210,8 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a0f484fbd111b938298e8541c588cb68a" name="a0f484fbd111b938298e8541c588cb68a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0f484fbd111b938298e8541c588cb68a">&#9670;&#160;</a></span>RemoveCommands()</h2>
+<a id="a2b4f29b2e9c96ebfee87bea3d7e617f5" name="a2b4f29b2e9c96ebfee87bea3d7e617f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b4f29b2e9c96ebfee87bea3d7e617f5">&#9670;&#160;</a></span>RemoveCommands()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -222,7 +222,7 @@ Static Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">static void yams::motorcontrollers::SmartMotorControllerCommandRegistry::RemoveCommands </td>
           <td>(</td>
-          <td class="paramtype">wpi::cmd::SubsystemBase *</td>          <td class="paramname"><span class="paramname"><em>subsystem</em></span></td><td>)</td>
+          <td class="paramtype">frc2::SubsystemBase *</td>          <td class="paramname"><span class="paramname"><em>subsystem</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
