@@ -129,6 +129,10 @@ jobs:
             test-filter: '--tests "yams.mechs.ShooterTest"'
           - group: mechanism-limits
             test-filter: '--tests "yams.mechs.MechanismLimitTest"'
+          # Four module swerve drives on a Pigeon2: TalonFX and SPARK MAX both ways round, and mixes
+          # of SPARK MAX, SPARK Flex, TalonFXS and TalonFX, all with the same PID gains.
+          - group: swerve-drive
+            test-filter: '--tests "yams.mechs.SwerveDriveTest"'
           # Every motor controller, closed loop controller, and attached encoder crossing the
           # continuous wrapping point: many simulated Talons, which Phoenix runs in real time.
           - group: continuous-wrapping
@@ -149,12 +153,11 @@ jobs:
             test-filter: '--tests "yams.core.motorcontrollers.DiscontinuityPointTest"'
           - group: zero-offsets
             test-filter: '--tests "yams.core.motorcontrollers.ZeroOffsetTest"'
-          # Everything else: swerve tests, motor controller / battery sim unit tests, and the
+          # Everything else: swerve config tests, motor controller / battery sim unit tests, and the
           # standalone math test. Gradle's --tests cannot exclude the groups above,
           # so each class is listed: add new test classes here unless they get their own group.
           - group: other
             test-filter: >-
-              --tests "yams.mechs.SwerveDriveTest"
               --tests "yams.core.mechanisms.*"
               --tests "yams.core.motorcontrollers.ForceFeedforwardTest"
               --tests "yams.core.motorcontrollers.LiveTuningTest"

@@ -7,6 +7,7 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.CANdi;
+import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.ctre.phoenix6.hardware.ParentDevice;
@@ -79,6 +80,11 @@ public class DeviceCreator {
   public static TalonFXS createTalonFXS() {
     final int device = ctreId.getAndIncrement();
     return fresh(new TalonFXS(ctreDeviceId(device), ctreBus(device)));
+  }
+
+  public static Pigeon2 createPigeon2() {
+    final int device = ctreId.getAndIncrement();
+    return fresh(new Pigeon2(ctreDeviceId(device), ctreBus(device)));
   }
 
   /**
