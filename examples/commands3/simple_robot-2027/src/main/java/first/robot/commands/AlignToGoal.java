@@ -129,7 +129,7 @@ public final class AlignToGoal {
         swerveMechanism.setDriveInput(-controller.getLeftY(), -controller.getLeftX(), 0);
         var originalSpeed     = swerveMechanism.getDriveInput();
         originalSpeed.omega = output + feedforwardOutput;
-        swerveMechanism.setRobotRelativeChassisSpeedsSetpoint(originalSpeed.toRobotRelative(new Rotation2d(swerveMechanism.getGyroAngle())));
+        swerveMechanism.setRobotRelativeChassisSpeedsSetpoint(originalSpeed.toRobotRelative(swerveMechanism.getGyroRotation3d().toRotation2d()));
         shotSpeed[0] = newHorizontalSpeed;
 
         coroutine.yield();

@@ -362,14 +362,14 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
     currentMode = mode;
 
     double omega = switch (mode) {
-      case TRANSLATION_ONLY -> requireRotationPID(config).calculate(swerveDrive.getGyroAngle().in(Radians), lockedHeading.orElseThrow().getRadians());
+      case TRANSLATION_ONLY -> requireRotationPID(config).calculate(swerveDrive.getGyroRotation3d().getZ(), lockedHeading.orElseThrow().getRadians());
       case AIM -> {
-        Rotation2d currentHeading = new Rotation2d(swerveDrive.getGyroAngle());
+        Rotation2d currentHeading = swerveDrive.getGyroRotation3d().toRotation2d();
         Translation2d relativeTarget = aimTarget.orElseThrow().relativeTo(swerveDrive.getPose()).getTranslation();
         Rotation2d target = new Rotation2d(relativeTarget.getX(), relativeTarget.getY()).plus(currentHeading);
         yield requireRotationPID(config).calculate(currentHeading.getRadians(), target.getRadians());
       }
-      case HEADING -> requireRotationPID(config).calculate(swerveDrive.getGyroAngle().in(Radians), heading.orElseThrow().in(Radians));
+      case HEADING -> requireRotationPID(config).calculate(swerveDrive.getGyroRotation3d().getZ(), heading.orElseThrow().in(Radians));
       case ANGULAR_VELOCITY -> {
         final double deadbanded = applyDeadband(rotation);
         final double axis = omegaAxisScale.map(scale -> deadbanded * scale).orElse(deadbanded);
@@ -379,7 +379,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
 
     ChassisVelocities speeds = new ChassisVelocities(vx, vy, omega);
     if (robotRelative) {
-      speeds = speeds.toFieldRelative(new Rotation2d(swerveDrive.getGyroAngle()));
+      speeds = speeds.toFieldRelative(swerveDrive.getGyroRotation3d().toRotation2d());
     }
     if (translationHeadingOffsetEnabled) {
       Translation2d offsetTranslation = new Translation2d(speeds.vx, speeds.vy).rotateBy(translationHeadingOffset);
@@ -404,7 +404,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
 
   /** Reset the rotation PID and lock the heading when switching modes. */
   private void transitionMode(Mode mode) {
-    lockedHeading = mode == Mode.TRANSLATION_ONLY ? Optional.of(new Rotation2d(swerveDrive.getGyroAngle())) : Optional.empty();
+    lockedHeading = mode == Mode.TRANSLATION_ONLY ? Optional.of(swerveDrive.getGyroRotation3d().toRotation2d()) : Optional.empty();
     if (mode != Mode.ANGULAR_VELOCITY) {
       swerveDrive.resetRotationPID();
     }

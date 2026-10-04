@@ -108,16 +108,4 @@ public class SwerveDriveAntiTippingTest {
         () -> plain.withAntiTipping(MetersPerSecond.of(4), Degrees.of(10), MetersPerSecond.of(0)), "zero maximum speed");
     assertTrue(plain.getAntiTippingCorrection().vx == 0, "rejected settings are not applied");
   }
-
-  @Test
-  void headingStaysContinuousPastHalfARotation() {
-    // A Rotation3d's yaw wraps at 180 degrees, but the heading turns on past it.
-    final SwerveDriveConfig<?> plain = new yams.commands2.config.SwerveDriveConfig().withGyro(attitude::get);
-    final double[] yaws = {170, 179, -179, -170, 179, 170};
-    final double[] headings = {170, 179, 181, 190, 179, 170};
-    for (int i = 0; i < yaws.length; i++) {
-      tilt(0, 0, yaws[i]);
-      assertEquals(headings[i], plain.getGyroAngle().in(Degrees), 1e-6, "heading after yaw " + yaws[i]);
-    }
-  }
 }

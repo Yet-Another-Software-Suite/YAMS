@@ -15,6 +15,7 @@ import org.wpilib.math.controller.PIDController;
 import org.wpilib.math.estimator.SwerveDrivePoseEstimator;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.geometry.Twist2d;
 import org.wpilib.math.kinematics.ChassisVelocities;
@@ -122,7 +123,7 @@ public class SwerveDrive {
     m_simPose = config.getInitialPose();
     Arrays.fill(m_desiredModuleStates, new SwerveModuleVelocity());
     m_kinematics = getKinematics();
-    m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics, new Rotation2d(getGyroAngle()), getModulePositions(), m_config.getInitialPose());
+    m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics, getGyroRotation3d().toRotation2d(), getModulePositions(), m_config.getInitialPose());
     // Start with the gyro reading the starting pose's heading so field relative driving matches it.
     resetOdometry(m_config.getInitialPose());
     setupTelemetry();
@@ -177,11 +178,12 @@ public class SwerveDrive {
   }
 
   /**
-   * Get the Gyro Angle.
+   * Get the robot's attitude from the gyro (see {@link SwerveDriveConfig#getGyroRotation3d()}): its
+   * yaw is the robot's heading. In simulation, the simulated heading with no tilt.
    *
-   * @return Gyro angle, or maple sim odometry gyro angle.
+   * @return The robot's attitude.
    */
-  public Angle getGyroAngle() {
+  public Rotation3d getGyroRotation3d() {
     if (RobotBase.isSimulation()) {
       //      if (m_config.getMapleDriveSim().isPresent())
       //      {
@@ -189,9 +191,9 @@ public class SwerveDrive {
       //
       // m_config.getMapleDriveSim().get().getOdometryEstimatedPose().getRotation().getMeasure();
       //      }
-      return m_simGyroAngle;
+      return new Rotation3d(0, 0, m_simGyroAngle.in(Radians));
     }
-    return m_config.getGyroAngle();
+    return m_config.getGyroRotation3d();
   }
 
   /**
@@ -355,7 +357,7 @@ public class SwerveDrive {
    *                               {@link SwerveDriveConfig#withGyro(java.util.function.Supplier)}.
    */
   public void setFieldRelativeChassisSpeeds(ChassisVelocities fieldRelativeChassisSpeeds) {
-    setRobotRelativeChassisSpeeds(fieldRelativeChassisSpeeds.toRobotRelative(new Rotation2d(getGyroAngle())));
+    setRobotRelativeChassisSpeeds(fieldRelativeChassisSpeeds.toRobotRelative(getGyroRotation3d().toRotation2d()));
   }
 
   /**
@@ -408,8 +410,8 @@ public class SwerveDrive {
   }
 
   /**
-   * Make {@link #getGyroAngle()} read the given heading from now on. On a real robot the gyro offset
-   * is adjusted; in simulation the simulated gyro angle is set directly.
+   * Make {@link #getGyroRotation3d()} read the given heading as its yaw from now on. On a real robot
+   * the gyro offset is adjusted; in simulation the simulated gyro angle is set directly.
    *
    * @param heading Heading the gyro should report.
    */
@@ -418,7 +420,7 @@ public class SwerveDrive {
       m_simGyroAngle = heading;
       return;
     }
-    m_config.withGyroOffset(getGyroAngle().plus(m_config.getGyroOffset()).minus(heading));
+    m_config.withGyroOffset(getGyroRotation3d().getMeasureZ().plus(m_config.getGyroOffset()).minus(heading));
   }
 
   /**
@@ -445,7 +447,7 @@ public class SwerveDrive {
     //      m_config.getMapleDriveSim().get().setSimulationWorldPose(pose);
     //    }
     setGyroAngle(pose.getRotation().getMeasure());
-    m_poseEstimator.resetPosition(new Rotation2d(getGyroAngle()), getModulePositions(), pose);
+    m_poseEstimator.resetPosition(getGyroRotation3d().toRotation2d(), getModulePositions(), pose);
     m_desiredChassisSpeeds = new ChassisVelocities();
     m_desiredModuleStates = m_kinematics.toSwerveModuleVelocities(new ChassisVelocities());
     m_simPose = pose;
@@ -519,7 +521,7 @@ public class SwerveDrive {
    * @throws SwerveDriveConfigurationException if the rotation PID controller is not configured.
    */
   public ChassisVelocities driveToPoseSetpoint(Pose2d targetPose) {
-    return driveToPoseSetpoint(targetPose, getPose(), new Rotation2d(getGyroAngle()));
+    return driveToPoseSetpoint(targetPose, getPose(), getGyroRotation3d().toRotation2d());
   }
 
   /**
@@ -600,7 +602,7 @@ public class SwerveDrive {
    * {@link SwerveModulePosition}
    */
   private void updatePoseEstimator() {
-    m_poseEstimator.update(new Rotation2d(getGyroAngle()), getModulePositions());
+    m_poseEstimator.update(getGyroRotation3d().toRotation2d(), getModulePositions());
   }
 
   /** Update the telemetry and {@link SwerveDrivePoseEstimator} of the drive. */
@@ -661,7 +663,7 @@ public class SwerveDrive {
    * @return Field relative speed of the drive.
    */
   public ChassisVelocities getFieldRelativeSpeed() {
-    return getRobotRelativeSpeed().toFieldRelative(new Rotation2d(getGyroAngle()));
+    return getRobotRelativeSpeed().toFieldRelative(getGyroRotation3d().toRotation2d());
   }
 
   /**

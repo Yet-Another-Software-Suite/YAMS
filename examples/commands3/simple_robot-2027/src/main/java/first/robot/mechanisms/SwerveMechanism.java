@@ -20,10 +20,10 @@ import com.revrobotics.spark.SparkMax;
 import org.wpilib.math.controller.PIDController;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.math.system.DCMotor;
-import org.wpilib.units.measure.Angle;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import java.util.function.Supplier;
@@ -204,7 +204,7 @@ public class SwerveMechanism implements Mechanism {
     return drive.getFieldRelativeSpeed();
   }
 
-  public Angle getGyroAngle() {
-    return drive.getGyroAngle();
+  public Rotation3d getGyroRotation3d() {
+    return drive.getGyroRotation3d();
   }
 }

@@ -30,6 +30,7 @@ import org.wpilib.units.measure.LinearVelocity;
 import org.wpilib.units.measure.Time;
 import org.wpilib.util.Alert;
 import yams.core.math.DerivativeTimeFilter;
+import yams.core.mechanisms.config.enums.GyroAxis;
 import yams.core.mechanisms.swerve.SwerveDrive;
 import yams.core.mechanisms.swerve.SwerveModule;
 import yams.core.telemetry.SwerveDriveTelemetryConfig;
@@ -67,20 +68,25 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
    */
   private Optional<Supplier<Rotation3d>> gyroSupplier = Optional.empty();
   /**
-   * The gyro's yaw, kept continuous: a {@link Rotation3d}'s yaw wraps at half a rotation, but the
-   * heading must not jump when the robot turns past it.
+   * Axis of the gyro that points up through the robot.
    */
-  private double continuousYawRadians = 0;
+  private GyroAxis gyroHeadingAxis = GyroAxis.YAW;
   /**
-   * Whether {@link #continuousYawRadians} has been read from the gyro yet.
+   * The robot's heading, kept continuous for deriving the gyro angular velocity from it: a
+   * {@link Rotation3d}'s yaw wraps at half a rotation, but its derivative must not spike when the
+   * robot turns past it.
    */
-  private boolean continuousYawRead = false;
+  private double continuousHeadingRadians = 0;
+  /**
+   * Whether {@link #continuousHeadingRadians} has been read from the gyro yet.
+   */
+  private boolean continuousHeadingRead = false;
   /**
    * Gyro angular velocity supplier.
    */
   private Optional<Supplier<AngularVelocity>> gyroAngularVelocitySupplier = Optional.empty();
   /**
-   * Derives the gyro angular velocity from the gyro angle ({@link #getGyroAngle()}) when
+   * Derives the gyro angular velocity from the heading ({@link #getGyroRotation3d()}) when
    * {@link #gyroAngularVelocitySupplier} is not configured, in both simulation and real robot code.
    */
   private final DerivativeTimeFilter gyroAngularVelocityFilter = new DerivativeTimeFilter(Milliseconds.of(20));
@@ -366,8 +372,9 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
   }
 
   /**
-   * Set the gyro, as the robot's attitude: its yaw is the robot's heading, and its roll and pitch
-   * are what anti-tipping corrects with (see {@link #withAntiTipping(AntiTipping)}).
+   * Set the gyro, as the robot's attitude: its yaw is the robot's heading (or the axis set with
+   * {@link #withGyroHeadingAxis(GyroAxis)}), and its roll and pitch are what anti-tipping corrects
+   * with (see {@link #withAntiTipping(AntiTipping)}).
    *
    * @param gyro {@link Supplier} for the robot's attitude, such as {@code pigeon::getRotation3d} or
    *             {@code imu::getRotation3d}.
@@ -375,7 +382,24 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
    */
   public T withGyro(Supplier<Rotation3d> gyro) {
     gyroSupplier = Optional.ofNullable(gyro);
-    continuousYawRead = false;
+    continuousHeadingRead = false;
+    return self();
+  }
+
+  /**
+   * Set which axis of the gyro points up through the robot, for a gyro mounted so the robot turning
+   * shows up as its roll or pitch instead of its yaw. Defaults to {@link GyroAxis#YAW}. The gyro's
+   * attitude is rotated into the robot's frame with {@link GyroAxis#toRobotAttitude(Rotation3d)}
+   * before the heading and anti-tipping (see {@link #withAntiTipping(AntiTipping)}) read it;
+   * {@link #withGyroInverted(boolean)} and {@link #withGyroOffset(Angle)} apply to the resulting
+   * heading.
+   *
+   * @param axis Axis of the gyro that points up through the robot.
+   * @return {@link SwerveDriveConfig} for chaining.
+   */
+  public T withGyroHeadingAxis(GyroAxis axis) {
+    gyroHeadingAxis = axis;
+    continuousHeadingRead = false;
     return self();
   }
 
@@ -432,7 +456,7 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
     }
     // AntiTipping gives the correction in the frame of the attitude, which the gyro's yaw makes the
     // field's. Turn it to the robot's, like the chassis speeds it is added to.
-    final Rotation3d attitude = gyroSupplier.get().get();
+    final Rotation3d attitude = getGyroRotation3d();
     return antiTipping.get().calculate(attitude).toRobotRelative(new Rotation2d(attitude.getZ()));
   }
 
@@ -621,24 +645,25 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
   }
 
   /**
-   * Get the gyro angle with inversions and offsets applied.
+   * Get the robot's attitude from the gyro: the gyro's attitude rotated into the robot's frame for
+   * the axis set with {@link #withGyroHeadingAxis(GyroAxis)}, with the inversion
+   * ({@link #withGyroInverted(boolean)}) and offset ({@link #withGyroOffset(Angle)}) applied to its
+   * yaw. Its yaw is the robot's heading, wrapped to half a rotation each way, and its roll and pitch
+   * are the robot's tilt.
    *
-   * @return {@link Angle} of the gyro.
+   * @return The robot's attitude.
    * @throws IllegalStateException if no gyro supplier was set with {@link #withGyro(Supplier)}.
    */
-  public Angle getGyroAngle() {
+  public Rotation3d getGyroRotation3d() {
     if (gyroSupplier.isEmpty()) {
       throw new IllegalStateException("Gyro supplier is not set! Please use .withGyro() to set the gyro supplier!");
     }
-    // Keep the yaw continuous: unwrapped, it would jump a whole rotation when the robot turns past
-    // half a rotation, and the gyro angular velocity derived from it would spike.
-    final double wrappedYawRadians = gyroSupplier.get().get().getZ();
-    continuousYawRadians = continuousYawRead
-                           ? continuousYawRadians + MathUtil.angleModulus(wrappedYawRadians - continuousYawRadians)
-                           : wrappedYawRadians;
-    continuousYawRead = true;
-    final Angle yaw = Radians.of(continuousYawRadians);
-    return (gyroInverted ? yaw.unaryMinus() : yaw).minus(gyroOffset.orElse(Rotations.of(0)));
+    Rotation3d attitude = gyroHeadingAxis.toRobotAttitude(gyroSupplier.get().get());
+    if (gyroInverted) {
+      attitude = new Rotation3d(attitude.getX(), attitude.getY(), -attitude.getZ());
+    }
+    // Turning the attitude about the robot's Z axis, after its roll and pitch, offsets only its yaw.
+    return attitude.rotateBy(new Rotation3d(0, 0, -getGyroOffset().in(Radians)));
   }
 
   /**
@@ -704,12 +729,19 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
             getTelemetryName() + " has an angular velocity scale factor configured but no gyro angular velocity " + ("supplier (see SwerveDriveConfig#withGyroVelocity); deriving it from the gyro " + "angle instead."), Alert.Level.LOW);
         noGyroAngularVelocitySupplierAlert.set(true);
       }
-      gyroAngularVelocity = Radians.per(Microsecond).of(gyroAngularVelocityFilter.derivative(getGyroAngle().in(Radians)));
+      // Differentiate the heading kept continuous: wrapped, it jumps a whole rotation when the robot
+      // turns past half a rotation, and the derived angular velocity would spike.
+      final double wrappedHeadingRadians = getGyroRotation3d().getZ();
+      continuousHeadingRadians = continuousHeadingRead
+                                 ? continuousHeadingRadians + MathUtil.angleModulus(wrappedHeadingRadians - continuousHeadingRadians)
+                                 : wrappedHeadingRadians;
+      continuousHeadingRead = true;
+      gyroAngularVelocity = Radians.per(Microsecond).of(gyroAngularVelocityFilter.derivative(continuousHeadingRadians));
     }
     var angularVelocityScale = (RobotBase.isSimulation() ? simAngularVelocityScaleFactor.orElse(angularVelocityScaleFactor.orElseThrow()) : angularVelocityScaleFactor.orElseThrow());
     var angularVelocity = new Rotation2d(gyroAngularVelocity.in(RadiansPerSecond) * angularVelocityScale);
     if (angularVelocity.getRadians() != 0.0) {
-      var gyroRotation = new Rotation2d(getGyroAngle());
+      var gyroRotation = getGyroRotation3d().toRotation2d();
       ChassisVelocities fieldRelativeVelocity = robotRelativeVelocity.toFieldRelative(gyroRotation);
       robotRelativeVelocity = fieldRelativeVelocity.toRobotRelative(gyroRotation.plus(angularVelocity));
     }
@@ -747,7 +779,6 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
   public Angle getGyroOffset() {
     return gyroOffset.orElse(Rotations.of(0));
   }
-
   /**
    * Get the translation PID controller used for drive to pose. In simulation the simulation
    * controller is preferred over the real one.
