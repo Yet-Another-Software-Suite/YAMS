@@ -20,10 +20,10 @@ import com.revrobotics.spark.SparkMax;
 import org.wpilib.math.controller.PIDController;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.math.system.DCMotor;
-import org.wpilib.units.measure.Angle;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.SubsystemBase;
 import org.wpilib.command2.button.CommandNiDsXboxController;
@@ -142,7 +142,7 @@ public class SwerveSubsystem extends SubsystemBase {
             .withAllianceRelativeControl();
 
     return drive.drive(
-        () -> inputStream.get().toRobotRelative(new Rotation2d(drive.getGyroAngle())));
+        () -> inputStream.get().toRobotRelative(drive.getGyroRotation3d().toRotation2d()));
   }
 
   public Command lock() {
@@ -169,7 +169,7 @@ public class SwerveSubsystem extends SubsystemBase {
     return drive.getFieldRelativeSpeed();
   }
 
-  public Angle getGyroAngle() {
-    return drive.getGyroAngle();
+  public Rotation3d getGyroRotation3d() {
+    return drive.getGyroRotation3d();
   }
 }

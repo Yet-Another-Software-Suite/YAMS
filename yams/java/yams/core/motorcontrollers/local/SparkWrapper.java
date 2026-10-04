@@ -361,7 +361,17 @@ public class SparkWrapper extends SmartMotorController {
       m_simSupplier.ifPresent(mSimSupplier -> {
         // iterate() expects RPM of the feedback sensor: SparkSim closes its loop on that position and
         // then copies it to the selected feedback sensor, so the other encoder is moved here.
-        sparkSim.ifPresent(sim -> sim.iterate(mSimSupplier.getMechanismVelocity().times(m_mechanismToFeedbackSensorRatio).in(RPM), mSimSupplier.getMechanismSupplyVoltage().in(Volts), simLoop.in(Second)));
+        // A SPARK closes its loop onboard every millisecond, like a Talon, so step SparkSim's loop at
+        // that rate through the simulation period instead of once per period.
+        final double feedbackRPM = mSimSupplier.getMechanismVelocity().times(m_mechanismToFeedbackSensorRatio).in(RPM);
+        final double busVolts = mSimSupplier.getMechanismSupplyVoltage().in(Volts);
+        final int loopSteps = Math.max(1, (int) Math.round(simLoop.in(Seconds) / kSparkLoopPeriod.in(Seconds)));
+        final double stepSeconds = simLoop.in(Seconds) / loopSteps;
+        sparkSim.ifPresent(sim -> {
+          for (int step = 0; step < loopSteps; step++) {
+            sim.iterate(feedbackRPM, busVolts, stepSeconds);
+          }
+        });
         final double mechanismToExternalEncoderRatio = m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getMechanismToRotorRatio();
         if (m_config.getUseExternalFeedback() && m_config.getExternalEncoder().isPresent()) {
           sparkRelativeEncoderSim.ifPresent(sim -> sim.iterate(mSimSupplier.getMechanismVelocity().times(m_config.getGearing().getMechanismToRotorRatio()).in(RPM), simLoop.in(Seconds)));
@@ -447,9 +457,10 @@ public class SparkWrapper extends SmartMotorController {
                                                    ? m_config.convertToMechanism(MetersPerSecond.of(1)).in(RotationsPerSecond)
                                                    : m_config.convertToMechanism(Meters.of(1)).in(Rotations);
     final double scale = m_config.getVoltageCompensation().orElse(Volts.of(12)).in(Volts) * feedbackUnitsPerMechanismUnit * mechanismRotationsPerGainUnit;
-    // REVLib's simulation steps the SPARK's closed loop once per simulation period, so its derivative
-    // sees a whole period's change in error at once, and its integral accumulates once per period.
-    final double loopPeriodSeconds = RobotBase.isSimulation() ? m_config.getSimulationPeriod().in(Seconds) : kSparkLoopPeriod.in(Seconds);
+    // A real SPARK's integral and derivative gains are per 1 ms loop. REVLib's simulated SPARK
+    // applies them per second of error instead (its derivative is the error's rate of change), so in
+    // simulation the gains are not scaled by the loop period.
+    final double loopPeriodSeconds = RobotBase.isSimulation() ? 1 : kSparkLoopPeriod.in(Seconds);
     m_sparkBaseConfig.closedLoop.pid(kP / scale, kI * loopPeriodSeconds / scale, kD / loopPeriodSeconds / scale, slot);
   }
 

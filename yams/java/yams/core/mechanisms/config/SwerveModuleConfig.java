@@ -650,6 +650,26 @@ public class SwerveModuleConfig {
   }
 
   /**
+   * Get the state that turns the wheel to {@code angle} without driving it, as for locking the
+   * drive in place. Unlike {@link #getOptimizedState(SwerveModuleVelocity, SwerveModuleVelocityWithAzimuth)},
+   * the velocity deadband does not hold the wheel where it is, since the wheel is meant to turn
+   * without driving. With optimization enabled the wheel turns to whichever of {@code angle} and its
+   * opposite is nearer, as either holds the drive the same way.
+   *
+   * @param angle    Angle to turn the wheel to.
+   * @param measured The wheel's measured state: its angle and how fast it is turning.
+   * @return Zero speed {@link SwerveModuleVelocity} at the angle to turn the wheel to.
+   */
+  public SwerveModuleVelocity getLockedState(Rotation2d angle, SwerveModuleVelocityWithAzimuth measured) {
+    SwerveModuleVelocity state = new SwerveModuleVelocity(0, angle);
+    if (swerveModuleStateOptimization) {
+      state = SwerveModuleVelocityWithAzimuth.optimize(state, measured, lastCommandedAngle);
+    }
+    lastCommandedAngle = state.angle;
+    return state;
+  }
+
+  /**
    * Get the telemetry name for the {@link SwerveModule}.
    *
    * @return Telemetry name for the {@link SwerveModule}.

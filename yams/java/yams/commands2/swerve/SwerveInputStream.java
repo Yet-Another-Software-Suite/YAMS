@@ -592,7 +592,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
     // Transitioning to new mode
     switch (newMode) {
       case TRANSLATION_ONLY -> {
-        lockedHeading = Optional.of(new Rotation2d(swerveDrive.getGyroAngle()));
+        lockedHeading = Optional.of(swerveDrive.getGyroRotation3d().toRotation2d());
         swerveDrive.resetRotationPID();
         break;
       }
@@ -674,7 +674,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
    */
   private ChassisVelocities applyRobotRelativeTranslation(ChassisVelocities fieldRelativeSpeeds) {
     if (robotRelative.isPresent() && robotRelative.get().getAsBoolean()) {
-      return fieldRelativeSpeeds.toFieldRelative(new Rotation2d(swerveDrive.getGyroAngle()));
+      return fieldRelativeSpeeds.toFieldRelative(swerveDrive.getGyroRotation3d().toRotation2d());
     }
     return fieldRelativeSpeeds;
   }
@@ -770,7 +770,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
       case TRANSLATION_ONLY -> {
         var azimuthPIDs = requireRotationPID(config);
 
-        omegaRadiansPerSecond = azimuthPIDs.calculate(swerveDrive.getGyroAngle().in(Radians), lockedHeading.orElseThrow().getRadians());
+        omegaRadiansPerSecond = azimuthPIDs.calculate(swerveDrive.getGyroRotation3d().getZ(), lockedHeading.orElseThrow().getRadians());
         speeds = new ChassisVelocities(vxMetersPerSecond, vyMetersPerSecond, omegaRadiansPerSecond);
         break;
       }
@@ -781,7 +781,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
       }
       case HEADING -> {
         var azimuthPIDs = requireRotationPID(config);
-        omegaRadiansPerSecond = azimuthPIDs.calculate(swerveDrive.getGyroAngle().in(Radians), headingSupplier.orElseThrow().get().in(Radians));
+        omegaRadiansPerSecond = azimuthPIDs.calculate(swerveDrive.getGyroRotation3d().getZ(), headingSupplier.orElseThrow().get().in(Radians));
 
         // Prevent rotation if controller heading inputs are not past axisDeadband
         if (controllerHeadingX.isPresent() && controllerHeadingY.isPresent() && axisDeadband.isPresent() &&
@@ -793,7 +793,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
       }
       case AIM -> {
         var azimuthPIDs = requireRotationPID(config);
-        Rotation2d currentHeading = new Rotation2d(swerveDrive.getGyroAngle());
+        Rotation2d currentHeading = swerveDrive.getGyroRotation3d().toRotation2d();
         Translation2d relativeTrl = aimTarget.orElseThrow().get().relativeTo(swerveDrive.getPose()).getTranslation();
         Rotation2d target = new Rotation2d(relativeTrl.getX(), relativeTrl.getY()).plus(currentHeading);
         omegaRadiansPerSecond = azimuthPIDs.calculate(currentHeading.getRadians(), target.getRadians());

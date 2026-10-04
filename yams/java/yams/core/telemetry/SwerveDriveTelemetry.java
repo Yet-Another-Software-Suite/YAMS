@@ -114,7 +114,7 @@ public class SwerveDriveTelemetry {
       if (!dt.enabled)
         continue;
       switch (dt.getField()) {
-        case Gyro -> dt.set(drive.getGyroAngle().in(Degrees));
+        case Gyro -> dt.set(drive.getGyroRotation3d().getMeasureZ().in(Degrees));
       }
     }
     for (Map.Entry<StructArrayTelemetryField, StructArrayTelemetry<?, StructArrayTelemetryField>> entry : m_structArrayTelemetry.entrySet()) {
