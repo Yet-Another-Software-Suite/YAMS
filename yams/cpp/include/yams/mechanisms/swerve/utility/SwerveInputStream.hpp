@@ -9,6 +9,7 @@
 #include <numbers>
 #include <optional>
 #include <stdexcept>
+#include <string>
 #include <utility>
 #include <wpi/driverstation/Alliance.hpp>
 #include <wpi/driverstation/MatchState.hpp>
@@ -28,89 +29,20 @@
 
 namespace yams::mechanisms::swerve::utility {
 
-/**
- * Transforms controller axis inputs into ChassisSpeeds with built-in support for
- * angular-velocity, heading, aim-at-pose, and translation-only drive modes.
- *
- * Call Get() (or `operator()`) each loop to get the current ChassisSpeeds.
- * Passes the result to SwerveDrive::Drive() as a supplier.
- *
- * Inspired by SciBorgs FRC 1155.
- *
- * @tparam NumModules Number of swerve modules (must match the SwerveDrive).
- *
- * ### Example usage
- * @code{.cpp}
- * using namespace yams::mechanisms::swerve::utility;
- *
- * // Declare as subsystem member:
- * //   wpi::XboxController m_driverController{0};
- * //   std::optional<SwerveInputStream<4>> m_driveStream;
- *
- * // In constructor:
- * m_driveStream.emplace(
- *   SwerveInputStream<4>::Of(*m_drive,
- *     [this]{ return -m_driverController.GetLeftY(); },
- *     [this]{ return -m_driverController.GetLeftX(); })
- *   .WithControllerRotationAxis([this]{ return m_driverController.GetRightX(); })
- *   .WithDeadband(0.1)
- *   .WithScaleTranslation(0.8)
- *   .WithAllianceRelativeControl()
- * );
- *
- * // Heading-based copy for direct-angle control:
- * SwerveInputStream<4> driveHeading = m_driveStream->Clone()
- *   .WithControllerHeadingAxis(
- *     [this]{ return m_driverController.GetRightX(); },
- *     [this]{ return m_driverController.GetRightY(); })
- *   .WithHeadingControl([this]{ return true; });
- *
- * // Pass to Drive():
- * m_drive->Drive([this]{ return m_driveStream->Get(); });
- * @endcode
- */
 template <size_t NumModules = 4>
 class SwerveInputStream {
  public:
-  /**
-   * Create a SwerveInputStream without a rotation component.
-   *
-   * A rotation source must be added with WithControllerRotationAxis() or
-   * WithControllerHeadingAxis(); otherwise Get() falls back to TRANSLATION_ONLY.
-   *
-   * @param drive SwerveDrive to query pose and gyro from.
-   * @param x     Translation X axis supplier, range [-1, 1].
-   * @param y     Translation Y axis supplier, range [-1, 1].
-   * @return New SwerveInputStream instance.
-   */
   static SwerveInputStream Of(SwerveDrive<NumModules>& drive, std::function<double()> x,
                               std::function<double()> y) {
     return SwerveInputStream{drive, std::move(x), std::move(y)};
   }
 
-  /**
-   * Construct with an angular-velocity rotation axis (enables ANGULAR_VELOCITY mode).
-   *
-   * @param drive SwerveDrive to query from.
-   * @param x     Translation X axis supplier, range [-1, 1].
-   * @param y     Translation Y axis supplier, range [-1, 1].
-   * @param rot   Rotation axis supplier, range [-1, 1].
-   */
   SwerveInputStream(SwerveDrive<NumModules>& drive, std::function<double()> x,
                     std::function<double()> y, std::function<double()> rot)
       : SwerveInputStream{drive, std::move(x), std::move(y)} {
     m_controllerOmega = std::move(rot);
   }
 
-  /**
-   * Construct with heading X/Y axes (enables HEADING mode when WithHeadingControl() is active).
-   *
-   * @param drive    SwerveDrive to query from.
-   * @param x        Translation X axis supplier, range [-1, 1].
-   * @param y        Translation Y axis supplier, range [-1, 1].
-   * @param headingX Heading X axis supplier, range [-1, 1].
-   * @param headingY Heading Y axis supplier, range [-1, 1].
-   */
   SwerveInputStream(SwerveDrive<NumModules>& drive, std::function<double()> x,
                     std::function<double()> y, std::function<double()> headingX,
                     std::function<double()> headingY)
@@ -118,118 +50,120 @@ class SwerveInputStream {
     WithControllerHeadingAxis(std::move(headingX), std::move(headingY));
   }
 
-  /** Return a copy of this stream; subsequent With* calls on the copy do not affect the original.
-   */
   SwerveInputStream Clone() const { return *this; }
 
-  // ---- Builder methods -------------------------------------------------------
+  std::string GetCurrentModeName() const {
+    switch (m_currentMode) {
+      case SwerveInputMode::TRANSLATION_ONLY:
+        return "TRANSLATION_ONLY";
+      case SwerveInputMode::ANGULAR_VELOCITY:
+        return "ANGULAR_VELOCITY";
+      case SwerveInputMode::HEADING:
+        return "HEADING";
+      case SwerveInputMode::AIM:
+        return "AIM";
+    }
+    return "UNKNOWN";
+  }
 
-  /**
-   * Set the maximum chassis linear velocity (default 4 m/s).
-   *
-   * @param velocity Maximum linear velocity.
-   * @return *this for chaining.
-   */
+  double GetAxisDeadband() const { return m_axisDeadband.value_or(0.0); }
+  void SetAxisDeadband(double deadband) {
+    m_axisDeadband = (deadband == 0.0) ? std::nullopt : std::optional<double>{deadband};
+  }
+
+  double GetTranslationAxisScale() const { return m_translationAxisScale.value_or(1.0); }
+  void SetTranslationAxisScale(double scale) {
+    m_translationAxisScale = (scale == 0.0) ? std::nullopt : std::optional<double>{scale};
+  }
+
+  double GetOmegaAxisScale() const { return m_omegaAxisScale.value_or(1.0); }
+  void SetOmegaAxisScale(double scale) {
+    m_omegaAxisScale = (scale == 0.0) ? std::nullopt : std::optional<double>{scale};
+  }
+
+  wpi::units::meters_per_second_t GetMaximumChassisLinearVelocity() const {
+    return m_maximumChassisLinearVelocity;
+  }
+  void SetMaximumChassisLinearVelocity(wpi::units::meters_per_second_t velocity) {
+    m_maximumChassisLinearVelocity = velocity;
+  }
+
+  wpi::units::radians_per_second_t GetMaximumChassisAngularVelocity() const {
+    return m_maximumChassisAngularVelocity;
+  }
+  void SetMaximumChassisAngularVelocity(wpi::units::radians_per_second_t velocity) {
+    m_maximumChassisAngularVelocity = velocity;
+  }
+
+  bool IsTranslationCubeEnabled() const {
+    return m_translationCube.has_value() && m_translationCube.value()();
+  }
+  void SetTranslationCubeEnabled(bool enabled) {
+    m_translationCube = enabled ? std::optional<std::function<bool()>>{[] { return true; }} : std::nullopt;
+  }
+
+  bool IsOmegaCubeEnabled() const { return m_omegaCube.has_value() && m_omegaCube.value()(); }
+  void SetOmegaCubeEnabled(bool enabled) {
+    m_omegaCube = enabled ? std::optional<std::function<bool()>>{[] { return true; }} : std::nullopt;
+  }
+
+  bool IsAllianceRelativeEnabled() const {
+    return m_allianceRelative.has_value() && m_allianceRelative.value()();
+  }
+  void SetAllianceRelativeEnabled(bool enabled) {
+    m_allianceRelative = enabled ? std::optional<std::function<bool()>>{[] { return true; }} : std::nullopt;
+  }
+
+  bool IsRobotRelativeEnabled() const { return m_robotRelative.has_value() && m_robotRelative.value()(); }
+  void SetRobotRelativeEnabled(bool enabled) {
+    m_robotRelative = enabled ? std::optional<std::function<bool()>>{[] { return true; }} : std::nullopt;
+  }
+
   SwerveInputStream& WithMaximumLinearVelocity(wpi::units::meters_per_second_t velocity) {
     m_maximumChassisLinearVelocity = velocity;
     return *this;
   }
 
-  /**
-   * Set the maximum chassis angular velocity (default 2π rad/s = 1 rotation/s).
-   *
-   * @param velocity Maximum angular velocity.
-   * @return *this for chaining.
-   */
   SwerveInputStream& WithMaximumAngularVelocity(wpi::units::radians_per_second_t velocity) {
     m_maximumChassisAngularVelocity = velocity;
     return *this;
   }
 
-  /**
-   * Add an angular-velocity rotation axis (enables ANGULAR_VELOCITY mode).
-   *
-   * @param rot Supplier returning rotation input in range [-1, 1].
-   * @return *this for chaining.
-   */
   SwerveInputStream& WithControllerRotationAxis(std::function<double()> rot) {
     m_controllerOmega = std::move(rot);
     return *this;
   }
 
-  /**
-   * Add heading X/Y axes (enables HEADING mode when WithHeadingControl() is active).
-   *
-   * @param headingX Supplier for the heading X component, range [-1, 1].
-   * @param headingY Supplier for the heading Y component, range [-1, 1].
-   * @return *this for chaining.
-   */
   SwerveInputStream& WithControllerHeadingAxis(std::function<double()> headingX,
                                                std::function<double()> headingY) {
-    // The stick points at the heading to face; atan2(x, y) turns it into that heading.
     WithHeading([headingX, headingY] {
       return wpi::units::radian_t{std::atan2(headingX(), headingY())};
     });
-    // Kept to hold the heading while the stick is inside the deadband.
     m_controllerHeadingX = std::move(headingX);
     m_controllerHeadingY = std::move(headingY);
     return *this;
   }
 
-  /**
-   * Set a deadband applied to all controller axes.
-   *
-   * @param deadband Deadband value, range [0, 1).  Pass 0 to disable.
-   * @return *this for chaining.
-   */
   SwerveInputStream& WithDeadband(double deadband) {
     m_axisDeadband = (deadband == 0.0) ? std::nullopt : std::optional<double>{deadband};
     return *this;
   }
 
-  /**
-   * Scale the translation axis magnitude by a constant factor.
-   *
-   * @param scale Scale factor, range (0, 1].  Pass 0 to disable.
-   * @return *this for chaining.
-   */
   SwerveInputStream& WithScaleTranslation(double scale) {
     m_translationAxisScale = (scale == 0.0) ? std::nullopt : std::optional<double>{scale};
     return *this;
   }
 
-  /**
-   * Scale the rotation axis magnitude by a constant factor.
-   *
-   * @param scale Scale factor, range (0, 1].  Pass 0 to disable.
-   * @return *this for chaining.
-   */
   SwerveInputStream& WithScaleRotation(double scale) {
     m_omegaAxisScale = (scale == 0.0) ? std::nullopt : std::optional<double>{scale};
     return *this;
   }
 
-  /**
-   * Enable heading-based control while the supplier returns true.
-   *
-   * Requires WithControllerHeadingAxis() or WithHeading() to be configured.
-   *
-   * @param trigger Supplier that enables HEADING mode when true.
-   * @return *this for chaining.
-   */
   SwerveInputStream& WithHeadingControl(std::function<bool()> trigger) {
     m_headingEnabled = std::move(trigger);
     return *this;
   }
 
-  /**
-   * Supply the field relative heading to face in heading mode, which is enabled with
-   * WithHeadingControl(). Replaces any controller heading axes.
-   *
-   * @param heading Field relative heading to face, blue-origin where 0 degrees faces the red
-   *     alliance wall.
-   * @return *this for chaining.
-   */
   SwerveInputStream& WithHeading(std::function<wpi::units::radian_t()> heading) {
     m_headingSupplier = std::move(heading);
     m_controllerHeadingX.reset();
@@ -237,136 +171,68 @@ class SwerveInputStream {
     return *this;
   }
 
-  /**
-   * Enable aim-at-pose mode while the trigger is true.
-   *
-   * @param aimTarget Supplier for the field-relative pose to aim at.
-   * @param trigger   Supplier that enables AIM mode when true.
-   * @return *this for chaining.
-   */
   SwerveInputStream& WithAim(std::function<wpi::math::Pose2d()> aimTarget,
-                             std::function<bool()> trigger) {
+                            std::function<bool()> trigger) {
     m_aimTarget = std::move(aimTarget);
     m_aimEnabled = std::move(trigger);
     return *this;
   }
 
-  /**
-   * Hold the current heading and translate only while the trigger is true.
-   *
-   * @param trigger Supplier that enables TRANSLATION_ONLY mode when true.
-   * @return *this for chaining.
-   */
   SwerveInputStream& WithTranslationOnly(std::function<bool()> trigger) {
     m_translationOnlyEnabled = std::move(trigger);
     return *this;
   }
 
-  /**
-   * Cube the angular-velocity axis for a non-linear control feel.
-   *
-   * @param enabled Supplier that enables cubing when true.
-   * @return *this for chaining.
-   */
   SwerveInputStream& WithCubeRotationControllerAxis(std::function<bool()> enabled) {
     m_omegaCube = std::move(enabled);
     return *this;
   }
 
-  /** Enable cubing of the angular-velocity axis unconditionally. @return *this for chaining. */
   SwerveInputStream& WithCubeRotationControllerAxis() {
     return WithCubeRotationControllerAxis([] { return true; });
   }
 
-  /**
-   * Cube the translation axis magnitude for a non-linear control feel.
-   *
-   * @param enabled Supplier that enables cubing when true.
-   * @return *this for chaining.
-   */
   SwerveInputStream& WithCubeTranslationControllerAxis(std::function<bool()> enabled) {
     m_translationCube = std::move(enabled);
     return *this;
   }
 
-  /** Enable cubing of the translation axis unconditionally. @return *this for chaining. */
   SwerveInputStream& WithCubeTranslationControllerAxis() {
     return WithCubeTranslationControllerAxis([] { return true; });
   }
 
-  /**
-   * Flip the translation when on the Red alliance so forward always aims toward the opponent wall.
-   * Has no effect while robot-relative control is enabled.
-   *
-   * @param enabled Supplier that enables alliance-relative control when true.
-   * @return *this for chaining.
-   */
   SwerveInputStream& WithAllianceRelativeControl(std::function<bool()> enabled) {
     m_allianceRelative = std::move(enabled);
     return *this;
   }
 
-  /**
-   * Enable alliance-relative control unconditionally. Has no effect while robot-relative control is
-   * enabled. @return *this for chaining.
-   */
   SwerveInputStream& WithAllianceRelativeControl() {
     return WithAllianceRelativeControl([] { return true; });
   }
 
-  /**
-   * Route the output ChassisSpeeds through robot-relative conversion.
-   *
-   * @param enabled Supplier that enables robot-relative output when true.
-   * @return *this for chaining.
-   */
   SwerveInputStream& WithRobotRelative(std::function<bool()> enabled) {
     m_robotRelative = std::move(enabled);
     return *this;
   }
 
-  /** Enable robot-relative output unconditionally. @return *this for chaining. */
   SwerveInputStream& WithRobotRelative() {
     return WithRobotRelative([] { return true; });
   }
 
-  /**
-   * Rotate the output translation vector by a fixed heading offset while the trigger is true.
-   *
-   * @param angle   Offset rotation to apply.
-   * @param enabled Supplier that enables the offset when true.
-   * @return *this for chaining.
-   */
   SwerveInputStream& WithTranslationHeadingOffset(wpi::math::Rotation2d angle,
-                                                  std::function<bool()> enabled) {
+                                                std::function<bool()> enabled) {
     m_translationHeadingOffset = angle;
     m_translationHeadingOffsetEnabled = std::move(enabled);
     return *this;
   }
 
-  /**
-   * Rotate the output translation vector by a fixed heading offset unconditionally.
-   *
-   * @param angle Offset rotation to apply.
-   * @return *this for chaining.
-   */
   SwerveInputStream& WithTranslationHeadingOffset(wpi::math::Rotation2d angle) {
     return WithTranslationHeadingOffset(angle, [] { return true; });
   }
 
-  // ---- Output ---------------------------------------------------------------
-
-  /**
-   * Compute and return the current ChassisSpeeds based on all configured inputs and the active
-   * drive mode.  Call this once per robot loop.
-   *
-   * @return Field-relative (or robot-relative, if configured) ChassisSpeeds.
-   */
   wpi::math::ChassisVelocities Get() {
     auto& cfg = m_swerveDrive->GetConfig();
-
-    double maxLinear =
-        cfg.GetMaximumChassisLinearVelocity().value_or(m_maximumChassisLinearVelocity).value();
+    double maxLinear = cfg.GetMaximumChassisLinearVelocity().value_or(m_maximumChassisLinearVelocity).value();
     wpi::units::radians_per_second_t maxAngular =
         cfg.GetMaximumChassisAngularVelocity().has_value()
             ? wpi::units::radians_per_second_t{cfg.GetMaximumChassisAngularVelocity().value()}
@@ -403,10 +269,9 @@ class SwerveInputStream {
         auto& pid = RequireRotationPID();
         omega = pid.Calculate(wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}.value(),
                               m_headingSupplier.value()().value());
-        // Prevent rotation if controller heading inputs are not past axisDeadband
         if (m_controllerHeadingX.has_value() && m_controllerHeadingY.has_value() &&
             m_axisDeadband.has_value() &&
-            std::abs(m_controllerHeadingX.value()()) + std::abs(m_controllerHeadingY.value()()) <
+            std::abs(m_controllerHeadingX.value()()) + std::abs(m_controllerHeadingY.value()) <
                 m_axisDeadband.value()) {
           omega = 0.0;
         }
@@ -430,10 +295,6 @@ class SwerveInputStream {
     return ApplyTranslationHeadingOffset(ApplyRobotRelativeTranslation(speeds));
   }
 
-  /**
-   * Callable operator so a SwerveInputStream can be used as a
-   * `std::function<wpi::math::ChassisVelocities()>` supplier directly.
-   */
   wpi::math::ChassisVelocities operator()() { return Get(); }
 
  private:
@@ -444,7 +305,6 @@ class SwerveInputStream {
     AIM,
   };
 
-  // Base private constructor requires a rotation source to be added via WithController* methods.
   SwerveInputStream(SwerveDrive<NumModules>& drive, std::function<double()> x,
                     std::function<double()> y)
       : m_swerveDrive{&drive},
@@ -465,7 +325,6 @@ class SwerveInputStream {
   std::optional<std::function<double()>> m_controllerOmega;
   std::optional<std::function<double()>> m_controllerHeadingX;
   std::optional<std::function<double()>> m_controllerHeadingY;
-  /** Field relative heading to face in HEADING mode. */
   std::optional<std::function<wpi::units::radian_t()>> m_headingSupplier;
   std::optional<double> m_axisDeadband;
   std::optional<double> m_translationAxisScale;
@@ -485,13 +344,6 @@ class SwerveInputStream {
   wpi::units::meters_per_second_t m_maximumChassisLinearVelocity{4.0};
   wpi::units::radians_per_second_t m_maximumChassisAngularVelocity{2.0 * std::numbers::pi};
 
-  // ---- Private helpers -------------------------------------------------------
-
-  /**
-   * Get the rotation PID controller needed by the heading, aim, and translation only modes.
-   *
-   * @throws SwerveDriveConfigurationException if no rotation PID controller is configured.
-   */
   wpi::math::PIDController& RequireRotationPID() {
     auto pid = m_swerveDrive->GetConfig().GetRotationPID();
     if (!pid) {
@@ -511,8 +363,7 @@ class SwerveInputStream {
       if (m_aimTarget.has_value()) {
         return SwerveInputMode::AIM;
       }
-      std::cerr << "[YAMS SwerveInputStream] AIM mode enabled but no target set. "
-                   "Call WithAim() first.\n";
+      std::cerr << "[YAMS SwerveInputStream] AIM mode enabled but no target set. Call WithAim() first.\n";
     }
     if (m_headingEnabled.has_value() && m_headingEnabled.value()()) {
       if (m_headingSupplier.has_value()) {
@@ -531,7 +382,6 @@ class SwerveInputStream {
   }
 
   void TransitionMode(SwerveInputMode newMode) {
-    // Exit current mode
     switch (m_currentMode) {
       case SwerveInputMode::TRANSLATION_ONLY:
         m_lockedHeading = std::nullopt;
@@ -543,7 +393,6 @@ class SwerveInputStream {
       default:
         break;
     }
-    // Enter new mode
     switch (newMode) {
       case SwerveInputMode::TRANSLATION_ONLY:
         m_lockedHeading =
@@ -591,14 +440,13 @@ class SwerveInputStream {
 
   wpi::math::ChassisVelocities ApplyRobotRelativeTranslation(wpi::math::ChassisVelocities speeds) {
     if (m_robotRelative.has_value() && m_robotRelative.value()()) {
-      return (speeds).ToFieldRelative(
+      return speeds.ToFieldRelative(
           wpi::math::Rotation2d{wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}});
     }
     return speeds;
   }
 
   wpi::math::Translation2d ApplyAllianceAwareTranslation(wpi::math::Translation2d translation) {
-    // Robot relative translation does not depend on the alliance, so it is never flipped.
     if (m_robotRelative.has_value() && m_robotRelative.value()()) {
       return translation;
     }
@@ -626,3 +474,224 @@ class SwerveInputStream {
 };
 
 }  // namespace yams::mechanisms::swerve::utility
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+a doubt?"
