@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-package yams.commands2.swerve;
+package yams.commands2.telemetry;
 
 import static org.wpilib.units.Units.MetersPerSecond;
 
@@ -9,6 +9,7 @@ import java.util.Objects;
 import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.networktables.NetworkTable;
 import org.wpilib.networktables.NetworkTableInstance;
+import yams.commands2.swerve.SwerveInputStream;
 
 /**
  * Telemetry and live tuning support for {@link SwerveInputStream}.
@@ -25,9 +26,6 @@ public class SwerveInputStreamTelemetry {
   public void update() {
     ChassisVelocities speeds = stream.get();
     table.getStringTopic("mode").getEntry("UNKNOWN").set(stream.getCurrentModeName());
-    table.getDoubleTopic("vx").getEntry(0.0).set(speeds.vx);
-    table.getDoubleTopic("vy").getEntry(0.0).set(speeds.vy);
-    table.getDoubleTopic("omega").getEntry(0.0).set(speeds.omega);
 
     updateDeadband();
     updateTranslationScale();
