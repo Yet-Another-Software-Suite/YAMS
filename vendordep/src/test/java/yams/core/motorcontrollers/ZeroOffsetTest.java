@@ -90,28 +90,43 @@ public class ZeroOffsetTest {
   }
 
   /** Check that the encoder holds the zero offset, in its own terms. */
-  private static void assertConfigured(SmartMotorController smc, String name) throws InterruptedException {
+  private static void assertConfigured(SmartMotorController smc, String name)
+      throws InterruptedException {
     final double offset = kZeroOffset.in(Rotations);
     final Object encoder = smc.getConfig().getExternalEncoder().orElseThrow();
     if (encoder instanceof CANcoder cancoder) {
       final CANcoderConfiguration config = new CANcoderConfiguration();
       DeviceCreator.refreshConfig(() -> cancoder.getConfigurator().refresh(config, 1.0));
-      assertEquals(offset, config.MagnetSensor.MagnetOffset, 1e-3, name + ": CANcoder magnet offset");
+      assertEquals(
+          offset, config.MagnetSensor.MagnetOffset, 1e-3, name + ": CANcoder magnet offset");
     } else if (encoder instanceof CANdi candi) {
       final CANdiConfiguration config = new CANdiConfiguration();
       DeviceCreator.refreshConfig(() -> candi.getConfigurator().refresh(config, 1.0));
-      assertEquals(offset, config.PWM1.AbsoluteSensorOffset, 1e-3, name + ": CANdi absolute sensor offset");
+      assertEquals(
+          offset, config.PWM1.AbsoluteSensorOffset, 1e-3, name + ": CANdi absolute sensor offset");
     } else if (encoder instanceof DetachedEncoder detachedEncoder) {
-      assertEquals(offset, detachedEncoder.detachedEncoderAccessor.getDutyCycleOffset(), 1e-6, name + ": CAN encoder duty cycle offset");
+      assertEquals(
+          offset,
+          detachedEncoder.detachedEncoderAccessor.getDutyCycleOffset(),
+          1e-6,
+          name + ": CAN encoder duty cycle offset");
     } else {
       final SparkBase spark = (SparkBase) smc.getMotorController();
       final double[] zeroOffset = new double[1];
-      assertTrue(AbsoluteEncoderCases.eventually(() -> {
-        zeroOffset[0] = spark instanceof SparkMax sparkMax
+      assertTrue(
+          AbsoluteEncoderCases.eventually(
+              () -> {
+                zeroOffset[0] =
+                    spark instanceof SparkMax sparkMax
                         ? sparkMax.configAccessor.absoluteEncoder.getZeroOffset()
                         : ((SparkFlex) spark).configAccessor.absoluteEncoder.getZeroOffset();
-        return Math.abs(zeroOffset[0] - offset) < 1e-6;
-      }), name + ": SPARK absolute encoder zero offset expected " + offset + " but was " + zeroOffset[0]);
+                return Math.abs(zeroOffset[0] - offset) < 1e-6;
+              }),
+          name
+              + ": SPARK absolute encoder zero offset expected "
+              + offset
+              + " but was "
+              + zeroOffset[0]);
     }
   }
 
@@ -119,9 +134,11 @@ public class ZeroOffsetTest {
   @MethodSource("createCases")
   void encoderReadsZeroWhereTheMechanismIsAtZero(Case testCase) throws InterruptedException {
     final String name = testCase.name();
-    final SmartMotorController smc = AbsoluteEncoderCases.create(testCase.encoder(),
-        AbsoluteEncoderCases.config("ZeroOffsetTest " + name, testCase.controller()),
-        config -> config.withExternalEncoderZeroOffset(kZeroOffset));
+    final SmartMotorController smc =
+        AbsoluteEncoderCases.create(
+            testCase.encoder(),
+            AbsoluteEncoderCases.config("ZeroOffsetTest " + name, testCase.controller()),
+            config -> config.withExternalEncoderZeroOffset(kZeroOffset));
     try {
       assertConfigured(smc, name);
       AbsoluteEncoderCases.runTo(smc, testCase.encoder(), kSetpoint, Seconds.of(2.5));
@@ -129,14 +146,35 @@ public class ZeroOffsetTest {
       final Angle simulated = smc.getSimSupplier().orElseThrow().getMechanismPosition();
       final Angle mechanism = smc.getMechanismPosition();
       final Angle absolute = AbsoluteEncoderCases.absoluteAngle(smc);
-      // An absolute encoder gives the angle within a rotation, so the mechanism may have gone either
+      // An absolute encoder gives the angle within a rotation, so the mechanism may have gone
+      // either
       // way round to it.
-      assertTrue(Math.abs(MathUtil.inputModulus(simulated.minus(kSetpoint).in(Degrees), -180, 180)) < kTolerance.in(Degrees),
-          name + ": expected the simulated mechanism at " + kSetpoint.in(Degrees) + "° but it was at " + simulated.in(Degrees) + "°");
-      assertTrue(Math.abs(MathUtil.inputModulus(mechanism.minus(kSetpoint).in(Degrees), -180, 180)) < kTolerance.in(Degrees),
-          name + ": expected the mechanism to read " + kSetpoint.in(Degrees) + "° but it read " + mechanism.in(Degrees) + "°");
-      assertTrue(Math.abs(absolute.minus(kSetpoint).in(Degrees)) < kTolerance.in(Degrees),
-          name + ": expected the encoder to read " + kSetpoint.in(Degrees) + "° but it read " + absolute.in(Degrees) + "°");
+      assertTrue(
+          Math.abs(MathUtil.inputModulus(simulated.minus(kSetpoint).in(Degrees), -180, 180))
+              < kTolerance.in(Degrees),
+          name
+              + ": expected the simulated mechanism at "
+              + kSetpoint.in(Degrees)
+              + "° but it was at "
+              + simulated.in(Degrees)
+              + "°");
+      assertTrue(
+          Math.abs(MathUtil.inputModulus(mechanism.minus(kSetpoint).in(Degrees), -180, 180))
+              < kTolerance.in(Degrees),
+          name
+              + ": expected the mechanism to read "
+              + kSetpoint.in(Degrees)
+              + "° but it read "
+              + mechanism.in(Degrees)
+              + "°");
+      assertTrue(
+          Math.abs(absolute.minus(kSetpoint).in(Degrees)) < kTolerance.in(Degrees),
+          name
+              + ": expected the encoder to read "
+              + kSetpoint.in(Degrees)
+              + "° but it read "
+              + absolute.in(Degrees)
+              + "°");
     } finally {
       AbsoluteEncoderCases.close(smc);
     }
@@ -144,7 +182,9 @@ public class ZeroOffsetTest {
 
   @Test
   void negativeZeroOffsetIsTheSameAngleWithinARotation() {
-    final SmartMotorControllerConfig config = new yams.commands2.config.SmartMotorControllerConfig().withExternalEncoderZeroOffset(Degrees.of(-10));
+    final SmartMotorControllerConfig config =
+        new yams.commands2.config.SmartMotorControllerConfig()
+            .withExternalEncoderZeroOffset(Degrees.of(-10));
     assertEquals(350, config.getExternalEncoderZeroOffset().orElseThrow().in(Degrees), 1e-9);
   }
 
@@ -170,28 +210,45 @@ public class ZeroOffsetTest {
   @MethodSource("createRelativeCases")
   void withoutAnAbsoluteEncoder(RelativeCase testCase) {
     final String name = testCase.toString();
-    final SmartMotorControllerConfig config = AbsoluteEncoderCases.config("ZeroOffsetTest " + name, testCase.controller())
-        .withExternalEncoderZeroOffset(kZeroOffset);
+    final SmartMotorControllerConfig config =
+        AbsoluteEncoderCases.config("ZeroOffsetTest " + name, testCase.controller())
+            .withExternalEncoderZeroOffset(kZeroOffset);
     if (!testCase.feedback().talon()) {
       // A SPARK rejects the option without an absolute encoder to give it to.
-      assertThrows(SmartMotorControllerConfigurationException.class, () -> AbsoluteEncoderCases.create(testCase.feedback(), config),
+      assertThrows(
+          SmartMotorControllerConfigurationException.class,
+          () -> AbsoluteEncoderCases.create(testCase.feedback(), config),
           name + ": a SPARK without an absolute encoder has no zero offset");
       return;
     }
     // A Talon alerts that the zero offset is not applied without an external encoder: the mechanism
-    // reads 0 degrees where it starts, not the offset, and goes to 100 degrees where 100 degrees is.
+    // reads 0 degrees where it starts, not the offset, and goes to 100 degrees where 100 degrees
+    // is.
     final SmartMotorController smc = AbsoluteEncoderCases.create(testCase.feedback(), config);
     try {
       AbsoluteEncoderCases.run(smc, true, Optional.empty(), Seconds.of(0.5));
-      assertTrue(Math.abs(smc.getMechanismPosition().in(Degrees)) < kTolerance.in(Degrees),
-          name + ": expected the mechanism to read 0 degrees where it starts but it read " + smc.getMechanismPosition().in(Degrees));
+      assertTrue(
+          Math.abs(smc.getMechanismPosition().in(Degrees)) < kTolerance.in(Degrees),
+          name
+              + ": expected the mechanism to read 0 degrees where it starts but it read "
+              + smc.getMechanismPosition().in(Degrees));
       AbsoluteEncoderCases.run(smc, true, Optional.of(kSetpoint), Seconds.of(2.5));
       final Angle simulated = smc.getSimSupplier().orElseThrow().getMechanismPosition();
       final Angle mechanism = smc.getMechanismPosition();
-      assertTrue(Math.abs(simulated.minus(kSetpoint).in(Degrees)) < kTolerance.in(Degrees),
-          name + ": expected the simulated mechanism at " + kSetpoint.in(Degrees) + " degrees but it was at " + simulated.in(Degrees));
-      assertTrue(Math.abs(mechanism.minus(kSetpoint).in(Degrees)) < kTolerance.in(Degrees),
-          name + ": expected the mechanism to read " + kSetpoint.in(Degrees) + " degrees but it read " + mechanism.in(Degrees));
+      assertTrue(
+          Math.abs(simulated.minus(kSetpoint).in(Degrees)) < kTolerance.in(Degrees),
+          name
+              + ": expected the simulated mechanism at "
+              + kSetpoint.in(Degrees)
+              + " degrees but it was at "
+              + simulated.in(Degrees));
+      assertTrue(
+          Math.abs(mechanism.minus(kSetpoint).in(Degrees)) < kTolerance.in(Degrees),
+          name
+              + ": expected the mechanism to read "
+              + kSetpoint.in(Degrees)
+              + " degrees but it read "
+              + mechanism.in(Degrees));
     } finally {
       AbsoluteEncoderCases.close(smc);
     }

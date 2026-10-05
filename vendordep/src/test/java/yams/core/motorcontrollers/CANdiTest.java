@@ -64,7 +64,8 @@ import yams.helpers.SmartMotorControllerTestSubsystem;
  */
 public class CANdiTest {
   private static final Angle kTolerance = Degrees.of(5);
-  private static final MechanismGearing kGearing = new MechanismGearing(GearBox.fromReductionStages(3, 4));
+  private static final MechanismGearing kGearing =
+      new MechanismGearing(GearBox.fromReductionStages(3, 4));
 
   @BeforeEach
   void startTest() {
@@ -80,8 +81,12 @@ public class CANdiTest {
   /** A Talon, the PWM input of its CANdi, and the CANdi's zero offset. */
   private record Case(boolean talonFXS, int pwm, Angle zeroOffset) {
     String name() {
-      return (talonFXS ? "TalonFXS" : "TalonFX") + " CANdi PWM" + pwm
-          + (zeroOffset.isEquivalent(Rotations.zero()) ? "" : " offset " + zeroOffset.in(Degrees) + "°");
+      return (talonFXS ? "TalonFXS" : "TalonFX")
+          + " CANdi PWM"
+          + pwm
+          + (zeroOffset.isEquivalent(Rotations.zero())
+              ? ""
+              : " offset " + zeroOffset.in(Degrees) + "°");
     }
 
     @Override
@@ -114,13 +119,17 @@ public class CANdiTest {
     if (talonFXS) {
       final TalonFXSConfiguration config = new TalonFXSConfiguration();
       config.ExternalFeedback.ExternalFeedbackSensorSource =
-          pwm == 1 ? ExternalFeedbackSensorSourceValue.SyncCANdiPWM1 : ExternalFeedbackSensorSourceValue.SyncCANdiPWM2;
+          pwm == 1
+              ? ExternalFeedbackSensorSourceValue.SyncCANdiPWM1
+              : ExternalFeedbackSensorSourceValue.SyncCANdiPWM2;
       config.ExternalFeedback.FeedbackRemoteSensorID = candi.getDeviceID();
       return config;
     }
     final TalonFXConfiguration config = new TalonFXConfiguration();
     config.Feedback.FeedbackSensorSource =
-        pwm == 1 ? FeedbackSensorSourceValue.SyncCANdiPWM1 : FeedbackSensorSourceValue.SyncCANdiPWM2;
+        pwm == 1
+            ? FeedbackSensorSourceValue.SyncCANdiPWM1
+            : FeedbackSensorSourceValue.SyncCANdiPWM2;
     config.Feedback.FeedbackRemoteSensorID = candi.getDeviceID();
     return config;
   }
@@ -139,21 +148,31 @@ public class CANdiTest {
   }
 
   /** Close the loop on a CANdi mounted on the mechanism, 1:1. */
-  private static SmartMotorControllerConfig withCANdi(SmartMotorControllerConfig cfg, Case testCase, CANdi candi) {
-    cfg = cfg.withVendorConfig(vendorConfig(testCase.talonFXS(), testCase.pwm(), candi))
-        .withExternalEncoder(candi)
-        .withUseExternalFeedbackEncoder(true)
-        .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5));
-    return testCase.zeroOffset().isEquivalent(Rotations.zero()) ? cfg : cfg.withExternalEncoderZeroOffset(testCase.zeroOffset());
+  private static SmartMotorControllerConfig withCANdi(
+      SmartMotorControllerConfig cfg, Case testCase, CANdi candi) {
+    cfg =
+        cfg.withVendorConfig(vendorConfig(testCase.talonFXS(), testCase.pwm(), candi))
+            .withExternalEncoder(candi)
+            .withUseExternalFeedbackEncoder(true)
+            .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5));
+    return testCase.zeroOffset().isEquivalent(Rotations.zero())
+        ? cfg
+        : cfg.withExternalEncoderZeroOffset(testCase.zeroOffset());
   }
 
   private static SmartMotorController create(Case testCase, String name) {
     if (testCase.talonFXS()) {
       final TalonFXS talon = DeviceCreator.createTalonFXS();
-      return new TalonFXSWrapper(talon, DCMotor.getNEO(1), withCANdi(config(name), testCase, DeviceCreator.createCANdiFor(talon)));
+      return new TalonFXSWrapper(
+          talon,
+          DCMotor.getNEO(1),
+          withCANdi(config(name), testCase, DeviceCreator.createCANdiFor(talon)));
     }
     final TalonFX talon = DeviceCreator.createTalonFX();
-    return new TalonFXWrapper(talon, DCMotor.getKrakenX60(1), withCANdi(config(name), testCase, DeviceCreator.createCANdiFor(talon)));
+    return new TalonFXWrapper(
+        talon,
+        DCMotor.getKrakenX60(1),
+        withCANdi(config(name), testCase, DeviceCreator.createCANdiFor(talon)));
   }
 
   /** Put the Talon and the CANdi back to factory defaults and close them. */
@@ -178,7 +197,8 @@ public class CANdiTest {
     subsys.close();
     smc.close();
     DeviceCreator.silence(smc);
-    closeDevices(smc.getMotorController(), (CANdi) smc.getConfig().getExternalEncoder().orElseThrow());
+    closeDevices(
+        smc.getMotorController(), (CANdi) smc.getConfig().getExternalEncoder().orElseThrow());
   }
 
   /** Check that the Talon closes its loop on the CANdi, configured as the SMC config says. */
@@ -187,33 +207,62 @@ public class CANdiTest {
   }
 
   /** Check that the Talon closes its loop on the CANdi, with the discontinuity point in rotations. */
-  private static void assertConfigured(SmartMotorController smc, Case testCase, String when, double expectedDiscontinuityPoint) {
+  private static void assertConfigured(
+      SmartMotorController smc, Case testCase, String when, double expectedDiscontinuityPoint) {
     final String name = testCase.name() + " " + when;
     final CANdi candi = (CANdi) smc.getConfig().getExternalEncoder().orElseThrow();
     if (testCase.talonFXS()) {
       final ExternalFeedbackConfigs feedback = new ExternalFeedbackConfigs();
-      DeviceCreator.refreshConfig(() -> ((TalonFXS) smc.getMotorController()).getConfigurator().refresh(feedback, 1.0));
-      assertEquals(testCase.pwm() == 1 ? ExternalFeedbackSensorSourceValue.FusedCANdiPWM1 : ExternalFeedbackSensorSourceValue.FusedCANdiPWM2,
-          feedback.ExternalFeedbackSensorSource, name + ": feedback sensor source");
-      assertEquals(candi.getDeviceID(), feedback.FeedbackRemoteSensorID, name + ": remote sensor ID");
-      assertEquals(kGearing.getMechanismToRotorRatio(), feedback.RotorToSensorRatio, 1e-9, name + ": rotor to sensor ratio");
+      DeviceCreator.refreshConfig(
+          () -> ((TalonFXS) smc.getMotorController()).getConfigurator().refresh(feedback, 1.0));
+      assertEquals(
+          testCase.pwm() == 1
+              ? ExternalFeedbackSensorSourceValue.FusedCANdiPWM1
+              : ExternalFeedbackSensorSourceValue.FusedCANdiPWM2,
+          feedback.ExternalFeedbackSensorSource,
+          name + ": feedback sensor source");
+      assertEquals(
+          candi.getDeviceID(), feedback.FeedbackRemoteSensorID, name + ": remote sensor ID");
+      assertEquals(
+          kGearing.getMechanismToRotorRatio(),
+          feedback.RotorToSensorRatio,
+          1e-9,
+          name + ": rotor to sensor ratio");
       assertEquals(1, feedback.SensorToMechanismRatio, 1e-9, name + ": sensor to mechanism ratio");
     } else {
       final FeedbackConfigs feedback = new FeedbackConfigs();
-      DeviceCreator.refreshConfig(() -> ((TalonFX) smc.getMotorController()).getConfigurator().refresh(feedback, 1.0));
-      assertEquals(testCase.pwm() == 1 ? FeedbackSensorSourceValue.FusedCANdiPWM1 : FeedbackSensorSourceValue.FusedCANdiPWM2,
-          feedback.FeedbackSensorSource, name + ": feedback sensor source");
-      assertEquals(candi.getDeviceID(), feedback.FeedbackRemoteSensorID, name + ": remote sensor ID");
-      assertEquals(kGearing.getMechanismToRotorRatio(), feedback.RotorToSensorRatio, 1e-9, name + ": rotor to sensor ratio");
+      DeviceCreator.refreshConfig(
+          () -> ((TalonFX) smc.getMotorController()).getConfigurator().refresh(feedback, 1.0));
+      assertEquals(
+          testCase.pwm() == 1
+              ? FeedbackSensorSourceValue.FusedCANdiPWM1
+              : FeedbackSensorSourceValue.FusedCANdiPWM2,
+          feedback.FeedbackSensorSource,
+          name + ": feedback sensor source");
+      assertEquals(
+          candi.getDeviceID(), feedback.FeedbackRemoteSensorID, name + ": remote sensor ID");
+      assertEquals(
+          kGearing.getMechanismToRotorRatio(),
+          feedback.RotorToSensorRatio,
+          1e-9,
+          name + ": rotor to sensor ratio");
       assertEquals(1, feedback.SensorToMechanismRatio, 1e-9, name + ": sensor to mechanism ratio");
     }
 
     final CANdiConfiguration candiConfig = new CANdiConfiguration();
     DeviceCreator.refreshConfig(() -> candi.getConfigurator().refresh(candiConfig, 1.0));
-    final double discontinuityPoint = testCase.pwm() == 1 ? candiConfig.PWM1.AbsoluteSensorDiscontinuityPoint : candiConfig.PWM2.AbsoluteSensorDiscontinuityPoint;
-    final double zeroOffset = testCase.pwm() == 1 ? candiConfig.PWM1.AbsoluteSensorOffset : candiConfig.PWM2.AbsoluteSensorOffset;
-    assertEquals(expectedDiscontinuityPoint, discontinuityPoint, 1e-9, name + ": CANdi discontinuity point");
-    assertEquals(testCase.zeroOffset().in(Rotations), zeroOffset, 1e-3, name + ": CANdi zero offset");
+    final double discontinuityPoint =
+        testCase.pwm() == 1
+            ? candiConfig.PWM1.AbsoluteSensorDiscontinuityPoint
+            : candiConfig.PWM2.AbsoluteSensorDiscontinuityPoint;
+    final double zeroOffset =
+        testCase.pwm() == 1
+            ? candiConfig.PWM1.AbsoluteSensorOffset
+            : candiConfig.PWM2.AbsoluteSensorOffset;
+    assertEquals(
+        expectedDiscontinuityPoint, discontinuityPoint, 1e-9, name + ": CANdi discontinuity point");
+    assertEquals(
+        testCase.zeroOffset().in(Rotations), zeroOffset, 1e-3, name + ": CANdi zero offset");
   }
 
   /** Let 10ms of real time pass. */
@@ -235,12 +284,16 @@ public class CANdiTest {
   void configuresTheTalonAndTheCANdi(Case testCase) {
     final SmartMotorController smc = create(testCase, "CANdiTest config " + testCase.name());
     try {
-      ((SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem()).setSMC(smc);
+      ((SmartMotorControllerTestSubsystem)
+              ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+          .setSMC(smc);
       assertConfigured(smc, testCase, "after construction");
       // Applying the config again, as live tuning and the config commands do, keeps the CANdi.
       assertTrue(smc.applyConfig(smc.getConfig()), testCase.name() + ": applying the config again");
       assertConfigured(smc, testCase, "after applying the config again");
-      assertTrue(smc.applyConfig(smc.getConfig().withExternalEncoderDiscontinuityPoint(Rotations.of(1))), testCase.name() + ": applying a 1 rotation discontinuity point");
+      assertTrue(
+          smc.applyConfig(smc.getConfig().withExternalEncoderDiscontinuityPoint(Rotations.of(1))),
+          testCase.name() + ": applying a 1 rotation discontinuity point");
       assertConfigured(smc, testCase, "with a 1 rotation discontinuity point", 1);
     } finally {
       closeSmc(smc);
@@ -253,7 +306,9 @@ public class CANdiTest {
     final String name = testCase.name();
     final SmartMotorController smc = create(testCase, "CANdiTest closed loop " + name);
     try {
-      ((SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem()).setSMC(smc);
+      ((SmartMotorControllerTestSubsystem)
+              ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+          .setSMC(smc);
       smc.setupSimulation();
 
       try (PeriodicScheduler scheduler = new PeriodicScheduler()) {
@@ -272,10 +327,22 @@ public class CANdiTest {
 
         final Angle mechanism = smc.getMechanismPosition();
         final Angle candi = smc.getExternalEncoderPosition().orElseThrow();
-        assertTrue(Math.abs(wrappedErrorDegrees(mechanism, setpoint)) < kTolerance.in(Degrees),
-            name + ": expected the mechanism at " + setpoint.in(Degrees) + "° but was at " + mechanism.in(Degrees) + "°");
-        assertTrue(Math.abs(wrappedErrorDegrees(candi, setpoint)) < kTolerance.in(Degrees),
-            name + ": expected the CANdi to read " + setpoint.in(Degrees) + "° but it read " + candi.in(Degrees) + "°");
+        assertTrue(
+            Math.abs(wrappedErrorDegrees(mechanism, setpoint)) < kTolerance.in(Degrees),
+            name
+                + ": expected the mechanism at "
+                + setpoint.in(Degrees)
+                + "° but was at "
+                + mechanism.in(Degrees)
+                + "°");
+        assertTrue(
+            Math.abs(wrappedErrorDegrees(candi, setpoint)) < kTolerance.in(Degrees),
+            name
+                + ": expected the CANdi to read "
+                + setpoint.in(Degrees)
+                + "° but it read "
+                + candi.in(Degrees)
+                + "°");
       }
     } finally {
       closeSmc(smc);
@@ -285,19 +352,27 @@ public class CANdiTest {
   @ParameterizedTest(name = "{0}")
   @ValueSource(strings = {"TalonFX", "TalonFXS"})
   void requiresAPwmInput(String name) {
-    final Object talon = name.equals("TalonFXS") ? DeviceCreator.createTalonFXS() : DeviceCreator.createTalonFX();
-    final CANdi candi = talon instanceof TalonFXS fxs ? DeviceCreator.createCANdiFor(fxs) : DeviceCreator.createCANdiFor((TalonFX) talon);
-    final SmartMotorControllerConfig config = config("CANdiTest no PWM input " + name)
-        .withExternalEncoder(candi)
-        .withUseExternalFeedbackEncoder(true);
+    final Object talon =
+        name.equals("TalonFXS") ? DeviceCreator.createTalonFXS() : DeviceCreator.createTalonFX();
+    final CANdi candi =
+        talon instanceof TalonFXS fxs
+            ? DeviceCreator.createCANdiFor(fxs)
+            : DeviceCreator.createCANdiFor((TalonFX) talon);
+    final SmartMotorControllerConfig config =
+        config("CANdiTest no PWM input " + name)
+            .withExternalEncoder(candi)
+            .withUseExternalFeedbackEncoder(true);
     try {
-      assertThrows(SmartMotorControllerConfigurationException.class, () -> {
-        if (talon instanceof TalonFXS fxs) {
-          new TalonFXSWrapper(fxs, DCMotor.getNEO(1), config);
-        } else {
-          new TalonFXWrapper((TalonFX) talon, DCMotor.getKrakenX60(1), config);
-        }
-      }, name + ": a CANdi without a PWM input selected");
+      assertThrows(
+          SmartMotorControllerConfigurationException.class,
+          () -> {
+            if (talon instanceof TalonFXS fxs) {
+              new TalonFXSWrapper(fxs, DCMotor.getNEO(1), config);
+            } else {
+              new TalonFXWrapper((TalonFX) talon, DCMotor.getKrakenX60(1), config);
+            }
+          },
+          name + ": a CANdi without a PWM input selected");
     } finally {
       CommandScheduler.getInstance().unregisterSubsystem(config.getSubsystem());
       DeviceCreator.silence(talon);

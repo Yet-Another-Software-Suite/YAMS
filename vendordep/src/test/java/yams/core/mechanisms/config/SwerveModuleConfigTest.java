@@ -30,15 +30,22 @@ public class SwerveModuleConfigTest {
   @BeforeEach
   void createConfig() {
     // Given the wheel's measured state, the optimizer needs no motor controllers.
-    config = new SwerveModuleConfig(null, null).withOptimization(true).withVelocityDeadband(MetersPerSecond.of(0.1));
+    config =
+        new SwerveModuleConfig(null, null)
+            .withOptimization(true)
+            .withVelocityDeadband(MetersPerSecond.of(0.1));
   }
 
   private static SwerveModuleVelocityWithAzimuth wheelAt(double degrees) {
-    return new SwerveModuleVelocityWithAzimuth(0, Rotation2d.fromDegrees(degrees), DegreesPerSecond.of(0));
+    return new SwerveModuleVelocityWithAzimuth(
+        0, Rotation2d.fromDegrees(degrees), DegreesPerSecond.of(0));
   }
 
-  private SwerveModuleVelocity optimize(double velocity, double targetDegrees, double wheelDegrees) {
-    return config.getOptimizedState(new SwerveModuleVelocity(velocity, Rotation2d.fromDegrees(targetDegrees)), wheelAt(wheelDegrees));
+  private SwerveModuleVelocity optimize(
+      double velocity, double targetDegrees, double wheelDegrees) {
+    return config.getOptimizedState(
+        new SwerveModuleVelocity(velocity, Rotation2d.fromDegrees(targetDegrees)),
+        wheelAt(wheelDegrees));
   }
 
   @Test
@@ -64,15 +71,26 @@ public class SwerveModuleConfigTest {
     Rotation2d last = optimize(1, 110, 0).angle;
     for (double target : new double[] {70, 112, 68, 110, 72, 88}) {
       final Rotation2d commanded = optimize(1, target, 0).angle;
-      assertTrue(Math.abs(commanded.minus(last).getDegrees()) < 90,
-          "commanded " + commanded.getDegrees() + " degrees right after " + last.getDegrees() + " for a target of " + target + " degrees");
+      assertTrue(
+          Math.abs(commanded.minus(last).getDegrees()) < 90,
+          "commanded "
+              + commanded.getDegrees()
+              + " degrees right after "
+              + last.getDegrees()
+              + " for a target of "
+              + target
+              + " degrees");
       last = commanded;
     }
   }
 
   @Test
   void turnsAroundWhenTheOtherOrientationIsClearlyBetter() {
-    assertEquals(-70, optimize(1, 110, 0).angle.getDegrees(), 1e-6, "110 degrees is reached by turning back to -70 degrees");
+    assertEquals(
+        -70,
+        optimize(1, 110, 0).angle.getDegrees(),
+        1e-6,
+        "110 degrees is reached by turning back to -70 degrees");
     // The wheel has ended up at 90 degrees: -70 degrees is now 160 degrees away and 110 degrees 20.
     final SwerveModuleVelocity state = optimize(1, 110, 90);
     assertEquals(110, state.angle.getDegrees(), 1e-6, "turns to 110 degrees");
@@ -84,7 +102,8 @@ public class SwerveModuleConfigTest {
     final SwerveModuleVelocity held = optimize(0.05, 120, 30);
     assertEquals(30, held.angle.getDegrees(), 1e-6, "the wheel holds where it is");
     assertEquals(0, held.velocity, 1e-9, "and does not drive");
-    // The next state is optimized from where the wheel was held: 140 degrees is 110 degrees from it,
+    // The next state is optimized from where the wheel was held: 140 degrees is 110 degrees from
+    // it,
     // so the wheel turns 70 degrees the other way and drives backwards.
     final SwerveModuleVelocity next = optimize(1, 140, 30);
     assertEquals(-40, next.angle.getDegrees(), 1e-6, "turns to -40 degrees");
@@ -94,8 +113,16 @@ public class SwerveModuleConfigTest {
   @Test
   void withoutALastAngleOrHysteresisOptimizesLikeWpilib() {
     final SwerveModuleVelocity desired = new SwerveModuleVelocity(1, Rotation2d.fromDegrees(100));
-    final SwerveModuleVelocity expected = new SwerveModuleVelocity(1, Rotation2d.fromDegrees(100)).optimize(new Rotation2d());
-    assertEquals(expected, SwerveModuleVelocityWithAzimuth.optimize(desired, wheelAt(0), null), "no last angle");
-    assertEquals(expected, SwerveModuleVelocityWithAzimuth.optimize(desired, wheelAt(0), Rotation2d.fromDegrees(100), Degrees.of(0)), "no hysteresis");
+    final SwerveModuleVelocity expected =
+        new SwerveModuleVelocity(1, Rotation2d.fromDegrees(100)).optimize(new Rotation2d());
+    assertEquals(
+        expected,
+        SwerveModuleVelocityWithAzimuth.optimize(desired, wheelAt(0), null),
+        "no last angle");
+    assertEquals(
+        expected,
+        SwerveModuleVelocityWithAzimuth.optimize(
+            desired, wheelAt(0), Rotation2d.fromDegrees(100), Degrees.of(0)),
+        "no hysteresis");
   }
 }

@@ -19,6 +19,7 @@ import com.revrobotics.spark.SparkBase;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.UnaryOperator;
+import org.wpilib.command2.CommandScheduler;
 import org.wpilib.math.controller.SimpleMotorFeedforward;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
@@ -34,7 +35,6 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
 import yams.helpers.DeviceCreator;
 import yams.helpers.PeriodicScheduler;
 import yams.helpers.SmartMotorControllerTestSubsystem;
-import org.wpilib.command2.CommandScheduler;
 
 /**
  * Every absolute external encoder on every motor controller, and every closed loop controller, for
@@ -133,23 +133,30 @@ final class AbsoluteEncoderCases {
    * @return The config.
    */
   static SmartMotorControllerConfig config(String name, Controller controller) {
-    SmartMotorControllerConfig config = new yams.commands2.config.SmartMotorControllerConfig()
-        .withSubsystem(new SmartMotorControllerTestSubsystem())
-        .withGearing(ContinuousWrappingTest.kGearing)
-        .withStatorCurrentLimit(Amps.of(40))
-        .withZeroPower(MotorMode.BRAKE)
-        .withControlMode(ControlMode.CLOSED_LOOP)
-        .withSimulationPeriod(Milliseconds.of(10))
-        // Roughly 12 V over the free speed of a NEO or Kraken behind the 12:1 gearing, in volts per
-        // mechanism rotation per second, so the motion profiles can be followed.
-        .withFeedforward(new SimpleMotorFeedforward(0, 1.5))
-        .withTelemetry(name, TelemetryVerbosity.LOW);
+    SmartMotorControllerConfig config =
+        new yams.commands2.config.SmartMotorControllerConfig()
+            .withSubsystem(new SmartMotorControllerTestSubsystem())
+            .withGearing(ContinuousWrappingTest.kGearing)
+            .withStatorCurrentLimit(Amps.of(40))
+            .withZeroPower(MotorMode.BRAKE)
+            .withControlMode(ControlMode.CLOSED_LOOP)
+            .withSimulationPeriod(Milliseconds.of(10))
+            // Roughly 12 V over the free speed of a NEO or Kraken behind the 12:1 gearing, in volts
+            // per
+            // mechanism rotation per second, so the motion profiles can be followed.
+            .withFeedforward(new SimpleMotorFeedforward(0, 1.5))
+            .withTelemetry(name, TelemetryVerbosity.LOW);
     return switch (controller) {
       case PID -> config.withClosedLoopController(8, 0, 0);
-      case TRAPEZOIDAL_PROFILE -> config.withClosedLoopController(8, 0, 0)
-          .withTrapezoidalProfile(DegreesPerSecond.of(720), DegreesPerSecondPerSecond.of(1440));
-      case EXPONENTIAL_PROFILE -> config.withClosedLoopController(8, 0, 0)
-          .withExponentialProfile(Volts.of(12), DegreesPerSecond.of(720), DegreesPerSecondPerSecond.of(1440));
+      case TRAPEZOIDAL_PROFILE ->
+          config
+              .withClosedLoopController(8, 0, 0)
+              .withTrapezoidalProfile(DegreesPerSecond.of(720), DegreesPerSecondPerSecond.of(1440));
+      case EXPONENTIAL_PROFILE ->
+          config
+              .withClosedLoopController(8, 0, 0)
+              .withExponentialProfile(
+                  Volts.of(12), DegreesPerSecond.of(720), DegreesPerSecondPerSecond.of(1440));
       case LQR -> config.withClosedLoopController(ContinuousWrappingTest.lqr());
     };
   }
@@ -162,37 +169,57 @@ final class AbsoluteEncoderCases {
    * @param encoderOptions Options for the encoder, such as its discontinuity point or zero offset.
    * @return The motor controller.
    */
-  static SmartMotorController create(Encoder encoder, SmartMotorControllerConfig config,
-                                     UnaryOperator<SmartMotorControllerConfig> encoderOptions) {
+  static SmartMotorController create(
+      Encoder encoder,
+      SmartMotorControllerConfig config,
+      UnaryOperator<SmartMotorControllerConfig> encoderOptions) {
     return switch (encoder) {
       case SPARK_MAX_ABSOLUTE, SPARK_FLEX_ABSOLUTE, SPARK_MAX_CAN, SPARK_FLEX_CAN -> {
-        final boolean flex = encoder == Encoder.SPARK_FLEX_ABSOLUTE || encoder == Encoder.SPARK_FLEX_CAN;
-        final SparkBase spark = flex ? DeviceCreator.createSparkFlex() : DeviceCreator.createSparkMax();
-        final Object absoluteEncoder = encoder == Encoder.SPARK_MAX_CAN || encoder == Encoder.SPARK_FLEX_CAN
-                                       ? DeviceCreator.createDetachedEncoder()
-                                       : spark.getAbsoluteEncoder();
-        yield new SparkWrapper(spark, flex ? DCMotor.getNeoVortex(1) : DCMotor.getNEO(1),
-            encoderOptions.apply(config.withExternalEncoder(absoluteEncoder).withUseExternalFeedbackEncoder(true)));
+        final boolean flex =
+            encoder == Encoder.SPARK_FLEX_ABSOLUTE || encoder == Encoder.SPARK_FLEX_CAN;
+        final SparkBase spark =
+            flex ? DeviceCreator.createSparkFlex() : DeviceCreator.createSparkMax();
+        final Object absoluteEncoder =
+            encoder == Encoder.SPARK_MAX_CAN || encoder == Encoder.SPARK_FLEX_CAN
+                ? DeviceCreator.createDetachedEncoder()
+                : spark.getAbsoluteEncoder();
+        yield new SparkWrapper(
+            spark,
+            flex ? DCMotor.getNeoVortex(1) : DCMotor.getNEO(1),
+            encoderOptions.apply(
+                config.withExternalEncoder(absoluteEncoder).withUseExternalFeedbackEncoder(true)));
       }
       case TALONFX_CANCODER, TALONFX_CANDI -> {
         final TalonFX talon = DeviceCreator.createTalonFX();
         if (encoder == Encoder.TALONFX_CANDI) {
           final CANdi candi = DeviceCreator.createCANdiFor(talon);
-          config = config.withVendorConfig(CANdiTest.vendorConfig(false, 1, candi)).withExternalEncoder(candi);
+          config =
+              config
+                  .withVendorConfig(CANdiTest.vendorConfig(false, 1, candi))
+                  .withExternalEncoder(candi);
         } else {
           config = config.withExternalEncoder(DeviceCreator.createCANcoderFor(talon));
         }
-        yield new TalonFXWrapper(talon, DCMotor.getKrakenX60(1), encoderOptions.apply(config.withUseExternalFeedbackEncoder(true)));
+        yield new TalonFXWrapper(
+            talon,
+            DCMotor.getKrakenX60(1),
+            encoderOptions.apply(config.withUseExternalFeedbackEncoder(true)));
       }
       case TALONFXS_CANCODER, TALONFXS_CANDI -> {
         final TalonFXS talon = DeviceCreator.createTalonFXS();
         if (encoder == Encoder.TALONFXS_CANDI) {
           final CANdi candi = DeviceCreator.createCANdiFor(talon);
-          config = config.withVendorConfig(CANdiTest.vendorConfig(true, 1, candi)).withExternalEncoder(candi);
+          config =
+              config
+                  .withVendorConfig(CANdiTest.vendorConfig(true, 1, candi))
+                  .withExternalEncoder(candi);
         } else {
           config = config.withExternalEncoder(DeviceCreator.createCANcoderFor(talon));
         }
-        yield new TalonFXSWrapper(talon, DCMotor.getNEO(1), encoderOptions.apply(config.withUseExternalFeedbackEncoder(true)));
+        yield new TalonFXSWrapper(
+            talon,
+            DCMotor.getNEO(1),
+            encoderOptions.apply(config.withUseExternalFeedbackEncoder(true)));
       }
     };
   }
@@ -207,18 +234,28 @@ final class AbsoluteEncoderCases {
   static SmartMotorController create(RelativeFeedback feedback, SmartMotorControllerConfig config) {
     if (feedback.talon()) {
       return feedback == RelativeFeedback.TALONFX
-             ? new TalonFXWrapper(DeviceCreator.createTalonFX(), DCMotor.getKrakenX60(1), config)
-             : new TalonFXSWrapper(DeviceCreator.createTalonFXS(), DCMotor.getNEO(1), config);
+          ? new TalonFXWrapper(DeviceCreator.createTalonFX(), DCMotor.getKrakenX60(1), config)
+          : new TalonFXSWrapper(DeviceCreator.createTalonFXS(), DCMotor.getNEO(1), config);
     }
-    final boolean flex = feedback == RelativeFeedback.SPARK_FLEX || feedback == RelativeFeedback.SPARK_FLEX_QUADRATURE;
+    final boolean flex =
+        feedback == RelativeFeedback.SPARK_FLEX
+            || feedback == RelativeFeedback.SPARK_FLEX_QUADRATURE;
     final SparkBase spark = flex ? DeviceCreator.createSparkFlex() : DeviceCreator.createSparkMax();
     try {
-      final boolean quadrature = feedback == RelativeFeedback.SPARK_MAX_QUADRATURE || feedback == RelativeFeedback.SPARK_FLEX_QUADRATURE;
-      return new SparkWrapper(spark, flex ? DCMotor.getNeoVortex(1) : DCMotor.getNEO(1), quadrature
-          ? ThroughBoreEncoderTest.withThroughBore(spark, ThroughBoreEncoderTest.Connection.QUADRATURE, config).withUseExternalFeedbackEncoder(true)
-          : config);
+      final boolean quadrature =
+          feedback == RelativeFeedback.SPARK_MAX_QUADRATURE
+              || feedback == RelativeFeedback.SPARK_FLEX_QUADRATURE;
+      return new SparkWrapper(
+          spark,
+          flex ? DCMotor.getNeoVortex(1) : DCMotor.getNEO(1),
+          quadrature
+              ? ThroughBoreEncoderTest.withThroughBore(
+                      spark, ThroughBoreEncoderTest.Connection.QUADRATURE, config)
+                  .withUseExternalFeedbackEncoder(true)
+              : config);
     } catch (RuntimeException e) {
-      // The SPARK rejected the config; put it back to factory defaults for the tests after this one.
+      // The SPARK rejected the config; put it back to factory defaults for the tests after this
+      // one.
       CommandScheduler.getInstance().unregisterSubsystem(config.getSubsystem());
       ThroughBoreEncoderTest.closeDevices(spark, null);
       throw e;
@@ -273,8 +310,11 @@ final class AbsoluteEncoderCases {
    * @param setpoint Mechanism position setpoint, or empty to leave the mechanism where it is.
    * @param duration How long to run.
    */
-  static void run(SmartMotorController smc, boolean talon, Optional<Angle> setpoint, Time duration) {
-    ((SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem()).setSMC(smc);
+  static void run(
+      SmartMotorController smc, boolean talon, Optional<Angle> setpoint, Time duration) {
+    ((SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+        .setSMC(smc);
     smc.setupSimulation();
     try (PeriodicScheduler scheduler = new PeriodicScheduler()) {
       setpoint.ifPresent(smc::setPosition);

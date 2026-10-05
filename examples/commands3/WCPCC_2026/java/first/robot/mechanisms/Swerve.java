@@ -198,9 +198,9 @@ public class Swerve implements Mechanism {
             .withMaximumLinearVelocity(Driving.kMaxSpeed)
             .withMaximumAngularVelocity(Driving.kMaxRotationalRate)
             .withDeadband(Driving.kJoystickDeadband)
-            .withCubeTranslationControllerAxis()
-            .withCubeRotationControllerAxis()
-            .withAllianceRelativeControl();
+            .setCubeTranslationControllerAxis()
+            .setCubeRotationControllerAxis()
+            .setAllianceRelativeControl();
     }
 
     /** Drive with field relative speeds, e.g. from {@link #createDriverInput}. */

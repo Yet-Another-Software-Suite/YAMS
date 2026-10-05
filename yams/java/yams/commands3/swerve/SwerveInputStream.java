@@ -61,8 +61,8 @@ import yams.core.mechanisms.swerve.SwerveDrive;
  *                      .withDeadband(0.05)
  *                      .withScaleTranslation(0.8)
  *                      .withScaleRotation(0.6)
- *                      .withAllianceRelativeControl()  // auto-flip for Red alliance
- *                      .withCubeTranslationControllerAxis(); // non-linear response
+ *                      .setAllianceRelativeControl(true)  // auto-flip for Red alliance
+ *                      .setCubeTranslationControllerAxis(true); // non-linear response
  *
  * // In your coroutine or command, call .get() to obtain ChassisVelocities:
  * swerveDrive.setFieldRelativeChassisSpeeds(angularVelocityStream.get());
@@ -319,7 +319,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>, Cloneable
    * @param enabled Robot-Relative {@link ChassisVelocities} output.
    * @return self
    */
-  public SwerveInputStream withRobotRelative(BooleanSupplier enabled) {
+  public SwerveInputStream setRobotRelative(BooleanSupplier enabled) {
     robotRelative = Optional.ofNullable(enabled);
     return this;
   }
@@ -330,8 +330,8 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>, Cloneable
    * @param enabled Robot-Relative {@link ChassisVelocities} output.
    * @return self
    */
-  public SwerveInputStream withRobotRelative(boolean enabled) {
-    return withRobotRelative(() -> enabled);
+  public SwerveInputStream setRobotRelative(boolean enabled) {
+    return setRobotRelative(() -> enabled);
   }
 
   /**
@@ -339,42 +339,49 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>, Cloneable
    *
    * @return self
    */
-  public SwerveInputStream withRobotRelative() {
-    return withRobotRelative(() -> true);
+  public SwerveInputStream setRobotRelative() {
+    return setRobotRelative(() -> true);
   }
 
   /**
-   * Heading offset enabled boolean supplier.
-   *
-   * @param angle   {@link Rotation2d} offset to apply
-   * @param enabled Enable state
-   * @return self
-   */
-  public SwerveInputStream withTranslationHeadingOffset(Rotation2d angle, BooleanSupplier enabled) {
-    translationHeadingOffset = Optional.ofNullable(angle);
-    translationHeadingOffsetEnabled = Optional.ofNullable(enabled);
-    return this;
-  }
-
-  /**
-   * Heading offset enabled boolean.
-   *
-   * @param angle   {@link Rotation2d} offset to apply
-   * @param enabled Enable state
-   * @return self
-   */
-  public SwerveInputStream withTranslationHeadingOffset(Rotation2d angle, boolean enabled) {
-    return withTranslationHeadingOffset(angle, () -> enabled);
-  }
-
-  /**
-   * Set the heading offset angle.
+   * Set the translation heading offset angle.
    *
    * @param angle {@link Rotation2d} offset to apply
    * @return self
    */
   public SwerveInputStream withTranslationHeadingOffset(Rotation2d angle) {
-    return withTranslationHeadingOffset(angle, () -> true);
+    translationHeadingOffset = Optional.ofNullable(angle);
+    return this;
+  }
+
+  /**
+   * Set the translation heading offset enabled state.
+   *
+   * @param enabled Enable state
+   * @return self
+   */
+  public SwerveInputStream setTranslationHeadingOffset(BooleanSupplier enabled) {
+    translationHeadingOffsetEnabled = Optional.ofNullable(enabled);
+    return this;
+  }
+
+  /**
+   * Set the translation heading offset enabled state.
+   *
+   * @param enabled Enable state
+   * @return self
+   */
+  public SwerveInputStream setTranslationHeadingOffset(boolean enabled) {
+    return setTranslationHeadingOffset(() -> enabled);
+  }
+
+  /**
+   * Enable translation heading offset.
+   *
+   * @return self
+   */
+  public SwerveInputStream setTranslationHeadingOffset() {
+    return setTranslationHeadingOffset(() -> true);
   }
 
   /**
@@ -383,8 +390,8 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>, Cloneable
    *
    * @return self
    */
-  public SwerveInputStream withAllianceRelativeControl() {
-    return withAllianceRelativeControl(() -> true);
+  public SwerveInputStream setAllianceRelativeControl() {
+    return setAllianceRelativeControl(() -> true);
   }
 
   /**
@@ -394,7 +401,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>, Cloneable
    * @param enabled Alliance aware {@link ChassisVelocities} output.
    * @return self
    */
-  public SwerveInputStream withAllianceRelativeControl(BooleanSupplier enabled) {
+  public SwerveInputStream setAllianceRelativeControl(BooleanSupplier enabled) {
     allianceRelative = Optional.ofNullable(enabled);
     return this;
   }
@@ -406,8 +413,8 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>, Cloneable
    * @param enabled Alliance aware {@link ChassisVelocities} output.
    * @return self
    */
-  public SwerveInputStream withAllianceRelativeControl(boolean enabled) {
-    return withAllianceRelativeControl(() -> enabled);
+  public SwerveInputStream setAllianceRelativeControl(boolean enabled) {
+    return setAllianceRelativeControl(() -> enabled);
   }
 
   /**
@@ -416,7 +423,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>, Cloneable
    * @param enabled Enabled state for the stream.
    * @return self.
    */
-  public SwerveInputStream withCubeRotationControllerAxis(BooleanSupplier enabled) {
+  public SwerveInputStream setCubeRotationControllerAxis(BooleanSupplier enabled) {
     omegaCube = Optional.ofNullable(enabled);
     return this;
   }
@@ -427,8 +434,8 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>, Cloneable
    * @param enabled Enabled state for the stream.
    * @return self.
    */
-  public SwerveInputStream withCubeRotationControllerAxis(boolean enabled) {
-    return withCubeRotationControllerAxis(() -> enabled);
+  public SwerveInputStream setCubeRotationControllerAxis(boolean enabled) {
+    return setCubeRotationControllerAxis(() -> enabled);
   }
 
   /**
@@ -436,8 +443,8 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>, Cloneable
    *
    * @return self.
    */
-  public SwerveInputStream withCubeRotationControllerAxis() {
-    return withCubeRotationControllerAxis(() -> true);
+  public SwerveInputStream setCubeRotationControllerAxis() {
+    return setCubeRotationControllerAxis(() -> true);
   }
 
   /**
@@ -446,7 +453,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>, Cloneable
    * @param enabled Enabled state for the stream
    * @return self
    */
-  public SwerveInputStream withCubeTranslationControllerAxis(BooleanSupplier enabled) {
+  public SwerveInputStream setCubeTranslationControllerAxis(BooleanSupplier enabled) {
     translationCube = Optional.ofNullable(enabled);
     return this;
   }
@@ -457,8 +464,8 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>, Cloneable
    * @param enabled Enabled state for the stream
    * @return self
    */
-  public SwerveInputStream withCubeTranslationControllerAxis(boolean enabled) {
-    return withCubeTranslationControllerAxis(() -> enabled);
+  public SwerveInputStream setCubeTranslationControllerAxis(boolean enabled) {
+    return setCubeTranslationControllerAxis(() -> enabled);
   }
 
   /**
@@ -466,8 +473,8 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>, Cloneable
    *
    * @return self
    */
-  public SwerveInputStream withCubeTranslationControllerAxis() {
-    return withCubeTranslationControllerAxis(() -> true);
+  public SwerveInputStream setCubeTranslationControllerAxis() {
+    return setCubeTranslationControllerAxis(() -> true);
   }
 
   /**
@@ -567,7 +574,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>, Cloneable
    * @param trigger Supplier to use.
    * @return this.
    */
-  public SwerveInputStream withHeadingControl(BooleanSupplier trigger) {
+  public SwerveInputStream setHeadingControl(BooleanSupplier trigger) {
     headingEnabled = Optional.ofNullable(trigger);
     return this;
   }
@@ -578,13 +585,22 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>, Cloneable
    * @param trigger Boolean to use.
    * @return this.
    */
-  public SwerveInputStream withHeadingControl(boolean trigger) {
-    return withHeadingControl(() -> trigger);
+  public SwerveInputStream setHeadingControl(boolean trigger) {
+    return setHeadingControl(() -> trigger);
+  }
+
+  /**
+   * Output {@link ChassisVelocities} based on heading.
+   *
+   * @return this.
+   */
+  public SwerveInputStream setHeadingControl() {
+    return setHeadingControl(() -> true);
   }
 
   /**
    * Supply the field relative heading to face in heading mode, which is enabled with
-   * {@link #withHeadingControl(BooleanSupplier)}. Replaces any controller heading axis.
+   * {@link #setHeadingControl(BooleanSupplier)}. Replaces any controller heading axis.
    *
    * @param heading Field relative heading to face, blue-origin where 0 degrees faces the red
    *                alliance wall.
@@ -605,93 +621,6 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>, Cloneable
    */
   public SwerveInputStream withHeading(Angle heading) {
     return withHeading(() -> heading);
-  }
-
-  /**
-   * Supply the field relative heading and trigger to face in heading mode.
-   *
-   * @param heading Field relative heading to face.
-   * @param trigger Trigger to enable heading control.
-   * @return this.
-   */
-  public SwerveInputStream withHeading(Supplier<Angle> heading, BooleanSupplier trigger) {
-    return withHeading(heading).withHeadingControl(trigger);
-  }
-
-  /**
-   * Supply the field relative heading and trigger to face in heading mode.
-   *
-   * @param heading Field relative heading to face.
-   * @param trigger Trigger to enable heading control.
-   * @return this.
-   */
-  public SwerveInputStream withHeading(Angle heading, BooleanSupplier trigger) {
-    return withHeading(() -> heading).withHeadingControl(trigger);
-  }
-
-  /**
-   * Aim the {@link SwerveDrive} at this pose while driving.
-   *
-   * @param trigger   When True will enable aiming at the current target.
-   * @param aimTarget {@link Pose2d} supplier to point at.
-   * @return this
-   */
-  public SwerveInputStream withAim(Supplier<Pose2d> aimTarget, BooleanSupplier trigger) {
-    this.aimTarget = Optional.ofNullable(aimTarget);
-    this.aimEnabled = Optional.ofNullable(trigger);
-    return this;
-  }
-
-  /**
-   * Aim the {@link SwerveDrive} at this pose while driving.
-   *
-   * @param aimTarget {@link Pose2d} supplier to point at.
-   * @return this
-   */
-  public SwerveInputStream withAim(Supplier<Pose2d> aimTarget) {
-    return withAim(aimTarget, () -> true);
-  }
-
-  /**
-   * Aim the {@link SwerveDrive} at this pose while driving.
-   *
-   * @param aimTarget {@link Pose2d} to point at.
-   * @param trigger   When True will enable aiming at the current target.
-   * @return this
-   */
-  public SwerveInputStream withAim(Pose2d aimTarget, BooleanSupplier trigger) {
-    return withAim(() -> aimTarget, trigger);
-  }
-
-  /**
-   * Aim the {@link SwerveDrive} at this pose while driving.
-   *
-   * @param aimTarget {@link Pose2d} to point at.
-   * @return this
-   */
-  public SwerveInputStream withAim(Pose2d aimTarget) {
-    return withAim(() -> aimTarget, () -> true);
-  }
-
-  /**
-   * Aim the {@link SwerveDrive} at the configured target while the trigger is True.
-   *
-   * @param trigger When True will enable aiming at the current target.
-   * @return this
-   */
-  public SwerveInputStream withAim(BooleanSupplier trigger) {
-    this.aimEnabled = Optional.ofNullable(trigger);
-    return this;
-  }
-
-  /**
-   * Aim the {@link SwerveDrive} at the configured target while the boolean is True.
-   *
-   * @param trigger When True will enable aiming at the current target.
-   * @return this
-   */
-  public SwerveInputStream withAim(boolean trigger) {
-    return withAim(() -> trigger);
   }
 
   /**
@@ -716,12 +645,42 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>, Cloneable
   }
 
   /**
+   * Aim the {@link SwerveDrive} at the configured target while the trigger is True.
+   *
+   * @param trigger When True will enable aiming at the current target.
+   * @return this
+   */
+  public SwerveInputStream setAim(BooleanSupplier trigger) {
+    this.aimEnabled = Optional.ofNullable(trigger);
+    return this;
+  }
+
+  /**
+   * Aim the {@link SwerveDrive} at the configured target while the boolean is True.
+   *
+   * @param trigger When True will enable aiming at the current target.
+   * @return this
+   */
+  public SwerveInputStream setAim(boolean trigger) {
+    return setAim(() -> trigger);
+  }
+
+  /**
+   * Enable aiming the {@link SwerveDrive} at the configured target.
+   *
+   * @return this
+   */
+  public SwerveInputStream setAim() {
+    return setAim(() -> true);
+  }
+
+  /**
    * Enable locking of rotation and only translating, overrides everything.
    *
    * @param trigger Translation only while returns true.
    * @return this
    */
-  public SwerveInputStream withTranslationOnly(BooleanSupplier trigger) {
+  public SwerveInputStream setTranslationOnly(BooleanSupplier trigger) {
     translationOnlyEnabled = Optional.ofNullable(trigger);
     return this;
   }
@@ -732,8 +691,8 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>, Cloneable
    * @param enabled Translation only while true.
    * @return this
    */
-  public SwerveInputStream withTranslationOnly(boolean enabled) {
-    return withTranslationOnly(() -> enabled);
+  public SwerveInputStream setTranslationOnly(boolean enabled) {
+    return setTranslationOnly(() -> enabled);
   }
 
   /**
@@ -741,8 +700,8 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>, Cloneable
    *
    * @return this
    */
-  public SwerveInputStream withTranslationOnly() {
-    return withTranslationOnly(() -> true);
+  public SwerveInputStream setTranslationOnly() {
+    return setTranslationOnly(() -> true);
   }
 
   /**
@@ -758,7 +717,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities>, Cloneable
       if (aimTarget.isPresent()) {
         return SwerveInputMode.AIM;
       } else {
-        DriverStationErrors.reportError("Attempting to enter AIM mode without target, please use " + "SwerveInputStream.aim() to select a target first!", false);
+        DriverStationErrors.reportError("Attempting to enter AIM mode without target, please use " + "SwerveInputStream.withAimTarget() to select a target first!", false);
       }
     } else if (headingEnabled.isPresent() && headingEnabled.get().getAsBoolean()) {
       if (headingSupplier.isPresent()) {

@@ -65,15 +65,16 @@ public final class Drive {
                 () -> -hid.getLeftX(),
                 () -> -hid.getRightX()
             )
-            .withAim(() -> new Pose2d(Landmarks.hubPosition(), Rotation2d.ZERO), () -> aimAtHub[0])
+            .withAimTarget(() -> new Pose2d(Landmarks.hubPosition(), Rotation2d.ZERO))
+            .setAim(() -> aimAtHub[0])
             .withHeading(() -> {
                 if (snapHeading[0].isPresent()) {
                     return snapHeading[0].get().plus(swerve.getOperatorForwardDirection()).getMeasure();
                 }
                 return Rotation2d.ZERO.getMeasure();
             })
-            .withHeadingControl(() -> snapHeading[0].isPresent() && !aimAtHub[0])
-            .withTranslationOnly(() -> holdHeading[0] && snapHeading[0].isEmpty() && !aimAtHub[0]);
+            .setHeadingControl(() -> snapHeading[0].isPresent() && !aimAtHub[0])
+            .setTranslationOnly(() -> holdHeading[0] && snapHeading[0].isEmpty() && !aimAtHub[0]);
 
             while (true) {
                 aimAtHub[0] = hid.getRightTriggerAxis() > kAimTriggerThreshold;
@@ -125,7 +126,8 @@ public final class Drive {
     public static Command autoAim(Swerve swerve) {
         return swerve.run(coroutine -> {
             SwerveInputStream stream = swerve.createDriverInput(() -> 0, () -> 0, () -> 0)
-                .withAim(() -> new Pose2d(Landmarks.hubPosition(), Rotation2d.ZERO), () -> true);
+                .withAimTarget(() -> new Pose2d(Landmarks.hubPosition(), Rotation2d.ZERO))
+                .setAim(true);
             while (true) {
                 swerve.driveFieldRelative(stream.get());
                 coroutine.yield();

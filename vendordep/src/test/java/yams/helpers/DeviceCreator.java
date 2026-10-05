@@ -7,10 +7,10 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.CANdi;
+import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
-import com.ctre.phoenix6.hardware.ParentDevice;
 import com.revrobotics.encoder.SplineEncoder;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -44,7 +44,9 @@ public class DeviceCreator {
   private static final AtomicInteger ctreId = new AtomicInteger(0);
 
   /** Simulated CAN buses CTRE devices are spread over. */
-  private static final CANPort[] kCtreBuses = {CANPort.CAN_S0, CANPort.CAN_S1, CANPort.CAN_S2, CANPort.CAN_S3, CANPort.CAN_S4};
+  private static final CANPort[] kCtreBuses = {
+    CANPort.CAN_S0, CANPort.CAN_S1, CANPort.CAN_S2, CANPort.CAN_S3, CANPort.CAN_S4
+  };
 
   public static SparkMax createSparkMax() {
     int id = revId.getAndIncrement();
@@ -64,12 +66,15 @@ public class DeviceCreator {
     return new SparkFlex(CANPorts.fromBusId(1), id, MotorType.kBrushless);
   }
 
-  // Creates an encoder a SPARK reads over CAN. REVLib's only detached encoder model is the MAXSpline
+  // Creates an encoder a SPARK reads over CAN. REVLib's only detached encoder model is the
+  // MAXSpline
   // Encoder.
-  // Detached encoders take CAN IDs 1 to 62 and are closed by the test that creates them, so their IDs
+  // Detached encoders take CAN IDs 1 to 62 and are closed by the test that creates them, so their
+  // IDs
   // are reused.
   public static SplineEncoder createDetachedEncoder() {
-    return new SplineEncoder(CANPorts.fromBusId(1), detachedId.getAndIncrement() % MAX_DETACHED_ID + 1);
+    return new SplineEncoder(
+        CANPorts.fromBusId(1), detachedId.getAndIncrement() % MAX_DETACHED_ID + 1);
   }
 
   public static TalonFX createTalonFX() {

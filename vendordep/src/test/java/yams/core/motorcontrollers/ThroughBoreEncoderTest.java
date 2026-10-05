@@ -76,7 +76,8 @@ import yams.helpers.SmartMotorControllerTestSubsystem;
  */
 public class ThroughBoreEncoderTest {
   private static final Angle kTolerance = Degrees.of(5);
-  private static final MechanismGearing kGearing = new MechanismGearing(GearBox.fromReductionStages(3, 4));
+  private static final MechanismGearing kGearing =
+      new MechanismGearing(GearBox.fromReductionStages(3, 4));
 
   @BeforeEach
   void startTest() {
@@ -102,7 +103,10 @@ public class ThroughBoreEncoderTest {
   /** A SPARK, how its Through Bore Encoder is connected, and whether it closes the loop on it. */
   private record Case(boolean sparkFlex, Connection connection, boolean feedback) {
     String name() {
-      return (sparkFlex ? "SparkFlex" : "SparkMax") + " " + connection + (feedback ? " feedback" : " reporting");
+      return (sparkFlex ? "SparkFlex" : "SparkMax")
+          + " "
+          + connection
+          + (feedback ? " feedback" : " reporting");
     }
 
     @Override
@@ -144,32 +148,42 @@ public class ThroughBoreEncoderTest {
    * @param cfg        Config to attach it to.
    * @return The config.
    */
-  static SmartMotorControllerConfig withThroughBore(SparkBase spark, Connection connection, SmartMotorControllerConfig cfg) {
+  static SmartMotorControllerConfig withThroughBore(
+      SparkBase spark, Connection connection, SmartMotorControllerConfig cfg) {
     return switch (connection) {
-      case ABSOLUTE -> cfg.withExternalEncoder(spark.getAbsoluteEncoder())
-          .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5));
+      case ABSOLUTE ->
+          cfg.withExternalEncoder(spark.getAbsoluteEncoder())
+              .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5));
       case QUADRATURE -> {
         // The vendor config gives the Through Bore Encoder's counts per revolution.
         if (spark instanceof SparkMax sparkMax) {
           final SparkMaxConfig vendorConfig = new SparkMaxConfig();
-          vendorConfig.alternateEncoder.apply(AlternateEncoderConfig.Presets.REV_ThroughBoreEncoder);
-          sparkMax.configure(vendorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-          yield cfg.withVendorConfig(vendorConfig).withExternalEncoder(sparkMax.getAlternateEncoder());
+          vendorConfig.alternateEncoder.apply(
+              AlternateEncoderConfig.Presets.REV_ThroughBoreEncoder);
+          sparkMax.configure(
+              vendorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+          yield cfg.withVendorConfig(vendorConfig)
+              .withExternalEncoder(sparkMax.getAlternateEncoder());
         }
         final SparkFlexConfig vendorConfig = new SparkFlexConfig();
         vendorConfig.externalEncoder.apply(ExternalEncoderConfig.Presets.REV_ThroughBoreEncoder);
-        yield cfg.withVendorConfig(vendorConfig).withExternalEncoder(((SparkFlex) spark).getExternalEncoder());
+        yield cfg.withVendorConfig(vendorConfig)
+            .withExternalEncoder(((SparkFlex) spark).getExternalEncoder());
       }
-      case CAN -> cfg.withExternalEncoder(DeviceCreator.createDetachedEncoder())
-          .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5));
+      case CAN ->
+          cfg.withExternalEncoder(DeviceCreator.createDetachedEncoder())
+              .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5));
     };
   }
 
   private static SmartMotorController create(Case testCase, String name) {
-    final SparkBase spark = testCase.sparkFlex() ? DeviceCreator.createSparkFlex() : DeviceCreator.createSparkMax();
-    final SmartMotorControllerConfig cfg = withThroughBore(spark, testCase.connection(), config(name))
-        .withUseExternalFeedbackEncoder(testCase.feedback());
-    return new SparkWrapper(spark, testCase.sparkFlex() ? DCMotor.getNeoVortex(1) : DCMotor.getNEO(1), cfg);
+    final SparkBase spark =
+        testCase.sparkFlex() ? DeviceCreator.createSparkFlex() : DeviceCreator.createSparkMax();
+    final SmartMotorControllerConfig cfg =
+        withThroughBore(spark, testCase.connection(), config(name))
+            .withUseExternalFeedbackEncoder(testCase.feedback());
+    return new SparkWrapper(
+        spark, testCase.sparkFlex() ? DCMotor.getNeoVortex(1) : DCMotor.getNEO(1), cfg);
   }
 
   /** Put the SPARK and the detached encoder, if any, back to factory defaults and close them. */
@@ -180,14 +194,17 @@ public class ThroughBoreEncoderTest {
     }
     if (motorController instanceof SparkMax sparkMax) {
       try {
-        sparkMax.configure(new SparkMaxConfig(), ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        sparkMax.configure(
+            new SparkMaxConfig(), ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
       } catch (IllegalStateException e) {
-        // Resetting puts the data port back to its default, and REVLib then reports that a SPARK MAX
+        // Resetting puts the data port back to its default, and REVLib then reports that a SPARK
+        // MAX
         // whose alternate encoder is in use is not configured for it. The reset is applied.
       }
       sparkMax.close();
     } else if (motorController instanceof SparkFlex sparkFlex) {
-      sparkFlex.configure(new SparkFlexConfig(), ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+      sparkFlex.configure(
+          new SparkFlexConfig(), ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
       sparkFlex.close();
     }
   }
@@ -231,8 +248,8 @@ public class ThroughBoreEncoderTest {
   /** The SPARK's absolute encoder range offset. */
   private static double absoluteEncoderRangeOffset(SparkBase spark) {
     return spark instanceof SparkMax sparkMax
-           ? sparkMax.configAccessor.absoluteEncoder.getRangeOffset()
-           : ((SparkFlex) spark).configAccessor.absoluteEncoder.getRangeOffset();
+        ? sparkMax.configAccessor.absoluteEncoder.getRangeOffset()
+        : ((SparkFlex) spark).configAccessor.absoluteEncoder.getRangeOffset();
   }
 
   /** Difference between two angles, wrapped into [-180°, 180°). */
@@ -246,42 +263,69 @@ public class ThroughBoreEncoderTest {
     final String name = testCase.name();
     final SmartMotorController smc = create(testCase, "ThroughBoreEncoderTest config " + name);
     try {
-      ((SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem()).setSMC(smc);
+      ((SmartMotorControllerTestSubsystem)
+              ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+          .setSMC(smc);
       final SparkBase spark = (SparkBase) smc.getMotorController();
-      final FeedbackSensor expectedSensor = !testCase.feedback()
-                                            ? FeedbackSensor.kPrimaryEncoder
-                                            : switch (testCase.connection()) {
-                                              case ABSOLUTE -> FeedbackSensor.kAbsoluteEncoder;
-                                              case QUADRATURE -> FeedbackSensor.kAlternateOrExternalEncoder;
-                                              case CAN -> FeedbackSensor.kDetachedAbsoluteEncoder;
-                                            };
-      assertTrue(eventually(() -> sparkParameter(spark, SparkParameters.kClosedLoopControlSensor) == expectedSensor.value),
-          name + ": expected the SPARK's feedback sensor to be " + expectedSensor + " but it was " + sparkParameter(spark, SparkParameters.kClosedLoopControlSensor));
+      final FeedbackSensor expectedSensor =
+          !testCase.feedback()
+              ? FeedbackSensor.kPrimaryEncoder
+              : switch (testCase.connection()) {
+                case ABSOLUTE -> FeedbackSensor.kAbsoluteEncoder;
+                case QUADRATURE -> FeedbackSensor.kAlternateOrExternalEncoder;
+                case CAN -> FeedbackSensor.kDetachedAbsoluteEncoder;
+              };
+      assertTrue(
+          eventually(
+              () ->
+                  sparkParameter(spark, SparkParameters.kClosedLoopControlSensor)
+                      == expectedSensor.value),
+          name
+              + ": expected the SPARK's feedback sensor to be "
+              + expectedSensor
+              + " but it was "
+              + sparkParameter(spark, SparkParameters.kClosedLoopControlSensor));
 
       switch (testCase.connection()) {
         case ABSOLUTE -> {
           // REVLib's range offset is the middle of the range the encoder reports: 0 for [-0.5, 0.5)
           // rotations, 0.5 for [0, 1).
-          assertTrue(eventually(() -> Math.abs(absoluteEncoderRangeOffset(spark)) < 1e-6),
-              name + ": a 0.5 rotation discontinuity point is a range offset of 0, but it was " + absoluteEncoderRangeOffset(spark));
+          assertTrue(
+              eventually(() -> Math.abs(absoluteEncoderRangeOffset(spark)) < 1e-6),
+              name
+                  + ": a 0.5 rotation discontinuity point is a range offset of 0, but it was "
+                  + absoluteEncoderRangeOffset(spark));
           smc.applyConfig(smc.getConfig().withExternalEncoderDiscontinuityPoint(Rotations.of(1)));
-          assertTrue(eventually(() -> Math.abs(absoluteEncoderRangeOffset(spark) - 0.5) < 1e-6),
-              name + ": a 1 rotation discontinuity point is a range offset of 0.5, but it was " + absoluteEncoderRangeOffset(spark));
+          assertTrue(
+              eventually(() -> Math.abs(absoluteEncoderRangeOffset(spark) - 0.5) < 1e-6),
+              name
+                  + ": a 1 rotation discontinuity point is a range offset of 0.5, but it was "
+                  + absoluteEncoderRangeOffset(spark));
         }
         case QUADRATURE -> {
-          final int countsPerRevolution = spark instanceof SparkMax sparkMax
-                                          ? sparkMax.configAccessor.alternateEncoder.getCountsPerRevolution()
-                                          : ((SparkFlex) spark).configAccessor.externalEncoder.getCountsPerRevolution();
-          assertEquals(8192, countsPerRevolution, name + ": Through Bore Encoder counts per revolution");
+          final int countsPerRevolution =
+              spark instanceof SparkMax sparkMax
+                  ? sparkMax.configAccessor.alternateEncoder.getCountsPerRevolution()
+                  : ((SparkFlex) spark).configAccessor.externalEncoder.getCountsPerRevolution();
+          assertEquals(
+              8192, countsPerRevolution, name + ": Through Bore Encoder counts per revolution");
         }
         case CAN -> {
-          final DetachedEncoder encoder = (DetachedEncoder) smc.getConfig().getExternalEncoder().orElseThrow();
+          final DetachedEncoder encoder =
+              (DetachedEncoder) smc.getConfig().getExternalEncoder().orElseThrow();
           if (testCase.feedback()) {
-            assertEquals(encoder.getDeviceId(), sparkParameter(spark, SparkParameters.kDetachedEncoderDeviceID), name + ": the SPARK reads the detached encoder's CAN ID");
+            assertEquals(
+                encoder.getDeviceId(),
+                sparkParameter(spark, SparkParameters.kDetachedEncoderDeviceID),
+                name + ": the SPARK reads the detached encoder's CAN ID");
           }
-          assertTrue(encoder.detachedEncoderAccessor.isDutyCycleZeroCentered(), name + ": a 0.5 rotation discontinuity point is zero-centered");
+          assertTrue(
+              encoder.detachedEncoderAccessor.isDutyCycleZeroCentered(),
+              name + ": a 0.5 rotation discontinuity point is zero-centered");
           smc.applyConfig(smc.getConfig().withExternalEncoderDiscontinuityPoint(Rotations.of(1)));
-          assertTrue(!encoder.detachedEncoderAccessor.isDutyCycleZeroCentered(), name + ": a 1 rotation discontinuity point is not zero-centered");
+          assertTrue(
+              !encoder.detachedEncoderAccessor.isDutyCycleZeroCentered(),
+              name + ": a 1 rotation discontinuity point is not zero-centered");
         }
       }
     } finally {
@@ -295,7 +339,9 @@ public class ThroughBoreEncoderTest {
     final String name = testCase.name();
     final SmartMotorController smc = create(testCase, "ThroughBoreEncoderTest closed loop " + name);
     try {
-      ((SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem()).setSMC(smc);
+      ((SmartMotorControllerTestSubsystem)
+              ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+          .setSMC(smc);
       smc.setupSimulation();
 
       try (PeriodicScheduler scheduler = new PeriodicScheduler()) {
@@ -313,12 +359,30 @@ public class ThroughBoreEncoderTest {
         final Angle simulated = smc.getSimSupplier().orElseThrow().getMechanismPosition();
         final Angle mechanism = smc.getMechanismPosition();
         final Angle encoder = smc.getExternalEncoderPosition().orElseThrow();
-        assertTrue(Math.abs(wrappedErrorDegrees(simulated, setpoint)) < kTolerance.in(Degrees),
-            name + ": expected the simulated mechanism at " + setpoint.in(Degrees) + "° but it was at " + simulated.in(Degrees) + "°");
-        assertTrue(Math.abs(wrappedErrorDegrees(mechanism, setpoint)) < kTolerance.in(Degrees),
-            name + ": expected the mechanism to read " + setpoint.in(Degrees) + "° but it read " + mechanism.in(Degrees) + "°");
-        assertTrue(Math.abs(wrappedErrorDegrees(encoder, setpoint)) < kTolerance.in(Degrees),
-            name + ": expected the Through Bore Encoder to read " + setpoint.in(Degrees) + "° but it read " + encoder.in(Degrees) + "°");
+        assertTrue(
+            Math.abs(wrappedErrorDegrees(simulated, setpoint)) < kTolerance.in(Degrees),
+            name
+                + ": expected the simulated mechanism at "
+                + setpoint.in(Degrees)
+                + "° but it was at "
+                + simulated.in(Degrees)
+                + "°");
+        assertTrue(
+            Math.abs(wrappedErrorDegrees(mechanism, setpoint)) < kTolerance.in(Degrees),
+            name
+                + ": expected the mechanism to read "
+                + setpoint.in(Degrees)
+                + "° but it read "
+                + mechanism.in(Degrees)
+                + "°");
+        assertTrue(
+            Math.abs(wrappedErrorDegrees(encoder, setpoint)) < kTolerance.in(Degrees),
+            name
+                + ": expected the Through Bore Encoder to read "
+                + setpoint.in(Degrees)
+                + "° but it read "
+                + encoder.in(Degrees)
+                + "°");
       }
     } finally {
       closeSmc(smc);
@@ -328,13 +392,21 @@ public class ThroughBoreEncoderTest {
   @ParameterizedTest(name = "{0}")
   @ValueSource(strings = {"SparkMax", "SparkFlex"})
   void quadratureEncoderHasNoZeroOffset(String name) {
-    final SparkBase spark = name.equals("SparkFlex") ? DeviceCreator.createSparkFlex() : DeviceCreator.createSparkMax();
-    final SmartMotorControllerConfig config = withThroughBore(spark, Connection.QUADRATURE, config("ThroughBoreEncoderTest zero offset " + name))
-        .withUseExternalFeedbackEncoder(true)
-        .withExternalEncoderZeroOffset(Degrees.of(30));
+    final SparkBase spark =
+        name.equals("SparkFlex") ? DeviceCreator.createSparkFlex() : DeviceCreator.createSparkMax();
+    final SmartMotorControllerConfig config =
+        withThroughBore(
+                spark, Connection.QUADRATURE, config("ThroughBoreEncoderTest zero offset " + name))
+            .withUseExternalFeedbackEncoder(true)
+            .withExternalEncoderZeroOffset(Degrees.of(30));
     try {
-      assertThrows(SmartMotorControllerConfigurationException.class,
-          () -> new SparkWrapper(spark, name.equals("SparkFlex") ? DCMotor.getNeoVortex(1) : DCMotor.getNEO(1), config),
+      assertThrows(
+          SmartMotorControllerConfigurationException.class,
+          () ->
+              new SparkWrapper(
+                  spark,
+                  name.equals("SparkFlex") ? DCMotor.getNeoVortex(1) : DCMotor.getNEO(1),
+                  config),
           name + ": a quadrature encoder has no zero offset");
     } finally {
       CommandScheduler.getInstance().unregisterSubsystem(config.getSubsystem());

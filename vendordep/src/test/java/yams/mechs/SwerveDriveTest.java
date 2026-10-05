@@ -85,7 +85,10 @@ public class SwerveDriveTest {
 
   /** Motor controllers a module's drive or azimuth motor can use. */
   enum Motor {
-    SPARK_MAX, SPARK_FLEX, TALON_FXS, TALON_FX
+    SPARK_MAX,
+    SPARK_FLEX,
+    TALON_FXS,
+    TALON_FX
   }
 
   /**
@@ -97,7 +100,10 @@ public class SwerveDriveTest {
    */
   record Layout(String name, Motor[] drives, Motor[] azimuths) {
     static Layout uniform(String name, Motor drive, Motor azimuth) {
-      return new Layout(name, new Motor[] {drive, drive, drive, drive}, new Motor[] {azimuth, azimuth, azimuth, azimuth});
+      return new Layout(
+          name,
+          new Motor[] {drive, drive, drive, drive},
+          new Motor[] {azimuth, azimuth, azimuth, azimuth});
     }
 
     @Override
@@ -112,21 +118,28 @@ public class SwerveDriveTest {
   private static final Motor TFX = Motor.TALON_FX;
 
   /** TalonFX drive motors and SPARK MAX azimuth motors. */
-  private static final Layout kTalonFXDriveSparkMaxAzimuth = Layout.uniform("Pigeon2, TalonFX drive, SPARK MAX azimuth", TFX, SMAX);
+  private static final Layout kTalonFXDriveSparkMaxAzimuth =
+      Layout.uniform("Pigeon2, TalonFX drive, SPARK MAX azimuth", TFX, SMAX);
 
   static Stream<Layout> layouts() {
     return Stream.of(
         kTalonFXDriveSparkMaxAzimuth,
         Layout.uniform("Pigeon2, SPARK MAX drive, TalonFX azimuth", SMAX, TFX),
         // Every motor controller as a drive and an azimuth, each module pairing two different ones.
-        new Layout("Pigeon2, mixed: SMAX/SFLEX, SFLEX/TFXS, TFXS/TFX, TFX/SMAX",
-            new Motor[] {SMAX, SFLEX, TFXS, TFX}, new Motor[] {SFLEX, TFXS, TFX, SMAX}),
+        new Layout(
+            "Pigeon2, mixed: SMAX/SFLEX, SFLEX/TFXS, TFXS/TFX, TFX/SMAX",
+            new Motor[] {SMAX, SFLEX, TFXS, TFX},
+            new Motor[] {SFLEX, TFXS, TFX, SMAX}),
         // The same pairs the other way round.
-        new Layout("Pigeon2, mixed: SFLEX/SMAX, TFXS/SFLEX, TFX/TFXS, SMAX/TFX",
-            new Motor[] {SFLEX, TFXS, TFX, SMAX}, new Motor[] {SMAX, SFLEX, TFXS, TFX}),
+        new Layout(
+            "Pigeon2, mixed: SFLEX/SMAX, TFXS/SFLEX, TFX/TFXS, SMAX/TFX",
+            new Motor[] {SFLEX, TFXS, TFX, SMAX},
+            new Motor[] {SMAX, SFLEX, TFXS, TFX}),
         // Each module one motor controller for both, every module a different one.
-        new Layout("Pigeon2, mixed: SMAX/SMAX, SFLEX/SFLEX, TFXS/TFXS, TFX/TFX",
-            new Motor[] {SMAX, SFLEX, TFXS, TFX}, new Motor[] {SMAX, SFLEX, TFXS, TFX}));
+        new Layout(
+            "Pigeon2, mixed: SMAX/SMAX, SFLEX/SFLEX, TFXS/TFXS, TFX/TFX",
+            new Motor[] {SMAX, SFLEX, TFXS, TFX},
+            new Motor[] {SMAX, SFLEX, TFXS, TFX}));
   }
 
   /** Subsystem that runs the drive's telemetry and simulation, like a robot's swerve subsystem. */
@@ -165,11 +178,37 @@ public class SwerveDriveTest {
 
     Hardware(Layout layout) {
       final String prefix = "L" + HARDWARE.size();
-      modules = new SwerveModule[] {
-          createModule(this, prefix + "FL", layout.drives()[0], layout.azimuths()[0], kModuleOffsetInches, kModuleOffsetInches),
-          createModule(this, prefix + "FR", layout.drives()[1], layout.azimuths()[1], kModuleOffsetInches, -kModuleOffsetInches),
-          createModule(this, prefix + "BL", layout.drives()[2], layout.azimuths()[2], -kModuleOffsetInches, kModuleOffsetInches),
-          createModule(this, prefix + "BR", layout.drives()[3], layout.azimuths()[3], -kModuleOffsetInches, -kModuleOffsetInches)};
+      modules =
+          new SwerveModule[] {
+            createModule(
+                this,
+                prefix + "FL",
+                layout.drives()[0],
+                layout.azimuths()[0],
+                kModuleOffsetInches,
+                kModuleOffsetInches),
+            createModule(
+                this,
+                prefix + "FR",
+                layout.drives()[1],
+                layout.azimuths()[1],
+                kModuleOffsetInches,
+                -kModuleOffsetInches),
+            createModule(
+                this,
+                prefix + "BL",
+                layout.drives()[2],
+                layout.azimuths()[2],
+                -kModuleOffsetInches,
+                kModuleOffsetInches),
+            createModule(
+                this,
+                prefix + "BR",
+                layout.drives()[3],
+                layout.azimuths()[3],
+                -kModuleOffsetInches,
+                -kModuleOffsetInches)
+          };
     }
 
     void close() {
@@ -207,19 +246,26 @@ public class SwerveDriveTest {
     };
   }
 
-  private static SmartMotorController createMotor(Hardware hardware, Motor motor, SmartMotorControllerConfig config) {
-    final SmartMotorController smc = switch (motor) {
-      case SPARK_MAX -> new SparkWrapper(DeviceCreator.createSparkMax(), dcMotor(motor), config);
-      case SPARK_FLEX -> new SparkWrapper(DeviceCreator.createSparkFlex(), dcMotor(motor), config);
-      case TALON_FXS -> new TalonFXSWrapper(DeviceCreator.createTalonFXS(), dcMotor(motor), config);
-      case TALON_FX -> new TalonFXWrapper(DeviceCreator.createTalonFX(), dcMotor(motor), config);
-    };
+  private static SmartMotorController createMotor(
+      Hardware hardware, Motor motor, SmartMotorControllerConfig config) {
+    final SmartMotorController smc =
+        switch (motor) {
+          case SPARK_MAX ->
+              new SparkWrapper(DeviceCreator.createSparkMax(), dcMotor(motor), config);
+          case SPARK_FLEX ->
+              new SparkWrapper(DeviceCreator.createSparkFlex(), dcMotor(motor), config);
+          case TALON_FXS ->
+              new TalonFXSWrapper(DeviceCreator.createTalonFXS(), dcMotor(motor), config);
+          case TALON_FX ->
+              new TalonFXWrapper(DeviceCreator.createTalonFX(), dcMotor(motor), config);
+        };
     hardware.motorControllers.add(smc);
     return smc;
   }
 
   /** Drive gear reduction. */
   private static final double kDriveReduction = 6.75;
+
   /**
    * Drive velocity feedforward, volts per wheel rotation per second: 12 V over the motor's free
    * speed at the wheel. kV is a property of the motor; the PID gains below are the same on every
@@ -229,26 +275,37 @@ public class SwerveDriveTest {
     return 12.0 / (dcMotor(motor).freeSpeed / (2 * Math.PI) / kDriveReduction);
   }
 
-  private static SwerveModule createModule(Hardware hardware, String name, Motor driveMotor, Motor azimuthMotor, double frontInches, double leftInches) {
-    SmartMotorControllerConfig driveCfg = new SmartMotorControllerConfig(hardware.subsystem)
-        .withWheelDiameter(Inches.of(4))
-        .withClosedLoopController(0.4, 0, 0)
-        .withFeedforward(new SimpleMotorFeedforward(0, driveKV(driveMotor)))
-        .withGearing(new MechanismGearing(GearBox.fromReductionStages(kDriveReduction)))
-        .withStatorCurrentLimit(Amps.of(40))
-        .withTelemetry(name + "Drive", TelemetryVerbosity.LOW);
-    SmartMotorControllerConfig azimuthCfg = new SmartMotorControllerConfig(hardware.subsystem)
-        .withClosedLoopController(50, 0, 0.5)
-        .withContinuousWrapping(Radians.of(-Math.PI), Radians.of(Math.PI))
-        .withGearing(new MechanismGearing(GearBox.fromReductionStages(12.8)))
-        .withStatorCurrentLimit(Amps.of(40))
-        .withTelemetry(name + "Azimuth", TelemetryVerbosity.LOW);
-    SwerveModuleConfig moduleCfg = new SwerveModuleConfig(createMotor(hardware, driveMotor, driveCfg), createMotor(hardware, azimuthMotor, azimuthCfg))
-        .withAbsoluteEncoder(() -> Degrees.of(0))
-        .withLocation(new Translation2d(Inches.of(frontInches), Inches.of(leftInches)))
-        .withOptimization(true)
-        .withCosineCompensation(true)
-        .withTelemetry(name, TelemetryVerbosity.LOW);
+  private static SwerveModule createModule(
+      Hardware hardware,
+      String name,
+      Motor driveMotor,
+      Motor azimuthMotor,
+      double frontInches,
+      double leftInches) {
+    SmartMotorControllerConfig driveCfg =
+        new SmartMotorControllerConfig(hardware.subsystem)
+            .withWheelDiameter(Inches.of(4))
+            .withClosedLoopController(0.4, 0, 0)
+            .withFeedforward(new SimpleMotorFeedforward(0, driveKV(driveMotor)))
+            .withGearing(new MechanismGearing(GearBox.fromReductionStages(kDriveReduction)))
+            .withStatorCurrentLimit(Amps.of(40))
+            .withTelemetry(name + "Drive", TelemetryVerbosity.LOW);
+    SmartMotorControllerConfig azimuthCfg =
+        new SmartMotorControllerConfig(hardware.subsystem)
+            .withClosedLoopController(50, 0, 0.5)
+            .withContinuousWrapping(Radians.of(-Math.PI), Radians.of(Math.PI))
+            .withGearing(new MechanismGearing(GearBox.fromReductionStages(12.8)))
+            .withStatorCurrentLimit(Amps.of(40))
+            .withTelemetry(name + "Azimuth", TelemetryVerbosity.LOW);
+    SwerveModuleConfig moduleCfg =
+        new SwerveModuleConfig(
+                createMotor(hardware, driveMotor, driveCfg),
+                createMotor(hardware, azimuthMotor, azimuthCfg))
+            .withAbsoluteEncoder(() -> Degrees.of(0))
+            .withLocation(new Translation2d(Inches.of(frontInches), Inches.of(leftInches)))
+            .withOptimization(true)
+            .withCosineCompensation(true)
+            .withTelemetry(name, TelemetryVerbosity.LOW);
     return new SwerveModule(moduleCfg);
   }
 
@@ -258,7 +315,12 @@ public class SwerveDriveTest {
     return new SwerveDriveConfig(subsystem, modules)
         // Phoenix's simulated Pigeon2 does not fill in its quaternion, which getRotation3d() reads,
         // so read the attitude from its roll, pitch and yaw.
-        .withGyro(() -> new Rotation3d(pigeon.getRoll().getValue(), pigeon.getPitch().getValue(), pigeon.getYaw().getValue()))
+        .withGyro(
+            () ->
+                new Rotation3d(
+                    pigeon.getRoll().getValue(),
+                    pigeon.getPitch().getValue(),
+                    pigeon.getYaw().getValue()))
         .withStartingPose(new Pose2d())
         .withMaximumChassisSpeed(MetersPerSecond.of(4.5), DegreesPerSecond.of(540))
         .withTelemetry("SwerveDriveTest" + driveCount, TelemetryVerbosity.LOW);
@@ -270,21 +332,25 @@ public class SwerveDriveTest {
     subsystem = hardware.subsystem;
     pigeon = hardware.pigeon;
     modules = hardware.modules;
-    drive = new SwerveDrive(baseConfig()
-        .withTranslationController(new PIDController(2, 0, 0))
-        .withRotationController(new PIDController(4, 0, 0)));
+    drive =
+        new SwerveDrive(
+            baseConfig()
+                .withTranslationController(new PIDController(2, 0, 0))
+                .withRotationController(new PIDController(4, 0, 0)));
     subsystem.drive = drive;
   }
 
   /** Run the scheduler, giving Phoenix, which simulates Talons in real time, each loop to catch up. */
   private static void runFor(double seconds) {
-    TestWithScheduler.cycle(Seconds.of(seconds), () -> {
-      try {
-        Thread.sleep(20);
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-      }
-    });
+    TestWithScheduler.cycle(
+        Seconds.of(seconds),
+        () -> {
+          try {
+            Thread.sleep(20);
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+          }
+        });
   }
 
   @BeforeEach
@@ -335,7 +401,9 @@ public class SwerveDriveTest {
     pigeon.getSimState().setRawYaw(Degrees.of(30));
     pigeon.getSimState().setPitch(Degrees.of(5));
     Rotation3d attitude = drive.getConfig().getGyroRotation3d();
-    for (int attempt = 0; attempt < 100 && Math.abs(Math.toDegrees(attitude.getZ()) - 30) > 0.5; attempt++) {
+    for (int attempt = 0;
+        attempt < 100 && Math.abs(Math.toDegrees(attitude.getZ()) - 30) > 0.5;
+        attempt++) {
       Thread.sleep(20);
       attitude = drive.getConfig().getGyroRotation3d();
     }
@@ -352,10 +420,12 @@ public class SwerveDriveTest {
   private double moduleDisagreement() {
     final SwerveModuleVelocity[] measured = drive.getModuleStates();
     final var kinematics = drive.getKinematics();
-    final SwerveModuleVelocity[] rigid = kinematics.toSwerveModuleVelocities(kinematics.toChassisVelocities(measured));
+    final SwerveModuleVelocity[] rigid =
+        kinematics.toSwerveModuleVelocities(kinematics.toChassisVelocities(measured));
     double worst = 0;
     for (int i = 0; i < measured.length; i++) {
-      final Translation2d measuredVector = new Translation2d(measured[i].velocity, measured[i].angle);
+      final Translation2d measuredVector =
+          new Translation2d(measured[i].velocity, measured[i].angle);
       final Translation2d rigidVector = new Translation2d(rigid[i].velocity, rigid[i].angle);
       worst = Math.max(worst, measuredVector.getDistance(rigidVector));
     }
@@ -370,7 +440,8 @@ public class SwerveDriveTest {
    * @param pose         Pose at the end.
    * @param speed        Measured robot relative speed at the end.
    */
-  private record DriveResult(double disagreement, Pose2d settledPose, Pose2d pose, ChassisVelocities speed) {}
+  private record DriveResult(
+      double disagreement, Pose2d settledPose, Pose2d pose, ChassisVelocities speed) {}
 
   /** Seconds the modules get to turn to their first states before they are checked. */
   private static final double kSettleSeconds = 0.75;
@@ -382,20 +453,23 @@ public class SwerveDriveTest {
     final AtomicInteger loop = new AtomicInteger();
     final double[] worst = {0};
     final Pose2d[] settledPose = {null};
-    TestWithScheduler.cycle(Seconds.of(seconds), () -> {
-      try {
-        Thread.sleep(20);
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-      }
-      final int current = loop.incrementAndGet();
-      if (current == settleLoops) {
-        settledPose[0] = drive.getPose();
-      } else if (current > settleLoops) {
-        worst[0] = Math.max(worst[0], moduleDisagreement());
-      }
-    });
-    return new DriveResult(worst[0], settledPose[0], drive.getPose(), drive.getRobotRelativeSpeed());
+    TestWithScheduler.cycle(
+        Seconds.of(seconds),
+        () -> {
+          try {
+            Thread.sleep(20);
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+          }
+          final int current = loop.incrementAndGet();
+          if (current == settleLoops) {
+            settledPose[0] = drive.getPose();
+          } else if (current > settleLoops) {
+            worst[0] = Math.max(worst[0], moduleDisagreement());
+          }
+        });
+    return new DriveResult(
+        worst[0], settledPose[0], drive.getPose(), drive.getRobotRelativeSpeed());
   }
 
   /** Largest velocity, in meters per second, a module may be off from the drive's rigid motion. */
@@ -411,7 +485,9 @@ public class SwerveDriveTest {
     assertEquals(0, result.pose().getY(), 0.1, "should not drive sideways");
     assertEquals(0, result.pose().getRotation().getDegrees(), 5, "should not turn");
     assertEquals(1, result.speed().vx, 0.2, "should be driving forward at the commanded speed");
-    assertTrue(result.disagreement() < kMaxDisagreement, "modules should not fight, but were " + result.disagreement() + " m/s apart");
+    assertTrue(
+        result.disagreement() < kMaxDisagreement,
+        "modules should not fight, but were " + result.disagreement() + " m/s apart");
   }
 
   @ParameterizedTest(name = "{0}")
@@ -420,12 +496,20 @@ public class SwerveDriveTest {
     build(layout);
     final DriveResult result = drive(() -> new ChassisVelocities(0, 0, 2), 2);
     System.out.printf("%s spin: %s%n", layout, result);
-    final double movedSinceSettling = result.pose().getTranslation().getDistance(result.settledPose().getTranslation());
-    final double turnedSinceSettling = result.pose().getRotation().minus(result.settledPose().getRotation()).getDegrees();
-    assertEquals(2, result.speed().omega, 0.4, "should be spinning counterclockwise at the commanded speed");
-    assertTrue(movedSinceSettling < 0.1, "should spin in place, but moved " + movedSinceSettling + " m");
-    assertTrue(Math.abs(turnedSinceSettling) > 20, "should have kept turning, but turned " + turnedSinceSettling + " degrees");
-    assertTrue(result.disagreement() < kMaxDisagreement, "modules should not fight, but were " + result.disagreement() + " m/s apart");
+    final double movedSinceSettling =
+        result.pose().getTranslation().getDistance(result.settledPose().getTranslation());
+    final double turnedSinceSettling =
+        result.pose().getRotation().minus(result.settledPose().getRotation()).getDegrees();
+    assertEquals(
+        2, result.speed().omega, 0.4, "should be spinning counterclockwise at the commanded speed");
+    assertTrue(
+        movedSinceSettling < 0.1, "should spin in place, but moved " + movedSinceSettling + " m");
+    assertTrue(
+        Math.abs(turnedSinceSettling) > 20,
+        "should have kept turning, but turned " + turnedSinceSettling + " degrees");
+    assertTrue(
+        result.disagreement() < kMaxDisagreement,
+        "modules should not fight, but were " + result.disagreement() + " m/s apart");
   }
 
   @ParameterizedTest(name = "{0}")
@@ -433,13 +517,27 @@ public class SwerveDriveTest {
   void translatesWhileSpinning(Layout layout) {
     build(layout);
     // Field relative toward +X while spinning: some drift off +X is expected, fighting is not.
-    final DriveResult result = drive(() -> new ChassisVelocities(1, 0, 2).toRobotRelative(drive.getGyroRotation3d().toRotation2d()), 2);
+    final DriveResult result =
+        drive(
+            () ->
+                new ChassisVelocities(1, 0, 2)
+                    .toRobotRelative(drive.getGyroRotation3d().toRotation2d()),
+            2);
     System.out.printf("%s translate while spinning: %s%n", layout, result);
-    final Translation2d travel = result.pose().getTranslation().minus(result.settledPose().getTranslation());
-    assertTrue(travel.getX() > 0.5, "should translate toward +X while spinning, but went " + travel);
-    assertEquals(2, result.speed().omega, 0.4, "should be spinning counterclockwise at the commanded speed");
-    assertEquals(1, Math.hypot(result.speed().vx, result.speed().vy), 0.3, "should be translating at the commanded speed");
-    assertTrue(result.disagreement() < kMaxDisagreement, "modules should not fight, but were " + result.disagreement() + " m/s apart");
+    final Translation2d travel =
+        result.pose().getTranslation().minus(result.settledPose().getTranslation());
+    assertTrue(
+        travel.getX() > 0.5, "should translate toward +X while spinning, but went " + travel);
+    assertEquals(
+        2, result.speed().omega, 0.4, "should be spinning counterclockwise at the commanded speed");
+    assertEquals(
+        1,
+        Math.hypot(result.speed().vx, result.speed().vy),
+        0.3,
+        "should be translating at the commanded speed");
+    assertTrue(
+        result.disagreement() < kMaxDisagreement,
+        "modules should not fight, but were " + result.disagreement() + " m/s apart");
   }
 
   @ParameterizedTest(name = "{0}")
@@ -470,11 +568,13 @@ public class SwerveDriveTest {
 
     runFor(1);
     for (SwerveModule module : drive.getModules()) {
-      double expected = module.getConfig().getLocation().orElseThrow().getAngle().orElseThrow().getDegrees();
+      double expected =
+          module.getConfig().getLocation().orElseThrow().getAngle().orElseThrow().getDegrees();
       double actual = module.getState().angle.getDegrees();
       // Module optimization may reverse the wheel, so angles half a rotation apart are equivalent.
       double error = Math.IEEEremainder(actual - expected, 180);
-      assertEquals(0, error, 10, module.getName() + " at " + actual + " should turn toward " + expected);
+      assertEquals(
+          0, error, 10, module.getName() + " at " + actual + " should turn toward " + expected);
     }
   }
 
@@ -500,7 +600,8 @@ public class SwerveDriveTest {
     assertDoesNotThrow(plain::simIterate);
     assertDoesNotThrow(plain::resetTranslationPID);
     assertDoesNotThrow(plain::resetRotationPID);
-    assertThrows(SwerveDriveConfigurationException.class, () -> plain.driveToPoseSetpoint(new Pose2d()));
+    assertThrows(
+        SwerveDriveConfigurationException.class, () -> plain.driveToPoseSetpoint(new Pose2d()));
   }
 
   @Test
@@ -547,9 +648,11 @@ public class SwerveDriveTest {
   @Test
   void stateFromSpeedsForwardDrive() {
     build(kTalonFXDriveSparkMaxAzimuth);
-    SwerveModuleVelocity[] states = drive.getStateFromRobotRelativeChassisSpeeds(new ChassisVelocities(1, 0, 0));
+    SwerveModuleVelocity[] states =
+        drive.getStateFromRobotRelativeChassisSpeeds(new ChassisVelocities(1, 0, 0));
     for (int i = 0; i < states.length; i++) {
-      assertEquals(1, states[i].velocity, 0.01, "module " + i + " speed should equal the commanded speed");
+      assertEquals(
+          1, states[i].velocity, 0.01, "module " + i + " speed should equal the commanded speed");
       assertEquals(0, states[i].angle.getDegrees(), 1, "module " + i + " should point forward");
     }
   }
@@ -557,10 +660,13 @@ public class SwerveDriveTest {
   @Test
   void stateFromSpeedsPureRotation() {
     build(kTalonFXDriveSparkMaxAzimuth);
-    SwerveModuleVelocity[] states = drive.getStateFromRobotRelativeChassisSpeeds(new ChassisVelocities(0, 0, 1));
+    SwerveModuleVelocity[] states =
+        drive.getStateFromRobotRelativeChassisSpeeds(new ChassisVelocities(0, 0, 1));
     for (int i = 0; i < states.length; i++) {
       assertTrue(Math.abs(states[i].velocity) > 0, "module " + i + " should move to rotate");
-      assertTrue(Math.abs(states[i].angle.getDegrees()) > 1, "module " + i + " should not point forward to rotate");
+      assertTrue(
+          Math.abs(states[i].angle.getDegrees()) > 1,
+          "module " + i + " should not point forward to rotate");
     }
   }
 
@@ -587,18 +693,24 @@ public class SwerveDriveTest {
   void angleDifferenceFromPoseWrapsAtHalfARotation() {
     build(kTalonFXDriveSparkMaxAzimuth);
     drive.resetOdometry(new Pose2d(0, 0, Rotation2d.fromDegrees(170)));
-    double difference = drive.getAngleDifferenceFromPose(new Pose2d(0, 0, Rotation2d.fromDegrees(-170))).in(Degrees);
-    assertEquals(20, Math.abs(Math.toDegrees(MathUtil.angleModulus(Math.toRadians(difference)))), 0.1);
+    double difference =
+        drive
+            .getAngleDifferenceFromPose(new Pose2d(0, 0, Rotation2d.fromDegrees(-170)))
+            .in(Degrees);
+    assertEquals(
+        20, Math.abs(Math.toDegrees(MathUtil.angleModulus(Math.toRadians(difference)))), 0.1);
   }
 
   @Test
   void driveCommandCallsSpeedSupplier() {
     build(kTalonFXDriveSparkMaxAzimuth);
     AtomicInteger calls = new AtomicInteger();
-    TestWithScheduler.schedule(drive.drive(() -> {
-      calls.incrementAndGet();
-      return new ChassisVelocities();
-    }));
+    TestWithScheduler.schedule(
+        drive.drive(
+            () -> {
+              calls.incrementAndGet();
+              return new ChassisVelocities();
+            }));
     runFor(0.1);
     assertTrue(calls.get() >= 1);
   }
@@ -616,14 +728,18 @@ public class SwerveDriveTest {
     build(kTalonFXDriveSparkMaxAzimuth);
     AtomicInteger firstCalls = new AtomicInteger();
     AtomicInteger secondCalls = new AtomicInteger();
-    Command first = drive.drive(() -> {
-      firstCalls.incrementAndGet();
-      return new ChassisVelocities();
-    });
-    Command second = drive.drive(() -> {
-      secondCalls.incrementAndGet();
-      return new ChassisVelocities();
-    });
+    Command first =
+        drive.drive(
+            () -> {
+              firstCalls.incrementAndGet();
+              return new ChassisVelocities();
+            });
+    Command second =
+        drive.drive(
+            () -> {
+              secondCalls.incrementAndGet();
+              return new ChassisVelocities();
+            });
 
     TestWithScheduler.schedule(first);
     runFor(0.04);

@@ -237,7 +237,7 @@ public class SwerveMechanism implements Mechanism
     return SwerveInputStream.of(swerveDrive, translationX, translationY)
         .withDeadband(0.1)
         .withScaleTranslation(.8)
-        .withAllianceRelativeControl(true);
+        .setAllianceRelativeControl(true);
   }
 
   public void driveFieldOriented(ChassisVelocities velocity)

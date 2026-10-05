@@ -169,11 +169,11 @@ public class SwerveMechanism implements Mechanism
         .withDeadband(0.01)
         // Cubing the rotation axis gives finer control at low inputs without
         // reducing the achievable maximum.
-        .withCubeRotationControllerAxis(true)
-        .withCubeTranslationControllerAxis(true)
+        .setCubeRotationControllerAxis(true)
+        .setCubeTranslationControllerAxis(true)
         // Alliance-relative: forward on the stick always moves toward the opposing
         // alliance wall regardless of which side the robot started on.
-        .withAllianceRelativeControl(true);
+        .setAllianceRelativeControl(true);
   }
 
   /** Drive with speeds from an input stream. Call once per loop. */

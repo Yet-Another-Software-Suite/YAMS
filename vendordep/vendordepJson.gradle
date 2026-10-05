@@ -82,11 +82,13 @@ ext.createVendordepJsonTask = { variant ->
         vendordep.cppDependencies = (variant.includeCpp && !skipCpp) ? vendordep.cppDependencies : []
         vendordep.requires = [variant.requires]
         def other = vendordepVariants[variant.conflictsWith]
-        vendordep.conflictsWith = [[
-            uuid           : other.uuid,
-            errorMessage   : "${variant.name} cannot be used with ${other.name}. Remove one of them.",
-            offlineFileName: other.fileName,
-        ]]
+        vendordep.conflictsWith = [
+            [
+                uuid           : other.uuid,
+                errorMessage   : "${variant.name} cannot be used with ${other.name}. Remove one of them.",
+                offlineFileName: other.fileName,
+            ]
+        ]
 
         def pretty = JsonOutput.prettyPrint(JsonOutput.toJson(vendordep))
         // Groovy's pretty-printer spreads empty arrays/objects across three lines; collapse them

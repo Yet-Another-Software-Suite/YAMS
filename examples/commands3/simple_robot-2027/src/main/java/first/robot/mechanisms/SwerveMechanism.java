@@ -142,8 +142,8 @@ public class SwerveMechanism implements Mechanism {
         .withMaximumLinearVelocity(MetersPerSecond.of(4))
         .withMaximumAngularVelocity(DegreesPerSecond.of(360))
         .withDeadband(0.05)
-        .withCubeTranslationControllerAxis()
-        .withAllianceRelativeControl();
+        .setCubeTranslationControllerAxis()
+        .setAllianceRelativeControl();
   }
 
   /** Drive with field relative speeds from an input stream. Call once per loop. */

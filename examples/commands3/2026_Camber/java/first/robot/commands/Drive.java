@@ -56,7 +56,7 @@ public final class Drive
           heading[0] = Math.atan2(x, y);
         }
         return Radians.of(heading[0]);
-      }).withHeadingControl(true);
+      }).setHeadingControl(true);
       while (true)
       {
         swerve.driveFieldOrientedSetpoint(input.get());
@@ -82,7 +82,8 @@ public final class Drive
           () -> hid.getLeftY() * -1,
           () -> hid.getLeftX() * -1
       ).withControllerRotationAxis(() -> hid.getRightX())
-       .withAim(() -> targetPose, () -> true);
+       .withAimTarget(() -> targetPose)
+       .setAim(true);
       while (true)
       {
         swerve.driveFieldOrientedSetpoint(input.get());

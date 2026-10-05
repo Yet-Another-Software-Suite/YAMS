@@ -69,12 +69,19 @@ public class DiscontinuityPointTest {
   /** An encoder, a closed loop controller, and a discontinuity point. */
   private record Case(Encoder encoder, Controller controller, Angle discontinuityPoint) {
     String name() {
-      return encoder + " " + controller + " discontinuity point " + discontinuityPoint.in(Rotations) + " rotations";
+      return encoder
+          + " "
+          + controller
+          + " discontinuity point "
+          + discontinuityPoint.in(Rotations)
+          + " rotations";
     }
 
     /** An angle in the range the discontinuity point gives, outside the other one. */
     Angle setpoint() {
-      return discontinuityPoint.isEquivalent(Rotations.of(0.5)) ? Degrees.of(-100) : Degrees.of(260);
+      return discontinuityPoint.isEquivalent(Rotations.of(0.5))
+          ? Degrees.of(-100)
+          : Degrees.of(260);
     }
 
     @Override
@@ -96,30 +103,50 @@ public class DiscontinuityPointTest {
   }
 
   /** Check that the encoder holds the discontinuity point, in its own terms. */
-  private static void assertConfigured(SmartMotorController smc, Case testCase) throws InterruptedException {
+  private static void assertConfigured(SmartMotorController smc, Case testCase)
+      throws InterruptedException {
     final String name = testCase.name();
     final double point = testCase.discontinuityPoint().in(Rotations);
     final Object encoder = smc.getConfig().getExternalEncoder().orElseThrow();
     if (encoder instanceof CANcoder cancoder) {
       final CANcoderConfiguration config = new CANcoderConfiguration();
       DeviceCreator.refreshConfig(() -> cancoder.getConfigurator().refresh(config, 1.0));
-      assertEquals(point, config.MagnetSensor.AbsoluteSensorDiscontinuityPoint, 1e-9, name + ": CANcoder discontinuity point");
+      assertEquals(
+          point,
+          config.MagnetSensor.AbsoluteSensorDiscontinuityPoint,
+          1e-9,
+          name + ": CANcoder discontinuity point");
     } else if (encoder instanceof CANdi candi) {
       final CANdiConfiguration config = new CANdiConfiguration();
       DeviceCreator.refreshConfig(() -> candi.getConfigurator().refresh(config, 1.0));
-      assertEquals(point, config.PWM1.AbsoluteSensorDiscontinuityPoint, 1e-9, name + ": CANdi discontinuity point");
+      assertEquals(
+          point,
+          config.PWM1.AbsoluteSensorDiscontinuityPoint,
+          1e-9,
+          name + ": CANdi discontinuity point");
     } else if (encoder instanceof DetachedEncoder detachedEncoder) {
-      assertEquals(point == 0.5, detachedEncoder.detachedEncoderAccessor.isDutyCycleZeroCentered(), name + ": CAN encoder zero-centered");
+      assertEquals(
+          point == 0.5,
+          detachedEncoder.detachedEncoderAccessor.isDutyCycleZeroCentered(),
+          name + ": CAN encoder zero-centered");
     } else {
       // REVLib's range offset is the middle of the range the encoder reports.
       final SparkBase spark = (SparkBase) smc.getMotorController();
       final double[] rangeOffset = new double[1];
-      assertTrue(AbsoluteEncoderCases.eventually(() -> {
-        rangeOffset[0] = spark instanceof SparkMax sparkMax
-                         ? sparkMax.configAccessor.absoluteEncoder.getRangeOffset()
-                         : ((SparkFlex) spark).configAccessor.absoluteEncoder.getRangeOffset();
-        return Math.abs(rangeOffset[0] - (point - 0.5)) < 1e-6;
-      }), name + ": SPARK absolute encoder range offset expected " + (point - 0.5) + " but was " + rangeOffset[0]);
+      assertTrue(
+          AbsoluteEncoderCases.eventually(
+              () -> {
+                rangeOffset[0] =
+                    spark instanceof SparkMax sparkMax
+                        ? sparkMax.configAccessor.absoluteEncoder.getRangeOffset()
+                        : ((SparkFlex) spark).configAccessor.absoluteEncoder.getRangeOffset();
+                return Math.abs(rangeOffset[0] - (point - 0.5)) < 1e-6;
+              }),
+          name
+              + ": SPARK absolute encoder range offset expected "
+              + (point - 0.5)
+              + " but was "
+              + rangeOffset[0]);
     }
   }
 
@@ -127,24 +154,49 @@ public class DiscontinuityPointTest {
   @MethodSource("createCases")
   void encoderReportsAnglesBelowItsDiscontinuityPoint(Case testCase) throws InterruptedException {
     final String name = testCase.name();
-    final SmartMotorController smc = AbsoluteEncoderCases.create(testCase.encoder(),
-        AbsoluteEncoderCases.config("DiscontinuityPointTest " + name, testCase.controller()),
-        config -> config.withExternalEncoderDiscontinuityPoint(testCase.discontinuityPoint()));
+    final SmartMotorController smc =
+        AbsoluteEncoderCases.create(
+            testCase.encoder(),
+            AbsoluteEncoderCases.config("DiscontinuityPointTest " + name, testCase.controller()),
+            config -> config.withExternalEncoderDiscontinuityPoint(testCase.discontinuityPoint()));
     try {
       assertConfigured(smc, testCase);
       AbsoluteEncoderCases.runTo(smc, testCase.encoder(), testCase.setpoint(), Seconds.of(2.5));
 
       final Angle simulated = smc.getSimSupplier().orElseThrow().getMechanismPosition();
-      // An absolute encoder gives the angle within a rotation, so the mechanism may have gone either
+      // An absolute encoder gives the angle within a rotation, so the mechanism may have gone
+      // either
       // way round to it.
-      assertTrue(Math.abs(MathUtil.inputModulus(simulated.minus(testCase.setpoint()).in(Degrees), -180, 180)) < kTolerance.in(Degrees),
-          name + ": expected the simulated mechanism at " + testCase.setpoint().in(Degrees) + "° but it was at " + simulated.in(Degrees) + "°");
+      assertTrue(
+          Math.abs(
+                  MathUtil.inputModulus(
+                      simulated.minus(testCase.setpoint()).in(Degrees), -180, 180))
+              < kTolerance.in(Degrees),
+          name
+              + ": expected the simulated mechanism at "
+              + testCase.setpoint().in(Degrees)
+              + "° but it was at "
+              + simulated.in(Degrees)
+              + "°");
       final Angle absolute = AbsoluteEncoderCases.absoluteAngle(smc);
       final double point = testCase.discontinuityPoint().in(Rotations);
-      assertTrue(absolute.in(Rotations) >= point - 1 - 1e-6 && absolute.in(Rotations) <= point + 1e-6,
-          name + ": expected the encoder to report an angle in [" + (point - 1) + ", " + point + ") rotations but it reported " + absolute.in(Rotations));
-      assertTrue(Math.abs(absolute.minus(testCase.setpoint()).in(Degrees)) < kTolerance.in(Degrees),
-          name + ": expected the encoder to report " + testCase.setpoint().in(Degrees) + "° but it reported " + absolute.in(Degrees) + "°");
+      assertTrue(
+          absolute.in(Rotations) >= point - 1 - 1e-6 && absolute.in(Rotations) <= point + 1e-6,
+          name
+              + ": expected the encoder to report an angle in ["
+              + (point - 1)
+              + ", "
+              + point
+              + ") rotations but it reported "
+              + absolute.in(Rotations));
+      assertTrue(
+          Math.abs(absolute.minus(testCase.setpoint()).in(Degrees)) < kTolerance.in(Degrees),
+          name
+              + ": expected the encoder to report "
+              + testCase.setpoint().in(Degrees)
+              + "° but it reported "
+              + absolute.in(Degrees)
+              + "°");
     } finally {
       AbsoluteEncoderCases.close(smc);
     }
@@ -153,21 +205,33 @@ public class DiscontinuityPointTest {
   @ParameterizedTest(name = "{0} rotations")
   @ValueSource(doubles = {0.5, 1})
   void acceptsHalfAndWholeRotations(double rotations) {
-    assertDoesNotThrow(() -> new yams.commands2.config.SmartMotorControllerConfig().withExternalEncoderDiscontinuityPoint(Rotations.of(rotations)));
+    assertDoesNotThrow(
+        () ->
+            new yams.commands2.config.SmartMotorControllerConfig()
+                .withExternalEncoderDiscontinuityPoint(Rotations.of(rotations)));
   }
 
   @ParameterizedTest(name = "{0} rotations")
   @ValueSource(doubles = {0, 0.3, 0.75, 2, -0.5})
   void rejectsOtherDiscontinuityPoints(double rotations) {
-    assertThrows(SmartMotorControllerConfigurationException.class,
-        () -> new yams.commands2.config.SmartMotorControllerConfig().withExternalEncoderDiscontinuityPoint(Rotations.of(rotations)));
+    assertThrows(
+        SmartMotorControllerConfigurationException.class,
+        () ->
+            new yams.commands2.config.SmartMotorControllerConfig()
+                .withExternalEncoderDiscontinuityPoint(Rotations.of(rotations)));
   }
 
   /** A motor controller without an absolute encoder, a closed loop controller, and a discontinuity point. */
-  private record RelativeCase(RelativeFeedback feedback, Controller controller, Angle discontinuityPoint) {
+  private record RelativeCase(
+      RelativeFeedback feedback, Controller controller, Angle discontinuityPoint) {
     @Override
     public String toString() {
-      return feedback + " " + controller + " discontinuity point " + discontinuityPoint.in(Rotations) + " rotations";
+      return feedback
+          + " "
+          + controller
+          + " discontinuity point "
+          + discontinuityPoint.in(Rotations)
+          + " rotations";
     }
   }
 
@@ -187,11 +251,14 @@ public class DiscontinuityPointTest {
   @MethodSource("createRelativeCases")
   void withoutAnAbsoluteEncoder(RelativeCase testCase) {
     final String name = testCase.toString();
-    final SmartMotorControllerConfig config = AbsoluteEncoderCases.config("DiscontinuityPointTest " + name, testCase.controller())
-        .withExternalEncoderDiscontinuityPoint(testCase.discontinuityPoint());
+    final SmartMotorControllerConfig config =
+        AbsoluteEncoderCases.config("DiscontinuityPointTest " + name, testCase.controller())
+            .withExternalEncoderDiscontinuityPoint(testCase.discontinuityPoint());
     if (!testCase.feedback().talon()) {
       // A SPARK rejects the option without an absolute encoder to give it to.
-      assertThrows(SmartMotorControllerConfigurationException.class, () -> AbsoluteEncoderCases.create(testCase.feedback(), config),
+      assertThrows(
+          SmartMotorControllerConfigurationException.class,
+          () -> AbsoluteEncoderCases.create(testCase.feedback(), config),
           name + ": a SPARK without an absolute encoder has no discontinuity point");
       return;
     }
@@ -203,10 +270,20 @@ public class DiscontinuityPointTest {
       AbsoluteEncoderCases.run(smc, true, Optional.of(setpoint), Seconds.of(2.5));
       final Angle simulated = smc.getSimSupplier().orElseThrow().getMechanismPosition();
       final Angle mechanism = smc.getMechanismPosition();
-      assertTrue(Math.abs(simulated.minus(setpoint).in(Degrees)) < kTolerance.in(Degrees),
-          name + ": expected the simulated mechanism at " + setpoint.in(Degrees) + " degrees but it was at " + simulated.in(Degrees));
-      assertTrue(Math.abs(mechanism.minus(setpoint).in(Degrees)) < kTolerance.in(Degrees),
-          name + ": expected the mechanism to read " + setpoint.in(Degrees) + " degrees but it read " + mechanism.in(Degrees));
+      assertTrue(
+          Math.abs(simulated.minus(setpoint).in(Degrees)) < kTolerance.in(Degrees),
+          name
+              + ": expected the simulated mechanism at "
+              + setpoint.in(Degrees)
+              + " degrees but it was at "
+              + simulated.in(Degrees));
+      assertTrue(
+          Math.abs(mechanism.minus(setpoint).in(Degrees)) < kTolerance.in(Degrees),
+          name
+              + ": expected the mechanism to read "
+              + setpoint.in(Degrees)
+              + " degrees but it read "
+              + mechanism.in(Degrees));
     } finally {
       AbsoluteEncoderCases.close(smc);
     }

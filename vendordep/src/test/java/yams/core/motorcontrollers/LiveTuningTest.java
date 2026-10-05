@@ -11,7 +11,6 @@ import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.MetersPerSecondPerSecond;
 import static org.wpilib.units.Units.RPM;
-import static org.wpilib.units.Units.Rotations;
 import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
 import static org.wpilib.units.Units.Second;
@@ -72,7 +71,9 @@ import yams.helpers.SmartMotorControllerTestSubsystem;
  */
 public class LiveTuningTest {
   private static final double kTolerance = 1e-9;
-  private static final MechanismGearing kGearing = new MechanismGearing(GearBox.fromReductionStages(3, 4));
+  private static final MechanismGearing kGearing =
+      new MechanismGearing(GearBox.fromReductionStages(3, 4));
+
   /** Meters per mechanism rotation of the linear mechanisms. */
   private static final double kCircumferenceMeters = 0.2;
 
@@ -98,8 +99,11 @@ public class LiveTuningTest {
   }
 
   /** A motor controller to test, created from its config when the test runs. */
-  private record Case(String name, Controller controller, boolean linear,
-                      Function<SmartMotorControllerConfig, SmartMotorController> create) {
+  private record Case(
+      String name,
+      Controller controller,
+      boolean linear,
+      Function<SmartMotorControllerConfig, SmartMotorController> create) {
     @Override
     public String toString() {
       return name;
@@ -111,38 +115,68 @@ public class LiveTuningTest {
     for (Controller controller : Controller.values()) {
       for (boolean linear : new boolean[] {false, true}) {
         final String suffix = " " + controller + (linear ? " linear" : "");
-        cases.add(new Case("SparkMax" + suffix, controller, linear,
-            cfg -> new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1), cfg)));
-        cases.add(new Case("SparkFlex" + suffix, controller, linear,
-            cfg -> new SparkWrapper(DeviceCreator.createSparkFlex(), DCMotor.getNeoVortex(1), cfg)));
-        cases.add(new Case("TalonFX" + suffix, controller, linear,
-            cfg -> new TalonFXWrapper(DeviceCreator.createTalonFX(), DCMotor.getKrakenX60(1), cfg)));
-        cases.add(new Case("TalonFXS" + suffix, controller, linear,
-            cfg -> new TalonFXSWrapper(DeviceCreator.createTalonFXS(), DCMotor.getNEO(1), cfg)));
+        cases.add(
+            new Case(
+                "SparkMax" + suffix,
+                controller,
+                linear,
+                cfg -> new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1), cfg)));
+        cases.add(
+            new Case(
+                "SparkFlex" + suffix,
+                controller,
+                linear,
+                cfg ->
+                    new SparkWrapper(
+                        DeviceCreator.createSparkFlex(), DCMotor.getNeoVortex(1), cfg)));
+        cases.add(
+            new Case(
+                "TalonFX" + suffix,
+                controller,
+                linear,
+                cfg ->
+                    new TalonFXWrapper(
+                        DeviceCreator.createTalonFX(), DCMotor.getKrakenX60(1), cfg)));
+        cases.add(
+            new Case(
+                "TalonFXS" + suffix,
+                controller,
+                linear,
+                cfg ->
+                    new TalonFXSWrapper(DeviceCreator.createTalonFXS(), DCMotor.getNEO(1), cfg)));
       }
     }
     return cases.stream();
   }
 
   private static SmartMotorControllerConfig config(Case testCase) {
-    SmartMotorControllerConfig config = new yams.commands2.config.SmartMotorControllerConfig()
-        .withSubsystem(new SmartMotorControllerTestSubsystem())
-        .withGearing(kGearing)
-        .withStatorCurrentLimit(Amps.of(40))
-        .withZeroPower(MotorMode.BRAKE)
-        .withControlMode(ControlMode.CLOSED_LOOP)
-        .withClosedLoopController(1.5, 0.25, 0.125)
-        .withFeedforward(new SimpleMotorFeedforward(0.2, 0.75, 0.05))
-        .withTelemetry("LiveTuningTest " + testCase.name(), TelemetryVerbosity.HIGH);
+    SmartMotorControllerConfig config =
+        new yams.commands2.config.SmartMotorControllerConfig()
+            .withSubsystem(new SmartMotorControllerTestSubsystem())
+            .withGearing(kGearing)
+            .withStatorCurrentLimit(Amps.of(40))
+            .withZeroPower(MotorMode.BRAKE)
+            .withControlMode(ControlMode.CLOSED_LOOP)
+            .withClosedLoopController(1.5, 0.25, 0.125)
+            .withFeedforward(new SimpleMotorFeedforward(0.2, 0.75, 0.05))
+            .withTelemetry("LiveTuningTest " + testCase.name(), TelemetryVerbosity.HIGH);
     if (testCase.linear()) {
-      config = config.withMechanismCircumference(Meters.of(kCircumferenceMeters)).withLinearClosedLoopController(true);
+      config =
+          config
+              .withMechanismCircumference(Meters.of(kCircumferenceMeters))
+              .withLinearClosedLoopController(true);
     }
     return switch (testCase.controller()) {
       case PID -> config;
-      case TRAPEZOIDAL_PROFILE -> testCase.linear()
-                                  ? config.withTrapezoidalProfile(MetersPerSecond.of(1.5), MetersPerSecondPerSecond.of(3))
-                                  : config.withTrapezoidalProfile(RotationsPerSecond.of(2), RotationsPerSecondPerSecond.of(4));
-      case EXPONENTIAL_PROFILE -> config.withExponentialProfile(ExponentialProfile.Constraints.fromCharacteristics(12, 1.5, 0.3));
+      case TRAPEZOIDAL_PROFILE ->
+          testCase.linear()
+              ? config.withTrapezoidalProfile(
+                  MetersPerSecond.of(1.5), MetersPerSecondPerSecond.of(3))
+              : config.withTrapezoidalProfile(
+                  RotationsPerSecond.of(2), RotationsPerSecondPerSecond.of(4));
+      case EXPONENTIAL_PROFILE ->
+          config.withExponentialProfile(
+              ExponentialProfile.Constraints.fromCharacteristics(12, 1.5, 0.3));
     };
   }
 
@@ -156,15 +190,18 @@ public class LiveTuningTest {
     smc.close();
     DeviceCreator.silence(smc);
 
-    // Simulated devices keep their configuration for the rest of the test run, and YAMS starts from a
+    // Simulated devices keep their configuration for the rest of the test run, and YAMS starts from
+    // a
     // device's previous configuration, so put every device back to factory defaults for the tests
     // that reuse its ID.
     Object motorController = smc.getMotorController();
     if (motorController instanceof SparkMax sparkMax) {
-      sparkMax.configure(new SparkMaxConfig(), ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+      sparkMax.configure(
+          new SparkMaxConfig(), ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
       sparkMax.close();
     } else if (motorController instanceof SparkFlex sparkFlex) {
-      sparkFlex.configure(new SparkFlexConfig(), ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+      sparkFlex.configure(
+          new SparkFlexConfig(), ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
       sparkFlex.close();
     } else if (motorController instanceof TalonFXS talonFXS) {
       talonFXS.getConfigurator().apply(new TalonFXSConfiguration());
@@ -176,7 +213,11 @@ public class LiveTuningTest {
   }
 
   private static void assertShown(NetworkTable tuning, String key, double expected, String name) {
-    assertEquals(expected, tuning.getEntry(key).getDouble(Double.NaN), kTolerance, name + ": " + key + " shown");
+    assertEquals(
+        expected,
+        tuning.getEntry(key).getDouble(Double.NaN),
+        kTolerance,
+        name + ": " + key + " shown");
   }
 
   private static void enter(NetworkTable tuning, String key, double value) {
@@ -184,7 +225,8 @@ public class LiveTuningTest {
   }
 
   /** The kP on the motor controller itself, in its own units, waiting for an asynchronous apply. */
-  private static double deviceKp(SmartMotorController smc, double expected) throws InterruptedException {
+  private static double deviceKp(SmartMotorController smc, double expected)
+      throws InterruptedException {
     double kP = Double.NaN;
     for (int i = 0; i < 50; i++) {
       final Object motorController = smc.getMotorController();
@@ -197,7 +239,8 @@ public class LiveTuningTest {
         if (motorController instanceof TalonFXS talonFXS) {
           DeviceCreator.refreshConfig(() -> talonFXS.getConfigurator().refresh(slot0, 1.0));
         } else {
-          DeviceCreator.refreshConfig(() -> ((TalonFX) motorController).getConfigurator().refresh(slot0, 1.0));
+          DeviceCreator.refreshConfig(
+              () -> ((TalonFX) motorController).getConfigurator().refresh(slot0, 1.0));
         }
         kP = slot0.kP;
       }
@@ -215,9 +258,13 @@ public class LiveTuningTest {
     final String name = testCase.name();
     final SmartMotorController smc = testCase.create().apply(config(testCase));
     try {
-      ((SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem()).setSMC(smc);
-      final NetworkTable telemetryTable = NetworkTableInstance.getDefault().getTable("LiveTuningTest");
-      final NetworkTable tuningTable = NetworkTableInstance.getDefault().getTable("LiveTuningTestTuning");
+      ((SmartMotorControllerTestSubsystem)
+              ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+          .setSMC(smc);
+      final NetworkTable telemetryTable =
+          NetworkTableInstance.getDefault().getTable("LiveTuningTest");
+      final NetworkTable tuningTable =
+          NetworkTableInstance.getDefault().getTable("LiveTuningTestTuning");
       smc.setupTelemetry(telemetryTable, tuningTable);
       final NetworkTable tuning = tuningTable.getSubTable("LiveTuningTest " + name);
 
@@ -230,18 +277,23 @@ public class LiveTuningTest {
       assertShown(tuning, "closedloop/feedforward/kA", 0.05, name);
       switch (testCase.controller()) {
         case TRAPEZOIDAL_PROFILE -> {
-          assertShown(tuning, "closedloop/motionprofile/maxVelocity",
-              testCase.linear() ? 1.5 : RotationsPerSecond.of(2).in(RPM), name);
-          assertShown(tuning, "closedloop/motionprofile/maxAcceleration",
-              testCase.linear() ? 3 : RotationsPerSecondPerSecond.of(4).in(RPM.per(Second)), name);
+          assertShown(
+              tuning,
+              "closedloop/motionprofile/maxVelocity",
+              testCase.linear() ? 1.5 : RotationsPerSecond.of(2).in(RPM),
+              name);
+          assertShown(
+              tuning,
+              "closedloop/motionprofile/maxAcceleration",
+              testCase.linear() ? 3 : RotationsPerSecondPerSecond.of(4).in(RPM.per(Second)),
+              name);
         }
         case EXPONENTIAL_PROFILE -> {
           assertShown(tuning, "closedloop/motionprofile/kV", 1.5, name);
           assertShown(tuning, "closedloop/motionprofile/kA", 0.3, name);
           assertShown(tuning, "closedloop/motionprofile/maxInput", 12, name);
         }
-        default -> {
-        }
+        default -> {}
       }
 
       // Enter new values, one after another, and apply them.
@@ -253,8 +305,13 @@ public class LiveTuningTest {
       enter(tuning, "closedloop/feedforward/kA", 0.1);
       switch (testCase.controller()) {
         case TRAPEZOIDAL_PROFILE -> {
-          enter(tuning, "closedloop/motionprofile/maxVelocity", testCase.linear() ? 2.5 : RotationsPerSecond.of(3).in(RPM));
-          enter(tuning, "closedloop/motionprofile/maxAcceleration",
+          enter(
+              tuning,
+              "closedloop/motionprofile/maxVelocity",
+              testCase.linear() ? 2.5 : RotationsPerSecond.of(3).in(RPM));
+          enter(
+              tuning,
+              "closedloop/motionprofile/maxAcceleration",
               testCase.linear() ? 5 : RotationsPerSecondPerSecond.of(6).in(RPM.per(Second)));
         }
         case EXPONENTIAL_PROFILE -> {
@@ -262,11 +319,13 @@ public class LiveTuningTest {
           enter(tuning, "closedloop/motionprofile/kA", 0.45);
           enter(tuning, "closedloop/motionprofile/maxInput", 10);
         }
-        default -> {
-        }
+        default -> {}
       }
       // Hold the mechanism where it is while tuning.
-      enter(tuning, "closedloop/setpoint/position", testCase.linear() ? 0 : Degrees.of(0).in(Degrees));
+      enter(
+          tuning,
+          "closedloop/setpoint/position",
+          testCase.linear() ? 0 : Degrees.of(0).in(Degrees));
       smc.applyTuningValues();
 
       // The config holds exactly the entered values.
@@ -275,35 +334,48 @@ public class LiveTuningTest {
       assertEquals(2.5, pid.getP(), kTolerance, name + ": config kP");
       assertEquals(0.5, pid.getI(), kTolerance, name + ": config kI");
       assertEquals(0.375, pid.getD(), kTolerance, name + ": config kD");
-      final var feedforward = cfg.getSimpleFeedforward(ClosedLoopControllerSlot.SLOT_0).orElseThrow();
+      final var feedforward =
+          cfg.getSimpleFeedforward(ClosedLoopControllerSlot.SLOT_0).orElseThrow();
       assertEquals(0.3, feedforward.getKs(), kTolerance, name + ": config kS");
       assertEquals(1.25, feedforward.getKv(), kTolerance, name + ": config kV");
       assertEquals(0.1, feedforward.getKa(), kTolerance, name + ": config kA");
       switch (testCase.controller()) {
         case TRAPEZOIDAL_PROFILE -> {
           final TrapezoidProfile.Constraints constraints = cfg.getTrapezoidProfile().orElseThrow();
-          assertEquals(testCase.linear() ? 2.5 : 3, constraints.maxVelocity, 1e-9, name + ": config max velocity");
-          assertEquals(testCase.linear() ? 5 : 6, constraints.maxAcceleration, 1e-9, name + ": config max acceleration");
+          assertEquals(
+              testCase.linear() ? 2.5 : 3,
+              constraints.maxVelocity,
+              1e-9,
+              name + ": config max velocity");
+          assertEquals(
+              testCase.linear() ? 5 : 6,
+              constraints.maxAcceleration,
+              1e-9,
+              name + ": config max acceleration");
         }
         case EXPONENTIAL_PROFILE -> {
-          final ExponentialProfile.Constraints constraints = cfg.getExponentialProfile().orElseThrow();
+          final ExponentialProfile.Constraints constraints =
+              cfg.getExponentialProfile().orElseThrow();
           assertEquals(1.8, -constraints.A / constraints.B, 1e-9, name + ": config profile kV");
           assertEquals(0.45, 1.0 / constraints.B, 1e-9, name + ": config profile kA");
           assertEquals(10, constraints.maxInput, 1e-9, name + ": config profile max input");
         }
-        default -> {
-        }
+        default -> {}
       }
 
-      // The motor controller holds the entered kP in its own units: duty cycle per motor rotation on
-      // a SPARK, volts per mechanism rotation on a Talon, and per meter converted to per rotation for
+      // The motor controller holds the entered kP in its own units: duty cycle per motor rotation
+      // on
+      // a SPARK, volts per mechanism rotation on a Talon, and per meter converted to per rotation
+      // for
       // a linear mechanism.
       final double rotationsPerGainUnit = testCase.linear() ? 1 / kCircumferenceMeters : 1;
-      final double expectedDeviceKp = smc instanceof SparkWrapper
-                                      ? 2.5 / (12 * kGearing.getMechanismToRotorRatio() * rotationsPerGainUnit)
-                                      : 2.5 / rotationsPerGainUnit;
+      final double expectedDeviceKp =
+          smc instanceof SparkWrapper
+              ? 2.5 / (12 * kGearing.getMechanismToRotorRatio() * rotationsPerGainUnit)
+              : 2.5 / rotationsPerGainUnit;
       final double deviceKp = deviceKp(smc, expectedDeviceKp);
-      assertTrue(Math.abs(deviceKp - expectedDeviceKp) <= 1e-6 * expectedDeviceKp,
+      assertTrue(
+          Math.abs(deviceKp - expectedDeviceKp) <= 1e-6 * expectedDeviceKp,
           name + ": device kP expected " + expectedDeviceKp + " but was " + deviceKp);
     } finally {
       closeSmc(smc);

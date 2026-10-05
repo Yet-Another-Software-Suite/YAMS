@@ -40,7 +40,7 @@ public final class Drive
           () -> -hid.getLeftX(),
           () -> -hid.getRightX(),
           OIConstants.kDriveDeadband
-      ).withRobotRelative(!fieldRelative);
+      ).setRobotRelative(!fieldRelative);
       // Drop a Start press from before this command started.
       hid.getStartButtonPressed();
       while (true)

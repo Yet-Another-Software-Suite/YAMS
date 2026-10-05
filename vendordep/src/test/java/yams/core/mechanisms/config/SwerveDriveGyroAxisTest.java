@@ -25,7 +25,9 @@ public class SwerveDriveGyroAxisTest {
   private final AtomicReference<Rotation3d> gyro = new AtomicReference<>(new Rotation3d());
 
   private SwerveDriveConfig<?> config(GyroAxis axis) {
-    return new yams.commands2.config.SwerveDriveConfig().withGyro(gyro::get).withGyroHeadingAxis(axis);
+    return new yams.commands2.config.SwerveDriveConfig()
+        .withGyro(gyro::get)
+        .withGyroHeadingAxis(axis);
   }
 
   /** The gyro rotated about its own X, Y or Z axis by the given degrees. */
@@ -48,7 +50,8 @@ public class SwerveDriveGyroAxisTest {
     for (double turn : turns) {
       rotateGyro(x, y, z, turn);
       final double expected = Math.toDegrees(MathUtil.angleModulus(Math.toRadians(turn)));
-      assertEquals(expected, headingDegrees(config), kTolerance, axis + " heading after turning " + turn);
+      assertEquals(
+          expected, headingDegrees(config), kTolerance, axis + " heading after turning " + turn);
     }
   }
 
@@ -64,14 +67,16 @@ public class SwerveDriveGyroAxisTest {
 
   @Test
   void pitchHeadingFollowsGyroYPastAQuarterRotation() {
-    // A Rotation3d's pitch only reaches a quarter rotation each way, so the heading has to come from
+    // A Rotation3d's pitch only reaches a quarter rotation each way, so the heading has to come
+    // from
     // the robot frame yaw, not the gyro's pitch.
     assertHeadingFollows(GyroAxis.PITCH, 0, 1, 0);
   }
 
   @Test
   void inversionAndOffsetApplyToTheChosenAxis() {
-    final SwerveDriveConfig<?> config = config(GyroAxis.ROLL).withGyroInverted(true).withGyroOffset(Degrees.of(10));
+    final SwerveDriveConfig<?> config =
+        config(GyroAxis.ROLL).withGyroInverted(true).withGyroOffset(Degrees.of(10));
     rotateGyro(1, 0, 0, 30);
     assertEquals(-40, headingDegrees(config), kTolerance, "inverted, offset roll heading");
   }
@@ -105,11 +110,16 @@ public class SwerveDriveGyroAxisTest {
 
   @Test
   void antiTippingCorrectsTheRobotsTiltWithASideMountedGyro() {
-    final SwerveDriveConfig<?> config = config(GyroAxis.ROLL)
-        .withAntiTipping(MetersPerSecond.of(4), Degrees.of(10), MetersPerSecond.of(1.5));
+    final SwerveDriveConfig<?> config =
+        config(GyroAxis.ROLL)
+            .withAntiTipping(MetersPerSecond.of(4), Degrees.of(10), MetersPerSecond.of(1.5));
     // Robot tipping forward 15 degrees, seen by a ROLL mounted gyro as rotation about its Y axis.
     rotateGyro(0, 1, 0, 15);
-    assertEquals(4 * Math.sin(Math.toRadians(15)), config.getAntiTippingCorrection().vx, kTolerance, "forward correction");
+    assertEquals(
+        4 * Math.sin(Math.toRadians(15)),
+        config.getAntiTippingCorrection().vx,
+        kTolerance,
+        "forward correction");
     assertEquals(0, config.getAntiTippingCorrection().vy, kTolerance, "no sideways correction");
   }
 }

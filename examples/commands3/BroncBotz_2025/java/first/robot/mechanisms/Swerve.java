@@ -143,7 +143,7 @@ public class Swerve implements Mechanism {
             .withDeadband(OperatorConstants.kDeadband)
             .withScaleTranslation(translationScale)
             .withScaleRotation(OperatorConstants.kRotationScale)
-            .withAllianceRelativeControl(allianceRelative);
+            .setAllianceRelativeControl(allianceRelative);
     }
 
     /** Underlying {@link SwerveDrive}. */

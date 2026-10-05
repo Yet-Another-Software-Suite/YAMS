@@ -24,6 +24,7 @@ import org.wpilib.math.kinematics.ChassisVelocities;
  */
 public class SwerveDriveAntiTippingTest {
   private static final double kTolerance = 1e-9;
+
   /** Correction speed per sine of the tilt, in meters per second. */
   private static final double kP = 4;
 
@@ -32,17 +33,21 @@ public class SwerveDriveAntiTippingTest {
 
   @BeforeEach
   void createConfig() {
-    config = new yams.commands2.config.SwerveDriveConfig()
-        .withGyro(attitude::get)
-        .withAntiTipping(MetersPerSecond.of(kP), Degrees.of(10), MetersPerSecond.of(1.5));
+    config =
+        new yams.commands2.config.SwerveDriveConfig()
+            .withGyro(attitude::get)
+            .withAntiTipping(MetersPerSecond.of(kP), Degrees.of(10), MetersPerSecond.of(1.5));
   }
 
   /** The robot's attitude, from its roll, pitch and yaw in degrees. */
   private void tilt(double rollDegrees, double pitchDegrees, double yawDegrees) {
-    attitude.set(new Rotation3d(Math.toRadians(rollDegrees), Math.toRadians(pitchDegrees), Math.toRadians(yawDegrees)));
+    attitude.set(
+        new Rotation3d(
+            Math.toRadians(rollDegrees), Math.toRadians(pitchDegrees), Math.toRadians(yawDegrees)));
   }
 
-  private static void assertSpeeds(double vx, double vy, double omega, ChassisVelocities actual, String message) {
+  private static void assertSpeeds(
+      double vx, double vy, double omega, ChassisVelocities actual, String message) {
     assertEquals(vx, actual.vx, kTolerance, message + ": vx");
     assertEquals(vy, actual.vy, kTolerance, message + ": vy");
     assertEquals(omega, actual.omega, kTolerance, message + ": omega");
@@ -57,13 +62,23 @@ public class SwerveDriveAntiTippingTest {
   @Test
   void drivesForwardUnderAForwardTip() {
     tilt(0, 15, 0);
-    assertSpeeds(kP * Math.sin(Math.toRadians(15)), 0, 0, config.getAntiTippingCorrection(), "tipping forward");
+    assertSpeeds(
+        kP * Math.sin(Math.toRadians(15)),
+        0,
+        0,
+        config.getAntiTippingCorrection(),
+        "tipping forward");
   }
 
   @Test
   void drivesRightUnderARightwardTip() {
     tilt(15, 0, 0);
-    assertSpeeds(0, -kP * Math.sin(Math.toRadians(15)), 0, config.getAntiTippingCorrection(), "tipping right");
+    assertSpeeds(
+        0,
+        -kP * Math.sin(Math.toRadians(15)),
+        0,
+        config.getAntiTippingCorrection(),
+        "tipping right");
   }
 
   @Test
@@ -71,41 +86,63 @@ public class SwerveDriveAntiTippingTest {
     // The chassis speeds the correction is added to are robot relative, so the heading does not
     // change which way the robot drives to catch itself.
     tilt(0, 15, 90);
-    assertSpeeds(kP * Math.sin(Math.toRadians(15)), 0, 0, config.getAntiTippingCorrection(), "tipping forward, facing 90 degrees");
+    assertSpeeds(
+        kP * Math.sin(Math.toRadians(15)),
+        0,
+        0,
+        config.getAntiTippingCorrection(),
+        "tipping forward, facing 90 degrees");
   }
 
   @Test
   void correctsNoFasterThanTheMaximumCorrectionSpeed() {
     tilt(0, -40, 0);
-    assertSpeeds(-1.5, 0, 0, config.getAntiTippingCorrection(), "tipping back past the maximum correction");
+    assertSpeeds(
+        -1.5, 0, 0, config.getAntiTippingCorrection(), "tipping back past the maximum correction");
   }
 
   @Test
   void addsTheCorrectionToRobotRelativeChassisSpeeds() {
     tilt(0, 15, 0);
-    final ChassisVelocities speeds = config.optimizeRobotRelativeChassisSpeeds(new ChassisVelocities(1, 0.5, 2));
-    assertSpeeds(1 + kP * Math.sin(Math.toRadians(15)), 0.5, 2, speeds, "driving while tipping forward");
+    final ChassisVelocities speeds =
+        config.optimizeRobotRelativeChassisSpeeds(new ChassisVelocities(1, 0.5, 2));
+    assertSpeeds(
+        1 + kP * Math.sin(Math.toRadians(15)), 0.5, 2, speeds, "driving while tipping forward");
   }
 
   @Test
   void withoutAntiTippingChassisSpeedsAreUnchanged() {
-    final SwerveDriveConfig<?> plain = new yams.commands2.config.SwerveDriveConfig().withGyro(attitude::get);
+    final SwerveDriveConfig<?> plain =
+        new yams.commands2.config.SwerveDriveConfig().withGyro(attitude::get);
     tilt(0, 40, 0);
-    assertSpeeds(1, 0.5, 2, plain.optimizeRobotRelativeChassisSpeeds(new ChassisVelocities(1, 0.5, 2)), "no anti-tipping");
+    assertSpeeds(
+        1,
+        0.5,
+        2,
+        plain.optimizeRobotRelativeChassisSpeeds(new ChassisVelocities(1, 0.5, 2)),
+        "no anti-tipping");
     assertSpeeds(0, 0, 0, plain.getAntiTippingCorrection(), "no anti-tipping");
   }
 
   @Test
   void rejectsSettingsThatCannotCorrect() {
     final SwerveDriveConfig<?> plain = new yams.commands2.config.SwerveDriveConfig();
-    assertThrows(IllegalArgumentException.class,
-        () -> plain.withAntiTipping(MetersPerSecond.of(0), Degrees.of(10), MetersPerSecond.of(1)), "zero kP");
-    assertThrows(IllegalArgumentException.class,
-        () -> plain.withAntiTipping(MetersPerSecond.of(4), Degrees.of(0), MetersPerSecond.of(1)), "zero threshold");
-    assertThrows(IllegalArgumentException.class,
-        () -> plain.withAntiTipping(MetersPerSecond.of(4), Degrees.of(90), MetersPerSecond.of(1)), "90 degree threshold");
-    assertThrows(IllegalArgumentException.class,
-        () -> plain.withAntiTipping(MetersPerSecond.of(4), Degrees.of(10), MetersPerSecond.of(0)), "zero maximum speed");
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> plain.withAntiTipping(MetersPerSecond.of(0), Degrees.of(10), MetersPerSecond.of(1)),
+        "zero kP");
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> plain.withAntiTipping(MetersPerSecond.of(4), Degrees.of(0), MetersPerSecond.of(1)),
+        "zero threshold");
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> plain.withAntiTipping(MetersPerSecond.of(4), Degrees.of(90), MetersPerSecond.of(1)),
+        "90 degree threshold");
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> plain.withAntiTipping(MetersPerSecond.of(4), Degrees.of(10), MetersPerSecond.of(0)),
+        "zero maximum speed");
     assertTrue(plain.getAntiTippingCorrection().vx == 0, "rejected settings are not applied");
   }
 }

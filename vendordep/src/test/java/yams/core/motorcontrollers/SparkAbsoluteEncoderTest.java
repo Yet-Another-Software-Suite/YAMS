@@ -44,8 +44,15 @@ public class SparkAbsoluteEncoderTest {
   /** Check the SPARK's absolute encoder range offset, which is configured asynchronously. */
   private static void assertRangeOffset(SparkMax sparkMax, double expected) {
     try {
-      assertTrue(AbsoluteEncoderCases.eventually(() -> Math.abs(sparkMax.configAccessor.absoluteEncoder.getRangeOffset() - expected) < 1e-6),
-          "range offset expected " + expected + " but was " + sparkMax.configAccessor.absoluteEncoder.getRangeOffset());
+      assertTrue(
+          AbsoluteEncoderCases.eventually(
+              () ->
+                  Math.abs(sparkMax.configAccessor.absoluteEncoder.getRangeOffset() - expected)
+                      < 1e-6),
+          "range offset expected "
+              + expected
+              + " but was "
+              + sparkMax.configAccessor.absoluteEncoder.getRangeOffset());
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
     }

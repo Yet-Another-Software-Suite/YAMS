@@ -95,12 +95,17 @@ public class StartingPositionTest {
   }
 
   private static SmartMotorController create(Case testCase, String name) {
-    final SmartMotorControllerConfig config = AbsoluteEncoderCases.config(name, testCase.controller());
+    final SmartMotorControllerConfig config =
+        AbsoluteEncoderCases.config(name, testCase.controller());
     final Feedback feedback = testCase.feedback();
     if (feedback.absoluteEncoder() != null) {
-      return AbsoluteEncoderCases.create(feedback.absoluteEncoder(), config, cfg -> cfg.withSimStartingPosition(kStartingPosition));
+      return AbsoluteEncoderCases.create(
+          feedback.absoluteEncoder(),
+          config,
+          cfg -> cfg.withSimStartingPosition(kStartingPosition));
     }
-    return AbsoluteEncoderCases.create(feedback.relative(), config.withStartingPosition(kStartingPosition));
+    return AbsoluteEncoderCases.create(
+        feedback.relative(), config.withStartingPosition(kStartingPosition));
   }
 
   /** Difference between two angles, wrapped into [-180°, 180°). */
@@ -109,7 +114,8 @@ public class StartingPositionTest {
   }
 
   private static void assertNear(Angle actual, Angle expected, String what) {
-    assertTrue(Math.abs(wrappedErrorDegrees(actual, expected)) < kTolerance.in(Degrees),
+    assertTrue(
+        Math.abs(wrappedErrorDegrees(actual, expected)) < kTolerance.in(Degrees),
         what + " expected " + expected.in(Degrees) + "° but was " + actual.in(Degrees) + "°");
   }
 
@@ -121,17 +127,33 @@ public class StartingPositionTest {
     try {
       // Let the simulation, and a Talon's fused sensor, settle where the mechanism starts.
       AbsoluteEncoderCases.run(smc, testCase.feedback().talon(), Optional.empty(), Seconds.of(0.5));
-      assertNear(smc.getSimSupplier().orElseThrow().getMechanismPosition(), kStartingPosition, name + ": simulated mechanism at the start");
-      assertNear(smc.getMechanismPosition(), kStartingPosition, name + ": mechanism reading at the start");
-      smc.getExternalEncoderPosition().ifPresent(encoder -> assertNear(encoder, kStartingPosition, name + ": encoder reading at the start"));
+      assertNear(
+          smc.getSimSupplier().orElseThrow().getMechanismPosition(),
+          kStartingPosition,
+          name + ": simulated mechanism at the start");
+      assertNear(
+          smc.getMechanismPosition(), kStartingPosition, name + ": mechanism reading at the start");
+      smc.getExternalEncoderPosition()
+          .ifPresent(
+              encoder ->
+                  assertNear(encoder, kStartingPosition, name + ": encoder reading at the start"));
 
-      AbsoluteEncoderCases.run(smc, testCase.feedback().talon(), Optional.of(kSetpoint), Seconds.of(2.5));
+      AbsoluteEncoderCases.run(
+          smc, testCase.feedback().talon(), Optional.of(kSetpoint), Seconds.of(2.5));
       final Angle simulated = smc.getSimSupplier().orElseThrow().getMechanismPosition();
       // The mechanism started at 30°, so going to 100° moves it 70°, not a whole rotation more.
-      assertTrue(Math.abs(simulated.minus(kSetpoint).in(Degrees)) < kTolerance.in(Degrees),
-          name + ": expected the simulated mechanism at " + kSetpoint.in(Degrees) + "° but it was at " + simulated.in(Degrees) + "°");
+      assertTrue(
+          Math.abs(simulated.minus(kSetpoint).in(Degrees)) < kTolerance.in(Degrees),
+          name
+              + ": expected the simulated mechanism at "
+              + kSetpoint.in(Degrees)
+              + "° but it was at "
+              + simulated.in(Degrees)
+              + "°");
       assertNear(smc.getMechanismPosition(), kSetpoint, name + ": mechanism reading after moving");
-      smc.getExternalEncoderPosition().ifPresent(encoder -> assertNear(encoder, kSetpoint, name + ": encoder reading after moving"));
+      smc.getExternalEncoderPosition()
+          .ifPresent(
+              encoder -> assertNear(encoder, kSetpoint, name + ": encoder reading after moving"));
     } finally {
       AbsoluteEncoderCases.close(smc);
     }

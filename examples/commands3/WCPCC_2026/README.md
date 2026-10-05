@@ -94,9 +94,9 @@ Every motor is a TalonFX wrapped in a YAMS `TalonFXWrapper` (`DCMotor.getKrakenX
 
 - **Drive** (teleop)
   - The CTRE request state machine is replaced by a `SwerveInputStream`: 5.42 m/s, 1 rps, 0.15 deadband, alliance relative.
-  - Heading hold uses `withTranslationOnly(...)` after a 0.25 s debounce, with heading PID 5.
-  - The A/B/X/Y snap headings use `withHeading(...)` + `withHeadingControl(...)`.
-- **Aiming** uses `SwerveInputStream.withAim(hub)`: in teleop `Drive.teleop` aims while the right trigger is held, and in autonomous `Drive.autoAim` aims in place. The aimed check uses `swerve.isFacing(hub, 5°)`.
+  - Heading hold uses `setTranslationOnly(...)` after a 0.25 s debounce, with heading PID 5.
+  - The A/B/X/Y snap headings use `withHeading(...)` + `setHeadingControl(...)`.
+- **Aiming** uses `SwerveInputStream.withAimTarget(hub)` + `setAim(...)`: in teleop `Drive.teleop` aims while the right trigger is held, and in autonomous `Drive.autoAim` aims in place. The aimed check uses `swerve.isFacing(hub, 5°)`.
 - **MechanismCommands** adds `intake()` and `home()`. The v2 `aimAndShoot` is `shootWhenAimed`, since the drive commands now do the aiming; its logic and timings, and those of `shootManually`, are unchanged.
 - The shot map (`ShotMap`) is unchanged.
 - **OutpostAndDepotAuto**: the same Choreo routine, speeds and timings.

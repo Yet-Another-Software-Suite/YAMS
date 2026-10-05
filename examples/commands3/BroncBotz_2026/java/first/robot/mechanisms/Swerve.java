@@ -146,7 +146,7 @@ public class Swerve implements Mechanism {
             .withDeadband(OperatorConstants.kDeadband)
             .withScaleTranslation(translationScale)
             .withScaleRotation(DriveConstants.kRotationScale)
-            .withAllianceRelativeControl(true);
+            .setAllianceRelativeControl(true);
     }
 
     /**
@@ -164,7 +164,7 @@ public class Swerve implements Mechanism {
         return run(coroutine -> {
             SwerveInputStream stream = createDriverInput(forward, left, rotation, translationScale);
             if (aimAtHub) {
-                stream.withAim(() -> new Pose2d(Field.hub(), Rotation2d.ZERO), () -> true);
+                stream.withAimTarget(() -> new Pose2d(Field.hub(), Rotation2d.ZERO)).setAim(true);
             }
             while (true) {
                 drive.setFieldRelativeChassisSpeeds(stream.get());
