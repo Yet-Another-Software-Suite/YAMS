@@ -173,7 +173,7 @@ public class SwerveDrive {
    *                               but no gyro supplier was set with
    *                               {@link SwerveDriveConfig#withGyro(java.util.function.Supplier)}.
    */
-  public void applyDriveToPoseTuningValues() {
+  public void applyTuningValues() {
     m_swerveTelemetry.applyTuningValues(this);
   }
 
