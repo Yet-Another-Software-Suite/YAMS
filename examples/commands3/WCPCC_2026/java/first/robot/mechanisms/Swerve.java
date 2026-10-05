@@ -19,6 +19,7 @@ import first.robot.Constants.Driving;
 import first.robot.Ports;
 import first.robot.util.GeometryUtil;
 import java.util.Optional;
+import java.util.function.DoubleSupplier;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.driverstation.Alliance;
@@ -68,7 +69,6 @@ public class Swerve implements Mechanism {
     private static final Rotation2d kRedAlliancePerspectiveRotation = Rotation2d.k180deg;
 
     private final SwerveDrive drive;
-    private final SwerveInputStream input;
 
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
@@ -105,16 +105,6 @@ public class Swerve implements Mechanism {
             .withRotationController(new PIDController(5, 0, 0))
             .withTelemetry("Swerve", TelemetryVerbosity.HIGH);
         drive = new SwerveDrive(config);
-        // The one drive input: field centric from the operator's perspective, with WCP's joystick
-        // deadband and a cubed response on both the translation and rotation axes. Drive commands
-        // set its sticks and modes every loop.
-        input = new SwerveInputStream(drive)
-            .withMaximumLinearVelocity(Driving.kMaxSpeed)
-            .withMaximumAngularVelocity(Driving.kMaxRotationalRate)
-            .withDeadband(Driving.kJoystickDeadband)
-            .withCubeTranslationControllerAxis(true)
-            .withCubeRotationControllerAxis(true)
-            .withAllianceRelativeControl(true);
     }
 
     private SwerveModule createModule(String name, int driveId, int steerId, int encoderId, Angle encoderOffset,
@@ -194,54 +184,28 @@ public class Swerve implements Mechanism {
         resetPose(new Pose2d(getPose().getTranslation(), operatorForwardDirection));
     }
 
-    /** Reset the drive input: sticks at zero, no aiming, no heading control, no heading hold. */
-    public void resetDriveInput() {
-        input.reset();
-    }
-
     /**
-     * Set the driver's stick inputs, from the operator's perspective.
+     * Create a driver input stream: field centric from the operator's perspective, with WCP's
+     * joystick deadband and a cubed response on both the translation and rotation axes.
      *
      * @param forward  Stick input away from the operator, in [-1, 1].
      * @param left     Stick input to the operator's left, in [-1, 1].
      * @param rotation Counterclockwise rotation stick input, in [-1, 1].
+     * @return {@link SwerveInputStream} producing field relative {@link ChassisVelocities}.
      */
-    public void setDriveInput(double forward, double left, double rotation) {
-        input.withTranslation(forward, left).withRotation(rotation);
+    public SwerveInputStream createDriverInput(DoubleSupplier forward, DoubleSupplier left, DoubleSupplier rotation) {
+        return new SwerveInputStream(drive, forward, left, rotation)
+            .withMaximumLinearVelocity(Driving.kMaxSpeed)
+            .withMaximumAngularVelocity(Driving.kMaxRotationalRate)
+            .withDeadband(Driving.kJoystickDeadband)
+            .withCubeTranslationControllerAxis()
+            .withCubeRotationControllerAxis()
+            .withAllianceRelativeControl();
     }
 
-    /**
-     * Face a field position while driving, or stop aiming.
-     *
-     * @param target Field position to face, blue alliance origin, or empty to stop aiming.
-     */
-    public void setAimTarget(Optional<Translation2d> target) {
-        target.ifPresent(position -> input.withAimTarget(new Pose2d(position, Rotation2d.ZERO)));
-        input.withAim(target.isPresent());
-    }
-
-    /**
-     * Turn to and hold a field relative heading while driving, or stop.
-     *
-     * @param heading Field relative heading, or empty to rotate from the stick.
-     */
-    public void setHeadingLock(Optional<Rotation2d> heading) {
-        heading.ifPresent(angle -> input.withHeading(angle.getMeasure()));
-        input.withHeadingControl(heading.isPresent());
-    }
-
-    /**
-     * Hold the heading the robot has when this is enabled and only translate.
-     *
-     * @param enabled Hold the heading while true. Overrides aiming and the heading lock.
-     */
-    public void setHoldHeading(boolean enabled) {
-        input.withTranslationOnly(enabled);
-    }
-
-    /** Drive from the drive input set with the methods above. Call once per loop. */
-    public void driveFromInput() {
-        drive.setFieldRelativeChassisSpeeds(input.get());
+    /** Drive with field relative speeds, e.g. from {@link #createDriverInput}. */
+    public void driveFieldRelative(ChassisVelocities fieldRelativeSpeeds) {
+        drive.setFieldRelativeChassisSpeeds(fieldRelativeSpeeds);
     }
 
     /**

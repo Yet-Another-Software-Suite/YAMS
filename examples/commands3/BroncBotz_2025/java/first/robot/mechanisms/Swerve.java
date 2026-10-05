@@ -16,6 +16,8 @@ import first.robot.Constants.DriveToPose;
 import first.robot.Constants.OperatorConstants;
 import first.robot.Ports;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
@@ -47,7 +49,6 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  */
 public class Swerve implements Mechanism {
     private final SwerveDrive drive;
-    private final SwerveInputStream input;
     private final Vision vision;
 
     public Swerve() {
@@ -73,13 +74,6 @@ public class Swerve implements Mechanism {
             .withRotationController(new PIDController(DriveToPose.kRotationP, 0, 0))
             .withTelemetry("Swerve", TelemetryVerbosity.HIGH);
         drive = new SwerveDrive(config);
-        // The one driver input; the teleop drive command sets its sticks and modes every loop.
-        input = new SwerveInputStream(drive)
-            .withMaximumLinearVelocity(kMaxSpeed)
-            .withMaximumAngularVelocity(kMaxAngularSpeed)
-            .withDeadband(OperatorConstants.kDeadband)
-            .withScaleTranslation(OperatorConstants.kTranslationScale)
-            .withScaleRotation(OperatorConstants.kRotationScale);
         vision = new Vision(drive);
     }
 
@@ -133,26 +127,28 @@ public class Swerve implements Mechanism {
     }
 
     /**
-     * Set the driver's sticks. The original passed its input stream to a robot relative drive, so the
-     * sticks drive relative to the robot; alliance relative control flips them for the red alliance.
+     * Create the driver input stream.
      *
      * @param forward          Stick input toward the robot's front, in [-1, 1].
      * @param left             Stick input toward the robot's left, in [-1, 1].
      * @param rotation         Counterclockwise rotation stick input, in [-1, 1].
      * @param translationScale Scale applied to the translation sticks.
-     * @param allianceRelative Flip the sticks for the red alliance.
+     * @param allianceRelative Flip the sticks for the red alliance while true.
      */
-    public void setDriveInput(double forward, double left, double rotation, double translationScale,
-                              boolean allianceRelative) {
-        input.withTranslation(forward, left)
-            .withRotation(rotation)
+    public SwerveInputStream createDriverInput(DoubleSupplier forward, DoubleSupplier left, DoubleSupplier rotation,
+                                               DoubleSupplier translationScale, BooleanSupplier allianceRelative) {
+        return new SwerveInputStream(drive, forward, left, rotation)
+            .withMaximumLinearVelocity(kMaxSpeed)
+            .withMaximumAngularVelocity(kMaxAngularSpeed)
+            .withDeadband(OperatorConstants.kDeadband)
             .withScaleTranslation(translationScale)
+            .withScaleRotation(OperatorConstants.kRotationScale)
             .withAllianceRelativeControl(allianceRelative);
     }
 
-    /** Drive robot relative from the input set with {@link #setDriveInput}. Call once per loop. */
-    public void driveFromInput() {
-        drive.setRobotRelativeChassisSpeeds(input.get());
+    /** Underlying {@link SwerveDrive}. */
+    public SwerveDrive getDrive() {
+        return drive;
     }
 
     /**

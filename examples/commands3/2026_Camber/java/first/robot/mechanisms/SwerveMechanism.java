@@ -25,6 +25,7 @@ import first.robot.pathplanner.AutoBuilder;
 import first.robot.utils.AllianceFlipUtil;
 import first.robot.utils.FieldConstants.Hub;
 import java.util.Arrays;
+import java.util.function.DoubleSupplier;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.driverstation.Alliance;
@@ -225,14 +226,15 @@ public class SwerveMechanism implements Mechanism
   }
 
   /**
-   * Create a driver input stream for this drivetrain. Each drive command owns one and sets its
-   * sticks and modes every loop.
+   * Create a driver input stream for this drivetrain.
    *
+   * @param translationX Translation X supplier.
+   * @param translationY Translation Y supplier.
    * @return Input stream with the original deadband, translation scale and alliance relative control.
    */
-  public SwerveInputStream createInputStream()
+  public SwerveInputStream createInputStream(DoubleSupplier translationX, DoubleSupplier translationY)
   {
-    return new SwerveInputStream(swerveDrive)
+    return SwerveInputStream.of(swerveDrive, translationX, translationY)
         .withDeadband(0.1)
         .withScaleTranslation(.8)
         .withAllianceRelativeControl(true);

@@ -9,10 +9,10 @@ import org.wpilib.command3.Command;
 import org.wpilib.command3.button.CommandNiDsXboxController;
 import org.wpilib.driverstation.NiDsXboxController;
 import org.wpilib.math.geometry.Pose2d;
+import yams.commands3.swerve.SwerveInputStream;
 
 /**
- * Drive commands. {@link SwerveMechanism} owns one YAMS {@code SwerveInputStream}; each command sets
- * its sticks through {@link SwerveMechanism} every loop and then drives from it.
+ * Drive commands.
  */
 public final class Drive
 {
@@ -37,7 +37,11 @@ public final class Drive
   {
     final NiDsXboxController hid = controller.getNiDsXboxController();
     return drive.run(coroutine -> {
-      drive.resetDriveInput();
+      SwerveInputStream input = drive.createDriverInput(
+          () -> hid.getLeftY(),
+          () -> hid.getLeftX(),
+          () -> hid.getRightX()
+      );
       Optional<Pose2d> lastTarget = Optional.empty();
       while (true)
       {
@@ -54,8 +58,7 @@ public final class Drive
           drive.driveTowardPose(target.get());
         } else
         {
-          drive.setDriveInput(hid.getLeftY(), hid.getLeftX(), hid.getRightX());
-          drive.driveFromInput();
+          drive.driveFromInput(input);
         }
         lastTarget = target;
         coroutine.yield();

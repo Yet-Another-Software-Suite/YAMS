@@ -9,6 +9,7 @@ import first.robot.mechanisms.Swerve;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.button.CommandNiDsXboxController;
 import org.wpilib.driverstation.NiDsXboxController;
+import yams.commands3.swerve.SwerveInputStream;
 
 /** Drive commands for the swerve drivetrain. */
 public final class Drive {
@@ -28,22 +29,27 @@ public final class Drive {
     public static Command teleop(Swerve swerve, CommandNiDsXboxController controller) {
         final NiDsXboxController hid = controller.getNiDsXboxController();
         return swerve.run(coroutine -> {
-            boolean allianceRelative = false;
+            boolean[] allianceRelative = new boolean[]{false};
             // Drop button presses from before this command started.
             hid.getXButtonPressed();
             hid.getYButtonPressed();
+            SwerveInputStream input = swerve.createDriverInput(
+                () -> -hid.getLeftY(),
+                () -> -hid.getLeftX(),
+                () -> -hid.getRightX(),
+                () -> hid.getLeftBumperButton()
+                    ? OperatorConstants.kSlowTranslationScale
+                    : OperatorConstants.kTranslationScale,
+                () -> allianceRelative[0]
+            );
             while (true) {
                 if (hid.getXButtonPressed()) {
-                    allianceRelative = true;
+                    allianceRelative[0] = true;
                 }
                 if (hid.getYButtonPressed()) {
-                    allianceRelative = false;
+                    allianceRelative[0] = false;
                 }
-                final double translationScale = hid.getLeftBumperButton()
-                    ? OperatorConstants.kSlowTranslationScale
-                    : OperatorConstants.kTranslationScale;
-                swerve.setDriveInput(-hid.getLeftY(), -hid.getLeftX(), -hid.getRightX(), translationScale, allianceRelative);
-                swerve.driveFromInput();
+                swerve.getDrive().setRobotRelativeChassisSpeeds(input.get());
                 coroutine.yield();
             }
         }).named("Teleop Drive");

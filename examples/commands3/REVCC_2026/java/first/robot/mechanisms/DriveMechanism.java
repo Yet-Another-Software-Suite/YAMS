@@ -6,6 +6,7 @@ package first.robot.mechanisms;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Centimeters;
 
+import java.util.function.DoubleSupplier;
 import first.robot.Constants.DriveConstants;
 import first.robot.Constants.OIConstants;
 import org.wpilib.command3.Command;
@@ -34,7 +35,6 @@ public class DriveMechanism implements Mechanism
   private final OnboardIMU m_gyro = new OnboardIMU(MountOrientation.FLAT);
 
   private final SwerveDrive m_drive;
-  private final SwerveInputStream m_input;
 
   /** Creates a new DriveMechanism. */
   public DriveMechanism()
@@ -87,48 +87,31 @@ public class DriveMechanism implements Mechanism
         .withRotationController(new PIDController(1, 0, 0))
         .withTelemetry("Drive", TelemetryVerbosity.HIGH);
     m_drive = new SwerveDrive(config);
-    // The one driver input. Drive commands set its sticks every loop; the sticks are scaled to the
-    // maximum chassis speeds configured above.
-    m_input = new SwerveInputStream(m_drive)
+  }
+
+  /**
+   * Joystick input stream for teleop driving. Inputs are in [-1, 1] and are scaled to the maximum
+   * chassis speeds configured above.
+   *
+   * @param xSpeed Speed of the robot in the x direction (forward).
+   * @param ySpeed Speed of the robot in the y direction (sideways).
+   * @param rot    Angular rate of the robot.
+   * @param deadband Joystick deadband.
+   * @return {@link SwerveInputStream} producing field relative {@link ChassisVelocities}.
+   */
+  public SwerveInputStream getInputStream(DoubleSupplier xSpeed, DoubleSupplier ySpeed, DoubleSupplier rot,
+                                          double deadband)
+  {
+    return new SwerveInputStream(m_drive, xSpeed, ySpeed, rot)
         .withMaximumLinearVelocity(DriveConstants.kMaxSpeed)
         .withMaximumAngularVelocity(DriveConstants.kMaxAngularSpeed)
-        .withDeadband(OIConstants.kDriveDeadband);
+        .withDeadband(deadband);
   }
 
-  /** Reset the drive input: sticks at zero and field relative translation. */
-  public void resetDriveInput()
+  /** Drive with field relative speeds from an input stream. */
+  public void driveFromInput(SwerveInputStream input)
   {
-    m_input.reset().withRobotRelative(false);
-  }
-
-  /**
-   * Set the driver's stick inputs. The sticks are scaled to the maximum chassis speeds configured
-   * above.
-   *
-   * @param forward  Forward stick input, [-1, 1].
-   * @param left     Left stick input, [-1, 1].
-   * @param rotation Counterclockwise rotation stick input, [-1, 1].
-   */
-  public void setDriveInput(double forward, double left, double rotation)
-  {
-    m_input.withTranslation(forward, left).withRotation(rotation);
-  }
-
-  /**
-   * Drive the translation sticks relative to the field or to the robot.
-   *
-   * @param fieldRelative Whether the translation sticks are relative to the field.
-   */
-  public void setFieldRelative(boolean fieldRelative)
-  {
-    m_input.withRobotRelative(!fieldRelative);
-  }
-
-  /** Drive from the drive input set with the methods above. Call once per loop. */
-  public void driveFromInput()
-  {
-    // The stream always outputs field relative speeds; robot relative sticks are converted.
-    m_drive.setFieldRelativeChassisSpeeds(m_input.get());
+    m_drive.setFieldRelativeChassisSpeeds(input.get());
   }
 
   /** Sets the wheels into an X formation to prevent movement. Call once per loop to hold it. */

@@ -33,6 +33,7 @@ import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.LinearVelocity;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
@@ -97,7 +98,6 @@ public class SwerveMechanism implements Mechanism
   private final SwerveInputsAutoLogged swerveInputs = new SwerveInputsAutoLogged();
 
   private final SwerveDrive drive;
-  private final SwerveInputStream input;
 
   /**
    * Builds one swerve module from a drive motor, azimuth motor, CANcoder, and
@@ -152,28 +152,34 @@ public class SwerveMechanism implements Mechanism
     return new SwerveModule(moduleConfig);
   }
 
-  /** Reset the drive input: sticks at zero. */
-  public void resetDriveInput()
-  {
-    input.reset();
-  }
-
   /**
-   * Set the driver's stick inputs for "standard" swerve drive controls, each from [-1,1].
+   * Builds the driver input stream from axis suppliers.
    *
-   * @param translationX Translation in the X direction.
-   * @param translationY Translation in the Y direction.
-   * @param rotation     Rotation speed.
+   * @param translationX Translation X supplier.
+   * @param translationY Translation Y supplier.
+   * @param rotation     Rotation supplier.
+   * @return Configured {@link SwerveInputStream}.
    */
-  public void setDriveInput(double translationX, double translationY, double rotation)
+  public SwerveInputStream createDriverInput(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier rotation)
   {
-    input.withTranslation(translationX, translationY).withRotation(rotation);
+    return new SwerveInputStream(drive, translationX, translationY, rotation)
+        .withMaximumAngularVelocity(maximumChassisSpeedsAngularVelocity)
+        .withMaximumLinearVelocity(maximumChassisSpeedsLinearVelocity)
+        // 0.01 deadband eliminates stick drift without adding noticeable dead zone.
+        .withDeadband(0.01)
+        // Cubing the rotation axis gives finer control at low inputs without
+        // reducing the achievable maximum.
+        .withCubeRotationControllerAxis(true)
+        .withCubeTranslationControllerAxis(true)
+        // Alliance-relative: forward on the stick always moves toward the opposing
+        // alliance wall regardless of which side the robot started on.
+        .withAllianceRelativeControl(true);
   }
 
-  /** Drive from the drive input set with {@link #setDriveInput}. Call once per loop. */
-  public void driveFromInput()
+  /** Drive with speeds from an input stream. Call once per loop. */
+  public void driveFromInput(SwerveInputStream stream)
   {
-    ChassisVelocities speeds = input.get();
+    ChassisVelocities speeds = stream.get();
     Logger.recordOutput("Swerve/DesiredChassisSpeeds", speeds);
     Logger.recordOutput("Swerve/DesiredOptimizedChassisSpeeds", config.optimizeRobotRelativeChassisSpeeds(speeds));
     SwerveModuleVelocity[] states = drive.getStateFromRobotRelativeChassisSpeeds(speeds);
@@ -236,19 +242,6 @@ public class SwerveMechanism implements Mechanism
         .withTranslationController(new PIDController(1, 0, 0))
         .withRotationController(new PIDController(1, 0, 0));
     drive = new SwerveDrive(config);
-    // The one driver input; drive commands set its sticks every loop through setDriveInput.
-    input = new SwerveInputStream(drive)
-        .withMaximumAngularVelocity(maximumChassisSpeedsAngularVelocity)
-        .withMaximumLinearVelocity(maximumChassisSpeedsLinearVelocity)
-        // 0.01 deadband eliminates stick drift without adding noticeable dead zone.
-        .withDeadband(0.01)
-        // Cubing the rotation axis gives finer control at low inputs without
-        // reducing the achievable maximum.
-        .withCubeRotationControllerAxis(true)
-        .withCubeTranslationControllerAxis(true)
-        // Alliance-relative: forward on the stick always moves toward the opposing
-        // alliance wall regardless of which side the robot started on.
-        .withAllianceRelativeControl(true);
 
     // Second pose estimator for vision fusion. Its output is a computed value
     // (NOT in SwerveInputs) so it is recomputed from scratch during replay.

@@ -44,17 +44,21 @@ public final class Drive
   {
     NiDsXboxController hid = controller.getNiDsXboxController();
     return swerve.run(coroutine -> {
-      SwerveInputStream input   = swerve.createInputStream().withHeadingControl(true);
-      double            heading = 0;
-      while (true)
-      {
+      double[] heading = new double[]{0};
+      SwerveInputStream input = swerve.createInputStream(
+          () -> hid.getLeftY() * -1,
+          () -> hid.getLeftX() * -1
+      ).withHeading(() -> {
         double x = hid.getRightX();
         double y = hid.getRightY();
         if (Math.hypot(x, y) > SwerveDrive.Modules.angleJoystickRadiusDeadband)
         {
-          heading = Math.atan2(x, y);
+          heading[0] = Math.atan2(x, y);
         }
-        input.withTranslation(hid.getLeftY() * -1, hid.getLeftX() * -1).withHeading(Radians.of(heading));
+        return Radians.of(heading[0]);
+      }).withHeadingControl(true);
+      while (true)
+      {
         swerve.driveFieldOrientedSetpoint(input.get());
         coroutine.yield();
       }
@@ -74,10 +78,13 @@ public final class Drive
     return swerve.run(coroutine -> {
       Pose2d targetPose = AllianceFlipUtil.apply(new Pose2d(Hub.topCenterPoint.toTranslation2d(), Rotation2d.ZERO));
       swerve.getField().getObject("AimTarget").setPose(targetPose);
-      SwerveInputStream input = swerve.createInputStream().withAimTarget(targetPose).withAim(true);
+      SwerveInputStream input = swerve.createInputStream(
+          () -> hid.getLeftY() * -1,
+          () -> hid.getLeftX() * -1
+      ).withControllerRotationAxis(() -> hid.getRightX())
+       .withAim(() -> targetPose, () -> true);
       while (true)
       {
-        input.withTranslation(hid.getLeftY() * -1, hid.getLeftX() * -1).withRotation(hid.getRightX());
         swerve.driveFieldOrientedSetpoint(input.get());
         coroutine.yield();
       }

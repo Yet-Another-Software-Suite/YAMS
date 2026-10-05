@@ -31,6 +31,7 @@ import org.wpilib.command3.button.CommandNiDsXboxController;
 import first.robot.mechanisms.ShooterMechanism;
 import first.robot.mechanisms.SwerveMechanism;
 import java.util.List;
+import yams.commands3.swerve.SwerveInputStream;
 
 /** Factory for a command that rotates the drivetrain toward a goal and spins the shooter while driving. */
 public final class AlignToGoal {
@@ -87,6 +88,11 @@ public final class AlignToGoal {
     return swerveMechanism.run(coroutine -> {
       pidController.reset(swerveMechanism.getPose().getRotation().getRadians(),
                           swerveMechanism.getFieldOrientedChassisSpeed().omega);
+      SwerveInputStream inputStream = swerveMechanism.createDriverInput(
+          () -> -controller.getLeftY(),
+          () -> -controller.getLeftX(),
+          () -> 0
+      );
       // Latest shot speed; the forked YAMS shooter command reads it every loop.
       LinearVelocity[] shotSpeed = {MetersPerSecond.of(0)};
       coroutine.fork(shooterMechanism.setLinearVelocity(() -> shotSpeed[0]));
@@ -126,8 +132,7 @@ public final class AlignToGoal {
                 swerveMechanism.getPose().getRotation().getRadians(),
                 new State(turretAngle.in(Radians), 0));
         var feedforwardOutput = feedforward.calculate(pidController.getSetpoint().velocity);
-        swerveMechanism.setDriveInput(-controller.getLeftY(), -controller.getLeftX(), 0);
-        var originalSpeed     = swerveMechanism.getDriveInput();
+        var originalSpeed     = inputStream.get();
         originalSpeed.omega = output + feedforwardOutput;
         swerveMechanism.setRobotRelativeChassisSpeedsSetpoint(originalSpeed.toRobotRelative(swerveMechanism.getGyroRotation3d().toRotation2d()));
         shotSpeed[0] = newHorizontalSpeed;

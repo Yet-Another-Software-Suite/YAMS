@@ -12,12 +12,12 @@ import org.wpilib.command3.Command;
 import org.wpilib.command3.button.CommandNiDsXboxController;
 import org.wpilib.driverstation.NiDsXboxController;
 import org.wpilib.math.filter.Debouncer;
+import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
+import yams.commands3.swerve.SwerveInputStream;
 
 /**
- * Drive commands for the swerve drivetrain. {@link Swerve} owns one YAMS
- * {@code SwerveInputStream}; each command sets its sticks and modes through {@link Swerve} every
- * loop and then drives from it.
+ * Drive commands for the swerve drivetrain.
  *
  * <p>{@link #teleop} reads the driver controller. It drives field centric with manual rotation,
  * holds the current heading once the rotation stick has been idle for a short delay, and turns to a
@@ -45,12 +45,13 @@ public final class Drive {
     public static Command teleop(Swerve swerve, CommandNiDsXboxController controller) {
         final NiDsXboxController hid = controller.getNiDsXboxController();
         return swerve.run(coroutine -> {
-            swerve.resetDriveInput();
             // Rotation stick must be idle for the heading lock delay before the heading is held.
             final Debouncer headingHoldDebouncer = new Debouncer(Driving.kHeadingLockDelaySeconds);
             // Heading picked with the face buttons, from the operator's perspective.
-            Optional<Rotation2d> snapHeading = Optional.empty();
-            boolean wasRotating = false;
+            final Optional<Rotation2d>[] snapHeading = new Optional[]{Optional.empty()};
+            final boolean[] wasRotating = new boolean[]{false};
+            final boolean[] holdHeading = new boolean[]{false};
+            final boolean[] aimAtHub = new boolean[]{false};
 
             // Drop button presses from before this command started.
             hid.getAButtonPressed();
@@ -59,52 +60,57 @@ public final class Drive {
             hid.getYButtonPressed();
             hid.getBackButtonPressed();
 
-            while (true) {
-                swerve.setDriveInput(-hid.getLeftY(), -hid.getLeftX(), -hid.getRightX());
+            SwerveInputStream stream = swerve.createDriverInput(
+                () -> -hid.getLeftY(),
+                () -> -hid.getLeftX(),
+                () -> -hid.getRightX()
+            )
+            .withAim(() -> new Pose2d(Landmarks.hubPosition(), Rotation2d.ZERO), () -> aimAtHub[0])
+            .withHeading(() -> {
+                if (snapHeading[0].isPresent()) {
+                    return snapHeading[0].get().plus(swerve.getOperatorForwardDirection()).getMeasure();
+                }
+                return Rotation2d.ZERO.getMeasure();
+            })
+            .withHeadingControl(() -> snapHeading[0].isPresent() && !aimAtHub[0])
+            .withTranslationOnly(() -> holdHeading[0] && snapHeading[0].isEmpty() && !aimAtHub[0]);
 
-                final boolean aimAtHub = hid.getRightTriggerAxis() > kAimTriggerThreshold;
-                if (aimAtHub) {
+            while (true) {
+                aimAtHub[0] = hid.getRightTriggerAxis() > kAimTriggerThreshold;
+                if (aimAtHub[0]) {
                     // Aiming replaces manual rotation; start fresh once the trigger is released.
-                    snapHeading = Optional.empty();
-                    wasRotating = false;
+                    snapHeading[0] = Optional.empty();
+                    wasRotating[0] = false;
                     headingHoldDebouncer.calculate(false);
-                    swerve.setAimTarget(Optional.of(Landmarks.hubPosition()));
-                    swerve.setHeadingLock(Optional.empty());
-                    swerve.setHoldHeading(false);
+                    holdHeading[0] = false;
                 } else {
                     if (hid.getAButtonPressed()) {
-                        snapHeading = Optional.of(Rotation2d.k180deg);
+                        snapHeading[0] = Optional.of(Rotation2d.k180deg);
                     }
                     if (hid.getBButtonPressed()) {
-                        snapHeading = Optional.of(Rotation2d.CW_90DEG);
+                        snapHeading[0] = Optional.of(Rotation2d.CW_90DEG);
                     }
                     if (hid.getXButtonPressed()) {
-                        snapHeading = Optional.of(Rotation2d.CCW_90DEG);
+                        snapHeading[0] = Optional.of(Rotation2d.CCW_90DEG);
                     }
                     if (hid.getYButtonPressed()) {
-                        snapHeading = Optional.of(Rotation2d.ZERO);
+                        snapHeading[0] = Optional.of(Rotation2d.ZERO);
                     }
                     if (hid.getBackButtonPressed()) {
-                        snapHeading = Optional.empty();
+                        snapHeading[0] = Optional.empty();
                         swerve.seedFieldCentric();
                     }
 
                     final boolean rotating = Math.abs(hid.getRightX()) > Driving.kJoystickDeadband;
                     // Rotating manually cancels a picked heading.
-                    if (rotating && !wasRotating) {
-                        snapHeading = Optional.empty();
+                    if (rotating && !wasRotating[0]) {
+                        snapHeading[0] = Optional.empty();
                     }
-                    wasRotating = rotating;
-                    final boolean holdHeading = headingHoldDebouncer.calculate(!rotating);
-
-                    // Face the picked heading, converted to the field frame, or hold the current
-                    // heading once the rotation stick is idle.
-                    swerve.setAimTarget(Optional.empty());
-                    swerve.setHeadingLock(snapHeading.map(heading -> heading.plus(swerve.getOperatorForwardDirection())));
-                    swerve.setHoldHeading(holdHeading && snapHeading.isEmpty());
+                    wasRotating[0] = rotating;
+                    holdHeading[0] = headingHoldDebouncer.calculate(!rotating);
                 }
 
-                swerve.driveFromInput();
+                swerve.driveFieldRelative(stream.get());
                 coroutine.yield();
             }
         }).named("Teleop Drive");
@@ -118,10 +124,10 @@ public final class Drive {
      */
     public static Command autoAim(Swerve swerve) {
         return swerve.run(coroutine -> {
-            swerve.resetDriveInput();
+            SwerveInputStream stream = swerve.createDriverInput(() -> 0, () -> 0, () -> 0)
+                .withAim(() -> new Pose2d(Landmarks.hubPosition(), Rotation2d.ZERO), () -> true);
             while (true) {
-                swerve.setAimTarget(Optional.of(Landmarks.hubPosition()));
-                swerve.driveFromInput();
+                swerve.driveFieldRelative(stream.get());
                 coroutine.yield();
             }
         }).named("Auto Aim");

@@ -54,7 +54,6 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
 public class Swerve implements Mechanism {
     private final OnboardIMU gyro = new OnboardIMU(MountOrientation.FLAT);
     private final SwerveDrive drive;
-    private final SwerveInputStream input;
     private final List<Vision> cameras = List.of(Vision.drivetrainCamera(), Vision.turretCamera());
     private final DoublePublisher distanceToHubPublisher = NetworkTableInstance.getDefault()
         .getDoubleTopic("Swerve/Distance to Hub (m)")
@@ -84,14 +83,6 @@ public class Swerve implements Mechanism {
             .withRotationController(new PIDController(kHeadingKP, 0, kHeadingKD))
             .withTelemetry("Swerve", TelemetryVerbosity.HIGH);
         drive = new SwerveDrive(config);
-        // The one drive input: field relative from the driver's alliance wall, with the original's
-        // deadband and rotation scale. Drive commands set its sticks and modes every loop.
-        input = new SwerveInputStream(drive)
-            .withMaximumLinearVelocity(DriveConstants.kMaxSpeed)
-            .withMaximumAngularVelocity(DriveConstants.kMaxAngularSpeed)
-            .withDeadband(OperatorConstants.kDeadband)
-            .withScaleRotation(DriveConstants.kRotationScale)
-            .withAllianceRelativeControl(true);
     }
 
     private SwerveModule createModule(String name, int driveId, int steerId, int encoderChannel, Angle encoderOffset,
@@ -139,6 +130,26 @@ public class Swerve implements Mechanism {
     }
 
     /**
+     * Create the driver input stream.
+     *
+     * @param forward          Stick input away from the driver, in [-1, 1].
+     * @param left             Stick input to the driver's left, in [-1, 1].
+     * @param rotation         Counterclockwise rotation stick input, in [-1, 1].
+     * @param translationScale Scale on the translation sticks.
+     * @return Input stream configured for field-relative teleop.
+     */
+    public SwerveInputStream createDriverInput(DoubleSupplier forward, DoubleSupplier left, DoubleSupplier rotation,
+                                               double translationScale) {
+        return new SwerveInputStream(drive, forward, left, rotation)
+            .withMaximumLinearVelocity(DriveConstants.kMaxSpeed)
+            .withMaximumAngularVelocity(DriveConstants.kMaxAngularSpeed)
+            .withDeadband(OperatorConstants.kDeadband)
+            .withScaleTranslation(translationScale)
+            .withScaleRotation(DriveConstants.kRotationScale)
+            .withAllianceRelativeControl(true);
+    }
+
+    /**
      * Drive from the driver's sticks until canceled.
      *
      * @param forward          Stick input away from the driver, in [-1, 1].
@@ -151,14 +162,12 @@ public class Swerve implements Mechanism {
     public Command drive(DoubleSupplier forward, DoubleSupplier left, DoubleSupplier rotation, double translationScale,
                          boolean aimAtHub, String name) {
         return run(coroutine -> {
-            input.reset();
+            SwerveInputStream stream = createDriverInput(forward, left, rotation, translationScale);
+            if (aimAtHub) {
+                stream.withAim(() -> new Pose2d(Field.hub(), Rotation2d.ZERO), () -> true);
+            }
             while (true) {
-                input.withTranslation(forward.getAsDouble(), left.getAsDouble())
-                    .withRotation(rotation.getAsDouble())
-                    .withScaleTranslation(translationScale)
-                    .withAimTarget(new Pose2d(Field.hub(), Rotation2d.ZERO))
-                    .withAim(aimAtHub);
-                drive.setFieldRelativeChassisSpeeds(input.get());
+                drive.setFieldRelativeChassisSpeeds(stream.get());
                 coroutine.yield();
             }
         }).named(name);

@@ -6,10 +6,10 @@ package first.robot.commands;
 import first.robot.mechanisms.SwerveMechanism;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.button.CommandNiDsXboxController;
+import yams.commands3.swerve.SwerveInputStream;
 
 /**
- * Drive commands. {@link SwerveMechanism} owns one YAMS {@code SwerveInputStream}; each command sets
- * its sticks through {@link SwerveMechanism} every loop and then drives from it.
+ * Drive commands.
  */
 public final class Drive {
   private Drive() {
@@ -26,10 +26,13 @@ public final class Drive {
    */
   public static Command teleop(SwerveMechanism drive, CommandNiDsXboxController controller) {
     return drive.run(coroutine -> {
-      drive.resetDriveInput();
+      SwerveInputStream input = drive.createDriverInput(
+          () -> -controller.getLeftY(),
+          () -> -controller.getLeftX(),
+          () -> -controller.getRightX()
+      );
       while (true) {
-        drive.setDriveInput(-controller.getLeftY(), -controller.getLeftX(), -controller.getRightX());
-        drive.driveFromInput();
+        drive.driveFromInput(input);
         coroutine.yield();
       }
     }).named("Swerve Drive With Joystick");

@@ -18,7 +18,7 @@ This is the Commands v3 version of [`examples/commands2/REVCC_2026`](../../comma
   - The bindings and the field-relative drive default are in the `@Teleop` opmode `opmodes/teleop/DefaultTeleop`.
   - The S-curve auto is the `@Autonomous` opmode `opmodes/auto/ExampleAuto`. It starts `Autos.exampleAuto` when the robot is enabled.
 - **Coroutines.**
-  - `DriveMechanism` owns one YAMS commands3 `SwerveInputStream` and exposes methods to change it (`setDriveInput`, `setFieldRelative`, `driveFromInput`, `lockWheels`, `zeroHeading`). Driving is one `while (true)` loop in `commands/Drive.teleop(drive, controller, true)` that reads the controller and calls those methods every loop: the sticks drive through the stream, holding the left stick button locks the wheels in an X, and pressing Start zeroes the heading. The v2 `setXCommand` and `zeroHeadingCommand` bindings are gone.
+  - `DriveMechanism` exposes `getInputStream(...)` to construct a YAMS commands3 `SwerveInputStream` from controller axis suppliers, and `driveFromInput(...)` to drive from it. Driving is one `while (true)` loop in `commands/Drive.teleop(drive, controller, true)` that reads the controller into the stream: the sticks drive through the stream, holding the left stick button locks the wheels in an X, and pressing Start zeroes the heading. The v2 `setXCommand` and `zeroHeadingCommand` bindings are gone.
   - `FuelCommands` builds `Command.noRequirements(...)` coroutines that compose the mechanism commands. `intake`, `extake` and `feed` `awaitAll` the two mechanism commands. In v3 nested commands are effectively proxied, so each mechanism is only owned while its own command runs and its default command takes over afterwards.
   - `shoot` forks `shooter.spinUp()`, calls `coroutine.waitUntil(isFlywheelSpinning)`, then awaits `feeder.feed()`. The feeder is only claimed once the flywheel is at speed.
   - The Y toggle uses `FuelCommands.shootAndIntake`, a no-requirements coroutine that awaits `shoot` and `intake` together. It replaces v2's `alongWith`.
@@ -78,7 +78,7 @@ This is the Commands v3 version of [`examples/commands2/REVCC_2026`](../../comma
     - New: a `kTurningMotorReduction = 20.0` constant for the relative encoder and simulation.
   - **Gyro:** changed from the ADIS16470 to the Systemcore `OnboardIMU` (the ADIS16470 does not exist on Systemcore). The turn rate now uses the Z axis.
   - **API:**
-    - `drive(x, y, rot, fieldRelative)` is replaced by `Drive.teleop(drive, controller, fieldRelative)`, which reads the controller into the mechanism's YAMS `SwerveInputStream` every loop.
+    - `drive(x, y, rot, fieldRelative)` is replaced by `Drive.teleop(drive, controller, fieldRelative)`, which creates a YAMS `SwerveInputStream` from controller axis suppliers and drives from it.
     - The X lock (`lockPose`) and zero heading (`zeroGyro`) are handled inside the drive command loop, which reads the left stick button and Start every loop.
     - New `driveToPoseCommand(...)` and `stop()`.
   - New: YAMS telemetry (including the `SwerveDrive` field widget) and simulation through `simIterate()`.

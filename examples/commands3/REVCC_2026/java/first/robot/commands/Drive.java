@@ -3,14 +3,15 @@
 
 package first.robot.commands;
 
+import first.robot.Constants.OIConstants;
 import first.robot.mechanisms.DriveMechanism;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.button.CommandNiDsXboxController;
 import org.wpilib.driverstation.NiDsXboxController;
+import yams.commands3.swerve.SwerveInputStream;
 
 /**
- * Drive commands. {@link DriveMechanism} owns one YAMS {@code SwerveInputStream}; each command sets
- * its sticks and modes through {@link DriveMechanism} every loop and then drives from it.
+ * Drive commands.
  */
 public final class Drive
 {
@@ -34,8 +35,12 @@ public final class Drive
   {
     final NiDsXboxController hid = controller.getNiDsXboxController();
     return drive.run(coroutine -> {
-      drive.resetDriveInput();
-      drive.setFieldRelative(fieldRelative);
+      SwerveInputStream input = drive.getInputStream(
+          () -> -hid.getLeftY(),
+          () -> -hid.getLeftX(),
+          () -> -hid.getRightX(),
+          OIConstants.kDriveDeadband
+      ).withRobotRelative(!fieldRelative);
       // Drop a Start press from before this command started.
       hid.getStartButtonPressed();
       while (true)
@@ -49,8 +54,7 @@ public final class Drive
           drive.lockWheels();
         } else
         {
-          drive.setDriveInput(-hid.getLeftY(), -hid.getLeftX(), -hid.getRightX());
-          drive.driveFromInput();
+          drive.driveFromInput(input);
         }
         coroutine.yield();
       }

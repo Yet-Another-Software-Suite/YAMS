@@ -13,9 +13,9 @@
  * {@link yams.core.mechanisms.config.SwerveModuleConfig}.
  *
  * <p>{@link yams.commands3.swerve.SwerveInputStream} turns driver inputs into
- * {@link org.wpilib.math.kinematics.ChassisVelocities}. It holds plain values rather than
- * suppliers: a drive coroutine reads the controller, sets the stick values and modes, and calls
- * {@code get()} every loop.
+ * {@link org.wpilib.math.kinematics.ChassisVelocities}. It converts controller axis suppliers into
+ * {@link org.wpilib.math.kinematics.ChassisVelocities} that can be sampled with {@code get()} inside
+ * drive commands or coroutines.
  *
  * <pre>{@code
  * public class DriveMechanism implements Mechanism {

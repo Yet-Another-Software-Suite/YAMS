@@ -26,6 +26,7 @@ import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import yams.commands3.config.SmartMotorControllerConfig;
 import yams.commands3.config.SwerveDriveConfig;
@@ -41,7 +42,6 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
 
 public class SwerveMechanism implements Mechanism {
   private final SwerveDrive drive;
-  private final SwerveInputStream input;
 
   public SwerveModule createModule(
       SparkMax drive,
@@ -108,13 +108,6 @@ public class SwerveMechanism implements Mechanism {
         .withTranslationController(new PIDController(1, 0, 0))
         .withRotationController(new PIDController(1, 0, 0));
     drive = new SwerveDrive(config);
-    // The one driver input; drive commands set its sticks every loop.
-    input = new SwerveInputStream(drive)
-        .withMaximumLinearVelocity(MetersPerSecond.of(4))
-        .withMaximumAngularVelocity(DegreesPerSecond.of(360))
-        .withDeadband(0.05)
-        .withCubeTranslationControllerAxis(true)
-        .withAllianceRelativeControl(true);
   }
 
   public Command setRobotRelativeChassisSpeeds(ChassisVelocities speeds)
@@ -136,34 +129,26 @@ public class SwerveMechanism implements Mechanism {
     return drive.drive(speedsSupplier);
   }
 
-  /** Reset the drive input: sticks at zero. */
-  public void resetDriveInput() {
-    input.reset();
-  }
-
   /**
-   * Set the driver's stick inputs on the drive input.
+   * Create a driver input stream for teleop driving.
    *
-   * @param forward  Forward stick input, [-1, 1].
-   * @param left     Left stick input, [-1, 1].
-   * @param rotation Counterclockwise rotation stick input, [-1, 1].
+   * @param forward  Forward stick supplier.
+   * @param left     Left stick supplier.
+   * @param rotation Rotation stick supplier.
+   * @return Configured {@link SwerveInputStream}.
    */
-  public void setDriveInput(double forward, double left, double rotation) {
-    input.withTranslation(forward, left).withRotation(rotation);
+  public SwerveInputStream createDriverInput(DoubleSupplier forward, DoubleSupplier left, DoubleSupplier rotation) {
+    return new SwerveInputStream(drive, forward, left, rotation)
+        .withMaximumLinearVelocity(MetersPerSecond.of(4))
+        .withMaximumAngularVelocity(DegreesPerSecond.of(360))
+        .withDeadband(0.05)
+        .withCubeTranslationControllerAxis()
+        .withAllianceRelativeControl();
   }
 
-  /**
-   * Field relative {@link ChassisVelocities} from the drive input.
-   *
-   * @return Field relative {@link ChassisVelocities}.
-   */
-  public ChassisVelocities getDriveInput() {
-    return input.get();
-  }
-
-  /** Drive from the drive input set with {@link #setDriveInput}. Call once per loop. */
-  public void driveFromInput() {
-    drive.setFieldRelativeChassisSpeeds(input.get());
+  /** Drive with field relative speeds from an input stream. Call once per loop. */
+  public void driveFromInput(SwerveInputStream stream) {
+    drive.setFieldRelativeChassisSpeeds(stream.get());
   }
 
   /**
