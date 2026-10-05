@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['yamsexception_0',['YamsException',['../classyams_1_1exceptions_1_1YamsException.html',1,'yams::exceptions']]]
+  ['unsupportedtelemetryfields_0',['UnsupportedTelemetryFields',['../structyams_1_1telemetry_1_1UnsupportedTelemetryFields.html',1,'yams::telemetry']]]
 ];

@@ -87,14 +87,14 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &lt;hal/SimDevice.h&gt;</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &lt;hal/Value.h&gt;</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;functional&gt;</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;optional&gt;</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;utility&gt;</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &lt;wpi/hal/Value.h&gt;</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &lt;functional&gt;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;optional&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;utility&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;wpi/hal/SimDevice.hpp&gt;</span></div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceyams_1_1motorcontrollers_1_1simulation.html">yams::motorcontrollers::simulation</a> {</div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
@@ -157,7 +157,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  <a class="code hl_enumeration" href="classyams_1_1motorcontrollers_1_1simulation_1_1SensorData.html#a53f85542143720a890544eed306bd8ca">HALValueType</a> m_type;</div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  HAL_Value m_defaultValue;</div>
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  std::optional&lt;std::vector&lt;std::pair&lt;std::function&lt;bool()&gt;, HAL_Value&gt;&gt;&gt; m_triggerValues;</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  HAL_SimValueHandle m_glassValue{HAL_kInvalidHandle};</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  HAL_SimValueHandle m_glassValue{HAL_INVALID_HANDLE};</div>
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  std::optional&lt;HAL_Value&gt; m_prev;</div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>};</div>
 </div>
@@ -198,7 +198,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1simulation_1_1SensorData_html_ada90db630cc5c2725f8b990fdcd868b8"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1simulation_1_1SensorData.html#ada90db630cc5c2725f8b990fdcd868b8">yams::motorcontrollers::simulation::SensorData::Convert</a></div><div class="ttdeci">static HAL_Value Convert(bool value)</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1simulation_1_1SensorData_html_ae2ff6f390e34747ca865e7e68545d3cf"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1simulation_1_1SensorData.html#ae2ff6f390e34747ca865e7e68545d3cf">yams::motorcontrollers::simulation::SensorData::Set</a></div><div class="ttdeci">void Set(double val)</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1simulation_1_1SensorData_html_aeb043d72fa0121e979dbbf1f89ab3a1e"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1simulation_1_1SensorData.html#aeb043d72fa0121e979dbbf1f89ab3a1e">yams::motorcontrollers::simulation::SensorData::Convert</a></div><div class="ttdeci">static std::function&lt; HAL_Value()&gt; Convert(std::function&lt; int64_t()&gt; supplier)</div></div>
-<div class="ttc" id="anamespaceyams_1_1motorcontrollers_1_1simulation_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers_1_1simulation.html">yams::motorcontrollers::simulation</a></div><div class="ttdef"><b>Definition</b> SimSensorConfig.hpp:16</div></div>
+<div class="ttc" id="anamespaceyams_1_1motorcontrollers_1_1simulation_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers_1_1simulation.html">yams::motorcontrollers::simulation</a></div><div class="ttdef"><b>Definition</b> SimSensorConfig.hpp:15</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
