@@ -65,20 +65,6 @@ public class AllianceFlipUtil
     return new Pose3d(apply(pose.getTranslation()), apply(pose.getRotation()));
   }
 
-  /**
-   * Mirror a pose to the other alliance's side, whatever the current alliance is. Used for
-   * PathPlanner paths, which are always drawn from the blue alliance.
-   *
-   * @param pose Pose, blue alliance origin.
-   * @return The same spot on the red alliance's side.
-   */
-  public static Pose2d flip(Pose2d pose)
-  {
-    return new Pose2d(FieldConstants.fieldLength - pose.getX(),
-                      FieldConstants.fieldWidth - pose.getY(),
-                      pose.getRotation().rotateBy(Rotation2d.k180deg));
-  }
-
   public static boolean shouldFlip()
   {
     return MatchState.getAlliance().isPresent()

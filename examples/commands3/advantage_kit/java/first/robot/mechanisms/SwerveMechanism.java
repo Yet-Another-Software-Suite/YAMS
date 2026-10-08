@@ -33,7 +33,6 @@ import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.LinearVelocity;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
-import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
@@ -98,6 +97,8 @@ public class SwerveMechanism implements Mechanism
   private final SwerveInputsAutoLogged swerveInputs = new SwerveInputsAutoLogged();
 
   private final SwerveDrive drive;
+  /** Active driver input, set by the teleop. */
+  private SwerveInputStream inputStream;
 
   /**
    * Builds one swerve module from a drive motor, azimuth motor, CANcoder, and
@@ -109,7 +110,7 @@ public class SwerveMechanism implements Mechanism
    * @param moduleName      Telemetry prefix (e.g. "frontleft")
    * @param location        Module location relative to robot center
    */
-  public SwerveModule createModule(SparkMax drive, SparkMax azimuth, CANcoder absoluteEncoder, String moduleName,
+  private SwerveModule createModule(SparkMax drive, SparkMax azimuth, CANcoder absoluteEncoder, String moduleName,
                                    Translation2d location)
   {
     // Drive gearing: 12:1 first stage, 2:1 second stage = 24:1 total.
@@ -153,33 +154,78 @@ public class SwerveMechanism implements Mechanism
   }
 
   /**
-   * Builds the driver input stream from axis suppliers.
+   * Drive with field relative {@link ChassisVelocities}. Runs until canceled.
    *
-   * @param translationX Translation X supplier.
-   * @param translationY Translation Y supplier.
-   * @param rotation     Rotation supplier.
-   * @return Configured {@link SwerveInputStream}.
+   * @param velocities Field relative {@link ChassisVelocities}, read every loop.
+   * @return {@link Command} that drives the robot.
    */
-  public SwerveInputStream createDriverInput(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier rotation)
+  public Command driveFieldRelative(Supplier<ChassisVelocities> velocities)
   {
-    return new SwerveInputStream(drive, translationX, translationY, rotation)
-        .withMaximumAngularVelocity(maximumChassisSpeedsAngularVelocity)
-        .withMaximumLinearVelocity(maximumChassisSpeedsLinearVelocity)
-        // 0.01 deadband eliminates stick drift without adding noticeable dead zone.
-        .withDeadband(0.01)
-        // Cubing the rotation axis gives finer control at low inputs without
-        // reducing the achievable maximum.
-        .setCubeRotationControllerAxis(true)
-        .setCubeTranslationControllerAxis(true)
-        // Alliance-relative: forward on the stick always moves toward the opposing
-        // alliance wall regardless of which side the robot started on.
-        .setAllianceRelativeControl(true);
+    return run(coroutine -> {
+      while (true)
+      {
+        setFieldRelativeChassisSpeeds(velocities.get());
+        coroutine.yield();
+      }
+    }).named("Swerve Drive Field Relative");
   }
 
-  /** Drive with speeds from an input stream. Call once per loop. */
-  public void driveFromInput(SwerveInputStream stream)
+  /**
+   * Drive with the active {@link SwerveInputStream}. A stream set while this runs takes effect on the next loop. Runs
+   * until canceled.
+   *
+   * @return {@link Command} that drives the robot.
+   */
+  public Command driveInputStream()
   {
-    ChassisVelocities speeds = stream.get();
+    return run(coroutine -> {
+      while (true)
+      {
+        setFieldRelativeChassisSpeeds(inputStream.get());
+        coroutine.yield();
+      }
+    }).named("Swerve Drive Input Stream");
+  }
+
+  /**
+   * Set the active driver input.
+   *
+   * @param inputStream Field relative {@link SwerveInputStream} driven by {@link #driveInputStream()}.
+   */
+  public void setInputStream(SwerveInputStream inputStream)
+  {
+    this.inputStream = inputStream;
+  }
+
+  /**
+   * Get the active driver input, so commands can read or adjust it.
+   *
+   * @return Active {@link SwerveInputStream}.
+   */
+  public SwerveInputStream getInputStream()
+  {
+    return inputStream;
+  }
+
+  /**
+   * Underlying YAMS {@link SwerveDrive}, for building a {@link SwerveInputStream}.
+   *
+   * @return {@link SwerveDrive} driven by this mechanism.
+   */
+  public SwerveDrive getSwerveDrive()
+  {
+    return drive;
+  }
+
+  /**
+   * Drive with field relative speeds for one loop. Converts with the logged gyro angle so replay matches the real
+   * match.
+   *
+   * @param fieldRelativeSpeeds Field relative {@link ChassisVelocities}.
+   */
+  private void setFieldRelativeChassisSpeeds(ChassisVelocities fieldRelativeSpeeds)
+  {
+    ChassisVelocities speeds = fieldRelativeSpeeds.toRobotRelative(getGyroAngle());
     Logger.recordOutput("Swerve/DesiredChassisSpeeds", speeds);
     Logger.recordOutput("Swerve/DesiredOptimizedChassisSpeeds", config.optimizeRobotRelativeChassisSpeeds(speeds));
     SwerveModuleVelocity[] states = drive.getStateFromRobotRelativeChassisSpeeds(speeds);
@@ -188,7 +234,7 @@ public class SwerveMechanism implements Mechanism
   }
 
   /** Reset the drive to pose PIDs. Call before driving to a new pose with {@link #driveTowardPose}. */
-  public void startDriveToPose()
+  private void startDriveToPose()
   {
     drive.resetTranslationPID();
     drive.resetRotationPID();
@@ -199,7 +245,7 @@ public class SwerveMechanism implements Mechanism
    *
    * @param pose Field-relative pose to drive toward.
    */
-  public void driveTowardPose(Pose2d pose)
+  private void driveTowardPose(Pose2d pose)
   {
     drive.setRobotRelativeChassisSpeeds(driveToPoseSpeeds(pose));
   }
@@ -237,6 +283,8 @@ public class SwerveMechanism implements Mechanism
         // Use the logged estimated pose as the starting pose so the drive's
         // internal odometry initialises from the replayed value, not from zero.
         .withStartingPose(swerveInputs.estimatedPose)
+        // Driver input streams scale the sticks to these speeds.
+        .withMaximumChassisSpeed(maximumChassisSpeedsLinearVelocity, maximumChassisSpeedsAngularVelocity)
         // kP=1 translation and rotation PIDs are starters for driveToPose();
         // increase if the robot undershoots at approach speed.
         .withTranslationController(new PIDController(1, 0, 0))

@@ -27,11 +27,17 @@
 
 #include <cmath>
 #include <ctre/phoenix6/TalonFX.hpp>
+#include <limits>
 #include <memory>
 #include <numbers>
 #include <optional>
 #include <string>
 #include <utility>
+#include <vector>
+#include <wpi/nt/BooleanTopic.hpp>
+#include <wpi/nt/DoubleTopic.hpp>
+#include <wpi/nt/NetworkTableInstance.hpp>
+#include <wpi/nt/StringTopic.hpp>
 
 #include "helpers/MockHardware.h"
 #include "helpers/MotorControllerFactory.h"
@@ -43,6 +49,8 @@
 #include "yams/mechanisms/swerve/SwerveDrive.hpp"
 #include "yams/mechanisms/swerve/SwerveDriveConfig.hpp"
 #include "yams/mechanisms/swerve/SwerveModule.hpp"
+#include "yams/mechanisms/swerve/utility/SwerveInputStream.hpp"
+#include "yams/mechanisms/swerve/utility/SwerveInputStreamTelemetry.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 #include "yams/motorcontrollers/remote/TalonFXWrapper.hpp"
 
@@ -515,6 +523,272 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.SecondDriveCommandInte
   CHECK(secondCalls >= 1);
   INFO("cmd1 should have been cancelled");
   CHECK(firstCalls == firstCallsAtInterrupt);
+}
+
+// ---- SwerveInputStream live tuning ---------------------------------------------
+//
+// SwerveInputStreamTelemetry on the fixture's drive (4.5 m/s, 540 deg/s, rotation controller). Each
+// test publishes to its own NetworkTableInstance; a second publisher on a topic stands in for the
+// dashboard.
+
+using utility::SwerveInputStream;
+using utility::SwerveInputStreamTelemetry;
+
+namespace {
+
+constexpr double kConfigMaxLinear = 4.5;
+constexpr double kConfigMaxAngular = 540.0 * std::numbers::pi / 180.0;
+
+// A NetworkTableInstance of its own, with helpers to read entries and edit them as the dashboard.
+// Declare it before the stream and telemetry so it is destroyed after them.
+struct TuningTable {
+  TuningTable()
+      : instance{wpi::nt::NetworkTableInstance::Create()},
+        table{instance.GetTable("SwerveInputStream")->GetSubTable("test")} {}
+
+  ~TuningTable() {
+    doublePublishers.clear();
+    booleanPublishers.clear();
+    wpi::nt::NetworkTableInstance::Destroy(instance);
+  }
+
+  double Published(std::string_view key) {
+    return table->GetDoubleTopic(key).Subscribe(std::numeric_limits<double>::quiet_NaN()).Get();
+  }
+
+  bool PublishedBoolean(std::string_view key) {
+    return table->GetBooleanTopic(key).Subscribe(false).Get();
+  }
+
+  std::string Mode() { return table->GetStringTopic("mode").Subscribe("").Get(); }
+
+  void Dashboard(std::string_view key, double value) {
+    doublePublishers.push_back(table->GetDoubleTopic(key).Publish());
+    doublePublishers.back().Set(value);
+  }
+
+  void Dashboard(std::string_view key, bool value) {
+    booleanPublishers.push_back(table->GetBooleanTopic(key).Publish());
+    booleanPublishers.back().Set(value);
+  }
+
+  wpi::nt::NetworkTableInstance instance;
+  std::shared_ptr<wpi::nt::NetworkTable> table;
+  std::vector<wpi::nt::DoublePublisher> doublePublishers;
+  std::vector<wpi::nt::BooleanPublisher> booleanPublishers;
+};
+
+}  // namespace
+
+TEST_CASE_METHOD(SwerveDriveTestFixture,
+                 "SwerveInputStreamTelemetryTest.PublishesTheStreamConfiguration",
+                 "[SwerveInputStreamTelemetryTest]") {
+  TuningTable nt;
+  SwerveInputStream<4> stream{*m_drive, [] { return 0.0; }, [] { return 0.0; },
+                              [] { return 0.0; }};
+  stream.WithDeadband(0.1)
+      .WithScaleTranslation(0.8)
+      .WithScaleRotation(0.5)
+      .WithCubeTranslationControllerAxis()
+      .WithAllianceRelativeControl();
+  SwerveInputStreamTelemetry<4> telemetry{stream, nt.table};
+
+  CHECK(nt.Published("deadband") == Catch::Approx(0.1));
+  CHECK(nt.Published("translationScale") == Catch::Approx(0.8));
+  CHECK(nt.Published("rotationScale") == Catch::Approx(0.5));
+  CHECK(nt.Published("maxLinearVelocity") == Catch::Approx(kConfigMaxLinear));
+  CHECK(nt.Published("maxAngularVelocity") == Catch::Approx(kConfigMaxAngular));
+  CHECK(nt.PublishedBoolean("translationCube"));
+  CHECK_FALSE(nt.PublishedBoolean("rotationCube"));
+  CHECK(nt.PublishedBoolean("allianceRelative"));
+  CHECK_FALSE(nt.PublishedBoolean("robotRelative"));
+  CHECK(nt.Mode() == "ANGULAR_VELOCITY");
+}
+
+TEST_CASE_METHOD(SwerveDriveTestFixture,
+                 "SwerveInputStreamTelemetryTest.DashboardEditsAreAppliedToTheStream",
+                 "[SwerveInputStreamTelemetryTest]") {
+  TuningTable nt;
+  SwerveInputStream<4> stream{*m_drive, [] { return 0.0; }, [] { return 0.0; },
+                              [] { return 0.0; }};
+  SwerveInputStreamTelemetry<4> telemetry{stream, nt.table};
+
+  nt.Dashboard("deadband", 0.2);
+  nt.Dashboard("translationScale", 0.6);
+  nt.Dashboard("rotationScale", 0.4);
+  nt.Dashboard("maxLinearVelocity", 3.0);
+  nt.Dashboard("maxAngularVelocity", 5.0);
+  nt.Dashboard("translationCube", true);
+  nt.Dashboard("rotationCube", true);
+  nt.Dashboard("allianceRelative", true);
+  nt.Dashboard("robotRelative", true);
+  telemetry.Update();
+
+  CHECK(stream.GetAxisDeadband() == Catch::Approx(0.2));
+  CHECK(stream.GetTranslationAxisScale() == Catch::Approx(0.6));
+  CHECK(stream.GetOmegaAxisScale() == Catch::Approx(0.4));
+  CHECK(stream.GetMaximumChassisLinearVelocity().value() == Catch::Approx(3.0));
+  CHECK(stream.GetMaximumChassisAngularVelocity().value() == Catch::Approx(5.0));
+  CHECK(stream.IsTranslationCubeEnabled());
+  CHECK(stream.IsOmegaCubeEnabled());
+  CHECK(stream.IsAllianceRelativeEnabled());
+  CHECK(stream.IsRobotRelativeEnabled());
+
+  // The edits stay applied on later loops.
+  telemetry.Update();
+  CHECK(stream.GetAxisDeadband() == Catch::Approx(0.2));
+  CHECK(nt.Published("deadband") == Catch::Approx(0.2));
+  CHECK(stream.IsRobotRelativeEnabled());
+
+  // Turning a feature back off on the dashboard turns it off in the stream.
+  nt.Dashboard("translationCube", false);
+  telemetry.Update();
+  CHECK_FALSE(stream.IsTranslationCubeEnabled());
+}
+
+TEST_CASE_METHOD(SwerveDriveTestFixture,
+                 "SwerveInputStreamTelemetryTest.TunedValuesChangeTheOutput",
+                 "[SwerveInputStreamTelemetryTest]") {
+  TuningTable nt;
+  double forward = 1.0;
+  double rotation = 1.0;
+  SwerveInputStream<4> stream{*m_drive, [&] { return forward; }, [] { return 0.0; },
+                              [&] { return rotation; }};
+  SwerveInputStreamTelemetry<4> telemetry{stream, nt.table};
+
+  auto speeds = stream.Get();
+  CHECK(speeds.vx.value() == Catch::Approx(kConfigMaxLinear));
+  CHECK(speeds.omega.value() == Catch::Approx(kConfigMaxAngular));
+
+  SECTION("maximum velocities override the drive config") {
+    nt.Dashboard("maxLinearVelocity", 2.0);
+    nt.Dashboard("maxAngularVelocity", 3.0);
+    telemetry.Update();
+    speeds = stream.Get();
+    CHECK(speeds.vx.value() == Catch::Approx(2.0));
+    CHECK(speeds.omega.value() == Catch::Approx(3.0));
+  }
+
+  SECTION("scales") {
+    nt.Dashboard("translationScale", 0.5);
+    nt.Dashboard("rotationScale", 0.25);
+    telemetry.Update();
+    speeds = stream.Get();
+    CHECK(speeds.vx.value() == Catch::Approx(0.5 * kConfigMaxLinear));
+    CHECK(speeds.omega.value() == Catch::Approx(0.25 * kConfigMaxAngular));
+  }
+
+  SECTION("deadband") {
+    forward = 0.3;
+    nt.Dashboard("deadband", 0.5);
+    telemetry.Update();
+    CHECK(stream.Get().vx.value() == Catch::Approx(0.0));
+  }
+
+  SECTION("rotation cubing") {
+    rotation = 0.5;
+    nt.Dashboard("rotationCube", true);
+    telemetry.Update();
+    CHECK(stream.Get().omega.value() == Catch::Approx(0.125 * kConfigMaxAngular));
+  }
+}
+
+TEST_CASE_METHOD(SwerveDriveTestFixture,
+                 "SwerveInputStreamTelemetryTest.InvalidDashboardValuesAreReplacedWithTheStreamValue",
+                 "[SwerveInputStreamTelemetryTest]") {
+  const double nan = std::numeric_limits<double>::quiet_NaN();
+  const double infinity = std::numeric_limits<double>::infinity();
+  const std::vector<std::pair<std::string, double>> cases{
+      {"deadband", -0.1},         {"deadband", 1.0},           {"deadband", nan},
+      {"translationScale", 0.0},  {"translationScale", 1.5},   {"rotationScale", -0.5},
+      {"rotationScale", nan},     {"maxLinearVelocity", 0.0},  {"maxLinearVelocity", -1.0},
+      {"maxLinearVelocity", infinity}, {"maxAngularVelocity", 0.0}, {"maxAngularVelocity", nan}};
+  for (const auto& [key, value] : cases) {
+    INFO(key << " = " << value);
+    TuningTable nt;
+    SwerveInputStream<4> stream{*m_drive, [] { return 0.0; }, [] { return 0.0; },
+                                [] { return 0.0; }};
+    stream.WithDeadband(0.1).WithScaleTranslation(0.8).WithScaleRotation(0.5);
+    SwerveInputStreamTelemetry<4> telemetry{stream, nt.table};
+    double before = nt.Published(key);
+
+    nt.Dashboard(key, value);
+    telemetry.Update();
+    CHECK(nt.Published(key) == Catch::Approx(before));
+    telemetry.Update();
+    CHECK(nt.Published(key) == Catch::Approx(before));
+  }
+}
+
+TEST_CASE_METHOD(SwerveDriveTestFixture,
+                 "SwerveInputStreamTelemetryTest.CodeChangesArePublishedAndNotOverridden",
+                 "[SwerveInputStreamTelemetryTest]") {
+  TuningTable nt;
+  SwerveInputStream<4> stream{*m_drive, [] { return 0.0; }, [] { return 0.0; },
+                              [] { return 0.0; }};
+  stream.WithScaleTranslation(0.8);
+  SwerveInputStreamTelemetry<4> telemetry{stream, nt.table};
+
+  // E.g. a slow mode binding changing the scale while driving.
+  stream.WithScaleTranslation(0.4);
+  telemetry.Update();
+  CHECK(nt.Published("translationScale") == Catch::Approx(0.4));
+  CHECK(stream.GetTranslationAxisScale() == Catch::Approx(0.4));
+
+  stream.WithScaleTranslation(0.8);
+  telemetry.Update();
+  CHECK(nt.Published("translationScale") == Catch::Approx(0.8));
+  CHECK(stream.GetTranslationAxisScale() == Catch::Approx(0.8));
+}
+
+TEST_CASE_METHOD(SwerveDriveTestFixture,
+                 "SwerveInputStreamTelemetryTest.SupplierControlledFeaturesAreNotOverridden",
+                 "[SwerveInputStreamTelemetryTest]") {
+  TuningTable nt;
+  bool allianceRelative = false;
+  SwerveInputStream<4> stream{*m_drive, [] { return 0.0; }, [] { return 0.0; },
+                              [] { return 0.0; }};
+  stream.WithAllianceRelativeControl([&] { return allianceRelative; });
+  SwerveInputStreamTelemetry<4> telemetry{stream, nt.table};
+
+  allianceRelative = true;
+  telemetry.Update();
+  CHECK(nt.PublishedBoolean("allianceRelative"));
+
+  // The stream still follows the supplier: the telemetry did not replace it with a fixed value.
+  allianceRelative = false;
+  CHECK_FALSE(stream.IsAllianceRelativeEnabled());
+  telemetry.Update();
+  CHECK_FALSE(nt.PublishedBoolean("allianceRelative"));
+}
+
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveInputStreamTelemetryTest.PublishesTheCurrentMode",
+                 "[SwerveInputStreamTelemetryTest]") {
+  TuningTable nt;
+  bool headingControl = false;
+  auto stream = SwerveInputStream<4>::Of(*m_drive, [] { return 0.0; }, [] { return 0.0; });
+  stream.WithControllerHeadingAxis([] { return 0.0; }, [] { return 1.0; })
+      .WithHeadingControl([&] { return headingControl; });
+  SwerveInputStreamTelemetry<4> telemetry{stream, nt.table};
+
+  headingControl = true;
+  stream.Get();
+  telemetry.Update();
+  CHECK(nt.Mode() == "HEADING");
+}
+
+TEST_CASE_METHOD(SwerveDriveTestFixture,
+                 "SwerveInputStreamTelemetryTest.WithMaximumVelocityOverridesTheDriveConfig",
+                 "[SwerveInputStreamTelemetryTest]") {
+  SwerveInputStream<4> stream{*m_drive, [] { return 1.0; }, [] { return 0.0; },
+                              [] { return 1.0; }};
+  CHECK(stream.Get().vx.value() == Catch::Approx(kConfigMaxLinear));
+
+  stream.WithMaximumLinearVelocity(2.0_mps)
+      .WithMaximumAngularVelocity(wpi::units::radians_per_second_t{1.0});
+  auto speeds = stream.Get();
+  CHECK(speeds.vx.value() == Catch::Approx(2.0));
+  CHECK(speeds.omega.value() == Catch::Approx(1.0));
 }
 
 }  // namespace yams::test

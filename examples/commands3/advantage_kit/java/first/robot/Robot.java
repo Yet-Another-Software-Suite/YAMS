@@ -11,13 +11,14 @@ import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.RPM;
 import static org.wpilib.units.Units.Seconds;
 
-import first.robot.commands.Drive;
 import first.robot.mechanisms.ArmMechanism;
 import first.robot.mechanisms.ArmMechanism.ArmConstants;
 import first.robot.mechanisms.ElevatorMechanism;
 import first.robot.mechanisms.IndexerMechanism;
 import first.robot.mechanisms.ShooterMechanism;
 import first.robot.mechanisms.SwerveMechanism;
+import first.robot.opmodes.teleop.AngularVelocityTeleop;
+import first.robot.opmodes.teleop.HeadingTeleop;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -46,6 +47,8 @@ import org.wpilib.units.measure.Distance;
  * same base as TimedRobot, so this follows WPILib's hatchbotcmdv3 example: Commands v3 run on the
  * default {@link Scheduler} from robotPeriodic() and button bindings are created in the
  * constructor, where they are globally scoped (active in every mode, like the v2 port).
+ * WPILib does not discover {@code @Teleop} opmodes on a LoggedRobot either, so the teleop classes in
+ * {@code opmodes/teleop} are created from {@link #teleopInit()}; {@link #HEADING_TELEOP} picks which one.
  * Replay (including {@link #setUseTiming(boolean)}) keeps working unchanged.
  *
  * <p>Commands that use more than one mechanism ({@link #shoot}, {@link #scorePreloadAuto}) have no
@@ -68,11 +71,14 @@ public class Robot extends LoggedRobot {
   /// Change to Mode.REPLAY to enable REPLAy.
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
+  /** Use {@link HeadingTeleop} instead of {@link AngularVelocityTeleop} for teleop driving. */
+  private static final boolean HEADING_TELEOP = false;
+
   private final Scheduler scheduler = Scheduler.getDefault();
 
   // Mechanisms are created after Logger.start() in the constructor so their hardware reads are
   // logged from the first loop.
-  private final SwerveMechanism   drive;
+  public final SwerveMechanism    drive;
   private final ArmMechanism      arm;
   private final ElevatorMechanism elevator;
   private final ShooterMechanism  shooter;
@@ -88,7 +94,7 @@ public class Robot extends LoggedRobot {
 
   private final Command autonomousCommand;
 
-  private final CommandNiDsXboxController xboxController = new CommandNiDsXboxController(0);
+  public final CommandNiDsXboxController xboxController = new CommandNiDsXboxController(0);
 
   public Robot() {
     switch (currentMode) {
@@ -122,10 +128,6 @@ public class Robot extends LoggedRobot {
     indexer = new IndexerMechanism();
 
     DriverStationBackend.silenceJoystickConnectionAlert(true);
-    // The drive command also drives to these poses while the left or right bumper is held.
-    drive.setDefaultCommand(Drive.teleop(drive, xboxController,
-                                          new Pose2d(Meters.of(3), Meters.of(3), Rotation2d.fromDegrees(30)),
-                                          new Pose2d(Meters.of(5), Meters.of(6), Rotation2d.fromDegrees(70))));
     arm.setDefaultCommand(arm.setAngle(Degrees.of(0)));
     elevator.setDefaultCommand(elevator.setHeight(Meters.of(0)));
     shooter.setDefaultCommand(shooter.set(0));
@@ -140,6 +142,11 @@ public class Robot extends LoggedRobot {
     xboxController.b().whileTrue(elevator.setHeight(SCORE_HEIGHT));
     xboxController.x().whileTrue(shooter.setVelocity(SHOOT_SPEED));
     xboxController.rightTrigger().whileTrue(shoot(SHOOT_SPEED));
+    // Drive to these poses while the left or right bumper is held, then return to the teleop drive.
+    xboxController.leftBumper().whileTrue(
+        drive.driveToPose(new Pose2d(Meters.of(3), Meters.of(3), Rotation2d.fromDegrees(30))));
+    xboxController.rightBumper().whileTrue(
+        drive.driveToPose(new Pose2d(Meters.of(5), Meters.of(6), Rotation2d.fromDegrees(70))));
   }
 
   /**
@@ -228,6 +235,12 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void teleopInit() {
+    // Sets the drive's input stream and default command.
+    if (HEADING_TELEOP) {
+      new HeadingTeleop(this);
+    } else {
+      new AngularVelocityTeleop(this);
+    }
   }
 
   @Override

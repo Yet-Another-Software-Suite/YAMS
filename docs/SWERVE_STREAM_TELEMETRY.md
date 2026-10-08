@@ -6,9 +6,14 @@ This document describes the telemetry and live tuning features for `SwerveInputS
 
 `SwerveInputStreamTelemetry` publishes real-time telemetry from a `SwerveInputStream` to NetworkTables, enabling:
 
-- **Monitoring**: View current drive state (velocities, mode, etc.) on the dashboard
+- **Monitoring**: View the current drive mode and stream configuration on the dashboard
 - **Live tuning**: Adjust control parameters (deadband, scaling, max velocities) without redeploying code
 - **Debugging**: Quickly identify input issues or calibration problems
+
+Tunable values stay in sync both ways. A value edited on the dashboard is applied to the stream on the
+next `update()`. A change made in code, such as a slow mode binding calling `withScaleTranslation`, or a
+`BooleanSupplier` passed to `withAllianceRelativeControl` changing, is published to the dashboard and is
+not overridden. Dashboard values outside the allowed range are replaced with the stream's current value.
 
 ## Java Usage
 
@@ -16,7 +21,7 @@ This document describes the telemetry and live tuning features for `SwerveInputS
 
 ```java
 import yams.commands2.swerve.SwerveInputStream;
-import yams.commands2.swerve.SwerveInputStreamTelemetry;
+import yams.commands2.telemetry.SwerveInputStreamTelemetry;
 
 // In your subsystem or command initialization:
 SwerveInputStream driveStream = SwerveInputStream.of(drive, leftY, leftX)
@@ -26,10 +31,10 @@ SwerveInputStream driveStream = SwerveInputStream.of(drive, leftY, leftX)
 
 SwerveInputStreamTelemetry telemetry = new SwerveInputStreamTelemetry(driveStream, "drive");
 
-// In your periodic or command execute:
+// In your periodic or command execute. SwerveInputStream output is field relative.
 void periodic() {
     telemetry.update();
-    drive.setRobotRelativeChassisSpeeds(driveStream.get());
+    drive.setFieldRelativeChassisSpeeds(driveStream.get());
 }
 ```
 
@@ -37,7 +42,7 @@ void periodic() {
 
 ```java
 import yams.commands3.swerve.SwerveInputStream;
-import yams.commands3.swerve.SwerveInputStreamTelemetry;
+import yams.commands3.telemetry.SwerveInputStreamTelemetry;
 
 var telemetry = new SwerveInputStreamTelemetry(input, "drive");
 
@@ -45,7 +50,7 @@ public Command teleop(SwerveInputStream input) {
     return drive.run(coroutine -> {
         while (true) {
             telemetry.update();
-            drive.setRobotRelativeChassisSpeeds(input.get());
+            drive.setFieldRelativeChassisSpeeds(input.get());
             coroutine.yield();
         }
     });
@@ -60,19 +65,19 @@ public Command teleop(SwerveInputStream input) {
 using namespace yams::mechanisms::swerve::utility;
 
 // In your subsystem:
-auto driveStream = SwerveInputStream<4>::Of(m_drive,
+// Members. The stream must outlive its telemetry, so declare it first.
+SwerveInputStream<4> m_driveStream = SwerveInputStream<4>::Of(m_drive,
     [this]{ return -m_driverController.GetLeftY(); },
     [this]{ return -m_driverController.GetLeftX(); })
   .WithControllerRotationAxis([this]{ return -m_driverController.GetRightX(); })
   .WithDeadband(0.05)
   .WithScaleTranslation(0.8);
+SwerveInputStreamTelemetry<4> m_telemetry{m_driveStream, "drive"};
 
-auto telemetry = std::make_unique<SwerveInputStreamTelemetry<4>>(driveStream, "drive");
-
-// In Periodic():
+// In Periodic(). SwerveInputStream output is field relative.
 void Periodic() override {
-    telemetry->Update();
-    m_drive.Drive([this]{ return m_driveStream.Get(); });
+    m_telemetry.Update();
+    m_drive.SetFieldRelativeChassisSpeeds(m_driveStream.Get());
 }
 ```
 
@@ -85,9 +90,9 @@ Published to `/SwerveInputStream/<name>/`:
 | Topic | Type | Description |
 |-------|------|-------------|
 | `mode` | string | Current drive mode: `ANGULAR_VELOCITY`, `HEADING`, `AIM`, `TRANSLATION_ONLY` |
-| `vx` | double | Forward/back velocity (m/s) |
-| `vy` | double | Left/right velocity (m/s) |
-| `omega` | double | Rotation velocity (rad/s) |
+
+The output velocities are not published: reading them would call `get()` a second time each loop, which
+runs the heading controller twice. Log the speeds you send to the drive instead.
 
 ### Live Tuning
 
@@ -96,8 +101,8 @@ Published to `/SwerveInputStream/<name>/`:
 | `deadband` | double | [0, 1) | Controller axis deadband |
 | `translationScale` | double | (0, 1] | Translation axis scaling factor |
 | `rotationScale` | double | (0, 1] | Rotation axis scaling factor |
-| `maxLinearVelocity` | double | > 0 | Maximum chassis linear velocity (m/s) |
-| `maxAngularVelocity` | double | > 0 | Maximum chassis angular velocity (rad/s) |
+| `maxLinearVelocity` | double | > 0 | Maximum chassis linear velocity (m/s). Starts at the drive config's maximum and overrides it |
+| `maxAngularVelocity` | double | > 0 | Maximum chassis angular velocity (rad/s). Starts at the drive config's maximum and overrides it |
 | `translationCube` | boolean | - | Enable cubic translation response curve |
 | `rotationCube` | boolean | - | Enable cubic rotation response curve |
 | `allianceRelative` | boolean | - | Enable alliance-relative translation flip |
@@ -111,7 +116,6 @@ Create a tab and add widgets for the SwerveInputStream topics:
 
 1. **Display widgets** for state monitoring:
    - Mode indicator (String)
-   - Velocity gauges (Vx, Vy, Omega)
 
 2. **Slider widgets** for tuning:
    - Deadband: slider 0.0 to 0.1
@@ -128,8 +132,6 @@ Example JSON for Shuffleboard:
 {
   "SwerveInputStream/drive": {
     "mode": {"class": "String", "position": [0, 0]},
-    "vx": {"class": "Gauge", "position": [1, 0]},
-    "vy": {"class": "Gauge", "position": [2, 0]},
     "deadband": {"class": "Slider", "position": [0, 1], "min": 0.0, "max": 0.1},
     "translationScale": {"class": "Slider", "position": [1, 1], "min": 0.1, "max": 1.0},
     "rotationScale": {"class": "Slider", "position": [2, 1], "min": 0.1, "max": 1.0}
@@ -160,7 +162,8 @@ Example JSON for Shuffleboard:
 
 ## Best Practices
 
-1. **Publish during development only**: Disable telemetry in competition code to save bandwidth
+1. **Publish during development only**: Disable telemetry in competition code to save bandwidth. In Java,
+   `close()` stops publishing; in C++, destroy the telemetry object
 2. **Use descriptive names**: Give each SwerveInputStream a clear name (e.g., "drive", "intake_aiming")
 3. **Monitor all parameters**: Check mode, velocities, and active features during testing
 4. **Document final values**: Keep notes on what worked best for your chassis and driver
@@ -170,7 +173,8 @@ Example JSON for Shuffleboard:
 | Issue | Solution |
 |-------|----------|
 | Telemetry not appearing | Check NetworkTables connection; ensure `update()` is called every loop |
-| Changes don't apply immediately | Verify the robot code is reading the published values |
+| Changes don't apply immediately | Verify `update()` is called every loop before the stream is read |
+| A dashboard value snaps back | The value is outside the allowed range in the Live Tuning table |
 | Live tuning causes instability | Use slider ranges that respect your drivetrain limits |
 | High NetworkTables latency | Reduce update frequency or disable verbose logging on the dashboard |
 

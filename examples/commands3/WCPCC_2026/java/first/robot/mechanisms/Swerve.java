@@ -19,7 +19,7 @@ import first.robot.Constants.Driving;
 import first.robot.Ports;
 import first.robot.util.GeometryUtil;
 import java.util.Optional;
-import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.driverstation.Alliance;
@@ -69,6 +69,8 @@ public class Swerve implements Mechanism {
     private static final Rotation2d kRedAlliancePerspectiveRotation = Rotation2d.k180deg;
 
     private final SwerveDrive drive;
+    /** Active driver input, set by the teleop opmode. */
+    private SwerveInputStream inputStream;
 
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
@@ -185,27 +187,60 @@ public class Swerve implements Mechanism {
     }
 
     /**
-     * Create a driver input stream: field centric from the operator's perspective, with WCP's
-     * joystick deadband and a cubed response on both the translation and rotation axes.
+     * Set the active driver input.
      *
-     * @param forward  Stick input away from the operator, in [-1, 1].
-     * @param left     Stick input to the operator's left, in [-1, 1].
-     * @param rotation Counterclockwise rotation stick input, in [-1, 1].
-     * @return {@link SwerveInputStream} producing field relative {@link ChassisVelocities}.
+     * @param inputStream Field relative {@link SwerveInputStream} driven by {@link #driveInputStream()}.
      */
-    public SwerveInputStream createDriverInput(DoubleSupplier forward, DoubleSupplier left, DoubleSupplier rotation) {
-        return new SwerveInputStream(drive, forward, left, rotation)
-            .withMaximumLinearVelocity(Driving.kMaxSpeed)
-            .withMaximumAngularVelocity(Driving.kMaxRotationalRate)
-            .withDeadband(Driving.kJoystickDeadband)
-            .setCubeTranslationControllerAxis()
-            .setCubeRotationControllerAxis()
-            .setAllianceRelativeControl();
+    public void setInputStream(SwerveInputStream inputStream) {
+        this.inputStream = inputStream;
     }
 
-    /** Drive with field relative speeds, e.g. from {@link #createDriverInput}. */
-    public void driveFieldRelative(ChassisVelocities fieldRelativeSpeeds) {
-        drive.setFieldRelativeChassisSpeeds(fieldRelativeSpeeds);
+    /**
+     * Get the active driver input, so commands can read or adjust it.
+     *
+     * @return Active {@link SwerveInputStream}.
+     */
+    public SwerveInputStream getInputStream() {
+        return inputStream;
+    }
+
+    /**
+     * Drive with the active {@link SwerveInputStream}. A stream set while this runs takes effect on the next loop.
+     * Runs until canceled.
+     *
+     * @return {@link Command} that drives the robot.
+     */
+    public Command driveInputStream() {
+        return run(coroutine -> {
+            while (true) {
+                drive.setFieldRelativeChassisSpeeds(inputStream.get());
+                coroutine.yield();
+            }
+        }).named("Swerve Drive Input Stream");
+    }
+
+    /**
+     * Drive with field relative {@link ChassisVelocities}, e.g. from a {@link SwerveInputStream}. Runs until canceled.
+     *
+     * @param velocities Field relative {@link ChassisVelocities}, read every loop.
+     * @return {@link Command} that drives the robot.
+     */
+    public Command driveFieldRelative(Supplier<ChassisVelocities> velocities) {
+        return run(coroutine -> {
+            while (true) {
+                drive.setFieldRelativeChassisSpeeds(velocities.get());
+                coroutine.yield();
+            }
+        }).named("Swerve Drive Field Relative");
+    }
+
+    /**
+     * Underlying YAMS {@link SwerveDrive}, for building a {@link SwerveInputStream}.
+     *
+     * @return {@link SwerveDrive} driven by this mechanism.
+     */
+    public SwerveDrive getSwerveDrive() {
+        return drive;
     }
 
     /**

@@ -69,7 +69,7 @@ public final class MechanismCommands {
     /**
      * Start tracking the shot after 0.25 s, and feed once the robot is facing the hub and the shot is
      * ready. Runs until canceled. The drive command running alongside it does the aiming:
-     * {@link Drive#teleop} aims while the right trigger is held, and the autonomous routine runs
+     * the teleop input stream aims while the right trigger is held, and the autonomous routine runs
      * {@link Drive#autoAim}.
      */
     public Command shootWhenAimed() {

@@ -6,9 +6,8 @@ package first.robot.mechanisms;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Centimeters;
 
-import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 import first.robot.Constants.DriveConstants;
-import first.robot.Constants.OIConstants;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.hardware.imu.OnboardIMU;
@@ -35,6 +34,8 @@ public class DriveMechanism implements Mechanism
   private final OnboardIMU m_gyro = new OnboardIMU(MountOrientation.FLAT);
 
   private final SwerveDrive m_drive;
+  /** Active driver input, set by the teleop opmode. */
+  private SwerveInputStream m_inputStream;
 
   /** Creates a new DriveMechanism. */
   public DriveMechanism()
@@ -90,40 +91,84 @@ public class DriveMechanism implements Mechanism
   }
 
   /**
-   * Joystick input stream for teleop driving. Inputs are in [-1, 1] and are scaled to the maximum
-   * chassis speeds configured above.
+   * Drive with field relative {@link ChassisVelocities}, e.g. from a {@link SwerveInputStream}
+   * built in a teleop opmode. Runs until canceled.
    *
-   * @param xSpeed Speed of the robot in the x direction (forward).
-   * @param ySpeed Speed of the robot in the y direction (sideways).
-   * @param rot    Angular rate of the robot.
-   * @param deadband Joystick deadband.
-   * @return {@link SwerveInputStream} producing field relative {@link ChassisVelocities}.
+   * @param velocities Field relative {@link ChassisVelocities}, read every loop.
+   * @return {@link Command} that drives the robot.
    */
-  public SwerveInputStream getInputStream(DoubleSupplier xSpeed, DoubleSupplier ySpeed, DoubleSupplier rot,
-                                          double deadband)
+  public Command driveFieldRelative(Supplier<ChassisVelocities> velocities)
   {
-    return new SwerveInputStream(m_drive, xSpeed, ySpeed, rot)
-        .withMaximumLinearVelocity(DriveConstants.kMaxSpeed)
-        .withMaximumAngularVelocity(DriveConstants.kMaxAngularSpeed)
-        .withDeadband(deadband);
+    return run(coroutine -> {
+      while (true)
+      {
+        m_drive.setFieldRelativeChassisSpeeds(velocities.get());
+        coroutine.yield();
+      }
+    }).named("Drive Field Relative");
   }
 
-  /** Drive with field relative speeds from an input stream. */
-  public void driveFromInput(SwerveInputStream input)
+  /**
+   * Drive with the active {@link SwerveInputStream}. A stream set while this runs takes effect on the next loop. Runs
+   * until canceled.
+   *
+   * @return {@link Command} that drives the robot.
+   */
+  public Command driveInputStream()
   {
-    m_drive.setFieldRelativeChassisSpeeds(input.get());
+    return run(coroutine -> {
+      while (true)
+      {
+        m_drive.setFieldRelativeChassisSpeeds(m_inputStream.get());
+        coroutine.yield();
+      }
+    }).named("Swerve Drive Input Stream");
   }
 
-  /** Sets the wheels into an X formation to prevent movement. Call once per loop to hold it. */
-  public void lockWheels()
+  /**
+   * Set the active driver input.
+   *
+   * @param inputStream Field relative {@link SwerveInputStream} driven by {@link #driveInputStream()}.
+   */
+  public void setInputStream(SwerveInputStream inputStream)
   {
-    m_drive.lockPose();
+    m_inputStream = inputStream;
   }
 
-  /** Zeroes the heading of the robot. */
-  public void zeroHeading()
+  /**
+   * Get the active driver input, so commands can read or adjust it.
+   *
+   * @return Active {@link SwerveInputStream}.
+   */
+  public SwerveInputStream getInputStream()
   {
-    m_drive.zeroGyro();
+    return m_inputStream;
+  }
+
+  /**
+   * Sets the wheels into an X formation to prevent movement. Runs until canceled.
+   *
+   * @return {@link Command} that holds the X formation.
+   */
+  public Command lockWheels()
+  {
+    return run(coroutine -> {
+      while (true)
+      {
+        m_drive.lockPose();
+        coroutine.yield();
+      }
+    }).named("Lock Wheels");
+  }
+
+  /**
+   * Zeroes the heading of the robot. Requires no mechanisms, so it does not interrupt driving.
+   *
+   * @return {@link Command} that zeroes the heading and ends.
+   */
+  public Command zeroHeading()
+  {
+    return Command.noRequirements(coroutine -> m_drive.zeroGyro()).named("Zero Heading");
   }
 
   /**
@@ -141,6 +186,16 @@ public class DriveMechanism implements Mechanism
   public void stop()
   {
     m_drive.setRobotRelativeChassisSpeeds(new ChassisVelocities());
+  }
+
+  /**
+   * Underlying YAMS {@link SwerveDrive}, for building a {@link SwerveInputStream}.
+   *
+   * @return {@link SwerveDrive} driven by this mechanism.
+   */
+  public SwerveDrive getSwerveDrive()
+  {
+    return m_drive;
   }
 
   /**

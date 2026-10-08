@@ -21,11 +21,11 @@ import com.revrobotics.spark.SparkMax;
 import first.robot.Constants;
 import first.robot.Constants.CANIDS;
 import first.robot.Constants.SwerveDrive.Modules.Module;
-import first.robot.pathplanner.AutoBuilder;
 import first.robot.utils.AllianceFlipUtil;
 import first.robot.utils.FieldConstants.Hub;
 import java.util.Arrays;
-import java.util.function.DoubleSupplier;
+import java.util.List;
+import java.util.function.Supplier;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.driverstation.Alliance;
@@ -42,6 +42,7 @@ import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.math.util.Units;
 import org.wpilib.smartdashboard.Field2d;
 import org.wpilib.telemetry.Telemetry;
+import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.Distance;
 import yams.commands3.config.SmartMotorControllerConfig;
 import yams.commands3.config.SwerveDriveConfig;
@@ -65,6 +66,8 @@ public class SwerveMechanism implements Mechanism
 {
 
   SwerveDrive swerveDrive;
+  /** Active driver input, set by the teleop opmode. */
+  private SwerveInputStream inputStream;
   // Systemcore's built-in IMU replaces the navX on the roboRIO SPI port.
   private final OnboardIMU imu = new OnboardIMU(MountOrientation.FLAT);
   // limelight stuff
@@ -83,8 +86,9 @@ public class SwerveMechanism implements Mechanism
         .withMaximumChassisSpeed(maxLinearVelocity, maxAngularVelocity)
         .withMaximumModuleSpeed(maxLinearVelocity)
         .withModuleStateOptimization(true)
-        // Heading PID from controllerproperties.json, used by SwerveInputStream heading control and
-        // aiming.
+        // Translation PID for the autos' drive to pose, and heading PID from controllerproperties.json,
+        // used by drive to pose, SwerveInputStream heading control and aiming.
+        .withTranslationController(new PIDController(translationKP, 0, 0))
         .withRotationController(new PIDController(headingKP, 0, 0))
         .withTelemetry("Swerve", TelemetryVerbosity.HIGH);
     swerveDrive = new SwerveDrive(config);
@@ -220,47 +224,112 @@ public class SwerveMechanism implements Mechanism
     swerveDrive.simIterate();
   }
 
+  /**
+   * Underlying YAMS {@link SwerveDrive}, for building a {@link SwerveInputStream}.
+   *
+   * @return {@link SwerveDrive} driven by this mechanism.
+   */
   public SwerveDrive getSwerveDrive()
   {
     return swerveDrive;
   }
 
   /**
-   * Create a driver input stream for this drivetrain.
+   * Drive with field relative {@link ChassisVelocities}. Runs until canceled.
    *
-   * @param translationX Translation X supplier.
-   * @param translationY Translation Y supplier.
-   * @return Input stream with the original deadband, translation scale and alliance relative control.
+   * @param velocities Field relative {@link ChassisVelocities}, read every loop.
+   * @return {@link Command} that drives the robot.
    */
-  public SwerveInputStream createInputStream(DoubleSupplier translationX, DoubleSupplier translationY)
+  public Command driveFieldRelative(Supplier<ChassisVelocities> velocities)
   {
-    return SwerveInputStream.of(swerveDrive, translationX, translationY)
-        .withDeadband(0.1)
-        .withScaleTranslation(.8)
-        .setAllianceRelativeControl(true);
-  }
-
-  public void driveFieldOriented(ChassisVelocities velocity)
-  {
-    swerveDrive.setFieldRelativeChassisSpeeds(velocity);
+    return run(coroutine -> {
+      while (true)
+      {
+        swerveDrive.setFieldRelativeChassisSpeeds(velocities.get());
+        coroutine.yield();
+      }
+    }).named("Swerve Drive Field Relative");
   }
 
   /**
-   * Run a PathPlanner auto. Not available with commands v3 yet, so this does nothing; see
-   * {@link AutoBuilder}.
+   * Drive with the active {@link SwerveInputStream}. A stream set while this runs takes effect on the next loop. Runs
+   * until canceled.
    *
-   * @param autoName PathPlanner auto name.
-   * @return Command that runs the auto.
+   * @return {@link Command} that drives the robot.
    */
-  public Command getAutonomousCommand(String autoName)
+  public Command driveInputStream()
   {
-    return AutoBuilder.buildAuto(autoName);
+    return run(coroutine -> {
+      while (true)
+      {
+        swerveDrive.setFieldRelativeChassisSpeeds(inputStream.get());
+        coroutine.yield();
+      }
+    }).named("Swerve Drive Input Stream");
   }
 
-  public Command driveToPose(Pose2d pose)
+  /**
+   * Translate with the active {@link SwerveInputStream} while the robot turns to face a target, which is shown as
+   * {@code AimTarget} on the field. Runs until canceled.
+   *
+   * @param aimTarget Pose to face, read every loop.
+   * @return {@link Command} that aims while driving.
+   */
+  public Command driveAimedAt(Supplier<Pose2d> aimTarget)
   {
-    // PathPlanner pathfinding is not available, so drive straight to the pose with the YAMS PID.
-    return swerveDrive.driveToPose(pose);
+    return run(coroutine -> {
+      SwerveInputStream aimInput = inputStream.clone().withAim(aimTarget, () -> true);
+      while (true)
+      {
+        getField().getObject("AimTarget").setPose(aimTarget.get());
+        swerveDrive.setFieldRelativeChassisSpeeds(aimInput.get());
+        coroutine.yield();
+      }
+    }).whenCanceled(() -> getField().getObject("AimTarget").setPoses(List.of())).named("Auto Aim");
+  }
+
+  /**
+   * Set the active driver input.
+   *
+   * @param inputStream Field relative {@link SwerveInputStream} driven by {@link #driveInputStream()}.
+   */
+  public void setInputStream(SwerveInputStream inputStream)
+  {
+    this.inputStream = inputStream;
+  }
+
+  /**
+   * Get the active driver input, so commands can read or adjust it.
+   *
+   * @return Active {@link SwerveInputStream}.
+   */
+  public SwerveInputStream getInputStream()
+  {
+    return inputStream;
+  }
+
+  /**
+   * Drive straight to a pose, ending once the robot is within the given tolerances. The drive stops when the command
+   * ends or is canceled.
+   *
+   * @param pose                 Field relative, blue-origin {@link Pose2d} to drive to.
+   * @param translationTolerance Maximum distance from the pose to be considered at the pose.
+   * @param rotationTolerance    Maximum heading error from the pose to be considered at the pose.
+   * @return {@link Command} that drives to the pose.
+   */
+  public Command driveToPose(Pose2d pose, Distance translationTolerance, Angle rotationTolerance)
+  {
+    return swerveDrive.driveToPose(pose, translationTolerance, rotationTolerance);
+  }
+
+  /**
+   * Reset odometry to a pose, e.g. an auto's starting pose.
+   *
+   * @param pose Field relative, blue-origin {@link Pose2d} the robot is at.
+   */
+  public void resetPose(Pose2d pose)
+  {
+    swerveDrive.resetOdometry(pose);
   }
 
   public Rotation2d getHeading()
@@ -312,11 +381,6 @@ public class SwerveMechanism implements Mechanism
   {
     return Meters.of(getPose().getTranslation()
                               .getDistance(AllianceFlipUtil.apply(Hub.topCenterPoint.toTranslation2d())));
-  }
-
-  public void driveFieldOrientedSetpoint(ChassisVelocities speeds)
-  {
-    swerveDrive.setFieldRelativeChassisSpeeds(speeds);
   }
 
   public Field2d getField()

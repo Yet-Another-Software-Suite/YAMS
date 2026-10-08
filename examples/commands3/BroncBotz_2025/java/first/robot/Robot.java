@@ -10,7 +10,6 @@ import first.robot.Constants.AlgaeArmConstants;
 import first.robot.Constants.CoralArmConstants;
 import first.robot.Constants.ElevatorConstants;
 import first.robot.Constants.OperatorConstants;
-import first.robot.commands.Drive;
 import first.robot.commands.AlgaeArmCommands;
 import first.robot.commands.CoralArmCommands;
 import first.robot.commands.SuperstructureCommands;
@@ -67,7 +66,7 @@ public class Robot extends OpModeRobot {
      * initialization code. Default commands set here apply in every opmode.
      */
     public Robot() {
-        swerve.setDefaultCommand(Drive.teleop(swerve, driver));
+        // The swerve drive default is set by the teleop opmodes, so autos never read the sticks.
         // Return the elevator to the bottom, rest the coral arm, and keep the algae arm stowed out of
         // the way unless it holds an algae.
         elevator.setDefaultCommand(elevator.holdAt(ElevatorConstants.kMinHeight));

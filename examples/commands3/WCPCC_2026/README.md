@@ -28,19 +28,19 @@ A port of the West Coast Products 2026 Competitive Concept robot code to WPILib 
 | Original | Port | Notes |
 | --- | --- | --- |
 | `Robot.java`, `RobotContainer.java` | `Robot.java` | An `OpModeRobot` that holds the mechanisms, the controller and the default commands |
-| `RobotContainer.configureBindings()` | `opmodes/teleop/DriverTeleop.java` | The teleop bindings, created when the opmode is selected |
+| `RobotContainer.configureBindings()` | `opmodes/teleop/AngularVelocityTeleop.java`, `opmodes/teleop/HeadingTeleop.java`, `opmodes/teleop/TeleopBindings.java` | Two teleop opmodes, one per drive style, each building its `SwerveInputStream` and drive bindings when selected. The shared mechanism bindings are in `TeleopBindings` |
 | `commands/AutoRoutines.java` | `opmodes/auto/OutpostAndDepotAuto.java` | One `@Autonomous` opmode per routine, replacing the `AutoChooser` |
 | `subsystems/*.java` | `mechanisms/*.java` | Each subsystem is a Commands v3 `Mechanism` |
 | `subsystems/Intake.java` | `mechanisms/IntakePivot.java`, `mechanisms/IntakeRollers.java` | Split so each mechanism can be live tuned on its own. `intakeCommand()` moved to `MechanismCommands.intake()`, and agitating is `IntakePivot.agitate()` |
 | `subsystems/Swerve.java` (`TunerSwerveDrivetrain`) | `mechanisms/Swerve.java` | Rewritten on YAMS `SwerveDrive`, with its own Choreo trajectory follower |
 | `generated/TunerConstants.java` | (removed) | IDs moved to `Ports`; gains, ratios and offsets moved to `Constants.SwerveConstants` |
 | `commands/SubsystemCommands.java` | `commands/MechanismCommands.java` | Multi-mechanism coroutine commands |
-| `commands/ManualDriveCommand.java`, `commands/AimAndDriveCommand.java` | `commands/Drive.java` | Merged into one teleop drive loop, `Drive.teleop(swerve, controller)`, that drives through the `Swerve` input stream every loop and aims while the right trigger is held. `Drive.autoAim(swerve)` is the autonomous aim loop |
+| `commands/ManualDriveCommand.java`, `commands/AimAndDriveCommand.java` | `opmodes/teleop/AngularVelocityTeleop.java`, `commands/Drive.java` | The teleop opmode builds one `SwerveInputStream` that drives, holds and snaps the heading, and aims while the right trigger is held. `Drive.autoAim(swerve)` is the autonomous aim loop and `Drive.holdHeading(swerve)` the default outside teleop |
 | `commands/PrepareShotCommand.java` | `commands/ShotMap.java`, `commands/MechanismCommands.java` | The shot map is a plain `ShotMap.forDistance(...)` lookup; the shot tracking loop is the `prepareShot()` factory in `MechanismCommands` |
 | `LimelightHelpers.java` | (removed) | Replaced by the LimelightLib vendordep |
 | `frc/util/SwerveTelemetry.java` | (removed) | Replaced by YAMS swerve telemetry |
 | `frc/util/DriveInputSmoother.java`, `frc/util/ManualDriveInput.java` | (removed) | Replaced by `SwerveInputStream` |
-| `frc/util/Stopwatch.java` | (removed) | Replaced by a `Debouncer` in `Drive` |
+| `frc/util/Stopwatch.java` | (removed) | Replaced by a debounced `Trigger` in `AngularVelocityTeleop` |
 | `frc/util/GeometryUtil.java` | `util/GeometryUtil.java` | Same logic |
 | `generated/ChoreoTraj.java`, `generated/ChoreoVars.java` | same names | Package change. `ChoreoTraj` was regenerated without the ChoreoLib helpers (`asAutoTraj`) |
 
@@ -93,10 +93,11 @@ Every motor is a TalonFX wrapped in a YAMS `TalonFXWrapper` (`DCMotor.getKrakenX
 ### Commands, bindings and autos
 
 - **Drive** (teleop)
-  - The CTRE request state machine is replaced by a `SwerveInputStream`: 5.42 m/s, 1 rps, 0.15 deadband, alliance relative.
-  - Heading hold uses `setTranslationOnly(...)` after a 0.25 s debounce, with heading PID 5.
-  - The A/B/X/Y snap headings use `withHeading(...)` + `setHeadingControl(...)`.
-- **Aiming** uses `SwerveInputStream.withAimTarget(hub)` + `setAim(...)`: in teleop `Drive.teleop` aims while the right trigger is held, and in autonomous `Drive.autoAim` aims in place. The aimed check uses `swerve.isFacing(hub, 5°)`.
+  - The CTRE request state machine is replaced by a `SwerveInputStream` built in each teleop opmode: 5.42 m/s, 1 rps, 0.15 deadband, alliance relative. The opmode hands it to `Swerve.setInputStream(...)` and makes `Swerve.driveInputStream()` the default command.
+  - `AngularVelocityTeleop` (the original controls): the right stick X axis sets the rotation rate. Heading hold uses `withTranslationOnly(...)` after a 0.25 s debounce, with heading PID 5. The A/B/X/Y snap headings use `withHeading(...)` + `withHeadingControl(...)`.
+  - `HeadingTeleop`: the robot faces the direction the right stick is pushed, with `withControllerHeadingAxis(...)` + `withHeadingControl(...)`.
+  - Outside teleop the drivetrain's default is `Drive.holdHeading`, which holds still and keeps the heading between autonomous trajectories.
+- **Aiming** uses `SwerveInputStream.withAim(hub, trigger)`: in both teleops the robot aims while the right trigger is held, and in autonomous `Drive.autoAim` aims in place. The aimed check uses `swerve.isFacing(hub, 5°)`.
 - **MechanismCommands** adds `intake()` and `home()`. The v2 `aimAndShoot` is `shootWhenAimed`, since the drive commands now do the aiming; its logic and timings, and those of `shootManually`, are unchanged.
 - The shot map (`ShotMap`) is unchanged.
 - **OutpostAndDepotAuto**: the same Choreo routine, speeds and timings.
@@ -107,7 +108,7 @@ Every motor is a TalonFX wrapped in a YAMS `TalonFXWrapper` (`DCMotor.getKrakenX
   - Right trigger: aim and shoot. Right bumper: manual shot.
   - Left trigger: intake. Left bumper: stow.
   - D-pad up/down: hanger.
-  - A/B/X/Y: snap headings. Back: seed field centric.
+  - A/B/X/Y: snap headings (`AngularVelocityTeleop` only). Back: seed field centric.
   - Homing runs at auto and teleop start.
 
 ### Behavior differences
@@ -132,13 +133,13 @@ Every motor is a TalonFX wrapped in a YAMS `TalonFXWrapper` (`DCMotor.getKrakenX
 This is the Commands v3 version of `examples/commands2/WCPCC_2026`. The mechanisms, gains, bindings and timings match that port. What differs from it:
 
 - **Mechanisms instead of subsystems.** Each v2 subsystem is a class implementing `org.wpilib.command3.Mechanism` in the `mechanisms` package, still with one YAMS mechanism each. Their `periodic()`/`simulationPeriodic()` methods are called from `Robot`, since Commands v3 has no subsystem periodic.
-- **Opmodes instead of `RobotContainer`.** `Robot` extends `OpModeRobot` and sets the global defaults (manual drive, vision, and stopping the feeder, floor and intake rollers). It also binds homing to `RobotModeTriggers.autonomous().or(teleop())` with `whileTrue`, as the v2 port did, so disabling cancels it. `DriverTeleop` creates the bindings, and `OutpostAndDepotAuto` replaces `AutoRoutines` and its `AutoChooser`; it binds its routine to `RobotModeTriggers.autonomous()` in its constructor, so the binding only exists while the opmode is selected and disabling cancels the routine.
+- **Opmodes instead of `RobotContainer`.** `Robot` extends `OpModeRobot` and sets the global defaults (holding the heading, vision, and stopping the feeder, floor and intake rollers). It also binds homing to `RobotModeTriggers.autonomous().or(teleop())` with `whileTrue`, as the v2 port did, so disabling cancels it. The `AngularVelocityTeleop` and `HeadingTeleop` opmodes create the drive input stream and the bindings, and `OutpostAndDepotAuto` replaces `AutoRoutines` and its `AutoChooser`; it binds its routine to `RobotModeTriggers.autonomous()` in its constructor, so the binding only exists while the opmode is selected and disabling cancels the routine.
 - **Coroutines instead of decorators and groups.**
   - Each mechanism has command factories for its own actions, written as coroutines with `waitUntil`/`park` or a `while (true)` loop that yields: `Shooter.spinUp`/`runAt`, `Hood.moveTo`, `IntakePivot.moveTo`/`holdAt`/`agitate`/`home`, `Hanger.moveTo`/`home`, `Feeder.feed`, `Floor.feed`, `IntakeRollers.intake`. Where a YAMS command matches, it is used directly: `FlyWheel.run(supplier)` for the feeder, `setVoltage(...)` for the floor and intake rollers, `Arm.setAngle` for `holdAt` and `Elevator.runTo` for the hanger. `IntakePivot.moveTo` stays its own coroutine because YAMS `runTo` adds a 0.1 s debounce that would slow the agitate rocking. `whenCanceled` replaces `startEnd` and `handleInterrupt`, and the feeder, floor and intake rollers get a lowest priority `stop()` default command (also their `idle()`), so they stop whenever nothing uses them.
   - `shootWhenAimed`, `shootManually`, `intake` and `home` in `MechanismCommands` have no requirements of their own. They run the mechanism commands with `fork`, `await` and `awaitAll`, so each mechanism is only owned while its command runs, the way the v2 feed, floor feed and agitate commands were combined. Feeding is a `feed()` command both shooting commands `await`: the feeder after 0.25 s, then 0.125 s later the floor rollers, intake rollers and `IntakePivot.agitate()`, which `await`s `moveTo(AGITATE)` and `moveTo(INTAKE)` in a loop. `shootWhenAimed` does not require the swerve: it `fork`s `prepareShot()`, which sets the shooter and hood from the shot map every loop, and waits until the drive command faces the hub and the shooter and hood are at their setpoints. `shootManually` `fork`s `Shooter.runAt(dashboard RPM)`, which holds the speed and stops the shooter when canceled.
   - The auto's routine coroutine `await`s the trajectory followers in order, replacing the `done()`/`doneDelayed()` chaining, resets odometry with a plain `Swerve.resetOdometry` call, and gives aim and shoot five seconds with `awaitAny(aim, shootWhenAimed, Command.waitFor(5 s))`. The other v2 trajectory triggers are triggers created inside the routine, so they are scoped to it: `following(traj)` (true while the follower runs) replaces `active()`, and `following(traj).debounce(t)` replaces `atTime(t)` and `atTimeBeforeEnd(1)`. They deploy the intake once the hanger has homed, start intaking one second before the depot, pause vision and spin up on the way to the shooting pose, and pause vision and extend the hanger on the way to the tower.
-  - Driving commands take the driver controller instead of stick suppliers, and one `MechanismCommands` instance is shared by teleop and autonomous.
-  - `Swerve` creates a `SwerveInputStream` with `createDriverInput(...)` using stick suppliers, configured with deadband, cubed response curves, alliance-relative flipping, heading snap, heading hold, and aim targeting. `Drive.teleop` is the manual drive loop: it reads the driver controller buttons to manage snap headings and aiming, and feeds `stream.get()` to `driveFieldRelative`. Autonomous has its own drive loop, `Drive.autoAim`, which the auto runs with `shootWhenAimed` for its five second shot.
+  - The controller is read in the teleop opmodes, not in command classes, and one `MechanismCommands` instance is shared by teleop and autonomous.
+  - Each teleop opmode builds its `SwerveInputStream` with `SwerveInputStream.of(swerve.getSwerveDrive(), ...)` from the controller sticks, configured with deadband, cubed response curves, alliance-relative flipping, and aim targeting, plus heading snap and hold in `AngularVelocityTeleop`. The snap heading is opmode state set by A/B/X/Y `onTrue` bindings and cleared by manual rotation, aiming, or Back. `Swerve.driveInputStream()` feeds the active stream's field relative speeds to the drive every loop, and commands can fetch it with `Swerve.getInputStream()`. Autonomous has its own drive loop, `Drive.autoAim`, which builds a stick-free aiming stream, drives it with `Swerve.driveFieldRelative(...)`, and runs with `shootWhenAimed` for its five second shot.
 - **Priority instead of interruption behavior.** Homing runs above the default priority, replacing `InterruptionBehavior.CANCEL_INCOMING`. The vision default command has the lowest priority so the auto can pause vision with `limelight.idle()`.
 - **Choreo without `choreo.auto`.** ChoreoLib's `AutoFactory`, `AutoRoutine` and `AutoTrajectory` are built on Commands v2, so the auto loads the splits with `Choreo.loadTrajectory(...).getSplit(i)` and follows them with `Swerve.followTrajectory`, a coroutine that samples the trajectory each loop and holds the final sample, as `AutoTrajectory.cmd()` did. The trajectory triggers became awaits and scoped triggers in one routine coroutine, as described above.
 - **Mechanism ownership.** Because the multi-mechanism commands only own a mechanism while its command runs, a few interactions differ from the v2 groups, which owned everything from the start:

@@ -4,15 +4,11 @@
 
 package first.robot;
 
-import static org.wpilib.units.Units.Seconds;
-
 import first.robot.Constants.Shooter.Setpoints;
-import first.robot.commands.Drive;
 import first.robot.commands.ShooterCommands;
 import first.robot.mechanisms.IndexerMechanism;
 import first.robot.mechanisms.ShooterMechanism;
 import first.robot.mechanisms.SwerveMechanism;
-import first.robot.pathplanner.NamedCommands;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Scheduler;
 import org.wpilib.command3.button.CommandNiDsXboxController;
@@ -41,29 +37,17 @@ public class Robot extends OpModeRobot
 
   /**
    * This function is run when the robot is first started up and should be used for any
-   * initialization code. Default commands and named commands set here apply in every opmode.
+   * initialization code. Default commands set here apply in every opmode. The
+   * drivetrain default is set by the teleop opmodes, so autos never read the sticks.
    */
   public Robot()
   {
-    drivebase.setDefaultCommand(Drive.driveDirectAngle(drivebase, driverController));
-
     shooter.setDefaultCommand(shooter.setVelocityCommand(() -> Setpoints.maxRPM.times(Math.clamp(MathUtil.applyDeadband(
                                                                                                      -operatorController.getRightY(),
                                                                                                      0.1),
                                                                                                  0,
                                                                                                  1))));
     indexer.setDefaultCommand(indexer.idle());
-
-    NamedCommands.registerCommand("ShootBallsOdom",
-                                  () -> shooterCommands.shootAndIndex(drivebase).withTimeout(Seconds.of(4)));
-
-    NamedCommands.registerCommand("ShootBalls",
-                                  () -> shooterCommands.shootAndIndex(Setpoints.autonomousPeriodRPM)
-                                                       .withTimeout(Seconds.of(4)));
-
-    NamedCommands.registerCommand("Stop", shooterCommands::stopCommand);
-
-    NamedCommands.registerCommand("StartIntake", shooterCommands::intake);
 
     // if (isSimulation())
     // {

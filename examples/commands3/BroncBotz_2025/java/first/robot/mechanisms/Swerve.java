@@ -13,11 +13,8 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import first.robot.Constants.DriveToPose;
-import first.robot.Constants.OperatorConstants;
 import first.robot.Ports;
 import java.util.Optional;
-import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
@@ -50,6 +47,8 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
 public class Swerve implements Mechanism {
     private final SwerveDrive drive;
     private final Vision vision;
+    /** Active driver input, set by the teleop opmode. */
+    private SwerveInputStream inputStream;
 
     public Swerve() {
         final SwerveModule frontLeft = createModule("frontleft", Ports.kFrontLeftDrive, Ports.kFrontLeftAngle,
@@ -127,27 +126,59 @@ public class Swerve implements Mechanism {
     }
 
     /**
-     * Create the driver input stream.
+     * Drive with field relative {@link ChassisVelocities}. Runs until canceled.
      *
-     * @param forward          Stick input toward the robot's front, in [-1, 1].
-     * @param left             Stick input toward the robot's left, in [-1, 1].
-     * @param rotation         Counterclockwise rotation stick input, in [-1, 1].
-     * @param translationScale Scale applied to the translation sticks.
-     * @param allianceRelative Flip the sticks for the red alliance while true.
+     * @param velocities Field relative {@link ChassisVelocities}, read every loop.
+     * @return {@link Command} that drives the robot.
      */
-    public SwerveInputStream createDriverInput(DoubleSupplier forward, DoubleSupplier left, DoubleSupplier rotation,
-                                               DoubleSupplier translationScale, BooleanSupplier allianceRelative) {
-        return new SwerveInputStream(drive, forward, left, rotation)
-            .withMaximumLinearVelocity(kMaxSpeed)
-            .withMaximumAngularVelocity(kMaxAngularSpeed)
-            .withDeadband(OperatorConstants.kDeadband)
-            .withScaleTranslation(translationScale)
-            .withScaleRotation(OperatorConstants.kRotationScale)
-            .setAllianceRelativeControl(allianceRelative);
+    public Command driveFieldRelative(Supplier<ChassisVelocities> velocities) {
+        return run(coroutine -> {
+            while (true) {
+                drive.setFieldRelativeChassisSpeeds(velocities.get());
+                coroutine.yield();
+            }
+        }).named("Swerve Drive Field Relative");
     }
 
-    /** Underlying {@link SwerveDrive}. */
-    public SwerveDrive getDrive() {
+    /**
+     * Drive with the active {@link SwerveInputStream}. A stream set while this runs takes effect on the next loop.
+     * Runs until canceled.
+     *
+     * @return {@link Command} that drives the robot.
+     */
+    public Command driveInputStream() {
+        return run(coroutine -> {
+            while (true) {
+                drive.setFieldRelativeChassisSpeeds(inputStream.get());
+                coroutine.yield();
+            }
+        }).named("Swerve Drive Input Stream");
+    }
+
+    /**
+     * Set the active driver input.
+     *
+     * @param inputStream Field relative {@link SwerveInputStream} driven by {@link #driveInputStream()}.
+     */
+    public void setInputStream(SwerveInputStream inputStream) {
+        this.inputStream = inputStream;
+    }
+
+    /**
+     * Get the active driver input, so commands can read or adjust it.
+     *
+     * @return Active {@link SwerveInputStream}.
+     */
+    public SwerveInputStream getInputStream() {
+        return inputStream;
+    }
+
+    /**
+     * Underlying YAMS {@link SwerveDrive}, for building a {@link SwerveInputStream}.
+     *
+     * @return {@link SwerveDrive} driven by this mechanism.
+     */
+    public SwerveDrive getSwerveDrive() {
         return drive;
     }
 

@@ -20,6 +20,7 @@ import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.interpolation.InterpolatingDoubleTreeMap;
+import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.math.trajectory.TrapezoidProfile.Constraints;
 import org.wpilib.math.trajectory.TrapezoidProfile.State;
 import org.wpilib.units.measure.Angle;
@@ -27,11 +28,9 @@ import org.wpilib.units.measure.AngularAcceleration;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.LinearVelocity;
 import org.wpilib.command3.Command;
-import org.wpilib.command3.button.CommandNiDsXboxController;
 import first.robot.mechanisms.ShooterMechanism;
 import first.robot.mechanisms.SwerveMechanism;
 import java.util.List;
-import yams.commands3.swerve.SwerveInputStream;
 
 /** Factory for a command that rotates the drivetrain toward a goal and spins the shooter while driving. */
 public final class AlignToGoal {
@@ -53,15 +52,13 @@ public final class AlignToGoal {
    *
    * @param swerveMechanism Drivetrain to rotate toward the goal.
    * @param shooterMechanism Shooter to spin up for the current distance.
-   * @param controller Driver controller; the left stick translates while aligning.
    * @param targetPose Goal pose.
-   * @return {@link Command} requiring the drivetrain. The shooter runs as a forked child command, so it is only owned
-   *     while this command runs and its default command resumes afterwards.
+   * @return {@link Command} that drives and shoots. The drivetrain and shooter run as forked child commands, so they
+   *     are only owned while this command runs and their default commands resume afterwards.
    */
   public static Command create(
       SwerveMechanism swerveMechanism,
       ShooterMechanism shooterMechanism,
-      CommandNiDsXboxController controller,
       Pose2d targetPose) {
     // Maps Distance to RPM
     InterpolatingDoubleTreeMap shooterTable = new InterpolatingDoubleTreeMap();
@@ -85,17 +82,19 @@ public final class AlignToGoal {
     pidController.setTolerance(setpointTolerance.in(Radians));
     SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0, 0, 0);
 
-    return swerveMechanism.run(coroutine -> {
+    return Command.noRequirements(coroutine -> {
       pidController.reset(swerveMechanism.getPose().getRotation().getRadians(),
                           swerveMechanism.getFieldOrientedChassisSpeed().omega);
-      SwerveInputStream inputStream = swerveMechanism.createDriverInput(
-          () -> -controller.getLeftY(),
-          () -> -controller.getLeftX(),
-          () -> 0
-      );
-      // Latest shot speed; the forked YAMS shooter command reads it every loop.
+      // Latest shot speed and turn rate; the forked YAMS commands read them every loop.
       LinearVelocity[] shotSpeed = {MetersPerSecond.of(0)};
+      AngularVelocity[] turnRate = {RadiansPerSecond.of(0)};
       coroutine.fork(shooterMechanism.setLinearVelocity(() -> shotSpeed[0]));
+      coroutine.fork(swerveMechanism.driveFieldRelative(() -> {
+        // Translate with the driver's sticks; the alignment controller replaces their rotation.
+        ChassisVelocities velocities = swerveMechanism.getInputStream().get();
+        velocities.omega = turnRate[0].in(RadiansPerSecond);
+        return velocities;
+      }));
 
       while (true) {
         // Please look here for the original authors work!
@@ -132,9 +131,7 @@ public final class AlignToGoal {
                 swerveMechanism.getPose().getRotation().getRadians(),
                 new State(turretAngle.in(Radians), 0));
         var feedforwardOutput = feedforward.calculate(pidController.getSetpoint().velocity);
-        var originalSpeed     = inputStream.get();
-        originalSpeed.omega = output + feedforwardOutput;
-        swerveMechanism.setRobotRelativeChassisSpeedsSetpoint(originalSpeed.toRobotRelative(swerveMechanism.getGyroRotation3d().toRotation2d()));
+        turnRate[0] = RadiansPerSecond.of(output + feedforwardOutput);
         shotSpeed[0] = newHorizontalSpeed;
 
         coroutine.yield();

@@ -8,7 +8,6 @@ import static org.wpilib.units.Units.DegreesPerSecond;
 import static org.wpilib.units.Units.Inches;
 import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Radians;
-import static org.wpilib.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.CANBus;
 import org.wpilib.hardware.bus.CANPort;
@@ -26,7 +25,6 @@ import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
-import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import yams.commands3.config.SmartMotorControllerConfig;
 import yams.commands3.config.SwerveDriveConfig;
@@ -42,8 +40,10 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
 
 public class SwerveMechanism implements Mechanism {
   private final SwerveDrive drive;
+  /** Active driver input, set by the teleop opmode. */
+  private SwerveInputStream inputStream;
 
-  public SwerveModule createModule(
+  private SwerveModule createModule(
       SparkMax drive,
       SparkMax azimuth,
       CANcoder absoluteEncoder,
@@ -103,7 +103,7 @@ public class SwerveMechanism implements Mechanism {
                           new Translation2d(Inches.of(-24), Inches.of(-24)));
     SwerveDriveConfig config = new SwerveDriveConfig(this, fl, fr, bl, br)
         .withGyro(gyro::getRotation3d)
-        .withMaximumChassisSpeed(MetersPerSecond.of(4), RotationsPerSecond.of(360))
+        .withMaximumChassisSpeed(MetersPerSecond.of(4), DegreesPerSecond.of(360))
         .withStartingPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)))
         .withTranslationController(new PIDController(1, 0, 0))
         .withRotationController(new PIDController(1, 0, 0));
@@ -130,36 +130,51 @@ public class SwerveMechanism implements Mechanism {
   }
 
   /**
-   * Create a driver input stream for teleop driving.
+   * Drive with field relative {@link ChassisVelocities}. Runs until canceled.
    *
-   * @param forward  Forward stick supplier.
-   * @param left     Left stick supplier.
-   * @param rotation Rotation stick supplier.
-   * @return Configured {@link SwerveInputStream}.
+   * @param velocities Field relative {@link ChassisVelocities}, read every loop.
+   * @return {@link Command} that drives the robot.
    */
-  public SwerveInputStream createDriverInput(DoubleSupplier forward, DoubleSupplier left, DoubleSupplier rotation) {
-    return new SwerveInputStream(drive, forward, left, rotation)
-        .withMaximumLinearVelocity(MetersPerSecond.of(4))
-        .withMaximumAngularVelocity(DegreesPerSecond.of(360))
-        .withDeadband(0.05)
-        .setCubeTranslationControllerAxis()
-        .setAllianceRelativeControl();
-  }
-
-  /** Drive with field relative speeds from an input stream. Call once per loop. */
-  public void driveFromInput(SwerveInputStream stream) {
-    drive.setFieldRelativeChassisSpeeds(stream.get());
+  public Command driveFieldRelative(Supplier<ChassisVelocities> velocities) {
+    return run(coroutine -> {
+      while (true) {
+        drive.setFieldRelativeChassisSpeeds(velocities.get());
+        coroutine.yield();
+      }
+    }).named("Swerve Drive Field Relative");
   }
 
   /**
-   * Apply robot relative {@link ChassisVelocities} directly, for use inside commands that already
-   * require this mechanism.
+   * Drive with the active {@link SwerveInputStream}. A stream set while this runs takes effect on the next loop. Runs
+   * until canceled.
    *
-   * @param speeds Robot relative {@link ChassisVelocities} to apply.
+   * @return {@link Command} that drives the robot.
    */
-  public void setRobotRelativeChassisSpeedsSetpoint(ChassisVelocities speeds)
-  {
-    drive.setRobotRelativeChassisSpeeds(speeds);
+  public Command driveInputStream() {
+    return run(coroutine -> {
+      while (true) {
+        drive.setFieldRelativeChassisSpeeds(inputStream.get());
+        coroutine.yield();
+      }
+    }).named("Swerve Drive Input Stream");
+  }
+
+  /**
+   * Set the active driver input.
+   *
+   * @param inputStream Field relative {@link SwerveInputStream} driven by {@link #driveInputStream()}.
+   */
+  public void setInputStream(SwerveInputStream inputStream) {
+    this.inputStream = inputStream;
+  }
+
+  /**
+   * Get the active driver input, so commands can read or adjust it.
+   *
+   * @return Active {@link SwerveInputStream}.
+   */
+  public SwerveInputStream getInputStream() {
+    return inputStream;
   }
 
   public Command lock() {
@@ -178,6 +193,15 @@ public class SwerveMechanism implements Mechanism {
   public void simulationPeriodic() {
     drive.simIterate();
     gyro.getSimState().setRawYaw(drive.getSimPose().getRotation().getRadians());
+  }
+
+  /**
+   * Underlying YAMS {@link SwerveDrive}, for building a {@link SwerveInputStream}.
+   *
+   * @return {@link SwerveDrive} driven by this mechanism.
+   */
+  public SwerveDrive getSwerveDrive() {
+    return drive;
   }
 
   public Pose2d getPose() {

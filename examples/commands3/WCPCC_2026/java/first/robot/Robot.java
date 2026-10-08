@@ -64,9 +64,9 @@ public class Robot extends OpModeRobot {
      * initialization code. Default commands set here apply in every opmode.
      */
     public Robot() {
-        // Manual drive is the default in every mode, as in the v2 port, so the drivetrain holds its
-        // heading between autonomous trajectories.
-        swerve.setDefaultCommand(Drive.teleop(swerve, driver));
+        // Hold the heading by default, so the drivetrain holds still between autonomous trajectories. The teleop
+        // opmodes replace this with driver control while they are selected.
+        swerve.setDefaultCommand(Drive.holdHeading(swerve));
         // Lowest priority so an autonomous routine can pause vision with limelight.idle().
         limelight.setDefaultCommand(updateVisionCommand());
         // The rollers stop whenever no command is using them, at the lowest priority.

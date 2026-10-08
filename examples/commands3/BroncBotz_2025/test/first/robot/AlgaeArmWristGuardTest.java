@@ -22,7 +22,7 @@ import org.wpilib.simulation.SimHooks;
 
 /**
  * The algae arm only swings down to rest once the coral wrist is at rest, or it would hit the wrist
- * and break. In the "Driver Teleop" opmode, the operator raises the algae arm to the reef, holds a
+ * and break. In the "Angular Velocity Teleop" opmode, the operator raises the algae arm to the reef, holds a
  * coral level that swings the wrist out, and lets go of the reef position, so the algae arm's default
  * command stows it: the algae arm waits above its stowed angle until the coral level is let go and
  * the wrist is back at rest.
@@ -62,7 +62,7 @@ class AlgaeArmWristGuardTest {
     void algaeArmWaitsForTheWristBeforeResting() {
         DriverStationSim.setDsAttached(true);
         DriverStationSim.setRobotMode(RobotMode.TELEOPERATED);
-        DriverStationSim.setOpMode(OpModeOption.makeId(RobotMode.TELEOPERATED, "Driver Teleop".hashCode()));
+        DriverStationSim.setOpMode(OpModeOption.makeId(RobotMode.TELEOPERATED, "Angular Velocity Teleop".hashCode()));
         DriverStationSim.setEnabled(false);
         DriverStationSim.notifyNewData();
         step(0.2);

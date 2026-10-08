@@ -82,9 +82,8 @@ public final class Constants {
         public static final double kHeadingKP = 0.4 * DriveConstants.kMaxAngularSpeed.in(RadiansPerSecond);
         public static final double kHeadingKD = 0.01 * DriveConstants.kMaxAngularSpeed.in(RadiansPerSecond);
 
-        // PathPlanner holonomic drive controller gains.
+        // Drive to pose translation gain, from the original PathPlanner holonomic drive controller.
         public static final double kTranslationKP = 5.0;
-        public static final double kRotationKP = 5.0;
     }
 
     public static class ShooterConstants {

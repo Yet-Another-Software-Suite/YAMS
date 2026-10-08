@@ -158,9 +158,8 @@ public final class Constants
       // angular velocity; the YAMS rotation controller outputs rad/s directly.
       public static final double headingKP = 0.2218 * maxAngularVelocity.in(RadiansPerSecond);
 
-      // controllerproperties.json angleJoystickRadiusDeadband: the heading stick only picks a new
-      // heading once pushed this far.
-      public static final double angleJoystickRadiusDeadband = 0.5;
+      // Translation P of the original PathPlanner PPHolonomicDriveController, used by the autos' drive to pose.
+      public static final double translationKP = 5.0;
     }
   }
 

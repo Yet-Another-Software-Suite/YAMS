@@ -10,12 +10,12 @@ import static org.wpilib.units.Units.Rotations;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import first.robot.Constants.DriveConstants;
-import first.robot.Constants.OperatorConstants;
 import first.robot.Field;
 import first.robot.Ports;
 import first.robot.Vision;
 import java.util.List;
-import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.hardware.imu.OnboardIMU;
@@ -31,6 +31,7 @@ import org.wpilib.math.system.DCMotor;
 import org.wpilib.networktables.DoublePublisher;
 import org.wpilib.networktables.NetworkTableInstance;
 import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.Distance;
 import yams.commands3.config.SmartMotorControllerConfig;
 import yams.commands3.config.SwerveDriveConfig;
 import yams.commands3.swerve.SwerveDrive;
@@ -54,6 +55,8 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
 public class Swerve implements Mechanism {
     private final OnboardIMU gyro = new OnboardIMU(MountOrientation.FLAT);
     private final SwerveDrive drive;
+    /** Active driver input, set by the teleop opmode. */
+    private SwerveInputStream inputStream;
     private final List<Vision> cameras = List.of(Vision.drivetrainCamera(), Vision.turretCamera());
     private final DoublePublisher distanceToHubPublisher = NetworkTableInstance.getDefault()
         .getDoubleTopic("Swerve/Distance to Hub (m)")
@@ -81,6 +84,8 @@ public class Swerve implements Mechanism {
             .withMaximumModuleSpeed(DriveConstants.kMaxSpeed)
             // Heading PID from the YAGSL controller properties, used to aim at the hub.
             .withRotationController(new PIDController(kHeadingKP, 0, kHeadingKD))
+            // Drive to pose, used by the autos, with the original PathPlanner translation gain.
+            .withTranslationController(new PIDController(kTranslationKP, 0, 0))
             .withTelemetry("Swerve", TelemetryVerbosity.HIGH);
         drive = new SwerveDrive(config);
     }
@@ -130,47 +135,118 @@ public class Swerve implements Mechanism {
     }
 
     /**
-     * Create the driver input stream.
+     * Drive with field relative {@link ChassisVelocities}, e.g. from a {@link SwerveInputStream}
+     * built in an opmode. Runs until canceled.
      *
-     * @param forward          Stick input away from the driver, in [-1, 1].
-     * @param left             Stick input to the driver's left, in [-1, 1].
-     * @param rotation         Counterclockwise rotation stick input, in [-1, 1].
-     * @param translationScale Scale on the translation sticks.
-     * @return Input stream configured for field-relative teleop.
+     * @param velocities Field relative {@link ChassisVelocities}, read every loop.
+     * @return {@link Command} that drives the robot.
      */
-    public SwerveInputStream createDriverInput(DoubleSupplier forward, DoubleSupplier left, DoubleSupplier rotation,
-                                               double translationScale) {
-        return new SwerveInputStream(drive, forward, left, rotation)
-            .withMaximumLinearVelocity(DriveConstants.kMaxSpeed)
-            .withMaximumAngularVelocity(DriveConstants.kMaxAngularSpeed)
-            .withDeadband(OperatorConstants.kDeadband)
-            .withScaleTranslation(translationScale)
-            .withScaleRotation(DriveConstants.kRotationScale)
-            .setAllianceRelativeControl(true);
+    public Command driveFieldRelative(Supplier<ChassisVelocities> velocities) {
+        return run(coroutine -> {
+            while (true) {
+                drive.setFieldRelativeChassisSpeeds(velocities.get());
+                coroutine.yield();
+            }
+        }).named("Swerve Drive Field Relative");
     }
 
     /**
-     * Drive from the driver's sticks until canceled.
+     * Drive with the active {@link SwerveInputStream}. A stream set while this runs takes effect on the next loop. Runs
+     * until canceled.
      *
-     * @param forward          Stick input away from the driver, in [-1, 1].
-     * @param left             Stick input to the driver's left, in [-1, 1].
-     * @param rotation         Counterclockwise rotation stick input, in [-1, 1].
-     * @param translationScale Scale on the translation sticks.
-     * @param aimAtHub         Face the hub instead of rotating from the stick.
-     * @param name             Command name.
+     * @return {@link Command} that drives the robot.
      */
-    public Command drive(DoubleSupplier forward, DoubleSupplier left, DoubleSupplier rotation, double translationScale,
-                         boolean aimAtHub, String name) {
+    public Command driveInputStream() {
         return run(coroutine -> {
-            SwerveInputStream stream = createDriverInput(forward, left, rotation, translationScale);
-            if (aimAtHub) {
-                stream.withAimTarget(() -> new Pose2d(Field.hub(), Rotation2d.ZERO)).setAim(true);
+            while (true) {
+                drive.setFieldRelativeChassisSpeeds(inputStream.get());
+                coroutine.yield();
             }
+        }).named("Swerve Drive Input Stream");
+    }
+
+    /**
+     * Drive slowly with a copy of the active {@link SwerveInputStream} until canceled.
+     *
+     * @return {@link Command} that drives the robot.
+     */
+    public Command slowMode() {
+        return driveInputStreamCopy(stream -> stream.withScaleTranslation(DriveConstants.kSlowModeTranslationScale),
+            "Slow Mode");
+    }
+
+    /**
+     * Drive slowly with a copy of the active {@link SwerveInputStream} while facing this alliance's hub, until
+     * canceled.
+     *
+     * @return {@link Command} that drives the robot.
+     */
+    public Command aimAtHub() {
+        return driveInputStreamCopy(stream -> stream.withScaleTranslation(DriveConstants.kAimTranslationScale)
+            .withAim(() -> new Pose2d(Field.hub(), Rotation2d.ZERO), () -> true), "Aim at Hub");
+    }
+
+    /**
+     * Drive with a modified copy of the active {@link SwerveInputStream}, leaving the active stream unchanged.
+     *
+     * @param modify Changes to make to the copy.
+     * @param name   Command name.
+     * @return {@link Command} that drives the robot.
+     */
+    private Command driveInputStreamCopy(UnaryOperator<SwerveInputStream> modify, String name) {
+        return run(coroutine -> {
+            SwerveInputStream stream = modify.apply(inputStream.clone());
             while (true) {
                 drive.setFieldRelativeChassisSpeeds(stream.get());
                 coroutine.yield();
             }
         }).named(name);
+    }
+
+    /**
+     * Set the active driver input.
+     *
+     * @param inputStream Field relative {@link SwerveInputStream} driven by {@link #driveInputStream()}.
+     */
+    public void setInputStream(SwerveInputStream inputStream) {
+        this.inputStream = inputStream;
+    }
+
+    /**
+     * Get the active driver input, so commands can read or adjust it.
+     *
+     * @return Active {@link SwerveInputStream}.
+     */
+    public SwerveInputStream getInputStream() {
+        return inputStream;
+    }
+
+    /**
+     * Hold position and face this alliance's hub, until canceled. For autonomous, where no driver input is set.
+     *
+     * @return {@link Command} that aims the robot.
+     */
+    public Command aimAtHubInPlace() {
+        return run(coroutine -> {
+            SwerveInputStream stream = SwerveInputStream.of(drive, () -> 0, () -> 0, () -> 0)
+                .withAim(() -> new Pose2d(Field.hub(), Rotation2d.ZERO), () -> true);
+            while (true) {
+                drive.setFieldRelativeChassisSpeeds(stream.get());
+                coroutine.yield();
+            }
+        }).named("Aim at Hub in Place");
+    }
+
+    /**
+     * Drive to a pose, ending once the robot is within the given tolerances of it.
+     *
+     * @param pose                 Field relative {@link Pose2d}, blue alliance origin.
+     * @param translationTolerance Maximum distance from the pose to be considered there.
+     * @param rotationTolerance    Maximum heading error to be considered there.
+     * @return {@link Command} that drives to the pose and then stops.
+     */
+    public Command driveToPose(Pose2d pose, Distance translationTolerance, Angle rotationTolerance) {
+        return drive.driveToPose(pose, translationTolerance, rotationTolerance);
     }
 
     /** Point the wheels in an X so the robot resists being pushed, until canceled. */
@@ -196,6 +272,15 @@ public class Swerve implements Mechanism {
 
     public void stop() {
         drive.setRobotRelativeChassisSpeeds(new ChassisVelocities());
+    }
+
+    /**
+     * Underlying YAMS {@link SwerveDrive}, for building a {@link SwerveInputStream}.
+     *
+     * @return {@link SwerveDrive} driven by this mechanism.
+     */
+    public SwerveDrive getSwerveDrive() {
+        return drive;
     }
 
     /** Current estimated pose of the robot, blue alliance origin. */

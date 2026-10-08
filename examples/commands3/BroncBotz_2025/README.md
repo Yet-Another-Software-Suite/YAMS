@@ -45,7 +45,7 @@ A port of BroncBotz 3481's 2025 Reefscape robot code (the `comp` branch) to WPIL
 | `systems/field/FieldConstants.java`, `AllianceFlipUtil.java` | `util/FieldConstants.java`, `util/AllianceFlipUtil.java` | Only the reef positions are kept |
 | `utils/ProfiledHolonomicDriveController.java` | (removed) | Replaced by YAMS drive to pose with a speed cap |
 | `Robot.java`, `RobotContainer.java` | `Robot.java` | An `OpModeRobot` that holds the mechanisms, controllers and default commands |
-| `RobotContainer` bindings | `opmodes/teleop/DriverTeleop.java`, `commands/Drive.java` | Bindings are created with the opmode. Driving (slow mode, alliance relative toggle) is the drivetrain's default command |
+| `RobotContainer` bindings | `opmodes/teleop/AngularVelocityTeleop.java`, `HeadingTeleop.java`, `TeleopBindings.java` | Each teleop builds the driver's `SwerveInputStream`, sets it on the drivetrain, and makes driving from it the drivetrain's default command. The shared bindings (slow mode, alliance relative toggle, operator and Launchpad) are in `TeleopBindings` and are created with the opmode |
 | `RobotContainer.justCoralL4Auto` | `opmodes/auto/CoralL4Auto.java` | Only the routine the robot ran |
 
 ### Mechanisms
@@ -79,8 +79,9 @@ Every motor is a NEO on a SPARK MAX wrapped in a YAMS `SparkWrapper`. Each is a 
 ### Commands, bindings and autos
 
 - **Driver**
-  - Left stick translates and right stick rotates, relative to the robot. Left bumper slows translation from 0.8 to 0.4.
-  - X and Y turn alliance relative control on and off.
+  - Two teleop opmodes. In `Angular Velocity Teleop` the left stick translates and the right stick's X axis rotates, as in the original. In `Heading Teleop` the left stick translates and the robot faces the direction the right stick is pushed.
+  - Driving is field relative. Left bumper slows translation from 0.8 to 0.4.
+  - X and Y turn alliance relative control on and off. It starts off in each teleop.
   - A and B re-read an arm's absolute encoder and swing that arm to -40°.
 - **Operator** (port 4): the original bindings.
   - A/B/X/Y: coral L1 to L4.
@@ -102,6 +103,7 @@ Every motor is a NEO on a SPARK MAX wrapped in a YAMS `SparkWrapper`. Each is a 
 ### Behavior differences
 
 - **Bugs fixed:**
+  - The field relative output of the driver's `SwerveInputStream` was applied as robot relative speeds, so the sticks drove relative to the robot and the alliance relative toggle flipped robot relative motion. The stream now drives the robot field relative.
   - The algae net shot waited for the processor angle, so it always ran its full 5 s timeout. It now waits for the net angle.
   - `algaeScored()` returned true without a LaserCAN reading, which ended outtaking at once. It now returns false.
   - The targeting system started without a level, so scoring waited out its timeout. It now starts at L4.
