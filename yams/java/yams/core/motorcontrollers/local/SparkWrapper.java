@@ -522,6 +522,8 @@ public class SparkWrapper extends SmartMotorController {
     if (m_sparkAbsoluteEncoder.isPresent()) {
       m_sparkBaseConfig.absoluteEncoder.zeroOffset(getMechanismPosition().minus(angle.times(m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getMechanismToRotorRatio())).in(Rotations));
       m_sparkAbsoluteEncoderSim.ifPresent(absoluteEncoderSim -> absoluteEncoderSim.setPosition(angle.times(m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getMechanismToRotorRatio()).in(Rotations)));
+      // Send the new zero offset to the SPARK; without this it only lives in the local config.
+      m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     }
     final double externalEncoderRotations = angle.times(m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getMechanismToRotorRatio()).in(Rotations);
     m_sparkQuadratureEncoder.ifPresent(quadratureEncoder -> quadratureEncoder.setPosition(externalEncoderRotations));
@@ -815,10 +817,10 @@ public class SparkWrapper extends SmartMotorController {
 
     // Set Mechanism Limits
     config.getMechanismLowerLimit().ifPresent(lowerLimit -> {
-      m_sparkBaseConfig.softLimit.reverseSoftLimit(lowerLimit.in(Rotations)).reverseSoftLimitEnabled(config.getMotorControllerMode() == ControlMode.CLOSED_LOOP);
+      m_sparkBaseConfig.softLimit.reverseSoftLimit(lowerLimit.times(m_mechanismToFeedbackSensorRatio).in(Rotations)).reverseSoftLimitEnabled(config.getMotorControllerMode() == ControlMode.CLOSED_LOOP);
     });
     config.getMechanismUpperLimit().ifPresent(upperLimit -> {
-      m_sparkBaseConfig.softLimit.forwardSoftLimit(upperLimit.in(Rotations)).forwardSoftLimitEnabled(config.getMotorControllerMode() == ControlMode.CLOSED_LOOP);
+      m_sparkBaseConfig.softLimit.forwardSoftLimit(upperLimit.times(m_mechanismToFeedbackSensorRatio).in(Rotations)).forwardSoftLimitEnabled(config.getMotorControllerMode() == ControlMode.CLOSED_LOOP);
     });
 
     // Throw warning about supply stator limits on Spark's
@@ -1565,7 +1567,7 @@ public class SparkWrapper extends SmartMotorController {
   public void setMeasurementUpperLimit(Distance upperLimit) {
     if (m_config.getMechanismCircumference().isPresent() && m_config.getMechanismLowerLimit().isPresent()) {
       m_config.withSoftLimits(m_config.convertFromMechanism(m_config.getMechanismLowerLimit().get()), upperLimit);
-      m_sparkBaseConfig.softLimit.forwardSoftLimit(m_config.convertToMechanism(upperLimit).in(Rotations));
+      m_sparkBaseConfig.softLimit.forwardSoftLimit(m_config.convertToMechanism(upperLimit).times(m_mechanismToFeedbackSensorRatio).in(Rotations));
       m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
       m_looseFollowers.ifPresent(smcs -> {
         for (var f : smcs) {
@@ -1585,7 +1587,7 @@ public class SparkWrapper extends SmartMotorController {
   public void setMeasurementLowerLimit(Distance lowerLimit) {
     if (m_config.getMechanismCircumference().isPresent() && m_config.getMechanismUpperLimit().isPresent()) {
       m_config.withSoftLimits(lowerLimit, m_config.convertFromMechanism(m_config.getMechanismUpperLimit().get()));
-      m_sparkBaseConfig.softLimit.reverseSoftLimit(m_config.convertToMechanism(lowerLimit).in(Rotations));
+      m_sparkBaseConfig.softLimit.reverseSoftLimit(m_config.convertToMechanism(lowerLimit).times(m_mechanismToFeedbackSensorRatio).in(Rotations));
       m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
       m_looseFollowers.ifPresent(smcs -> {
         for (var f : smcs) {
@@ -1607,7 +1609,7 @@ public class SparkWrapper extends SmartMotorController {
     m_config.getMechanismLowerLimit().ifPresent(lowerLimit -> {
       m_config.withSoftLimits(lowerLimit, upperLimit);
     });
-    m_sparkBaseConfig.softLimit.forwardSoftLimit(upperLimit.in(Rotations));
+    m_sparkBaseConfig.softLimit.forwardSoftLimit(upperLimit.times(m_mechanismToFeedbackSensorRatio).in(Rotations));
     m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
@@ -1627,7 +1629,7 @@ public class SparkWrapper extends SmartMotorController {
     m_config.getMechanismUpperLimit().ifPresent(upperLimit -> {
       m_config.withSoftLimits(lowerLimit, upperLimit);
     });
-    m_sparkBaseConfig.softLimit.reverseSoftLimit(lowerLimit.in(Rotations));
+    m_sparkBaseConfig.softLimit.reverseSoftLimit(lowerLimit.times(m_mechanismToFeedbackSensorRatio).in(Rotations));
     m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
@@ -1646,7 +1648,7 @@ public class SparkWrapper extends SmartMotorController {
   @Override
   public void setMechanismLimits(Angle lower, Angle upper) {
     m_config.withSoftLimits(lower, upper);
-    m_sparkBaseConfig.softLimit.reverseSoftLimit(lower.in(Rotations)).forwardSoftLimit(upper.in(Rotations));
+    m_sparkBaseConfig.softLimit.reverseSoftLimit(lower.times(m_mechanismToFeedbackSensorRatio).in(Rotations)).forwardSoftLimit(upper.times(m_mechanismToFeedbackSensorRatio).in(Rotations));
     m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {

@@ -1405,7 +1405,11 @@ public class TalonFXSWrapper extends SmartMotorController {
       m_config.withTrapezoidalProfileConstraints(constraints);
       m_trapezoidProfile = Optional.of(new TrapezoidProfile(constraints));
     }
-    m_talonConfig.MotionMagic.withMotionMagicAcceleration(maxAcceleration);
+    if (m_config.getVelocityTrapezoidalProfileInUse()) {
+      m_talonConfig.MotionMagic.MotionMagicJerk = maxAcceleration.in(RotationsPerSecondPerSecond);
+    } else {
+      m_talonConfig.MotionMagic.withMotionMagicAcceleration(maxAcceleration);
+    }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
@@ -1714,7 +1718,7 @@ public class TalonFXSWrapper extends SmartMotorController {
   @Override
   public void setClosedLoopRampRate(Time rampRate) {
     m_config.withClosedLoopRampRate(rampRate);
-    m_talonConfig.ClosedLoopRamps.withDutyCycleClosedLoopRampPeriod(rampRate);
+    m_talonConfig.ClosedLoopRamps.withDutyCycleClosedLoopRampPeriod(rampRate).withVoltageClosedLoopRampPeriod(rampRate).withTorqueClosedLoopRampPeriod(rampRate);
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
@@ -1726,7 +1730,7 @@ public class TalonFXSWrapper extends SmartMotorController {
   @Override
   public void setOpenLoopRampRate(Time rampRate) {
     m_config.withOpenLoopRampRate(rampRate);
-    m_talonConfig.OpenLoopRamps.withDutyCycleOpenLoopRampPeriod(rampRate);
+    m_talonConfig.OpenLoopRamps.withDutyCycleOpenLoopRampPeriod(rampRate).withVoltageOpenLoopRampPeriod(rampRate).withTorqueOpenLoopRampPeriod(rampRate);
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
