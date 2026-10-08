@@ -458,9 +458,9 @@ public abstract class SmartMotorController {
         feedforward.set(ff.calculate(mechanismPosition.in(Radians), currentVelocitySetpoint.in(RadiansPerSecond), nextVelocitySetpoint.in(RadiansPerSecond)));
       } else {
         // When using a velocity profile the next velocity is the "position" (poorly named)
-        var nextVelocitySetpoint = velocityTrapezoidalProfile.get() ? nextTrapState.get().position : setpointVelocity.orElse(RotationsPerSecond.zero()).in(RotationsPerSecond);
+        var nextVelocitySetpoint = RotationsPerSecond.of(velocityTrapezoidalProfile.get() ? nextTrapState.get().position : setpointVelocity.orElse(RotationsPerSecond.zero()).in(RotationsPerSecond));
         // Not profiled, so using current velocity or setpoint velocity.
-        ff.calculate(mechanismPosition.in(Radians), getMechanismVelocity().in(RadiansPerSecond), nextVelocitySetpoint);
+        feedforward.set(ff.calculate(mechanismPosition.in(Radians), getMechanismVelocity().in(RadiansPerSecond), nextVelocitySetpoint.in(RadiansPerSecond)));
       }
     });
 

@@ -1571,8 +1571,10 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   public T withExponentialProfile(Voltage maxVolts, DCMotor motor, MomentOfInertia moi) {
     this.moi = moi;
     var sysid = Models.singleJointedArmFromPhysicalConstants(motor, moi.in(KilogramSquareMeters), gearing.getMechanismToRotorRatio());
-    var A = sysid.getA(0, 0); // radians
-    var B = sysid.getB(0, 0); // radians
+    // The arm model is [position, velocity]; the velocity row (A(1,1), B(1,0)) holds the dynamics.
+    // A(0,0) and B(0,0) are always 0, which would make kV and kA NaN/infinite.
+    var A = sysid.getA(1, 1); // 1/s
+    var B = sysid.getB(1, 0); // (radians/s^2)/V
     // -A / B and 1 / B are in volts per radian per second (per second); the profile is in rotations,
     // and a rotation is 2 pi radians.
     var kV = -A / B * 2 * Math.PI;
@@ -1594,8 +1596,10 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   public T withExponentialProfile(Voltage maxVolts, DCMotor motor, Mass mass, Distance drumRadius) {
     var sysid = Models.elevatorFromPhysicalConstants(motor, mass.in(Kilograms), drumRadius.in(Meters), gearing.getMechanismToRotorRatio());
     var circumference = (2.0 * Math.PI * drumRadius.in(Meters));
-    var A = sysid.getA(0, 0);
-    var B = sysid.getB(0, 0);
+    // The elevator model is [position, velocity]; the velocity row (A(1,1), B(1,0)) holds the
+    // dynamics. A(0,0) and B(0,0) are always 0, which would make kV and kA NaN/infinite.
+    var A = sysid.getA(1, 1); // 1/s
+    var B = sysid.getB(1, 0); // (meters/s^2)/V
     var kV = MetersPerSecond.of(-A / B);
     var kA = MetersPerSecondPerSecond.of(1.0 / B);
     this.trapezoidProfile = Optional.empty();

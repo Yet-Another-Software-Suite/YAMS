@@ -1800,7 +1800,7 @@ public class TalonFXWrapper extends SmartMotorController {
   @Override
   public void setClosedLoopRampRate(Time rampRate) {
     m_config.withClosedLoopRampRate(rampRate);
-    m_talonConfig.ClosedLoopRamps.withDutyCycleClosedLoopRampPeriod(rampRate);
+    m_talonConfig.ClosedLoopRamps.withDutyCycleClosedLoopRampPeriod(rampRate).withVoltageClosedLoopRampPeriod(rampRate).withTorqueClosedLoopRampPeriod(rampRate);
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
@@ -1812,7 +1812,7 @@ public class TalonFXWrapper extends SmartMotorController {
   @Override
   public void setOpenLoopRampRate(Time rampRate) {
     m_config.withOpenLoopRampRate(rampRate);
-    m_talonConfig.OpenLoopRamps.withDutyCycleOpenLoopRampPeriod(rampRate);
+    m_talonConfig.OpenLoopRamps.withDutyCycleOpenLoopRampPeriod(rampRate).withVoltageOpenLoopRampPeriod(rampRate).withTorqueOpenLoopRampPeriod(rampRate);
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
